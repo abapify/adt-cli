@@ -27,21 +27,34 @@ export const getCommand = new Command('get')
       const client = await getAdtClientV2();
 
       // Step 1: Search for the object
-      const searchResult = await client.adt.repository.informationsystem.search.quickSearch({
-        query: objectName,
-        maxResults: 10,
-      });
+      const searchResult =
+        await client.adt.repository.informationsystem.search.quickSearch({
+          query: objectName,
+          maxResults: 10,
+        });
 
       // Handle union type - objectReference may be array or single object
-      const rawObjects = 'objectReference' in searchResult ? searchResult.objectReference : [];
-      const objects = Array.isArray(rawObjects) ? rawObjects : rawObjects ? [rawObjects] : [];
+      const rawObjects =
+        'objectReference' in searchResult ? searchResult.objectReference : [];
+      const objects = Array.isArray(rawObjects)
+        ? rawObjects
+        : rawObjects
+          ? [rawObjects]
+          : [];
 
       // Define object type for type safety
-      type SearchObject = { name?: string; type?: string; uri?: string; description?: string; packageName?: string };
+      type SearchObject = {
+        name?: string;
+        type?: string;
+        uri?: string;
+        description?: string;
+        packageName?: string;
+      };
 
       // Find exact match
       const exactMatch = objects.find(
-        (obj: SearchObject) => String(obj.name || '').toUpperCase() === objectName.toUpperCase()
+        (obj: SearchObject) =>
+          String(obj.name || '').toUpperCase() === objectName.toUpperCase(),
       );
 
       if (!exactMatch) {
@@ -49,7 +62,9 @@ export const getCommand = new Command('get')
 
         // Show similar objects if any
         const similar = objects.filter((obj: SearchObject) =>
-          String(obj.name || '').toUpperCase().includes(objectName.toUpperCase())
+          String(obj.name || '')
+            .toUpperCase()
+            .includes(objectName.toUpperCase()),
         );
 
         if (similar.length > 0) {
@@ -69,7 +84,9 @@ export const getCommand = new Command('get')
       if (route) {
         try {
           // Fetch full object data using route's fetch function
-          const data = await route.fetch(client, { name: String(exactMatch.name || objectName) });
+          const data = await route.fetch(client, {
+            name: String(exactMatch.name || objectName),
+          });
 
           // JSON output
           if (options.json) {
@@ -86,7 +103,8 @@ export const getCommand = new Command('get')
           // If fetch fails (e.g., 404 for non-package), fall through to generic
           const is404 =
             fetchError instanceof Error &&
-            (fetchError.message.includes('404') || fetchError.message.includes('Not Found'));
+            (fetchError.message.includes('404') ||
+              fetchError.message.includes('Not Found'));
           if (!is404) {
             throw fetchError;
           }
@@ -110,7 +128,7 @@ export const getCommand = new Command('get')
     } catch (error) {
       console.error(
         `❌ Get failed:`,
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

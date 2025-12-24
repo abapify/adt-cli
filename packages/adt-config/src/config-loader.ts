@@ -1,6 +1,6 @@
 /**
  * Config Loader
- * 
+ *
  * Loads ADT configuration from:
  * 1. adt.config.ts (TypeScript config - takes precedence)
  * 2. adt.config.json (JSON config)
@@ -18,7 +18,7 @@ import type { AdtConfig, Destination } from './types';
 const GLOBAL_CONFIG_PATH = resolve(
   process.env.HOME || process.env.USERPROFILE || '.',
   '.adt',
-  'config.json'
+  'config.json',
 );
 
 // =============================================================================
@@ -28,13 +28,13 @@ const GLOBAL_CONFIG_PATH = resolve(
 export interface LoadedConfig {
   /** Raw config data */
   readonly raw: AdtConfig;
-  
+
   /** Get a destination by name (SID) */
   getDestination(name: string): Destination | undefined;
-  
+
   /** List all destination names */
   listDestinations(): string[];
-  
+
   /** Check if destination exists */
   hasDestination(name: string): boolean;
 }
@@ -103,7 +103,7 @@ function mergeWithGlobal(localConfig: AdtConfig): AdtConfig {
 function createLoadedConfig(config: AdtConfig): LoadedConfig {
   return {
     raw: config,
-    
+
     getDestination(name: string): Destination | undefined {
       const dest = config.destinations?.[name];
       if (!dest) return undefined;
@@ -113,11 +113,11 @@ function createLoadedConfig(config: AdtConfig): LoadedConfig {
       }
       return dest;
     },
-    
+
     listDestinations(): string[] {
       return Object.keys(config.destinations || {});
     },
-    
+
     hasDestination(name: string): boolean {
       return name in (config.destinations || {});
     },
@@ -129,10 +129,12 @@ function createLoadedConfig(config: AdtConfig): LoadedConfig {
  * 1. adt.config.ts in cwd
  * 2. adt.config.json in cwd
  * 3. ~/.adt/config.json (global)
- * 
+ *
  * @param cwd Current working directory (defaults to process.cwd())
  */
-export async function loadConfig(cwd: string = process.cwd()): Promise<LoadedConfig> {
+export async function loadConfig(
+  cwd: string = process.cwd(),
+): Promise<LoadedConfig> {
   // Try TS config first
   const tsConfigPath = join(cwd, 'adt.config.ts');
   const tsConfig = await loadTsConfig(tsConfigPath);
@@ -166,11 +168,11 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<LoadedCon
 /**
  * Helper function for TypeScript config files.
  * Provides type checking and autocomplete.
- * 
+ *
  * Usage in adt.config.ts:
  * ```ts
  * import { defineConfig } from '@abapify/adt-config';
- * 
+ *
  * export default defineConfig({
  *   destinations: {
  *     DEV: { type: 'basic', options: { url: '...' } },

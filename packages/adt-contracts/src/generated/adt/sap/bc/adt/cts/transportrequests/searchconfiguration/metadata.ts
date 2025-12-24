@@ -1,9 +1,9 @@
 /**
  * Transport Search Configurations (Metadata)
- * 
+ *
  * Endpoint: /sap/bc/adt/cts/transportrequests/searchconfiguration/metadata
  * Category: transportconfigurationsmetadata
- * 
+ *
  * @generated - DO NOT EDIT MANUALLY
  */
 

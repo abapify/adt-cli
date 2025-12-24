@@ -1,6 +1,6 @@
 /**
  * Discovery Contract Scenarios
- * 
+ *
  * Two types of tests:
  * 1. Contract Definition Tests - validate method, path, headers, body, responses
  * 2. Client Call Tests - test FULLY TYPED client calls
@@ -10,7 +10,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { discovery } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation, createClient } from './base';
+import {
+  ContractScenario,
+  runScenario,
+  type ContractOperation,
+  createClient,
+} from './base';
 import { discoveryContract } from '../../src/adt/discovery';
 import { createMockAdapter } from '../helpers/mock-adapter';
 
@@ -24,7 +29,7 @@ const MOCK_DISCOVERY_XML = `<?xml version="1.0" encoding="UTF-8"?>
 
 class DiscoveryScenario extends ContractScenario {
   readonly name = 'Discovery';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get discovery document',
@@ -59,12 +64,13 @@ describe('Discovery Client Calls - Typed Response Validation', () => {
     // TYPE CHECK: These property accesses would fail to compile if type inference breaks!
     // The compiler verifies these properties exist on the response type
     const _typeCheck_service: typeof response.service = response.service;
-    const _typeCheck_workspace: typeof response.service.workspace = response.service?.workspace;
-    
+    const _typeCheck_workspace: typeof response.service.workspace =
+      response.service?.workspace;
+
     // Suppress unused variable warnings
     void _typeCheck_service;
     void _typeCheck_workspace;
-    
+
     // Runtime assertion
     expect(response).toBeDefined();
   });

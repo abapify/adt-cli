@@ -1,8 +1,8 @@
 /**
  * @abapify/adt-atc
- * 
+ *
  * ABAP Test Cockpit (ATC) CLI plugin for adt-cli.
- * 
+ *
  * @example
  * ```typescript
  * // In adt.config.ts

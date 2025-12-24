@@ -6,5 +6,5 @@
  */
 
 export type ConfigurationsSchema = {
-    configurations: unknown;
+  configurations: unknown;
 };

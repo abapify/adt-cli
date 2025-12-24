@@ -6,42 +6,42 @@
  */
 
 export type ChecklistSchema = {
-    messages: {
-        msg?: {
-            shortText: {
-                txt: string[];
-            };
-            longText?: {
-                txt: string[];
-            };
-            t100Key?: {
-                msgno?: number;
-                msgid?: string;
-                msgv1?: string;
-                msgv2?: string;
-                msgv3?: string;
-                msgv4?: string;
-            };
-            correctionHint?: {
-                number?: number;
-                kind?: string;
-                line?: number;
-                column?: number;
-                word?: string;
-            }[];
-            objDescr: string;
-            type: unknown;
-            line?: number;
-            offset?: number;
-            href?: string;
-            forceSupported?: boolean;
-            code?: string;
-        }[];
-        properties: {
-            checkExecuted?: boolean;
-            activationExecuted?: boolean;
-            generationExecuted?: boolean;
-        };
-        forceSupported?: boolean;
+  messages: {
+    msg?: {
+      shortText: {
+        txt: string[];
+      };
+      longText?: {
+        txt: string[];
+      };
+      t100Key?: {
+        msgno?: number;
+        msgid?: string;
+        msgv1?: string;
+        msgv2?: string;
+        msgv3?: string;
+        msgv4?: string;
+      };
+      correctionHint?: {
+        number?: number;
+        kind?: string;
+        line?: number;
+        column?: number;
+        word?: string;
+      }[];
+      objDescr: string;
+      type: unknown;
+      line?: number;
+      offset?: number;
+      href?: string;
+      forceSupported?: boolean;
+      code?: string;
+    }[];
+    properties: {
+      checkExecuted?: boolean;
+      activationExecuted?: boolean;
+      generationExecuted?: boolean;
     };
+    forceSupported?: boolean;
+  };
 };

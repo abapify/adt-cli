@@ -16,9 +16,7 @@ Add to your `adt.config.ts`:
 
 ```typescript
 export default {
-  commands: [
-    '@abapify/adt-atc/commands/atc',
-  ],
+  commands: ['@abapify/adt-atc/commands/atc'],
 };
 ```
 
@@ -43,20 +41,24 @@ adt atc -t S0DK942970 --format gitlab --output gl-code-quality.json
 
 ### Options
 
-| Option | Description |
-|--------|-------------|
-| `-p, --package <package>` | Run ATC on package |
-| `-o, --object <uri>` | Run ATC on specific object |
-| `-t, --transport <transport>` | Run ATC on transport request |
-| `--variant <variant>` | ATC check variant (default: from system customizing) |
-| `--max-results <number>` | Maximum number of results (default: 100) |
-| `--format <format>` | Output format: console, json, gitlab, sarif |
-| `--output <file>` | Output file (required for gitlab/sarif format) |
+| Option                        | Description                                          |
+| ----------------------------- | ---------------------------------------------------- |
+| `-p, --package <package>`     | Run ATC on package                                   |
+| `-o, --object <uri>`          | Run ATC on specific object                           |
+| `-t, --transport <transport>` | Run ATC on transport request                         |
+| `--variant <variant>`         | ATC check variant (default: from system customizing) |
+| `--max-results <number>`      | Maximum number of results (default: 100)             |
+| `--format <format>`           | Output format: console, json, gitlab, sarif          |
+| `--output <file>`             | Output file (required for gitlab/sarif format)       |
 
 ### Programmatic Usage
 
 ```typescript
-import { atcCommand, outputSarifReport, outputGitLabCodeQuality } from '@abapify/adt-atc';
+import {
+  atcCommand,
+  outputSarifReport,
+  outputGitLabCodeQuality,
+} from '@abapify/adt-atc';
 import type { AtcResult, AtcFinding } from '@abapify/adt-atc';
 
 // Use the formatters directly

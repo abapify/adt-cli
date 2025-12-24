@@ -5,63 +5,132 @@
  * Mode: Flattened
  */
 
-export type PackagesV1Schema = {
-    package: {
+export type PackagesV1Schema =
+  | {
+      package: {
         containerRef?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
+          extension?: unknown;
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
         };
         adtTemplate?: {
-            adtProperty?: {
-                $value?: string;
-                key?: string;
-            }[];
-            name?: string;
+          adtProperty?: {
+            $value?: string;
+            key?: string;
+          }[];
+          name?: string;
         };
         packageRef?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
+          extension?: unknown;
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
         };
         attributes: {
-            packageType: unknown;
-            isPackageTypeEditable?: boolean;
-            isAddingObjectsAllowed?: boolean;
-            isAddingObjectsAllowedEditable?: boolean;
-            isEncapsulated?: boolean;
-            isEncapsulationEditable?: boolean;
-            isEncapsulationVisible?: boolean;
-            recordChanges?: boolean;
-            isRecordChangesEditable?: boolean;
-            isSwitchVisible?: boolean;
-            languageVersion?: "" | "2" | "5";
-            isLanguageVersionEditable?: boolean;
-            isLanguageVersionVisible?: boolean;
+          packageType: unknown;
+          isPackageTypeEditable?: boolean;
+          isAddingObjectsAllowed?: boolean;
+          isAddingObjectsAllowedEditable?: boolean;
+          isEncapsulated?: boolean;
+          isEncapsulationEditable?: boolean;
+          isEncapsulationVisible?: boolean;
+          recordChanges?: boolean;
+          isRecordChangesEditable?: boolean;
+          isSwitchVisible?: boolean;
+          languageVersion?: '' | '2' | '5';
+          isLanguageVersionEditable?: boolean;
+          isLanguageVersionVisible?: boolean;
         };
         superPackage?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
+          extension?: unknown;
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
         };
         extensionAlias: {
-            name?: string;
-            isVisible?: boolean;
-            isEditable?: boolean;
+          name?: string;
+          isVisible?: boolean;
+          isEditable?: boolean;
         };
         switch: {
+          extension?: unknown;
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
+          state?: '' | 'undefined' | 'on' | 'off' | 'stand-by';
+        };
+        applicationComponent?: {
+          name?: string;
+          description?: string;
+          isVisible?: boolean;
+          isEditable?: boolean;
+        };
+        transport: {
+          softwareComponent?: {
+            name?: string;
+            description?: string;
+            type?: string;
+            typeDescription?: string;
+            isVisible?: boolean;
+            isEditable?: boolean;
+          };
+          transportLayer?: {
+            name?: string;
+            description?: string;
+            isVisible?: boolean;
+            isEditable?: boolean;
+          };
+        };
+        translation?: {
+          relevance?: string;
+          relevanceDescription?: string;
+          isVisible?: boolean;
+        };
+        useAccesses: {
+          useAccess?: {
+            packageInterfaceRef: {
+              extension?: unknown;
+              uri?: string;
+              parentUri?: string;
+              type?: string;
+              name?: string;
+              packageName?: string;
+              description?: string;
+            };
+            packageRef: {
+              extension?: unknown;
+              uri?: string;
+              parentUri?: string;
+              type?: string;
+              name?: string;
+              packageName?: string;
+              description?: string;
+            };
+            severity?:
+              | ''
+              | 'none'
+              | 'error'
+              | 'warning'
+              | 'information'
+              | 'obsolet';
+          }[];
+          isVisible?: boolean;
+        };
+        packageInterfaces: {
+          packageInterfaceRef?: {
             extension?: unknown;
             uri?: string;
             parentUri?: string;
@@ -69,81 +138,19 @@ export type PackagesV1Schema = {
             name?: string;
             packageName?: string;
             description?: string;
-            state?: "" | "undefined" | "on" | "off" | "stand-by";
-        };
-        applicationComponent?: {
-            name?: string;
-            description?: string;
-            isVisible?: boolean;
-            isEditable?: boolean;
-        };
-        transport: {
-            softwareComponent?: {
-                name?: string;
-                description?: string;
-                type?: string;
-                typeDescription?: string;
-                isVisible?: boolean;
-                isEditable?: boolean;
-            };
-            transportLayer?: {
-                name?: string;
-                description?: string;
-                isVisible?: boolean;
-                isEditable?: boolean;
-            };
-        };
-        translation?: {
-            relevance?: string;
-            relevanceDescription?: string;
-            isVisible?: boolean;
-        };
-        useAccesses: {
-            useAccess?: {
-                packageInterfaceRef: {
-                    extension?: unknown;
-                    uri?: string;
-                    parentUri?: string;
-                    type?: string;
-                    name?: string;
-                    packageName?: string;
-                    description?: string;
-                };
-                packageRef: {
-                    extension?: unknown;
-                    uri?: string;
-                    parentUri?: string;
-                    type?: string;
-                    name?: string;
-                    packageName?: string;
-                    description?: string;
-                };
-                severity?: "" | "none" | "error" | "warning" | "information" | "obsolet";
-            }[];
-            isVisible?: boolean;
-        };
-        packageInterfaces: {
-            packageInterfaceRef?: {
-                extension?: unknown;
-                uri?: string;
-                parentUri?: string;
-                type?: string;
-                name?: string;
-                packageName?: string;
-                description?: string;
-            }[];
-            isVisible?: boolean;
+          }[];
+          isVisible?: boolean;
         };
         subPackages: {
-            packageRef?: {
-                extension?: unknown;
-                uri?: string;
-                parentUri?: string;
-                type?: string;
-                name?: string;
-                packageName?: string;
-                description?: string;
-            }[];
+          packageRef?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+          }[];
         };
         name: string;
         type: string;
@@ -151,7 +158,14 @@ export type PackagesV1Schema = {
         changedAt?: string;
         createdAt?: string;
         createdBy?: string;
-        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        version?:
+          | ''
+          | 'active'
+          | 'inactive'
+          | 'workingArea'
+          | 'new'
+          | 'partlyActive'
+          | 'activeWithInactiveVersion';
         description?: string;
         descriptionTextLimit?: number;
         language?: string;
@@ -159,42 +173,43 @@ export type PackagesV1Schema = {
         masterLanguage?: string;
         responsible?: string;
         abapLanguageVersion?: string;
-    };
-} | {
-    packageTree: {
+      };
+    }
+  | {
+      packageTree: {
         treeNode?: {
+          extension?: unknown;
+          superPackageRef: {
             extension?: unknown;
-            superPackageRef: {
-                extension?: unknown;
-                uri?: string;
-                parentUri?: string;
-                type?: string;
-                name?: string;
-                packageName?: string;
-                description?: string;
-            };
-            packageInterfaces: {
-                packageInterfaceRef?: {
-                    extension?: unknown;
-                    uri?: string;
-                    parentUri?: string;
-                    type?: string;
-                    name?: string;
-                    packageName?: string;
-                    description?: string;
-                }[];
-                isVisible?: boolean;
-            };
             uri?: string;
             parentUri?: string;
             type?: string;
             name?: string;
             packageName?: string;
             description?: string;
-            isEncapsulated?: boolean;
-            hasSubpackages?: boolean;
-            hasInterfaces?: boolean;
+          };
+          packageInterfaces: {
+            packageInterfaceRef?: {
+              extension?: unknown;
+              uri?: string;
+              parentUri?: string;
+              type?: string;
+              name?: string;
+              packageName?: string;
+              description?: string;
+            }[];
+            isVisible?: boolean;
+          };
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
+          isEncapsulated?: boolean;
+          hasSubpackages?: boolean;
+          hasInterfaces?: boolean;
         }[];
         isSuperTree?: boolean;
+      };
     };
-};

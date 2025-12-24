@@ -29,7 +29,7 @@ export function genericPage({ url, response }: PageProps): PageResult {
 
   for (const link of response.links) {
     const title = link.title || getActionName(link.rel);
-    
+
     // Make path relative/shorter for display
     let displayPath = link.href;
     const currentBase = url.split('/').slice(0, -1).join('/');
@@ -99,14 +99,32 @@ function extractSummary(data: Record<string, unknown>): SummaryItem[] {
       if (key.includes('link') || key === '?xml') continue;
 
       // Extract interesting attributes (those starting with @_)
-      if (key.startsWith('@_') && typeof value === 'string' || typeof value === 'number') {
+      if (
+        (key.startsWith('@_') && typeof value === 'string') ||
+        typeof value === 'number'
+      ) {
         const cleanKey = key.replace('@_', '').replace(/^\w+:/, '');
         // Skip duplicates and uninteresting fields
-        if (seen.has(cleanKey) || cleanKey === 'version' || cleanKey === 'encoding') continue;
+        if (
+          seen.has(cleanKey) ||
+          cleanKey === 'version' ||
+          cleanKey === 'encoding'
+        )
+          continue;
         seen.add(cleanKey);
 
         // Limit to important fields
-        const important = ['number', 'owner', 'desc', 'status', 'status_text', 'type', 'target', 'name', 'uri'];
+        const important = [
+          'number',
+          'owner',
+          'desc',
+          'status',
+          'status_text',
+          'type',
+          'target',
+          'name',
+          'uri',
+        ];
         if (important.some((f) => cleanKey.includes(f))) {
           summary.push({ key: cleanKey, value: String(value) });
         }

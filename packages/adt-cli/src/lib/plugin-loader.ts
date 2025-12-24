@@ -1,6 +1,6 @@
 /**
  * CLI Plugin Loader
- * 
+ *
  * Dynamically loads CLI command plugins from config.
  * Translates CLI-agnostic plugin definitions to Commander commands.
  */
@@ -8,9 +8,9 @@
 import { Command } from 'commander';
 import { resolve, dirname } from 'path';
 import { existsSync } from 'fs';
-import type { 
-  CliCommandPlugin, 
-  CliContext, 
+import type {
+  CliCommandPlugin,
+  CliContext,
   CliLogger,
   AdtCliConfig,
 } from '@abapify/adt-plugin';
@@ -22,7 +22,7 @@ import { getAdtSystem } from './ui/components/link';
  */
 export async function loadCliConfig(cwd: string): Promise<AdtCliConfig | null> {
   const configNames = ['adt.config.ts', 'adt.config.js', 'adt.config.mjs'];
-  
+
   let dir = cwd;
   while (dir !== dirname(dir)) {
     for (const name of configNames) {
@@ -39,7 +39,7 @@ export async function loadCliConfig(cwd: string): Promise<AdtCliConfig | null> {
     }
     dir = dirname(dir);
   }
-  
+
   return null;
 }
 
@@ -58,18 +58,23 @@ function createSimpleLogger(): CliLogger {
 /**
  * Convert a CLI-agnostic plugin to a Commander command
  */
-function pluginToCommand(plugin: CliCommandPlugin, config: AdtCliConfig): Command {
-  const cmd = new Command(plugin.name)
-    .description(plugin.description);
-  
+function pluginToCommand(
+  plugin: CliCommandPlugin,
+  config: AdtCliConfig,
+): Command {
+  const cmd = new Command(plugin.name).description(plugin.description);
+
   // Add options
   if (plugin.options) {
     for (const opt of plugin.options) {
       // Commander expects string | boolean | string[] for defaults
-      const defaultValue = opt.default !== undefined 
-        ? (typeof opt.default === 'number' ? String(opt.default) : opt.default as string | boolean)
-        : undefined;
-      
+      const defaultValue =
+        opt.default !== undefined
+          ? typeof opt.default === 'number'
+            ? String(opt.default)
+            : (opt.default as string | boolean)
+          : undefined;
+
       if (opt.required) {
         cmd.requiredOption(opt.flags, opt.description, defaultValue);
       } else {
@@ -77,28 +82,28 @@ function pluginToCommand(plugin: CliCommandPlugin, config: AdtCliConfig): Comman
       }
     }
   }
-  
+
   // Add arguments
   if (plugin.arguments) {
     for (const arg of plugin.arguments) {
       cmd.argument(arg.name, arg.description, arg.default);
     }
   }
-  
+
   // Add subcommands recursively
   if (plugin.subcommands) {
     for (const sub of plugin.subcommands) {
       cmd.addCommand(pluginToCommand(sub, config));
     }
   }
-  
+
   // Add action if execute is defined
   if (plugin.execute) {
     cmd.action(async (...actionArgs: unknown[]) => {
       // Commander passes options as last argument before Command
       const cmdInstance = actionArgs.pop() as Command;
       const options = cmdInstance.opts();
-      
+
       // Merge positional args into options
       const args: Record<string, unknown> = { ...options };
       if (plugin.arguments) {
@@ -107,7 +112,7 @@ function pluginToCommand(plugin: CliCommandPlugin, config: AdtCliConfig): Comman
           args[argName] = actionArgs[index];
         });
       }
-      
+
       const ctx: CliContext = {
         cwd: process.cwd(),
         config,
@@ -118,7 +123,7 @@ function pluginToCommand(plugin: CliCommandPlugin, config: AdtCliConfig): Comman
         // Provide system name for ADT hyperlinks
         adtSystemName: getAdtSystem(),
       };
-      
+
       try {
         await plugin.execute!(args, ctx);
       } catch (err) {
@@ -127,28 +132,33 @@ function pluginToCommand(plugin: CliCommandPlugin, config: AdtCliConfig): Comman
       }
     });
   }
-  
+
   return cmd;
 }
 
 /**
  * Load a command plugin from a module path
  */
-async function loadCommandPlugin(modulePath: string, cwd: string): Promise<CliCommandPlugin | null> {
+async function loadCommandPlugin(
+  modulePath: string,
+  cwd: string,
+): Promise<CliCommandPlugin | null> {
   try {
     // Handle relative paths
-    const resolvedPath = modulePath.startsWith('.') 
+    const resolvedPath = modulePath.startsWith('.')
       ? resolve(cwd, modulePath)
       : modulePath;
-    
+
     const module = await import(resolvedPath);
     const plugin = module.default ?? module;
-    
+
     if (!plugin?.name || !plugin?.description) {
-      console.warn(`Invalid command plugin: ${modulePath} (missing name or description)`);
+      console.warn(
+        `Invalid command plugin: ${modulePath} (missing name or description)`,
+      );
       return null;
     }
-    
+
     return plugin as CliCommandPlugin;
   } catch (err) {
     console.warn(`Failed to load command plugin: ${modulePath}`, err);
@@ -159,13 +169,16 @@ async function loadCommandPlugin(modulePath: string, cwd: string): Promise<CliCo
 /**
  * Load all command plugins from config and register with Commander
  */
-export async function loadCommandPlugins(program: Command, cwd: string): Promise<void> {
+export async function loadCommandPlugins(
+  program: Command,
+  cwd: string,
+): Promise<void> {
   const config = await loadCliConfig(cwd);
-  
+
   if (!config?.commands?.length) {
     return;
   }
-  
+
   for (const modulePath of config.commands) {
     const plugin = await loadCommandPlugin(modulePath, cwd);
     if (plugin) {

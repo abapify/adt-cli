@@ -1,13 +1,17 @@
 /**
  * Playwright Browser Adapter
- * 
+ *
  * Implements BrowserAdapter interface for Playwright.
  * This is a thin wrapper - all auth logic is in @abapify/browser-auth.
  */
 
 import { chromium } from 'playwright';
 import type { BrowserContext, Page, Cookie } from 'playwright';
-import type { BrowserAdapter, CookieData, ResponseEvent } from '@abapify/browser-auth';
+import type {
+  BrowserAdapter,
+  CookieData,
+  ResponseEvent,
+} from '@abapify/browser-auth';
 
 /**
  * Convert Playwright cookie to CookieData
@@ -31,7 +35,7 @@ function convertCookie(cookie: Cookie): CookieData {
 export function createPlaywrightAdapter(): BrowserAdapter {
   let context: BrowserContext | null = null;
   let page: Page | null = null;
-  
+
   const responseHandlers: ((event: ResponseEvent) => void)[] = [];
   const closeHandlers: (() => void)[] = [];
 
@@ -57,22 +61,24 @@ export function createPlaywrightAdapter(): BrowserAdapter {
       page = await context.newPage();
 
       // Wire up event handlers
-      page.on('response', response => {
+      page.on('response', (response) => {
         const event: ResponseEvent = {
           url: response.url(),
           status: response.status(),
         };
-        responseHandlers.forEach(handler => handler(event));
+        responseHandlers.forEach((handler) => handler(event));
       });
 
       page.once('close', () => {
-        closeHandlers.forEach(handler => handler());
+        closeHandlers.forEach((handler) => handler());
       });
     },
 
     async goto(url, options) {
       if (!page) throw new Error('Page not created');
-      await page.goto(url, { timeout: options?.timeout ?? 30000 }).catch(() => {});
+      await page
+        .goto(url, { timeout: options?.timeout ?? 30000 })
+        .catch(() => {});
     },
 
     async getCookies() {
@@ -84,12 +90,17 @@ export function createPlaywrightAdapter(): BrowserAdapter {
     async clearCookies(domain: string) {
       if (!context) throw new Error('Browser not launched');
       const cookies = await context.cookies();
-      const toRemove = cookies.filter(c => 
-        c.domain.includes(domain) || domain.includes(c.domain.replace(/^\./, ''))
+      const toRemove = cookies.filter(
+        (c) =>
+          c.domain.includes(domain) ||
+          domain.includes(c.domain.replace(/^\./, '')),
       );
       // Clear each matching cookie individually
       for (const cookie of toRemove) {
-        await context.clearCookies({ name: cookie.name, domain: cookie.domain });
+        await context.clearCookies({
+          name: cookie.name,
+          domain: cookie.domain,
+        });
       }
     },
 

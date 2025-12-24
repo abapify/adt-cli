@@ -68,7 +68,7 @@ export function createCliLogger(options: LoggerOptions = {}): Logger {
  */
 function createFilteredLogger(
   baseLogger: any,
-  allowedComponents: string[]
+  allowedComponents: string[],
 ): Logger {
   return {
     trace: (msg: string, obj?: any) => {

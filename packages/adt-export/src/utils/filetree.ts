@@ -2,7 +2,12 @@
  * FileTree implementations
  */
 
-import { readFile, readdir, access, glob as nativeGlob } from 'node:fs/promises';
+import {
+  readFile,
+  readdir,
+  access,
+  glob as nativeGlob,
+} from 'node:fs/promises';
 import { join } from 'node:path';
 import type { FileTree } from '@abapify/adt-plugin';
 
@@ -25,7 +30,7 @@ export class FsFileTree implements FileTree {
     const fullPath = join(this.root, path);
     const content = await readFile(fullPath, 'utf-8');
     // Strip UTF-8 BOM if present
-    return content.charCodeAt(0) === 0xFEFF ? content.slice(1) : content;
+    return content.charCodeAt(0) === 0xfeff ? content.slice(1) : content;
   }
 
   async readBuffer(path: string): Promise<Buffer> {
@@ -55,19 +60,20 @@ export class FsFileTree implements FileTree {
 export class MemoryFileTree implements FileTree {
   constructor(
     public readonly root: string,
-    private files: Map<string, string | Buffer>
+    private files: Map<string, string | Buffer>,
   ) {}
 
   async glob(pattern: string): Promise<string[]> {
     // Simple glob matching for testing
     const regex = new RegExp(
-      '^' + pattern
-        .replace(/\*\*/g, '.*')
-        .replace(/\*/g, '[^/]*')
-        .replace(/\./g, '\\.')
-      + '$'
+      '^' +
+        pattern
+          .replace(/\*\*/g, '.*')
+          .replace(/\*/g, '[^/]*')
+          .replace(/\./g, '\\.') +
+        '$',
     );
-    return Array.from(this.files.keys()).filter(p => regex.test(p));
+    return Array.from(this.files.keys()).filter((p) => regex.test(p));
   }
 
   async read(path: string): Promise<string> {
@@ -93,7 +99,7 @@ export class MemoryFileTree implements FileTree {
   async readdir(path: string): Promise<string[]> {
     const prefix = path ? path + '/' : '';
     const entries = new Set<string>();
-    
+
     for (const filePath of this.files.keys()) {
       if (filePath.startsWith(prefix)) {
         const rest = filePath.slice(prefix.length);
@@ -101,7 +107,7 @@ export class MemoryFileTree implements FileTree {
         entries.add(firstPart);
       }
     }
-    
+
     return Array.from(entries);
   }
 }

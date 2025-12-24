@@ -5,58 +5,61 @@
  * Mode: Flattened
  */
 
-export type LogSchema = {
-    logKeys: {
+export type LogSchema =
+  | {
+      logKeys: {
         progVersion?: {
-            key?: {
-                value?: string;
-                calls?: number;
-                lastCall?: string;
-            }[];
-            generatedAt?: string;
+          key?: {
+            value?: string;
+            calls?: number;
+            lastCall?: string;
+          }[];
+          generatedAt?: string;
         }[];
         base?: string;
-    };
-} | {
-    logEntry: {
+      };
+    }
+  | {
+      logEntry: {
         fieldList: {
-            field?: {
-                value: {
-                    e?: {
-                        t?: boolean;
-                        v?: string;
-                        y?: string;
-                    };
-                    s?: {
-                        c: unknown[];
-                        t?: boolean;
-                    };
-                    t?: {
-                        c?: unknown[];
-                        t?: boolean;
-                    };
-                };
-                name?: string;
-            }[];
-        };
-    };
-} | {
-    collectionSummary: {
-        success?: {
-            server: {
-                name?: string;
+          field?: {
+            value: {
+              e?: {
+                t?: boolean;
+                v?: string;
+                y?: string;
+              };
+              s?: {
+                c: unknown[];
+                t?: boolean;
+              };
+              t?: {
+                c?: unknown[];
+                t?: boolean;
+              };
             };
+            name?: string;
+          }[];
+        };
+      };
+    }
+  | {
+      collectionSummary: {
+        success?: {
+          server: {
+            name?: string;
+          };
         };
         unreached?: {
-            server: {
-                name?: string;
-            };
+          server: {
+            name?: string;
+          };
         };
         failed?: {
-            server?: string;
-            returnCode?: number;
-            errorMessage?: string;
+          server?: string;
+          returnCode?: number;
+          errorMessage?: string;
         }[];
         collectedLogs?: number;
+      };
     };
-};

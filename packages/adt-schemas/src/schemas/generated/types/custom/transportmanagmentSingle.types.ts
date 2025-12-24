@@ -6,171 +6,178 @@
  */
 
 export type TransportmanagmentSingleSchema = {
-    root: {
-        containerRef?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-        };
-        adtTemplate?: {
-            adtProperty?: {
-                $value?: string;
-                key?: string;
-            }[];
-            name?: string;
-        };
-        request?: {
-            long_desc?: string;
-            attributes?: {
-                attribute?: string;
-                description?: string;
-                value?: string;
-                position?: string;
-            }[];
-            abap_object?: {
-                pgmid?: string;
-                type?: string;
-                name?: string;
-                wbtype?: string;
-                uri?: string;
-                dummy_uri?: string;
-                obj_info?: string;
-                obj_desc?: string;
-                lock_status?: string;
-                position?: string;
-                img_activity?: string;
-                obj_func?: string;
-            }[];
-            all_objects?: {
-                abap_object?: {
-                    pgmid?: string;
-                    type?: string;
-                    name?: string;
-                    wbtype?: string;
-                    uri?: string;
-                    dummy_uri?: string;
-                    obj_info?: string;
-                    obj_desc?: string;
-                    lock_status?: string;
-                    position?: string;
-                    img_activity?: string;
-                    obj_func?: string;
-                }[];
-            };
-            task?: {
-                long_desc?: string;
-                abap_object?: {
-                    pgmid?: string;
-                    type?: string;
-                    name?: string;
-                    wbtype?: string;
-                    uri?: string;
-                    dummy_uri?: string;
-                    obj_info?: string;
-                    obj_desc?: string;
-                    lock_status?: string;
-                    position?: string;
-                    img_activity?: string;
-                    obj_func?: string;
-                }[];
-                number?: string;
-                owner?: string;
-                desc?: string;
-                status?: string;
-                uri?: string;
-                type?: string;
-                status_text?: string;
-                target?: string;
-                target_desc?: string;
-                source_client?: string;
-                parent?: string;
-                cts_project?: string;
-                cts_project_desc?: string;
-                lastchanged_timestamp?: string;
-                docu?: string;
-            }[];
-            review?: {
-                repository_id?: string;
-                repository_url?: string;
-                repository_branch?: string;
-                pull_request_url?: string;
-            };
-            dynamic_attributes?: {
-                dynamic_attribute?: {
-                    properties?: {
-                        property?: {
-                            key?: string;
-                            value?: string;
-                        }[];
-                    };
-                    attribute?: string;
-                    value?: string;
-                    description?: string;
-                    domain_name?: string;
-                }[];
-            };
-            number?: string;
-            owner?: string;
-            desc?: string;
-            status?: string;
-            uri?: string;
-            type?: string;
-            status_text?: string;
-            target?: string;
-            target_desc?: string;
-            source_client?: string;
-            parent?: string;
-            cts_project?: string;
-            cts_project_desc?: string;
-            lastchanged_timestamp?: string;
-            docu?: string;
-        };
-        task?: {
-            long_desc?: string;
-            abap_object?: {
-                pgmid?: string;
-                type?: string;
-                name?: string;
-                wbtype?: string;
-                uri?: string;
-                dummy_uri?: string;
-                obj_info?: string;
-                obj_desc?: string;
-                lock_status?: string;
-                position?: string;
-                img_activity?: string;
-                obj_func?: string;
-            }[];
-            number?: string;
-            owner?: string;
-            desc?: string;
-            status?: string;
-            uri?: string;
-            type?: string;
-            status_text?: string;
-            target?: string;
-            target_desc?: string;
-            source_client?: string;
-            parent?: string;
-            cts_project?: string;
-            cts_project_desc?: string;
-            lastchanged_timestamp?: string;
-            docu?: string;
-        }[];
-        name: string;
-        type: string;
-        changedBy?: string;
-        changedAt?: string;
-        createdAt?: string;
-        createdBy?: string;
-        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string;
-        descriptionTextLimit?: number;
-        language?: string;
-        object_type?: string;
+  root: {
+    containerRef?: {
+      extension?: unknown;
+      uri?: string;
+      parentUri?: string;
+      type?: string;
+      name?: string;
+      packageName?: string;
+      description?: string;
     };
+    adtTemplate?: {
+      adtProperty?: {
+        $value?: string;
+        key?: string;
+      }[];
+      name?: string;
+    };
+    request?: {
+      long_desc?: string;
+      attributes?: {
+        attribute?: string;
+        description?: string;
+        value?: string;
+        position?: string;
+      }[];
+      abap_object?: {
+        pgmid?: string;
+        type?: string;
+        name?: string;
+        wbtype?: string;
+        uri?: string;
+        dummy_uri?: string;
+        obj_info?: string;
+        obj_desc?: string;
+        lock_status?: string;
+        position?: string;
+        img_activity?: string;
+        obj_func?: string;
+      }[];
+      all_objects?: {
+        abap_object?: {
+          pgmid?: string;
+          type?: string;
+          name?: string;
+          wbtype?: string;
+          uri?: string;
+          dummy_uri?: string;
+          obj_info?: string;
+          obj_desc?: string;
+          lock_status?: string;
+          position?: string;
+          img_activity?: string;
+          obj_func?: string;
+        }[];
+      };
+      task?: {
+        long_desc?: string;
+        abap_object?: {
+          pgmid?: string;
+          type?: string;
+          name?: string;
+          wbtype?: string;
+          uri?: string;
+          dummy_uri?: string;
+          obj_info?: string;
+          obj_desc?: string;
+          lock_status?: string;
+          position?: string;
+          img_activity?: string;
+          obj_func?: string;
+        }[];
+        number?: string;
+        owner?: string;
+        desc?: string;
+        status?: string;
+        uri?: string;
+        type?: string;
+        status_text?: string;
+        target?: string;
+        target_desc?: string;
+        source_client?: string;
+        parent?: string;
+        cts_project?: string;
+        cts_project_desc?: string;
+        lastchanged_timestamp?: string;
+        docu?: string;
+      }[];
+      review?: {
+        repository_id?: string;
+        repository_url?: string;
+        repository_branch?: string;
+        pull_request_url?: string;
+      };
+      dynamic_attributes?: {
+        dynamic_attribute?: {
+          properties?: {
+            property?: {
+              key?: string;
+              value?: string;
+            }[];
+          };
+          attribute?: string;
+          value?: string;
+          description?: string;
+          domain_name?: string;
+        }[];
+      };
+      number?: string;
+      owner?: string;
+      desc?: string;
+      status?: string;
+      uri?: string;
+      type?: string;
+      status_text?: string;
+      target?: string;
+      target_desc?: string;
+      source_client?: string;
+      parent?: string;
+      cts_project?: string;
+      cts_project_desc?: string;
+      lastchanged_timestamp?: string;
+      docu?: string;
+    };
+    task?: {
+      long_desc?: string;
+      abap_object?: {
+        pgmid?: string;
+        type?: string;
+        name?: string;
+        wbtype?: string;
+        uri?: string;
+        dummy_uri?: string;
+        obj_info?: string;
+        obj_desc?: string;
+        lock_status?: string;
+        position?: string;
+        img_activity?: string;
+        obj_func?: string;
+      }[];
+      number?: string;
+      owner?: string;
+      desc?: string;
+      status?: string;
+      uri?: string;
+      type?: string;
+      status_text?: string;
+      target?: string;
+      target_desc?: string;
+      source_client?: string;
+      parent?: string;
+      cts_project?: string;
+      cts_project_desc?: string;
+      lastchanged_timestamp?: string;
+      docu?: string;
+    }[];
+    name: string;
+    type: string;
+    changedBy?: string;
+    changedAt?: string;
+    createdAt?: string;
+    createdBy?: string;
+    version?:
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string;
+    descriptionTextLimit?: number;
+    language?: string;
+    object_type?: string;
+  };
 };

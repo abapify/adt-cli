@@ -171,7 +171,7 @@ export class CodegenFramework {
    */
   private async callHook(
     hookName: keyof import('./types').PluginHooks,
-    context: any
+    context: any,
   ): Promise<void> {
     for (const plugin of this.plugins) {
       const hook = plugin.hooks?.[hookName];
@@ -185,7 +185,7 @@ export class CodegenFramework {
    * Create workspace context
    */
   private async createWorkspaceContext(
-    workspace: any
+    workspace: any,
   ): Promise<WorkspaceContext> {
     const title = workspace['atom:title'];
     const folderName = this.sanitizeTitle(title);
@@ -231,7 +231,7 @@ export class CodegenFramework {
    */
   private createCollectionContext(
     collection: any,
-    workspace: WorkspaceContext
+    workspace: WorkspaceContext,
   ): CollectionContext {
     const accepts = collection['app:accept'];
     const acceptsArray = accepts
@@ -273,7 +273,7 @@ export class CodegenFramework {
    */
   private createTemplateLinkContext(
     link: TemplateLink,
-    collection: CollectionContext
+    collection: CollectionContext,
   ): TemplateLinkContext {
     return {
       rel: link.rel,

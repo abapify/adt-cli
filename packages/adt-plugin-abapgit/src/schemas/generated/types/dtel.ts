@@ -5,61 +5,63 @@
  * Mode: Flattened
  */
 
-export type DtelSchema = {
-    abapGit: {
+export type DtelSchema =
+  | {
+      abapGit: {
         abap: {
-            values: {
-                DD04V?: {
-                    ROLLNAME: string;
-                    DDLANGUAGE?: string;
-                    DDTEXT?: string;
-                    DOMNAME?: string;
-                    DATATYPE?: string;
-                    LENG?: string;
-                    DECIMALS?: string;
-                    HEADLEN?: string;
-                    SCRLEN1?: string;
-                    SCRLEN2?: string;
-                    SCRLEN3?: string;
-                    REPTEXT?: string;
-                    SCRTEXT_S?: string;
-                    SCRTEXT_M?: string;
-                    SCRTEXT_L?: string;
-                    DTELMASTER?: string;
-                    REFKIND?: string;
-                    ABAP_LANGUAGE_VERSION?: string;
-                };
+          values: {
+            DD04V?: {
+              ROLLNAME: string;
+              DDLANGUAGE?: string;
+              DDTEXT?: string;
+              DOMNAME?: string;
+              DATATYPE?: string;
+              LENG?: string;
+              DECIMALS?: string;
+              HEADLEN?: string;
+              SCRLEN1?: string;
+              SCRLEN2?: string;
+              SCRLEN3?: string;
+              REPTEXT?: string;
+              SCRTEXT_S?: string;
+              SCRTEXT_M?: string;
+              SCRTEXT_L?: string;
+              DTELMASTER?: string;
+              REFKIND?: string;
+              ABAP_LANGUAGE_VERSION?: string;
             };
-            version?: string;
+          };
+          version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-    };
-} | {
-    abap: {
+      };
+    }
+  | {
+      abap: {
         values: {
-            DD04V?: {
-                ROLLNAME: string;
-                DDLANGUAGE?: string;
-                DDTEXT?: string;
-                DOMNAME?: string;
-                DATATYPE?: string;
-                LENG?: string;
-                DECIMALS?: string;
-                HEADLEN?: string;
-                SCRLEN1?: string;
-                SCRLEN2?: string;
-                SCRLEN3?: string;
-                REPTEXT?: string;
-                SCRTEXT_S?: string;
-                SCRTEXT_M?: string;
-                SCRTEXT_L?: string;
-                DTELMASTER?: string;
-                REFKIND?: string;
-                ABAP_LANGUAGE_VERSION?: string;
-            };
+          DD04V?: {
+            ROLLNAME: string;
+            DDLANGUAGE?: string;
+            DDTEXT?: string;
+            DOMNAME?: string;
+            DATATYPE?: string;
+            LENG?: string;
+            DECIMALS?: string;
+            HEADLEN?: string;
+            SCRLEN1?: string;
+            SCRLEN2?: string;
+            SCRLEN3?: string;
+            REPTEXT?: string;
+            SCRTEXT_S?: string;
+            SCRTEXT_M?: string;
+            SCRTEXT_L?: string;
+            DTELMASTER?: string;
+            REFKIND?: string;
+            ABAP_LANGUAGE_VERSION?: string;
+          };
         };
         version?: string;
+      };
     };
-};

@@ -1,6 +1,6 @@
 /**
  * CLI Command Plugin Types
- * 
+ *
  * CLI-agnostic interface for command plugins.
  * Plugins implement this interface without depending on any CLI framework (Commander, yargs, etc.)
  * The CLI shell (adt-cli) translates these definitions to the actual CLI framework.
@@ -15,17 +15,17 @@ export interface CliOption {
    * @example '-o, --output <dir>' or '--verbose'
    */
   flags: string;
-  
+
   /**
    * Description shown in help
    */
   description: string;
-  
+
   /**
    * Default value if not provided
    */
   default?: string | boolean | number;
-  
+
   /**
    * Whether this option is required
    */
@@ -42,12 +42,12 @@ export interface CliArgument {
    * @example '<path>' or '[config]'
    */
   name: string;
-  
+
   /**
    * Description shown in help
    */
   description: string;
-  
+
   /**
    * Default value if not provided (only for optional arguments)
    */
@@ -62,17 +62,17 @@ export interface CliContext {
    * Current working directory
    */
   cwd: string;
-  
+
   /**
    * Loaded configuration from adt.config.ts (if present)
    */
   config: Record<string, unknown>;
-  
+
   /**
    * Logger instance
    */
   logger: CliLogger;
-  
+
   /**
    * ADT client factory (provided by adt-cli when authenticated)
    * Returns an authenticated ADT client for making API calls.
@@ -80,7 +80,7 @@ export interface CliContext {
    * Note: This is async - plugins must await the result.
    */
   getAdtClient?: () => Promise<unknown>;
-  
+
   /**
    * ADT system name for hyperlinks (e.g., "S0D")
    * Used to construct adt:// protocol links.
@@ -101,14 +101,14 @@ export interface CliLogger {
 
 /**
  * CLI Command Plugin interface
- * 
+ *
  * Implement this interface to create a CLI command plugin.
  * The plugin is CLI-agnostic - it doesn't know about Commander or any other CLI framework.
- * 
+ *
  * @example
  * ```typescript
  * import type { CliCommandPlugin } from '@abapify/adt-plugin';
- * 
+ *
  * export const myCommand: CliCommandPlugin = {
  *   name: 'my-command',
  *   description: 'Does something useful',
@@ -128,38 +128,35 @@ export interface CliCommandPlugin {
    * @example 'codegen' results in `adt codegen`
    */
   name: string;
-  
+
   /**
    * Command description shown in help
    */
   description: string;
-  
+
   /**
    * Command options (flags)
    */
   options?: CliOption[];
-  
+
   /**
    * Positional arguments
    */
   arguments?: CliArgument[];
-  
+
   /**
    * Nested subcommands
    * @example codegen.subcommands = [contractsCommand] results in `adt codegen contracts`
    */
   subcommands?: CliCommandPlugin[];
-  
+
   /**
    * Execute the command
-   * 
+   *
    * @param args - Parsed arguments and options as key-value pairs
    * @param ctx - Execution context (cwd, config, logger)
    */
-  execute?(
-    args: Record<string, unknown>,
-    ctx: CliContext
-  ): Promise<void>;
+  execute?(args: Record<string, unknown>, ctx: CliContext): Promise<void>;
 }
 
 /**
@@ -180,7 +177,7 @@ export interface AdtCliConfig {
   /**
    * Command plugins to load
    * Can be package names or relative paths
-   * 
+   *
    * @example
    * ```typescript
    * commands: [
@@ -190,7 +187,7 @@ export interface AdtCliConfig {
    * ```
    */
   commands?: string[];
-  
+
   /**
    * Additional configuration passed to commands via context
    */

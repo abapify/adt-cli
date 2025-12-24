@@ -1,6 +1,6 @@
 /**
  * @abapify/adt-auth
- * 
+ *
  * Authentication package for SAP ADT systems
  * Single source of truth for session management across all consumers
  */
@@ -26,4 +26,3 @@ export type {
   BasicAuthResult,
   ConnectionTestResult,
 } from './types';
-

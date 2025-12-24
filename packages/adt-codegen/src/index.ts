@@ -28,8 +28,8 @@ export type {
 } from './plugins/index';
 
 // Contract generator
-export { 
-  generateContracts, 
+export {
+  generateContracts,
   defaultResolveImports,
   type GenerateContractsOptions,
   type ContractImports,

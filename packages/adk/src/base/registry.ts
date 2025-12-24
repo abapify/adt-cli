@@ -1,9 +1,9 @@
 /**
  * ADK Object Registry
- * 
+ *
  * Maps ADT types to ADK object constructors.
  * Supports both full types (DEVC/K) and main types (DEVC).
- * 
+ *
  * Architecture:
  * - ADT type (external): "DEVC/K", "CLAS/OC" - from SAP
  * - ADK kind (internal): Package, Class - our abstraction
@@ -21,8 +21,9 @@ import * as kinds from './kinds';
 
 /** Constructor signature for ADK objects */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AdkObjectConstructor<T extends AdkObject<AdkKind, any> = AdkObject<AdkKind, any>> = 
-  new (ctx: AdkContext, nameOrData: string | any) => T;
+export type AdkObjectConstructor<
+  T extends AdkObject<AdkKind, any> = AdkObject<AdkKind, any>,
+> = new (ctx: AdkContext, nameOrData: string | any) => T;
 
 /** Registry entry with constructor and kind */
 export interface RegistryEntry {
@@ -36,7 +37,7 @@ export interface RegistryEntry {
 
 /**
  * Parse ADT type into components
- * 
+ *
  * @example
  * parseAdtType("DEVC/K") // { full: "DEVC/K", main: "DEVC", sub: "K" }
  * parseAdtType("DEVC")   // { full: "DEVC", main: "DEVC", sub: undefined }
@@ -56,7 +57,7 @@ export function parseAdtType(adtType: string): {
 
 /**
  * Get main type from ADT type
- * 
+ *
  * @example
  * getMainType("DEVC/K") // "DEVC"
  * getMainType("CLAS")   // "CLAS"
@@ -80,7 +81,7 @@ const kindToAdt = new Map<AdkKind, string>();
 
 /**
  * Register an ADK object type
- * 
+ *
  * @param adtMainType - Main ADT type (e.g., "DEVC", "CLAS")
  * @param kind - ADK kind constant
  * @param constructor - Object constructor
@@ -91,7 +92,7 @@ export function registerObjectType(
   constructor: AdkObjectConstructor,
 ): void {
   const normalizedType = adtMainType.toUpperCase();
-  
+
   registry.set(normalizedType, { kind, constructor });
   adtToKind.set(normalizedType, kind);
   kindToAdt.set(kind, normalizedType);
@@ -99,7 +100,7 @@ export function registerObjectType(
 
 /**
  * Resolve ADT type to registry entry
- * 
+ *
  * @param adtType - Full or main ADT type (e.g., "DEVC/K" or "DEVC")
  * @returns Registry entry or undefined if not found
  */
@@ -110,7 +111,7 @@ export function resolveType(adtType: string): RegistryEntry | undefined {
 
 /**
  * Resolve ADK kind to registry entry
- * 
+ *
  * @param kind - ADK kind constant
  * @returns Registry entry or undefined if not found
  */
@@ -174,27 +175,27 @@ export function getRegisteredKinds(): AdkKind[] {
 
 /**
  * Known ADT type to ADK kind mappings
- * 
+ *
  * Repository Objects:
  * - DEVC → Package
- * - CLAS → Class  
+ * - CLAS → Class
  * - INTF → Interface
  * - FUGR → FunctionGroup
  * - FUNC → FunctionModule
  * - PROG → Program
  * - INCL → Include
- * 
+ *
  * Data Dictionary:
  * - TABL → Table
  * - STRU → Structure (actually TABL with different category)
  * - DTEL → DataElement
  * - DOMA → Domain
  * - TTYP → TableType
- * 
+ *
  * Other:
  * - MSAG → MessageClass
  * - ENHS → EnhancementSpot
- * 
+ *
  * CTS:
  * - (Transport requests/tasks use different identification)
  */
@@ -207,13 +208,13 @@ export const ADT_TYPE_MAPPINGS = {
   FUNC: kinds.FunctionModule,
   PROG: kinds.Program,
   INCL: kinds.Include,
-  
+
   // Data Dictionary
   TABL: kinds.Table,
   DTEL: kinds.DataElement,
   DOMA: kinds.Domain,
   TTYP: kinds.TableType,
-  
+
   // Other
   MSAG: kinds.MessageClass,
   ENHS: kinds.EnhancementSpot,

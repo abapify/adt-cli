@@ -3,7 +3,7 @@
  *
  * Endpoint: /sap/bc/adt/oo/classes
  * Full CRUD operations for ABAP classes including source code management.
- * 
+ *
  * Uses the crud() helper with sources and includes options for complete
  * class operations including metadata, source code, and class includes.
  */
@@ -15,7 +15,13 @@ import { classes as classesSchema, type InferTypedSchema } from '../../schemas';
  * Include types for ABAP classes
  * Based on AbapClassIncludeType from SAP XSD schema
  */
-export type ClassIncludeType = 'main' | 'definitions' | 'implementations' | 'macros' | 'testclasses' | 'localtypes';
+export type ClassIncludeType =
+  | 'main'
+  | 'definitions'
+  | 'implementations'
+  | 'macros'
+  | 'testclasses'
+  | 'localtypes';
 
 /**
  * Class response type - exported for consumers (ADK, etc.)
@@ -28,7 +34,7 @@ export type ClassResponse = InferTypedSchema<typeof classesSchema>;
 /**
  * /sap/bc/adt/oo/classes
  * Full CRUD operations for ABAP classes
- * 
+ *
  * Includes:
  * - Basic CRUD: get, post, put, delete
  * - Lock/Unlock: lock, unlock
@@ -41,7 +47,13 @@ export const classesContract = crud({
   schema: classesSchema,
   contentType: 'application/vnd.sap.adt.oo.classes.v4+xml',
   sources: ['main'] as const,
-  includes: ['definitions', 'implementations', 'macros', 'testclasses', 'localtypes'] as const,
+  includes: [
+    'definitions',
+    'implementations',
+    'macros',
+    'testclasses',
+    'localtypes',
+  ] as const,
 });
 
 /** Type alias for the classes contract */

@@ -32,7 +32,7 @@ import type {
  */
 export type SchemaLocationResolver = (
   schemaLocation: string,
-  basePath?: string
+  basePath?: string,
 ) => Schema | undefined;
 
 export interface SchemaToSourceFileOptions {
@@ -61,7 +61,6 @@ export interface SchemaSourceFileResult {
   rootTypeName: string | undefined;
 }
 
-
 // =============================================================================
 // Helpers
 // =============================================================================
@@ -85,7 +84,7 @@ function deriveRootTypeName(filename: string | undefined): string | undefined {
  */
 export function schemaToSourceFile(
   schema: Schema,
-  options: SchemaToSourceFileOptions = {}
+  options: SchemaToSourceFileOptions = {},
 ): SchemaSourceFileResult {
   const project =
     options.project ?? new Project({ useInMemoryFileSystem: true });
@@ -118,7 +117,7 @@ export function schemaToSourceFile(
       if (imp.schemaLocation) {
         const resolvedSchema = options.schemaLocationResolver(
           imp.schemaLocation,
-          options.basePath
+          options.basePath,
         );
         if (resolvedSchema) {
           trackImportedTypes(resolvedSchema, ctx);
@@ -196,7 +195,7 @@ export interface FlattenTypeOptions {
 export function flattenType(
   sourceFile: SourceFile,
   typeName: string,
-  options: FlattenTypeOptions = {}
+  options: FlattenTypeOptions = {},
 ): SourceFile {
   const project = sourceFile.getProject();
 
@@ -209,7 +208,7 @@ export function flattenType(
         project.createSourceFile(
           additionalFile.getFilePath(),
           additionalFile.getFullText(),
-          { overwrite: true }
+          { overwrite: true },
         );
       }
     }
@@ -245,7 +244,6 @@ export function flattenType(
   return flatFile;
 }
 
-
 // =============================================================================
 // Type Expansion (for flattenType)
 // =============================================================================
@@ -279,7 +277,7 @@ export function expandTypeToString(
   checker: TypeChecker,
   context: Node,
   indent = '',
-  visited = new Set<string>()
+  visited = new Set<string>(),
 ): string {
   if (isPrimitiveType(type)) {
     return type.getText();
@@ -293,7 +291,7 @@ export function expandTypeToString(
         checker,
         context,
         indent,
-        visited
+        visited,
       )}[]`;
     }
     return 'unknown[]';
@@ -358,7 +356,7 @@ export function expandTypeToString(
         checker,
         context,
         indent + '  ',
-        newVisited
+        newVisited,
       );
       lines.push(`${indent}  ${name}${optional}: ${expanded};`);
     }
@@ -395,7 +393,13 @@ export function expandTypeToString(
           const ifaceType = iface.getType();
           const newVisited = new Set(visited);
           newVisited.add(typeName);
-          return expandTypeToString(ifaceType, checker, context, indent, newVisited);
+          return expandTypeToString(
+            ifaceType,
+            checker,
+            context,
+            indent,
+            newVisited,
+          );
         }
       }
     }
@@ -410,7 +414,7 @@ export function expandTypeToString(
         checker,
         context,
         indent,
-        newVisited
+        newVisited,
       );
     }
     // If still no properties, return unknown to avoid import() in output
@@ -419,7 +423,6 @@ export function expandTypeToString(
 
   return textRepr;
 }
-
 
 // =============================================================================
 // Internal Types
@@ -504,7 +507,7 @@ function toInterfaceName(name: string): string {
 
 function trackImportedTypes(
   importedSchema: Schema,
-  ctx: GeneratorContext
+  ctx: GeneratorContext,
 ): void {
   const schemaName = importedSchema.$filename?.replace('.xsd', '') ?? 'unknown';
 
@@ -594,7 +597,7 @@ function resolveTypeName(typeName: string, ctx: GeneratorContext): string {
 function generateInterface(
   name: string,
   ct: TopLevelComplexType | LocalComplexType,
-  ctx: GeneratorContext
+  ctx: GeneratorContext,
 ): void {
   const interfaceName = toInterfaceName(name);
   if (ctx.generatedTypes.has(interfaceName)) return;
@@ -628,25 +631,31 @@ function generateInterface(
 
     // Collect extension's own properties
     const ext = ct.complexContent.extension;
-    if (ext.sequence) hasAny = collectFromGroup(ext.sequence, properties, ctx, false) || hasAny;
-    if (ext.choice) hasAny = collectFromGroup(ext.choice, properties, ctx, true) || hasAny;
-    if (ext.all) hasAny = collectFromGroup(ext.all, properties, ctx, false) || hasAny;
+    if (ext.sequence)
+      hasAny = collectFromGroup(ext.sequence, properties, ctx, false) || hasAny;
+    if (ext.choice)
+      hasAny = collectFromGroup(ext.choice, properties, ctx, true) || hasAny;
+    if (ext.all)
+      hasAny = collectFromGroup(ext.all, properties, ctx, false) || hasAny;
     collectAttributes(ext.attribute, properties, ctx);
   }
   // Handle simpleContent
   else if (ct.simpleContent?.extension) {
     const ext = ct.simpleContent.extension;
     const baseType = ext.base
-      ? XSD_BUILT_IN_TYPES[stripNsPrefix(ext.base)] ?? 'string'
+      ? (XSD_BUILT_IN_TYPES[stripNsPrefix(ext.base)] ?? 'string')
       : 'string';
     properties.push({ name: '$value', type: baseType, hasQuestionToken: true });
     collectAttributes(ext.attribute, properties, ctx);
   }
   // Handle direct content (no complexContent/simpleContent)
   else {
-    if (ct.sequence) hasAny = collectFromGroup(ct.sequence, properties, ctx, false) || hasAny;
-    if (ct.choice) hasAny = collectFromGroup(ct.choice, properties, ctx, true) || hasAny;
-    if (ct.all) hasAny = collectFromGroup(ct.all, properties, ctx, false) || hasAny;
+    if (ct.sequence)
+      hasAny = collectFromGroup(ct.sequence, properties, ctx, false) || hasAny;
+    if (ct.choice)
+      hasAny = collectFromGroup(ct.choice, properties, ctx, true) || hasAny;
+    if (ct.all)
+      hasAny = collectFromGroup(ct.all, properties, ctx, false) || hasAny;
     collectAttributes(ct.attribute, properties, ctx);
 
     if (ct.mixed) {
@@ -663,9 +672,14 @@ function generateInterface(
       const group = ctx.schema.group?.find((g) => g.name === groupName);
       if (group) {
         if (group.sequence)
-          hasAny = collectFromGroup(group.sequence, properties, ctx, false) || hasAny;
-        if (group.choice) hasAny = collectFromGroup(group.choice, properties, ctx, true) || hasAny;
-        if (group.all) hasAny = collectFromGroup(group.all, properties, ctx, false) || hasAny;
+          hasAny =
+            collectFromGroup(group.sequence, properties, ctx, false) || hasAny;
+        if (group.choice)
+          hasAny =
+            collectFromGroup(group.choice, properties, ctx, true) || hasAny;
+        if (group.all)
+          hasAny =
+            collectFromGroup(group.all, properties, ctx, false) || hasAny;
       }
     }
   }
@@ -706,7 +720,7 @@ function collectFromGroup(
   group: GroupLike,
   properties: Array<{ name: string; type: string; hasQuestionToken: boolean }>,
   ctx: GeneratorContext,
-  forceOptional: boolean
+  forceOptional: boolean,
 ): boolean {
   let hasAny = false;
 
@@ -728,11 +742,21 @@ function collectFromGroup(
       const namedGroup = ctx.schema.group?.find((gr) => gr.name === groupName);
       if (namedGroup) {
         if (namedGroup.sequence)
-          if (collectFromGroup(namedGroup.sequence, properties, ctx, forceOptional)) hasAny = true;
+          if (
+            collectFromGroup(
+              namedGroup.sequence,
+              properties,
+              ctx,
+              forceOptional,
+            )
+          )
+            hasAny = true;
         if (namedGroup.choice)
-          if (collectFromGroup(namedGroup.choice, properties, ctx, true)) hasAny = true;
+          if (collectFromGroup(namedGroup.choice, properties, ctx, true))
+            hasAny = true;
         if (namedGroup.all)
-          if (collectFromGroup(namedGroup.all, properties, ctx, forceOptional)) hasAny = true;
+          if (collectFromGroup(namedGroup.all, properties, ctx, forceOptional))
+            hasAny = true;
       }
     }
   }
@@ -749,7 +773,7 @@ function addElementProperty(
   element: LocalElement,
   properties: Array<{ name: string; type: string; hasQuestionToken: boolean }>,
   ctx: GeneratorContext,
-  forceOptional: boolean
+  forceOptional: boolean,
 ): void {
   // Handle element reference
   if (element.ref) {
@@ -764,7 +788,7 @@ function addElementProperty(
         },
         properties,
         ctx,
-        forceOptional
+        forceOptional,
       );
     }
     return;
@@ -810,7 +834,7 @@ function addElementProperty(
 function collectAttributes(
   attributes: readonly LocalAttribute[] | undefined,
   properties: Array<{ name: string; type: string; hasQuestionToken: boolean }>,
-  ctx: GeneratorContext
+  ctx: GeneratorContext,
 ): void {
   if (!attributes) return;
 
@@ -853,7 +877,7 @@ function collectAttributes(
 function generateSimpleType(
   name: string,
   st: TopLevelSimpleType,
-  ctx: GeneratorContext
+  ctx: GeneratorContext,
 ): void {
   const typeName = toInterfaceName(name);
   if (ctx.generatedTypes.has(typeName)) return;
@@ -883,16 +907,16 @@ function generateSimpleType(
 
 function generateRootType(rootTypeName: string, ctx: GeneratorContext): void {
   const elements = ctx.schema.element ?? [];
-  
+
   // Filter to non-abstract elements that have a name
-  const concreteElements = elements.filter(el => el.name && !el.abstract);
-  
+  const concreteElements = elements.filter((el) => el.name && !el.abstract);
+
   if (concreteElements.length === 0) return;
 
   // Build type for each element
   const elementTypes: string[] = [];
   const elementNames: string[] = [];
-  
+
   for (const el of concreteElements) {
     let elementType: string;
     if (el.type) {
@@ -900,7 +924,9 @@ function generateRootType(rootTypeName: string, ctx: GeneratorContext): void {
     } else if (el.complexType) {
       // For inline complexType, use the generated interface name
       const interfaceName = toInterfaceName(el.name!);
-      elementType = ctx.generatedTypes.has(interfaceName) ? interfaceName : 'unknown';
+      elementType = ctx.generatedTypes.has(interfaceName)
+        ? interfaceName
+        : 'unknown';
     } else {
       elementType = 'string';
     }
@@ -911,14 +937,16 @@ function generateRootType(rootTypeName: string, ctx: GeneratorContext): void {
   // For single root: wrap with element name { elementName: Type }
   // For multi-root: union of wrapped types { el1: Type1 } | { el2: Type2 }
   // Root type matches what parse() returns - wrapped with element name for type discrimination
-  const wrappedTypes = elementNames.map((name, i) => `{ ${name}: ${elementTypes[i]} }`);
-  const rootType = wrappedTypes.length === 1 
-    ? wrappedTypes[0] 
-    : wrappedTypes.join(' | ');
-  
-  const description = elementNames.length === 1
-    ? `Root schema type (${elementNames[0]} element)`
-    : `Root schema type (${elementNames.join(' | ')} elements)`;
+  const wrappedTypes = elementNames.map(
+    (name, i) => `{ ${name}: ${elementTypes[i]} }`,
+  );
+  const rootType =
+    wrappedTypes.length === 1 ? wrappedTypes[0] : wrappedTypes.join(' | ');
+
+  const description =
+    elementNames.length === 1
+      ? `Root schema type (${elementNames[0]} element)`
+      : `Root schema type (${elementNames.join(' | ')} elements)`;
 
   ctx.sourceFile.addTypeAlias({
     name: rootTypeName,

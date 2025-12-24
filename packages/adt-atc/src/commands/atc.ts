@@ -1,6 +1,6 @@
 /**
  * ATC Command Plugin
- * 
+ *
  * CLI-agnostic command for running ABAP Test Cockpit checks.
  * Uses the CliContext.getAdtClient() factory for API access.
  */
@@ -15,25 +15,42 @@ import type { AtcResult, AtcFinding, OutputFormat } from '../types';
 interface AdtClient {
   adt: {
     atc: {
-      customizing: { get: () => Promise<{ customizing: { properties: { property?: Array<{ name: string; value?: string }> } } }> };
-      worklists: {
-        create: (params: { checkVariant: string }) => Promise<string | { worklistRun?: { worklistId: string }; worklist?: { id: string } }>;
-        get: (id: string, params: { includeExemptedFindings: string }) => Promise<WorklistResponse>;
-      };
-      runs: { 
-        post: (params: { worklistId: string }, body: {
-          run: {
-            maximumVerdicts: number;
-            objectSets: {
-              objectSet: Array<{
-                kind: string;
-                objectReferences: {
-                  objectReference: Array<{ uri: string }>;
-                };
-              }>;
-            };
+      customizing: {
+        get: () => Promise<{
+          customizing: {
+            properties: { property?: Array<{ name: string; value?: string }> };
           };
-        }) => Promise<void>;
+        }>;
+      };
+      worklists: {
+        create: (params: {
+          checkVariant: string;
+        }) => Promise<
+          | string
+          | { worklistRun?: { worklistId: string }; worklist?: { id: string } }
+        >;
+        get: (
+          id: string,
+          params: { includeExemptedFindings: string },
+        ) => Promise<WorklistResponse>;
+      };
+      runs: {
+        post: (
+          params: { worklistId: string },
+          body: {
+            run: {
+              maximumVerdicts: number;
+              objectSets: {
+                objectSet: Array<{
+                  kind: string;
+                  objectReferences: {
+                    objectReference: Array<{ uri: string }>;
+                  };
+                }>;
+              };
+            };
+          },
+        ) => Promise<void>;
       };
     };
   };
@@ -93,13 +110,13 @@ function adtLink(name: string, uri: string, systemName?: string): string {
  */
 function convertWorklistToResult(
   worklistResponse: WorklistResponse,
-  checkVariant: string
+  checkVariant: string,
 ): AtcResult {
   const findings: AtcFinding[] = [];
 
   if (worklistResponse.worklist) {
     const objects = worklistResponse.worklist.objects.object || [];
-    
+
     for (const obj of objects) {
       const objFindings = obj.findings.finding || [];
       for (const finding of objFindings) {
@@ -119,9 +136,9 @@ function convertWorklistToResult(
     }
   }
 
-  const errorCount = findings.filter(f => f.priority === 1).length;
-  const warningCount = findings.filter(f => f.priority === 2).length;
-  const infoCount = findings.filter(f => f.priority >= 3).length;
+  const errorCount = findings.filter((f) => f.priority === 1).length;
+  const warningCount = findings.filter((f) => f.priority === 2).length;
+  const infoCount = findings.filter((f) => f.priority >= 3).length;
 
   return {
     checkVariant,
@@ -145,8 +162,7 @@ function displayAtcResults(result: AtcResult, systemName?: string): void {
 
   console.log(`\n📊 ATC Results Summary:`);
   console.log(`   🎯 Variant: ${result.checkVariant}`);
-  if (result.errorCount > 0)
-    console.log(`   ❌ Errors: ${result.errorCount}`);
+  if (result.errorCount > 0) console.log(`   ❌ Errors: ${result.errorCount}`);
   if (result.warningCount > 0)
     console.log(`   ⚠️ Warnings: ${result.warningCount}`);
   if (result.infoCount > 0) console.log(`   ℹ️ Info: ${result.infoCount}`);
@@ -157,10 +173,12 @@ function displayAtcResults(result: AtcResult, systemName?: string): void {
     result.findings.slice(0, 5).forEach((finding) => {
       const priorityIcon =
         finding.priority === 1 ? '❌' : finding.priority === 2 ? '⚠️' : 'ℹ️';
-      const objectLink = finding.location 
+      const objectLink = finding.location
         ? adtLink(finding.objectName, finding.location, systemName)
         : finding.objectName;
-      console.log(`   ${priorityIcon} ${finding.checkTitle || finding.checkId}`);
+      console.log(
+        `   ${priorityIcon} ${finding.checkTitle || finding.checkId}`,
+      );
       console.log(`      ${finding.messageText}`);
       console.log(`      Object: ${objectLink} (${finding.objectType})`);
     });
@@ -179,17 +197,38 @@ function displayAtcResults(result: AtcResult, systemName?: string): void {
 export const atcCommand: CliCommandPlugin = {
   name: 'atc',
   description: 'Run ABAP Test Cockpit (ATC) checks',
-  
+
   options: [
     { flags: '-p, --package <package>', description: 'Run ATC on package' },
-    { flags: '-o, --object <uri>', description: 'Run ATC on specific object (e.g., /sap/bc/adt/oo/classes/zcl_my_class)' },
-    { flags: '-t, --transport <transport>', description: 'Run ATC on transport request (e.g., S0DK942970)' },
-    { flags: '--variant <variant>', description: 'ATC check variant (default: from system customizing)' },
-    { flags: '--max-results <number>', description: 'Maximum number of results', default: '100' },
-    { flags: '--format <format>', description: 'Output format: console, json, gitlab, sarif', default: 'console' },
-    { flags: '--output <file>', description: 'Output file (required for gitlab/sarif format)' },
+    {
+      flags: '-o, --object <uri>',
+      description:
+        'Run ATC on specific object (e.g., /sap/bc/adt/oo/classes/zcl_my_class)',
+    },
+    {
+      flags: '-t, --transport <transport>',
+      description: 'Run ATC on transport request (e.g., S0DK942970)',
+    },
+    {
+      flags: '--variant <variant>',
+      description: 'ATC check variant (default: from system customizing)',
+    },
+    {
+      flags: '--max-results <number>',
+      description: 'Maximum number of results',
+      default: '100',
+    },
+    {
+      flags: '--format <format>',
+      description: 'Output format: console, json, gitlab, sarif',
+      default: 'console',
+    },
+    {
+      flags: '--output <file>',
+      description: 'Output file (required for gitlab/sarif format)',
+    },
   ],
-  
+
   async execute(args, ctx: CliContext) {
     const options = args as {
       package?: string;
@@ -202,32 +241,45 @@ export const atcCommand: CliCommandPlugin = {
     };
 
     // Validate mutually exclusive options
-    const targetCount = [options.package, options.object, options.transport].filter(Boolean).length;
-    
+    const targetCount = [
+      options.package,
+      options.object,
+      options.transport,
+    ].filter(Boolean).length;
+
     if (targetCount === 0) {
-      ctx.logger.error('❌ One of --package, --object, or --transport is required');
+      ctx.logger.error(
+        '❌ One of --package, --object, or --transport is required',
+      );
       process.exit(1);
     }
 
     if (targetCount > 1) {
-      ctx.logger.error('❌ Only one of --package, --object, or --transport can be specified');
+      ctx.logger.error(
+        '❌ Only one of --package, --object, or --transport can be specified',
+      );
       process.exit(1);
     }
 
     // Validate output file for gitlab/sarif formats
-    if ((options.format === 'gitlab' || options.format === 'sarif') && !options.output) {
+    if (
+      (options.format === 'gitlab' || options.format === 'sarif') &&
+      !options.output
+    ) {
       ctx.logger.error(`❌ --output is required for ${options.format} format`);
       process.exit(1);
     }
 
     // Get ADT client from context
     if (!ctx.getAdtClient) {
-      ctx.logger.error('❌ ADT client not available. This command requires authentication.');
+      ctx.logger.error(
+        '❌ ADT client not available. This command requires authentication.',
+      );
       ctx.logger.error('   Run: adt auth login');
       process.exit(1);
     }
 
-    const client = await ctx.getAdtClient() as AdtClient;
+    const client = (await ctx.getAdtClient()) as AdtClient;
 
     ctx.logger.info('🔍 Running ABAP Test Cockpit checks...');
 
@@ -252,12 +304,12 @@ export const atcCommand: CliCommandPlugin = {
     // Step 1: Get ATC customizing to find default check variant
     ctx.logger.info('📋 Reading ATC customizing...');
     const customizing = await client.adt.atc.customizing.get();
-    
+
     // Find systemCheckVariant in properties
     let checkVariant = options.variant;
     if (!checkVariant) {
       const variantProp = customizing.customizing.properties.property?.find(
-        p => p.name === 'systemCheckVariant'
+        (p) => p.name === 'systemCheckVariant',
       );
       if (variantProp?.value) {
         checkVariant = variantProp.value;
@@ -269,17 +321,25 @@ export const atcCommand: CliCommandPlugin = {
 
     // Step 2: Create worklist (just with checkVariant, no objects)
     ctx.logger.info('📋 Creating ATC worklist...');
-    const worklistCreateResponse = await client.adt.atc.worklists.create({ checkVariant });
-    
+    const worklistCreateResponse = await client.adt.atc.worklists.create({
+      checkVariant,
+    });
+
     // Extract worklist ID - SAP can return plain string or object
     let worklistId: string;
     if (typeof worklistCreateResponse === 'string') {
       // Plain string response - extract ID from XML or use as-is
       const idMatch = worklistCreateResponse.match(/id="([^"]+)"/);
       worklistId = idMatch ? idMatch[1] : worklistCreateResponse.trim();
-    } else if ('worklist' in worklistCreateResponse && worklistCreateResponse.worklist?.id) {
+    } else if (
+      'worklist' in worklistCreateResponse &&
+      worklistCreateResponse.worklist?.id
+    ) {
       worklistId = worklistCreateResponse.worklist.id;
-    } else if ('worklistRun' in worklistCreateResponse && worklistCreateResponse.worklistRun?.worklistId) {
+    } else if (
+      'worklistRun' in worklistCreateResponse &&
+      worklistCreateResponse.worklistRun?.worklistId
+    ) {
       worklistId = worklistCreateResponse.worklistRun.worklistId;
     } else {
       ctx.logger.error('❌ Failed to get worklist ID from response');
@@ -294,12 +354,14 @@ export const atcCommand: CliCommandPlugin = {
       run: {
         maximumVerdicts: maxResults,
         objectSets: {
-          objectSet: [{
-            kind: 'inclusive',
-            objectReferences: {
-              objectReference: [{ uri: targetUri }],
+          objectSet: [
+            {
+              kind: 'inclusive',
+              objectReferences: {
+                objectReference: [{ uri: targetUri }],
+              },
             },
-          }],
+          ],
         },
       },
     };
@@ -307,10 +369,15 @@ export const atcCommand: CliCommandPlugin = {
 
     // Step 4: Get results
     ctx.logger.info('📊 Fetching results...');
-    const worklistResult = await client.adt.atc.worklists.get(worklistId, { includeExemptedFindings: 'false' });
+    const worklistResult = await client.adt.atc.worklists.get(worklistId, {
+      includeExemptedFindings: 'false',
+    });
 
     // Convert to AtcResult
-    const result = convertWorklistToResult(worklistResult as WorklistResponse, checkVariant);
+    const result = convertWorklistToResult(
+      worklistResult as WorklistResponse,
+      checkVariant,
+    );
 
     // Output based on format
     if (options.format === 'json') {

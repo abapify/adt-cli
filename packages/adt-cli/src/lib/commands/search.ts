@@ -11,28 +11,43 @@ export const searchCommand = new Command('search')
       const adtClient = await getAdtClientV2();
       const maxResults = parseInt(options.max, 10);
 
-      console.log(`🔍 Searching for: "${query}" (max: ${maxResults} results)...\n`);
+      console.log(
+        `🔍 Searching for: "${query}" (max: ${maxResults} results)...\n`,
+      );
 
       // Perform search
-      const results = await adtClient.adt.repository.informationsystem.search.quickSearch({
-        query,
-        maxResults,
-      });
+      const results =
+        await adtClient.adt.repository.informationsystem.search.quickSearch({
+          query,
+          maxResults,
+        });
 
       // Handle results - define type for search objects
-      type SearchObject = { name?: string; type?: string; uri?: string; description?: string; packageName?: string };
+      type SearchObject = {
+        name?: string;
+        type?: string;
+        uri?: string;
+        description?: string;
+        packageName?: string;
+      };
       // Results can come in different shapes depending on response - handle both
       const resultsAny = results as Record<string, unknown>;
       let rawObjects: SearchObject | SearchObject[] | undefined;
       if ('objectReferences' in resultsAny && resultsAny.objectReferences) {
-        const refs = resultsAny.objectReferences as { objectReference?: SearchObject | SearchObject[] };
+        const refs = resultsAny.objectReferences as {
+          objectReference?: SearchObject | SearchObject[];
+        };
         rawObjects = refs.objectReference;
       } else if ('mainObject' in resultsAny && resultsAny.mainObject) {
-        const main = resultsAny.mainObject as { objectReference?: SearchObject | SearchObject[] };
+        const main = resultsAny.mainObject as {
+          objectReference?: SearchObject | SearchObject[];
+        };
         rawObjects = main.objectReference;
       }
       const objects: SearchObject[] = rawObjects
-        ? (Array.isArray(rawObjects) ? rawObjects : [rawObjects])
+        ? Array.isArray(rawObjects)
+          ? rawObjects
+          : [rawObjects]
         : [];
 
       if (objects.length === 0) {
@@ -64,7 +79,7 @@ export const searchCommand = new Command('search')
     } catch (error) {
       console.error(
         '❌ Search failed:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       if (error instanceof Error && error.stack) {
         console.error('\nStack trace:', error.stack);

@@ -1,12 +1,12 @@
 /**
  * @abapify/adt-plugin
- * 
+ *
  * ADT Plugin interface and factory for abapify.
- * 
+ *
  * @example
  * ```typescript
  * import { createPlugin, type AdtPlugin } from '@abapify/adt-plugin';
- * 
+ *
  * export const myPlugin = createPlugin({
  *   name: 'myFormat',
  *   version: '1.0.0',

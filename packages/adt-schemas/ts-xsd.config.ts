@@ -20,11 +20,7 @@
  *   npx nx run adt-schemas:codegen
  */
 
-import {
-  defineConfig,
-  rawSchema,
-  interfaces,
-} from 'ts-xsd/generators';
+import { defineConfig, rawSchema, interfaces } from 'ts-xsd/generators';
 import { deriveRootTypeName } from 'ts-xsd';
 
 // Target schemas - exported with typed wrappers
@@ -121,7 +117,7 @@ export default defineConfig({
       '',
       ...sapSchemas.map(
         (s: string) =>
-          `export { default as ${s.replace(/-/g, '')} } from './${s}';`
+          `export { default as ${s.replace(/-/g, '')} } from './${s}';`,
       ),
       '',
     ].join('\n');
@@ -135,7 +131,7 @@ export default defineConfig({
       '',
       ...customSchemas.map(
         (s: string) =>
-          `export { default as ${s.replace(/-/g, '')} } from './${s}';`
+          `export { default as ${s.replace(/-/g, '')} } from './${s}';`,
       ),
       '',
     ].join('\n');
@@ -247,13 +243,13 @@ export default defineConfig({
       const rootTypeName = toRootTypeName(schemaName);
 
       sapTypeImportLines.push(
-        `import type { ${rootTypeName} } from './types/sap/${schemaName}.types';`
+        `import type { ${rootTypeName} } from './types/sap/${schemaName}.types';`,
       );
       typedLines.push(
-        `import ${importName} from './schemas/sap/${schemaName}';`
+        `import ${importName} from './schemas/sap/${schemaName}';`,
       );
       typedLines.push(
-        `export const ${exportName}: TypedSchema<${rootTypeName}> = typedSchema<${rootTypeName}>(${importName});`
+        `export const ${exportName}: TypedSchema<${rootTypeName}> = typedSchema<${rootTypeName}>(${importName});`,
       );
     }
 
@@ -267,13 +263,13 @@ export default defineConfig({
       const rootTypeName = toRootTypeName(schemaName);
 
       customTypeImportLines.push(
-        `import type { ${rootTypeName} } from './types/custom/${schemaName}.types';`
+        `import type { ${rootTypeName} } from './types/custom/${schemaName}.types';`,
       );
       typedLines.push(
-        `import ${importName} from './schemas/custom/${schemaName}';`
+        `import ${importName} from './schemas/custom/${schemaName}';`,
       );
       typedLines.push(
-        `export const ${exportName}: TypedSchema<${rootTypeName}> = typedSchema<${rootTypeName}>(${importName});`
+        `export const ${exportName}: TypedSchema<${rootTypeName}> = typedSchema<${rootTypeName}>(${importName});`,
       );
     }
 

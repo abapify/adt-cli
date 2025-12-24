@@ -102,7 +102,10 @@ function TextField({
   const displayValue = displayText.padEnd(width, ' ').slice(0, width);
   return (
     <Box>
-      <Text color={focused ? 'cyan' : 'gray'}>{focused ? '▶ ' : '  '}{label}: </Text>
+      <Text color={focused ? 'cyan' : 'gray'}>
+        {focused ? '▶ ' : '  '}
+        {label}:{' '}
+      </Text>
       <Text
         backgroundColor={editing ? 'yellow' : focused ? 'blue' : 'gray'}
         color={editing ? 'black' : focused ? 'white' : 'black'}
@@ -133,16 +136,20 @@ function SelectField({
 }) {
   const selectedOption = options.find((o) => o.value === value);
   const displayLabel = selectedOption?.label || 'Select a date';
-  
+
   return (
     <Box flexDirection="column">
       <Box>
-        <Text color={focused ? 'cyan' : 'gray'}>{focused ? '▶ ' : '  '}{label}: </Text>
+        <Text color={focused ? 'cyan' : 'gray'}>
+          {focused ? '▶ ' : '  '}
+          {label}:{' '}
+        </Text>
         <Text
           backgroundColor={expanded ? 'yellow' : focused ? 'blue' : 'gray'}
           color={expanded ? 'black' : focused ? 'white' : 'black'}
         >
-          {' '}{displayLabel.padEnd(20, ' ')}{' '}
+          {' '}
+          {displayLabel.padEnd(20, ' ')}{' '}
         </Text>
         <Text color="gray">{expanded ? ' ▲' : ' ▼'}</Text>
         {focused && !expanded && <Text color="gray"> [Enter to open]</Text>}
@@ -153,7 +160,13 @@ function SelectField({
             <Box key={opt.value}>
               <Text
                 backgroundColor={idx === highlightedIndex ? 'blue' : undefined}
-                color={idx === highlightedIndex ? 'white' : opt.value === value ? 'cyan' : 'gray'}
+                color={
+                  idx === highlightedIndex
+                    ? 'white'
+                    : opt.value === value
+                      ? 'cyan'
+                      : 'gray'
+                }
                 bold={opt.value === value}
               >
                 {idx === highlightedIndex ? '▶ ' : '  '}
@@ -163,7 +176,9 @@ function SelectField({
             </Box>
           ))}
           <Box marginTop={0}>
-            <Text color="gray" dimColor>↑↓ Select | Enter Confirm | Esc Cancel</Text>
+            <Text color="gray" dimColor>
+              ↑↓ Select | Enter Confirm | Esc Cancel
+            </Text>
           </Box>
         </Box>
       )}
@@ -198,17 +213,14 @@ export function TreeConfigEditor({
 
   const currentField = FIELD_ORDER[focusIndex];
 
-  const moveFocus = useCallback(
-    (delta: number) => {
-      setFocusIndex((prev: number) => {
-        const next = prev + delta;
-        if (next < 0) return FIELD_ORDER.length - 1;
-        if (next >= FIELD_ORDER.length) return 0;
-        return next;
-      });
-    },
-    []
-  );
+  const moveFocus = useCallback((delta: number) => {
+    setFocusIndex((prev: number) => {
+      const next = prev + delta;
+      if (next < 0) return FIELD_ORDER.length - 1;
+      if (next >= FIELD_ORDER.length) return 0;
+      return next;
+    });
+  }, []);
 
   const toggleCheckbox = useCallback((field: keyof TreeConfigState) => {
     setConfig((prev: TreeConfigState) => ({
@@ -221,7 +233,7 @@ export function TreeConfigEditor({
     (field: 'releasedDateFilter', delta: number) => {
       setConfig((prev: TreeConfigState) => {
         const currentIndex = DATE_FILTER_OPTIONS.findIndex(
-          (o) => o.value === prev[field]
+          (o) => o.value === prev[field],
         );
         let nextIndex = currentIndex + delta;
         if (nextIndex < 0) nextIndex = DATE_FILTER_OPTIONS.length - 1;
@@ -232,7 +244,7 @@ export function TreeConfigEditor({
         };
       });
     },
-    []
+    [],
   );
 
   const startTextEdit = useCallback(
@@ -240,7 +252,7 @@ export function TreeConfigEditor({
       setEditingText(true);
       setTextBuffer(config[field]);
     },
-    [config]
+    [config],
   );
 
   const finishTextEdit = useCallback(
@@ -252,7 +264,7 @@ export function TreeConfigEditor({
       setEditingText(false);
       setTextBuffer('');
     },
-    [textBuffer]
+    [textBuffer],
   );
 
   const cancelTextEdit = useCallback(() => {
@@ -263,7 +275,7 @@ export function TreeConfigEditor({
   // Open dropdown and set initial index to current value
   const openDropdown = useCallback(() => {
     const currentIndex = DATE_FILTER_OPTIONS.findIndex(
-      (o) => o.value === config.releasedDateFilter
+      (o) => o.value === config.releasedDateFilter,
     );
     setDropdownIndex(currentIndex >= 0 ? currentIndex : 0);
     setDropdownOpen(true);
@@ -283,76 +295,98 @@ export function TreeConfigEditor({
     setDropdownOpen(false);
   }, []);
 
-  useInput((input: string, key: { return?: boolean; escape?: boolean; backspace?: boolean; delete?: boolean; ctrl?: boolean; meta?: boolean; upArrow?: boolean; downArrow?: boolean; leftArrow?: boolean; rightArrow?: boolean; tab?: boolean; shift?: boolean }) => {
-    // Handle dropdown mode
-    if (dropdownOpen) {
-      if (key.upArrow) {
-        setDropdownIndex((prev: number) => (prev > 0 ? prev - 1 : DATE_FILTER_OPTIONS.length - 1));
-      } else if (key.downArrow) {
-        setDropdownIndex((prev: number) => (prev < DATE_FILTER_OPTIONS.length - 1 ? prev + 1 : 0));
+  useInput(
+    (
+      input: string,
+      key: {
+        return?: boolean;
+        escape?: boolean;
+        backspace?: boolean;
+        delete?: boolean;
+        ctrl?: boolean;
+        meta?: boolean;
+        upArrow?: boolean;
+        downArrow?: boolean;
+        leftArrow?: boolean;
+        rightArrow?: boolean;
+        tab?: boolean;
+        shift?: boolean;
+      },
+    ) => {
+      // Handle dropdown mode
+      if (dropdownOpen) {
+        if (key.upArrow) {
+          setDropdownIndex((prev: number) =>
+            prev > 0 ? prev - 1 : DATE_FILTER_OPTIONS.length - 1,
+          );
+        } else if (key.downArrow) {
+          setDropdownIndex((prev: number) =>
+            prev < DATE_FILTER_OPTIONS.length - 1 ? prev + 1 : 0,
+          );
+        } else if (key.return || input === ' ') {
+          selectDropdownOption(dropdownIndex);
+        } else if (key.escape) {
+          closeDropdown();
+        }
+        return;
+      }
+
+      // Handle text editing mode
+      if (editingText) {
+        if (key.return) {
+          finishTextEdit(currentField as 'userName' | 'fromDate' | 'toDate');
+        } else if (key.escape) {
+          cancelTextEdit();
+        } else if (key.backspace || key.delete) {
+          setTextBuffer((prev: string) => prev.slice(0, -1));
+        } else if (input && !key.ctrl && !key.meta) {
+          setTextBuffer((prev: string) => prev + input);
+        }
+        return;
+      }
+
+      // Navigation
+      if (key.upArrow || (key.shift && key.tab)) {
+        moveFocus(-1);
+      } else if (key.downArrow || key.tab) {
+        moveFocus(1);
+      } else if (key.leftArrow) {
+        if (currentField === 'releasedDateFilter') {
+          cycleSelect('releasedDateFilter', -1);
+        }
+      } else if (key.rightArrow) {
+        if (currentField === 'releasedDateFilter') {
+          cycleSelect('releasedDateFilter', 1);
+        }
       } else if (key.return || input === ' ') {
-        selectDropdownOption(dropdownIndex);
+        // Handle field activation
+        switch (currentField) {
+          case 'releasedDateFilter':
+            openDropdown();
+            break;
+          case 'userName':
+          case 'fromDate':
+          case 'toDate':
+            startTextEdit(currentField);
+            break;
+          case 'customizingRequests':
+          case 'workbenchRequests':
+          case 'transportOfCopies':
+          case 'modifiable':
+          case 'released':
+            toggleCheckbox(currentField);
+            break;
+        }
       } else if (key.escape) {
-        closeDropdown();
+        onCancel();
+        exit();
+      } else if (key.ctrl && input === 's') {
+        // Ctrl+S to save
+        onSave(config);
+        exit();
       }
-      return;
-    }
-
-    // Handle text editing mode
-    if (editingText) {
-      if (key.return) {
-        finishTextEdit(currentField as 'userName' | 'fromDate' | 'toDate');
-      } else if (key.escape) {
-        cancelTextEdit();
-      } else if (key.backspace || key.delete) {
-        setTextBuffer((prev: string) => prev.slice(0, -1));
-      } else if (input && !key.ctrl && !key.meta) {
-        setTextBuffer((prev: string) => prev + input);
-      }
-      return;
-    }
-
-    // Navigation
-    if (key.upArrow || (key.shift && key.tab)) {
-      moveFocus(-1);
-    } else if (key.downArrow || key.tab) {
-      moveFocus(1);
-    } else if (key.leftArrow) {
-      if (currentField === 'releasedDateFilter') {
-        cycleSelect('releasedDateFilter', -1);
-      }
-    } else if (key.rightArrow) {
-      if (currentField === 'releasedDateFilter') {
-        cycleSelect('releasedDateFilter', 1);
-      }
-    } else if (key.return || input === ' ') {
-      // Handle field activation
-      switch (currentField) {
-        case 'releasedDateFilter':
-          openDropdown();
-          break;
-        case 'userName':
-        case 'fromDate':
-        case 'toDate':
-          startTextEdit(currentField);
-          break;
-        case 'customizingRequests':
-        case 'workbenchRequests':
-        case 'transportOfCopies':
-        case 'modifiable':
-        case 'released':
-          toggleCheckbox(currentField);
-          break;
-      }
-    } else if (key.escape) {
-      onCancel();
-      exit();
-    } else if (key.ctrl && input === 's') {
-      // Ctrl+S to save
-      onSave(config);
-      exit();
-    }
-  });
+    },
+  );
 
   // Check if date fields should be shown (only when Released is checked and Custom date filter)
   const showDateFields = config.released && config.releasedDateFilter === '4';
@@ -450,7 +484,8 @@ export function TreeConfigEditor({
       {/* Help text */}
       <Box marginTop={1} borderStyle="single" borderColor="gray" paddingX={1}>
         <Text color="gray">
-          ↑↓ Navigate | Space/Enter Toggle/Edit | ←→ Change selection | Ctrl+S Save | Esc Cancel
+          ↑↓ Navigate | Space/Enter Toggle/Edit | ←→ Change selection | Ctrl+S
+          Save | Esc Cancel
         </Text>
       </Box>
     </Box>

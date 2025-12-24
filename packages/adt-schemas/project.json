@@ -17,7 +17,10 @@
         "cwd": "{projectRoot}"
       },
       "dependsOn": ["download", "ts-xsd:build"],
-      "inputs": ["{projectRoot}/.xsd/**/*.xsd", "{projectRoot}/ts-xsd.config.ts"],
+      "inputs": [
+        "{projectRoot}/.xsd/**/*.xsd",
+        "{projectRoot}/ts-xsd.config.ts"
+      ],
       "outputs": ["{projectRoot}/src/schemas/generated"]
     },
     "typecheck:test": {

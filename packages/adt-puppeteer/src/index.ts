@@ -9,8 +9,15 @@ import type { AdtConfig, Destination } from '@abapify/adt-config';
 import type { BrowserAuthOptions } from '@abapify/browser-auth';
 
 // Re-export types
-export type { PuppeteerCredentials, PuppeteerAuthOptions } from './puppeteer-auth';
-export type { BrowserCredentials, BrowserAuthOptions, CookieData } from '@abapify/browser-auth';
+export type {
+  PuppeteerCredentials,
+  PuppeteerAuthOptions,
+} from './puppeteer-auth';
+export type {
+  BrowserCredentials,
+  BrowserAuthOptions,
+  CookieData,
+} from '@abapify/browser-auth';
 
 /**
  * Plugin-level options applied to all destinations
@@ -32,7 +39,7 @@ function createPuppeteerDestination(options: BrowserAuthOptions): Destination {
  */
 export function withPuppeteer(
   config: AdtConfig,
-  options?: Partial<BrowserAuthOptions>
+  options?: Partial<BrowserAuthOptions>,
 ): AdtConfig {
   if (!config.destinations) {
     return config;
@@ -51,9 +58,15 @@ export function withPuppeteer(
         destinations[name] = dest;
       }
     } else if (typeof dest === 'string') {
-      destinations[name] = createPuppeteerDestination({ url: dest, ...options });
+      destinations[name] = createPuppeteerDestination({
+        url: dest,
+        ...options,
+      });
     } else {
-      destinations[name] = createPuppeteerDestination({ ...(dest as BrowserAuthOptions), ...options });
+      destinations[name] = createPuppeteerDestination({
+        ...(dest as BrowserAuthOptions),
+        ...options,
+      });
     }
   }
 
@@ -61,7 +74,12 @@ export function withPuppeteer(
 }
 
 // Main exports
-export { puppeteerAuth, puppeteer, toCookieHeader, toHeaders } from './puppeteer-auth';
+export {
+  puppeteerAuth,
+  puppeteer,
+  toCookieHeader,
+  toHeaders,
+} from './puppeteer-auth';
 
 // AuthManager compatibility exports
 export { default } from './auth-plugin';

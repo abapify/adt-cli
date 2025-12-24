@@ -1,6 +1,6 @@
 /**
  * Generated schema exports
- * 
+ *
  * THIS FILE IS AUTO-GENERATED - DO NOT EDIT MANUALLY
  * Run: npx tsx scripts/generate-schemas.ts
  */
@@ -38,15 +38,24 @@ export const logpoint = toSpeciSchema(adtSchemas.logpoint);
 export const packagesV1 = toSpeciSchema(adtSchemas.packagesV1);
 export const quickfixes = toSpeciSchema(adtSchemas.quickfixes);
 export const templatelink = toSpeciSchema(adtSchemas.templatelink);
-export const templatelinkExtended = toSpeciSchema(adtSchemas.templatelinkExtended);
+export const templatelinkExtended = toSpeciSchema(
+  adtSchemas.templatelinkExtended,
+);
 export const traces = toSpeciSchema(adtSchemas.traces);
 export const transportfind = toSpeciSchema(adtSchemas.transportfind);
 export const transportmanagment = toSpeciSchema(adtSchemas.transportmanagment);
-export const transportmanagmentCreate = toSpeciSchema(adtSchemas.transportmanagmentCreate);
-export const transportmanagmentSingle = toSpeciSchema(adtSchemas.transportmanagmentSingle);
+export const transportmanagmentCreate = toSpeciSchema(
+  adtSchemas.transportmanagmentCreate,
+);
+export const transportmanagmentSingle = toSpeciSchema(
+  adtSchemas.transportmanagmentSingle,
+);
 export const transportsearch = toSpeciSchema(adtSchemas.transportsearch);
 
 // ============================================================================
 // JSON Schemas (re-exported directly - they use zod, not ts-xsd)
 // ============================================================================
-export { systeminformation, systeminformationSchema } from '@abapify/adt-schemas';
+export {
+  systeminformation,
+  systeminformationSchema,
+} from '@abapify/adt-schemas';

@@ -27,17 +27,19 @@ function extractConfigId(uri: string): string {
 function propertiesToMap(config: unknown): Record<string, string> {
   const result: Record<string, string> = {};
   if (!config || typeof config !== 'object') return result;
-  
+
   const configObj = config as Record<string, unknown>;
-  const properties = configObj.properties as Record<string, unknown> | undefined;
-  
+  const properties = configObj.properties as
+    | Record<string, unknown>
+    | undefined;
+
   if (!properties) return result;
-  
+
   const propArray = properties.property;
   if (!propArray) return result;
-  
+
   const props = Array.isArray(propArray) ? propArray : [propArray];
-  
+
   for (const prop of props) {
     if (prop && typeof prop === 'object') {
       const p = prop as Record<string, unknown>;
@@ -60,7 +62,7 @@ function buildConfigurationData(properties: Record<string, string>) {
     isMandatory: undefined,
     $text: value,
   }));
-  
+
   return {
     properties: {
       property: propertyArray,
@@ -69,14 +71,19 @@ function buildConfigurationData(properties: Record<string, string>) {
 }
 
 export const treeConfigSetCommand = new Command('set')
-  .description('Update search configuration (only specified options are changed)')
+  .description(
+    'Update search configuration (only specified options are changed)',
+  )
   .option('-u, --user <username>', 'Filter by user (use * for all users)')
   .option('--workbench <bool>', 'Include workbench requests (true/false)')
   .option('--customizing <bool>', 'Include customizing requests (true/false)')
   .option('--copies <bool>', 'Include transport of copies (true/false)')
   .option('--modifiable <bool>', 'Include modifiable requests (true/false)')
   .option('--released <bool>', 'Include released requests (true/false)')
-  .option('--date-filter <preset>', 'Date filter preset (0=Week, 1=2Weeks, 2=4Weeks, 3=3Months, 4=Custom, 5=All)')
+  .option(
+    '--date-filter <preset>',
+    'Date filter preset (0=Week, 1=2Weeks, 2=4Weeks, 3=3Months, 4=Custom, 5=All)',
+  )
   .option('--from-date <date>', 'From date (YYYY-MM-DD or YYYYMMDD)')
   .option('--to-date <date>', 'To date (YYYY-MM-DD or YYYYMMDD)')
   .action(async (options) => {
@@ -84,7 +91,8 @@ export const treeConfigSetCommand = new Command('set')
       const client = await getAdtClientV2();
 
       // Check if any option was provided
-      const hasOptions = options.user !== undefined ||
+      const hasOptions =
+        options.user !== undefined ||
         options.workbench !== undefined ||
         options.customizing !== undefined ||
         options.copies !== undefined ||
@@ -95,22 +103,29 @@ export const treeConfigSetCommand = new Command('set')
         options.toDate !== undefined;
 
       if (!hasOptions) {
-        console.log('💡 No options specified. Use --help to see available options.');
+        console.log(
+          '💡 No options specified. Use --help to see available options.',
+        );
         console.log('\nExamples:');
         console.log('  npx adt cts tree config set --user=PPLENKOV');
         console.log('  npx adt cts tree config set --user=* --workbench=true');
-        console.log('  npx adt cts tree config set --released=true --date-filter=3');
+        console.log(
+          '  npx adt cts tree config set --released=true --date-filter=3',
+        );
         return;
       }
 
       console.log('🔍 Fetching current configuration...');
 
       // Get configurations list
-      const configsResponse = await client.adt.cts.transportrequests.searchconfiguration.configurations.get();
-      
+      const configsResponse =
+        await client.adt.cts.transportrequests.searchconfiguration.configurations.get();
+
       // Response has 'configurations' property (plural) containing config array
       const configsData = configsResponse as { configurations?: unknown };
-      const configs = configsData?.configurations as Array<{ link?: { href?: string } }> | undefined;
+      const configs = configsData?.configurations as
+        | Array<{ link?: { href?: string } }>
+        | undefined;
       if (!configs) {
         console.log('\n❌ No search configuration found');
         return;
@@ -132,7 +147,10 @@ export const treeConfigSetCommand = new Command('set')
 
       // Fetch current config details
       const configId = extractConfigId(configUri);
-      const configDetails = await client.adt.cts.transportrequests.searchconfiguration.configurations.getById(configId);
+      const configDetails =
+        await client.adt.cts.transportrequests.searchconfiguration.configurations.getById(
+          configId,
+        );
       const currentProps = propertiesToMap(configDetails);
 
       // Apply changes - only update what was specified
@@ -143,23 +161,40 @@ export const treeConfigSetCommand = new Command('set')
         console.log(`  📝 User: ${options.user}`);
       }
       if (options.workbench !== undefined) {
-        newProps.WorkbenchRequests = options.workbench === 'true' || options.workbench === true ? 'true' : 'false';
+        newProps.WorkbenchRequests =
+          options.workbench === 'true' || options.workbench === true
+            ? 'true'
+            : 'false';
         console.log(`  📝 WorkbenchRequests: ${newProps.WorkbenchRequests}`);
       }
       if (options.customizing !== undefined) {
-        newProps.CustomizingRequests = options.customizing === 'true' || options.customizing === true ? 'true' : 'false';
-        console.log(`  📝 CustomizingRequests: ${newProps.CustomizingRequests}`);
+        newProps.CustomizingRequests =
+          options.customizing === 'true' || options.customizing === true
+            ? 'true'
+            : 'false';
+        console.log(
+          `  📝 CustomizingRequests: ${newProps.CustomizingRequests}`,
+        );
       }
       if (options.copies !== undefined) {
-        newProps.TransportOfCopies = options.copies === 'true' || options.copies === true ? 'true' : 'false';
+        newProps.TransportOfCopies =
+          options.copies === 'true' || options.copies === true
+            ? 'true'
+            : 'false';
         console.log(`  📝 TransportOfCopies: ${newProps.TransportOfCopies}`);
       }
       if (options.modifiable !== undefined) {
-        newProps.Modifiable = options.modifiable === 'true' || options.modifiable === true ? 'true' : 'false';
+        newProps.Modifiable =
+          options.modifiable === 'true' || options.modifiable === true
+            ? 'true'
+            : 'false';
         console.log(`  📝 Modifiable: ${newProps.Modifiable}`);
       }
       if (options.released !== undefined) {
-        newProps.Released = options.released === 'true' || options.released === true ? 'true' : 'false';
+        newProps.Released =
+          options.released === 'true' || options.released === true
+            ? 'true'
+            : 'false';
         console.log(`  📝 Released: ${newProps.Released}`);
       }
       if (options.dateFilter !== undefined) {
@@ -180,17 +215,21 @@ export const treeConfigSetCommand = new Command('set')
       // Save configuration
       console.log('\n🔄 Saving configuration...');
       const configData = buildConfigurationData(newProps);
-      
+
       // Cast to unknown to bypass schema mismatch - schema alignment pending
       await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
         configId,
-        configData as unknown as Parameters<typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put>[1]
+        configData as unknown as Parameters<
+          typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put
+        >[1],
       );
 
       console.log('✅ Configuration updated successfully');
-
     } catch (error) {
-      console.error('❌ Failed:', error instanceof Error ? error.message : String(error));
+      console.error(
+        '❌ Failed:',
+        error instanceof Error ? error.message : String(error),
+      );
       process.exit(1);
     }
   });

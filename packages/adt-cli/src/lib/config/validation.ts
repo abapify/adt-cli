@@ -77,15 +77,22 @@ export class ConfigValidator {
 
       if (!plugin.name.startsWith('@abapify/')) {
         warnings.push(
-          `Plugin ${plugin.name} does not follow @abapify/* naming convention`
+          `Plugin ${plugin.name} does not follow @abapify/* naming convention`,
         );
       }
 
       // Validate version if specified (version is optional on PluginSpec)
-      const pluginWithVersion = plugin as { name: string; version?: string; config?: unknown };
-      if (pluginWithVersion.version && !this.isValidSemver(pluginWithVersion.version)) {
+      const pluginWithVersion = plugin as {
+        name: string;
+        version?: string;
+        config?: unknown;
+      };
+      if (
+        pluginWithVersion.version &&
+        !this.isValidSemver(pluginWithVersion.version)
+      ) {
         warnings.push(
-          `Plugin ${pluginWithVersion.name} has invalid version format: ${pluginWithVersion.version}`
+          `Plugin ${pluginWithVersion.name} has invalid version format: ${pluginWithVersion.version}`,
         );
       }
 
@@ -93,13 +100,13 @@ export class ConfigValidator {
       if (plugin.config) {
         const configResult = this.validatePluginConfig(
           plugin.name,
-          plugin.config
+          plugin.config,
         );
         errors.push(
-          ...configResult.errors.map((err) => `${plugin.name}: ${err}`)
+          ...configResult.errors.map((err) => `${plugin.name}: ${err}`),
         );
         warnings.push(
-          ...configResult.warnings.map((warn) => `${plugin.name}: ${warn}`)
+          ...configResult.warnings.map((warn) => `${plugin.name}: ${warn}`),
         );
       }
     }
@@ -125,7 +132,7 @@ export class ConfigValidator {
         [];
       if (!availableFormats.includes(config.defaults.format)) {
         errors.push(
-          `Default format '${config.defaults.format}' is not in configured plugins`
+          `Default format '${config.defaults.format}' is not in configured plugins`,
         );
       }
     }
@@ -136,7 +143,7 @@ export class ConfigValidator {
       !this.isValidPath(config.defaults.outputPath)
     ) {
       warnings.push(
-        `Default output path may be invalid: ${config.defaults.outputPath}`
+        `Default output path may be invalid: ${config.defaults.outputPath}`,
       );
     }
 
@@ -166,7 +173,7 @@ export class ConfigValidator {
    */
   private validatePluginConfig(
     pluginName: string,
-    config: any
+    config: any,
   ): ConfigValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];

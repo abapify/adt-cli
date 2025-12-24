@@ -1,11 +1,11 @@
 /**
  * ADK v2 - ABAP Development Kit
- * 
+ *
  * Facade over ADT client providing stable ABAP object interfaces.
- * 
+ *
  * Usage:
  *   import { createAdk, type AbapPackage } from '@abapify/adk';
- *   
+ *
  *   const adk = createAdk(client);
  *   const pkg = await adk.getPackage('ZPACKAGE');
  *   const objects = await pkg.getObjects();
@@ -14,8 +14,8 @@
 // Base types
 export type { AbapObject } from './base/types';
 export type { AdkContext } from './base/context';
-export { 
-  AdkObject, 
+export {
+  AdkObject,
   AdkMainObject,
   type LockHandle,
   type SaveOptions,
@@ -47,17 +47,17 @@ export type {
 export { createAdkContract } from './base/adt';
 
 // Global context management
-export { 
-  initializeAdk, 
-  getGlobalContext, 
-  isAdkInitialized, 
+export {
+  initializeAdk,
+  getGlobalContext,
+  isAdkInitialized,
   resetAdk,
   tryGetGlobalContext,
 } from './base/global-context';
 
 // Package types and class
-export type { 
-  AbapPackage, 
+export type {
+  AbapPackage,
   PackageType,
   PackageAttributes,
   ObjectReference,
@@ -65,7 +65,7 @@ export type {
   SoftwareComponent,
   TransportLayer,
   TransportConfig,
-  PackageXml,  // Raw API response type (inferred from schema)
+  PackageXml, // Raw API response type (inferred from schema)
 } from './objects/repository/devc';
 export { AdkPackage } from './objects/repository/devc';
 
@@ -76,14 +76,14 @@ export type {
   ClassVisibility,
   ClassInclude,
   ClassIncludeType,
-  ClassXml,  // Raw API response type
+  ClassXml, // Raw API response type
 } from './objects/repository/clas';
 export { AdkClass } from './objects/repository/clas';
 
 // Interface types and class
 export type {
   AbapInterface,
-  InterfaceXml,  // Raw API response type
+  InterfaceXml, // Raw API response type
 } from './objects/repository/intf';
 export { AdkInterface } from './objects/repository/intf';
 
@@ -101,22 +101,33 @@ export type {
   TransportUpdateOptions,
   ReleaseResult,
 } from './objects/cts';
-export { AdkTransportItem, AdkTransportRequest, AdkTransportTask, AdkTransportObject, clearConfigCache } from './objects/cts';
+export {
+  AdkTransportItem,
+  AdkTransportRequest,
+  AdkTransportTask,
+  AdkTransportObject,
+  clearConfigCache,
+} from './objects/cts';
 
 // CTS - Simplified transport for import operations
-export { 
-  AdkTransport, 
-  AdkTransportObjectRef, 
+export {
+  AdkTransport,
+  AdkTransportObjectRef,
   AdkTransportTaskRef,
   type TransportResponse,
 } from './objects/cts';
 
 // Factory and registry
 export type { AdkFactory } from './factory';
-export { createAdk, createAdkFactory, AdkGenericObject, parseXmlIdentity } from './factory';
-export { 
-  registerObjectType, 
-  resolveType, 
+export {
+  createAdk,
+  createAdkFactory,
+  AdkGenericObject,
+  parseXmlIdentity,
+} from './factory';
+export {
+  registerObjectType,
+  resolveType,
   resolveKind,
   parseAdtType,
   getMainType,

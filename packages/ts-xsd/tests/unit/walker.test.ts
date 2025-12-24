@@ -33,9 +33,7 @@ describe('Schema Walker', () => {
             { name: 'name', type: 'xs:string' },
           ],
         },
-        attribute: [
-          { name: 'version', type: 'xs:string', use: 'required' },
-        ],
+        attribute: [{ name: 'version', type: 'xs:string', use: 'required' }],
       },
     ],
     simpleType: [
@@ -68,18 +66,14 @@ describe('Schema Walker', () => {
                 { name: 'phones', type: 'xs:string', maxOccurs: 'unbounded' },
               ],
             },
-            attribute: [
-              { name: 'active', type: 'xs:boolean' },
-            ],
+            attribute: [{ name: 'active', type: 'xs:boolean' }],
           },
         },
       },
       {
         name: 'CompanyType',
         sequence: {
-          element: [
-            { name: 'companyName', type: 'xs:string' },
-          ],
+          element: [{ name: 'companyName', type: 'xs:string' }],
         },
       },
     ],
@@ -105,9 +99,7 @@ describe('Schema Walker', () => {
       {
         name: 'ComplexType',
         sequence: {
-          element: [
-            { name: 'header', type: 'xs:string' },
-          ],
+          element: [{ name: 'header', type: 'xs:string' }],
           sequence: [
             {
               element: [
@@ -136,7 +128,7 @@ describe('Schema Walker', () => {
   describe('walkComplexTypes', () => {
     it('should yield all complexTypes in a schema', () => {
       const types = [...walkComplexTypes(baseSchema)];
-      
+
       assert.equal(types.length, 1);
       assert.equal(types[0].ct.name, 'BaseType');
       assert.equal(types[0].schema, baseSchema);
@@ -144,10 +136,10 @@ describe('Schema Walker', () => {
 
     it('should yield complexTypes from $imports', () => {
       const types = [...walkComplexTypes(derivedSchema)];
-      
+
       assert.equal(types.length, 3); // PersonType, CompanyType, BaseType
-      
-      const names = types.map(t => t.ct.name);
+
+      const names = types.map((t) => t.ct.name);
       assert.ok(names.includes('PersonType'));
       assert.ok(names.includes('CompanyType'));
       assert.ok(names.includes('BaseType'));
@@ -155,11 +147,11 @@ describe('Schema Walker', () => {
 
     it('should preserve schema context for each type', () => {
       const types = [...walkComplexTypes(derivedSchema)];
-      
-      const baseType = types.find(t => t.ct.name === 'BaseType');
+
+      const baseType = types.find((t) => t.ct.name === 'BaseType');
       assert.equal(baseType?.schema, baseSchema);
-      
-      const personType = types.find(t => t.ct.name === 'PersonType');
+
+      const personType = types.find((t) => t.ct.name === 'PersonType');
       assert.equal(personType?.schema, derivedSchema);
     });
   });
@@ -171,14 +163,14 @@ describe('Schema Walker', () => {
   describe('walkSimpleTypes', () => {
     it('should yield all simpleTypes in a schema', () => {
       const types = [...walkSimpleTypes(baseSchema)];
-      
+
       assert.equal(types.length, 1);
       assert.equal(types[0].st.name, 'StatusType');
     });
 
     it('should yield simpleTypes from $imports', () => {
       const types = [...walkSimpleTypes(derivedSchema)];
-      
+
       assert.equal(types.length, 1);
       assert.equal(types[0].st.name, 'StatusType');
       assert.equal(types[0].schema, baseSchema);
@@ -192,7 +184,7 @@ describe('Schema Walker', () => {
   describe('walkTopLevelElements', () => {
     it('should yield all top-level elements', () => {
       const elements = [...walkTopLevelElements(derivedSchema)];
-      
+
       assert.equal(elements.length, 2);
       assert.equal(elements[0].element.name, 'person');
       assert.equal(elements[1].element.name, 'company');
@@ -206,7 +198,7 @@ describe('Schema Walker', () => {
   describe('findComplexType', () => {
     it('should find type in current schema', () => {
       const result = findComplexType('PersonType', derivedSchema);
-      
+
       assert.ok(result);
       assert.equal(result?.ct.name, 'PersonType');
       assert.equal(result?.schema, derivedSchema);
@@ -214,7 +206,7 @@ describe('Schema Walker', () => {
 
     it('should find type in $imports', () => {
       const result = findComplexType('BaseType', derivedSchema);
-      
+
       assert.ok(result);
       assert.equal(result?.ct.name, 'BaseType');
       assert.equal(result?.schema, baseSchema);
@@ -222,7 +214,7 @@ describe('Schema Walker', () => {
 
     it('should return undefined for non-existent type', () => {
       const result = findComplexType('NonExistent', derivedSchema);
-      
+
       assert.equal(result, undefined);
     });
   });
@@ -234,7 +226,7 @@ describe('Schema Walker', () => {
   describe('findSimpleType', () => {
     it('should find simpleType in $imports', () => {
       const result = findSimpleType('StatusType', derivedSchema);
-      
+
       assert.ok(result);
       assert.equal(result?.st.name, 'StatusType');
     });
@@ -247,7 +239,7 @@ describe('Schema Walker', () => {
   describe('findElement', () => {
     it('should find top-level element', () => {
       const result = findElement('person', derivedSchema);
-      
+
       assert.ok(result);
       assert.equal(result?.element.name, 'person');
       assert.equal(result?.element.type, 'PersonType');
@@ -263,7 +255,7 @@ describe('Schema Walker', () => {
       const types = derivedSchema.complexType as ComplexTypeLike[];
       const companyType = types[1];
       const elements = [...walkElements(companyType, derivedSchema)];
-      
+
       assert.equal(elements.length, 1);
       assert.equal(elements[0].element.name, 'companyName');
       assert.equal(elements[0].optional, false);
@@ -275,24 +267,24 @@ describe('Schema Walker', () => {
       const types = derivedSchema.complexType as ComplexTypeLike[];
       const personType = types[0];
       const elements = [...walkElements(personType, derivedSchema)];
-      
+
       // Should include inherited elements from BaseType + own elements
-      const names = elements.map(e => e.element.name);
-      assert.ok(names.includes('id'));       // inherited
-      assert.ok(names.includes('name'));     // inherited
-      assert.ok(names.includes('email'));    // own
-      assert.ok(names.includes('phones'));   // own
+      const names = elements.map((e) => e.element.name);
+      assert.ok(names.includes('id')); // inherited
+      assert.ok(names.includes('name')); // inherited
+      assert.ok(names.includes('email')); // own
+      assert.ok(names.includes('phones')); // own
     });
 
     it('should mark optional elements correctly', () => {
       const types = derivedSchema.complexType as ComplexTypeLike[];
       const personType = types[0];
       const elements = [...walkElements(personType, derivedSchema)];
-      
-      const email = elements.find(e => e.element.name === 'email');
+
+      const email = elements.find((e) => e.element.name === 'email');
       assert.equal(email?.optional, true);
-      
-      const id = elements.find(e => e.element.name === 'id');
+
+      const id = elements.find((e) => e.element.name === 'id');
       assert.equal(id?.optional, false);
     });
 
@@ -300,11 +292,11 @@ describe('Schema Walker', () => {
       const types = derivedSchema.complexType as ComplexTypeLike[];
       const personType = types[0];
       const elements = [...walkElements(personType, derivedSchema)];
-      
-      const phones = elements.find(e => e.element.name === 'phones');
+
+      const phones = elements.find((e) => e.element.name === 'phones');
       assert.equal(phones?.array, true);
-      
-      const email = elements.find(e => e.element.name === 'email');
+
+      const email = elements.find((e) => e.element.name === 'email');
       assert.equal(email?.array, false);
     });
 
@@ -312,30 +304,30 @@ describe('Schema Walker', () => {
       const types = schemaWithChoice.complexType as ComplexTypeLike[];
       const paymentType = types[0];
       const elements = [...walkElements(paymentType, schemaWithChoice)];
-      
+
       assert.equal(elements.length, 3);
-      assert.ok(elements.every(e => e.optional));
-      assert.ok(elements.every(e => e.source === 'choice'));
+      assert.ok(elements.every((e) => e.optional));
+      assert.ok(elements.every((e) => e.source === 'choice'));
     });
 
     it('should handle nested groups', () => {
       const types = schemaWithNestedGroups.complexType as ComplexTypeLike[];
       const complexType = types[0];
       const elements = [...walkElements(complexType, schemaWithNestedGroups)];
-      
-      const names = elements.map(e => e.element.name);
+
+      const names = elements.map((e) => e.element.name);
       assert.ok(names.includes('header'));
       assert.ok(names.includes('nested1'));
       assert.ok(names.includes('nested2'));
       assert.ok(names.includes('optionA'));
       assert.ok(names.includes('optionB'));
-      
+
       // nested2 should be optional (minOccurs=0)
-      const nested2 = elements.find(e => e.element.name === 'nested2');
+      const nested2 = elements.find((e) => e.element.name === 'nested2');
       assert.equal(nested2?.optional, true);
-      
+
       // Choice elements should be optional
-      const optionA = elements.find(e => e.element.name === 'optionA');
+      const optionA = elements.find((e) => e.element.name === 'optionA');
       assert.equal(optionA?.optional, true);
     });
   });
@@ -349,7 +341,7 @@ describe('Schema Walker', () => {
       const types = baseSchema.complexType as ComplexTypeLike[];
       const baseType = types[0];
       const attrs = [...walkAttributes(baseType, baseSchema)];
-      
+
       assert.equal(attrs.length, 1);
       assert.equal(attrs[0].attribute.name, 'version');
       assert.equal(attrs[0].required, true);
@@ -359,21 +351,21 @@ describe('Schema Walker', () => {
       const types = derivedSchema.complexType as ComplexTypeLike[];
       const personType = types[0];
       const attrs = [...walkAttributes(personType, derivedSchema)];
-      
-      const names = attrs.map(a => a.attribute.name);
+
+      const names = attrs.map((a) => a.attribute.name);
       assert.ok(names.includes('version')); // inherited
-      assert.ok(names.includes('active'));  // own
+      assert.ok(names.includes('active')); // own
     });
 
     it('should mark required/optional correctly', () => {
       const types = derivedSchema.complexType as ComplexTypeLike[];
       const personType = types[0];
       const attrs = [...walkAttributes(personType, derivedSchema)];
-      
-      const version = attrs.find(a => a.attribute.name === 'version');
+
+      const version = attrs.find((a) => a.attribute.name === 'version');
       assert.equal(version?.required, true);
-      
-      const active = attrs.find(a => a.attribute.name === 'active');
+
+      const active = attrs.find((a) => a.attribute.name === 'active');
       assert.equal(active?.required, false);
     });
   });
@@ -402,20 +394,20 @@ describe('Schema Walker', () => {
   describe('lazy evaluation', () => {
     it('should stop iteration early when match found', () => {
       let iterationCount = 0;
-      
+
       // Create a schema with many types
       const largeSchema: SchemaLike = {
         complexType: Array.from({ length: 100 }, (_, i) => ({
           name: `Type${i}`,
         })),
       };
-      
+
       // Find Type5 - should stop after ~6 iterations
       for (const { ct } of walkComplexTypes(largeSchema)) {
         iterationCount++;
         if (ct.name === 'Type5') break;
       }
-      
+
       assert.equal(iterationCount, 6); // 0, 1, 2, 3, 4, 5
     });
   });
@@ -437,14 +429,18 @@ describe('Schema Walker', () => {
         { name: 'CLAS', type: 'ClasType', substitutionGroup: 'asx:Schema' },
       ],
       complexType: [
-        { name: 'DevcType', sequence: { element: [{ name: 'CTEXT', type: 'xs:string' }] } },
-        { name: 'ClasType', sequence: { element: [{ name: 'CLSNAME', type: 'xs:string' }] } },
+        {
+          name: 'DevcType',
+          sequence: { element: [{ name: 'CTEXT', type: 'xs:string' }] },
+        },
+        {
+          name: 'ClasType',
+          sequence: { element: [{ name: 'CLSNAME', type: 'xs:string' }] },
+        },
         {
           name: 'AbapValuesType',
           sequence: {
-            element: [
-              { ref: 'asx:Schema' },
-            ],
+            element: [{ ref: 'asx:Schema' }],
           },
         },
       ],
@@ -452,28 +448,45 @@ describe('Schema Walker', () => {
 
     it('should yield substitutes instead of abstract element ref', () => {
       const complexTypes = substitutionSchema.complexType as ComplexTypeLike[];
-      const valuesType = complexTypes.find((ct: ComplexTypeLike) => ct.name === 'AbapValuesType');
+      const valuesType = complexTypes.find(
+        (ct: ComplexTypeLike) => ct.name === 'AbapValuesType',
+      );
       assert.ok(valuesType, 'AbapValuesType should exist');
-      
+
       const elements = [...walkElements(valuesType, substitutionSchema)];
-      
+
       // Should yield DEVC and CLAS (the substitutes), not Schema (the abstract)
-      const elementNames = elements.map(e => e.element.name);
-      
-      assert.ok(elementNames.includes('DEVC'), 'Should include DEVC substitute');
-      assert.ok(elementNames.includes('CLAS'), 'Should include CLAS substitute');
-      assert.ok(!elementNames.includes('Schema'), 'Should NOT include abstract Schema');
+      const elementNames = elements.map((e) => e.element.name);
+
+      assert.ok(
+        elementNames.includes('DEVC'),
+        'Should include DEVC substitute',
+      );
+      assert.ok(
+        elementNames.includes('CLAS'),
+        'Should include CLAS substitute',
+      );
+      assert.ok(
+        !elementNames.includes('Schema'),
+        'Should NOT include abstract Schema',
+      );
     });
 
     it('should preserve optionality from ref when yielding substitutes', () => {
       const complexTypes = substitutionSchema.complexType as ComplexTypeLike[];
-      const valuesType = complexTypes.find((ct: ComplexTypeLike) => ct.name === 'AbapValuesType');
+      const valuesType = complexTypes.find(
+        (ct: ComplexTypeLike) => ct.name === 'AbapValuesType',
+      );
       assert.ok(valuesType);
       const elements = [...walkElements(valuesType, substitutionSchema)];
-      
+
       // All substitutes should have same optionality as the original ref
       for (const entry of elements) {
-        assert.equal(entry.optional, false, `${entry.element.name} should not be optional`);
+        assert.equal(
+          entry.optional,
+          false,
+          `${entry.element.name} should not be optional`,
+        );
       }
     });
   });
@@ -507,16 +520,16 @@ describe('Schema Walker', () => {
 
     it('should walk complexTypes in object format', () => {
       const types = [...walkComplexTypes(objectFormatSchema)];
-      const names = types.map(t => t.ct.name);
-      
+      const names = types.map((t) => t.ct.name);
+
       assert.ok(names.includes('PersonType'), 'Should include PersonType');
       assert.ok(names.includes('AddressType'), 'Should include AddressType');
     });
 
     it('should walk simpleTypes in object format', () => {
       const types = [...walkSimpleTypes(objectFormatSchema)];
-      const names = types.map(t => t.st.name);
-      
+      const names = types.map((t) => t.st.name);
+
       assert.ok(names.includes('StatusType'), 'Should include StatusType');
       assert.ok(names.includes('CodeType'), 'Should include CodeType');
     });
@@ -590,12 +603,12 @@ describe('Schema Walker', () => {
     it('should walk elements from base type via extension', () => {
       const complexTypes = extensionSchema.complexType as ComplexTypeLike[];
       const derivedType = complexTypes.find(
-        (ct: ComplexTypeLike) => ct.name === 'DerivedType'
+        (ct: ComplexTypeLike) => ct.name === 'DerivedType',
       ) as ComplexTypeLike;
-      
+
       const elements = [...walkElements(derivedType, extensionSchema)];
-      const names = elements.map(e => e.element.name);
-      
+      const names = elements.map((e) => e.element.name);
+
       assert.ok(names.includes('baseField'), 'Should include base field');
       assert.ok(names.includes('derivedField'), 'Should include derived field');
     });
@@ -603,14 +616,17 @@ describe('Schema Walker', () => {
     it('should walk attributes from base type via extension', () => {
       const complexTypes = extensionSchema.complexType as ComplexTypeLike[];
       const derivedType = complexTypes.find(
-        (ct: ComplexTypeLike) => ct.name === 'DerivedType'
+        (ct: ComplexTypeLike) => ct.name === 'DerivedType',
       ) as ComplexTypeLike;
-      
+
       const attrs = [...walkAttributes(derivedType, extensionSchema)];
-      const names = attrs.map(a => a.attribute.name);
-      
+      const names = attrs.map((a) => a.attribute.name);
+
       assert.ok(names.includes('baseAttr'), 'Should include base attribute');
-      assert.ok(names.includes('derivedAttr'), 'Should include derived attribute');
+      assert.ok(
+        names.includes('derivedAttr'),
+        'Should include derived attribute',
+      );
     });
   });
 
@@ -644,14 +660,17 @@ describe('Schema Walker', () => {
     it('should walk elements from group reference', () => {
       const complexTypes = groupSchema.complexType as ComplexTypeLike[];
       const recordType = complexTypes.find(
-        (ct: ComplexTypeLike) => ct.name === 'RecordType'
+        (ct: ComplexTypeLike) => ct.name === 'RecordType',
       ) as ComplexTypeLike;
-      
+
       const elements = [...walkElements(recordType, groupSchema)];
-      const names = elements.map(e => e.element.name);
-      
+      const names = elements.map((e) => e.element.name);
+
       assert.ok(names.includes('id'), 'Should include id from group');
-      assert.ok(names.includes('timestamp'), 'Should include timestamp from group');
+      assert.ok(
+        names.includes('timestamp'),
+        'Should include timestamp from group',
+      );
       assert.ok(names.includes('data'), 'Should include direct element');
     });
   });
@@ -682,14 +701,17 @@ describe('Schema Walker', () => {
     it('should walk attributes from attributeGroup reference', () => {
       const complexTypes = attrGroupSchema.complexType as ComplexTypeLike[];
       const docType = complexTypes.find(
-        (ct: ComplexTypeLike) => ct.name === 'DocumentType'
+        (ct: ComplexTypeLike) => ct.name === 'DocumentType',
       ) as ComplexTypeLike;
-      
+
       const attrs = [...walkAttributes(docType, attrGroupSchema)];
-      const names = attrs.map(a => a.attribute.name);
-      
+      const names = attrs.map((a) => a.attribute.name);
+
       assert.ok(names.includes('lang'), 'Should include lang from group');
-      assert.ok(names.includes('encoding'), 'Should include encoding from group');
+      assert.ok(
+        names.includes('encoding'),
+        'Should include encoding from group',
+      );
       assert.ok(names.includes('version'), 'Should include direct attribute');
     });
   });
@@ -724,12 +746,12 @@ describe('Schema Walker', () => {
     it('should walk elements from choice group', () => {
       const complexTypes = choiceSchema.complexType as ComplexTypeLike[];
       const choiceType = complexTypes.find(
-        (ct: ComplexTypeLike) => ct.name === 'ChoiceType'
+        (ct: ComplexTypeLike) => ct.name === 'ChoiceType',
       ) as ComplexTypeLike;
-      
+
       const elements = [...walkElements(choiceType, choiceSchema)];
-      const names = elements.map(e => e.element.name);
-      
+      const names = elements.map((e) => e.element.name);
+
       assert.ok(names.includes('optionA'));
       assert.ok(names.includes('optionB'));
     });
@@ -737,12 +759,12 @@ describe('Schema Walker', () => {
     it('should walk elements from all group', () => {
       const complexTypes = choiceSchema.complexType as ComplexTypeLike[];
       const allType = complexTypes.find(
-        (ct: ComplexTypeLike) => ct.name === 'AllType'
+        (ct: ComplexTypeLike) => ct.name === 'AllType',
       ) as ComplexTypeLike;
-      
+
       const elements = [...walkElements(allType, choiceSchema)];
-      const names = elements.map(e => e.element.name);
-      
+      const names = elements.map((e) => e.element.name);
+
       assert.ok(names.includes('field1'));
       assert.ok(names.includes('field2'));
     });

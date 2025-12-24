@@ -51,7 +51,7 @@ export interface ${typeName}Response {
 
     async finalize(ctx) {
       ctx.logger.success(
-        `Generated types for ${ctx.workspaces.length} workspaces`
+        `Generated types for ${ctx.workspaces.length} workspaces`,
       );
     },
   },

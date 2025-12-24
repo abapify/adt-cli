@@ -1,9 +1,9 @@
 /**
  * Package
- * 
+ *
  * Endpoint: /sap/bc/adt/packages
  * Category: devck
- * 
+ *
  * @generated - DO NOT EDIT MANUALLY
  */
 
@@ -14,7 +14,16 @@ export const packagesContract = contract({
   /**
    * GET Package
    */
-  properties: (object_name: string, params?: { corrNr?: string; lockHandle?: string; version?: string; accessMode?: string; _action?: string }) =>
+  properties: (
+    object_name: string,
+    params?: {
+      corrNr?: string;
+      lockHandle?: string;
+      version?: string;
+      accessMode?: string;
+      _action?: string;
+    },
+  ) =>
     http.get(`/sap/bc/adt/packages/${object_name}`, {
       query: params,
       responses: { 200: packagesV1 },
@@ -24,10 +33,13 @@ export const packagesContract = contract({
    * GET Package
    */
   checkuseaccess: (packagename: string, packageinterfacename: string) =>
-    http.get(`/sap/bc/adt/packages/${packagename}/useaccesses/${packageinterfacename}`, {
-      responses: { 200: packagesV1 },
-      headers: { Accept: 'application/vnd.sap.adt.packages.v2+xml' },
-    }),
+    http.get(
+      `/sap/bc/adt/packages/${packagename}/useaccesses/${packageinterfacename}`,
+      {
+        responses: { 200: packagesV1 },
+        headers: { Accept: 'application/vnd.sap.adt.packages.v2+xml' },
+      },
+    ),
   /**
    * GET Package
    */

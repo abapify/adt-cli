@@ -37,7 +37,7 @@ function formatDate(date: Date | undefined): string {
  */
 function renderPackagePage(pkg: PackageXml, _params: NavParams): Page {
   const sections: Component[] = [];
-  
+
   // Extract values with defaults for optional fields
   const name = pkg?.name ?? '';
   const type = pkg?.type ?? 'DEVC/K';
@@ -46,7 +46,7 @@ function renderPackagePage(pkg: PackageXml, _params: NavParams): Page {
   const transport = pkg?.transport;
   const appComponent = pkg?.applicationComponent;
   const superPkg = pkg?.superPackage;
-  
+
   // Header section with core info
   const headerFields: Component[] = [
     Field('Name', adtLink({ name, type })),
@@ -54,7 +54,7 @@ function renderPackagePage(pkg: PackageXml, _params: NavParams): Page {
     Field('Description', description),
   ];
   sections.push(Section('▼ Package', ...headerFields));
-  
+
   // Package attributes section
   const attrFields: Component[] = [
     Field('Package Type', String(attrs?.packageType ?? '-')),
@@ -66,14 +66,14 @@ function renderPackagePage(pkg: PackageXml, _params: NavParams): Page {
     Field('Record Changes', attrs?.recordChanges ?? false),
     Field('Language Version', attrs?.languageVersion ?? '-'),
   ];
-  
+
   // Super package link
   if (superPkg?.name) {
     attrFields.push(Field('Super Package', adtLink(superPkg)));
   }
-  
+
   sections.push(Section('▼ Attributes', ...attrFields));
-  
+
   // Metadata section
   const responsible = pkg?.responsible ?? '-';
   const masterLanguage = pkg?.masterLanguage ?? '-';
@@ -83,39 +83,52 @@ function renderPackagePage(pkg: PackageXml, _params: NavParams): Page {
   const changedBy = pkg?.changedBy ?? '-';
   const createdAt = pkg?.createdAt;
   const changedAt = pkg?.changedAt;
-  
+
   const metaFields: Component[] = [
     Field('Responsible', responsible),
     Field('Master Language', masterLanguage),
     Field('Language', language),
     Field('Version', version),
     Field('Created By', createdBy),
-    Field('Created At', formatDate(createdAt ? new Date(createdAt as string) : undefined)),
+    Field(
+      'Created At',
+      formatDate(createdAt ? new Date(createdAt as string) : undefined),
+    ),
     Field('Changed By', changedBy),
-    Field('Changed At', formatDate(changedAt ? new Date(changedAt as string) : undefined)),
+    Field(
+      'Changed At',
+      formatDate(changedAt ? new Date(changedAt as string) : undefined),
+    ),
   ];
   sections.push(Section('▼ Metadata', ...metaFields));
-  
+
   // Subpackages section
   // Note: Subpackages are included in the package data if present
   const subPkgs = pkg?.subPackages?.packageRef ?? [];
   if (subPkgs.length > 0) {
-    type PackageRef = { name?: string; uri?: string; type?: string; description?: string };
-    const subPkgFields = subPkgs.map((ref: PackageRef) => 
-      Field(adtLink(ref), ref.description ?? '')
+    type PackageRef = {
+      name?: string;
+      uri?: string;
+      type?: string;
+      description?: string;
+    };
+    const subPkgFields = subPkgs.map((ref: PackageRef) =>
+      Field(adtLink(ref), ref.description ?? ''),
     );
-    sections.push(Section(`▼ Subpackages (${subPkgs.length})`, ...subPkgFields));
+    sections.push(
+      Section(`▼ Subpackages (${subPkgs.length})`, ...subPkgFields),
+    );
   }
-  
+
   const content = Box(...sections);
-  
+
   const page: Page = {
     title: `Package: ${name}`,
     icon: '📦',
     render: () => content.render(),
     print: () => {},
   };
-  
+
   page.print = createPrintFn(page);
   return page;
 }
@@ -129,7 +142,7 @@ function renderPackagePage(pkg: PackageXml, _params: NavParams): Page {
  *
  * Self-registers with the router on import.
  * Type: DEVC (Development Class / Package)
- * 
+ *
  * Usage:
  * ```ts
  * const page = await router.navTo(client, 'DEVC', { name: '$TMP' });

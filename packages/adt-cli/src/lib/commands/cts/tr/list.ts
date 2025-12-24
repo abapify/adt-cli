@@ -1,6 +1,6 @@
 /**
  * adt cts tr list - List transport requests
- * 
+ *
  * Uses v2 client service layer for transport operations.
  */
 
@@ -35,20 +35,29 @@ export const ctsListCommand = new Command('list')
           console.log('📭 No transports found');
         } else {
           console.log(`📋 Found ${transports.length} transports`);
-          
+
           for (const tr of displayTransports) {
             const status = tr.status === 'D' ? '📂' : '📁';
-            console.log(`${status} ${tr.number} - ${tr.desc || '(no description)'}`);
-            console.log(`   Owner: ${tr.owner || 'unknown'} | Status: ${tr.status || 'unknown'}`);
+            console.log(
+              `${status} ${tr.number} - ${tr.desc || '(no description)'}`,
+            );
+            console.log(
+              `   Owner: ${tr.owner || 'unknown'} | Status: ${tr.status || 'unknown'}`,
+            );
           }
 
           if (transports.length > maxResults) {
-            console.log(`\n💡 Showing ${maxResults} of ${transports.length} (use --max to see more)`);
+            console.log(
+              `\n💡 Showing ${maxResults} of ${transports.length} (use --max to see more)`,
+            );
           }
         }
       }
     } catch (error) {
-      console.error('❌ List failed:', error instanceof Error ? error.message : String(error));
+      console.error(
+        '❌ List failed:',
+        error instanceof Error ? error.message : String(error),
+      );
       process.exit(1);
     }
   });

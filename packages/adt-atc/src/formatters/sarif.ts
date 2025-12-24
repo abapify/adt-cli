@@ -1,6 +1,6 @@
 /**
  * SARIF Formatter
- * 
+ *
  * Outputs ATC findings in SARIF format for GitHub Code Scanning.
  */
 
@@ -10,7 +10,7 @@ import type { AtcResult, AtcFinding } from '../types';
 export async function outputSarifReport(
   result: AtcResult,
   outputFile: string,
-  _targetName?: string
+  _targetName?: string,
 ): Promise<void> {
   // Transform ATC findings to SARIF format
   const rules = Array.from(
@@ -27,16 +27,16 @@ export async function outputSarifReport(
               f.priority === 1
                 ? 'error'
                 : f.priority === 2
-                ? 'warning'
-                : 'note',
+                  ? 'warning'
+                  : 'note',
           },
           properties: {
             tags: ['abap', 'code-quality'],
             precision: 'high',
           },
         },
-      ])
-    ).values()
+      ]),
+    ).values(),
   );
 
   const results = result.findings.map((finding: AtcFinding) => {
@@ -52,8 +52,8 @@ export async function outputSarifReport(
         finding.priority === 1
           ? 'error'
           : finding.priority === 2
-          ? 'warning'
-          : 'note',
+            ? 'warning'
+            : 'note',
       message: { text: finding.messageText },
       locations: [
         {
@@ -94,6 +94,6 @@ export async function outputSarifReport(
   await writeFile(outputFile, JSON.stringify(sarifReport, null, 2));
   console.log(`\n📄 SARIF report written to: ${outputFile}`);
   console.log(
-    `📊 ${result.totalFindings} issues exported for GitHub Code Scanning`
+    `📊 ${result.totalFindings} issues exported for GitHub Code Scanning`,
   );
 }

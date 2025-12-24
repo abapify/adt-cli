@@ -28,15 +28,23 @@ export interface DiscoveryParams extends NavParams {
 /**
  * Render discovery data as a Page
  */
-function renderDiscoveryPage(data: DiscoveryData, params: DiscoveryParams): Page {
+function renderDiscoveryPage(
+  data: DiscoveryData,
+  params: DiscoveryParams,
+): Page {
   // Access service.workspace from discovery response
   const service = data?.service;
-  const workspaces = (service?.workspace ?? []) as Array<{ title?: string; collection?: unknown }>;
+  const workspaces = (service?.workspace ?? []) as Array<{
+    title?: string;
+    collection?: unknown;
+  }>;
   const filter = params.filter?.toLowerCase();
 
   // Filter workspaces if filter provided
   const filteredWorkspaces = filter
-    ? workspaces.filter((ws: { title?: string }) => ws.title?.toLowerCase().includes(filter))
+    ? workspaces.filter((ws: { title?: string }) =>
+        ws.title?.toLowerCase().includes(filter),
+      )
     : workspaces;
 
   // Build content
@@ -47,8 +55,8 @@ function renderDiscoveryPage(data: DiscoveryData, params: DiscoveryParams): Page
     Box(
       Field('Total Workspaces', String(workspaces.length)),
       Field('Showing', String(filteredWorkspaces.length)),
-      ...(filter ? [Field('Filter', filter)] : [])
-    )
+      ...(filter ? [Field('Filter', filter)] : []),
+    ),
   );
 
   // Each workspace as a section
@@ -60,36 +68,46 @@ function renderDiscoveryPage(data: DiscoveryData, params: DiscoveryParams): Page
         : [];
 
     // Build collection items
-    const collectionComponents: Component[] = collections.map((coll: { title?: string; href?: string; category?: unknown; templateLinks?: { templateLink?: unknown } }) => {
-      const categories = Array.isArray(coll.category)
-        ? coll.category
-        : coll.category
-          ? [coll.category]
-          : [];
-      const categoryTerms = categories
-        .map((c: { term?: string }) => c.term)
-        .filter(Boolean)
-        .join(', ');
+    const collectionComponents: Component[] = collections.map(
+      (coll: {
+        title?: string;
+        href?: string;
+        category?: unknown;
+        templateLinks?: { templateLink?: unknown };
+      }) => {
+        const categories = Array.isArray(coll.category)
+          ? coll.category
+          : coll.category
+            ? [coll.category]
+            : [];
+        const categoryTerms = categories
+          .map((c: { term?: string }) => c.term)
+          .filter(Boolean)
+          .join(', ');
 
-      const templateCount = Array.isArray(coll.templateLinks?.templateLink)
-        ? coll.templateLinks.templateLink.length
-        : coll.templateLinks?.templateLink
-          ? 1
-          : 0;
+        const templateCount = Array.isArray(coll.templateLinks?.templateLink)
+          ? coll.templateLinks.templateLink.length
+          : coll.templateLinks?.templateLink
+            ? 1
+            : 0;
 
-      const info = [
-        categoryTerms ? `[${categoryTerms}]` : '',
-        templateCount > 0 ? `(${templateCount} templates)` : '',
-      ]
-        .filter(Boolean)
-        .join(' ');
+        const info = [
+          categoryTerms ? `[${categoryTerms}]` : '',
+          templateCount > 0 ? `(${templateCount} templates)` : '',
+        ]
+          .filter(Boolean)
+          .join(' ');
 
-      return Text(`  └─ ${coll.title || '-'} ${coll.href} ${info}`);
-    });
+        return Text(`  └─ ${coll.title || '-'} ${coll.href} ${info}`);
+      },
+    );
 
     if (collectionComponents.length > 0) {
       sections.push(
-        Section(`📁 ${workspace.title || 'Unnamed Workspace'}`, ...collectionComponents)
+        Section(
+          `📁 ${workspace.title || 'Unnamed Workspace'}`,
+          ...collectionComponents,
+        ),
       );
     }
   }
@@ -119,7 +137,7 @@ function renderDiscoveryPage(data: DiscoveryData, params: DiscoveryParams): Page
  */
 export default function DiscoveryPage(
   data: DiscoveryData,
-  params: DiscoveryParams = {}
+  params: DiscoveryParams = {},
 ): Page {
   return renderDiscoveryPage(data, params);
 }

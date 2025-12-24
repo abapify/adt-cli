@@ -39,7 +39,11 @@ export interface NavigationEntry {
  */
 export type FetchFn = (
   url: string,
-  options?: { method?: string; headers?: Record<string, string>; body?: string }
+  options?: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+  },
 ) => Promise<string>;
 
 /**

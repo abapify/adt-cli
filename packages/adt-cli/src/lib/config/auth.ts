@@ -49,7 +49,7 @@ export class BtpAuthProvider implements AuthProvider {
       throw new Error(
         `Failed to create BTP client: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`
+        }`,
       );
     }
   }
@@ -121,10 +121,10 @@ export class MockAuthProvider implements AuthProvider {
   async createClient(): Promise<AdtClient> {
     // Return a mock client for testing
     // Use config.enabled to potentially customize mock behavior
-    const baseUrl = this.config.enabled 
-      ? 'http://mock-sap-system.local' 
+    const baseUrl = this.config.enabled
+      ? 'http://mock-sap-system.local'
       : 'http://disabled-mock.local';
-    
+
     return createAdtClient({
       baseUrl,
       username: 'mock-user',
@@ -158,7 +158,7 @@ export class AuthRegistry {
    */
   register(
     type: string,
-    providerClass: new (config: any) => AuthProvider
+    providerClass: new (config: any) => AuthProvider,
   ): void {
     this.providers.set(type, providerClass);
   }

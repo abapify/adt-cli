@@ -1,6 +1,6 @@
 /**
  * Fixture registry - lives with the fixtures
- * 
+ *
  * Add new fixtures here as simple path strings.
  * The proxy in src/fixtures.ts will auto-generate loaders.
  */

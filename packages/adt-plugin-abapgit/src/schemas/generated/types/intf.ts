@@ -5,39 +5,41 @@
  * Mode: Flattened
  */
 
-export type IntfSchema = {
-    abapGit: {
+export type IntfSchema =
+  | {
+      abapGit: {
         abap: {
-            values: {
-                VSEOINTERF?: {
-                    CLSNAME: string;
-                    LANGU?: string;
-                    DESCRIPT?: string;
-                    EXPOSURE?: string;
-                    STATE?: string;
-                    UNICODE?: string;
-                    ABAP_LANGUAGE_VERSION?: string;
-                };
+          values: {
+            VSEOINTERF?: {
+              CLSNAME: string;
+              LANGU?: string;
+              DESCRIPT?: string;
+              EXPOSURE?: string;
+              STATE?: string;
+              UNICODE?: string;
+              ABAP_LANGUAGE_VERSION?: string;
             };
-            version?: string;
+          };
+          version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-    };
-} | {
-    abap: {
+      };
+    }
+  | {
+      abap: {
         values: {
-            VSEOINTERF?: {
-                CLSNAME: string;
-                LANGU?: string;
-                DESCRIPT?: string;
-                EXPOSURE?: string;
-                STATE?: string;
-                UNICODE?: string;
-                ABAP_LANGUAGE_VERSION?: string;
-            };
+          VSEOINTERF?: {
+            CLSNAME: string;
+            LANGU?: string;
+            DESCRIPT?: string;
+            EXPOSURE?: string;
+            STATE?: string;
+            UNICODE?: string;
+            ABAP_LANGUAGE_VERSION?: string;
+          };
         };
         version?: string;
+      };
     };
-};

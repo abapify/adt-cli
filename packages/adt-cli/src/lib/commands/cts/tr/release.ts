@@ -30,7 +30,9 @@ export const ctsReleaseCommand = new Command('release')
     const verboseFlag = globalOpts.verbose ?? ctx.verbose ?? false;
     const compact = !verboseFlag;
     const logger =
-      (this as any).logger ?? ctx.logger ?? createCliLogger({ verbose: verboseFlag });
+      (this as any).logger ??
+      ctx.logger ??
+      createCliLogger({ verbose: verboseFlag });
     const progress = createProgressReporter({ compact, logger });
 
     try {
@@ -39,7 +41,7 @@ export const ctsReleaseCommand = new Command('release')
       // Step 1: Get transport via ADK
       progress.step(`🔍 Getting transport ${transport}...`);
       // ADK expects (number, ctx?) - ctx is AdkContext with client property
-      
+
       let tr: AdkTransportRequest;
       try {
         tr = await AdkTransportRequest.get(transport, { client });
@@ -54,7 +56,9 @@ export const ctsReleaseCommand = new Command('release')
       if (tr.status === 'R') {
         console.log(`ℹ️  Transport ${transport} is already released`);
         if (options.json) {
-          console.log(JSON.stringify({ transport, status: 'already_released' }, null, 2));
+          console.log(
+            JSON.stringify({ transport, status: 'already_released' }, null, 2),
+          );
         }
         process.exit(0);
       }
@@ -64,7 +68,9 @@ export const ctsReleaseCommand = new Command('release')
         console.log(`\n📋 Transport: ${tr.number}`);
         console.log(`   Description: ${tr.description || '-'}`);
         console.log(`   Owner: ${tr.owner || '-'}`);
-        console.log(`   Target: ${tr.targetDescription || tr.target || 'LOCAL'}`);
+        console.log(
+          `   Target: ${tr.targetDescription || tr.target || 'LOCAL'}`,
+        );
         console.log(`   Status: ${tr.statusText}`);
         console.log(`   Tasks: ${tr.tasks.length}`);
         console.log(`   Objects: ${tr.objects.length}`);
@@ -74,7 +80,9 @@ export const ctsReleaseCommand = new Command('release')
       if (!options.skipCheck) {
         // For now, just warn that checks are not implemented
         if (!options.json) {
-          console.log('\n💡 Pre-release checks not yet implemented (use --skip-check to suppress)');
+          console.log(
+            '\n💡 Pre-release checks not yet implemented (use --skip-check to suppress)',
+          );
         }
       }
 
@@ -93,7 +101,7 @@ export const ctsReleaseCommand = new Command('release')
 
       // Step 4: Release the transport using ADK
       progress.step(`🚀 Releasing transport ${transport}...`);
-      
+
       let result;
       if (options.releaseAll) {
         // Release all tasks first, then the transport
@@ -111,14 +119,22 @@ export const ctsReleaseCommand = new Command('release')
       }
 
       if (options.json) {
-        console.log(JSON.stringify({
-          transport,
-          status: 'released',
-          result,
-        }, null, 2));
+        console.log(
+          JSON.stringify(
+            {
+              transport,
+              status: 'released',
+              result,
+            },
+            null,
+            2,
+          ),
+        );
       } else {
         console.log(`\n✅ Transport ${transport} released successfully!`);
-        console.log(`   Target: ${tr.targetDescription || tr.target || 'LOCAL'}`);
+        console.log(
+          `   Target: ${tr.targetDescription || tr.target || 'LOCAL'}`,
+        );
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

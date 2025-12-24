@@ -13,8 +13,8 @@ const BUNDLED_PLUGINS: Record<string, any> = {
  * Format shortcuts - map short names to actual package names
  */
 const FORMAT_SHORTCUTS: Record<string, string> = {
-  'oat': '@abapify/oat',
-  'abapgit': '@abapify/adt-plugin-abapgit',
+  oat: '@abapify/oat',
+  abapgit: '@abapify/adt-plugin-abapgit',
 };
 
 /**
@@ -72,7 +72,8 @@ export async function loadFormatPlugin(formatSpec: string) {
     }
 
     // Use bundled plugin if available, otherwise try dynamic import
-    const pluginModule = BUNDLED_PLUGINS[packageName] ?? await import(packageName);
+    const pluginModule =
+      BUNDLED_PLUGINS[packageName] ?? (await import(packageName));
     const PluginClass =
       pluginModule.default || pluginModule[Object.keys(pluginModule)[0]];
 
@@ -99,9 +100,12 @@ export async function loadFormatPlugin(formatSpec: string) {
   } catch (error: unknown) {
     const err = error as Error;
     // Check both error code (CommonJS) and message (ES modules)
-    if ((err as any).code === 'MODULE_NOT_FOUND' || err.message?.includes(`Cannot find module '${packageName}'`)) {
+    if (
+      (err as any).code === 'MODULE_NOT_FOUND' ||
+      err.message?.includes(`Cannot find module '${packageName}'`)
+    ) {
       throw new Error(
-        `Plugin package '${packageName}' not found. Install it with: bun add ${packageName}`
+        `Plugin package '${packageName}' not found. Install it with: bun add ${packageName}`,
       );
     }
     throw error;

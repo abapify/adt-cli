@@ -1,15 +1,15 @@
 /**
  * abapGit Handler System
- * 
+ *
  * Use `createHandler` factory to create handlers.
  * Handlers auto-register when created.
  */
 
 // Export factory and types
 export { createHandler } from './base';
-export type { 
-  SerializedFile, 
-  ObjectHandler, 
+export type {
+  SerializedFile,
+  ObjectHandler,
   AbapObjectType,
   HandlerDefinition,
   HandlerContext,

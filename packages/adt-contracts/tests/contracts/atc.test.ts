@@ -1,8 +1,8 @@
 /**
  * ATC (ABAP Test Cockpit) Contract Tests
- * 
+ *
  * Tests GENERATED contracts from src/generated/adt/sap/bc/adt/atc/
- * 
+ *
  * Two types of tests:
  * 1. Contract Definition Tests - validate method, path, headers, body, responses
  * 2. Client Call Tests - test FULLY TYPED client calls with mock adapter
@@ -22,7 +22,7 @@ import { resultsContract } from '../../src/generated/adt/sap/bc/adt/atc/results'
 
 class AtcWorklistsScenario extends ContractScenario {
   readonly name = 'ATC Worklists (Generated)';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get worklist by ID',
@@ -38,7 +38,11 @@ class AtcWorklistsScenario extends ContractScenario {
     },
     {
       name: 'get worklist with query params',
-      contract: () => worklistsContract.get('WL123', { timestamp: '2024-01-01', includeExemptedFindings: 'true' }),
+      contract: () =>
+        worklistsContract.get('WL123', {
+          timestamp: '2024-01-01',
+          includeExemptedFindings: 'true',
+        }),
       method: 'GET',
       path: '/sap/bc/adt/atc/worklists/WL123',
       headers: { Accept: '*/*' },
@@ -58,7 +62,7 @@ class AtcWorklistsScenario extends ContractScenario {
 
 class AtcResultsScenario extends ContractScenario {
   readonly name = 'ATC Results (Generated)';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get active results',
@@ -88,7 +92,10 @@ class AtcResultsScenario extends ContractScenario {
     },
     {
       name: 'get result with exempted findings',
-      contract: () => resultsContract.displayid('RESULT001', { includeExemptedFindings: 'true' }),
+      contract: () =>
+        resultsContract.displayid('RESULT001', {
+          includeExemptedFindings: 'true',
+        }),
       method: 'GET',
       path: '/sap/bc/adt/atc/results/RESULT001',
       headers: { Accept: 'application/xml' },

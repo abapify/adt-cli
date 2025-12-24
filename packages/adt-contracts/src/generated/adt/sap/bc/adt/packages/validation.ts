@@ -1,9 +1,9 @@
 /**
  * Package Name Validation
- * 
+ *
  * Endpoint: /sap/bc/adt/packages/validation
  * Category: devck/validation
- * 
+ *
  * @generated - DO NOT EDIT MANUALLY
  */
 

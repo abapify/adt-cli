@@ -6,12 +6,12 @@
  */
 
 export type AtcRunSchema = {
-    run: {
-        objectSets: {
-            objectSet: {
-                kind?: string;
-            }[];
-        };
-        maximumVerdicts?: number;
+  run: {
+    objectSets: {
+      objectSet: {
+        kind?: string;
+      }[];
     };
+    maximumVerdicts?: number;
+  };
 };

@@ -1,6 +1,6 @@
 /**
  * Unit tests for cross-schema XML parse/build functionality
- * 
+ *
  * These tests verify that parsing and building works correctly when:
  * 1. Types are inherited from imported schemas ($imports)
  * 2. Elements reference types from other schemas
@@ -20,9 +20,7 @@ describe('Cross-schema XML parsing', () => {
         atom: 'http://www.w3.org/2005/Atom',
       },
       targetNamespace: 'http://www.w3.org/2005/Atom',
-      element: [
-        { name: 'link', type: 'atom:LinkType' },
-      ],
+      element: [{ name: 'link', type: 'atom:LinkType' }],
       complexType: [
         {
           name: 'LinkType',
@@ -53,9 +51,7 @@ describe('Cross-schema XML parsing', () => {
               { ref: 'atom:link', minOccurs: '0', maxOccurs: 'unbounded' },
             ],
           },
-          attribute: [
-            { name: 'id', type: 'xs:string' },
-          ],
+          attribute: [{ name: 'id', type: 'xs:string' }],
         },
       ],
     } as const satisfies SchemaLike;
@@ -132,9 +128,7 @@ describe('Cross-schema XML parsing', () => {
           complexContent: {
             extension: {
               base: 'base:BaseType',
-              attribute: [
-                { name: 'status', type: 'xs:string' },
-              ],
+              attribute: [{ name: 'status', type: 'xs:string' }],
             },
           },
         },
@@ -209,13 +203,9 @@ describe('Cross-schema XML parsing', () => {
         {
           name: 'MainType',
           sequence: {
-            element: [
-              { name: 'packageRef', type: 'ref:PackageRefType' },
-            ],
+            element: [{ name: 'packageRef', type: 'ref:PackageRefType' }],
           },
-          attribute: [
-            { name: 'name', type: 'xs:string' },
-          ],
+          attribute: [{ name: 'name', type: 'xs:string' }],
         },
       ],
     } as const satisfies SchemaLike;
@@ -244,19 +234,21 @@ describe('Cross-schema XML parsing', () => {
   describe('Element ref inherited from base type', () => {
     // This tests the case where a ref element is defined in a base type
     // and the derived type inherits it through multiple levels
-    
+
     // atom schema defines the link element
     const atomSchema = {
       $xmlns: { atom: 'http://www.w3.org/2005/Atom' },
       targetNamespace: 'http://www.w3.org/2005/Atom',
       element: [{ name: 'link', type: 'atom:LinkType' }],
-      complexType: [{
-        name: 'LinkType',
-        attribute: [
-          { name: 'href', type: 'xs:string' },
-          { name: 'rel', type: 'xs:string' },
-        ],
-      }],
+      complexType: [
+        {
+          name: 'LinkType',
+          attribute: [
+            { name: 'href', type: 'xs:string' },
+            { name: 'rel', type: 'xs:string' },
+          ],
+        },
+      ],
     } as const satisfies SchemaLike;
 
     // adtcore imports atom and defines AdtObject with ref to atom:link
@@ -267,17 +259,17 @@ describe('Cross-schema XML parsing', () => {
       },
       $imports: [atomSchema],
       targetNamespace: 'http://www.sap.com/adt/core',
-      complexType: [{
-        name: 'AdtObject',
-        sequence: {
-          element: [
-            { ref: 'atom:link', minOccurs: '0', maxOccurs: 'unbounded' },
-          ],
+      complexType: [
+        {
+          name: 'AdtObject',
+          sequence: {
+            element: [
+              { ref: 'atom:link', minOccurs: '0', maxOccurs: 'unbounded' },
+            ],
+          },
+          attribute: [{ name: 'name', type: 'xs:string' }],
         },
-        attribute: [
-          { name: 'name', type: 'xs:string' },
-        ],
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     // derived schema extends AdtObject
@@ -289,17 +281,17 @@ describe('Cross-schema XML parsing', () => {
       $imports: [adtcoreSchema],
       targetNamespace: 'http://example.com/derived',
       element: [{ name: 'DerivedObject', type: 'derived:DerivedType' }],
-      complexType: [{
-        name: 'DerivedType',
-        complexContent: {
-          extension: {
-            base: 'adtcore:AdtObject',
-            attribute: [
-              { name: 'extra', type: 'xs:string' },
-            ],
+      complexType: [
+        {
+          name: 'DerivedType',
+          complexContent: {
+            extension: {
+              base: 'adtcore:AdtObject',
+              attribute: [{ name: 'extra', type: 'xs:string' }],
+            },
           },
         },
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     it('should parse ref elements inherited from base type in $imports', () => {
@@ -315,7 +307,10 @@ describe('Cross-schema XML parsing', () => {
       assert.strictEqual(result.DerivedObject.name, 'test');
       assert.strictEqual(result.DerivedObject.extra, 'value');
       // This is the key test - link should be parsed from inherited base type
-      assert.ok(Array.isArray(result.DerivedObject.link), 'link should be an array');
+      assert.ok(
+        Array.isArray(result.DerivedObject.link),
+        'link should be an array',
+      );
       assert.strictEqual(result.DerivedObject.link.length, 2);
       assert.strictEqual(result.DerivedObject.link[0].href, '/path/1');
     });
@@ -327,18 +322,20 @@ describe('Cross-schema XML parsing', () => {
     // - AdtMainObject extends AdtObject (adds packageRef)
     // - Element declaration uses AdtMainObject type
     // - When parsing, the ref should be resolved from the base type
-    
+
     const atomSchema = {
       $xmlns: { atom: 'http://www.w3.org/2005/Atom' },
       targetNamespace: 'http://www.w3.org/2005/Atom',
       element: [{ name: 'link', type: 'atom:LinkType' }],
-      complexType: [{
-        name: 'LinkType',
-        attribute: [
-          { name: 'href', type: 'xs:string' },
-          { name: 'rel', type: 'xs:string' },
-        ],
-      }],
+      complexType: [
+        {
+          name: 'LinkType',
+          attribute: [
+            { name: 'href', type: 'xs:string' },
+            { name: 'rel', type: 'xs:string' },
+          ],
+        },
+      ],
     } as const satisfies SchemaLike;
 
     const adtcoreSchema = {
@@ -365,7 +362,9 @@ describe('Cross-schema XML parsing', () => {
             extension: {
               base: 'adtcore:AdtObject',
               sequence: {
-                element: [{ name: 'packageRef', type: 'xs:string', minOccurs: '0' }],
+                element: [
+                  { name: 'packageRef', type: 'xs:string', minOccurs: '0' },
+                ],
               },
             },
           },
@@ -384,7 +383,10 @@ describe('Cross-schema XML parsing', () => {
       // parse() returns wrapped format: { ElementName: content }
       assert.strictEqual(result.mainObject.name, 'TEST');
       // Key assertion: link should be parsed from base type AdtObject
-      assert.ok(Array.isArray(result.mainObject.link), 'link should be an array (from base type AdtObject)');
+      assert.ok(
+        Array.isArray(result.mainObject.link),
+        'link should be an array (from base type AdtObject)',
+      );
       assert.strictEqual(result.mainObject.link.length, 1);
       assert.strictEqual(result.mainObject.link[0].href, '/test');
     });
@@ -394,18 +396,20 @@ describe('Cross-schema XML parsing', () => {
     // This reproduces the exact SAP ADT schema structure:
     // AbapInterface → AbapOoObject → AbapSourceMainObject → AdtMainObject → AdtObject
     // where atom:link ref is in AdtObject, but interfaces doesn't directly import atom
-    
+
     const atomSchema = {
       $xmlns: { atom: 'http://www.w3.org/2005/Atom' },
       targetNamespace: 'http://www.w3.org/2005/Atom',
       element: [{ name: 'link', type: 'atom:LinkType' }],
-      complexType: [{
-        name: 'LinkType',
-        attribute: [
-          { name: 'href', type: 'xs:string' },
-          { name: 'rel', type: 'xs:string' },
-        ],
-      }],
+      complexType: [
+        {
+          name: 'LinkType',
+          attribute: [
+            { name: 'href', type: 'xs:string' },
+            { name: 'rel', type: 'xs:string' },
+          ],
+        },
+      ],
     } as const satisfies SchemaLike;
 
     // adtcore imports atom, defines AdtObject with ref
@@ -432,7 +436,9 @@ describe('Cross-schema XML parsing', () => {
             extension: {
               base: 'adtcore:AdtObject',
               sequence: {
-                element: [{ name: 'packageRef', type: 'xs:string', minOccurs: '0' }],
+                element: [
+                  { name: 'packageRef', type: 'xs:string', minOccurs: '0' },
+                ],
               },
             },
           },
@@ -449,15 +455,17 @@ describe('Cross-schema XML parsing', () => {
       },
       $imports: [adtcoreSchema, atomSchema],
       targetNamespace: 'http://www.sap.com/adt/abapsource',
-      complexType: [{
-        name: 'AbapSourceMainObject',
-        complexContent: {
-          extension: {
-            base: 'adtcore:AdtMainObject',
-            attribute: [{ name: 'sourceUri', type: 'xs:string' }],
+      complexType: [
+        {
+          name: 'AbapSourceMainObject',
+          complexContent: {
+            extension: {
+              base: 'adtcore:AdtMainObject',
+              attribute: [{ name: 'sourceUri', type: 'xs:string' }],
+            },
           },
         },
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     // abapoo imports adtcore and abapsource (NOT atom directly)
@@ -469,15 +477,17 @@ describe('Cross-schema XML parsing', () => {
       },
       $imports: [adtcoreSchema, abapsourceSchema],
       targetNamespace: 'http://www.sap.com/adt/oo',
-      complexType: [{
-        name: 'AbapOoObject',
-        complexContent: {
-          extension: {
-            base: 'abapsource:AbapSourceMainObject',
-            attribute: [{ name: 'modeled', type: 'xs:boolean' }],
+      complexType: [
+        {
+          name: 'AbapOoObject',
+          complexContent: {
+            extension: {
+              base: 'abapsource:AbapSourceMainObject',
+              attribute: [{ name: 'modeled', type: 'xs:boolean' }],
+            },
           },
         },
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     // interfaces imports abapsource and abapoo (NOT adtcore, NOT atom)
@@ -490,14 +500,16 @@ describe('Cross-schema XML parsing', () => {
       $imports: [abapsourceSchema, abapooSchema],
       targetNamespace: 'http://www.sap.com/adt/oo/interfaces',
       element: [{ name: 'abapInterface', type: 'intf:AbapInterface' }],
-      complexType: [{
-        name: 'AbapInterface',
-        complexContent: {
-          extension: {
-            base: 'abapoo:AbapOoObject',
+      complexType: [
+        {
+          name: 'AbapInterface',
+          complexContent: {
+            extension: {
+              base: 'abapoo:AbapOoObject',
+            },
           },
         },
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     it('should parse ref elements through deep inheritance chain', () => {
@@ -512,9 +524,15 @@ describe('Cross-schema XML parsing', () => {
       // parse() returns wrapped format: { ElementName: content }
       assert.strictEqual(result.abapInterface.name, 'ZIF_TEST');
       // Key assertion: link should be parsed even though interfaces doesn't directly import atom
-      assert.ok(Array.isArray(result.abapInterface.link), 'link should be an array (inherited from AdtObject via deep chain)');
+      assert.ok(
+        Array.isArray(result.abapInterface.link),
+        'link should be an array (inherited from AdtObject via deep chain)',
+      );
       assert.strictEqual(result.abapInterface.link.length, 2);
-      assert.strictEqual(result.abapInterface.link[0].href, '/sap/bc/adt/oo/interfaces/zif_test');
+      assert.strictEqual(
+        result.abapInterface.link[0].href,
+        '/sap/bc/adt/oo/interfaces/zif_test',
+      );
       assert.strictEqual(result.abapInterface.link[0].rel, 'self');
     });
   });
@@ -522,18 +540,20 @@ describe('Cross-schema XML parsing', () => {
   describe('Deep inheritance with qualified elements (exact SAP ADT match)', () => {
     // This test matches the EXACT structure of the real SAP ADT schemas
     // including elementFormDefault: "qualified" and attributeFormDefault: "qualified"
-    
+
     const atomSchema = {
       $xmlns: { atom: 'http://www.w3.org/2005/Atom' },
       targetNamespace: 'http://www.w3.org/2005/Atom',
       element: [{ name: 'link', type: 'atom:LinkType' }],
-      complexType: [{
-        name: 'LinkType',
-        attribute: [
-          { name: 'href', type: 'xs:string' },
-          { name: 'rel', type: 'xs:string' },
-        ],
-      }],
+      complexType: [
+        {
+          name: 'LinkType',
+          attribute: [
+            { name: 'href', type: 'xs:string' },
+            { name: 'rel', type: 'xs:string' },
+          ],
+        },
+      ],
     } as const satisfies SchemaLike;
 
     const adtcoreSchema = {
@@ -561,7 +581,9 @@ describe('Cross-schema XML parsing', () => {
             extension: {
               base: 'adtcore:AdtObject',
               sequence: {
-                element: [{ name: 'packageRef', type: 'xs:string', minOccurs: '0' }],
+                element: [
+                  { name: 'packageRef', type: 'xs:string', minOccurs: '0' },
+                ],
               },
             },
           },
@@ -579,14 +601,16 @@ describe('Cross-schema XML parsing', () => {
       targetNamespace: 'http://www.sap.com/adt/abapsource',
       attributeFormDefault: 'qualified',
       elementFormDefault: 'qualified',
-      complexType: [{
-        name: 'AbapSourceMainObject',
-        complexContent: {
-          extension: {
-            base: 'adtcore:AdtMainObject',
+      complexType: [
+        {
+          name: 'AbapSourceMainObject',
+          complexContent: {
+            extension: {
+              base: 'adtcore:AdtMainObject',
+            },
           },
         },
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     const abapooSchema = {
@@ -599,17 +623,26 @@ describe('Cross-schema XML parsing', () => {
       targetNamespace: 'http://www.sap.com/adt/oo',
       attributeFormDefault: 'qualified',
       elementFormDefault: 'qualified',
-      complexType: [{
-        name: 'AbapOoObject',
-        complexContent: {
-          extension: {
-            base: 'abapsource:AbapSourceMainObject',
-            sequence: {
-              element: [{ name: 'interfaceRef', type: 'xs:string', minOccurs: '0', maxOccurs: 'unbounded' }],
+      complexType: [
+        {
+          name: 'AbapOoObject',
+          complexContent: {
+            extension: {
+              base: 'abapsource:AbapSourceMainObject',
+              sequence: {
+                element: [
+                  {
+                    name: 'interfaceRef',
+                    type: 'xs:string',
+                    minOccurs: '0',
+                    maxOccurs: 'unbounded',
+                  },
+                ],
+              },
             },
           },
         },
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     // interfaces schema - matches real SAP structure exactly
@@ -624,14 +657,16 @@ describe('Cross-schema XML parsing', () => {
       attributeFormDefault: 'qualified',
       elementFormDefault: 'qualified',
       element: [{ name: 'abapInterface', type: 'intf:AbapInterface' }],
-      complexType: [{
-        name: 'AbapInterface',
-        complexContent: {
-          extension: {
-            base: 'abapoo:AbapOoObject',
+      complexType: [
+        {
+          name: 'AbapInterface',
+          complexContent: {
+            extension: {
+              base: 'abapoo:AbapOoObject',
+            },
           },
         },
-      }],
+      ],
     } as const satisfies SchemaLike;
 
     it('should parse ref elements with qualified elements and attributes', () => {
@@ -643,13 +678,16 @@ describe('Cross-schema XML parsing', () => {
                     adtcore:name="ZIF_TEST">
   <atom:link href="/test" rel="self"/>
 </intf:abapInterface>`;
-      
+
       const result = parseXml(interfacesSchema, xml);
 
       // parse() returns wrapped format: { ElementName: content }
       assert.strictEqual(result.abapInterface.name, 'ZIF_TEST');
       // Key assertion: link should be parsed from base type AdtObject
-      assert.ok(Array.isArray(result.abapInterface.link), 'link should be an array (from base type AdtObject)');
+      assert.ok(
+        Array.isArray(result.abapInterface.link),
+        'link should be an array (from base type AdtObject)',
+      );
       assert.strictEqual(result.abapInterface.link.length, 1);
       assert.strictEqual(result.abapInterface.link[0].href, '/test');
     });
@@ -775,8 +813,14 @@ describe('Cross-schema XML building', () => {
 
       // Should contain all attributes (inherited + own)
       assert.ok(xml.includes('id="123"'), 'Should have inherited id attribute');
-      assert.ok(xml.includes('name="Test"'), 'Should have inherited name attribute');
-      assert.ok(xml.includes('status="active"'), 'Should have own status attribute');
+      assert.ok(
+        xml.includes('name="Test"'),
+        'Should have inherited name attribute',
+      );
+      assert.ok(
+        xml.includes('status="active"'),
+        'Should have own status attribute',
+      );
     });
   });
 
@@ -830,9 +874,15 @@ describe('Cross-schema XML building', () => {
 
       // Should contain nested element with attributes
       assert.ok(xml.includes('packageRef'), 'Should have packageRef element');
-      assert.ok(xml.includes('uri="/path/to/pkg"'), 'Should have uri attribute');
+      assert.ok(
+        xml.includes('uri="/path/to/pkg"'),
+        'Should have uri attribute',
+      );
       assert.ok(xml.includes('type="DEVC/K"'), 'Should have type attribute');
-      assert.ok(xml.includes('name="$TMP"') || xml.includes("name='$TMP'"), 'Should have name attribute on packageRef');
+      assert.ok(
+        xml.includes('name="$TMP"') || xml.includes("name='$TMP'"),
+        'Should have name attribute on packageRef',
+      );
     });
   });
 

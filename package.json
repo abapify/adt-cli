@@ -91,7 +91,7 @@
     "knip": "^5.71.0",
     "nx": "22.1.1",
     "pino-pretty": "^10.3.1",
-    "prettier": "^2.6.2",
+    "prettier": "^3.7.4",
     "rollup": "^4.14.0",
     "swc-loader": "0.1.15",
     "ts-jest": "29.4.1",

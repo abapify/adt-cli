@@ -1,6 +1,6 @@
 /**
  * Mock HTTP Adapter for Contract Testing
- * 
+ *
  * Returns XML strings that get parsed by the contract's response schema.
  * This tests the full contract flow: input types → HTTP → XML → parsed output types.
  */
@@ -40,7 +40,9 @@ export function createMockAdapter(mockResponse: MockResponse): {
   let lastRequest: CapturedRequest | undefined;
 
   const adapter: HttpAdapter = {
-    request: async <TResponse>(options?: HttpRequestOptions): Promise<TResponse> => {
+    request: async <TResponse>(
+      options?: HttpRequestOptions,
+    ): Promise<TResponse> => {
       if (!options) {
         throw new Error('No request options provided');
       }
@@ -58,7 +60,9 @@ export function createMockAdapter(mockResponse: MockResponse): {
 
       // If body schema provided, serialize body to XML
       if (options.bodySchema && options.body) {
-        const schema = options.bodySchema as { build?: (data: unknown) => string };
+        const schema = options.bodySchema as {
+          build?: (data: unknown) => string;
+        };
         if (schema.build) {
           lastRequest.bodyXml = schema.build(options.body);
         }
@@ -66,7 +70,9 @@ export function createMockAdapter(mockResponse: MockResponse): {
 
       // Get response schema for the status code
       const status = mockResponse.status ?? 200;
-      const responseSchema = options.responses?.[status] as { parse: (xml: string) => TResponse } | undefined;
+      const responseSchema = options.responses?.[status] as
+        | { parse: (xml: string) => TResponse }
+        | undefined;
 
       if (!responseSchema) {
         throw new Error(`No response schema for status ${status}`);

@@ -76,7 +76,11 @@ function parseType(type?: string): string | undefined {
 export const ctsSearchCommand = new Command('search')
   .description('Search transport requests')
   .option('-u, --user <user>', 'Filter by owner (* for all)', '*')
-  .option('-t, --type <type>', 'Filter by type: workbench/customizing/copies or K/W/T', '*')
+  .option(
+    '-t, --type <type>',
+    'Filter by type: workbench/customizing/copies or K/W/T',
+    '*',
+  )
   .option('-m, --max <number>', 'Maximum results to display', '50')
   .option('--json', 'Output as JSON')
   .action(async (options) => {
@@ -93,9 +97,11 @@ export const ctsSearchCommand = new Command('search')
       // Build filter description for output
       const filterParts: string[] = [];
       if (params.user !== '*') filterParts.push(`user=${params.user}`);
-      if (params.trfunction !== '*') filterParts.push(`type=${params.trfunction}`);
+      if (params.trfunction !== '*')
+        filterParts.push(`type=${params.trfunction}`);
 
-      const filterDesc = filterParts.length > 0 ? ` (${filterParts.join(', ')})` : '';
+      const filterDesc =
+        filterParts.length > 0 ? ` (${filterParts.join(', ')})` : '';
       console.log(`🔍 Searching transports${filterDesc}...`);
 
       // Call the API via adt.cts.transports.find
@@ -113,30 +119,40 @@ export const ctsSearchCommand = new Command('search')
           console.log('\n📭 No transports found matching the criteria');
         } else {
           // Group by status for display
-          const modifiable = displayTransports.filter((t: CtsReqHeader) => t.TRSTATUS === 'D');
-          const released = displayTransports.filter((t: CtsReqHeader) => t.TRSTATUS === 'R');
+          const modifiable = displayTransports.filter(
+            (t: CtsReqHeader) => t.TRSTATUS === 'D',
+          );
+          const released = displayTransports.filter(
+            (t: CtsReqHeader) => t.TRSTATUS === 'R',
+          );
           const other = displayTransports.filter(
-            (t: CtsReqHeader) => t.TRSTATUS !== 'D' && t.TRSTATUS !== 'R'
+            (t: CtsReqHeader) => t.TRSTATUS !== 'D' && t.TRSTATUS !== 'R',
           );
 
           if (modifiable.length > 0) {
             console.log(`\n📂 Modifiable (${modifiable.length})`);
-            modifiable.forEach((tr: CtsReqHeader, i: number) => formatTransport(tr, i, modifiable.length));
+            modifiable.forEach((tr: CtsReqHeader, i: number) =>
+              formatTransport(tr, i, modifiable.length),
+            );
           }
 
           if (released.length > 0) {
             console.log(`\n📁 Released (${released.length})`);
-            released.forEach((tr: CtsReqHeader, i: number) => formatTransport(tr, i, released.length));
+            released.forEach((tr: CtsReqHeader, i: number) =>
+              formatTransport(tr, i, released.length),
+            );
           }
 
           if (other.length > 0) {
             console.log(`\n📋 Other (${other.length})`);
-            other.forEach((tr: CtsReqHeader, i: number) => formatTransport(tr, i, other.length));
+            other.forEach((tr: CtsReqHeader, i: number) =>
+              formatTransport(tr, i, other.length),
+            );
           }
 
           if (transports.length > maxResults) {
             console.log(
-              `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`
+              `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`,
             );
           }
         }
@@ -146,7 +162,7 @@ export const ctsSearchCommand = new Command('search')
     } catch (error) {
       console.error(
         '❌ Search failed:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

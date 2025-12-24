@@ -7,7 +7,11 @@
 
 import puppeteer from 'puppeteer';
 import type { Browser, Page, Protocol } from 'puppeteer';
-import type { BrowserAdapter, CookieData, ResponseEvent } from '@abapify/browser-auth';
+import type {
+  BrowserAdapter,
+  CookieData,
+  ResponseEvent,
+} from '@abapify/browser-auth';
 
 /**
  * Convert Puppeteer cookie to CookieData
@@ -63,25 +67,27 @@ export function createPuppeteerAdapter(): BrowserAdapter {
       }
 
       // Wire up event handlers
-      page.on('response', response => {
+      page.on('response', (response) => {
         const event: ResponseEvent = {
           url: response.url(),
           status: response.status(),
         };
-        responseHandlers.forEach(handler => handler(event));
+        responseHandlers.forEach((handler) => handler(event));
       });
 
       page.once('close', () => {
-        closeHandlers.forEach(handler => handler());
+        closeHandlers.forEach((handler) => handler());
       });
     },
 
     async goto(url: string, options?: { timeout?: number }) {
       if (!page) throw new Error('Page not created');
-      await page.goto(url, {
-        waitUntil: 'domcontentloaded',
-        timeout: options?.timeout ?? 30000,
-      }).catch(() => {});
+      await page
+        .goto(url, {
+          waitUntil: 'domcontentloaded',
+          timeout: options?.timeout ?? 30000,
+        })
+        .catch(() => {});
     },
 
     async getCookies(): Promise<CookieData[]> {
@@ -95,11 +101,16 @@ export function createPuppeteerAdapter(): BrowserAdapter {
       if (!page) throw new Error('Page not created');
       const client = await page.createCDPSession();
       const { cookies } = await client.send('Network.getAllCookies');
-      const toRemove = cookies.filter(c => 
-        c.domain.includes(domain) || domain.includes(c.domain.replace(/^\./, ''))
+      const toRemove = cookies.filter(
+        (c) =>
+          c.domain.includes(domain) ||
+          domain.includes(c.domain.replace(/^\./, '')),
       );
       for (const cookie of toRemove) {
-        await client.send('Network.deleteCookies', { name: cookie.name, domain: cookie.domain });
+        await client.send('Network.deleteCookies', {
+          name: cookie.name,
+          domain: cookie.domain,
+        });
       }
     },
 

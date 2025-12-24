@@ -1,9 +1,9 @@
 /**
  * Transport Management
- * 
+ *
  * Endpoint: /sap/bc/adt/cts/transportrequests/reference
  * Category: transportmanagementref
- * 
+ *
  * @generated - DO NOT EDIT MANUALLY
  */
 

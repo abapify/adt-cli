@@ -34,7 +34,7 @@ function applyInsecureSslFlag(): void {
     const authFile = resolve(
       process.env.HOME || process.env.USERPROFILE || '.',
       '.adt',
-      'auth.json'
+      'auth.json',
     );
 
     if (existsSync(authFile)) {
@@ -55,7 +55,7 @@ function addGlobalOptionsHelpToAll(rootProgram: Command): void {
     .filter(
       (option) =>
         !option.flags.includes('-h, --help') &&
-        !option.flags.includes('-V, --version')
+        !option.flags.includes('-V, --version'),
     )
     .map((option) => `  ${option.flags.padEnd(30)} ${option.description}`)
     .join('\n');
@@ -85,28 +85,28 @@ export async function createCLI(): Promise<Command> {
     .version('1.0.0')
     .option(
       '--sid <sid>',
-      'SAP System ID (e.g., BHF, S0D) - overrides default system'
+      'SAP System ID (e.g., BHF, S0D) - overrides default system',
     )
     .option(
       '-v, --verbose [components]',
       `Enable verbose logging. Optionally filter by components: ${AVAILABLE_COMPONENTS.join(
-        ', '
-      )} or 'all'`
+        ', ',
+      )} or 'all'`,
     )
     .option(
       '--log-level <level>',
       'Log level: trace|debug|info|warn|error',
-      'info'
+      'info',
     )
     .option(
       '--log-output <dir>',
       'Output directory for log files',
-      './tmp/logs'
+      './tmp/logs',
     )
     .option(
       '--log-response-files',
       'Save ADT responses as separate files',
-      false
+      false,
     )
     .hook('preAction', (thisCommand) => {
       const opts = thisCommand.optsWithGlobals();
@@ -148,7 +148,7 @@ export async function createCLI(): Promise<Command> {
 
   // Object inspector command
   program.addCommand(getCommand);
-  
+
   // Get subcommands for specific object types
   getCommand.addCommand(packageGetCommand);
 

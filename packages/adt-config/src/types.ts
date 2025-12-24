@@ -1,6 +1,6 @@
 /**
  * ADT Configuration Types
- * 
+ *
  * Configuration types for adt.config.ts/json files.
  * Includes auth plugin definition types.
  */
@@ -30,16 +30,16 @@ export type DestinationInput = Destination | string;
 export interface AdtConfig {
   /** Named destinations (SID -> destination config or URL string) */
   destinations?: Record<string, DestinationInput>;
-  
+
   /** CLI command plugins to load dynamically */
   commands?: string[];
-  
+
   /** Codegen framework configuration */
   codegen?: Record<string, unknown>;
-  
+
   /** Contract generation configuration */
   contracts?: ContractsConfig;
-  
+
   /** Allow arbitrary plugin-specific config sections */
   [key: string]: unknown;
 }
@@ -52,11 +52,11 @@ export interface ContractsConfig {
    * Discovery source configuration
    * - If file exists: use cached discovery data
    * - If file doesn't exist: fetch from SAP and cache to this path
-   * 
+   *
    * @example 'tmp/discovery/discovery.xml'
    */
   discovery?: string;
-  
+
   /** Content-type to schema mapping */
   contentTypeMapping?: ContentTypeMapping | string;
   /** Enabled endpoints whitelist */
@@ -101,17 +101,14 @@ export interface AuthTestResult {
 
 /**
  * Auth plugin interface
- * 
+ *
  * Plugins implement this to provide authentication methods.
  * Use `defineAuthPlugin` helper for type safety.
  */
-export interface AuthPlugin<
-  TOptions = unknown,
-  TCredentials = unknown
-> {
+export interface AuthPlugin<TOptions = unknown, TCredentials = unknown> {
   /** Plugin name (e.g., 'puppeteer', 'basic') */
   readonly name: string;
-  
+
   /** Human-readable display name */
   readonly displayName?: string;
 

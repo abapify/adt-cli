@@ -29,7 +29,6 @@ function formatDate(date: Date | string | undefined): string {
   });
 }
 
-
 // =============================================================================
 // Render Functions
 // =============================================================================
@@ -39,44 +38,57 @@ function formatDate(date: Date | string | undefined): string {
  */
 function renderInterfacePage(intf: any, _params: NavParams): Page {
   const sections: Component[] = [];
-  
+
   // Extract values with defaults for optional fields
   const name = intf?.name ?? '';
   const type = intf?.type ?? 'INTF/OI';
   const description = intf?.description ?? '-';
-  
+
   // Header section with core info
   const headerFields: Component[] = [
     Field('Name', adtLink({ name, type })),
     Field('Type', type),
     Field('Description', description),
   ];
-  
+
   // Package link
   const pkgRef = intf?.packageRef;
   if (pkgRef?.name) {
     headerFields.push(Field('Package', adtLink({ ...pkgRef, type: 'DEVC/K' })));
   }
-  
+
   sections.push(Section('▼ Interface', ...headerFields));
-  
+
   // Interface attributes section - only show non-default values
   const intfFields: Component[] = [];
   if (intf?.modeled) intfFields.push(Field('Modeled', '✓ Yes'));
   if (intfFields.length > 0) {
     sections.push(Section('▼ Interface Attributes', ...intfFields));
   }
-  
+
   // Inherited interfaces (very useful navigation!)
   const interfaces = intf?.interfaceRef ?? [];
   if (interfaces.length > 0) {
-    type InterfaceRef = { name?: string; uri?: string; type?: string; description?: string };
-    const inheritedFields = interfaces.map((ref: InterfaceRef) => 
-      Field(adtLink({ ...ref, type: ref.type || 'INTF/OI' }), ref.description ?? '')
+    type InterfaceRef = {
+      name?: string;
+      uri?: string;
+      type?: string;
+      description?: string;
+    };
+    const inheritedFields = interfaces.map((ref: InterfaceRef) =>
+      Field(
+        adtLink({ ...ref, type: ref.type || 'INTF/OI' }),
+        ref.description ?? '',
+      ),
     );
-    sections.push(Section(`▼ Inherited Interfaces (${interfaces.length})`, ...inheritedFields));
+    sections.push(
+      Section(
+        `▼ Inherited Interfaces (${interfaces.length})`,
+        ...inheritedFields,
+      ),
+    );
   }
-  
+
   // Metadata section
   const responsible = intf?.responsible ?? '-';
   const masterLanguage = intf?.masterLanguage ?? '-';
@@ -86,7 +98,7 @@ function renderInterfacePage(intf: any, _params: NavParams): Page {
   const changedBy = intf?.changedBy ?? '-';
   const createdAt = intf?.createdAt;
   const changedAt = intf?.changedAt;
-  
+
   const metaFields: Component[] = [
     Field('Responsible', responsible),
     Field('Master Language', masterLanguage),
@@ -98,16 +110,16 @@ function renderInterfacePage(intf: any, _params: NavParams): Page {
     Field('Changed At', formatDate(changedAt)),
   ];
   sections.push(Section('▼ Metadata', ...metaFields));
-  
+
   const content = Box(...sections);
-  
+
   const page: Page = {
     title: `Interface: ${name}`,
     icon: '🔶',
     render: () => content.render(),
     print: () => {},
   };
-  
+
   page.print = createPrintFn(page);
   return page;
 }
@@ -121,7 +133,7 @@ function renderInterfacePage(intf: any, _params: NavParams): Page {
  *
  * Self-registers with the router on import.
  * Type: INTF (ABAP Interface)
- * 
+ *
  * Usage:
  * ```ts
  * const page = await router.navTo(client, 'INTF', { name: 'IF_MY_INTERFACE' });
@@ -136,7 +148,9 @@ export default definePage<any>({
   // Use client's OO contract to fetch interface data
   fetch: async (client, params) => {
     if (!params.name) throw new Error('Interface name is required');
-    return await client.adt.oo.interfaces.get(params.name) as InterfaceResponse;
+    return (await client.adt.oo.interfaces.get(
+      params.name,
+    )) as InterfaceResponse;
   },
 
   render: renderInterfacePage,

@@ -26,7 +26,7 @@ describe('codegen/ts-morph', () => {
     it('handles path in filename', () => {
       assert.equal(
         deriveRootTypeName('path/to/discovery.xsd'),
-        'DiscoverySchema'
+        'DiscoverySchema',
       );
     });
 
@@ -115,7 +115,9 @@ describe('codegen/ts-morph', () => {
       assert.ok(code.includes('export type TestSchema'));
       // Root type is now wrapped with element name (matches parse() behavior)
       // Element name is 'person' (lowercase) as defined in schema
-      assert.ok(code.includes('export type TestSchema = { person: PersonType }'));
+      assert.ok(
+        code.includes('export type TestSchema = { person: PersonType }'),
+      );
     });
 
     it('handles optional elements (minOccurs=0)', () => {
@@ -327,7 +329,9 @@ describe('codegen/ts-morph', () => {
       assert.ok(code.includes('export type TestSchema'));
       // Root type is now wrapped with element name (matches parse() behavior)
       // Element name is 'person' (lowercase) as defined in schema
-      assert.ok(code.includes('export type TestSchema = { person: PersonType }'));
+      assert.ok(
+        code.includes('export type TestSchema = { person: PersonType }'),
+      );
     });
 
     it('generates flattened type with flatten: true', () => {
@@ -404,11 +408,11 @@ describe('codegen/ts-morph', () => {
       // Should have both own and inherited properties inlined
       assert.ok(
         code.includes('id: string'),
-        'Should have inherited id property'
+        'Should have inherited id property',
       );
       assert.ok(
         code.includes('extra: string'),
-        'Should have own extra property'
+        'Should have own extra property',
       );
     });
   });

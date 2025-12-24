@@ -1,13 +1,13 @@
 /**
  * ADK v2 - Base Object
- * 
+ *
  * Abstract base class for all ADK objects.
  * Supports two construction patterns:
  * 1. Full data: new AdkObject(ctx, data)
  * 2. Deferred load: new AdkObject(ctx, 'OBJECT_NAME').load()
- * 
+ *
  * Provides lazy loading, caching, and automatic lock/unlock.
- * 
+ *
  * Hierarchy (mirrors XSD):
  * - AdkObject (AdtObject) - base with name, type, links, description, version, etc.
  * - AdkMainObject (AdtMainObject) - adds packageRef, responsible, masterLanguage
@@ -82,7 +82,6 @@ export interface AdtObjectReference {
   packageName?: string;
 }
 
-
 /**
  * Base data contract for all ADK objects
  * Matches XSD AdtObject type attributes and elements
@@ -119,14 +118,14 @@ export interface AdkMainObjectData extends AdkObjectData {
 
 /**
  * Base class for all ADK objects
- * 
+ *
  * All ADK objects (AdkPackage, AdkTransportRequest, etc.) extend this.
  * Supports deferred loading - create with just a name, then call load().
- * 
+ *
  * Note: Uses loose type constraint for D to allow schema-inferred types
  * from contracts which may have different shapes. The getters safely
  * handle missing properties with defaults.
- * 
+ *
  * @typeParam K - The object kind (from AdkKind)
  * @typeParam D - The internal data type (typically schema-inferred from contract)
  */
@@ -134,13 +133,13 @@ export interface AdkMainObjectData extends AdkObjectData {
 export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   /** Object kind identifier */
   abstract readonly kind: K;
-  
-  /** 
+
+  /**
    * ADT object URI - base path for all operations.
    * Example: `/sap/bc/adt/oo/classes/zcl_my_class`
    */
   abstract get objectUri(): string;
-  
+
   /**
    * ADT collection URI - base path for creating new objects.
    * Example: `/sap/bc/adt/oo/classes`
@@ -152,14 +151,14 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     const lastSlash = uri.lastIndexOf('/');
     return lastSlash > 0 ? uri.substring(0, lastSlash) : uri;
   }
-  
+
   protected readonly ctx: AdkContext;
   protected _data?: D;
   protected _name: string;
   protected cache = new Map<string, unknown>();
   protected dirty = new Set<string>();
   protected _lockHandle?: LockHandle;
-  
+
   /**
    * Create ADK object
    * @param ctx - ADK context
@@ -184,26 +183,30 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
   /**
    * Load object data from SAP
-   * 
+   *
    * Default implementation uses crudContract.get() and unwraps with wrapperKey.
    * Objects without crudContract must override this.
-   * 
+   *
    * @returns this (for chaining)
    */
   async load(): Promise<this> {
     const contract = this.crudContract;
     const wrapperKey = this.wrapperKey;
-    
+
     if (!contract || !wrapperKey) {
-      throw new Error(`Load not implemented for ${this.kind}. Override load() or provide crudContract/wrapperKey.`);
+      throw new Error(
+        `Load not implemented for ${this.kind}. Override load() or provide crudContract/wrapperKey.`,
+      );
     }
-    
+
     const response = await contract.get(this.name);
-    
+
     if (!response || !(wrapperKey in response)) {
-      throw new Error(`${this.kind} '${this.name}' not found or returned empty response`);
+      throw new Error(
+        `${this.kind} '${this.name}' not found or returned empty response`,
+      );
     }
-    
+
     this.setData((response as Record<string, unknown>)[wrapperKey] as D);
     return this;
   }
@@ -213,7 +216,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     return !!this._data;
   }
 
-  /** 
+  /**
    * Get data - auto-loads if not already loaded
    * @returns Promise that resolves to the data
    */
@@ -225,13 +228,15 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     return this._data as D;
   }
 
-  /** 
+  /**
    * Get data synchronously - throws if not loaded
    * Use when you know data is already loaded
    */
   get dataSync(): D {
     if (!this._data) {
-      throw new Error(`${this.kind} '${this._name}' not loaded. Call load() or use data() instead.`);
+      throw new Error(
+        `${this.kind} '${this._name}' not loaded. Call load() or use data() instead.`,
+      );
     }
     return this._data;
   }
@@ -242,7 +247,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     // Cast to access name property which may exist on schema-inferred types
     this._name = (data as AdkObjectData).name;
   }
-  
+
   /** Helper to access data with AdkObjectData properties */
   private get coreData(): AdkObjectData {
     return this.dataSync as unknown as AdkObjectData;
@@ -253,175 +258,201 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   // ============================================
 
   /** ADT object name (adtcore:name) - available even before load() */
-  get name(): string { return this._name; }
-  
+  get name(): string {
+    return this._name;
+  }
+
   /** ADT object type (adtcore:type, e.g. 'RQRQ', 'DEVC/K') - requires load() */
-  get type(): string { return this.coreData.type; }
-  
+  get type(): string {
+    return this.coreData.type;
+  }
+
   /** Description text (adtcore:description) */
-  get description(): string { return this.coreData.description ?? ''; }
-  
+  get description(): string {
+    return this.coreData.description ?? '';
+  }
+
   /** Version state (adtcore:version) - active, inactive, etc. */
-  get version(): string { return this.coreData.version ?? ''; }
-  
+  get version(): string {
+    return this.coreData.version ?? '';
+  }
+
   /** Current language (adtcore:language) */
-  get language(): string { return this.coreData.language ?? ''; }
-  
+  get language(): string {
+    return this.coreData.language ?? '';
+  }
+
   /** User who last modified (adtcore:changedBy) */
-  get changedBy(): string { return this.coreData.changedBy ?? ''; }
-  
+  get changedBy(): string {
+    return this.coreData.changedBy ?? '';
+  }
+
   /** Last modification timestamp (adtcore:changedAt) */
   get changedAt(): Date {
     const val = this.coreData.changedAt;
     return val instanceof Date ? val : val ? new Date(val) : new Date(0);
   }
-  
+
   /** User who created (adtcore:createdBy) */
-  get createdBy(): string { return this.coreData.createdBy ?? ''; }
-  
+  get createdBy(): string {
+    return this.coreData.createdBy ?? '';
+  }
+
   /** Creation timestamp (adtcore:createdAt) */
   get createdAt(): Date {
     const val = this.coreData.createdAt;
     return val instanceof Date ? val : val ? new Date(val) : new Date(0);
   }
-  
+
   // ============================================
   // Links (atom:link elements)
   // ============================================
-  
+
   /** All atom:link elements */
-  get links(): AtomLink[] { return this.coreData.links ?? []; }
-  
+  get links(): AtomLink[] {
+    return this.coreData.links ?? [];
+  }
+
   /** Find link by rel attribute */
   getLink(rel: string): AtomLink | undefined {
-    return this.links.find(l => l.rel === rel);
+    return this.links.find((l) => l.rel === rel);
   }
-  
+
   /** Get link href by rel, or undefined */
   getLinkHref(rel: string): string | undefined {
     return this.getLink(rel)?.href;
   }
-  
+
   /** Container reference (adtcore:containerRef) */
   get containerRef(): AdtObjectReference | undefined {
     return this.coreData.containerRef;
   }
-  
+
   // ============================================
   // Lock State
   // ============================================
-  
+
   /** Check if object is currently locked */
-  get isLocked(): boolean { return !!this._lockHandle; }
-  
+  get isLocked(): boolean {
+    return !!this._lockHandle;
+  }
+
   /** Get current lock handle */
   get lockHandle(): LockHandle | undefined {
     return this._lockHandle;
   }
-  
-  /** 
+
+  /**
    * Lock the object for modification
-   * 
+   *
    * Uses the CRUD contract's lock() method.
-   * 
+   *
    * The lock response contains:
    * - LOCK_HANDLE: Required for subsequent PUT/unlock operations
    * - CORRNR: Transport request assigned to this object (use for PUT if no explicit transport)
    * - CORRUSER: User who owns the transport
-   * 
+   *
    * @param transport - Optional transport request to use for locking.
    *                    Required when object is already in a transport.
    */
   async lock(transport?: string): Promise<LockHandle> {
     if (this._lockHandle) return this._lockHandle;
-    
+
     const contract = this.crudContract;
     if (!contract?.lock) {
-      throw new Error(`Lock not supported for ${this.kind}. Provide crudContract with lock() method.`);
+      throw new Error(
+        `Lock not supported for ${this.kind}. Provide crudContract with lock() method.`,
+      );
     }
-    
+
     // Use contract's lock method
     const response = await contract.lock(this.name, { corrNr: transport });
-    
+
     // Parse lock response XML
     // Response format: <asx:abap>...<DATA><LOCK_HANDLE>xxx</LOCK_HANDLE><CORRNR>yyy</CORRNR>...</DATA>...</asx:abap>
     const responseText = String(response);
     this._lockHandle = this.parseLockResponse(responseText);
     return this._lockHandle;
   }
-  
-  /** 
+
+  /**
    * Unlock the object
-   * 
+   *
    * Uses the CRUD contract's unlock() method.
    */
   async unlock(): Promise<void> {
     if (!this._lockHandle) return;
-    
+
     const contract = this.crudContract;
     if (!contract?.unlock) {
-      throw new Error(`Unlock not supported for ${this.kind}. Provide crudContract with unlock() method.`);
+      throw new Error(
+        `Unlock not supported for ${this.kind}. Provide crudContract with unlock() method.`,
+      );
     }
-    
+
     // Use contract's unlock method
     await contract.unlock(this.name, { lockHandle: this._lockHandle.handle });
     this._lockHandle = undefined;
   }
-  
+
   /**
    * Parse lock response XML to extract lock handle and correlation info
    */
   protected parseLockResponse(responseText: string): LockHandle {
-    const lockHandleMatch = responseText.match(/<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/);
-    
+    const lockHandleMatch = responseText.match(
+      /<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/,
+    );
+
     if (!lockHandleMatch) {
       // Don't expose raw SAP response in error message for security
-      throw new Error('Failed to parse lock handle from SAP response. The response format may have changed.');
+      throw new Error(
+        'Failed to parse lock handle from SAP response. The response format may have changed.',
+      );
     }
-    
+
     // Extract CORRNR (transport request) - this is the transport assigned to the object
     const corrNrMatch = responseText.match(/<CORRNR>([^<]+)<\/CORRNR>/);
     const corrUserMatch = responseText.match(/<CORRUSER>([^<]+)<\/CORRUSER>/);
-    
-    return { 
+
+    return {
       handle: lockHandleMatch[1],
       correlationNumber: corrNrMatch?.[1],
       correlationUser: corrUserMatch?.[1],
     };
   }
-  
+
   /**
    * Set lock handle (for subclasses that need custom lock logic)
    */
   protected setLockHandle(handle: LockHandle | undefined): void {
     this._lockHandle = handle;
   }
-  
+
   // ============================================
   // Save Operations
   // ============================================
-  
+
   /**
    * Save the object to SAP
-   * 
+   *
    * Generic implementation that handles:
    * - Lock/unlock lifecycle
    * - Mode switching (create/update/upsert)
    * - Error handling
-   * 
+   *
    * Subclasses implement `saveViaContract()` to provide the typed contract call.
-   * 
+   *
    * Modes:
    * - 'update' (default): PUT to existing object
    * - 'create': POST to create new object
    * - 'upsert': Try PUT first, fall back to POST if 404
-   * 
+   *
    * @param options - Save options
    * @returns this (for chaining)
    */
   async save(options: SaveOptions = {}): Promise<this> {
     const { transport, mode = 'update' } = options;
-    
+
     // Lock if not already locked (skip for create mode - object doesn't exist yet)
     const wasLocked = this.isLocked;
     const needsLock = mode !== 'create';
@@ -436,19 +467,20 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
         throw e;
       }
     }
-    
+
     try {
       // Check if object has pending sources (from abapGit deserialization)
       // For existing objects with sources, save sources instead of metadata
       const hasPendingSources = this.hasPendingSources();
-      
+
       // Use transport from lock response if not explicitly provided
       // The lock response contains CORRNR which is the transport assigned to this object
-      const effectiveTransport = transport ?? this._lockHandle?.correlationNumber;
-      
+      const effectiveTransport =
+        transport ?? this._lockHandle?.correlationNumber;
+
       if (hasPendingSources && mode !== 'create') {
         // Save sources only - skip metadata PUT which SAP often rejects
-        await this.savePendingSources({ 
+        await this.savePendingSources({
           lockHandle: this._lockHandle?.handle,
           transport: effectiveTransport,
         });
@@ -461,10 +493,10 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
           lockHandle: this._lockHandle?.handle,
         });
       }
-      
+
       // Clear dirty flags
       this.dirty.clear();
-      
+
       return this;
     } catch (e: unknown) {
       // For upsert with PUT failure (404), try POST
@@ -479,56 +511,60 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       }
     }
   }
-  
+
   /**
    * Wrapper key for the data in contract requests/responses
-   * 
+   *
    * Contracts wrap data like { abapClass: ... } or { abapInterface: ... }.
    * Subclasses that support save override this.
    */
   protected get wrapperKey(): string | undefined {
     return undefined;
   }
-  
+
   /**
    * CRUD contract for this object type
-   * 
+   *
    * Subclasses that support save override this to return their contract.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected get crudContract(): any {
     return undefined;
   }
-  
+
   /**
    * Execute the typed contract call for save
-   * 
+   *
    * Generic implementation using wrapperKey and crudContract.
    * Objects that don't support save leave wrapperKey/crudContract undefined.
-   * 
+   *
    * @param mode - 'create' (POST) or 'update' (PUT)
    * @param options - Contract options (transport, lockHandle)
    */
   protected async saveViaContract(
     mode: 'create' | 'update',
-    options: { transport?: string; lockHandle?: string }
+    options: { transport?: string; lockHandle?: string },
   ): Promise<void> {
     const wrapperKey = this.wrapperKey;
     const contract = this.crudContract;
-    
+
     if (!wrapperKey || !contract) {
       throw new Error(`Save not supported for ${this.kind}.`);
     }
-    
+
     const data = { [wrapperKey]: await this.data() };
-    
+
     if (mode === 'create') {
       await contract.post({ corrNr: options.transport }, data);
     } else {
-      await contract.put(this.name, { corrNr: options.transport, lockHandle: options.lockHandle }, data);
+      await contract.put(
+        this.name,
+        { corrNr: options.transport, lockHandle: options.lockHandle },
+        data,
+      );
     }
   }
-  
+
   /**
    * Check if error is a 404 Not Found
    */
@@ -538,34 +574,37 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     }
     return false;
   }
-  
+
   /**
    * Check if object has pending sources to save
    * Subclasses with source code (classes, interfaces) override this
    */
   protected hasPendingSources(): boolean {
-    const self = this as unknown as { 
+    const self = this as unknown as {
       _pendingSources?: Record<string, string>;
       _pendingSource?: string;
     };
     return !!(self._pendingSources || self._pendingSource);
   }
-  
+
   /**
    * Save pending sources
    * Subclasses with source code (classes, interfaces) override this
    * Default implementation does nothing
    */
-  protected async savePendingSources(_options?: { lockHandle?: string; transport?: string }): Promise<void> {
+  protected async savePendingSources(_options?: {
+    lockHandle?: string;
+    transport?: string;
+  }): Promise<void> {
     // Default: no-op. Subclasses like AdkClass override this.
   }
-  
+
   /**
    * Set source content for a source-based object
-   * 
+   *
    * Generic implementation for objects with source code (classes, includes, etc.)
    * Subclasses should override if they need custom source handling.
-   * 
+   *
    * @param sourcePath - Relative path to source (e.g., '/source/main')
    * @param content - Source code content
    * @param options - Save options
@@ -573,16 +612,16 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   async setSource(
     sourcePath: string,
     content: string,
-    options: SaveOptions = {}
+    options: SaveOptions = {},
   ): Promise<void> {
     const { transport } = options;
-    
+
     // Lock if not already locked
     const wasLocked = this.isLocked;
     if (!wasLocked) {
       await this.lock();
     }
-    
+
     try {
       // Build URL
       const params = new URLSearchParams();
@@ -592,12 +631,12 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       if (this._lockHandle) {
         params.set('lockHandle', this._lockHandle.handle);
       }
-      
+
       const fullPath = `${this.objectUri}${sourcePath}`;
-      const url = params.toString() 
+      const url = params.toString()
         ? `${fullPath}?${params.toString()}`
         : fullPath;
-      
+
       // PUT source content
       await this.ctx.client.fetch(url, {
         method: 'PUT',
@@ -613,13 +652,13 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       }
     }
   }
-  
+
   /**
    * Activate this object
-   * 
+   *
    * Activates a single object. For bulk activation of multiple objects,
    * use `AdkObjectSet.activateAll()`.
-   * 
+   *
    * @returns this (for chaining)
    */
   async activate(): Promise<this> {
@@ -633,18 +672,18 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/xml',
-        'Accept': 'application/xml',
+        Accept: 'application/xml',
       },
       body: activationXml,
     });
-    
+
     return this;
   }
-  
+
   // ============================================
   // Caching Infrastructure
   // ============================================
-  
+
   /** Lazy load a segment (async) - fetches only once, then cached */
   protected async lazy<T>(key: string, loader: () => Promise<T>): Promise<T> {
     if (!this.cache.has(key)) {
@@ -652,7 +691,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     }
     return this.cache.get(key) as T;
   }
-  
+
   /** Lazy compute a segment (sync) - computes only once, then cached */
   protected cached<T>(key: string, compute: () => T): T {
     if (!this.cache.has(key)) {
@@ -660,22 +699,22 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     }
     return this.cache.get(key) as T;
   }
-  
+
   /** Set a cached value directly (for local/generated data) */
   protected set<T>(key: string, value: T): void {
     this.cache.set(key, value);
   }
-  
+
   /** Mark a segment as dirty (modified locally) */
   protected markDirty(key: string): void {
     this.dirty.add(key);
   }
-  
+
   /** Check if any segment (or specific segment) is dirty */
   isDirty(segment?: string): boolean {
     return segment ? this.dirty.has(segment) : this.dirty.size > 0;
   }
-  
+
   /** Clear cache for a segment (force reload on next access) */
   protected invalidate(key: string): void {
     this.cache.delete(key);
@@ -683,60 +722,58 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   }
 }
 
-
 /**
  * Base class for main development objects (AdtMainObject)
- * 
+ *
  * Extends AdkObject with package reference, responsible user, and master language.
  * Used for repository objects like classes, interfaces, packages, etc.
- * 
+ *
  * Note: Uses type assertions internally because schema-inferred types from
  * contracts may have different shapes than AdkMainObjectData. The getters
  * safely handle missing properties with defaults.
- * 
+ *
  * @typeParam K - The object kind (from AdkKind)
  * @typeParam D - The internal data type (typically schema-inferred from contract)
  */
 export abstract class AdkMainObject<
-  K extends AdkKind = AdkKind, 
+  K extends AdkKind = AdkKind,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  D = any
+  D = any,
 > extends AdkObject<K, D> {
-  
   // Helper to access data with main object properties
   private get mainData(): AdkMainObjectData {
     return this.dataSync as unknown as AdkMainObjectData;
   }
-  
+
   // ============================================
   // Main Object Properties (AdtMainObject additions)
   // ============================================
-  
+
   /** Package reference (adtcore:packageRef) */
   get packageRef(): AdtObjectReference | undefined {
     return this.mainData.packageRef;
   }
-  
+
   /** Package name (convenience getter) */
   get package(): string {
     return this.mainData.packageRef?.name ?? '';
   }
-  
+
   /** Master system (adtcore:masterSystem) */
   get masterSystem(): string {
     return this.mainData.masterSystem ?? '';
   }
-  
+
   /** Master language (adtcore:masterLanguage) */
   get masterLanguage(): string {
     return this.mainData.masterLanguage ?? '';
   }
-  
+
   /** Responsible user (adtcore:responsible) */
   get responsible(): string {
     return this.mainData.responsible ?? '';
   }
-  
+
   /** ABAP language version (adtcore:abapLanguageVersion) */
   get abapLanguageVersion(): string {
     return this.mainData.abapLanguageVersion ?? '';

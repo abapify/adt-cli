@@ -31,12 +31,13 @@ export const interfaceHandler = createHandler(AdkInterface, {
     type: 'INTF/OI', // ADT object type
     description: VSEOINTERF?.DESCRIPT,
   }),
-  
+
   // Git → SAP: Set source files on ADK object (symmetric with getSource)
   // Stores sources as pending for later deploy via ADT
   setSources: (intf, sources) => {
     if (sources.main) {
-      (intf as unknown as { _pendingSource: string })._pendingSource = sources.main;
+      (intf as unknown as { _pendingSource: string })._pendingSource =
+        sources.main;
     }
   },
 });

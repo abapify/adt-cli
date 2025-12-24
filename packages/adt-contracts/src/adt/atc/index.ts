@@ -1,8 +1,8 @@
 /**
  * ADT ATC (ABAP Test Cockpit) Contracts
- * 
+ *
  * Combines generated contracts with manually-defined endpoints not in discovery.
- * 
+ *
  * Structure mirrors URL tree:
  * - /sap/bc/adt/atc/customizing → atc.customizing (manual - not in discovery)
  * - /sap/bc/adt/atc/runs → atc.runs (manual - POST with body)
@@ -20,7 +20,7 @@ export { resultsContract } from '../../generated/adt/sap/bc/adt/atc/results';
 /**
  * /sap/bc/adt/atc/customizing
  * Get ATC customizing settings (check variants, exemption reasons, etc.)
- * 
+ *
  * NOTE: Not in SAP discovery - manually defined
  */
 const customizing = contract({
@@ -36,7 +36,7 @@ const customizing = contract({
 
 /**
  * /sap/bc/adt/atc/runs
- * 
+ *
  * NOTE: POST endpoint with body - not in SAP discovery
  * @source atcruns.json
  */
@@ -50,7 +50,7 @@ const runs = contract({
       query: params,
       body: atcRun,
       responses: { 200: atcworklist },
-      headers: { 
+      headers: {
         Accept: 'application/xml',
         'Content-Type': 'application/xml',
       },
@@ -59,14 +59,14 @@ const runs = contract({
 
 /**
  * /sap/bc/adt/atc/worklists - Extended
- * 
+ *
  * Adds POST (create) endpoint not in generated contract
  */
 const worklistsExtended = contract({
   /**
    * POST /sap/bc/adt/atc/worklists{?checkVariant}
    * Create a new ATC worklist
-   * 
+   *
    * NOTE: Not in SAP discovery - manually defined
    */
   create: (params?: { checkVariant?: string }) =>
@@ -83,7 +83,7 @@ import { resultsContract } from '../../generated/adt/sap/bc/adt/atc/results';
 
 /**
  * Combined ATC contract
- * 
+ *
  * Uses generated contracts where available, adds manual endpoints for:
  * - customizing (not in discovery)
  * - runs POST (not in discovery)

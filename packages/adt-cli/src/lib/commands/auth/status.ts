@@ -1,11 +1,6 @@
 import { Command } from 'commander';
-import {
-  loadAuthSession,
-  getDefaultSid,
-} from '../../utils/auth';
-import {
-  handleCommandError,
-} from '../../utils/command-helpers';
+import { loadAuthSession, getDefaultSid } from '../../utils/auth';
+import { handleCommandError } from '../../utils/command-helpers';
 
 export const statusCommand = new Command('status')
   .description('Check authentication status')
@@ -43,8 +38,9 @@ export const statusCommand = new Command('status')
 
       // Show auth method
       const authMethodDisplay =
-        session.auth.method === 'cookie' ? 'Cookie (Browser SSO)' :
-        'Basic Auth';
+        session.auth.method === 'cookie'
+          ? 'Cookie (Browser SSO)'
+          : 'Basic Auth';
       console.log(`🔐 Auth Method: ${authMethodDisplay}`);
 
       // Show plugin if available
@@ -53,9 +49,15 @@ export const statusCommand = new Command('status')
       }
 
       // Show credentials info based on method
-      if (session.auth.method === 'basic' && 'username' in session.auth.credentials) {
+      if (
+        session.auth.method === 'basic' &&
+        'username' in session.auth.credentials
+      ) {
         console.log(`👤 User: ${session.auth.credentials.username}`);
-      } else if (session.auth.method === 'cookie' && 'expiresAt' in session.auth.credentials) {
+      } else if (
+        session.auth.method === 'cookie' &&
+        'expiresAt' in session.auth.credentials
+      ) {
         // Show token expiration for cookie auth
         const expiresAt = new Date(session.auth.credentials.expiresAt);
         const now = new Date();
@@ -65,19 +67,22 @@ export const statusCommand = new Command('status')
         console.log('⏱️  Session Status:');
 
         if (isExpired) {
-          console.log('   Status: ⚠️  Expired (re-authenticate with "npx adt auth login")');
+          console.log(
+            '   Status: ⚠️  Expired (re-authenticate with "npx adt auth login")',
+          );
           console.log(`   Expired: ${formatDate(expiresAt)}`);
         } else {
           const timeLeft = expiresAt.getTime() - now.getTime();
           const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-          const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const minutesLeft = Math.floor(
+            (timeLeft % (1000 * 60 * 60)) / (1000 * 60),
+          );
 
           console.log(`   Status: ✅ Valid`);
           console.log(`   Expires: ${formatDate(expiresAt)}`);
           console.log(`   Time left: ${hoursLeft}h ${minutesLeft}m`);
         }
       }
-
     } catch (error) {
       handleCommandError(error, 'Status');
     }
@@ -91,7 +96,6 @@ function formatDate(date: Date): string {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false
+    hour12: false,
   });
 }
-

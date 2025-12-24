@@ -1,11 +1,11 @@
 /**
  * Fully-Typed Contract Client Tests
- * 
+ *
  * Demonstrates that:
  * 1. Response types are fully inferred from schema
- * 2. POST body types are fully inferred from schema  
+ * 2. POST body types are fully inferred from schema
  * 3. Mock adapter returns parsed, typed data from fixtures
- * 
+ *
  * If this file compiles, type inference is working correctly!
  */
 
@@ -45,7 +45,7 @@ describe('Typed Client - GET Response', () => {
     // ✅ TYPE CHECK: result should be typed as the parsed transport schema
     // If this compiles, the response type is correctly inferred!
     expect(result).toBeDefined();
-    
+
     // Access nested properties - these would fail compilation if types were wrong
     // The exact structure depends on the schema, but we verify it's an object
     expect(typeof result).toBe('object');
@@ -124,7 +124,7 @@ describe('Typed Client - Compile-Time Type Safety', () => {
     // - client.transportrequests(params?) - list transports
     // - client.attribute(name, params?) - get attribute valuehelp
     // - client.target(name, params?) - get target valuehelp
-    
+
     // The fact that this compiles proves:
     // 1. Contract methods are correctly typed
     // 2. Parameters are inferred from contract definition
@@ -161,7 +161,7 @@ describe('Typed Client - Schema Parsing', () => {
     // So result should be a parsed object, not raw XML
     expect(result).toBeDefined();
     expect(typeof result).toBe('object');
-    
+
     // Should NOT be a string (raw XML)
     expect(typeof result).not.toBe('string');
   });

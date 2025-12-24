@@ -42,7 +42,7 @@ const TYPE_NAMES: Record<string, string> = {
  * Interactive prompts for transport creation
  */
 async function promptForOptions(
-  existingOptions: Partial<TransportCreateInput>
+  existingOptions: Partial<TransportCreateInput>,
 ): Promise<TransportCreateInput> {
   // Description is required
   const description =
@@ -116,7 +116,11 @@ function displayResult(tr: AdkTransportRequest): void {
 export const ctsCreateCommand = new Command('create')
   .description('Create a new transport request')
   .option('-d, --description <desc>', 'Transport description')
-  .option('-t, --type <type>', 'Transport type: K (Workbench) or W (Customizing)', 'K')
+  .option(
+    '-t, --type <type>',
+    'Transport type: K (Workbench) or W (Customizing)',
+    'K',
+  )
   .option('--target <target>', 'Target system', 'LOCAL')
   .option('--project <project>', 'CTS project')
   .option('--no-interactive', 'Skip interactive prompts (requires -d)')
@@ -128,7 +132,8 @@ export const ctsCreateCommand = new Command('create')
       let createOptions: TransportCreateInput;
 
       // Determine if we should use interactive mode
-      const useInteractive = options.interactive !== false && !options.description;
+      const useInteractive =
+        options.interactive !== false && !options.description;
 
       if (useInteractive) {
         console.log('🚚 Create Transport Request\n');
@@ -156,7 +161,9 @@ export const ctsCreateCommand = new Command('create')
 
       // Show what we're creating
       if (!options.json) {
-        console.log(`\n🔄 Creating ${TYPE_NAMES[createOptions.type || 'K']}...`);
+        console.log(
+          `\n🔄 Creating ${TYPE_NAMES[createOptions.type || 'K']}...`,
+        );
         console.log(`   Description: "${createOptions.description}"`);
         console.log(`   Target: ${createOptions.target}`);
         if (createOptions.project) {
@@ -166,31 +173,43 @@ export const ctsCreateCommand = new Command('create')
 
       // Create the transport via ADK layer
       // ADK expects (options, ctx?) - ctx is AdkContext with client property
-      const tr = await AdkTransportRequest.create({
-        description: createOptions.description,
-        type: createOptions.type as 'K' | 'W',
-        target: createOptions.target,
-        project: createOptions.project,
-        owner: createOptions.owner,
-      }, { client });
+      const tr = await AdkTransportRequest.create(
+        {
+          description: createOptions.description,
+          type: createOptions.type as 'K' | 'W',
+          target: createOptions.target,
+          project: createOptions.project,
+          owner: createOptions.owner,
+        },
+        { client },
+      );
 
       if (options.json) {
-        console.log(JSON.stringify({
-          transport: tr.number,
-          description: tr.description,
-          type: tr.type,
-          target: tr.target,
-          owner: tr.owner,
-          status: tr.statusText,
-          tasks: tr.tasks.map(t => ({ number: t.number, owner: t.owner })),
-        }, null, 2));
+        console.log(
+          JSON.stringify(
+            {
+              transport: tr.number,
+              description: tr.description,
+              type: tr.type,
+              target: tr.target,
+              owner: tr.owner,
+              status: tr.statusText,
+              tasks: tr.tasks.map((t) => ({
+                number: t.number,
+                owner: t.owner,
+              })),
+            },
+            null,
+            2,
+          ),
+        );
       } else {
         displayResult(tr);
       }
     } catch (error) {
       console.error(
         '❌ Transport creation failed:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

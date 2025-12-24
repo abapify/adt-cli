@@ -1,18 +1,24 @@
 /**
  * Codegen + Inference Integration Test
- * 
+ *
  * This test demonstrates the full flow:
  * 1. Generate TypeScript literals from XSD fixtures using codegen CLI
  * 2. Write to a reviewable output folder (tests/fixtures/generated/)
  * 3. Verify type inference works with the generated schemas
- * 
+ *
  * Input fixtures:  tests/fixtures/xsd/*.xsd
  * Output schemas:  tests/fixtures/generated/*.ts
  */
 
 import { describe, test as it, before } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  existsSync,
+  readdirSync,
+} from 'node:fs';
 import { join, basename } from 'node:path';
 import { execSync } from 'node:child_process';
 import { generateSchemaFile } from '../../src/codegen';
@@ -32,7 +38,9 @@ describe('Codegen CLI Integration', () => {
 
   it('should generate schemas from all XSD fixtures', () => {
     // Get all XSD files in fixtures
-    const xsdFiles = readdirSync(FIXTURES_DIR).filter(f => f.endsWith('.xsd'));
+    const xsdFiles = readdirSync(FIXTURES_DIR).filter((f) =>
+      f.endsWith('.xsd'),
+    );
     assert.ok(xsdFiles.length > 0, 'Expected at least one XSD fixture');
 
     console.log(`\nProcessing ${xsdFiles.length} XSD fixtures:`);
@@ -70,7 +78,7 @@ describe('Codegen CLI Integration', () => {
     // Run CLI
     const result = execSync(
       `npx tsx ${CLI_PATH} ${inputPath} ${outputPath} --name=personCliSchema`,
-      { encoding: 'utf-8', cwd: join(import.meta.dirname, '../..') }
+      { encoding: 'utf-8', cwd: join(import.meta.dirname, '../..') },
     );
 
     console.log('\nCLI output:', result);
@@ -100,7 +108,10 @@ describe('Codegen CLI Integration', () => {
     console.log(`Output: ${outputPath}`);
 
     // Verify it's substantial
-    assert.ok(tsContent.length > 50000, `Expected large output, got ${tsContent.length}`);
+    assert.ok(
+      tsContent.length > 50000,
+      `Expected large output, got ${tsContent.length}`,
+    );
     assert.ok(tsContent.includes('"http://www.w3.org/2001/XMLSchema"'));
   });
 });
@@ -109,25 +120,28 @@ describe('Type Inference with Generated Schemas', () => {
   it('should infer types from person schema structure', () => {
     // This schema structure matches what codegen produces from person.xsd
     const personSchema = {
-      targetNamespace: "http://example.com/person",
-      elementFormDefault: "qualified",
-      element: [
-        { name: "Person", type: "tns:PersonType" },
-      ],
+      targetNamespace: 'http://example.com/person',
+      elementFormDefault: 'qualified',
+      element: [{ name: 'Person', type: 'tns:PersonType' }],
       complexType: [
         {
-          name: "PersonType",
+          name: 'PersonType',
           sequence: {
             element: [
-              { name: "firstName", type: "xs:string" },
-              { name: "lastName", type: "xs:string" },
-              { name: "age", type: "xs:int", minOccurs: 0 },
-              { name: "email", type: "xs:string", minOccurs: 0, maxOccurs: "unbounded" as const },
+              { name: 'firstName', type: 'xs:string' },
+              { name: 'lastName', type: 'xs:string' },
+              { name: 'age', type: 'xs:int', minOccurs: 0 },
+              {
+                name: 'email',
+                type: 'xs:string',
+                minOccurs: 0,
+                maxOccurs: 'unbounded' as const,
+              },
             ],
           },
           attribute: [
-            { name: "id", type: "xs:string", use: "required" as const },
-            { name: "active", type: "xs:boolean" },
+            { name: 'id', type: 'xs:string', use: 'required' as const },
+            { name: 'active', type: 'xs:boolean' },
           ],
         },
       ],
@@ -153,50 +167,52 @@ describe('Type Inference with Generated Schemas', () => {
   it('should infer types from order schema structure', () => {
     // This schema structure matches what codegen produces from order.xsd
     const orderSchema = {
-      targetNamespace: "http://example.com/order",
-      element: [
-        { name: "Order", type: "OrderType" },
-      ],
+      targetNamespace: 'http://example.com/order',
+      element: [{ name: 'Order', type: 'OrderType' }],
       complexType: [
         {
-          name: "OrderType",
+          name: 'OrderType',
           sequence: {
             element: [
-              { name: "orderId", type: "xs:string" },
-              { name: "status", type: "OrderStatusType" },
-              { name: "items", type: "ItemListType" },
-              { name: "notes", type: "xs:string", minOccurs: 0 },
+              { name: 'orderId', type: 'xs:string' },
+              { name: 'status', type: 'OrderStatusType' },
+              { name: 'items', type: 'ItemListType' },
+              { name: 'notes', type: 'xs:string', minOccurs: 0 },
             ],
           },
         },
         {
-          name: "ItemListType",
+          name: 'ItemListType',
           sequence: {
             element: [
-              { name: "item", type: "ItemType", maxOccurs: "unbounded" as const },
+              {
+                name: 'item',
+                type: 'ItemType',
+                maxOccurs: 'unbounded' as const,
+              },
             ],
           },
         },
         {
-          name: "ItemType",
+          name: 'ItemType',
           sequence: {
             element: [
-              { name: "sku", type: "xs:string" },
-              { name: "name", type: "xs:string" },
-              { name: "quantity", type: "xs:int" },
+              { name: 'sku', type: 'xs:string' },
+              { name: 'name', type: 'xs:string' },
+              { name: 'quantity', type: 'xs:int' },
             ],
           },
         },
       ],
       simpleType: [
         {
-          name: "OrderStatusType",
+          name: 'OrderStatusType',
           restriction: {
-            base: "xs:string",
+            base: 'xs:string',
             enumeration: [
-              { value: "pending" },
-              { value: "confirmed" },
-              { value: "shipped" },
+              { value: 'pending' },
+              { value: 'confirmed' },
+              { value: 'shipped' },
             ],
           },
         },
@@ -218,9 +234,7 @@ describe('Type Inference with Generated Schemas', () => {
       orderId: 'ORD-001',
       status: 'pending',
       items: {
-        item: [
-          { sku: 'SKU-001', name: 'Widget', quantity: 5 },
-        ],
+        item: [{ sku: 'SKU-001', name: 'Widget', quantity: 5 }],
       },
     };
 

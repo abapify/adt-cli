@@ -50,11 +50,11 @@ but this is wrong because:
 
 ### Separation of Concerns
 
-| Layer | Responsibility | Does NOT do |
-|-------|---------------|-------------|
-| **CLI/Service** | Create FileTree, iterate generator, deploy objects | Parse file formats |
-| **Plugin** | Map FileTree → ADK objects | Deploy to SAP |
-| **ADK** | Object operations (save, activate) | Know about file formats |
+| Layer           | Responsibility                                     | Does NOT do             |
+| --------------- | -------------------------------------------------- | ----------------------- |
+| **CLI/Service** | Create FileTree, iterate generator, deploy objects | Parse file formats      |
+| **Plugin**      | Map FileTree → ADK objects                         | Deploy to SAP           |
+| **ADK**         | Object operations (save, activate)                 | Know about file formats |
 
 ### FileTree Abstraction
 
@@ -64,16 +64,16 @@ Virtual file system interface - allows testing without real FS:
 interface FileTree {
   /** List files matching pattern (glob) */
   glob(pattern: string): Promise<string[]>;
-  
+
   /** Read file contents */
   read(path: string): Promise<string>;
-  
+
   /** Check if path exists */
   exists(path: string): Promise<boolean>;
-  
+
   /** List directory contents */
   readdir(path: string): Promise<string[]>;
-  
+
   /** Get file stats */
   stat(path: string): Promise<{ isFile: boolean; isDirectory: boolean }>;
 }
@@ -96,11 +96,15 @@ class MemoryFileTree implements FileTree {
 ```typescript
 interface AdtPlugin {
   // ... existing ...
-  
+
   readonly format: {
     // Existing: SAP → Files (import)
-    import(object: AdkObject, targetPath: string, context: ImportContext): Promise<ImportResult>;
-    
+    import(
+      object: AdkObject,
+      targetPath: string,
+      context: ImportContext,
+    ): Promise<ImportResult>;
+
     // NEW: Files → ADK Objects (export) - GENERATOR
     export?(fileTree: FileTree): AsyncGenerator<AdkObject>;
   };
@@ -114,32 +118,32 @@ interface AdtPlugin {
 async exportTransport(options: TransportExportOptions): Promise<ExportResult> {
   const plugin = await loadFormatPlugin(options.format);
   const fileTree = createFileTree(options.inputPath);
-  
+
   const objects: AdkObject[] = [];
-  
+
   // Plugin yields ADK objects - we just collect and deploy
   for await (const adkObject of plugin.format.export!(fileTree)) {
     // Filter by type if needed
     if (options.objectTypes && !options.objectTypes.includes(adkObject.type)) {
       continue;
     }
-    
+
     // Save inactive
     if (!options.dryRun) {
-      await adkObject.save({ 
-        inactive: true, 
-        transport: options.transportNumber 
+      await adkObject.save({
+        inactive: true,
+        transport: options.transportNumber
       });
     }
-    
+
     objects.push(adkObject);
   }
-  
+
   // Bulk activate all at once
   if (!options.dryRun && objects.length > 0) {
     await adk.activate(objects);
   }
-  
+
   return { /* results */ };
 }
 ```
@@ -152,15 +156,15 @@ async function* export(fileTree: FileTree): AsyncGenerator<AdkObject> {
   // Plugin knows OAT format: *.oat.xml files
   for await (const file of fileTree.glob('**/*.oat.xml')) {
     const content = await fileTree.read(file);
-    
+
     // Parse OAT XML → extract type, name, source, metadata
     const parsed = parseOatXml(content);
-    
+
     // Create ADK object with data
     const adkObject = adk.get(parsed.name, parsed.type);
     adkObject.setSource(parsed.source);
     adkObject.setMetadata(parsed.metadata);
-    
+
     yield adkObject;
   }
 }
@@ -174,19 +178,19 @@ async function* export(fileTree: FileTree): AsyncGenerator<AdkObject> {
   // Plugin knows abapGit format: .abap + .xml files
   // First scan to build object list
   const objects = await scanAbapGitStructure(fileTree);
-  
+
   for (const obj of objects) {
     // Read source files (.abap)
     const source = await fileTree.read(obj.sourcePath);
-    
+
     // Read metadata (.xml)
     const metadata = await fileTree.read(obj.metadataPath);
-    
+
     // Create ADK object
     const adkObject = adk.get(obj.name, obj.type);
     adkObject.setSource(source);
     adkObject.setMetadata(parseAbapGitXml(metadata));
-    
+
     yield adkObject;
   }
 }
@@ -229,6 +233,7 @@ async function* export(fileTree: FileTree): AsyncGenerator<AdkObject> {
 ```
 
 **Why separate package?**
+
 - Export can modify SAP system - should be explicit opt-in
 - Users must consciously add to config - no accidental deployments
 - Clear separation of read-only vs write operations
@@ -259,9 +264,7 @@ Add to `adt.config.ts`:
 
 ```typescript
 export default {
-  commands: [
-    '@abapify/adt-export/commands/export',
-  ],
+  commands: ['@abapify/adt-export/commands/export'],
 };
 ```
 

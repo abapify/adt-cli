@@ -1,16 +1,21 @@
 /**
  * ts-xsd Codegen Configuration for adt-plugin-abapgit
- * 
+ *
  * 3-Step Pipeline:
  * 1. rawSchema() - Generate raw schema literals with `as const`
  * 2. flattenedInterfaces() - Generate TypeScript interfaces from XSD
  * 3. indexBarrel() - Generate typed index exports
- * 
+ *
  * Usage:
  *   npx nx codegen adt-plugin-abapgit
  */
 
-import { defineConfig, rawSchema, interfaces, indexBarrel } from 'ts-xsd/generators';
+import {
+  defineConfig,
+  rawSchema,
+  interfaces,
+  indexBarrel,
+} from 'ts-xsd/generators';
 
 export default defineConfig({
   // Use extensionless imports for bundler compatibility
@@ -23,13 +28,7 @@ export default defineConfig({
       outputDir: 'src/schemas/generated/schemas',
       // Only object schemas - base schemas (asx, abapgit) are included via xs:import/xs:include
       // and their types get merged into each object schema during resolution
-      schemas: [
-        'clas',
-        'devc',
-        'doma',
-        'dtel',
-        'intf',
-      ],
+      schemas: ['clas', 'devc', 'doma', 'dtel', 'intf'],
     },
   },
   generators: [
@@ -38,30 +37,30 @@ export default defineConfig({
     rawSchema({
       defaultExport: true,
       $xmlns: true,
-      $imports: false,  // Not needed when resolve is enabled - schema is self-contained
-      resolve: true,    // Merge imports, expand extensions and substitution groups
+      $imports: false, // Not needed when resolve is enabled - schema is self-contained
+      resolve: true, // Merge imports, expand extensions and substitution groups
     }),
     // Generate flattened TypeScript types to ../types/ directory
     interfaces({
       filePattern: '../types/{name}.ts',
-      flatten: true,  // Flatten all types into single file with root type alias
+      flatten: true, // Flatten all types into single file with root type alias
       addJsDoc: true,
     }),
     // Generate index.ts barrel file for schemas
     indexBarrel({
       namedExports: true,
-      importExtension: '',  // Extensionless - tsx loader handles resolution
+      importExtension: '', // Extensionless - tsx loader handles resolution
     }),
   ],
 
   // Generate aggregate index files after all sources are processed
   afterAll(ctx) {
     // Get all schemas from context
-    const schemas = Object.values(ctx.sources).flatMap(s => s.schemas);
-    
+    const schemas = Object.values(ctx.sources).flatMap((s) => s.schemas);
+
     // Helper to capitalize first letter
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-    
+
     // Main index file
     const mainIndex = [
       '/**',
@@ -89,8 +88,9 @@ export default defineConfig({
       ' */',
       '',
       `// Object types - flattened root types renamed per schema to avoid conflicts`,
-      ...schemas.map(s => 
-        `export type { ${capitalize(s)}Schema as ${capitalize(s)}AbapGitType } from './${s}';`
+      ...schemas.map(
+        (s) =>
+          `export type { ${capitalize(s)}Schema as ${capitalize(s)}AbapGitType } from './${s}';`,
       ),
       '',
     ].join('\n');
@@ -114,22 +114,25 @@ export default defineConfig({
       `import { abapGitSchema } from '../../lib/handlers/abapgit-schema';`,
       '',
       '// Raw schemas',
-      ...schemas.map(s => `import _${s} from './schemas/${s}';`),
+      ...schemas.map((s) => `import _${s} from './schemas/${s}';`),
       '',
       '// Full AbapGit types - using flattened root types',
       '// Note: Generated types may be unions, we import the raw schema type',
-      ...schemas.map(s => 
-        `import type { ${capitalize(s)}Schema as _${capitalize(s)}Schema } from './types/${s}';`
+      ...schemas.map(
+        (s) =>
+          `import type { ${capitalize(s)}Schema as _${capitalize(s)}Schema } from './types/${s}';`,
       ),
       '',
       '// Extract the abapGit variant from union types (generated types may be unions)',
-      ...schemas.map(s => 
-        `type ${capitalize(s)}AbapGitType = Extract<_${capitalize(s)}Schema, { abapGit: unknown }>;`
+      ...schemas.map(
+        (s) =>
+          `type ${capitalize(s)}AbapGitType = Extract<_${capitalize(s)}Schema, { abapGit: unknown }>;`,
       ),
       '',
       '// AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values',
-      ...schemas.map(s => 
-        `export const ${s} = abapGitSchema<${capitalize(s)}AbapGitType, ${capitalize(s)}AbapGitType['abapGit']['abap']['values']>(_${s});`
+      ...schemas.map(
+        (s) =>
+          `export const ${s} = abapGitSchema<${capitalize(s)}AbapGitType, ${capitalize(s)}AbapGitType['abapGit']['abap']['values']>(_${s});`,
       ),
       '',
       '// Re-export types and utilities',

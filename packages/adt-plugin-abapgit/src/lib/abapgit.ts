@@ -27,7 +27,7 @@ function generateAbapGitXml(): string {
 
 /**
  * abapGit Plugin
- * 
+ *
  * Provides import/export of ADK objects to abapGit repository format.
  */
 export const abapGitPlugin: AdtPlugin = createPlugin({
@@ -49,13 +49,13 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
         // Note: object.type might be 'DEVC/K' not just 'DEVC'
         const isPackage = object.type?.startsWith('DEVC');
         const objPackage = isPackage
-          ? object.name 
-          : ((object as any).package || object.name || 'ROOT');
-        
+          ? object.name
+          : (object as any).package || object.name || 'ROOT';
+
         // Resolve full package path from SAP (root → ... → current)
         // This uses ADK to load package hierarchy via super package references
         const packagePath = await context.resolvePackagePath(objPackage);
-        
+
         // abapGit PREFIX folder logic:
         // - Root package (1 element in path): no subfolder, files go directly in src/
         // - Child packages: use name with parent prefix stripped
@@ -84,7 +84,7 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
         const files = await serializer.serializeObjectPublic(
           object,
           targetPath,
-          packageDir
+          packageDir,
         );
 
         return {
@@ -102,10 +102,10 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
 
     /**
      * Export abapGit files to SAP
-     * 
+     *
      * Reads abapGit format files from FileTree and yields AdkObject instances.
      * True generator - streams objects one at a time for memory efficiency.
-     * 
+     *
      * @param fileTree - Virtual file system abstraction
      * @param client - ADT client for creating ADK objects
      */

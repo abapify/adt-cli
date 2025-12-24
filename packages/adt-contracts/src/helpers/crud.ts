@@ -1,22 +1,22 @@
 /**
  * CRUD Contract Helper
- * 
+ *
  * Generates full CRUD contracts for ADT repository objects following the
  * standard SAP ADT URL template pattern:
- * 
+ *
  *   {basePath}/{object_name}{?corrNr,lockHandle,version,accessMode,_action}
- * 
+ *
  * @example
  * ```ts
  * import { crud } from '../helpers/crud';
  * import { classes } from '../schemas';
- * 
+ *
  * export const classesContract = crud({
  *   basePath: '/sap/bc/adt/oo/classes',
  *   schema: classes,
  *   contentType: 'application/vnd.sap.adt.oo.classes.v4+xml',
  * });
- * 
+ *
  * // Usage:
  * // classesContract.get('zcl_my_class')
  * // classesContract.post({ corrNr: 'DEVK900001' })
@@ -63,7 +63,10 @@ export interface SourcePutOptions {
  */
 export interface SourceContract {
   get: (name: string) => ReturnType<typeof http.get>;
-  put: (name: string, options?: SourcePutOptions) => ReturnType<typeof http.put>;
+  put: (
+    name: string,
+    options?: SourcePutOptions,
+  ) => ReturnType<typeof http.put>;
 }
 
 /**
@@ -117,25 +120,42 @@ export interface ObjectStructureOptions {
  */
 export interface CrudContractBase<S extends Serializable<unknown>> {
   /** GET {basePath}/{name} - Retrieve object metadata */
-  get: (name: string, options?: Pick<CrudQueryParams, 'version'>) => ReturnType<typeof http.get>;
-  
+  get: (
+    name: string,
+    options?: Pick<CrudQueryParams, 'version'>,
+  ) => ReturnType<typeof http.get>;
+
   /** POST {basePath} - Create new object */
-  post: (options?: Pick<CrudQueryParams, 'corrNr'>) => ReturnType<typeof http.post>;
-  
+  post: (
+    options?: Pick<CrudQueryParams, 'corrNr'>,
+  ) => ReturnType<typeof http.post>;
+
   /** PUT {basePath}/{name} - Update object */
-  put: (name: string, options?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>) => ReturnType<typeof http.put>;
-  
+  put: (
+    name: string,
+    options?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>,
+  ) => ReturnType<typeof http.put>;
+
   /** DELETE {basePath}/{name} - Delete object */
-  delete: (name: string, options?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>) => ReturnType<typeof http.delete>;
-  
+  delete: (
+    name: string,
+    options?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>,
+  ) => ReturnType<typeof http.delete>;
+
   /** POST {basePath}/{name}?_action=LOCK - Lock object for modification */
   lock: (name: string, options?: LockOptions) => ReturnType<typeof http.post>;
-  
+
   /** POST {basePath}/{name}?_action=UNLOCK - Unlock object */
-  unlock: (name: string, options: UnlockOptions) => ReturnType<typeof http.post>;
-  
+  unlock: (
+    name: string,
+    options: UnlockOptions,
+  ) => ReturnType<typeof http.post>;
+
   /** GET {basePath}/{name}/objectstructure - Get object structure (includes, methods, etc.) */
-  objectstructure: (name: string, options?: ObjectStructureOptions) => ReturnType<typeof http.get>;
+  objectstructure: (
+    name: string,
+    options?: ObjectStructureOptions,
+  ) => ReturnType<typeof http.get>;
 }
 
 /**
@@ -143,7 +163,10 @@ export interface CrudContractBase<S extends Serializable<unknown>> {
  */
 export interface SourceOperations {
   get: (name: string) => ReturnType<typeof http.get>;
-  put: (name: string, options?: SourcePutOptions) => ReturnType<typeof http.put>;
+  put: (
+    name: string,
+    options?: SourcePutOptions,
+  ) => ReturnType<typeof http.put>;
 }
 
 /**
@@ -160,8 +183,15 @@ export type SourcesContract<Sources extends readonly string[]> = {
  */
 export type IncludesContract<Includes extends readonly string[]> = {
   /** Generic get/put for any include type */
-  get: (name: string, includeType: Includes[number]) => ReturnType<typeof http.get>;
-  put: (name: string, includeType: Includes[number], options?: SourcePutOptions) => ReturnType<typeof http.put>;
+  get: (
+    name: string,
+    includeType: Includes[number],
+  ) => ReturnType<typeof http.get>;
+  put: (
+    name: string,
+    includeType: Includes[number],
+    options?: SourcePutOptions,
+  ) => ReturnType<typeof http.put>;
 } & {
   /** Shorthand accessors for specific includes */
   [K in Includes[number]]: SourceOperations;
@@ -173,10 +203,14 @@ export type IncludesContract<Includes extends readonly string[]> = {
 export type CrudContract<
   S extends Serializable<unknown>,
   Sources extends readonly string[] | undefined = undefined,
-  Includes extends readonly string[] | undefined = undefined
-> = CrudContractBase<S> 
-  & (Sources extends readonly string[] ? { source: SourcesContract<Sources> } : object)
-  & (Includes extends readonly string[] ? { includes: IncludesContract<Includes> } : object);
+  Includes extends readonly string[] | undefined = undefined,
+> = CrudContractBase<S> &
+  (Sources extends readonly string[]
+    ? { source: SourcesContract<Sources> }
+    : object) &
+  (Includes extends readonly string[]
+    ? { includes: IncludesContract<Includes> }
+    : object);
 
 /**
  * Create source operations for a given source type
@@ -184,7 +218,7 @@ export type CrudContract<
 function createSourceOperations(
   basePath: string,
   sourceType: string,
-  nameTransform: (n: string) => string
+  nameTransform: (n: string) => string,
 ): SourceOperations {
   return {
     get: (name: string) =>
@@ -211,7 +245,7 @@ function createSourceOperations(
 function createIncludeOperations(
   basePath: string,
   includeType: string,
-  nameTransform: (n: string) => string
+  nameTransform: (n: string) => string,
 ): SourceOperations {
   return {
     get: (name: string) =>
@@ -234,10 +268,10 @@ function createIncludeOperations(
 
 /**
  * Create a full CRUD contract for an ADT repository object
- * 
+ *
  * Follows the standard SAP ADT URL template pattern:
  *   {basePath}/{object_name}{?corrNr,lockHandle,version,accessMode,_action}
- * 
+ *
  * @example Basic CRUD
  * ```ts
  * const packagesContract = crud({
@@ -246,7 +280,7 @@ function createIncludeOperations(
  *   contentType: 'application/vnd.sap.adt.packages.v1+xml',
  * });
  * ```
- * 
+ *
  * @example With source code support
  * ```ts
  * const interfacesContract = crud({
@@ -257,7 +291,7 @@ function createIncludeOperations(
  * });
  * // interfacesContract.source.main.get('zif_my_interface')
  * ```
- * 
+ *
  * @example With includes support (classes)
  * ```ts
  * const classesContract = crud({
@@ -275,12 +309,19 @@ function createIncludeOperations(
 export function crud<
   S extends Serializable<unknown>,
   const Sources extends readonly string[] | undefined = undefined,
-  const Includes extends readonly string[] | undefined = undefined
+  const Includes extends readonly string[] | undefined = undefined,
 >(
-  options: CrudOptions<S> & { sources?: Sources; includes?: Includes }
+  options: CrudOptions<S> & { sources?: Sources; includes?: Includes },
 ): CrudContract<S, Sources, Includes> {
-  const { basePath, schema, contentType, nameTransform = (n) => n.toLowerCase(), sources, includes } = options;
-  
+  const {
+    basePath,
+    schema,
+    contentType,
+    nameTransform = (n) => n.toLowerCase(),
+    sources,
+    includes,
+  } = options;
+
   return {
     /**
      * GET {basePath}/{name}
@@ -290,7 +331,9 @@ export function crud<
       http.get(`${basePath}/${nameTransform(name)}`, {
         responses: { 200: schema },
         headers: { Accept: contentType },
-        query: queryOptions?.version ? { version: queryOptions.version } : undefined,
+        query: queryOptions?.version
+          ? { version: queryOptions.version }
+          : undefined,
       }),
 
     /**
@@ -305,14 +348,19 @@ export function crud<
           Accept: contentType,
           'Content-Type': contentType,
         },
-        query: queryOptions?.corrNr ? { corrNr: queryOptions.corrNr } : undefined,
+        query: queryOptions?.corrNr
+          ? { corrNr: queryOptions.corrNr }
+          : undefined,
       }),
 
     /**
      * PUT {basePath}/{name}
      * Update object metadata
      */
-    put: (name: string, queryOptions?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>) =>
+    put: (
+      name: string,
+      queryOptions?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>,
+    ) =>
       http.put(`${basePath}/${nameTransform(name)}`, {
         body: schema,
         responses: { 200: schema },
@@ -322,7 +370,9 @@ export function crud<
         },
         query: {
           ...(queryOptions?.corrNr ? { corrNr: queryOptions.corrNr } : {}),
-          ...(queryOptions?.lockHandle ? { lockHandle: queryOptions.lockHandle } : {}),
+          ...(queryOptions?.lockHandle
+            ? { lockHandle: queryOptions.lockHandle }
+            : {}),
         },
       }),
 
@@ -330,26 +380,31 @@ export function crud<
      * DELETE {basePath}/{name}
      * Delete object
      */
-    delete: (name: string, queryOptions?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>) =>
+    delete: (
+      name: string,
+      queryOptions?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>,
+    ) =>
       http.delete(`${basePath}/${nameTransform(name)}`, {
         responses: { 204: undefined },
         query: {
           ...(queryOptions?.corrNr ? { corrNr: queryOptions.corrNr } : {}),
-          ...(queryOptions?.lockHandle ? { lockHandle: queryOptions.lockHandle } : {}),
+          ...(queryOptions?.lockHandle
+            ? { lockHandle: queryOptions.lockHandle }
+            : {}),
         },
       }),
 
     /**
      * POST {basePath}/{name}?_action=LOCK
      * Lock object for modification
-     * 
+     *
      * Response contains lock handle in XML format:
      * <asx:abap>...<DATA><LOCK_HANDLE>xxx</LOCK_HANDLE><CORRNR>yyy</CORRNR>...</DATA>...</asx:abap>
      */
     lock: (name: string, lockOptions?: LockOptions) =>
       http.post(`${basePath}/${nameTransform(name)}`, {
         responses: { 200: undefined },
-        headers: { 
+        headers: {
           'X-sap-adt-sessiontype': 'stateful',
         },
         query: {
@@ -376,61 +431,89 @@ export function crud<
      * GET {basePath}/{name}/objectstructure
      * Get object structure (includes, methods, attributes, etc.)
      */
-    objectstructure: (name: string, structureOptions?: ObjectStructureOptions) =>
+    objectstructure: (
+      name: string,
+      structureOptions?: ObjectStructureOptions,
+    ) =>
       http.get(`${basePath}/${nameTransform(name)}/objectstructure`, {
         responses: { 200: undefined },
         query: {
-          ...(structureOptions?.version ? { version: structureOptions.version } : {}),
-          ...(structureOptions?.withShortDescriptions !== undefined 
-            ? { withShortDescriptions: String(structureOptions.withShortDescriptions) } 
+          ...(structureOptions?.version
+            ? { version: structureOptions.version }
+            : {}),
+          ...(structureOptions?.withShortDescriptions !== undefined
+            ? {
+                withShortDescriptions: String(
+                  structureOptions.withShortDescriptions,
+                ),
+              }
             : {}),
         },
       }),
-    
+
     // Conditionally add source operations
-    ...(sources ? {
-      source: Object.fromEntries(
-        sources.map(sourceType => [
-          sourceType,
-          createSourceOperations(basePath, sourceType, nameTransform)
-        ])
-      ),
-    } : {}),
-    
+    ...(sources
+      ? {
+          source: Object.fromEntries(
+            sources.map((sourceType) => [
+              sourceType,
+              createSourceOperations(basePath, sourceType, nameTransform),
+            ]),
+          ),
+        }
+      : {}),
+
     // Conditionally add includes operations
-    ...(includes ? {
-      includes: {
-        // Generic get/put for any include type
-        get: (name: string, includeType: string) =>
-          http.get(`${basePath}/${nameTransform(name)}/includes/${includeType}`, {
-            responses: { 200: undefined as unknown as string },
-            headers: { Accept: 'text/plain' },
-          }),
-        put: (name: string, includeType: string, options?: SourcePutOptions) =>
-          http.put(`${basePath}/${nameTransform(name)}/includes/${includeType}`, {
-            body: undefined as unknown as string,
-            responses: { 200: undefined as unknown as string },
-            headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
-            query: {
-              ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
-              ...(options?.corrNr ? { corrNr: options.corrNr } : {}),
-            },
-          }),
-        // Shorthand accessors for each include type
-        ...Object.fromEntries(
-          includes.map(includeType => [
-            includeType,
-            createIncludeOperations(basePath, includeType, nameTransform)
-          ])
-        ),
-      },
-    } : {}),
+    ...(includes
+      ? {
+          includes: {
+            // Generic get/put for any include type
+            get: (name: string, includeType: string) =>
+              http.get(
+                `${basePath}/${nameTransform(name)}/includes/${includeType}`,
+                {
+                  responses: { 200: undefined as unknown as string },
+                  headers: { Accept: 'text/plain' },
+                },
+              ),
+            put: (
+              name: string,
+              includeType: string,
+              options?: SourcePutOptions,
+            ) =>
+              http.put(
+                `${basePath}/${nameTransform(name)}/includes/${includeType}`,
+                {
+                  body: undefined as unknown as string,
+                  responses: { 200: undefined as unknown as string },
+                  headers: {
+                    Accept: 'text/plain',
+                    'Content-Type': 'text/plain',
+                  },
+                  query: {
+                    ...(options?.lockHandle
+                      ? { lockHandle: options.lockHandle }
+                      : {}),
+                    ...(options?.corrNr ? { corrNr: options.corrNr } : {}),
+                  },
+                },
+              ),
+            // Shorthand accessors for each include type
+            ...Object.fromEntries(
+              includes.map((includeType) => [
+                includeType,
+                createIncludeOperations(basePath, includeType, nameTransform),
+              ]),
+            ),
+          },
+        }
+      : {}),
   } as CrudContract<S, Sources, Includes>;
 }
 
 /**
  * Shorthand alias for crud()
- * 
+ *
  * @example
  * ```ts
  * export const classesContract = repo('/sap/bc/adt/oo/classes', classes, 'application/vnd.sap.adt.oo.classes.v4+xml');
@@ -440,7 +523,7 @@ export function repo<S extends Serializable<unknown>>(
   basePath: string,
   schema: S,
   contentType: string,
-  nameTransform?: (name: string) => string
+  nameTransform?: (name: string) => string,
 ): CrudContract<S> {
   return crud({ basePath, schema, contentType, nameTransform });
 }

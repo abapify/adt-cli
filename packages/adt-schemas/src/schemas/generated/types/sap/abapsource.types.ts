@@ -5,26 +5,28 @@
  * Mode: Flattened
  */
 
-export type AbapsourceSchema = {
-    syntaxConfigurations: {
+export type AbapsourceSchema =
+  | {
+      syntaxConfigurations: {
         syntaxConfiguration?: {
-            language?: {
-                version?: string;
-                description?: string;
-            };
-            objectUsage?: {
-                restricted?: boolean;
-            };
-        }[];
-    };
-} | {
-    syntaxConfiguration: {
-        language?: {
+          language?: {
             version?: string;
             description?: string;
+          };
+          objectUsage?: {
+            restricted?: boolean;
+          };
+        }[];
+      };
+    }
+  | {
+      syntaxConfiguration: {
+        language?: {
+          version?: string;
+          description?: string;
         };
         objectUsage?: {
-            restricted?: boolean;
+          restricted?: boolean;
         };
+      };
     };
-};

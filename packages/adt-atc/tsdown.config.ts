@@ -9,9 +9,5 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: [
-    '@abapify/adt-plugin',
-    '@abapify/adt-contracts',
-    'chalk',
-  ],
+  external: ['@abapify/adt-plugin', '@abapify/adt-contracts', 'chalk'],
 });

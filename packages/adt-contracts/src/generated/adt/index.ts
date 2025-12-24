@@ -1,9 +1,9 @@
 /**
  * Generated ADT Contracts Index
- * 
+ *
  * Only includes enabled endpoints from config/enabled-endpoints.json
  * See docs/adt-endpoints.md for available but not-yet-enabled endpoints.
- * 
+ *
  * @generated - DO NOT EDIT MANUALLY
  */
 
@@ -27,4 +27,3 @@ export { metadataContract } from './sap/bc/adt/cts/transportrequests/searchconfi
 // sap/bc/adt/packages
 export { settingsContract } from './sap/bc/adt/packages/settings';
 export { validationContract } from './sap/bc/adt/packages/validation';
-

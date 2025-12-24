@@ -1,17 +1,20 @@
 /**
  * OO (Object-Oriented) Contract Scenarios
- * 
+ *
  * Classes and Interfaces CRUD operations.
  */
 
-import { classes as classesSchema, interfaces as interfacesSchema } from '../../src/schemas';
+import {
+  classes as classesSchema,
+  interfaces as interfacesSchema,
+} from '../../src/schemas';
 import { ContractScenario, runScenario, type ContractOperation } from './base';
 import { ooContract } from '../../src/adt/oo';
 import { fixtures } from 'adt-fixtures';
 
 class ClassesScenario extends ContractScenario {
   readonly name = 'OO Classes';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get class metadata',
@@ -61,7 +64,7 @@ class ClassesScenario extends ContractScenario {
 
 class ClassSourceScenario extends ContractScenario {
   readonly name = 'OO Class Source';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get main source',
@@ -87,7 +90,8 @@ class ClassSourceScenario extends ContractScenario {
     },
     {
       name: 'get implementations include',
-      contract: () => ooContract.classes.includes.implementations.get('ZCL_TEST'),
+      contract: () =>
+        ooContract.classes.includes.implementations.get('ZCL_TEST'),
       method: 'GET',
       path: '/sap/bc/adt/oo/classes/zcl_test/includes/implementations',
       headers: { Accept: 'text/plain' },
@@ -101,7 +105,8 @@ class ClassSourceScenario extends ContractScenario {
     },
     {
       name: 'update include by type',
-      contract: () => ooContract.classes.includes.put('ZCL_TEST', 'definitions'),
+      contract: () =>
+        ooContract.classes.includes.put('ZCL_TEST', 'definitions'),
       method: 'PUT',
       path: '/sap/bc/adt/oo/classes/zcl_test/includes/definitions',
       headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
@@ -111,7 +116,7 @@ class ClassSourceScenario extends ContractScenario {
 
 class InterfacesScenario extends ContractScenario {
   readonly name = 'OO Interfaces';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get interface metadata',
@@ -174,7 +179,7 @@ class InterfacesScenario extends ContractScenario {
 
 class ClassRunScenario extends ContractScenario {
   readonly name = 'OO Class Run';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'execute class',
@@ -185,7 +190,8 @@ class ClassRunScenario extends ContractScenario {
     },
     {
       name: 'execute class with profiler',
-      contract: () => ooContract.classrun.post('ZCL_CONSOLE_APP', { profilerId: 'PROF001' }),
+      contract: () =>
+        ooContract.classrun.post('ZCL_CONSOLE_APP', { profilerId: 'PROF001' }),
       method: 'POST',
       path: '/sap/bc/adt/oo/classrun/zcl_console_app',
       query: { profilerId: 'PROF001' },

@@ -4,13 +4,17 @@
  * Provides typed access to SAP ADT REST APIs:
  * - client.adt.*   - Typed ADT REST contracts (speci-generated)
  * - client.fetch() - Generic HTTP utility for raw requests
- * 
+ *
  * Note: Business logic (transport management, etc.) has moved to @abapify/adk
  * Use AdkTransportRequest for transport operations.
  */
 
 import { createAdtAdapter, type AdtAdapterConfig } from './adapter';
-import { createAdtClient as createAdtContractClient, type AdtClientType, type HttpRequestOptions } from '@abapify/adt-contracts';
+import {
+  createAdtClient as createAdtContractClient,
+  type AdtClientType,
+  type HttpRequestOptions,
+} from '@abapify/adt-contracts';
 import { createTransportService, type TransportService } from './services';
 
 /**
@@ -43,7 +47,7 @@ export interface FetchOptions {
  *   method: 'GET',
  *   headers: { Accept: 'application/xml' }
  * });
- * 
+ *
  * // For business logic, use ADK:
  * // import { initializeAdk, AdkTransportRequest } from '@abapify/adk';
  * // initializeAdk(client);
@@ -75,7 +79,10 @@ export function createAdtClient(config: AdtAdapterConfig): AdtClientReturn {
   });
 
   // Create fetch function for raw HTTP access
-  const fetchFn = async (url: string, options?: FetchOptions): Promise<unknown> => {
+  const fetchFn = async (
+    url: string,
+    options?: FetchOptions,
+  ): Promise<unknown> => {
     const method = options?.method || 'GET';
     const headers = options?.headers || {};
     const body = options?.body;

@@ -46,7 +46,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { firstName: 'John', lastName: 'Doe' }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { firstName: 'John', lastName: 'Doe' },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<firstName>John</firstName>'));
       assert.ok(xml.includes('<lastName>Doe</lastName>'));
@@ -68,7 +72,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { name: 'John', age: undefined }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { name: 'John', age: undefined },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<name>John</name>'));
       assert.ok(!xml.includes('<age>'));
@@ -224,7 +232,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { active: true, enabled: false }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { active: true, enabled: false },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<active>true</active>'));
       assert.ok(xml.includes('<enabled>false</enabled>'));
@@ -247,10 +259,16 @@ describe('buildXml', () => {
       } as const satisfies SchemaLike;
 
       const date = new Date('2024-01-15T10:30:00Z');
-      const xml = buildXml(schema, { date, timestamp: date }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { date, timestamp: date },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<date>2024-01-15</date>'));
-      assert.ok(xml.includes('<timestamp>2024-01-15T10:30:00.000Z</timestamp>'));
+      assert.ok(
+        xml.includes('<timestamp>2024-01-15T10:30:00.000Z</timestamp>'),
+      );
     });
 
     it('should format numbers', () => {
@@ -280,13 +298,19 @@ describe('buildXml', () => {
           {
             name: 'ListType',
             sequence: {
-              element: [{ name: 'item', type: 'xs:string', maxOccurs: 'unbounded' }],
+              element: [
+                { name: 'item', type: 'xs:string', maxOccurs: 'unbounded' },
+              ],
             },
           },
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { item: ['a', 'b', 'c'] }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { item: ['a', 'b', 'c'] },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<item>a</item>'));
       assert.ok(xml.includes('<item>b</item>'));
@@ -300,7 +324,9 @@ describe('buildXml', () => {
           {
             name: 'OrderType',
             sequence: {
-              element: [{ name: 'item', type: 'ItemType', maxOccurs: 'unbounded' }],
+              element: [
+                { name: 'item', type: 'ItemType', maxOccurs: 'unbounded' },
+              ],
             },
           },
           {
@@ -315,12 +341,16 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, {
-        item: [
-          { sku: 'A1', qty: 2 },
-          { sku: 'B2', qty: 3 },
-        ],
-      }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        {
+          item: [
+            { sku: 'A1', qty: 2 },
+            { sku: 'B2', qty: 3 },
+          ],
+        },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<sku>A1</sku>'));
       assert.ok(xml.includes('<qty>2</qty>'));
@@ -349,7 +379,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { customer: { name: 'John' } }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { customer: { name: 'John' } },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<customer>'));
       assert.ok(xml.includes('<name>John</name>'));
@@ -396,7 +430,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { field1: 'a', field2: 'b' }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { field1: 'a', field2: 'b' },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<field1>a</field1>'));
       assert.ok(xml.includes('<field2>b</field2>'));
@@ -428,7 +466,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { name: 'John', department: 'Engineering' }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { name: 'John', department: 'Engineering' },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('<name>John</name>'));
       assert.ok(xml.includes('<department>Engineering</department>'));
@@ -454,7 +496,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { id: 'P1', empId: 'E1' }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { id: 'P1', empId: 'E1' },
+        { xmlDecl: false },
+      );
 
       assert.ok(xml.includes('id="P1"'));
       assert.ok(xml.includes('empId="E1"'));
@@ -475,7 +521,11 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { name: 'John' }, { xmlDecl: false, pretty: true });
+      const xml = buildXml(
+        schema,
+        { name: 'John' },
+        { xmlDecl: false, pretty: true },
+      );
 
       assert.ok(xml.includes('\n'));
       assert.ok(xml.includes('  ')); // indentation
@@ -578,7 +628,9 @@ describe('buildXml', () => {
           {
             name: 'AbapValuesType',
             sequence: {
-              element: [{ ref: 'Schema', minOccurs: '0', maxOccurs: 'unbounded' }],
+              element: [
+                { ref: 'Schema', minOccurs: '0', maxOccurs: 'unbounded' },
+              ],
             },
           },
         ],
@@ -588,12 +640,14 @@ describe('buildXml', () => {
         element: [
           { name: 'DD01V', type: 'Dd01vType', substitutionGroup: 'Schema' },
         ],
-        complexType: [{
-          name: 'Dd01vType',
-          sequence: {
-            element: [{ name: 'DOMNAME', type: 'xs:string' }],
+        complexType: [
+          {
+            name: 'Dd01vType',
+            sequence: {
+              element: [{ name: 'DOMNAME', type: 'xs:string' }],
+            },
           },
-        }],
+        ],
         $imports: [asxSchema],
       } as const satisfies SchemaLike;
 
@@ -610,14 +664,26 @@ describe('buildXml', () => {
         },
       };
 
-      const xml = buildXml(combinedSchema, data, { rootElement: 'abap', xmlDecl: false });
+      const xml = buildXml(combinedSchema, data, {
+        rootElement: 'abap',
+        xmlDecl: false,
+      });
 
       // Should build DD01V element (substitute), not Schema (abstract)
       assert.ok(xml.includes('<abap'), `Expected <abap> but got: ${xml}`);
       assert.ok(xml.includes('<values>'), `Expected <values> but got: ${xml}`);
-      assert.ok(xml.includes('<DD01V>'), `Expected <DD01V> (substitute) but got: ${xml}`);
-      assert.ok(xml.includes('<DOMNAME>ZTEST</DOMNAME>'), `Expected DOMNAME content but got: ${xml}`);
-      assert.ok(!xml.includes('<Schema>'), `Should NOT have abstract <Schema> element`);
+      assert.ok(
+        xml.includes('<DD01V>'),
+        `Expected <DD01V> (substitute) but got: ${xml}`,
+      );
+      assert.ok(
+        xml.includes('<DOMNAME>ZTEST</DOMNAME>'),
+        `Expected DOMNAME content but got: ${xml}`,
+      );
+      assert.ok(
+        !xml.includes('<Schema>'),
+        `Should NOT have abstract <Schema> element`,
+      );
     });
   });
 
@@ -627,25 +693,29 @@ describe('buildXml', () => {
       // The root element "abapGit" is in abapgit.xsd, not doma.xsd
       const abapgitSchema = {
         element: [{ name: 'abapGit', type: 'AbapGitType' }],
-        complexType: [{
-          name: 'AbapGitType',
-          sequence: {
-            element: [
-              { name: 'version', type: 'xs:string' },
-              { name: 'content', type: 'xs:string' },
-            ],
+        complexType: [
+          {
+            name: 'AbapGitType',
+            sequence: {
+              element: [
+                { name: 'version', type: 'xs:string' },
+                { name: 'content', type: 'xs:string' },
+              ],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
       const domaSchema = {
         element: [{ name: 'DD01V', type: 'Dd01vType' }],
-        complexType: [{
-          name: 'Dd01vType',
-          sequence: {
-            element: [{ name: 'DOMNAME', type: 'xs:string' }],
+        complexType: [
+          {
+            name: 'Dd01vType',
+            sequence: {
+              element: [{ name: 'DOMNAME', type: 'xs:string' }],
+            },
           },
-        }],
+        ],
         $imports: [abapgitSchema],
       } as const satisfies SchemaLike;
 
@@ -666,22 +736,26 @@ describe('buildXml', () => {
     it('should prefer element from main schema when data matches both', () => {
       const importedSchema = {
         element: [{ name: 'Item', type: 'ItemType' }],
-        complexType: [{
-          name: 'ItemType',
-          sequence: {
-            element: [{ name: 'name', type: 'xs:string' }],
+        complexType: [
+          {
+            name: 'ItemType',
+            sequence: {
+              element: [{ name: 'name', type: 'xs:string' }],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
       const mainSchema = {
         element: [{ name: 'Product', type: 'ProductType' }],
-        complexType: [{
-          name: 'ProductType',
-          sequence: {
-            element: [{ name: 'name', type: 'xs:string' }],
+        complexType: [
+          {
+            name: 'ProductType',
+            sequence: {
+              element: [{ name: 'name', type: 'xs:string' }],
+            },
           },
-        }],
+        ],
         $imports: [importedSchema],
       } as const satisfies SchemaLike;
 
@@ -698,12 +772,14 @@ describe('buildXml', () => {
     it('should throw when rootElement not found in schema or $imports', () => {
       const schema = {
         element: [{ name: 'Person', type: 'PersonType' }],
-        complexType: [{
-          name: 'PersonType',
-          sequence: {
-            element: [{ name: 'name', type: 'xs:string' }],
+        complexType: [
+          {
+            name: 'PersonType',
+            sequence: {
+              element: [{ name: 'name', type: 'xs:string' }],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
       assert.throws(() => {
@@ -714,12 +790,14 @@ describe('buildXml', () => {
     it('should find rootElement in $imports', () => {
       const importedSchema = {
         element: [{ name: 'Item', type: 'ItemType' }],
-        complexType: [{
-          name: 'ItemType',
-          sequence: {
-            element: [{ name: 'id', type: 'xs:string' }],
+        complexType: [
+          {
+            name: 'ItemType',
+            sequence: {
+              element: [{ name: 'id', type: 'xs:string' }],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
       const mainSchema = {
@@ -728,7 +806,11 @@ describe('buildXml', () => {
         $imports: [importedSchema],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(mainSchema, { id: '123' }, { rootElement: 'Item', xmlDecl: false });
+      const xml = buildXml(
+        mainSchema,
+        { id: '123' },
+        { rootElement: 'Item', xmlDecl: false },
+      );
       assert.ok(xml.includes('<Item'), `Expected <Item> but got: ${xml}`);
       assert.ok(xml.includes('<id>123</id>'));
     });
@@ -738,18 +820,24 @@ describe('buildXml', () => {
     it('should format XML with pretty option', () => {
       const schema = {
         element: [{ name: 'Root', type: 'RootType' }],
-        complexType: [{
-          name: 'RootType',
-          sequence: {
-            element: [
-              { name: 'child1', type: 'xs:string' },
-              { name: 'child2', type: 'xs:string' },
-            ],
+        complexType: [
+          {
+            name: 'RootType',
+            sequence: {
+              element: [
+                { name: 'child1', type: 'xs:string' },
+                { name: 'child2', type: 'xs:string' },
+              ],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { child1: 'a', child2: 'b' }, { pretty: true, xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { child1: 'a', child2: 'b' },
+        { pretty: true, xmlDecl: false },
+      );
       // Pretty printed XML should have newlines
       assert.ok(xml.includes('\n'), 'Pretty XML should contain newlines');
     });
@@ -759,16 +847,25 @@ describe('buildXml', () => {
     it('should use custom encoding in XML declaration', () => {
       const schema = {
         element: [{ name: 'Root', type: 'RootType' }],
-        complexType: [{
-          name: 'RootType',
-          sequence: {
-            element: [{ name: 'value', type: 'xs:string' }],
+        complexType: [
+          {
+            name: 'RootType',
+            sequence: {
+              element: [{ name: 'value', type: 'xs:string' }],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { value: 'test' }, { encoding: 'ISO-8859-1' });
-      assert.ok(xml.includes('encoding="ISO-8859-1"'), `Expected ISO-8859-1 encoding but got: ${xml}`);
+      const xml = buildXml(
+        schema,
+        { value: 'test' },
+        { encoding: 'ISO-8859-1' },
+      );
+      assert.ok(
+        xml.includes('encoding="ISO-8859-1"'),
+        `Expected ISO-8859-1 encoding but got: ${xml}`,
+      );
     });
   });
 
@@ -789,15 +886,23 @@ describe('buildXml', () => {
     it('should build multiple elements for array values', () => {
       const schema = {
         element: [{ name: 'Root', type: 'RootType' }],
-        complexType: [{
-          name: 'RootType',
-          sequence: {
-            element: [{ name: 'item', type: 'xs:string', maxOccurs: 'unbounded' }],
+        complexType: [
+          {
+            name: 'RootType',
+            sequence: {
+              element: [
+                { name: 'item', type: 'xs:string', maxOccurs: 'unbounded' },
+              ],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { item: ['a', 'b', 'c'] }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { item: ['a', 'b', 'c'] },
+        { xmlDecl: false },
+      );
       assert.ok(xml.includes('<item>a</item>'));
       assert.ok(xml.includes('<item>b</item>'));
       assert.ok(xml.includes('<item>c</item>'));
@@ -810,7 +915,9 @@ describe('buildXml', () => {
           {
             name: 'RootType',
             sequence: {
-              element: [{ name: 'person', type: 'PersonType', maxOccurs: 'unbounded' }],
+              element: [
+                { name: 'person', type: 'PersonType', maxOccurs: 'unbounded' },
+              ],
             },
           },
           {
@@ -822,10 +929,14 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { 
-        person: [{ name: 'Alice' }, { name: 'Bob' }] 
-      }, { xmlDecl: false });
-      
+      const xml = buildXml(
+        schema,
+        {
+          person: [{ name: 'Alice' }, { name: 'Bob' }],
+        },
+        { xmlDecl: false },
+      );
+
       assert.ok(xml.includes('<person><name>Alice</name></person>'));
       assert.ok(xml.includes('<person><name>Bob</name></person>'));
     });
@@ -835,10 +946,12 @@ describe('buildXml', () => {
     it('should skip null attribute values', () => {
       const schema = {
         element: [{ name: 'Root', type: 'RootType' }],
-        complexType: [{
-          name: 'RootType',
-          attribute: [{ name: 'id', type: 'xs:string' }],
-        }],
+        complexType: [
+          {
+            name: 'RootType',
+            attribute: [{ name: 'id', type: 'xs:string' }],
+          },
+        ],
       } as const satisfies SchemaLike;
 
       const xml = buildXml(schema, { id: null }, { xmlDecl: false });
@@ -848,20 +961,29 @@ describe('buildXml', () => {
     it('should skip undefined element values', () => {
       const schema = {
         element: [{ name: 'Root', type: 'RootType' }],
-        complexType: [{
-          name: 'RootType',
-          sequence: {
-            element: [
-              { name: 'required', type: 'xs:string' },
-              { name: 'optional', type: 'xs:string' },
-            ],
+        complexType: [
+          {
+            name: 'RootType',
+            sequence: {
+              element: [
+                { name: 'required', type: 'xs:string' },
+                { name: 'optional', type: 'xs:string' },
+              ],
+            },
           },
-        }],
+        ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { required: 'yes', optional: undefined }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { required: 'yes', optional: undefined },
+        { xmlDecl: false },
+      );
       assert.ok(xml.includes('<required>yes</required>'));
-      assert.ok(!xml.includes('<optional'), 'Should not include undefined element');
+      assert.ok(
+        !xml.includes('<optional'),
+        'Should not include undefined element',
+      );
     });
   });
 
@@ -874,9 +996,7 @@ describe('buildXml', () => {
         },
         targetNamespace: 'http://www.sap.com/adt/atc',
         elementFormDefault: 'qualified',
-        element: [
-          { name: 'run', type: 'atc:RunRequest' },
-        ],
+        element: [{ name: 'run', type: 'atc:RunRequest' }],
         complexType: [
           {
             name: 'RunRequest',
@@ -885,23 +1005,23 @@ describe('buildXml', () => {
                 { name: 'objectSets', type: 'atc:ObjectSets', minOccurs: '1' },
               ],
             },
-            attribute: [
-              { name: 'maximumVerdicts', type: 'xs:integer' },
-            ],
+            attribute: [{ name: 'maximumVerdicts', type: 'xs:integer' }],
           },
           {
             name: 'ObjectSets',
             sequence: {
               element: [
-                { name: 'objectSet', type: 'atc:ObjectSet', maxOccurs: 'unbounded' },
+                {
+                  name: 'objectSet',
+                  type: 'atc:ObjectSet',
+                  maxOccurs: 'unbounded',
+                },
               ],
             },
           },
           {
             name: 'ObjectSet',
-            attribute: [
-              { name: 'kind', type: 'xs:string' },
-            ],
+            attribute: [{ name: 'kind', type: 'xs:string' }],
           },
         ],
       } as const satisfies SchemaLike;
@@ -916,10 +1036,19 @@ describe('buildXml', () => {
       const xml = buildXml(schema, data, { xmlDecl: false });
 
       // Should contain the nested structure
-      assert.ok(xml.includes('<atc:run'), 'Should have root element with prefix');
+      assert.ok(
+        xml.includes('<atc:run'),
+        'Should have root element with prefix',
+      );
       assert.ok(xml.includes('maximumVerdicts="100"'), 'Should have attribute');
-      assert.ok(xml.includes('<atc:objectSets'), 'Should have objectSets element');
-      assert.ok(xml.includes('<atc:objectSet'), 'Should have objectSet element');
+      assert.ok(
+        xml.includes('<atc:objectSets'),
+        'Should have objectSets element',
+      );
+      assert.ok(
+        xml.includes('<atc:objectSet'),
+        'Should have objectSet element',
+      );
       assert.ok(xml.includes('kind="inclusive"'), 'Should have kind attribute');
     });
 
@@ -940,15 +1069,17 @@ describe('buildXml', () => {
             name: 'ObjectReferences',
             sequence: {
               element: [
-                { name: 'objectReference', type: 'adtcore:ObjectReference', maxOccurs: 'unbounded' },
+                {
+                  name: 'objectReference',
+                  type: 'adtcore:ObjectReference',
+                  maxOccurs: 'unbounded',
+                },
               ],
             },
           },
           {
             name: 'ObjectReference',
-            attribute: [
-              { name: 'uri', type: 'xs:string' },
-            ],
+            attribute: [{ name: 'uri', type: 'xs:string' }],
           },
         ],
       } as const satisfies SchemaLike;
@@ -963,26 +1094,32 @@ describe('buildXml', () => {
         targetNamespace: 'http://www.sap.com/adt/atc',
         attributeFormDefault: 'unqualified',
         elementFormDefault: 'qualified',
-        element: [
-          { name: 'run', type: 'atc:AtcRunRequest' },
-        ],
+        element: [{ name: 'run', type: 'atc:AtcRunRequest' }],
         complexType: [
           {
             name: 'AtcRunRequest',
             sequence: {
               element: [
-                { name: 'objectSets', type: 'atc:AtcObjectSets', minOccurs: '1', maxOccurs: '1' },
+                {
+                  name: 'objectSets',
+                  type: 'atc:AtcObjectSets',
+                  minOccurs: '1',
+                  maxOccurs: '1',
+                },
               ],
             },
-            attribute: [
-              { name: 'maximumVerdicts', type: 'xsd:integer' },
-            ],
+            attribute: [{ name: 'maximumVerdicts', type: 'xsd:integer' }],
           },
           {
             name: 'AtcObjectSets',
             sequence: {
               element: [
-                { name: 'objectSet', type: 'atc:AtcObjectSetRequest', minOccurs: '1', maxOccurs: 'unbounded' },
+                {
+                  name: 'objectSet',
+                  type: 'atc:AtcObjectSetRequest',
+                  minOccurs: '1',
+                  maxOccurs: 'unbounded',
+                },
               ],
             },
           },
@@ -990,12 +1127,14 @@ describe('buildXml', () => {
             name: 'AtcObjectSetRequest',
             sequence: {
               element: [
-                { ref: 'adtcore:objectReferences', minOccurs: '0', maxOccurs: '1' },
+                {
+                  ref: 'adtcore:objectReferences',
+                  minOccurs: '0',
+                  maxOccurs: '1',
+                },
               ],
             },
-            attribute: [
-              { name: 'kind', type: 'xsd:string' },
-            ],
+            attribute: [{ name: 'kind', type: 'xsd:string' }],
           },
         ],
       } as const satisfies SchemaLike;
@@ -1003,25 +1142,45 @@ describe('buildXml', () => {
       const data = {
         maximumVerdicts: 100,
         objectSets: {
-          objectSet: [{
-            kind: 'inclusive',
-            objectReferences: {
-              objectReference: [{ uri: '/sap/bc/adt/cts/transportrequests/TEST123' }],
+          objectSet: [
+            {
+              kind: 'inclusive',
+              objectReferences: {
+                objectReference: [
+                  { uri: '/sap/bc/adt/cts/transportrequests/TEST123' },
+                ],
+              },
             },
-          }],
+          ],
         },
       };
 
       const xml = buildXml(atcSchema, data, { xmlDecl: false });
 
       // Should contain the full nested structure including ref element
-      assert.ok(xml.includes('<atc:run'), 'Should have root element with prefix');
+      assert.ok(
+        xml.includes('<atc:run'),
+        'Should have root element with prefix',
+      );
       assert.ok(xml.includes('maximumVerdicts="100"'), 'Should have attribute');
-      assert.ok(xml.includes('<atc:objectSets'), 'Should have objectSets element');
-      assert.ok(xml.includes('<atc:objectSet'), 'Should have objectSet element');
+      assert.ok(
+        xml.includes('<atc:objectSets'),
+        'Should have objectSets element',
+      );
+      assert.ok(
+        xml.includes('<atc:objectSet'),
+        'Should have objectSet element',
+      );
       assert.ok(xml.includes('kind="inclusive"'), 'Should have kind attribute');
-      assert.ok(xml.includes('objectReferences') || xml.includes('adtcore:objectReferences'), 'Should have objectReferences element');
-      assert.ok(xml.includes('uri='), 'Should have uri attribute on objectReference');
+      assert.ok(
+        xml.includes('objectReferences') ||
+          xml.includes('adtcore:objectReferences'),
+        'Should have objectReferences element',
+      );
+      assert.ok(
+        xml.includes('uri='),
+        'Should have uri attribute on objectReference',
+      );
     });
 
     it('should build deeply nested complex types', () => {
@@ -1031,32 +1190,24 @@ describe('buildXml', () => {
         },
         targetNamespace: 'http://example.com/ns',
         elementFormDefault: 'qualified',
-        element: [
-          { name: 'root', type: 'ns:Level1' },
-        ],
+        element: [{ name: 'root', type: 'ns:Level1' }],
         complexType: [
           {
             name: 'Level1',
             sequence: {
-              element: [
-                { name: 'level2', type: 'ns:Level2' },
-              ],
+              element: [{ name: 'level2', type: 'ns:Level2' }],
             },
           },
           {
             name: 'Level2',
             sequence: {
-              element: [
-                { name: 'level3', type: 'ns:Level3' },
-              ],
+              element: [{ name: 'level3', type: 'ns:Level3' }],
             },
           },
           {
             name: 'Level3',
             sequence: {
-              element: [
-                { name: 'value', type: 'xs:string' },
-              ],
+              element: [{ name: 'value', type: 'xs:string' }],
             },
           },
         ],
@@ -1075,7 +1226,10 @@ describe('buildXml', () => {
       assert.ok(xml.includes('<ns:root'), 'Should have root element');
       assert.ok(xml.includes('<ns:level2'), 'Should have level2 element');
       assert.ok(xml.includes('<ns:level3'), 'Should have level3 element');
-      assert.ok(xml.includes('<ns:value>deep</ns:value>'), 'Should have value element with content');
+      assert.ok(
+        xml.includes('<ns:value>deep</ns:value>'),
+        'Should have value element with content',
+      );
     });
   });
 
@@ -1096,7 +1250,10 @@ describe('buildXml', () => {
       const xml = buildXml(schema, { id: 'test' }, { xmlDecl: false });
 
       // Root element should have explicit closing tag, not self-closing
-      assert.ok(xml.includes('</ex:Empty>'), 'Root element should have explicit closing tag');
+      assert.ok(
+        xml.includes('</ex:Empty>'),
+        'Root element should have explicit closing tag',
+      );
       assert.ok(!xml.includes('/>'), 'Root element should not be self-closing');
     });
 
@@ -1114,9 +1271,16 @@ describe('buildXml', () => {
         ],
       } as const satisfies SchemaLike;
 
-      const xml = buildXml(schema, { name: 'test', value: '123' }, { xmlDecl: false });
+      const xml = buildXml(
+        schema,
+        { name: 'test', value: '123' },
+        { xmlDecl: false },
+      );
 
-      assert.ok(xml.includes('</Item>'), 'Root element should have explicit closing tag');
+      assert.ok(
+        xml.includes('</Item>'),
+        'Root element should have explicit closing tag',
+      );
     });
   });
 
@@ -1164,14 +1328,23 @@ describe('buildXml', () => {
       const xml = buildXml(
         derivedSchema,
         { id: '123', name: 'Test', extra: 'value' },
-        { xmlDecl: false }
+        { xmlDecl: false },
       );
 
       // Inherited attributes should use base namespace prefix
-      assert.ok(xml.includes('base:id="123"'), 'Inherited id attribute should use base: prefix');
-      assert.ok(xml.includes('base:name="Test"'), 'Inherited name attribute should use base: prefix');
+      assert.ok(
+        xml.includes('base:id="123"'),
+        'Inherited id attribute should use base: prefix',
+      );
+      assert.ok(
+        xml.includes('base:name="Test"'),
+        'Inherited name attribute should use base: prefix',
+      );
       // Own attribute should use derived namespace prefix
-      assert.ok(xml.includes('derived:extra="value"'), 'Own extra attribute should use derived: prefix');
+      assert.ok(
+        xml.includes('derived:extra="value"'),
+        'Own extra attribute should use derived: prefix',
+      );
     });
   });
 });

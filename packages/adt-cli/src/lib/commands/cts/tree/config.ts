@@ -14,7 +14,10 @@ import { Command } from 'commander';
 import { render } from 'ink';
 import React from 'react';
 import { getAdtClientV2 } from '../../../utils/adt-client-v2';
-import { TreeConfigEditor, type TreeConfigState } from '../../../components/TreeConfigEditor';
+import {
+  TreeConfigEditor,
+  type TreeConfigState,
+} from '../../../components/TreeConfigEditor';
 import { treeConfigSetCommand } from './config-set';
 
 // Date filter preset names
@@ -50,17 +53,19 @@ function extractConfigId(uri: string): string {
 function propertiesToMap(config: unknown): Record<string, string> {
   const result: Record<string, string> = {};
   if (!config || typeof config !== 'object') return result;
-  
+
   const configObj = config as Record<string, unknown>;
-  const properties = configObj.properties as Record<string, unknown> | undefined;
-  
+  const properties = configObj.properties as
+    | Record<string, unknown>
+    | undefined;
+
   if (!properties) return result;
-  
+
   const propArray = properties.property;
   if (!propArray) return result;
-  
+
   const props = Array.isArray(propArray) ? propArray : [propArray];
-  
+
   for (const prop of props) {
     if (prop && typeof prop === 'object') {
       const p = prop as Record<string, unknown>;
@@ -80,7 +85,7 @@ function propertiesToMap(config: unknown): Record<string, string> {
  */
 function propertiesToConfigState(
   properties: Record<string, string>,
-  _configDetails: unknown
+  _configDetails: unknown,
 ): TreeConfigState {
   return {
     userName: (properties.User || '*') as string,
@@ -108,21 +113,41 @@ function configStateToConfigurationData(config: TreeConfigState) {
   // Convert date format YYYY-MM-DD to YYYYMMDD
   const fromDate = config.fromDate.replace(/-/g, '');
   const toDate = config.toDate.replace(/-/g, '');
-  
+
   // Build properties array matching the schema structure
   // Each property needs: key, isMandatory (optional attribute), $text (text content)
   const properties = [
     { key: 'User', isMandatory: undefined, $text: config.userName },
-    { key: 'WorkbenchRequests', isMandatory: undefined, $text: String(config.workbenchRequests) },
-    { key: 'CustomizingRequests', isMandatory: undefined, $text: String(config.customizingRequests) },
-    { key: 'TransportOfCopies', isMandatory: undefined, $text: String(config.transportOfCopies) },
-    { key: 'Modifiable', isMandatory: undefined, $text: String(config.modifiable) },
+    {
+      key: 'WorkbenchRequests',
+      isMandatory: undefined,
+      $text: String(config.workbenchRequests),
+    },
+    {
+      key: 'CustomizingRequests',
+      isMandatory: undefined,
+      $text: String(config.customizingRequests),
+    },
+    {
+      key: 'TransportOfCopies',
+      isMandatory: undefined,
+      $text: String(config.transportOfCopies),
+    },
+    {
+      key: 'Modifiable',
+      isMandatory: undefined,
+      $text: String(config.modifiable),
+    },
     { key: 'Released', isMandatory: undefined, $text: String(config.released) },
-    { key: 'DateFilter', isMandatory: undefined, $text: config.releasedDateFilter },
+    {
+      key: 'DateFilter',
+      isMandatory: undefined,
+      $text: config.releasedDateFilter,
+    },
     { key: 'FromDate', isMandatory: undefined, $text: fromDate },
     { key: 'ToDate', isMandatory: undefined, $text: toDate },
   ];
-  
+
   return {
     properties: {
       property: properties,
@@ -135,7 +160,7 @@ function configStateToConfigurationData(config: TreeConfigState) {
  */
 async function launchEditor(
   initialConfig: TreeConfigState,
-  onSave: (config: TreeConfigState) => Promise<void>
+  onSave: (config: TreeConfigState) => Promise<void>,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     let savedConfig: TreeConfigState | null = null;
@@ -154,7 +179,7 @@ async function launchEditor(
         initialConfig,
         onSave: handleSave,
         onCancel: handleCancel,
-      })
+      }),
     );
 
     waitUntilExit().then(async () => {
@@ -164,7 +189,7 @@ async function launchEditor(
       // Move cursor up ~20 lines (TUI height) and clear from cursor to end of screen
       const tuiHeight = 20;
       process.stdout.write(`\x1b[${tuiHeight}A\x1b[J`);
-      
+
       if (savedConfig) {
         try {
           await onSave(savedConfig);
@@ -196,11 +221,14 @@ export const treeConfigCommand = new Command('config')
       }
 
       // Get configurations list (typed)
-      const configsResponse = await client.adt.cts.transportrequests.searchconfiguration.configurations.get();
-      
+      const configsResponse =
+        await client.adt.cts.transportrequests.searchconfiguration.configurations.get();
+
       // Response has 'configurations' property (plural) containing config array
       const configsData = configsResponse as { configurations?: unknown };
-      const configs = configsData?.configurations as Array<{ link?: { href?: string } }> | undefined;
+      const configs = configsData?.configurations as
+        | Array<{ link?: { href?: string } }>
+        | undefined;
       if (!configs) {
         console.log('\n📭 No search configuration found');
         return;
@@ -222,13 +250,22 @@ export const treeConfigCommand = new Command('config')
 
       // Extract config ID and fetch details using typed contract
       const configId = extractConfigId(configUri);
-      const configDetailsRaw = await client.adt.cts.transportrequests.searchconfiguration.configurations.getById(configId);
-      
+      const configDetailsRaw =
+        await client.adt.cts.transportrequests.searchconfiguration.configurations.getById(
+          configId,
+        );
+
       // Response has nested structure - extract configuration object
       // Cast to expected shape for property access
       type ConfigDetails = {
         configuration?: {
-          properties?: { property?: Array<{ key?: string; _text?: string; isMandatory?: boolean }> };
+          properties?: {
+            property?: Array<{
+              key?: string;
+              _text?: string;
+              isMandatory?: boolean;
+            }>;
+          };
           createdBy?: string;
           createdAt?: string;
           changedBy?: string;
@@ -238,26 +275,33 @@ export const treeConfigCommand = new Command('config')
       const configDetails = (configDetailsRaw as ConfigDetails)?.configuration;
 
       // Convert properties to map for easy access
-      const properties = propertiesToMap(configDetails as Record<string, unknown>);
+      const properties = propertiesToMap(
+        configDetails as Record<string, unknown>,
+      );
 
       // Edit mode - launch interactive editor
       if (options.edit) {
-        const initialConfig = propertiesToConfigState(properties, configDetails);
+        const initialConfig = propertiesToConfigState(
+          properties,
+          configDetails,
+        );
 
         // Save handler - updates the configuration on the server using typed contract
         const handleSave = async (newConfig: TreeConfigState) => {
           console.log('\n🔄 Saving configuration...');
-          
+
           // Convert config to schema-compatible format
           const configData = configStateToConfigurationData(newConfig);
-          
+
           // PUT the configuration back using the typed contract
           // Body type is Partial<Configuration> - we only send properties
           // Note: CSRF token is auto-initialized by the adapter before write operations
           // Cast to unknown to bypass schema mismatch - schema alignment pending
           await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
             configId,
-            configData as unknown as Parameters<typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put>[1]
+            configData as unknown as Parameters<
+              typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put
+            >[1],
           );
         };
 
@@ -317,7 +361,8 @@ export const treeConfigCommand = new Command('config')
 
         // Date Range
         console.log('\n📅 Date Range:');
-        const datePreset = DATE_FILTER_PRESETS[properties.DateFilter] || 'Unknown';
+        const datePreset =
+          DATE_FILTER_PRESETS[properties.DateFilter] || 'Unknown';
         console.log(`   Preset: ${datePreset}`);
         if (properties.FromDate) {
           console.log(`   From: ${formatDate(properties.FromDate)}`);
@@ -327,13 +372,14 @@ export const treeConfigCommand = new Command('config')
         }
 
         console.log('\n' + '═'.repeat(50));
-        console.log('💡 Configure in ADT Eclipse: Transport Organizer → Configure Tree');
+        console.log(
+          '💡 Configure in ADT Eclipse: Transport Organizer → Configure Tree',
+        );
       }
-
     } catch (error) {
       console.error(
         '❌ Failed:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

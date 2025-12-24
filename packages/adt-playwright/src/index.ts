@@ -9,8 +9,15 @@ import type { AdtConfig, Destination } from '@abapify/adt-config';
 import type { BrowserAuthOptions } from '@abapify/browser-auth';
 
 // Re-export types
-export type { PlaywrightCredentials, PlaywrightAuthOptions } from './playwright-auth';
-export type { BrowserCredentials, BrowserAuthOptions, CookieData } from '@abapify/browser-auth';
+export type {
+  PlaywrightCredentials,
+  PlaywrightAuthOptions,
+} from './playwright-auth';
+export type {
+  BrowserCredentials,
+  BrowserAuthOptions,
+  CookieData,
+} from '@abapify/browser-auth';
 
 /**
  * Plugin-level options applied to all destinations
@@ -32,7 +39,7 @@ function createPlaywrightDestination(options: BrowserAuthOptions): Destination {
  */
 export function withPlaywright(
   config: AdtConfig,
-  options?: Partial<BrowserAuthOptions>
+  options?: Partial<BrowserAuthOptions>,
 ): AdtConfig {
   if (!config.destinations) {
     return config;
@@ -42,7 +49,10 @@ export function withPlaywright(
 
   for (const [name, dest] of Object.entries(config.destinations)) {
     if (typeof dest === 'object' && 'type' in dest) {
-      if (dest.type === '@abapify/adt-playwright' || dest.type === 'playwright') {
+      if (
+        dest.type === '@abapify/adt-playwright' ||
+        dest.type === 'playwright'
+      ) {
         destinations[name] = {
           type: '@abapify/adt-playwright',
           options: { ...options, ...(dest.options as BrowserAuthOptions) },
@@ -51,9 +61,15 @@ export function withPlaywright(
         destinations[name] = dest;
       }
     } else if (typeof dest === 'string') {
-      destinations[name] = createPlaywrightDestination({ url: dest, ...options });
+      destinations[name] = createPlaywrightDestination({
+        url: dest,
+        ...options,
+      });
     } else {
-      destinations[name] = createPlaywrightDestination({ ...(dest as BrowserAuthOptions), ...options });
+      destinations[name] = createPlaywrightDestination({
+        ...(dest as BrowserAuthOptions),
+        ...options,
+      });
     }
   }
 
@@ -61,7 +77,12 @@ export function withPlaywright(
 }
 
 // Main exports
-export { playwrightAuth, playwright, toCookieHeader, toHeaders } from './playwright-auth';
+export {
+  playwrightAuth,
+  playwright,
+  toCookieHeader,
+  toHeaders,
+} from './playwright-auth';
 
 // AuthManager compatibility exports
 export { default } from './auth-plugin';

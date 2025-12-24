@@ -16,9 +16,14 @@ async function createFetchFn() {
 
   return async (
     url: string,
-    options?: { method?: string; headers?: Record<string, string> }
+    options?: { method?: string; headers?: Record<string, string> },
   ): Promise<string> => {
-    const method = (options?.method || 'GET') as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    const method = (options?.method || 'GET') as
+      | 'GET'
+      | 'POST'
+      | 'PUT'
+      | 'PATCH'
+      | 'DELETE';
     const response = await adtClient.fetch(url, {
       method,
       headers: options?.headers || { Accept: '*/*' },
@@ -33,7 +38,8 @@ async function createFetchFn() {
 async function getSystemId(): Promise<string | undefined> {
   try {
     const adtClient = await getAdtClientV2();
-    const info = await adtClient.adt.core.http.systeminformation.getSystemInfo();
+    const info =
+      await adtClient.adt.core.http.systeminformation.getSystemInfo();
     // Response is parsed data with systemID property
     const infoData = info as { systemID?: string };
     return infoData.systemID;
@@ -59,7 +65,7 @@ export function createReplCommand(): Command {
       } catch (error) {
         console.error(
           '❌ Failed to start REPL:',
-          error instanceof Error ? error.message : String(error)
+          error instanceof Error ? error.message : String(error),
         );
         process.exit(1);
       }

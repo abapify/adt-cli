@@ -29,7 +29,8 @@ export const packageGetCommand = new Command('package')
       // Use router to render the package page
       const route = router.get('DEVC');
       // Extract package data - response is wrapped in { package: ... }
-      const pkgData = (pkg as { package?: Record<string, unknown> })?.package ?? pkg ?? {};
+      const pkgData =
+        (pkg as { package?: Record<string, unknown> })?.package ?? pkg ?? {};
       if (route) {
         const page = route.page(pkgData, { name });
         render(page);
@@ -45,7 +46,7 @@ export const packageGetCommand = new Command('package')
     } catch (error) {
       console.error(
         `❌ Failed to get package:`,
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

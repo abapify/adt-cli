@@ -32,7 +32,7 @@ export class PluginRegistry implements IPluginRegistry {
       } catch (error) {
         throw new PluginLoadError(
           spec.name,
-          error instanceof Error ? error : undefined
+          error instanceof Error ? error : undefined,
         );
       }
     }
@@ -86,7 +86,7 @@ export class PluginRegistry implements IPluginRegistry {
     if (!this.isValidPlugin(plugin)) {
       throw new PluginConfigError(
         pluginName,
-        'Plugin does not implement required interface'
+        'Plugin does not implement required interface',
       );
     }
 
@@ -113,7 +113,7 @@ export class PluginRegistry implements IPluginRegistry {
       if (!this.isValidPlugin(plugin)) {
         throw new PluginConfigError(
           spec.name,
-          'Plugin does not implement FormatPlugin interface'
+          'Plugin does not implement FormatPlugin interface',
         );
       }
 

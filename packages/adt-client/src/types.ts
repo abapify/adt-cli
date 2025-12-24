@@ -18,7 +18,6 @@ export interface AdtConnectionConfig {
   logger?: Logger;
 }
 
-
 // Note: Class/Interface types are available from adt-schemas via InferXsd
 // Example: import { classes, InferXsd } from 'adt-schemas';
 // type ClassData = InferXsd<typeof classes, 'AbapClass'>;

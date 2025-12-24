@@ -1,6 +1,6 @@
 /**
  * Browser Auth Core Types
- * 
+ *
  * Shared types for browser-based SSO authentication.
  * Used by both Playwright and Puppeteer adapters.
  */

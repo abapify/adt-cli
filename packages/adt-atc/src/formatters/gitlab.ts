@@ -1,6 +1,6 @@
 /**
  * GitLab Code Quality Formatter
- * 
+ *
  * Outputs ATC findings in GitLab Code Quality format.
  */
 
@@ -9,7 +9,7 @@ import type { AtcResult, AtcFinding } from '../types';
 
 export async function outputGitLabCodeQuality(
   result: AtcResult,
-  outputFile: string
+  outputFile: string,
 ): Promise<void> {
   // Transform ATC findings to GitLab Code Quality format
   const gitlabReport = result.findings.map((finding: AtcFinding) => {

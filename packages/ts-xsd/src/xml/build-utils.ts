@@ -29,7 +29,7 @@ export interface BuildOptions {
  */
 export function getSchemaPrefix(schema: SchemaLike): string | undefined {
   if (!schema.$xmlns || !schema.targetNamespace) return undefined;
-  
+
   for (const [prefix, uri] of Object.entries(schema.$xmlns)) {
     if (uri === schema.targetNamespace && prefix) {
       return prefix;
@@ -50,11 +50,15 @@ export function createXmlDocument(schema: SchemaLike): XmlDocument {
 /**
  * Collect all namespace declarations from a schema and its $imports recursively
  */
-function collectAllNamespaces(schema: SchemaLike, collected: Map<string, string> = new Map(), visited: Set<unknown> = new Set()): Map<string, string> {
+function collectAllNamespaces(
+  schema: SchemaLike,
+  collected: Map<string, string> = new Map(),
+  visited: Set<unknown> = new Set(),
+): Map<string, string> {
   // Prevent infinite recursion
   if (visited.has(schema)) return collected;
   visited.add(schema);
-  
+
   // Add namespaces from this schema's $xmlns
   if (schema.$xmlns) {
     for (const [pfx, uri] of Object.entries(schema.$xmlns)) {
@@ -63,7 +67,7 @@ function collectAllNamespaces(schema: SchemaLike, collected: Map<string, string>
       }
     }
   }
-  
+
   // Recursively collect from $imports
   const imports = (schema as { $imports?: SchemaLike[] }).$imports;
   if (imports) {
@@ -71,7 +75,7 @@ function collectAllNamespaces(schema: SchemaLike, collected: Map<string, string>
       collectAllNamespaces(imported, collected, visited);
     }
   }
-  
+
   // Also collect from $includes
   const includes = (schema as { $includes?: SchemaLike[] }).$includes;
   if (includes) {
@@ -79,13 +83,13 @@ function collectAllNamespaces(schema: SchemaLike, collected: Map<string, string>
       collectAllNamespaces(included, collected, visited);
     }
   }
-  
+
   return collected;
 }
 
 /**
  * Create root element with namespace declarations
- * 
+ *
  * When elementFormDefault="unqualified", the root element should NOT have
  * a namespace prefix. This is important for formats like abapGit where
  * the root element (abapGit) is unqualified but child elements may have prefixes.
@@ -94,15 +98,16 @@ export function createRootElement(
   doc: XmlDocument,
   elementName: string,
   schema: SchemaLike,
-  prefix: string | undefined
+  prefix: string | undefined,
 ): XmlElement {
   const ns = schema.targetNamespace || null;
-  
+
   // Check elementFormDefault - when "unqualified", root element should NOT have prefix
   // This follows the abapGit pattern where root is unqualified but xmlns:asx is declared
-  const elementFormDefault = (schema as { elementFormDefault?: string }).elementFormDefault;
+  const elementFormDefault = (schema as { elementFormDefault?: string })
+    .elementFormDefault;
   const usePrefix = elementFormDefault === 'unqualified' ? undefined : prefix;
-  
+
   const rootTag = usePrefix ? `${usePrefix}:${elementName}` : elementName;
   const root = doc.createElement(rootTag);
 
@@ -117,7 +122,7 @@ export function createRootElement(
   // Collect ALL namespace declarations from schema and its $imports recursively
   // This ensures that namespaces used by inherited types are declared
   const allNamespaces = collectAllNamespaces(schema);
-  
+
   for (const [pfx, uri] of allNamespaces) {
     if (pfx && pfx !== prefix) {
       root.setAttribute(`xmlns:${pfx}`, uri);
@@ -135,10 +140,10 @@ export function createRootElement(
 export function findElementDeclaration(
   schema: SchemaLike,
   rootElement?: string,
-  _data?: Record<string, unknown>
+  _data?: Record<string, unknown>,
 ): ElementLike {
   if (rootElement) {
-    const elementDecl = schema.element?.find(e => e.name === rootElement);
+    const elementDecl = schema.element?.find((e) => e.name === rootElement);
     if (!elementDecl) {
       throw new Error(`Element '${rootElement}' not found in schema`);
     }
@@ -164,12 +169,12 @@ export function findElementDeclaration(
  */
 export function getElementComplexType(
   elementDecl: ElementLike,
-  schema: SchemaLike
+  schema: SchemaLike,
 ): { type: ComplexTypeLike; schema: SchemaLike } {
   if (elementDecl.complexType) {
     return { type: elementDecl.complexType as ComplexTypeLike, schema };
   }
-  
+
   if (elementDecl.type) {
     const typeName = stripNsPrefix(elementDecl.type);
     const typeEntry = findComplexType(typeName, schema);
@@ -178,8 +183,10 @@ export function getElementComplexType(
     }
     return { type: typeEntry.ct, schema: typeEntry.schema };
   }
-  
-  throw new Error(`Element ${elementDecl.name} has no type or inline complexType`);
+
+  throw new Error(
+    `Element ${elementDecl.name} has no type or inline complexType`,
+  );
 }
 
 /**
@@ -202,7 +209,7 @@ export function formatValue(value: unknown, type: string): string {
 
 /**
  * Simple XML formatter (basic indentation)
- * 
+ *
  * Keeps text content inline: <tag>text</tag>
  * Only adds newlines for nested elements
  */
@@ -215,7 +222,7 @@ export function formatXml(xml: string): string {
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
     const nextPart = parts[i + 1];
-    
+
     if (part.startsWith('<?')) {
       formatted += part + '\n';
       lastWasText = false;

@@ -5,64 +5,74 @@
  * Mode: Flattened
  */
 
-export type CheckrunSchema = {
-    checkObjectList: {
+export type CheckrunSchema =
+  | {
+      checkObjectList: {
         checkObject?: {
-            extension?: unknown;
-            artifacts?: {
-                artifact?: {
-                    content?: string;
-                    uri?: string;
-                    contentType?: string;
-                }[];
+          extension?: unknown;
+          artifacts?: {
+            artifact?: {
+              content?: string;
+              uri?: string;
+              contentType?: string;
             }[];
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-            version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+          }[];
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
+          version?:
+            | ''
+            | 'active'
+            | 'inactive'
+            | 'workingArea'
+            | 'new'
+            | 'partlyActive'
+            | 'activeWithInactiveVersion';
         }[];
-    };
-} | {
-    checkRunReports: {
+      };
+    }
+  | {
+      checkRunReports: {
         checkReport?: {
-            checkMessageList?: {
-                checkMessage?: {
-                    t100Key?: {
-                        msgno?: number;
-                        msgid?: string;
-                        msgv1?: string;
-                        msgv2?: string;
-                        msgv3?: string;
-                        msgv4?: string;
-                    };
-                    correctionHint?: {
-                        number?: number;
-                        kind?: string;
-                        line?: number;
-                        column?: number;
-                        word?: string;
-                    }[];
-                    uri?: string;
-                    type?: unknown;
-                    shortText?: string;
-                    category?: string;
-                    code?: string;
-                }[];
-            };
-            reporter?: string;
-            triggeringUri?: string;
-            status?: string;
-            statusText?: string;
+          checkMessageList?: {
+            checkMessage?: {
+              t100Key?: {
+                msgno?: number;
+                msgid?: string;
+                msgv1?: string;
+                msgv2?: string;
+                msgv3?: string;
+                msgv4?: string;
+              };
+              correctionHint?: {
+                number?: number;
+                kind?: string;
+                line?: number;
+                column?: number;
+                word?: string;
+              }[];
+              uri?: string;
+              type?: unknown;
+              shortText?: string;
+              category?: string;
+              code?: string;
+            }[];
+          };
+          reporter?: string;
+          triggeringUri?: string;
+          status?: string;
+          statusText?: string;
         }[];
-    };
-} | {
-    checkReporters: {
+      };
+    }
+  | {
+      checkReporters: {
         reporter?: {
-            supportedType?: string[];
-            name?: string;
+          supportedType?: string[];
+          name?: string;
         }[];
+      };
     };
-};

@@ -1,11 +1,11 @@
 /**
  * AdkTransport - Simplified transport for import operations
- * 
+ *
  * Focused on the import use case:
  * - Get transport by number
  * - Iterate objects
  * - Load each object as proper ADK type
- * 
+ *
  * Architecture:
  * - Uses ADT contracts via ctx.client.adt.cts.transportrequests.get()
  * - No business logic beyond object iteration
@@ -52,50 +52,64 @@ function asArray<T>(val: T | T[] | undefined): T[] {
 
 /**
  * Transport object reference - lightweight wrapper
- * 
+ *
  * Contains metadata about an object in the transport.
  * Call load() to get the full ADK object.
  */
 export class AdkTransportObjectRef {
   constructor(
     private readonly ctx: AdkContext,
-    private readonly data: TransportObjectData
+    private readonly data: TransportObjectData,
   ) {}
 
   /** Program ID (R3TR, LIMU, etc.) */
-  get pgmid(): string { return this.data.pgmid ?? ''; }
-  
+  get pgmid(): string {
+    return this.data.pgmid ?? '';
+  }
+
   /** Object type (CLAS, INTF, DOMA, etc.) */
-  get type(): string { return this.data.type ?? ''; }
-  
+  get type(): string {
+    return this.data.type ?? '';
+  }
+
   /** Object name */
-  get name(): string { return this.data.name ?? ''; }
-  
+  get name(): string {
+    return this.data.name ?? '';
+  }
+
   /** Workbench type (more specific type) */
-  get wbtype(): string | undefined { return this.data.wbtype; }
-  
+  get wbtype(): string | undefined {
+    return this.data.wbtype;
+  }
+
   /** Object URI for direct access */
-  get uri(): string | undefined { return this.data.uri; }
-  
+  get uri(): string | undefined {
+    return this.data.uri;
+  }
+
   /** Object description */
-  get description(): string | undefined { return this.data.obj_desc; }
-  
+  get description(): string | undefined {
+    return this.data.obj_desc;
+  }
+
   /** Full object key (PGMID/TYPE/NAME) */
-  get key(): string { return `${this.pgmid}/${this.type}/${this.name}`; }
+  get key(): string {
+    return `${this.pgmid}/${this.type}/${this.name}`;
+  }
 
   /**
    * Load the full ADK object
-   * 
+   *
    * Uses the ADK factory to create the appropriate object type
    * (AdkClass, AdkInterface, AdkPackage, etc.)
-   * 
+   *
    * @returns The loaded ADK object, or undefined if type not supported
    */
   async load(): Promise<unknown> {
     // Import dynamically to avoid circular dependency
     const { createAdk } = await import('../../factory');
     const adk = createAdk(this.ctx.client);
-    
+
     // Use the factory to get the object
     // The factory handles type resolution and loading
     try {
@@ -112,7 +126,9 @@ export class AdkTransportObjectRef {
   }
 
   /** Raw data from API */
-  get raw(): TransportObjectData { return this.data; }
+  get raw(): TransportObjectData {
+    return this.data;
+  }
 }
 
 /**
@@ -121,32 +137,42 @@ export class AdkTransportObjectRef {
 export class AdkTransportTaskRef {
   constructor(
     private readonly ctx: AdkContext,
-    private readonly data: TransportTaskData
+    private readonly data: TransportTaskData,
   ) {}
 
-  get number(): string { return this.data.number ?? ''; }
-  get owner(): string { return this.data.owner ?? ''; }
-  get description(): string { return this.data.desc ?? ''; }
-  get status(): string { return this.data.status ?? ''; }
-  get statusText(): string { return this.data.status_text ?? ''; }
+  get number(): string {
+    return this.data.number ?? '';
+  }
+  get owner(): string {
+    return this.data.owner ?? '';
+  }
+  get description(): string {
+    return this.data.desc ?? '';
+  }
+  get status(): string {
+    return this.data.status ?? '';
+  }
+  get statusText(): string {
+    return this.data.status_text ?? '';
+  }
 
   /** Objects in this task */
   get objects(): AdkTransportObjectRef[] {
     return asArray(this.data.abap_object).map(
-      obj => new AdkTransportObjectRef(this.ctx, obj)
+      (obj) => new AdkTransportObjectRef(this.ctx, obj),
     );
   }
 }
 
 /**
  * AdkTransport - Transport request for import operations
- * 
+ *
  * Simple, focused API for importing transport objects:
- * 
+ *
  * @example
  * ```typescript
  * const transport = await AdkTransport.get('DEVK900001');
- * 
+ *
  * for (const objRef of transport.objects) {
  *   console.log(`${objRef.type} ${objRef.name}`);
  *   const adkObject = await objRef.load();
@@ -163,7 +189,7 @@ export class AdkTransport {
 
   private constructor(
     private readonly ctx: AdkContext,
-    private readonly data: TransportData
+    private readonly data: TransportData,
   ) {}
 
   // ===========================================================================
@@ -171,38 +197,38 @@ export class AdkTransport {
   // ===========================================================================
 
   /** Transport number */
-  get number(): string { 
-    return this.data.name ?? this.data.request?.number ?? ''; 
+  get number(): string {
+    return this.data.name ?? this.data.request?.number ?? '';
   }
 
   /** Transport description */
-  get description(): string { 
-    return this.data.request?.desc ?? ''; 
+  get description(): string {
+    return this.data.request?.desc ?? '';
   }
 
   /** Transport owner */
-  get owner(): string { 
-    return this.data.request?.owner ?? ''; 
+  get owner(): string {
+    return this.data.request?.owner ?? '';
   }
 
   /** Transport status (D=Modifiable, R=Released) */
-  get status(): string { 
-    return this.data.request?.status ?? ''; 
+  get status(): string {
+    return this.data.request?.status ?? '';
   }
 
   /** Transport status text */
-  get statusText(): string { 
-    return this.data.request?.status_text ?? ''; 
+  get statusText(): string {
+    return this.data.request?.status_text ?? '';
   }
 
   /** Transport target system */
-  get target(): string { 
-    return this.data.request?.target ?? ''; 
+  get target(): string {
+    return this.data.request?.target ?? '';
   }
 
   /** Object type (K=Request, T=Task) */
-  get objectType(): string { 
-    return this.data.object_type ?? 'K'; 
+  get objectType(): string {
+    return this.data.object_type ?? 'K';
   }
 
   // ===========================================================================
@@ -215,7 +241,7 @@ export class AdkTransport {
       const requestTasks = asArray(this.data.request?.task);
       const rootTasks = asArray(this.data.task);
       const allTasks = [...requestTasks, ...rootTasks];
-      this._tasks = allTasks.map(t => new AdkTransportTaskRef(this.ctx, t));
+      this._tasks = allTasks.map((t) => new AdkTransportTaskRef(this.ctx, t));
     }
     return this._tasks;
   }
@@ -226,7 +252,7 @@ export class AdkTransport {
 
   /**
    * All objects in this transport
-   * 
+   *
    * Collects objects from:
    * - Direct objects on request
    * - Objects from all tasks
@@ -277,19 +303,19 @@ export class AdkTransport {
 
   /**
    * Get objects filtered by type
-   * 
+   *
    * @param types - Object types to include (e.g., ['CLAS', 'INTF'])
    */
   getObjectsByType(...types: string[]): AdkTransportObjectRef[] {
-    const typeSet = new Set(types.map(t => t.toUpperCase()));
-    return this.objects.filter(obj => typeSet.has(obj.type.toUpperCase()));
+    const typeSet = new Set(types.map((t) => t.toUpperCase()));
+    return this.objects.filter((obj) => typeSet.has(obj.type.toUpperCase()));
   }
 
   /**
    * Get unique object types in this transport
    */
   getObjectTypes(): string[] {
-    const types = new Set(this.objects.map(obj => obj.type));
+    const types = new Set(this.objects.map((obj) => obj.type));
     return Array.from(types).sort();
   }
 
@@ -309,7 +335,9 @@ export class AdkTransport {
   // ===========================================================================
 
   /** Raw API response (unwrapped) */
-  get raw(): TransportData { return this.data; }
+  get raw(): TransportData {
+    return this.data;
+  }
 
   // ===========================================================================
   // Static Factory
@@ -317,10 +345,10 @@ export class AdkTransport {
 
   /**
    * Get a transport by number
-   * 
+   *
    * @param number - Transport number (e.g., 'DEVK900001')
    * @param ctx - Optional ADK context (uses global context if not provided)
-   * 
+   *
    * @example
    * ```typescript
    * const transport = await AdkTransport.get('DEVK900001');

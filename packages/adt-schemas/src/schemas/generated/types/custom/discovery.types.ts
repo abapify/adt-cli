@@ -6,12 +6,12 @@
  */
 
 export type DiscoverySchema = {
-    service: {
-        workspace?: {
-            collection?: {
-                accept?: string[];
-                href: string;
-            }[];
-        }[];
-    };
+  service: {
+    workspace?: {
+      collection?: {
+        accept?: string[];
+        href: string;
+      }[];
+    }[];
+  };
 };

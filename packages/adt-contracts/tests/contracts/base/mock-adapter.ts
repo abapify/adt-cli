@@ -1,6 +1,6 @@
 /**
  * Mock HTTP Adapter for Contract Testing
- * 
+ *
  * Creates a mock adapter that returns fixture data based on request path/method.
  * Tests the full speci client flow: request → schema parsing → typed response.
  */
@@ -34,10 +34,10 @@ export interface MockMatcher {
 
 /**
  * Create a mock HTTP adapter for testing
- * 
+ *
  * @param matchers - Array of request matchers with mock responses
  * @returns HttpAdapter that returns mocked responses
- * 
+ *
  * @example
  * ```typescript
  * const adapter = createMockAdapter([
@@ -50,12 +50,12 @@ export interface MockMatcher {
  *     },
  *   },
  * ]);
- * 
+ *
  * const client = createClient(worklistsContract, {
  *   baseUrl: 'https://sap.example.com',
  *   adapter,
  * });
- * 
+ *
  * const result = await client.get('123');
  * // result is fully typed!
  * ```
@@ -68,7 +68,7 @@ export function createMockAdapter(matchers: MockMatcher[]): HttpAdapter {
       }
 
       const { method = 'GET', url } = options;
-      
+
       // Find matching mock
       const matcher = matchers.find((m) => {
         if (m.method && m.method !== method) return false;
@@ -86,7 +86,7 @@ export function createMockAdapter(matchers: MockMatcher[]): HttpAdapter {
       }
 
       const { response } = matcher;
-      
+
       // Load body from fixture if needed
       let body: string;
       if (typeof response.body === 'string') {
@@ -97,8 +97,14 @@ export function createMockAdapter(matchers: MockMatcher[]): HttpAdapter {
 
       // Parse response using schema from responses map
       const responseSchema = options.responses?.[response.status];
-      if (responseSchema && typeof responseSchema === 'object' && 'parse' in responseSchema) {
-        const parsed = (responseSchema as { parse: (xml: string) => unknown }).parse(body);
+      if (
+        responseSchema &&
+        typeof responseSchema === 'object' &&
+        'parse' in responseSchema
+      ) {
+        const parsed = (
+          responseSchema as { parse: (xml: string) => unknown }
+        ).parse(body);
         return parsed as TResponse;
       }
 
@@ -114,7 +120,7 @@ export function createMockAdapter(matchers: MockMatcher[]): HttpAdapter {
  */
 export function createSimpleMockAdapter(
   body: string | FixtureHandle,
-  status = 200
+  status = 200,
 ): HttpAdapter {
   return createMockAdapter([
     {

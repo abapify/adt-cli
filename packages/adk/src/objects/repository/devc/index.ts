@@ -3,8 +3,8 @@
  */
 
 // Public types
-export type { 
-  AbapPackage, 
+export type {
+  AbapPackage,
   PackageType,
   PackageAttributes,
   ObjectReference,

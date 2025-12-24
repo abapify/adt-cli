@@ -8,13 +8,15 @@ export const infoCommand = new Command('info')
   .option('--system', 'Get system information')
   .option(
     '-o, --output <file>',
-    'Save data to file (JSON or XML based on extension)'
+    'Save data to file (JSON or XML based on extension)',
   )
   .action(async (options) => {
     try {
       // If no flags specified, show both
-      const showSession = options.session || (!options.session && !options.system);
-      const showSystem = options.system || (!options.session && !options.system);
+      const showSession =
+        options.session || (!options.session && !options.system);
+      const showSystem =
+        options.system || (!options.session && !options.system);
 
       // Capture data for output
       let capturedData: any = {};
@@ -45,8 +47,16 @@ export const infoCommand = new Command('info')
 
       // Fetch system info
       if (showSystem) {
-        console.log(showSession ? '\n🔄 Fetching system information...\n' : '🔄 Fetching system information...\n');
-        const systemData = await adtClient.adt.core.http.systeminformation.getSystemInfo() as unknown as Record<string, unknown>;
+        console.log(
+          showSession
+            ? '\n🔄 Fetching system information...\n'
+            : '🔄 Fetching system information...\n',
+        );
+        const systemData =
+          (await adtClient.adt.core.http.systeminformation.getSystemInfo()) as unknown as Record<
+            string,
+            unknown
+          >;
         capturedData.system = systemData;
 
         if (!options.output) {
@@ -54,9 +64,10 @@ export const infoCommand = new Command('info')
 
           // Display key system properties
           const displayProperty = (key: string, label: string) => {
-            if (systemData[key]) console.log(`  • ${label}: ${systemData[key]}`);
+            if (systemData[key])
+              console.log(`  • ${label}: ${systemData[key]}`);
           };
-          
+
           displayProperty('systemID', 'System ID');
           displayProperty('client', 'Client');
           displayProperty('userName', 'User');
@@ -65,11 +76,21 @@ export const infoCommand = new Command('info')
           displayProperty('sapRelease', 'SAP Release');
 
           // Display any other properties
-          const knownKeys = ['systemID', 'client', 'userName', 'userFullName', 'language', 'release', 'sapRelease'];
-          const otherKeys = Object.keys(systemData).filter(k => !knownKeys.includes(k));
+          const knownKeys = [
+            'systemID',
+            'client',
+            'userName',
+            'userFullName',
+            'language',
+            'release',
+            'sapRelease',
+          ];
+          const otherKeys = Object.keys(systemData).filter(
+            (k) => !knownKeys.includes(k),
+          );
           if (otherKeys.length > 0) {
             console.log('\n  Additional properties:');
-            otherKeys.forEach(key => {
+            otherKeys.forEach((key) => {
               console.log(`    • ${key}: ${JSON.stringify(systemData[key])}`);
             });
           }
@@ -87,10 +108,7 @@ export const infoCommand = new Command('info')
         }
 
         // Save as JSON
-        writeFileSync(
-          options.output,
-          JSON.stringify(capturedData, null, 2)
-        );
+        writeFileSync(options.output, JSON.stringify(capturedData, null, 2));
         console.log(`\n💾 Information saved to: ${options.output}`);
       }
 
@@ -98,7 +116,7 @@ export const infoCommand = new Command('info')
     } catch (error) {
       console.error(
         '❌ Failed to fetch information:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       if (error instanceof Error && error.stack) {
         console.error('\nStack trace:', error.stack);

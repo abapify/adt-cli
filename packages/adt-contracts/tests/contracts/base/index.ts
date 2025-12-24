@@ -1,6 +1,6 @@
 /**
  * Contract Testing Framework
- * 
+ *
  * Tests contract definitions: method, path, headers, body, responses.
  * Uses speci's RestEndpointDescriptor - no duplicate types.
  */
@@ -58,11 +58,11 @@ export function runScenario(scenario: ContractScenario): void {
     for (const op of scenario.operations) {
       describe(op.name, () => {
         const contract = op.contract();
-        
+
         it('has correct method', () => {
           expect(contract.method).toBe(op.method);
         });
-        
+
         it('has correct path', () => {
           if (typeof op.path === 'string') {
             expect(contract.path).toBe(op.path);
@@ -70,40 +70,40 @@ export function runScenario(scenario: ContractScenario): void {
             expect(contract.path).toMatch(op.path);
           }
         });
-        
+
         // Capture values to avoid non-null assertions in callbacks
         const { headers, query, body, response } = op;
-        
+
         if (headers) {
           it('has correct headers', () => {
             expect(contract.headers).toMatchObject(headers);
           });
         }
-        
+
         if (query) {
           it('has correct query params', () => {
             expect(contract.query).toEqual(query);
           });
         }
-        
+
         if (body) {
-          const bodySchema = body.schema as { 
-            parse: (xml: string) => unknown; 
+          const bodySchema = body.schema as {
+            parse: (xml: string) => unknown;
             build?: (data: unknown) => string;
           };
           const bodyFixture = body.fixture;
-          
+
           it('has body schema', () => {
             expect(contract.body).toBe(body.schema);
           });
-          
+
           if (bodyFixture) {
             it('body schema parses fixture', async () => {
               const xml = await bodyFixture.load();
               const parsed = bodySchema.parse(xml);
               expect(parsed).toBeDefined();
             });
-            
+
             it('body schema round-trips', async () => {
               const xml = await bodyFixture.load();
               const parsed = bodySchema.parse(xml);
@@ -114,16 +114,18 @@ export function runScenario(scenario: ContractScenario): void {
             });
           }
         }
-        
+
         if (response) {
-          const responseSchema = response.schema as { parse: (xml: string) => unknown };
+          const responseSchema = response.schema as {
+            parse: (xml: string) => unknown;
+          };
           const responseFixture = response.fixture;
           const responseStatus = response.status;
-          
+
           it(`has response schema for ${responseStatus}`, () => {
             expect(contract.responses[responseStatus]).toBe(response.schema);
           });
-          
+
           if (responseFixture) {
             it('response schema parses fixture', async () => {
               const xml = await responseFixture.load();

@@ -6,75 +6,86 @@
  */
 
 export type InterfacesSchema = {
-    abapInterface: {
-        containerRef?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-        };
-        adtTemplate?: {
-            adtProperty?: {
-                $value?: string;
-                key?: string;
-            }[];
-            name?: string;
-        };
-        packageRef?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-        };
-        template?: {
-            property?: {
-                $value?: string;
-                key?: string;
-            }[];
-            name?: string;
-        };
-        syntaxConfiguration?: {
-            language?: {
-                version?: string;
-                description?: string;
-            };
-            objectUsage?: {
-                restricted?: boolean;
-            };
-        };
-        interfaceRef?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-        }[];
-        name: string;
-        type: string;
-        changedBy?: string;
-        changedAt?: string;
-        createdAt?: string;
-        createdBy?: string;
-        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string;
-        descriptionTextLimit?: number;
-        language?: string;
-        masterSystem?: string;
-        masterLanguage?: string;
-        responsible?: string;
-        abapLanguageVersion?: string;
-        sourceUri?: string;
-        sourceObjectStatus?: "SAPStandardProduction" | "customerProduction" | "system" | "test";
-        fixPointArithmetic?: boolean;
-        activeUnicodeCheck?: boolean;
-        modeled?: boolean;
+  abapInterface: {
+    containerRef?: {
+      extension?: unknown;
+      uri?: string;
+      parentUri?: string;
+      type?: string;
+      name?: string;
+      packageName?: string;
+      description?: string;
     };
+    adtTemplate?: {
+      adtProperty?: {
+        $value?: string;
+        key?: string;
+      }[];
+      name?: string;
+    };
+    packageRef?: {
+      extension?: unknown;
+      uri?: string;
+      parentUri?: string;
+      type?: string;
+      name?: string;
+      packageName?: string;
+      description?: string;
+    };
+    template?: {
+      property?: {
+        $value?: string;
+        key?: string;
+      }[];
+      name?: string;
+    };
+    syntaxConfiguration?: {
+      language?: {
+        version?: string;
+        description?: string;
+      };
+      objectUsage?: {
+        restricted?: boolean;
+      };
+    };
+    interfaceRef?: {
+      extension?: unknown;
+      uri?: string;
+      parentUri?: string;
+      type?: string;
+      name?: string;
+      packageName?: string;
+      description?: string;
+    }[];
+    name: string;
+    type: string;
+    changedBy?: string;
+    changedAt?: string;
+    createdAt?: string;
+    createdBy?: string;
+    version?:
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string;
+    descriptionTextLimit?: number;
+    language?: string;
+    masterSystem?: string;
+    masterLanguage?: string;
+    responsible?: string;
+    abapLanguageVersion?: string;
+    sourceUri?: string;
+    sourceObjectStatus?:
+      | 'SAPStandardProduction'
+      | 'customerProduction'
+      | 'system'
+      | 'test';
+    fixPointArithmetic?: boolean;
+    activeUnicodeCheck?: boolean;
+    modeled?: boolean;
+  };
 };

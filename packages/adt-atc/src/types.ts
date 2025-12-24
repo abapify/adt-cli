@@ -1,6 +1,6 @@
 /**
  * ATC Types
- * 
+ *
  * Types for ATC command and formatters.
  */
 

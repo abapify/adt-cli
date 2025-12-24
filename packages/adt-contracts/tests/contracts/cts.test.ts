@@ -1,28 +1,34 @@
 /**
  * CTS (Change and Transport System) Contract Scenarios
- * 
+ *
  * NOTE: CTS contracts use plain objects with methods (not wrapped with contract()),
  * so client call tests are not applicable here. The contract definition tests
  * verify the structure is correct.
  */
 
 import { fixtures } from 'adt-fixtures';
-import { transportmanagmentSingle, transportmanagmentCreate, transportfind, transportmanagment } from '../../src/schemas';
+import {
+  transportmanagmentSingle,
+  transportmanagmentCreate,
+  transportfind,
+  transportmanagment,
+} from '../../src/schemas';
 import { ContractScenario, runScenario, type ContractOperation } from './base';
 import { transports, TransportFunction } from '../../src/adt/cts/transports';
 import { transportrequests } from '../../src/adt/cts/transportrequests';
 
 class TransportsScenario extends ContractScenario {
   readonly name = 'CTS Transports';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'find transports',
-      contract: () => transports.find({ 
-        _action: 'FIND', 
-        user: '*', 
-        trfunction: TransportFunction.ALL 
-      }),
+      contract: () =>
+        transports.find({
+          _action: 'FIND',
+          user: '*',
+          trfunction: TransportFunction.ALL,
+        }),
       method: 'GET',
       path: '/sap/bc/adt/cts/transports',
       headers: { Accept: '*/*' },
@@ -34,11 +40,12 @@ class TransportsScenario extends ContractScenario {
     },
     {
       name: 'find workbench requests for user',
-      contract: () => transports.find({ 
-        _action: 'FIND', 
-        user: 'DEVELOPER', 
-        trfunction: TransportFunction.WORKBENCH 
-      }),
+      contract: () =>
+        transports.find({
+          _action: 'FIND',
+          user: 'DEVELOPER',
+          trfunction: TransportFunction.WORKBENCH,
+        }),
       method: 'GET',
       path: '/sap/bc/adt/cts/transports',
       query: { _action: 'FIND', user: 'DEVELOPER', trfunction: 'K' },
@@ -49,7 +56,7 @@ class TransportsScenario extends ContractScenario {
 
 class TransportRequestsScenario extends ContractScenario {
   readonly name = 'CTS Transport Requests';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'list all transports',

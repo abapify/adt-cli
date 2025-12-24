@@ -8,7 +8,7 @@ export const discoveryCommand = new Command('discovery')
   .description('Discover available ADT services')
   .option(
     '-o, --output <file>',
-    'Save discovery data to file (JSON or XML based on extension)'
+    'Save discovery data to file (JSON or XML based on extension)',
   )
   .option('-f, --filter <text>', 'Filter workspaces by title')
   .action(async (options, command) => {
@@ -52,7 +52,7 @@ export const discoveryCommand = new Command('discovery')
     } catch (error) {
       console.error(
         '❌ Discovery failed:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

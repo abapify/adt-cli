@@ -1,6 +1,6 @@
 /**
  * Schema re-exports
- * 
+ *
  * Re-exports all schemas from the generated file plus helpers.
  * This file exists so imports like `from '../../schemas'` continue to work.
  */

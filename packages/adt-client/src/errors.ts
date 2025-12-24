@@ -1,6 +1,6 @@
 /**
  * ADT Error Handling
- * 
+ *
  * SAP ADT returns errors in a standard XML format defined by exception.xsd:
  * <exc:exception xmlns:exc="http://www.sap.com/abapxml/types/communicationframework">
  *   <namespace id="..."/>
@@ -11,11 +11,14 @@
  *     <entry key="key1">value1</entry>
  *   </properties>
  * </exc:exception>
- * 
+ *
  * Uses the generated exception schema from @abapify/adt-schemas for type-safe parsing.
  */
 
-import { exception as exceptionSchema, type InferTypedSchema } from '@abapify/adt-schemas';
+import {
+  exception as exceptionSchema,
+  type InferTypedSchema,
+} from '@abapify/adt-schemas';
 
 /** Exception schema type - inferred from the typed schema */
 type ExceptionSchema = InferTypedSchema<typeof exceptionSchema>;
@@ -41,7 +44,7 @@ export type { ExceptionSchema };
 
 /**
  * Custom error class for ADT exceptions
- * 
+ *
  * Provides structured access to SAP ADT error details.
  */
 export class AdtError extends Error {
@@ -68,9 +71,10 @@ export class AdtError extends Error {
   }) {
     // Build a meaningful error message
     const baseMsg = `HTTP ${options.status}: ${options.statusText}`;
-    const detailMsg = options.exception?.message || options.exception?.localizedMessage;
+    const detailMsg =
+      options.exception?.message || options.exception?.localizedMessage;
     const fullMsg = detailMsg ? `${baseMsg} - ${detailMsg}` : baseMsg;
-    
+
     super(fullMsg);
     this.name = 'AdtError';
     this.status = options.status;
@@ -79,7 +83,7 @@ export class AdtError extends Error {
     this.method = options.method;
     this.rawBody = options.rawBody;
     this.exception = options.exception;
-    
+
     // Maintain proper stack trace in V8 environments
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, AdtError);
@@ -90,7 +94,11 @@ export class AdtError extends Error {
    * Get the most relevant error message
    */
   get detailMessage(): string {
-    return this.exception?.localizedMessage || this.exception?.message || this.statusText;
+    return (
+      this.exception?.localizedMessage ||
+      this.exception?.message ||
+      this.statusText
+    );
   }
 
   /**
@@ -117,12 +125,15 @@ export class AdtError extends Error {
 
 /**
  * Parse ADT exception XML into structured data
- * 
+ *
  * Uses the generated exception schema from @abapify/adt-schemas for type-safe parsing.
  */
 export function parseAdtException(xml: string): AdtExceptionData | undefined {
   // Quick check if this looks like an ADT exception
-  if (!xml.includes('exception') || !xml.includes('http://www.sap.com/abapxml/types/communicationframework')) {
+  if (
+    !xml.includes('exception') ||
+    !xml.includes('http://www.sap.com/abapxml/types/communicationframework')
+  ) {
     return undefined;
   }
 
@@ -130,7 +141,7 @@ export function parseAdtException(xml: string): AdtExceptionData | undefined {
     // Use the generated schema for type-safe parsing
     const parsed = exceptionSchema.parse(xml);
     const exc = parsed.exception;
-    
+
     if (!exc) {
       return undefined;
     }
@@ -153,8 +164,8 @@ export function parseAdtException(xml: string): AdtExceptionData | undefined {
     }
     if (exc.properties?.entry) {
       result.properties = {};
-      const entries = Array.isArray(exc.properties.entry) 
-        ? exc.properties.entry 
+      const entries = Array.isArray(exc.properties.entry)
+        ? exc.properties.entry
         : [exc.properties.entry];
       for (const entry of entries) {
         if (entry.key && entry.$value) {
@@ -164,7 +175,12 @@ export function parseAdtException(xml: string): AdtExceptionData | undefined {
     }
 
     // Return undefined if we didn't find any meaningful data
-    if (!result.namespace && !result.type && !result.message && !result.localizedMessage) {
+    if (
+      !result.namespace &&
+      !result.type &&
+      !result.message &&
+      !result.localizedMessage
+    ) {
       return undefined;
     }
 
@@ -183,7 +199,7 @@ export function createAdtError(
   statusText: string,
   url: string,
   method: string,
-  rawBody: string
+  rawBody: string,
 ): AdtError {
   const exception = parseAdtException(rawBody);
   return new AdtError({

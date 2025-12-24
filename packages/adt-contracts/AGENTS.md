@@ -9,6 +9,7 @@ Type-safe SAP ADT REST API contracts using `speci` + `adt-schemas`.
 ### Purpose
 
 Tests contract **definitions** (not HTTP calls):
+
 - **Method** - GET, POST, PUT, DELETE
 - **Path** - URL pattern with parameters
 - **Headers** - Accept, Content-Type
@@ -58,7 +59,7 @@ import { fixtures } from 'adt-fixtures';
 
 export class MyApiScenario extends ContractScenario {
   readonly name = 'My API';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get item',
@@ -69,7 +70,7 @@ export class MyApiScenario extends ContractScenario {
       response: {
         status: 200,
         schema: mySchema,
-        fixture: fixtures.myapi.item,  // Optional: test parsing
+        fixture: fixtures.myapi.item, // Optional: test parsing
       },
     },
     {
@@ -83,7 +84,7 @@ export class MyApiScenario extends ContractScenario {
       },
       body: {
         schema: mySchema,
-        fixture: fixtures.myapi.create,  // Optional: test round-trip
+        fixture: fixtures.myapi.create, // Optional: test round-trip
       },
       response: { status: 200, schema: mySchema },
     },
@@ -92,6 +93,7 @@ export class MyApiScenario extends ContractScenario {
 ```
 
 Register in `tests/contracts/index.ts`:
+
 ```typescript
 import { MyApiScenario } from './myapi';
 export const SCENARIOS = [..., new MyApiScenario()];
@@ -99,17 +101,17 @@ export const SCENARIOS = [..., new MyApiScenario()];
 
 ### What Gets Tested
 
-| Test | When |
-|------|------|
-| `has correct method` | Always |
-| `has correct path` | Always |
-| `has correct headers` | If `headers` defined |
-| `has correct query params` | If `query` defined |
-| `has body schema` | If `body` defined |
-| `body schema parses fixture` | If `body.fixture` defined |
-| `body schema round-trips` | If `body.fixture` + schema has `build` |
-| `has response schema for N` | If `response` defined |
-| `response schema parses fixture` | If `response.fixture` defined |
+| Test                             | When                                   |
+| -------------------------------- | -------------------------------------- |
+| `has correct method`             | Always                                 |
+| `has correct path`               | Always                                 |
+| `has correct headers`            | If `headers` defined                   |
+| `has correct query params`       | If `query` defined                     |
+| `has body schema`                | If `body` defined                      |
+| `body schema parses fixture`     | If `body.fixture` defined              |
+| `body schema round-trips`        | If `body.fixture` + schema has `build` |
+| `has response schema for N`      | If `response` defined                  |
+| `response schema parses fixture` | If `response.fixture` defined          |
 
 ### Fixtures
 
@@ -119,21 +121,21 @@ Use `adt-fixtures` for real SAP XML samples:
 import { fixtures } from 'adt-fixtures';
 
 // Type-safe fixture access
-fixtures.transport.single    // GET transport response
-fixtures.transport.create    // POST create request
-fixtures.atc.worklist        // ATC worklist
-fixtures.atc.result          // ATC result
+fixtures.transport.single; // GET transport response
+fixtures.transport.create; // POST create request
+fixtures.atc.worklist; // ATC worklist
+fixtures.atc.result; // ATC result
 ```
 
 ## Contract Areas
 
-| Area | Path | Schemas Used |
-|------|------|--------------|
-| **CTS** | `/sap/bc/adt/cts/` | `transportmanagment*`, `transportfind` |
-| **ATC** | `/sap/bc/adt/atc/` | `atcworklist` |
-| **Discovery** | `/sap/bc/adt/discovery` | `discovery` |
-| **OO** | `/sap/bc/adt/oo/` | `classes`, `interfaces` |
-| **Packages** | `/sap/bc/adt/packages/` | `packagesV1` |
+| Area          | Path                    | Schemas Used                           |
+| ------------- | ----------------------- | -------------------------------------- |
+| **CTS**       | `/sap/bc/adt/cts/`      | `transportmanagment*`, `transportfind` |
+| **ATC**       | `/sap/bc/adt/atc/`      | `atcworklist`                          |
+| **Discovery** | `/sap/bc/adt/discovery` | `discovery`                            |
+| **OO**        | `/sap/bc/adt/oo/`       | `classes`, `interfaces`                |
+| **Packages**  | `/sap/bc/adt/packages/` | `packagesV1`                           |
 
 ## Running Tests
 
@@ -171,10 +173,11 @@ The `schemas.ts` file **automatically wraps all schemas** with speci's `_infer` 
 import { mySchema } from '../../schemas';
 
 const myContract = contract({
-  post: (params?) => http.post('/path', {
-    body: mySchema,  // ✅ Already speci-compatible!
-    responses: { 200: otherSchema },
-  }),
+  post: (params?) =>
+    http.post('/path', {
+      body: mySchema, // ✅ Already speci-compatible!
+      responses: { 200: otherSchema },
+    }),
 });
 ```
 
@@ -188,7 +191,7 @@ const myContract = contract({
 // adt-schemas is NOT responsible for speci compatibility
 
 // ❌ WRONG: Import directly from @abapify/adt-schemas
-import { mySchema } from '@abapify/adt-schemas';  // ❌ Bypasses schemas.ts
+import { mySchema } from '@abapify/adt-schemas'; // ❌ Bypasses schemas.ts
 ```
 
 ### ✅ ALWAYS Do This
@@ -204,11 +207,11 @@ responses: { 200: mySchema }
 
 ### Why This Architecture?
 
-| Package | Responsibility |
-|---------|---------------|
-| **ts-xsd** | Generic W3C XSD parsing/building - NO speci knowledge |
-| **adt-schemas** | SAP ADT schemas using ts-xsd - NO speci knowledge |
-| **adt-contracts** | Integration layer - bridges ts-xsd and speci |
-| **speci** | REST contract library - defines Inferrable interface |
+| Package           | Responsibility                                        |
+| ----------------- | ----------------------------------------------------- |
+| **ts-xsd**        | Generic W3C XSD parsing/building - NO speci knowledge |
+| **adt-schemas**   | SAP ADT schemas using ts-xsd - NO speci knowledge     |
+| **adt-contracts** | Integration layer - bridges ts-xsd and speci          |
+| **speci**         | REST contract library - defines Inferrable interface  |
 
 The `schemas.ts` file is the **only place** where ts-xsd and speci are bridged. All schemas are automatically wrapped with `toSpeciSchema()` on export, keeping all packages independent and maintainable.

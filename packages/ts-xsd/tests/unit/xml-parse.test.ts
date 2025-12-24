@@ -16,9 +16,7 @@ describe('parseXml', () => {
           {
             name: 'PersonType',
             sequence: {
-              element: [
-                { name: 'name', type: 'xs:string' },
-              ],
+              element: [{ name: 'name', type: 'xs:string' }],
             },
           },
         ],
@@ -49,7 +47,9 @@ describe('parseXml', () => {
       const xml = `<Person><firstName>John</firstName><lastName>Doe</lastName></Person>`;
       const result = parseXml(schema, xml);
 
-      assert.deepStrictEqual(result, { Person: { firstName: 'John', lastName: 'Doe' } });
+      assert.deepStrictEqual(result, {
+        Person: { firstName: 'John', lastName: 'Doe' },
+      });
     });
 
     it('should handle missing optional elements', () => {
@@ -82,9 +82,7 @@ describe('parseXml', () => {
         complexType: [
           {
             name: 'PersonType',
-            attribute: [
-              { name: 'id', type: 'xs:string' },
-            ],
+            attribute: [{ name: 'id', type: 'xs:string' }],
           },
         ],
       } as const satisfies SchemaLike;
@@ -120,9 +118,7 @@ describe('parseXml', () => {
         complexType: [
           {
             name: 'PersonType',
-            attribute: [
-              { name: 'id', type: 'xs:string' },
-            ],
+            attribute: [{ name: 'id', type: 'xs:string' }],
           },
         ],
       } as const satisfies SchemaLike;
@@ -260,9 +256,7 @@ describe('parseXml', () => {
           {
             name: 'ListType',
             sequence: {
-              element: [
-                { name: 'item', type: 'xs:string', maxOccurs: 5 },
-              ],
+              element: [{ name: 'item', type: 'xs:string', maxOccurs: 5 }],
             },
           },
         ],
@@ -281,9 +275,7 @@ describe('parseXml', () => {
           {
             name: 'ListType',
             sequence: {
-              element: [
-                { name: 'item', type: 'xs:string', maxOccurs: '10' },
-              ],
+              element: [{ name: 'item', type: 'xs:string', maxOccurs: '10' }],
             },
           },
         ],
@@ -304,17 +296,13 @@ describe('parseXml', () => {
           {
             name: 'OrderType',
             sequence: {
-              element: [
-                { name: 'customer', type: 'CustomerType' },
-              ],
+              element: [{ name: 'customer', type: 'CustomerType' }],
             },
           },
           {
             name: 'CustomerType',
             sequence: {
-              element: [
-                { name: 'name', type: 'xs:string' },
-              ],
+              element: [{ name: 'name', type: 'xs:string' }],
             },
           },
         ],
@@ -478,7 +466,9 @@ describe('parseXml', () => {
       const xml = `<Employee><name>John</name><department>Engineering</department></Employee>`;
       const result = parseXml(schema, xml);
 
-      assert.deepStrictEqual(result, { Employee: { name: 'John', department: 'Engineering' } });
+      assert.deepStrictEqual(result, {
+        Employee: { name: 'John', department: 'Engineering' },
+      });
     });
 
     it('should merge inherited attributes', () => {
@@ -632,7 +622,9 @@ describe('parseXml', () => {
       const xml = `<Envelope version="1.0"><body><content>Hello</content></body></Envelope>`;
       const result = parseXml(schema, xml);
 
-      assert.deepStrictEqual(result, { Envelope: { version: '1.0', body: { content: 'Hello' } } });
+      assert.deepStrictEqual(result, {
+        Envelope: { version: '1.0', body: { content: 'Hello' } },
+      });
     });
   });
 
@@ -668,7 +660,9 @@ describe('parseXml', () => {
       const xml = `<Document><header><title>Test</title></header></Document>`;
       const result = parseXml(schema, xml);
 
-      assert.deepStrictEqual(result, { Document: { header: { title: 'Test' } } });
+      assert.deepStrictEqual(result, {
+        Document: { header: { title: 'Test' } },
+      });
     });
 
     it('should resolve element ref to imported schema element', () => {
@@ -876,9 +870,7 @@ describe('parseXml', () => {
             simpleContent: {
               extension: {
                 base: 'xs:string',
-                attribute: [
-                  { name: 'lang', type: 'xs:string' },
-                ],
+                attribute: [{ name: 'lang', type: 'xs:string' }],
               },
             },
           },

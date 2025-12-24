@@ -1,11 +1,15 @@
 /**
  * Test for DTEL (Data Element) schema
- * 
+ *
  * Fixture-driven: parses XML, validates content, round-trips
  */
 
 import assert from 'node:assert';
-import { runSchemaTests, createTypedSchema, type SchemaScenario } from './base/scenario.ts';
+import {
+  runSchemaTests,
+  createTypedSchema,
+  type SchemaScenario,
+} from './base/scenario.ts';
 import { dtel as dtelSchema } from '../../src/schemas/generated/schemas/index.ts';
 import type { DtelSchema } from '../../src/schemas/generated/types/dtel.ts';
 
@@ -21,13 +25,13 @@ const scenario: SchemaScenario<DtelSchema> = {
       validate: (data) => {
         // Schema is union type - assert to the abapGit variant
         const root = (data as any).abapGit;
-        
+
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');
         assert.strictEqual(root.serializer, 'LCL_OBJECT_DTEL');
         assert.strictEqual(root.serializer_version, 'v1.0.0');
         assert.strictEqual(root.abap.version, '1.0');
-        
+
         // DD04V content (data element)
         const dd04v = root.abap.values.DD04V!;
         assert.strictEqual(dd04v.ROLLNAME, 'ZAGE_DTEL_WITH_DOMAIN');

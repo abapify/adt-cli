@@ -3,7 +3,7 @@
  *
  * Endpoint: /sap/bc/adt/oo/interfaces
  * Full CRUD operations for ABAP interfaces including source code management.
- * 
+ *
  * Uses the crud() helper with sources option for complete
  * interface operations including metadata and source code.
  */
@@ -25,7 +25,7 @@ export type InterfaceResponse = InferTypedSchema<typeof interfacesSchema>;
 /**
  * /sap/bc/adt/oo/interfaces
  * Full CRUD operations for ABAP interfaces
- * 
+ *
  * Includes:
  * - Basic CRUD: get, post, put, delete
  * - Lock/Unlock: lock, unlock

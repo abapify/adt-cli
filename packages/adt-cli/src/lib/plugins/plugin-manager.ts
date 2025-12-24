@@ -61,7 +61,7 @@ export class PluginManager {
    */
   async loadPlugin(
     pluginName: string,
-    options?: Record<string, any>
+    options?: Record<string, any>,
   ): Promise<PluginInfo> {
     const shortName = this.getShortName(pluginName);
 
@@ -94,7 +94,7 @@ export class PluginManager {
       throw new Error(
         `Failed to load plugin '${pluginName}': ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
@@ -121,8 +121,8 @@ export class PluginManager {
     if (!plugin) {
       throw new Error(
         `Format '${shortName}' not loaded. Available: ${this.getAvailableFormats().join(
-          ', '
-        )}`
+          ', ',
+        )}`,
       );
     }
     return plugin.instance;
@@ -193,7 +193,7 @@ export class PluginManager {
    */
   private async loadExternalPlugin(
     packageName: string,
-    options?: Record<string, any>
+    options?: Record<string, any>,
   ): Promise<BaseFormat> {
     try {
       // Dynamic import of external package
@@ -209,7 +209,7 @@ export class PluginManager {
 
       if (!FormatClass) {
         throw new Error(
-          `No format class found in package '${packageName}'. Expected exports: default, Format, or *Format`
+          `No format class found in package '${packageName}'. Expected exports: default, Format, or *Format`,
         );
       }
 
@@ -220,7 +220,7 @@ export class PluginManager {
         error.message.includes('Cannot resolve module')
       ) {
         throw new Error(
-          `Package '${packageName}' not found. Install it with: npm install ${packageName}`
+          `Package '${packageName}' not found. Install it with: npm install ${packageName}`,
         );
       }
       throw error;
@@ -233,9 +233,11 @@ export class PluginManager {
    */
   private async loadBuiltinPlugin(
     pluginName: string,
-    _options?: Record<string, any>
+    _options?: Record<string, any>,
   ): Promise<BaseFormat> {
-    throw new Error(`Built-in plugin '${pluginName}' not available - FormatRegistry needs ADK migration`);
+    throw new Error(
+      `Built-in plugin '${pluginName}' not available - FormatRegistry needs ADK migration`,
+    );
   }
 
   /**

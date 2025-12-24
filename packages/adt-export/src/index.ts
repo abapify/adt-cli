@@ -1,8 +1,8 @@
 /**
  * @abapify/adt-export
- * 
+ *
  * Export CLI plugin for adt-cli - deploy local files to SAP.
- * 
+ *
  * @example
  * ```typescript
  * // In adt.config.ts
@@ -16,4 +16,9 @@
 
 export { exportCommand } from './commands/export';
 export { createFileTree, FsFileTree, MemoryFileTree } from './utils/filetree';
-export type { FileTree, ExportResult, ExportObjectResult, ExportOptions } from './types';
+export type {
+  FileTree,
+  ExportResult,
+  ExportObjectResult,
+  ExportOptions,
+} from './types';

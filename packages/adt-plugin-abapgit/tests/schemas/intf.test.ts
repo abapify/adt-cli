@@ -1,11 +1,15 @@
 /**
  * Test for INTF (Interface) schema
- * 
+ *
  * Fixture-driven: parses XML, validates content, round-trips
  */
 
 import assert from 'node:assert';
-import { runSchemaTests, createTypedSchema, type SchemaScenario } from './base/scenario.ts';
+import {
+  runSchemaTests,
+  createTypedSchema,
+  type SchemaScenario,
+} from './base/scenario.ts';
 import { intf as intfSchema } from '../../src/schemas/generated/schemas/index.ts';
 import type { IntfSchema } from '../../src/schemas/generated/types/intf.ts';
 
@@ -21,13 +25,13 @@ const scenario: SchemaScenario<IntfSchema> = {
       validate: (data) => {
         // Schema is union type - assert to the abapGit variant
         const root = (data as any).abapGit;
-        
+
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');
         assert.strictEqual(root.serializer, 'LCL_OBJECT_INTF');
         assert.strictEqual(root.serializer_version, 'v1.0.0');
         assert.strictEqual(root.abap.version, '1.0');
-        
+
         // VSEOINTERF content (interface)
         const intf = root.abap.values.VSEOINTERF!;
         assert.strictEqual(intf.CLSNAME, 'ZIF_AGE_TEST');

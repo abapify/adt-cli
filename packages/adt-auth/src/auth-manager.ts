@@ -1,14 +1,14 @@
 /**
  * Authentication Manager
- * 
+ *
  * Single source of truth for authentication across all consumers:
  * - CLI
  * - MCP Server
  * - Other tools
  */
 
-import type { 
-  AuthSession, 
+import type {
+  AuthSession,
   CookieCredentials,
   AuthPlugin,
   AuthPluginOptions,
@@ -39,22 +39,28 @@ export class AuthManager {
 
   /**
    * Login using a destination configuration
-   * 
+   *
    * Dynamically loads the plugin specified in destination.type and authenticates.
-   * 
+   *
    * @param sid - System ID (e.g., 'BHF', 'S0D')
    * @param destination - Destination config with plugin type and options
    */
   async login(sid: string, destination: Destination): Promise<AuthSession> {
     // Dynamic import of the auth plugin
-    const pluginModule = await import(destination.type) as { authPlugin: AuthPlugin };
-    
+    const pluginModule = (await import(destination.type)) as {
+      authPlugin: AuthPlugin;
+    };
+
     if (!pluginModule.authPlugin?.authenticate) {
-      throw new Error(`Plugin ${destination.type} does not export authPlugin.authenticate`);
+      throw new Error(
+        `Plugin ${destination.type} does not export authPlugin.authenticate`,
+      );
     }
 
     // Authenticate using the plugin
-    const result = await pluginModule.authPlugin.authenticate(destination.options);
+    const result = await pluginModule.authPlugin.authenticate(
+      destination.options,
+    );
 
     // Build session based on result type
     const session = this.buildSession(sid, destination, result);
@@ -73,7 +79,11 @@ export class AuthManager {
   /**
    * Build session from plugin result
    */
-  private buildSession(sid: string, destination: Destination, result: AuthPluginResult): AuthSession {
+  private buildSession(
+    sid: string,
+    destination: Destination,
+    result: AuthPluginResult,
+  ): AuthSession {
     if (result.method === 'cookie') {
       return {
         sid: sid.toUpperCase(),
@@ -187,7 +197,7 @@ export class AuthManager {
    */
   async refreshCredentials(
     session: AuthSession,
-    options?: { log?: (message: string) => void }
+    options?: { log?: (message: string) => void },
   ): Promise<AuthSession | null> {
     const log = options?.log ?? console.log;
 
@@ -196,10 +206,14 @@ export class AuthManager {
     }
 
     // Dynamic import of the auth plugin (expects default export)
-    const pluginModule = await import(session.auth.plugin) as { default?: AuthPlugin };
+    const pluginModule = (await import(session.auth.plugin)) as {
+      default?: AuthPlugin;
+    };
 
     if (!pluginModule.default) {
-      throw new Error(`Plugin ${session.auth.plugin} does not have a default export`);
+      throw new Error(
+        `Plugin ${session.auth.plugin} does not have a default export`,
+      );
     }
 
     const plugin = pluginModule.default;
@@ -225,17 +239,26 @@ export class AuthManager {
         // Preserve original plugin options (including userDataDir)
         const destination: Destination = {
           type: session.auth.plugin,
-          options: session.auth.pluginOptions || { url: session.host, client: session.client },
+          options: session.auth.pluginOptions || {
+            url: session.host,
+            client: session.client,
+          },
         };
 
-        const updatedSession = this.buildSession(session.sid, destination, result);
+        const updatedSession = this.buildSession(
+          session.sid,
+          destination,
+          result,
+        );
         this.saveSession(updatedSession);
 
         return updatedSession;
       }
 
       // Refresh failed - fall through to interactive authenticate
-      log('⚠️  Silent refresh failed - falling back to interactive authentication...');
+      log(
+        '⚠️  Silent refresh failed - falling back to interactive authentication...',
+      );
     }
 
     // Fallback: Call authenticate (full re-auth with browser interaction)
@@ -275,7 +298,9 @@ export class AuthManager {
   /**
    * Get basic auth credentials (convenience method)
    */
-  getBasicAuth(session: AuthSession): { username: string; password: string } | null {
+  getBasicAuth(
+    session: AuthSession,
+  ): { username: string; password: string } | null {
     if (session.auth.method !== 'basic') {
       return null;
     }

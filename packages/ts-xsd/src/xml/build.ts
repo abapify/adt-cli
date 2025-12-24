@@ -1,6 +1,6 @@
 /**
  * XML Builder for W3C Schema (Walker-based implementation)
- * 
+ *
  * Build XML string from typed JavaScript object using W3C-compliant Schema definition.
  * Uses the walker module for schema traversal.
  */
@@ -27,13 +27,16 @@ import {
 /**
  * Get the namespace prefix for a schema's targetNamespace from the root schema's $xmlns
  */
-function getPrefixForSchema(schema: SchemaLike, rootSchema: SchemaLike): string | undefined {
+function getPrefixForSchema(
+  schema: SchemaLike,
+  rootSchema: SchemaLike,
+): string | undefined {
   const targetNs = (schema as { targetNamespace?: string }).targetNamespace;
   if (!targetNs) return undefined;
-  
+
   const xmlns = (rootSchema as { $xmlns?: Record<string, string> }).$xmlns;
   if (!xmlns) return undefined;
-  
+
   // Find prefix that maps to this namespace
   for (const [prefix, ns] of Object.entries(xmlns)) {
     if (ns === targetNs) {
@@ -54,7 +57,7 @@ import type { BuildOptions } from './build-utils';
 export function build<T extends SchemaLike>(
   schema: T,
   data: unknown,
-  options: BuildOptions = {}
+  options: BuildOptions = {},
 ): string {
   const { xmlDecl = true, encoding = 'utf-8', pretty = false } = options;
   const prefix = options.prefix ?? getSchemaPrefix(schema);
@@ -65,7 +68,7 @@ export function build<T extends SchemaLike>(
   let elementDecl: ElementLike | undefined;
   let elementSchema: SchemaLike = schema;
   let elementData = data as Record<string, unknown>;
-  
+
   if (options.rootElement) {
     // Search in main schema and $imports
     const found = findElement(options.rootElement, schema);
@@ -89,10 +92,13 @@ export function build<T extends SchemaLike>(
         elementDecl = found.element;
         elementSchema = found.schema;
         // Unwrap the data
-        elementData = elementData[potentialElementName] as Record<string, unknown>;
+        elementData = elementData[potentialElementName] as Record<
+          string,
+          unknown
+        >;
       }
     }
-    
+
     // Fallback to matching by data structure if not wrapped
     if (!elementDecl) {
       elementDecl = findMatchingElement(elementData, schema);
@@ -105,7 +111,7 @@ export function build<T extends SchemaLike>(
   // Get the complexType - either inline or by reference
   let rootType: ComplexTypeLike;
   let rootSchema: SchemaLike = elementSchema;
-  
+
   if (elementDecl.complexType) {
     rootType = elementDecl.complexType as ComplexTypeLike;
   } else if (elementDecl.type) {
@@ -117,7 +123,9 @@ export function build<T extends SchemaLike>(
     rootType = rootTypeEntry.ct;
     rootSchema = rootTypeEntry.schema;
   } else {
-    throw new Error(`Element ${elementDecl.name} has no type or inline complexType`);
+    throw new Error(
+      `Element ${elementDecl.name} has no type or inline complexType`,
+    );
   }
 
   // Create root element with namespace declarations
@@ -128,13 +136,13 @@ export function build<T extends SchemaLike>(
   const root = createRootElement(doc, elementName, schema, prefix);
 
   buildElement(doc, root, elementData, rootType, rootSchema, schema, prefix);
-  
+
   // Ensure root element is never self-closing (SAP ADT requires closing tags)
   // If root has no child nodes, add an empty text node to force </element> instead of />
   if (!root.hasChildNodes()) {
     root.appendChild(doc.createTextNode(''));
   }
-  
+
   doc.appendChild(root);
 
   let xml = new XMLSerializer().serializeToString(doc);
@@ -156,17 +164,20 @@ export function build<T extends SchemaLike>(
  */
 function findMatchingElement(
   data: Record<string, unknown>,
-  schema: SchemaLike
+  schema: SchemaLike,
 ): ElementLike | undefined {
   const dataKeys = new Set(Object.keys(data));
   let bestMatch: ElementLike | undefined;
   let bestScore = -1;
 
   // Helper to score an element against the data
-  const scoreElement = (element: ElementLike, searchSchema: SchemaLike): number => {
+  const scoreElement = (
+    element: ElementLike,
+    searchSchema: SchemaLike,
+  ): number => {
     let ct: ComplexTypeLike | undefined;
     let ctSchema: SchemaLike = searchSchema;
-    
+
     // Handle inline complexType
     if (element.complexType) {
       ct = element.complexType as ComplexTypeLike;
@@ -178,7 +189,7 @@ function findMatchingElement(
         ctSchema = typeEntry.schema;
       }
     }
-    
+
     if (!ct) return 0;
 
     // Get all field names from this type using walker
@@ -191,7 +202,7 @@ function findMatchingElement(
     }
 
     let score = 0;
-    dataKeys.forEach(key => {
+    dataKeys.forEach((key) => {
       if (typeFields.has(key)) score++;
     });
     return score;
@@ -215,7 +226,7 @@ function findMatchingElement(
     for (const importedSchema of imports) {
       const importedElements = importedSchema.element;
       if (!importedElements) continue;
-      
+
       for (const element of importedElements) {
         const score = scoreElement(element, importedSchema);
         if (score > bestScore) {
@@ -246,30 +257,41 @@ function buildElement(
   typeDef: ComplexTypeLike,
   schema: SchemaLike,
   rootSchema: SchemaLike,
-  prefix: string | undefined
+  prefix: string | undefined,
 ): void {
   // Build attributes using walker (handles inheritance)
   // The walker now returns the schema where each attribute is defined,
   // which is critical for correct namespace prefix resolution in inherited types
-  for (const { attribute, schema: attrSchema } of walkAttributes(typeDef, schema)) {
+  for (const { attribute, schema: attrSchema } of walkAttributes(
+    typeDef,
+    schema,
+  )) {
     if (!attribute.name) continue;
     const value = data[attribute.name];
     if (value !== undefined && value !== null) {
       // Check attributeFormDefault - attributes get prefix when "qualified"
       // Use the schema where the attribute is defined (from walker), not the current schema
-      const attributeFormDefault = (attrSchema as { attributeFormDefault?: string }).attributeFormDefault;
+      const attributeFormDefault = (
+        attrSchema as { attributeFormDefault?: string }
+      ).attributeFormDefault;
       const attrForm = (attribute as { form?: string }).form;
-      
+
       let attrName = attribute.name;
       // Priority: 1. Per-attribute form, 2. Schema attributeFormDefault
-      if (attrForm === 'qualified' || (attrForm !== 'unqualified' && attributeFormDefault === 'qualified')) {
+      if (
+        attrForm === 'qualified' ||
+        (attrForm !== 'unqualified' && attributeFormDefault === 'qualified')
+      ) {
         // Get prefix for the attribute's defining schema's namespace
         const attrPrefix = getPrefixForSchema(attrSchema, rootSchema);
         if (attrPrefix) {
           attrName = `${attrPrefix}:${attribute.name}`;
         }
       }
-      node.setAttribute(attrName, formatValue(value, attribute.type || 'string'));
+      node.setAttribute(
+        attrName,
+        formatValue(value, attribute.type || 'string'),
+      );
     }
   }
 
@@ -279,37 +301,59 @@ function buildElement(
     if (element.ref) {
       const refName = stripNsPrefix(element.ref);
       const refElement = findElement(refName, schema);
-      
+
       if (refElement && refElement.element.abstract) {
         // Abstract element - find substitutes in data using rootSchema
         const substitutes = findSubstitutes(refName, rootSchema);
         for (const substitute of substitutes) {
           const subName = substitute.element.name;
           if (!subName) continue;
-          
+
           const value = data[subName];
           if (value !== undefined) {
-            const typeName = substitute.element.type ? stripNsPrefix(substitute.element.type) : undefined;
-            buildField(doc, node, value, subName, typeName, substitute.schema, rootSchema, prefix);
+            const typeName = substitute.element.type
+              ? stripNsPrefix(substitute.element.type)
+              : undefined;
+            buildField(
+              doc,
+              node,
+              value,
+              subName,
+              typeName,
+              substitute.schema,
+              rootSchema,
+              prefix,
+            );
           }
         }
         continue;
       }
     }
-    
+
     const resolved = resolveElementInfo(element, schema);
     if (!resolved) continue;
-    
+
     const value = data[resolved.dataKey];
     if (value !== undefined) {
-      buildFieldWithTagName(doc, node, value, resolved.tagName, resolved.typeName, resolved.inlineComplexType, resolved.elementSchema, rootSchema, prefix, resolved.form);
+      buildFieldWithTagName(
+        doc,
+        node,
+        value,
+        resolved.tagName,
+        resolved.typeName,
+        resolved.inlineComplexType,
+        resolved.elementSchema,
+        rootSchema,
+        prefix,
+        resolved.form,
+      );
     }
   }
 }
 
 /**
  * Resolve element info (name and type), handling ref
- * 
+ *
  * Returns:
  * - tagName: The XML tag name to use (may include prefix like "asx:abap")
  * - dataKey: The key to look up in data object (local name without prefix)
@@ -320,15 +364,17 @@ function buildElement(
  */
 function resolveElementInfo(
   element: ElementLike,
-  schema: SchemaLike
-): { 
-  tagName: string; 
-  dataKey: string; 
-  typeName: string | undefined;
-  inlineComplexType: ComplexTypeLike | undefined;
-  elementSchema: SchemaLike;
-  form: string | undefined;
-} | undefined {
+  schema: SchemaLike,
+):
+  | {
+      tagName: string;
+      dataKey: string;
+      typeName: string | undefined;
+      inlineComplexType: ComplexTypeLike | undefined;
+      elementSchema: SchemaLike;
+      form: string | undefined;
+    }
+  | undefined {
   // Direct element with name
   if (element.name) {
     return {
@@ -340,7 +386,7 @@ function resolveElementInfo(
       form: (element as { form?: string }).form,
     };
   }
-  
+
   // Handle element reference - get type from referenced element declaration
   // IMPORTANT: Keep the original ref (with prefix) for the tag name
   // This ensures elements like ref="asx:abap" render as <asx:abap>
@@ -351,22 +397,33 @@ function resolveElementInfo(
       return {
         tagName: element.ref, // Keep original ref with prefix for tag
         dataKey: refElement.element.name ?? refName, // Local name for data lookup
-        typeName: refElement.element.type ? stripNsPrefix(refElement.element.type) : undefined,
-        inlineComplexType: refElement.element.complexType as ComplexTypeLike | undefined,
+        typeName: refElement.element.type
+          ? stripNsPrefix(refElement.element.type)
+          : undefined,
+        inlineComplexType: refElement.element.complexType as
+          | ComplexTypeLike
+          | undefined,
         elementSchema: refElement.schema,
         form: undefined, // Refs always use their prefix
       };
     }
     // Fallback: use ref as tag, local name for data
-    return { tagName: element.ref, dataKey: refName, typeName: undefined, inlineComplexType: undefined, elementSchema: schema, form: undefined };
+    return {
+      tagName: element.ref,
+      dataKey: refName,
+      typeName: undefined,
+      inlineComplexType: undefined,
+      elementSchema: schema,
+      form: undefined,
+    };
   }
-  
+
   return undefined;
 }
 
 /**
  * Build a field (child element)
- * 
+ *
  * Respects elementFormDefault:
  * - "qualified": local elements get namespace prefix
  * - "unqualified" (default): local elements do NOT get namespace prefix
@@ -379,16 +436,17 @@ function buildField(
   typeName: string | undefined,
   schema: SchemaLike,
   rootSchema: SchemaLike,
-  prefix: string | undefined
+  prefix: string | undefined,
 ): void {
   if (value === undefined || value === null) return;
 
   // Search for nested complexType
   const nestedType = typeName ? findComplexType(typeName, schema) : undefined;
-  
+
   // Check elementFormDefault - local elements only get prefix when "qualified"
   // Default is "unqualified" per XSD spec
-  const elementFormDefault = (rootSchema as { elementFormDefault?: string }).elementFormDefault;
+  const elementFormDefault = (rootSchema as { elementFormDefault?: string })
+    .elementFormDefault;
   const usePrefix = elementFormDefault === 'qualified' ? prefix : undefined;
   const tagName = usePrefix ? `${usePrefix}:${elementName}` : elementName;
 
@@ -396,7 +454,15 @@ function buildField(
     for (const item of value) {
       const child = doc.createElement(tagName);
       if (nestedType) {
-        buildElement(doc, child, item as Record<string, unknown>, nestedType.ct, nestedType.schema, rootSchema, prefix);
+        buildElement(
+          doc,
+          child,
+          item as Record<string, unknown>,
+          nestedType.ct,
+          nestedType.schema,
+          rootSchema,
+          prefix,
+        );
       } else {
         // Only add text node if value is not empty (allows self-closing tags)
         const text = formatValue(item, typeName || 'string');
@@ -407,7 +473,15 @@ function buildField(
   } else {
     const child = doc.createElement(tagName);
     if (nestedType) {
-      buildElement(doc, child, value as Record<string, unknown>, nestedType.ct, nestedType.schema, rootSchema, prefix);
+      buildElement(
+        doc,
+        child,
+        value as Record<string, unknown>,
+        nestedType.ct,
+        nestedType.schema,
+        rootSchema,
+        prefix,
+      );
     } else {
       // Only add text node if value is not empty (allows self-closing tags)
       const text = formatValue(value, typeName || 'string');
@@ -419,7 +493,7 @@ function buildField(
 
 /**
  * Build a field with an explicit tag name (used for element refs with prefix)
- * 
+ *
  * Handles three cases:
  * 1. Element refs with prefix (e.g., ref="asx:abap") - use tagName directly
  * 2. Elements with form="unqualified" - never use prefix
@@ -435,7 +509,7 @@ function buildFieldWithTagName(
   elementSchema: SchemaLike,
   rootSchema: SchemaLike,
   prefix: string | undefined,
-  elementForm: string | undefined
+  elementForm: string | undefined,
 ): void {
   if (value === undefined || value === null) return;
 
@@ -462,7 +536,8 @@ function buildFieldWithTagName(
       usePrefix = prefix;
     } else {
       // No element-level form - use schema default
-      const elementFormDefault = (rootSchema as { elementFormDefault?: string }).elementFormDefault;
+      const elementFormDefault = (rootSchema as { elementFormDefault?: string })
+        .elementFormDefault;
       usePrefix = elementFormDefault === 'qualified' ? prefix : undefined;
     }
     actualTagName = usePrefix ? `${usePrefix}:${tagName}` : tagName;
@@ -472,7 +547,15 @@ function buildFieldWithTagName(
     for (const item of value) {
       const child = doc.createElement(actualTagName);
       if (nestedType) {
-        buildElement(doc, child, item as Record<string, unknown>, nestedType.ct, nestedType.schema, rootSchema, prefix);
+        buildElement(
+          doc,
+          child,
+          item as Record<string, unknown>,
+          nestedType.ct,
+          nestedType.schema,
+          rootSchema,
+          prefix,
+        );
       } else {
         // Only add text node if value is not empty (allows self-closing tags)
         const text = formatValue(item, typeName || 'string');
@@ -483,7 +566,15 @@ function buildFieldWithTagName(
   } else {
     const child = doc.createElement(actualTagName);
     if (nestedType) {
-      buildElement(doc, child, value as Record<string, unknown>, nestedType.ct, nestedType.schema, rootSchema, prefix);
+      buildElement(
+        doc,
+        child,
+        value as Record<string, unknown>,
+        nestedType.ct,
+        nestedType.schema,
+        rootSchema,
+        prefix,
+      );
     } else {
       // Only add text node if value is not empty (allows self-closing tags)
       const text = formatValue(value, typeName || 'string');
@@ -499,15 +590,15 @@ function buildFieldWithTagName(
  */
 function findSubstitutes(
   abstractElementName: string,
-  schema: SchemaLike
+  schema: SchemaLike,
 ): Array<{ element: ElementLike; schema: SchemaLike }> {
   const substitutes: Array<{ element: ElementLike; schema: SchemaLike }> = [];
-  
+
   // Helper to search in a single schema
   const searchSchema = (s: SchemaLike) => {
     const elements = s.element;
     if (!elements) return;
-    
+
     for (const el of elements) {
       if (el.substitutionGroup) {
         const subGroupName = stripNsPrefix(el.substitutionGroup);
@@ -517,10 +608,10 @@ function findSubstitutes(
       }
     }
   };
-  
+
   // Search in main schema
   searchSchema(schema);
-  
+
   // Search in $imports
   const imports = schema.$imports as SchemaLike[] | undefined;
   if (imports) {
@@ -528,7 +619,6 @@ function findSubstitutes(
       searchSchema(imported);
     }
   }
-  
+
   return substitutes;
 }
-

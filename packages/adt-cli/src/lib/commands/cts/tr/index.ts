@@ -1,6 +1,6 @@
 /**
  * Transport Request (TR) Commands
- * 
+ *
  * Subcommands for transport request operations:
  * - adt cts tr list         - List transports
  * - adt cts tr get <TR>     - Get transport details
@@ -20,8 +20,7 @@ import { ctsDeleteCommand } from './delete';
 import { ctsReleaseCommand } from './release';
 
 export function createTrCommand(): Command {
-  const trCmd = new Command('tr')
-    .description('Transport request operations');
+  const trCmd = new Command('tr').description('Transport request operations');
 
   trCmd.addCommand(ctsListCommand);
   trCmd.addCommand(ctsGetCommand);

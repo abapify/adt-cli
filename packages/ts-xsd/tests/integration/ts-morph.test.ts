@@ -101,48 +101,48 @@ describe('ts-morph integration', () => {
       // Verify import statement
       assert.ok(
         code.includes('import { AdtObjectType } from "./adtcore.types"'),
-        'Should import AdtObjectType from adtcore.types'
+        'Should import AdtObjectType from adtcore.types',
       );
 
       // Verify AbapClass extends AdtObjectType
       assert.ok(
         code.includes('export interface AbapClassType extends AdtObjectType'),
-        'AbapClassType should extend AdtObjectType'
+        'AbapClassType should extend AdtObjectType',
       );
 
       // Verify AbapClass properties
       assert.ok(
         code.includes('superClass?:'),
-        'Should have optional superClass'
+        'Should have optional superClass',
       );
       assert.ok(
         code.includes('interfaces?:'),
-        'Should have optional interfaces'
+        'Should have optional interfaces',
       );
       assert.ok(
         code.includes('final?:'),
-        'Should have optional final attribute'
+        'Should have optional final attribute',
       );
       assert.ok(
         code.includes('abstract?:'),
-        'Should have optional abstract attribute'
+        'Should have optional abstract attribute',
       );
 
       // Verify InterfaceList
       assert.ok(
         code.includes('export interface InterfaceListType'),
-        'Should have InterfaceListType interface'
+        'Should have InterfaceListType interface',
       );
       assert.ok(
         code.includes('interface: string[]'),
-        'InterfaceListType should have interface array'
+        'InterfaceListType should have interface array',
       );
 
       // Verify root type
       assert.equal(rootTypeName, 'ClassesSchema');
       assert.ok(
         code.includes('export type ClassesSchema'),
-        'Should have ClassesSchema root type'
+        'Should have ClassesSchema root type',
       );
     });
 
@@ -174,27 +174,27 @@ describe('ts-morph integration', () => {
       // So we check for the content properties, not the element wrapper
       assert.ok(
         flatCode.includes('name:'),
-        'Should have inherited name property'
+        'Should have inherited name property',
       );
       assert.ok(
         flatCode.includes('description?:'),
-        'Should have inherited description property'
+        'Should have inherited description property',
       );
       assert.ok(
         flatCode.includes('uri:'),
-        'Should have inherited uri property'
+        'Should have inherited uri property',
       );
       assert.ok(
         flatCode.includes('superClass?:'),
-        'Should have superClass property'
+        'Should have superClass property',
       );
       assert.ok(
         flatCode.includes('interfaces?:'),
-        'Should have interfaces property'
+        'Should have interfaces property',
       );
       assert.ok(
         flatCode.includes('interface:'),
-        'Should have nested interface array'
+        'Should have nested interface array',
       );
     });
   });
@@ -256,34 +256,34 @@ describe('ts-morph integration', () => {
       // Verify enumeration types
       assert.ok(
         code.includes("export type PriorityType = '1' | '2' | '3'"),
-        'Should have PriorityType union'
+        'Should have PriorityType union',
       );
       assert.ok(
         code.includes(
-          "export type MessageKindType = 'error' | 'warning' | 'info'"
+          "export type MessageKindType = 'error' | 'warning' | 'info'",
         ),
-        'Should have MessageKindType union'
+        'Should have MessageKindType union',
       );
 
       // Verify Finding interface uses enum types
       assert.ok(
         code.includes('export interface FindingType'),
-        'Should have FindingType interface'
+        'Should have FindingType interface',
       );
 
       // Verify Location interface
       assert.ok(
         code.includes('export interface LocationType'),
-        'Should have LocationType interface'
+        'Should have LocationType interface',
       );
       assert.ok(
         code.includes('uri: string'),
-        'Location should have required uri'
+        'Location should have required uri',
       );
       assert.ok(code.includes('line?:'), 'Location should have optional line');
       assert.ok(
         code.includes('column?:'),
-        'Location should have optional column'
+        'Location should have optional column',
       );
     });
   });
@@ -349,19 +349,19 @@ describe('ts-morph integration', () => {
       // Verify flattened output has no type references
       assert.ok(
         !flatCode.includes('PersonType'),
-        'Should not reference PersonType'
+        'Should not reference PersonType',
       );
       assert.ok(
         !flatCode.includes('AddressType'),
-        'Should not reference AddressType'
+        'Should not reference AddressType',
       );
       assert.ok(
         !flatCode.includes('MetadataType'),
-        'Should not reference MetadataType'
+        'Should not reference MetadataType',
       );
       assert.ok(
         !flatCode.includes('RootType'),
-        'Should not reference RootType'
+        'Should not reference RootType',
       );
 
       // Verify all properties are inlined

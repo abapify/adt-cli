@@ -1,6 +1,6 @@
 /**
  * abapGit Object Handlers
- * 
+ *
  * Each handler implements the ObjectHandler interface for a specific ABAP object type.
  */
 

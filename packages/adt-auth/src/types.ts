@@ -1,6 +1,6 @@
 /**
  * Core types for ADT authentication
- * 
+ *
  * Session format is the single source of truth for all consumers
  * (CLI, MCP server, other tools)
  */
@@ -28,8 +28,8 @@ export interface BasicCredentials {
  * Cookie-based authentication credentials
  */
 export interface CookieCredentials {
-  cookies: string;      // Cookie header value
-  expiresAt: string;    // ISO date string
+  cookies: string; // Cookie header value
+  expiresAt: string; // ISO date string
 }
 
 /**
@@ -51,8 +51,8 @@ export type Credentials = BasicCredentials | CookieCredentials;
  */
 export interface AuthConfig {
   method: AuthMethod;
-  plugin?: string;  // e.g., "@abapify/adt-puppeteer" - for refresh
-  pluginOptions?: AuthPluginOptions;  // Original options (url, userDataDir, etc.)
+  plugin?: string; // e.g., "@abapify/adt-puppeteer" - for refresh
+  pluginOptions?: AuthPluginOptions; // Original options (url, userDataDir, etc.)
   credentials: Credentials;
 }
 
@@ -62,7 +62,7 @@ export interface AuthConfig {
 
 /**
  * Authentication session stored in ~/.adt/sessions/<SID>.json
- * 
+ *
  * This is the canonical format used by all consumers:
  * - CLI
  * - MCP Server
@@ -81,7 +81,7 @@ export interface AuthSession {
 
 /**
  * Auth plugin interface for credential providers
- * 
+ *
  * Plugins are dynamically imported when:
  * - Initial authentication (login)
  * - Credential refresh (when expired)
@@ -97,7 +97,7 @@ export interface AuthPlugin {
 export interface AuthPluginOptions {
   url: string;
   client?: string;
-  [key: string]: unknown;  // Plugin-specific options
+  [key: string]: unknown; // Plugin-specific options
 }
 
 /** Cookie-based auth result (from browser SSO plugins) */
@@ -134,4 +134,3 @@ export interface ConnectionTestResult {
   statusCode?: number;
   responseTime?: number;
 }
-

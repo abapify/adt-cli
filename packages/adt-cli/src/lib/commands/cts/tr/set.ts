@@ -30,7 +30,9 @@ export const ctsSetCommand = new Command('set')
     const verboseFlag = globalOpts.verbose ?? ctx.verbose ?? false;
     const compact = !verboseFlag;
     const logger =
-      (this as any).logger ?? ctx.logger ?? createCliLogger({ verbose: verboseFlag });
+      (this as any).logger ??
+      ctx.logger ??
+      createCliLogger({ verbose: verboseFlag });
     const progress = createProgressReporter({ compact, logger });
 
     try {
@@ -57,7 +59,9 @@ export const ctsSetCommand = new Command('set')
             target: json.target,
           };
         } catch (err) {
-          console.error(`❌ Failed to load JSON file: ${err instanceof Error ? err.message : String(err)}`);
+          console.error(
+            `❌ Failed to load JSON file: ${err instanceof Error ? err.message : String(err)}`,
+          );
           process.exit(1);
         }
       } else {
@@ -79,12 +83,18 @@ export const ctsSetCommand = new Command('set')
       progress.done();
 
       if (options.json) {
-        console.log(JSON.stringify({
-          transport,
-          status: 'updated',
-          description: tr.description,
-          target: tr.target,
-        }, null, 2));
+        console.log(
+          JSON.stringify(
+            {
+              transport,
+              status: 'updated',
+              description: tr.description,
+              target: tr.target,
+            },
+            null,
+            2,
+          ),
+        );
       } else {
         console.log(`✅ Transport ${transport} updated successfully`);
         if (updateOptions.description) {

@@ -6,12 +6,12 @@
  */
 
 export type HttpSchema = {
-    session: {
-        properties?: {
-            property?: {
-                $value?: string;
-                name: string;
-            }[];
-        };
+  session: {
+    properties?: {
+      property?: {
+        $value?: string;
+        name: string;
+      }[];
     };
+  };
 };

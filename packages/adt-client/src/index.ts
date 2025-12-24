@@ -7,7 +7,6 @@
 // Export main client factory
 export { createAdtClient, type AdtClient } from './client';
 
-
 // Export contract for advanced use cases
 export { adtContract, type AdtContract } from '@abapify/adt-contracts';
 
@@ -41,14 +40,14 @@ export {
 } from './plugins';
 
 // Export session management
-export {
-  SessionManager,
-  CookieStore,
-  CsrfTokenManager,
-} from './utils/session';
+export { SessionManager, CookieStore, CsrfTokenManager } from './utils/session';
 
 // Re-export contract types needed for declaration generation
-export type { RestEndpointDescriptor, Serializable, RestContract } from '@abapify/adt-contracts';
+export type {
+  RestEndpointDescriptor,
+  Serializable,
+  RestContract,
+} from '@abapify/adt-contracts';
 
 // Re-export CRUD contract types for ADK consumers
 // This allows ADK to use typed CRUD contracts without depending on adt-contracts directly

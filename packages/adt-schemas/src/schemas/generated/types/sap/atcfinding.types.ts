@@ -5,21 +5,22 @@
  * Mode: Flattened
  */
 
-export type AtcfindingSchema = {
-    finding: {
+export type AtcfindingSchema =
+  | {
+      finding: {
         extension?: unknown;
         quickfixes: {
-            manual?: boolean;
-            automatic?: boolean;
-            pseudo?: boolean;
-            ai_enabled?: boolean;
-            aiBasedQF?: boolean;
+          manual?: boolean;
+          automatic?: boolean;
+          pseudo?: boolean;
+          ai_enabled?: boolean;
+          aiBasedQF?: boolean;
         };
         tags?: {
-            tag?: {
-                name?: string;
-                value?: string;
-            }[];
+          tag?: {
+            name?: string;
+            value?: string;
+          }[];
         };
         uri?: string;
         parentUri?: string;
@@ -44,47 +45,50 @@ export type AtcfindingSchema = {
         checksum?: number;
         remarkText?: string;
         remarkLink?: string;
-    };
-} | {
-    findingReferences: {
+      };
+    }
+  | {
+      findingReferences: {
         findingReference?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
+          extension?: unknown;
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
         }[];
-    };
-} | {
-    items: {
+      };
+    }
+  | {
+      items: {
         item?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-            processor?: string;
-            status?: number;
-            remarkText?: string;
-            remarkLink?: string;
+          extension?: unknown;
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
+          processor?: string;
+          status?: number;
+          remarkText?: string;
+          remarkLink?: string;
         }[];
-    };
-} | {
-    remarks: {
+      };
+    }
+  | {
+      remarks: {
         remark?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-            remarkText?: string;
-            remarkLink?: string;
+          extension?: unknown;
+          uri?: string;
+          parentUri?: string;
+          type?: string;
+          name?: string;
+          packageName?: string;
+          description?: string;
+          remarkText?: string;
+          remarkLink?: string;
         }[];
+      };
     };
-};

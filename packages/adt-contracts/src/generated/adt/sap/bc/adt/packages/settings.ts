@@ -1,9 +1,9 @@
 /**
  * Package Settings
- * 
+ *
  * Endpoint: /sap/bc/adt/packages/settings
  * Category: settings
- * 
+ *
  * @generated - DO NOT EDIT MANUALLY
  */
 

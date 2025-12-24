@@ -130,7 +130,11 @@ function NavigatorInner({ systemName }: { systemName?: string }) {
 /**
  * Main Navigator component
  */
-export function Navigator({ startUrl, fetch, systemName }: NavigatorProps): React.ReactNode {
+export function Navigator({
+  startUrl,
+  fetch,
+  systemName,
+}: NavigatorProps): React.ReactNode {
   return (
     <NavigationProvider
       fetch={fetch}
@@ -164,7 +168,9 @@ function UrlPrompt({ onSubmit }: { onSubmit: (url: string) => void }) {
         <TextInput value={url} onChange={setUrl} onSubmit={handleSubmit} />
       </Box>
       <Box marginTop={1}>
-        <Text dimColor>Example: /sap/bc/adt/cts/transportrequests/S0DK900001</Text>
+        <Text dimColor>
+          Example: /sap/bc/adt/cts/transportrequests/S0DK900001
+        </Text>
       </Box>
     </Box>
   );

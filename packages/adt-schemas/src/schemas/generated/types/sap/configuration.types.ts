@@ -6,19 +6,19 @@
  */
 
 export type ConfigurationSchema = {
-    configuration: {
-        properties: {
-            property: {
-                $value?: string;
-                key?: string;
-                isMandatory?: boolean;
-            }[];
-        };
-        client?: string;
-        configName?: string;
-        createdBy?: string;
-        createdAt?: string;
-        changedBy?: string;
-        changedAt?: string;
+  configuration: {
+    properties: {
+      property: {
+        $value?: string;
+        key?: string;
+        isMandatory?: boolean;
+      }[];
     };
+    client?: string;
+    configName?: string;
+    createdBy?: string;
+    createdAt?: string;
+    changedBy?: string;
+    changedAt?: string;
+  };
 };

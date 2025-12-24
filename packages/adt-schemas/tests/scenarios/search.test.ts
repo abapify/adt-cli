@@ -21,7 +21,7 @@ class SearchScenario extends Scenario<typeof adtcore> {
     // The search response uses 'objectReferences' as root element
     const objectReferences = (data as any).objectReferences;
     expect(objectReferences).toBeDefined();
-    
+
     // Cast to any to access dynamic properties from search response
     const merged = objectReferences as unknown as Record<string, unknown>;
 

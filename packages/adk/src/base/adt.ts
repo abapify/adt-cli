@@ -1,14 +1,14 @@
 /**
  * ADK v2 - ADT Integration Layer
- * 
+ *
  * Single integration point for adt-client.
  * All ADK objects import types from here, not directly from adt-client.
- * 
+ *
  * This provides:
  * 1. Single dependency point - only this file imports from adt-client
  * 2. Re-exported types - objects import from '../base/adt'
  * 3. Proxy contract - ADK-specific contract interface
- * 
+ *
  * Architecture:
  * ```
  * adt-client (external)
@@ -30,7 +30,7 @@ export type { AdtClient } from '@abapify/adt-client';
 // Response types (inferred from contracts/schemas)
 // Note: Some response types are unions (e.g., ClassResponse = { abapClass } | { abapClassInclude })
 // We re-export the full union and provide extracted types for ADK objects
-export type { 
+export type {
   ClassResponse as ClassResponseUnion,
   InterfaceResponse as InterfaceResponseUnion,
   PackageResponse as PackageResponseUnion,
@@ -50,7 +50,7 @@ export type {
   IncludesContract,
 } from '@abapify/adt-client';
 
-import type { 
+import type {
   ClassResponse as _ClassResponse,
   InterfaceResponse as _InterfaceResponse,
   PackageResponse as _PackageResponse,
@@ -66,7 +66,10 @@ export type ClassResponse = Extract<_ClassResponse, { abapClass: unknown }>;
 /**
  * Extract the abapInterface variant from InterfaceResponse union
  */
-export type InterfaceResponse = Extract<_InterfaceResponse, { abapInterface: unknown }>;
+export type InterfaceResponse = Extract<
+  _InterfaceResponse,
+  { abapInterface: unknown }
+>;
 
 /**
  * Extract the package variant from PackageResponse union
@@ -84,7 +87,7 @@ import type { AdtClient } from '@abapify/adt-client';
 
 /**
  * ADT REST contracts accessible via client.adt.*
- * 
+ *
  * This is the typed contract layer from adt-client.
  * Example: client.adt.oo.classes.get('ZCL_MY_CLASS')
  */
@@ -92,7 +95,7 @@ export type AdtContracts = AdtClient['adt'];
 
 /**
  * ADK Contract interface
- * 
+ *
  * Proxy to adt-client contracts.
  * Provides typed access to ADT REST endpoints.
  */
@@ -111,7 +114,7 @@ export interface AdkContract {
 
 /**
  * Create ADK contract from ADT client
- * 
+ *
  * @param client - ADT client instance from createAdtClient()
  * @returns ADK contract proxy
  */

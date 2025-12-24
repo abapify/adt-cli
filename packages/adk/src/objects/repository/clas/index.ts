@@ -3,8 +3,8 @@
  */
 
 // Public types
-export type { 
-  AbapClass, 
+export type {
+  AbapClass,
   ClassCategory,
   ClassVisibility,
   ClassInclude,

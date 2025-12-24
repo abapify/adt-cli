@@ -11,7 +11,7 @@ export class PluginError extends Error {
       | 'validation'
       | 'filesystem',
     public readonly context?: Record<string, unknown>,
-    public override readonly cause?: Error
+    public override readonly cause?: Error,
   ) {
     super(message);
     this.name = 'PluginError';
@@ -25,7 +25,7 @@ export class PluginConfigError extends PluginError {
   constructor(
     plugin: string,
     message: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ) {
     super(message, plugin, 'config', context);
     this.name = 'PluginConfigError';
@@ -40,7 +40,7 @@ export class PluginSerializationError extends PluginError {
     plugin: string,
     message: string,
     context?: Record<string, unknown>,
-    cause?: Error
+    cause?: Error,
   ) {
     super(message, plugin, 'serialization', context, cause);
     this.name = 'PluginSerializationError';
@@ -54,7 +54,7 @@ export class PluginValidationError extends PluginError {
   constructor(
     plugin: string,
     message: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ) {
     super(message, plugin, 'validation', context);
     this.name = 'PluginValidationError';
@@ -69,7 +69,7 @@ export class PluginFilesystemError extends PluginError {
     plugin: string,
     message: string,
     context?: Record<string, unknown>,
-    cause?: Error
+    cause?: Error,
   ) {
     super(message, plugin, 'filesystem', context, cause);
     this.name = 'PluginFilesystemError';

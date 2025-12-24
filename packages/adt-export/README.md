@@ -14,9 +14,7 @@ Add to your `adt.config.ts`:
 
 ```typescript
 export default {
-  commands: [
-    '@abapify/adt-export/commands/export',
-  ],
+  commands: ['@abapify/adt-export/commands/export'],
 };
 ```
 
@@ -38,15 +36,15 @@ adt export --source ./my-objects --format oat --transport DEVK900123 --no-activa
 
 ## Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `-s, --source <path>` | Source directory containing serialized files | `.` |
-| `-f, --format <format>` | Format plugin: `oat`, `abapgit`, `@abapify/oat` | `oat` |
-| `-t, --transport <request>` | Transport request for changes | (required unless dry-run) |
-| `-p, --package <package>` | Target package for new objects | |
-| `--types <types>` | Filter by object types (comma-separated) | |
-| `--dry-run` | Validate without saving to SAP | `false` |
-| `--no-activate` | Save inactive (skip activation) | `false` |
+| Option                      | Description                                     | Default                   |
+| --------------------------- | ----------------------------------------------- | ------------------------- |
+| `-s, --source <path>`       | Source directory containing serialized files    | `.`                       |
+| `-f, --format <format>`     | Format plugin: `oat`, `abapgit`, `@abapify/oat` | `oat`                     |
+| `-t, --transport <request>` | Transport request for changes                   | (required unless dry-run) |
+| `-p, --package <package>`   | Target package for new objects                  |                           |
+| `--types <types>`           | Filter by object types (comma-separated)        |                           |
+| `--dry-run`                 | Validate without saving to SAP                  | `false`                   |
+| `--no-activate`             | Save inactive (skip activation)                 | `false`                   |
 
 ## Architecture
 
@@ -56,6 +54,7 @@ This plugin follows the two-generator pattern:
 2. **Format Plugin** → yields ADK objects ready to deploy
 
 The export command:
+
 1. Creates a FileTree from the source directory
 2. Calls the format plugin's `export(fileTree)` generator
 3. For each yielded ADK object:
