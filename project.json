@@ -13,6 +13,18 @@
     "build": {
       "executor": "nx:noop",
       "dependsOn": []
+    },
+    "lint": {
+      "executor": "nx:noop"
+    },
+    "test": {
+      "executor": "nx:noop"
+    },
+    "typecheck": {
+      "executor": "nx:noop"
+    },
+    "e2e-ci": {
+      "executor": "nx:noop"
     }
   }
 }

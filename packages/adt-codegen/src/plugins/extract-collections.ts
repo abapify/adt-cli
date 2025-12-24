@@ -21,7 +21,7 @@ function cleanUrl(url: string): string {
  */
 function sanitizePath(path: string): string {
   // First clean the URL
-  let cleanPath = cleanUrl(path);
+  const cleanPath = cleanUrl(path);
 
   return cleanPath
     .replace(/^\/+/, '') // Remove leading slashes

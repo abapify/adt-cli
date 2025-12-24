@@ -19,19 +19,11 @@
     "packages/plugins/*"
   ],
   "scripts": {
-    "test": "nx run-many --target=test --exclude=${npm_package_name}",
-    "test:vitest": "vitest run --silent",
-    "test:vitest:verbose": "vitest run",
     "prepare": "husky",
-    "precommit": "nx format:check --uncommitted",
-    "lint": "nx run-many --target=lint --fix --exclude=${npm_package_name}",
+    "precommit": "nx format:check --uncommitted",    
     "devcontainer": "devcontainer up --workspace-folder=$(pwd)",
     "preversion": "npx nx release version ${npm_new_version}",
-    "btp": "npx tsx e2e/btp-cli/cli.ts",
-    "btp:token": "npm run btp -- --file e2e/secrets/service_key.json",
-    "knip": "knip",
-    "deploy:examples": "npx adt export --source git_modules/abapgit-examples/src --format abapgit",
-    "deploy:examples:dry": "npx adt export --source git_modules/abapgit-examples/src --format abapgit --dry-run"
+    "knip": "knip"    
   },
   "dependencies": {
     "@cloudfoundry/api": "^0.1.7",

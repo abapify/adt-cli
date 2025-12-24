@@ -46,7 +46,7 @@ export function parseDiscoveryXml(xml: string): DiscoveryData {
     ? workspacesRaw
     : [workspacesRaw];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const workspaces: WorkspaceData[] = workspacesArray.map(
     (ws: Record<string, any>) => {
       const collectionsRaw = ws['app:collection'];
@@ -56,7 +56,7 @@ export function parseDiscoveryXml(xml: string): DiscoveryData {
           : [collectionsRaw]
         : [];
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const collections: CollectionData[] = collectionsArray.map(
         (coll: Record<string, any>) => {
           // Parse accepts

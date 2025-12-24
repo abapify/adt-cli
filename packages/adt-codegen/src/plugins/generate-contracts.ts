@@ -437,7 +437,7 @@ function generateCrudContractFile(
     );
   }
 
-  let code =
+  const code =
     '/**\n' +
     ' * ' +
     coll.title +

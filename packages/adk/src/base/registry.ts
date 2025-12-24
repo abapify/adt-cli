@@ -20,7 +20,7 @@ import * as kinds from './kinds';
 // ============================================
 
 /** Constructor signature for ADK objects */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export type AdkObjectConstructor<
   T extends AdkObject<AdkKind, any> = AdkObject<AdkKind, any>,
 > = new (ctx: AdkContext, nameOrData: string | any) => T;
