@@ -12,8 +12,8 @@ export { transportmanagmentSingle as schema };
 // Use type from contracts package
 type TransportRoot = TransportResponse;
 
-// Extract nested types
-export type Request = NonNullable<TransportRoot['request']>;
+// Extract nested types - TransportResponse has root.request structure
+export type Request = NonNullable<NonNullable<TransportRoot['root']>['request']>;
 export type Task = NonNullable<Request['task']>[number];
 export type AbapObject = NonNullable<Task['abap_object']>[number];
 
@@ -79,7 +79,7 @@ export function load(xml: string): TransportData {
  * Transform parsed XSD data to TransportData
  */
 function transformToTransportData(data: TransportRoot): TransportData {
-  const request = data.request;
+  const request = data.root?.request;
   
   if (!request) {
     throw new Error('No request element found in transport data');

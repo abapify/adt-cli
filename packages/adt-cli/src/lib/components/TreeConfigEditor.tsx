@@ -186,7 +186,7 @@ export function TreeConfigEditor({
   initialConfig,
   onSave,
   onCancel,
-}: TreeConfigEditorProps) {
+}: TreeConfigEditorProps): React.ReactNode {
   const { exit } = useApp();
   const [config, setConfig] = useState<TreeConfigState>(initialConfig);
   const [focusIndex, setFocusIndex] = useState(0);

@@ -73,7 +73,7 @@ class ClassSourceScenario extends ContractScenario {
     },
     {
       name: 'update main source',
-      contract: () => ooContract.classes.source.main.put('ZCL_TEST', 'CLASS zcl_test...'),
+      contract: () => ooContract.classes.source.main.put('ZCL_TEST'),
       method: 'PUT',
       path: '/sap/bc/adt/oo/classes/zcl_test/source/main',
       headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
@@ -101,7 +101,7 @@ class ClassSourceScenario extends ContractScenario {
     },
     {
       name: 'update include by type',
-      contract: () => ooContract.classes.includes.put('ZCL_TEST', 'definitions', 'TYPES...'),
+      contract: () => ooContract.classes.includes.put('ZCL_TEST', 'definitions'),
       method: 'PUT',
       path: '/sap/bc/adt/oo/classes/zcl_test/includes/definitions',
       headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
@@ -164,7 +164,7 @@ class InterfacesScenario extends ContractScenario {
     },
     {
       name: 'update interface source',
-      contract: () => ooContract.interfaces.source.main.put('ZIF_TEST', 'INTERFACE zif_test...'),
+      contract: () => ooContract.interfaces.source.main.put('ZIF_TEST'),
       method: 'PUT',
       path: '/sap/bc/adt/oo/interfaces/zif_test/source/main',
       headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },

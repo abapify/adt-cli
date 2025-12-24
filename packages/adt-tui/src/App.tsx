@@ -23,7 +23,7 @@ export interface AppProps {
 /**
  * Main TUI Application
  */
-export function App({ startUrl, fetch, router, systemName }: AppProps) {
+export function App({ startUrl, fetch, router, systemName }: AppProps): React.ReactNode {
   const [, setResizeKey] = useState(0);
 
   // Handle terminal resize - just trigger re-render, don't clear

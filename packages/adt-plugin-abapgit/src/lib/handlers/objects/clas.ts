@@ -55,8 +55,9 @@ export const classHandler = createHandler(AdkClass, {
   suffixToSourceKey: SUFFIX_TO_SOURCE_KEY,
 
   toAbapGit: (cls) => {
-    const includes = cls.data.include ?? [];
-    const hasTestClasses = includes.some((inc) => inc.includeType === 'testclasses');
+    const data = cls.dataSync;
+    const includes = data.include ?? [];
+    const hasTestClasses = includes.some((inc) => String(inc.includeType) === 'testclasses');
 
     return {
       VSEOCLASS: {
@@ -64,28 +65,28 @@ export const classHandler = createHandler(AdkClass, {
         CLSNAME: cls.name ?? '',
         
         // Basic metadata
-        LANGU: cls.data.language ?? 'E',
-        DESCRIPT: cls.data.description ?? '',
+        LANGU: data.language ?? 'E',
+        DESCRIPT: data.description ?? '',
         STATE: '1', // Active
         
-        // Class attributes - access via data.*
-        CATEGORY: cls.data.category ?? '00',
-        EXPOSURE: VISIBILITY_TO_EXPOSURE[cls.data.visibility ?? 'public'] ?? '2',
-        CLSFINAL: cls.data.final ? 'X' : undefined,
-        CLSABSTRCT: cls.data.abstract ? 'X' : undefined,
-        SHRM_ENABLED: cls.data.sharedMemoryEnabled ? 'X' : undefined,
+        // Class attributes - access via dataSync.*
+        CATEGORY: data.category ?? '00',
+        EXPOSURE: VISIBILITY_TO_EXPOSURE[data.visibility ?? 'public'] ?? '2',
+        CLSFINAL: data.final ? 'X' : undefined,
+        CLSABSTRCT: data.abstract ? 'X' : undefined,
+        SHRM_ENABLED: data.sharedMemoryEnabled ? 'X' : undefined,
         
         // Source attributes
         CLSCCINCL: 'X', // Class constructor include
-        FIXPT: cls.data.fixPointArithmetic ? 'X' : undefined,
-        UNICODE: cls.data.activeUnicodeCheck ? 'X' : undefined,
+        FIXPT: data.fixPointArithmetic ? 'X' : undefined,
+        UNICODE: data.activeUnicodeCheck ? 'X' : undefined,
         
         // References
-        REFCLSNAME: cls.data.superClassRef?.name,
-        MSG_ID: cls.data.messageClassRef?.name,
+        REFCLSNAME: data.superClassRef?.name,
+        MSG_ID: data.messageClassRef?.name,
         
         // ABAP language version
-        ABAP_LANGUAGE_VERSION: cls.data.abapLanguageVersion,
+        ABAP_LANGUAGE_VERSION: data.abapLanguageVersion,
         
         // Test classes flag
         ...(hasTestClasses ? { WITH_UNIT_TESTS: 'X' } : {}),
@@ -94,10 +95,10 @@ export const classHandler = createHandler(AdkClass, {
   },
 
   getSources: (cls) => {
-    const includes = cls.data.include ?? [];
+    const includes = cls.dataSync.include ?? [];
     return includes.map((inc) => ({
-      suffix: ABAPGIT_SUFFIX[inc.includeType as ClassIncludeType],
-      content: cls.getIncludeSource(inc.includeType as ClassIncludeType),
+      suffix: ABAPGIT_SUFFIX[(String(inc.includeType ?? 'main')) as ClassIncludeType],
+      content: cls.getIncludeSource(String(inc.includeType ?? 'main') as ClassIncludeType),
     }));
   },
 

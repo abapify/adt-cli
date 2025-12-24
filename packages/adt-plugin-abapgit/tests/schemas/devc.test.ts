@@ -7,11 +7,11 @@
 import assert from 'node:assert';
 import { runSchemaTests, createTypedSchema, type SchemaScenario } from './base/scenario.ts';
 import { devc as devcSchema } from '../../src/schemas/generated/schemas/index.ts';
-import type { AbapGitType } from '../../src/schemas/generated/types/devc.ts';
+import type { DevcSchema } from '../../src/schemas/generated/types/devc.ts';
 
-const schema = createTypedSchema<AbapGitType>(devcSchema);
+const schema = createTypedSchema<DevcSchema>(devcSchema);
 
-const scenario: SchemaScenario<AbapGitType> = {
+const scenario: SchemaScenario<DevcSchema> = {
   name: 'DEVC',
   xsdName: 'devc',
   schema,
@@ -19,16 +19,19 @@ const scenario: SchemaScenario<AbapGitType> = {
     {
       path: 'devc/package.devc.xml',
       validate: (data) => {
+        // Schema is union type - assert to the abapGit variant
+        const root = (data as any).abapGit;
+        
         // Envelope attributes
-        assert.strictEqual(data.version, 'v1.0.0');
-        assert.strictEqual(data.serializer, 'LCL_OBJECT_DEVC');
-        assert.strictEqual(data.serializer_version, 'v1.0.0');
+        assert.strictEqual(root.version, 'v1.0.0');
+        assert.strictEqual(root.serializer, 'LCL_OBJECT_DEVC');
+        assert.strictEqual(root.serializer_version, 'v1.0.0');
         
         // asx:abap
-        assert.strictEqual(data.abap.version, '1.0');
+        assert.strictEqual(root.abap.version, '1.0');
         
         // DEVC content
-        const devc = data.abap.values.DEVC!;
+        const devc = root.abap.values.DEVC!;
         assert.strictEqual(devc.CTEXT, 'Classes');
       },
     },

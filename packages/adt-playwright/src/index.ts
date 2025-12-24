@@ -5,7 +5,6 @@
  * Uses @abapify/browser-auth core with Playwright adapter.
  */
 
-import { playwrightAuth } from './playwright-auth';
 import type { AdtConfig, Destination } from '@abapify/adt-config';
 import type { BrowserAuthOptions } from '@abapify/browser-auth';
 

@@ -639,7 +639,7 @@ function generateInterface(
     const baseType = ext.base
       ? XSD_BUILT_IN_TYPES[stripNsPrefix(ext.base)] ?? 'string'
       : 'string';
-    properties.push({ name: '_text', type: baseType, hasQuestionToken: true });
+    properties.push({ name: '$value', type: baseType, hasQuestionToken: true });
     collectAttributes(ext.attribute, properties, ctx);
   }
   // Handle direct content (no complexContent/simpleContent)

@@ -1,4 +1,4 @@
-import { type CreateNodesV2, logger, workspaceRoot } from '@nx/devkit';
+import { type CreateNodesV2, type CreateNodesResult, logger, workspaceRoot } from '@nx/devkit';
 import { dirname, relative, basename, join } from 'node:path';
 import { existsSync } from 'node:fs';
 
@@ -105,7 +105,7 @@ export const createNodesV2: CreateNodesV2<NxTypecheckPluginOptions> = [
           ],
         };
 
-        return [
+        const result: [string, CreateNodesResult] = [
           configFile,
           {
             projects: {
@@ -117,10 +117,8 @@ export const createNodesV2: CreateNodesV2<NxTypecheckPluginOptions> = [
             },
           },
         ];
+        return result;
       })
-      .filter(
-        (result): result is [string, { projects: Record<string, unknown> }] =>
-          result !== null
-      );
+      .filter((result): result is [string, CreateNodesResult] => result !== null);
   },
 ];

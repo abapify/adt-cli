@@ -18,7 +18,7 @@ export type PackagesV1Schema = {
         };
         adtTemplate?: {
             adtProperty?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
             name?: string;

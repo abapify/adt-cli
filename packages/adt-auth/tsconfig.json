@@ -1,15 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "moduleResolution": "bundler"
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"],
+  "files": [],
+  "include": [],
   "references": [
     {
-      "path": "../logger"
+      "path": "./tsconfig.lib.json"
     }
   ]
 }

@@ -366,7 +366,7 @@ export type InferExtension<Ext extends ExtensionLike, T extends SchemaLike> =
 
 /** Infer from simpleContent/extension (text content + attributes) */
 export type InferSimpleContentExtension<Ext extends SimpleExtensionLike, _T extends SchemaLike> =
-  (Ext['base'] extends string ? { _text: InferBuiltInType<StripPrefix<Ext['base']>> } : EmptyObject) &
+  (Ext['base'] extends string ? { $value: InferBuiltInType<StripPrefix<Ext['base']>> } : EmptyObject) &
   InferAttributes<Ext['attribute']>;
 
 // =============================================================================

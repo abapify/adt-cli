@@ -130,7 +130,7 @@ function NavigatorInner({ systemName }: { systemName?: string }) {
 /**
  * Main Navigator component
  */
-export function Navigator({ startUrl, fetch, systemName }: NavigatorProps) {
+export function Navigator({ startUrl, fetch, systemName }: NavigatorProps): React.ReactNode {
   return (
     <NavigationProvider
       fetch={fetch}

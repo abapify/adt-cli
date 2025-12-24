@@ -41,7 +41,7 @@ export function NavigationProvider({
   fetch,
   parseResponse,
   initialUrl,
-}: NavigationProviderProps) {
+}: NavigationProviderProps): React.ReactNode {
   const [current, setCurrent] = useState<NavigationEntry | null>(null);
   const [history, setHistory] = useState<NavigationEntry[]>([]);
   const [loading, setLoading] = useState(false);

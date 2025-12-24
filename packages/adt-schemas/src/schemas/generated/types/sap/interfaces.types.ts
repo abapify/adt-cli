@@ -18,7 +18,7 @@ export type InterfacesSchema = {
         };
         adtTemplate?: {
             adtProperty?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
             name?: string;
@@ -34,7 +34,7 @@ export type InterfacesSchema = {
         };
         template?: {
             property?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
             name?: string;

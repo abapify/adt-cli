@@ -9,7 +9,7 @@ export type HttpSchema = {
     session: {
         properties?: {
             property?: {
-                _text?: string;
+                $value?: string;
                 name: string;
             }[];
         };

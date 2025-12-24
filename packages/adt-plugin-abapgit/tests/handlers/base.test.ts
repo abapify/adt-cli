@@ -13,6 +13,9 @@ describe('createHandler factory', () => {
     
     const handler = createHandler('TEST', {
       schema: mockSchema as any,
+      version: 'v1.0.0',
+      serializer: 'LCL_OBJECT_TEST',
+      serializer_version: 'v1.0.0',
       toAbapGit: (obj) => ({ NAME: obj.name ?? '' }),
     });
 
@@ -52,6 +55,9 @@ describe('default serialize behavior', () => {
 
     const handler = createHandler('XMLONLY', {
       schema: mockSchema as any,
+      version: 'v1.0.0',
+      serializer: 'LCL_OBJECT_XMLONLY',
+      serializer_version: 'v1.0.0',
       toAbapGit: (obj) => ({ CTEXT: obj.description ?? '' }),
     });
 
@@ -71,6 +77,9 @@ describe('default serialize behavior', () => {
 
     const handler = createHandler('WITHSRC', {
       schema: mockSchema as any,
+      version: 'v1.0.0',
+      serializer: 'LCL_OBJECT_WITHSRC',
+      serializer_version: 'v1.0.0',
       toAbapGit: (obj) => ({ CTEXT: obj.description ?? '' }),
       getSource: async () => '* ABAP source code',
     });
@@ -96,6 +105,9 @@ describe('default serialize behavior', () => {
 
     const handler = createHandler('MULTISRC', {
       schema: mockSchema as any,
+      version: 'v1.0.0',
+      serializer: 'LCL_OBJECT_MULTISRC',
+      serializer_version: 'v1.0.0',
       toAbapGit: (obj) => ({ CTEXT: obj.description ?? '' }),
       getSources: () => [
         { content: Promise.resolve('* Main source') },
@@ -127,6 +139,9 @@ describe('default serialize behavior', () => {
 
     const handler = createHandler('CUSTXML', {
       schema: mockSchema as any,
+      version: 'v1.0.0',
+      serializer: 'LCL_OBJECT_CUSTXML',
+      serializer_version: 'v1.0.0',
       xmlFileName: 'package.devc.xml',
       toAbapGit: (obj) => ({ CTEXT: obj.description ?? '' }),
     });

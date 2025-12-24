@@ -18,7 +18,7 @@ export type ClassesSchema = {
         };
         adtTemplate?: {
             adtProperty?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
             name?: string;
@@ -34,7 +34,7 @@ export type ClassesSchema = {
         };
         template?: {
             property?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
             name?: string;
@@ -69,7 +69,7 @@ export type ClassesSchema = {
             };
             adtTemplate?: {
                 adtProperty?: {
-                    _text?: string;
+                    $value?: string;
                     key?: string;
                 }[];
                 name?: string;
@@ -155,7 +155,7 @@ export type ClassesSchema = {
         };
         adtTemplate?: {
             adtProperty?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
             name?: string;

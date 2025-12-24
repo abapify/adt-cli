@@ -8,7 +8,9 @@
 import { http } from '../../../base';
 import { systeminformationSchema } from '../../../schemas';
 
-export const systeminformationContract = {
+export const systeminformationContract: {
+  getSystemInfo: () => ReturnType<typeof http.get>;
+} = {
   /**
    * Get system information
    *

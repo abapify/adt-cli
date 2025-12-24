@@ -15,7 +15,10 @@
  * Uses the generated exception schema from @abapify/adt-schemas for type-safe parsing.
  */
 
-import { exception as exceptionSchema, type ExceptionSchema } from '@abapify/adt-schemas';
+import { exception as exceptionSchema, type InferTypedSchema } from '@abapify/adt-schemas';
+
+/** Exception schema type - inferred from the typed schema */
+type ExceptionSchema = InferTypedSchema<typeof exceptionSchema>;
 
 /**
  * Parsed ADT exception structure - derived from ExceptionSchema

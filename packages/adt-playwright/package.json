@@ -11,6 +11,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@abapify/adt-auth": "*",
     "@abapify/adt-config": "*",
     "@abapify/browser-auth": "*",
     "playwright": "^1.57.0"

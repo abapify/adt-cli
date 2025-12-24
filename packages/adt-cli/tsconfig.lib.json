@@ -43,7 +43,7 @@
       "path": "../adt-client"
     },
     {
-      "path": "../adt-auth"
+      "path": "../adt-auth/tsconfig.lib.json"
     },
     {
       "path": "../adk/tsconfig.lib.json"

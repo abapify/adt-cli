@@ -15,23 +15,23 @@ export type AtcexemptionSchema = {
         objectTypeDescr: string;
         restriction: {
             thisFinding: {
-                _text?: boolean;
+                $value?: boolean;
                 enabled: boolean;
             };
             rangeOfFindings: {
                 restrictByObject: {
-                    _text?: string;
+                    $value?: string;
                     subobject?: boolean;
                     object?: boolean;
                     package?: boolean;
                 };
                 restrictByCheck: {
-                    _text?: string;
+                    $value?: string;
                     message?: boolean;
                     check?: boolean;
                 };
                 restrictByValidity?: {
-                    _text?: string;
+                    $value?: string;
                     unrestricted?: boolean;
                     date?: boolean;
                     component_release?: boolean;
@@ -64,23 +64,23 @@ export type AtcexemptionSchema = {
             objectTypeDescr: string;
             restriction: {
                 thisFinding: {
-                    _text?: boolean;
+                    $value?: boolean;
                     enabled: boolean;
                 };
                 rangeOfFindings: {
                     restrictByObject: {
-                        _text?: string;
+                        $value?: string;
                         subobject?: boolean;
                         object?: boolean;
                         package?: boolean;
                     };
                     restrictByCheck: {
-                        _text?: string;
+                        $value?: string;
                         message?: boolean;
                         check?: boolean;
                     };
                     restrictByValidity?: {
-                        _text?: string;
+                        $value?: string;
                         unrestricted?: boolean;
                         date?: boolean;
                         component_release?: boolean;

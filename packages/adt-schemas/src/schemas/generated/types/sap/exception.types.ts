@@ -14,16 +14,16 @@ export type ExceptionSchema = {
             id?: string;
         };
         message?: {
-            _text?: string;
+            $value?: string;
             lang?: string;
         };
         localizedMessage?: {
-            _text?: string;
+            $value?: string;
             lang?: string;
         };
         properties?: {
             entry?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
         };

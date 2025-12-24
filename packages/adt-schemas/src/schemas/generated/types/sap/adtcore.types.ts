@@ -18,7 +18,7 @@ export type AdtcoreSchema = {
         };
         adtTemplate?: {
             adtProperty?: {
-                _text?: string;
+                $value?: string;
                 key?: string;
             }[];
             name?: string;
@@ -72,7 +72,7 @@ export type AdtcoreSchema = {
     };
 } | {
     content: {
-        _text?: string;
+        $value?: string;
         type?: string;
         encoding?: string;
     };

@@ -149,7 +149,7 @@ export async function* deserialize(
       }
       
       // Get payload from handler (pure data mapping) or build default
-      const payload = handler.fromAbapGit
+      const payload: { name: string; description?: string; [key: string]: unknown } = handler.fromAbapGit
         ? handler.fromAbapGit(values)
         : { name: objFiles.name };
       

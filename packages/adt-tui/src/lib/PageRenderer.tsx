@@ -54,7 +54,7 @@ export function PageRenderer({
   onNavigate,
   onBack,
   onAction,
-}: PageRendererProps) {
+}: PageRendererProps): React.ReactNode {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Handle keyboard input

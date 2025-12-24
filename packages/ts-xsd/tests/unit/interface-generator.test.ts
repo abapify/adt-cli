@@ -221,12 +221,12 @@ describe('Interface Generator', () => {
     ],
   } as const;
 
-  it('should generate interface for simpleContent with _text', () => {
-    // NOTE: The simplified generator uses _text instead of $value for simpleContent
+  it('should generate interface for simpleContent with $value', () => {
+    // NOTE: simpleContent text uses $value to match the XML parser output
     const { code: output } = generateInterfaces(simpleContentSchema as unknown as Schema);
     
     assert.ok(output.includes('export interface PriceType'), 'Should have PriceType');
-    assert.ok(output.includes('_text?: number'), 'Should have _text for text content');
+    assert.ok(output.includes('$value?: number'), 'Should have $value for text content');
     assert.ok(output.includes('currency: string'), 'Should have currency attribute');
   });
 

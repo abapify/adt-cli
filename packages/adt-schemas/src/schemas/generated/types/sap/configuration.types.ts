@@ -9,7 +9,7 @@ export type ConfigurationSchema = {
     configuration: {
         properties: {
             property: {
-                _text?: string;
+                $value?: string;
                 key?: string;
                 isMandatory?: boolean;
             }[];

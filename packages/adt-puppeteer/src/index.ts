@@ -5,7 +5,6 @@
  * Uses @abapify/browser-auth core with Puppeteer adapter.
  */
 
-import { puppeteerAuth } from './puppeteer-auth';
 import type { AdtConfig, Destination } from '@abapify/adt-config';
 import type { BrowserAuthOptions } from '@abapify/browser-auth';
 
