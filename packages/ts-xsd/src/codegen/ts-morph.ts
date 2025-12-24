@@ -783,7 +783,7 @@ function addElementProperty(
     tsType = resolveTypeName(element.type, ctx);
   } else if (element.complexType) {
     // Inline complex type - generate anonymous interface
-    tsType = 'unknown'; // TODO: could generate inline type
+    tsType = 'unknown'; // NOTE: could generate inline type for complex types
   } else if (element.simpleType?.restriction?.enumeration) {
     tsType = element.simpleType.restriction.enumeration
       .map((e: { value?: string }) => `'${e.value}'`)

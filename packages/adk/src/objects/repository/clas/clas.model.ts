@@ -189,9 +189,6 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
   }
 }
 
-// Backward compatibility alias (deprecated)
-/** @deprecated Use AdkClass instead */
-export const AbapClassModel = AdkClass;
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';

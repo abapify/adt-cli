@@ -99,14 +99,14 @@ export class AdkPackage extends AdkMainObject<typeof PackageKind, PackageXml> im
   
   async getSubpackages(): Promise<AbapPackage[]> {
     return this.lazy('subpackages', async () => {
-      // TODO: Call client.repository.packages.children(this.name)
+      // NOTE: Could use client.repository.packages.children(this.name) when available
       return [];
     });
   }
   
   async getObjects(): Promise<AbapObject[]> {
     return this.lazy('objects', async () => {
-      // TODO: Call client.repository.packages.objects(this.name)
+      // NOTE: Could use client.repository.packages.objects(this.name) when available
       return [];
     });
   }
@@ -163,9 +163,6 @@ export class AdkPackage extends AdkMainObject<typeof PackageKind, PackageXml> im
   }
 }
 
-// Backward compatibility alias (deprecated)
-/** @deprecated Use AdkPackage instead */
-export const AbapPackageModel = AdkPackage;
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';

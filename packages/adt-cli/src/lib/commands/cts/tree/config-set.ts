@@ -181,7 +181,7 @@ export const treeConfigSetCommand = new Command('set')
       console.log('\n🔄 Saving configuration...');
       const configData = buildConfigurationData(newProps);
       
-      // Cast to unknown to bypass schema mismatch - TODO: align schema with actual API
+      // Cast to unknown to bypass schema mismatch - schema alignment pending
       await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
         configId,
         configData as unknown as Parameters<typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put>[1]

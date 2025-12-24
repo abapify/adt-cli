@@ -375,7 +375,8 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     const lockHandleMatch = responseText.match(/<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/);
     
     if (!lockHandleMatch) {
-      throw new Error(`Failed to parse lock handle from response: ${responseText.substring(0, 200)}`);
+      // Don't expose raw SAP response in error message for security
+      throw new Error('Failed to parse lock handle from SAP response. The response format may have changed.');
     }
     
     // Extract CORRNR (transport request) - this is the transport assigned to the object
@@ -428,8 +429,8 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       try {
         await this.lock(transport);
       } catch (e) {
-        // For upsert, lock failure means object doesn't exist - switch to create
-        if (mode === 'upsert') {
+        // For upsert, only fallback to create if it's a 404 Not Found error
+        if (mode === 'upsert' && this.isNotFoundError(e)) {
           return this.save({ ...options, mode: 'create' });
         }
         throw e;
@@ -682,9 +683,6 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   }
 }
 
-// Re-export for backward compatibility (deprecated)
-/** @deprecated Use AdkObject instead */
-export const BaseModel = AdkObject;
 
 /**
  * Base class for main development objects (AdtMainObject)

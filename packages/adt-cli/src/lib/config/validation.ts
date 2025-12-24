@@ -85,7 +85,7 @@ export class ConfigValidator {
       const pluginWithVersion = plugin as { name: string; version?: string; config?: unknown };
       if (pluginWithVersion.version && !this.isValidSemver(pluginWithVersion.version)) {
         warnings.push(
-          `Plugin ${plugin.name} has invalid version format: ${pluginWithVersion.version}`
+          `Plugin ${pluginWithVersion.name} has invalid version format: ${pluginWithVersion.version}`
         );
       }
 

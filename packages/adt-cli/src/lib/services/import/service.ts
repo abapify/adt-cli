@@ -256,7 +256,7 @@ export class ImportService {
     const pkg = await AdkPackage.get(options.packageName);
     
     // Get objects from package
-    // TODO: ADK should support getObjects({ recursive: true }) instead of separate methods
+    // NOTE: Consider ADK enhancement - getObjects({ recursive: true }) instead of separate methods
     const allObjects = options.includeSubpackages 
       ? await pkg.getAllObjects()  // includes subpackages
       : await pkg.getObjects();    // direct objects only

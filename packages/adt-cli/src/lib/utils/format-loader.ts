@@ -96,10 +96,12 @@ export async function loadFormatPlugin(formatSpec: string) {
       instance: plugin,
       preset,
     };
-  } catch (error: any) {
-    if (error?.code === 'MODULE_NOT_FOUND') {
+  } catch (error: unknown) {
+    const err = error as Error;
+    // Check both error code (CommonJS) and message (ES modules)
+    if ((err as any).code === 'MODULE_NOT_FOUND' || err.message?.includes(`Cannot find module '${packageName}'`)) {
       throw new Error(
-        `Plugin package '${packageName}' not found. Install it with: npm install ${packageName}`
+        `Plugin package '${packageName}' not found. Install it with: bun add ${packageName}`
       );
     }
     throw error;

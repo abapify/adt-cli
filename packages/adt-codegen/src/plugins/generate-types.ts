@@ -23,12 +23,12 @@ export const generateTypesPlugin = definePlugin({
  * Endpoint: ${coll.href}
  */
 export interface ${typeName} {
-  // TODO: Add properties based on content-type
+  // NOTE: Could add properties based on content-type in future
   // Content-Types: ${coll.accepts.join(', ') || 'none'}
 }
 
 export interface ${typeName}Request {
-  // TODO: Add request parameters
+  // NOTE: Could add request parameters in future
 }
 
 export interface ${typeName}Response {

@@ -29,7 +29,7 @@ export const packageGetCommand = new Command('package')
       // Use router to render the package page
       const route = router.get('DEVC');
       // Extract package data - response is wrapped in { package: ... }
-      const pkgData = (pkg as { package?: Record<string, unknown> }).package ?? pkg;
+      const pkgData = (pkg as { package?: Record<string, unknown> })?.package ?? pkg ?? {};
       if (route) {
         const page = route.page(pkgData, { name });
         render(page);

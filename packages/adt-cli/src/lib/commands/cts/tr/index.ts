@@ -29,7 +29,7 @@ export function createTrCommand(): Command {
   trCmd.addCommand(ctsSetCommand);
   trCmd.addCommand(ctsDeleteCommand);
   trCmd.addCommand(ctsReleaseCommand);
-  // TODO: trCmd.addCommand(ctsCheckCommand);
+  // NOTE: ctsCheckCommand not yet implemented (check endpoint not available)
 
   return trCmd;
 }

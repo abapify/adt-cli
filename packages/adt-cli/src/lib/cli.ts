@@ -9,16 +9,12 @@ import {
   infoCommand,
   fetchCommand,
   getCommand,
-  outlineCommand,
   // ATC command moved to @abapify/adt-atc plugin
   loginCommand,
   logoutCommand,
   statusCommand,
   authListCommand,
   setDefaultCommand,
-  createTestLogCommand,
-  createTestAdtCommand,
-  createResearchSessionsCommand,
   createCtsCommand,
   createReplCommand,
   packageGetCommand,
@@ -26,8 +22,6 @@ import {
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
 // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
-import { createUnlockCommand } from './commands/unlock/index';
-import { createLockCommand } from './commands/lock';
 import { createCliLogger, AVAILABLE_COMPONENTS } from './utils/logger-config';
 import { setCliContext } from './utils/adt-client-v2';
 import { loadCommandPlugins } from './plugin-loader';
@@ -158,9 +152,6 @@ export async function createCLI(): Promise<Command> {
   // Get subcommands for specific object types
   getCommand.addCommand(packageGetCommand);
 
-  // Object outline command
-  program.addCommand(outlineCommand);
-
   // ATC (ABAP Test Cockpit) command - now loaded as plugin from @abapify/adt-atc
   // Add '@abapify/adt-atc/commands/atc' to adt.config.ts commands array to enable
 
@@ -169,7 +160,7 @@ export async function createCLI(): Promise<Command> {
 
   // CTS commands (v2 client) - replaces old 'transport' command
   // Use: adt cts search, adt cts get <TR>
-  // TODO: adt cts create, adt cts release, adt cts check
+  // NOTE: Future commands - adt cts create, adt cts release (via ADK), adt cts check
   program.addCommand(createCtsCommand());
 
   // Import commands
@@ -186,21 +177,8 @@ export async function createCLI(): Promise<Command> {
   // Deploy command moved to @abapify/adt-export plugin
   // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
 
-  // Lock command
-  program.addCommand(createLockCommand());
-
-  // Unlock command
-  program.addCommand(createUnlockCommand());
-
-  // Research command
-  program.addCommand(createResearchSessionsCommand());
-
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());
-
-  // Test commands for debugging
-  program.addCommand(createTestLogCommand());
-  program.addCommand(createTestAdtCommand());
 
   // Load command plugins from config (adt.config.ts)
   await loadCommandPlugins(program, process.cwd());

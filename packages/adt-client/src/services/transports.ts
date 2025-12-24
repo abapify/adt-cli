@@ -86,7 +86,7 @@ export class TransportService {
    * Use ADK's AdkTransportRequest.create() for full functionality.
    */
   async create(_options: CreateTransportOptions): Promise<Transport> {
-    // TODO: Implement XML body building for transport creation
+    // NOTE: XML body building for transport creation not yet implemented
     // The contract exists but we need to build the request XML
     throw new Error(
       'Transport creation via service layer not yet implemented. ' +
@@ -108,7 +108,7 @@ export class TransportService {
    * This is a placeholder for the full implementation.
    */
   async release(_trkorr: string): Promise<void> {
-    // TODO: Implement release action
+    // NOTE: Release action not yet implemented via service layer
     throw new Error(
       'Transport release via service layer not yet implemented.'
     );

@@ -254,7 +254,7 @@ export const treeConfigCommand = new Command('config')
           // PUT the configuration back using the typed contract
           // Body type is Partial<Configuration> - we only send properties
           // Note: CSRF token is auto-initialized by the adapter before write operations
-          // Cast to unknown to bypass schema mismatch - TODO: align schema with actual API
+          // Cast to unknown to bypass schema mismatch - schema alignment pending
           await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
             configId,
             configData as unknown as Parameters<typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put>[1]

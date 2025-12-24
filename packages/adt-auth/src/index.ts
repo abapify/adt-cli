@@ -27,9 +27,3 @@ export type {
   ConnectionTestResult,
 } from './types';
 
-// Legacy types (for backward compatibility during migration)
-export type {
-  AuthMethodType,
-  BasicAuthCredentials,
-  BasicAuth,
-} from './types';

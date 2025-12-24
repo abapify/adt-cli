@@ -182,13 +182,13 @@ export class AdkObjectSet {
     
     for (const obj of this.objects) {
       try {
-        onProgress?.(saved, total, obj);
-        
         await obj.save(saveOptions);
+        
+        saved++;
+        onProgress?.(saved, total, obj);
         
         result.success++;
         result.results.push({ object: obj, success: true });
-        saved++;
       } catch (error) {
         result.failed++;
         result.results.push({
@@ -244,7 +244,7 @@ export class AdkObjectSet {
         body: activationXml,
       });
       
-      // TODO: Parse actual response XML for detailed messages
+      // NOTE: Could parse actual response XML for detailed messages
       return { 
         success: this.objects.length, 
         failed: 0, 

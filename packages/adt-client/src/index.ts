@@ -7,10 +7,6 @@
 // Export main client factory
 export { createAdtClient, type AdtClient } from './client';
 
-// Legacy compatibility - AdtClientImpl was the old class name
-// TODO: Migrate CLI commands to use createAdtClient() and remove this
-/** @deprecated Use createAdtClient() instead */
-export { createAdtClient as AdtClientImpl } from './client';
 
 // Export contract for advanced use cases
 export { adtContract, type AdtContract } from '@abapify/adt-contracts';
@@ -18,7 +14,6 @@ export { adtContract, type AdtContract } from '@abapify/adt-contracts';
 // Export types
 export type {
   AdtConnectionConfig,
-  AdtRestContract,
   OperationResult,
   LockHandle,
   AdtError,

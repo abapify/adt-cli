@@ -1,9 +1,10 @@
-// TODO: BaseFormat and FormatRegistry were removed - needs ADK migration
+// NOTE: BaseFormat and FormatRegistry were removed during v2 migration
+// The format plugin system needs to be redesigned with ADK integration
 // import { BaseFormat } from '../formats/base-format';
 import { ConfigLoader } from '../config/loader';
 import { CliConfig } from '../config/interfaces';
 
-// TODO: Stub until ADK migration
+// NOTE: Stub interface until format plugin system is redesigned with ADK
 interface BaseFormat {
   name: string;
   description: string;
@@ -228,7 +229,7 @@ export class PluginManager {
 
   /**
    * Load built-in plugin
-   * TODO: FormatRegistry was removed - needs ADK migration
+   * NOTE: FormatRegistry was removed - needs ADK migration
    */
   private async loadBuiltinPlugin(
     pluginName: string,

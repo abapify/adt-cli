@@ -135,25 +135,3 @@ export interface ConnectionTestResult {
   responseTime?: number;
 }
 
-// =============================================================================
-// Legacy Types - For backward compatibility during migration
-// =============================================================================
-
-/** @deprecated Use AuthMethod instead */
-export type AuthMethodType = 'basic' | 'slc' | 'oauth';
-
-/** @deprecated Use BasicCredentials instead */
-export interface BasicAuthCredentials {
-  baseUrl: string;
-  client?: string;
-  language?: string;
-  username: string;
-  password: string;
-  insecure?: boolean;
-}
-
-/** @deprecated */
-export interface BasicAuth {
-  type: 'basic';
-  credentials: BasicAuthCredentials;
-}

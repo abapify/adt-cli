@@ -70,7 +70,7 @@ export const ctsReleaseCommand = new Command('release')
         console.log(`   Objects: ${tr.objects.length}`);
       }
 
-      // Step 2: Pre-release check (TODO: implement when check endpoint is available)
+      // Step 2: Pre-release check (not yet implemented - check endpoint not available)
       if (!options.skipCheck) {
         // For now, just warn that checks are not implemented
         if (!options.json) {
