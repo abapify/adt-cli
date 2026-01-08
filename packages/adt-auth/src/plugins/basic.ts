@@ -1,6 +1,6 @@
 /**
  * Built-in Basic Auth Plugin
- * 
+ *
  * Simple username/password authentication
  * No external dependencies
  */
@@ -15,10 +15,10 @@ export interface BasicAuthOptions extends AuthPluginOptions {
 /**
  * Basic auth plugin - uses provided credentials
  */
-export const authPlugin: AuthPlugin = {
+const authPlugin: AuthPlugin = {
   async authenticate(options: BasicAuthOptions): Promise<BasicAuthResult> {
     const { username, password } = options;
-    
+
     if (!username || !password) {
       throw new Error('Basic auth requires username and password');
     }
@@ -32,3 +32,5 @@ export const authPlugin: AuthPlugin = {
     };
   },
 };
+
+export default authPlugin;
