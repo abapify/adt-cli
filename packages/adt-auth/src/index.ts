@@ -11,6 +11,9 @@ export { AuthManager, type Destination } from './auth-manager';
 // Storage
 export { FileStorage } from './storage/file-storage';
 
+// Built-in plugins
+export { default as basicAuthPlugin } from './plugins/basic';
+
 // Types - New format (single source of truth)
 export type {
   AuthMethod,
