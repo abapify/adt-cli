@@ -82,6 +82,10 @@ export const importTransportCommand = new Command('transport')
         error instanceof Error && 'status' in error
           ? (error as any).status
           : '';
+      const cause =
+        error instanceof Error && 'cause' in error
+          ? (error as any).cause
+          : null;
 
       console.error(`❌ Import failed: ${errorMsg}`);
       if (errorCode && errorCode !== 'UNKNOWN') {
@@ -90,8 +94,16 @@ export const importTransportCommand = new Command('transport')
       if (errorStatus) {
         console.error(`   HTTP status: ${errorStatus}`);
       }
+      if (cause) {
+        const causeMsg = cause instanceof Error ? cause.message : String(cause);
+        const causeCode =
+          cause instanceof Error && 'code' in cause ? (cause as any).code : '';
+        console.error(
+          `   Cause: ${causeMsg}${causeCode ? ` (${causeCode})` : ''}`,
+        );
+      }
       if (error instanceof Error && error.stack) {
-        console.error(`   Details: ${error.stack}`);
+        console.error(`   Stack: ${error.stack}`);
       }
       process.exit(1);
     }
