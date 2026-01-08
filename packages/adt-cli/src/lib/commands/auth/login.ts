@@ -7,7 +7,11 @@ import {
   getAuthManager,
 } from '../../utils/auth';
 import { handleCommandError } from '../../utils/command-helpers';
-import { listDestinations, getDestination, type Destination } from '../../utils/destinations';
+import {
+  listDestinations,
+  getDestination,
+  type Destination,
+} from '../../utils/destinations';
 
 interface DestinationOptions {
   url: string;
@@ -22,8 +26,11 @@ interface DestinationChoice {
 
 export const loginCommand = new Command('login')
   .description('Login to ADT - supports Basic Auth and Browser-based SSO')
-  .option('--insecure', 'Allow insecure SSL connections (ignore certificate errors)')
-  .action(async function(this: Command, options) {
+  .option(
+    '--insecure',
+    'Allow insecure SSL connections (ignore certificate errors)',
+  )
+  .action(async function (this: Command, options) {
     try {
       // Get SID from global options (--sid is a global option on root program)
       const globalOpts = this.optsWithGlobals();
@@ -38,7 +45,9 @@ export const loginCommand = new Command('login')
 
       // If --sid provided and destination exists in config, use it directly
       // Case-insensitive match
-      const matchedSid = configuredDestinations.find(d => d.toUpperCase() === sid);
+      const matchedSid = configuredDestinations.find(
+        (d) => d.toUpperCase() === sid,
+      );
       if (sid && matchedSid) {
         const dest = await getDestination(matchedSid);
         if (dest) {
@@ -52,7 +61,7 @@ export const loginCommand = new Command('login')
 
           // Set as default
           setDefaultSid(sid);
-          
+
           console.log(`\n✅ Successfully logged in!`);
           console.log(`   System: ${session.sid}`);
           console.log(`   Host: ${session.host}`);
@@ -123,7 +132,10 @@ export const loginCommand = new Command('login')
       }
 
       // Collect credentials for basic auth
-      const pluginOptions = await collectPluginOptions(manualConfig.url, options);
+      const pluginOptions = await collectPluginOptions(
+        manualConfig.url,
+        options,
+      );
 
       // Authenticate via AuthManager (always uses built-in basic auth for manual flow)
       console.log(`\n📋 Authenticating to ${sid}...\n`);
@@ -144,7 +156,9 @@ export const loginCommand = new Command('login')
         setDefaultSid(sid);
         console.log(`💡 ${sid} set as default system`);
       } else {
-        console.log(`\n💡 Run "npx adt auth set-default ${sid}" to make it the default system`);
+        console.log(
+          `\n💡 Run "npx adt auth set-default ${sid}" to make it the default system`,
+        );
       }
     } catch (error) {
       // Handle user cancellation (Ctrl+C)
@@ -176,7 +190,7 @@ async function promptForSid(): Promise<string> {
  */
 async function collectPluginOptions(
   url: string,
-  commandOptions: any
+  commandOptions: any,
 ): Promise<DestinationOptions> {
   const client = await input({
     message: 'Client (optional, e.g., 100)',
@@ -208,14 +222,17 @@ async function collectPluginOptions(
 /**
  * Prompt for manual configuration (no adt.config.ts)
  */
-async function promptManualConfig(): Promise<{ pluginType: string; url: string }> {
+async function promptManualConfig(): Promise<{
+  pluginType: string;
+  url: string;
+}> {
   // Step 1: Choose authentication method (built-in plugins only)
   const pluginType = await select({
     message: 'Authentication method',
     choices: [
       {
         name: 'Basic Authentication (username/password)',
-        value: '@abapify/adt-auth/basic',
+        value: '@abapify/adt-auth/plugins/basic',
         description: 'Standard username and password authentication',
       },
     ],
