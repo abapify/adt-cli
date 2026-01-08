@@ -7,6 +7,7 @@
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
+    "./basic": "./dist/basic.mjs",
     "./plugins/basic": "./dist/plugins/basic.mjs",
     "./package.json": "./package.json"
   },
