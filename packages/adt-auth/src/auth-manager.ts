@@ -48,19 +48,17 @@ export class AuthManager {
   async login(sid: string, destination: Destination): Promise<AuthSession> {
     // Dynamic import of the auth plugin
     const pluginModule = (await import(destination.type)) as {
-      authPlugin: AuthPlugin;
+      default?: AuthPlugin;
     };
 
-    if (!pluginModule.authPlugin?.authenticate) {
+    if (!pluginModule.default?.authenticate) {
       throw new Error(
-        `Plugin ${destination.type} does not export authPlugin.authenticate`,
+        `Plugin ${destination.type} does not have a default export with authenticate method`,
       );
     }
 
     // Authenticate using the plugin
-    const result = await pluginModule.authPlugin.authenticate(
-      destination.options,
-    );
+    const result = await pluginModule.default.authenticate(destination.options);
 
     // Build session based on result type
     const session = this.buildSession(sid, destination, result);
