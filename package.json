@@ -20,16 +20,13 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "precommit": "nx format:check --uncommitted",    
+    "precommit": "nx format:check --uncommitted",
     "devcontainer": "devcontainer up --workspace-folder=$(pwd)",
     "preversion": "npx nx release version ${npm_new_version}",
-    "knip": "knip"    
+    "knip": "knip"
   },
   "dependencies": {
-    "@cloudfoundry/api": "^0.1.7",
     "@nx/devkit": "22.1.1",
-    "@sap/cds-dk": "^8.4.0",
-    "@sap/xsenv": "^5.4.0",
     "@xmldom/xmldom": "^0.9.5",
     "axios": "^1.7.7",
     "dset": "^3.1.4",
@@ -45,7 +42,6 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@cap-js/cds-types": "^0.7.0",
     "@eslint/js": "^9.8.0",
     "@nx/eslint": "22.1.1",
     "@nx/eslint-plugin": "22.1.1",
