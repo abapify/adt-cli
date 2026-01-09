@@ -108,6 +108,7 @@ export async function createCLI(): Promise<Command> {
       'Save ADT responses as separate files',
       false,
     )
+    .option('--config <path>', 'Path to config file (default: adt.config.ts)')
     .hook('preAction', (thisCommand) => {
       const opts = thisCommand.optsWithGlobals();
 
@@ -180,8 +181,9 @@ export async function createCLI(): Promise<Command> {
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());
 
-  // Load command plugins from config (adt.config.ts)
-  await loadCommandPlugins(program, process.cwd());
+  // Load command plugins from config (adt.config.ts or --config)
+  const configPath = program.opts().config;
+  await loadCommandPlugins(program, process.cwd(), configPath);
 
   // Apply global options help to all commands using afterAll hook
   addGlobalOptionsHelpToAll(program);
