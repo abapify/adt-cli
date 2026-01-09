@@ -18,9 +18,30 @@ import { getAdtClientV2 } from './utils/adt-client-v2';
 import { getAdtSystem } from './ui/components/link';
 
 /**
- * Load config file from current directory or parent directories
+ * Load config file from explicit path or current directory
  */
-export async function loadCliConfig(cwd: string): Promise<AdtCliConfig | null> {
+export async function loadCliConfig(
+  cwd: string,
+  explicitConfigPath?: string,
+): Promise<AdtCliConfig | null> {
+  // If explicit config path provided, use it directly
+  if (explicitConfigPath) {
+    const configPath = resolve(cwd, explicitConfigPath);
+    if (existsSync(configPath)) {
+      try {
+        const module = await import(configPath);
+        return module.default ?? module;
+      } catch (err) {
+        console.error(`Failed to load config from ${configPath}:`, err);
+        return null;
+      }
+    } else {
+      console.error(`Config file not found: ${configPath}`);
+      return null;
+    }
+  }
+
+  // Otherwise search for config in current directory and parents
   const configNames = ['adt.config.ts', 'adt.config.js', 'adt.config.mjs'];
 
   let dir = cwd;
@@ -172,8 +193,9 @@ async function loadCommandPlugin(
 export async function loadCommandPlugins(
   program: Command,
   cwd: string,
+  explicitConfigPath?: string,
 ): Promise<void> {
-  const config = await loadCliConfig(cwd);
+  const config = await loadCliConfig(cwd, explicitConfigPath);
 
   if (!config?.commands?.length) {
     return;
