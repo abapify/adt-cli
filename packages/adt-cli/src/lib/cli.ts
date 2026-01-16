@@ -182,7 +182,10 @@ export async function createCLI(): Promise<Command> {
   program.addCommand(createReplCommand());
 
   // Load command plugins from config (adt.config.ts or --config)
-  const configPath = program.opts().config;
+  // NOTE: We need to parse --config early since plugins must be loaded before parseAsync()
+  const configArgIndex = process.argv.findIndex((arg) => arg === '--config');
+  const configPath =
+    configArgIndex !== -1 ? process.argv[configArgIndex + 1] : undefined;
   await loadCommandPlugins(program, process.cwd(), configPath);
 
   // Apply global options help to all commands using afterAll hook
