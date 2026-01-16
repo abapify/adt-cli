@@ -30,8 +30,8 @@ export async function outputGitLabCodeQuality(
         break;
     }
 
-    // Extract file path from object reference
-    const filePath = `src/${finding.objectType.toLowerCase()}/${finding.objectName.toLowerCase()}.${finding.objectType.toLowerCase()}`;
+    // Extract file path from object reference (abapgit format: src/<type>/<name>.<type>.abap)
+    const filePath = `src/${finding.objectType.toLowerCase()}/${finding.objectName.toLowerCase()}.${finding.objectType.toLowerCase()}.abap`;
 
     // Parse line number from location if available
     const lineMatch = finding.location?.match(/start=(\d+)/);
