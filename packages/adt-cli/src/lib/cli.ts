@@ -18,6 +18,7 @@ import {
   createCtsCommand,
   createReplCommand,
   packageGetCommand,
+  lsCommand,
 } from './commands';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
@@ -158,6 +159,9 @@ export async function createCLI(): Promise<Command> {
 
   // Search command
   program.addCommand(searchCommand);
+
+  // List objects in repository (format-aware: abapgit, AFF)
+  program.addCommand(lsCommand);
 
   // CTS commands (v2 client) - replaces old 'transport' command
   // Use: adt cts search, adt cts get <TR>

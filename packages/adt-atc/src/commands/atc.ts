@@ -210,6 +210,10 @@ export const atcCommand: CliCommandPlugin = {
       description: 'Run ATC on transport request (e.g., S0DK942970)',
     },
     {
+      flags: '-f, --from-file <file>',
+      description: 'Run ATC on objects listed in file (one URI per line)',
+    },
+    {
       flags: '--variant <variant>',
       description: 'ATC check variant (default: from system customizing)',
     },
@@ -234,6 +238,7 @@ export const atcCommand: CliCommandPlugin = {
       package?: string;
       object?: string;
       transport?: string;
+      fromFile?: string;
       variant?: string;
       maxResults?: string;
       format?: OutputFormat;
@@ -245,18 +250,19 @@ export const atcCommand: CliCommandPlugin = {
       options.package,
       options.object,
       options.transport,
+      options.fromFile,
     ].filter(Boolean).length;
 
     if (targetCount === 0) {
       ctx.logger.error(
-        '❌ One of --package, --object, or --transport is required',
+        '❌ One of --package, --object, --transport, or --from-file is required',
       );
       process.exit(1);
     }
 
     if (targetCount > 1) {
       ctx.logger.error(
-        '❌ Only one of --package, --object, or --transport can be specified',
+        '❌ Only one of --package, --object, --transport, or --from-file can be specified',
       );
       process.exit(1);
     }
@@ -283,20 +289,35 @@ export const atcCommand: CliCommandPlugin = {
 
     ctx.logger.info('🔍 Running ABAP Test Cockpit checks...');
 
-    // Determine target
-    let targetUri: string;
+    // Determine target(s)
+    let targetUris: string[];
     let targetName: string;
 
-    if (options.transport) {
-      targetUri = `/sap/bc/adt/cts/transportrequests/${options.transport}`;
+    if (options.fromFile) {
+      // Read URIs from file
+      const { readFileSync } = await import('fs');
+      const fileContent = readFileSync(options.fromFile, 'utf-8');
+      targetUris = fileContent
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith('#')); // Skip empty lines and comments
+
+      if (targetUris.length === 0) {
+        ctx.logger.error(`❌ No objects found in ${options.fromFile}`);
+        process.exit(1);
+      }
+      targetName = `${targetUris.length} objects from ${options.fromFile}`;
+      ctx.logger.info(`📄 Target: ${targetName}`);
+    } else if (options.transport) {
+      targetUris = [`/sap/bc/adt/cts/transportrequests/${options.transport}`];
       targetName = `Transport ${options.transport}`;
       ctx.logger.info(`🚚 Target: ${targetName}`);
     } else if (options.package) {
-      targetUri = `/sap/bc/adt/packages/${options.package.toUpperCase()}`;
+      targetUris = [`/sap/bc/adt/packages/${options.package.toUpperCase()}`];
       targetName = `Package ${options.package.toUpperCase()}`;
       ctx.logger.info(`📦 Target: ${targetName}`);
     } else {
-      targetUri = options.object!;
+      targetUris = [options.object!];
       targetName = options.object!;
       ctx.logger.info(`📄 Target: ${targetName}`);
     }
@@ -358,7 +379,7 @@ export const atcCommand: CliCommandPlugin = {
             {
               kind: 'inclusive',
               objectReferences: {
-                objectReference: [{ uri: targetUri }],
+                objectReference: targetUris.map((uri) => ({ uri })),
               },
             },
           ],
