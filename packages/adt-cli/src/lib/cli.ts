@@ -233,6 +233,7 @@ export async function main(): Promise<void> {
       logOutput: loggingConfig.logOutput,
       logResponseFiles: loggingConfig.logResponseFiles,
       verbose: globalOptions.verbose,
+      configPath: globalOptions.config,
     });
   });
 

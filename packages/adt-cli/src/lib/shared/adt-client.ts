@@ -19,6 +19,8 @@ export interface CliContext {
   logOutput?: string;
   logResponseFiles?: boolean;
   verbose?: boolean | string;
+  /** Path to config file (from --config flag) */
+  configPath?: string;
 }
 
 let globalCliContext: CliContext = {};

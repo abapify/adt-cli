@@ -28,7 +28,7 @@ export type {
   ContentTypeMapping,
   EnabledEndpoints,
 } from './types';
-export type { LoadedConfig } from './config-loader';
+export type { LoadedConfig, LoadConfigOptions } from './config-loader';
 
 // Config Loader
 export { loadConfig, defineConfig } from './config-loader';
