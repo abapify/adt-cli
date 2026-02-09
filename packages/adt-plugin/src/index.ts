@@ -20,6 +20,7 @@
 // Format Plugin Types
 export type {
   AbapObjectType,
+  FormatOptionValue,
   ImportContext,
   ImportResult,
   ExportContext,

@@ -15,6 +15,11 @@ import type { AdkObject } from '@abapify/adk';
  */
 export type AbapObjectType = string;
 
+/**
+ * Primitive value accepted for format/plugin options.
+ */
+export type FormatOptionValue = string | number | boolean;
+
 // ============================================
 // Import Types (ADK → File System)
 // ============================================
@@ -34,6 +39,18 @@ export interface ImportContext {
    * @returns Array of package names from root to current (e.g., ['ZROOT', 'ZROOT_CHILD', 'ZROOT_CHILD_SUB'])
    */
   resolvePackagePath(packageName: string): Promise<string[]>;
+
+  /**
+   * Format options provided explicitly by CLI invocation.
+   * Interpreted by the selected format plugin.
+   */
+  formatOptions?: Readonly<Record<string, FormatOptionValue>>;
+
+  /**
+   * Format options loaded from configuration (e.g. adt.config.ts).
+   * Interpreted by the selected format plugin.
+   */
+  configFormatOptions?: Readonly<Record<string, FormatOptionValue>>;
 }
 
 /**
