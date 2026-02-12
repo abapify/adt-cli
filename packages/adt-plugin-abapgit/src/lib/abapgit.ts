@@ -156,17 +156,10 @@ function calculatePackageDir(
     }
 
     case 'full': {
-      // FULL mode: root → src/, children use full name as folder
-      // Example: ['ZTEST', 'ZTEST_EXAMPLES'] → 'ztest_examples'
-      if (packagePath.length === 1) {
-        return ''; // Root package goes directly to src/
-      }
-
-      // Child packages get full name as folder (excluding root)
-      return packagePath
-        .slice(1)
-        .map((p) => p.toLowerCase())
-        .join('/');
+      // FULL mode: all packages including root become folders under src/
+      // Example: ['ZABAPGIT_EXAMPLES', 'ZABAPGIT_EXAMPLES_CLAS'] → 'zabapgit_examples/zabapgit_examples_clas'
+      // This matches abapGit FULL folder logic where every package has its own directory
+      return packagePath.map((p) => p.toLowerCase()).join('/');
     }
 
     case 'full-with-root': {

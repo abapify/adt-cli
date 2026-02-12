@@ -101,11 +101,27 @@ describe('abapGit package directory mapping', () => {
     assert.equal(packageDir, 'child/deep');
   });
 
-  it('supports full logic', () => {
+  it('supports full logic (includes root package as folder)', () => {
     const packageDir = __testing.calculatePackageDir(
       ['ZROOT', 'ZROOT_CHILD', 'ZROOT_CHILD_DEEP'],
       'full',
     );
-    assert.equal(packageDir, 'zroot_child/zroot_child_deep');
+    assert.equal(packageDir, 'zroot/zroot_child/zroot_child_deep');
+  });
+
+  it('supports full logic with real package names', () => {
+    const packageDir = __testing.calculatePackageDir(
+      ['ZABAPGIT_EXAMPLES', 'ZABAPGIT_EXAMPLES_CLAS'],
+      'full',
+    );
+    assert.equal(packageDir, 'zabapgit_examples/zabapgit_examples_clas');
+  });
+
+  it('supports full logic with single root package', () => {
+    const packageDir = __testing.calculatePackageDir(
+      ['ZABAPGIT_EXAMPLES'],
+      'full',
+    );
+    assert.equal(packageDir, 'zabapgit_examples');
   });
 });
