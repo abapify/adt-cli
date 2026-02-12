@@ -41,8 +41,11 @@ export async function outputGitLabCodeQuality(
     const fingerprint = `${finding.checkId}-${finding.objectName}-${line}`;
 
     // Extract method name from ATC location URI if present
-    // e.g., /sap/bc/adt/oo/classes/zcl_foo/methods/my_method#start=21,0
-    const methodMatch = finding.location?.match(/\/methods\/(\w+)/i);
+    // Format 1: /sap/bc/adt/oo/classes/zcl_foo/methods/my_method#start=21,0
+    // Format 2: /sap/bc/adt/oo/classes/zcl_foo/source/main#type=CLAS%2FOM;name=MY_METHOD;start=21
+    const methodMatch =
+      finding.location?.match(/\/methods\/(\w+)/i) ||
+      finding.location?.match(/[;?&]name=(\w+)/i);
     const methodName = methodMatch ? methodMatch[1].toLowerCase() : undefined;
 
     return {
