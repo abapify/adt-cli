@@ -40,6 +40,11 @@ export async function outputGitLabCodeQuality(
     // Create unique fingerprint for the finding
     const fingerprint = `${finding.checkId}-${finding.objectName}-${line}`;
 
+    // Extract method name from ATC location URI if present
+    // e.g., /sap/bc/adt/oo/classes/zcl_foo/methods/my_method#start=21,0
+    const methodMatch = finding.location?.match(/\/methods\/(\w+)/i);
+    const methodName = methodMatch ? methodMatch[1].toLowerCase() : undefined;
+
     return {
       description: finding.messageText,
       check_name: finding.checkTitle || finding.checkId,
@@ -52,6 +57,9 @@ export async function outputGitLabCodeQuality(
           end: line,
         },
       },
+      // Extra fields for downstream processing (path/line resolution)
+      ...(methodName && { method: methodName }),
+      ...(finding.location && { atc_location: finding.location }),
     };
   });
 
