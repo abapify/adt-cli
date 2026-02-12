@@ -415,7 +415,14 @@ export const atcCommand: CliCommandPlugin = {
         };
         const moduleName = resolverMap[options.resolver] || options.resolver;
         ctx.logger.info(`📂 Loading resolver: ${moduleName}`);
-        const mod = await import(moduleName);
+
+        // Resolve from cwd (where node_modules lives) since bundled code
+        // can't resolve workspace packages from its own dist/ directory
+        const { createRequire } = await import('module');
+        const cwdRequire = createRequire(`${process.cwd()}/package.json`);
+        const resolvedPath = cwdRequire.resolve(moduleName);
+        const mod = await import(resolvedPath);
+
         if (typeof mod.createFindingResolver === 'function') {
           resolver = mod.createFindingResolver();
         } else {
