@@ -231,6 +231,11 @@ export const atcCommand: CliCommandPlugin = {
       flags: '--output <file>',
       description: 'Output file (required for gitlab/sarif format)',
     },
+    {
+      flags: '--resolver <name>',
+      description:
+        'Finding resolver plugin for path/line resolution (e.g., abapgit)',
+    },
   ],
 
   async execute(args, ctx: CliContext) {
@@ -243,6 +248,7 @@ export const atcCommand: CliCommandPlugin = {
       maxResults?: string;
       format?: OutputFormat;
       output?: string;
+      resolver?: string;
     };
 
     // Validate mutually exclusive options
@@ -400,11 +406,35 @@ export const atcCommand: CliCommandPlugin = {
       checkVariant,
     );
 
+    // Load finding resolver if requested
+    let resolver: import('../types').FindingResolver | undefined;
+    if (options.resolver) {
+      try {
+        const resolverMap: Record<string, string> = {
+          abapgit: '@abapify/adt-plugin-abapgit',
+        };
+        const moduleName = resolverMap[options.resolver] || options.resolver;
+        ctx.logger.info(`📂 Loading resolver: ${moduleName}`);
+        const mod = await import(moduleName);
+        if (typeof mod.createFindingResolver === 'function') {
+          resolver = mod.createFindingResolver();
+        } else {
+          ctx.logger.warn(
+            `⚠️ Resolver module ${moduleName} does not export createFindingResolver()`,
+          );
+        }
+      } catch (e) {
+        ctx.logger.warn(
+          `⚠️ Failed to load resolver "${options.resolver}": ${e instanceof Error ? e.message : e}`,
+        );
+      }
+    }
+
     // Output based on format
     if (options.format === 'json') {
       console.log(JSON.stringify(result, null, 2));
     } else if (options.format === 'gitlab' && options.output) {
-      await outputGitLabCodeQuality(result, options.output);
+      await outputGitLabCodeQuality(result, options.output, { resolver });
     } else if (options.format === 'sarif' && options.output) {
       await outputSarifReport(result, options.output, targetName);
     } else {
