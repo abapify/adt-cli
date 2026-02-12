@@ -409,31 +409,28 @@ export const atcCommand: CliCommandPlugin = {
     // Load finding resolver if requested
     let resolver: import('../types').FindingResolver | undefined;
     if (options.resolver) {
-      try {
-        const resolverMap: Record<string, string> = {
-          abapgit: '@abapify/adt-plugin-abapgit',
-        };
-        const moduleName = resolverMap[options.resolver] || options.resolver;
-        ctx.logger.info(`📂 Loading resolver: ${moduleName}`);
-
-        // Resolve from cwd (where node_modules lives) since bundled code
-        // can't resolve workspace packages from its own dist/ directory
-        const { createRequire } = await import('module');
-        const cwdRequire = createRequire(`${process.cwd()}/package.json`);
-        const resolvedPath = cwdRequire.resolve(moduleName);
-        const mod = await import(resolvedPath);
-
-        if (typeof mod.createFindingResolver === 'function') {
-          resolver = mod.createFindingResolver();
-        } else {
+      const name = options.resolver;
+      if (name === 'abapgit') {
+        // Built-in abapgit resolver — no external dependencies
+        const { createAbapGitResolver } = await import('../resolvers/abapgit');
+        resolver = createAbapGitResolver();
+      } else {
+        // External resolver — try dynamic import
+        try {
+          ctx.logger.info(`📂 Loading external resolver: ${name}`);
+          const mod = await import(name);
+          if (typeof mod.createFindingResolver === 'function') {
+            resolver = mod.createFindingResolver();
+          } else {
+            ctx.logger.warn(
+              `⚠️ Module ${name} does not export createFindingResolver()`,
+            );
+          }
+        } catch (e) {
           ctx.logger.warn(
-            `⚠️ Resolver module ${moduleName} does not export createFindingResolver()`,
+            `⚠️ Failed to load resolver "${name}": ${e instanceof Error ? e.message : e}`,
           );
         }
-      } catch (e) {
-        ctx.logger.warn(
-          `⚠️ Failed to load resolver "${options.resolver}": ${e instanceof Error ? e.message : e}`,
-        );
       }
     }
 
