@@ -35,6 +35,7 @@ export interface RestEndpointOptions<
 /**
  * HTTP helper object with optional global responses
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Http<TGlobalResponses extends ResponseMap = {}> = {
   // GET - with shortcut syntax
   get: {
@@ -172,6 +173,7 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
  *   // 400, 401, 500 are automatically added
  * })
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export function createHttp<TGlobalResponses extends ResponseMap = {}>(
   globalResponses?: TGlobalResponses,
 ): Http<TGlobalResponses> {

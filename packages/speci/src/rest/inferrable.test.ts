@@ -21,13 +21,15 @@ describe('InferSchema with complex types', () => {
     ? E extends Record<string, unknown>
       ? { data: string }
       : never
-    : {};
+    : // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+      {};
 
   // Simulate SpeciSchema - like adt-schemas does
   type SimulatedSpeciSchema<T> = T & Serializable<SimulatedInferXsd<T>>;
 
   it('should infer type from Serializable with complex generic', () => {
     // This simulates what adt-schemas does
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     type Schema = SimulatedSpeciSchema<{ root: 'test'; elements: { foo: {} } }>;
 
     // InferSchema should extract the type from _infer

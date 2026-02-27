@@ -122,7 +122,9 @@ export async function authenticate(
         }
       });
 
-      // Navigate - events are already set up
+      // Navigate - events are already set up; navigation errors are expected
+      // (auth flow handles results through response event listeners, not navigation result)
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       adapter.goto(targetUrl, { timeout: 30000 }).catch(() => {});
     });
 
