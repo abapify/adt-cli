@@ -14,12 +14,12 @@ ADK v2 is a complete redesign focused on:
 
 ## Key Differences from v1
 
-| Aspect | v1 | v2 |
-|--------|----|----|
-| Schemas | Manual (`adt-schemas`) | XSD-derived (`adt-schemas`) |
-| Network | Mixed in | Separated out |
-| Source | Eager | Lazy |
-| Dependencies | `adt-client` v1 | `adt-contracts` |
+| Aspect       | v1                     | v2                          |
+| ------------ | ---------------------- | --------------------------- |
+| Schemas      | Manual (`adt-schemas`) | XSD-derived (`adt-schemas`) |
+| Network      | Mixed in               | Separated out               |
+| Source       | Eager                  | Lazy                        |
+| Dependencies | `adt-client` v1        | `adt-contracts`             |
 
 ## Usage
 

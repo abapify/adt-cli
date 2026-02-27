@@ -11,6 +11,8 @@ export const metadata = contract({
   get: () =>
     http.get('/sap/bc/adt/cts/transportrequests/searchconfiguration/metadata', {
       responses: { 200: configuration },
-      headers: { Accept: 'application/vnd.sap.adt.configuration.metadata.v1+xml' },
+      headers: {
+        Accept: 'application/vnd.sap.adt.configuration.metadata.v1+xml',
+      },
     }),
 });

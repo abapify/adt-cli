@@ -1,6 +1,6 @@
 /**
  * CLAS - ABAP Class
- * 
+ *
  * Public interface for ABAP Class objects.
  * Based on ADT class:abapClass XML structure.
  */
@@ -11,7 +11,7 @@ import type { AdtObjectReference } from '../../../base/model';
 /**
  * Class category (class:category attribute)
  */
-export type ClassCategory = 
+export type ClassCategory =
   | 'generalObjectType'
   | 'exceptionClass'
   | 'testClass'
@@ -30,7 +30,7 @@ export type ClassCategory =
 /**
  * Class include type (class:includeType attribute)
  */
-export type ClassIncludeType = 
+export type ClassIncludeType =
   | 'main'
   | 'definitions'
   | 'implementations'
@@ -66,13 +66,13 @@ export interface ClassInclude {
 
 /**
  * ABAP Class interface
- * 
+ *
  * Plugins work with this interface - implementation is internal.
  * Mirrors ADT class:abapClass structure.
  */
 export interface AbapClass extends AbapObject {
   readonly kind: 'Class';
-  
+
   // Core attributes (from adtcore:*)
   readonly responsible: string;
   readonly masterLanguage: string;
@@ -82,51 +82,51 @@ export interface AbapClass extends AbapObject {
   readonly createdBy: string;
   readonly changedAt: Date;
   readonly changedBy: string;
-  
+
   // Class-specific (from class:*)
   readonly category: ClassCategory;
   readonly final: boolean;
   readonly abstract: boolean;
   readonly visibility: ClassVisibility;
   readonly sharedMemoryEnabled: boolean;
-  
+
   // OO attributes (from abapoo:*)
   readonly modeled: boolean;
-  
+
   // Source attributes (from abapsource:*)
   readonly fixPointArithmetic: boolean;
   readonly activeUnicodeCheck: boolean;
-  
+
   // References
   readonly superClassRef?: AdtObjectReference;
   readonly messageClassRef?: AdtObjectReference;
   readonly packageRef?: AdtObjectReference;
-  
+
   // Includes
   readonly includes: ClassInclude[];
-  
+
   // Lazy segments - fetched on demand
-  
+
   /**
    * Get main source code (global definitions + implementations)
    */
   getMainSource(): Promise<string>;
-  
+
   /**
    * Get source code for a specific include
    */
   getIncludeSource(includeType: ClassIncludeType): Promise<string>;
-  
+
   /**
    * Get definitions include source
    */
   getDefinitions(): Promise<string>;
-  
+
   /**
    * Get implementations include source
    */
   getImplementations(): Promise<string>;
-  
+
   /**
    * Get test classes source
    */

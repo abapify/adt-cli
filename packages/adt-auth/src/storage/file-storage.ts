@@ -1,11 +1,18 @@
 /**
  * File-based session storage
- * 
+ *
  * Stores auth sessions in ~/.adt/sessions/
  * Stores config in ~/.adt/config.json
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  unlinkSync,
+} from 'fs';
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 import type { AuthSession } from '../types';
@@ -52,7 +59,9 @@ export class FileStorage {
       const data = readFileSync(filePath, 'utf8');
       return JSON.parse(data) as AuthSession;
     } catch (error) {
-      throw new Error(`Failed to load session ${sid}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to load session ${sid}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -75,8 +84,8 @@ export class FileStorage {
     }
 
     return readdirSync(this.storageDir)
-      .filter(file => file.endsWith('.json'))
-      .map(file => file.replace('.json', ''));
+      .filter((file) => file.endsWith('.json'))
+      .map((file) => file.replace('.json', ''));
   }
 
   /**
@@ -143,6 +152,8 @@ export class FileStorage {
 
   private saveConfig(config: Config): void {
     mkdirSync(dirname(this.configPath), { recursive: true });
-    writeFileSync(this.configPath, JSON.stringify(config, null, 2), { mode: 0o600 });
+    writeFileSync(this.configPath, JSON.stringify(config, null, 2), {
+      mode: 0o600,
+    });
   }
 }

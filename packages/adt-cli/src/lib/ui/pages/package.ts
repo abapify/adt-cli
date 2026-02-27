@@ -126,6 +126,7 @@ function renderPackagePage(pkg: PackageXml, _params: NavParams): Page {
     title: `Package: ${name}`,
     icon: '📦',
     render: () => content.render(),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     print: () => {},
   };
 

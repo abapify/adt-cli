@@ -4,7 +4,12 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { parseXsd, linkSchema, loadSchema, type XsdLoader } from '../../src/xsd';
+import {
+  parseXsd,
+  linkSchema,
+  loadSchema,
+  type XsdLoader,
+} from '../../src/xsd';
 
 describe('linkSchema', () => {
   describe('xs:import resolution', () => {
@@ -41,7 +46,10 @@ describe('linkSchema', () => {
       // Verify $imports is populated
       assert.ok(schema.$imports, '$imports should be populated');
       assert.strictEqual(schema.$imports.length, 1, 'Should have 1 import');
-      assert.strictEqual(schema.$imports[0].targetNamespace, 'http://example.com/base');
+      assert.strictEqual(
+        schema.$imports[0].targetNamespace,
+        'http://example.com/base',
+      );
       assert.strictEqual(schema.$imports[0].$filename, 'base.xsd');
     });
 
@@ -65,9 +73,13 @@ describe('linkSchema', () => {
         </xs:schema>`;
 
       const schema = parseXsd(mainXsd);
-      
+
       assert.throws(() => {
-        linkSchema(schema, { basePath: '/test', loader: () => null, throwOnMissing: true });
+        linkSchema(schema, {
+          basePath: '/test',
+          loader: () => null,
+          throwOnMissing: true,
+        });
       }, /Failed to load schema: missing.xsd/);
     });
   });
@@ -144,10 +156,15 @@ describe('linkSchema', () => {
       // Redefine block should have $schema populated with base schema
       assert.ok(schema.redefine, 'redefine should exist');
       assert.strictEqual(schema.redefine.length, 1);
-      assert.ok(schema.redefine[0].complexType, 'redefine should have complexType');
-      
+      assert.ok(
+        schema.redefine[0].complexType,
+        'redefine should have complexType',
+      );
+
       // Base schema is attached to redefine.$schema (not $includes)
-      const redefine = schema.redefine[0] as { $schema?: { $filename?: string } };
+      const redefine = schema.redefine[0] as {
+        $schema?: { $filename?: string };
+      };
       assert.ok(redefine.$schema, 'redefine should have $schema');
       assert.strictEqual(redefine.$schema.$filename, 'base-types.xsd');
     });
@@ -186,13 +203,19 @@ describe('linkSchema', () => {
       // Main -> level1
       assert.ok(schema.$imports);
       assert.strictEqual(schema.$imports.length, 1);
-      assert.strictEqual(schema.$imports[0].targetNamespace, 'http://example.com/level1');
+      assert.strictEqual(
+        schema.$imports[0].targetNamespace,
+        'http://example.com/level1',
+      );
 
       // level1 -> level2
       const level1 = schema.$imports[0];
       assert.ok(level1.$imports);
       assert.strictEqual(level1.$imports.length, 1);
-      assert.strictEqual(level1.$imports[0].targetNamespace, 'http://example.com/level2');
+      assert.strictEqual(
+        level1.$imports[0].targetNamespace,
+        'http://example.com/level2',
+      );
     });
 
     it('should handle circular references without infinite loop', () => {
@@ -215,7 +238,7 @@ describe('linkSchema', () => {
       };
 
       const schema = parseXsd(schemaA);
-      
+
       // Should not hang or throw
       linkSchema(schema, { basePath: '/test', loader });
 
@@ -245,10 +268,10 @@ describe('linkSchema', () => {
         return null;
       };
 
-      const schema = loadSchema('main.xsd', { 
-        basePath: '/test', 
-        loader, 
-        autoLink: true 
+      const schema = loadSchema('main.xsd', {
+        basePath: '/test',
+        loader,
+        autoLink: true,
       });
 
       assert.ok(schema.$imports, '$imports should be populated with autoLink');
@@ -278,20 +301,25 @@ describe('linkSchema', () => {
         return null;
       };
 
-      const schema = loadSchema('main.xsd', { 
-        basePath: '/test', 
-        loader, 
-        autoResolve: true 
+      const schema = loadSchema('main.xsd', {
+        basePath: '/test',
+        loader,
+        autoResolve: true,
       });
 
       // autoResolve flattens - no $imports
       assert.ok(!schema.$imports, '$imports should NOT exist after resolve');
-      
+
       // Both types should be merged into one schema
       assert.ok(schema.complexType, 'complexType should exist');
-      const typeNames = schema.complexType.map((ct: { name: string }) => ct.name);
+      const typeNames = schema.complexType.map(
+        (ct: { name: string }) => ct.name,
+      );
       assert.ok(typeNames.includes('MainType'), 'Should have MainType');
-      assert.ok(typeNames.includes('BaseType'), 'Should have BaseType from import');
+      assert.ok(
+        typeNames.includes('BaseType'),
+        'Should have BaseType from import',
+      );
     });
 
     it('should keep $imports with autoLink but not autoResolve', () => {
@@ -315,21 +343,21 @@ describe('linkSchema', () => {
         return null;
       };
 
-      const schema = loadSchema('main.xsd', { 
-        basePath: '/test', 
-        loader, 
-        autoLink: true  // NOT autoResolve
+      const schema = loadSchema('main.xsd', {
+        basePath: '/test',
+        loader,
+        autoLink: true, // NOT autoResolve
       });
 
       // autoLink keeps structure - $imports exists
       assert.ok(schema.$imports, '$imports should exist with autoLink');
       assert.strictEqual(schema.$imports.length, 1);
-      
+
       // Main schema only has its own type
       assert.ok(schema.complexType, 'complexType should exist');
       assert.strictEqual(schema.complexType.length, 1);
       assert.strictEqual(schema.complexType[0].name, 'MainType');
-      
+
       // BaseType is in $imports, not merged
       assert.strictEqual(schema.$imports![0].complexType![0].name, 'BaseType');
     });
@@ -385,7 +413,10 @@ describe('linkSchema', () => {
       // Check imports (external namespace)
       assert.ok(schema.$imports);
       assert.strictEqual(schema.$imports.length, 1);
-      assert.strictEqual(schema.$imports[0].targetNamespace, 'http://example.com/external');
+      assert.strictEqual(
+        schema.$imports[0].targetNamespace,
+        'http://example.com/external',
+      );
 
       // Check includes (internal only - redefine base goes to redefine.$schema)
       assert.ok(schema.$includes);
@@ -394,7 +425,9 @@ describe('linkSchema', () => {
 
       // Check redefine.$schema (base schema)
       assert.ok(schema.redefine);
-      const redefine = schema.redefine[0] as { $schema?: { $filename?: string } };
+      const redefine = schema.redefine[0] as {
+        $schema?: { $filename?: string };
+      };
       assert.ok(redefine.$schema, 'redefine should have $schema');
       assert.strictEqual(redefine.$schema.$filename, 'base.xsd');
     });

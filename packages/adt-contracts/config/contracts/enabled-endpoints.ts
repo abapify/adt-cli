@@ -11,6 +11,7 @@
  * { path: '/sap/bc/adt/atc/runs', methods: ['POST'] }
  */
 
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type { EndpointDefinition } from '@abapify/adt-codegen';
 
 export const enabledEndpoints: EndpointDefinition[] = [

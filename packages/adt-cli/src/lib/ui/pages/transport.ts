@@ -7,7 +7,11 @@
 
 import type { Page, Component } from '../types';
 import type { NavParams } from '../router';
-import { AdkTransportRequest, AdkTransportTask, type AdkTransportObject } from '@abapify/adk';
+import {
+  AdkTransportRequest,
+  AdkTransportTask,
+  type AdkTransportObject,
+} from '@abapify/adk';
 import { Box, Field, Section, Text, adtLink } from '../components';
 import { IconRegistry } from '../../utils/icon-registry';
 import { createPrintFn } from '../render';
@@ -63,7 +67,6 @@ function getObjectIcon(type: string): string {
   return IconRegistry.getIcon(type);
 }
 
-
 // =============================================================================
 // Render Functions
 // =============================================================================
@@ -73,7 +76,7 @@ function getObjectIcon(type: string): string {
  */
 function getMaxNameLength(objects: AdkTransportObject[]): number {
   if (!objects || objects.length === 0) return 30;
-  return Math.max(...objects.map(o => (o.name || '').length));
+  return Math.max(...objects.map((o) => (o.name || '').length));
 }
 
 /**
@@ -81,7 +84,11 @@ function getMaxNameLength(objects: AdkTransportObject[]): number {
  * Format: [icon] [pgmid] [type] [name-link] [desc]
  * Like Eclipse: R3TR CLAS ZCL_MY_CLASS  Description
  */
-function renderObject(obj: AdkTransportObject, prefix: string = '', nameWidth: number = 30): Component {
+function renderObject(
+  obj: AdkTransportObject,
+  prefix = '',
+  nameWidth = 30,
+): Component {
   const name = obj.name || '';
   const type = obj.type || '';
   const pgmid = obj.pgmid || '';
@@ -93,21 +100,30 @@ function renderObject(obj: AdkTransportObject, prefix: string = '', nameWidth: n
   const pgmidPad = pgmid.padEnd(4);
   const typePad = type.padEnd(4);
   const desc = obj.objectDescription || '-';
-  return Text(`${prefix}${icon} ${pgmidPad} ${typePad} ${nameLink}${padding} ${desc}${lock}`);
+  return Text(
+    `${prefix}${icon} ${pgmidPad} ${typePad} ${nameLink}${padding} ${desc}${lock}`,
+  );
 }
 
 /**
  * Render task with its objects (Eclipse-style: simple indentation, no tree connectors for objects)
  */
-function renderTask(task: AdkTransportTask, isLast: boolean, showObjects: boolean, nameWidth: number = 30): Component[] {
+function renderTask(
+  task: AdkTransportTask,
+  isLast: boolean,
+  showObjects: boolean,
+  nameWidth = 30,
+): Component[] {
   const prefix = isLast ? '└─' : '├─';
   const childIndent = '   '; // Simple indentation for objects under task
   const components: Component[] = [];
-  
+
   // Task header with ADT link
   const taskLink = adtLink({ name: task.number, uri: task.uri });
-  components.push(Text(`${prefix} 📁 ${taskLink} - ${task.owner} (${task.statusText})`));
-  
+  components.push(
+    Text(`${prefix} 📁 ${taskLink} - ${task.owner} (${task.statusText})`),
+  );
+
   // Task objects (Eclipse-style: simple indented list)
   if (showObjects) {
     const taskObjects = task.objects;
@@ -119,14 +135,17 @@ function renderTask(task: AdkTransportTask, isLast: boolean, showObjects: boolea
       components.push(Text(`${childIndent}(no objects)`));
     }
   }
-  
+
   return components;
 }
 
 /**
  * Render transport page
  */
-function renderTransportPage(transport: TransportData, params: NavParams): Page {
+function renderTransportPage(
+  transport: TransportData,
+  params: NavParams,
+): Page {
   const showObjects = (params.showObjects as boolean | undefined) ?? false;
   // Tasks only exist on requests, not on tasks themselves
   const tasks = 'tasks' in transport ? transport.tasks : [];
@@ -141,35 +160,40 @@ function renderTransportPage(transport: TransportData, params: NavParams): Page 
     Field('Short Description', transport.description || '-'),
     Field('Owner', transport.owner || '-'),
   ];
-  
+
   // For tasks, show parent request link
   if (transport.itemType === 'task' && 'request' in transport) {
     const parentRequest = (transport as AdkTransportTask).request;
-    const parentLink = adtLink({ name: parentRequest.number, uri: parentRequest.uri });
+    const parentLink = adtLink({
+      name: parentRequest.number,
+      uri: parentRequest.uri,
+    });
     propertyFields.push(Field('Request', parentLink));
   }
-  
+
   propertyFields.push(
     Field('Target', transport.targetDescription || transport.target || '-'),
     Field('Status', transport.statusText || transport.status || '-'),
     Field('Last Changed', formatDate(transport.lastChangedAt)),
-    Field('ADT Link', transportLink)
+    Field('ADT Link', transportLink),
   );
-  
+
   sections.push(Section('▼ Properties', ...propertyFields));
 
   // Objects section
   const objectComponents: Component[] = [];
-  
+
   // Calculate max name width for alignment
   const nameWidth = getMaxNameLength(objects);
-  
+
   if (tasks.length > 0) {
     // Show tree with tasks (only for requests)
     for (let i = 0; i < tasks.length; i++) {
       const task = tasks[i];
       const isLast = i === tasks.length - 1;
-      objectComponents.push(...renderTask(task, isLast, showObjects, nameWidth));
+      objectComponents.push(
+        ...renderTask(task, isLast, showObjects, nameWidth),
+      );
     }
   } else if (showObjects && objects.length > 0) {
     // No tasks (or this is a task itself), show objects directly with indentation
@@ -179,7 +203,9 @@ function renderTransportPage(transport: TransportData, params: NavParams): Page 
     }
   } else if (!showObjects && (tasks.length > 0 || objects.length > 0)) {
     const totalObjects = objects.length;
-    objectComponents.push(Text(`${tasks.length} task(s), ${totalObjects} object(s)`));
+    objectComponents.push(
+      Text(`${tasks.length} task(s), ${totalObjects} object(s)`),
+    );
     objectComponents.push(Text(`Use --objects flag to show details`));
   } else {
     objectComponents.push(Text('(no objects)'));
@@ -191,12 +217,14 @@ function renderTransportPage(transport: TransportData, params: NavParams): Page 
 
   // Determine if this is a request or task
   const itemType = transport.itemType; // 'request' or 'task'
-  const typeLabel = itemType === 'task' ? 'Transport Task' : 'Transport Request';
+  const typeLabel =
+    itemType === 'task' ? 'Transport Task' : 'Transport Request';
 
   const page: Page = {
     title: `${typeLabel}: ${transport.number}`,
     icon: '📋',
     render: () => content.render(),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     print: () => {},
   };
 
@@ -213,12 +241,12 @@ function renderTransportPage(transport: TransportData, params: NavParams): Page 
  *
  * Self-registers with the router on import.
  * Type: RQRQ (Transport Request)
- * 
+ *
  * Usage:
  * ```ts
- * const page = await router.navTo(client, 'RQRQ', { 
+ * const page = await router.navTo(client, 'RQRQ', {
  *   name: 'S0DK942971',
- *   showObjects: true 
+ *   showObjects: true
  * });
  * page.print();
  * ```

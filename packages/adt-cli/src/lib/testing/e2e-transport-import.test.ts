@@ -39,7 +39,7 @@ describe('Transport Import E2E Tests', () => {
       {
         mockClient,
         captureOutput: true,
-      }
+      },
     );
 
     expect(result.exitCode).toBe(1);
@@ -61,7 +61,7 @@ describe('Transport Import E2E Tests', () => {
       {
         mockClient,
         captureOutput: true,
-      }
+      },
     );
 
     expect(result.exitCode).toBe(0);
@@ -84,7 +84,7 @@ describe('Transport Import E2E Tests', () => {
       {
         mockClient,
         captureOutput: true,
-      }
+      },
     );
 
     expect(result.exitCode).toBe(0);
@@ -107,7 +107,7 @@ describe('Transport Import E2E Tests', () => {
       {
         mockClient,
         captureOutput: true,
-      }
+      },
     );
 
     expect(result.exitCode).toBe(1);
@@ -130,7 +130,7 @@ describe('Transport Import E2E Tests', () => {
       {
         mockClient,
         captureOutput: true,
-      }
+      },
     );
 
     expect(result.exitCode).toBe(0);
@@ -145,7 +145,7 @@ describe('Transport Import E2E Tests', () => {
       {
         mockClient,
         captureOutput: true,
-      }
+      },
     );
 
     expect(result.exitCode).toBe(0);
@@ -167,7 +167,7 @@ describe('Transport Import E2E Tests', () => {
       {
         mockClient,
         captureOutput: true,
-      }
+      },
     );
 
     expect(result.exitCode).toBe(0);

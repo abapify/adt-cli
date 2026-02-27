@@ -1,7 +1,7 @@
 import type { AdkObject as AdkObjectType, AdkKind } from '@abapify/adk';
-import { 
-  ADT_TYPE_MAPPINGS, 
-  getKindForType as adkGetKindForType, 
+import {
+  ADT_TYPE_MAPPINGS,
+  getKindForType as adkGetKindForType,
   getTypeForKind as adkGetTypeForKind,
 } from '@abapify/adk';
 
@@ -69,31 +69,34 @@ export interface DeserializedObject<T = unknown> {
 
 /**
  * Handler for a specific object type
- * 
+ *
  * Each object type (CLAS, INTF, DOMA, etc.) has its own handler
  * that knows how to serialize/deserialize that type.
  */
 export interface ObjectHandler<T extends AdkObject = AdkObject> {
   /** ABAP object type code (e.g., 'CLAS') */
   readonly type: AbapObjectType;
-  
+
   /** File extension used by this format (e.g., 'clas', 'intf') */
   readonly fileExtension: string;
-  
+
   /**
    * Serialize ADK object to files
    * @param object - ADK object to serialize
    * @returns Files to write
    */
   serialize(object: T): Promise<SerializedFile[]>;
-  
+
   /**
    * Deserialize files to object data
    * @param files - Map of filename to content
    * @param objectName - Name of the object
    * @returns Parsed object data
    */
-  deserialize?(files: Map<string, string>, objectName: string): Promise<DeserializedObject>;
+  deserialize?(
+    files: Map<string, string>,
+    objectName: string,
+  ): Promise<DeserializedObject>;
 }
 
 /**
@@ -104,22 +107,22 @@ export interface ObjectHandlerRegistry {
    * Register a handler for an object type
    */
   register(handler: ObjectHandler): void;
-  
+
   /**
    * Get handler for an object type
    */
   get(type: AbapObjectType): ObjectHandler | undefined;
-  
+
   /**
    * Check if a type has a handler
    */
   has(type: AbapObjectType): boolean;
-  
+
   /**
    * Get all registered types
    */
   getTypes(): AbapObjectType[];
-  
+
   /**
    * Get all handlers
    */
@@ -131,24 +134,24 @@ export interface ObjectHandlerRegistry {
  */
 export function createHandlerRegistry(): ObjectHandlerRegistry {
   const handlers = new Map<AbapObjectType, ObjectHandler>();
-  
+
   return {
     register(handler: ObjectHandler): void {
       handlers.set(handler.type, handler);
     },
-    
+
     get(type: AbapObjectType): ObjectHandler | undefined {
       return handlers.get(type);
     },
-    
+
     has(type: AbapObjectType): boolean {
       return handlers.has(type);
     },
-    
+
     getTypes(): AbapObjectType[] {
       return Array.from(handlers.keys());
     },
-    
+
     getHandlers(): ObjectHandler[] {
       return Array.from(handlers.values());
     },
@@ -165,13 +168,13 @@ export function createHandlerRegistry(): ObjectHandlerRegistry {
 export interface ExportOptions {
   /** Target directory */
   targetDir: string;
-  
+
   /** Overwrite existing files */
   overwrite?: boolean;
-  
+
   /** Include source code */
   includeSource?: boolean;
-  
+
   /** Filter object types */
   objectTypes?: AbapObjectType[];
 }
@@ -182,13 +185,13 @@ export interface ExportOptions {
 export interface ImportOptions {
   /** Source directory */
   sourceDir: string;
-  
+
   /** Transport request for changes */
   transportRequest?: string;
-  
+
   /** Dry run - don't actually import */
   dryRun?: boolean;
-  
+
   /** Filter object types */
   objectTypes?: AbapObjectType[];
 }
@@ -229,13 +232,13 @@ export interface ImportResult {
 export interface PluginContext {
   /** Root directory for the operation */
   rootDir: string;
-  
+
   /** Package path from root (e.g., ['ZROOT', 'ZSUB']) */
   packagePath: string[];
-  
+
   /** Current package name */
   packageName: string;
-  
+
   /** Logger for plugin output */
   log: {
     info(message: string): void;
@@ -243,7 +246,7 @@ export interface PluginContext {
     error(message: string): void;
     debug(message: string): void;
   };
-  
+
   /** Progress callback */
   onProgress?(current: number, total: number, message: string): void;
 }
@@ -254,10 +257,10 @@ export interface PluginContext {
 
 /**
  * Core plugin interface for format plugins
- * 
+ *
  * Plugins implement this interface to provide serialization/deserialization
  * for a specific format (abapGit, OAT, etc.).
- * 
+ *
  * The plugin manages:
  * - Registry of object handlers
  * - File system operations
@@ -271,17 +274,17 @@ export interface FormatPlugin {
   // ============================================
   // Primary API: import/export
   // ============================================
-  
+
   /**
    * Export objects from SAP to file system
-   * 
+   *
    * This is the main entry point for serialization.
    * It handles:
    * - Iterating over objects
    * - Calling appropriate handlers
    * - Writing files to disk
    * - Creating format-specific metadata
-   * 
+   *
    * @param objects - ADK objects to export
    * @param options - Export options
    * @param context - Plugin context
@@ -289,35 +292,35 @@ export interface FormatPlugin {
   export?(
     objects: AdkObject[],
     options: ExportOptions,
-    context: PluginContext
+    context: PluginContext,
   ): Promise<ExportResult>;
-  
+
   /**
    * Import objects from file system to SAP
-   * 
+   *
    * This is the main entry point for deserialization.
    * It handles:
    * - Scanning directory structure
    * - Calling appropriate handlers
    * - Creating/updating objects in SAP
-   * 
+   *
    * @param options - Import options
    * @param context - Plugin context
    */
   import?(
     options: ImportOptions,
-    context: PluginContext
+    context: PluginContext,
   ): Promise<ImportResult>;
 
   // ============================================
   // Object Handler Registry
   // ============================================
-  
+
   /**
    * Get handler for a specific object type
    */
   getHandler?(type: AbapObjectType): ObjectHandler | undefined;
-  
+
   /**
    * Register a custom handler
    */
@@ -338,7 +341,7 @@ export interface FormatPlugin {
   serializeObject(
     object: AdkObject,
     targetPath: string,
-    context: SerializationContext
+    context: SerializationContext,
   ): Promise<SerializeObjectResult>;
 
   /**
@@ -348,7 +351,7 @@ export interface FormatPlugin {
   serialize?(
     objects: AdkObject[],
     targetPath: string,
-    options?: SerializeOptions
+    options?: SerializeOptions,
   ): Promise<SerializeResult>;
 
   /**
@@ -356,7 +359,7 @@ export interface FormatPlugin {
    */
   deserialize?(
     sourcePath: string,
-    options?: DeserializeOptions
+    options?: DeserializeOptions,
   ): Promise<AdkObject[]>;
 
   /**

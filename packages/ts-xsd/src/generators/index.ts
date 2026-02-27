@@ -50,7 +50,6 @@ export { interfaces, type InterfacesOptions } from './interfaces';
 export { indexBarrel, type IndexBarrelOptions } from './index-barrel';
 export { typedSchemas, type TypedSchemasOptions } from './typed-schemas';
 
-
 // Runner - re-exported from codegen
 export {
   runCodegen,

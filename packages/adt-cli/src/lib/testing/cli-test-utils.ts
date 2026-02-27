@@ -25,7 +25,7 @@ export interface CliTestResult {
  */
 export async function executeCli(
   args: string[],
-  options: CliTestOptions = {}
+  options: CliTestOptions = {},
 ): Promise<CliTestResult> {
   const { mockClient, captureOutput = true } = options;
 
@@ -105,7 +105,7 @@ export async function executeCli(
  * Create a mock ADT client for testing
  */
 export function createMockAdtClient(
-  options: { fixturesPath?: string } = {}
+  options: { fixturesPath?: string } = {},
 ): MockAdtClient {
   return new MockAdtClient({
     fixturesPath: options.fixturesPath,

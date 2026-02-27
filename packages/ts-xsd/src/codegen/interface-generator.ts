@@ -43,7 +43,6 @@ export interface GenerateInterfacesResult {
   project: Project;
 }
 
-
 // =============================================================================
 // Helpers
 // =============================================================================
@@ -83,14 +82,14 @@ export function deriveRootTypeName(filename?: string): string | undefined {
  */
 export function generateInterfaces(
   schema: Schema,
-  options: GenerateInterfacesOptions = {}
+  options: GenerateInterfacesOptions = {},
 ): GenerateInterfacesResult {
   const { flatten, additionalSourceFiles, ...schemaOptions } = options;
 
   // Step 1: Generate the source file with interfaces using ts-morph
   const { project, sourceFile, rootTypeName } = schemaToSourceFile(
     schema,
-    schemaOptions
+    schemaOptions,
   );
 
   // Step 2: If flatten is requested and we have a root type, flatten it
@@ -118,4 +117,3 @@ export function generateInterfaces(
     project,
   };
 }
-

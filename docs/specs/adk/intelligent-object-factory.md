@@ -102,7 +102,7 @@ class AdkObjectFactory {
   async create(
     objectType: string,
     objectName: string,
-    packageName?: string
+    packageName?: string,
   ): Promise<AdkObjectBase> {
     // 1. Fetch object XML from ADT client
     const xml = await this.fetchObjectXml(objectType, objectName, packageName);
@@ -117,7 +117,7 @@ class AdkObjectFactory {
   private async fetchObjectXml(
     objectType: string,
     objectName: string,
-    packageName?: string
+    packageName?: string,
   ): Promise<string> {
     // Use ADT client to fetch object definition
     // Handle different object types with appropriate ADT endpoints
@@ -126,7 +126,7 @@ class AdkObjectFactory {
   private createTypedObject(
     objectType: string,
     metadata: ObjectMetadata,
-    xml: string
+    xml: string,
   ): AdkObjectBase {
     switch (objectType) {
       case 'Class':
@@ -151,7 +151,7 @@ class ClassObjectImpl implements ClassObject {
   constructor(
     private metadata: ObjectMetadata,
     private rawXml: string,
-    private adtClient: AdtClient
+    private adtClient: AdtClient,
   ) {}
 
   get name(): string {
@@ -212,7 +212,7 @@ class OatPlugin implements FormatPlugin {
   async serialize(
     objects: AdkObjectBase[],
     targetPath: string,
-    options?: SerializeOptions
+    options?: SerializeOptions,
   ): Promise<SerializeResult> {
     for (const obj of objects) {
       // Use object-specific methods

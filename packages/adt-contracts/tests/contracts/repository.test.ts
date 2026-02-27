@@ -29,7 +29,8 @@ class SearchScenario extends ContractScenario {
     },
     {
       name: 'quick search with custom maxResults',
-      contract: () => searchContract.quickSearch({ query: 'ztest', maxResults: 10 }),
+      contract: () =>
+        searchContract.quickSearch({ query: 'ztest', maxResults: 10 }),
       method: 'GET',
       path: '/sap/bc/adt/repository/informationsystem/search',
       query: {
@@ -44,7 +45,8 @@ class SearchScenario extends ContractScenario {
     },
     {
       name: 'quick search with wildcard',
-      contract: () => searchContract.quickSearch({ query: '*test*', maxResults: 100 }),
+      contract: () =>
+        searchContract.quickSearch({ query: '*test*', maxResults: 100 }),
       method: 'GET',
       path: '/sap/bc/adt/repository/informationsystem/search',
       query: {

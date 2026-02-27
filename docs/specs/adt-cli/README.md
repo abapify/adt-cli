@@ -176,6 +176,7 @@ adt auth login --token $SAP_TOKEN --endpoint $SAP_ENDPOINT
 ```
 
 **Design Rationale**: Flexible authentication supporting multiple SAP deployment scenarios:
+
 - **Service Key**: SAP Business Technology Platform (BTP) with OAuth 2.0
 - **Basic Auth**: On-premise S/4HANA systems with username/password
 - **Interactive**: Browser-based OAuth flows
@@ -268,7 +269,7 @@ class AdkObjectHandler<T extends Spec<unknown, Kind>> {
   constructor(
     private adtClient: AdtClient,
     private parser: (xml: string) => T,
-    private objectType: string
+    private objectType: string,
   ) {}
 }
 ```

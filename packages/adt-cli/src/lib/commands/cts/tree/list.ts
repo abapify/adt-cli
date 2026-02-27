@@ -3,7 +3,7 @@
  *
  * Uses the /sap/bc/adt/cts/transportrequests endpoint with search configuration.
  * This endpoint supports full filtering (status, date range, request types).
- * 
+ *
  * Flow:
  * 1. GET /searchconfiguration/configurations → get config ID
  * 2. GET /transportrequests?targets=true&configUri=<encoded-path> → get transports
@@ -34,7 +34,11 @@ const STATUS_NAMES: Record<string, string> = {
 /**
  * Format a single transport for display
  */
-function formatTransport(tr: AdkTransportRequest, index: number, total: number): void {
+function formatTransport(
+  tr: AdkTransportRequest,
+  index: number,
+  total: number,
+): void {
   const isLast = index === total - 1;
   const prefix = isLast ? '└──' : '├──';
   const statusIcon = STATUS_ICONS[tr.status || ''] || '📄';
@@ -80,7 +84,7 @@ export const treeListCommand = new Command('list')
 
       if (options.json) {
         // Serialize transport data for JSON output
-        const jsonData = transports.map(t => ({
+        const jsonData = transports.map((t) => ({
           number: t.number,
           description: t.description,
           status: t.status,
@@ -96,30 +100,40 @@ export const treeListCommand = new Command('list')
           console.log('\n📭 No transports found');
         } else {
           // Group by status for display
-          const modifiable = displayTransports.filter((t: AdkTransportRequest) => t.status === 'D');
-          const released = displayTransports.filter((t: AdkTransportRequest) => t.status === 'R');
+          const modifiable = displayTransports.filter(
+            (t: AdkTransportRequest) => t.status === 'D',
+          );
+          const released = displayTransports.filter(
+            (t: AdkTransportRequest) => t.status === 'R',
+          );
           const other = displayTransports.filter(
-            (t: AdkTransportRequest) => t.status !== 'D' && t.status !== 'R'
+            (t: AdkTransportRequest) => t.status !== 'D' && t.status !== 'R',
           );
 
           if (modifiable.length > 0) {
             console.log(`\n📂 Modifiable (${modifiable.length})`);
-            modifiable.forEach((tr: AdkTransportRequest, i: number) => formatTransport(tr, i, modifiable.length));
+            modifiable.forEach((tr: AdkTransportRequest, i: number) =>
+              formatTransport(tr, i, modifiable.length),
+            );
           }
 
           if (released.length > 0) {
             console.log(`\n📁 Released (${released.length})`);
-            released.forEach((tr: AdkTransportRequest, i: number) => formatTransport(tr, i, released.length));
+            released.forEach((tr: AdkTransportRequest, i: number) =>
+              formatTransport(tr, i, released.length),
+            );
           }
 
           if (other.length > 0) {
             console.log(`\n📋 Other (${other.length})`);
-            other.forEach((tr: AdkTransportRequest, i: number) => formatTransport(tr, i, other.length));
+            other.forEach((tr: AdkTransportRequest, i: number) =>
+              formatTransport(tr, i, other.length),
+            );
           }
 
           if (transports.length > maxResults) {
             console.log(
-              `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`
+              `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`,
             );
           }
         }
@@ -129,7 +143,7 @@ export const treeListCommand = new Command('list')
     } catch (error) {
       console.error(
         '❌ Failed:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

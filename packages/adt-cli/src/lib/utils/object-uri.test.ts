@@ -73,7 +73,7 @@ describe('object-uri utilities', () => {
 
     it('should detect class with section', () => {
       const result = detectObjectTypeFromFilename(
-        'zcl_test.clas.definitions.abap'
+        'zcl_test.clas.definitions.abap',
       );
       expect(result).toEqual({
         type: 'CLAS',

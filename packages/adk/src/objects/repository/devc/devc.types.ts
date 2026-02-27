@@ -1,6 +1,6 @@
 /**
  * DEVC - ABAP Package
- * 
+ *
  * Public interface for ABAP Package objects.
  * Based on ADT pak:package XML structure.
  */
@@ -64,13 +64,13 @@ export interface TransportConfig {
 
 /**
  * ABAP Package interface
- * 
+ *
  * Plugins work with this interface - implementation is internal.
  * Mirrors ADT pak:package structure.
  */
 export interface AbapPackage extends AbapObject {
   readonly kind: 'Package';
-  
+
   // Core attributes (from adtcore:*)
   readonly responsible: string;
   readonly masterLanguage: string;
@@ -80,25 +80,25 @@ export interface AbapPackage extends AbapObject {
   readonly createdBy: string;
   readonly changedAt: Date;
   readonly changedBy: string;
-  
+
   // Package-specific (from pak:*)
   readonly attributes: PackageAttributes;
   readonly superPackage?: AdtObjectReference;
   readonly applicationComponent?: ApplicationComponent;
   readonly transport?: TransportConfig;
-  
+
   // Lazy segments - fetched on demand
-  
+
   /**
    * Get direct subpackages
    */
   getSubpackages(): Promise<AbapPackage[]>;
-  
+
   /**
    * Get objects contained in this package (direct, not recursive)
    */
   getObjects(): Promise<AbapObject[]>;
-  
+
   /**
    * Get all objects recursively (includes subpackages)
    */

@@ -37,7 +37,9 @@ export function loadAuthSession(sid?: string) {
 /**
  * Save auth session
  */
-export function saveAuthSession(session: Parameters<typeof authManager.saveSession>[0]) {
+export function saveAuthSession(
+  session: Parameters<typeof authManager.saveSession>[0],
+) {
   authManager.saveSession(session);
 }
 
@@ -73,7 +75,9 @@ export function setDefaultSid(sid: string) {
 /**
  * Check if session is expired
  */
-export function isExpired(session: Parameters<typeof authManager.isExpired>[0]) {
+export function isExpired(
+  session: Parameters<typeof authManager.isExpired>[0],
+) {
   return authManager.isExpired(session);
 }
 
@@ -82,7 +86,7 @@ export function isExpired(session: Parameters<typeof authManager.isExpired>[0]) 
  */
 export async function refreshCredentials(
   session: Parameters<typeof authManager.refreshCredentials>[0],
-  options?: Parameters<typeof authManager.refreshCredentials>[1]
+  options?: Parameters<typeof authManager.refreshCredentials>[1],
 ) {
   return authManager.refreshCredentials(session, options);
 }

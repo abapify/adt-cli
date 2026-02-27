@@ -203,7 +203,7 @@ class AdkFactory {
    */
   createWithLazySegments(
     adtObject: AdtObject,
-    segmentLoader: (uri: string) => Promise<string>
+    segmentLoader: (uri: string) => Promise<string>,
   ): AdkObject {
     // Create object with lazy content loaders
   }
@@ -258,7 +258,7 @@ async function serializeClass(classObj: Class, outputDir: string) {
   // Main class file
   await writeFile(
     `${outputDir}/${classObj.name}.clas.abap`,
-    classObj.spec.source.mainSource
+    classObj.spec.source.mainSource,
   );
 
   // Includes (lazy loaded)
@@ -272,7 +272,7 @@ async function serializeClass(classObj: Class, outputDir: string) {
     // Write segment file
     await writeFile(
       `${outputDir}/${classObj.name}.clas.${include.includeType}.abap`,
-      content
+      content,
     );
   }
 }
@@ -411,7 +411,7 @@ describe('ADK Integration', () => {
     // 4. Verify files
     expect(fs.existsSync(`${outputDir}/zcl_test.clas.abap`)).toBe(true);
     expect(fs.existsSync(`${outputDir}/zcl_test.clas.locals_def.abap`)).toBe(
-      true
+      true,
     );
   });
 });

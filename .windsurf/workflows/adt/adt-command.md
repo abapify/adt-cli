@@ -26,6 +26,7 @@ implements: .agents/commands/adt/command.md
 ```
 
 **Example:**
+
 ```typescript
 // ✅ PREFERRED - Use ADK
 const transport = await AdkTransportRequest.get(ctx, number);
@@ -43,6 +44,7 @@ const data = await client.fetch('/sap/bc/adt/...');
 ## Quick Reference
 
 ### Step 1: Create Command
+
 Location: `adt-cli/src/lib/commands/{area}/{type}.ts`
 
 ```typescript
@@ -55,6 +57,7 @@ const obj = await AdkMyObject.get(ctx, id);
 ```
 
 ### Step 2: Export & Register
+
 - Export from `commands/{area}/index.ts`
 - Register in `cli.ts`
 

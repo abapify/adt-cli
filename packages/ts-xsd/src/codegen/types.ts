@@ -1,6 +1,6 @@
 /**
  * Generator Plugin Types
- * 
+ *
  * Composable generator architecture for ts-xsd codegen.
  * Each generator is a plugin that can transform schemas and produce output files.
  */
@@ -101,7 +101,7 @@ export interface FinalizeContext {
 
 /**
  * Generator plugin interface
- * 
+ *
  * Generators are composable - multiple generators can be used together.
  * Each generator can:
  * - setup(): Initialize state before processing
@@ -111,19 +111,19 @@ export interface FinalizeContext {
 export interface GeneratorPlugin {
   /** Unique name for this generator */
   readonly name: string;
-  
+
   /**
    * Called once before processing any schemas.
    * Use for initialization, validation, etc.
    */
   setup?(ctx: SetupContext): void | Promise<void>;
-  
+
   /**
    * Called for each schema file.
    * Return generated files for this schema.
    */
   transform?(ctx: TransformContext): GeneratedFile[] | Promise<GeneratedFile[]>;
-  
+
   /**
    * Called once after all schemas are processed.
    * Use for generating index files, aggregate types, etc.
@@ -197,19 +197,21 @@ export interface CodegenConfig {
   };
   /** Properties to exclude from output */
   exclude?: string[];
-  
+
   /**
    * Hook called before any processing starts.
    * Use for setup, validation, cleaning output dirs, etc.
    */
   beforeAll?(ctx: HookContext): void | Promise<void>;
-  
+
   /**
    * Hook called after all processing is complete.
    * Use for generating aggregate files, post-processing, etc.
    * Return additional files to write.
    */
-  afterAll?(ctx: AfterAllContext): GeneratedFile[] | void | Promise<GeneratedFile[] | void>;
+  afterAll?(
+    ctx: AfterAllContext,
+  ): GeneratedFile[] | void | Promise<GeneratedFile[] | void>;
 }
 
 /**

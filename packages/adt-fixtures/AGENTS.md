@@ -19,8 +19,8 @@ import { fixtures, load } from 'adt-fixtures';
 // LAZY - nothing loads on import!
 // Get handle first, then explicitly load:
 const handle = fixtures.transport.single;
-console.log(handle.path);  // 'transport/single.xml'
-const xml = await handle.load();  // NOW it loads
+console.log(handle.path); // 'transport/single.xml'
+const xml = await handle.load(); // NOW it loads
 
 // Or one-liner:
 const xml = await fixtures.transport.single.load();
@@ -32,6 +32,7 @@ const xml = await load('transport/single.xml');
 ## Adding New Fixtures
 
 1. **Add XML file** to `fixtures/` directory:
+
    ```
    fixtures/
    ├── transport/
@@ -39,11 +40,12 @@ const xml = await load('transport/single.xml');
    ```
 
 2. **Update registry** in `src/fixtures.ts`:
+
    ```typescript
    const registry = {
      transport: {
        // ... existing
-       mynew: 'transport/mynew.xml',  // Just add path!
+       mynew: 'transport/mynew.xml', // Just add path!
      },
    } as const;
    ```

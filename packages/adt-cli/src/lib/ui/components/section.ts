@@ -7,7 +7,10 @@
 import chalk from 'chalk';
 import type { Component } from '../types';
 
-export default function Section(title: string, ...children: Component[]): Component {
+export default function Section(
+  title: string,
+  ...children: Component[]
+): Component {
   return {
     render: () => [
       '',

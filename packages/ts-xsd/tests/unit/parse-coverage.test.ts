@@ -1,8 +1,8 @@
 /**
  * XSD Parser Coverage Tests
- * 
+ *
  * Tests for parseXsd function covering all XSD constructs not in XMLSchema.xsd
- * 
+ *
  * NOTE: This test file uses non-null assertions (!) extensively because we're testing
  * parsed XSD results where we know the structure.
  */
@@ -16,7 +16,10 @@ describe('parseXsd coverage', () => {
   describe('Error handling', () => {
     it('should throw on invalid root element', () => {
       const xsd = `<?xml version="1.0"?><notSchema xmlns="http://www.w3.org/2001/XMLSchema"/>`;
-      assert.throws(() => parseXsd(xsd), /Invalid XSD: root element must be xs:schema/);
+      assert.throws(
+        () => parseXsd(xsd),
+        /Invalid XSD: root element must be xs:schema/,
+      );
     });
 
     it('should throw on empty document', () => {
@@ -41,7 +44,7 @@ describe('parseXsd coverage', () => {
           xml:lang="en">
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       assert.equal(schema.id, 'schema-id');
       assert.equal(schema.targetNamespace, 'http://example.com');
       assert.equal(schema.version, '1.0');
@@ -64,7 +67,7 @@ describe('parseXsd coverage', () => {
           </xs:include>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       assert.ok(schema.include);
       assert.equal(schema.include![0].schemaLocation, 'other.xsd');
       assert.equal(schema.include![0].id, 'inc1');
@@ -87,7 +90,7 @@ describe('parseXsd coverage', () => {
           </xs:redefine>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       assert.ok(schema.redefine);
       assert.equal(schema.redefine![0].schemaLocation, 'base.xsd');
       assert.ok(schema.redefine![0].annotation);
@@ -116,7 +119,7 @@ describe('parseXsd coverage', () => {
           </xs:override>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       assert.ok(schema.override);
       assert.equal(schema.override![0].schemaLocation, 'base.xsd');
       assert.ok(schema.override![0].annotation);
@@ -141,7 +144,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const st = schema.simpleType![0];
       assert.ok(st.list);
       assert.equal(st.list.itemType, 'xs:string');
@@ -161,7 +164,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const st = schema.simpleType![0];
       assert.ok(st.list);
       assert.ok(st.list.simpleType);
@@ -177,7 +180,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const st = schema.simpleType![0];
       assert.ok(st.union);
       assert.equal(st.union.memberTypes, 'xs:string xs:integer');
@@ -199,7 +202,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const st = schema.simpleType![0];
       assert.ok(st.union);
       assert.ok(st.union.simpleType);
@@ -230,7 +233,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const r = schema.simpleType![0].restriction!;
       assert.ok(r.minExclusive);
       assert.ok(r.minInclusive);
@@ -261,7 +264,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const e = schema.simpleType![0].restriction!.enumeration![0];
       assert.equal(e.value, 'A');
       assert.equal(e.id, 'enum-a');
@@ -281,7 +284,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const p = schema.simpleType![0].restriction!.pattern![0];
       assert.equal(p.value, '[A-Z]+');
       assert.equal(p.id, 'pat1');
@@ -301,7 +304,7 @@ describe('parseXsd coverage', () => {
           </xs:simpleType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const r = schema.simpleType![0].restriction!;
       assert.ok(r.simpleType);
     });
@@ -324,7 +327,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.simpleContent);
       assert.ok(ct.simpleContent.extension);
@@ -357,7 +360,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.simpleContent);
       assert.ok(ct.simpleContent.restriction);
@@ -382,7 +385,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.complexContent);
       assert.equal(ct.complexContent.mixed, true);
@@ -403,7 +406,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.openContent);
       assert.equal(ct.openContent.mode, 'interleave');
@@ -420,7 +423,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.group);
       assert.equal(ct.group.ref, 'myGroup');
@@ -442,7 +445,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.all);
       assert.equal(ct.all!.minOccurs, '0');
@@ -469,7 +472,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.choice);
       assert.ok(ct.choice!.element);
@@ -492,7 +495,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ct = schema.complexType![0];
       assert.ok(ct.assert);
       assert.equal(ct.assert[0].test, '$value > 0');
@@ -512,7 +515,7 @@ describe('parseXsd coverage', () => {
           </xs:element>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const el = schema.element![0];
       assert.ok(el.complexType);
       assert.equal(el.complexType.mixed, true);
@@ -538,7 +541,7 @@ describe('parseXsd coverage', () => {
           </xs:element>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const el = schema.element![0];
       assert.equal(el.name, 'myElement');
       assert.equal(el.id, 'el1');
@@ -562,7 +565,7 @@ describe('parseXsd coverage', () => {
           </xs:element>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const el = schema.element![0];
       assert.ok(el.simpleType);
     });
@@ -587,7 +590,7 @@ describe('parseXsd coverage', () => {
           </xs:element>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const el = schema.element![0];
       assert.ok(el.alternative);
       assert.equal(el.alternative.length, 3);
@@ -619,7 +622,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const el = schema.complexType![0].sequence!.element![0];
       assert.equal(el.minOccurs, '0');
       assert.equal(el.maxOccurs, 'unbounded');
@@ -657,18 +660,18 @@ describe('parseXsd coverage', () => {
           </xs:element>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const el = schema.element![0];
       assert.ok(el.unique);
       assert.equal(el.unique![0].name, 'uniqueConstraint');
       assert.equal(el.unique![0].ref, 'otherUnique');
       assert.ok(el.unique![0].selector);
       assert.ok(el.unique![0].field);
-      
+
       assert.ok(el.key);
       assert.equal(el.key![0].name, 'keyConstraint');
       assert.equal(el.key![0].field!.length, 2);
-      
+
       assert.ok(el.keyref);
       assert.equal(el.keyref![0].refer, 'keyConstraint');
     });
@@ -702,7 +705,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const el = schema.complexType![0].sequence!.element![0];
       assert.ok(el.unique);
       assert.ok(el.key);
@@ -725,7 +728,7 @@ describe('parseXsd coverage', () => {
           </xs:attribute>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const attr = schema.attribute![0];
       assert.equal(attr.name, 'myAttr');
       assert.equal(attr.id, 'attr1');
@@ -745,7 +748,7 @@ describe('parseXsd coverage', () => {
           </xs:attribute>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const attr = schema.attribute![0];
       assert.ok(attr.simpleType);
     });
@@ -772,7 +775,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const attr = schema.complexType![0].attribute![0];
       assert.equal(attr.use, 'required');
       assert.equal(attr.form, 'qualified');
@@ -795,7 +798,7 @@ describe('parseXsd coverage', () => {
           </xs:group>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const grp = schema.group![0];
       assert.equal(grp.name, 'myGroup');
       assert.equal(grp.id, 'grp1');
@@ -813,7 +816,7 @@ describe('parseXsd coverage', () => {
           </xs:group>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const grp = schema.group![0];
       assert.ok(grp.choice);
     });
@@ -829,7 +832,7 @@ describe('parseXsd coverage', () => {
           </xs:group>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const grp = schema.group![0];
       assert.ok(grp.sequence);
     });
@@ -848,7 +851,7 @@ describe('parseXsd coverage', () => {
           </xs:attributeGroup>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ag = schema.attributeGroup![0];
       assert.equal(ag.name, 'myAttrGroup');
       assert.equal(ag.id, 'ag1');
@@ -867,7 +870,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ag = schema.complexType![0].attributeGroup![0];
       assert.equal(ag.ref, 'myAttrGroup');
       assert.equal(ag.id, 'agRef1');
@@ -893,7 +896,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const any = schema.complexType![0].sequence!.any![0];
       assert.equal(any.id, 'any1');
       assert.equal(any.minOccurs, '0');
@@ -918,7 +921,7 @@ describe('parseXsd coverage', () => {
           </xs:complexType>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const aa = schema.complexType![0].anyAttribute!;
       assert.equal(aa.id, 'anyAttr1');
       assert.equal(aa.namespace, '##local');
@@ -938,7 +941,7 @@ describe('parseXsd coverage', () => {
           </xs:defaultOpenContent>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const doc = schema.defaultOpenContent;
       assert.ok(doc);
       assert.equal(doc.id, 'doc1');
@@ -957,7 +960,7 @@ describe('parseXsd coverage', () => {
           </xs:annotation>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const ann = schema.annotation![0];
       assert.equal(ann.id, 'ann1');
       assert.ok(ann.appinfo);
@@ -973,7 +976,7 @@ describe('parseXsd coverage', () => {
           </xs:annotation>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const doc = schema.annotation![0].documentation![0];
       assert.equal(doc.source, 'http://docs.example.com');
       assert.equal(doc['xml:lang'], 'en');
@@ -990,7 +993,7 @@ describe('parseXsd coverage', () => {
           </xs:notation>
         </xs:schema>`;
       const schema = parseXsd(xsd);
-      
+
       const not = schema.notation![0];
       assert.equal(not.name, 'jpeg');
       assert.equal(not.id, 'not1');

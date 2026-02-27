@@ -65,7 +65,7 @@ export function createInferrable<T>(): Inferrable<T> {
 
 /**
  * Infer type from a schema
- * 
+ *
  * Uses _infer property from Inferrable<T> (which Serializable extends).
  * Falls back to original type if no _infer property.
  *
@@ -73,10 +73,9 @@ export function createInferrable<T>(): Inferrable<T> {
  * type A = InferSchema<{ _infer?: User }>  // User
  * type B = InferSchema<string>             // string (fallback)
  */
-export type InferSchema<T> = 
-  T extends { _infer?: infer U }
-    ? NonNullable<U>
-    : T;
+export type InferSchema<T> = T extends { _infer?: infer U }
+  ? NonNullable<U>
+  : T;
 
 /**
  * Schema-like object - can be any schema library (Zod, JSON Schema, custom, etc.)
@@ -114,7 +113,7 @@ export interface RestEndpointDescriptor<
   TMethod extends RestMethod = RestMethod,
   TPath extends string = string,
   TBodySchema = unknown,
-  TResponses extends ResponseMap = ResponseMap
+  TResponses extends ResponseMap = ResponseMap,
 > extends OperationDescriptor {
   /** HTTP method */
   method: TMethod;
@@ -172,7 +171,7 @@ export interface RestMetadata {
  */
 export type RestOperationFunction<
   TParams extends any[] = any[],
-  TDescriptor extends RestEndpointDescriptor = RestEndpointDescriptor
+  TDescriptor extends RestEndpointDescriptor = RestEndpointDescriptor,
 > = (...params: TParams) => TDescriptor;
 
 /**
@@ -190,7 +189,7 @@ export type RestContract = {
  */
 export type ExtractResponse<
   T extends RestEndpointDescriptor,
-  Status extends keyof T['responses']
+  Status extends keyof T['responses'],
 > = InferSchema<T['responses'][Status]>;
 
 /**

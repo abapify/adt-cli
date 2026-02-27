@@ -142,7 +142,7 @@ class AdkObjectHandler<T extends Spec<unknown, Kind>> {
   constructor(
     private client: AdtClient,
     private parser: (xml: string) => T,
-    private urlBuilder: (name: string) => string
+    private urlBuilder: (name: string) => string,
   ) {}
 }
 
@@ -153,8 +153,8 @@ this.handlers.set(
     new AdkObjectHandler(
       client,
       (xml) => ClassAdtAdapter.fromAdtXML(xml),
-      (name) => `/sap/bc/adt/oo/classes/${name.toLowerCase()}`
-    )
+      (name) => `/sap/bc/adt/oo/classes/${name.toLowerCase()}`,
+    ),
 );
 ```
 
@@ -232,7 +232,7 @@ Create new adapter base classes following the same pattern:
 
 ```typescript
 abstract class AbapGitAdapter<
-  T extends Spec<unknown, Kind>
+  T extends Spec<unknown, Kind>,
 > extends BaseAdapter<T> {
   abstract toAbapGit(): string;
   static abstract fromAbapGit<TSpec>(content: string): TSpec;

@@ -41,7 +41,7 @@ interface ObjectTypeRegistry {
     objectType: string,
     metadata: ObjectMetadata,
     xml: string,
-    client: AdtClient
+    client: AdtClient,
   ): AdkObjectBase;
   getSupportedTypes(): string[];
 }
@@ -51,7 +51,7 @@ interface ObjectFactory {
   create(
     metadata: ObjectMetadata,
     xml: string,
-    client: AdtClient
+    client: AdtClient,
   ): AdkObjectBase;
   getSupportedTypes(): string[];
 }
@@ -80,7 +80,7 @@ export class ClassAdapter
   constructor(
     private metadata: ObjectMetadata,
     private rawXml: string,
-    private adtClient: AdtClient
+    private adtClient: AdtClient,
   ) {
     super();
   }
@@ -125,7 +125,7 @@ export class ClassObjectFactory implements ObjectFactory {
   create(
     metadata: ObjectMetadata,
     xml: string,
-    client: AdtClient
+    client: AdtClient,
   ): ClassAdapter {
     return new ClassAdapter(metadata, xml, client);
   }
@@ -142,14 +142,14 @@ export class AdkObjectFactory {
   async create(
     objectType: string,
     objectName: string,
-    packageName?: string
+    packageName?: string,
   ): Promise<AdkObjectBase> {
     const xml = await this.fetchObjectXml(objectType, objectName, packageName);
     const metadata = await this.parseMetadata(
       xml,
       objectType,
       objectName,
-      packageName
+      packageName,
     );
 
     // No case statements - use registry
@@ -157,7 +157,7 @@ export class AdkObjectFactory {
       objectType.toLowerCase(),
       metadata,
       xml,
-      this.adtClient
+      this.adtClient,
     );
   }
 }

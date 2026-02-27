@@ -4,7 +4,12 @@
  * Wraps puppeteerAuth to return AuthPluginResult format expected by AuthManager.
  */
 
-import type { AuthPlugin, AuthPluginResult, AuthPluginOptions, AuthSession } from '@abapify/adt-auth';
+import type {
+  AuthPlugin,
+  AuthPluginResult,
+  AuthPluginOptions,
+  AuthSession,
+} from '@abapify/adt-auth';
 import { puppeteerAuth, toCookieHeader } from './puppeteer-auth';
 
 /**
@@ -12,9 +17,9 @@ import { puppeteerAuth, toCookieHeader } from './puppeteer-auth';
  */
 function getExpiresAt(cookies: { expires?: number }[]): Date {
   const expirations = cookies
-    .filter(c => c.expires && c.expires > 0)
-    .map(c => c.expires! * 1000); // Convert seconds to ms
-  
+    .filter((c) => c.expires && c.expires > 0)
+    .map((c) => c.expires! * 1000); // Convert seconds to ms
+
   if (expirations.length > 0) {
     return new Date(Math.min(...expirations));
   }

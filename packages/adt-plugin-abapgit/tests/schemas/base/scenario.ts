@@ -1,6 +1,6 @@
 /**
  * Test scenario base for abapGit schema tests
- * 
+ *
  * Fixture-driven testing with full validation:
  * 1. Validate fixture XML against XSD using xmllint
  * 2. Parse XML fixture → typed TypeScript object
@@ -42,14 +42,17 @@ function isXmllintAvailable(): boolean {
 const xmllintAvailable = isXmllintAvailable();
 
 /** Validate XML file against XSD using xmllint */
-export function validateXsd(fixturePath: string, xsdName: string): { valid: boolean; error?: string; skipped?: boolean } {
+export function validateXsd(
+  fixturePath: string,
+  xsdName: string,
+): { valid: boolean; error?: string; skipped?: boolean } {
   if (!xmllintAvailable) {
     return { valid: true, skipped: true, error: 'xmllint not available' };
   }
-  
+
   const xmlPath = join(fixturesDir, fixturePath);
   const xsdPath = join(xsdDir, `${xsdName}.xsd`);
-  
+
   try {
     execSync(`xmllint --schema "${xsdPath}" "${xmlPath}" --noout 2>&1`, {
       encoding: 'utf-8',
@@ -57,7 +60,10 @@ export function validateXsd(fixturePath: string, xsdName: string): { valid: bool
     return { valid: true };
   } catch (err) {
     const error = err as { stdout?: string; stderr?: string; message?: string };
-    return { valid: false, error: error.stdout || error.stderr || error.message };
+    return {
+      valid: false,
+      error: error.stdout || error.stderr || error.message,
+    };
   }
 }
 
@@ -111,15 +117,19 @@ export function runSchemaTests<T>(scenario: SchemaScenario<T>): void {
         let parsed: T;
         let built: string;
         let reparsed: T;
-        let xsdValidation: { valid: boolean; error?: string; skipped?: boolean };
+        let xsdValidation: {
+          valid: boolean;
+          error?: string;
+          skipped?: boolean;
+        };
 
         before(() => {
           // 1. Validate against XSD first
           xsdValidation = validateXsd(fixture.path, scenario.xsdName);
-          
+
           // Only continue if XSD validation passes
           if (!xsdValidation.valid) return;
-          
+
           // 2. Load and parse
           xml = loadFixture(fixture.path);
           try {
@@ -128,7 +138,7 @@ export function runSchemaTests<T>(scenario: SchemaScenario<T>): void {
             console.error('Parse error:', e);
             return;
           }
-          
+
           // 3. Build back to XML
           try {
             built = scenario.schema.build(parsed);
@@ -136,7 +146,7 @@ export function runSchemaTests<T>(scenario: SchemaScenario<T>): void {
             console.error('Build error:', e);
             return;
           }
-          
+
           // 4. Parse again for round-trip
           try {
             reparsed = scenario.schema.parse(built);
@@ -150,7 +160,10 @@ export function runSchemaTests<T>(scenario: SchemaScenario<T>): void {
             t.skip('xmllint not available');
             return;
           }
-          assert.ok(xsdValidation.valid, `XSD validation failed: ${xsdValidation.error}`);
+          assert.ok(
+            xsdValidation.valid,
+            `XSD validation failed: ${xsdValidation.error}`,
+          );
         });
 
         it('parses fixture to typed object', () => {

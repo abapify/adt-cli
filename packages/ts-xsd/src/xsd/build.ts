@@ -1,6 +1,6 @@
 /**
  * XSD Builder - Build XSD documents from typed Schema objects
- * 
+ *
  * This builder produces valid XSD XML from Schema objects,
  * completing the roundtrip: XSD → Schema → XSD
  */
@@ -97,7 +97,7 @@ interface BuildContext {
 
 function buildSchema(schema: Schema, ctx: BuildContext): string {
   const attrs: string[] = [];
-  
+
   // XML namespace declarations (only if present in schema)
   if (schema.$xmlns) {
     for (const [prefix, uri] of Object.entries(schema.$xmlns)) {
@@ -108,7 +108,7 @@ function buildSchema(schema: Schema, ctx: BuildContext): string {
       }
     }
   }
-  
+
   // Schema attributes
   addAttr(attrs, 'id', schema.id);
   addAttr(attrs, 'targetNamespace', schema.targetNamespace);
@@ -229,7 +229,12 @@ function buildDocumentation(doc: Documentation, ctx: BuildContext): string {
   addAttr(attrs, 'xml:lang', doc['xml:lang']);
 
   if (doc._text) {
-    return buildElementWithText(`${ctx.prefix}:documentation`, attrs, doc._text, ctx);
+    return buildElementWithText(
+      `${ctx.prefix}:documentation`,
+      attrs,
+      doc._text,
+      ctx,
+    );
   }
   return buildElement(`${ctx.prefix}:documentation`, attrs, [], ctx);
 }
@@ -255,7 +260,9 @@ function buildInclude(inc: Include, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (inc.annotation) {
-    children.push(buildAnnotation(inc.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(inc.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:include`, attrs, children, ctx);
@@ -269,7 +276,9 @@ function buildImport(imp: Import, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (imp.annotation) {
-    children.push(buildAnnotation(imp.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(imp.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:import`, attrs, children, ctx);
@@ -472,7 +481,10 @@ function buildLocalElement(el: LocalElement, ctx: BuildContext): string {
 // Attribute Declarations
 // =============================================================================
 
-function buildTopLevelAttribute(attr: TopLevelAttribute, ctx: BuildContext): string {
+function buildTopLevelAttribute(
+  attr: TopLevelAttribute,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', attr.id);
   addAttr(attrs, 'name', attr.name);
@@ -524,7 +536,10 @@ function buildLocalAttribute(attr: LocalAttribute, ctx: BuildContext): string {
 // Complex Types
 // =============================================================================
 
-function buildTopLevelComplexType(ct: TopLevelComplexType, ctx: BuildContext): string {
+function buildTopLevelComplexType(
+  ct: TopLevelComplexType,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', ct.id);
   addAttr(attrs, 'name', ct.name);
@@ -537,7 +552,10 @@ function buildTopLevelComplexType(ct: TopLevelComplexType, ctx: BuildContext): s
   return buildComplexTypeContent(ct, attrs, ctx);
 }
 
-function buildLocalComplexType(ct: LocalComplexType, ctx: BuildContext): string {
+function buildLocalComplexType(
+  ct: LocalComplexType,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', ct.id);
   addBoolAttr(attrs, 'mixed', ct.mixed);
@@ -548,7 +566,7 @@ function buildLocalComplexType(ct: LocalComplexType, ctx: BuildContext): string 
 function buildComplexTypeContent(
   ct: TopLevelComplexType | LocalComplexType,
   attrs: string[],
-  ctx: BuildContext
+  ctx: BuildContext,
 ): string {
   const children: string[] = [];
   const childCtx = { ...ctx, level: ctx.level + 1 };
@@ -606,7 +624,10 @@ function buildComplexTypeContent(
 // Simple Types
 // =============================================================================
 
-function buildTopLevelSimpleType(st: TopLevelSimpleType, ctx: BuildContext): string {
+function buildTopLevelSimpleType(
+  st: TopLevelSimpleType,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', st.id);
   addAttr(attrs, 'name', st.name);
@@ -625,7 +646,7 @@ function buildLocalSimpleType(st: LocalSimpleType, ctx: BuildContext): string {
 function buildSimpleTypeContent(
   st: TopLevelSimpleType | LocalSimpleType,
   attrs: string[],
-  ctx: BuildContext
+  ctx: BuildContext,
 ): string {
   const children: string[] = [];
   const childCtx = { ...ctx, level: ctx.level + 1 };
@@ -645,7 +666,10 @@ function buildSimpleTypeContent(
   return buildElement(`${ctx.prefix}:simpleType`, attrs, children, ctx);
 }
 
-function buildSimpleTypeRestriction(r: SimpleTypeRestriction, ctx: BuildContext): string {
+function buildSimpleTypeRestriction(
+  r: SimpleTypeRestriction,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', r.id);
   addAttr(attrs, 'base', r.base);
@@ -669,7 +693,7 @@ function buildSimpleTypeRestriction(r: SimpleTypeRestriction, ctx: BuildContext)
 function buildFacets(
   r: SimpleTypeRestriction | SimpleContentRestriction,
   children: string[],
-  ctx: BuildContext
+  ctx: BuildContext,
 ): void {
   if (r.minExclusive) {
     for (const f of r.minExclusive) {
@@ -751,7 +775,9 @@ function buildFacet(f: Facet, name: string, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (f.annotation) {
-    children.push(buildAnnotation(f.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(f.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:${name}`, attrs, children, ctx);
@@ -764,7 +790,9 @@ function buildPattern(p: Pattern, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (p.annotation) {
-    children.push(buildAnnotation(p.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(p.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:pattern`, attrs, children, ctx);
@@ -851,7 +879,10 @@ function buildSimpleContent(sc: SimpleContent, ctx: BuildContext): string {
   return buildElement(`${ctx.prefix}:simpleContent`, attrs, children, ctx);
 }
 
-function buildComplexContentRestriction(r: ComplexContentRestriction, ctx: BuildContext): string {
+function buildComplexContentRestriction(
+  r: ComplexContentRestriction,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', r.id);
   addAttr(attrs, 'base', r.base);
@@ -899,7 +930,10 @@ function buildComplexContentRestriction(r: ComplexContentRestriction, ctx: Build
   return buildElement(`${ctx.prefix}:restriction`, attrs, children, ctx);
 }
 
-function buildComplexContentExtension(e: ComplexContentExtension, ctx: BuildContext): string {
+function buildComplexContentExtension(
+  e: ComplexContentExtension,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', e.id);
   addAttr(attrs, 'base', e.base);
@@ -947,7 +981,10 @@ function buildComplexContentExtension(e: ComplexContentExtension, ctx: BuildCont
   return buildElement(`${ctx.prefix}:extension`, attrs, children, ctx);
 }
 
-function buildSimpleContentRestriction(r: SimpleContentRestriction, ctx: BuildContext): string {
+function buildSimpleContentRestriction(
+  r: SimpleContentRestriction,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', r.id);
   addAttr(attrs, 'base', r.base);
@@ -988,7 +1025,10 @@ function buildSimpleContentRestriction(r: SimpleContentRestriction, ctx: BuildCo
   return buildElement(`${ctx.prefix}:restriction`, attrs, children, ctx);
 }
 
-function buildSimpleContentExtension(e: SimpleContentExtension, ctx: BuildContext): string {
+function buildSimpleContentExtension(
+  e: SimpleContentExtension,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', e.id);
   addAttr(attrs, 'base', e.base);
@@ -1025,7 +1065,11 @@ function buildSimpleContentExtension(e: SimpleContentExtension, ctx: BuildContex
 // Model Groups (sequence, choice, all)
 // =============================================================================
 
-function buildExplicitGroup(g: ExplicitGroup, name: 'sequence' | 'choice', ctx: BuildContext): string {
+function buildExplicitGroup(
+  g: ExplicitGroup,
+  name: 'sequence' | 'choice',
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', g.id);
   addOccursAttr(attrs, 'minOccurs', g.minOccurs);
@@ -1134,13 +1178,18 @@ function buildGroupRef(g: GroupRef, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (g.annotation) {
-    children.push(buildAnnotation(g.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(g.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:group`, attrs, children, ctx);
 }
 
-function buildNamedAttributeGroup(ag: NamedAttributeGroup, ctx: BuildContext): string {
+function buildNamedAttributeGroup(
+  ag: NamedAttributeGroup,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', ag.id);
   addAttr(attrs, 'name', ag.name);
@@ -1168,14 +1217,19 @@ function buildNamedAttributeGroup(ag: NamedAttributeGroup, ctx: BuildContext): s
   return buildElement(`${ctx.prefix}:attributeGroup`, attrs, children, ctx);
 }
 
-function buildAttributeGroupRef(ag: AttributeGroupRef, ctx: BuildContext): string {
+function buildAttributeGroupRef(
+  ag: AttributeGroupRef,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', ag.id);
   addAttr(attrs, 'ref', ag.ref);
 
   const children: string[] = [];
   if (ag.annotation) {
-    children.push(buildAnnotation(ag.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(ag.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:attributeGroup`, attrs, children, ctx);
@@ -1197,7 +1251,9 @@ function buildAny(a: Any, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (a.annotation) {
-    children.push(buildAnnotation(a.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(a.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:any`, attrs, children, ctx);
@@ -1213,7 +1269,9 @@ function buildAnyAttribute(aa: AnyAttribute, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (aa.annotation) {
-    children.push(buildAnnotation(aa.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(aa.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:anyAttribute`, attrs, children, ctx);
@@ -1304,7 +1362,9 @@ function buildSelector(s: Selector, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (s.annotation) {
-    children.push(buildAnnotation(s.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(s.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:selector`, attrs, children, ctx);
@@ -1318,7 +1378,9 @@ function buildField(f: Field, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (f.annotation) {
-    children.push(buildAnnotation(f.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(f.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:field`, attrs, children, ctx);
@@ -1346,7 +1408,10 @@ function buildOpenContent(oc: OpenContent, ctx: BuildContext): string {
   return buildElement(`${ctx.prefix}:openContent`, attrs, children, ctx);
 }
 
-function buildDefaultOpenContent(doc: DefaultOpenContent, ctx: BuildContext): string {
+function buildDefaultOpenContent(
+  doc: DefaultOpenContent,
+  ctx: BuildContext,
+): string {
   const attrs: string[] = [];
   addAttr(attrs, 'id', doc.id);
   addBoolAttr(attrs, 'appliesToEmpty', doc.appliesToEmpty);
@@ -1371,7 +1436,9 @@ function buildAssertion(a: Assertion, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (a.annotation) {
-    children.push(buildAnnotation(a.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(a.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:assert`, attrs, children, ctx);
@@ -1409,7 +1476,9 @@ function buildNotation(n: Notation, ctx: BuildContext): string {
 
   const children: string[] = [];
   if (n.annotation) {
-    children.push(buildAnnotation(n.annotation, { ...ctx, level: ctx.level + 1 }));
+    children.push(
+      buildAnnotation(n.annotation, { ...ctx, level: ctx.level + 1 }),
+    );
   }
 
   return buildElement(`${ctx.prefix}:notation`, attrs, children, ctx);
@@ -1419,19 +1488,31 @@ function buildNotation(n: Notation, ctx: BuildContext): string {
 // Utility Functions
 // =============================================================================
 
-function addAttr(attrs: string[], name: string, value: string | undefined): void {
+function addAttr(
+  attrs: string[],
+  name: string,
+  value: string | undefined,
+): void {
   if (value !== undefined) {
     attrs.push(`${name}="${escapeXml(value)}"`);
   }
 }
 
-function addBoolAttr(attrs: string[], name: string, value: boolean | undefined): void {
+function addBoolAttr(
+  attrs: string[],
+  name: string,
+  value: boolean | undefined,
+): void {
   if (value !== undefined) {
     attrs.push(`${name}="${value}"`);
   }
 }
 
-function addOccursAttr(attrs: string[], name: string, value: number | string | undefined): void {
+function addOccursAttr(
+  attrs: string[],
+  name: string,
+  value: number | string | undefined,
+): void {
   if (value !== undefined) {
     attrs.push(`${name}="${value}"`);
   }
@@ -1450,7 +1531,7 @@ function buildElement(
   tag: string,
   attrs: string[],
   children: string[],
-  ctx: BuildContext
+  ctx: BuildContext,
 ): string {
   const indent = ctx.pretty ? ctx.indent.repeat(ctx.level) : '';
   const attrStr = attrs.length > 0 ? ' ' + attrs.join(' ') : '';
@@ -1468,7 +1549,7 @@ function buildElementWithText(
   tag: string,
   attrs: string[],
   text: string,
-  ctx: BuildContext
+  ctx: BuildContext,
 ): string {
   const indent = ctx.pretty ? ctx.indent.repeat(ctx.level) : '';
   const attrStr = attrs.length > 0 ? ' ' + attrs.join(' ') : '';

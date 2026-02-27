@@ -1,12 +1,12 @@
 /**
  * Schema Resolver
- * 
+ *
  * Resolves a schema with all its imports, includes, extensions, and substitution groups
  * into a single self-contained schema. This makes codegen straightforward - no need to
  * track cross-schema dependencies.
- * 
+ *
  * Uses the SchemaTraverser for OO traversal with real W3C XSD types.
- * 
+ *
  * Features:
  * - Merges types from $imports (xs:import)
  * - Expands complexContent/extension - flattens inheritance
@@ -49,7 +49,7 @@ export interface ResolveOptions {
 
 /**
  * Collects all schema components into Maps for resolution.
- * 
+ *
  * IMPORTANT: Elements are only collected from schemas with the SAME targetNamespace
  * as the root schema. This follows XSD semantics where xs:import brings in types
  * from a different namespace but doesn't merge elements into the current namespace.
@@ -62,7 +62,7 @@ class SchemaCollector extends SchemaTraverser {
   readonly attributeGroups = new Map<string, NamedAttributeGroup>();
   readonly substitutionGroups = new Map<string, TopLevelElement[]>();
   readonly xmlns = new Map<string, string>();
-  
+
   protected override onEnterSchema(schema: Schema): void {
     if (schema.$xmlns) {
       for (const [prefix, uri] of Object.entries(schema.$xmlns)) {
@@ -72,7 +72,7 @@ class SchemaCollector extends SchemaTraverser {
       }
     }
   }
-  
+
   protected override onComplexType(ct: TopLevelComplexType): void {
     // Types are collected from all schemas (needed for extension resolution)
     // First one wins (root schema takes precedence)
@@ -80,13 +80,13 @@ class SchemaCollector extends SchemaTraverser {
       this.complexTypes.set(ct.name, ct);
     }
   }
-  
+
   protected override onSimpleType(st: TopLevelSimpleType): void {
     if (!this.simpleTypes.has(st.name)) {
       this.simpleTypes.set(st.name, st);
     }
   }
-  
+
   protected override onElement(element: TopLevelElement): void {
     // Collect elements from:
     // 1. Same targetNamespace as root schema
@@ -103,11 +103,14 @@ class SchemaCollector extends SchemaTraverser {
     const sameOrNoNamespace = currentNs === rootNs || currentNs === undefined;
     const hasSubstitutionGroup = !!element.substitutionGroup;
     const isAbstract = !!(element as { abstract?: boolean }).abstract;
-    
-    if ((sameOrNoNamespace || hasSubstitutionGroup || isAbstract) && !this.elements.has(element.name)) {
+
+    if (
+      (sameOrNoNamespace || hasSubstitutionGroup || isAbstract) &&
+      !this.elements.has(element.name)
+    ) {
       this.elements.set(element.name, element);
     }
-    
+
     // Track substitution groups (from any namespace - substitutes can be cross-namespace)
     if (element.substitutionGroup) {
       const abstractName = stripNsPrefix(element.substitutionGroup);
@@ -116,13 +119,13 @@ class SchemaCollector extends SchemaTraverser {
       this.substitutionGroups.set(abstractName, existing);
     }
   }
-  
+
   protected override onGroup(group: NamedGroup): void {
     if (!this.groups.has(group.name)) {
       this.groups.set(group.name, group);
     }
   }
-  
+
   protected override onAttributeGroup(group: NamedAttributeGroup): void {
     if (!this.attributeGroups.has(group.name)) {
       this.attributeGroups.set(group.name, group);
@@ -138,7 +141,10 @@ class SchemaCollector extends SchemaTraverser {
  * Resolve a schema by merging all imports/includes and expanding all references.
  * Returns a new self-contained schema with no external dependencies.
  */
-export function resolveSchema(schema: Schema, options: ResolveOptions = {}): Schema {
+export function resolveSchema(
+  schema: Schema,
+  options: ResolveOptions = {},
+): Schema {
   const {
     resolveImports = true,
     resolveIncludes = true,
@@ -166,7 +172,7 @@ export function resolveSchema(schema: Schema, options: ResolveOptions = {}): Sch
     for (const ct of collector.complexTypes.values()) {
       collectElementRefsFromType(ct, referencedElements);
     }
-    elements = Array.from(collector.elements.values()).filter(el => {
+    elements = Array.from(collector.elements.values()).filter((el) => {
       if ((el as Record<string, unknown>).abstract === true) return false;
       if (referencedElements.has(el.name)) return false;
       return true;
@@ -179,15 +185,19 @@ export function resolveSchema(schema: Schema, options: ResolveOptions = {}): Sch
   // Expand extensions if requested
   let resolvedComplexTypes = Array.from(collector.complexTypes.values());
   if (expandExtensions) {
-    resolvedComplexTypes = resolvedComplexTypes.map(ct => 
-      expandComplexTypeExtension(ct, collector.complexTypes)
+    resolvedComplexTypes = resolvedComplexTypes.map((ct) =>
+      expandComplexTypeExtension(ct, collector.complexTypes),
     );
   }
 
   // Expand substitution groups in complex types if requested
   if (expandSubstitutions) {
-    resolvedComplexTypes = resolvedComplexTypes.map(ct =>
-      expandSubstitutionGroupsInType(ct, collector.elements, collector.substitutionGroups)
+    resolvedComplexTypes = resolvedComplexTypes.map((ct) =>
+      expandSubstitutionGroupsInType(
+        ct,
+        collector.elements,
+        collector.substitutionGroups,
+      ),
     );
   }
 
@@ -196,11 +206,12 @@ export function resolveSchema(schema: Schema, options: ResolveOptions = {}): Sch
     targetNamespace: schema.targetNamespace,
     elementFormDefault: schema.elementFormDefault,
     $filename: schema.$filename,
-    $xmlns: collector.xmlns.size > 0 
-      ? Object.fromEntries(collector.xmlns) 
-      : schema.$xmlns,
+    $xmlns:
+      collector.xmlns.size > 0
+        ? Object.fromEntries(collector.xmlns)
+        : schema.$xmlns,
   };
-  
+
   // Add elements
   if (elements.length > 0) {
     resolved.element = elements;
@@ -237,7 +248,7 @@ export function resolveSchema(schema: Schema, options: ResolveOptions = {}): Sch
 function expandComplexTypeExtension(
   ct: TopLevelComplexType,
   allTypes: Map<string, TopLevelComplexType>,
-  visited: Set<string> = new Set()
+  visited: Set<string> = new Set(),
 ): TopLevelComplexType {
   const extension = ct.complexContent?.extension;
   if (!extension?.base) return ct;
@@ -257,11 +268,15 @@ function expandComplexTypeExtension(
   const baseType = allTypes.get(baseName);
   if (baseType && !visited.has(baseName)) {
     // Recursively expand base type first
-    const expandedBase = expandComplexTypeExtension(baseType, allTypes, visited);
-    
+    const expandedBase = expandComplexTypeExtension(
+      baseType,
+      allTypes,
+      visited,
+    );
+
     // Collect elements from base
     collectElementsFromType(expandedBase, mergedElements);
-    
+
     // Collect attributes from base
     if (expandedBase.attribute) {
       mergedAttributes.push(...expandedBase.attribute);
@@ -272,7 +287,7 @@ function expandComplexTypeExtension(
   collectElementsFromGroup(extension.sequence, mergedElements);
   collectElementsFromGroup(extension.choice, mergedElements);
   collectElementsFromGroup(extension.all, mergedElements);
-  
+
   // Add extension attributes
   if (extension.attribute) {
     mergedAttributes.push(...extension.attribute);
@@ -293,7 +308,16 @@ function expandComplexTypeExtension(
 
   // Copy other properties (excluding complexContent which we've flattened)
   for (const [key, value] of Object.entries(ct)) {
-    if (!['name', 'complexContent', 'all', 'sequence', 'choice', 'attribute'].includes(key)) {
+    if (
+      ![
+        'name',
+        'complexContent',
+        'all',
+        'sequence',
+        'choice',
+        'attribute',
+      ].includes(key)
+    ) {
       flattened[key] = value;
     }
   }
@@ -304,7 +328,10 @@ function expandComplexTypeExtension(
 /**
  * Collect elements from a complex type's content model.
  */
-function collectElementsFromType(ct: TopLevelComplexType, elements: LocalElement[]): void {
+function collectElementsFromType(
+  ct: TopLevelComplexType,
+  elements: LocalElement[],
+): void {
   collectElementsFromGroup(ct.sequence, elements);
   collectElementsFromGroup(ct.choice, elements);
   collectElementsFromGroup(ct.all, elements);
@@ -313,7 +340,10 @@ function collectElementsFromType(ct: TopLevelComplexType, elements: LocalElement
 /**
  * Collect elements from a group (sequence/choice/all).
  */
-function collectElementsFromGroup(group: ExplicitGroup | All | undefined, elements: LocalElement[]): void {
+function collectElementsFromGroup(
+  group: ExplicitGroup | All | undefined,
+  elements: LocalElement[],
+): void {
   if (!group?.element) return;
   elements.push(...group.element);
 }
@@ -329,14 +359,18 @@ function collectElementsFromGroup(group: ExplicitGroup | All | undefined, elemen
 function expandSubstitutionGroupsInType(
   ct: TopLevelComplexType,
   allElements: Map<string, TopLevelElement>,
-  substitutionGroups: Map<string, TopLevelElement[]>
+  substitutionGroups: Map<string, TopLevelElement[]>,
 ): TopLevelComplexType {
   let changed = false;
   const result = { ...ct } as Record<string, unknown>;
 
   // Process sequence
   if (ct.sequence) {
-    const expanded = expandSubstitutionGroupsInGroup(ct.sequence, allElements, substitutionGroups);
+    const expanded = expandSubstitutionGroupsInGroup(
+      ct.sequence,
+      allElements,
+      substitutionGroups,
+    );
     if (expanded !== ct.sequence) {
       result.sequence = expanded;
       changed = true;
@@ -345,7 +379,11 @@ function expandSubstitutionGroupsInType(
 
   // Process all
   if (ct.all) {
-    const expanded = expandSubstitutionGroupsInGroup(ct.all, allElements, substitutionGroups);
+    const expanded = expandSubstitutionGroupsInGroup(
+      ct.all,
+      allElements,
+      substitutionGroups,
+    );
     if (expanded !== ct.all) {
       result.all = expanded;
       changed = true;
@@ -354,7 +392,11 @@ function expandSubstitutionGroupsInType(
 
   // Process choice
   if (ct.choice) {
-    const expanded = expandSubstitutionGroupsInGroup(ct.choice, allElements, substitutionGroups);
+    const expanded = expandSubstitutionGroupsInGroup(
+      ct.choice,
+      allElements,
+      substitutionGroups,
+    );
     if (expanded !== ct.choice) {
       result.choice = expanded;
       changed = true;
@@ -370,7 +412,7 @@ function expandSubstitutionGroupsInType(
 function expandSubstitutionGroupsInGroup(
   group: ExplicitGroup | All,
   allElements: Map<string, TopLevelElement>,
-  substitutionGroups: Map<string, TopLevelElement[]>
+  substitutionGroups: Map<string, TopLevelElement[]>,
 ): ExplicitGroup | All {
   if (!group.element) return group;
 
@@ -382,7 +424,7 @@ function expandSubstitutionGroupsInGroup(
     if (el.ref) {
       const refName = stripNsPrefix(el.ref);
       const refElement = allElements.get(refName);
-      
+
       if (refElement?.abstract) {
         // This is an abstract element - expand to substitutes
         const substitutes = substitutionGroups.get(refName);
@@ -401,7 +443,7 @@ function expandSubstitutionGroupsInGroup(
         }
       }
     }
-    
+
     // Keep original element
     expandedElements.push(el);
   }
@@ -423,13 +465,12 @@ function expandSubstitutionGroupsInGroup(
  */
 export function getSubstitutes(
   abstractElementName: string,
-  schema: Schema
+  schema: Schema,
 ): TopLevelElement[] {
   const collector = new SchemaCollector();
   collector.traverse(schema);
   return collector.substitutionGroups.get(abstractElementName) ?? [];
 }
-
 
 /**
  * Collect element refs from an element's nested structure
@@ -444,9 +485,12 @@ function collectElementRefs(el: TopLevelElement, refs: Set<string>): void {
 /**
  * Recursively collect element refs from a complex type
  */
-function collectElementRefsFromType(ct: TopLevelComplexType, refs: Set<string>): void {
+function collectElementRefsFromType(
+  ct: TopLevelComplexType,
+  refs: Set<string>,
+): void {
   const record = ct as Record<string, unknown>;
-  
+
   // Check sequence/all/choice for element refs
   for (const groupKey of ['sequence', 'all', 'choice']) {
     const group = record[groupKey] as Record<string, unknown> | undefined;
@@ -460,12 +504,15 @@ function collectElementRefsFromType(ct: TopLevelComplexType, refs: Set<string>):
         }
         // Recurse into nested complexType
         if (el.complexType) {
-          collectElementRefsFromType(el.complexType as TopLevelComplexType, refs);
+          collectElementRefsFromType(
+            el.complexType as TopLevelComplexType,
+            refs,
+          );
         }
       }
     }
   }
-  
+
   // Check complexContent/extension
   if (record.complexContent) {
     const cc = record.complexContent as Record<string, unknown>;

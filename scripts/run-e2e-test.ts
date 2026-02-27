@@ -13,7 +13,7 @@ async function runE2ETest() {
 
   const testFile = join(
     process.cwd(),
-    'packages/adt-cli/src/lib/testing/e2e-transport-import.test.ts'
+    'packages/adt-cli/src/lib/testing/e2e-transport-import.test.ts',
   );
 
   return new Promise<void>((resolve, reject) => {

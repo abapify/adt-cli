@@ -35,8 +35,9 @@ export default function GenericPage(obj: ObjectReference): Page {
         Field('Package', obj.packageName),
         Field('URI', obj.uri),
         Text(''),
-        Text('💡 Use --json for full data', 'dim')
+        Text('💡 Use --json for full data', 'dim'),
       ).render(),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     print: () => {}, // placeholder
   };
 

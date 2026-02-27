@@ -35,12 +35,17 @@ describe('parseXsd', () => {
   it('should parse simpleTypes with enumerations', () => {
     const schema = parseXsd(xsdContent);
 
-    const formChoice = schema.simpleType?.find(st => st.name === 'formChoice');
+    const formChoice = schema.simpleType?.find(
+      (st) => st.name === 'formChoice',
+    );
 
     assert.ok(formChoice, 'formChoice should exist');
     assert.equal(formChoice?.restriction?.enumeration?.length, 2);
     assert.equal(formChoice?.restriction?.enumeration?.[0]?.value, 'qualified');
-    assert.equal(formChoice?.restriction?.enumeration?.[1]?.value, 'unqualified');
+    assert.equal(
+      formChoice?.restriction?.enumeration?.[1]?.value,
+      'unqualified',
+    );
   });
 
   it('should parse groups', () => {
@@ -65,7 +70,9 @@ describe('parseXsd', () => {
 
     const firstAnnotation = schema.annotation?.[0];
     assert.ok(firstAnnotation?.documentation);
-    assert.ok(firstAnnotation?.documentation?.[0]?._text?.includes('Part 1 version'));
+    assert.ok(
+      firstAnnotation?.documentation?.[0]?._text?.includes('Part 1 version'),
+    );
   });
 });
 
@@ -73,7 +80,7 @@ describe('Schema type validation', () => {
   it('should satisfy Schema type', () => {
     // Parse W3C XSD and verify it satisfies Schema type
     const schema: Schema = parseXsd(xsdContent);
-    
+
     assert.equal(schema.targetNamespace, 'http://www.w3.org/2001/XMLSchema');
   });
 });
@@ -81,7 +88,7 @@ describe('Schema type validation', () => {
 describe('$xmlns declarations', () => {
   it('should extract $xmlns declarations from schema root', () => {
     const schema = parseXsd(xsdContent);
-    
+
     assert.ok(schema.$xmlns, '$xmlns should be present');
     assert.equal(schema.$xmlns?.xs, 'http://www.w3.org/2001/XMLSchema');
   });
@@ -96,7 +103,7 @@ describe('$xmlns declarations', () => {
 </xs:schema>`;
 
     const schema = parseXsd(xsd);
-    
+
     assert.ok(schema.$xmlns, '$xmlns should be present');
     assert.equal(schema.$xmlns?.xs, 'http://www.w3.org/2001/XMLSchema');
     assert.equal(schema.$xmlns?.tns, 'http://example.com/order');
@@ -112,7 +119,7 @@ describe('$xmlns declarations', () => {
 </schema>`;
 
     const schema = parseXsd(xsd);
-    
+
     assert.ok(schema.$xmlns, '$xmlns should be present');
     assert.equal(schema.$xmlns?.[''], 'http://www.w3.org/2001/XMLSchema');
     assert.equal(schema.$xmlns?.tns, 'http://example.com/order');

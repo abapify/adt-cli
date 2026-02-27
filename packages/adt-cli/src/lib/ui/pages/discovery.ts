@@ -118,6 +118,7 @@ function renderDiscoveryPage(
     title: 'ADT Service Discovery',
     icon: '🔍',
     render: () => content.render(),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     print: () => {},
   };
 

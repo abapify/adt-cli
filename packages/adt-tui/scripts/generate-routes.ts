@@ -1,14 +1,14 @@
 /**
  * Route Generator
- * 
+ *
  * Scans src/pages/ directory and generates a route manifest.
  * Run this at build time to create _routes.ts
- * 
+ *
  * File naming conventions:
  * - [slug].tsx → Dynamic segment (matches any value)
  * - index.tsx → Directory root
  * - name.tsx → Static segment
- * 
+ *
  * Example:
  *   src/pages/sap/bc/adt/cts/transportrequests/[slug].tsx
  *   → Pattern: /sap/bc/adt/cts/transportrequests/:slug
@@ -68,9 +68,10 @@ function pathToRoute(filePath: string): RouteInfo | null {
   // [slug] → :slug (for pattern display)
   // [slug] → [^/]+ (for regex)
   const pattern = '/' + routePath.replace(/\[([^\]]+)\]/g, ':$1');
-  const regexPattern = '^/' + routePath
-    .replace(/\[([^\]]+)\]/g, '([^/]+)')
-    .replace(/\//g, '\\/') + '$';
+  const regexPattern =
+    '^/' +
+    routePath.replace(/\[([^\]]+)\]/g, '([^/]+)').replace(/\//g, '\\/') +
+    '$';
 
   const isDynamic = routePath.includes('[');
 
@@ -100,11 +101,13 @@ function generateRoutesFile(routes: RouteInfo[]): string {
     .join('\n');
 
   const routeEntries = routes
-    .map((r, i) => `  {
+    .map(
+      (r, i) => `  {
     pattern: '${r.pattern}',
     regex: new RegExp('${r.regex}'),
     page: Page${i},
-  }`)
+  }`,
+    )
     .join(',\n');
 
   return `/**
@@ -143,7 +146,7 @@ export function matchRoute(url: string): Route | null {
 console.log('Scanning pages directory:', PAGES_DIR);
 const routes = scanDirectory(PAGES_DIR);
 console.log(`Found ${routes.length} routes:`);
-routes.forEach(r => console.log(`  ${r.pattern} → ${r.importPath}`));
+routes.forEach((r) => console.log(`  ${r.pattern} → ${r.importPath}`));
 
 const content = generateRoutesFile(routes);
 writeFileSync(OUTPUT_FILE, content);

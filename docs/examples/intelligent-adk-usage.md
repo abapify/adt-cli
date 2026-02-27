@@ -86,7 +86,7 @@ if (domainObj.kind === 'Domain') {
 class EnhancedOatPlugin implements FormatPlugin {
   async serialize(
     objects: AdkObjectBase[],
-    targetPath: string
+    targetPath: string,
   ): Promise<SerializeResult> {
     for (const obj of objects) {
       // Get all source files for the object
@@ -113,7 +113,7 @@ class EnhancedOatPlugin implements FormatPlugin {
           classObj,
           sourceFiles,
           enhancedMetadata,
-          targetPath
+          targetPath,
         );
       }
 

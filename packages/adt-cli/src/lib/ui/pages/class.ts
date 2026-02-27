@@ -173,6 +173,7 @@ function renderClassPage(cls: any, _params: NavParams): Page {
     title: `Class: ${name}`,
     icon: '🔷',
     render: () => content.render(),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     print: () => {},
   };
 

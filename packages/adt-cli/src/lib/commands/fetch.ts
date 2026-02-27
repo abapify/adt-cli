@@ -6,10 +6,18 @@ export const fetchCommand = new Command('fetch')
   .description('Fetch a URL with authentication (like curl but authenticated)')
   .argument('<url>', 'URL path to fetch (e.g., /sap/bc/adt/core/http/sessions)')
   .option('-X, --method <method>', 'HTTP method', 'GET')
-  .option('-H, --header <header>', 'Add header (can be used multiple times)', collect, [])
+  .option(
+    '-H, --header <header>',
+    'Add header (can be used multiple times)',
+    collect,
+    [],
+  )
   .option('-d, --data <data>', 'Request body (for POST/PUT)')
   .option('-o, --output <file>', 'Save response to file')
-  .option('--accept <type>', 'Set Accept header (shorthand for -H "Accept: <type>")')
+  .option(
+    '--accept <type>',
+    'Set Accept header (shorthand for -H "Accept: <type>")',
+  )
   .action(async (url: string, options, command) => {
     try {
       // Create v2 client (uses global CLI context automatically)
@@ -31,7 +39,12 @@ export const fetchCommand = new Command('fetch')
         customHeaders['Accept'] = options.accept;
       }
 
-      const method = options.method.toUpperCase() as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+      const method = options.method.toUpperCase() as
+        | 'GET'
+        | 'POST'
+        | 'PUT'
+        | 'PATCH'
+        | 'DELETE';
 
       console.log(`🔄 ${method} ${url}...\n`);
 
@@ -44,7 +57,10 @@ export const fetchCommand = new Command('fetch')
 
       // Display response
       if (options.output) {
-        const content = typeof response === 'string' ? response : JSON.stringify(response, null, 2);
+        const content =
+          typeof response === 'string'
+            ? response
+            : JSON.stringify(response, null, 2);
         writeFileSync(options.output, content);
         console.log(`💾 Response saved to: ${options.output}`);
       } else {
@@ -60,7 +76,7 @@ export const fetchCommand = new Command('fetch')
     } catch (error) {
       console.error(
         '❌ Request failed:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       if (error instanceof Error && error.stack) {
         console.error('\nStack trace:', error.stack);
