@@ -1,6 +1,6 @@
 /**
  * Test: XSD Schema Body Inference
- * 
+ *
  * Verifies that ts-xsd schemas wrapped with speci's Serializable interface
  * correctly support automatic body type inference.
  */
@@ -26,13 +26,13 @@ describe('XSD Schema Body Inference', () => {
   // Mock schema that mimics transportmanagmentCreate
   const mockXsdSchema: Serializable<TransportCreate> = {
     _infer: undefined as unknown as TransportCreate,
-    parse: (xml: string) => ({} as TransportCreate),
+    parse: (xml: string) => ({}) as TransportCreate,
     build: (data: TransportCreate) => '<xml/>',
   };
 
   const mockAdapter: HttpAdapter<TransportCreate> = {
     request: async <TResponse = TransportCreate>(): Promise<TResponse> =>
-      ({ useraction: 'test', request: [] } as unknown as TResponse),
+      ({ useraction: 'test', request: [] }) as unknown as TResponse,
   };
 
   describe('Pattern: No-param contract with Inferrable body schema', () => {
@@ -81,13 +81,15 @@ describe('XSD Schema Body Inference', () => {
 
       const bodyData: TransportCreate = {
         useraction: 'newrequest',
-        request: [{
-          desc: 'Test TR',
-          type: 'K',
-          target: 'LOCAL',
-          cts_project: '',
-          task: [],
-        }],
+        request: [
+          {
+            desc: 'Test TR',
+            type: 'K',
+            target: 'LOCAL',
+            cts_project: '',
+            task: [],
+          },
+        ],
       };
 
       await client.create(bodyData);

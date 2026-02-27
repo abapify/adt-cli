@@ -21,7 +21,8 @@ interface DownloadOptions {
  */
 function parseArtifacts(xml: string): Artifact[] {
   const artifacts: Artifact[] = [];
-  const regex = /<artifact classifier='([^']+)' id='([^']+)' version='([^']+)'>/g;
+  const regex =
+    /<artifact classifier='([^']+)' id='([^']+)' version='([^']+)'>/g;
   let match;
 
   while ((match = regex.exec(xml)) !== null) {
@@ -38,7 +39,10 @@ function parseArtifacts(xml: string): Artifact[] {
 /**
  * Download P2 repository metadata and optionally plugins
  */
-export async function download(repoUrl: string, options: DownloadOptions): Promise<void> {
+export async function download(
+  repoUrl: string,
+  options: DownloadOptions,
+): Promise<void> {
   const { output, filter, extract, extractOutput, extractPatterns } = options;
 
   console.log(`🔧 P2 Repository Download`);
@@ -56,7 +60,6 @@ export async function download(repoUrl: string, options: DownloadOptions): Promi
   const contentJar = join(output, 'content.jar');
   console.log('📥 Downloading content.jar...');
   execOutput(`wget -q "${repoUrl}/content.jar" -O "${contentJar}"`);
-
 
   // Parse artifacts
   const xml = execOutput(`unzip -p "${artifactsJar}" artifacts.xml`);
@@ -76,9 +79,11 @@ export async function download(repoUrl: string, options: DownloadOptions): Promi
           return regex.test(a.id);
         }
         return a.id.startsWith(p);
-      })
+      }),
     );
-    console.log(`🎯 Filtered to ${toDownload.length} plugins matching: ${filter}`);
+    console.log(
+      `🎯 Filtered to ${toDownload.length} plugins matching: ${filter}`,
+    );
   }
 
   if (toDownload.length === 0) {
@@ -99,7 +104,7 @@ export async function download(repoUrl: string, options: DownloadOptions): Promi
     const targetPath = join(pluginsDir, fileName);
 
     process.stdout.write(
-      `\r   Downloading ${i + 1}/${toDownload.length}: ${artifact.id.slice(0, 50).padEnd(50)}`
+      `\r   Downloading ${i + 1}/${toDownload.length}: ${artifact.id.slice(0, 50).padEnd(50)}`,
     );
 
     if (existsSync(targetPath)) {

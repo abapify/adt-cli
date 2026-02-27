@@ -1,12 +1,16 @@
 /**
  * Index Barrel Generator
- * 
+ *
  * Generates index.ts files that re-export all schemas in a source.
- * 
+ *
  * Output: `export * from './schema1'; export * from './schema2'; ...`
  */
 
-import type { GeneratorPlugin, FinalizeContext, GeneratedFile } from '../codegen/types';
+import type {
+  GeneratorPlugin,
+  FinalizeContext,
+  GeneratedFile,
+} from '../codegen/types';
 
 // ============================================================================
 // Options
@@ -31,14 +35,14 @@ export interface IndexBarrelOptions {
 
 /**
  * Create an index barrel generator plugin
- * 
+ *
  * This generator runs in finalize() after all schemas are processed.
  * It generates an index.ts that re-exports all schemas.
- * 
+ *
  * @example
  * ```ts
  * import { rawSchema, indexBarrel } from 'ts-xsd/generators';
- * 
+ *
  * export default defineConfig({
  *   generators: [
  *     rawSchema(),
@@ -50,7 +54,7 @@ export interface IndexBarrelOptions {
 export function indexBarrel(options: IndexBarrelOptions = {}): GeneratorPlugin {
   const {
     filename = 'index.ts',
-    importExtension = '',  // Default to extensionless for bundler compatibility
+    importExtension = '', // Default to extensionless for bundler compatibility
     namedExports = false,
     includeTypedExports = false,
     header = true,
@@ -82,13 +86,17 @@ export function indexBarrel(options: IndexBarrelOptions = {}): GeneratorPlugin {
         }
 
         // Sort schemas alphabetically for consistent output
-        const sortedSchemas = [...schemas].sort((a, b) => a.name.localeCompare(b.name));
+        const sortedSchemas = [...schemas].sort((a, b) =>
+          a.name.localeCompare(b.name),
+        );
 
         // Generate exports
         for (const schema of sortedSchemas) {
           if (namedExports) {
             const exportName = toValidIdentifier(schema.name);
-            lines.push(`export { default as ${exportName} } from './${schema.name}${importExtension}';`);
+            lines.push(
+              `export { default as ${exportName} } from './${schema.name}${importExtension}';`,
+            );
           } else {
             lines.push(`export * from './${schema.name}${importExtension}';`);
           }
@@ -96,7 +104,9 @@ export function indexBarrel(options: IndexBarrelOptions = {}): GeneratorPlugin {
           // Also export from typed files if requested
           if (includeTypedExports) {
             const typeName = pascalCase(schema.name);
-            lines.push(`export type { ${typeName} } from './${schema.name}.typed${importExtension}';`);
+            lines.push(
+              `export type { ${typeName} } from './${schema.name}.typed${importExtension}';`,
+            );
           }
         }
 
@@ -118,12 +128,52 @@ export function indexBarrel(options: IndexBarrelOptions = {}): GeneratorPlugin {
 // ============================================================================
 
 const RESERVED_WORDS = new Set([
-  'break', 'case', 'catch', 'continue', 'debugger', 'default', 'delete',
-  'do', 'else', 'finally', 'for', 'function', 'if', 'in', 'instanceof',
-  'new', 'return', 'switch', 'this', 'throw', 'try', 'typeof', 'var',
-  'void', 'while', 'with', 'class', 'const', 'enum', 'export', 'extends',
-  'import', 'super', 'implements', 'interface', 'let', 'package', 'private',
-  'protected', 'public', 'static', 'yield', 'await', 'null', 'true', 'false',
+  'break',
+  'case',
+  'catch',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'in',
+  'instanceof',
+  'new',
+  'return',
+  'switch',
+  'this',
+  'throw',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'class',
+  'const',
+  'enum',
+  'export',
+  'extends',
+  'import',
+  'super',
+  'implements',
+  'interface',
+  'let',
+  'package',
+  'private',
+  'protected',
+  'public',
+  'static',
+  'yield',
+  'await',
+  'null',
+  'true',
+  'false',
 ]);
 
 function toValidIdentifier(name: string): string {
@@ -139,5 +189,5 @@ function toValidIdentifier(name: string): string {
 function pascalCase(str: string): string {
   return str
     .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
-    .replace(/^./, s => s.toUpperCase());
+    .replace(/^./, (s) => s.toUpperCase());
 }

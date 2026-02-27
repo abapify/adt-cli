@@ -1,10 +1,10 @@
 /**
  * XSD Root Element Validation Tests
- * 
+ *
  * Validates that XSD schemas correctly enforce abapGit as the ONLY valid root element.
  * Uses xs:redefine pattern to ensure object-specific elements (DD01V, etc.) can only
  * appear inside asx:values, not as document roots.
- * 
+ *
  * Tests both:
  * - Positive: abapGit root element should validate
  * - Negative: Other root elements (like DD01V, DD02V, etc.) should NOT validate
@@ -31,9 +31,12 @@ function isXmllintAvailable(): boolean {
 }
 
 /** Validate XML string against XSD using xmllint */
-function validateXmlString(xml: string, xsdName: string): { valid: boolean; error?: string } {
+function validateXmlString(
+  xml: string,
+  xsdName: string,
+): { valid: boolean; error?: string } {
   const xsdPath = join(xsdDir, `${xsdName}.xsd`);
-  
+
   try {
     execSync(`echo '${xml}' | xmllint --schema "${xsdPath}" - --noout 2>&1`, {
       encoding: 'utf-8',
@@ -42,7 +45,10 @@ function validateXmlString(xml: string, xsdName: string): { valid: boolean; erro
     return { valid: true };
   } catch (err) {
     const error = err as { stdout?: string; stderr?: string; message?: string };
-    return { valid: false, error: error.stdout || error.stderr || error.message };
+    return {
+      valid: false,
+      error: error.stdout || error.stderr || error.message,
+    };
   }
 }
 
@@ -85,33 +91,36 @@ function buildXmlWithRoot(element: string, content: string): string {
  */
 function runRootValidationTests(testCase: RootValidationTestCase): void {
   const xmllintAvailable = isXmllintAvailable();
-  
+
   describe(`${testCase.xsdName}.xsd Root Element Validation`, () => {
     it('should validate abapGit as root element (positive test)', (t) => {
       if (!xmllintAvailable) {
         t.skip('xmllint not available');
         return;
       }
-      
+
       const xml = buildValidAbapGitXml(testCase.validRoot.content);
       const result = validateXmlString(xml, testCase.xsdName);
-      
-      assert.ok(result.valid, `abapGit root should validate but got: ${result.error}`);
+
+      assert.ok(
+        result.valid,
+        `abapGit root should validate but got: ${result.error}`,
+      );
     });
-    
+
     for (const invalidRoot of testCase.invalidRoots) {
       it(`should REJECT ${invalidRoot.element} as root element (negative test)`, (t) => {
         if (!xmllintAvailable) {
           t.skip('xmllint not available');
           return;
         }
-        
+
         const xml = buildXmlWithRoot(invalidRoot.element, invalidRoot.content);
         const result = validateXmlString(xml, testCase.xsdName);
-        
+
         assert.ok(
           !result.valid,
-          `${invalidRoot.element} should NOT be valid as root element! Schema allows wrong root.`
+          `${invalidRoot.element} should NOT be valid as root element! Schema allows wrong root.`,
         );
       });
     }

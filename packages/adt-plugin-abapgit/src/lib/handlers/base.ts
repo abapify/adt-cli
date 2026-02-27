@@ -27,7 +27,7 @@ export type InferAdkData<T> =
  * We use `any[]` for constructor args since we only need the static `kind` property,
  * not to actually instantiate the class.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export type AdkObjectClass<T extends AdkObject = AdkObject> = {
   new (...args: any[]): T;
   readonly kind: AdkKind;

@@ -1,6 +1,6 @@
 /**
  * Type Inference Tests
- * 
+ *
  * These tests verify that InferSchema correctly infers TypeScript types
  * from W3C-compliant schema definitions.
  */
@@ -15,9 +15,7 @@ import type { InferSchema, SchemaLike } from '../../src/infer';
 
 /** Simple schema with one element and one complexType */
 const PersonSchema = {
-  element: [
-    { name: 'Person', type: 'PersonType' }
-  ],
+  element: [{ name: 'Person', type: 'PersonType' }],
   complexType: [
     {
       name: 'PersonType',
@@ -26,20 +24,16 @@ const PersonSchema = {
           { name: 'firstName', type: 'xs:string' },
           { name: 'lastName', type: 'xs:string' },
           { name: 'age', type: 'xs:int', minOccurs: 0 },
-        ]
+        ],
       },
-      attribute: [
-        { name: 'id', type: 'xs:string', use: 'required' as const },
-      ]
-    }
-  ]
+      attribute: [{ name: 'id', type: 'xs:string', use: 'required' as const }],
+    },
+  ],
 } as const;
 
 /** Schema with nested complexType */
 const AddressSchema = {
-  element: [
-    { name: 'Address', type: 'AddressType' }
-  ],
+  element: [{ name: 'Address', type: 'AddressType' }],
   complexType: [
     {
       name: 'AddressType',
@@ -48,17 +42,15 @@ const AddressSchema = {
           { name: 'street', type: 'xs:string' },
           { name: 'city', type: 'xs:string' },
           { name: 'zip', type: 'xs:string', minOccurs: 0 },
-        ]
-      }
-    }
-  ]
+        ],
+      },
+    },
+  ],
 } as const;
 
 /** Schema with array elements (maxOccurs="unbounded") */
 const OrderSchema = {
-  element: [
-    { name: 'Order', type: 'OrderType' }
-  ],
+  element: [{ name: 'Order', type: 'OrderType' }],
   complexType: [
     {
       name: 'OrderType',
@@ -66,8 +58,8 @@ const OrderSchema = {
         element: [
           { name: 'orderId', type: 'xs:string' },
           { name: 'item', type: 'ItemType', maxOccurs: 'unbounded' as const },
-        ]
-      }
+        ],
+      },
     },
     {
       name: 'ItemType',
@@ -75,25 +67,21 @@ const OrderSchema = {
         element: [
           { name: 'name', type: 'xs:string' },
           { name: 'quantity', type: 'xs:int' },
-        ]
-      }
-    }
-  ]
+        ],
+      },
+    },
+  ],
 } as const;
 
 /** Schema with inheritance (complexContent/extension) */
 const InheritanceSchema = {
-  element: [
-    { name: 'Employee', type: 'EmployeeType' }
-  ],
+  element: [{ name: 'Employee', type: 'EmployeeType' }],
   complexType: [
     {
       name: 'PersonType',
       sequence: {
-        element: [
-          { name: 'name', type: 'xs:string' },
-        ]
-      }
+        element: [{ name: 'name', type: 'xs:string' }],
+      },
     },
     {
       name: 'EmployeeType',
@@ -101,21 +89,17 @@ const InheritanceSchema = {
         extension: {
           base: 'PersonType',
           sequence: {
-            element: [
-              { name: 'employeeId', type: 'xs:string' },
-            ]
-          }
-        }
-      }
-    }
-  ]
+            element: [{ name: 'employeeId', type: 'xs:string' }],
+          },
+        },
+      },
+    },
+  ],
 } as const;
 
 /** Schema with simpleType enum */
 const EnumSchema = {
-  element: [
-    { name: 'Status', type: 'StatusType' }
-  ],
+  element: [{ name: 'Status', type: 'StatusType' }],
   simpleType: [
     {
       name: 'StatusType',
@@ -125,10 +109,10 @@ const EnumSchema = {
           { value: 'active' },
           { value: 'inactive' },
           { value: 'pending' },
-        ]
-      }
-    }
-  ]
+        ],
+      },
+    },
+  ],
 } as const;
 
 // =============================================================================
@@ -148,7 +132,7 @@ type _Status = InferSchema<typeof EnumSchema>;
 const _personTest: Person = {
   firstName: 'John',
   lastName: 'Doe',
-  age: 30,  // optional
+  age: 30, // optional
   id: '123',
 };
 
@@ -179,7 +163,7 @@ describe('Type Inference', () => {
         lastName: 'Doe',
         id: '123',
       };
-      
+
       assert.equal(person.firstName, 'John');
       assert.equal(person.lastName, 'Doe');
       assert.equal(person.id, '123');
@@ -191,7 +175,7 @@ describe('Type Inference', () => {
         street: '123 Main St',
         city: 'Springfield',
       };
-      
+
       assert.equal(address.street, '123 Main St');
       assert.equal(address.city, 'Springfield');
       assert.equal(address.zip, undefined);
@@ -200,11 +184,9 @@ describe('Type Inference', () => {
     it('should infer arrays from maxOccurs=unbounded', () => {
       const order: Order = {
         orderId: 'ORD-001',
-        item: [
-          { name: 'Widget', quantity: 5 },
-        ],
+        item: [{ name: 'Widget', quantity: 5 }],
       };
-      
+
       assert.ok(Array.isArray(order.item));
       assert.equal(order.item.length, 1);
       assert.equal(order.item[0].name, 'Widget');
@@ -216,7 +198,7 @@ describe('Type Inference', () => {
         lastName: 'Smith',
         id: '456',
       };
-      
+
       // id is required (use="required")
       assert.equal(person.id, '456');
     });
@@ -229,7 +211,7 @@ describe('Type Inference', () => {
         lastName: 'User',
         id: '789',
       };
-      
+
       assert.equal(typeof person.firstName, 'string');
     });
 
@@ -240,7 +222,7 @@ describe('Type Inference', () => {
         id: '789',
         age: 25,
       };
-      
+
       assert.equal(typeof person.age, 'number');
     });
   });
@@ -255,7 +237,7 @@ describe('Type Inference', () => {
         InheritanceSchema,
         EnumSchema,
       ];
-      
+
       assert.equal(schemas.length, 5);
     });
   });
@@ -265,70 +247,86 @@ describe('Type Inference', () => {
       // This is a simplified XSD schema definition - the structure that
       // describes XSD itself. For full inference, we'd need the complete
       // W3C XMLSchema.xsd as a literal type.
-      
+
       // Simplified xs:schema element definition
       const _XsdSchemaSchema = {
-        element: [
-          { name: 'schema', type: 'schemaType' }
-        ],
+        element: [{ name: 'schema', type: 'schemaType' }],
         complexType: [
           {
             name: 'schemaType',
             sequence: {
               element: [
-                { name: 'element', type: 'elementType', minOccurs: 0, maxOccurs: 'unbounded' as const },
-                { name: 'complexType', type: 'complexTypeType', minOccurs: 0, maxOccurs: 'unbounded' as const },
-                { name: 'simpleType', type: 'simpleTypeType', minOccurs: 0, maxOccurs: 'unbounded' as const },
-              ]
+                {
+                  name: 'element',
+                  type: 'elementType',
+                  minOccurs: 0,
+                  maxOccurs: 'unbounded' as const,
+                },
+                {
+                  name: 'complexType',
+                  type: 'complexTypeType',
+                  minOccurs: 0,
+                  maxOccurs: 'unbounded' as const,
+                },
+                {
+                  name: 'simpleType',
+                  type: 'simpleTypeType',
+                  minOccurs: 0,
+                  maxOccurs: 'unbounded' as const,
+                },
+              ],
             },
             attribute: [
               { name: 'targetNamespace', type: 'xs:anyURI' },
               { name: 'elementFormDefault', type: 'xs:string' },
-            ]
+            ],
           },
           {
             name: 'elementType',
             sequence: {
               element: [
                 { name: 'complexType', type: 'complexTypeType', minOccurs: 0 },
-              ]
+              ],
             },
             attribute: [
               { name: 'name', type: 'xs:NCName', use: 'required' as const },
               { name: 'type', type: 'xs:QName' },
-            ]
+            ],
           },
           {
             name: 'complexTypeType',
             sequence: {
               element: [
                 { name: 'sequence', type: 'sequenceType', minOccurs: 0 },
-              ]
+              ],
             },
-            attribute: [
-              { name: 'name', type: 'xs:NCName' },
-            ]
+            attribute: [{ name: 'name', type: 'xs:NCName' }],
           },
           {
             name: 'sequenceType',
             sequence: {
               element: [
-                { name: 'element', type: 'elementType', minOccurs: 0, maxOccurs: 'unbounded' as const },
-              ]
-            }
+                {
+                  name: 'element',
+                  type: 'elementType',
+                  minOccurs: 0,
+                  maxOccurs: 'unbounded' as const,
+                },
+              ],
+            },
           },
           {
             name: 'simpleTypeType',
             attribute: [
               { name: 'name', type: 'xs:NCName', use: 'required' as const },
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       } as const;
 
       // Infer the type of an XSD schema document
       type XsdDocument = InferSchema<typeof _XsdSchemaSchema>;
-      
+
       // This should give us a type like:
       // {
       //   element?: Array<{ name: string; type?: string; complexType?: ... }>;
@@ -337,16 +335,12 @@ describe('Type Inference', () => {
       //   targetNamespace?: string;
       //   elementFormDefault?: string;
       // }
-      
+
       const xsdDoc: XsdDocument = {
-        element: [
-          { name: 'Person' },
-        ],
-        complexType: [
-          { name: 'PersonType', sequence: { element: [] } },
-        ],
+        element: [{ name: 'Person' }],
+        complexType: [{ name: 'PersonType', sequence: { element: [] } }],
       };
-      
+
       assert.ok(Array.isArray(xsdDoc.element));
       assert.equal(xsdDoc.element?.[0].name, 'Person');
     });
@@ -354,17 +348,20 @@ describe('Type Inference', () => {
     it('should work with parsed schema (runtime type only)', async () => {
       // When we parse XSD at runtime, we get Schema type (not literal)
       // So inference gives us the general Schema type, not specific fields
-      
+
       const { parseXsd } = await import('../../src/xsd');
       const { getW3CSchema } = await import('../fixtures');
-      
+
       const xsdContent = await getW3CSchema();
       const schema = parseXsd(xsdContent);
-      
+
       // Runtime: we can access the parsed data
-      assert.ok(Array.isArray(schema.complexType) || typeof schema.complexType === 'object');
+      assert.ok(
+        Array.isArray(schema.complexType) ||
+          typeof schema.complexType === 'object',
+      );
       assert.ok(schema.targetNamespace === 'http://www.w3.org/2001/XMLSchema');
-      
+
       // But for compile-time inference, we'd need the schema as a literal type
       // This is the limitation: parseXsd() returns Schema, not a literal type
     });
@@ -381,47 +378,43 @@ describe('Type Inference', () => {
             element: [
               { name: 'id', type: 'xs:string' },
               { name: 'name', type: 'xs:string' },
-            ]
-          }
-        }
-      ]
+            ],
+          },
+        },
+      ],
     } as const;
 
     // Schema that imports BaseSchema and uses its type
     const DerivedSchema = {
       targetNamespace: 'http://example.com/derived',
-      element: [
-        { name: 'Item', type: 'ItemType' }
-      ],
+      element: [{ name: 'Item', type: 'ItemType' }],
       complexType: [
         {
           name: 'ItemType',
           complexContent: {
             extension: {
-              base: 'BaseType',  // References type from BaseSchema
+              base: 'BaseType', // References type from BaseSchema
               sequence: {
-                element: [
-                  { name: 'price', type: 'xs:decimal' },
-                ]
-              }
-            }
-          }
-        }
+                element: [{ name: 'price', type: 'xs:decimal' }],
+              },
+            },
+          },
+        },
       ],
-      $imports: [BaseSchema]  // Link to imported schema
+      $imports: [BaseSchema], // Link to imported schema
     } as const;
 
     it('should resolve types from $imports', () => {
       // Type inference should find BaseType in $imports
       type Item = InferSchema<typeof DerivedSchema>;
-      
+
       // Compile-time check: Item should have fields from both BaseType and ItemType
       const item: Item = {
         id: '123',
         name: 'Test Item',
-        price: 99.99
+        price: 99.99,
       };
-      
+
       assert.equal(item.id, '123');
       assert.equal(item.name, 'Test Item');
       assert.equal(item.price, 99.99);
@@ -437,13 +430,13 @@ describe('Type Inference', () => {
     it('should work without $imports (backward compatible)', () => {
       // Schema without $imports should still work
       type Person = InferSchema<typeof PersonSchema>;
-      
+
       const person: Person = {
         id: '1',
         firstName: 'John',
-        lastName: 'Doe'
+        lastName: 'Doe',
       };
-      
+
       assert.equal(person.firstName, 'John');
     });
   });

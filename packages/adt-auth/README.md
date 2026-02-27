@@ -29,13 +29,16 @@ const authManager = new AuthManager();
 authManager.registerMethod(new BasicAuthMethod());
 
 // Login
-const session = await authManager.login({
-  method: 'basic',
-  baseUrl: 'https://sap.example.com',
-  username: 'user',
-  password: 'pass',
-  client: '100',
-}, 'BHF');
+const session = await authManager.login(
+  {
+    method: 'basic',
+    baseUrl: 'https://sap.example.com',
+    username: 'user',
+    password: 'pass',
+    client: '100',
+  },
+  'BHF',
+);
 
 console.log('✅ Logged in!', session.sid);
 
@@ -52,15 +55,18 @@ const authManager = new AuthManager();
 authManager.registerMethod(new SlcAuthMethod());
 
 // Login (SLC handles authentication via proxy)
-const session = await authManager.login({
-  method: 'slc',
-  baseUrl: 'https://sap.example.com',
-  slcProxy: {
-    host: 'localhost',
-    port: 3128,
+const session = await authManager.login(
+  {
+    method: 'slc',
+    baseUrl: 'https://sap.example.com',
+    slcProxy: {
+      host: 'localhost',
+      port: 3128,
+    },
+    client: '200',
   },
-  client: '200',
-}, 'BHF');
+  'BHF',
+);
 
 console.log('✅ Logged in via SLC!');
 ```
@@ -109,6 +115,7 @@ Main orchestrator for authentication.
 Username/password authentication.
 
 **Config:**
+
 ```typescript
 {
   method: 'basic',
@@ -126,6 +133,7 @@ Username/password authentication.
 SAP Secure Login Client Web Adapter.
 
 **Config:**
+
 ```typescript
 {
   method: 'slc',
@@ -140,6 +148,7 @@ SAP Secure Login Client Web Adapter.
 ```
 
 **Prerequisites:**
+
 - SAP Secure Login Client installed and running
 - Web Adapter profile configured and active
 
@@ -193,20 +202,21 @@ if (!credentials) {
 const client = createAdtClient({
   baseUrl: credentials.baseUrl,
   client: credentials.client,
-  
+
   // Method-specific config
   ...(credentials.method === 'basic' && {
     username: credentials.username,
     password: credentials.password,
   }),
-  
+
   ...(credentials.method === 'slc' && {
     proxy: credentials.slcProxy,
   }),
 });
 
 // Use client
-const info = await client.adt.core.http.systeminformation.getSystemInformation();
+const info =
+  await client.adt.core.http.systeminformation.getSystemInformation();
 console.log('System:', info);
 ```
 
@@ -224,7 +234,11 @@ All auth plugins MUST:
 
 ```typescript
 // Plugin implementation
-import type { AuthPlugin, AuthPluginResult, AuthPluginOptions } from '@abapify/adt-auth';
+import type {
+  AuthPlugin,
+  AuthPluginResult,
+  AuthPluginOptions,
+} from '@abapify/adt-auth';
 
 const authPlugin: AuthPlugin = {
   async authenticate(options: AuthPluginOptions): Promise<AuthPluginResult> {

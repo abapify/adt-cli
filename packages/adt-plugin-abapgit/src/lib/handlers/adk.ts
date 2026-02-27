@@ -1,6 +1,6 @@
 /**
  * ADK re-exports for abapGit handlers
- * 
+ *
  * Centralizes all ADK imports used by object handlers.
  */
 

@@ -6,7 +6,11 @@
  */
 
 import { Box, Text } from 'ink';
-import type { PageProps, PageResult, MenuItem } from '../../../../../../lib/types';
+import type {
+  PageProps,
+  PageResult,
+  MenuItem,
+} from '../../../../../../lib/types';
 import { load } from './[slug].loader';
 
 /**
@@ -115,17 +119,22 @@ export function transportPage({ url, response }: PageProps): PageResult | null {
       </Text>
       {transport.target && (
         <Text>
-          <Text bold>Target:</Text> {transport.target} {transport.targetDesc && `(${transport.targetDesc})`}
+          <Text bold>Target:</Text> {transport.target}{' '}
+          {transport.targetDesc && `(${transport.targetDesc})`}
         </Text>
       )}
       {transport.tasks.length > 0 && (
         <Box marginTop={1}>
-          <Text bold color="yellow">📋 Tasks ({transport.tasks.length}):</Text>
+          <Text bold color="yellow">
+            📋 Tasks ({transport.tasks.length}):
+          </Text>
         </Box>
       )}
       {transport.objects.length > 0 && (
         <Box marginTop={1}>
-          <Text bold color="cyan">📦 Objects ({transport.objects.length}):</Text>
+          <Text bold color="cyan">
+            📦 Objects ({transport.objects.length}):
+          </Text>
         </Box>
       )}
     </Box>
@@ -136,7 +145,8 @@ export function transportPage({ url, response }: PageProps): PageResult | null {
     title: `${isTask ? 'Task' : 'Transport Request'}: ${transport.number}`,
     icon: isTask ? '�' : '�',
     color: isTask ? 'yellow' : 'cyan',
-    subtitle: isTask && transport.parent ? `Parent: ${transport.parent}` : undefined,
+    subtitle:
+      isTask && transport.parent ? `Parent: ${transport.parent}` : undefined,
     content,
     menu,
     footer: '[o] XML in VS Code | [e] open in Eclipse ADT',

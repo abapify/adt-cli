@@ -1,6 +1,6 @@
 /**
  * XSD Module
- * 
+ *
  * Parse and build XSD files with typed Schema objects.
  * Supports full roundtrip: XSD → Schema → XSD
  */

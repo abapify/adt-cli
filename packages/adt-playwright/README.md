@@ -31,11 +31,11 @@ export default withPlaywright(
     },
   }),
   {
-    userDataDir: true,           // Enable session persistence
-    headless: false,             // Show browser window for SSO
-    ignoreHTTPSErrors: true,     // Ignore self-signed certificates
+    userDataDir: true, // Enable session persistence
+    headless: false, // Show browser window for SSO
+    ignoreHTTPSErrors: true, // Ignore self-signed certificates
     requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'],
-  }
+  },
 );
 ```
 
@@ -129,13 +129,19 @@ Enable `userDataDir` to persist browser state across runs:
 
 ```typescript
 // Use default profile directory (~/.adt/browser-profile)
-{ userDataDir: true }
+{
+  userDataDir: true;
+}
 
 // Use custom directory
-{ userDataDir: '/path/to/profile' }
+{
+  userDataDir: '/path/to/profile';
+}
 
 // No persistence (fresh session each time)
-{ userDataDir: false }
+{
+  userDataDir: false;
+}
 ```
 
 ### Benefits
@@ -147,7 +153,7 @@ Enable `userDataDir` to persist browser state across runs:
 ### How It Works
 
 1. **First run**: User completes full SSO login → profile saved
-2. **Subsequent runs**: 
+2. **Subsequent runs**:
    - ✅ **Okta valid**: Auto-authenticates, extracts SAP cookies
    - ❌ **Okta expired**: Prompts for re-login
 
@@ -181,7 +187,7 @@ export default withPlaywright(
     userDataDir: true,
     headless: false,
     requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'],
-  }
+  },
 );
 ```
 
@@ -293,7 +299,9 @@ export type {
 Ensure `headless: false` is set:
 
 ```typescript
-{ headless: false }
+{
+  headless: false;
+}
 ```
 
 ### Cookies not captured
@@ -301,7 +309,9 @@ Ensure `headless: false` is set:
 Specify the required cookies explicitly:
 
 ```typescript
-{ requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'] }
+{
+  requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'];
+}
 ```
 
 ### SSL Certificate errors
@@ -309,7 +319,9 @@ Specify the required cookies explicitly:
 Enable `ignoreHTTPSErrors` (default is true):
 
 ```typescript
-{ ignoreHTTPSErrors: true }
+{
+  ignoreHTTPSErrors: true;
+}
 ```
 
 ### Session not persisting
@@ -317,9 +329,13 @@ Enable `ignoreHTTPSErrors` (default is true):
 Check that `userDataDir` is enabled and the directory is writable:
 
 ```typescript
-{ userDataDir: true }
+{
+  userDataDir: true;
+}
 // or
-{ userDataDir: '/writable/path' }
+{
+  userDataDir: '/writable/path';
+}
 ```
 
 ## Related Packages

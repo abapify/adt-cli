@@ -27,6 +27,7 @@ client.fetch('/arbitrary/endpoint', { method: 'GET' })
 ```
 
 **Layer 1: Contracts** (`src/adt/` → `client.adt.*`)
+
 - Thin, declarative HTTP definitions
 - Pure data structures (no business logic)
 - Schema-driven type inference
@@ -34,6 +35,7 @@ client.fetch('/arbitrary/endpoint', { method: 'GET' })
 - Example: `client.adt.core.http.sessions.getSession()`
 
 **Layer 2: Services** (`src/services/` → `client.services.*`)
+
 - Business logic orchestration
 - Combines multiple contract calls
 - Domain-specific workflows
@@ -42,6 +44,7 @@ client.fetch('/arbitrary/endpoint', { method: 'GET' })
 - Example: `client.services.transports.importAndActivate(transportId)`
 
 **Utility Methods** (on client directly)
+
 - `client.fetch(url, options)` - Generic authenticated HTTP requests
 - Not contracts (no schema), not services (no business logic)
 - For debugging, testing, undocumented endpoints
@@ -49,18 +52,21 @@ client.fetch('/arbitrary/endpoint', { method: 'GET' })
 ### When to Use Each Layer
 
 **Use Contracts when:**
+
 - You need direct access to a specific SAP ADT endpoint
 - You want 1:1 HTTP mapping with type safety
 - The operation is a simple request/response (no orchestration)
 - Example: Fetching session data, searching objects, reading class metadata
 
 **Use Services when:**
+
 - You need to combine multiple contract calls
 - Business logic, validation, or error handling is required
 - The operation involves workflows or state management
 - Example: Import transport + activate objects + verify success
 
 **Use Utilities when:**
+
 - Testing undocumented endpoints
 - Debugging raw API responses
 - One-off requests that don't justify a contract
@@ -70,11 +76,13 @@ See [SERVICE-ARCHITECTURE.md](./docs/SERVICE-ARCHITECTURE.md) for detailed examp
 ## Critical Rules
 
 ### Rule 0: NO CONSOLE USAGE
+
 **NEVER use `console.log`, `console.error`, `console.warn`, or any console methods directly in the v2 client code.**
 
 The v2 client is a pure library that must not perform direct I/O. Instead:
 
 ✅ **CORRECT** - Use the logger parameter:
+
 ```typescript
 // In adapter.ts, session manager, etc.
 logger?.debug('Session: CSRF token cached');
@@ -83,18 +91,21 @@ logger?.warn('Session cleared due to 403');
 ```
 
 ❌ **WRONG** - Direct console usage:
+
 ```typescript
-console.log('Debug info');  // ❌ NEVER
-console.error('Error');     // ❌ NEVER
+console.log('Debug info'); // ❌ NEVER
+console.error('Error'); // ❌ NEVER
 ```
 
 **Why?**
+
 - V2 client is a library, not a CLI tool
 - Callers control logging via the `logger` parameter
 - Enables testability (mock logger in tests)
 - Allows integration with any logging framework (pino, winston, bunyan, etc.)
 
 **Logger Interface:**
+
 ```typescript
 export interface Logger {
   trace(msg: string, obj?: any): void;
@@ -108,12 +119,13 @@ export interface Logger {
 ```
 
 Pass logger to client:
+
 ```typescript
 const client = createAdtClient({
   baseUrl: 'https://...',
   username: 'user',
   password: 'pass',
-  logger: myLogger,  // ← Optional, but required for internal logging
+  logger: myLogger, // ← Optional, but required for internal logging
 });
 ```
 
@@ -122,6 +134,7 @@ const client = createAdtClient({
 **MANDATORY**: Every contract endpoint MUST include a `responses` field for type inference.
 
 ❌ **WRONG** - No type inference (returns `unknown`):
+
 ```typescript
 export const badContract = createContract({
   getData: () =>
@@ -134,37 +147,40 @@ export const badContract = createContract({
 ✅ **CORRECT** - Full type inference:
 
 **For XML responses with schema:**
+
 ```typescript
 import { ExampleSchema } from './example-schema';
 
 export const goodContract = createContract({
   getData: () =>
     adtHttp.get('/sap/bc/adt/example', {
-      responses: { 200: ExampleSchema },  // ← REQUIRED for type inference
+      responses: { 200: ExampleSchema }, // ← REQUIRED for type inference
       headers: { Accept: 'application/vnd.sap.adt.example.v1+xml' },
     }),
 });
 ```
 
 **For JSON responses:**
+
 ```typescript
 import { ExampleSchema } from './example-schema';
 
 export const goodContract = createContract({
   getData: () =>
     adtHttp.get('/sap/bc/adt/example', {
-      responses: { 200: ExampleSchema },  // ← REQUIRED (Inferrable schema)
+      responses: { 200: ExampleSchema }, // ← REQUIRED (Inferrable schema)
       headers: { Accept: 'application/vnd.sap.adt.example.v1+json' },
     }),
 });
 ```
 
 **For plain text responses:**
+
 ```typescript
 export const goodContract = createContract({
   getData: () =>
     adtHttp.get('/sap/bc/adt/example', {
-      responses: { 200: undefined as unknown as string },  // ← REQUIRED
+      responses: { 200: undefined as unknown as string }, // ← REQUIRED
       headers: { Accept: 'text/plain' },
     }),
 });
@@ -213,6 +229,7 @@ describe('Feature Type Inference', () => {
 ```
 
 **After creating the test**:
+
 ```bash
 # Build and typecheck - this MUST pass
 npx nx build adt-client
@@ -233,7 +250,7 @@ import { createSchema } from '../../../base/schema';
 import type { InferSchemaType } from '../../../base/schema';
 
 export const ExampleSchema = createSchema({
-  tag: 'namespace:element',  // Use namespaced tag if applicable
+  tag: 'namespace:element', // Use namespaced tag if applicable
   ns: {
     namespace: 'http://www.sap.com/adt/namespace',
     atom: 'http://www.w3.org/2005/Atom',
@@ -250,6 +267,7 @@ export type ExampleXml = InferSchemaType<typeof ExampleSchema>;
 **Why `createSchema()` is required**: The helper automatically adds the `_infer` property that `speci` needs for type inference. Without it, contract methods will return `ElementSchema` instead of your parsed type, breaking type safety.
 
 **For JSON Schemas** (Inferrable pattern):
+
 ```typescript
 // example-schema.ts
 
@@ -258,8 +276,8 @@ export type ExampleXml = InferSchemaType<typeof ExampleSchema>;
  */
 export interface ExampleJson {
   // Match exact field names from SAP response (check actual API!)
-  systemID?: string;     // Note: SAP often uses camelCase starting lowercase
-  userName?: string;     // Not 'user_name' or 'User'
+  systemID?: string; // Note: SAP often uses camelCase starting lowercase
+  userName?: string; // Not 'user_name' or 'User'
 
   // Document optional vs required fields accurately
   requiredField: string;
@@ -294,6 +312,7 @@ You don't need to parse responses manually in contracts.
 ### Rule 5: Vendor-Specific Content Types
 
 SAP uses vendor-specific content types like:
+
 - `application/vnd.sap.adt.core.http.session.v3+xml`
 - `application/vnd.sap.adt.core.http.systeminformation.v1+json`
 
@@ -308,6 +327,7 @@ The adapter recognizes `+json` and `+xml` suffixes automatically (fixed in [adap
 Before writing any code, understand the actual API using ALL THREE sources:
 
 **Source 1: Discovery Collections** (URL + Content Types)
+
 ```bash
 # Check existing parsed collections
 ls e2e/adt-codegen/generated/collections/sap/bc/adt/<feature>/
@@ -317,6 +337,7 @@ cat e2e/adt-codegen/generated/collections/sap/bc/adt/<feature>/<endpoint>.json
 ```
 
 Collections contain:
+
 - `href` - Endpoint path
 - `accepts` - Content types the endpoint accepts
 - `templateLinks` - URL templates with parameters
@@ -325,6 +346,7 @@ Collections contain:
 **Source 2: SAP SDK XSD Schemas** (Official Schema Definitions)
 
 First, extract SDK if not done:
+
 ```bash
 # From abapify root, extract SDK from existing installation
 cd e2e/adt-sdk
@@ -332,6 +354,7 @@ npx tsx scripts/extract-sdk.ts /path/to/sdk/jars
 ```
 
 Then read schemas:
+
 ```bash
 # List available schemas
 ls e2e/adt-sdk/extracted/schemas/xsd/*.xsd
@@ -341,17 +364,20 @@ cat e2e/adt-sdk/extracted/schemas/xsd/<feature>.xsd
 ```
 
 SDK schemas provide:
+
 - Official XML element/attribute definitions
 - Namespace URIs (e.g., `http://www.sap.com/cts/adt/tm`)
 - Type definitions and constraints
 - Relationships between elements
 
 **Key CTS schemas:**
+
 - `transportmanagment.xsd` - Transport requests, tasks, objects
 - `transportsearch.xsd` - Transport search results
 - `transport-properties.xsd` - Transport properties
 
 **Source 3: Real Endpoint Calls** (Actual Response Data)
+
 ```bash
 # Use adt fetch to get real response
 npx adt fetch /sap/bc/adt/<endpoint> -o tmp/response.xml
@@ -361,6 +387,7 @@ npx adt fetch /sap/bc/adt/<endpoint> -H "Accept: application/vnd.sap.adt.feature
 ```
 
 **⚠️ IMPORTANT: Use ALL THREE sources together!**
+
 - Collections → URL and content types
 - XSD schemas → Official structure and namespaces
 - Real calls → Actual data to verify and create fixtures
@@ -370,6 +397,7 @@ npx adt fetch /sap/bc/adt/<endpoint> -H "Accept: application/vnd.sap.adt.feature
 **Location:** `fixtures/sap/bc/adt/<path>/<filename>.xml`
 
 **CRITICAL: Mock all sensitive data!**
+
 - ❌ Real transport IDs (DEVK900001)
 - ✅ Mock transport IDs (MOCK900001)
 - ❌ Real usernames (PPLENKOV)
@@ -404,12 +432,12 @@ touch src/adt/path/to/feature-contract.ts
 
 ```typescript
 import { createContract, adtHttp } from '../../../base/contract';
-import { FeatureSchema } from './feature-schema';  // or type { FeatureJson }
+import { FeatureSchema } from './feature-schema'; // or type { FeatureJson }
 
 export const featureContract = createContract({
   getFeature: () =>
     adtHttp.get('/sap/bc/adt/path/to/feature', {
-      responses: { 200: FeatureSchema },  // ← MANDATORY
+      responses: { 200: FeatureSchema }, // ← MANDATORY
       headers: {
         Accept: 'application/vnd.sap.adt.feature.v1+xml',
         'X-sap-adt-sessiontype': 'stateful',
@@ -434,7 +462,7 @@ export const adtContract = {
     http: {
       sessions: sessionsContract,
       systeminformation: systeminformationContract,
-      feature: featureContract,  // ← Add here
+      feature: featureContract, // ← Add here
     },
   },
 } satisfies RestContract;
@@ -469,6 +497,7 @@ touch src/services/feature-service.ts
 ```
 
 **When to create a service:**
+
 - Combining multiple contract calls into a workflow
 - Adding validation, error handling, or retries
 - Managing state across multiple operations
@@ -483,15 +512,15 @@ export function createFeatureService(client: AdtClient) {
     async doComplexOperation(params: ComplexParams) {
       // Step 1: Call first contract
       const step1 = await client.adt.feature.getFeature();
-      
+
       // Step 2: Business logic
       if (!step1.isValid) {
         throw new Error('Invalid state');
       }
-      
+
       // Step 3: Call second contract
       const step2 = await client.adt.feature.updateFeature(params);
-      
+
       return { step1, step2 };
     },
   };
@@ -531,12 +560,15 @@ Register in `packages/adt-cli/src/lib/commands/index.ts` and `cli.ts`.
 ## Common Mistakes
 
 ### Mistake 1: Missing `responses` Field
+
 **Symptom**: TypeScript shows `unknown` type, no autocomplete
 **Fix**: Add `responses: { 200: YourSchema }` to contract
 
 ### Mistake 2: Not Using `createSchema()` for XML Schemas
+
 **Symptom**: TypeScript shows `ElementSchema` type instead of parsed type (e.g., `Property 'links' does not exist on type 'ElementSchema'`)
 **Fix**: Wrap XML schema definitions with `createSchema()` helper:
+
 ```typescript
 // ❌ WRONG - Returns ElementSchema
 export const MySchema: ElementSchema = { ... } as const;
@@ -544,54 +576,67 @@ export const MySchema: ElementSchema = { ... } as const;
 // ✅ CORRECT - Returns inferred type
 export const MySchema = createSchema({ ... } as const);
 ```
+
 The `createSchema()` helper automatically adds the `_infer` property needed for speci type inference.
 
 ### Mistake 3: Missing `_infer` Property in JSON Schema
+
 **Symptom**: TypeScript shows `unknown` type even with `responses` field
 **Fix**: For JSON responses, create an Inferrable schema with `_infer` property:
+
 ```typescript
 export const MySchema = {
   _infer: undefined as unknown as MyInterface,
 } as const;
 ```
+
 Then use `responses: { 200: MySchema }` (not `responses: { 200: undefined as unknown as MyInterface }`)
 
 ### Mistake 4: Wrong Field Names in Schema
+
 **Symptom**: Runtime data doesn't match schema types
 **Fix**: Check actual SAP response (use `npx adt <command> -o output.json`) and match field names exactly
 
 ### Mistake 5: Not Running Typecheck
+
 **Symptom**: Type errors discovered later in CLI or production
 **Fix**: Always run `npx tsc --noEmit` before committing
 
 ### Mistake 6: Skipping Type Inference Test
+
 **Symptom**: Contract changes break type safety silently
 **Fix**: Every contract needs a `*-type-inference.test.ts` file
 
 ### Mistake 7: Business Logic in Contracts
+
 **Symptom**: Contracts become hard to test and reuse
 **Fix**: Keep contracts thin - move logic to services layer
 
 ### Mistake 8: Adding `metadata` Field to Contracts
+
 **Symptom**: Redundant code that duplicates `responses` field
 **Fix**: **NEVER** add `metadata: { responseSchema: ... }` to contracts. The adapter automatically detects schemas from `responses[200]`. This field is legacy and should be removed if found.
+
 ```typescript
 // ❌ WRONG - Redundant metadata
 adtHttp.get('/endpoint', {
   responses: { 200: MySchema },
-  metadata: { responseSchema: MySchema },  // ← Remove this!
-})
+  metadata: { responseSchema: MySchema }, // ← Remove this!
+});
 
 // ✅ CORRECT - Adapter auto-detects from responses
 adtHttp.get('/endpoint', {
-  responses: { 200: MySchema },  // ← This is enough!
-})
+  responses: { 200: MySchema }, // ← This is enough!
+});
 ```
+
 The adapter checks if `responses[200]` is an `ElementSchema` (has `tag` and `fields`) and automatically uses it for XML parsing.
 
 ### Mistake 9: Using `as any` Type Assertions
+
 **Symptom**: Type safety violations, runtime errors not caught at compile time
 **Fix**: **NEVER** use `as any` without explicit justification. If type inference fails, fix the schema/contract, don't bypass it with casts.
+
 ```typescript
 // ❌ WRONG - Defeats type safety
 const sys = systemData as any;
@@ -603,8 +648,10 @@ sessionData.links.forEach((link) => { ... });  // Type inferred from schema
 ```
 
 ### Mistake 10: Exposing fetch() as a Contract
+
 **Symptom**: Generic utility methods appearing in contract hierarchy
 **Fix**: The `fetch()` method is a **utility function on the client**, not a contract endpoint. Contracts must map to specific SAP ADT endpoints with known schemas.
+
 ```typescript
 // ❌ WRONG - fetch in contracts
 client.adt.core.http.fetch.fetch(url)
@@ -612,21 +659,25 @@ client.adt.core.http.fetch.fetch(url)
 // ✅ CORRECT - fetch as client utility
 client.fetch(url, { method: 'GET', headers: {...} })
 ```
+
 Contracts are for typed, schema-driven endpoints. `fetch()` is for debugging and ad-hoc requests.
 
 ## Testing Strategy
 
 ### Compile-Time Type Tests
+
 - **Purpose**: Validate type inference works
 - **Location**: `tests/*-type-inference.test.ts`
 - **Run**: `npx tsc --noEmit` (must pass)
 
 ### Runtime Integration Tests
+
 - **Purpose**: Validate actual SAP responses match schemas
 - **Location**: `tests/e2e/*.test.ts` (future)
 - **Run**: `npx nx test adt-client` (when configured)
 
 ### Manual CLI Testing
+
 - **Purpose**: Quick validation during development
 - **Command**: `npx adt <command>` (see CLI commands)
 
@@ -686,12 +737,14 @@ When migrating from `adt-client` (v1):
 ### Migration Status
 
 **Migrated to V2** (CLI commands using `adt-client`):
+
 - ✅ `info` - Session and system information
 - ✅ `fetch` - Generic authenticated HTTP requests
 - ✅ `search` - ABAP object repository search
 - ✅ `discovery` - Discovery service
 
 **Still Using V1** (CLI commands using `adt-client`):
+
 - ⏳ `get` - Uses `searchObjectsDetailed` from v1
 - ⏳ `lock` - Uses `searchObjectsDetailed` from v1
 - ⏳ `outline` - Uses `searchObjectsDetailed` from v1
@@ -699,6 +752,7 @@ When migrating from `adt-client` (v1):
 - ⏳ Other commands - See `packages/adt-cli/src/lib/commands/`
 
 **V1 Cleanup Workflow:**
+
 1. Ensure v2 functionality is stable and tested
 2. Identify all v1 usages: `grep -r "adt-client" packages/adt-cli/src/`
 3. Remove unused v1 services/methods (e.g., if `searchObjectsDetailed` is fully replaced)
@@ -710,6 +764,7 @@ When migrating from `adt-client` (v1):
 ### Using v2 Client in CLI Commands
 
 **DON'T** duplicate client initialization in every command:
+
 ```typescript
 // ❌ WRONG - Duplicated in every command
 const authManager = new AuthManager();
@@ -727,6 +782,7 @@ const adtClient = createAdtClient({
 ```
 
 **DO** use the shared utility helper:
+
 ```typescript
 // ✅ CORRECT - Use shared helper
 import { getAdtClientV2 } from '../utils/adt-client';
@@ -735,6 +791,7 @@ const adtClient = getAdtClientV2();
 ```
 
 **With plugins:**
+
 ```typescript
 // For commands that need response plugins
 const adtClient = getAdtClientV2({
@@ -753,6 +810,7 @@ const adtClient = getAdtClientV2({
 **Location:** `packages/adt-cli/src/lib/utils/adt-client.ts`
 
 **Benefits:**
+
 - **DRY**: No duplicated auth/client creation code
 - **Consistency**: Same error messages across all commands
 - **Maintainability**: Changes to client initialization in one place
@@ -760,6 +818,7 @@ const adtClient = getAdtClientV2({
 
 **Architecture Note:**
 The CLI integration uses a clean separation of concerns:
+
 - `packages/adt-cli/src/lib/utils/auth.ts` - Auth bridge that wraps v1 AuthManager
 - v2 client remains pure (no file I/O or CLI dependencies)
 - Auth credentials are loaded from `~/.adt/auth.json` via the bridge

@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
  * ts-xsd Codegen CLI
- * 
+ *
  * Usage:
  *   ts-xsd codegen [--config=ts-xsd.config.ts] [--verbose]
  *   ts-xsd codegen <input.xsd> [output.ts] [--name=SchemaName]
- * 
+ *
  * Config-based (recommended):
  *   ts-xsd codegen                          # Uses ts-xsd.config.ts in cwd
  *   ts-xsd codegen --config=my-config.ts    # Uses custom config
  *   ts-xsd codegen --verbose                # Verbose output
- * 
+ *
  * Single-file (legacy):
  *   ts-xsd codegen person.xsd
  *   ts-xsd codegen person.xsd ./generated/person-schema.ts
@@ -63,9 +63,10 @@ function parseArgs(args: string[]): CliOptions {
     const input = positional[0];
     const defaultOutput = input.replace(/\.xsd$/i, '-schema.ts');
     const output = positional[1] || defaultOutput;
-    const defaultName = basename(input, '.xsd')
-      .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
-      .replace(/^./, s => s.toLowerCase()) + 'Schema';
+    const defaultName =
+      basename(input, '.xsd')
+        .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+        .replace(/^./, (s) => s.toLowerCase()) + 'Schema';
 
     return {
       mode: 'single',
@@ -86,15 +87,17 @@ function parseArgs(args: string[]): CliOptions {
 
 async function runConfigMode(options: ConfigModeOptions) {
   const configPath = resolve(options.config);
-  
+
   if (!existsSync(configPath)) {
     console.error(`❌ Config file not found: ${configPath}`);
-    console.error('\nCreate a ts-xsd.config.ts file or specify --config=path/to/config.ts');
+    console.error(
+      '\nCreate a ts-xsd.config.ts file or specify --config=path/to/config.ts',
+    );
     process.exit(1);
   }
 
   console.log(`📦 Loading config: ${configPath}\n`);
-  
+
   // Dynamic import of config file
   const configUrl = pathToFileURL(configPath).href;
   const configModule = await import(configUrl);
@@ -138,7 +141,9 @@ function runSingleFileMode(options: SingleFileModeOptions) {
 
   console.log(`Done! Generated ${tsContent.length} characters`);
   console.log(`\nUsage in TypeScript:`);
-  console.log(`  import { ${options.name} } from './${basename(options.output, '.ts')}';`);
+  console.log(
+    `  import { ${options.name} } from './${basename(options.output, '.ts')}';`,
+  );
   console.log(`  import type { InferSchema } from 'ts-xsd';`);
   console.log(`  type MyType = InferSchema<typeof ${options.name}>;`);
 }
@@ -171,7 +176,7 @@ Examples:
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.includes('--help') || args.includes('-h')) {
     showHelp();
     process.exit(0);
@@ -186,7 +191,7 @@ async function main() {
   }
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('Fatal error:', err);
   process.exit(1);
 });

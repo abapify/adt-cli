@@ -4,7 +4,10 @@
 
 export * from './informationsystem';
 
-import { informationsystemContract, type InformationSystemContract } from './informationsystem';
+import {
+  informationsystemContract,
+  type InformationSystemContract,
+} from './informationsystem';
 
 export interface RepositoryContract {
   informationsystem: InformationSystemContract;

@@ -32,7 +32,9 @@ function sanitize(message: string): string {
   return message.replace(/\s+/g, ' ').trim();
 }
 
-export function createProgressReporter(options: ProgressOptions = {}): ProgressReporter {
+export function createProgressReporter(
+  options: ProgressOptions = {},
+): ProgressReporter {
   const compact = Boolean(options.compact);
   const logger = options.logger;
   const level = options.level ?? 'info';
@@ -42,7 +44,11 @@ export function createProgressReporter(options: ProgressOptions = {}): ProgressR
   const logWithFlag = (message: string, meta?: Record<string, unknown>) => {
     if (logger) {
       const logFn = (logger as any)[level] ?? logger.info;
-      logFn.call(logger, message, { progress: true, component: 'progress', ...meta });
+      logFn.call(logger, message, {
+        progress: true,
+        component: 'progress',
+        ...meta,
+      });
     }
   };
 

@@ -1,6 +1,6 @@
 /**
  * CTS Transport - Request, Task, Object
- * 
+ *
  * Simplified 2-layer hierarchy:
  * - AdkTransportRequest - full transport with tasks, CRUD
  *   - AdkTransportTask extends AdkTransportRequest - task-specific overrides
@@ -23,7 +23,11 @@ export type {
 } from './transport.types';
 
 // ADK classes
-export { AdkTransportRequest, AdkTransportTask, clearConfigCache } from './transport';
+export {
+  AdkTransportRequest,
+  AdkTransportTask,
+  clearConfigCache,
+} from './transport';
 export { AdkTransportObject } from './transport-object';
 
 // Backward compatibility alias

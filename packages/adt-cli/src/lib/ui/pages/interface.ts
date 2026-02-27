@@ -117,6 +117,7 @@ function renderInterfacePage(intf: any, _params: NavParams): Page {
     title: `Interface: ${name}`,
     icon: '🔶',
     render: () => content.render(),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     print: () => {},
   };
 

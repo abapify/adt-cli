@@ -18,7 +18,10 @@ const parser = new XMLParser({
 /**
  * Extract all atom:link elements from parsed XML object
  */
-function extractLinks(obj: unknown, links: HypermediaLink[] = []): HypermediaLink[] {
+function extractLinks(
+  obj: unknown,
+  links: HypermediaLink[] = [],
+): HypermediaLink[] {
   if (!obj || typeof obj !== 'object') return links;
 
   if (Array.isArray(obj)) {
@@ -29,7 +32,7 @@ function extractLinks(obj: unknown, links: HypermediaLink[] = []): HypermediaLin
     const record = obj as Record<string, unknown>;
 
     const linkKey = Object.keys(record).find(
-      (k) => k === 'atom:link' || k === 'link' || k.endsWith(':link')
+      (k) => k === 'atom:link' || k === 'link' || k.endsWith(':link'),
     );
 
     if (linkKey) {
@@ -127,7 +130,10 @@ export function categorizeLinks(links: HypermediaLink[]): {
   for (const link of links) {
     if (link.rel === 'self') {
       self.push(link);
-    } else if (link.rel.includes('/relations/') || link.rel.includes('adturi')) {
+    } else if (
+      link.rel.includes('/relations/') ||
+      link.rel.includes('adturi')
+    ) {
       actions.push(link);
     } else {
       navigation.push(link);

@@ -11,7 +11,7 @@
     }
   },
   "tags": [],
-  "targets": { 
+  "targets": {
     "nx-release-publish": {
       "options": {
         "packageRoot": "dist/{projectRoot}"

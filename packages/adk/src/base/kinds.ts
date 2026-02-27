@@ -1,9 +1,9 @@
 /**
  * ADK Object Kinds
- * 
+ *
  * Central registry of all ADK object types.
  * Import specific kinds for type-safe usage:
- * 
+ *
  * @example
  * import { TransportRequest } from '../base/kinds';
  * class AdkTransportRequest extends AdkObject<typeof TransportRequest> { ... }
@@ -34,7 +34,7 @@ export const MessageClass = 'MessageClass' as const;
 export const EnhancementSpot = 'EnhancementSpot' as const;
 
 /** Union type of all ADK kinds */
-export type AdkKind = 
+export type AdkKind =
   | typeof TransportRequest
   | typeof TransportTask
   | typeof Package
@@ -60,23 +60,30 @@ export type AdkKind =
 import type { AdkClass } from '../objects/repository/clas/clas.model';
 import type { AdkInterface } from '../objects/repository/intf/intf.model';
 import type { AdkPackage } from '../objects/repository/devc/devc.model';
-import type { AdkTransportRequest, AdkTransportTask } from '../objects/cts/transport/transport';
+import type {
+  AdkTransportRequest,
+  AdkTransportTask,
+} from '../objects/cts/transport/transport';
 import type { AdkObject } from './model';
 
 /**
  * Maps ADK kind to concrete object type
- * 
+ *
  * Enables type-safe factory methods:
  * ```ts
  * const cls = factory.byKind(Class, 'ZCL_TEST');  // → AdkClass
  * const intf = factory.byKind(Interface, 'ZIF'); // → AdkInterface
  * ```
  */
-export type AdkObjectForKind<K extends AdkKind> = 
-  K extends typeof Class ? AdkClass :
-  K extends typeof Interface ? AdkInterface :
-  K extends typeof Package ? AdkPackage :
-  K extends typeof TransportRequest ? AdkTransportRequest :
-  K extends typeof TransportTask ? AdkTransportTask :
-  // Add more mappings as types are implemented
-  AdkObject;  // fallback
+export type AdkObjectForKind<K extends AdkKind> = K extends typeof Class
+  ? AdkClass
+  : K extends typeof Interface
+    ? AdkInterface
+    : K extends typeof Package
+      ? AdkPackage
+      : K extends typeof TransportRequest
+        ? AdkTransportRequest
+        : K extends typeof TransportTask
+          ? AdkTransportTask
+          : // Add more mappings as types are implemented
+            AdkObject; // fallback

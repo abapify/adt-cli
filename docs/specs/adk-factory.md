@@ -57,7 +57,7 @@ interface AdkFactory {
    */
   createFromAdt(
     adtResponse: AdtResponse,
-    options?: FactoryOptions
+    options?: FactoryOptions,
   ): Promise<AdkObject>;
 
   /**
@@ -92,7 +92,7 @@ Each object type has a dedicated factory:
 class ClassFactory {
   create(
     adtResponse: AdtResponse,
-    options: FactoryOptions
+    options: FactoryOptions,
   ): Promise<AdkObject> {
     // Parse ADT XML
     const parsed = this.parseClassXml(adtResponse.metadata);
@@ -117,7 +117,7 @@ class ClassFactory {
 
   private createIncludes(
     adtIncludes: AdtInclude[],
-    options: FactoryOptions
+    options: FactoryOptions,
   ): ClassInclude[] {
     return adtIncludes.map((inc) => ({
       includeType: this.mapIncludeType(inc.type),
@@ -157,7 +157,7 @@ class FactoryError extends Error {
     message: string,
     public readonly objectType: string,
     public readonly objectName: string,
-    public readonly cause?: Error
+    public readonly cause?: Error,
   ) {
     super(message);
     this.name = 'FactoryError';
@@ -170,7 +170,7 @@ try {
 } catch (error) {
   if (error instanceof FactoryError) {
     console.error(
-      `Failed to create ${error.objectType} ${error.objectName}: ${error.message}`
+      `Failed to create ${error.objectType} ${error.objectName}: ${error.message}`,
     );
   }
 }
@@ -218,7 +218,7 @@ packages/adt-client/src/factories/
 abstract class BaseFactory {
   abstract create(
     adtResponse: AdtResponse,
-    options: FactoryOptions
+    options: FactoryOptions,
   ): Promise<AdkObject>;
 
   protected parseXml(xml: string): any {
@@ -233,7 +233,7 @@ abstract class BaseFactory {
 class ClassFactory extends BaseFactory {
   async create(
     response: AdtResponse,
-    options: FactoryOptions
+    options: FactoryOptions,
   ): Promise<AdkObject> {
     // Class-specific creation logic
   }
@@ -242,7 +242,7 @@ class ClassFactory extends BaseFactory {
 class InterfaceFactory extends BaseFactory {
   async create(
     response: AdtResponse,
-    options: FactoryOptions
+    options: FactoryOptions,
   ): Promise<AdkObject> {
     // Interface-specific creation logic
   }
@@ -265,7 +265,7 @@ export class AdkFactory {
 
   async createFromAdt(
     response: AdtResponse,
-    options?: FactoryOptions
+    options?: FactoryOptions,
   ): Promise<AdkObject> {
     const factory = this.factories.get(response.type);
 
@@ -416,7 +416,7 @@ const adkObject = await adkFactory.createFromAdt(
   {
     lazyLoad: true,
     fetchContent: (uri) => adtClient.request(uri),
-  }
+  },
 );
 
 // Use in plugin
@@ -481,7 +481,7 @@ describe('AdkFactory Integration', () => {
       },
       {
         fetchContent: (uri) => adtClient.request(uri),
-      }
+      },
     );
 
     // Verify structure

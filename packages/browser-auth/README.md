@@ -31,7 +31,11 @@ npm install @abapify/browser-auth
 This package is primarily used by browser adapter implementations. Direct usage:
 
 ```typescript
-import { authenticate, testCredentials, toCookieHeader } from '@abapify/browser-auth';
+import {
+  authenticate,
+  testCredentials,
+  toCookieHeader,
+} from '@abapify/browser-auth';
 import type { BrowserAdapter } from '@abapify/browser-auth';
 
 // Create your browser adapter (see BrowserAdapter interface)
@@ -63,24 +67,26 @@ Performs browser-based SSO authentication.
 ```typescript
 async function authenticate(
   adapter: BrowserAdapter,
-  options: BrowserAuthOptions
-): Promise<BrowserCredentials>
+  options: BrowserAuthOptions,
+): Promise<BrowserCredentials>;
 ```
 
 **Parameters:**
+
 - `adapter` - Browser adapter implementing `BrowserAdapter` interface
 - `options` - Authentication options
 
 **Options:**
+
 ```typescript
 interface BrowserAuthOptions {
-  url: string;                    // SAP system URL
-  headless?: boolean;             // Hide browser (default: false)
-  timeout?: number;               // Login timeout in ms (default: 300000)
-  userAgent?: string;             // Custom user agent
-  requiredCookies?: string[];     // Cookie patterns to wait for
+  url: string; // SAP system URL
+  headless?: boolean; // Hide browser (default: false)
+  timeout?: number; // Login timeout in ms (default: 300000)
+  userAgent?: string; // Custom user agent
+  requiredCookies?: string[]; // Cookie patterns to wait for
   userDataDir?: string | boolean; // Session persistence path
-  ignoreHTTPSErrors?: boolean;    // Ignore SSL errors (default: true)
+  ignoreHTTPSErrors?: boolean; // Ignore SSL errors (default: true)
 }
 ```
 
@@ -92,8 +98,8 @@ Tests if credentials are still valid by making a request to the SAP system.
 
 ```typescript
 async function testCredentials(
-  credentials: BrowserCredentials
-): Promise<TestResult>
+  credentials: BrowserCredentials,
+): Promise<TestResult>;
 ```
 
 ### `toCookieHeader(credentials)`
@@ -101,7 +107,7 @@ async function testCredentials(
 Converts credentials to a Cookie header string.
 
 ```typescript
-function toCookieHeader(credentials: BrowserCredentials): string
+function toCookieHeader(credentials: BrowserCredentials): string;
 ```
 
 ### `toHeaders(credentials)`
@@ -109,7 +115,7 @@ function toCookieHeader(credentials: BrowserCredentials): string
 Creates headers object with Cookie and User-Agent.
 
 ```typescript
-function toHeaders(credentials: BrowserCredentials): Record<string, string>
+function toHeaders(credentials: BrowserCredentials): Record<string, string>;
 ```
 
 ## BrowserAdapter Interface
@@ -158,13 +164,13 @@ The `requiredCookies` option supports wildcard patterns:
 
 ```typescript
 // Wait for any SAP session cookie
-requiredCookies: ['SAP_SESSIONID_*']
+requiredCookies: ['SAP_SESSIONID_*'];
 
 // Wait for specific cookies
-requiredCookies: ['SAP_SESSIONID_S0D_200', 'sap-usercontext']
+requiredCookies: ['SAP_SESSIONID_S0D_200', 'sap-usercontext'];
 
 // Multiple patterns
-requiredCookies: ['SAP_SESSIONID_*', 'MYSAPSSO2', 'sap-usercontext']
+requiredCookies: ['SAP_SESSIONID_*', 'MYSAPSSO2', 'sap-usercontext'];
 ```
 
 ### Utility Functions
@@ -212,7 +218,11 @@ interface TestResult {
 Example: Creating a Selenium adapter
 
 ```typescript
-import type { BrowserAdapter, CookieData, ResponseEvent } from '@abapify/browser-auth';
+import type {
+  BrowserAdapter,
+  CookieData,
+  ResponseEvent,
+} from '@abapify/browser-auth';
 import { Builder, Browser } from 'selenium-webdriver';
 
 export function createSeleniumAdapter(): BrowserAdapter {
@@ -221,9 +231,7 @@ export function createSeleniumAdapter(): BrowserAdapter {
 
   return {
     async launch(options) {
-      driver = await new Builder()
-        .forBrowser(Browser.CHROME)
-        .build();
+      driver = await new Builder().forBrowser(Browser.CHROME).build();
     },
 
     async newPage() {
@@ -236,15 +244,17 @@ export function createSeleniumAdapter(): BrowserAdapter {
 
     async getCookies(): Promise<CookieData[]> {
       const cookies = await driver?.manage().getCookies();
-      return cookies?.map(c => ({
-        name: c.name,
-        value: c.value,
-        domain: c.domain || '',
-        path: c.path || '/',
-        expires: c.expiry?.getTime(),
-        httpOnly: c.httpOnly,
-        secure: c.secure,
-      })) || [];
+      return (
+        cookies?.map((c) => ({
+          name: c.name,
+          value: c.value,
+          domain: c.domain || '',
+          path: c.path || '/',
+          expires: c.expiry?.getTime(),
+          httpOnly: c.httpOnly,
+          secure: c.secure,
+        })) || []
+      );
     },
 
     // ... implement remaining methods

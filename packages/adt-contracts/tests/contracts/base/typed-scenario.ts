@@ -143,7 +143,7 @@ export abstract class TypedContractScenario<
  * Run a typed contract scenario.
  * Executes request/response assertions with full type safety.
  */
- 
+
 export function runTypedScenario<
   T extends (...args: any[]) => RestEndpointDescriptor,
 >(scenario: TypedContractScenario<T>): void {

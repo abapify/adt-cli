@@ -8,14 +8,31 @@
  * - CLI handles auth management (via v1 AuthManager stored in ~/.adt/auth.json)
  * - This module extracts credentials and creates v2 client
  * - v2 client remains pure (no CLI/file I/O dependencies)
- * 
+ *
  * Shared state (context, loggers, capture) is in shared/adt-client.ts
  */
-import { createAdtClient, LoggingPlugin, FileLoggingPlugin, type Logger, type ResponseContext, type AdtClient } from '@abapify/adt-client';
+import {
+  createAdtClient,
+  LoggingPlugin,
+  FileLoggingPlugin,
+  type Logger,
+  type ResponseContext,
+  type AdtClient,
+} from '@abapify/adt-client';
 import type { AdtAdapterConfig } from '@abapify/adt-client';
 import { initializeAdk, isAdkInitialized } from '@abapify/adk';
-import { loadAuthSession, isExpired, refreshCredentials, type CookieCredentials, type BasicCredentials, type AuthSession } from './auth';
-import { createProgressReporter, type ProgressReporter } from './progress-reporter';
+import {
+  loadAuthSession,
+  isExpired,
+  refreshCredentials,
+  type CookieCredentials,
+  type BasicCredentials,
+  type AuthSession,
+} from './auth';
+import {
+  createProgressReporter,
+  type ProgressReporter,
+} from './progress-reporter';
 import { setAdtSystem } from '../ui/components/link';
 
 // Re-export shared state from shared/adt-client.ts for backward compatibility
@@ -72,7 +89,7 @@ export interface AdtClientV2Options {
 
 /**
  * Try to auto-refresh expired session credentials
- * 
+ *
  * @param session - The expired session
  * @param sid - Optional SID for error messages
  * @returns Updated session with fresh credentials
@@ -80,7 +97,7 @@ export interface AdtClientV2Options {
 async function tryAutoRefresh(
   session: AuthSession,
   sid: string | undefined,
-  progress: ProgressReporter
+  progress: ProgressReporter,
 ): Promise<AuthSession> {
   // Check if plugin is available for refresh
   if (!session.auth.plugin) {
@@ -90,9 +107,11 @@ async function tryAutoRefresh(
   }
 
   progress.step(`🔄 Session expired for ${session.sid}, refreshing...`);
-  
+
   try {
-    const refreshedSession = await refreshCredentials(session, { log: progress.step });
+    const refreshedSession = await refreshCredentials(session, {
+      log: progress.step,
+    });
     if (!refreshedSession) {
       throw new Error('Refresh returned null');
     }
@@ -100,9 +119,14 @@ async function tryAutoRefresh(
     return refreshedSession;
   } catch (error) {
     progress.done('❌ Auto-refresh failed');
-    console.error('❌ Auto-refresh failed:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '❌ Auto-refresh failed:',
+      error instanceof Error ? error.message : String(error),
+    );
     const sidArg = sid ? ` --sid=${sid}` : '';
-    console.error(`💡 Run "npx adt auth login${sidArg}" to re-authenticate manually`);
+    console.error(
+      `💡 Run "npx adt auth login${sidArg}" to re-authenticate manually`,
+    );
     process.exit(1);
   }
 }
@@ -134,7 +158,9 @@ async function tryAutoRefresh(
  *   plugins: [myPlugin]
  * });
  */
-export async function getAdtClientV2(options?: AdtClientV2Options): Promise<AdtClient> {
+export async function getAdtClientV2(
+  options?: AdtClientV2Options,
+): Promise<AdtClient> {
   // Merge with global CLI context (explicit options take precedence)
   const ctx = getCliContext();
   const effectiveOptions = {
@@ -151,14 +177,23 @@ export async function getAdtClientV2(options?: AdtClientV2Options): Promise<AdtC
   };
 
   // Priority: 1) user-provided logger, 2) global CLI logger, 3) console if enableLogging, 4) silent
-  const logger = effectiveOptions.logger ?? (effectiveOptions.enableLogging ? consoleLogger : silentLogger);
-  const progress = createProgressReporter({ compact: !effectiveOptions.verbose, logger });
+  const logger =
+    effectiveOptions.logger ??
+    (effectiveOptions.enableLogging ? consoleLogger : silentLogger);
+  const progress = createProgressReporter({
+    compact: !effectiveOptions.verbose,
+    logger,
+  });
   let session = loadAuthSession(effectiveOptions.sid);
 
   if (!session) {
-    const sidMsg = effectiveOptions.sid ? ` for SID ${effectiveOptions.sid}` : '';
+    const sidMsg = effectiveOptions.sid
+      ? ` for SID ${effectiveOptions.sid}`
+      : '';
     console.error(`❌ Not authenticated${sidMsg}`);
-    console.error(`💡 Run "npx adt auth login${effectiveOptions.sid ? ` --sid=${effectiveOptions.sid}` : ''}" to authenticate first`);
+    console.error(
+      `💡 Run "npx adt auth login${effectiveOptions.sid ? ` --sid=${effectiveOptions.sid}` : ''}" to authenticate first`,
+    );
     process.exit(1);
   }
 
@@ -210,18 +245,22 @@ export async function getAdtClientV2(options?: AdtClientV2Options): Promise<AdtC
 
   // Add file logging plugin if enabled
   if (effectiveOptions.logResponseFiles) {
-    plugins.push(new FileLoggingPlugin({
-      outputDir: effectiveOptions.logOutput,
-      writeMetadata: effectiveOptions.writeMetadata,
-      logger,
-    }));
+    plugins.push(
+      new FileLoggingPlugin({
+        outputDir: effectiveOptions.logOutput,
+        writeMetadata: effectiveOptions.writeMetadata,
+        logger,
+      }),
+    );
   }
 
   // Add console logging plugin if enabled
   if (effectiveOptions.enableLogging) {
-    plugins.push(new LoggingPlugin((msg, data) => {
-      logger.info(`${msg}${data ? ` ${JSON.stringify(data)}` : ''}`);
-    }));
+    plugins.push(
+      new LoggingPlugin((msg, data) => {
+        logger.info(`${msg}${data ? ` ${JSON.stringify(data)}` : ''}`);
+      }),
+    );
   }
 
   // Add user-provided plugins last
@@ -231,7 +270,11 @@ export async function getAdtClientV2(options?: AdtClientV2Options): Promise<AdtC
   // Only applicable for cookie-based auth with a plugin that can refresh
   let onSessionExpired: (() => Promise<string>) | undefined;
 
-  if (effectiveOptions.autoReauth && session.auth.method === 'cookie' && session.auth.plugin) {
+  if (
+    effectiveOptions.autoReauth &&
+    session.auth.method === 'cookie' &&
+    session.auth.plugin
+  ) {
     // Capture current session for the callback closure
     let currentSession = session;
     let refreshAttempts = 0;
@@ -241,18 +284,28 @@ export async function getAdtClientV2(options?: AdtClientV2Options): Promise<AdtC
       refreshAttempts++;
 
       if (refreshAttempts > MAX_REFRESH_ATTEMPTS) {
-        const error = new Error(`Maximum refresh attempts (${MAX_REFRESH_ATTEMPTS}) exceeded`);
+        const error = new Error(
+          `Maximum refresh attempts (${MAX_REFRESH_ATTEMPTS}) exceeded`,
+        );
         console.error('❌ Auto-refresh failed: Too many attempts');
-        const sidArg = effectiveOptions.sid ? ` --sid=${effectiveOptions.sid}` : '';
-        console.error(`💡 Run "npx adt auth login${sidArg}" to re-authenticate manually`);
+        const sidArg = effectiveOptions.sid
+          ? ` --sid=${effectiveOptions.sid}`
+          : '';
+        console.error(
+          `💡 Run "npx adt auth login${sidArg}" to re-authenticate manually`,
+        );
         throw error;
       }
 
-      progress.step(`🔄 Session expired, refreshing credentials for ${currentSession.sid}... (attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS})`);
+      progress.step(
+        `🔄 Session expired, refreshing credentials for ${currentSession.sid}... (attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS})`,
+      );
 
       try {
         // Refresh credentials using the auth plugin (opens browser for SAML)
-        const refreshedSession = await refreshCredentials(currentSession, { log: progress.step });
+        const refreshedSession = await refreshCredentials(currentSession, {
+          log: progress.step,
+        });
         if (!refreshedSession) {
           throw new Error('Refresh returned null');
         }
@@ -267,9 +320,16 @@ export async function getAdtClientV2(options?: AdtClientV2Options): Promise<AdtC
         return newCookie;
       } catch (error) {
         progress.done('❌ Auto-refresh failed');
-        console.error('❌ Auto-refresh failed:', error instanceof Error ? error.message : String(error));
-        const sidArg = effectiveOptions.sid ? ` --sid=${effectiveOptions.sid}` : '';
-        console.error(`💡 Run "npx adt auth login${sidArg}" to re-authenticate manually`);
+        console.error(
+          '❌ Auto-refresh failed:',
+          error instanceof Error ? error.message : String(error),
+        );
+        const sidArg = effectiveOptions.sid
+          ? ` --sid=${effectiveOptions.sid}`
+          : '';
+        console.error(
+          `💡 Run "npx adt auth login${sidArg}" to re-authenticate manually`,
+        );
         throw error;
       }
     };

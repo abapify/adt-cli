@@ -88,12 +88,12 @@ interface FormatPlugin {
   serialize(
     objects: AdkObject[],
     targetPath: string,
-    options?: SerializeOptions
+    options?: SerializeOptions,
   ): Promise<SerializeResult>;
 
   deserialize(
     sourcePath: string,
-    options?: DeserializeOptions
+    options?: DeserializeOptions,
   ): Promise<AdkObject[]>;
 
   getSupportedObjectTypes(): string[];
@@ -249,12 +249,12 @@ export class AbapGitPlugin implements FormatPlugin {
   async serialize(
     objects: AdkObject[],
     targetPath: string,
-    options?: SerializeOptions
+    options?: SerializeOptions,
   ): Promise<SerializeResult>;
 
   async deserialize(
     sourcePath: string,
-    options?: DeserializeOptions
+    options?: DeserializeOptions,
   ): Promise<AdkObject[]>;
 
   getSupportedObjectTypes(): string[];

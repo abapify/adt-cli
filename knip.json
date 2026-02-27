@@ -4,9 +4,7 @@
     "interface": true,
     "type": true
   },
-  "tags": [
-    "-lintignore"
-  ],
+  "tags": ["-lintignore"],
   "workspaces": {
     ".": {}
   }

@@ -42,7 +42,7 @@ function isInferrableSchema(value: any): boolean {
  */
 function createMethod(
   config: ClientConfig,
-  operationFn: OperationFunction
+  operationFn: OperationFunction,
 ): any {
   const method = async (...args: any[]) => {
     // Execute the operation function with the provided args
@@ -148,7 +148,7 @@ function createMethod(
  */
 export function createClient<T extends Record<string, any>>(
   contract: T,
-  config: ClientConfig
+  config: ClientConfig,
 ): RestClient<T> {
   const client: any = {};
 

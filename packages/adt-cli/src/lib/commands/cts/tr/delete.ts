@@ -26,7 +26,9 @@ export const ctsDeleteCommand = new Command('delete')
     const verboseFlag = globalOpts.verbose ?? ctx.verbose ?? false;
     const compact = !verboseFlag;
     const logger =
-      (this as any).logger ?? ctx.logger ?? createCliLogger({ verbose: verboseFlag });
+      (this as any).logger ??
+      ctx.logger ??
+      createCliLogger({ verbose: verboseFlag });
     const progress = createProgressReporter({ compact, logger });
 
     try {
@@ -34,7 +36,7 @@ export const ctsDeleteCommand = new Command('delete')
 
       // Step 1: Fetch transport details to show user what they're deleting
       progress.step(`🔍 Getting transport ${transport}...`);
-      
+
       let transportInfo: any;
       try {
         transportInfo = await client.services.transports.get(transport);
@@ -52,31 +54,39 @@ export const ctsDeleteCommand = new Command('delete')
       }
 
       // Step 2: Display warning with transport details
-      console.log('\n⚠️  WARNING: You are about to DELETE a transport request\n');
+      console.log(
+        '\n⚠️  WARNING: You are about to DELETE a transport request\n',
+      );
       console.log(`   🚛 Transport: ${request.number}`);
       console.log(`   📝 Description: ${request.desc || '-'}`);
       console.log(`   👤 Owner: ${request.owner || '-'}`);
-      console.log(`   📊 Status: ${request.status_text || request.status || '-'}`);
-      
+      console.log(
+        `   📊 Status: ${request.status_text || request.status || '-'}`,
+      );
+
       // Count objects
       const taskCount = request.task?.length || 0;
       let objectCount = 0;
       if (request.task) {
-        const tasks = Array.isArray(request.task) ? request.task : [request.task];
+        const tasks = Array.isArray(request.task)
+          ? request.task
+          : [request.task];
         for (const task of tasks) {
           if (task.abap_object) {
-            const objs = Array.isArray(task.abap_object) ? task.abap_object : [task.abap_object];
+            const objs = Array.isArray(task.abap_object)
+              ? task.abap_object
+              : [task.abap_object];
             objectCount += objs.length;
           }
         }
       }
       if (request.all_objects?.abap_object) {
-        const objs = Array.isArray(request.all_objects.abap_object) 
-          ? request.all_objects.abap_object 
+        const objs = Array.isArray(request.all_objects.abap_object)
+          ? request.all_objects.abap_object
           : [request.all_objects.abap_object];
         objectCount = Math.max(objectCount, objs.length);
       }
-      
+
       console.log(`   📁 Tasks: ${taskCount}`);
       console.log(`   📦 Objects: ${objectCount}`);
       console.log('\n   ⛔ This action is IRREVERSIBLE!\n');
@@ -99,13 +109,15 @@ export const ctsDeleteCommand = new Command('delete')
 
       // Step 4: Delete the transport
       progress.step(`🗑️  Deleting transport ${transport}...`);
-      
+
       await client.services.transports.delete(transport);
 
       progress.done();
 
       if (options.json) {
-        console.log(JSON.stringify({ deleted: transport, success: true }, null, 2));
+        console.log(
+          JSON.stringify({ deleted: transport, success: true }, null, 2),
+        );
       } else {
         console.log(`\n✅ Transport ${transport} deleted successfully`);
       }

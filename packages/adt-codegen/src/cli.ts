@@ -77,7 +77,7 @@ async function findConfig(): Promise<{ path: string; config: CodegenConfig }> {
   }
 
   throw new Error(
-    'No config file found. Please create adt.config.ts or adt-codegen.config.ts'
+    'No config file found. Please create adt.config.ts or adt-codegen.config.ts',
   );
 }
 

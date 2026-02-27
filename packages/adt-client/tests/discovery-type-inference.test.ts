@@ -14,7 +14,7 @@ describe('Discovery Type Inference', () => {
     // Check that the schema has the _infer property
     assert.ok(
       '_infer' in DiscoverySchema,
-      'Schema should have _infer property'
+      'Schema should have _infer property',
     );
   });
 

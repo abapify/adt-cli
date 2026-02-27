@@ -64,7 +64,7 @@ export type TransportStatusCode =
 
 /**
  * Query parameters for transport find endpoint
- * 
+ *
  * Note: This is the basic find endpoint (/sap/bc/adt/cts/transports?_action=FIND)
  * which only supports user and trfunction filters. For advanced filtering
  * (status, date range, etc.), use the discovery-based search endpoint.
@@ -118,7 +118,7 @@ export interface CtsReqHeader {
  */
 export function normalizeTransportFindResponse(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  response: any
+  response: any,
 ): CtsReqHeader[] {
   // ts-xsd parses root element content directly: { version, values: { DATA: { CTS_REQ_HEADER: [...] } } }
   const headers = response?.values?.DATA?.CTS_REQ_HEADER;

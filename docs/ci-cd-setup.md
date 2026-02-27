@@ -329,17 +329,14 @@ checkout → setup → install → format-check → affected-tasks → fix-ci
 ### Common Issues
 
 1. **EventEmitter Memory Leak**
-
    - **Symptom**: `MaxListenersExceededWarning` in CI logs
    - **Solution**: Reduce `--parallel` value in CI workflow
 
 2. **Test Hanging**
-
    - **Symptom**: Tests don't complete, show "press q to quit"
    - **Solution**: Ensure `watch: false` in vitest config
 
 3. **Module Resolution Errors**
-
    - **Symptom**: Cannot resolve package imports
    - **Solution**: Verify package.json exports match build output
 

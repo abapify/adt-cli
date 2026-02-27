@@ -16,7 +16,7 @@ export class PackageMapper {
     // 1. Try static mapping first (reverse lookup)
     const staticMatch = Object.entries(this.mapping).find(
       ([localName, remoteName]) =>
-        typeof remoteName === 'string' && remoteName === remotePkg
+        typeof remoteName === 'string' && remoteName === remotePkg,
     );
 
     if (staticMatch) {

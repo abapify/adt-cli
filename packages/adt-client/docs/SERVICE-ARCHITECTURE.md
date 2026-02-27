@@ -54,6 +54,7 @@ We need to separate **low-level HTTP client logic** (contracts, schemas) from **
 **Location:** `adt-client/src/adt/`
 
 **Characteristics:**
+
 - ✅ Schema-driven using `speci` + `ts-xsd`
 - ✅ One contract per SAP ADT service area
 - ✅ Type-safe with automatic XML parsing/building
@@ -63,6 +64,7 @@ We need to separate **low-level HTTP client logic** (contracts, schemas) from **
 - ❌ No conditional logic
 
 **Example:**
+
 ```typescript
 // adt-client/src/adt/cts/transports-contract.ts
 export const transportsContract = createContract({
@@ -95,6 +97,7 @@ export const transportsContract = createContract({
 **Location:** `adt-client/src/services/`
 
 **Characteristics:**
+
 - ✅ Encapsulates multi-step workflows
 - ✅ Handles conditional logic and error recovery
 - ✅ Provides convenience methods
@@ -103,6 +106,7 @@ export const transportsContract = createContract({
 - ❌ Does not make raw HTTP calls
 
 **File Structure:**
+
 ```
 adt-client/src/services/
 ├── transport-service.ts       # Transport business logic
@@ -160,9 +164,11 @@ export class TransportService {
    * Create transport with automatic user detection
    * (Business logic: user detection + XML building)
    */
-  async createWithAutoUser(options: TransportCreateOptions): Promise<Transport> {
+  async createWithAutoUser(
+    options: TransportCreateOptions,
+  ): Promise<Transport> {
     // Business logic: detect user if not provided
-    const owner = options.owner || await this.getCurrentUser();
+    const owner = options.owner || (await this.getCurrentUser());
 
     // Delegate to contract
     return this.client.transport.create({
@@ -244,7 +250,7 @@ export class AtcService {
    */
   private async pollForResults(
     worklistId: string,
-    maxWaitMs: number
+    maxWaitMs: number,
   ): Promise<AtcResult> {
     const startTime = Date.now();
     const pollInterval = 2000; // 2 seconds
@@ -273,7 +279,7 @@ export class AtcService {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 ```
@@ -297,7 +303,7 @@ export class DeploymentService {
     objectUri: string,
     sourcePath: string,
     content: string,
-    options: SetSourceOptions = {}
+    options: SetSourceOptions = {},
   ): Promise<SetSourceResult> {
     let lockHandle: string | undefined;
 
@@ -308,7 +314,10 @@ export class DeploymentService {
       if (exists) {
         // Business logic: Compare source if requested
         if (options.compareSource) {
-          const currentSource = await this.client.objects.getSource(objectUri, sourcePath);
+          const currentSource = await this.client.objects.getSource(
+            objectUri,
+            sourcePath,
+          );
           if (currentSource === content) {
             return { action: 'skipped', reason: 'identical' };
           }
@@ -318,7 +327,12 @@ export class DeploymentService {
         lockHandle = await this.client.locking.lock(objectUri);
 
         // Delegate to contract
-        await this.client.objects.updateSource(objectUri, sourcePath, content, lockHandle);
+        await this.client.objects.updateSource(
+          objectUri,
+          sourcePath,
+          content,
+          lockHandle,
+        );
 
         return { action: 'updated' };
       } else {
@@ -356,8 +370,8 @@ export class DeploymentService {
 import { createAdtClient } from '@abapify/adt-client';
 import { TransportService } from '@abapify/adt-client/services';
 
-export const transportCreateCommand = new Command('create')
-  .action(async (options) => {
+export const transportCreateCommand = new Command('create').action(
+  async (options) => {
     // Create low-level client
     const adtClient = createAdtClient({
       baseUrl: session.basicAuth.host,
@@ -375,7 +389,8 @@ export const transportCreateCommand = new Command('create')
     });
 
     console.log(`✅ Transport created: ${transport.number}`);
-  });
+  },
+);
 ```
 
 ---
@@ -383,27 +398,33 @@ export const transportCreateCommand = new Command('create')
 ## Benefits of This Architecture
 
 ### ✅ **Clear Separation of Concerns**
+
 - Contracts = "what the API does"
 - Services = "how to use it effectively"
 
 ### ✅ **Easy to Test**
+
 - **Contracts:** Mock HTTP with `speci`
 - **Services:** Mock the client interface
 
 ### ✅ **Gradual Migration**
+
 - Can implement contracts first
 - Add services as needed
 - CLI can use either directly
 
 ### ✅ **Reusable Business Logic**
+
 - Services can be used by CLI, tests, or other tools
 - No duplication
 
 ### ✅ **Type Safety End-to-End**
+
 - Schemas enforce structure
 - TypeScript catches errors at compile time
 
 ### ✅ **Easy to Maintain**
+
 - Contracts map 1:1 to SAP docs
 - Services document business rules
 - Changes isolated to appropriate layer
@@ -413,12 +434,14 @@ export const transportCreateCommand = new Command('create')
 ## Migration Path
 
 ### Phase 1: Contracts Only
+
 ```typescript
 // CLI uses contracts directly (simple operations)
 const discovery = await adtClient.discovery.getDiscovery();
 ```
 
 ### Phase 2: Add Services for Complex Operations
+
 ```typescript
 // CLI uses services (complex workflows)
 const transportService = new TransportService(adtClient);
@@ -426,6 +449,7 @@ const transport = await transportService.createWithAutoUser({ ... });
 ```
 
 ### Phase 3: Remove V1
+
 ```typescript
 // Delete adt-client v1 entirely
 // All logic migrated to v2 contracts + services
@@ -477,6 +501,7 @@ packages/
 ## Testing Strategy
 
 ### Unit Tests: Contracts
+
 ```typescript
 // Mock HTTP responses
 const mockAdapter = createMockAdapter();
@@ -490,6 +515,7 @@ const transports = await client.transport.list();
 ```
 
 ### Unit Tests: Services
+
 ```typescript
 // Mock the client
 const mockClient = {
@@ -506,6 +532,7 @@ expect(mockClient.transport.create).toHaveBeenCalledWith({ owner: 'TESTUSER' });
 ```
 
 ### Integration Tests
+
 ```typescript
 // Use real SAP system
 const client = createAdtClient({ baseUrl: '...', ... });
@@ -518,17 +545,20 @@ const transport = await service.createWithAutoUser({ ... });
 ## Summary
 
 **Contracts = Thin, schema-driven HTTP layer**
+
 - Pure REST operations
 - No business logic
 - 1:1 with SAP ADT API
 
 **Services = Business logic orchestration**
+
 - Multi-step workflows
 - Error handling
 - Convenience methods
 - Uses contracts internally
 
 **CLI = Consumes services**
+
 - Simple commands → use contracts directly
 - Complex commands → use services
 
