@@ -10,7 +10,9 @@ export const baseOptions = {
   clean: true,
   treeshake: true,
   minify: false,
-  exports: true,
+  exports: {
+    devExports: 'abapify',
+  },
   shims: true,
 };
 
