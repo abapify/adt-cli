@@ -123,6 +123,7 @@ export async function authenticate(
       });
 
       // Navigate - events are already set up
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       adapter.goto(targetUrl, { timeout: 30000 }).catch(() => {});
     });
 

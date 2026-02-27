@@ -14,7 +14,7 @@ import type {
  */
 export interface RestEndpointOptions<
   TBodySchema = unknown,
-  TResponses extends ResponseMap = ResponseMap
+  TResponses extends ResponseMap = ResponseMap,
 > {
   /** Request body schema - can be Inferrable schema or plain type */
   body?: TBodySchema;
@@ -35,10 +35,13 @@ export interface RestEndpointOptions<
 /**
  * HTTP helper object with optional global responses
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Http<TGlobalResponses extends ResponseMap = {}> = {
   // GET - with shortcut syntax
   get: {
-    <TSuccess = unknown>(path: string): RestEndpointDescriptor<
+    <TSuccess = unknown>(
+      path: string,
+    ): RestEndpointDescriptor<
       'GET',
       string,
       never,
@@ -47,7 +50,7 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
 
     <TPath extends string, TResponses extends ResponseMap>(
       path: TPath,
-      options: Omit<RestEndpointOptions<never, TResponses>, 'body'>
+      options: Omit<RestEndpointOptions<never, TResponses>, 'body'>,
     ): RestEndpointDescriptor<
       'GET',
       TPath,
@@ -60,10 +63,10 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
   post: <
     TPath extends string,
     TBody = unknown,
-    TResponses extends ResponseMap = ResponseMap
+    TResponses extends ResponseMap = ResponseMap,
   >(
     path: TPath,
-    options: RestEndpointOptions<TBody, TResponses>
+    options: RestEndpointOptions<TBody, TResponses>,
   ) => RestEndpointDescriptor<
     'POST',
     TPath,
@@ -75,10 +78,10 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
   put: <
     TPath extends string,
     TBody = unknown,
-    TResponses extends ResponseMap = ResponseMap
+    TResponses extends ResponseMap = ResponseMap,
   >(
     path: TPath,
-    options: RestEndpointOptions<TBody, TResponses>
+    options: RestEndpointOptions<TBody, TResponses>,
   ) => RestEndpointDescriptor<
     'PUT',
     TPath,
@@ -90,10 +93,10 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
   patch: <
     TPath extends string,
     TBody = unknown,
-    TResponses extends ResponseMap = ResponseMap
+    TResponses extends ResponseMap = ResponseMap,
   >(
     path: TPath,
-    options: RestEndpointOptions<TBody, TResponses>
+    options: RestEndpointOptions<TBody, TResponses>,
   ) => RestEndpointDescriptor<
     'PATCH',
     TPath,
@@ -103,7 +106,9 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
 
   // DELETE - with shortcut syntax
   delete: {
-    (path: string): RestEndpointDescriptor<
+    (
+      path: string,
+    ): RestEndpointDescriptor<
       'DELETE',
       string,
       never,
@@ -112,7 +117,7 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
 
     <TPath extends string, TResponses extends ResponseMap>(
       path: TPath,
-      options: Omit<RestEndpointOptions<never, TResponses>, 'body'>
+      options: Omit<RestEndpointOptions<never, TResponses>, 'body'>,
     ): RestEndpointDescriptor<
       'DELETE',
       TPath,
@@ -123,7 +128,7 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
 
   head: <TPath extends string, TResponses extends ResponseMap>(
     path: TPath,
-    options: Omit<RestEndpointOptions<never, TResponses>, 'body'>
+    options: Omit<RestEndpointOptions<never, TResponses>, 'body'>,
   ) => RestEndpointDescriptor<
     'HEAD',
     TPath,
@@ -133,7 +138,7 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
 
   options: <TPath extends string, TResponses extends ResponseMap>(
     path: TPath,
-    options: Omit<RestEndpointOptions<never, TResponses>, 'body'>
+    options: Omit<RestEndpointOptions<never, TResponses>, 'body'>,
   ) => RestEndpointDescriptor<
     'OPTIONS',
     TPath,
@@ -168,8 +173,9 @@ type Http<TGlobalResponses extends ResponseMap = {}> = {
  *   // 400, 401, 500 are automatically added
  * })
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export function createHttp<TGlobalResponses extends ResponseMap = {}>(
-  globalResponses?: TGlobalResponses
+  globalResponses?: TGlobalResponses,
 ): Http<TGlobalResponses> {
   const mergeResponses = (responses: any) => {
     if (!globalResponses) return responses;
