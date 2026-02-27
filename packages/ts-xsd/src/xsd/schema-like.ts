@@ -1,10 +1,10 @@
 /**
  * Schema-Like Types for Type Inference
- * 
+ *
  * These are minimal type constraints designed to work with `as const` schema literals.
  * They are intentionally looser than the full W3C types in xsd/types.ts to allow
  * TypeScript's compile-time type inference to work correctly.
- * 
+ *
  * Key differences from xsd/types.ts:
  * - All arrays are `readonly` for `as const` compatibility
  * - Properties are optional and loosely typed
@@ -20,27 +20,27 @@
  * Properties prefixed with $ are clearly non-W3C.
  */
 export type SchemaExtensions = {
-  /** 
+  /**
    * Namespace prefix declarations (xmlns:prefix -> namespace URI).
    * Extracted from XML namespace attributes, not part of XSD spec.
    * Prefixed with $ to indicate this is NOT a W3C XSD property.
    */
   readonly $xmlns?: { readonly [prefix: string]: string };
-  
+
   /**
    * Original filename/path of this schema.
    * Used to reconstruct $imports relationships from schemaLocation references.
    * Prefixed with $ to indicate this is NOT a W3C XSD property.
    */
   readonly $filename?: string;
-  
-  /** 
+
+  /**
    * Resolved imported schemas for cross-schema type resolution.
    * Actual schema objects that can be searched for type definitions.
    * Use this to link schemas that import each other (xs:import - different namespace).
    */
   readonly $imports?: readonly SchemaLike[];
-  
+
   /**
    * Resolved included schemas for same-namespace type resolution.
    * Content from xs:include is in the same namespace as the including schema.
@@ -64,11 +64,15 @@ export type SchemaLike = SchemaExtensions & {
   readonly blockDefault?: string;
   readonly finalDefault?: string;
   readonly 'xml:lang'?: string;
-  
+
   // W3C XSD Schema children
   readonly element?: readonly ElementLike[];
-  readonly complexType?: readonly ComplexTypeLike[] | { readonly [name: string]: ComplexTypeLike };
-  readonly simpleType?: readonly SimpleTypeLike[] | { readonly [name: string]: SimpleTypeLike };
+  readonly complexType?:
+    | readonly ComplexTypeLike[]
+    | { readonly [name: string]: ComplexTypeLike };
+  readonly simpleType?:
+    | readonly SimpleTypeLike[]
+    | { readonly [name: string]: SimpleTypeLike };
   readonly group?: readonly unknown[];
   readonly attributeGroup?: readonly unknown[];
   readonly notation?: readonly unknown[];

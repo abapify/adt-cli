@@ -6,26 +6,35 @@
 
 import { describe, it, expect } from 'vitest';
 import { http, createClient } from './index';
-import { createInferrable, type Inferrable, type Serializable, type InferSchema } from './types';
+import {
+  createInferrable,
+  type Inferrable,
+  type Serializable,
+  type InferSchema,
+} from './types';
 import type { HttpAdapter } from './client/types';
 
 // Test InferSchema with complex conditional types (like InferXsd)
 describe('InferSchema with complex types', () => {
   // Simulate InferXsd - a complex conditional type
-  type SimulatedInferXsd<T> = T extends { root: string; elements: infer E } 
-    ? E extends Record<string, unknown> ? { data: string } : never
-    : {};
+  type SimulatedInferXsd<T> = T extends { root: string; elements: infer E }
+    ? E extends Record<string, unknown>
+      ? { data: string }
+      : never
+    : // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+      {};
 
   // Simulate SpeciSchema - like adt-schemas does
   type SimulatedSpeciSchema<T> = T & Serializable<SimulatedInferXsd<T>>;
 
   it('should infer type from Serializable with complex generic', () => {
     // This simulates what adt-schemas does
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     type Schema = SimulatedSpeciSchema<{ root: 'test'; elements: { foo: {} } }>;
-    
+
     // InferSchema should extract the type from _infer
     type Inferred = InferSchema<Schema>;
-    
+
     // Should be { data: string }, not {}
     const test: Inferred = { data: 'hello' };
     expect(test.data).toBe('hello');
@@ -34,9 +43,9 @@ describe('InferSchema with complex types', () => {
   it('should work with Inferrable directly', () => {
     type MyType = { id: number; name: string };
     type Schema = Inferrable<MyType>;
-    
+
     type Inferred = InferSchema<Schema>;
-    
+
     const test: Inferred = { id: 1, name: 'test' };
     expect(test.id).toBe(1);
   });
@@ -44,9 +53,9 @@ describe('InferSchema with complex types', () => {
   it('should work with Serializable (which extends Inferrable)', () => {
     type MyType = { id: number; name: string };
     type Schema = Serializable<MyType>;
-    
+
     type Inferred = InferSchema<Schema>;
-    
+
     const test: Inferred = { id: 1, name: 'test' };
     expect(test.id).toBe(1);
   });

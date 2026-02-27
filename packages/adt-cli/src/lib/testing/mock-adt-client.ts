@@ -72,7 +72,7 @@ export class MockAdtClient {
 
     // Check for transport details pattern
     const transportMatch = endpoint.match(
-      /\/sap\/bc\/adt\/cts\/transports\/([A-Z0-9]+)/
+      /\/sap\/bc\/adt\/cts\/transports\/([A-Z0-9]+)/,
     );
     if (transportMatch) {
       return 'transport-details';
@@ -86,7 +86,7 @@ export class MockAdtClient {
 
     // Check for interface pattern
     const interfaceMatch = endpoint.match(
-      /\/sap\/bc\/adt\/oo\/interfaces\/([a-z_]+)/
+      /\/sap\/bc\/adt\/oo\/interfaces\/([a-z_]+)/,
     );
     if (interfaceMatch) {
       return 'interface-zif-test'; // Use generic interface fixture

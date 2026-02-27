@@ -9,7 +9,7 @@ import type { FilterValue, FilterConfig } from './types';
  */
 function matchesValue(
   value: string | undefined,
-  filter: FilterValue<string>
+  filter: FilterValue<string>,
 ): boolean {
   if (!value) return false;
 
@@ -89,7 +89,7 @@ export function matchesCollectionFilter(collection: any, filter: any): boolean {
       ? collection.link
       : [collection.link];
     const hasMatchingLink = links.some((link: any) =>
-      matchesObject(link, filter.templateLinks)
+      matchesObject(link, filter.templateLinks),
     );
     if (!hasMatchingLink) return false;
   }
@@ -103,7 +103,7 @@ export function matchesCollectionFilter(collection: any, filter: any): boolean {
 export function matchesFilter(
   item: any,
   filterConfig: FilterConfig | undefined,
-  type: 'workspace' | 'collection'
+  type: 'workspace' | 'collection',
 ): boolean {
   if (!filterConfig) return true;
 

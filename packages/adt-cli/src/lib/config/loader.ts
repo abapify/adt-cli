@@ -35,7 +35,7 @@ export class ConfigLoader implements IConfigLoader {
       const validation = this.validate(config);
       if (!validation.valid) {
         throw new Error(
-          `Invalid configuration: ${validation.errors.join(', ')}`
+          `Invalid configuration: ${validation.errors.join(', ')}`,
         );
       }
 
@@ -47,7 +47,7 @@ export class ConfigLoader implements IConfigLoader {
       throw new Error(
         `Failed to load config from ${resolvedPath}: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
@@ -82,7 +82,7 @@ export class ConfigLoader implements IConfigLoader {
         }
         if (!plugin.name.startsWith('@abapify/')) {
           warnings.push(
-            `Plugin ${plugin.name} does not follow @abapify/* naming convention`
+            `Plugin ${plugin.name} does not follow @abapify/* naming convention`,
           );
         }
       }
@@ -91,11 +91,11 @@ export class ConfigLoader implements IConfigLoader {
     // Validate defaults
     if (config.defaults?.format) {
       const availableFormats = config.plugins.formats.map((p) =>
-        p.name.replace('@abapify/', '')
+        p.name.replace('@abapify/', ''),
       );
       if (!availableFormats.includes(config.defaults.format)) {
         errors.push(
-          `Default format '${config.defaults.format}' is not in configured plugins`
+          `Default format '${config.defaults.format}' is not in configured plugins`,
         );
       }
     }

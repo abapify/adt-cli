@@ -47,7 +47,7 @@ export interface AdtCorePageOptions {
  */
 export default function AdtCorePage(
   obj: AdtCoreObject,
-  options?: AdtCorePageOptions
+  options?: AdtCorePageOptions,
 ): Page {
   const icon = options?.icon || '📄';
 
@@ -64,7 +64,7 @@ export default function AdtCorePage(
       Field('Created by', obj.createdBy),
       Field('Created at', obj.createdAt),
       Field('Changed by', obj.changedBy),
-      Field('Changed at', obj.changedAt)
+      Field('Changed at', obj.changedAt),
     ),
 
     // Technical
@@ -73,8 +73,8 @@ export default function AdtCorePage(
       Field('Language', obj.language || obj.masterLanguage),
       Field('Master System', obj.masterSystem),
       Field('ABAP Version', obj.abapLanguageVersion),
-      Field('Version', obj.version)
-    )
+      Field('Version', obj.version),
+    ),
   );
 
   // Create clickable title link to open in Eclipse ADT
@@ -91,6 +91,7 @@ export default function AdtCorePage(
       }
       return lines;
     },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     print: () => {}, // placeholder, set below
   };
 

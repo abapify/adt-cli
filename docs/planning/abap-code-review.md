@@ -36,7 +36,6 @@ Implement a complete CI/CD pipeline for ABAP code review using transport request
 ### 📋 Backlog
 
 - **[#7] CI/CD Platform Templates** - Integration templates for major platforms
-
   - Status: `status:backlog`
   - Dependencies: Core pipeline stages
   - Estimated effort: 1-2 days

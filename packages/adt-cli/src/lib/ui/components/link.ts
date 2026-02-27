@@ -60,54 +60,54 @@ export function getAdtSystem(): string {
  */
 const ADT_PATH_TEMPLATES: Record<string, string> = {
   // Packages
-  'DEVC': '/packages/{name}',
+  DEVC: '/packages/{name}',
   'DEVC/K': '/packages/{name}',
   // Classes
-  'CLAS': '/oo/classes/{name}',
+  CLAS: '/oo/classes/{name}',
   'CLAS/OC': '/oo/classes/{name}',
   // Interfaces
-  'INTF': '/oo/interfaces/{name}',
+  INTF: '/oo/interfaces/{name}',
   'INTF/OI': '/oo/interfaces/{name}',
   // Function Groups
-  'FUGR': '/functions/groups/{name}',
+  FUGR: '/functions/groups/{name}',
   'FUGR/F': '/functions/groups/{name}',
   // Function Modules (need group context, simplified)
-  'FUNC': '/functions/groups/{name}',
+  FUNC: '/functions/groups/{name}',
   // Programs
-  'PROG': '/programs/programs/{name}',
+  PROG: '/programs/programs/{name}',
   'PROG/P': '/programs/programs/{name}',
   // Includes
   'PROG/I': '/programs/includes/{name}',
   // Tables
-  'TABL': '/ddic/tables/{name}',
+  TABL: '/ddic/tables/{name}',
   'TABL/DT': '/ddic/tables/{name}',
   // Structures
   'TABL/DS': '/ddic/structures/{name}',
   // Views
-  'VIEW': '/ddic/views/{name}',
+  VIEW: '/ddic/views/{name}',
   // Data Elements
-  'DTEL': '/ddic/dataelements/{name}',
+  DTEL: '/ddic/dataelements/{name}',
   'DTEL/DE': '/ddic/dataelements/{name}',
   // Domains
-  'DOMA': '/ddic/domains/{name}',
+  DOMA: '/ddic/domains/{name}',
   'DOMA/DO': '/ddic/domains/{name}',
   // Search Helps
-  'SHLP': '/ddic/searchhelps/{name}',
+  SHLP: '/ddic/searchhelps/{name}',
   // Lock Objects
-  'ENQU': '/ddic/lockobjects/{name}',
+  ENQU: '/ddic/lockobjects/{name}',
   // Message Classes
-  'MSAG': '/messageclass/{name}',
+  MSAG: '/messageclass/{name}',
   // Transactions
-  'TRAN': '/transactions/{name}',
+  TRAN: '/transactions/{name}',
   // CDS Views
-  'DDLS': '/ddic/ddl/sources/{name}',
+  DDLS: '/ddic/ddl/sources/{name}',
   'DDLS/DF': '/ddic/ddl/sources/{name}',
   // Behavior Definitions
-  'BDEF': '/bo/behaviordefinitions/{name}',
+  BDEF: '/bo/behaviordefinitions/{name}',
   // Service Definitions
-  'SRVD': '/businessservices/servicedefinitions/{name}',
+  SRVD: '/businessservices/servicedefinitions/{name}',
   // Service Bindings
-  'SRVB': '/businessservices/servicebindings/{name}',
+  SRVB: '/businessservices/servicebindings/{name}',
 };
 
 /**
@@ -167,14 +167,16 @@ export function link(text: string, url: string): string {
  */
 export function adtLink(ref?: AdtObjectRef): string {
   const name = ref?.name || '';
-  
+
   if (!adtSystemName || !name) {
     return name ? chalk.cyan(name) : '';
   }
 
   // If URI is provided, use it directly
   if (ref?.uri) {
-    const path = ref.uri.startsWith('/sap/bc/adt') ? ref.uri : `/sap/bc/adt${ref.uri}`;
+    const path = ref.uri.startsWith('/sap/bc/adt')
+      ? ref.uri
+      : `/sap/bc/adt${ref.uri}`;
     const url = `adt://${adtSystemName}${path}`;
     return hyperlink(chalk.cyan(name), url);
   }

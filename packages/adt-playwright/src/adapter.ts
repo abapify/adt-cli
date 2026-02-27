@@ -78,6 +78,8 @@ export function createPlaywrightAdapter(): BrowserAdapter {
       if (!page) throw new Error('Page not created');
       await page
         .goto(url, { timeout: options?.timeout ?? 30000 })
+        // Navigation errors are intentionally ignored; caller handles auth via event listeners
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
     },
 

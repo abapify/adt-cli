@@ -31,6 +31,7 @@ p2 download https://tools.hana.ondemand.com/latest -o ./sdk --extract
 ```
 
 **Options:**
+
 - `-o, --output <dir>` - Output directory (default: `./p2-download`)
 - `-f, --filter <patterns>` - Filter plugins by ID pattern (comma-separated)
 - `-e, --extract` - Also extract files after download
@@ -56,12 +57,14 @@ p2 extract ./my-plugin.jar -o ./extracted
 ```
 
 **Options:**
+
 - `-o, --output <dir>` - Output directory (default: `./extracted`)
 - `-p, --patterns <patterns>` - File patterns to extract (default: `*.xsd,*.ecore,*.genmodel,*.xml`)
 - `--no-organize` - Do not organize files by type (flat output)
 - `-v, --verbose` - Verbose output
 
 **Organized output structure:**
+
 ```
 extracted/
 ├── schemas/
@@ -87,11 +90,13 @@ p2 decompile ./extracted/classes -o ./decompiled -d cfr
 ```
 
 **Options:**
+
 - `-o, --output <dir>` - Output directory (default: `./decompiled`)
 - `-d, --decompiler <name>` - Decompiler to use (`cfr`, `procyon`, `fernflower`)
 - `-v, --verbose` - Verbose output
 
 **Supported decompilers:**
+
 - **CFR** - `brew install cfr-decompiler` (macOS/Linux)
 - **Procyon** - Download from GitHub
 - **Fernflower** - Bundled with IntelliJ IDEA

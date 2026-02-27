@@ -64,7 +64,9 @@ export interface PageDefinition<T = unknown, P extends NavParams = NavParams> {
 /**
  * Define and register a page in one step
  */
-export function definePage<T>(definition: PageDefinition<T>): PageDefinition<T> {
+export function definePage<T>(
+  definition: PageDefinition<T>,
+): PageDefinition<T> {
   router.register({
     type: definition.type,
     name: definition.name,
@@ -121,7 +123,11 @@ class ObjectTypeRouter {
    * Navigate to a page with parameters
    * Fetches data and renders the page in one call
    */
-  async navTo(client: AdtClient, type: string, params: NavParams = {}): Promise<Page> {
+  async navTo(
+    client: AdtClient,
+    type: string,
+    params: NavParams = {},
+  ): Promise<Page> {
     const route = this.get(type);
     if (!route) {
       throw new Error(`No route registered for type: ${type}`);

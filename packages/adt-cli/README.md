@@ -836,7 +836,7 @@ export const myCommand = new Command('my-command').action(
     } catch (error) {
       handleCommandError(error, 'My operation');
     }
-  }
+  },
 );
 ```
 

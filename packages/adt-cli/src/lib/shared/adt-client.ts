@@ -1,9 +1,9 @@
 /**
  * Shared ADT Client State
- * 
+ *
  * Global state and singleton instances for ADT client management.
  * This module holds stateful objects that are shared across CLI commands.
- * 
+ *
  * For the factory function that creates clients, see utils/adt-client.ts
  */
 import type { Logger } from '@abapify/adt-client';
@@ -54,13 +54,15 @@ export function resetCliContext(): void {
 /**
  * Silent logger - suppresses all output (default for CLI)
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const noop = () => {};
 export const silentLogger: Logger = {
-  trace: () => {},
-  debug: () => {},
-  info: () => {},
-  warn: () => {},
-  error: () => {},
-  fatal: () => {},
+  trace: noop,
+  debug: noop,
+  info: noop,
+  warn: noop,
+  error: noop,
+  fatal: noop,
   child: () => silentLogger,
 };
 

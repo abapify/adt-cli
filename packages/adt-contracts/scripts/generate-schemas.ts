@@ -1,9 +1,9 @@
 /**
  * Generate schemas.ts with speci-compatible wrappers
- * 
+ *
  * This script reads all schema exports from @abapify/adt-schemas
  * and generates the schemas.ts file with toSpeciSchema() wrappers.
- * 
+ *
  * Run: npx tsx scripts/generate-schemas.ts
  */
 
@@ -17,15 +17,18 @@ import { join } from 'path';
 const allExports = Object.entries(adtSchemas);
 
 const xmlSchemaExports = allExports.filter(([_, value]) => {
-  return value && typeof value === 'object' && 
-    'parse' in value && 
-    'schema' in value;  // TypedSchema has schema property
+  return (
+    value && typeof value === 'object' && 'parse' in value && 'schema' in value
+  ); // TypedSchema has schema property
 });
 
 const jsonSchemaExports = allExports.filter(([_, value]) => {
-  return value && typeof value === 'object' && 
-    'parse' in value && 
-    !('schema' in value);  // JSON schemas don't have schema property
+  return (
+    value &&
+    typeof value === 'object' &&
+    'parse' in value &&
+    !('schema' in value)
+  ); // JSON schemas don't have schema property
 });
 
 // Get schema names and sort alphabetically
@@ -46,7 +49,7 @@ import { toSpeciSchema } from '../helpers/speci-schema';
 // ============================================================================
 // XML Schemas (wrapped for speci compatibility)
 // ============================================================================
-${xmlSchemaNames.map(name => `export const ${name} = toSpeciSchema(adtSchemas.${name});`).join('\n')}
+${xmlSchemaNames.map((name) => `export const ${name} = toSpeciSchema(adtSchemas.${name});`).join('\n')}
 
 // ============================================================================
 // JSON Schemas (re-exported directly - they use zod, not ts-xsd)
@@ -59,5 +62,9 @@ const outputPath = join(import.meta.dirname, '../src/generated/schemas.ts');
 writeFileSync(outputPath, output);
 
 console.log(`✅ Generated schemas.ts`);
-console.log(`   XML schemas (${xmlSchemaNames.length}): ${xmlSchemaNames.join(', ')}`);
-console.log(`   JSON schemas (${jsonSchemaNames.length}): ${jsonSchemaNames.join(', ')}`);
+console.log(
+  `   XML schemas (${xmlSchemaNames.length}): ${xmlSchemaNames.join(', ')}`,
+);
+console.log(
+  `   JSON schemas (${jsonSchemaNames.length}): ${jsonSchemaNames.join(', ')}`,
+);

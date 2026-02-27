@@ -11,8 +11,9 @@ import { treeListCommand } from './list';
 import { treeConfigCommand } from './config';
 
 export function createTreeCommand(): Command {
-  const treeCmd = new Command('tree')
-    .description('Transport tree operations (uses search configuration)');
+  const treeCmd = new Command('tree').description(
+    'Transport tree operations (uses search configuration)',
+  );
 
   // Default action - list transports
   treeCmd.addCommand(treeListCommand, { isDefault: true });

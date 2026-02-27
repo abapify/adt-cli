@@ -22,7 +22,7 @@ export class HttpError<TPayload = unknown> extends Error {
   constructor(
     public readonly status: number,
     public readonly payload: TPayload,
-    message?: string
+    message?: string,
   ) {
     super(message || `HTTP ${status}`);
     this.name = 'HttpError';
@@ -52,7 +52,7 @@ export interface HttpAdapter<TDefaultResponse = unknown> {
    * Execute an HTTP request
    */
   request<TResponse = TDefaultResponse>(
-    options?: HttpRequestOptions
+    options?: HttpRequestOptions,
   ): Promise<TResponse>;
 }
 
@@ -94,20 +94,21 @@ type IsUpdateMethod<TMethod> = TMethod extends 'PUT' | 'PATCH' ? true : false;
  * Only extracts if the body is an Inferrable schema
  * For PUT/PATCH methods, returns Partial<T> since updates typically send partial data
  */
-type ExtractBodyType<TDescriptor> = TDescriptor extends RestEndpointDescriptor<
-  infer TMethod,
-  any,
-  infer TBody,
-  any
->
-  ? IsInferrableBody<TBody> extends true
-    ? TBody extends { _infer?: infer U }
-      ? IsUpdateMethod<TMethod> extends true
-        ? Partial<U>  // PUT/PATCH: allow partial body
-        : U           // POST: require full body
+type ExtractBodyType<TDescriptor> =
+  TDescriptor extends RestEndpointDescriptor<
+    infer TMethod,
+    any,
+    infer TBody,
+    any
+  >
+    ? IsInferrableBody<TBody> extends true
+      ? TBody extends { _infer?: infer U }
+        ? IsUpdateMethod<TMethod> extends true
+          ? Partial<U> // PUT/PATCH: allow partial body
+          : U // POST: require full body
+        : never
       : never
-    : never
-  : never;
+    : never;
 
 /**
  * Build parameter list for a REST client method
@@ -119,8 +120,8 @@ type BuildParams<T extends OperationFunction> =
     ? ExtractBodyType<ExtractDescriptor<T>> extends never
       ? ExtractParams<T> // No body - use declared params
       : ExtractParams<T> extends []
-      ? [ExtractBodyType<ExtractDescriptor<T>>] // Empty params + body - add body param
-      : [...ExtractParams<T>, ExtractBodyType<ExtractDescriptor<T>>] // Has params + body - append body
+        ? [ExtractBodyType<ExtractDescriptor<T>>] // Empty params + body - add body param
+        : [...ExtractParams<T>, ExtractBodyType<ExtractDescriptor<T>>] // Has params + body - append body
     : ExtractParams<T>;
 
 /**
@@ -131,7 +132,9 @@ type BuildParams<T extends OperationFunction> =
  * Automatically infers parameter types from body schema if present
  */
 export type RestClientMethod<T extends OperationFunction> = {
-  (...params: BuildParams<T>): Promise<
+  (
+    ...params: BuildParams<T>
+  ): Promise<
     ExtractDescriptor<T> extends RestEndpointDescriptor
       ? InferSuccessResponse<ExtractDescriptor<T>>
       : never
@@ -142,7 +145,7 @@ export type RestClientMethod<T extends OperationFunction> = {
     : never;
   /** Check if error is from this endpoint */
   isError(
-    error: unknown
+    error: unknown,
   ): error is HttpError<
     ExtractDescriptor<T> extends RestEndpointDescriptor
       ? InferErrorResponse<ExtractDescriptor<T>>
@@ -158,6 +161,6 @@ export type RestClient<T extends Record<string, any>> = {
   [K in keyof T]: T[K] extends OperationFunction
     ? RestClientMethod<T[K]>
     : T[K] extends Record<string, any>
-    ? RestClient<T[K]>
-    : never;
+      ? RestClient<T[K]>
+      : never;
 };

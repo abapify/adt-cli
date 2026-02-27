@@ -21,7 +21,7 @@ describe('Body Parameter Inference', () => {
 
   const mockAdapter: HttpAdapter<User> = {
     request: async <TResponse = User>(): Promise<TResponse> =>
-      ({ id: 1, name: 'Test', email: 'test@example.com' } as TResponse),
+      ({ id: 1, name: 'Test', email: 'test@example.com' }) as TResponse,
   };
 
   describe('Pattern 1: Manual Parameter Typing (current working pattern)', () => {

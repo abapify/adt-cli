@@ -11,14 +11,12 @@ This specification outlines the approach for implementing Continuous Integration
 1. **Manual Quality Checks**: Traditional ABAP development relies heavily on manual code reviews and quality assessments, which are time-consuming and prone to human error.
 
 2. **Transport-Based Workflow Limitations**:
-
    - Transport requests contain multiple objects and changes
    - Difficult to review individual changes in context
    - No automated quality gates before transport release
    - Limited visibility into what exactly changed
 
 3. **Lack of Modern DevOps Practices**:
-
    - No automated testing integration
    - Limited code quality metrics
    - Manual deployment processes
@@ -126,19 +124,16 @@ adt atc -t $TRANSPORT_NUMBER --format gitlab --output atc-results.json
 ### SAP Piper Limitations
 
 1. **Infrastructure Dependency**:
-
    - Requires Jenkins infrastructure setup and maintenance
    - Tied to specific CI/CD platforms and configurations
    - Heavy infrastructure overhead for simple tasks
 
 2. **Fragmented Workflow**:
-
    - Multiple separate tools for different tasks
    - No unified end-to-end experience
    - Complex orchestration between different components
 
 3. **Configuration Complexity**:
-
    - Multiple configuration files required (`repositories.yml`, `Jenkinsfile`, etc.)
    - Complex setup process with many prerequisites
    - Steep learning curve for teams

@@ -1,16 +1,16 @@
 /**
  * ADK Lockable Decorators
- * 
+ *
  * Provides declarative lock management for ADK objects.
- * 
+ *
  * Usage:
  *   class AdkTransportRequest extends AdkObject implements Lockable {
- *     
+ *
  *     @requiresLock()
  *     async update(changes: UpdateOptions): Promise<void> {
  *       // Lock acquired automatically, released after
  *     }
- *     
+ *
  *     @requiresLock({ keep: true })
  *     async startBatch(): Promise<void> {
  *       // Lock is acquired and KEPT for subsequent operations
@@ -39,13 +39,13 @@ export interface RequiresLockOptions {
 
 /**
  * @requiresLock - Method decorator
- * 
+ *
  * Automatically acquires lock before method execution
  * and releases it after (unless keep: true).
- * 
+ *
  * @param options - Lock options
  * @param options.keep - If true, keep lock after method completes
- * 
+ *
  * @example
  * ```typescript
  * @requiresLock()
@@ -53,7 +53,7 @@ export interface RequiresLockOptions {
  *   // Lock is acquired before this runs
  *   // Lock is released after this completes
  * }
- * 
+ *
  * @requiresLock({ keep: true })
  * async startTransaction(): Promise<void> {
  *   // Lock is acquired and KEPT for subsequent operations
@@ -64,18 +64,18 @@ export function requiresLock(options?: RequiresLockOptions) {
   return function <T extends Lockable>(
     _target: T,
     _propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
-    
+
     descriptor.value = async function (this: Lockable, ...args: unknown[]) {
       const wasLocked = this.isLocked;
-      
+
       try {
         if (!wasLocked) {
           await this.lock();
         }
-        
+
         return await originalMethod.apply(this, args);
       } finally {
         // Release lock if we acquired it and keep is not set
@@ -84,17 +84,17 @@ export function requiresLock(options?: RequiresLockOptions) {
         }
       }
     };
-    
+
     return descriptor;
   };
 }
 
 /**
  * @readonly - Method decorator (marker)
- * 
+ *
  * Marks a method as read-only (no lock required).
  * This is purely for documentation/clarity.
- * 
+ *
  * @example
  * ```typescript
  * @readonly
@@ -106,7 +106,7 @@ export function requiresLock(options?: RequiresLockOptions) {
 export function readonly(
   _target: any,
   _propertyKey: string,
-  descriptor: PropertyDescriptor
+  descriptor: PropertyDescriptor,
 ) {
   // No-op decorator, just for documentation
   return descriptor;

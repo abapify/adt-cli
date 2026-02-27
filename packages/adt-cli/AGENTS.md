@@ -32,16 +32,18 @@ This file provides guidance to AI coding assistants when working with the `adt-c
 ```
 
 **Why?**
+
 - **DRY**: Business logic in one place, reusable
 - **Testability**: Services can be unit tested without CLI
 - **Separation**: CLI concerns (args, output) vs business logic
 - **Programmatic use**: Services can be called from other code
 
 **Example:**
+
 ```typescript
 // Command - thin wrapper
-export const importTransportCommand = new Command('transport')
-  .action(async (transportNumber, outputDir, options) => {
+export const importTransportCommand = new Command('transport').action(
+  async (transportNumber, outputDir, options) => {
     const service = new ImportService();
     const result = await service.importTransport({
       transportNumber,
@@ -49,15 +51,17 @@ export const importTransportCommand = new Command('transport')
       format: options.format,
       objectTypes: options.objectTypes?.split(','),
     });
-    
+
     // Display results
     console.log(`✅ Imported ${result.results.success} objects`);
-  });
+  },
+);
 ```
 
 ### Command Structure
 
 Commands are organized in `src/lib/commands/`:
+
 ```
 commands/
 ├── auth/           # Authentication commands (login, logout)
@@ -98,6 +102,7 @@ commands/
 ```
 
 #### ❌ WRONG - Importing v1 Directly
+
 ```typescript
 import { createAdtClient } from '@abapify/adt-client';
 import { AuthManager } from '@abapify/adt-client'; // ❌ NO!
@@ -109,11 +114,13 @@ const session = authManager.loadSession();
 ```
 
 **Why wrong?**
+
 - Couples commands to v1 implementation
 - Duplicates auth logic across every command
 - Mixes CLI concerns with client logic
 
 #### ✅ CORRECT - Use Shared Helper
+
 ```typescript
 import { getAdtClientV2 } from '../utils/adt-client';
 
@@ -122,6 +129,7 @@ const adtClient = getAdtClientV2();
 ```
 
 #### With Plugins
+
 ```typescript
 import { getAdtClientV2 } from '../utils/adt-client';
 import type { ResponseContext } from '@abapify/adt-client';
@@ -141,12 +149,13 @@ const adtClient = getAdtClientV2({
 ```
 
 #### With Logger
+
 ```typescript
 import { getAdtClientV2 } from '../utils/adt-client';
 
 // Enable HTTP request/response logging
 const adtClient = getAdtClientV2({
-  enableLogging: true,  // Logs HTTP requests/responses to console
+  enableLogging: true, // Logs HTTP requests/responses to console
 });
 
 // Or pass custom logger
@@ -159,10 +168,12 @@ const adtClient = getAdtClientV2({
 ```
 
 **Locations:**
+
 - `src/lib/utils/adt-client.ts` - Client initialization helper
 - `src/lib/utils/auth.ts` - Auth bridge (wraps v1 AuthManager)
 
 **Why correct?**
+
 - **DRY**: Eliminates 15-20 lines of boilerplate per command
 - **Consistency**: Same error messages across all commands
 - **Maintainability**: Auth logic in one place, v1 dependency isolated
@@ -192,7 +203,10 @@ export const myCommand = new Command('mycommand')
       // Display results
       console.log('✅ Done!');
     } catch (error) {
-      console.error('❌ Failed:', error instanceof Error ? error.message : String(error));
+      console.error(
+        '❌ Failed:',
+        error instanceof Error ? error.message : String(error),
+      );
       process.exit(1);
     }
   });
@@ -201,11 +215,15 @@ export const myCommand = new Command('mycommand')
 ### 2. Error Handling Pattern
 
 **Standard pattern:**
+
 ```typescript
 try {
   // Command logic
 } catch (error) {
-  console.error('❌ Command failed:', error instanceof Error ? error.message : String(error));
+  console.error(
+    '❌ Command failed:',
+    error instanceof Error ? error.message : String(error),
+  );
   if (error instanceof Error && error.stack) {
     console.error('\nStack trace:', error.stack);
   }
@@ -216,6 +234,7 @@ try {
 ### 3. Output Formatting
 
 **Use consistent emoji indicators:**
+
 - 🔄 - Loading/in progress
 - 🔍 - Searching
 - 📋 - Listing results
@@ -225,9 +244,13 @@ try {
 - 💾 - File saved
 
 **Example:**
+
 ```typescript
 console.log('🔍 Searching for objects...');
-const results = await adtClient.adt.repository.informationsystem.search.quickSearch({ query });
+const results =
+  await adtClient.adt.repository.informationsystem.search.quickSearch({
+    query,
+  });
 console.log(`📋 Found ${results.length} objects`);
 console.log('✅ Search complete!');
 ```
@@ -256,12 +279,14 @@ For machine-readable output, add `--json` flag:
 ### When to Use V1 vs V2
 
 **Use V2 (`@abapify/adt-client`) when:**
+
 - Endpoint has a contract in v2
 - Need type-safe responses
 - Simple request/response operations
 - Available contracts: discovery, sessions, systeminformation, search
 
 **Use V1 (`@abapify/adt-client`) when:**
+
 - Endpoint not yet migrated to v2
 - Need handler-based object operations
 - Need v1-specific features (searchObjectsDetailed with filters)
@@ -271,11 +296,13 @@ For machine-readable output, add `--json` flag:
 When migrating a command from v1 to v2:
 
 1. **Check if v2 contract exists:**
+
    ```bash
    ls packages/adt-client/src/adt/**/*contract.ts
    ```
 
 2. **Update imports:**
+
    ```typescript
    // Remove
    import { AdtClientImpl } from '@abapify/adt-client';
@@ -285,6 +312,7 @@ When migrating a command from v1 to v2:
    ```
 
 3. **Replace client initialization:**
+
    ```typescript
    // Old: const client = new AdtClientImpl();
    // New:
@@ -292,12 +320,14 @@ When migrating a command from v1 to v2:
    ```
 
 4. **Update API calls:**
+
    ```typescript
    // Old: await client.repository.searchObjects(...)
    // New: await adtClient.adt.repository.informationsystem.search.quickSearch(...)
    ```
 
 5. **Test the command:**
+
    ```bash
    npx adt <command> [args]
    ```
@@ -307,6 +337,7 @@ When migrating a command from v1 to v2:
 ## Testing Commands
 
 ### Manual Testing
+
 ```bash
 # Authenticate first
 npx adt auth login
@@ -318,6 +349,7 @@ npx adt <command> [args]
 ```
 
 ### Common Test Cases
+
 - ✅ Authentication check (should fail if not authenticated)
 - ✅ Valid input (should succeed)
 - ✅ Invalid input (should show error message)
@@ -329,24 +361,30 @@ npx adt <command> [args]
 ### Available Helpers
 
 **`utils/adt-client.ts`**
+
 - `getAdtClientV2(options?)` - Get authenticated v2 client
 
 **`utils/command-helpers.ts`**
+
 - `createComponentLogger()` - Create scoped logger
 - `handleCommandError()` - Standard error handling
 
 **`utils/format-loader.ts`**
+
 - `loadFormatPlugin()` - Load format plugins (e.g., @abapify/oat)
 
 **`utils/object-uri.ts`**
+
 - URI parsing and construction utilities
 
 ## Critical Rules
 
 ### NO CONSOLE USAGE in Commands
+
 **NEVER use `console.log`, `console.error`, `console.warn`, etc. directly in command implementations.**
 
 Commands should output to users using standard output/error streams:
+
 - Use `console.log()` and `console.error()` only for **user-facing output** (results, messages)
 - For debug logging, pass a logger to the client via `getAdtClientV2({ logger, enableLogging: true })`
 - The v2 client will use the logger internally for HTTP requests, session management, errors, etc.
@@ -356,26 +394,32 @@ Commands should output to users using standard output/error streams:
 ## Common Mistakes
 
 ### Mistake 1: Duplicating Client Initialization
+
 **Symptom:** 15-20 lines of auth code in every command
 **Fix:** Use `getAdtClientV2()` helper
 
 ### Mistake 2: Inconsistent Error Messages
+
 **Symptom:** Different error formats across commands
 **Fix:** Use standard error handling pattern (see above)
 
 ### Mistake 3: Not Handling Authentication
+
 **Symptom:** Command crashes when user not authenticated
 **Fix:** Use `getAdtClientV2()` - it handles auth check automatically
 
 ### Mistake 4: Missing JSON Output
+
 **Symptom:** Command only has human-readable output
 **Fix:** Add `--json` flag for machine-readable output
 
 ### Mistake 5: Mixing V1 and V2 Unnecessarily
+
 **Symptom:** Using v1 client when v2 contract exists
 **Fix:** Check if v2 contract exists and use it
 
 ### Mistake 6: Using Console for Debug Logging
+
 **Symptom:** Debug logs mixed with user output
 **Fix:** Pass logger to client and use `enableLogging` option
 
@@ -384,6 +428,7 @@ Commands should output to users using standard output/error streams:
 After creating a command, register it in:
 
 1. **`src/lib/commands/index.ts`:**
+
    ```typescript
    export { myCommand } from './mycommand';
    ```

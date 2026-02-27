@@ -1,6 +1,6 @@
 /**
  * ts-xsd
- * 
+ *
  * Core XSD parser, builder, and type inference for TypeScript.
  * Implements W3C XML Schema Definition (XSD) 1.1 specification.
  */

@@ -50,7 +50,7 @@ export class FileLoggingPlugin implements ResponsePlugin {
       }
     } catch (error) {
       this.config.logger?.error(
-        `Failed to write response file: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to write response file: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
 
@@ -79,7 +79,13 @@ export class FileLoggingPlugin implements ResponsePlugin {
     const segments = basePath.split('/').filter((s) => s);
 
     // Check if source endpoint (no extension)
-    const sourceTypes = ['main', 'definitions', 'implementations', 'macros', 'testclasses'];
+    const sourceTypes = [
+      'main',
+      'definitions',
+      'implementations',
+      'macros',
+      'testclasses',
+    ];
     const lastSegment = segments[segments.length - 1];
 
     if (sourceTypes.includes(lastSegment)) {
@@ -87,14 +93,17 @@ export class FileLoggingPlugin implements ResponsePlugin {
     }
 
     // Generate request ID
-    const requestId = Date.now().toString() + Math.random().toString(36).slice(2, 7);
+    const requestId =
+      Date.now().toString() + Math.random().toString(36).slice(2, 7);
 
     // Build directory path
     let dirPath = `./adt/${segments.join('/')}`;
 
     // Add query string to directory if present
     if (urlObj.search) {
-      const sanitizedQuery = urlObj.search.slice(1).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const sanitizedQuery = urlObj.search
+        .slice(1)
+        .replace(/[^a-zA-Z0-9_-]/g, '_');
       dirPath += `/${sanitizedQuery}`;
     }
 

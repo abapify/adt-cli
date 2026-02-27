@@ -65,7 +65,7 @@ export interface TypedSchemasOptions {
  * ```
  */
 export function typedSchemas(
-  options: TypedSchemasOptions = {}
+  options: TypedSchemasOptions = {},
 ): GeneratorPlugin {
   const {
     outputPath = 'src/schemas/generated/index.ts',
@@ -96,13 +96,13 @@ export function typedSchemas(
           " * import { classes } from '@abapify/adt-schemas';",
           ' * const data = classes.parse(xml);  // data is fully typed!',
           ' */',
-          ''
+          '',
         );
       }
 
       // Import typedSchema helper and TypedSchema type
       lines.push(
-        `import { typedSchema, type TypedSchema } from '${tsXsdPath}';`
+        `import { typedSchema, type TypedSchema } from '${tsXsdPath}';`,
       );
       lines.push('');
 
@@ -123,7 +123,7 @@ export function typedSchemas(
           if (rootTypes.length === 0) {
             // No root elements - skip or export raw
             lines.push(
-              `// ${schema.name}: No root elements found, skipping typed export`
+              `// ${schema.name}: No root elements found, skipping typed export`,
             );
             continue;
           }
@@ -144,12 +144,12 @@ export function typedSchemas(
           // Import type(s)
           if (rootTypes.length === 1) {
             lines.push(
-              `import type { ${rootTypes[0]} } from '${typesImport}';`
+              `import type { ${rootTypes[0]} } from '${typesImport}';`,
             );
           } else {
             // Multiple root types - import all
             lines.push(
-              `import type { ${rootTypes.join(', ')} } from '${typesImport}';`
+              `import type { ${rootTypes.join(', ')} } from '${typesImport}';`,
             );
           }
         }
@@ -159,11 +159,11 @@ export function typedSchemas(
 
       // Generate typed exports
       lines.push(
-        '// ============================================================================'
+        '// ============================================================================',
       );
       lines.push('// TYPED SCHEMA EXPORTS');
       lines.push(
-        '// ============================================================================'
+        '// ============================================================================',
       );
       lines.push('');
 
@@ -173,13 +173,13 @@ export function typedSchemas(
         if (rootTypes.length === 1) {
           // Single root type - explicit type annotation for isolatedDeclarations
           lines.push(
-            `export const ${exportName}: TypedSchema<${rootTypes[0]}> = typedSchema<${rootTypes[0]}>(_${exportName});`
+            `export const ${exportName}: TypedSchema<${rootTypes[0]}> = typedSchema<${rootTypes[0]}>(_${exportName});`,
           );
         } else {
           // Multiple root types - use union with explicit type annotation
           const unionType = rootTypes.join(' | ');
           lines.push(
-            `export const ${exportName}: TypedSchema<${unionType}> = typedSchema<${unionType}>(_${exportName});`
+            `export const ${exportName}: TypedSchema<${unionType}> = typedSchema<${unionType}>(_${exportName});`,
           );
         }
       }
@@ -191,7 +191,7 @@ export function typedSchemas(
       // If you need a specific type, import it directly from the types file:
       //   import type { AbapClass } from './types/sap/classes.types';
       lines.push(
-        '// Types are internal - import directly from types/{source}/{schema}.types if needed'
+        '// Types are internal - import directly from types/{source}/{schema}.types if needed',
       );
       lines.push('');
 

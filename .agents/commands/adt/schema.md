@@ -46,19 +46,22 @@ import schema from '../../speci';
 export default schema({
   ns: 'http://www.sap.com/adt/...',
   root: 'MyRoot',
-  elements: { /* ... */ },
-} as const);  // as const is REQUIRED for type inference!
+  elements: {
+    /* ... */
+  },
+} as const); // as const is REQUIRED for type inference!
 ```
 
 ### Why `as const`?
 
 Without `as const`, TypeScript widens literal types:
+
 ```typescript
 // WITHOUT as const - types are widened
-const bad = { name: 'foo', type: 'string' };  // type: { name: string; type: string }
+const bad = { name: 'foo', type: 'string' }; // type: { name: string; type: string }
 
 // WITH as const - literal types preserved
-const good = { name: 'foo', type: 'string' } as const;  // type: { name: 'foo'; type: 'string' }
+const good = { name: 'foo', type: 'string' } as const; // type: { name: 'foo'; type: 'string' }
 ```
 
 speci needs literal types to infer the correct TypeScript types from schema definitions.
@@ -83,6 +86,7 @@ speci needs literal types to infer the correct TypeScript types from schema defi
 **Goal:** Get real XML responses from SAP for the endpoint.
 
 **Actions:**
+
 1. Use ADT CLI to fetch sample data:
    ```bash
    npx adt fetch /sap/bc/adt/{endpoint} --raw > sample.xml
@@ -114,6 +118,7 @@ speci needs literal types to infer the correct TypeScript types from schema defi
 **When:** XSD file available in SAP SDK.
 
 **Actions:**
+
 1. Download XSD to `.xsd/model/`:
    ```bash
    npx nx run adt-schemas-xsd:download
@@ -157,6 +162,7 @@ speci needs literal types to infer the correct TypeScript types from schema defi
 **Location:** `adt-schemas-xsd/src/schemas/manual/`
 
 **Pattern:**
+
 ```typescript
 // src/schemas/manual/myschema.ts
 import schema from '../../speci';
@@ -165,22 +171,24 @@ export default schema({
   ns: 'http://www.sap.com/adt/myarea',
   prefix: 'myprefix',
   root: 'MyRootElement',
-  include: [/* imported schemas */],
+  include: [
+    /* imported schemas */
+  ],
   elements: {
     MyRootElement: {
       sequence: [
         { name: 'child1', type: 'string' },
         { name: 'child2', type: 'Child2Type' },
       ],
-      attributes: [
-        { name: 'attr1', type: 'string' },
-      ],
+      attributes: [{ name: 'attr1', type: 'string' }],
     },
     Child2Type: {
-      sequence: [/* ... */],
+      sequence: [
+        /* ... */
+      ],
     },
   },
-} as const);  // CRITICAL: as const for type inference
+} as const); // CRITICAL: as const for type inference
 ```
 
 ### Step 3c: Create ABAP XML Schema
@@ -188,11 +196,13 @@ export default schema({
 **When:** XML uses `asx:abap` envelope format.
 
 **Key rules:**
+
 1. **ALWAYS use `as const`** - Critical for TypeScript type inference
 2. **Element names WITHOUT namespace prefix** - Use `'abap'`, not `'asx:abap'`
 3. **Root element content is parsed directly** - No wrapper in result
 
 **Pattern:**
+
 ```typescript
 // src/schemas/manual/myabapschema.ts
 import schema from '../../speci';
@@ -200,7 +210,7 @@ import schema from '../../speci';
 export default schema({
   ns: 'http://www.sap.com/abapxml',
   prefix: 'asx',
-  root: 'abap',  // WITHOUT prefix!
+  root: 'abap', // WITHOUT prefix!
   elements: {
     abap: {
       sequence: [{ name: 'values', type: 'values' }],
@@ -216,17 +226,19 @@ export default schema({
       ],
     },
   },
-} as const);  // CRITICAL!
+} as const); // CRITICAL!
 ```
 
 ### Step 4: Export Schema
 
 **Actions:**
+
 1. Add export to `src/schemas/index.ts`:
+
    ```typescript
    // For generated schemas - usually auto-exported
    export * from './generated/sap';
-   
+
    // For manual schemas
    export { default as myschema } from './manual/myschema';
    ```
@@ -245,6 +257,7 @@ export default schema({
 4. **SchemaType<S> required** - use the type helper for parsed data
 
 **Pattern:**
+
 ```typescript
 // tests/scenarios/myschema.ts
 import { expect } from 'vitest';
@@ -253,14 +266,14 @@ import { myschema } from '../../src/schemas/index';
 
 export class MySchemaScenario extends Scenario<typeof myschema> {
   readonly schema = myschema;
-  readonly fixtures = ['myschema.xml'];  // In fixtures/ folder
+  readonly fixtures = ['myschema.xml']; // In fixtures/ folder
 
   validateParsed(data: SchemaType<typeof myschema>): void {
     // Type-safe assertions - TypeScript validates property access!
     // If schema is wrong, this won't compile
     expect(data.someField).toBeDefined();
     expect(data.nested?.child).toBe('expected');
-    
+
     // ❌ This would cause compile error if 'wrongField' not in schema:
     // expect(data.wrongField).toBeDefined();
   }
@@ -273,6 +286,7 @@ export class MySchemaScenario extends Scenario<typeof myschema> {
 ```
 
 **Register scenario:**
+
 ```typescript
 // tests/scenarios/index.ts
 import { MySchemaScenario } from './myschema';
@@ -290,6 +304,7 @@ npx tsc --noEmit -p packages/adt-schemas-xsd
 ```
 
 **Verify:**
+
 - Schema parses sample XML correctly
 - **Type check passes** (compile-time verification)
 - Type inference works (accessing wrong properties = compile error)

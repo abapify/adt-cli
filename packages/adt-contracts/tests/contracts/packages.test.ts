@@ -9,13 +9,13 @@ import { packagesContract } from '../../src/adt/packages';
 
 class PackagesScenario extends ContractScenario {
   readonly name = 'Packages';
-  
+
   readonly operations: ContractOperation[] = [
     {
       name: 'get package by name',
       contract: () => packagesContract.get('$TMP'),
       method: 'GET',
-      path: '/sap/bc/adt/packages/%24TMP',  // $ is URL-encoded
+      path: '/sap/bc/adt/packages/%24TMP', // $ is URL-encoded
       headers: { Accept: 'application/vnd.sap.adt.packages.v1+xml' },
       response: {
         status: 200,

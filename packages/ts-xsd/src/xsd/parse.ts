@@ -1,9 +1,9 @@
 /**
  * XSD Parser - Parse XSD documents to typed Schema objects
- * 
+ *
  * This parser understands XSD semantics and produces correctly typed output
  * matching the W3C XMLSchema.xsd specification.
- * 
+ *
  * No intermediate JSON - direct XSD to typed objects.
  */
 
@@ -456,7 +456,10 @@ function parseLocalComplexType(el: Element): LocalComplexType {
   return result;
 }
 
-function parseComplexTypeContent(el: Element, result: Mutable<TopLevelComplexType> | Mutable<LocalComplexType>): void {
+function parseComplexTypeContent(
+  el: Element,
+  result: Mutable<TopLevelComplexType> | Mutable<LocalComplexType>,
+): void {
   for (const child of getAllChildElements(el)) {
     const name = getLocalName(child);
     switch (name) {
@@ -523,7 +526,10 @@ function parseLocalSimpleType(el: Element): LocalSimpleType {
   return result;
 }
 
-function parseSimpleTypeContent(el: Element, result: Mutable<TopLevelSimpleType> | Mutable<LocalSimpleType>): void {
+function parseSimpleTypeContent(
+  el: Element,
+  result: Mutable<TopLevelSimpleType> | Mutable<LocalSimpleType>,
+): void {
   for (const child of getAllChildElements(el)) {
     const name = getLocalName(child);
     switch (name) {
@@ -669,7 +675,9 @@ function parseSimpleContent(el: Element): SimpleContent {
   return result;
 }
 
-function parseComplexContentRestriction(el: Element): ComplexContentRestriction {
+function parseComplexContentRestriction(
+  el: Element,
+): ComplexContentRestriction {
   const result: Mutable<ComplexContentRestriction> = { base: '' };
   copyAttr(el, result, 'id');
   copyAttr(el, result, 'base');
@@ -1096,28 +1104,43 @@ function parseNotation(el: Element): Notation {
 // Utility Functions
 // =============================================================================
 
-function copyAttr(el: Element, target: Record<string, unknown>, name: string): void {
+function copyAttr(
+  el: Element,
+  target: Record<string, unknown>,
+  name: string,
+): void {
   const value = el.getAttribute(name);
   if (value !== null) {
     target[name] = value;
   }
 }
 
-function copyBoolAttr(el: Element, target: Record<string, unknown>, name: string): void {
+function copyBoolAttr(
+  el: Element,
+  target: Record<string, unknown>,
+  name: string,
+): void {
   const value = el.getAttribute(name);
   if (value !== null) {
     target[name] = value === 'true';
   }
 }
 
-function pushTo(target: Record<string, unknown>, name: string, value: unknown): void {
+function pushTo(
+  target: Record<string, unknown>,
+  name: string,
+  value: unknown,
+): void {
   if (!target[name]) {
     target[name] = [];
   }
   (target[name] as unknown[]).push(value);
 }
 
-function parseAnnotationChild(el: Element, result: { annotation?: Annotation }): void {
+function parseAnnotationChild(
+  el: Element,
+  result: { annotation?: Annotation },
+): void {
   for (const child of getAllChildElements(el)) {
     if (getLocalName(child) === 'annotation') {
       result.annotation = parseAnnotation(child);
@@ -1129,11 +1152,11 @@ function parseAnnotationChild(el: Element, result: { annotation?: Annotation }):
 /**
  * Extract xmlns declarations from an element's attributes.
  * Returns undefined if no xmlns declarations found.
- * 
+ *
  * @example
  * For <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://example.com">
  * Returns: { xs: "http://www.w3.org/2001/XMLSchema", tns: "http://example.com" }
- * 
+ *
  * For <xs:element xmlns="http://default.com">
  * Returns: { "": "http://default.com" }
  */
@@ -1164,7 +1187,10 @@ function extractXmlns(el: Element): Record<string, string> | undefined {
 /**
  * Copy xmlns declarations to target if present
  */
-function copyXmlns(el: Element, target: { $xmlns?: Record<string, string> }): void {
+function copyXmlns(
+  el: Element,
+  target: { $xmlns?: Record<string, string> },
+): void {
   const xmlns = extractXmlns(el);
   if (xmlns) {
     target.$xmlns = xmlns;

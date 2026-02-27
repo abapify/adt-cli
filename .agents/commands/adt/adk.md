@@ -23,6 +23,7 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
 **Goal:** Fully understand the ABAP object type before implementation.
 
 **Actions:**
+
 1. Research the object type in SAP documentation
 2. Identify ADT endpoint(s) for the object type:
    - Discovery: `GET /sap/bc/adt/discovery` - find available endpoints
@@ -34,6 +35,7 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
 4. Identify if it's a repository object (transportable) or runtime object
 
 **Output:** Object type analysis document with:
+
 - ADT endpoint(s)
 - Supported operations (CRUD + actions)
 - Object relationships
@@ -46,6 +48,7 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
 **Goal:** Type-safe XML parsing for the object type.
 
 **Actions:**
+
 1. Capture sample XML responses from SAP:
    - GET single object
    - GET list/collection
@@ -60,6 +63,7 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
 5. **MANDATORY:** Create test scenario in `adt-schemas-xsd/tests/scenarios/`
 
 **Output:**
+
 - Schema in `adt-schemas-xsd/src/schemas/generated/` or `manual/`
 - Test scenario with real SAP XML fixture
 - Exported from index.ts
@@ -71,25 +75,30 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
 **Goal:** Type-safe API contract definition.
 
 **Actions:**
+
 1. Create contract in `adt-contracts/src/adt/{area}/`:
+
    ```typescript
    import { contract } from '../../base';
    import { mySchema } from '@abapify/adt-schemas-xsd';
-   
+
    export const myObject = {
-     get: (name: string) => contract({
-       method: 'GET',
-       path: `/sap/bc/adt/{area}/${name}`,
-       headers: { Accept: 'application/xml' },
-       responses: { 200: mySchema },
-     }),
+     get: (name: string) =>
+       contract({
+         method: 'GET',
+         path: `/sap/bc/adt/{area}/${name}`,
+         headers: { Accept: 'application/xml' },
+         responses: { 200: mySchema },
+       }),
      // ... other operations
    };
    ```
+
 2. Export from area index and main index
 3. **MANDATORY:** Create test scenario in `adt-contracts/tests/contracts/`
 
 **Output:**
+
 - Contract in `adt-contracts/src/adt/{area}/`
 - Test scenario with contract validation
 - Exported from index.ts
@@ -99,17 +108,20 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
 **Goal:** Business logic layer for complex operations.
 
 **When needed:**
+
 - Multi-step operations (create + activate + transport)
 - Complex error handling
 - Caching or optimization
 - Cross-object coordination
 
 **Actions:**
+
 1. Create service in `adt-client-v2/src/services/{area}/`:
+
    ```typescript
    export class MyObjectService {
      constructor(private client: AdtClient) {}
-     
+
      async get(name: string): Promise<MyObject> {
        const contract = myObjectContract.get(name);
        return this.client.execute(contract);
@@ -117,10 +129,12 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
      // ... other methods
    }
    ```
+
 2. Register service in client factory
 3. Add tests for service methods
 
 **Output:**
+
 - Service class in `adt-client-v2/src/services/`
 - Service registration in client
 - Unit tests
@@ -132,6 +146,7 @@ Comprehensive workflow for implementing a new ADK object type with full stack su
 **Location:** `adk-v2/src/objects/{category}/{object_type}/`
 
 **Files to create:**
+
 1. `{type}.model.ts` - Main ADK object class
 2. `{type}.types.ts` - TypeScript interfaces
 3. `index.ts` - Exports
@@ -167,12 +182,14 @@ export type MyObjectData = MyObjectResponse;
 ```
 
 **Why adt-client-v2 is the import source:**
+
 - **Single dependency:** ADK only depends on `adt-client-v2`, not `adt-contracts` directly
 - **Clean layering:** `adt-client-v2` re-exports contract types for consumers
 - **Contract is still source of truth:** Types originate from contract, but flow through client
 - **Simpler dependency graph:** ADK → client → contracts → schemas
 
 **Dependency Architecture:**
+
 ```
 adt-schemas-xsd (schema definitions)
        ↓
@@ -184,6 +201,7 @@ adk-v2 (imports types from client only)
 ```
 
 **Pattern:**
+
 ```typescript
 // {type}.model.ts
 import { AdkObject } from '../../../base/model';
@@ -195,39 +213,45 @@ export type MyObjectData = MyObjectResponse;
 
 export class AdkMyObject extends AdkObject<typeof MyObjectKind, MyObjectData> {
   readonly kind = MyObjectKind;
-  
-  get objectUri(): string { 
-    return `/sap/bc/adt/{area}/${encodeURIComponent(this.name)}`; 
+
+  get objectUri(): string {
+    return `/sap/bc/adt/{area}/${encodeURIComponent(this.name)}`;
   }
-  
+
   // Properties from schema
-  get description(): string { return this.dataSync.description; }
-  
+  get description(): string {
+    return this.dataSync.description;
+  }
+
   // Lazy-loaded relationships
   async getRelated(): Promise<AdkRelated[]> {
     return this.lazy('related', async () => {
       // Load via service
     });
   }
-  
+
   // CRUD operations
   async load(): Promise<this> {
     const data = await this.ctx.services.myObject.get(this.name);
     this.setData(data);
     return this;
   }
-  
+
   // Actions
-  async activate(): Promise<void> { /* ... */ }
+  async activate(): Promise<void> {
+    /* ... */
+  }
 }
 ```
 
 **Cross-object references:**
+
 - Use `AdkContext` for accessing other object types
 - Implement lazy loading for relationships
 - Use `lazy()` helper for caching
 
 **Output:**
+
 - ADK object model with full type safety
 - Lazy-loaded relationships
 - CRUD + action methods
@@ -242,6 +266,7 @@ export class AdkMyObject extends AdkObject<typeof MyObjectKind, MyObjectData> {
 See `/adt-command` workflow for detailed implementation guide.
 
 **Quick summary:**
+
 - Location: `adt-cli/src/lib/commands/{area}/`
 - Uses `getAdtClientV2()` for client
 - Uses router + pages for display
@@ -256,6 +281,7 @@ See `/adt-command` workflow for detailed implementation guide.
 See `/adt-page` workflow for detailed implementation guide.
 
 **Quick summary:**
+
 - Location: `adt-cli/src/lib/ui/pages/{type}.ts`
 - Self-registering via `definePage()`
 - Uses ADK for data fetching
@@ -268,6 +294,7 @@ See `/adt-page` workflow for detailed implementation guide.
 **Location:** `adt-tui/src/pages/{area}/`
 
 **Pattern:**
+
 ```typescript
 // pages/{area}/{type}-editor.tsx
 import { useState } from 'react';
@@ -277,17 +304,17 @@ import { useNavigation } from '../../lib/context';
 export function MyObjectEditor({ obj }: { obj: AdkMyObject }) {
   const [description, setDescription] = useState(obj.description);
   const { navigate } = useNavigation();
-  
+
   const save = async () => {
     await obj.update({ description });
     navigate('back');
   };
-  
+
   return (
     <Box flexDirection="column">
       <Text>Edit {obj.name}</Text>
-      <TextInput 
-        value={description} 
+      <TextInput
+        value={description}
         onChange={setDescription}
         placeholder="Description"
       />
@@ -298,11 +325,13 @@ export function MyObjectEditor({ obj }: { obj: AdkMyObject }) {
 ```
 
 **Integration:**
+
 - Register page in TUI routes
 - Connect to ADK object for save operations
 - Handle validation and errors
 
 **Output:**
+
 - TUI editor page
 - Form components for object fields
 - Save/cancel actions
@@ -314,10 +343,12 @@ export function MyObjectEditor({ obj }: { obj: AdkMyObject }) {
 **Location:** `plugins/abapgit/src/objects/{type}/`
 
 **Files to create:**
+
 1. `{type}-handler.ts` - Serialization/deserialization
 2. `{type}-files.ts` - File mapping
 
 **Pattern:**
+
 ```typescript
 // objects/{type}/{type}-handler.ts
 import { ObjectHandler } from '../../lib/handler';
@@ -326,15 +357,15 @@ import { AdkMyObject } from '@abapify/adk-v2';
 export class MyObjectHandler implements ObjectHandler {
   readonly objectType = 'MYOB';
   readonly fileExtension = 'myob';
-  
+
   async serialize(obj: AdkMyObject): Promise<SerializedFiles> {
     return {
-      [`${obj.name.toLowerCase()}.${this.fileExtension}.xml`]: 
+      [`${obj.name.toLowerCase()}.${this.fileExtension}.xml`]:
         this.buildMetadataXml(obj),
       // Additional files (source code, etc.)
     };
   }
-  
+
   async deserialize(files: SerializedFiles): Promise<MyObjectData> {
     // Parse files back to object data
   }
@@ -342,6 +373,7 @@ export class MyObjectHandler implements ObjectHandler {
 ```
 
 **Register handler:**
+
 ```typescript
 // objects/index.ts
 import { MyObjectHandler } from './{type}/{type}-handler';
@@ -352,6 +384,7 @@ export const handlers = [
 ```
 
 **Output:**
+
 - Object handler for serialization
 - File mapping for Git storage
 - Round-trip tests

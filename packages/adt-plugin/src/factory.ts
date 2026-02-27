@@ -1,6 +1,6 @@
 /**
  * ADT Plugin Factory
- * 
+ *
  * Factory function for creating ADT plugins with validation.
  */
 
@@ -8,24 +8,24 @@ import type { AdtPlugin, AdtPluginDefinition } from './types';
 
 /**
  * Create an ADT plugin with validation
- * 
+ *
  * @param definition - Plugin definition
  * @returns Validated plugin instance
- * 
+ *
  * @example
  * ```typescript
  * import { createPlugin } from '@abapify/adt-plugin';
- * 
+ *
  * export const myPlugin = createPlugin({
  *   name: 'myFormat',
  *   version: '1.0.0',
  *   description: 'My custom format plugin',
- *   
+ *
  *   registry: {
  *     isSupported: (type) => supportedTypes.includes(type),
  *     getSupportedTypes: () => supportedTypes,
  *   },
- *   
+ *
  *   format: {
  *     import: async (object, targetPath, context) => {
  *       // Implementation

@@ -38,7 +38,7 @@ export interface OperationDescriptor {
  */
 export type OperationFunction<
   TParams extends any[] = any[],
-  TDescriptor extends OperationDescriptor = OperationDescriptor
+  TDescriptor extends OperationDescriptor = OperationDescriptor,
 > = (...params: TParams) => TDescriptor;
 
 /**

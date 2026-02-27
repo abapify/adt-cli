@@ -1,8 +1,8 @@
 /**
  * XSD Types - TypeScript representation of W3C XML Schema Definition
- * 
+ *
  * Based on: https://www.w3.org/TR/xmlschema11-1/XMLSchema.xsd
- * 
+ *
  * These types represent the structure of XSD documents.
  * They are designed to be the result of parsing XMLSchema.xsd itself.
  */
@@ -17,10 +17,10 @@
 
 /**
  * XML namespace declarations (xmlns:prefix -> URI mappings)
- * 
+ *
  * This is not part of XSD itself, but part of XML Namespaces spec.
  * XSD documents rely on xmlns declarations to resolve QName prefixes.
- * 
+ *
  * @example
  * ```typescript
  * xmlns: {
@@ -39,15 +39,15 @@ export type XmlnsDeclarations = {
  * Allows attributes from other namespaces
  */
 export interface OpenAttrs {
-  /** 
+  /**
    * XML namespace declarations scoped to this element (xmlns:prefix -> namespace URI).
    * Inherited by child elements unless overridden.
-   * 
+   *
    * Note: Prefixed with $ to indicate this is NOT a W3C XSD property -
    * it's extracted from XML namespace attributes.
    */
   readonly $xmlns?: XmlnsDeclarations;
-  
+
   /** Any additional attributes from other namespaces */
   [key: string]: unknown;
 }
@@ -62,20 +62,20 @@ export interface SchemaAttrs extends OpenAttrs {
    * Extracted from XML namespace attributes, not part of XSD spec.
    */
   readonly $xmlns?: { readonly [prefix: string]: string };
-  
+
   /**
    * Original filename/path of this schema.
    * Used to reconstruct $imports relationships from schemaLocation references.
    */
   readonly $filename?: string;
-  
+
   /**
    * Resolved imported schemas for cross-schema type resolution (xs:import).
    * Actual schema objects that can be searched for type definitions.
    * Use this to link schemas that import each other (different namespace).
    */
   readonly $imports?: readonly Schema[];
-  
+
   /**
    * Resolved included schemas for same-namespace type resolution (xs:include).
    * Content from xs:include is in the same namespace as the including schema.
@@ -131,14 +131,14 @@ export interface Schema extends SchemaAttrs {
   readonly defaultAttributes?: string;
   readonly xpathDefaultNamespace?: string;
   readonly 'xml:lang'?: string;
-  
+
   // Composition
   readonly include?: Include[];
   readonly import?: Import[];
   readonly redefine?: Redefine[];
   readonly override?: Override[];
   readonly annotation?: Annotation[];
-  
+
   // Schema top-level declarations
   // Note: W3C XSD defines these as arrays only. Union types with maps were removed
   // because they caused TypeScript inference issues. Use utility functions for lookups.
@@ -149,7 +149,7 @@ export interface Schema extends SchemaAttrs {
   readonly element?: TopLevelElement[];
   readonly attribute?: TopLevelAttribute[];
   readonly notation?: Notation[];
-  
+
   // Default open content (XSD 1.1)
   readonly defaultOpenContent?: DefaultOpenContent;
 }
@@ -209,16 +209,16 @@ export interface TopLevelElement extends Annotated {
   readonly abstract?: boolean;
   readonly final?: string;
   readonly block?: string;
-  
+
   // Inline type definition
   readonly simpleType?: LocalSimpleType;
   readonly complexType?: LocalComplexType;
-  
+
   // Identity constraints
   readonly unique?: Unique[];
   readonly key?: Key[];
   readonly keyref?: Keyref[];
-  
+
   // Alternatives (XSD 1.1)
   readonly alternative?: Alternative[];
 }
@@ -238,16 +238,16 @@ export interface LocalElement extends Annotated {
   readonly block?: string;
   readonly form?: FormChoice;
   readonly targetNamespace?: string;
-  
+
   // Inline type definition
   readonly simpleType?: LocalSimpleType;
   readonly complexType?: LocalComplexType;
-  
+
   // Identity constraints
   readonly unique?: Unique[];
   readonly key?: Key[];
   readonly keyref?: Keyref[];
-  
+
   // Alternatives (XSD 1.1)
   readonly alternative?: Alternative[];
 }
@@ -265,7 +265,7 @@ export interface TopLevelAttribute extends Annotated {
   readonly default?: string;
   readonly fixed?: string;
   readonly inheritable?: boolean;
-  
+
   readonly simpleType?: LocalSimpleType;
 }
 
@@ -282,7 +282,7 @@ export interface LocalAttribute extends Annotated {
   readonly form?: FormChoice;
   readonly targetNamespace?: string;
   readonly inheritable?: boolean;
-  
+
   readonly simpleType?: LocalSimpleType;
 }
 
@@ -300,11 +300,11 @@ export interface TopLevelComplexType extends Annotated {
   readonly final?: string;
   readonly block?: string;
   readonly defaultAttributesApply?: boolean;
-  
+
   // Content model (choice)
   readonly simpleContent?: SimpleContent;
   readonly complexContent?: ComplexContent;
-  
+
   // Short form (implicit restriction of anyType)
   readonly openContent?: OpenContent;
   readonly group?: GroupRef;
@@ -322,11 +322,11 @@ export interface TopLevelComplexType extends Annotated {
  */
 export interface LocalComplexType extends Annotated {
   readonly mixed?: boolean;
-  
+
   // Content model (choice)
   readonly simpleContent?: SimpleContent;
   readonly complexContent?: ComplexContent;
-  
+
   // Short form
   readonly openContent?: OpenContent;
   readonly group?: GroupRef;
@@ -349,7 +349,7 @@ export interface LocalComplexType extends Annotated {
 export interface TopLevelSimpleType extends Annotated {
   readonly name: string;
   readonly final?: string;
-  
+
   // Derivation (choice)
   readonly restriction?: SimpleTypeRestriction;
   readonly list?: List;
@@ -369,7 +369,7 @@ export interface LocalSimpleType extends Annotated {
 export interface SimpleTypeRestriction extends Annotated {
   readonly base?: string;
   readonly simpleType?: LocalSimpleType;
-  
+
   // Facets
   readonly minExclusive?: Facet[];
   readonly minInclusive?: Facet[];
@@ -450,7 +450,7 @@ export interface ComplexContentExtension extends Annotated {
 export interface SimpleContentRestriction extends Annotated {
   readonly base: string;
   readonly simpleType?: LocalSimpleType;
-  
+
   // Facets (same as SimpleTypeRestriction)
   readonly minExclusive?: Facet[];
   readonly minInclusive?: Facet[];
@@ -466,7 +466,7 @@ export interface SimpleContentRestriction extends Annotated {
   readonly pattern?: Pattern[];
   readonly assertion?: Assertion[];
   readonly explicitTimezone?: Facet[];
-  
+
   readonly attribute?: LocalAttribute[];
   readonly attributeGroup?: AttributeGroupRef[];
   readonly anyAttribute?: AnyAttribute;
@@ -491,7 +491,7 @@ export interface SimpleContentExtension extends Annotated {
 export interface ExplicitGroup extends Annotated {
   readonly minOccurs?: number | string;
   readonly maxOccurs?: number | string | 'unbounded';
-  
+
   readonly element?: LocalElement[];
   readonly group?: GroupRef[];
   readonly choice?: ExplicitGroup[];
@@ -505,7 +505,7 @@ export interface ExplicitGroup extends Annotated {
 export interface All extends Annotated {
   readonly minOccurs?: number | string;
   readonly maxOccurs?: number | string;
-  
+
   readonly element?: LocalElement[];
   readonly any?: Any[];
   readonly group?: GroupRef[];

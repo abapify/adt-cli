@@ -4,11 +4,11 @@
 
 **Core XSD parser, builder, and type inference** - the foundation for all XSD-based packages.
 
-| Module | Purpose | Key Exports |
-|--------|---------|-------------|
-| `xsd` | Parse/build XSD files | `parseXsd`, `buildXsd`, `Schema` |
-| `infer` | Compile-time type inference | `InferSchema`, `InferElement` |
-| `xml` | Parse/build XML with schemas | `parseXml`, `buildXml` |
+| Module    | Purpose                      | Key Exports                                   |
+| --------- | ---------------------------- | --------------------------------------------- |
+| `xsd`     | Parse/build XSD files        | `parseXsd`, `buildXsd`, `Schema`              |
+| `infer`   | Compile-time type inference  | `InferSchema`, `InferElement`                 |
+| `xml`     | Parse/build XML with schemas | `parseXml`, `buildXml`                        |
 | `codegen` | Generate TypeScript from XSD | `generateSchemaLiteral`, `generateInterfaces` |
 
 ## 🚨 Critical Rules
@@ -17,14 +17,15 @@
 
 **NEVER** add properties that don't exist in [XMLSchema.xsd](https://www.w3.org/TR/xmlschema11-1/XMLSchema.xsd):
 
-| ❌ WRONG | ✅ CORRECT | Reason |
-|----------|-----------|--------|
-| `attributes` | `attribute` | W3C uses singular |
-| `elements` | `element` | W3C uses singular |
-| `text` | `_text` | Not in XSD spec (use `_text` for mixed content) |
-| Direct array for sequence | `ExplicitGroup` | Must match W3C structure |
+| ❌ WRONG                  | ✅ CORRECT      | Reason                                          |
+| ------------------------- | --------------- | ----------------------------------------------- |
+| `attributes`              | `attribute`     | W3C uses singular                               |
+| `elements`                | `element`       | W3C uses singular                               |
+| `text`                    | `_text`         | Not in XSD spec (use `_text` for mixed content) |
+| Direct array for sequence | `ExplicitGroup` | Must match W3C structure                        |
 
 **Before ANY change to `types.ts`:**
+
 1. Find the type in [XMLSchema.xsd](https://www.w3.org/TR/xmlschema11-1/XMLSchema.xsd)
 2. Match properties exactly (name, type, optionality)
 3. Run `npx nx test ts-xsd`
@@ -44,11 +45,11 @@ explicitGroup    → ExplicitGroup
 
 Non-W3C properties are prefixed with `$` to clearly distinguish them from W3C XSD properties.
 
-| Property | Type | Purpose |
-|----------|------|---------|
-| `$xmlns` | `{ [prefix: string]: string }` | **Namespace declarations** - Maps prefixes to namespace URIs. Extracted from `xmlns:*` attributes in XML. Required for resolving QName prefixes like `xs:string` or `adtcore:AdtObject`. |
-| `$imports` | `Schema[]` | **Linked schemas** - Array of resolved imported schemas. Enables cross-schema type resolution. When type inference encounters `base: "adtcore:AdtObject"`, it searches `$imports` to find the `AdtObject` complexType. |
-| `$filename` | `string` | **Source filename** - Original XSD filename (e.g., `classes.xsd`). Enables **backward rendering** - rebuilding XSD from schema objects with correct import references. |
+| Property    | Type                           | Purpose                                                                                                                                                                                                                |
+| ----------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$xmlns`    | `{ [prefix: string]: string }` | **Namespace declarations** - Maps prefixes to namespace URIs. Extracted from `xmlns:*` attributes in XML. Required for resolving QName prefixes like `xs:string` or `adtcore:AdtObject`.                               |
+| `$imports`  | `Schema[]`                     | **Linked schemas** - Array of resolved imported schemas. Enables cross-schema type resolution. When type inference encounters `base: "adtcore:AdtObject"`, it searches `$imports` to find the `AdtObject` complexType. |
+| `$filename` | `string`                       | **Source filename** - Original XSD filename (e.g., `classes.xsd`). Enables **backward rendering** - rebuilding XSD from schema objects with correct import references.                                                 |
 
 #### Why These Extensions?
 
@@ -130,12 +131,12 @@ src/
 
 ### Key Components
 
-| Component | Purpose |
-|-----------|---------|
-| **Resolver** | Merges `$imports`, expands `complexContent/extension`, handles `substitutionGroup` |
-| **Traverser** | OO traversal with real W3C XSD types (SchemaTraverser class) |
-| **Walker** | Functional iteration over schema elements, types, groups |
-| **Loader** | File-based XSD loading with automatic import resolution |
+| Component     | Purpose                                                                            |
+| ------------- | ---------------------------------------------------------------------------------- |
+| **Resolver**  | Merges `$imports`, expands `complexContent/extension`, handles `substitutionGroup` |
+| **Traverser** | OO traversal with real W3C XSD types (SchemaTraverser class)                       |
+| **Walker**    | Functional iteration over schema elements, types, groups                           |
+| **Loader**    | File-based XSD loading with automatic import resolution                            |
 
 ## Key Type Definitions
 
@@ -146,18 +147,18 @@ interface Schema {
   // Namespace
   targetNamespace?: string;
   elementFormDefault?: 'qualified' | 'unqualified';
-  
+
   // Declarations
   element?: TopLevelElement[];
   complexType?: TopLevelComplexType[];
   simpleType?: TopLevelSimpleType[];
   group?: NamedGroup[];
   attributeGroup?: NamedAttributeGroup[];
-  
+
   // Composition
   import?: Import[];
   include?: Include[];
-  
+
   // Extensions (non-W3C)
   $xmlns?: { [prefix: string]: string };
   $imports?: Schema[];
@@ -230,23 +231,23 @@ npx vitest run tests/unit/parse.test.ts
 
 ### Test Categories
 
-| Test | Purpose |
-|------|---------|
-| `parse.test.ts` | XSD parsing |
-| `build.test.ts` | XSD building |
-| `roundtrip.test.ts` | Parse → Build → Parse |
+| Test                    | Purpose                |
+| ----------------------- | ---------------------- |
+| `parse.test.ts`         | XSD parsing            |
+| `build.test.ts`         | XSD building           |
+| `roundtrip.test.ts`     | Parse → Build → Parse  |
 | `w3c-roundtrip.test.ts` | Official XMLSchema.xsd |
 
 ## Common Mistakes
 
-| Mistake | Consequence | Prevention |
-|---------|-------------|------------|
-| Inventing properties | Breaks W3C compliance | Check XMLSchema.xsd first |
-| Renaming properties | Type inference fails | Use exact W3C names |
-| Simplifying structures | Loses XSD semantics | Keep nested structure |
-| Missing `as const` | Type inference fails | Always use `as const` |
-| Circular type refs | TypeScript errors | Use `$imports` linking |
-| Stack overflow in codegen | Infinite recursion | Cycle detection in `expandTypeToString` |
+| Mistake                   | Consequence           | Prevention                              |
+| ------------------------- | --------------------- | --------------------------------------- |
+| Inventing properties      | Breaks W3C compliance | Check XMLSchema.xsd first               |
+| Renaming properties       | Type inference fails  | Use exact W3C names                     |
+| Simplifying structures    | Loses XSD semantics   | Keep nested structure                   |
+| Missing `as const`        | Type inference fails  | Always use `as const`                   |
+| Circular type refs        | TypeScript errors     | Use `$imports` linking                  |
+| Stack overflow in codegen | Infinite recursion    | Cycle detection in `expandTypeToString` |
 
 ## Dependencies
 

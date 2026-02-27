@@ -164,7 +164,9 @@ export async function loadConfig(
       }
     }
     // Config path specified but file not found/loadable - continue with auto-discovery
-    console.warn(`Warning: Config file not found at ${configPath}, using auto-discovery`);
+    console.warn(
+      `Warning: Config file not found at ${configPath}, using auto-discovery`,
+    );
   }
 
   // Try TS config first

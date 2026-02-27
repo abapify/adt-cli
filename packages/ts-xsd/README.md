@@ -8,12 +8,12 @@
 
 `ts-xsd` is a comprehensive TypeScript library for working with W3C XSD schemas. It provides:
 
-| Module | Purpose |
-|--------|---------|
-| **xsd** | Parse XSD files into typed `Schema` objects, build XSD from objects |
-| **infer** | Compile-time TypeScript type inference from schema literals |
-| **xml** | Parse/build XML documents using schema definitions |
-| **codegen** | Generate TypeScript schema literals from XSD files |
+| Module      | Purpose                                                             |
+| ----------- | ------------------------------------------------------------------- |
+| **xsd**     | Parse XSD files into typed `Schema` objects, build XSD from objects |
+| **infer**   | Compile-time TypeScript type inference from schema literals         |
+| **xml**     | Parse/build XML documents using schema definitions                  |
+| **codegen** | Generate TypeScript schema literals from XSD files                  |
 
 ### Key Features
 
@@ -64,15 +64,17 @@ import type { InferSchema } from '@abapify/ts-xsd';
 // Define schema as const literal
 const personSchema = {
   element: [{ name: 'person', type: 'PersonType' }],
-  complexType: [{
-    name: 'PersonType',
-    sequence: {
-      element: [
-        { name: 'name', type: 'xs:string' },
-        { name: 'age', type: 'xs:int', minOccurs: 0 },
-      ]
-    }
-  }]
+  complexType: [
+    {
+      name: 'PersonType',
+      sequence: {
+        element: [
+          { name: 'name', type: 'xs:string' },
+          { name: 'age', type: 'xs:int', minOccurs: 0 },
+        ],
+      },
+    },
+  ],
 } as const;
 
 // Infer TypeScript type at compile time
@@ -117,9 +119,9 @@ Build an XSD XML string from a Schema object.
 
 ```typescript
 const xsd = buildXsd(schema, {
-  prefix: 'xsd',      // Namespace prefix (default: 'xs')
-  pretty: true,       // Pretty print (default: true)
-  indent: '  '        // Indentation (default: '  ')
+  prefix: 'xsd', // Namespace prefix (default: 'xs')
+  pretty: true, // Pretty print (default: true)
+  indent: '  ', // Indentation (default: '  ')
 });
 ```
 
@@ -157,14 +159,14 @@ type Person = InferElement<typeof schema, 'person'>;
 
 #### Built-in Type Mapping
 
-| XSD Type | TypeScript |
-|----------|------------|
-| `xs:string`, `xs:token`, `xs:NCName` | `string` |
-| `xs:int`, `xs:integer`, `xs:decimal` | `number` |
-| `xs:boolean` | `boolean` |
-| `xs:date`, `xs:dateTime`, `xs:time` | `string` |
-| `xs:anyURI`, `xs:QName` | `string` |
-| `xs:anyType` | `unknown` |
+| XSD Type                             | TypeScript |
+| ------------------------------------ | ---------- |
+| `xs:string`, `xs:token`, `xs:NCName` | `string`   |
+| `xs:int`, `xs:integer`, `xs:decimal` | `number`   |
+| `xs:boolean`                         | `boolean`  |
+| `xs:date`, `xs:dateTime`, `xs:time`  | `string`   |
+| `xs:anyURI`, `xs:QName`              | `string`   |
+| `xs:anyType`                         | `unknown`  |
 
 ### XML Module
 
@@ -194,7 +196,7 @@ Generate TypeScript schema literal from XSD content.
 const code = generateSchemaLiteral(xsdContent, {
   name: 'PersonSchema',
   features: { $xmlns: true, $imports: true },
-  exclude: ['annotation']
+  exclude: ['annotation'],
 });
 // export default { ... } as const;
 ```
@@ -205,9 +207,9 @@ Generate TypeScript interfaces from parsed schema. Returns an object with `code`
 
 ```typescript
 const { code } = generateInterfaces(schema, {
-  flatten: true,      // Inline all nested types (default: false)
-  addJsDoc: true,     // Add JSDoc comments
-  rootTypeName: 'MySchema',  // Custom root type name
+  flatten: true, // Inline all nested types (default: false)
+  addJsDoc: true, // Add JSDoc comments
+  rootTypeName: 'MySchema', // Custom root type name
 });
 ```
 
@@ -221,22 +223,22 @@ interface Schema {
   targetNamespace?: string;
   elementFormDefault?: 'qualified' | 'unqualified';
   attributeFormDefault?: 'qualified' | 'unqualified';
-  
+
   // Composition
   import?: Import[];
   include?: Include[];
-  
+
   // Declarations
   element?: TopLevelElement[];
   complexType?: TopLevelComplexType[];
   simpleType?: TopLevelSimpleType[];
   group?: NamedGroup[];
   attributeGroup?: NamedAttributeGroup[];
-  
+
   // Extensions (non-W3C, prefixed with $)
   $xmlns?: { [prefix: string]: string };
-  $imports?: Schema[];  // Resolved imported schemas
-  $filename?: string;   // Source filename
+  $imports?: Schema[]; // Resolved imported schemas
+  $filename?: string; // Source filename
 }
 ```
 
@@ -251,7 +253,7 @@ const classes = parseXsd(classesXsd);
 // Link schemas via $imports
 const linkedClasses = {
   ...classes,
-  $imports: [adtcore]
+  $imports: [adtcore],
 };
 
 // Now InferSchema can resolve types from adtcore
@@ -277,28 +279,31 @@ The type inference system uses TypeScript's conditional types to:
 const schema = {
   $imports: [baseSchema],
   element: [{ name: 'order', type: 'OrderType' }],
-  complexType: [{
-    name: 'OrderType',
-    complexContent: {
-      extension: {
-        base: 'base:BaseEntity',  // Inherits from imported schema
-        sequence: {
-          element: [
-            { name: 'items', type: 'ItemType', maxOccurs: 'unbounded' },
-            { name: 'total', type: 'xs:decimal' },
-          ]
-        }
-      }
-    }
-  }, {
-    name: 'ItemType',
-    sequence: {
-      element: [
-        { name: 'sku', type: 'xs:string' },
-        { name: 'quantity', type: 'xs:int' },
-      ]
-    }
-  }]
+  complexType: [
+    {
+      name: 'OrderType',
+      complexContent: {
+        extension: {
+          base: 'base:BaseEntity', // Inherits from imported schema
+          sequence: {
+            element: [
+              { name: 'items', type: 'ItemType', maxOccurs: 'unbounded' },
+              { name: 'total', type: 'xs:decimal' },
+            ],
+          },
+        },
+      },
+    },
+    {
+      name: 'ItemType',
+      sequence: {
+        element: [
+          { name: 'sku', type: 'xs:string' },
+          { name: 'quantity', type: 'xs:int' },
+        ],
+      },
+    },
+  ],
 } as const;
 
 type Order = InferSchema<typeof schema>;
@@ -349,12 +354,12 @@ type Order = InferSchema<typeof schema>;
 
 ### Key Components
 
-| Component | Purpose |
-|-----------|---------|
-| **Resolver** | Merges `$imports`, expands `complexContent/extension`, handles `substitutionGroup` |
-| **Traverser** | OO traversal with real W3C XSD types (SchemaTraverser class) |
-| **Walker** | Functional iteration over schema elements, types, groups |
-| **Loader** | File-based XSD loading with automatic import resolution |
+| Component     | Purpose                                                                            |
+| ------------- | ---------------------------------------------------------------------------------- |
+| **Resolver**  | Merges `$imports`, expands `complexContent/extension`, handles `substitutionGroup` |
+| **Traverser** | OO traversal with real W3C XSD types (SchemaTraverser class)                       |
+| **Walker**    | Functional iteration over schema elements, types, groups                           |
+| **Loader**    | File-based XSD loading with automatic import resolution                            |
 
 ## Design Principles
 
@@ -375,6 +380,7 @@ npx nx test:coverage ts-xsd
 ```
 
 Tests include:
+
 - Unit tests for parser, builder, and inference
 - Integration tests with real XSD files
 - W3C XMLSchema.xsd roundtrip verification

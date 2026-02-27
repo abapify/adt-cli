@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { fixtures } from 'adt-fixtures';
-import { systeminformation, type SystemInformationJson } from '../../src/schemas/index';
+import {
+  systeminformation,
+  type SystemInformationJson,
+} from '../../src/schemas/index';
 
 /**
  * Test for System Information response - GET /sap/bc/adt/core/http/systeminformation

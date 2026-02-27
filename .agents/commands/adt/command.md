@@ -40,6 +40,7 @@ Create CLI commands for ADT object types.
 ```
 
 **Why this order?**
+
 - **ADK** - Encapsulates business logic, relationships, lazy loading
 - **Service** - Reusable business logic, error handling
 - **Contract** - Type-safe but low-level
@@ -65,6 +66,7 @@ Create CLI commands for ADT object types.
 ### Command Patterns
 
 **Full CRUD cycle:**
+
 - `get <id>` - Display single object
 - `list` - List objects with filters
 - `create` - Create new object
@@ -75,6 +77,7 @@ Create CLI commands for ADT object types.
 ### Client Initialization
 
 **ALWAYS use shared helper:**
+
 ```typescript
 import { getAdtClientV2 } from '../utils/adt-client-v2';
 import { AdkTransportRequest } from '@abapify/adk-v2';
@@ -87,6 +90,7 @@ const transport = await AdkTransportRequest.get(number);
 ```
 
 **Key points:**
+
 - `getAdtClientV2()` automatically initializes ADK global context
 - ADK objects can be used without passing context explicitly
 - Context is optional - pass it only for testing or multi-connection scenarios
@@ -100,10 +104,11 @@ const transport = await AdkTransportRequest.get(number);
 **Location:** `adt-cli/src/lib/commands/{area}/{type}.ts`
 
 **Pattern:**
+
 ```typescript
 /**
  * adt {area} {type} - {Type} commands
- * 
+ *
  * Uses ADK ({AdkType}) for operations.
  */
 
@@ -231,6 +236,7 @@ describe('{type} command', () => {
 ## Output Formatting Guidelines
 
 ### Emoji Indicators
+
 - 🔄 - Loading/in progress
 - 🔍 - Searching
 - 📋 - Listing results
@@ -240,7 +246,9 @@ describe('{type} command', () => {
 - 💾 - File saved
 
 ### JSON Output
+
 **Always add `--json` flag:**
+
 ```typescript
 if (options.json) {
   console.log(JSON.stringify(data, null, 2));
@@ -251,6 +259,7 @@ if (options.json) {
 ```
 
 ### Error Handling
+
 ```typescript
 try {
   // Command logic
@@ -267,7 +276,7 @@ Commands should use the router for display:
 
 ```typescript
 import { router } from '../../ui/router';
-import '../../ui/pages/{type}';  // Trigger page registration
+import '../../ui/pages/{type}'; // Trigger page registration
 
 // In action handler:
 const page = await router.navTo(client, '{TYPE_CODE}', { name: id });
@@ -275,6 +284,7 @@ page.print();
 ```
 
 This separates:
+
 - **Command** - Handles CLI args, options, auth, progress
 - **Page** - Handles data fetching and rendering
 

@@ -144,7 +144,7 @@ export class AdtClient {
   async getClass(name: string): Promise<string> {
     const response = await this.request(
       'GET',
-      `/sap/bc/adt/oo/classes/${name}`
+      `/sap/bc/adt/oo/classes/${name}`,
     );
 
     if (this.logResponseFiles) {
@@ -159,7 +159,7 @@ export class AdtClient {
   async getClassSource(name: string, include: IncludeType): Promise<string> {
     const source = await this.request(
       'GET',
-      `/sap/bc/adt/oo/classes/${name}/source/${include}`
+      `/sap/bc/adt/oo/classes/${name}/source/${include}`,
     );
 
     if (this.logResponseFiles) {
@@ -302,7 +302,7 @@ describe('ADT Client logging', () => {
     await client.getClass('ZCL_TEST');
 
     expect(
-      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/metadata.xml')
+      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/metadata.xml'),
     ).toBe(true);
   });
 
@@ -311,7 +311,7 @@ describe('ADT Client logging', () => {
     await client.getClass('ZCL_TEST');
 
     expect(
-      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/metadata.xml')
+      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/metadata.xml'),
     ).toBe(false);
   });
 });
@@ -323,17 +323,17 @@ describe('ADT Client logging', () => {
 describe('Transport import with logging', () => {
   it('should create complete log structure', async () => {
     await runCommand(
-      'npx adt import transport MOCK000001 --log-response-files'
+      'npx adt import transport MOCK000001 --log-response-files',
     );
 
     expect(
-      fs.existsSync('./tmp/logs/adt/cts/transports/MOCK000001/metadata.xml')
+      fs.existsSync('./tmp/logs/adt/cts/transports/MOCK000001/metadata.xml'),
     ).toBe(true);
     expect(
-      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/metadata.xml')
+      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/metadata.xml'),
     ).toBe(true);
     expect(
-      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/source/main')
+      fs.existsSync('./tmp/logs/adt/oo/classes/zcl_test/source/main'),
     ).toBe(true);
   });
 });

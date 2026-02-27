@@ -87,6 +87,8 @@ export function createPuppeteerAdapter(): BrowserAdapter {
           waitUntil: 'domcontentloaded',
           timeout: options?.timeout ?? 30000,
         })
+        // Navigation errors are intentionally ignored; caller handles auth via event listeners
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
     },
 

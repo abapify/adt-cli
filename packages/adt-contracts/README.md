@@ -70,12 +70,12 @@ const atc = createClient(atcContract, config);
 
 ## Available Contracts
 
-| Contract | Description |
-|----------|-------------|
-| `coreContract` | Core ADT object operations |
-| `ctsContract` | Change and Transport System |
-| `atcContract` | ABAP Test Cockpit |
-| `ooContract` | Object-Oriented (classes, interfaces) |
+| Contract       | Description                           |
+| -------------- | ------------------------------------- |
+| `coreContract` | Core ADT object operations            |
+| `ctsContract`  | Change and Transport System           |
+| `atcContract`  | ABAP Test Cockpit                     |
+| `ooContract`   | Object-Oriented (classes, interfaces) |
 
 ## Architecture
 

@@ -44,6 +44,8 @@ RUN apt-get update && apt-get install -y \
     xdg-utils
 
 USER node
-# Install uv Python package manager system-wide
+# Install uv Python package manager
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Install bun
+RUN curl -fsSL https://bun.sh/install | bash
 

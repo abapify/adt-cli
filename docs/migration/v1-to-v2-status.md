@@ -136,6 +136,7 @@ export type {
 Priority order based on usage:
 
 1. **Lock/Unlock** (2 commands depend on this)
+
    ```typescript
    // @abapify/adt-contracts
    export const lockContract = {
@@ -145,6 +146,7 @@ Priority order based on usage:
    ```
 
 2. **Source Operations** (deploy command)
+
    ```typescript
    // @abapify/adt-contracts
    export const sourceContract = {
@@ -154,6 +156,7 @@ Priority order based on usage:
    ```
 
 3. **ATC Service** (atc command)
+
    ```typescript
    // @abapify/adt-contracts
    export const atcContract = {
@@ -172,6 +175,7 @@ For each command using v1:
 
 1. Check if required contract exists in v2
 2. Update imports:
+
    ```typescript
    // Remove
    import { AdtClientImpl } from '@abapify/adt-client';
@@ -179,6 +183,7 @@ For each command using v1:
    // Add
    import { getAdtClientV2 } from '../utils/adt-client-v2';
    ```
+
 3. Update API calls to use contract-based approach
 4. Test thoroughly
 5. Remove v1 import
@@ -186,6 +191,7 @@ For each command using v1:
 ### Phase 4: Extract Logger Utilities
 
 Move `createLogger` and `createFileLogger` from v1 to either:
+
 - `@abapify/logger` (if generally useful)
 - `@abapify/adt-cli/utils` (if CLI-specific)
 

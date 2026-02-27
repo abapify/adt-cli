@@ -1,6 +1,6 @@
 /**
  * Object Handler Registry for abapGit plugin
- * 
+ *
  * Handlers auto-register themselves when instantiated via BaseHandler constructor.
  * This module just ensures all handlers are loaded and re-exports registry functions.
  */

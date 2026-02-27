@@ -71,7 +71,7 @@ export interface GenerateOptions {
  */
 export function generateSchemaLiteral(
   xsdContent: string,
-  options: GenerateOptions = {}
+  options: GenerateOptions = {},
 ): string {
   const schema = parseXsd(xsdContent);
   const features = options.features ?? {};
@@ -98,7 +98,7 @@ export function generateSchemaLiteral(
 function applyTransforms(
   schema: Record<string, unknown>,
   features: NonNullable<GenerateOptions['features']>,
-  exclude: Set<string>
+  exclude: Set<string>,
 ): Record<string, unknown> {
   return applyTransformsWithImports(schema, features, exclude, []);
 }
@@ -117,7 +117,7 @@ function applyTransformsWithImports(
   schema: Record<string, unknown>,
   features: NonNullable<GenerateOptions['features']>,
   exclude: Set<string>,
-  importedSchemaNames: string[]
+  importedSchemaNames: string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
@@ -136,7 +136,7 @@ function applyTransformsWithImports(
       // Convert import to $imports with schema references
       if (features.$imports && importedSchemaNames.length > 0) {
         result['$imports'] = importedSchemaNames.map(
-          (name) => new SchemaRef(name)
+          (name) => new SchemaRef(name),
         );
       }
       // If no imports resolved, skip the import property entirely
@@ -179,7 +179,7 @@ function filterDeep(value: unknown, exclude: Set<string>): unknown {
  */
 export function generateSchemaFile(
   xsdContent: string,
-  options: GenerateOptions = {}
+  options: GenerateOptions = {},
 ): string {
   const {
     name = 'schema',
@@ -248,7 +248,7 @@ export function generateSchemaFile(
 function generateSchemaLiteralWithImports(
   xsdContent: string,
   options: GenerateOptions,
-  importedSchemaNames: string[]
+  importedSchemaNames: string[],
 ): string {
   const schema = parseXsd(xsdContent);
   const features = options.features ?? {};
@@ -267,7 +267,7 @@ function generateSchemaLiteralWithImports(
     outputSchema,
     features,
     exclude,
-    importedSchemaNames
+    importedSchemaNames,
   );
 
   return schemaToLiteral(outputSchema as Schema, options);
@@ -285,7 +285,7 @@ function escapeReservedWord(name: string): string {
  */
 function schemaToLiteral(
   schema: Schema,
-  options: GenerateOptions = {}
+  options: GenerateOptions = {},
 ): string {
   const {
     name = 'schema',
@@ -313,7 +313,7 @@ function objectToLiteral(
   value: unknown,
   pretty: boolean,
   indent: string,
-  depth: number
+  depth: number,
 ): string {
   if (value === null || value === undefined) {
     return 'undefined';
@@ -338,7 +338,7 @@ function objectToLiteral(
     }
 
     const items = value.map((item) =>
-      objectToLiteral(item, pretty, indent, depth + 1)
+      objectToLiteral(item, pretty, indent, depth + 1),
     );
 
     if (pretty) {

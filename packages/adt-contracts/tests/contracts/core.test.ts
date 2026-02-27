@@ -3,7 +3,10 @@
  */
 
 import { fixtures } from 'adt-fixtures';
-import { http as sessions, systeminformationSchema as systeminformation } from '../../src/schemas';
+import {
+  http as sessions,
+  systeminformationSchema as systeminformation,
+} from '../../src/schemas';
 import { ContractScenario, runScenario, type ContractOperation } from './base';
 import { sessionsContract } from '../../src/adt/core/http/sessions';
 import { systeminformationContract } from '../../src/adt/core/http/systeminformation';

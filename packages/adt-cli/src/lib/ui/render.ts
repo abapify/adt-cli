@@ -10,12 +10,12 @@ import type { Page, MenuItem } from './types';
 /**
  * Create print function for a page
  */
-export function createPrintFn(page: { 
+export function createPrintFn(page: {
   title: string;
   titleLink?: string;
-  icon?: string; 
-  menu?: MenuItem[]; 
-  footer?: string; 
+  icon?: string;
+  menu?: MenuItem[];
+  footer?: string;
   render: () => string[];
 }): () => void {
   return () => {
