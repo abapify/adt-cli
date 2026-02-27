@@ -10,9 +10,7 @@
       "extensions": ["nrwl.angular-console"]
     }
   },
-  "runArgs": [
-    "--network=host"
-  ],
+  "runArgs": ["--network=host"],
   "remoteEnv": {
     "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
   },

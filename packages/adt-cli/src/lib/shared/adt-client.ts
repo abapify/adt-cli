@@ -1,9 +1,9 @@
 /**
  * Shared ADT Client State
- * 
+ *
  * Global state and singleton instances for ADT client management.
  * This module holds stateful objects that are shared across CLI commands.
- * 
+ *
  * For the factory function that creates clients, see utils/adt-client.ts
  */
 import type { Logger } from '@abapify/adt-client';
