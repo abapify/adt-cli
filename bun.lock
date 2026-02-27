@@ -5,10 +5,7 @@
     "": {
       "name": "abapify",
       "dependencies": {
-        "@cloudfoundry/api": "^0.1.7",
         "@nx/devkit": "22.1.1",
-        "@sap/cds-dk": "^8.4.0",
-        "@sap/xsenv": "^5.4.0",
         "@xmldom/xmldom": "^0.9.5",
         "axios": "^1.7.7",
         "dset": "^3.1.4",
@@ -24,7 +21,6 @@
         "zod": "^4.1.13",
       },
       "devDependencies": {
-        "@cap-js/cds-types": "^0.7.0",
         "@eslint/js": "^9.8.0",
         "@nx/eslint": "22.1.1",
         "@nx/eslint-plugin": "22.1.1",
@@ -62,12 +58,12 @@
         "knip": "^5.71.0",
         "nx": "22.1.1",
         "pino-pretty": "^10.3.1",
-        "prettier": "^2.6.2",
+        "prettier": "^3.7.4",
         "rollup": "^4.14.0",
         "swc-loader": "0.1.15",
         "ts-jest": "29.4.1",
         "ts-node": "10.9.1",
-        "tsdown": "^0.16.7",
+        "tsdown": "^0.18.0",
         "tslib": "^2.3.0",
         "tsx": "^4.19.2",
         "typescript": "^5.9.3",
@@ -82,6 +78,15 @@
       "version": "0.0.1",
       "dependencies": {
         "@abapify/adt-client": "*",
+        "@abapify/adt-schemas": "*",
+      },
+    },
+    "packages/adt-atc": {
+      "name": "@abapify/adt-atc",
+      "version": "0.1.0",
+      "dependencies": {
+        "@abapify/adt-plugin": "workspace:*",
+        "chalk": "^5.3.0",
       },
     },
     "packages/adt-auth": {
@@ -100,10 +105,14 @@
       },
       "dependencies": {
         "@abapify/adk": "*",
+        "@abapify/adt-atc": "*",
         "@abapify/adt-auth": "*",
         "@abapify/adt-client": "*",
+        "@abapify/adt-codegen": "*",
         "@abapify/adt-config": "*",
         "@abapify/adt-contracts": "*",
+        "@abapify/adt-export": "*",
+        "@abapify/adt-plugin": "*",
         "@abapify/adt-plugin-abapgit": "*",
         "@abapify/adt-tui": "*",
         "@abapify/logger": "*",
@@ -128,6 +137,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@abapify/adt-contracts": "*",
+        "@abapify/adt-schemas": "*",
         "@abapify/logger": "*",
       },
     },
@@ -138,6 +148,7 @@
         "adt-codegen": "./dist/cli.js",
       },
       "dependencies": {
+        "@abapify/adt-plugin": "workspace:*",
         "chalk": "^5.3.0",
         "commander": "^11.1.0",
         "fast-xml-parser": "^4.3.2",
@@ -158,6 +169,15 @@
         "adt-fixtures": "*",
       },
     },
+    "packages/adt-export": {
+      "name": "@abapify/adt-export",
+      "version": "0.1.0",
+      "dependencies": {
+        "@abapify/adt-plugin": "workspace:*",
+        "@abapify/adk": "workspace:*",
+        "@abapify/adt-plugin-abapgit": "workspace:*",
+      },
+    },
     "packages/adt-fixtures": {
       "name": "adt-fixtures",
       "version": "0.0.1",
@@ -166,6 +186,7 @@
       "name": "@abapify/adt-playwright",
       "version": "0.0.1",
       "dependencies": {
+        "@abapify/adt-auth": "*",
         "@abapify/adt-config": "*",
         "@abapify/browser-auth": "*",
         "playwright": "^1.57.0",
@@ -186,6 +207,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@abapify/adk": "*",
+        "@abapify/adt-atc": "workspace:*",
         "@abapify/adt-plugin": "*",
         "ts-xsd": "workspace:*",
       },
@@ -310,6 +332,8 @@
 
     "@abapify/adt-auth": ["@abapify/adt-auth@workspace:packages/adt-auth"],
 
+    "@abapify/adt-atc": ["@abapify/adt-atc@workspace:packages/adt-atc"],
+
     "@abapify/adt-cli": ["@abapify/adt-cli@workspace:packages/adt-cli"],
 
     "@abapify/adt-client": ["@abapify/adt-client@workspace:packages/adt-client"],
@@ -319,6 +343,8 @@
     "@abapify/adt-config": ["@abapify/adt-config@workspace:packages/adt-config"],
 
     "@abapify/adt-contracts": ["@abapify/adt-contracts@workspace:packages/adt-contracts"],
+
+    "@abapify/adt-export": ["@abapify/adt-export@workspace:packages/adt-export"],
 
     "@abapify/adt-playwright": ["@abapify/adt-playwright@workspace:packages/adt-playwright"],
 
