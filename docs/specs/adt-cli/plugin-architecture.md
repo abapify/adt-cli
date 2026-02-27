@@ -47,7 +47,7 @@ class PluginManager {
   // Runtime plugin loading with @package/plugin syntax
   async loadPlugin(
     pluginName: string,
-    options?: Record<string, any>
+    options?: Record<string, any>,
   ): Promise<PluginInfo>;
 
   // Format discovery and validation
@@ -248,7 +248,7 @@ abstract class BaseFormat {
   abstract serialize(
     objectData: any,
     objectType: string,
-    outputDir: string
+    outputDir: string,
   ): Promise<SerializeResult>;
 
   // Plugin lifecycle hooks

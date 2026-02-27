@@ -31,10 +31,10 @@ export default withPuppeteer(
     },
   }),
   {
-    userDataDir: true,           // Enable session persistence
-    headless: false,             // Show browser window for SSO
+    userDataDir: true, // Enable session persistence
+    headless: false, // Show browser window for SSO
     requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'],
-  }
+  },
 );
 ```
 
@@ -88,7 +88,7 @@ console.log(result.valid); // true/false
 
 ## Options
 
-```typescript
+````typescript
 interface PuppeteerAuthOptions {
   /** SAP system URL (required) */
   url: string;
@@ -148,7 +148,7 @@ export default withPuppeteer(
     userDataDir: true,  // ALL destinations share the same profile
   }
 );
-```
+````
 
 ### Per-Destination Configuration
 
@@ -161,7 +161,7 @@ export default defineConfig({
   destinations: {
     DEV: puppeteer({
       url: 'https://sap-dev.example.com',
-      userDataDir: '/path/to/dev-profile',  // Custom profile for DEV
+      userDataDir: '/path/to/dev-profile', // Custom profile for DEV
     }),
     PROD: puppeteer({
       url: 'https://sap-prod.example.com',
@@ -197,6 +197,7 @@ npx adt auth refresh --sid S0D
 ```
 
 **How it works:**
+
 1. Launches **headless browser** with persistent profile (no window popup!)
 2. Navigates to SAP system
 3. Okta **auto-authenticates** from stored session
@@ -204,6 +205,7 @@ npx adt auth refresh --sid S0D
 5. Updates `~/.adt/auth.json`
 
 **Benefits:**
+
 - ⚡ **Fast** - No manual login, typically <30 seconds
 - 🤫 **Silent** - Runs in background, no browser window
 - 🔄 **Automatic** - ADT CLI can auto-refresh when detecting expired sessions
@@ -241,11 +243,11 @@ export default withPuppeteer(
   }),
   {
     // Plugin options applied to ALL destinations
-    userDataDir: true,  // Session persistence
-    headless: false,    // Show browser
-    timeout: 120000,    // 2 min timeout
+    userDataDir: true, // Session persistence
+    headless: false, // Show browser
+    timeout: 120000, // 2 min timeout
     requiredCookies: ['MYSAPSSO2', 'SAP_SESSIONID_*'],
-  }
+  },
 );
 ```
 
@@ -276,7 +278,7 @@ export default defineConfig({
   destinations: {
     DEV: puppeteer({
       url: 'https://sap-dev.example.com',
-      timeout: 60000,  // Custom timeout for DEV
+      timeout: 60000, // Custom timeout for DEV
     }),
 
     PROD: puppeteer({
@@ -330,13 +332,13 @@ export type {
 
 ## Playwright vs Puppeteer
 
-| Feature | Playwright | Puppeteer |
-|---------|------------|-----------|
-| **Browser Support** | Chromium, Firefox, WebKit | Chrome/Chromium |
-| **Maintenance** | Microsoft-backed | Google-backed |
-| **API Style** | Modern, auto-waiting | Classic, manual waits |
-| **Bundle Size** | Larger | Smaller |
-| **Recommendation** | Preferred for new projects | Legacy/existing projects |
+| Feature             | Playwright                 | Puppeteer                |
+| ------------------- | -------------------------- | ------------------------ |
+| **Browser Support** | Chromium, Firefox, WebKit  | Chrome/Chromium          |
+| **Maintenance**     | Microsoft-backed           | Google-backed            |
+| **API Style**       | Modern, auto-waiting       | Classic, manual waits    |
+| **Bundle Size**     | Larger                     | Smaller                  |
+| **Recommendation**  | Preferred for new projects | Legacy/existing projects |
 
 Both packages share the same core logic via `@abapify/browser-auth`.
 

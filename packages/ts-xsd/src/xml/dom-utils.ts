@@ -1,6 +1,6 @@
 /**
  * DOM Utilities for XML parsing/building
- * 
+ *
  * Shared utilities for working with xmldom elements.
  * These handle namespace-aware attribute/element access.
  * Uses xmldom's native iterators where possible.
@@ -75,7 +75,8 @@ export function getAllChildElements(parent: Element): Element[] {
 export function getTextContent(node: Element): string {
   let text = '';
   for (const child of node.childNodes) {
-    if (child.nodeType === 3) { // TEXT_NODE
+    if (child.nodeType === 3) {
+      // TEXT_NODE
       text += child.textContent || '';
     }
   }
@@ -92,7 +93,11 @@ export function getLocalName(node: Element): string {
 /**
  * Check if element has a specific local name (case-insensitive option)
  */
-export function hasLocalName(node: Element, name: string, caseInsensitive = false): boolean {
+export function hasLocalName(
+  node: Element,
+  name: string,
+  caseInsensitive = false,
+): boolean {
   const localName = getLocalName(node);
   if (caseInsensitive) {
     return localName.toLowerCase() === name.toLowerCase();

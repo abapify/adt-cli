@@ -1,11 +1,11 @@
 /**
  * Tests for XML builder respecting elementFormDefault
- * 
+ *
  * The builder behavior for elementFormDefault:
  * - "unqualified": Root element and local elements do NOT get namespace prefix
  *   (This matches the abapGit XML format where <abapGit> has no prefix)
  * - "qualified": Root element and local elements DO get namespace prefix
- * 
+ *
  * Note: This is a pragmatic interpretation for the abapGit use case.
  * Strict XSD semantics would have global elements always prefixed, but
  * abapGit requires unqualified root elements.
@@ -74,21 +74,34 @@ describe('XML builder elementFormDefault handling', () => {
       CHILD2: 'value2',
     };
 
-    const xml = build(unqualifiedSchema, data, { rootElement: 'root', pretty: true });
+    const xml = build(unqualifiedSchema, data, {
+      rootElement: 'root',
+      pretty: true,
+    });
     console.log('Generated XML (unqualified):');
     console.log(xml);
 
     // Root element should NOT have prefix when elementFormDefault="unqualified"
     // This matches abapGit format where <abapGit> has no prefix
     assert.ok(xml.includes('<root'), 'Root element should exist');
-    assert.ok(!xml.includes('<asx:root'), 'Root element should NOT have prefix when unqualified');
-    
+    assert.ok(
+      !xml.includes('<asx:root'),
+      'Root element should NOT have prefix when unqualified',
+    );
+
     // Local elements should NOT have prefix when elementFormDefault="unqualified"
-    const hasUnprefixedChild1 = xml.includes('<CHILD1>') || xml.includes('<CHILD1 ');
+    const hasUnprefixedChild1 =
+      xml.includes('<CHILD1>') || xml.includes('<CHILD1 ');
     const hasPrefixedChild1 = xml.includes('<asx:CHILD1');
-    
-    assert.ok(hasUnprefixedChild1, 'Local elements should NOT have prefix when unqualified');
-    assert.ok(!hasPrefixedChild1, 'Local elements should NOT have asx: prefix when unqualified');
+
+    assert.ok(
+      hasUnprefixedChild1,
+      'Local elements should NOT have prefix when unqualified',
+    );
+    assert.ok(
+      !hasPrefixedChild1,
+      'Local elements should NOT have asx: prefix when unqualified',
+    );
   });
 
   it('qualified schema SHOULD prefix all elements', () => {
@@ -97,13 +110,25 @@ describe('XML builder elementFormDefault handling', () => {
       CHILD2: 'value2',
     };
 
-    const xml = build(qualifiedSchema, data, { rootElement: 'root', pretty: true });
+    const xml = build(qualifiedSchema, data, {
+      rootElement: 'root',
+      pretty: true,
+    });
     console.log('Generated XML (qualified):');
     console.log(xml);
 
     // All elements should have prefix when elementFormDefault="qualified"
-    assert.ok(xml.includes('<asx:root'), 'Root element should have prefix when qualified');
-    assert.ok(xml.includes('<asx:CHILD1'), 'Local elements should have prefix when qualified');
-    assert.ok(xml.includes('<asx:CHILD2'), 'Local elements should have prefix when qualified');
+    assert.ok(
+      xml.includes('<asx:root'),
+      'Root element should have prefix when qualified',
+    );
+    assert.ok(
+      xml.includes('<asx:CHILD1'),
+      'Local elements should have prefix when qualified',
+    );
+    assert.ok(
+      xml.includes('<asx:CHILD2'),
+      'Local elements should have prefix when qualified',
+    );
   });
 });

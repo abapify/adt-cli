@@ -18,3 +18,4 @@ export { setDefaultCommand } from './auth/set-default';
 export { createCtsCommand } from './cts';
 export { createReplCommand } from './repl';
 export { packageGetCommand } from './package';
+export { lsCommand } from './ls';

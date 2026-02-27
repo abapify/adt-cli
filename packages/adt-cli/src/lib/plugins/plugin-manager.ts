@@ -30,6 +30,7 @@ export class PluginManager {
   private loadedPlugins = new Map<string, PluginInfo>();
   private configLoader = new ConfigLoader();
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
   static getInstance(): PluginManager {

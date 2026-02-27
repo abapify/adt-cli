@@ -26,7 +26,7 @@ export function createCommandLogger(command: Command): Logger {
  */
 export function createComponentLogger(
   command: Command,
-  component: string
+  component: string,
 ): Logger {
   const logger = createCommandLogger(command);
   return logger.child({ component });
@@ -38,7 +38,7 @@ export function createComponentLogger(
 export function handleCommandError(error: unknown, operation: string): never {
   console.error(
     `❌ ${operation} failed:`,
-    error instanceof Error ? error.message : String(error)
+    error instanceof Error ? error.message : String(error),
   );
   process.exit(1);
 }

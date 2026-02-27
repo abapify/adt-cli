@@ -44,7 +44,7 @@ export interface BootstrapSchemasOptions {
  */
 function contentTypeToPath(
   contentType: string,
-  format: 'json' | 'xml'
+  format: 'json' | 'xml',
 ): string {
   // Remove +json or +xml suffix
   const base = contentType.replace(/\+(json|xml)$/, '');
@@ -74,7 +74,7 @@ function generateJsonSchemaTemplate(contentType: string): string {
       additionalProperties: true,
     },
     null,
-    2
+    2,
   );
 }
 
@@ -107,7 +107,7 @@ function generateXmlSchemaTemplate(contentType: string): string {
  * Factory function to create bootstrap schemas plugin
  */
 export function bootstrapSchemas(
-  options: BootstrapSchemasOptions = {}
+  options: BootstrapSchemasOptions = {},
 ): CodegenPlugin {
   const { output = 'schemas/{schemaPath}', unique = false } = options;
 
@@ -170,7 +170,7 @@ export function bootstrapSchemas(
               throw new Error(
                 `Duplicate schema path detected: "${filePath}"\n` +
                   `Content type: ${info.contentType}\n` +
-                  `Enable unique: true requires each schema to have a unique output path.`
+                  `Enable unique: true requires each schema to have a unique output path.`,
               );
             }
             seenPaths.add(filePath);

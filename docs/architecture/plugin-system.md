@@ -9,13 +9,11 @@ The ADT CLI now implements a plugin-based configuration system where format hand
 ### Core Components
 
 1. **Format Registry** (`/lib/formats/format-registry.ts`)
-
    - Manages format plugins (OAT, abapGit, etc.)
    - Auto-registers available object types from ObjectRegistry
    - Provides unified interface for format operations
 
 2. **Object Registry** (`/lib/objects/registry.ts`)
-
    - Manages object type handlers using ADK adapters
    - Currently supports: CLAS, INTF, DOMA
    - Uses ADK bridge for type-safe operations

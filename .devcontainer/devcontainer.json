@@ -4,23 +4,13 @@
     "dockerfile": "Dockerfile",
     "context": "."
   },
-  "mounts": [
-    "source=/home/${localEnv:USER}/.codeium,target=/home/node/.codeium,type=bind,consistency=cached",
-    //"source=/home/${localEnv:USER}/.gitconfig,target=/home/node/.gitconfig,type=bind,consistency=cached",
-    "source=/home/${localEnv:USER}/.npmrc,target=/home/node/.npmrc,type=bind,consistency=cached",
-    "source=/home/${localEnv:USER}/.vscode-server/data/User/globalStorage/kilocode.kilo-code,target=/home/node/.kilocode-data,type=bind,consistency=cached",
-    "source=/home/${localEnv:USER}/.kilocode,target=/home/node/.kilocode,type=bind,consistency=cached"
-  ],
+
   "customizations": {
     "vscode": {
       "extensions": ["nrwl.angular-console"]
     }
   },
-  "runArgs": [
-    "--network=host",
-    "--cap-add=SYS_ADMIN",
-    "--name=abapify-js-devcontainer"
-  ],
+  "runArgs": ["--network=host"],
   "remoteEnv": {
     "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
   },
@@ -28,6 +18,5 @@
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": false
     }
-  },
-  "postCreateCommand": "mkdir -p /home/node/.vscode-server/data/User/globalStorage && ln -sfn /home/node/.kilocode-data /home/node/.vscode-server/data/User/globalStorage/kilocode.kilo-code"
+  }
 }

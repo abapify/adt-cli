@@ -12,7 +12,9 @@ export const setDefaultCommand = new Command('set-default')
 
       if (!availableSids.includes(upperSid)) {
         console.error(`❌ System ${upperSid} not found.`);
-        console.error(`\nAvailable systems: ${availableSids.join(', ') || 'none'}`);
+        console.error(
+          `\nAvailable systems: ${availableSids.join(', ') || 'none'}`,
+        );
         console.error(`💡 Run "npx adt auth login --sid=${upperSid}" first`);
         process.exit(1);
       }
@@ -23,7 +25,7 @@ export const setDefaultCommand = new Command('set-default')
     } catch (error) {
       console.error(
         '❌ Failed to set default system:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

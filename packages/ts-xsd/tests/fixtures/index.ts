@@ -24,7 +24,7 @@ export async function getW3CSchema(): Promise<string> {
   }
 
   const content = await response.text();
-  
+
   // Cache for future runs
   mkdirSync(dirname(CACHE_PATH), { recursive: true });
   writeFileSync(CACHE_PATH, content, 'utf-8');

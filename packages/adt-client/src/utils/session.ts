@@ -137,8 +137,10 @@ export class CsrfTokenManager {
    */
   extractFromCookies(cookies: Map<string, string>): string | undefined {
     // Find CSRF/XSRF cookie
-    const xsrfEntry = Array.from(cookies.entries()).find(([key]) =>
-      key.toLowerCase().includes('xsrf') || key.toLowerCase().includes('csrf')
+    const xsrfEntry = Array.from(cookies.entries()).find(
+      ([key]) =>
+        key.toLowerCase().includes('xsrf') ||
+        key.toLowerCase().includes('csrf'),
     );
 
     if (!xsrfEntry) {
@@ -315,7 +317,7 @@ export class SessionManager {
     // Try to extract CSRF from cookies if not in header
     if (!csrfToken && this.cookieStore.hasCookies()) {
       const cookieCsrf = this.csrfManager.extractFromCookies(
-        this.cookieStore.getAll()
+        this.cookieStore.getAll(),
       );
       if (cookieCsrf) {
         this.csrfManager.cache(cookieCsrf);
@@ -340,7 +342,7 @@ export class SessionManager {
 
     // Add CSRF token for write operations
     const needsCsrf = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(
-      method.toUpperCase()
+      method.toUpperCase(),
     );
     if (needsCsrf) {
       const cachedToken = this.csrfManager.getCached();
@@ -390,7 +392,7 @@ export class SessionManager {
     baseUrl: string,
     authHeader: string,
     client?: string,
-    language?: string
+    language?: string,
   ): Promise<boolean> {
     const url = new URL('/sap/bc/adt/core/http/sessions', baseUrl);
 
@@ -422,7 +424,9 @@ export class SessionManager {
       });
 
       if (!response.ok) {
-        this.logger?.warn(`Session: CSRF initialization failed with status ${response.status}`);
+        this.logger?.warn(
+          `Session: CSRF initialization failed with status ${response.status}`,
+        );
         return false;
       }
 
@@ -433,12 +437,16 @@ export class SessionManager {
       if (success) {
         this.logger?.debug('Session: CSRF token initialized successfully');
       } else {
-        this.logger?.warn('Session: CSRF initialization succeeded but no token found');
+        this.logger?.warn(
+          'Session: CSRF initialization succeeded but no token found',
+        );
       }
 
       return success;
     } catch (error) {
-      this.logger?.error(`Session: CSRF initialization error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger?.error(
+        `Session: CSRF initialization error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return false;
     }
   }

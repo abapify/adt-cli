@@ -1,6 +1,7 @@
-import { loadFormatPlugin } from '../../utils/format-loader';
-import type { ImportContext } from '@abapify/adt-plugin';
-import { AdkPackage } from '@abapify/adk';
+import { loadFormatPlugin, parseFormatSpec } from '../../utils/format-loader';
+import { getConfig } from '../../utils/destinations';
+import type { ImportContext, FormatOptionValue } from '@abapify/adt-plugin';
+import { AdkPackage, AdkTransport } from '@abapify/adk';
 
 /**
  * Options for importing a transport request
@@ -14,6 +15,8 @@ export interface TransportImportOptions {
   objectTypes?: string[];
   /** Format plugin name or package (e.g., 'oat', '@abapify/oat') */
   format: string;
+  /** Format-specific options provided via CLI */
+  formatOptions?: Record<string, FormatOptionValue>;
   /** Enable debug output */
   debug?: boolean;
 }
@@ -70,6 +73,46 @@ export interface ImportResult {
  * 4. Delegate serialization to format plugin
  */
 export class ImportService {
+  private async getConfigFormatOptions(
+    formatSpec: string,
+  ): Promise<Record<string, FormatOptionValue>> {
+    const loadedConfig = await getConfig();
+    const rawConfig = loadedConfig.raw as Record<string, unknown>;
+    const importConfig = rawConfig.import;
+
+    if (
+      !importConfig ||
+      typeof importConfig !== 'object' ||
+      Array.isArray(importConfig)
+    ) {
+      return {};
+    }
+
+    const formatOptionsMap = (importConfig as { formatOptions?: unknown })
+      .formatOptions;
+    if (
+      !formatOptionsMap ||
+      typeof formatOptionsMap !== 'object' ||
+      Array.isArray(formatOptionsMap)
+    ) {
+      return {};
+    }
+
+    const { package: packageName } = parseFormatSpec(formatSpec);
+    const shortName = packageName.replace('@abapify/adt-plugin-', '');
+    const pluginName = packageName.replace('@abapify/', '');
+    const aliases = [formatSpec, packageName, shortName, pluginName];
+
+    for (const alias of aliases) {
+      const value = (formatOptionsMap as Record<string, unknown>)[alias];
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return value as Record<string, FormatOptionValue>;
+      }
+    }
+
+    return {};
+  }
+
   /**
    * Import objects from a transport request
    *
@@ -87,13 +130,13 @@ export class ImportService {
 
     // Load format plugin
     const plugin = await loadFormatPlugin(options.format);
+    const configFormatOptions = await this.getConfigFormatOptions(
+      options.format,
+    );
 
     if (options.debug) {
       console.log(`✅ Loaded plugin: ${plugin.name}`);
     }
-
-    // Import AdkTransport dynamically (ADK must be initialized before this)
-    const { AdkTransport } = await import('@abapify/adk');
 
     // Fetch transport
     if (options.debug) {
@@ -185,6 +228,8 @@ export class ImportService {
         // CLI provides a resolver function to get full package hierarchy from SAP
         const context: ImportContext = {
           resolvePackagePath,
+          formatOptions: options.formatOptions,
+          configFormatOptions,
         };
 
         // Delegate to plugin - import object from SAP to local files
@@ -257,9 +302,6 @@ export class ImportService {
     if (options.debug) {
       console.log(`✅ Loaded plugin: ${plugin.name}`);
     }
-
-    // Import AdkPackage dynamically (ADK must be initialized before this)
-    const { AdkPackage } = await import('@abapify/adk');
 
     // Fetch package
     if (options.debug) {

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@abapify/adk": "*",
+    "@abapify/adt-atc": "workspace:*",
     "@abapify/adt-plugin": "*",
     "ts-xsd": "workspace:*"
   }

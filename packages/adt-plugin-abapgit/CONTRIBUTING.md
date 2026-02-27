@@ -64,21 +64,21 @@ The codegen produces **two type levels** for each schema:
 ```typescript
 // Generated types/intf.ts
 export interface AbapGitType {
-    abap: AbapType;           // asx:abap envelope
-    version: string;          // abapGit attributes
-    serializer: string;
-    serializer_version: string;
+  abap: AbapType; // asx:abap envelope
+  version: string; // abapGit attributes
+  serializer: string;
+  serializer_version: string;
 }
 
 export interface AbapValuesType {
-    VSEOINTERF?: VseoInterfType;  // Object-specific content
+  VSEOINTERF?: VseoInterfType; // Object-specific content
 }
 
 export interface VseoInterfType {
-    CLSNAME: string;
-    LANGU?: string;
-    DESCRIPT?: string;
-    // ... all fields from XSD
+  CLSNAME: string;
+  LANGU?: string;
+  DESCRIPT?: string;
+  // ... all fields from XSD
 }
 ```
 
@@ -108,7 +108,7 @@ If your object uses a new SAP structure, create the type XSD first.
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   {TYPENAME} Type Definition
-  
+
   Defines the {TYPENAME} structure used in {type}.xsd
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -169,6 +169,7 @@ If your object uses a new SAP structure, create the type XSD first.
 ```
 
 **Key points:**
+
 - Use `xs:include` for type definitions (same namespace)
 - Use `xs:redefine` to extend `AbapValuesType`
 - Use `xs:import` for the abapGit root element
@@ -201,6 +202,7 @@ npx nx codegen adt-plugin-abapgit
 ```
 
 This generates:
+
 - `src/schemas/generated/schemas/mytype.ts` - Raw schema literal
 - `src/schemas/generated/types/mytype.ts` - TypeScript interfaces
 - Updates `src/schemas/generated/index.ts` - Adds typed schema export
@@ -221,7 +223,7 @@ import { createHandler } from '../base';
 export const {type}Handler = createHandler(Adk{Type}, {
   // Schema provides type inference for toAbapGit return value
   schema: mytype,
-  
+
   // abapGit metadata
   version: 'v1.0.0',
   serializer: 'LCL_OBJECT_{TYPE}',
@@ -243,6 +245,7 @@ export const {type}Handler = createHandler(Adk{Type}, {
 ```
 
 **Type inference flow:**
+
 1. `schema: mytype` → TypeScript knows `mytype._values` is `MytypeValuesType`
 2. `toAbapGit` return type is automatically inferred as `MytypeValuesType`
 3. IDE provides autocomplete for all valid fields
@@ -302,17 +305,17 @@ Factory function that creates and auto-registers a handler.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `type` | `string \| AdkClass` | Object type code (e.g., 'CLAS') or ADK class |
-| `definition.schema` | `AbapGitSchema` | Generated typed schema |
-| `definition.version` | `string` | abapGit version attribute |
-| `definition.serializer` | `string` | Serializer class name |
-| `definition.serializer_version` | `string` | Serializer version |
-| `definition.toAbapGit` | `(obj) => TValues` | Maps ADK object to abapGit XML values |
-| `definition.getSource?` | `(obj) => Promise<string>` | Returns single source file content |
-| `definition.getSources?` | `(obj) => Array<{suffix?, content}>` | Returns multiple source files |
-| `definition.xmlFileName?` | `string` | Override default XML filename |
+| Parameter                       | Type                                 | Description                                  |
+| ------------------------------- | ------------------------------------ | -------------------------------------------- |
+| `type`                          | `string \| AdkClass`                 | Object type code (e.g., 'CLAS') or ADK class |
+| `definition.schema`             | `AbapGitSchema`                      | Generated typed schema                       |
+| `definition.version`            | `string`                             | abapGit version attribute                    |
+| `definition.serializer`         | `string`                             | Serializer class name                        |
+| `definition.serializer_version` | `string`                             | Serializer version                           |
+| `definition.toAbapGit`          | `(obj) => TValues`                   | Maps ADK object to abapGit XML values        |
+| `definition.getSource?`         | `(obj) => Promise<string>`           | Returns single source file content           |
+| `definition.getSources?`        | `(obj) => Array<{suffix?, content}>` | Returns multiple source files                |
+| `definition.xmlFileName?`       | `string`                             | Override default XML filename                |
 
 ### Type Inference
 
@@ -341,7 +344,7 @@ export const dtelHandler = createHandler('DTEL', {
   version: 'v1.0.0',
   serializer: 'LCL_OBJECT_DTEL',
   serializer_version: 'v1.0.0',
-  
+
   toAbapGit: (obj) => ({
     DD04V: {
       ROLLNAME: obj.name ?? '',
@@ -360,14 +363,14 @@ export const intfHandler = createHandler(AdkInterface, {
   version: 'v1.0.0',
   serializer: 'LCL_OBJECT_INTF',
   serializer_version: 'v1.0.0',
-  
+
   toAbapGit: (obj) => ({
     VSEOINTERF: {
       CLSNAME: obj.name ?? '',
       DESCRIPT: obj.description ?? '',
     },
   }),
-  
+
   getSource: (obj) => obj.getSource(),
 });
 ```
@@ -388,15 +391,18 @@ export const classHandler = createHandler(AdkClass, {
   version: 'v1.0.0',
   serializer: 'LCL_OBJECT_CLAS',
   serializer_version: 'v1.0.0',
-  
+
   toAbapGit: (obj) => ({
-    VSEOCLASS: { /* ... */ },
+    VSEOCLASS: {
+      /* ... */
+    },
   }),
-  
-  getSources: (cls) => cls.includes.map((inc) => ({
-    suffix: SUFFIX_MAP[inc.includeType],
-    content: cls.getIncludeSource(inc.includeType),
-  })),
+
+  getSources: (cls) =>
+    cls.includes.map((inc) => ({
+      suffix: SUFFIX_MAP[inc.includeType],
+      content: cls.getIncludeSource(inc.includeType),
+    })),
 });
 ```
 
@@ -405,11 +411,11 @@ export const classHandler = createHandler(AdkClass, {
 ```typescript
 export const packageHandler = createHandler(AdkPackage, {
   schema: devc,
-  xmlFileName: 'package.devc.xml',  // Not '{name}.devc.xml'
+  xmlFileName: 'package.devc.xml', // Not '{name}.devc.xml'
   version: 'v1.0.0',
   serializer: 'LCL_OBJECT_DEVC',
   serializer_version: 'v1.0.0',
-  
+
   toAbapGit: (pkg) => ({
     DEVC: {
       CTEXT: pkg.description ?? '',
@@ -426,7 +432,7 @@ export const packageHandler = createHandler(AdkPackage, {
 
 ```typescript
 // WRONG - No validation, error-prone
-toAbapGit: (obj) => `<CLSNAME>${obj.name}</CLSNAME>`
+toAbapGit: (obj) => `<CLSNAME>${obj.name}</CLSNAME>`;
 ```
 
 ```typescript
@@ -435,7 +441,7 @@ toAbapGit: (obj) => ({
   VSEOCLASS: {
     CLSNAME: obj.name ?? '',
   },
-})
+});
 ```
 
 ### ❌ ADT Client Calls in Handler
@@ -443,14 +449,14 @@ toAbapGit: (obj) => ({
 ```typescript
 // WRONG - Handler shouldn't know about ADT
 getSource: async (obj) => {
-  const source = await adtClient.getSource(obj.uri);  // NO!
+  const source = await adtClient.getSource(obj.uri); // NO!
   return source;
-}
+};
 ```
 
 ```typescript
 // CORRECT - Use ADK facade
-getSource: (obj) => obj.getSource()  // ADK handles ADT calls
+getSource: (obj) => obj.getSource(); // ADK handles ADT calls
 ```
 
 ### ❌ Skipping XSD Schema

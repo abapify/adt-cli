@@ -1,4 +1,7 @@
-# AGENT.md
+<!-- nx configuration start-->
+<!-- Leave the start & end comments to automatically receive updates. -->
+
+# AGENTS.md
 
 ## Project Context & Goals
 
@@ -115,8 +118,8 @@ this.handlers.set(
     new AdkObjectHandler(
       client,
       (xml) => ClassAdtAdapter.fromAdtXML(xml),
-      (name) => `/sap/bc/adt/oo/classes/${name.toLowerCase()}`
-    )
+      (name) => `/sap/bc/adt/oo/classes/${name.toLowerCase()}`,
+    ),
 );
 ```
 
@@ -163,3 +166,5 @@ this.handlers.set(
 2. Run type check: `nx typecheck`
 3. Test: `nx test [package-name]`
 4. **Spec Validation**: Confirm implementation matches updated specifications
+
+<!-- nx configuration end-->

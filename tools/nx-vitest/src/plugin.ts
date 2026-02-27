@@ -98,7 +98,7 @@ function getRootVitestProjects(): string[] {
 
 function isProjectInVitestConfig(
   projectPath: string,
-  vitestProjects: string[]
+  vitestProjects: string[],
 ): boolean {
   const relativePath = relative(workspaceRoot, projectPath);
 
@@ -116,8 +116,8 @@ function isProjectInVitestConfig(
       if (projectMatches.length > 0) {
         logDebug(
           `Project ${relativePath} matches pattern ${pattern} - found files: ${projectMatches.join(
-            ', '
-          )}`
+            ', ',
+          )}`,
         );
         return true;
       }
@@ -127,7 +127,7 @@ function isProjectInVitestConfig(
   }
 
   logDebug(
-    `Project ${relativePath} does not match any vitest project patterns`
+    `Project ${relativePath} does not match any vitest project patterns`,
   );
   return false;
 }
@@ -139,7 +139,7 @@ export const createNodesV2: CreateNodesV2 = [
 
     if (verbose) {
       logger.info(
-        `[nx-vitest] Processing ${configFiles.length} vitest config files`
+        `[nx-vitest] Processing ${configFiles.length} vitest config files`,
       );
     }
 

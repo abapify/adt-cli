@@ -69,7 +69,10 @@ describe('Config Module', () => {
     it('should normalize TS config to JSON', () => {
       const tsConfig = defineConfig({
         destinations: {
-          DEV: { type: 'puppeteer', options: { url: 'https://dev.example.com', client: '100' } },
+          DEV: {
+            type: 'puppeteer',
+            options: { url: 'https://dev.example.com', client: '100' },
+          },
           QAS: { type: 'basic', options: { url: 'https://qas.example.com' } },
         },
       });
@@ -79,7 +82,9 @@ describe('Config Module', () => {
       const parsed = JSON.parse(json);
 
       expect(parsed.destinations.DEV.type).toBe('puppeteer');
-      expect(parsed.destinations.DEV.options.url).toBe('https://dev.example.com');
+      expect(parsed.destinations.DEV.options.url).toBe(
+        'https://dev.example.com',
+      );
       expect(parsed.destinations.QAS.type).toBe('basic');
     });
   });
@@ -94,9 +99,12 @@ describe('Config Module', () => {
         JSON.stringify({
           destinations: {
             DEV: { type: 'basic', options: { url: 'https://dev.example.com' } },
-            QAS: { type: 'puppeteer', options: { url: 'https://qas.example.com' } },
+            QAS: {
+              type: 'puppeteer',
+              options: { url: 'https://qas.example.com' },
+            },
           },
-        })
+        }),
       );
     });
 
@@ -106,7 +114,7 @@ describe('Config Module', () => {
 
     it('should load config and provide get method', async () => {
       const config = await loadConfig(testDir);
-      
+
       const dev = config.getDestination('DEV');
       expect(dev).toBeDefined();
       expect(dev?.type).toBe('basic');
@@ -114,13 +122,13 @@ describe('Config Module', () => {
 
     it('should return undefined for unknown destination', async () => {
       const config = await loadConfig(testDir);
-      
+
       expect(config.getDestination('UNKNOWN')).toBeUndefined();
     });
 
     it('should list all destinations', async () => {
       const config = await loadConfig(testDir);
-      
+
       const list = config.listDestinations();
       expect(list).toContain('DEV');
       expect(list).toContain('QAS');
@@ -129,14 +137,14 @@ describe('Config Module', () => {
 
     it('should check if destination exists', async () => {
       const config = await loadConfig(testDir);
-      
+
       expect(config.hasDestination('DEV')).toBe(true);
       expect(config.hasDestination('UNKNOWN')).toBe(false);
     });
 
     it('should provide raw config', async () => {
       const config = await loadConfig(testDir);
-      
+
       expect(config.raw.destinations).toBeDefined();
       expect(config.raw.destinations?.DEV).toBeDefined();
     });

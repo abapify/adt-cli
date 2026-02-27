@@ -85,7 +85,7 @@ async function demo() {
       console.error(
         `API Error [${error.status}]:`,
         error.payload.code,
-        error.payload.message
+        error.payload.message,
       );
     }
   }

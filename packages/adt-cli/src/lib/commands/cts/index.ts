@@ -20,8 +20,9 @@ import { createTreeCommand } from './tree';
 import { createTrCommand } from './tr';
 
 export function createCtsCommand(): Command {
-  const ctsCmd = new Command('cts')
-    .description('CTS (Change and Transport System) operations');
+  const ctsCmd = new Command('cts').description(
+    'CTS (Change and Transport System) operations',
+  );
 
   ctsCmd.addCommand(ctsSearchCommand);
   ctsCmd.addCommand(createTreeCommand());

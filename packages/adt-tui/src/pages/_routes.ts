@@ -15,9 +15,9 @@ export interface Route {
 export const routes: Route[] = [
   {
     pattern: '/sap/bc/adt/cts/transportrequests/:slug',
-    regex: new RegExp('^/sap\/bc\/adt\/cts\/transportrequests\/([^\/]+)$'),
+    regex: new RegExp('^/sap/bc/adt/cts/transportrequests/([^/]+)$'),
     page: Page0,
-  }
+  },
 ];
 
 /**

@@ -26,6 +26,7 @@ This package replaces the legacy `adt-client` with a **contract-first design**:
 ```
 
 **Benefits over v1:**
+
 - ✅ **Type-safe from XSD** - Types generated from official SAP schemas
 - ✅ **Contract-first** - API contracts define the interface
 - ✅ **Zero manual types** - No hand-written type definitions
@@ -262,13 +263,13 @@ client.fetch('/arbitrary/endpoint', { method: 'GET' })
 
 ## Comparison with adt-client v1
 
-| Feature | v1 (Legacy) | v2 (New) |
-|---------|-------------|----------|
-| **Type Safety** | Manual types | Generated from XSD |
-| **Architecture** | Service-based | Contract-first |
-| **Dependencies** | Many | Zero |
-| **Extensibility** | Complex | Add contracts |
-| **Testing** | Difficult | Easy (pure data) |
+| Feature           | v1 (Legacy)   | v2 (New)           |
+| ----------------- | ------------- | ------------------ |
+| **Type Safety**   | Manual types  | Generated from XSD |
+| **Architecture**  | Service-based | Contract-first     |
+| **Dependencies**  | Many          | Zero               |
+| **Extensibility** | Complex       | Add contracts      |
+| **Testing**       | Difficult     | Easy (pure data)   |
 
 ## Related Packages
 

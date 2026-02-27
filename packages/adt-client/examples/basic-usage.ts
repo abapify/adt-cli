@@ -25,7 +25,7 @@ async function demo() {
     console.log(`Found ${discovery.workspace.length} workspaces`);
     for (const workspace of discovery.workspace) {
       console.log(
-        `  - ${workspace.title}: ${workspace.collection.length} collections`
+        `  - ${workspace.title}: ${workspace.collection.length} collections`,
       );
     }
 
@@ -45,15 +45,18 @@ async function demo() {
     console.log('Main source length:', mainSource.length);
     console.log('Preview:', mainSource.substring(0, 100));
 
-    const definitions = await client.adt.oo.classes.includes.definitions.get(className);
+    const definitions =
+      await client.adt.oo.classes.includes.definitions.get(className);
     console.log('Definitions length:', definitions.length);
 
-    const implementations = await client.adt.oo.classes.includes.implementations.get(className);
+    const implementations =
+      await client.adt.oo.classes.includes.implementations.get(className);
     console.log('Implementations length:', implementations.length);
 
     // Example 4: Update class source
     console.log('\n=== Example 4: Update Class Source ===');
-    const currentSource = await client.adt.oo.classes.source.main.get(className);
+    const currentSource =
+      await client.adt.oo.classes.source.main.get(className);
     const modifiedSource = `* Modified by adt-client\n${currentSource}`;
 
     await client.adt.oo.classes.source.main.put(className, modifiedSource);

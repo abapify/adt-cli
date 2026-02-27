@@ -74,9 +74,7 @@ function deriveRootTypeName(schemaName: string, pattern: string): string {
  * });
  * ```
  */
-export function interfaces(
-  options: InterfacesOptions = {}
-): GeneratorPlugin {
+export function interfaces(options: InterfacesOptions = {}): GeneratorPlugin {
   const {
     filePattern = options.flatten ? '{name}.flattened.ts' : '{name}.types.ts',
     header = true,
@@ -127,7 +125,7 @@ export function interfaces(
           ` * Source: ${source.name}/${schema.name}.xsd`,
           flatten ? ' * Mode: Flattened' : ' * Mode: Interfaces',
           ' */',
-          ''
+          '',
         );
       }
 

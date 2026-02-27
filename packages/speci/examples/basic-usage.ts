@@ -175,7 +175,7 @@ async function demo() {
         console.error(
           `HTTP ${error.status}:`,
           error.payload.error,
-          error.payload.message
+          error.payload.message,
         );
       }
       // Option 2: Use HttpError directly with generic

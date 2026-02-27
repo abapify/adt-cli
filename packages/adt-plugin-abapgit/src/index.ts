@@ -1,6 +1,9 @@
 // Plugin instance
 export { abapGitPlugin, AbapGitPlugin } from './lib/abapgit';
 
+// Finding resolver for ATC integration
+export { createFindingResolver } from './lib/finding-resolver';
+
 // Re-export types from @abapify/adt-plugin for convenience
 export type {
   AdtPlugin,

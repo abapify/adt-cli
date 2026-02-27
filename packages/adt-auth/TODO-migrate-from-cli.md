@@ -7,6 +7,7 @@ These utilities need to be migrated from `adt-cli` to `adt-auth` before they can
 BTP Service Key parsing for service key-based authentication.
 
 ### Types to add:
+
 ```typescript
 interface UAACredentials {
   tenantmode: string;
@@ -40,9 +41,11 @@ interface BTPServiceKey {
 ```
 
 ### Implementation:
+
 - `ServiceKeyParser.parse(serviceKeyJson)` - Parse and validate service key JSON
 
 ### Target location:
+
 - `src/plugins/service-key-auth.ts` or new package `@abapify/adt-auth-service-key`
 
 ## 2. OAuth PKCE Utilities (`oauth-utils.ts`)
@@ -50,18 +53,20 @@ interface BTPServiceKey {
 PKCE (Proof Key for Code Exchange) utilities for OAuth flows.
 
 ### Functions to add:
+
 ```typescript
 // Generate cryptographically secure code verifier
-function generateCodeVerifier(): string
+function generateCodeVerifier(): string;
 
 // Generate code challenge from verifier using SHA256
-function generateCodeChallenge(verifier: string): string
+function generateCodeChallenge(verifier: string): string;
 
 // Generate random state parameter
-function generateState(): string
+function generateState(): string;
 ```
 
 ### Target location:
+
 - `src/utils/pkce.ts` - Generic PKCE utilities
 - Used by OAuth auth plugins
 

@@ -63,7 +63,7 @@ export interface ExtractCollectionsOptions {
  * Factory function to create extract collections plugin
  */
 export function extractCollections(
-  options: ExtractCollectionsOptions = {}
+  options: ExtractCollectionsOptions = {},
 ): CodegenPlugin {
   const { output = 'collections.json', unique = false } = options;
 
@@ -129,7 +129,7 @@ export function extractCollections(
                     .replace(/{title}/g, sanitizePath(coll.title || 'unknown'))
                     .replace(
                       /{category}/g,
-                      sanitizePath(coll.category?.term || 'unknown')
+                      sanitizePath(coll.category?.term || 'unknown'),
                     );
                 }
 
@@ -139,7 +139,7 @@ export function extractCollections(
                     throw new Error(
                       `Duplicate output path detected: "${filePath}"\n` +
                         `Collection: ${coll.title} (${coll.href})\n` +
-                        `Enable unique: true requires each collection to have a unique output path.`
+                        `Enable unique: true requires each collection to have a unique output path.`,
                     );
                   }
                   seenPaths.add(filePath);
@@ -149,7 +149,7 @@ export function extractCollections(
               }
 
               ctx.logger.success(
-                `Wrote ${ws.data.collectionDetails.length} collection files for ${ws.folderName}`
+                `Wrote ${ws.data.collectionDetails.length} collection files for ${ws.folderName}`,
               );
             }
           }
@@ -159,11 +159,11 @@ export function extractCollections(
             if (ws.data.collectionDetails) {
               await ws.writeFile(
                 output as string,
-                JSON.stringify(ws.data.collectionDetails, null, 2)
+                JSON.stringify(ws.data.collectionDetails, null, 2),
               );
 
               ctx.logger.success(
-                `Wrote ${ws.folderName}/${output} (${ws.data.collectionDetails.length} collections)`
+                `Wrote ${ws.folderName}/${output} (${ws.data.collectionDetails.length} collections)`,
               );
             }
           }

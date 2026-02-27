@@ -4,12 +4,12 @@ import {
   getDefaultSid,
   refreshCredentials,
 } from '../../utils/auth';
-import {
-  handleCommandError,
-} from '../../utils/command-helpers';
+import { handleCommandError } from '../../utils/command-helpers';
 
 export const refreshCommand = new Command('refresh')
-  .description('Refresh authentication session (auto-falls back to interactive if needed)')
+  .description(
+    'Refresh authentication session (auto-falls back to interactive if needed)',
+  )
   .option('--sid <sid>', 'System ID to refresh (defaults to current default)')
   .action(async (options) => {
     try {
@@ -49,7 +49,6 @@ export const refreshCommand = new Command('refresh')
       console.log(`   Host: ${updatedSession.host}`);
       console.log(`   Method: ${updatedSession.auth.method}`);
       console.log('');
-
     } catch (error) {
       console.log('');
       handleCommandError(error, 'Refresh');

@@ -28,6 +28,7 @@ implements: .agents/commands/adt/page.md
 ## Quick Reference
 
 ### Step 1: Create Page
+
 Location: `adt-cli/src/lib/ui/pages/{type}.ts`
 
 ```typescript
@@ -42,14 +43,17 @@ export const myPageDef = definePage<AdkMyObject>({
   // ALWAYS prefer ADK for data fetching
   fetch: async (client, params) => {
     const ctx = createAdkContext(client);
-    return AdkMyObject.get(ctx, params.name);  // ← ADK preferred
+    return AdkMyObject.get(ctx, params.name); // ← ADK preferred
   },
 
-  render: (data, params) => { /* ... */ },
+  render: (data, params) => {
+    /* ... */
+  },
 });
 ```
 
 ### Step 2: Export & Use
+
 - Export from `ui/pages/index.ts`
 - Import in command to trigger registration
 

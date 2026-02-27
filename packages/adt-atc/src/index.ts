@@ -16,4 +16,10 @@
 
 export { atcCommand } from './commands/atc';
 export { outputSarifReport, outputGitLabCodeQuality } from './formatters';
-export type { AtcResult, AtcFinding, OutputFormat } from './types';
+export type {
+  AtcResult,
+  AtcFinding,
+  OutputFormat,
+  FindingResolver,
+  ResolvedLocation,
+} from './types';

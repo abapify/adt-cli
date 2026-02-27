@@ -124,17 +124,51 @@ function createLoadedConfig(config: AdtConfig): LoadedConfig {
   };
 }
 
+export interface LoadConfigOptions {
+  /** Explicit config file path (overrides auto-discovery) */
+  configPath?: string;
+  /** Current working directory for auto-discovery (defaults to process.cwd()) */
+  cwd?: string;
+}
+
 /**
  * Load configuration with precedence:
- * 1. adt.config.ts in cwd
- * 2. adt.config.json in cwd
- * 3. ~/.adt/config.json (global)
+ * 1. Explicit configPath (if provided via --config flag)
+ * 2. adt.config.ts in cwd
+ * 3. adt.config.json in cwd
+ * 4. ~/.adt/config.json (global)
  *
- * @param cwd Current working directory (defaults to process.cwd())
+ * @param options Load config options or cwd string for backwards compatibility
  */
 export async function loadConfig(
-  cwd: string = process.cwd(),
+  options: LoadConfigOptions | string = {},
 ): Promise<LoadedConfig> {
+  // Support legacy string parameter (cwd)
+  const opts: LoadConfigOptions =
+    typeof options === 'string' ? { cwd: options } : options;
+  const cwd = opts.cwd ?? process.cwd();
+
+  // If explicit config path provided, use it directly
+  if (opts.configPath) {
+    const configPath = resolve(cwd, opts.configPath);
+    if (configPath.endsWith('.json')) {
+      const jsonConfig = loadJsonConfig(configPath);
+      if (jsonConfig) {
+        return createLoadedConfig(mergeWithGlobal(jsonConfig));
+      }
+    } else {
+      // Assume TS/JS config
+      const tsConfig = await loadTsConfig(configPath);
+      if (tsConfig) {
+        return createLoadedConfig(mergeWithGlobal(tsConfig));
+      }
+    }
+    // Config path specified but file not found/loadable - continue with auto-discovery
+    console.warn(
+      `Warning: Config file not found at ${configPath}, using auto-discovery`,
+    );
+  }
+
   // Try TS config first
   const tsConfigPath = join(cwd, 'adt.config.ts');
   const tsConfig = await loadTsConfig(tsConfigPath);

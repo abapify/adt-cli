@@ -37,18 +37,18 @@ export const myPlugin = createPlugin({
     // Import: ADK object → file system
     import: async (object, targetPath, context) => {
       // Serialize object to files
-      return { 
-        success: true, 
-        filesCreated: ['myclass.clas.xml'] 
+      return {
+        success: true,
+        filesCreated: ['myclass.clas.xml'],
       };
     },
 
     // Export: file system → ADK object (optional)
     export: async (sourcePath, type, name) => {
       // Deserialize files to ADK object
-      return { 
-        success: true, 
-        object: myAdkObject 
+      return {
+        success: true,
+        object: myAdkObject,
       };
     },
   },
@@ -70,11 +70,9 @@ import { abapGitPlugin } from '@abapify/adt-plugin-abapgit';
 // Check if type is supported
 if (abapGitPlugin.registry.isSupported('CLAS')) {
   // Import object to file system
-  const result = await abapGitPlugin.format.import(
-    myClassObject,
-    './output',
-    { packagePath: ['ZROOT', 'ZSUB'] }
-  );
+  const result = await abapGitPlugin.format.import(myClassObject, './output', {
+    packagePath: ['ZROOT', 'ZSUB'],
+  });
 
   if (result.success) {
     console.log('Files created:', result.filesCreated);

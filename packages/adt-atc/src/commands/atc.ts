@@ -210,6 +210,10 @@ export const atcCommand: CliCommandPlugin = {
       description: 'Run ATC on transport request (e.g., S0DK942970)',
     },
     {
+      flags: '-f, --from-file <file>',
+      description: 'Run ATC on objects listed in file (one URI per line)',
+    },
+    {
       flags: '--variant <variant>',
       description: 'ATC check variant (default: from system customizing)',
     },
@@ -227,6 +231,11 @@ export const atcCommand: CliCommandPlugin = {
       flags: '--output <file>',
       description: 'Output file (required for gitlab/sarif format)',
     },
+    {
+      flags: '--resolver <name>',
+      description:
+        'Finding resolver plugin for path/line resolution (e.g., abapgit)',
+    },
   ],
 
   async execute(args, ctx: CliContext) {
@@ -234,10 +243,12 @@ export const atcCommand: CliCommandPlugin = {
       package?: string;
       object?: string;
       transport?: string;
+      fromFile?: string;
       variant?: string;
       maxResults?: string;
       format?: OutputFormat;
       output?: string;
+      resolver?: string;
     };
 
     // Validate mutually exclusive options
@@ -245,18 +256,19 @@ export const atcCommand: CliCommandPlugin = {
       options.package,
       options.object,
       options.transport,
+      options.fromFile,
     ].filter(Boolean).length;
 
     if (targetCount === 0) {
       ctx.logger.error(
-        '❌ One of --package, --object, or --transport is required',
+        '❌ One of --package, --object, --transport, or --from-file is required',
       );
       process.exit(1);
     }
 
     if (targetCount > 1) {
       ctx.logger.error(
-        '❌ Only one of --package, --object, or --transport can be specified',
+        '❌ Only one of --package, --object, --transport, or --from-file can be specified',
       );
       process.exit(1);
     }
@@ -283,20 +295,35 @@ export const atcCommand: CliCommandPlugin = {
 
     ctx.logger.info('🔍 Running ABAP Test Cockpit checks...');
 
-    // Determine target
-    let targetUri: string;
+    // Determine target(s)
+    let targetUris: string[];
     let targetName: string;
 
-    if (options.transport) {
-      targetUri = `/sap/bc/adt/cts/transportrequests/${options.transport}`;
+    if (options.fromFile) {
+      // Read URIs from file
+      const { readFileSync } = await import('fs');
+      const fileContent = readFileSync(options.fromFile, 'utf-8');
+      targetUris = fileContent
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith('#')); // Skip empty lines and comments
+
+      if (targetUris.length === 0) {
+        ctx.logger.error(`❌ No objects found in ${options.fromFile}`);
+        process.exit(1);
+      }
+      targetName = `${targetUris.length} objects from ${options.fromFile}`;
+      ctx.logger.info(`📄 Target: ${targetName}`);
+    } else if (options.transport) {
+      targetUris = [`/sap/bc/adt/cts/transportrequests/${options.transport}`];
       targetName = `Transport ${options.transport}`;
       ctx.logger.info(`🚚 Target: ${targetName}`);
     } else if (options.package) {
-      targetUri = `/sap/bc/adt/packages/${options.package.toUpperCase()}`;
+      targetUris = [`/sap/bc/adt/packages/${options.package.toUpperCase()}`];
       targetName = `Package ${options.package.toUpperCase()}`;
       ctx.logger.info(`📦 Target: ${targetName}`);
     } else {
-      targetUri = options.object!;
+      targetUris = [options.object!];
       targetName = options.object!;
       ctx.logger.info(`📄 Target: ${targetName}`);
     }
@@ -358,7 +385,7 @@ export const atcCommand: CliCommandPlugin = {
             {
               kind: 'inclusive',
               objectReferences: {
-                objectReference: [{ uri: targetUri }],
+                objectReference: targetUris.map((uri) => ({ uri })),
               },
             },
           ],
@@ -379,11 +406,39 @@ export const atcCommand: CliCommandPlugin = {
       checkVariant,
     );
 
+    // Load finding resolver if requested
+    let resolver: import('../types').FindingResolver | undefined;
+    if (options.resolver) {
+      const name = options.resolver;
+      if (name === 'abapgit') {
+        // Built-in abapgit resolver — no external dependencies
+        const { createAbapGitResolver } = await import('../resolvers/abapgit');
+        resolver = createAbapGitResolver();
+      } else {
+        // External resolver — try dynamic import
+        try {
+          ctx.logger.info(`📂 Loading external resolver: ${name}`);
+          const mod = await import(name);
+          if (typeof mod.createFindingResolver === 'function') {
+            resolver = mod.createFindingResolver();
+          } else {
+            ctx.logger.warn(
+              `⚠️ Module ${name} does not export createFindingResolver()`,
+            );
+          }
+        } catch (e) {
+          ctx.logger.warn(
+            `⚠️ Failed to load resolver "${name}": ${e instanceof Error ? e.message : e}`,
+          );
+        }
+      }
+    }
+
     // Output based on format
     if (options.format === 'json') {
       console.log(JSON.stringify(result, null, 2));
     } else if (options.format === 'gitlab' && options.output) {
-      await outputGitLabCodeQuality(result, options.output);
+      await outputGitLabCodeQuality(result, options.output, { resolver });
     } else if (options.format === 'sarif' && options.output) {
       await outputSarifReport(result, options.output, targetName);
     } else {

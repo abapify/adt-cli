@@ -3,6 +3,32 @@ import { ImportService } from '../../services/import/service';
 import { IconRegistry } from '../../utils/icon-registry';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
 
+function parseFormatOptionEntries(entries: string[]): Record<string, string> {
+  const parsed: Record<string, string> = {};
+
+  for (const entry of entries) {
+    const separatorIndex = entry.indexOf('=');
+    if (separatorIndex <= 0 || separatorIndex === entry.length - 1) {
+      throw new Error(
+        `Invalid --format-option '${entry}'. Expected key=value format.`,
+      );
+    }
+
+    const key = entry.slice(0, separatorIndex).trim();
+    const value = entry.slice(separatorIndex + 1).trim();
+
+    if (!key || !value) {
+      throw new Error(
+        `Invalid --format-option '${entry}'. Expected key=value format.`,
+      );
+    }
+
+    parsed[key] = value;
+  }
+
+  return parsed;
+}
+
 export const importTransportCommand = new Command('transport')
   .argument('<transportNumber>', 'Transport request number to import')
   .argument('[targetFolder]', 'Target folder for output')
@@ -20,6 +46,16 @@ export const importTransportCommand = new Command('transport')
     '--format <format>',
     'Output format: abapgit | oat | @abapify/abapgit | @abapify/oat',
     'abapgit',
+  )
+  .option(
+    '--format-option <key=value>',
+    'Format-specific option (repeatable), e.g. --format-option folderLogic=full',
+    (value: string, previous: string[]) => [...previous, value],
+    [],
+  )
+  .option(
+    '--folder-logic <logic>',
+    '[DEPRECATED] Use --format-option folderLogic=<logic>',
   )
   .option('--debug', 'Enable debug output', false)
   .action(async (transportNumber, targetFolder, options) => {
@@ -45,12 +81,24 @@ export const importTransportCommand = new Command('transport')
             .split(',')
             .map((t: string) => t.trim().toUpperCase())
         : undefined;
+      const formatOptions = parseFormatOptionEntries(
+        options.formatOption ?? [],
+      );
+
+      // Backward compatibility: keep --folder-logic alias while moving to generic format options.
+      if (options.folderLogic && !formatOptions.folderLogic) {
+        formatOptions.folderLogic = options.folderLogic;
+        console.warn(
+          '⚠️  --folder-logic is deprecated. Use --format-option folderLogic=<logic> instead.',
+        );
+      }
 
       const result = await importService.importTransport({
         transportNumber,
         outputPath,
         objectTypes,
         format: options.format,
+        formatOptions,
         debug: options.debug,
       });
 

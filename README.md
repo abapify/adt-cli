@@ -67,6 +67,7 @@ The architecture prioritizes **type safety** and **contract-first design**:
 6. **adt-cli exposes** - User-friendly command-line interface
 
 **Benefits:**
+
 - ✅ **Single source of truth** - XSD schemas define types once
 - ✅ **Full type safety** - TypeScript types flow from schema to CLI
 - ✅ **No manual type definitions** - Generated from official SAP schemas
@@ -77,31 +78,31 @@ The architecture prioritizes **type safety** and **contract-first design**:
 
 ### Core Packages (Target Design)
 
-| Package | Purpose | Status |
-|---------|---------|--------|
-| **[ts-xsd](./packages/ts-xsd)** | XSD → TypeScript schema generation | ✅ Active |
-| **[speci](./packages/speci)** | Contract specification system | ✅ Active |
-| **[adt-schemas-xsd](./packages/adt-schemas-xsd)** | SAP ADT schemas (generated from XSD) | ✅ Active |
-| **[adt-contracts](./packages/adt-contracts)** | REST API contracts (speci + ts-xsd) | 🚧 Development |
-| **[adt-client-v2](./packages/adt-client-v2)** | HTTP client using contracts | 🚧 Development |
-| **[adt-cli](./packages/adt-cli)** | Command-line interface | ✅ Active |
+| Package                                           | Purpose                              | Status         |
+| ------------------------------------------------- | ------------------------------------ | -------------- |
+| **[ts-xsd](./packages/ts-xsd)**                   | XSD → TypeScript schema generation   | ✅ Active      |
+| **[speci](./packages/speci)**                     | Contract specification system        | ✅ Active      |
+| **[adt-schemas-xsd](./packages/adt-schemas-xsd)** | SAP ADT schemas (generated from XSD) | ✅ Active      |
+| **[adt-contracts](./packages/adt-contracts)**     | REST API contracts (speci + ts-xsd)  | 🚧 Development |
+| **[adt-client-v2](./packages/adt-client-v2)**     | HTTP client using contracts          | 🚧 Development |
+| **[adt-cli](./packages/adt-cli)**                 | Command-line interface               | ✅ Active      |
 
 ### Supporting Packages
 
-| Package | Purpose | Status |
-|---------|---------|--------|
-| **[adt-auth](./packages/adt-auth)** | Authentication (Basic, SLC, OAuth) | ✅ Active |
-| **[adt-config](./packages/adt-config)** | Configuration loader | ✅ Active |
-| **[browser-auth](./packages/browser-auth)** | Browser-based SSO | ✅ Active |
-| **[adt-puppeteer](./packages/adt-puppeteer)** | Puppeteer SSO adapter | ✅ Active |
-| **[adk](./packages/adk)** | ABAP Development Kit - object modeling | 🚧 Development |
+| Package                                       | Purpose                                | Status         |
+| --------------------------------------------- | -------------------------------------- | -------------- |
+| **[adt-auth](./packages/adt-auth)**           | Authentication (Basic, SLC, OAuth)     | ✅ Active      |
+| **[adt-config](./packages/adt-config)**       | Configuration loader                   | ✅ Active      |
+| **[browser-auth](./packages/browser-auth)**   | Browser-based SSO                      | ✅ Active      |
+| **[adt-puppeteer](./packages/adt-puppeteer)** | Puppeteer SSO adapter                  | ✅ Active      |
+| **[adk](./packages/adk)**                     | ABAP Development Kit - object modeling | 🚧 Development |
 
 ### Legacy Packages (Subject to Deletion)
 
-| Package | Replacement | Notes |
-|---------|-------------|-------|
+| Package                                 | Replacement   | Notes                                    |
+| --------------------------------------- | ------------- | ---------------------------------------- |
 | **[adt-client](./packages/adt-client)** | adt-client-v2 | Original client without contract support |
-| **[ts-xml](./packages/ts-xml)** | ts-xsd | Earlier XML schema approach |
+| **[ts-xml](./packages/ts-xml)**         | ts-xsd        | Earlier XML schema approach              |
 
 > ⚠️ **Legacy packages** will be removed once migration to the new architecture is complete.
 
@@ -245,7 +246,6 @@ import { Command } from 'commander';
    ```
 
 3. **Make Changes**
-
    - Write tests first (TDD approach)
    - Implement your changes
    - Ensure all tests pass: `npx nx test`
@@ -288,6 +288,7 @@ MIT License - see [LICENSE](./LICENSE) for details.
 The combination of `ts-xsd` and `speci` provides a powerful contract specification system:
 
 **ts-xsd** converts XSD schemas to TypeScript:
+
 ```typescript
 // Generated from SAP's official XSD
 const TransportSchema = {
@@ -309,6 +310,7 @@ type Transport = InferXsd<typeof TransportSchema>;
 ```
 
 **speci** defines REST contracts:
+
 ```typescript
 import { http } from 'speci/rest';
 import { schemas } from 'adt-schemas-xsd';
@@ -326,6 +328,7 @@ const ctsContract = {
 ### Why Not Just Use fast-xml-parser?
 
 Traditional XML parsers force you into their data format:
+
 ```typescript
 // fast-xml-parser output - awkward structure
 const data = {
@@ -337,6 +340,7 @@ const data = {
 ```
 
 With ts-xsd, you get clean domain objects:
+
 ```typescript
 // ts-xsd output - clean TypeScript types
 const data: Transport = {

@@ -35,6 +35,7 @@ abapGit format plugin for ADT - serializes ABAP objects to Git-compatible XML/AB
 ### 1. XSD Schemas as Single Source of Truth
 
 **Why XSD?**
+
 - XML Schema Definition (XSD) is the **industry standard** for XML structure validation
 - Can be used **outside our tools** (e.g., `xmllint --schema intf.xsd file.xml`)
 - Provides **formal contract** for abapGit XML format
@@ -50,6 +51,7 @@ xmllint --schema xsd/intf.xsd myinterface.intf.xml --noout
 **Why ts-xsd?**
 
 Unlike typical XML codegen tools that only generate types, `ts-xsd` provides:
+
 - **TypeScript types** with full type inference
 - **XML parser** that returns typed objects
 - **XML builder** that accepts typed objects
@@ -59,8 +61,8 @@ Unlike typical XML codegen tools that only generate types, `ts-xsd` provides:
 // Generated from XSD - fully typed parse/build
 import { intf } from './schemas/generated';
 
-const data = intf.parse(xmlString);  // → AbapGitIntf (typed)
-const xml = intf.build(data);        // → string (valid XML)
+const data = intf.parse(xmlString); // → AbapGitIntf (typed)
+const xml = intf.build(data); // → string (valid XML)
 ```
 
 ### 3. ADK as Client-Agnostic Facade
@@ -68,6 +70,7 @@ const xml = intf.build(data);        // → string (valid XML)
 **Why not implement ADT client features in the plugin?**
 
 The plugin **only consumes** the ADK facade:
+
 - ADK handles all SAP communication details
 - Plugin focuses purely on **serialization format**
 - Same plugin works with any ADT client implementation
@@ -75,10 +78,11 @@ The plugin **only consumes** the ADK facade:
 
 ```typescript
 // Plugin receives ADK objects, doesn't care how they were fetched
-getSources: (cls) => cls.includes.map((inc) => ({
-  suffix: ABAPGIT_SUFFIX[inc.includeType],
-  content: cls.getIncludeSource(inc.includeType),  // ADK handles this
-}))
+getSources: (cls) =>
+  cls.includes.map((inc) => ({
+    suffix: ABAPGIT_SUFFIX[inc.includeType],
+    content: cls.getIncludeSource(inc.includeType), // ADK handles this
+  }));
 ```
 
 ### 4. Handlers Don't Touch File System
@@ -86,10 +90,12 @@ getSources: (cls) => cls.includes.map((inc) => ({
 **Why delegate file operations to base class?**
 
 Object handlers **only define mappings**:
+
 - `toAbapGit()` - ADK data → abapGit XML structure
 - `getSource()` / `getSources()` - which source files to create
 
 The `createHandler` factory handles:
+
 - File creation with correct naming
 - XML building with proper envelope
 - Promise resolution for async sources
@@ -97,13 +103,13 @@ The `createHandler` factory handles:
 
 ## Supported Object Types
 
-| Type | Status | Handler | Notes |
-|------|--------|---------|-------|
-| CLAS | ✅ | `clas.ts` | Multiple includes (main, locals_def, locals_imp, testclasses, macros) |
-| INTF | ✅ | `intf.ts` | Single source file |
-| DEVC | ✅ | `devc.ts` | Fixed filename `package.devc.xml` |
-| DTEL | ✅ | `dtel.ts` | Metadata only (no source) |
-| DOMA | ✅ | `doma.ts` | Custom serialize for fixed values |
+| Type | Status | Handler   | Notes                                                                 |
+| ---- | ------ | --------- | --------------------------------------------------------------------- |
+| CLAS | ✅     | `clas.ts` | Multiple includes (main, locals_def, locals_imp, testclasses, macros) |
+| INTF | ✅     | `intf.ts` | Single source file                                                    |
+| DEVC | ✅     | `devc.ts` | Fixed filename `package.devc.xml`                                     |
+| DTEL | ✅     | `dtel.ts` | Metadata only (no source)                                             |
+| DOMA | ✅     | `doma.ts` | Custom serialize for fixed values                                     |
 
 ## File Structure
 
@@ -146,6 +152,7 @@ npx nx codegen adt-plugin-abapgit
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines on:
+
 - Adding new object type support
 - XSD schema conventions
 - Handler implementation patterns

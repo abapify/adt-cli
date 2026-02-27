@@ -29,7 +29,9 @@ import { parse, build, type XsdSchema, type InferXsd } from 'ts-xsd';
 import { http } from 'speci/rest';
 
 // ts-xsd schema with parse/build
-const TransportSchema = { /* ... */ } as const satisfies XsdSchema;
+const TransportSchema = {
+  /* ... */
+} as const satisfies XsdSchema;
 type Transport = InferXsd<typeof TransportSchema>;
 
 const transportApi = {

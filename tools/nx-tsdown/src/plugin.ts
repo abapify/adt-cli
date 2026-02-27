@@ -40,7 +40,7 @@ export const createNodesV2: CreateNodesV2 = [
 
     if (verbose) {
       logger.info(
-        `[nx-tsdown] Processing ${configFiles.length} tsdown config files`
+        `[nx-tsdown] Processing ${configFiles.length} tsdown config files`,
       );
     }
 

@@ -1,11 +1,11 @@
 /**
  * Tests for namespace handling in codegen/resolve
- * 
+ *
  * Specifically tests the abapGit pattern where:
  * - Root element (abapGit) is in NO namespace (from abapgit.xsd with no targetNamespace)
  * - Child elements (asx:abap, asx:values) are in asx namespace (from asx.xsd)
  * - Data elements (DEVC, CTEXT) are unqualified (no namespace prefix)
- * 
+ *
  * The issue: When resolveSchema merges schemas, it assigns the root schema's
  * targetNamespace to ALL elements, even those from imported schemas that have
  * different (or no) targetNamespace.
@@ -19,7 +19,7 @@ import type { Schema } from '../../src/xsd/types';
 describe('Multi-namespace schema handling (abapGit pattern)', () => {
   /**
    * abapGit XML format structure:
-   * 
+   *
    * <abapGit version="v1.0.0" serializer="LCL_OBJECT_DEVC" serializer_version="v1.0.0">
    *   <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
    *     <asx:values>
@@ -29,7 +29,7 @@ describe('Multi-namespace schema handling (abapGit pattern)', () => {
    *     </asx:values>
    *   </asx:abap>
    * </abapGit>
-   * 
+   *
    * Key characteristics:
    * 1. <abapGit> - NO namespace (root element from schema without targetNamespace)
    * 2. <asx:abap> - asx namespace, xmlns:asx declared HERE
@@ -45,9 +45,7 @@ describe('Multi-namespace schema handling (abapGit pattern)', () => {
       $xmlns: {
         asx: 'http://www.sap.com/abapxml',
       },
-      element: [
-        { name: 'abap', type: 'asx:AbapType' },
-      ],
+      element: [{ name: 'abap', type: 'asx:AbapType' }],
       complexType: [
         {
           name: 'AbapType',
@@ -87,7 +85,11 @@ describe('Multi-namespace schema handling (abapGit pattern)', () => {
             attribute: [
               { name: 'version', type: 'xs:string', use: 'required' },
               { name: 'serializer', type: 'xs:string', use: 'required' },
-              { name: 'serializer_version', type: 'xs:string', use: 'required' },
+              {
+                name: 'serializer_version',
+                type: 'xs:string',
+                use: 'required',
+              },
             ],
           },
         },
@@ -110,11 +112,11 @@ describe('Multi-namespace schema handling (abapGit pattern)', () => {
       // When we resolve abapgitSchema (which has NO targetNamespace),
       // the resolved schema should also have NO targetNamespace
       const resolved = resolveSchema(abapgitSchema);
-      
+
       assert.strictEqual(
         resolved.targetNamespace,
         undefined,
-        `Resolved schema should have undefined targetNamespace, got: ${resolved.targetNamespace}`
+        `Resolved schema should have undefined targetNamespace, got: ${resolved.targetNamespace}`,
       );
     });
 
@@ -122,11 +124,11 @@ describe('Multi-namespace schema handling (abapGit pattern)', () => {
       // abapgitSchema has no targetNamespace but imports asxSchema which has one
       // The resolved schema should NOT inherit the imported schema's targetNamespace
       const resolved = resolveSchema(abapgitSchema);
-      
+
       assert.strictEqual(
         resolved.targetNamespace,
         undefined,
-        `Should not inherit targetNamespace from $imports. Got: ${resolved.targetNamespace}`
+        `Should not inherit targetNamespace from $imports. Got: ${resolved.targetNamespace}`,
       );
     });
 
@@ -134,34 +136,42 @@ describe('Multi-namespace schema handling (abapGit pattern)', () => {
       // Chameleon schemas (no targetNamespace) adopt the importing schema's namespace
       // This is standard XSD behavior - elements from schemas without targetNamespace
       // are merged into the importing schema's namespace
-      
+
       const resolved = resolveSchema(devcSchema);
-      
+
       // devc schema's targetNamespace should be preserved
       assert.strictEqual(
         resolved.targetNamespace,
         'http://www.sap.com/abapxml',
-        'devc schema targetNamespace should be preserved'
+        'devc schema targetNamespace should be preserved',
       );
-      
+
       // The abapGit element SHOULD be merged because abapgit.xsd has NO targetNamespace
       // (chameleon schema - adopts importing schema's namespace)
-      const abapGitElement = resolved.element?.find(e => e.name === 'abapGit');
-      assert.ok(abapGitElement, 'abapGit element should be merged (chameleon schema)');
-      
+      const abapGitElement = resolved.element?.find(
+        (e) => e.name === 'abapGit',
+      );
+      assert.ok(
+        abapGitElement,
+        'abapGit element should be merged (chameleon schema)',
+      );
+
       // Types ARE merged (needed for extension resolution)
-      assert.ok(resolved.complexType?.some(ct => ct.name === 'AbapType'), 'Types should still be merged');
+      assert.ok(
+        resolved.complexType?.some((ct) => ct.name === 'AbapType'),
+        'Types should still be merged',
+      );
     });
 
     it('should preserve $xmlns from all merged schemas', () => {
       const resolved = resolveSchema(devcSchema);
-      
+
       // $xmlns should be preserved
       assert.ok(resolved.$xmlns, 'Resolved schema should have $xmlns');
       assert.strictEqual(
         resolved.$xmlns?.asx,
         'http://www.sap.com/abapxml',
-        'Should preserve asx namespace mapping'
+        'Should preserve asx namespace mapping',
       );
     });
   });
