@@ -120,7 +120,7 @@ export function parseAbapFilename(filename: string): ParsedAbapFile | null {
  * Uses the parsed filename structure and object mappings
  */
 export function detectObjectTypeFromFilename(
-  filename: string
+  filename: string,
 ): ObjectTypeInfo | null {
   const parsed = parseAbapFilename(filename);
   if (!parsed) {
@@ -164,7 +164,7 @@ export function filenameToObjectUri(filename: string): string | null {
  */
 export function getSourcePath(
   objectInfo: ObjectTypeInfo,
-  version?: 'active' | 'inactive'
+  version?: 'active' | 'inactive',
 ): string {
   const mapping = ABAP_OBJECT_MAPPINGS[objectInfo.type.toLowerCase()];
 
@@ -186,7 +186,7 @@ export function getSourcePath(
  */
 export function filenameToSourceUri(
   filename: string,
-  version?: 'active' | 'inactive'
+  version?: 'active' | 'inactive',
 ): {
   objectUri: string;
   sourcePath: string;

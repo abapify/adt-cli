@@ -1,6 +1,6 @@
 /**
  * Fixture registry with lazy proxy loading
- * 
+ *
  * Registry lives in fixtures/registry.ts (next to the XML files).
  * Proxy auto-generates loaders - nothing loads until .load() is called.
  */
@@ -18,19 +18,20 @@ export interface FixtureHandle {
 
 /** Recursively transform registry into proxy type */
 type ProxyRegistry<T> = {
-  [K in keyof T]: T[K] extends string 
-    ? FixtureHandle 
-    : ProxyRegistry<T[K]>;
+  [K in keyof T]: T[K] extends string ? FixtureHandle : ProxyRegistry<T[K]>;
 };
 
 /**
  * Create a proxy that wraps string paths with .load() method
  */
-function createProxy<T extends object>(obj: T, basePath = ''): ProxyRegistry<T> {
+function createProxy<T extends object>(
+  obj: T,
+  basePath = '',
+): ProxyRegistry<T> {
   return new Proxy(obj, {
     get(target, prop: string) {
       const value = (target as any)[prop];
-      
+
       if (typeof value === 'string') {
         // Leaf node - return handle with .load()
         return {
@@ -38,12 +39,12 @@ function createProxy<T extends object>(obj: T, basePath = ''): ProxyRegistry<T> 
           load: () => loadFile(value),
         } as FixtureHandle;
       }
-      
+
       if (typeof value === 'object' && value !== null) {
         // Nested object - recurse
         return createProxy(value, `${basePath}${prop}/`);
       }
-      
+
       return value;
     },
   }) as ProxyRegistry<T>;
@@ -51,15 +52,15 @@ function createProxy<T extends object>(obj: T, basePath = ''): ProxyRegistry<T> 
 
 /**
  * Fixture accessors - nothing loads until you call .load()
- * 
+ *
  * @example
  * ```typescript
  * import { fixtures } from 'adt-fixtures';
- * 
+ *
  * // Get handle (no loading yet!)
  * const handle = fixtures.transport.single;
  * console.log(handle.path); // 'transport/single.xml'
- * 
+ *
  * // Explicitly load when needed
  * const xml = await handle.load();
  * // or

@@ -1,11 +1,20 @@
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, copyFileSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  copyFileSync,
+  rmSync,
+} from 'node:fs';
 import { join, basename } from 'node:path';
 
 /**
  * Execute shell command
  */
-export function exec(cmd: string, options?: { silent?: boolean; maxBuffer?: number }): string {
+export function exec(
+  cmd: string,
+  options?: { silent?: boolean; maxBuffer?: number },
+): string {
   return execSync(cmd, {
     encoding: 'utf-8',
     maxBuffer: options?.maxBuffer ?? 50 * 1024 * 1024,
@@ -28,25 +37,24 @@ export function execOutput(cmd: string): string {
  */
 export function findFiles(dir: string, pattern: string): string[] {
   if (!existsSync(dir)) return [];
-  
+
   const files: string[] = [];
   const entries = readdirSync(dir, { withFileTypes: true, recursive: true });
-  
+
   // Convert glob to regex
   const regex = new RegExp(
-    '^' + pattern
-      .replace(/\./g, '\\.')
-      .replace(/\*/g, '.*')
-      .replace(/\?/g, '.') + '$'
+    '^' +
+      pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') +
+      '$',
   );
-  
+
   for (const entry of entries) {
     if (entry.isFile() && regex.test(entry.name)) {
       const parentPath = entry.parentPath ?? entry.path ?? dir;
       files.push(join(parentPath, entry.name));
     }
   }
-  
+
   return files;
 }
 

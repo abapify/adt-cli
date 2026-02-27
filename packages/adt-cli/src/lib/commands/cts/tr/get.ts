@@ -1,6 +1,6 @@
 /**
  * adt cts tr get <TR> - Get transport details
- * 
+ *
  * Uses ADK (AdkTransportRequest) for transport operations.
  * Renders via the Transport Page using the router.
  */
@@ -18,12 +18,15 @@ export const ctsGetCommand = new Command('get')
   .argument('<transport>', 'Transport number (e.g., S0DK942971)')
   .option('--json', 'Output as JSON')
   .option('--objects', 'Show list of objects in transport')
-  .action(async function(this: Command, transport: string, options) {
+  .action(async function (this: Command, transport: string, options) {
     const globalOpts = this.optsWithGlobals?.() ?? {};
     const ctx = getCliContext();
     const verboseFlag = globalOpts.verbose ?? ctx.verbose ?? false;
     const compact = !verboseFlag;
-    const logger = (this as any).logger ?? ctx.logger ?? createCliLogger({ verbose: verboseFlag });
+    const logger =
+      (this as any).logger ??
+      ctx.logger ??
+      createCliLogger({ verbose: verboseFlag });
     const progress = createProgressReporter({ compact, logger });
 
     try {
@@ -33,7 +36,7 @@ export const ctsGetCommand = new Command('get')
 
       // Use the router to navigate to the transport page
       // This uses ADK (AdkTransportRequest) under the hood
-      const page = await router.navTo(client, 'RQRQ', { 
+      const page = await router.navTo(client, 'RQRQ', {
         name: transport,
         showObjects: options.objects ?? false,
       });
@@ -48,7 +51,6 @@ export const ctsGetCommand = new Command('get')
         // Use the page's print function for formatted output
         page.print();
       }
-
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       progress.done(`❌ Get failed: ${message}`);

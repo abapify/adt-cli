@@ -8,7 +8,12 @@
  * @module @abapify/adt-playwright/auth-plugin
  */
 
-import type { AuthPlugin, AuthPluginResult, AuthPluginOptions, AuthSession } from '@abapify/adt-auth';
+import type {
+  AuthPlugin,
+  AuthPluginResult,
+  AuthPluginOptions,
+  AuthSession,
+} from '@abapify/adt-auth';
 import { playwrightAuth, toCookieHeader } from './playwright-auth';
 
 /** Default session duration when cookies don't specify expiration (8 hours) */
@@ -34,8 +39,8 @@ const DEFAULT_SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
  */
 function getExpiresAt(cookies: { expires?: number }[]): Date {
   const expirations = cookies
-    .filter(c => c.expires && c.expires > 0)
-    .map(c => c.expires! * 1000); // Cookie expires is in seconds, convert to ms
+    .filter((c) => c.expires && c.expires > 0)
+    .map((c) => c.expires! * 1000); // Cookie expires is in seconds, convert to ms
 
   if (expirations.length > 0) {
     return new Date(Math.min(...expirations));

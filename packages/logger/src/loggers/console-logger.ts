@@ -33,7 +33,9 @@ export class ConsoleLogger implements Logger {
 
   child(bindings: Record<string, any>): Logger {
     const childPrefix = bindings.component || bindings.name || 'child';
-    const newPrefix = this.prefix ? `${this.prefix}:${childPrefix}` : childPrefix;
+    const newPrefix = this.prefix
+      ? `${this.prefix}:${childPrefix}`
+      : childPrefix;
     return new ConsoleLogger(newPrefix);
   }
 

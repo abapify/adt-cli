@@ -19,7 +19,7 @@ import { fixtures } from 'adt-fixtures';
 
 // Get a handle (still no loading)
 const handle = fixtures.transport.single;
-console.log(handle.path);  // 'transport/single.xml'
+console.log(handle.path); // 'transport/single.xml'
 
 // Explicitly load when needed
 const xml = await handle.load();
@@ -42,12 +42,12 @@ const path = getPath('transport/single.xml');
 
 ## Available Fixtures
 
-| Category | Fixture | Description |
-|----------|---------|-------------|
-| `transport` | `single` | GET transport request response |
-| `transport` | `create` | POST create transport request |
-| `atc` | `worklist` | ATC worklist response |
-| `atc` | `result` | ATC check result |
+| Category    | Fixture    | Description                    |
+| ----------- | ---------- | ------------------------------ |
+| `transport` | `single`   | GET transport request response |
+| `transport` | `create`   | POST create transport request  |
+| `atc`       | `worklist` | ATC worklist response          |
+| `atc`       | `result`   | ATC check result               |
 
 ## Adding Fixtures
 

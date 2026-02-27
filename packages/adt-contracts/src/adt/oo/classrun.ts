@@ -1,6 +1,6 @@
 /**
  * ADT OO Classrun Contract
- * 
+ *
  * Endpoint: /sap/bc/adt/oo/classrun
  * Execute console application classes implementing IF_OO_ADT_CLASSRUN.
  */

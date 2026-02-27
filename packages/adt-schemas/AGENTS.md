@@ -4,24 +4,26 @@
 
 **Type-safe SAP ADT schemas** with pre-generated TypeScript interfaces and optimal tree-shaking.
 
-| Feature | Description |
-|---------|-------------|
-| **204+ interfaces** | Pre-generated, no runtime inference |
-| **Shared types** | `AdtObject`, `LinkType` defined once |
-| **Tree-shakeable** | Import only what you need |
-| **speci integration** | Works with REST contracts |
+| Feature               | Description                          |
+| --------------------- | ------------------------------------ |
+| **204+ interfaces**   | Pre-generated, no runtime inference  |
+| **Shared types**      | `AdtObject`, `LinkType` defined once |
+| **Tree-shakeable**    | Import only what you need            |
+| **speci integration** | Works with REST contracts            |
 
 ## 🚨 Critical Rules
 
 ### 1. NEVER Edit Generated Files
 
 Generated files are in `src/schemas/generated/`:
+
 - `schemas/sap/*.ts` - SAP official schemas
 - `schemas/custom/*.ts` - Custom schemas
 - `types/index.ts` - TypeScript interfaces
 - `index.ts` - Typed schema exports
 
 **If a generated schema is incorrect:**
+
 1. Fix the generator in `ts-xsd/src/codegen/`
 2. Rebuild: `npx nx build ts-xsd`
 3. Regenerate: `npx nx run adt-schemas:generate`
@@ -46,6 +48,7 @@ export default {
 ### 3. Every Schema Needs Tests
 
 **No exceptions.** When adding/modifying a schema:
+
 1. Add real SAP XML fixture to `tests/scenarios/fixtures/`
 2. Create scenario class in `tests/scenarios/`
 3. Register in `tests/scenarios/index.ts`
@@ -84,12 +87,12 @@ Typed Schemas (parse/build)
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/speci.ts` | `typed<T>()` wrapper factory |
-| `src/schemas/generated/index.ts` | Typed schema exports |
-| `src/schemas/generated/types/index.ts` | 204 TypeScript interfaces |
-| `scripts/generate*.ts` | Generation scripts |
+| File                                   | Purpose                      |
+| -------------------------------------- | ---------------------------- |
+| `src/speci.ts`                         | `typed<T>()` wrapper factory |
+| `src/schemas/generated/index.ts`       | Typed schema exports         |
+| `src/schemas/generated/types/index.ts` | 204 TypeScript interfaces    |
+| `scripts/generate*.ts`                 | Generation scripts           |
 
 ## Schema Structure (W3C Format)
 
@@ -205,13 +208,13 @@ export class MySchemaScenario extends Scenario<typeof mySchema> {
 
 ## Common Mistakes
 
-| Mistake | Consequence | Prevention |
-|---------|-------------|------------|
-| Editing generated files | Lost on regeneration | Fix generator instead |
-| Missing `as const` | Type inference fails | Always add `as const` |
-| No test scenario | Regressions undetected | Add test for every schema |
-| Wrong namespace prefix | Parse/build fails | Check SAP XSD |
-| Missing `$imports` | Cross-schema types fail | Link all dependencies |
+| Mistake                 | Consequence             | Prevention                |
+| ----------------------- | ----------------------- | ------------------------- |
+| Editing generated files | Lost on regeneration    | Fix generator instead     |
+| Missing `as const`      | Type inference fails    | Always add `as const`     |
+| No test scenario        | Regressions undetected  | Add test for every schema |
+| Wrong namespace prefix  | Parse/build fails       | Check SAP XSD             |
+| Missing `$imports`      | Cross-schema types fail | Link all dependencies     |
 
 ## Type Hierarchy
 

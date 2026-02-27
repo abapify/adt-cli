@@ -11,7 +11,10 @@ interface ExtractOptions {
 /**
  * Extract files from JAR archives - just unzip preserving package structure
  */
-export async function extractJars(input: string, options: ExtractOptions): Promise<void> {
+export async function extractJars(
+  input: string,
+  options: ExtractOptions,
+): Promise<void> {
   const { output, patterns, verbose = false } = options;
 
   console.log(`🔧 JAR Extraction`);
@@ -47,14 +50,16 @@ export async function extractJars(input: string, options: ExtractOptions): Promi
 
   for (const jar of jars) {
     const jarName = basename(jar);
-    
+
     if (verbose) {
       console.log(`   📦 ${jarName}`);
     }
 
     try {
       // Just unzip, preserving directory structure
-      execOutput(`unzip -o -q "${jar}" ${patternArgs} -d "${output}" 2>/dev/null || true`);
+      execOutput(
+        `unzip -o -q "${jar}" ${patternArgs} -d "${output}" 2>/dev/null || true`,
+      );
     } catch {
       // unzip returns non-zero if no matches, that's ok
     }

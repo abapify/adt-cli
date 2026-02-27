@@ -48,7 +48,7 @@ const config = await loadConfig();
 const dest = config.getDestination('DEV');
 
 // List all destination names
-const names = config.listDestinations();  // ['DEV', 'QAS']
+const names = config.listDestinations(); // ['DEV', 'QAS']
 
 // Check if destination exists
 if (config.hasDestination('DEV')) {

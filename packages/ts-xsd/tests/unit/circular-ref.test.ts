@@ -18,19 +18,22 @@ describe('Circular Reference Handling', () => {
           sequence: {
             element: [
               { name: 'value', type: 'xs:string' },
-              { name: 'children', type: 'TreeNode', minOccurs: '0', maxOccurs: 'unbounded' },
+              {
+                name: 'children',
+                type: 'TreeNode',
+                minOccurs: '0',
+                maxOccurs: 'unbounded',
+              },
             ],
           },
         },
       ],
-      element: [
-        { name: 'tree', type: 'TreeNode' },
-      ],
+      element: [{ name: 'tree', type: 'TreeNode' }],
     };
 
     // This should not throw stack overflow
     const { code } = generateInterfaces(schema, { flatten: true });
-    
+
     assert.ok(code.includes('TreeSchema'), 'Should generate root type');
     assert.ok(code.includes('value'), 'Should have value property');
     // Circular ref should be handled (either as unknown or type reference)
@@ -62,14 +65,12 @@ describe('Circular Reference Handling', () => {
           },
         },
       ],
-      element: [
-        { name: 'root', type: 'TypeA' },
-      ],
+      element: [{ name: 'root', type: 'TypeA' }],
     };
 
     // This should not throw stack overflow
     const { code } = generateInterfaces(schema, { flatten: true });
-    
+
     assert.ok(code.includes('MutualSchema'), 'Should generate root type');
     console.log('Generated code:', code);
   });
@@ -83,13 +84,9 @@ describe('Circular Reference Handling', () => {
         {
           name: 'BaseObject',
           sequence: {
-            element: [
-              { name: 'name', type: 'xs:string' },
-            ],
+            element: [{ name: 'name', type: 'xs:string' }],
           },
-          attribute: [
-            { name: 'type', type: 'xs:string' },
-          ],
+          attribute: [{ name: 'type', type: 'xs:string' }],
         },
         {
           name: 'MainObject',
@@ -133,14 +130,12 @@ describe('Circular Reference Handling', () => {
           },
         },
       ],
-      element: [
-        { name: 'class', type: 'ClassObject' },
-      ],
+      element: [{ name: 'class', type: 'ClassObject' }],
     };
 
     // This should not throw stack overflow
     const { code } = generateInterfaces(schema, { flatten: true });
-    
+
     assert.ok(code.includes('InheritanceSchema'), 'Should generate root type');
     assert.ok(code.includes('name'), 'Should have inherited name property');
     console.log('Generated code:', code);

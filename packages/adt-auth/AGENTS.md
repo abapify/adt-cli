@@ -13,6 +13,7 @@ This file provides guidance to AI coding assistants when working with the `adt-a
 **AuthManager MUST NOT know about specific plugin implementations.**
 
 #### ❌ WRONG - Plugin-specific code in AuthManager
+
 ```typescript
 // DON'T DO THIS!
 if (pluginModule.puppeteerAuth) { ... }
@@ -21,6 +22,7 @@ if (Array.isArray(credentials.cookies)) { ... }
 ```
 
 #### ✅ CORRECT - Generic plugin interface
+
 ```typescript
 // AuthManager only knows about the standard interface
 const pluginModule = await import(session.auth.plugin);
@@ -41,7 +43,7 @@ All auth plugins MUST:
 export default {
   async authenticate(options: AuthPluginOptions): Promise<AuthPluginResult> {
     // ... plugin-specific logic ...
-    
+
     // MUST return standard format
     return {
       method: 'cookie',  // or 'basic'
@@ -70,8 +72,8 @@ type AuthPluginResult = CookieAuthResult | BasicAuthResult;
 interface CookieAuthResult {
   method: 'cookie';
   credentials: {
-    cookies: string;      // Cookie header string
-    expiresAt: Date;      // When session expires
+    cookies: string; // Cookie header string
+    expiresAt: Date; // When session expires
   };
 }
 
@@ -94,7 +96,7 @@ interface AuthPlugin {
 interface AuthPluginOptions {
   url: string;
   client?: string;
-  [key: string]: unknown;  // Plugin-specific options
+  [key: string]: unknown; // Plugin-specific options
 }
 ```
 
@@ -107,7 +109,7 @@ interface AuthSession {
   client?: string;
   auth: {
     method: 'cookie' | 'basic';
-    plugin: string;  // Package name for refresh, e.g., '@abapify/adt-puppeteer'
+    plugin: string; // Package name for refresh, e.g., '@abapify/adt-puppeteer'
     credentials: CookieCredentials | BasicCredentials;
   };
 }
@@ -119,13 +121,17 @@ When creating a new auth plugin:
 
 ```typescript
 // my-auth-plugin/src/index.ts
-import type { AuthPlugin, AuthPluginResult, AuthPluginOptions } from '@abapify/adt-auth';
+import type {
+  AuthPlugin,
+  AuthPluginResult,
+  AuthPluginOptions,
+} from '@abapify/adt-auth';
 
 const authPlugin: AuthPlugin = {
   async authenticate(options: AuthPluginOptions): Promise<AuthPluginResult> {
     // Your authentication logic here
     const cookies = await doAuthentication(options.url);
-    
+
     // Convert to standard format
     return {
       method: 'cookie',
@@ -168,14 +174,17 @@ When a session expires, AuthManager calls `refreshCredentials()`:
 ## Common Mistakes
 
 ### Mistake 1: Adding plugin-specific code to AuthManager
+
 **Symptom:** AuthManager imports or references specific plugins
 **Fix:** Keep AuthManager generic, move conversion logic to plugin
 
 ### Mistake 2: Plugin not returning AuthPluginResult
+
 **Symptom:** `Cannot read properties of undefined (reading 'cookies')`
 **Fix:** Plugin must convert its internal format to AuthPluginResult
 
 ### Mistake 3: Named export instead of default
+
 **Symptom:** `Plugin does not have a default export`
 **Fix:** Use `export default authPlugin`
 

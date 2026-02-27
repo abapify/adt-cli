@@ -20,7 +20,7 @@ import * as kinds from './kinds';
 // ============================================
 
 /** Constructor signature for ADK objects */
- 
+
 export type AdkObjectConstructor<
   T extends AdkObject<AdkKind, any> = AdkObject<AdkKind, any>,
 > = new (ctx: AdkContext, nameOrData: string | any) => T;

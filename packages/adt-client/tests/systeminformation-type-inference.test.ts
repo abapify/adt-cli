@@ -36,7 +36,9 @@ describe('System Information Type Inference', () => {
     };
 
     // Verify the inferred type matches our schema
-    const typeCheck: SystemInfoType extends SystemInformationJson ? true : false = true;
+    const typeCheck: SystemInfoType extends SystemInformationJson
+      ? true
+      : false = true;
     assert.ok(typeCheck, 'Inferred type must extend SystemInformationJson');
 
     // Test that all expected fields are accessible with correct types
@@ -47,7 +49,8 @@ describe('System Information Type Inference', () => {
 
     // This will fail at runtime (no real server), but MUST compile
     try {
-      const sysInfo = await client.core.http.systeminformation.getSystemInformation();
+      const sysInfo =
+        await client.core.http.systeminformation.getSystemInformation();
 
       // These property accesses should be type-safe
       const systemId: string | undefined = sysInfo.systemID;
@@ -58,7 +61,10 @@ describe('System Information Type Inference', () => {
       assert.ok(true, 'Types are correct');
     } catch (error) {
       // Expected to fail at runtime - this is a COMPILE-TIME type test
-      assert.ok(true, 'Runtime failure expected - validating compile-time types');
+      assert.ok(
+        true,
+        'Runtime failure expected - validating compile-time types',
+      );
     }
   });
 
@@ -72,7 +78,8 @@ describe('System Information Type Inference', () => {
     });
 
     try {
-      const sysInfo = await client.core.http.systeminformation.getSystemInformation();
+      const sysInfo =
+        await client.core.http.systeminformation.getSystemInformation();
 
       // These should all compile - proving the type is inferred correctly
       // If type inference fails, these would be type errors

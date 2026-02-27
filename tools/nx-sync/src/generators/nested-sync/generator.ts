@@ -36,7 +36,7 @@ const SKIPPED_DIRECTORIES = new Set([
 
 export default async function nestedSyncGenerator(
   tree: Tree,
-  _schema: NxNestedSyncGeneratorSchema
+  _schema: NxNestedSyncGeneratorSchema,
 ) {
   const nestedWorkspaces = findNestedWorkspaces();
 
@@ -75,8 +75,8 @@ export default async function nestedSyncGenerator(
         workspaces: pending.map((workspace) => workspace.relativePath),
       },
       null,
-      2
-    )
+      2,
+    ),
   );
 
   return {
@@ -84,7 +84,7 @@ export default async function nestedSyncGenerator(
       pending.length === 1 ? '' : 's'
     } requiring sync.`,
     outOfSyncDetails: pending.flatMap((workspace) =>
-      formatOutOfSyncDetail(workspace)
+      formatOutOfSyncDetail(workspace),
     ),
     callback: async () => {
       for (const workspace of pending) {
@@ -122,7 +122,7 @@ function findNestedWorkspaces(): WorkspaceInfo[] {
 
       const absolutePath = join(current, entry.name);
       const relativePath = normalizeRelativePath(
-        relative(workspaceRoot, absolutePath)
+        relative(workspaceRoot, absolutePath),
       );
 
       if (!relativePath || relativePath.startsWith('..')) {
@@ -175,7 +175,7 @@ function checkWorkspace(workspace: WorkspaceInfo): WorkspaceCheckResult {
 
   throw new SyncError(
     `Failed to verify nested workspace "${workspace.relativePath}"`,
-    collectOutputLines(result)
+    collectOutputLines(result),
   );
 }
 
@@ -186,37 +186,33 @@ async function runNestedSync(workspace: PendingWorkspace) {
   if (result.status !== 0) {
     throw new SyncError(
       `Failed to sync nested workspace "${workspace.relativePath}"`,
-      collectOutputLines(result)
+      collectOutputLines(result),
     );
   }
 }
 
 function runNxSyncCommand(
   workspace: WorkspaceInfo,
-  extraArgs: string[]
+  extraArgs: string[],
 ): SpawnSyncReturns<string> {
   const nxBin = resolveNxBinary(workspace);
-  const result = spawnSync(
-    process.execPath,
-    [nxBin, 'sync', ...extraArgs],
-    {
-      cwd: workspace.absolutePath,
-      encoding: 'utf-8',
-      stdio: 'pipe',
-    }
-  ) as SpawnSyncReturns<string>;
+  const result = spawnSync(process.execPath, [nxBin, 'sync', ...extraArgs], {
+    cwd: workspace.absolutePath,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  }) as SpawnSyncReturns<string>;
 
   if (result.error) {
     throw new SyncError(
       `Failed to execute Nx inside "${workspace.relativePath}"`,
-      [result.error.message]
+      [result.error.message],
     );
   }
 
   if (result.status === null) {
     throw new SyncError(
       `Nx exited unexpectedly while processing "${workspace.relativePath}"`,
-      collectOutputLines(result)
+      collectOutputLines(result),
     );
   }
 
@@ -243,7 +239,7 @@ function resolveNxBinary(workspace: WorkspaceInfo): string {
       `Unable to locate Nx CLI for "${workspace.relativePath}"`,
       [
         'Install dependencies for that workspace or ensure it is a valid Nx project.',
-      ]
+      ],
     );
   }
 }

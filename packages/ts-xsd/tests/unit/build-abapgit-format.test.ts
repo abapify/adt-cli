@@ -1,12 +1,12 @@
 /**
  * Test for abapGit XML format building
- * 
+ *
  * The abapGit XML format has a specific namespace structure:
  * - <abapGit> - NO namespace prefix (root element from chameleon schema)
  * - <asx:abap> - asx namespace prefix
  * - <asx:values> - asx namespace prefix
  * - <DEVC>, <CTEXT> - NO namespace prefix (unqualified local elements)
- * 
+ *
  * Expected output:
  * ```xml
  * <?xml version="1.0" encoding="utf-8"?>
@@ -20,7 +20,7 @@
  *   </asx:abap>
  * </abapGit>
  * ```
- * 
+ *
  * The key insight is:
  * - elementFormDefault="unqualified" means local elements (DEVC, CTEXT) don't get prefix
  * - The root element (abapGit) should NOT have prefix because it's from a schema with NO targetNamespace
@@ -67,13 +67,9 @@ describe('abapGit XML format building', () => {
         name: 'abap',
         complexType: {
           sequence: {
-            element: [
-              { name: 'values', type: 'asx:DevcValuesType' },
-            ],
+            element: [{ name: 'values', type: 'asx:DevcValuesType' }],
           },
-          attribute: [
-            { name: 'version', type: 'xs:string', default: '1.0' },
-          ],
+          attribute: [{ name: 'version', type: 'xs:string', default: '1.0' }],
         },
       },
     ],
@@ -81,17 +77,13 @@ describe('abapGit XML format building', () => {
       {
         name: 'DevcValuesType',
         sequence: {
-          element: [
-            { name: 'DEVC', type: 'asx:DevcType', minOccurs: 0 },
-          ],
+          element: [{ name: 'DEVC', type: 'asx:DevcType', minOccurs: 0 }],
         },
       },
       {
         name: 'DevcType',
         all: {
-          element: [
-            { name: 'CTEXT', type: 'xs:string', minOccurs: 0 },
-          ],
+          element: [{ name: 'CTEXT', type: 'xs:string', minOccurs: 0 }],
         },
       },
     ],
@@ -112,25 +104,46 @@ describe('abapGit XML format building', () => {
       },
     };
 
-    const xml = build(devcSchema, data, { rootElement: 'abapGit', pretty: true });
+    const xml = build(devcSchema, data, {
+      rootElement: 'abapGit',
+      pretty: true,
+    });
     console.log('Generated XML:');
     console.log(xml);
 
     // Root element should NOT have asx: prefix
     // Because abapGit is from a chameleon schema (no targetNamespace)
-    assert.ok(xml.includes('<abapGit'), 'Root element should be <abapGit> without prefix');
-    assert.ok(!xml.includes('<asx:abapGit'), 'Root element should NOT have asx: prefix');
+    assert.ok(
+      xml.includes('<abapGit'),
+      'Root element should be <abapGit> without prefix',
+    );
+    assert.ok(
+      !xml.includes('<asx:abapGit'),
+      'Root element should NOT have asx: prefix',
+    );
 
     // Child element with ref="asx:abap" SHOULD have prefix
-    assert.ok(xml.includes('<asx:abap'), 'Element with ref should have asx: prefix');
+    assert.ok(
+      xml.includes('<asx:abap'),
+      'Element with ref should have asx: prefix',
+    );
 
     // Local elements should NOT have prefix (elementFormDefault=unqualified)
-    assert.ok(xml.includes('<DEVC>') || xml.includes('<DEVC '), 'DEVC should NOT have prefix');
+    assert.ok(
+      xml.includes('<DEVC>') || xml.includes('<DEVC '),
+      'DEVC should NOT have prefix',
+    );
     assert.ok(!xml.includes('<asx:DEVC'), 'DEVC should NOT have asx: prefix');
-    assert.ok(xml.includes('<CTEXT>') || xml.includes('<CTEXT '), 'CTEXT should NOT have prefix');
+    assert.ok(
+      xml.includes('<CTEXT>') || xml.includes('<CTEXT '),
+      'CTEXT should NOT have prefix',
+    );
     assert.ok(!xml.includes('<asx:CTEXT'), 'CTEXT should NOT have asx: prefix');
 
     // values element should have prefix (it's referenced via asx:DevcValuesType)
-    assert.ok(xml.includes('<asx:values') || xml.includes('<values'), 'values element should exist');
+    assert.ok(
+      xml.includes('<asx:values') || xml.includes('<values'),
+      'values element should exist',
+    );
   });
 });

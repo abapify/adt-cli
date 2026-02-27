@@ -33,7 +33,7 @@ export const listCommand = new Command('list')
     } catch (error) {
       console.error(
         '❌ Failed to list systems:',
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
       process.exit(1);
     }

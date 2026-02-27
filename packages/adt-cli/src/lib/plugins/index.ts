@@ -23,7 +23,7 @@ export type {
   IPluginRegistry,
 } from './interfaces';
 
-export { 
+export {
   ADT_TYPE_MAPPINGS,
   getObjectType,
   getKindFromType,

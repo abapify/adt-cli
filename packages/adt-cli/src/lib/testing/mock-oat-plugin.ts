@@ -30,10 +30,10 @@ export class MockOatPlugin {
   async serialize(
     objectData: any,
     objectType: string,
-    outputDir: string
+    outputDir: string,
   ): Promise<any> {
     console.log(
-      `📝 Mock OAT Plugin: Serializing ${objectType} to ${outputDir}`
+      `📝 Mock OAT Plugin: Serializing ${objectType} to ${outputDir}`,
     );
     console.log(`🎛️  Using preset: ${this.options.preset}`);
     console.log(`📁 File structure: ${this.options.fileStructure}`);

@@ -40,6 +40,7 @@ Create CLI display pages for ADT object types.
 ```
 
 **Why this order?**
+
 - **ADK** - Encapsulates business logic, relationships, lazy loading
 - **Service** - Reusable business logic, error handling
 - **Contract** - Type-safe but low-level
@@ -48,6 +49,7 @@ Create CLI display pages for ADT object types.
 ### Page Architecture
 
 Pages are **self-registering display components** that:
+
 - Fetch data using ADK objects (preferred)
 - Render formatted output for terminal
 - Register with the router on import
@@ -83,13 +85,12 @@ import { Box, Field, Section, Text, adtLink } from '../components';
 
 // Components are composable
 const content = Box(
-  Section('▼ Properties',
+  Section(
+    '▼ Properties',
     Field('Name', obj.name),
     Field('Description', obj.description),
   ),
-  Section('▼ Details',
-    Text('Additional info...'),
-  ),
+  Section('▼ Details', Text('Additional info...')),
 );
 ```
 
@@ -101,11 +102,15 @@ Pages register themselves when imported:
 import { definePage } from '../router';
 
 export const myPageDef = definePage<MyData>({
-  type: 'MYTYPE',  // Object type code
+  type: 'MYTYPE', // Object type code
   name: 'My Object',
   icon: '📦',
-  fetch: async (client, params) => { /* ... */ },
-  render: (data, params) => { /* ... */ },
+  fetch: async (client, params) => {
+    /* ... */
+  },
+  render: (data, params) => {
+    /* ... */
+  },
 });
 ```
 
@@ -116,12 +121,13 @@ export const myPageDef = definePage<MyData>({
 **Location:** `adt-cli/src/lib/ui/pages/{type}.ts`
 
 **Pattern:**
-```typescript
+
+````typescript
 /**
  * {Type} Page
  *
  * Self-registering page for {type} objects using ADK.
- * 
+ *
  * Note: ADK global context is automatically initialized by getAdtClientV2().
  * No need to create context manually - just use ADK objects directly.
  */
@@ -180,7 +186,7 @@ function render{Type}Page(data: Adk{Type}, params: NavParams): Page {
 
   // Properties section with ADT link
   const objectLink = adtLink({ name: data.name, type: data.type, uri: data.objectUri });
-  
+
   sections.push(Section('▼ Properties',
     Field('Name', data.name),
     Field('Description', data.description || '-'),
@@ -220,12 +226,12 @@ function render{Type}Page(data: Adk{Type}, params: NavParams): Page {
  *
  * Self-registers with the router on import.
  * Type: {TYPE_CODE}
- * 
+ *
  * Usage:
  * ```ts
- * const page = await router.navTo(client, '{TYPE_CODE}', { 
+ * const page = await router.navTo(client, '{TYPE_CODE}', {
  *   name: 'OBJECT_NAME',
- *   showDetails: true 
+ *   showDetails: true
  * });
  * page.print();
  * ```
@@ -247,7 +253,7 @@ export const {type}PageDef = definePage<Adk{Type}>({
 });
 
 export default {type}PageDef;
-```
+````
 
 ### Step 2: Export from Index
 
@@ -264,7 +270,7 @@ export { {type}PageDef } from './{type}';
 Routes are auto-registered via `definePage()`, but you can add aliases:
 
 ```typescript
-import './{type}';  // Triggers self-registration
+import './{type}'; // Triggers self-registration
 ```
 
 ### Step 4: Import in Command
@@ -288,19 +294,19 @@ page.print();
 import { Box, Field, Section, Text, adtLink } from '../components';
 
 // Box - Container for other components
-Box(...children)
+Box(...children);
 
 // Section - Titled section with children
-Section('▼ Title', ...children)
+Section('▼ Title', ...children);
 
 // Field - Label: Value pair
-Field('Label', 'Value')
+Field('Label', 'Value');
 
 // Text - Plain text
-Text('Some text')
+Text('Some text');
 
 // adtLink - Clickable ADT link (terminal hyperlink)
-adtLink({ name: 'OBJ', type: 'CLAS', uri: '/sap/bc/adt/...' })
+adtLink({ name: 'OBJ', type: 'CLAS', uri: '/sap/bc/adt/...' });
 ```
 
 ### Custom Components
@@ -319,16 +325,16 @@ function MyComponent(data: MyData): Component {
 interface PageDefinition<T> {
   /** Object type code (e.g., 'CLAS', 'RQRQ') */
   type: string;
-  
+
   /** Display name */
   name: string;
-  
+
   /** Icon emoji */
   icon: string;
-  
+
   /** Fetch data from client */
   fetch: (client: AdtClient, params: NavParams) => Promise<T>;
-  
+
   /** Render page from data */
   render: (data: T, params: NavParams) => Page;
 }

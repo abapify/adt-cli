@@ -1,6 +1,6 @@
 /**
  * Test: URL Path Parameters
- * 
+ *
  * Verifies that path parameters in template strings are correctly
  * interpolated into the final URL.
  */
@@ -57,7 +57,7 @@ describe('URL Path Parameters', () => {
 
       const client = createClient(contract, {
         baseUrl: 'http://test.com',
-        adapter: { request: async () => ({} as any) },
+        adapter: { request: async () => ({}) as any },
       });
 
       // Type check: parameter should be string
@@ -155,10 +155,10 @@ describe('URL Path Parameters', () => {
 
       // Verify URL has path param interpolated
       expect(capturedUrl).toBe('http://test.com/users/user-123/posts');
-      
+
       // Verify query params passed
       expect(capturedQuery).toEqual({ draft: 'true' });
-      
+
       // Verify body passed
       expect(capturedBody).toEqual(postData);
     });
@@ -174,11 +174,13 @@ describe('URL Path Parameters', () => {
 
       const client = createClient(contract, {
         baseUrl: 'http://test.com',
-        adapter: { request: async () => ({} as any) },
+        adapter: { request: async () => ({}) as any },
       });
 
       // Type check: should have 2 parameters - userId (string) and body (CreatePostRequest)
-      expectTypeOf(client.createPost).parameters.toEqualTypeOf<[string, CreatePostRequest]>();
+      expectTypeOf(client.createPost).parameters.toEqualTypeOf<
+        [string, CreatePostRequest]
+      >();
     });
 
     it('should infer correct response type', async () => {
@@ -193,12 +195,13 @@ describe('URL Path Parameters', () => {
       const client = createClient(contract, {
         baseUrl: 'http://test.com',
         adapter: {
-          request: async <T>() => ({
-            id: 'post-789',
-            title: 'Test',
-            content: 'Content',
-            createdAt: '2024-01-01',
-          } as T),
+          request: async <T>() =>
+            ({
+              id: 'post-789',
+              title: 'Test',
+              content: 'Content',
+              createdAt: '2024-01-01',
+            }) as T,
         },
       });
 

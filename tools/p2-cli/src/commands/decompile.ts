@@ -14,20 +14,25 @@ const DECOMPILERS = {
   cfr: {
     name: 'CFR',
     check: 'which cfr-decompiler',
-    command: (input: string, output: string) => `cfr-decompiler "${input}" --outputdir "${output}"`,
-    install: 'brew install cfr-decompiler (macOS/Linux) or download from https://www.benf.org/other/cfr/',
+    command: (input: string, output: string) =>
+      `cfr-decompiler "${input}" --outputdir "${output}"`,
+    install:
+      'brew install cfr-decompiler (macOS/Linux) or download from https://www.benf.org/other/cfr/',
   },
   procyon: {
     name: 'Procyon',
     check: 'which procyon',
-    command: (input: string, output: string) => `procyon -o "${output}" "${input}"`,
+    command: (input: string, output: string) =>
+      `procyon -o "${output}" "${input}"`,
     install: 'Download from https://github.com/mstrobel/procyon',
   },
   fernflower: {
     name: 'Fernflower',
     check: 'test -f fernflower.jar',
-    command: (input: string, output: string) => `java -jar fernflower.jar "${input}" "${output}"`,
-    install: 'Find in IntelliJ IDEA: plugins/java-decompiler/lib/java-decompiler.jar',
+    command: (input: string, output: string) =>
+      `java -jar fernflower.jar "${input}" "${output}"`,
+    install:
+      'Find in IntelliJ IDEA: plugins/java-decompiler/lib/java-decompiler.jar',
   },
 };
 
@@ -58,8 +63,16 @@ function findDecompiler(): keyof typeof DECOMPILERS | null {
 /**
  * Decompile Java class files or JAR files
  */
-export async function decompile(input: string, options: DecompileOptions): Promise<void> {
-  const { output, decompiler: requestedDecompiler, filter, verbose = false } = options;
+export async function decompile(
+  input: string,
+  options: DecompileOptions,
+): Promise<void> {
+  const {
+    output,
+    decompiler: requestedDecompiler,
+    filter,
+    verbose = false,
+  } = options;
 
   console.log(`🔧 Java Decompilation`);
   console.log(`   Input: ${input}`);
@@ -80,7 +93,9 @@ export async function decompile(input: string, options: DecompileOptions): Promi
   }
 
   if (requestedDecompiler && !isDecompilerAvailable(requestedDecompiler)) {
-    console.log(`❌ Requested decompiler '${requestedDecompiler}' is not available.`);
+    console.log(
+      `❌ Requested decompiler '${requestedDecompiler}' is not available.`,
+    );
     console.log(`   ${DECOMPILERS[requestedDecompiler].install}`);
     process.exit(1);
   }
@@ -93,7 +108,7 @@ export async function decompile(input: string, options: DecompileOptions): Promi
 
   // Check if input is a JAR file, directory with JARs, or directory with classes
   let jarFiles = findFiles(input, '*.jar');
-  
+
   // Apply filter if specified
   if (filter && jarFiles.length > 0) {
     const patterns = filter.split(',').map((p) => p.trim());
@@ -106,7 +121,7 @@ export async function decompile(input: string, options: DecompileOptions): Promi
     });
     console.log(`🎯 Filtered to ${jarFiles.length} JARs matching: ${filter}`);
   }
-  
+
   if (jarFiles.length > 0) {
     // Decompile JAR files directly (much faster)
     console.log(`🔍 Found ${jarFiles.length} JAR files`);
@@ -118,8 +133,10 @@ export async function decompile(input: string, options: DecompileOptions): Promi
     for (let i = 0; i < jarFiles.length; i++) {
       const jar = jarFiles[i];
       const jarName = basename(jar, '.jar');
-      
-      process.stdout.write(`\r   Decompiling ${i + 1}/${jarFiles.length}: ${jarName.slice(0, 50).padEnd(50)}`);
+
+      process.stdout.write(
+        `\r   Decompiling ${i + 1}/${jarFiles.length}: ${jarName.slice(0, 50).padEnd(50)}`,
+      );
 
       try {
         const cmd = config.command(jar, output);
@@ -141,7 +158,7 @@ export async function decompile(input: string, options: DecompileOptions): Promi
   } else {
     // Decompile individual class files
     const classFiles = findFiles(input, '*.class');
-    
+
     if (classFiles.length === 0) {
       console.log('❌ No JAR or class files found');
       return;
@@ -155,9 +172,11 @@ export async function decompile(input: string, options: DecompileOptions): Promi
 
     for (let i = 0; i < classFiles.length; i++) {
       const classFile = classFiles[i];
-      
+
       if (verbose) {
-        process.stdout.write(`\r   Decompiling ${i + 1}/${classFiles.length}: ${basename(classFile).slice(0, 50).padEnd(50)}`);
+        process.stdout.write(
+          `\r   Decompiling ${i + 1}/${classFiles.length}: ${basename(classFile).slice(0, 50).padEnd(50)}`,
+        );
       }
 
       try {

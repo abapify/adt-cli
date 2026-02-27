@@ -15,7 +15,7 @@ export function defineConfig(config: CodegenConfig): CodegenConfig {
  * Define an ADT config with codegen section
  */
 export function defineAdtConfig<T extends { codegen: CodegenConfig }>(
-  config: T
+  config: T,
 ): T {
   return config;
 }

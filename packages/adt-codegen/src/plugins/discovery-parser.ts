@@ -46,7 +46,6 @@ export function parseDiscoveryXml(xml: string): DiscoveryData {
     ? workspacesRaw
     : [workspacesRaw];
 
-   
   const workspaces: WorkspaceData[] = workspacesArray.map(
     (ws: Record<string, any>) => {
       const collectionsRaw = ws['app:collection'];
@@ -56,7 +55,6 @@ export function parseDiscoveryXml(xml: string): DiscoveryData {
           : [collectionsRaw]
         : [];
 
-       
       const collections: CollectionData[] = collectionsArray.map(
         (coll: Record<string, any>) => {
           // Parse accepts

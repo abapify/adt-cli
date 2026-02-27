@@ -46,13 +46,15 @@ bun add @abapify/adt-schemas
 import { classes, type AbapClass } from '@abapify/adt-schemas';
 
 // Parse XML to typed object
-const xml = await fetch('/sap/bc/adt/oo/classes/zcl_my_class').then(r => r.text());
+const xml = await fetch('/sap/bc/adt/oo/classes/zcl_my_class').then((r) =>
+  r.text(),
+);
 const data = classes.parse(xml);
 
 // Full type safety - TypeScript knows all properties
-console.log(data.name);           // string
-console.log(data.category);       // 'generalObjectType' | 'exceptionClass' | ...
-console.log(data.include?.[0]);   // AbapClassInclude | undefined
+console.log(data.name); // string
+console.log(data.category); // 'generalObjectType' | 'exceptionClass' | ...
+console.log(data.include?.[0]); // AbapClassInclude | undefined
 ```
 
 ### Build ADT XML
@@ -76,13 +78,18 @@ import { classes, configurations } from '@abapify/adt-schemas';
 import { http } from 'speci/rest';
 
 const adtContracts = {
-  getClass: (name: string) => http.get(`/sap/bc/adt/oo/classes/${name}`, {
-    responses: { 200: classes },
-  }),
-  
-  getConfigurations: () => http.get('/sap/bc/adt/cts/transportrequests/searchconfiguration/configurations', {
-    responses: { 200: configurations },
-  }),
+  getClass: (name: string) =>
+    http.get(`/sap/bc/adt/oo/classes/${name}`, {
+      responses: { 200: classes },
+    }),
+
+  getConfigurations: () =>
+    http.get(
+      '/sap/bc/adt/cts/transportrequests/searchconfiguration/configurations',
+      {
+        responses: { 200: configurations },
+      },
+    ),
 };
 ```
 
@@ -90,52 +97,52 @@ const adtContracts = {
 
 ### Core Schemas
 
-| Schema | Type | Description |
-|--------|------|-------------|
-| `adtcore` | `AdtObject` | Core ADT object types |
-| `atom` | `LinkType` | Atom feed format (links, categories) |
-| `abapsource` | `AbapSourceObject` | ABAP source code structures |
-| `abapoo` | `AbapOoObject` | ABAP OO base types |
+| Schema       | Type               | Description                          |
+| ------------ | ------------------ | ------------------------------------ |
+| `adtcore`    | `AdtObject`        | Core ADT object types                |
+| `atom`       | `LinkType`         | Atom feed format (links, categories) |
+| `abapsource` | `AbapSourceObject` | ABAP source code structures          |
+| `abapoo`     | `AbapOoObject`     | ABAP OO base types                   |
 
 ### Repository Objects
 
-| Schema | Type | Description |
-|--------|------|-------------|
-| `classes` | `AbapClass` | ABAP class metadata |
-| `interfaces` | `AbapInterface` | ABAP interface metadata |
-| `packagesV1` | `Package` | Package/devclass metadata |
+| Schema       | Type            | Description               |
+| ------------ | --------------- | ------------------------- |
+| `classes`    | `AbapClass`     | ABAP class metadata       |
+| `interfaces` | `AbapInterface` | ABAP interface metadata   |
+| `packagesV1` | `Package`       | Package/devclass metadata |
 
 ### Transport Management
 
-| Schema | Type | Description |
-|--------|------|-------------|
-| `transportfind` | `Abap` | Transport search (ABAP XML format) |
-| `transportmanagmentCreate` | `RootType` | Transport creation |
-| `configurations` | `Configurations` | Search configurations |
-| `configuration` | `Configuration` | Single configuration |
+| Schema                     | Type             | Description                        |
+| -------------------------- | ---------------- | ---------------------------------- |
+| `transportfind`            | `Abap`           | Transport search (ABAP XML format) |
+| `transportmanagmentCreate` | `RootType`       | Transport creation                 |
+| `configurations`           | `Configurations` | Search configurations              |
+| `configuration`            | `Configuration`  | Single configuration               |
 
 ### ATC (ABAP Test Cockpit)
 
-| Schema | Type | Description |
-|--------|------|-------------|
-| `atc` | `AtcWorklist` | ATC main schema |
-| `atcworklist` | `AtcWorklist` | ATC worklist |
-| `atcresult` | `AtcWorklist` | ATC results |
-| `checklist` | `CheckMessageList` | Check message lists |
-| `quickfixes` | `AtcQuickfixes` | ATC quickfixes |
+| Schema        | Type               | Description         |
+| ------------- | ------------------ | ------------------- |
+| `atc`         | `AtcWorklist`      | ATC main schema     |
+| `atcworklist` | `AtcWorklist`      | ATC worklist        |
+| `atcresult`   | `AtcWorklist`      | ATC results         |
+| `checklist`   | `CheckMessageList` | Check message lists |
+| `quickfixes`  | `AtcQuickfixes`    | ATC quickfixes      |
 
 ### Debugging & Tracing
 
-| Schema | Type | Description |
-|--------|------|-------------|
+| Schema     | Type          | Description          |
+| ---------- | ------------- | -------------------- |
 | `logpoint` | `AdtLogpoint` | Logpoint definitions |
-| `traces` | `Traces` | Trace data |
+| `traces`   | `Traces`      | Trace data           |
 
 ### Templates
 
-| Schema | Type | Description |
-|--------|------|-------------|
-| `templatelink` | `LinkType` | Template links |
+| Schema                 | Type                | Description             |
+| ---------------------- | ------------------- | ----------------------- |
+| `templatelink`         | `LinkType`          | Template links          |
 | `templatelinkExtended` | `TemplateLinksType` | Extended template links |
 
 ## Type System
@@ -146,19 +153,19 @@ All types are pre-generated as TypeScript interfaces, avoiding runtime inference
 
 ```typescript
 // Import types directly
-import type { 
-  AbapClass, 
-  AbapInterface, 
+import type {
+  AbapClass,
+  AbapInterface,
   AdtObject,
   AdtObjectReference,
-  LinkType 
+  LinkType,
 } from '@abapify/adt-schemas';
 
 // Use in your code
 function processClass(cls: AbapClass) {
   console.log(cls.name);
   console.log(cls.superClassRef?.name);
-  cls.include?.forEach(inc => console.log(inc.includeType));
+  cls.include?.forEach((inc) => console.log(inc.includeType));
 }
 ```
 
@@ -264,22 +271,20 @@ Some SAP endpoints return ABAP XML format (`asx:abap` envelope) without official
 ```typescript
 // schemas/custom/transportfind.ts
 export default {
-  $xmlns: { asx: "http://www.sap.com/abapxml" },
-  targetNamespace: "http://www.sap.com/abapxml",
-  element: [{ name: "abap", type: "Abap" }],
-  complexType: [{
-    name: "Abap",
-    sequence: {
-      element: [
-        { name: "values", type: "Values" },
-      ]
+  $xmlns: { asx: 'http://www.sap.com/abapxml' },
+  targetNamespace: 'http://www.sap.com/abapxml',
+  element: [{ name: 'abap', type: 'Abap' }],
+  complexType: [
+    {
+      name: 'Abap',
+      sequence: {
+        element: [{ name: 'values', type: 'Values' }],
+      },
+      attribute: [{ name: 'version', type: 'xs:string' }],
     },
-    attribute: [
-      { name: "version", type: "xs:string" },
-    ]
-  }],
+  ],
   // ... more types
-} as const;  // CRITICAL: 'as const' required!
+} as const; // CRITICAL: 'as const' required!
 ```
 
 ### Key Points
@@ -344,7 +349,7 @@ const contract = http.get('/sap/bc/adt/oo/classes/zcl_test', {
 
 // Response type is automatically inferred as AbapClass
 const response = await client.execute(contract);
-console.log(response.data.name);  // TypeScript knows this is string
+console.log(response.data.name); // TypeScript knows this is string
 ```
 
 ## Related Packages

@@ -54,6 +54,8 @@ export function resetCliContext(): void {
 /**
  * Silent logger - suppresses all output (default for CLI)
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const noop = () => {};
 export const silentLogger: Logger = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   trace: () => {},

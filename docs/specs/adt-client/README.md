@@ -32,21 +32,21 @@ interface AdtClient {
   getObjectSource(
     objectType: string,
     objectName: string,
-    include?: string
+    include?: string,
   ): Promise<string>;
   getObjectMetadata(
     objectType: string,
-    objectName: string
+    objectName: string,
   ): Promise<ObjectMetadata>;
   updateObject(
     objectType: string,
     objectName: string,
-    content: string
+    content: string,
   ): Promise<UpdateResult>;
   createObject(
     objectType: string,
     objectName: string,
-    content: string
+    content: string,
   ): Promise<CreateResult>;
   deleteObject(objectType: string, objectName: string): Promise<DeleteResult>;
 
@@ -55,14 +55,14 @@ interface AdtClient {
   getPackageContents(packageName: string): Promise<PackageContent>;
   getObjectStructure(
     objectType: string,
-    objectName: string
+    objectName: string,
   ): Promise<ObjectStructure>;
 
   // Transport operations
   getTransportObjects(transportId: string): Promise<TransportObject[]>;
   assignToTransport(
     objectKey: string,
-    transportId: string
+    transportId: string,
   ): Promise<AssignResult>;
 
   // System information
@@ -110,7 +110,7 @@ const classObject = await client.getObject('CLAS', 'ZCL_EXAMPLE');
 const classSource = await client.getObjectSource(
   'CLAS',
   'ZCL_EXAMPLE',
-  'source/main'
+  'source/main',
 );
 
 // Get object metadata only
@@ -127,7 +127,7 @@ const result = await client.updateObject('CLAS', 'ZCL_EXAMPLE', updatedSource);
 const createResult = await client.createObject(
   'CLAS',
   'ZCL_NEW',
-  initialSource
+  initialSource,
 );
 ```
 

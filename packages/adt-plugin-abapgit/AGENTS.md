@@ -13,6 +13,7 @@
 > **Mantra:** "Global elements create roots. Global types create reuse."
 
 **Core Rules:**
+
 - ✅ ONE root element per document schema (`abapGit`)
 - ✅ Reuse via `xs:complexType`, NOT via elements
 - ✅ Payload types are TYPES ONLY (never global elements)
@@ -45,6 +46,7 @@ src/schemas/generated/
 ### Type Inference
 
 Each schema provides **two type levels**:
+
 - `schema._type` → Full `AbapGitType` (XML envelope + content)
 - `schema._values` → `AbapValuesType` (what `toAbapGit()` returns)
 
@@ -79,6 +81,7 @@ toAbapGit: (obj) => ({
 ### 2. XSD Template for New Object Types
 
 **Step 1:** Create payload type in `xsd/types/{typename}.xsd` (TYPE ONLY):
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
@@ -93,6 +96,7 @@ toAbapGit: (obj) => ({
 ```
 
 **Step 2:** Create concrete document schema in `xsd/{type}.xsd`:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -169,11 +173,13 @@ export const {type}Handler = createHandler(Adk{Type}, {
 ### 4. Handlers Only Define Mappings
 
 Handlers should contain:
+
 - ✅ `toAbapGit()` - data mapping (return type inferred from schema)
 - ✅ `getSource()` / `getSources()` - source file definitions
 - ✅ `xmlFileName` - custom filename (if needed)
 
 Handlers should NOT contain:
+
 - ❌ File system operations
 - ❌ ADT client calls
 - ❌ XML string building
@@ -182,12 +188,14 @@ Handlers should NOT contain:
 ### 5. Import Conventions
 
 **Internal imports (within package):** Use extensionless paths
+
 ```typescript
 import { createHandler } from '../base';
 import { intf } from '../../../schemas/generated';
 ```
 
 **ADK imports:** Use local re-export module
+
 ```typescript
 // Correct
 import { AdkClass, type ClassIncludeType } from '../adk';
@@ -199,24 +207,25 @@ import { AdkClass } from '@abapify/adk';
 ### 6. Test File Imports
 
 Test files (`tests/**/*.test.ts`) need `.ts` extensions for Node.js native runner:
+
 ```typescript
 import { createHandler } from '../../src/lib/handlers/base.ts';
 ```
 
 ## File Locations
 
-| Purpose | Location |
-|---------|----------|
-| XSD schemas | `xsd/*.xsd` |
-| Type definitions | `xsd/types/*.xsd` |
-| Generated schemas | `src/schemas/generated/` |
-| Handler base | `src/lib/handlers/base.ts` |
-| Object handlers | `src/lib/handlers/objects/*.ts` |
-| ADK re-exports | `src/lib/handlers/adk.ts` |
-| Handler registry | `src/lib/handlers/registry.ts` |
-| Schema tests | `tests/schemas/*.test.ts` |
-| Handler tests | `tests/handlers/*.test.ts` |
-| XML fixtures | `tests/fixtures/` |
+| Purpose           | Location                        |
+| ----------------- | ------------------------------- |
+| XSD schemas       | `xsd/*.xsd`                     |
+| Type definitions  | `xsd/types/*.xsd`               |
+| Generated schemas | `src/schemas/generated/`        |
+| Handler base      | `src/lib/handlers/base.ts`      |
+| Object handlers   | `src/lib/handlers/objects/*.ts` |
+| ADK re-exports    | `src/lib/handlers/adk.ts`       |
+| Handler registry  | `src/lib/handlers/registry.ts`  |
+| Schema tests      | `tests/schemas/*.test.ts`       |
+| Handler tests     | `tests/handlers/*.test.ts`      |
+| XML fixtures      | `tests/fixtures/`               |
 
 ## Common Tasks
 
@@ -250,14 +259,14 @@ npx nx codegen adt-plugin-abapgit
 
 ## Anti-Patterns to Avoid
 
-| Don't | Do Instead |
-|-------|------------|
-| Manual XML strings | Use schema `.build()` |
-| `fs.writeFile` in handler | Return from `ctx.createFile()` |
-| `adtClient.getSource()` | Use `obj.getSource()` from ADK |
-| Skip XSD for "simple" types | Always create XSD first |
-| `as any` type assertions | Fix types at source |
-| Hand-write AbapGitSchema | Use codegen to generate |
+| Don't                       | Do Instead                     |
+| --------------------------- | ------------------------------ |
+| Manual XML strings          | Use schema `.build()`          |
+| `fs.writeFile` in handler   | Return from `ctx.createFile()` |
+| `adtClient.getSource()`     | Use `obj.getSource()` from ADK |
+| Skip XSD for "simple" types | Always create XSD first        |
+| `as any` type assertions    | Fix types at source            |
+| Hand-write AbapGitSchema    | Use codegen to generate        |
 
 ## Build Commands
 

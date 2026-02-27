@@ -21,13 +21,13 @@ updateMainSource: (className: string, source: string) =>
 
 ```typescript
 // ✅ Clean - body type declared, parameter inferred
-updateMainSource: (className: string) =>
+updateMainSource: ((className: string) =>
   adtHttp.put(`/classes/${className}/source`, {
     body: undefined as unknown as string, // Type declaration
     responses: { 200: undefined as unknown as void },
   }),
   // Usage: TypeScript knows the signature is (className: string, body: string)
-  await client.updateMainSource('ZCL_TEST', sourceCode);
+  await client.updateMainSource('ZCL_TEST', sourceCode));
 ```
 
 ## Supported Patterns
@@ -35,49 +35,49 @@ updateMainSource: (className: string) =>
 ### Pattern 1: No Path Parameters
 
 ```typescript
-createUser: () =>
+createUser: (() =>
   http.post('/users', {
     body: UserSchema, // Inferrable<User>
     responses: { 201: UserSchema },
   }),
   // Signature: (body: User) => Promise<User>
-  await client.createUser(userData);
+  await client.createUser(userData));
 ```
 
 ### Pattern 2: With Path Parameters
 
 ```typescript
-updateUser: (id: number) =>
+updateUser: ((id: number) =>
   http.put(`/users/${id}`, {
     body: UserSchema, // Inferrable<User>
     responses: { 200: UserSchema },
   }),
   // Signature: (id: number, body: User) => Promise<User>
-  await client.updateUser(123, userData);
+  await client.updateUser(123, userData));
 ```
 
 ### Pattern 3: Plain Type Assertions
 
 ```typescript
-updateSource: (className: string) =>
+updateSource: ((className: string) =>
   http.put(`/classes/${className}/source`, {
     body: undefined as unknown as string, // Plain type
     responses: { 200: undefined as unknown as void },
   }),
   // Signature: (className: string, body: string) => Promise<void>
-  await client.updateSource('ZCL_TEST', sourceCode);
+  await client.updateSource('ZCL_TEST', sourceCode));
 ```
 
 ### Pattern 4: Manual Typing (Still Supported)
 
 ```typescript
-createUser: (userData: User) =>
+createUser: ((userData: User) =>
   http.post('/users', {
     body: userData, // Actual value, not schema
     responses: { 201: UserSchema },
   }),
   // Signature: (userData: User) => Promise<User>
-  await client.createUser(userData);
+  await client.createUser(userData));
 ```
 
 ## Tests

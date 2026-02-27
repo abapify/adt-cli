@@ -25,14 +25,15 @@ import { mySchema } from '@abapify/adt-schemas-xsd';
 
 // Contract definition with full type safety
 export const myResource = {
-  get: (id: string) => contract({
-    method: 'GET',
-    path: `/sap/bc/adt/area/${id}`,
-    headers: { Accept: 'application/xml' },
-    responses: {
-      200: mySchema,  // Schema provides response type
-    },
-  }),
+  get: (id: string) =>
+    contract({
+      method: 'GET',
+      path: `/sap/bc/adt/area/${id}`,
+      headers: { Accept: 'application/xml' },
+      responses: {
+        200: mySchema, // Schema provides response type
+      },
+    }),
 };
 
 // When executed, response is fully typed:
@@ -79,6 +80,7 @@ expect(contract.responses[200]).toBe(mySchema);
 **Goal:** Map ADT REST API to contract operations.
 
 **Actions:**
+
 1. Discover endpoint via ADT discovery:
    ```bash
    npx adt discovery
@@ -104,6 +106,7 @@ expect(contract.responses[200]).toBe(mySchema);
 **Location:** `adt-contracts/src/adt/{area}/{resource}.ts`
 
 **Pattern:**
+
 ```typescript
 // src/adt/{area}/{resource}.ts
 import { contract } from '../../base';
@@ -111,98 +114,105 @@ import { mySchema, myListSchema } from '@abapify/adt-schemas-xsd';
 
 /**
  * {Resource} Contract
- * 
+ *
  * Endpoint: /sap/bc/adt/{area}/{resource}
  */
 export const myResource = {
   /**
    * Get single {resource}
    */
-  get: (id: string) => contract({
-    method: 'GET',
-    path: `/sap/bc/adt/{area}/${id}`,
-    headers: {
-      Accept: 'application/xml',
-    },
-    responses: {
-      200: mySchema,
-    },
-  }),
+  get: (id: string) =>
+    contract({
+      method: 'GET',
+      path: `/sap/bc/adt/{area}/${id}`,
+      headers: {
+        Accept: 'application/xml',
+      },
+      responses: {
+        200: mySchema,
+      },
+    }),
 
   /**
    * List {resources}
    */
-  list: (params?: { package?: string; user?: string }) => contract({
-    method: 'GET',
-    path: '/sap/bc/adt/{area}',
-    headers: {
-      Accept: 'application/xml',
-    },
-    query: params,
-    responses: {
-      200: myListSchema,
-    },
-  }),
+  list: (params?: { package?: string; user?: string }) =>
+    contract({
+      method: 'GET',
+      path: '/sap/bc/adt/{area}',
+      headers: {
+        Accept: 'application/xml',
+      },
+      query: params,
+      responses: {
+        200: myListSchema,
+      },
+    }),
 
   /**
    * Create {resource}
    */
-  create: () => contract({
-    method: 'POST',
-    path: '/sap/bc/adt/{area}',
-    headers: {
-      Accept: 'application/xml',
-      'Content-Type': 'application/xml',
-    },
-    body: mySchema,
-    responses: {
-      200: mySchema,
-      201: mySchema,
-    },
-  }),
+  create: () =>
+    contract({
+      method: 'POST',
+      path: '/sap/bc/adt/{area}',
+      headers: {
+        Accept: 'application/xml',
+        'Content-Type': 'application/xml',
+      },
+      body: mySchema,
+      responses: {
+        200: mySchema,
+        201: mySchema,
+      },
+    }),
 
   /**
    * Update {resource}
    */
-  update: (id: string) => contract({
-    method: 'PUT',
-    path: `/sap/bc/adt/{area}/${id}`,
-    headers: {
-      Accept: 'application/xml',
-      'Content-Type': 'application/xml',
-    },
-    body: mySchema,
-    responses: {
-      200: mySchema,
-    },
-  }),
+  update: (id: string) =>
+    contract({
+      method: 'PUT',
+      path: `/sap/bc/adt/{area}/${id}`,
+      headers: {
+        Accept: 'application/xml',
+        'Content-Type': 'application/xml',
+      },
+      body: mySchema,
+      responses: {
+        200: mySchema,
+      },
+    }),
 
   /**
    * Delete {resource}
    */
-  delete: (id: string) => contract({
-    method: 'DELETE',
-    path: `/sap/bc/adt/{area}/${id}`,
-    responses: {
-      200: undefined,
-      204: undefined,
-    },
-  }),
+  delete: (id: string) =>
+    contract({
+      method: 'DELETE',
+      path: `/sap/bc/adt/{area}/${id}`,
+      responses: {
+        200: undefined,
+        204: undefined,
+      },
+    }),
 };
 ```
 
 ### Step 3: Export Contract
 
 **Actions:**
+
 1. Create/update area index `src/adt/{area}/index.ts`:
+
    ```typescript
    import { myResource } from './myresource';
-   
+
    export const areaContract = {
      myResource,
      // ... other resources
    };
-   
+
    export type AreaContract = typeof areaContract;
    ```
 
@@ -225,6 +235,7 @@ export const myResource = {
 4. **ContractOperation type required** - use the type helper
 
 **Pattern:**
+
 ```typescript
 // tests/contracts/{area}.ts
 import { ContractScenario, type ContractOperation } from './base';
@@ -234,7 +245,7 @@ import { fixtures } from 'adt-fixtures';
 
 export class MyResourceScenario extends ContractScenario {
   readonly name = 'My Resource';
-  
+
   // ContractOperation[] ensures type safety
   readonly operations: ContractOperation[] = [
     {
@@ -245,8 +256,8 @@ export class MyResourceScenario extends ContractScenario {
       headers: { Accept: 'application/xml' },
       response: {
         status: 200,
-        schema: mySchema,  // TypeScript validates this is a valid schema
-        fixture: fixtures.myresource?.single,  // Optional
+        schema: mySchema, // TypeScript validates this is a valid schema
+        fixture: fixtures.myresource?.single, // Optional
       },
     },
     {
@@ -279,6 +290,7 @@ export class MyResourceScenario extends ContractScenario {
 ```
 
 **Register scenario:**
+
 ```typescript
 // tests/contracts/index.ts
 import { MyResourceScenario } from './{area}';
@@ -296,6 +308,7 @@ npx tsc --noEmit -p packages/adt-contracts
 ```
 
 **Verify:**
+
 - Contract has correct method
 - Contract has correct path
 - Contract has correct headers
@@ -309,52 +322,52 @@ npx tsc --noEmit -p packages/adt-contracts
 ### Path Parameters
 
 ```typescript
-get: (id: string, subId?: string) => contract({
-  path: subId 
-    ? `/sap/bc/adt/area/${id}/sub/${subId}`
-    : `/sap/bc/adt/area/${id}`,
-  // ...
-})
+get: (id: string, subId?: string) =>
+  contract({
+    path: subId
+      ? `/sap/bc/adt/area/${id}/sub/${subId}`
+      : `/sap/bc/adt/area/${id}`,
+    // ...
+  });
 ```
 
 ### Query Parameters
 
 ```typescript
-list: (params?: { 
-  package?: string; 
-  user?: string;
-  maxResults?: number;
-}) => contract({
-  query: params,
-  // ...
-})
+list: (params?: { package?: string; user?: string; maxResults?: number }) =>
+  contract({
+    query: params,
+    // ...
+  });
 ```
 
 ### Multiple Response Codes
 
 ```typescript
-create: () => contract({
-  responses: {
-    200: mySchema,      // Success with body
-    201: mySchema,      // Created with body
-    204: undefined,     // Success no body
-  },
-})
+create: () =>
+  contract({
+    responses: {
+      200: mySchema, // Success with body
+      201: mySchema, // Created with body
+      204: undefined, // Success no body
+    },
+  });
 ```
 
 ### Actions
 
 ```typescript
-release: (id: string) => contract({
-  method: 'POST',
-  path: `/sap/bc/adt/area/${id}/release`,
-  headers: {
-    Accept: 'application/xml',
-  },
-  responses: {
-    200: releaseResultSchema,
-  },
-})
+release: (id: string) =>
+  contract({
+    method: 'POST',
+    path: `/sap/bc/adt/area/${id}/release`,
+    headers: {
+      Accept: 'application/xml',
+    },
+    responses: {
+      200: releaseResultSchema,
+    },
+  });
 ```
 
 ## Checklist

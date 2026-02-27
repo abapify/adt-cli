@@ -1,11 +1,11 @@
 /**
  * Integration test for xs:include support
- * 
+ *
  * Tests 3 variants of include handling:
  * 1. raw - preserves include directive as-is (no linking)
  * 2. linked - converts include to $includes with TypeScript imports
  * 3. resolved - merges included content directly (self-contained)
- * 
+ *
  * Output directories:
  * - generated/raw/      - Raw include directive preserved
  * - generated/linked/   - $includes with imports
@@ -52,24 +52,42 @@ describe('xs:include integration', () => {
         },
       },
       generators: [
-        rawSchema({ $includes: false }),  // Disable $includes, keep raw include
+        rawSchema({ $includes: false }), // Disable $includes, keep raw include
       ],
     };
 
     const result = await runCodegen(config, { rootDir: fixturesDir });
-    assert.strictEqual(result.errors.length, 0, `Errors: ${JSON.stringify(result.errors)}`);
+    assert.strictEqual(
+      result.errors.length,
+      0,
+      `Errors: ${JSON.stringify(result.errors)}`,
+    );
 
-    const documentFile = result.files.find(f => f.path.includes('document') && !f.path.includes('index'));
+    const documentFile = result.files.find(
+      (f) => f.path.includes('document') && !f.path.includes('index'),
+    );
     assert.ok(documentFile, 'Should generate document.ts');
 
     const content = readFileSync(documentFile.path, 'utf-8');
 
     // RAW: Should have include directive, NOT $includes
-    assert.ok(content.includes('include:'), 'RAW should have include: property');
-    assert.ok(content.includes('schemaLocation'), 'RAW should have schemaLocation');
-    assert.ok(content.includes('common.xsd'), 'RAW should reference common.xsd');
+    assert.ok(
+      content.includes('include:'),
+      'RAW should have include: property',
+    );
+    assert.ok(
+      content.includes('schemaLocation'),
+      'RAW should have schemaLocation',
+    );
+    assert.ok(
+      content.includes('common.xsd'),
+      'RAW should reference common.xsd',
+    );
     assert.ok(!content.includes('$includes'), 'RAW should NOT have $includes');
-    assert.ok(!content.includes("import common"), 'RAW should NOT have import statement');
+    assert.ok(
+      !content.includes('import common'),
+      'RAW should NOT have import statement',
+    );
   });
 
   it('should generate LINKED output - $includes with TypeScript imports', async () => {
@@ -82,27 +100,48 @@ describe('xs:include integration', () => {
         },
       },
       generators: [
-        rawSchema({ $includes: true }),  // Enable $includes (default)
+        rawSchema({ $includes: true }), // Enable $includes (default)
       ],
     };
 
     const result = await runCodegen(config, { rootDir: fixturesDir });
-    assert.strictEqual(result.errors.length, 0, `Errors: ${JSON.stringify(result.errors)}`);
+    assert.strictEqual(
+      result.errors.length,
+      0,
+      `Errors: ${JSON.stringify(result.errors)}`,
+    );
 
-    const documentFile = result.files.find(f => f.path.includes('document') && !f.path.includes('index'));
+    const documentFile = result.files.find(
+      (f) => f.path.includes('document') && !f.path.includes('index'),
+    );
     assert.ok(documentFile, 'Should generate document.ts');
 
     const content = readFileSync(documentFile.path, 'utf-8');
 
     // LINKED: Should have $includes and import, NOT raw include
     assert.ok(content.includes('$includes'), 'LINKED should have $includes');
-    assert.ok(content.includes("import common from './common'"), 'LINKED should have import statement');
-    assert.ok(!content.includes('include:'), 'LINKED should NOT have include: property');
-    assert.ok(!content.includes('schemaLocation'), 'LINKED should NOT have schemaLocation');
+    assert.ok(
+      content.includes("import common from './common'"),
+      'LINKED should have import statement',
+    );
+    assert.ok(
+      !content.includes('include:'),
+      'LINKED should NOT have include: property',
+    );
+    assert.ok(
+      !content.includes('schemaLocation'),
+      'LINKED should NOT have schemaLocation',
+    );
 
     // Should have document's own content
-    assert.ok(content.includes('DocumentType'), 'LINKED should have DocumentType');
-    assert.ok(content.includes('substitutionGroup'), 'LINKED should have substitutionGroup');
+    assert.ok(
+      content.includes('DocumentType'),
+      'LINKED should have DocumentType',
+    );
+    assert.ok(
+      content.includes('substitutionGroup'),
+      'LINKED should have substitutionGroup',
+    );
   });
 
   it('should generate RESOLVED output - merged content, self-contained', async () => {
@@ -115,48 +154,99 @@ describe('xs:include integration', () => {
         },
       },
       generators: [
-        rawSchema({ resolveIncludes: true }),  // Merge includes
+        rawSchema({ resolveIncludes: true }), // Merge includes
       ],
     };
 
     const result = await runCodegen(config, { rootDir: fixturesDir });
-    assert.strictEqual(result.errors.length, 0, `Errors: ${JSON.stringify(result.errors)}`);
+    assert.strictEqual(
+      result.errors.length,
+      0,
+      `Errors: ${JSON.stringify(result.errors)}`,
+    );
 
-    const documentFile = result.files.find(f => f.path.includes('document') && !f.path.includes('index'));
+    const documentFile = result.files.find(
+      (f) => f.path.includes('document') && !f.path.includes('index'),
+    );
     assert.ok(documentFile, 'Should generate document.ts');
 
     const content = readFileSync(documentFile.path, 'utf-8');
 
     // RESOLVED: Should NOT have any include references
-    assert.ok(!content.includes('$includes'), 'RESOLVED should NOT have $includes');
-    assert.ok(!content.includes('include:'), 'RESOLVED should NOT have include:');
-    assert.ok(!content.includes("import common"), 'RESOLVED should NOT have import statement');
+    assert.ok(
+      !content.includes('$includes'),
+      'RESOLVED should NOT have $includes',
+    );
+    assert.ok(
+      !content.includes('include:'),
+      'RESOLVED should NOT have include:',
+    );
+    assert.ok(
+      !content.includes('import common'),
+      'RESOLVED should NOT have import statement',
+    );
 
     // RESOLVED: Should have MERGED content from common.xsd
-    assert.ok(content.includes('wrapper'), 'RESOLVED should have wrapper element from common.xsd');
-    assert.ok(content.includes('"content"'), 'RESOLVED should have content element from common.xsd');
-    assert.ok(content.includes('MetadataType'), 'RESOLVED should have MetadataType from common.xsd');
+    assert.ok(
+      content.includes('wrapper'),
+      'RESOLVED should have wrapper element from common.xsd',
+    );
+    assert.ok(
+      content.includes('"content"'),
+      'RESOLVED should have content element from common.xsd',
+    );
+    assert.ok(
+      content.includes('MetadataType'),
+      'RESOLVED should have MetadataType from common.xsd',
+    );
 
     // RESOLVED: Should still have document's own content
-    assert.ok(content.includes('DocumentType'), 'RESOLVED should have DocumentType from document.xsd');
-    assert.ok(content.includes('"document"'), 'RESOLVED should have document element');
+    assert.ok(
+      content.includes('DocumentType'),
+      'RESOLVED should have DocumentType from document.xsd',
+    );
+    assert.ok(
+      content.includes('"document"'),
+      'RESOLVED should have document element',
+    );
   });
 
   it('should produce different outputs for each variant', async () => {
     // Read all 3 generated files
-    const rawContent = readFileSync(join(generatedDir, outputDirs.raw, 'document.ts'), 'utf-8');
-    const linkedContent = readFileSync(join(generatedDir, outputDirs.linked, 'document.ts'), 'utf-8');
-    const resolvedContent = readFileSync(join(generatedDir, outputDirs.resolved, 'document.ts'), 'utf-8');
+    const rawContent = readFileSync(
+      join(generatedDir, outputDirs.raw, 'document.ts'),
+      'utf-8',
+    );
+    const linkedContent = readFileSync(
+      join(generatedDir, outputDirs.linked, 'document.ts'),
+      'utf-8',
+    );
+    const resolvedContent = readFileSync(
+      join(generatedDir, outputDirs.resolved, 'document.ts'),
+      'utf-8',
+    );
 
     // All should be different
-    assert.notStrictEqual(rawContent, linkedContent, 'RAW and LINKED should be different');
-    assert.notStrictEqual(linkedContent, resolvedContent, 'LINKED and RESOLVED should be different');
-    assert.notStrictEqual(rawContent, resolvedContent, 'RAW and RESOLVED should be different');
+    assert.notStrictEqual(
+      rawContent,
+      linkedContent,
+      'RAW and LINKED should be different',
+    );
+    assert.notStrictEqual(
+      linkedContent,
+      resolvedContent,
+      'LINKED and RESOLVED should be different',
+    );
+    assert.notStrictEqual(
+      rawContent,
+      resolvedContent,
+      'RAW and RESOLVED should be different',
+    );
 
     // RESOLVED should be the longest (has merged content)
     assert.ok(
       resolvedContent.length > linkedContent.length,
-      'RESOLVED should be longer than LINKED (merged content)'
+      'RESOLVED should be longer than LINKED (merged content)',
     );
   });
 });

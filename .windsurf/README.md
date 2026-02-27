@@ -78,7 +78,6 @@ Behavior:
 ## Memory: Internal vs. Workspace-Committable
 
 - Internal Memory (AI-side):
-
   - Stored in a persistent database.
   - Tracks user preferences, high-level decisions, and context.
   - Not committed to git.
@@ -93,7 +92,6 @@ I prefer committable memory for team-wide standards and processes.
 ## Agent Behaviors You Can Rely On
 
 - I will:
-
   - Consult `.windsurf/rules/` and follow applicable rules.
   - Use `.windsurf/workflows/` for well-defined procedures.
   - Keep `.windsurf/best-practices/` aligned with actual code changes.
@@ -113,11 +111,9 @@ I prefer committable memory for team-wide standards and processes.
 ## FAQ
 
 - Q: How do I make you auto-run a step in a workflow?
-
   - A: Add `// turbo` above that step. I’ll treat that step as safe to auto-run if it’s a terminal command.
 
 - Q: What’s the difference between a rule and a best practice?
-
   - A: Rules are imperative (“must do” under a specific condition). Best practices are guidance that I aim to follow consistently.
 
 - Q: When should I create a workflow instead of a rule?

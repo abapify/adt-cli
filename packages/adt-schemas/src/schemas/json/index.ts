@@ -1,10 +1,10 @@
 /**
  * JSON Schemas Index
- * 
+ *
  * Zod schemas for SAP ADT JSON endpoints.
  */
 
-export { 
+export {
   systeminformationSchema,
   systeminformation,
   type SystemInformation,
