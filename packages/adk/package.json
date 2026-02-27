@@ -6,7 +6,10 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
-    ".": "./dist/index.mjs",
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {

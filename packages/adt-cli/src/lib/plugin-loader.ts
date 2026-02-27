@@ -129,7 +129,7 @@ function pluginToCommand(
       const args: Record<string, unknown> = { ...options };
       if (plugin.arguments) {
         plugin.arguments.forEach((argDef, index) => {
-          const argName = argDef.name.replace(/[<>\[\]]/g, '');
+          const argName = argDef.name.replace(/[<>[\]]/g, '');
           args[argName] = actionArgs[index];
         });
       }

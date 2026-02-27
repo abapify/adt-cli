@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /**
  * Example: Using a global error response map with createHttp
  *
@@ -20,6 +21,7 @@ interface ApiError {
 }
 
 // 2. Define your global error response map
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 const globalErrors = {
   400: {} as ApiError,
   401: {} as ApiError,
@@ -27,6 +29,7 @@ const globalErrors = {
   404: {} as ApiError,
   500: {} as ApiError,
 } as const;
+/* eslint-enable @typescript-eslint/no-empty-object-type */
 
 // 3. Create http instance with global errors
 const api = createHttp(globalErrors);
@@ -85,7 +88,7 @@ async function demo() {
       console.error(
         `API Error [${error.status}]:`,
         error.payload.code,
-        error.payload.message
+        error.payload.message,
       );
     }
   }

@@ -55,11 +55,17 @@ export function resetCliContext(): void {
  * Silent logger - suppresses all output (default for CLI)
  */
 export const silentLogger: Logger = {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   trace: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   debug: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   info: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   warn: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   error: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   fatal: () => {},
   child: () => silentLogger,
 };

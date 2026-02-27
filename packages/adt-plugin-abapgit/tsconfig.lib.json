@@ -15,10 +15,13 @@
       "path": "../ts-xsd"
     },
     {
-      "path": "../adk/tsconfig.lib.json"
+      "path": "../adt-plugin/tsconfig.lib.json"
     },
     {
-      "path": "../adt-plugin/tsconfig.lib.json"
+      "path": "../adt-atc"
+    },
+    {
+      "path": "../adk/tsconfig.lib.json"
     }
   ]
 }

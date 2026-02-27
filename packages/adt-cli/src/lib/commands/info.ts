@@ -19,7 +19,7 @@ export const infoCommand = new Command('info')
         options.system || (!options.session && !options.system);
 
       // Capture data for output
-      let capturedData: any = {};
+      const capturedData: any = {};
 
       // Create v2 client (uses global CLI context automatically)
       const adtClient = await getAdtClientV2();

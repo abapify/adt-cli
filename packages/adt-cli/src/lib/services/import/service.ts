@@ -1,7 +1,7 @@
 import { loadFormatPlugin, parseFormatSpec } from '../../utils/format-loader';
 import { getConfig } from '../../utils/destinations';
 import type { ImportContext, FormatOptionValue } from '@abapify/adt-plugin';
-import { AdkPackage } from '@abapify/adk';
+import { AdkPackage, AdkTransport } from '@abapify/adk';
 
 /**
  * Options for importing a transport request
@@ -137,9 +137,6 @@ export class ImportService {
     if (options.debug) {
       console.log(`✅ Loaded plugin: ${plugin.name}`);
     }
-
-    // Import AdkTransport dynamically (ADK must be initialized before this)
-    const { AdkTransport } = await import('@abapify/adk');
 
     // Fetch transport
     if (options.debug) {
@@ -305,9 +302,6 @@ export class ImportService {
     if (options.debug) {
       console.log(`✅ Loaded plugin: ${plugin.name}`);
     }
-
-    // Import AdkPackage dynamically (ADK must be initialized before this)
-    const { AdkPackage } = await import('@abapify/adk');
 
     // Fetch package
     if (options.debug) {
