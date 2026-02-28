@@ -3,8 +3,6 @@
   "version": "0.0.1",
   "type": "module",
   "description": "Browser-based SSO authentication core - shared logic for Playwright/Puppeteer plugins",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",

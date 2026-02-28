@@ -3,8 +3,6 @@
   "type": "module",
   "version": "0.0.1",
   "description": "Terminal UI components for ADT - page-based navigation with Ink",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",

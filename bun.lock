@@ -148,6 +148,7 @@
         "adt-codegen": "./dist/cli.mjs",
       },
       "dependencies": {
+        "@abapify/adt-config": "workspace:*",
         "@abapify/adt-plugin": "workspace:*",
         "chalk": "^5.3.0",
         "commander": "^11.1.0",

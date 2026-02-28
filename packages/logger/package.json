@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Shared logger interface for abapify packages",
   "type": "module",
-  "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
@@ -20,6 +19,5 @@
     "adt"
   ],
   "author": "abapify",
-  "license": "MIT",
-  "module": "./dist/index.mjs"
+  "license": "MIT"
 }

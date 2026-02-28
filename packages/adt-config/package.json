@@ -3,8 +3,6 @@
   "type": "module",
   "version": "0.0.1",
   "description": "Configuration loader for ADT CLI",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",

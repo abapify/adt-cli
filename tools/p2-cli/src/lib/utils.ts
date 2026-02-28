@@ -50,7 +50,7 @@ export function findFiles(dir: string, pattern: string): string[] {
 
   for (const entry of entries) {
     if (entry.isFile() && regex.test(entry.name)) {
-      const parentPath = entry.parentPath ?? entry.path ?? dir;
+      const parentPath = entry.parentPath ?? dir;
       files.push(join(parentPath, entry.name));
     }
   }
