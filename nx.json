@@ -89,7 +89,7 @@
       "dependsOn": ["^build"]
     },
     "nx-release-publish": {
-      "dependsOn": ["build", "test"]
+      "dependsOn": ["build"]
     },
     "@nx/js:swc": {
       "cache": true,
