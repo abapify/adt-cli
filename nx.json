@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "nxCloudId": "689f2325a9081eb8eb04b58d",
+  "nxCloudId": "69a36ff87cc51963d062abd4",
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
