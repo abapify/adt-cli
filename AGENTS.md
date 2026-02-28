@@ -7,14 +7,14 @@ AI agent conventions for the **abapify / adt-cli** monorepo.
 
 ## Repository at a Glance
 
-| Item | Value |
-|------|-------|
-| Package manager | **npm workspaces** — use `npm`, not `pnpm` or `yarn` |
-| Monorepo tooling | **Nx 22** |
-| Language | **TypeScript 5 strict ESM** |
-| Build tool | **tsdown** (per package) |
-| Test runner | **Vitest** (some packages use Jest) |
-| Lint | **ESLint 10** + Prettier |
+| Item             | Value                                                |
+| ---------------- | ---------------------------------------------------- |
+| Package manager  | **npm workspaces** — use `npm`, not `pnpm` or `yarn` |
+| Monorepo tooling | **Nx 22**                                            |
+| Language         | **TypeScript 5 strict ESM**                          |
+| Build tool       | **tsdown** (per package)                             |
+| Test runner      | **Vitest** (some packages use Jest)                  |
+| Lint             | **ESLint 10** + Prettier                             |
 
 ## Essential Commands
 
@@ -163,6 +163,7 @@ Specifications live in `docs/specs/`. Before implementing a new feature:
 3. If adding a new pattern, create or update the relevant spec
 
 Key specs:
+
 - `docs/specs/cicd/abap-cicd-pipeline.md` — CI/CD architecture
 - `docs/specs/oat/` — OAT file format
 - `docs/specs/adt-cli/` — CLI design decisions
@@ -177,4 +178,3 @@ npx nx lint              # fix lint issues
 ```
 
 <!-- nx configuration end-->
-

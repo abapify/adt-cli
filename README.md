@@ -11,47 +11,47 @@ TypeScript monorepo providing a CLI and supporting libraries for [SAP ABAP Devel
 
 ### CLI
 
-| Package | npm | Description |
-|---------|-----|-------------|
+| Package                           | npm                                                                                                         | Description                           |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------- |
 | **[adt-cli](./packages/adt-cli)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-cli)](https://www.npmjs.com/package/@abapify/adt-cli) | Command-line interface — `adt` binary |
 
 ### Core Libraries
 
-| Package | npm | Description |
-|---------|-----|-------------|
-| **[adt-client](./packages/adt-client)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-client)](https://www.npmjs.com/package/@abapify/adt-client) | Contract-driven HTTP client for ADT REST APIs |
-| **[adt-contracts](./packages/adt-contracts)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-contracts)](https://www.npmjs.com/package/@abapify/adt-contracts) | Typed ADT REST API contract definitions |
-| **[adt-schemas](./packages/adt-schemas)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-schemas)](https://www.npmjs.com/package/@abapify/adt-schemas) | SAP ADT XML schemas generated from XSD |
-| **[adk](./packages/adk)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadk)](https://www.npmjs.com/package/@abapify/adk) | ABAP Development Kit — object construction and serialization |
-| **[adt-auth](./packages/adt-auth)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-auth)](https://www.npmjs.com/package/@abapify/adt-auth) | Authentication: Basic, SLC, OAuth, browser SSO |
-| **[adt-config](./packages/adt-config)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-config)](https://www.npmjs.com/package/@abapify/adt-config) | Config loader for `adt.config.ts` / `.json` |
+| Package                                       | npm                                                                                                                     | Description                                                  |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **[adt-client](./packages/adt-client)**       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-client)](https://www.npmjs.com/package/@abapify/adt-client)       | Contract-driven HTTP client for ADT REST APIs                |
+| **[adt-contracts](./packages/adt-contracts)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-contracts)](https://www.npmjs.com/package/@abapify/adt-contracts) | Typed ADT REST API contract definitions                      |
+| **[adt-schemas](./packages/adt-schemas)**     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-schemas)](https://www.npmjs.com/package/@abapify/adt-schemas)     | SAP ADT XML schemas generated from XSD                       |
+| **[adk](./packages/adk)**                     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadk)](https://www.npmjs.com/package/@abapify/adk)                     | ABAP Development Kit — object construction and serialization |
+| **[adt-auth](./packages/adt-auth)**           | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-auth)](https://www.npmjs.com/package/@abapify/adt-auth)           | Authentication: Basic, SLC, OAuth, browser SSO               |
+| **[adt-config](./packages/adt-config)**       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-config)](https://www.npmjs.com/package/@abapify/adt-config)       | Config loader for `adt.config.ts` / `.json`                  |
 
 ### CLI Plugins
 
-| Package | npm | Description |
-|---------|-----|-------------|
-| **[adt-atc](./packages/adt-atc)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-atc)](https://www.npmjs.com/package/@abapify/adt-atc) | ABAP Test Cockpit — runs ATC, outputs SARIF / GitLab Code Quality |
-| **[adt-export](./packages/adt-export)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-export)](https://www.npmjs.com/package/@abapify/adt-export) | Export plugin — deploy local files to SAP |
-| **[adt-plugin](./packages/adt-plugin)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin)](https://www.npmjs.com/package/@abapify/adt-plugin) | Plugin interface contract |
-| **[adt-plugin-abapgit](./packages/adt-plugin-abapgit)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin-abapgit)](https://www.npmjs.com/package/@abapify/adt-plugin-abapgit) | abapGit serialization format plugin |
+| Package                                                 | npm                                                                                                                               | Description                                                       |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **[adt-atc](./packages/adt-atc)**                       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-atc)](https://www.npmjs.com/package/@abapify/adt-atc)                       | ABAP Test Cockpit — runs ATC, outputs SARIF / GitLab Code Quality |
+| **[adt-export](./packages/adt-export)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-export)](https://www.npmjs.com/package/@abapify/adt-export)                 | Export plugin — deploy local files to SAP                         |
+| **[adt-plugin](./packages/adt-plugin)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin)](https://www.npmjs.com/package/@abapify/adt-plugin)                 | Plugin interface contract                                         |
+| **[adt-plugin-abapgit](./packages/adt-plugin-abapgit)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin-abapgit)](https://www.npmjs.com/package/@abapify/adt-plugin-abapgit) | abapGit serialization format plugin                               |
 
 ### Authentication Adapters
 
-| Package | npm | Description |
-|---------|-----|-------------|
-| **[browser-auth](./packages/browser-auth)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fbrowser-auth)](https://www.npmjs.com/package/@abapify/browser-auth) | Shared browser SSO logic |
+| Package                                         | npm                                                                                                                       | Description                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| **[browser-auth](./packages/browser-auth)**     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fbrowser-auth)](https://www.npmjs.com/package/@abapify/browser-auth)     | Shared browser SSO logic             |
 | **[adt-playwright](./packages/adt-playwright)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-playwright)](https://www.npmjs.com/package/@abapify/adt-playwright) | Playwright SSO authentication plugin |
-| **[adt-puppeteer](./packages/adt-puppeteer)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-puppeteer)](https://www.npmjs.com/package/@abapify/adt-puppeteer) | Puppeteer SSO authentication plugin |
+| **[adt-puppeteer](./packages/adt-puppeteer)**   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-puppeteer)](https://www.npmjs.com/package/@abapify/adt-puppeteer)   | Puppeteer SSO authentication plugin  |
 
 ### Foundation Libraries
 
-| Package | npm | Description |
-|---------|-----|-------------|
-| **[speci](./packages/speci)** | [![npm](https://img.shields.io/npm/v/speci)](https://www.npmjs.com/package/speci) | Arrow-function REST contract specification |
-| **[ts-xsd](./packages/ts-xsd)** | [![npm](https://img.shields.io/npm/v/ts-xsd)](https://www.npmjs.com/package/ts-xsd) | XSD parser, builder, and TypeScript type inference |
-| **[adt-codegen](./packages/adt-codegen)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-codegen)](https://www.npmjs.com/package/@abapify/adt-codegen) | Hook-based code generation toolkit |
-| **[asjson-parser](./packages/asjson-parser)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fasjson-parser)](https://www.npmjs.com/package/@abapify/asjson-parser) | ABAP asJSON canonical format parser |
-| **[logger](./packages/logger)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Flogger)](https://www.npmjs.com/package/@abapify/logger) | Shared logger interface |
+| Package                                       | npm                                                                                                                     | Description                                        |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| **[speci](./packages/speci)**                 | [![npm](https://img.shields.io/npm/v/speci)](https://www.npmjs.com/package/speci)                                       | Arrow-function REST contract specification         |
+| **[ts-xsd](./packages/ts-xsd)**               | [![npm](https://img.shields.io/npm/v/ts-xsd)](https://www.npmjs.com/package/ts-xsd)                                     | XSD parser, builder, and TypeScript type inference |
+| **[adt-codegen](./packages/adt-codegen)**     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-codegen)](https://www.npmjs.com/package/@abapify/adt-codegen)     | Hook-based code generation toolkit                 |
+| **[asjson-parser](./packages/asjson-parser)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fasjson-parser)](https://www.npmjs.com/package/@abapify/asjson-parser) | ABAP asJSON canonical format parser                |
+| **[logger](./packages/logger)**               | [![npm](https://img.shields.io/npm/v/%40abapify%2Flogger)](https://www.npmjs.com/package/@abapify/logger)               | Shared logger interface                            |
 
 ## Architecture
 

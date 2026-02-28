@@ -11,6 +11,7 @@ ABAP Development Kit — schema-driven construction and serialization of ABAP ob
 ADK provides typed representations of ABAP objects (classes, interfaces, packages, etc.) built from ADT XML responses. It handles parsing, construction, and lazy loading of source includes — no HTTP calls inside ADK itself.
 
 Key properties:
+
 - **Schema-first**: types derived from `@abapify/adt-schemas` (XSD-generated)
 - **Pure construction**: no network calls, no side effects
 - **Lazy source loading**: includes fetched on demand via an injected fetcher
@@ -32,8 +33,8 @@ const factory = new AdkFactory();
 // Parse ADT XML response into a typed object
 const classObj = factory.fromAdtXml('CLAS/OC', xmlString);
 
-console.log(classObj.kind);  // 'CLAS/OC'
-console.log(classObj.name);  // 'ZCL_MY_CLASS'
+console.log(classObj.kind); // 'CLAS/OC'
+console.log(classObj.name); // 'ZCL_MY_CLASS'
 
 // Lazy-load source (requires a fetcher injected via the CLI or client)
 const source = await classObj.getSource();
@@ -54,11 +55,11 @@ ADK sits between the HTTP layer (`adt-client`) and the serialization layer (`adt
 
 ## Supported Object Types
 
-| ABAP Type | Description |
-|-----------|-------------|
-| `CLAS/OC` | ABAP class |
+| ABAP Type | Description    |
+| --------- | -------------- |
+| `CLAS/OC` | ABAP class     |
 | `INTF/OI` | ABAP interface |
-| `DEVC/K`  | Package |
+| `DEVC/K`  | Package        |
 
 ## Bridge Pattern (CLI Integration)
 

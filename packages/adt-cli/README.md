@@ -83,8 +83,8 @@ Clear stored authentication tokens.
 
 List available ADT services and endpoints.
 
-| Option | Description |
-|--------|-------------|
+| Option                | Description                                               |
+| --------------------- | --------------------------------------------------------- |
 | `-o, --output <file>` | Save output — `.xml` for raw XML, `.json` for parsed JSON |
 
 ```bash
@@ -98,13 +98,13 @@ adt discovery -o services.json
 
 Download an ABAP package from SAP to local files.
 
-| Option | Description |
-|--------|-------------|
-| `-o, --output <path>` | Output directory |
+| Option                       | Description                             |
+| ---------------------------- | --------------------------------------- |
+| `-o, --output <path>`        | Output directory                        |
 | `-t, --object-types <types>` | Comma-separated types, e.g. `CLAS,INTF` |
-| `--sub-packages` | Include subpackages |
-| `--format <format>` | `oat` (default) \| `abapgit` \| `json` |
-| `--debug` | Debug output |
+| `--sub-packages`             | Include subpackages                     |
+| `--format <format>`          | `oat` (default) \| `abapgit` \| `json`  |
+| `--debug`                    | Debug output                            |
 
 ```bash
 adt import package ZTEST_PKG
@@ -115,13 +115,13 @@ adt import package ZTEST_PKG --object-types CLAS,INTF --format oat
 
 Deploy local files to SAP.
 
-| Option | Description |
-|--------|-------------|
-| `-i, --input <path>` | Input directory |
-| `-t, --object-types <types>` | Filter by type |
-| `--transport <request>` | Transport request |
-| `--create` | Apply changes (default is dry run) |
-| `--debug` | Debug output |
+| Option                       | Description                        |
+| ---------------------------- | ---------------------------------- |
+| `-i, --input <path>`         | Input directory                    |
+| `-t, --object-types <types>` | Filter by type                     |
+| `--transport <request>`      | Transport request                  |
+| `--create`                   | Apply changes (default is dry run) |
+| `--debug`                    | Debug output                       |
 
 ```bash
 # Dry run
@@ -137,13 +137,13 @@ adt export package ZTEST_PKG ./oat-ztest_pkg --create --transport NPLK900123
 
 Get details about an ABAP object. Supported types: `CLAS`, `INTF`, `DEVC`.
 
-| Option | Description |
-|--------|-------------|
-| `--source` | Show source code preview |
-| `--structure` | Show object structure |
-| `--properties` | Show package hierarchy and application component |
-| `--json` | JSON output |
-| `-o, --output <file>` | Save ADT XML to file |
+| Option                | Description                                      |
+| --------------------- | ------------------------------------------------ |
+| `--source`            | Show source code preview                         |
+| `--structure`         | Show object structure                            |
+| `--properties`        | Show package hierarchy and application component |
+| `--json`              | JSON output                                      |
+| `-o, --output <file>` | Save ADT XML to file                             |
 
 ```bash
 adt get ZCL_MY_CLASS
@@ -167,28 +167,28 @@ Show object structure as a tree (methods, attributes, visibility).
 
 #### `adt transport list [options]`
 
-| Option | Description |
-|--------|-------------|
-| `-u, --user <user>` | Filter by user |
+| Option                  | Description                |
+| ----------------------- | -------------------------- |
+| `-u, --user <user>`     | Filter by user             |
 | `-s, --status <status>` | `modifiable` or `released` |
-| `-m, --max <n>` | Max results (default: 50) |
+| `-m, --max <n>`         | Max results (default: 50)  |
 
 #### `adt transport get <tr-number> [options]`
 
 Get details for a transport request or task.
 
-| Option | Description |
-|--------|-------------|
+| Option    | Description          |
+| --------- | -------------------- |
 | `--tasks` | Include task details |
-| `--json` | JSON output |
+| `--json`  | JSON output          |
 
 #### `adt transport create [options]`
 
-| Option | Description |
-|--------|-------------|
-| `-d, --description <desc>` | Description (required) |
-| `-t, --type <type>` | `K` (Workbench, default) or `W` (Customizing) |
-| `--target <target>` | Target system (default: `LOCAL`) |
+| Option                     | Description                                   |
+| -------------------------- | --------------------------------------------- |
+| `-d, --description <desc>` | Description (required)                        |
+| `-t, --type <type>`        | `K` (Workbench, default) or `W` (Customizing) |
+| `--target <target>`        | Target system (default: `LOCAL`)              |
 
 ## Configuration
 
@@ -232,21 +232,21 @@ Available log levels: `trace`, `debug`, `info`, `warn`, `error`, `fatal`.
 
 ## Command Reference
 
-| Command | Description |
-|---------|-------------|
-| `adt auth login --file <path>` | Authenticate with BTP service key |
-| `adt auth logout` | Clear stored tokens |
-| `adt discovery` | List available ADT services |
-| `adt discovery -o file.json` | Export services as JSON |
-| `adt get <object>` | Get ABAP object details |
-| `adt get <object> --properties` | Show package and component info |
-| `adt get <object> -o file.xml` | Save ADT XML to file |
-| `adt outline <object>` | Show object tree structure |
-| `adt import package <pkg>` | Import package from SAP |
-| `adt export package <pkg> --create` | Deploy files to SAP |
-| `adt transport list` | List transport requests |
-| `adt transport get <TR>` | Get transport or task details |
-| `adt transport create -d "DESC"` | Create new transport request |
+| Command                             | Description                       |
+| ----------------------------------- | --------------------------------- |
+| `adt auth login --file <path>`      | Authenticate with BTP service key |
+| `adt auth logout`                   | Clear stored tokens               |
+| `adt discovery`                     | List available ADT services       |
+| `adt discovery -o file.json`        | Export services as JSON           |
+| `adt get <object>`                  | Get ABAP object details           |
+| `adt get <object> --properties`     | Show package and component info   |
+| `adt get <object> -o file.xml`      | Save ADT XML to file              |
+| `adt outline <object>`              | Show object tree structure        |
+| `adt import package <pkg>`          | Import package from SAP           |
+| `adt export package <pkg> --create` | Deploy files to SAP               |
+| `adt transport list`                | List transport requests           |
+| `adt transport get <TR>`            | Get transport or task details     |
+| `adt transport create -d "DESC"`    | Create new transport request      |
 
 ## Architecture
 
@@ -262,4 +262,3 @@ adt-cli (Commander.js, plugin loader)
 ## License
 
 MIT
-
