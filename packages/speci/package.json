@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Minimal arrow-function-based contract specification system for TypeScript",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
     "./rest": "./dist/rest/index.mjs",
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "keywords": [
     "api",
     "contract",

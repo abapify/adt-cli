@@ -65,8 +65,24 @@
     }
   ],
   "release": {
+    "projects": ["packages/*"],
+    "releaseTagPattern": "v{version}",
     "version": {
-      "preVersionCommand": "npx nx run-many -t build"
+      "preVersionCommand": "npx nx run-many -t build",
+      "conventionalCommits": true,
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "createRelease": "github",
+        "file": "CHANGELOG.md"
+      },
+      "projectChangelogs": false
+    },
+    "git": {
+      "commitMessage": "chore(release): publish {version} [skip ci]",
+      "tag": true
     }
   },
   "targetDefaults": {

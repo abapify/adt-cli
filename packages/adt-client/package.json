@@ -3,13 +3,15 @@
   "version": "0.0.1",
   "description": "Minimalistic speci-based ADT client for SAP ABAP Development Tools",
   "type": "module",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "@abapify/logger": "*",
     "@abapify/adt-contracts": "*",

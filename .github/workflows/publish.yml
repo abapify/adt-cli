@@ -1,34 +1,38 @@
-# ./.github/workflows/publish.yml
 name: Publish
 
 on:
   push:
     tags:
-      - v*.*.*
+      - 'v*.*.*'
 
 jobs:
-  test:
-    name: Publish
+  publish:
+    name: Publish to NPM
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # needed for GitHub releases
       id-token: write # needed for provenance data generation
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          filter: tree:0
 
-      - name: Install Node
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org/
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.9
+
       - name: Install dependencies
-        run: npm install
-        shell: bash
+        run: bun install
 
       - name: Print Environment Info
         run: npx nx report
@@ -41,3 +45,4 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
           NPM_CONFIG_ACCESS: public
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

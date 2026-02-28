@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Authentication package for SAP ADT systems - supports multiple auth methods",
   "type": "module",
-  "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
@@ -28,6 +27,5 @@
     "oauth"
   ],
   "author": "Booking.com",
-  "license": "MIT",
-  "module": "./dist/index.mjs"
+  "license": "MIT"
 }

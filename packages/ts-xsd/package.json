@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Core XSD parser and builder - W3C XMLSchema 1:1 TypeScript representation",
   "type": "module",
-  "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "bin": {
     "ts-xsd": "./dist/codegen/cli.mjs"
@@ -14,8 +13,11 @@
     "./generators": "./dist/generators/index.mjs",
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "@xmldom/xmldom": "*"
-  },
-  "module": "./dist/index.mjs"
+  }
 }

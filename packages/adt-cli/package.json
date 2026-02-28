@@ -2,14 +2,16 @@
   "name": "@abapify/adt-cli",
   "type": "module",
   "version": "0.0.1",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
     "./bin/adt": "./dist/bin/adt.mjs",
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "@abapify/adk": "*",
     "@abapify/adt-auth": "*",

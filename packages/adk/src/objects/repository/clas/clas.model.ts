@@ -200,7 +200,7 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
   protected override get wrapperKey() {
     return 'abapClass';
   }
-  protected override get crudContract() {
+  protected override get crudContract(): any {
     return this.ctx.client.adt.oo.classes;
   }
 

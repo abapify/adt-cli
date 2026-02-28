@@ -12,8 +12,8 @@
  */
 
 import { Command } from 'commander';
-import { readdir, readFile, stat, writeFile } from 'fs/promises';
-import { join, basename, extname } from 'path';
+import { readdir, readFile, writeFile } from 'fs/promises';
+import { join } from 'path';
 import { existsSync } from 'fs';
 
 interface AbapObject {
