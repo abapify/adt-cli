@@ -89,8 +89,6 @@ jobs:
         run: npx nx release publish
         shell: bash
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
           NPM_CONFIG_ACCESS: public
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
