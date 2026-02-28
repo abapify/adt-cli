@@ -30,14 +30,9 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.2.9
 
       - name: Install dependencies
         run: bun install
-
-      - name: Build packages
-        run: npx nx run-many -t build
 
       - name: Publish packages
         run: npx nx release publish
