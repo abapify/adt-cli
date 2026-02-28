@@ -1,3 +1,15 @@
+## 0.1.3 (2026-02-28)
+
+### 🩹 Fixes
+
+- **asjson-parser:** migrate from @nx/rollup to tsdown, drop nx@21 dep ([016cff4](https://github.com/abapify/adt-cli/commit/016cff4))
+- **asjson-parser:** add tsconfig: 'tsconfig.lib.json' to tsdown config to avoid references error ([5290dd6](https://github.com/abapify/adt-cli/commit/5290dd6))
+- **release:** publish packages directly in release workflow, remove dead publish.yml ([d6d8307](https://github.com/abapify/adt-cli/commit/d6d8307))
+
+### ❤️ Thank You
+
+- Claude
+
 ## 0.1.2 (2026-02-28)
 
 ### 🚀 Features
