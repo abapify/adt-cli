@@ -5,17 +5,9 @@
   "projectType": "library",
   "release": {
     "version": {
-      "currentVersionResolver": "git-tag",
-      "preserveLocalDependencyProtocols": false,
-      "manifestRootsToUpdate": ["dist/{projectRoot}"]
+      "manifestRootsToUpdate": ["{projectRoot}"]
     }
   },
   "tags": ["type:library", "scope:speci"],
-  "targets": {
-    "nx-release-publish": {
-      "options": {
-        "packageRoot": "dist/{projectRoot}"
-      }
-    }
-  }
+  "targets": {}
 }

@@ -9,5 +9,6 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
-  }
+  },
+  "files": ["dist", "README.md"]
 }

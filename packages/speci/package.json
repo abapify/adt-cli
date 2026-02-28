@@ -11,6 +11,7 @@
     "./rest": "./dist/rest/index.mjs",
     "./package.json": "./package.json"
   },
+  "files": ["dist", "README.md"],
   "keywords": [
     "api",
     "contract",
