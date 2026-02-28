@@ -15,6 +15,6 @@ export const baseOptions = {
   deps: {
     skipNodeModulesBundle: true,
   },
-} satisfies UserConfig;
+}; //satisfies UserConfig;
 
 export default defineConfig(baseOptions);
