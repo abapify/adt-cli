@@ -13,6 +13,11 @@ on:
         required: false
         default: false
         type: boolean
+      first_release:
+        description: 'First release (no previous git tag exists yet)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   release:
@@ -54,7 +59,7 @@ jobs:
 
       - name: Version, changelog & tag (dry run)
         if: ${{ inputs.dry_run }}
-        run: npx nx release "$NX_RELEASE_SPECIFIER" --dry-run
+        run: npx nx release "$NX_RELEASE_SPECIFIER" --dry-run ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +67,7 @@ jobs:
 
       - name: Version, changelog & tag
         if: ${{ !inputs.dry_run }}
-        run: npx nx release "$NX_RELEASE_SPECIFIER" --skip-publish
+        run: npx nx release "$NX_RELEASE_SPECIFIER" --skip-publish ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
