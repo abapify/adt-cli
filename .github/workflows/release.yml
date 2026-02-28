@@ -27,7 +27,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          filter: tree:0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
@@ -39,7 +38,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.2.9
 
       - name: Configure git
         run: |
@@ -55,18 +54,22 @@ jobs:
 
       - name: Version, changelog & tag (dry run)
         if: ${{ inputs.dry_run }}
-        run: npx nx release ${{ inputs.specifier }} --dry-run
+        run: npx nx release "$NX_RELEASE_SPECIFIER" --dry-run
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NX_RELEASE_SPECIFIER: ${{ inputs.specifier }}
 
       - name: Version, changelog & tag
         if: ${{ !inputs.dry_run }}
-        run: npx nx release ${{ inputs.specifier }} --skip-publish
+        run: npx nx release "$NX_RELEASE_SPECIFIER" --skip-publish
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NX_RELEASE_SPECIFIER: ${{ inputs.specifier }}
 
       - name: Push commit and tags
         if: ${{ !inputs.dry_run }}
-        run: git push --follow-tags
+        run: |
+          git push origin HEAD
+          git push --tags

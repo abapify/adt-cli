@@ -14,7 +14,10 @@
     "./generators": "./dist/generators/index.mjs",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "@xmldom/xmldom": "*"
   },

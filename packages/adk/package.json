@@ -9,7 +9,10 @@
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "@abapify/adt-client": "*",
     "@abapify/adt-schemas": "*"
