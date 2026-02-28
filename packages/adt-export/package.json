@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-export",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Export CLI plugin for adt-cli - deploy local files to SAP",
   "type": "module",
   "main": "./dist/index.mjs",

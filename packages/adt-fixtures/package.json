@@ -1,6 +1,6 @@
 {
   "name": "adt-fixtures",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "description": "SAP ADT XML fixtures for testing",
   "type": "module",
   "exports": {

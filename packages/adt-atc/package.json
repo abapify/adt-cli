@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-atc",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "ABAP Test Cockpit (ATC) CLI plugin for adt-cli",
   "type": "module",
   "main": "./dist/index.mjs",

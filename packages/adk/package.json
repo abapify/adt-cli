@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adk",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
