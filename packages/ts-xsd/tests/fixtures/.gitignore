@@ -1,3 +1,2 @@
-# Downloaded/cached files
-cache/
+# Downloaded/cached files - W3C schema is committed so CI doesn't need network
 generated/
