@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsdown';
+import { defineConfig, UserConfig } from 'tsdown';
 
 /** Base config options - spread into package configs */
 export const baseOptions = {
@@ -12,6 +12,9 @@ export const baseOptions = {
   minify: false,
   exports: true,
   shims: true,
-};
+  deps: {
+    skipNodeModulesBundle: true,
+  },
+} satisfies UserConfig;
 
 export default defineConfig(baseOptions);
