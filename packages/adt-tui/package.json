@@ -1,7 +1,7 @@
 {
   "name": "@abapify/adt-tui",
   "type": "module",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Terminal UI components for ADT - page-based navigation with Ink",
   "types": "./dist/index.d.mts",
   "exports": {

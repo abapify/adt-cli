@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-auth",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Authentication package for SAP ADT systems - supports multiple auth methods",
   "type": "module",
   "types": "./dist/index.d.mts",

@@ -1,3 +1,13 @@
+## 0.1.4 (2026-02-28)
+
+### 🩹 Fixes
+
+- **release:** add BUN_AUTH_TOKEN for bun publish authentication ([fa6657d](https://github.com/abapify/adt-cli/commit/fa6657d))
+
+### ❤️ Thank You
+
+- ThePlenkov @ThePlenkov
+
 ## 0.1.3 (2026-02-28)
 
 ### 🩹 Fixes
