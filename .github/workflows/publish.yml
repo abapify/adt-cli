@@ -7,6 +7,12 @@ on:
         description: 'Release version tag to publish (e.g. v1.2.3)'
         required: true
         type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'Release version tag to publish (e.g. v1.2.3)'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -38,8 +44,6 @@ jobs:
         run: npx nx release publish
         shell: bash
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
           NPM_CONFIG_ACCESS: public
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

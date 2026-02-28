@@ -32,6 +32,8 @@ jobs:
       contents: write # needed to push commits and tags
       id-token: write # needed for provenance data generation
     timeout-minutes: 15
+    outputs:
+      tag: ${{ steps.get_tag.outputs.tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -84,13 +86,18 @@ jobs:
           git push origin HEAD
           git push --tags
 
-      - name: Publish packages
-        if: ${{ !inputs.dry_run && inputs.publish }}
-        run: npx nx release publish
-        shell: bash
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
-          NPM_CONFIG_ACCESS: public
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get latest tag
+        id: get_tag
+        if: ${{ !inputs.dry_run }}
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
+  publish:
+    name: Publish packages
+    needs: release
+    if: ${{ !inputs.dry_run && inputs.publish }}
+    uses: ./.github/workflows/publish.yml
+    with:
+      version: ${{ needs.release.outputs.tag }}
+    permissions:
+      contents: read
+      id-token: write
