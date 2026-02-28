@@ -50,6 +50,7 @@ export class BtpAuthProvider implements AuthProvider {
         `Failed to create BTP client: ${
           error instanceof Error ? error.message : 'Unknown error'
         }`,
+        { cause: error },
       );
     }
   }

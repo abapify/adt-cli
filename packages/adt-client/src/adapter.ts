@@ -328,7 +328,9 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
             return this.request(options);
           } catch (refreshError) {
             logger?.error('Re-authentication failed');
-            throw new Error('Session expired - re-authentication failed');
+            throw new Error('Session expired - re-authentication failed', {
+              cause: refreshError,
+            });
           }
         }
 

@@ -61,6 +61,7 @@ export class FileStorage {
     } catch (error) {
       throw new Error(
         `Failed to load session ${sid}: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error },
       );
     }
   }
