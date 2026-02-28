@@ -1,5 +1,9 @@
 # @abapify/adt-plugin
 
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin)](https://www.npmjs.com/package/@abapify/adt-plugin)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
 Core plugin interface for ADT format serialization.
 
 ## Overview

@@ -1,5 +1,9 @@
 # @abapify/adt-auth
 
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-auth)](https://www.npmjs.com/package/@abapify/adt-auth)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
 Authentication package for SAP ADT systems supporting multiple authentication methods.
 
 ## Features

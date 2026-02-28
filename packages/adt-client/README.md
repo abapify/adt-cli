@@ -1,6 +1,10 @@
 # @abapify/adt-client
 
-**Contract-driven SAP ADT REST client** - The new architecture using `speci` + `ts-xsd` for full type safety.
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-client)](https://www.npmjs.com/package/@abapify/adt-client)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
+**Contract-driven SAP ADT REST client** — uses `speci` + `ts-xsd` for full type safety.
 
 ## Why v2?
 

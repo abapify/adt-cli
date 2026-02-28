@@ -1,43 +1,41 @@
 # @abapify/adk
 
-ABAP Development Kit v2 - Schema-driven object construction for ABAP objects.
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadk)](https://www.npmjs.com/package/@abapify/adk)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
+ABAP Development Kit — schema-driven construction and serialization of ABAP objects.
 
 ## Overview
 
-ADK v2 is a complete redesign focused on:
+ADK provides typed representations of ABAP objects (classes, interfaces, packages, etc.) built from ADT XML responses. It handles parsing, construction, and lazy loading of source includes — no HTTP calls inside ADK itself.
 
-- **Schema-first**: All types derived from `@abapify/adt-schemas`
-- **Contract-based**: Uses `@abapify/adt-contracts` for API interactions
-- **Pure construction**: No network calls, no side effects
-- **Lazy loading**: Source code and includes loaded on-demand
-- **Immutable**: Objects are snapshots
+Key properties:
+- **Schema-first**: types derived from `@abapify/adt-schemas` (XSD-generated)
+- **Pure construction**: no network calls, no side effects
+- **Lazy source loading**: includes fetched on demand via an injected fetcher
+- **Immutable snapshots**: objects represent a point-in-time state
 
-## Key Differences from v1
+## Installation
 
-| Aspect       | v1                     | v2                          |
-| ------------ | ---------------------- | --------------------------- |
-| Schemas      | Manual (`adt-schemas`) | XSD-derived (`adt-schemas`) |
-| Network      | Mixed in               | Separated out               |
-| Source       | Eager                  | Lazy                        |
-| Dependencies | `adt-client` v1        | `adt-contracts`             |
+```bash
+npm install @abapify/adk
+```
 
 ## Usage
 
 ```typescript
 import { AdkFactory } from '@abapify/adk';
-import { adtClientV2 } from '@abapify/adt-client';
 
-// Create factory
 const factory = new AdkFactory();
 
-// Construct from ADT XML
+// Parse ADT XML response into a typed object
 const classObj = factory.fromAdtXml('CLAS/OC', xmlString);
 
-// Access metadata
-console.log(classObj.kind); // 'CLAS/OC'
-console.log(classObj.name); // 'ZCL_MY_CLASS'
+console.log(classObj.kind);  // 'CLAS/OC'
+console.log(classObj.name);  // 'ZCL_MY_CLASS'
 
-// Lazy load source (requires fetcher)
+// Lazy-load source (requires a fetcher injected via the CLI or client)
 const source = await classObj.getSource();
 const includes = await classObj.getIncludes();
 ```
@@ -45,15 +43,39 @@ const includes = await classObj.getIncludes();
 ## Architecture
 
 ```
-adt-schemas (types)
-       ↓
-adt-contracts (API contracts)
-       ↓
-adk (pure construction) ← THIS PACKAGE
-       ↓
-adt-cli (orchestration)
+adt-schemas  (XSD-derived TypeScript types)
+      ↓
+adk  (parse ADT XML → domain objects)   ← this package
+      ↓
+adt-cli  (orchestrate: fetch → parse → serialize)
 ```
 
-## Status
+ADK sits between the HTTP layer (`adt-client`) and the serialization layer (`adt-plugin-*`). The CLI passes raw ADT XML to ADK, receives typed objects, and hands them to format plugins.
 
-🚧 Work in progress - Part of ACR-17 v2 migration
+## Supported Object Types
+
+| ABAP Type | Description |
+|-----------|-------------|
+| `CLAS/OC` | ABAP class |
+| `INTF/OI` | ABAP interface |
+| `DEVC/K`  | Package |
+
+## Bridge Pattern (CLI Integration)
+
+The CLI registers object handlers using ADK adapters:
+
+```typescript
+this.handlers.set(
+  'CLAS',
+  (client) =>
+    new AdkObjectHandler(
+      client,
+      (xml) => ClassAdtAdapter.fromAdtXML(xml),
+      (name) => `/sap/bc/adt/oo/classes/${name.toLowerCase()}`,
+    ),
+);
+```
+
+## License
+
+MIT

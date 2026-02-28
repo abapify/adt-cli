@@ -1,5 +1,9 @@
 # @abapify/browser-auth
 
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fbrowser-auth)](https://www.npmjs.com/package/@abapify/browser-auth)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
 Core browser-based SSO authentication logic for SAP ADT systems. This package provides the shared authentication flow used by browser-specific adapters like Playwright and Puppeteer.
 
 > **Note:** This is a low-level package. Most users should use `@abapify/adt-playwright` or `@abapify/adt-puppeteer` instead.

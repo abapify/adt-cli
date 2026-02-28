@@ -1,5 +1,9 @@
 # @abapify/adt-atc
 
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-atc)](https://www.npmjs.com/package/@abapify/adt-atc)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
 ABAP Test Cockpit (ATC) CLI plugin for `@abapify/adt-cli`.
 
 ## Installation
