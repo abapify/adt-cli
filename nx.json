@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "nxCloudId": "689f2325a9081eb8eb04b58d",
+  "nxCloudId": "69a36ff87cc51963d062abd4",
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -88,7 +88,7 @@
     "build": {
       "dependsOn": ["^build"]
     },
-    "nx-release-publish": {
+    "_nx-release-publish": {
       "dependsOn": ["build"]
     },
     "@nx/js:swc": {
