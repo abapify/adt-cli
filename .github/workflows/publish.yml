@@ -1,0 +1,50 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag to publish (e.g. v1.2.3)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    name: Publish packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # needed for provenance data generation
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository at tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.9
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build packages
+        run: npx nx run-many -t build
+
+      - name: Publish packages
+        run: npx nx release publish
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+          NPM_CONFIG_ACCESS: public
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
