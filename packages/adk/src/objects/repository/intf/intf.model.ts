@@ -110,7 +110,7 @@ export class AdkInterface extends AdkMainObject<
   protected override get wrapperKey() {
     return 'abapInterface';
   }
-  protected override get crudContract() {
+  protected override get crudContract(): any {
     return this.ctx.client.adt.oo.interfaces;
   }
 
