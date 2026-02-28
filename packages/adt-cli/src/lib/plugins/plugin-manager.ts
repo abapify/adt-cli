@@ -96,6 +96,7 @@ export class PluginManager {
         `Failed to load plugin '${pluginName}': ${
           error instanceof Error ? error.message : String(error)
         }`,
+        { cause: error },
       );
     }
   }
@@ -222,6 +223,7 @@ export class PluginManager {
       ) {
         throw new Error(
           `Package '${packageName}' not found. Install it with: npm install ${packageName}`,
+          { cause: error },
         );
       }
       throw error;

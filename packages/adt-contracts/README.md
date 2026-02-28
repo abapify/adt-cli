@@ -1,8 +1,12 @@
-# adt-contracts
+# @abapify/adt-contracts
 
-**SAP ADT REST API Contracts** - Type-safe API contracts using `speci` + `ts-xsd` schemas.
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-contracts)](https://www.npmjs.com/package/@abapify/adt-contracts)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
 
-Part of the **ADT Toolkit** - see [main README](../../README.md) for architecture overview.
+**SAP ADT REST API contracts** — typed endpoint definitions using `speci` + `ts-xsd` schemas.
+
+Part of the [abapify monorepo](../../README.md).
 
 ## What is it?
 

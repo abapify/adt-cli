@@ -106,6 +106,7 @@ export async function loadFormatPlugin(formatSpec: string) {
     ) {
       throw new Error(
         `Plugin package '${packageName}' not found. Install it with: bun add ${packageName}`,
+        { cause: error },
       );
     }
     throw error;

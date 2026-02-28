@@ -1,4 +1,8 @@
-# Speci
+# speci
+
+[![npm](https://img.shields.io/npm/v/speci)](https://www.npmjs.com/package/speci)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
 
 **Minimal arrow-function-based contract specification system for TypeScript**
 

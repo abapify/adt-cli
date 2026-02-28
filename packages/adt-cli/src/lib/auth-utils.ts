@@ -60,7 +60,7 @@ export class ServiceKeyParser {
       try {
         parsed = JSON.parse(serviceKeyJson);
       } catch (error) {
-        throw new Error('Invalid JSON format in service key');
+        throw new Error('Invalid JSON format in service key', { cause: error });
       }
     } else {
       parsed = serviceKeyJson;

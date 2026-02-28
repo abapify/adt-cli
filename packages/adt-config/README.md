@@ -1,5 +1,9 @@
 # @abapify/adt-config
 
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-config)](https://www.npmjs.com/package/@abapify/adt-config)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
 Configuration loader for ADT CLI. Loads destinations from `adt.config.ts/json` files.
 
 ## Installation

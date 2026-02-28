@@ -1,8 +1,10 @@
 # @abapify/adt-schemas
 
-**Type-safe SAP ADT schemas** generated from official XSD definitions with **shared types** and **optimal tree-shaking**.
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-schemas)](https://www.npmjs.com/package/@abapify/adt-schemas)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
 
-[![npm version](https://badge.fury.io/js/%40abapify%2Fadt-schemas.svg)](https://www.npmjs.com/package/@abapify/adt-schemas)
+**Type-safe SAP ADT schemas** generated from official XSD definitions with **shared types** and **optimal tree-shaking**.
 
 ## Overview
 

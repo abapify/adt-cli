@@ -1,8 +1,10 @@
-# @abapify/ts-xsd
+# ts-xsd
+
+[![npm](https://img.shields.io/npm/v/ts-xsd)](https://www.npmjs.com/package/ts-xsd)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
 
 **Core XSD parser, builder, and type inference** with **1:1 TypeScript representation** of W3C XML Schema Definition (XSD) 1.1.
-
-[![npm version](https://badge.fury.io/js/%40abapify%2Fts-xsd.svg)](https://www.npmjs.com/package/@abapify/ts-xsd)
 
 ## Overview
 

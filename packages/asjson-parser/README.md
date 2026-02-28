@@ -1,4 +1,10 @@
-# ABAP asJSON Parser
+# @abapify/asjson-parser
+
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fasjson-parser)](https://www.npmjs.com/package/@abapify/asjson-parser)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
+ABAP asJSON (canonical JSON representation) parser.
 
 [asJSON](https://help.sap.com/doc/abapdocu_latest_index_htm/latest/en-US/index.htm?file=abenabap_asjson.htm) - Canonical JSON Representation
 

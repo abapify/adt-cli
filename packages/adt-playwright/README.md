@@ -1,5 +1,9 @@
 # @abapify/adt-playwright
 
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-playwright)](https://www.npmjs.com/package/@abapify/adt-playwright)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+
 Playwright-based SSO authentication plugin for SAP ADT systems. Modern alternative to Puppeteer with better API and maintenance.
 
 ## Features

@@ -1,360 +1,167 @@
-# Abapify.js Monorepo
+# abapify — ADT CLI Monorepo
 
-**ADT Toolkit** - TypeScript libraries for SAP ABAP Development Tools (ADT) REST APIs.
+[![CI](https://github.com/abapify/adt-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/abapify/adt-cli/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933)](https://nodejs.org/)
 
-## 🎯 Vision
+TypeScript monorepo providing a CLI and supporting libraries for [SAP ABAP Development Tools (ADT)](https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec8641126391014adc9fffe4e204223.html) REST APIs.
 
-A complete ADT toolkit providing:
+## Packages
 
-- **CLI** - Command-line interface for SAP ADT operations
-- **Client** - Type-safe HTTP client library for ADT REST APIs
-- **MCP** - Model Context Protocol server for AI integration (future)
+### CLI
 
-## ⚠️ Current Status: Proof of Concept
+| Package                           | npm                                                                                                         | Description                           |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **[adt-cli](./packages/adt-cli)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-cli)](https://www.npmjs.com/package/@abapify/adt-cli) | Command-line interface — `adt` binary |
 
-This project is in **PoC phase**, focusing on technical implementation and architecture validation. The goal is to establish a solid foundation with:
+### Core Libraries
 
-- **Contract-first API design** using `speci` + `ts-xsd`
-- **Type-safe XML handling** with automatic schema generation
-- **Clean separation** between contracts, client, and CLI layers
+| Package                                       | npm                                                                                                                     | Description                                                  |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **[adt-client](./packages/adt-client)**       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-client)](https://www.npmjs.com/package/@abapify/adt-client)       | Contract-driven HTTP client for ADT REST APIs                |
+| **[adt-contracts](./packages/adt-contracts)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-contracts)](https://www.npmjs.com/package/@abapify/adt-contracts) | Typed ADT REST API contract definitions                      |
+| **[adt-schemas](./packages/adt-schemas)**     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-schemas)](https://www.npmjs.com/package/@abapify/adt-schemas)     | SAP ADT XML schemas generated from XSD                       |
+| **[adk](./packages/adk)**                     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadk)](https://www.npmjs.com/package/@abapify/adk)                     | ABAP Development Kit — object construction and serialization |
+| **[adt-auth](./packages/adt-auth)**           | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-auth)](https://www.npmjs.com/package/@abapify/adt-auth)           | Authentication: Basic, SLC, OAuth, browser SSO               |
+| **[adt-config](./packages/adt-config)**       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-config)](https://www.npmjs.com/package/@abapify/adt-config)       | Config loader for `adt.config.ts` / `.json`                  |
 
-**AI-Driven Development**: This project is actively developed using AI assistants. APIs may change, and some features are experimental.
+### CLI Plugins
 
-## 🏗️ Target Architecture
+| Package                                                 | npm                                                                                                                               | Description                                                       |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **[adt-atc](./packages/adt-atc)**                       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-atc)](https://www.npmjs.com/package/@abapify/adt-atc)                       | ABAP Test Cockpit — runs ATC, outputs SARIF / GitLab Code Quality |
+| **[adt-export](./packages/adt-export)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-export)](https://www.npmjs.com/package/@abapify/adt-export)                 | Export plugin — deploy local files to SAP                         |
+| **[adt-plugin](./packages/adt-plugin)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin)](https://www.npmjs.com/package/@abapify/adt-plugin)                 | Plugin interface contract                                         |
+| **[adt-plugin-abapgit](./packages/adt-plugin-abapgit)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin-abapgit)](https://www.npmjs.com/package/@abapify/adt-plugin-abapgit) | abapGit serialization format plugin                               |
 
-The architecture prioritizes **type safety** and **contract-first design**:
+### Authentication Adapters
+
+| Package                                         | npm                                                                                                                       | Description                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| **[browser-auth](./packages/browser-auth)**     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fbrowser-auth)](https://www.npmjs.com/package/@abapify/browser-auth)     | Shared browser SSO logic             |
+| **[adt-playwright](./packages/adt-playwright)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-playwright)](https://www.npmjs.com/package/@abapify/adt-playwright) | Playwright SSO authentication plugin |
+| **[adt-puppeteer](./packages/adt-puppeteer)**   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-puppeteer)](https://www.npmjs.com/package/@abapify/adt-puppeteer)   | Puppeteer SSO authentication plugin  |
+
+### Foundation Libraries
+
+| Package                                       | npm                                                                                                                     | Description                                        |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| **[speci](./packages/speci)**                 | [![npm](https://img.shields.io/npm/v/speci)](https://www.npmjs.com/package/speci)                                       | Arrow-function REST contract specification         |
+| **[ts-xsd](./packages/ts-xsd)**               | [![npm](https://img.shields.io/npm/v/ts-xsd)](https://www.npmjs.com/package/ts-xsd)                                     | XSD parser, builder, and TypeScript type inference |
+| **[adt-codegen](./packages/adt-codegen)**     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-codegen)](https://www.npmjs.com/package/@abapify/adt-codegen)     | Hook-based code generation toolkit                 |
+| **[asjson-parser](./packages/asjson-parser)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fasjson-parser)](https://www.npmjs.com/package/@abapify/asjson-parser) | ABAP asJSON canonical format parser                |
+| **[logger](./packages/logger)**               | [![npm](https://img.shields.io/npm/v/%40abapify%2Flogger)](https://www.npmjs.com/package/@abapify/logger)               | Shared logger interface                            |
+
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         ADT CLI                                  │
-│                    (User Interface Layer)                        │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      adt-client-v2                               │
-│              (HTTP Client + Request Execution)                   │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      adt-contracts                               │
-│         (REST API Contracts using speci + ts-xsd)                │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     adt-schemas-xsd                              │
-│        (TypeScript schemas from SAP XSD definitions)             │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌──────────────────────────────┬──────────────────────────────────┐
-│           ts-xsd             │             speci                 │
-│   (XSD → TypeScript types)   │    (Contract specification)       │
-└──────────────────────────────┴──────────────────────────────────┘
+adt-cli  (Commander.js CLI, plugin loader)
+  │
+  ├── adt-client  (HTTP client, auth interceptor)
+  │     ├── adt-contracts  (speci endpoint definitions)
+  │     └── adt-schemas    (XSD-derived TypeScript types)
+  │
+  ├── adk  (ABAP object construction: parse ADT XML → domain objects)
+  │
+  ├── adt-auth  (session management: basic / SLC / OAuth / browser SSO)
+  │     ├── adt-playwright  (Playwright browser adapter)
+  │     └── adt-puppeteer   (Puppeteer browser adapter)
+  │
+  └── plugins  (opt-in command extensions)
+        ├── adt-atc          (ATC runs → SARIF / GitLab Code Quality)
+        ├── adt-export       (file system → SAP deploy)
+        └── adt-plugin-abapgit  (abapGit format serialization)
 ```
 
-### Why This Architecture?
+**Type flow:** SAP XSD definitions → `ts-xsd` generates schema literals → `adt-schemas` exports them → `adt-contracts` wraps them in `speci` endpoint descriptors → `adt-client` executes with full type inference.
 
-**Contract-First Design** solves the fundamental problem of SAP ADT integration:
+## Development Setup
 
-1. **SAP provides XSD schemas** - Official XML schema definitions for ADT APIs
-2. **ts-xsd generates TypeScript** - Automatic type generation from XSD
-3. **speci defines contracts** - Type-safe REST endpoint definitions
-4. **adt-contracts combines them** - Declarative API contracts with full type inference
-5. **adt-client-v2 executes** - HTTP client that understands contracts
-6. **adt-cli exposes** - User-friendly command-line interface
-
-**Benefits:**
-
-- ✅ **Single source of truth** - XSD schemas define types once
-- ✅ **Full type safety** - TypeScript types flow from schema to CLI
-- ✅ **No manual type definitions** - Generated from official SAP schemas
-- ✅ **Easy to extend** - Add new endpoints by defining contracts
-- ✅ **Testable** - Contracts are pure data, easy to mock
-
-## 📦 Package Overview
-
-### Core Packages (Target Design)
-
-| Package                                           | Purpose                              | Status         |
-| ------------------------------------------------- | ------------------------------------ | -------------- |
-| **[ts-xsd](./packages/ts-xsd)**                   | XSD → TypeScript schema generation   | ✅ Active      |
-| **[speci](./packages/speci)**                     | Contract specification system        | ✅ Active      |
-| **[adt-schemas-xsd](./packages/adt-schemas-xsd)** | SAP ADT schemas (generated from XSD) | ✅ Active      |
-| **[adt-contracts](./packages/adt-contracts)**     | REST API contracts (speci + ts-xsd)  | 🚧 Development |
-| **[adt-client-v2](./packages/adt-client-v2)**     | HTTP client using contracts          | 🚧 Development |
-| **[adt-cli](./packages/adt-cli)**                 | Command-line interface               | ✅ Active      |
-
-### Supporting Packages
-
-| Package                                       | Purpose                                | Status         |
-| --------------------------------------------- | -------------------------------------- | -------------- |
-| **[adt-auth](./packages/adt-auth)**           | Authentication (Basic, SLC, OAuth)     | ✅ Active      |
-| **[adt-config](./packages/adt-config)**       | Configuration loader                   | ✅ Active      |
-| **[browser-auth](./packages/browser-auth)**   | Browser-based SSO                      | ✅ Active      |
-| **[adt-puppeteer](./packages/adt-puppeteer)** | Puppeteer SSO adapter                  | ✅ Active      |
-| **[adk](./packages/adk)**                     | ABAP Development Kit - object modeling | 🚧 Development |
-
-### Legacy Packages (Subject to Deletion)
-
-| Package                                 | Replacement   | Notes                                    |
-| --------------------------------------- | ------------- | ---------------------------------------- |
-| **[adt-client](./packages/adt-client)** | adt-client-v2 | Original client without contract support |
-| **[ts-xml](./packages/ts-xml)**         | ts-xsd        | Earlier XML schema approach              |
-
-> ⚠️ **Legacy packages** will be removed once migration to the new architecture is complete.
-
-## 🛠️ Development Setup
-
-### Prerequisites
-
-- **Node.js 18+**
-- **npm** (not pnpm or yarn - important!)
-- **Git**
-
-### Project Setup
+**Requirements:** Node.js 18+, npm (not pnpm or yarn)
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/abapify-js.git
-cd abapify-js
+git clone https://github.com/abapify/adt-cli.git
+cd adt-cli
 
-# Install dependencies
 npm install
 
 # Build all packages
 npx nx build
 
-# Run tests
+# Run all tests
 npx nx test
 
-# Type checking
+# Type check
 npx nx typecheck
 ```
 
-## 📁 Repository Structure
-
-```
-abapify-js/
-├── packages/
-│   ├── ts-xsd/           # XSD → TypeScript (foundation)
-│   ├── speci/            # Contract specification (foundation)
-│   ├── adt-schemas-xsd/  # SAP ADT schemas (generated)
-│   ├── adt-contracts/    # REST API contracts
-│   ├── adt-client-v2/    # HTTP client (new)
-│   ├── adt-cli/          # Command-line interface
-│   ├── adt-auth/         # Authentication
-│   ├── adt-config/       # Configuration
-│   ├── adk/              # ABAP object modeling
-│   ├── adt-client/       # ⚠️ Legacy - to be removed
-│   └── ts-xml/           # ⚠️ Legacy - to be removed
-├── docs/                 # Documentation
-├── e2e/                  # End-to-end tests
-└── tmp/                  # Temporary files (gitignored)
-```
-
-## 🔧 NX Monorepo Commands
+### Common Commands
 
 ```bash
-# Build specific package
+# Build a specific package
 npx nx build adt-cli
-npx nx build adt-client
 
-# Run tests for specific package
-npx nx test adk
+# Test a specific package
 npx nx test adt-cli
 
-# Build all packages
-npx nx run-many --target=build
+# Lint everything
+npx nx lint
 
-# Run all tests
-npx nx run-many --target=test
-
-# Lint all packages
-npx nx run-many --target=lint
+# Watch mode for a package
+npx nx test adt-cli --watch
 ```
 
-### NX Plugins Used
+## Repository Structure
 
-- **@nx/node** - Node.js library support
-- **@nx/eslint** - ESLint integration
-- **@nx/vite** - Vite build tool integration
-
-## 📋 Code Guidelines
-
-### TypeScript Standards
-
-- **Strict Mode**: All packages use TypeScript strict mode
-- **ESNext**: Prefer native Node.js APIs over external dependencies
-- **Async/Await**: Use async patterns over callbacks or sync operations
-
-### Code Style
-
-```typescript
-// ✅ Good - PascalCase for types, camelCase for variables
-interface AdtClientConfig {
-  serviceKeyPath: string;
-}
-
-const createClient = async (config: AdtClientConfig) => {
-  // Implementation
-};
-
-// ✅ Good - Use native APIs
-const response = await fetch(url, options);
-const fileContent = await readFile(path, 'utf-8');
+```
+adt-cli/
+├── packages/
+│   ├── adt-cli/            # Main CLI binary
+│   ├── adt-client/         # HTTP client
+│   ├── adt-contracts/      # REST API contracts
+│   ├── adt-schemas/        # SAP ADT XSD schemas
+│   ├── adk/                # ABAP object modeling
+│   ├── adt-auth/           # Authentication
+│   ├── adt-config/         # Config loader
+│   ├── adt-atc/            # ATC plugin
+│   ├── adt-export/         # Export plugin
+│   ├── adt-plugin/         # Plugin interface
+│   ├── adt-plugin-abapgit/ # abapGit plugin
+│   ├── browser-auth/       # Browser SSO core
+│   ├── adt-playwright/     # Playwright adapter
+│   ├── adt-puppeteer/      # Puppeteer adapter
+│   ├── speci/              # Contract spec
+│   ├── ts-xsd/             # XSD tools
+│   ├── adt-codegen/        # Code generation
+│   ├── asjson-parser/      # asJSON parser
+│   └── logger/             # Shared logger
+├── docs/                   # Architecture docs and specs
+├── samples/                # Example projects
+└── tmp/                    # Local temp files (gitignored)
 ```
 
-### Architecture Principles
+## Code Standards
 
-1. **CLI-First**: Design for command-line usage and automation
-2. **Modular**: Small, focused packages with clear boundaries
-3. **Type-Safe**: Comprehensive TypeScript support
-4. **Testable**: High test coverage with Vitest
+- TypeScript strict mode throughout
+- ESM modules (`"type": "module"` in all packages)
+- Async/await over callbacks
+- Native Node.js APIs preferred over external dependencies
+- `tsdown` for building (outputs `.mjs` + `.d.mts`)
+- Vitest for testing
 
-### Import Guidelines
-
-```typescript
-// ✅ Cross-package imports
-import { AdtClientImpl } from '@abapify/adt-client';
-
-// ✅ Internal imports (extensionless for bundlers)
-import { parseXml } from '../utils/xml-parser';
-
-// ✅ External packages
-import { Command } from 'commander';
-```
-
-## 🤝 Contributing
-
-### Quick Start for Contributors
-
-1. **Fork and Clone**
-
-   ```bash
-   git clone https://github.com/your-username/abapify-js.git
-   cd abapify-js
-   npm install
-   ```
-
-2. **Create Feature Branch**
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-3. **Make Changes**
-   - Write tests first (TDD approach)
-   - Implement your changes
-   - Ensure all tests pass: `npx nx test`
-
-4. **Submit PR**
-   - Push branch: `git push origin feature/your-feature-name`
-   - Open PR with clear description
-
-### Development Workflow
+## Contributing
 
 ```bash
-# Install dependencies
-npm install
-
-# Build and test everything
-npx nx build && npx nx test
-
-# Work on specific package
-npx nx build adt-cli
-npx nx test adt-cli --watch
-
-# Create new package
-npx nx g @nx/node:library packages/my-package
+git checkout -b feat/my-change
+# make changes
+npx nx build adt-cli && npx nx test adt-cli
+git push origin feat/my-change
+# open pull request
 ```
 
-### Project Planning
+See [AGENTS.md](./AGENTS.md) for conventions used by AI coding agents.
 
-- **Current Work**: See [current-sprint.md](./docs/planning/current-sprint.md)
-- **Project Status**: See [abap-code-review.md](./docs/planning/abap-code-review.md)
-- **Roadmap**: See [roadmap.md](./docs/planning/roadmap.md)
+## License
 
-## 📄 License
-
-MIT License - see [LICENSE](./LICENSE) for details.
-
-## 🔑 Key Concepts
-
-### ts-xsd + speci: The Contract Foundation
-
-The combination of `ts-xsd` and `speci` provides a powerful contract specification system:
-
-**ts-xsd** converts XSD schemas to TypeScript:
-
-```typescript
-// Generated from SAP's official XSD
-const TransportSchema = {
-  ns: 'http://www.sap.com/adt/cts',
-  root: 'request',
-  elements: {
-    request: {
-      sequence: [
-        { name: 'requestHeader', type: 'requestHeader' },
-        { name: 'tasks', type: 'tasks' },
-      ],
-    },
-    // ... full type definitions
-  },
-} as const;
-
-// TypeScript type is automatically inferred!
-type Transport = InferXsd<typeof TransportSchema>;
-```
-
-**speci** defines REST contracts:
-
-```typescript
-import { http } from 'speci/rest';
-import { schemas } from 'adt-schemas-xsd';
-
-const ctsContract = {
-  getTransport: (id: string) =>
-    http.get(`/sap/bc/adt/cts/transportrequests/${id}`, {
-      responses: { 200: schemas.transportmanagment },
-    }),
-};
-```
-
-**Result**: Full type safety from XSD to API response, with zero manual type definitions.
-
-### Why Not Just Use fast-xml-parser?
-
-Traditional XML parsers force you into their data format:
-
-```typescript
-// fast-xml-parser output - awkward structure
-const data = {
-  "cts:request": {
-    "@_xmlns:cts": "http://www.sap.com/adt/cts",
-    "cts:requestHeader": { ... }
-  }
-};
-```
-
-With ts-xsd, you get clean domain objects:
-
-```typescript
-// ts-xsd output - clean TypeScript types
-const data: Transport = {
-  requestHeader: { trRequestId: 'DEVK900001', ... },
-  tasks: [...]
-};
-```
-
-## 🗺️ Roadmap
-
-- **Current (PoC)**: Contract-first architecture with ts-xsd + speci
-- **Next**: Complete adt-contracts coverage for core ADT APIs
-- **Future**: MCP server for AI-assisted ABAP development
-
----
-
-**Built for the SAP development community** 🚀
+[MIT](./LICENSE)

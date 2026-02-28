@@ -48,6 +48,7 @@ export class ConfigLoader implements IConfigLoader {
         `Failed to load config from ${resolvedPath}: ${
           error instanceof Error ? error.message : String(error)
         }`,
+        { cause: error },
       );
     }
   }
