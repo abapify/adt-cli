@@ -1,4 +1,4 @@
-import { defineConfig, UserConfig } from 'tsdown';
+import { defineConfig } from 'tsdown';
 
 /** Base config options - spread into package configs */
 export const baseOptions = {
