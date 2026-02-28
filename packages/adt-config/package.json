@@ -1,7 +1,7 @@
 {
   "name": "@abapify/adt-config",
   "type": "module",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Configuration loader for ADT CLI",
   "types": "./dist/index.d.mts",
   "exports": {

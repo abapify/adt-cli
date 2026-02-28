@@ -1,6 +1,6 @@
 {
   "name": "ts-xsd",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Core XSD parser and builder - W3C XMLSchema 1:1 TypeScript representation",
   "type": "module",
   "types": "./dist/index.d.mts",

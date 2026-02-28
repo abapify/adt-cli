@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-playwright",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "description": "Playwright-based SSO authentication plugin for ADT client",
   "types": "./dist/index.d.mts",

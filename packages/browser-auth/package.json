@@ -1,6 +1,6 @@
 {
   "name": "@abapify/browser-auth",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "description": "Browser-based SSO authentication core - shared logic for Playwright/Puppeteer plugins",
   "types": "./dist/index.d.mts",

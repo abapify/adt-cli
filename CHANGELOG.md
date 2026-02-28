@@ -1,3 +1,13 @@
+## 0.1.5 (2026-02-28)
+
+### 🩹 Fixes
+
+- **release:** use NPM_CONFIG_TOKEN for bun publish authentication ([e014da2](https://github.com/abapify/adt-cli/commit/e014da2))
+
+### ❤️ Thank You
+
+- ThePlenkov @ThePlenkov
+
 ## 0.1.4 (2026-02-28)
 
 ### 🩹 Fixes

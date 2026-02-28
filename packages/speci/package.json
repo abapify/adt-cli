@@ -1,6 +1,6 @@
 {
   "name": "speci",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "description": "Minimal arrow-function-based contract specification system for TypeScript",
   "types": "./dist/index.d.mts",
