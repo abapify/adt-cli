@@ -34,3 +34,6 @@ jobs:
         shell: bash
       - run: npx nx-cloud record -- nx format:check
       - run: npx nx affected -t lint test build e2e-ci
+
+      - run: npx nx fix-ci
+      if: always()
