@@ -13,6 +13,7 @@ export interface AdtConnectionConfig {
   username?: string;
   password?: string;
   cookieHeader?: string; // For SAML authentication
+  authorizationHeader?: string; // For Bearer token auth (e.g., OAuth / BTP service key)
   client?: string;
   language?: string;
   logger?: Logger;

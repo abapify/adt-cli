@@ -6,6 +6,4 @@ export default defineConfig({
   ...baseConfig,
   entry: ['./src/index.ts', './src/bin/adt.ts', './src/bin/adt-all.ts'],
   tsconfig: 'tsconfig.lib.json',
-  // Force bundle these packages instead of marking as external
-  deps: { alwaysBundle: ['@abapify/adt-plugin-abapgit'] },
 });

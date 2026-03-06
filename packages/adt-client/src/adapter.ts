@@ -36,6 +36,7 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
     username,
     password,
     cookieHeader,
+    authorizationHeader,
     client,
     language,
     logger,
@@ -46,10 +47,14 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
   // Determine auth method
   const isSamlAuth = !!cookieHeader;
 
-  // Create Basic Auth header (if not using SAML)
-  const authHeader = isSamlAuth
-    ? undefined
-    : `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+  // Build Authorization header:
+  // 1. Explicit authorizationHeader (e.g., "Bearer <token>" for OAuth)
+  // 2. Basic Auth header (username/password) when not using SAML
+  const authHeader =
+    authorizationHeader ??
+    (isSamlAuth
+      ? undefined
+      : `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`);
 
   // Create session manager for stateful sessions
   const sessionManager = new SessionManager(logger);

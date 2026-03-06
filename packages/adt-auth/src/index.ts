@@ -13,6 +13,10 @@ export { FileStorage } from './storage/file-storage';
 
 // Built-in plugins
 export { default as basicAuthPlugin } from './plugins/basic';
+export { default as serviceKeyAuthPlugin } from './plugins/service-key';
+
+// Utilities
+export { resolveServiceKeyFromEnv, readServiceKey } from './utils/env';
 
 // Types - New format (single source of truth)
 export type {
@@ -29,3 +33,9 @@ export type {
   BasicAuthResult,
   ConnectionTestResult,
 } from './types';
+
+export type {
+  BTPServiceKey,
+  UAACredentials,
+  ServiceKeyPluginOptions,
+} from './types/service-key';

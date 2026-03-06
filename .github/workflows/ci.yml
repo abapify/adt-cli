@@ -2,9 +2,8 @@ name: CI
 on:
   push:
     branches:
-      # Change this if your primary branch is not main
+      # Runs on merge to main only
       - main
-      - 'copilot/**'
   pull_request:
 
 # Needed for nx-set-shas when run on the main branch

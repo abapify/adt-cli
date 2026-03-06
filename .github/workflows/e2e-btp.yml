@@ -1,0 +1,61 @@
+name: E2E BTP
+on:
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+  # Run automatically on pushes to the feature branch and main
+  push:
+    branches:
+      - main
+      - copilot/add-service-key-auth-plugin
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  service-key-auth:
+    name: Service Key Auth Test
+    runs-on: ubuntu-latest
+    steps:
+      # Guard against environments where the secret is unavailable (e.g. push from a fork)
+      - name: Check secret availability
+        id: secret-check
+        env:
+          SECRET: ${{ secrets.ADT_SERVICE_KEY }}
+        run: |
+          if [ -n "$SECRET" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "⏭️ ADT_SERVICE_KEY not configured – skipping e2e test"
+          fi
+
+      - uses: actions/checkout@v6
+        if: steps.secret-check.outputs.available == 'true'
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        if: steps.secret-check.outputs.available == 'true'
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        if: steps.secret-check.outputs.available == 'true'
+        with:
+          bun-version: 1.2.9
+      - name: Install dependencies
+        if: steps.secret-check.outputs.available == 'true'
+        run: bun install
+      - name: Build adt-cli
+        if: steps.secret-check.outputs.available == 'true'
+        run: npx nx build adt-cli
+      - name: Test service key authentication
+        if: steps.secret-check.outputs.available == 'true'
+        env:
+          ADT_SERVICE_KEY: ${{ secrets.ADT_SERVICE_KEY }}
+        run: |
+          echo "🔑 Testing BTP service key authentication..."
+          SERVICE_KEY_FILE=$(mktemp)
+          echo "$ADT_SERVICE_KEY" > "$SERVICE_KEY_FILE"
+          node packages/adt-cli/dist/bin/adt.mjs --service-key="$SERVICE_KEY_FILE" info --system
+          rm -f "$SERVICE_KEY_FILE"
+          echo "✅ Service key auth e2e test passed"

@@ -1,5 +1,4 @@
-// Standalone auth utilities for ADT CLI
-// Based on @abapify/btp-service-key-parser
+// BTP Service Key types
 
 export interface UAACredentials {
   tenantmode: string;
@@ -52,6 +51,13 @@ export interface OAuthToken {
   expires_at: Date;
 }
 
+export interface ServiceKeyPluginOptions {
+  url: string;
+  client?: string;
+  serviceKey: string | object;
+  [key: string]: unknown;
+}
+
 export class ServiceKeyParser {
   static parse(serviceKeyJson: string | object): BTPServiceKey {
     let parsed: unknown;
@@ -66,17 +72,16 @@ export class ServiceKeyParser {
       parsed = serviceKeyJson;
     }
 
-    // Basic validation
     if (!parsed || typeof parsed !== 'object') {
       throw new Error('Invalid service key format');
     }
 
-    const serviceKey = parsed as any;
+    const serviceKey = parsed as Record<string, unknown>;
 
-    if (!serviceKey.uaa || !serviceKey.url || !serviceKey.systemid) {
+    if (!serviceKey['uaa'] || !serviceKey['url'] || !serviceKey['systemid']) {
       throw new Error('Missing required fields in service key');
     }
 
-    return serviceKey as BTPServiceKey;
+    return serviceKey as unknown as BTPServiceKey;
   }
 }

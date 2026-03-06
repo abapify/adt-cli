@@ -11,6 +11,9 @@
     ".": "./dist/index.mjs",
     "./basic": "./dist/basic.mjs",
     "./plugins/basic": "./dist/plugins/basic.mjs",
+    "./plugins/service-key": "./dist/plugins/service-key.mjs",
+    "./service-key": "./dist/service-key.mjs",
+    "./utils/env": "./dist/utils/env.mjs",
     "./package.json": "./package.json"
   },
   "files": [

@@ -206,6 +206,7 @@ export async function getAdtClientV2(
   let username: string | undefined;
   let password: string | undefined;
   let cookieHeader: string | undefined;
+  let authorizationHeader: string | undefined;
 
   if (session.auth.method === 'basic') {
     const creds = session.auth.credentials as BasicCredentials;
@@ -219,7 +220,16 @@ export async function getAdtClientV2(
 
     const creds = session.auth.credentials as CookieCredentials;
     // Decode URL-encoded cookie values (e.g., %3d -> =)
-    cookieHeader = decodeURIComponent(creds.cookies);
+    const rawCookies = decodeURIComponent(creds.cookies);
+
+    const AUTH_PREFIX = 'Authorization: ';
+    if (rawCookies.startsWith(AUTH_PREFIX)) {
+      // Bearer token from OAuth (e.g., BTP service key auth) — pass as
+      // Authorization header, not as a Cookie
+      authorizationHeader = rawCookies.substring(AUTH_PREFIX.length);
+    } else {
+      cookieHeader = rawCookies;
+    }
   } else {
     console.error(`❌ Unsupported auth method: ${session.auth.method}`);
     process.exit(1);
@@ -340,6 +350,7 @@ export async function getAdtClientV2(
     username,
     password,
     cookieHeader,
+    authorizationHeader,
     client,
     logger,
     plugins,

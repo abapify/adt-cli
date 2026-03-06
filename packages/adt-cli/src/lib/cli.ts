@@ -24,7 +24,9 @@ import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
 // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
 import { createCliLogger, AVAILABLE_COMPONENTS } from './utils/logger-config';
-import { setCliContext } from './utils/adt-client-v2';
+import { setCliContext, getCliContext } from './utils/adt-client-v2';
+import { getAuthManager, setDefaultSid } from './utils/auth';
+import { readServiceKey } from '@abapify/adt-auth';
 import { loadCommandPlugins, loadStaticPlugins } from './plugin-loader';
 import type { CliCommandPlugin } from '@abapify/adt-plugin';
 import { existsSync, readFileSync } from 'fs';
@@ -116,6 +118,10 @@ export async function createCLI(options?: {
       false,
     )
     .option('--config <path>', 'Path to config file (default: adt.config.ts)')
+    .option(
+      '--service-key <path>',
+      'Path to a BTP service key JSON file. Auto-authenticates before running the command.',
+    )
     .hook('preAction', (thisCommand) => {
       const opts = thisCommand.optsWithGlobals();
 
@@ -225,7 +231,7 @@ export async function main(options?: {
   const program = await createCLI(options);
 
   // Add a hook to set up logger before command execution
-  program.hook('preAction', (thisCommand, actionCommand) => {
+  program.hook('preAction', async (thisCommand, actionCommand) => {
     // Set CLI mode for ADT client logger to enable pretty formatting
     process.env.ADT_CLI_MODE = 'true';
 
@@ -254,6 +260,41 @@ export async function main(options?: {
       verbose: globalOptions.verbose,
       configPath: globalOptions.config,
     });
+
+    // Handle --service-key: auto-authenticate before running the command
+    if (globalOptions.serviceKey) {
+      try {
+        const serviceKey = readServiceKey(globalOptions.serviceKey as string);
+
+        if (!serviceKey.systemid && !globalOptions.sid) {
+          throw new Error(
+            'Service key does not contain a systemid. Use --sid to specify the system ID.',
+          );
+        }
+
+        const sid =
+          globalOptions.sid?.toUpperCase() || serviceKey.systemid.toUpperCase();
+
+        const authManager = getAuthManager();
+        await authManager.login(sid, {
+          type: '@abapify/adt-auth/plugins/service-key',
+          options: {
+            url: serviceKey.url,
+            serviceKey,
+          },
+        });
+
+        // Explicitly set the SID so downstream commands find the session
+        setDefaultSid(sid);
+        setCliContext({ ...getCliContext(), sid });
+      } catch (error) {
+        console.error(
+          '❌ Service key authentication failed:',
+          error instanceof Error ? error.message : String(error),
+        );
+        process.exit(1);
+      }
+    }
   });
 
   await program.parseAsync(process.argv);
