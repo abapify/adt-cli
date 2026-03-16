@@ -6,7 +6,7 @@ When creating new projects, test scripts, or reproduction repos:
 
 **NEVER** hardcode specific versions in `package.json`. Instead:
 
-1. Use `npm install <package>` or `bun add <package>` to get latest
+1. Use `bun add <package>` to get latest
 2. Or use `latest` tag: `"tsdown": "latest"`
 
 ## Why
@@ -31,9 +31,9 @@ When creating new projects, test scripts, or reproduction repos:
 ### ✅ CORRECT - Install fresh
 
 ```bash
-# Let npm/bun resolve latest
-npm init -y
-npm install -D tsdown typescript
+# Let bun resolve latest
+bun init -y
+bun add -D tsdown typescript
 
 # Or use latest tag
 bun add -D tsdown@latest typescript@latest
