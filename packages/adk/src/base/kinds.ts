@@ -67,6 +67,10 @@ import type {
   AdkTransportTask,
 } from '../objects/cts/transport/transport';
 import type { AdkObject } from './model';
+import type { AdkDomain } from '../objects/ddic/doma/doma.model';
+import type { AdkDataElement } from '../objects/ddic/dtel/dtel.model';
+import type { AdkTable, AdkStructure } from '../objects/ddic/tabl/tabl.model';
+import type { AdkTableType } from '../objects/ddic/ttyp/ttyp.model';
 
 /**
  * Maps ADK kind to concrete object type
@@ -91,5 +95,14 @@ export type AdkObjectForKind<K extends AdkKind> = K extends typeof Class
             ? AdkTransportRequest
             : K extends typeof TransportTask
               ? AdkTransportTask
-              : // Add more mappings as types are implemented
-                AdkObject; // fallback
+              : K extends typeof Domain
+                ? AdkDomain
+                : K extends typeof DataElement
+                  ? AdkDataElement
+                  : K extends typeof Table
+                    ? AdkTable
+                    : K extends typeof Structure
+                      ? AdkStructure
+                      : K extends typeof TableType
+                        ? AdkTableType
+                        : AdkObject; // fallback

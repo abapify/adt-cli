@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Custom wrapper schema for DTEL (Data Element) responses.
+
+  SAP's official dataelements.xsd only defines the inner dtel:dataElement content.
+  But SAP's actual HTTP response wraps it in a blue:wbobj root element
+  (namespace http://www.sap.com/wbobj/dictionary/dtel) that extends adtcore:AdtMainObject.
+
+  This custom schema declares that wrapper so ts-xsd can parse the full response.
+  It uses xs:import for both adtcore (wrapper attributes) and the SAP dataelements
+  schema (inner content), then defines a root element that extends AdtMainObject
+  with a child dtel:dataElement.
+-->
+<xsd:schema xmlns:adtcore="http://www.sap.com/adt/core"
+	xmlns:dtel="http://www.sap.com/adt/dictionary/dataelements"
+	xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:blue="http://www.sap.com/wbobj/dictionary/dtel"
+	ecore:package="com.sap.adt.ddic.dataelement.model"
+	ecore:nsPrefix="blue"
+	targetNamespace="http://www.sap.com/wbobj/dictionary/dtel"
+	elementFormDefault="qualified"
+	attributeFormDefault="qualified">
+
+	<xsd:import namespace="http://www.sap.com/adt/core" schemaLocation="../sap/adtcore.xsd" />
+	<xsd:import namespace="http://www.sap.com/adt/dictionary/dataelements" schemaLocation="../sap/dataelements.xsd" />
+
+	<!-- Root element matching SAP's actual HTTP response -->
+	<xsd:element name="wbobj" type="blue:DataElementWrapper" />
+
+	<xsd:complexType name="DataElementWrapper">
+		<xsd:complexContent>
+			<xsd:extension base="adtcore:AdtMainObject">
+				<xsd:sequence>
+					<xsd:element ref="dtel:dataElement" minOccurs="0" maxOccurs="1" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+</xsd:schema>

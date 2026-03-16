@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- TYPE ONLY - no element declaration! -->
+  <!-- DD40V: Table type metadata -->
+  <xs:complexType name="Dd40vType">
+    <xs:all>
+      <xs:element name="TYPENAME" type="xs:string"/>
+      <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROWTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROWKIND" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATATYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACCESSMODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="KEYDEF" type="xs:string" minOccurs="0"/>
+      <xs:element name="KEYKIND" type="xs:string" minOccurs="0"/>
+      <xs:element name="GENERIC" type="xs:string" minOccurs="0"/>
+      <xs:element name="LENG" type="xs:string" minOccurs="0"/>
+      <xs:element name="DECIMALS" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPELEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="DEFFDNAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>

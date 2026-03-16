@@ -11,6 +11,11 @@ export {
   AdkPackage,
   AdkProgram,
   AdkFunctionGroup,
+  AdkDomain,
+  AdkDataElement,
+  AdkTable,
+  AdkStructure,
+  AdkTableType,
 } from '@abapify/adk';
 
 // Types

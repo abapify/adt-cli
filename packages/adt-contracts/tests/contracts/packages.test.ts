@@ -18,7 +18,10 @@ class PackagesScenario extends ContractScenario {
       contract: () => packagesContract.get('$TMP'),
       method: 'GET',
       path: '/sap/bc/adt/packages/%24TMP', // $ is URL-encoded
-      headers: { Accept: 'application/vnd.sap.adt.packages.v2+xml' },
+      headers: {
+        Accept:
+          'application/vnd.sap.adt.packages.v2+xml, application/vnd.sap.adt.packages.v1+xml',
+      },
       response: {
         status: 200,
         schema: packagesV1,
@@ -30,7 +33,10 @@ class PackagesScenario extends ContractScenario {
       contract: () => packagesContract.get('Z_MY_PACKAGE'),
       method: 'GET',
       path: '/sap/bc/adt/packages/Z_MY_PACKAGE',
-      headers: { Accept: 'application/vnd.sap.adt.packages.v2+xml' },
+      headers: {
+        Accept:
+          'application/vnd.sap.adt.packages.v2+xml, application/vnd.sap.adt.packages.v1+xml',
+      },
       response: { status: 200, schema: packagesV1 },
     },
     {
@@ -39,8 +45,9 @@ class PackagesScenario extends ContractScenario {
       method: 'POST',
       path: '/sap/bc/adt/packages',
       headers: {
-        Accept: 'application/vnd.sap.adt.packages.v2+xml',
-        'Content-Type': 'application/*',
+        Accept:
+          'application/vnd.sap.adt.packages.v2+xml, application/vnd.sap.adt.packages.v1+xml',
+        'Content-Type': 'application/vnd.sap.adt.packages.v2+xml',
       },
       query: { corrNr: 'DEVK900001' },
       body: { schema: packagesV1 },

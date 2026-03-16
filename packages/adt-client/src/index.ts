@@ -69,6 +69,13 @@ export type { ClassResponse, InterfaceResponse } from '@abapify/adt-contracts';
 export type { Package as PackageResponse } from '@abapify/adt-contracts';
 export type { ProgramResponse } from '@abapify/adt-contracts';
 export type { FunctionGroupResponse } from '@abapify/adt-contracts';
+export type {
+  DomainResponse,
+  DataElementResponse,
+  TableResponse,
+  StructureResponse,
+  TableTypeResponse,
+} from '@abapify/adt-contracts';
 
 // Transport response type - exported directly from contracts
 // Note: Transport business logic has moved to @abapify/adk (AdkTransportRequest)

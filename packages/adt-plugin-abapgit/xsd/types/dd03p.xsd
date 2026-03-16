@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- TYPE ONLY - no element declaration! -->
+  <!-- DD03P: Table/Structure field definition -->
+  <xs:complexType name="Dd03pType">
+    <xs:all>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="POSITION" type="xs:string" minOccurs="0"/>
+      <xs:element name="KEYFLAG" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROLLNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ADMINFIELD" type="xs:string" minOccurs="0"/>
+      <xs:element name="INTTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="INTLEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATATYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="LENG" type="xs:string" minOccurs="0"/>
+      <xs:element name="DECIMALS" type="xs:string" minOccurs="0"/>
+      <xs:element name="NOTNULL" type="xs:string" minOccurs="0"/>
+      <xs:element name="DOMNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHLPORIGIN" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMPTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="MASK" type="xs:string" minOccurs="0"/>
+      <xs:element name="REFTABLE" type="xs:string" minOccurs="0"/>
+      <xs:element name="REFFIELD" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONRFLAG" type="xs:string" minOccurs="0"/>
+      <xs:element name="PRECFIELD" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- DD03P table wrapper (used by TABL schema) -->
+  <xs:complexType name="Dd03pTableType">
+    <xs:sequence>
+      <xs:element name="DD03P" type="Dd03pType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

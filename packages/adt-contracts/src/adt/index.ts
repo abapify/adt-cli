@@ -12,6 +12,7 @@ export * from './core';
 export * from './repository';
 export * from './programs';
 export * from './functions';
+export * from './ddic';
 
 /**
  * Complete ADT Contract
@@ -29,6 +30,7 @@ import {
   type ProgramsModuleContract,
 } from './programs';
 import { functionsContract, type FunctionsContract } from './functions';
+import { ddicContract, type DdicContract } from './ddic';
 
 /**
  * Explicit type to avoid TS7056 "inferred type exceeds maximum length"
@@ -44,6 +46,7 @@ export interface AdtContract {
   repository: RepositoryContract;
   programs: ProgramsModuleContract;
   functions: FunctionsContract;
+  ddic: DdicContract;
 }
 
 export const adtContract: AdtContract = {
@@ -57,6 +60,7 @@ export const adtContract: AdtContract = {
   repository: repositoryContract,
   programs: programsModuleContract,
   functions: functionsContract,
+  ddic: ddicContract,
 };
 
 // Import RestClient from base for client type definition

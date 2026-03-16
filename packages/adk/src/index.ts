@@ -45,6 +45,9 @@ export type {
   ProgramResponse,
   FunctionGroupResponse,
   TransportGetResponse,
+  DomainResponse,
+  DataElementResponse,
+  TableTypeResponse,
 } from './base/adt';
 export { createAdkContract } from './base/adt';
 
@@ -102,6 +105,19 @@ export type {
   FunctionGroupXml, // Raw API response type
 } from './objects/repository/fugr';
 export { AdkFunctionGroup } from './objects/repository/fugr';
+
+// DDIC types and classes
+export {
+  AdkDomain,
+  AdkDataElement,
+  AdkTable,
+  AdkStructure,
+  AdkTableType,
+  type DomainXml,
+  type DataElementXml,
+  type TableXml,
+  type TableTypeXml,
+} from './objects/ddic';
 
 // CTS types (legacy complex transport)
 export type {

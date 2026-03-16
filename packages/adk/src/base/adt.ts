@@ -37,6 +37,11 @@ export type {
   TransportGetResponse,
   ProgramResponse as ProgramResponseUnion,
   FunctionGroupResponse as FunctionGroupResponseUnion,
+  DomainResponse,
+  DataElementResponse,
+  TableResponse,
+  StructureResponse,
+  TableTypeResponse,
 } from '@abapify/adt-client';
 
 // CRUD contract types for typed ADK base model
@@ -128,6 +133,8 @@ export interface AdkContract {
   readonly programs: AdtContracts['programs'];
   /** Functions contracts (function groups) */
   readonly functions: AdtContracts['functions'];
+  /** DDIC contracts (domains, data elements, structures, tables, table types) */
+  readonly ddic: AdtContracts['ddic'];
 }
 
 /**
@@ -145,5 +152,6 @@ export function createAdkContract(client: AdtClient): AdkContract {
     repository: client.adt.repository,
     programs: client.adt.programs,
     functions: client.adt.functions,
+    ddic: client.adt.ddic,
   };
 }

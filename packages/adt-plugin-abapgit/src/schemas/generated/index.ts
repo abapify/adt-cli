@@ -21,6 +21,8 @@ import _dtel from './schemas/dtel';
 import _intf from './schemas/intf';
 import _prog from './schemas/prog';
 import _fugr from './schemas/fugr';
+import _tabl from './schemas/tabl';
+import _ttyp from './schemas/ttyp';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -31,6 +33,8 @@ import type { DtelSchema as _DtelSchema } from './types/dtel';
 import type { IntfSchema as _IntfSchema } from './types/intf';
 import type { ProgSchema as _ProgSchema } from './types/prog';
 import type { FugrSchema as _FugrSchema } from './types/fugr';
+import type { TablSchema as _TablSchema } from './types/tabl';
+import type { TtypSchema as _TtypSchema } from './types/ttyp';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -40,6 +44,8 @@ type DtelAbapGitType = Extract<_DtelSchema, { abapGit: unknown }>;
 type IntfAbapGitType = Extract<_IntfSchema, { abapGit: unknown }>;
 type ProgAbapGitType = Extract<_ProgSchema, { abapGit: unknown }>;
 type FugrAbapGitType = Extract<_FugrSchema, { abapGit: unknown }>;
+type TablAbapGitType = Extract<_TablSchema, { abapGit: unknown }>;
+type TtypAbapGitType = Extract<_TtypSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<
@@ -70,6 +76,14 @@ export const fugr = abapGitSchema<
   FugrAbapGitType,
   FugrAbapGitType['abapGit']['abap']['values']
 >(_fugr);
+export const tabl = abapGitSchema<
+  TablAbapGitType,
+  TablAbapGitType['abapGit']['abap']['values']
+>(_tabl);
+export const ttyp = abapGitSchema<
+  TtypAbapGitType,
+  TtypAbapGitType['abapGit']['abap']['values']
+>(_ttyp);
 
 // Re-export types and utilities
 export {

@@ -11,3 +11,5 @@ export { default as dtel } from './dtel';
 export { default as fugr } from './fugr';
 export { default as intf } from './intf';
 export { default as prog } from './prog';
+export { default as tabl } from './tabl';
+export { default as ttyp } from './ttyp';

@@ -30,6 +30,8 @@ export const packagesContract = crud({
   basePath: '/sap/bc/adt/packages',
   schema: packagesV1,
   contentType: 'application/vnd.sap.adt.packages.v2+xml',
+  accept:
+    'application/vnd.sap.adt.packages.v2+xml, application/vnd.sap.adt.packages.v1+xml',
   nameTransform: (n) => encodeURIComponent(n), // preserve case (packages are uppercase)
 });
 

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  abapGit TABL (Table/Structure) Schema
+
+  Defines the DD02V and DD03P_TABLE structures used in *.tabl.xml files.
+  Based on SAP DDIC tables DD02V (table header) and DD03P (field definitions).
+
+  Uses xs:redefine to extend AbapValuesType with TABL-specific elements.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/dd02v.xsd"/>
+  <xs:include schemaLocation="types/dd03p.xsd"/>
+
+  <!-- Redefine AbapValuesType to include TABL-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="DD02V" type="asx:Dd02vType" minOccurs="0"/>
+            <xs:element name="DD03P_TABLE" type="asx:Dd03pTableType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

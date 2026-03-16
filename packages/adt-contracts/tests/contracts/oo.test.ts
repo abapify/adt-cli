@@ -21,7 +21,10 @@ class ClassesScenario extends ContractScenario {
       contract: () => ooContract.classes.get('ZCL_TEST'),
       method: 'GET',
       path: '/sap/bc/adt/oo/classes/zcl_test',
-      headers: { Accept: 'application/vnd.sap.adt.oo.classes.v4+xml' },
+      headers: {
+        Accept:
+          'application/vnd.sap.adt.oo.classes.v4+xml, application/vnd.sap.adt.oo.classes.v3+xml, application/vnd.sap.adt.oo.classes.v2+xml, application/vnd.sap.adt.oo.classes.v1+xml',
+      },
       response: {
         status: 200,
         schema: classesSchema,
@@ -34,8 +37,9 @@ class ClassesScenario extends ContractScenario {
       method: 'POST',
       path: '/sap/bc/adt/oo/classes',
       headers: {
-        Accept: 'application/vnd.sap.adt.oo.classes.v4+xml',
-        'Content-Type': 'application/*',
+        Accept:
+          'application/vnd.sap.adt.oo.classes.v4+xml, application/vnd.sap.adt.oo.classes.v3+xml, application/vnd.sap.adt.oo.classes.v2+xml, application/vnd.sap.adt.oo.classes.v1+xml',
+        'Content-Type': 'application/vnd.sap.adt.oo.classes.v4+xml',
       },
       body: { schema: classesSchema },
       response: { status: 200, schema: classesSchema },
@@ -46,7 +50,8 @@ class ClassesScenario extends ContractScenario {
       method: 'PUT',
       path: '/sap/bc/adt/oo/classes/zcl_test',
       headers: {
-        Accept: 'application/vnd.sap.adt.oo.classes.v4+xml',
+        Accept:
+          'application/vnd.sap.adt.oo.classes.v4+xml, application/vnd.sap.adt.oo.classes.v3+xml, application/vnd.sap.adt.oo.classes.v2+xml, application/vnd.sap.adt.oo.classes.v1+xml',
         'Content-Type': 'application/vnd.sap.adt.oo.classes.v4+xml',
       },
       body: { schema: classesSchema },
@@ -123,7 +128,10 @@ class InterfacesScenario extends ContractScenario {
       contract: () => ooContract.interfaces.get('ZIF_TEST'),
       method: 'GET',
       path: '/sap/bc/adt/oo/interfaces/zif_test',
-      headers: { Accept: 'application/vnd.sap.adt.oo.interfaces.v5+xml' },
+      headers: {
+        Accept:
+          'application/vnd.sap.adt.oo.interfaces.v5+xml, application/vnd.sap.adt.oo.interfaces.v4+xml, application/vnd.sap.adt.oo.interfaces.v3+xml, application/vnd.sap.adt.oo.interfaces.v2+xml, application/vnd.sap.adt.oo.interfaces+xml',
+      },
       response: {
         status: 200,
         schema: interfacesSchema,
@@ -135,8 +143,9 @@ class InterfacesScenario extends ContractScenario {
       method: 'POST',
       path: '/sap/bc/adt/oo/interfaces',
       headers: {
-        Accept: 'application/vnd.sap.adt.oo.interfaces.v5+xml',
-        'Content-Type': 'application/*',
+        Accept:
+          'application/vnd.sap.adt.oo.interfaces.v5+xml, application/vnd.sap.adt.oo.interfaces.v4+xml, application/vnd.sap.adt.oo.interfaces.v3+xml, application/vnd.sap.adt.oo.interfaces.v2+xml, application/vnd.sap.adt.oo.interfaces+xml',
+        'Content-Type': 'application/vnd.sap.adt.oo.interfaces.v5+xml',
       },
       body: { schema: interfacesSchema },
       response: { status: 200, schema: interfacesSchema },
@@ -147,7 +156,8 @@ class InterfacesScenario extends ContractScenario {
       method: 'PUT',
       path: '/sap/bc/adt/oo/interfaces/zif_test',
       headers: {
-        Accept: 'application/vnd.sap.adt.oo.interfaces.v5+xml',
+        Accept:
+          'application/vnd.sap.adt.oo.interfaces.v5+xml, application/vnd.sap.adt.oo.interfaces.v4+xml, application/vnd.sap.adt.oo.interfaces.v3+xml, application/vnd.sap.adt.oo.interfaces.v2+xml, application/vnd.sap.adt.oo.interfaces+xml',
         'Content-Type': 'application/vnd.sap.adt.oo.interfaces.v5+xml',
       },
       body: { schema: interfacesSchema },

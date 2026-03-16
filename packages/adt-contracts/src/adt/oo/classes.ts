@@ -46,6 +46,8 @@ export const classesContract = crud({
   basePath: '/sap/bc/adt/oo/classes',
   schema: classesSchema,
   contentType: 'application/vnd.sap.adt.oo.classes.v4+xml',
+  accept:
+    'application/vnd.sap.adt.oo.classes.v4+xml, application/vnd.sap.adt.oo.classes.v3+xml, application/vnd.sap.adt.oo.classes.v2+xml, application/vnd.sap.adt.oo.classes.v1+xml',
   sources: ['main'] as const,
   includes: [
     'definitions',

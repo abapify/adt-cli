@@ -28,7 +28,17 @@ export default defineConfig({
       outputDir: 'src/schemas/generated/schemas',
       // Only object schemas - base schemas (asx, abapgit) are included via xs:import/xs:include
       // and their types get merged into each object schema during resolution
-      schemas: ['clas', 'devc', 'doma', 'dtel', 'intf', 'prog', 'fugr'],
+      schemas: [
+        'clas',
+        'devc',
+        'doma',
+        'dtel',
+        'intf',
+        'prog',
+        'fugr',
+        'tabl',
+        'ttyp',
+      ],
     },
   },
   generators: [

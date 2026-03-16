@@ -43,6 +43,12 @@ import type { TracesSchema } from './types/sap/traces.types';
 import type { QuickfixesSchema } from './types/sap/quickfixes.types';
 import type { LogSchema } from './types/sap/log.types';
 import type { TemplatelinkSchema } from './types/sap/templatelink.types';
+import type { DomainSchema } from './types/sap/domain.types';
+import type { DataelementsSchema } from './types/sap/dataelements.types';
+import type { TabletypeSchema } from './types/sap/tabletype.types';
+import type { TablesettingsSchema } from './types/sap/tablesettings.types';
+import type { DataelementWrapperSchema } from './types/custom/dataelementWrapper.types';
+import type { BlueSourceSchema } from './types/custom/blueSource.types';
 import type { AtomExtendedSchema } from './types/custom/atomExtended.types';
 import type { DiscoverySchema } from './types/custom/discovery.types';
 import type { HttpSchema } from './types/custom/http.types';
@@ -139,8 +145,26 @@ export const log: TypedSchema<LogSchema> = typedSchema<LogSchema>(_log);
 import _templatelink from './schemas/sap/templatelink';
 export const templatelink: TypedSchema<TemplatelinkSchema> =
   typedSchema<TemplatelinkSchema>(_templatelink);
+import _domain from './schemas/sap/domain';
+export const domain: TypedSchema<DomainSchema> =
+  typedSchema<DomainSchema>(_domain);
+import _dataelements from './schemas/sap/dataelements';
+export const dataelements: TypedSchema<DataelementsSchema> =
+  typedSchema<DataelementsSchema>(_dataelements);
+import _tabletype from './schemas/sap/tabletype';
+export const tabletype: TypedSchema<TabletypeSchema> =
+  typedSchema<TabletypeSchema>(_tabletype);
+import _tablesettings from './schemas/sap/tablesettings';
+export const tablesettings: TypedSchema<TablesettingsSchema> =
+  typedSchema<TablesettingsSchema>(_tablesettings);
 
 // Custom schemas
+import _dataelementWrapper from './schemas/custom/dataelementWrapper';
+export const dataelementWrapper: TypedSchema<DataelementWrapperSchema> =
+  typedSchema<DataelementWrapperSchema>(_dataelementWrapper);
+import _blueSource from './schemas/custom/blueSource';
+export const blueSource: TypedSchema<BlueSourceSchema> =
+  typedSchema<BlueSourceSchema>(_blueSource);
 import _atomExtended from './schemas/custom/atomExtended';
 export const atomExtended: TypedSchema<AtomExtendedSchema> =
   typedSchema<AtomExtendedSchema>(_atomExtended);

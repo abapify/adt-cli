@@ -55,6 +55,12 @@ export const aunitRun = toSpeciSchema(adtSchemas.aunitRun);
 export const aunitResult = toSpeciSchema(adtSchemas.aunitResult);
 export const programs = toSpeciSchema(adtSchemas.programs);
 export const groups = toSpeciSchema(adtSchemas.groups);
+export const domain = toSpeciSchema(adtSchemas.domain);
+export const dataelements = toSpeciSchema(adtSchemas.dataelements);
+export const dataelementWrapper = toSpeciSchema(adtSchemas.dataelementWrapper);
+export const tabletype = toSpeciSchema(adtSchemas.tabletype);
+export const tablesettings = toSpeciSchema(adtSchemas.tablesettings);
+export const blueSource = toSpeciSchema(adtSchemas.blueSource);
 
 // ============================================================================
 // JSON Schemas (re-exported directly - they use zod, not ts-xsd)
