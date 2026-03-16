@@ -29,4 +29,6 @@ export const dataelementsContract = crud({
   basePath: '/sap/bc/adt/ddic/dataelements',
   schema: dataelementWrapperSchema,
   contentType: 'application/vnd.sap.adt.dataelements.v2+xml',
+  accept:
+    'application/vnd.sap.adt.dataelements.v2+xml, application/vnd.sap.adt.dataelements.v1+xml',
 });

@@ -30,6 +30,8 @@ export const programsContract = crud({
   basePath: '/sap/bc/adt/programs/programs',
   schema: programs,
   contentType: 'application/vnd.sap.adt.programs.programs.v2+xml',
+  accept:
+    'application/vnd.sap.adt.programs.programs.v2+xml, application/vnd.sap.adt.programs.programs.v1+xml',
   sources: ['main'] as const,
 });
 

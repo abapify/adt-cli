@@ -36,6 +36,8 @@ export const interfacesContract = crud({
   basePath: '/sap/bc/adt/oo/interfaces',
   schema: interfacesSchema,
   contentType: 'application/vnd.sap.adt.oo.interfaces.v5+xml',
+  accept:
+    'application/vnd.sap.adt.oo.interfaces.v5+xml, application/vnd.sap.adt.oo.interfaces.v4+xml, application/vnd.sap.adt.oo.interfaces.v3+xml, application/vnd.sap.adt.oo.interfaces.v2+xml, application/vnd.sap.adt.oo.interfaces+xml',
   sources: ['main'] as const,
 });
 

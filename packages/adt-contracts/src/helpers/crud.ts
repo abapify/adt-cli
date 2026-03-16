@@ -77,8 +77,10 @@ export interface CrudOptions<S extends Serializable<unknown>> {
   basePath: string;
   /** Schema for parsing/building XML */
   schema: S;
-  /** Content-Type header value (e.g., 'application/vnd.sap.adt.oo.classes.v4+xml') */
+  /** Content-Type header for POST/PUT (single specific version, e.g., 'application/vnd.sap.adt.oo.classes.v4+xml') */
   contentType: string;
+  /** Accept header for GET (multi-version, newest first). Falls back to contentType if not provided. */
+  accept?: string;
   /** Optional: Transform object name for URL (default: lowercase) */
   nameTransform?: (name: string) => string;
   /** Optional: Source endpoints to generate (e.g., ['main']) */
@@ -317,6 +319,7 @@ export function crud<
     basePath,
     schema,
     contentType,
+    accept = contentType,
     nameTransform = (n) => n.toLowerCase(),
     sources,
     includes,
@@ -330,7 +333,7 @@ export function crud<
     get: (name: string, queryOptions?: Pick<CrudQueryParams, 'version'>) =>
       http.get(`${basePath}/${nameTransform(name)}`, {
         responses: { 200: schema },
-        headers: { Accept: contentType },
+        headers: { Accept: accept },
         query: queryOptions?.version
           ? { version: queryOptions.version }
           : undefined,
@@ -345,7 +348,7 @@ export function crud<
         body: schema,
         responses: { 200: schema },
         headers: {
-          Accept: contentType,
+          Accept: accept,
           'Content-Type': contentType,
         },
         query: queryOptions?.corrNr
@@ -365,7 +368,7 @@ export function crud<
         body: schema,
         responses: { 200: schema },
         headers: {
-          Accept: contentType,
+          Accept: accept,
           'Content-Type': contentType,
         },
         query: {
@@ -526,6 +529,7 @@ export function repo<S extends Serializable<unknown>>(
   schema: S,
   contentType: string,
   nameTransform?: (name: string) => string,
+  accept?: string,
 ): CrudContract<S> {
-  return crud({ basePath, schema, contentType, nameTransform });
+  return crud({ basePath, schema, contentType, accept, nameTransform });
 }

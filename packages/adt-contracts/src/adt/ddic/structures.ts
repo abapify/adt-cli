@@ -26,12 +26,15 @@ export type StructuresContract = typeof structuresContract;
 
 const basePath = '/sap/bc/adt/ddic/structures';
 const contentType = 'application/vnd.sap.adt.structures.v2+xml';
+const accept =
+  'application/vnd.sap.adt.structures.v2+xml, application/vnd.sap.adt.structures.v1+xml';
 
 export const structuresContract = {
   ...crud({
     basePath,
     schema: blueSourceSchema,
     contentType,
+    accept,
   }),
 
   objectstructure: (name: string, options?: { version?: string }) =>

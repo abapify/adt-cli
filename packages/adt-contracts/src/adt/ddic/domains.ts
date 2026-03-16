@@ -20,4 +20,6 @@ export const domainsContract = crud({
   basePath: '/sap/bc/adt/ddic/domains',
   schema: domainSchema,
   contentType: 'application/vnd.sap.adt.domains.v2+xml',
+  accept:
+    'application/vnd.sap.adt.domains.v2+xml, application/vnd.sap.adt.domains.v1+xml',
 });
