@@ -43,13 +43,13 @@ ADT Client → ADK Bridge → ObjectData (with ADK spec) → abapGit Format → 
 #### Code Example
 
 ```typescript
+// Pseudocode – illustrative only, not the exact implementation
 // Enhanced serialization in abapGit format
 const adkSpec = objectData.metadata?.adkSpec
   ? this.createAdkSpecFromExistingData(objectData, objectType)
   : this.convertObjectDataToAdkSpec(objectData, objectType);
 
-const serializer = SerializerRegistry.get('abapgit');
-const serialized = serializer.serialize(adkSpec);
+const serialized = serializeWithAbapGit(adkSpec);
 ```
 
 ### Object Type Support
