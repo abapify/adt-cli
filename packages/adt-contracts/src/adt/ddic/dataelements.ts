@@ -8,19 +8,25 @@
 
 import { crud } from '../../helpers/crud';
 import {
-  dataelements as dataelementsSchema,
+  dataelementWrapper as dataelementWrapperSchema,
   type InferTypedSchema,
 } from '../../schemas';
 
 /**
  * Data Element response type - exported for consumers (ADK, etc.)
+ *
+ * Uses the custom wrapper schema because SAP wraps the inner
+ * dtel:dataElement content in a blue:wbobj root element
+ * (namespace http://www.sap.com/wbobj/dictionary/dtel).
  */
-export type DataElementResponse = InferTypedSchema<typeof dataelementsSchema>;
+export type DataElementResponse = InferTypedSchema<
+  typeof dataelementWrapperSchema
+>;
 
 export type DataelementsContract = typeof dataelementsContract;
 
 export const dataelementsContract = crud({
   basePath: '/sap/bc/adt/ddic/dataelements',
-  schema: dataelementsSchema,
+  schema: dataelementWrapperSchema,
   contentType: 'application/vnd.sap.adt.dataelements.v2+xml',
 });

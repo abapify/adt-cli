@@ -19,8 +19,16 @@ export {
   type DataelementsContract,
   type DataElementResponse,
 } from './dataelements';
-export { structuresContract } from './structures';
-export { tablesContract } from './tables';
+export {
+  structuresContract,
+  type StructuresContract,
+  type StructureResponse,
+} from './structures';
+export {
+  tablesContract,
+  type TablesContract,
+  type TableResponse,
+} from './tables';
 export {
   tabletypesContract,
   type TabletypesContract,

@@ -66,6 +66,8 @@ const targetSchemas = [
   'sap/tabletype',
   'sap/tablesettings',
   // Custom schemas
+  'custom/dataelementWrapper', // DTEL wrapper (SAP wraps inner dtel:dataElement in blue:wbobj)
+  'custom/blueSource', // TABL/Structure wrapper (SAP uses blue:blueSource extending AbapSourceMainObject)
   'custom/atomExtended',
   'custom/discovery',
   'custom/http',

@@ -475,9 +475,21 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       try {
         await this.lock(transport);
       } catch (e) {
-        // For upsert, only fallback to create if it's a 404 Not Found error
-        if (mode === 'upsert' && this.isNotFoundError(e)) {
-          return this.save({ ...options, mode: 'create' });
+        // For upsert, fallback to create if object doesn't exist (404)
+        // or endpoint doesn't support the operation (405 - common for DDIC types)
+        if (mode === 'upsert' && this.shouldFallbackToCreate(e)) {
+          try {
+            return await this.save({ ...options, mode: 'create' });
+          } catch (createErr) {
+            // If POST fails with 422 "already exists", the object exists but
+            // the endpoint doesn't support lock/PUT (e.g., some DDIC types).
+            // Treat as unchanged — we can't update it via this mechanism.
+            if (this.isAlreadyExistsError(createErr)) {
+              this._unchanged = true;
+              return this;
+            }
+            throw createErr;
+          }
         }
         throw e;
       }
@@ -510,9 +522,25 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
       return this;
     } catch (e: unknown) {
-      // For upsert with PUT failure (404), try POST
-      if (mode === 'upsert' && this.isNotFoundError(e)) {
-        return this.save({ ...options, mode: 'create' });
+      // For upsert with PUT failure (404/405), try POST (create)
+      if (mode === 'upsert' && this.shouldFallbackToCreate(e)) {
+        try {
+          return await this.save({ ...options, mode: 'create' });
+        } catch (createErr) {
+          // If POST fails with 422 "already exists", the object exists but
+          // the endpoint doesn't support PUT for updates (e.g., TABL).
+          // Treat as unchanged — we can't update it via this mechanism.
+          if (this.isAlreadyExistsError(createErr)) {
+            this._unchanged = true;
+            return this;
+          }
+          throw createErr;
+        }
+      }
+      // If PUT returns 422 "already exists" directly in upsert mode
+      if (mode === 'upsert' && this.isAlreadyExistsError(e)) {
+        this._unchanged = true;
+        return this;
       }
       throw e;
     } finally {
@@ -582,6 +610,35 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   protected isNotFoundError(e: unknown): boolean {
     if (e instanceof Error) {
       return e.message.includes('404') || e.message.includes('Not Found');
+    }
+    return false;
+  }
+
+  /**
+   * Check if error suggests the object doesn't exist or the operation
+   * is not supported for the current state.
+   *
+   * Some SAP DDIC endpoints (TABL, TTYP) return 405 Method Not Allowed
+   * instead of 404 when attempting to lock or PUT a non-existent object.
+   * In upsert mode, both should trigger a fallback to POST (create).
+   */
+  protected shouldFallbackToCreate(e: unknown): boolean {
+    return (
+      this.isNotFoundError(e) ||
+      (e instanceof Error &&
+        (e.message.includes('405') || e.message.includes('Method Not Allowed')))
+    );
+  }
+
+  /**
+   * Check if error is a 422 "already exists" from a POST create attempt
+   */
+  protected isAlreadyExistsError(e: unknown): boolean {
+    if (e instanceof Error) {
+      return (
+        (e.message.includes('422') || e.message.includes('Unprocessable')) &&
+        e.message.includes('already exists')
+      );
     }
     return false;
   }

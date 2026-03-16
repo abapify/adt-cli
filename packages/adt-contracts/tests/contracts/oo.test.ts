@@ -35,7 +35,7 @@ class ClassesScenario extends ContractScenario {
       path: '/sap/bc/adt/oo/classes',
       headers: {
         Accept: 'application/vnd.sap.adt.oo.classes.v4+xml',
-        'Content-Type': 'application/*',
+        'Content-Type': 'application/vnd.sap.adt.oo.classes.v4+xml',
       },
       body: { schema: classesSchema },
       response: { status: 200, schema: classesSchema },
@@ -136,7 +136,7 @@ class InterfacesScenario extends ContractScenario {
       path: '/sap/bc/adt/oo/interfaces',
       headers: {
         Accept: 'application/vnd.sap.adt.oo.interfaces.v5+xml',
-        'Content-Type': 'application/*',
+        'Content-Type': 'application/vnd.sap.adt.oo.interfaces.v5+xml',
       },
       body: { schema: interfacesSchema },
       response: { status: 200, schema: interfacesSchema },

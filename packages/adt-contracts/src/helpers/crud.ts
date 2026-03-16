@@ -346,7 +346,7 @@ export function crud<
         responses: { 200: schema },
         headers: {
           Accept: contentType,
-          'Content-Type': 'application/*',
+          'Content-Type': contentType,
         },
         query: queryOptions?.corrNr
           ? { corrNr: queryOptions.corrNr }
@@ -406,6 +406,8 @@ export function crud<
         responses: { 200: undefined },
         headers: {
           'X-sap-adt-sessiontype': 'stateful',
+          Accept:
+            'application/*,application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result',
         },
         query: {
           _action: 'LOCK',

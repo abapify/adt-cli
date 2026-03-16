@@ -40,7 +40,7 @@ class PackagesScenario extends ContractScenario {
       path: '/sap/bc/adt/packages',
       headers: {
         Accept: 'application/vnd.sap.adt.packages.v2+xml',
-        'Content-Type': 'application/*',
+        'Content-Type': 'application/vnd.sap.adt.packages.v2+xml',
       },
       query: { corrNr: 'DEVK900001' },
       body: { schema: packagesV1 },

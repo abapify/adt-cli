@@ -345,7 +345,11 @@ export class AdkObjectSet {
    */
   async unlockAll(): Promise<void> {
     for (const obj of this.objects) {
-      await obj.unlock();
+      try {
+        await obj.unlock();
+      } catch {
+        // Ignore unlock failures - object may not have been locked
+      }
     }
   }
 

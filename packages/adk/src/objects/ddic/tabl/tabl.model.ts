@@ -2,15 +2,16 @@
  * TABL - Database Table / Structure
  *
  * ADK object for ABAP Database Tables (TABL/DT) and Structures (TABL/DS).
- * DDIC objects are metadata-only (no source code).
+ * Tables and structures are source-based DDIC objects whose definition
+ * lives in ABAP source code (retrieved via sourceUri).
  *
  * Note: Tables and structures share the same ADT main type (TABL)
  * but use different endpoints and subtypes.
  * - Tables: /sap/bc/adt/ddic/tables (TABL/DT)
  * - Structures: /sap/bc/adt/ddic/structures (TABL/DS)
  *
- * Since no typed XSD schema is available yet for tables/structures,
- * these use a generic data type.
+ * SAP wraps both in a blue:blueSource root element
+ * (namespace http://www.sap.com/wbobj/blue) extending AbapSourceMainObject.
  */
 
 import { AdkMainObject } from '../../../base/model';
@@ -21,10 +22,12 @@ import {
 import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
 
+import type { TableResponse } from '../../../base/adt';
+
 /**
- * Generic table/structure data (untyped until schema is available)
+ * Table/Structure data type - unwrap from blueSource wrapper root element
  */
-export type TableXml = Record<string, unknown>;
+export type TableXml = TableResponse['blueSource'];
 
 /**
  * ADK Table object (database table - TABL/DT)
@@ -37,8 +40,8 @@ export class AdkTable extends AdkMainObject<typeof TableKind, TableXml> {
     return `/sap/bc/adt/ddic/tables/${encodeURIComponent(this.name.toLowerCase())}`;
   }
 
-  protected override get wrapperKey(): undefined {
-    return undefined;
+  protected override get wrapperKey() {
+    return 'blueSource';
   }
   protected override get crudContract(): any {
     return this.ctx.client.adt.ddic.tables;
@@ -64,8 +67,8 @@ export class AdkStructure extends AdkMainObject<
     return `/sap/bc/adt/ddic/structures/${encodeURIComponent(this.name.toLowerCase())}`;
   }
 
-  protected override get wrapperKey(): undefined {
-    return undefined;
+  protected override get wrapperKey() {
+    return 'blueSource';
   }
   protected override get crudContract(): any {
     return this.ctx.client.adt.ddic.structures;

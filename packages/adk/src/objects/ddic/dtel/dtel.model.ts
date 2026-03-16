@@ -13,9 +13,10 @@ import type { AdkContext } from '../../../base/context';
 import type { DataElementResponse } from '../../../base/adt';
 
 /**
- * Data Element data type - unwrap from schema root element
+ * Data Element data type - unwrap from wrapper root element
+ * SAP wraps DTEL content in a blue:wbobj element extending AdtMainObject
  */
-export type DataElementXml = DataElementResponse['dataElement'];
+export type DataElementXml = DataElementResponse['wbobj'];
 
 /**
  * ADK Data Element object
@@ -41,7 +42,7 @@ export class AdkDataElement extends AdkMainObject<
   }
 
   protected override get wrapperKey() {
-    return 'dataElement';
+    return 'wbobj';
   }
   protected override get crudContract(): any {
     return this.ctx.client.adt.ddic.dataelements;

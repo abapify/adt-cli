@@ -39,6 +39,8 @@ export type {
   FunctionGroupResponse as FunctionGroupResponseUnion,
   DomainResponse,
   DataElementResponse,
+  TableResponse,
+  StructureResponse,
   TableTypeResponse,
 } from '@abapify/adt-client';
 

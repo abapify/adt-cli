@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Custom wrapper schema for TABL/Structure responses.
+
+  SAP's actual HTTP response for tables and structures uses a blue:blueSource
+  root element (namespace http://www.sap.com/wbobj/blue) that extends
+  abapsource:AbapSourceMainObject (which extends adtcore:AdtMainObject).
+
+  No SAP XSD exists for this wrapper. This custom schema declares it so
+  ts-xsd can parse the full response including adtcore and abapsource attributes.
+-->
+<xsd:schema xmlns:adtcore="http://www.sap.com/adt/core"
+	xmlns:abapsource="http://www.sap.com/adt/abapsource"
+	xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:blue="http://www.sap.com/wbobj/blue"
+	ecore:package="com.sap.adt.wbobj.blue"
+	ecore:nsPrefix="blue"
+	targetNamespace="http://www.sap.com/wbobj/blue"
+	elementFormDefault="qualified"
+	attributeFormDefault="qualified">
+
+	<xsd:import namespace="http://www.sap.com/adt/core" schemaLocation="../sap/adtcore.xsd" />
+	<xsd:import namespace="http://www.sap.com/adt/abapsource" schemaLocation="../sap/abapsource.xsd" />
+
+	<!-- Root element matching SAP's actual HTTP response for TABL/Structure -->
+	<xsd:element name="blueSource" type="blue:BlueSource" />
+
+	<xsd:complexType name="BlueSource">
+		<xsd:complexContent>
+			<xsd:extension base="abapsource:AbapSourceMainObject">
+				<!-- No additional elements - TABL content is metadata + source only -->
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+</xsd:schema>

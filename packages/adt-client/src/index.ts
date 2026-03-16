@@ -72,6 +72,8 @@ export type { FunctionGroupResponse } from '@abapify/adt-contracts';
 export type {
   DomainResponse,
   DataElementResponse,
+  TableResponse,
+  StructureResponse,
   TableTypeResponse,
 } from '@abapify/adt-contracts';
 
