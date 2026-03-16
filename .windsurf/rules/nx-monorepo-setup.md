@@ -113,9 +113,9 @@ For packages in `packages/plugins/`:
 
 ```bash
 bunx nx g @nx/js:lib \
-  --name=oat \
-  --directory=packages/plugins/oat \
-  --importPath=@abapify/oat \
+  --name=custom-format \
+  --directory=packages/plugins/custom-format \
+  --importPath=@abapify/custom-format \
   --bundler=none \
   --unitTestRunner=none \
   --linter=eslint

@@ -118,8 +118,8 @@ export const exportCommand: CliCommandPlugin = {
     },
     {
       flags: '-f, --format <format>',
-      description: 'Format plugin: oat | abapgit | @abapify/oat',
-      default: 'oat',
+      description: 'Format plugin: abapgit | @abapify/adt-plugin-abapgit',
+      default: 'abapgit',
     },
     {
       flags: '-t, --transport <request>',

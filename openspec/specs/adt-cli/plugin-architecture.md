@@ -31,7 +31,7 @@ The ADT CLI implements a dynamic plugin system that enables configuration-driven
 
 ### 4. Format Plugins
 
-- **Packages**: `@abapify/oat`, `@abapify/abapgit`, custom plugins
+- **Packages**: `@abapify/adt-plugin-abapgit`, custom plugins
 - **Role**: ADK object ↔ file system serialization
 - **Isolation**: Zero knowledge of CLI or ADT operations
 
@@ -97,34 +97,7 @@ const config: CliConfig = {
   plugins: {
     formats: [
       {
-        name: '@abapify/oat',
-        config: {
-          enabled: true,
-          options: {
-            fileStructure: 'hierarchical',
-            includeMetadata: true,
-            packageMapping: {
-              finance: 'ZTEAMA_FIN',
-              basis: 'ZTEAMA_BASIS',
-              utilities: 'ZTEAMA_UTIL',
-
-              // Dynamic transform function
-              transform: (remotePkg: string, context?: any) => {
-                return remotePkg
-                  .toLowerCase()
-                  .replace(/^z(teama|dev|prd)_/, '')
-                  .replace(/_/g, '-');
-              },
-            },
-            objectFilters: {
-              include: ['CLAS', 'INTF', 'FUGR', 'TABL'],
-              exclude: ['DEVC'],
-            },
-          },
-        },
-      },
-      {
-        name: '@abapify/abapgit',
+        name: '@abapify/adt-plugin-abapgit',
         config: {
           enabled: true,
           options: {
@@ -137,7 +110,7 @@ const config: CliConfig = {
   },
 
   defaults: {
-    format: 'oat',
+    format: 'abapgit',
     outputPath: './output',
   },
 };
@@ -156,16 +129,7 @@ auth:
 
 plugins:
   formats:
-    - name: '@abapify/oat'
-      config:
-        enabled: true
-        options:
-          fileStructure: hierarchical
-          includeMetadata: true
-          packageMapping:
-            finance: ZTEAMA_FIN
-            basis: ZTEAMA_BASIS
-    - name: '@abapify/abapgit'
+    - name: '@abapify/adt-plugin-abapgit'
       config:
         enabled: true
         options:
@@ -178,7 +142,7 @@ plugins:
           customOption: value
 
 defaults:
-  format: oat
+  format: abapgit
   outputPath: ./output
   objectTypes:
     - CLAS
@@ -208,7 +172,7 @@ interface PluginSpec {
 npx adt import transport TR123456 ./output
 
 # Multiple plugins - requires selection or default
-npx adt import transport TR123456 ./output --format oat
+npx adt import transport TR123456 ./output --format abapgit
 ```
 
 ### Dynamic Plugin Loading
@@ -225,11 +189,11 @@ npx adt import transport TR123456 ./output --format @abapify/gcts
 
 ```bash
 # Format selection required
-❌ Format selection required. Available formats: oat, abapgit
+❌ Format selection required. Available formats: abapgit
    Use --format <format> or configure a default format in adt.config.ts
 
 # Unknown format
-❌ Unknown format 'unknown'. Available: oat, abapgit
+❌ Unknown format 'unknown'. Available: abapgit
 
 # Plugin loading failed
 ❌ Failed to load format plugin: Package '@company/missing' not found. Install it with: npm install @company/missing

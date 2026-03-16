@@ -188,7 +188,7 @@ export async function createCLI(options?: {
   // Import commands
   const importCmd = program
     .command('import')
-    .description('Import ABAP objects to various formats (OAT, abapGit, etc.)');
+    .description('Import ABAP objects to various formats (abapGit, etc.)');
 
   importCmd.addCommand(importPackageCommand);
   importCmd.addCommand(importTransportCommand);

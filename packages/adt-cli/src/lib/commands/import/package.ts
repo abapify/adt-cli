@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { ImportService } from '../../services/import/service';
 import { IconRegistry } from '../../utils/icon-registry';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
+import { handleImportError } from '../../utils/command-helpers';
 
 export const importPackageCommand = new Command('package')
   .argument('<packageName>', 'ABAP package name to import')
@@ -19,7 +20,7 @@ export const importPackageCommand = new Command('package')
   .option('--sub-packages', 'Include subpackages', false)
   .option(
     '--format <format>',
-    'Output format: abapgit | oat | @abapify/abapgit | @abapify/oat',
+    'Output format: abapgit | @abapify/adt-plugin-abapgit',
     'abapgit',
   )
   .option('--debug', 'Enable debug output', false)
@@ -72,38 +73,6 @@ export const importPackageCommand = new Command('package')
 
       console.log(`\n✨ Files written to: ${result.outputPath}`);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      const errorCode =
-        error instanceof Error && 'code' in error
-          ? (error as any).code
-          : 'UNKNOWN';
-      const errorStatus =
-        error instanceof Error && 'status' in error
-          ? (error as any).status
-          : '';
-      const cause =
-        error instanceof Error && 'cause' in error
-          ? (error as any).cause
-          : null;
-
-      console.error(`❌ Import failed: ${errorMsg}`);
-      if (errorCode && errorCode !== 'UNKNOWN') {
-        console.error(`   Error code: ${errorCode}`);
-      }
-      if (errorStatus) {
-        console.error(`   HTTP status: ${errorStatus}`);
-      }
-      if (cause) {
-        const causeMsg = cause instanceof Error ? cause.message : String(cause);
-        const causeCode =
-          cause instanceof Error && 'code' in cause ? (cause as any).code : '';
-        console.error(
-          `   Cause: ${causeMsg}${causeCode ? ` (${causeCode})` : ''}`,
-        );
-      }
-      if (error instanceof Error && error.stack) {
-        console.error(`   Stack: ${error.stack}`);
-      }
-      process.exit(1);
+      handleImportError(error);
     }
   });

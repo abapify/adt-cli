@@ -86,7 +86,7 @@ includeType: 'testclasses'      → zcl_example.clas.testclasses.abap
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Format Plugins (@abapify/abapgit, @abapify/oat)            │
+│ Format Plugins (@abapify/adt-plugin-abapgit)                │
 │ - Serialize ADK → Files                                     │
 │ - Deserialize Files → ADK                                   │
 │ - NO direct ADT Client access                               │

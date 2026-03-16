@@ -62,7 +62,7 @@ bunx nx lint
 ├── samples/              # Example projects
 ├── tools/                # Nx plugins/tools
 ├── openspec/             # OpenSpec specs and changes (source of truth)
-│   ├── specs/            # Domain specifications (adk, adt-cli, oat, cicd, etc.)
+│   ├── specs/            # Domain specifications (adk, adt-cli, cicd, etc.)
 │   ├── changes/          # Proposed changes (one folder per change)
 │   └── config.yaml       # OpenSpec project configuration
 ├── docs/                 # Architecture docs, migration notes, examples
@@ -205,7 +205,6 @@ Specifications live in `openspec/specs/` organized by domain:
 - `openspec/specs/adt-cli/` — CLI design and plugin architecture
 - `openspec/specs/adt-client/` — ADT API client
 - `openspec/specs/cicd/` — CI/CD pipeline architecture
-- `openspec/specs/oat/` — OAT file format
 
 ### Before implementing a new feature:
 

@@ -21,10 +21,10 @@ description: If you want to create some test output which is not supposed to be 
 
 ```bash
 # ✅ CORRECT - Use tmp/ for experiments
-npx adt import transport TR001 ./tmp/test-transport --format oat --debug
+npx adt import transport TR001 ./tmp/test-transport --format abapgit --debug
 
 # ❌ WRONG - Don't create test files in root
-npx adt import transport TR001 ./test-transport-import --format oat --debug
+npx adt import transport TR001 ./test-transport-import --format abapgit --debug
 ```
 
 ### Exception: E2E Tests

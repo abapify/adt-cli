@@ -137,7 +137,7 @@ export interface ExportResult {
  * ADT Plugin interface - service-based structure
  *
  * Plugins provide format-specific serialization/deserialization
- * of ADK objects (e.g., abapGit format, OAT format).
+ * of ADK objects (e.g., abapGit format).
  *
  * @example
  * ```typescript
@@ -199,7 +199,7 @@ export interface AdtPlugin {
      * Generator that yields ADK objects ready to be saved to SAP.
      *
      * Plugin is responsible for:
-     * - Iterating files in its format (*.oat.xml, *.abap, etc.)
+     * - Iterating files in its format (*.abap, *.xml, etc.)
      * - Parsing each file into ADK object
      * - Resolving format-specific concerns (e.g., packageRef from folder logic)
      * - Yielding ADK objects (does NOT save to SAP)

@@ -207,8 +207,8 @@ class ClassObjectImpl implements ClassObject {
 Plugins will receive intelligent ADK objects instead of raw data:
 
 ```typescript
-// OAT Plugin usage
-class OatPlugin implements FormatPlugin {
+// abapGit Plugin usage
+class AbapGitPlugin implements FormatPlugin {
   async serialize(
     objects: AdkObjectBase[],
     targetPath: string,
@@ -239,7 +239,7 @@ class OatPlugin implements FormatPlugin {
 2. **Implement object factory** - Create AdkObjectFactory with ADT client integration
 3. **Create object implementations** - Implement ClassObjectImpl, InterfaceObjectImpl, etc.
 4. **Integrate with existing adapters** - Reuse current XML parsing logic
-5. **Update plugins** - Modify OAT plugin to use new intelligent objects
+5. **Update plugins** - Modify abapGit plugin to use new intelligent objects
 
 ## Benefits
 

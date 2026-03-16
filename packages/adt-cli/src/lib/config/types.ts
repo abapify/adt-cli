@@ -22,25 +22,15 @@ export interface PackageMapping {
   [remote]?: (localPkg: string, context?: ExportContext) => string;
 }
 
-export interface OatConfig {
-  packageMapping?: PackageMapping;
-
-  objectFilters?: {
-    include?: string[];
-    exclude?: string[];
-  };
-
-  deployment?: {
-    targetSystem?: string;
-    transportLayer?: string;
-    createMissingPackages?: boolean;
-  };
-}
-
+/**
+ * Base configuration object type - extensible by format plugins via adt.config.ts.
+ * Format plugins may add their own configuration keys here.
+ */
 export interface AdtConfig {
-  oat?: OatConfig;
+  [key: string]: unknown;
 }
 
+/** Represents the shape of an adt.config.ts export */
 export interface AdtConfigFile {
   default: AdtConfig;
 }

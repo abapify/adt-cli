@@ -22,7 +22,7 @@ Implement a complete CI/CD pipeline for ABAP code review using transport request
 
 - **[#3] Transport Import Stage** - Extract and serialize transport objects
   - Status: `status:ready`
-  - Dependencies: ADT CLI auth, ADK adapters, OAT format
+  - Dependencies: ADT CLI auth, ADK adapters, abapGit format
   - Estimated effort: 2-3 days
 - **[#4] Quality Check Stage** - ATC integration with multi-platform output
   - Status: `status:ready`
@@ -69,7 +69,7 @@ Implement a complete CI/CD pipeline for ABAP code review using transport request
 
 - ADT CLI authentication system (✅ exists)
 - ADK object adapters (✅ exists)
-- OAT format specification (✅ exists)
+- abapGit format specification (✅ exists)
 - ATC API integration (❓ needs investigation)
 
 ### Risks
@@ -81,7 +81,7 @@ Implement a complete CI/CD pipeline for ABAP code review using transport request
 
 ## Success Metrics
 
-- [ ] Complete transport import with OAT output
+- [ ] Complete transport import with abapGit output
 - [ ] ATC integration with GitLab Code Quality format
 - [ ] Markdown report generation with quality metrics
 - [ ] End-to-end pipeline execution < 5 minutes for typical transport
@@ -92,7 +92,7 @@ Implement a complete CI/CD pipeline for ABAP code review using transport request
 1. Start with Issue #3 (Transport Import Stage)
 2. Implement basic ADT API integration for transport object retrieval
 3. Add ADK integration for type-safe serialization
-4. Create OAT format output generation
+4. Create abapGit format output generation
 5. Move to Quality Check Stage (Issue #4)
 
 ## Notes

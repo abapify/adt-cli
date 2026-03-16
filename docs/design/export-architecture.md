@@ -5,7 +5,7 @@
 The current export implementation in `ExportService` tries to iterate over files directly,
 but this is wrong because:
 
-1. **Each format has different file structures** - OAT uses `.oat.xml`, abapGit uses `.abap` + `.xml`
+1. **Each format has different file structures** - abapGit uses `.abap` + `.xml`
 2. **Only the plugin knows how to read its format** - file discovery is format-specific
 3. **Plugin should not be responsible for deployment** - only for format mapping
 
@@ -33,7 +33,7 @@ but this is wrong because:
 ┌─────────────────────────────────────────────────────────────┐
 │ Plugin (format.export generator)                            │
 │ - Receives FileTree                                         │
-│ - Iterates files in its format (*.oat.xml, *.abap, etc.)    │
+│ - Iterates files in its format (*.abap, *.xml, etc.)        │
 │ - Parses each file into ADK object                          │
 │ - Yields ADK objects (does NOT deploy)                      │
 └─────────────────────────────────────────────────────────────┘
@@ -148,28 +148,6 @@ async exportTransport(options: TransportExportOptions): Promise<ExportResult> {
 }
 ```
 
-### Plugin Implementation Example (OAT)
-
-```typescript
-// In @abapify/oat plugin
-async function* export(fileTree: FileTree): AsyncGenerator<AdkObject> {
-  // Plugin knows OAT format: *.oat.xml files
-  for await (const file of fileTree.glob('**/*.oat.xml')) {
-    const content = await fileTree.read(file);
-
-    // Parse OAT XML → extract type, name, source, metadata
-    const parsed = parseOatXml(content);
-
-    // Create ADK object with data
-    const adkObject = adk.get(parsed.name, parsed.type);
-    adkObject.setSource(parsed.source);
-    adkObject.setMetadata(parsed.metadata);
-
-    yield adkObject;
-  }
-}
-```
-
 ### Plugin Implementation Example (abapGit)
 
 ```typescript
@@ -253,10 +231,9 @@ async function* export(fileTree: FileTree): AsyncGenerator<AdkObject> {
 ### Remaining TODO
 
 1. Update `AdtPlugin` interface with `export` generator in `@abapify/adt-plugin`
-2. Implement `export` generator in OAT plugin
-3. Add bulk activation to ADK (if not exists)
-4. Remove export commands from `@abapify/adt-cli` (now in separate plugin)
-5. Wire up full export flow in adt-export command
+2. Add bulk activation to ADK (if not exists)
+3. Remove export commands from `@abapify/adt-cli` (now in separate plugin)
+4. Wire up full export flow in adt-export command
 
 ## Usage
 
@@ -271,7 +248,7 @@ export default {
 Then use:
 
 ```bash
-adt export --source ./my-objects --format oat --transport DEVK900123
+adt export --source ./my-objects --format abapgit --transport DEVK900123
 ```
 
 ## Open Questions

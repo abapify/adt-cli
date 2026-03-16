@@ -1,4 +1,3 @@
-import { shouldUseMockClient } from '../testing/cli-test-utils';
 // Static import for bundled abapgit plugin
 import * as abapgitPlugin from '@abapify/adt-plugin-abapgit';
 
@@ -13,17 +12,17 @@ const BUNDLED_PLUGINS: Record<string, any> = {
  * Format shortcuts - map short names to actual package names
  */
 const FORMAT_SHORTCUTS: Record<string, string> = {
-  oat: '@abapify/oat',
   abapgit: '@abapify/adt-plugin-abapgit',
+  ag: '@abapify/adt-plugin-abapgit',
 };
 
 /**
  * Parse format specification with optional preset
  * Examples:
- *   @abapify/oat -> { package: '@abapify/oat', preset: undefined }
- *   @abapify/oat/flat -> { package: '@abapify/oat', preset: 'flat' }
- *   oat -> { package: '@abapify/oat', preset: undefined } (shortcut)
+ *   @abapify/adt-plugin-abapgit -> { package: '@abapify/adt-plugin-abapgit', preset: undefined }
+ *   @abapify/adt-plugin-abapgit/full -> { package: '@abapify/adt-plugin-abapgit', preset: 'full' }
  *   abapgit -> { package: '@abapify/adt-plugin-abapgit', preset: undefined } (shortcut)
+ *   ag -> { package: '@abapify/adt-plugin-abapgit', preset: undefined } (shortcut)
  */
 export function parseFormatSpec(formatSpec: string): {
   package: string;
@@ -35,10 +34,10 @@ export function parseFormatSpec(formatSpec: string): {
 
   const parts = formatSpec.split('/');
   if (parts.length === 2) {
-    // @abapify/oat
+    // @abapify/adt-plugin-abapgit
     return { package: formatSpec };
   } else if (parts.length === 3) {
-    // @abapify/oat/flat
+    // @abapify/adt-plugin-abapgit/full
     const package_ = `${parts[0]}/${parts[1]}`;
     const preset = parts[2];
     return { package: package_, preset };
@@ -55,22 +54,6 @@ export async function loadFormatPlugin(formatSpec: string) {
   const { package: packageName, preset } = parseFormatSpec(formatSpec);
 
   try {
-    // Check if we're in test mode and should use mock plugin
-    if (shouldUseMockClient() && packageName === '@abapify/oat') {
-      const { MockOatPlugin } = await import('../testing/mock-oat-plugin');
-      const options = preset
-        ? { preset: preset as 'flat' | 'hierarchical' | 'grouped' }
-        : {};
-      const plugin = new MockOatPlugin(options);
-
-      return {
-        name: plugin.name,
-        description: plugin.description,
-        instance: plugin,
-        preset,
-      };
-    }
-
     // Use bundled plugin if available, otherwise try dynamic import
     const pluginModule =
       BUNDLED_PLUGINS[packageName] ?? (await import(packageName));

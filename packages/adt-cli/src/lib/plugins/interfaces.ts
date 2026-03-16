@@ -259,7 +259,7 @@ export interface PluginContext {
  * Core plugin interface for format plugins
  *
  * Plugins implement this interface to provide serialization/deserialization
- * for a specific format (abapGit, OAT, etc.).
+ * for a specific format (abapGit, etc.).
  *
  * The plugin manages:
  * - Registry of object handlers

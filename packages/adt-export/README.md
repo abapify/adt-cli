@@ -24,29 +24,29 @@ Then use the command:
 
 ```bash
 # Dry run - see what would be exported
-adt export --source ./my-objects --format oat --dry-run
+adt export --source ./my-objects --format abapgit --dry-run
 
 # Export to SAP with transport
-adt export --source ./my-objects --format oat --transport DEVK900123
+adt export --source ./my-objects --format abapgit --transport DEVK900123
 
 # Export specific object types only
-adt export --source ./my-objects --format oat --transport DEVK900123 --types CLAS,INTF
+adt export --source ./my-objects --format abapgit --transport DEVK900123 --types CLAS,INTF
 
 # Export without activation (save inactive)
-adt export --source ./my-objects --format oat --transport DEVK900123 --no-activate
+adt export --source ./my-objects --format abapgit --transport DEVK900123 --no-activate
 ```
 
 ## Options
 
-| Option                      | Description                                     | Default                   |
-| --------------------------- | ----------------------------------------------- | ------------------------- |
-| `-s, --source <path>`       | Source directory containing serialized files    | `.`                       |
-| `-f, --format <format>`     | Format plugin: `oat`, `abapgit`, `@abapify/oat` | `oat`                     |
-| `-t, --transport <request>` | Transport request for changes                   | (required unless dry-run) |
-| `-p, --package <package>`   | Target package for new objects                  |                           |
-| `--types <types>`           | Filter by object types (comma-separated)        |                           |
-| `--dry-run`                 | Validate without saving to SAP                  | `false`                   |
-| `--no-activate`             | Save inactive (skip activation)                 | `false`                   |
+| Option                      | Description                                             | Default                   |
+| --------------------------- | ------------------------------------------------------- | ------------------------- |
+| `-s, --source <path>`       | Source directory containing serialized files            | `.`                       |
+| `-f, --format <format>`     | Format plugin: `abapgit`, `@abapify/adt-plugin-abapgit` | `abapgit`                 |
+| `-t, --transport <request>` | Transport request for changes                           | (required unless dry-run) |
+| `-p, --package <package>`   | Target package for new objects                          |                           |
+| `--types <types>`           | Filter by object types (comma-separated)                |                           |
+| `--dry-run`                 | Validate without saving to SAP                          | `false`                   |
+| `--no-activate`             | Save inactive (skip activation)                         | `false`                   |
 
 ## Architecture
 
@@ -75,7 +75,6 @@ Export functionality can modify your SAP system. By making it an explicit opt-in
 
 ## Supported Formats
 
-- **oat** / `@abapify/oat` - OAT format (`.oat.xml` files)
 - **abapgit** / `@abapify/adt-plugin-abapgit` - abapGit format (`.abap` + `.xml` files)
 
 ## License

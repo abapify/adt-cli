@@ -9,6 +9,31 @@ import {
 } from '@abapify/adk';
 
 /**
+ * Resolve full package path from root to the given package.
+ * Traverses the ADK package hierarchy upward until the root is reached.
+ */
+async function resolvePackagePath(packageName: string): Promise<string[]> {
+  const path: string[] = [];
+  let currentPackage = packageName;
+
+  while (currentPackage) {
+    path.unshift(currentPackage);
+    try {
+      const pkg = await AdkPackage.get(currentPackage);
+      const superPkg = pkg.superPackage;
+      if (superPkg?.name) {
+        currentPackage = superPkg.name;
+      } else {
+        break;
+      }
+    } catch {
+      break;
+    }
+  }
+  return path;
+}
+
+/**
  * Options for importing a transport request
  */
 export interface TransportImportOptions {
@@ -18,7 +43,7 @@ export interface TransportImportOptions {
   outputPath: string;
   /** Filter by object types (e.g., ['CLAS', 'INTF']) - if not specified, imports all */
   objectTypes?: string[];
-  /** Format plugin name or package (e.g., 'oat', '@abapify/oat') */
+  /** Format plugin name or package (e.g., 'abapgit', '@abapify/adt-plugin-abapgit') */
   format: string;
   /** Format-specific options provided via CLI */
   formatOptions?: Record<string, FormatOptionValue>;
@@ -38,7 +63,7 @@ export interface PackageImportOptions {
   objectTypes?: string[];
   /** Include subpackages */
   includeSubpackages?: boolean;
-  /** Format plugin name or package (e.g., 'oat', '@abapify/oat') */
+  /** Format plugin name or package (e.g., 'abapgit', '@abapify/adt-plugin-abapgit') */
   format: string;
   /** Enable debug output */
   debug?: boolean;
@@ -164,41 +189,6 @@ export class ImportService {
     // Track results
     const results = { success: 0, skipped: 0, failed: 0 };
     const objectsByType: Record<string, number> = {};
-
-    /**
-     * Resolve full package path from root to the given package.
-     * Uses ADK to load package → super package → etc until root.
-     *
-     * Note: ADK handles per-instance caching. A global package cache
-     * could be added to ADK later if performance becomes an issue.
-     */
-    async function resolvePackagePath(packageName: string): Promise<string[]> {
-      const path: string[] = [];
-      let currentPackage = packageName;
-
-      // Traverse up the package hierarchy
-      while (currentPackage) {
-        path.unshift(currentPackage); // Add to beginning (building from leaf to root)
-
-        try {
-          // Load package to get super package
-          const pkg = await AdkPackage.get(currentPackage);
-          const superPkg = pkg.superPackage;
-
-          if (superPkg?.name) {
-            currentPackage = superPkg.name;
-          } else {
-            // No super package - we've reached the root
-            break;
-          }
-        } catch {
-          // Package not found or error - stop traversal
-          break;
-        }
-      }
-
-      return path;
-    }
 
     if (options.debug) {
       console.log(`📦 Processing ${objectsToImport.length} objects...`);
@@ -340,31 +330,6 @@ export class ImportService {
     // Track results
     const results = { success: 0, skipped: 0, failed: 0 };
     const objectsByType: Record<string, number> = {};
-
-    /**
-     * Resolve full package path from root to the given package.
-     * Uses ADK to load package → super package → etc until root.
-     */
-    async function resolvePackagePath(packageName: string): Promise<string[]> {
-      const path: string[] = [];
-      let currentPackage = packageName;
-
-      while (currentPackage) {
-        path.unshift(currentPackage);
-        try {
-          const pkgData = await AdkPackage.get(currentPackage);
-          const superPkg = pkgData.superPackage;
-          if (superPkg?.name) {
-            currentPackage = superPkg.name;
-          } else {
-            break;
-          }
-        } catch {
-          break;
-        }
-      }
-      return path;
-    }
 
     if (options.debug) {
       console.log(`📦 Processing ${objectsToImport.length} objects...`);

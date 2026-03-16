@@ -2,14 +2,14 @@
 
 ## Overview
 
-The ADT CLI now implements a plugin-based configuration system where format handlers (like OAT) can leverage ADK for proper serialization/deserialization of ABAP objects received from the ADT client.
+The ADT CLI implements a plugin-based configuration system where format handlers (like abapGit) can leverage ADK for proper serialization/deserialization of ABAP objects received from the ADT client.
 
 ## Architecture
 
 ### Core Components
 
 1. **Format Registry** (`/lib/formats/format-registry.ts`)
-   - Manages format plugins (OAT, abapGit, etc.)
+   - Manages format plugins (abapGit, etc.)
    - Auto-registers available object types from ObjectRegistry
    - Provides unified interface for format operations
 
@@ -23,14 +23,14 @@ The ADT CLI now implements a plugin-based configuration system where format hand
    - Preserves original ADT XML context for round-trip compatibility
    - Enhances ObjectData with ADK spec metadata
 
-### Enhanced OAT Format
+### Enhanced abapGit Format
 
-The OAT format now properly leverages ADK for serialization/deserialization:
+The abapGit format leverages ADK for serialization/deserialization:
 
 #### Serialization Flow
 
 ```
-ADT Client → ADK Bridge → ObjectData (with ADK spec) → OAT Format → YAML files
+ADT Client → ADK Bridge → ObjectData (with ADK spec) → abapGit Format → .abap + .xml files
 ```
 
 #### Key Improvements
@@ -43,13 +43,13 @@ ADT Client → ADK Bridge → ObjectData (with ADK spec) → OAT Format → YAML
 #### Code Example
 
 ```typescript
-// Enhanced serialization in OAT format
+// Pseudocode – illustrative only, not the exact implementation
+// Enhanced serialization in abapGit format
 const adkSpec = objectData.metadata?.adkSpec
   ? this.createAdkSpecFromExistingData(objectData, objectType)
   : this.convertObjectDataToAdkSpec(objectData, objectType);
 
-const serializer = SerializerRegistry.get('oat');
-const serialized = serializer.serialize(adkSpec);
+const serialized = serializeWithAbapGit(adkSpec);
 ```
 
 ### Object Type Support
@@ -81,23 +81,23 @@ The plugin system is automatically configured through:
 
 ## Usage
 
-### Transport Import with Enhanced OAT
+### Transport Import with abapGit
 
 ```bash
-adt import transport TR001234 ./output --format oat --debug
+adt import transport TR001234 ./output --format abapgit --debug
 ```
 
 This command now:
 
 1. Retrieves transport objects via ADT client
 2. Converts to ADK specs using appropriate adapters
-3. Serializes using OAT format with full ADK context
+3. Serializes using abapGit format with full ADK context
 4. Preserves all metadata for round-trip compatibility
 
 ### Supported Workflows
 
-- **Import**: ADT → ADK → OAT YAML files
-- **Export**: OAT YAML files → ADK → ADT (future)
+- **Import**: ADT → ADK → abapGit files (.abap + .xml)
+- **Export**: abapGit files → ADK → ADT
 - **Round-trip**: Maintains data integrity throughout the process
 
 ## Future Enhancements

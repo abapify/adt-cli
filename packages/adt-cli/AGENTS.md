@@ -371,7 +371,7 @@ npx adt <command> [args]
 
 **`utils/format-loader.ts`**
 
-- `loadFormatPlugin()` - Load format plugins (e.g., @abapify/oat)
+- `loadFormatPlugin()` - Load format plugins (e.g., @abapify/adt-plugin-abapgit)
 
 **`utils/object-uri.ts`**
 

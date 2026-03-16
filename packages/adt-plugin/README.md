@@ -6,7 +6,7 @@ Core plugin interface for ADT format serialization.
 
 ## Overview
 
-This package defines the **plugin contract** for serializing ADK objects to various formats (abapGit, OAT, etc.). Plugins implement this interface to provide format-specific serialization.
+This package defines the **plugin contract** for serializing ADK objects to various formats (abapGit, etc.). Plugins implement this interface to provide format-specific serialization.
 
 **Key principle:** Plugins only handle serialization format. They receive ADK objects and produce files - no ADT client logic.
 

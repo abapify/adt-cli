@@ -30,7 +30,6 @@ description: When making any changes for any of spec-driven packages
 ## Spec Domains
 
 - `openspec/specs/adk/` — ADK (ABAP Development Kit, TS native way to work with ABAP code and other objects)
-- `openspec/specs/oat/` — OAT (Alternative to AbapGit and gCTS way of representing ABAP objects in a file tree)
 - `openspec/specs/adt-cli/` — ADT CLI (alternative to piper CLI solution to operate with ABAP backend)
 - `openspec/specs/adt-client/` — ADT Client (abstracted ADT API communication)
 - `openspec/specs/cicd/` — CI/CD pipeline architecture
