@@ -7,32 +7,32 @@ AI agent conventions for the **abapify / adt-cli** monorepo.
 
 ## Repository at a Glance
 
-| Item             | Value                                                |
-| ---------------- | ---------------------------------------------------- |
-| Package manager  | **npm workspaces** — use `npm`, not `pnpm` or `yarn` |
-| Monorepo tooling | **Nx 22**                                            |
-| Language         | **TypeScript 5 strict ESM**                          |
-| Build tool       | **tsdown** (per package)                             |
-| Test runner      | **Vitest** (some packages use Jest)                  |
-| Lint             | **ESLint 10** + Prettier                             |
+| Item             | Value                                                              |
+| ---------------- | ------------------------------------------------------------------ |
+| Package manager  | **bun workspaces** — use `bun`/`bunx`, not `npm`, `pnpm` or `yarn` |
+| Monorepo tooling | **Nx 22**                                                          |
+| Language         | **TypeScript 5 strict ESM**                                        |
+| Build tool       | **tsdown** (per package)                                           |
+| Test runner      | **Vitest** (some packages use Jest)                                |
+| Lint             | **ESLint 10** + Prettier                                           |
 
 ## Essential Commands
 
 ```bash
 # Build
-npx nx build               # all packages
-npx nx build adt-cli       # single package
+bunx nx build               # all packages
+bunx nx build adt-cli       # single package
 
 # Test
-npx nx test                # all packages
-npx nx test adt-cli        # single package
-npx nx test adt-cli --watch  # watch mode
+bunx nx test                # all packages
+bunx nx test adt-cli        # single package
+bunx nx test adt-cli --watch  # watch mode
 
 # Type check
-npx nx typecheck
+bunx nx typecheck
 
 # Lint (auto-fix)
-npx nx lint
+bunx nx lint
 ```
 
 ## Monorepo Layout
@@ -73,12 +73,12 @@ npx nx lint
 
 - Cross-package imports: `@abapify/<package-name>`
 - Internal file imports: relative paths, no extension (`../utils/parse`)
-- `workspace:*` is **not** supported by npm — use `"*"` for local deps
+- `workspace:*` protocol is supported by bun — use it for local deps
 
 ## Creating a New Package
 
 ```bash
-npx nx g @nx/node:library --directory=packages/<name> --no-interactive
+bunx nx g @nx/node:library --directory=packages/<name> --no-interactive
 # then copy tsdown.config.ts from packages/sample-tsdown
 # set "build": "tsdown" in package.json
 ```
@@ -222,7 +222,7 @@ See `openspec/config.yaml` for project context and per-artifact rules.
 
 ```bash
 # Check if a file path appears in any Nx target outputs
-npx nx show project <package> --json | grep -i "xsd\|generated\|download"
+bunx nx show project <package> --json | grep -i "xsd\|generated\|download"
 ```
 
 | Pattern                               | Lifecycle           | Rule                                                   |
@@ -237,11 +237,11 @@ If an edit keeps "reverting": **stop**. Something is regenerating the file. Chec
 ## After Making Changes
 
 ```bash
-npx nx build <package>   # verify it compiles
-npx nx typecheck         # full type check
-npx nx test <package>    # run tests
-npx nx lint              # fix lint issues
-npx nx format:write      # REQUIRED before every commit — format all files with Prettier
+bunx nx build <package>   # verify it compiles
+bunx nx typecheck         # full type check
+bunx nx test <package>    # run tests
+bunx nx lint              # fix lint issues
+bunx nx format:write      # REQUIRED before every commit — format all files with Prettier
 ```
 
 <!-- nx configuration end-->

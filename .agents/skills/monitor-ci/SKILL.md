@@ -131,6 +131,7 @@ When subagent returns `fix_available`, main agent compares `failedTaskIds` vs `v
 When verifiable (non-e2e) unverified tasks exist:
 
 1. **Detect package manager:**
+   - `bun.lock` / `bun.lockb` exists → `bunx nx` ← this project
    - `pnpm-lock.yaml` exists → `pnpm nx`
    - `yarn.lock` exists → `yarn nx`
    - Otherwise → `npx nx`

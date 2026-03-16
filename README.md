@@ -76,38 +76,38 @@ adt-cli  (Commander.js CLI, plugin loader)
 
 ## Development Setup
 
-**Requirements:** Node.js 18+, npm (not pnpm or yarn)
+**Requirements:** [Bun](https://bun.sh/) (not npm, pnpm or yarn)
 
 ```bash
 git clone https://github.com/abapify/adt-cli.git
 cd adt-cli
 
-npm install
+bun install
 
 # Build all packages
-npx nx build
+bunx nx build
 
 # Run all tests
-npx nx test
+bunx nx test
 
 # Type check
-npx nx typecheck
+bunx nx typecheck
 ```
 
 ### Common Commands
 
 ```bash
 # Build a specific package
-npx nx build adt-cli
+bunx nx build adt-cli
 
 # Test a specific package
-npx nx test adt-cli
+bunx nx test adt-cli
 
 # Lint everything
-npx nx lint
+bunx nx lint
 
 # Watch mode for a package
-npx nx test adt-cli --watch
+bunx nx test adt-cli --watch
 ```
 
 ## Repository Structure
@@ -153,7 +153,7 @@ adt-cli/
 ```bash
 git checkout -b feat/my-change
 # make changes
-npx nx build adt-cli && npx nx test adt-cli
+bunx nx build adt-cli && bunx nx test adt-cli
 git push origin feat/my-change
 # open pull request
 ```
