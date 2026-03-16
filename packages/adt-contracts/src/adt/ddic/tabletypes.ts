@@ -3,7 +3,7 @@
  *
  * ADT endpoint: /sap/bc/adt/ddic/tabletypes
  * Content-Type: application/vnd.sap.adt.tabletype.v1+xml
- * Object type: TTYP/DA (ttypda)
+ * Object type: TTYP/TT
  */
 
 import { crud } from '../../helpers/crud';
