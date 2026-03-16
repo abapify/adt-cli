@@ -241,6 +241,7 @@ npx nx build <package>   # verify it compiles
 npx nx typecheck         # full type check
 npx nx test <package>    # run tests
 npx nx lint              # fix lint issues
+npx nx format:write      # REQUIRED before every commit — format all files with Prettier
 ```
 
 <!-- nx configuration end-->
