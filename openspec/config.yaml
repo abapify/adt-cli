@@ -1,0 +1,29 @@
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript 5 (strict ESM), Node.js
+  Monorepo: npm workspaces + Nx 22
+  Build tool: tsdown
+  Test runner: Vitest (some packages use Jest)
+  Lint: ESLint 10 + Prettier
+  Domain: SAP ABAP Development Tools (ADT) CLI and SDK
+  Key packages: adt-cli, adt-client, adt-contracts, adt-schemas, adk, speci
+  Architecture: Contract-first with typed REST endpoints (speci), XSD-derived schemas
+  Plugin system: Commander.js commands loaded from adt.config.ts
+  See AGENTS.md for full repository conventions
+
+rules:
+  proposal:
+    - Reference existing specs in openspec/specs/ before proposing changes
+    - Identify affected packages in the monorepo
+    - Include rollback considerations for breaking changes
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Reference existing patterns before inventing new ones
+    - Specs define WHAT and WHY, not HOW
+  design:
+    - Reference the dependency graph in AGENTS.md
+    - Consider impact on the plugin system and contract-first architecture
+  tasks:
+    - Break tasks into per-package units of work
+    - Include build/test verification steps

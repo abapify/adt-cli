@@ -61,7 +61,11 @@ npx nx lint
 │   └── logger/           # Logger (@abapify/logger)
 ├── samples/              # Example projects
 ├── tools/                # Nx plugins/tools
-├── docs/                 # Architecture docs, specs, planning
+├── openspec/             # OpenSpec specs and changes (source of truth)
+│   ├── specs/            # Domain specifications (adk, adt-cli, oat, cicd, etc.)
+│   ├── changes/          # Proposed changes (one folder per change)
+│   └── config.yaml       # OpenSpec project configuration
+├── docs/                 # Architecture docs, migration notes, examples
 └── tmp/                  # Local scratch files (gitignored)
 ```
 
@@ -191,19 +195,26 @@ adt get ZCL_TEST -o tmp/class.xml
 
 The `tmp/` directory is gitignored.
 
-## Spec-First Development
+## Specification-Driven Development (OpenSpec)
 
-Specifications live in `docs/specs/`. Before implementing a new feature:
+This project uses [OpenSpec](https://openspec.dev/) for spec-driven development.
 
-1. Check `docs/specs/` for an existing spec
+Specifications live in `openspec/specs/` organized by domain:
+
+- `openspec/specs/adk/` — ABAP Development Kit
+- `openspec/specs/adt-cli/` — CLI design and plugin architecture
+- `openspec/specs/adt-client/` — ADT API client
+- `openspec/specs/cicd/` — CI/CD pipeline architecture
+- `openspec/specs/oat/` — OAT file format
+
+### Before implementing a new feature:
+
+1. Check `openspec/specs/` for an existing spec
 2. If one exists, align implementation to it
-3. If adding a new pattern, create or update the relevant spec
+3. To propose a new change, use `/opsx:propose "description"`
+4. Review and apply changes with `/opsx:apply`, then archive with `/opsx:archive`
 
-Key specs:
-
-- `docs/specs/cicd/abap-cicd-pipeline.md` — CI/CD architecture
-- `docs/specs/oat/` — OAT file format
-- `docs/specs/adt-cli/` — CLI design decisions
+See `openspec/config.yaml` for project context and per-artifact rules.
 
 ## File Lifecycle — Know Before You Edit
 
@@ -230,6 +241,7 @@ npx nx build <package>   # verify it compiles
 npx nx typecheck         # full type check
 npx nx test <package>    # run tests
 npx nx lint              # fix lint issues
+npx nx format:write      # REQUIRED before every commit — format all files with Prettier
 ```
 
 <!-- nx configuration end-->
