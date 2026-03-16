@@ -26,6 +26,7 @@
     "knip": "knip"
   },
   "dependencies": {
+    "@fission-ai/openspec": "^1.2.0",
     "@nx/devkit": "22.5.3",
     "@xmldom/xmldom": "^0.8.11",
     "axios": "^1.13.6",
