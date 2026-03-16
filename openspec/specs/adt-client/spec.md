@@ -4,9 +4,38 @@
 **Status**: Draft  
 **Created**: 2025-01-09
 
-## Overview
+## Purpose
 
 The ADT Client (`@abapify/adt-client`) provides an abstracted layer for communicating with SAP ABAP Development Tools (ADT) services. It handles connection management, authentication, and provides high-level APIs for ABAP object operations, abstracting away the complexity of ADT endpoints from consuming applications.
+
+## Requirements
+
+### Requirement: Abstracted ADT communication
+
+The ADT Client SHALL hide ADT endpoint complexity from consumers, providing a clean typed interface for all ADT operations.
+
+#### Scenario: Retrieving an ABAP object
+
+- **WHEN** a consumer calls the client to retrieve a class object
+- **THEN** the client handles endpoint resolution, CSRF tokens, and XML parsing transparently
+
+### Requirement: Connection management with authentication
+
+The ADT Client SHALL manage connection lifecycle including authentication, session caching, and CSRF token handling.
+
+#### Scenario: Authenticating with browser SSO
+
+- **WHEN** a user connects with browser-based SSO authentication
+- **THEN** the client obtains and caches the session for subsequent requests
+
+### Requirement: Type-safe contract execution
+
+The ADT Client SHALL execute typed API contracts (speci descriptors) with full type inference at the call site.
+
+#### Scenario: Executing a typed contract
+
+- **WHEN** a speci contract descriptor is passed to the client
+- **THEN** the response type is inferred from the contract's schema
 
 ## Architecture
 

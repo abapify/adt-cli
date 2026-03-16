@@ -1,12 +1,52 @@
 # OAT (Open ABAP Tooling) Format Specification
 
-## Overview
+## Purpose
 
 OAT is a Git-friendly serialization format for ABAP objects, designed as part of the ADT CLI tooling. It provides a clean, minimal, and extensible structure for storing ABAP development objects in version control systems.
 
-## Core Principles
+## Requirements
 
-### 1. Clean Directory Structure
+### Requirement: Clean directory structure
+
+OAT SHALL organize objects by package and type in a predictable hierarchy, enabling multi-package projects while maintaining clear separation.
+
+#### Scenario: Exporting a multi-package project
+
+- **WHEN** objects from multiple ABAP packages are exported
+- **THEN** they are organized in a `packages/pkg/objects/type/name/` hierarchy
+
+### Requirement: Kubernetes-inspired metadata
+
+Each object SHALL have a YAML metadata file with `kind` and `spec` structure, providing consistent object description and extensibility.
+
+#### Scenario: Reading object metadata
+
+- **WHEN** an OAT object directory is inspected
+- **THEN** it contains a YAML metadata file with `kind` and `spec` fields
+
+### Requirement: Separation of concerns
+
+Source code and metadata SHALL be stored separately, enabling clean diffs and independent versioning of object properties vs. implementation.
+
+#### Scenario: Modifying source code only
+
+- **WHEN** a developer changes only the ABAP source code of a class
+- **THEN** only the source file shows changes in git diff, not the metadata file
+
+### Requirement: Plugin architecture
+
+OAT SHALL be implemented as a format plugin in the ADT CLI, allowing it to coexist with other formats like abapGit.
+
+#### Scenario: Using OAT alongside abapGit
+
+- **WHEN** both OAT and abapGit format plugins are installed
+- **THEN** the CLI can export to either format based on configuration
+
+## Background
+
+### Core Principles
+
+#### 1. Clean Directory Structure
 
 OAT organizes objects by package and type in a predictable `packages/pkg/objects/type/name/` hierarchy, enabling multi-package projects while maintaining clear separation between different packages.
 
