@@ -42,3 +42,43 @@ export function handleCommandError(error: unknown, operation: string): never {
   );
   process.exit(1);
 }
+
+/**
+ * Detailed error handler for import commands (transport / package).
+ * Prints error message, code, HTTP status, cause, and stack trace then exits.
+ */
+export function handleImportError(error: unknown): never {
+  const errorMsg = error instanceof Error ? error.message : String(error);
+  const errorCode =
+    error instanceof Error && 'code' in error
+      ? (error as { code: unknown }).code
+      : 'UNKNOWN';
+  const errorStatus =
+    error instanceof Error && 'status' in error
+      ? (error as { status: unknown }).status
+      : '';
+  const cause =
+    error instanceof Error && 'cause' in error
+      ? (error as { cause: unknown }).cause
+      : null;
+
+  console.error(`❌ Import failed: ${errorMsg}`);
+  if (errorCode && errorCode !== 'UNKNOWN') {
+    console.error(`   Error code: ${errorCode}`);
+  }
+  if (errorStatus) {
+    console.error(`   HTTP status: ${errorStatus}`);
+  }
+  if (cause) {
+    const causeMsg = cause instanceof Error ? cause.message : String(cause);
+    const causeCode =
+      cause instanceof Error && 'code' in cause
+        ? (cause as { code: unknown }).code
+        : '';
+    console.error(`   Cause: ${causeMsg}${causeCode ? ` (${causeCode})` : ''}`);
+  }
+  if (error instanceof Error && error.stack) {
+    console.error(`   Stack: ${error.stack}`);
+  }
+  process.exit(1);
+}

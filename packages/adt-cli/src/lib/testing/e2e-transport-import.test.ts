@@ -31,37 +31,29 @@ describe('Transport Import E2E Tests', () => {
     }
   });
 
-  it('should handle plugin loading errors gracefully', async () => {
+  async function runTransportImport(args: string[]) {
     const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
+    return executeCli(['import', 'transport', 'TRLK907362', ...args], {
+      mockClient,
+      captureOutput: true,
+    });
+  }
 
-    const result = await executeCli(
-      [
-        'import',
-        'transport',
-        'TRLK907362',
-        testOutputDir,
-        '--format=@nonexistent/plugin',
-      ],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
+  it('should handle plugin loading errors gracefully', async () => {
+    const result = await runTransportImport([
+      testOutputDir,
+      '--format=@nonexistent/plugin',
+    ]);
 
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain('@nonexistent/plugin');
   });
 
   it('should successfully configure transport import with format option', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      ['import', 'transport', 'TRLK907362', testOutputDir, '--format=abapgit'],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
+    const result = await runTransportImport([
+      testOutputDir,
+      '--format=abapgit',
+    ]);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Transport import configured successfully');
@@ -69,24 +61,13 @@ describe('Transport Import E2E Tests', () => {
     expect(result.stdout).toContain('ADT Client: Mock (Testing)');
   });
 
-  it('should successfully configure transport import with format option', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      [
-        'import',
-        'transport',
-        'TRLK907362',
-        testOutputDir,
-        '--format=abapgit',
-        '--format-option',
-        'folderLogic=full',
-      ],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
+  it('should accept additional format-options without error', async () => {
+    const result = await runTransportImport([
+      testOutputDir,
+      '--format=abapgit',
+      '--format-option',
+      'folderLogic=full',
+    ]);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Transport import configured successfully');
@@ -94,59 +75,29 @@ describe('Transport Import E2E Tests', () => {
   });
 
   it('should support object type filtering', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      [
-        'import',
-        'transport',
-        'TRLK907362',
-        testOutputDir,
-        '--format=abapgit',
-        '--object-types=CLAS,INTF',
-      ],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
+    const result = await runTransportImport([
+      testOutputDir,
+      '--format=abapgit',
+      '--object-types=CLAS,INTF',
+    ]);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Transport import configured successfully');
   });
 
   it('should use default output directory when not specified', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      ['import', 'transport', 'TRLK907362', '--format=abapgit'],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
+    const result = await runTransportImport(['--format=abapgit']);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Output: ./output');
   });
 
   it('should enable debug logging when --debug flag is used', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      [
-        'import',
-        'transport',
-        'TRLK907362',
-        testOutputDir,
-        '--format=abapgit',
-        '--debug',
-      ],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
+    const result = await runTransportImport([
+      testOutputDir,
+      '--format=abapgit',
+      '--debug',
+    ]);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Transport import configured successfully');
