@@ -7,11 +7,11 @@
 ### Core Commands
 
 ```bash
-npx nx build [package]           # Build (inferred from tsdown.config.ts)
-npx nx test [package]            # Test (inferred from vitest.config.ts)
-npx nx test:coverage [package]   # Test with coverage
-npx nx typecheck [package]       # Typecheck (inferred from tsconfig.json)
-npx nx lint [package]            # Lint (inferred from eslint config)
+bunx nx build [package]           # Build (inferred from tsdown.config.ts)
+bunx nx test [package]            # Test (inferred from vitest.config.ts)
+bunx nx test:coverage [package]   # Test with coverage
+bunx nx typecheck [package]       # Typecheck (inferred from tsconfig.json)
+bunx nx lint [package]            # Lint (inferred from eslint config)
 ```
 
 ### Package Creation Workflow
@@ -19,7 +19,7 @@ npx nx lint [package]            # Lint (inferred from eslint config)
 **Step 1: Generate Base Package**
 
 ```bash
-npx nx g @nx/js:lib \
+bunx nx g @nx/js:lib \
   --name=[library-name] \
   --directory=packages/[name] \
   --importPath=@abapify/[library-name] \
@@ -112,7 +112,7 @@ export default defineConfig({
 For packages in `packages/plugins/`:
 
 ```bash
-npx nx g @nx/js:lib \
+bunx nx g @nx/js:lib \
   --name=oat \
   --directory=packages/plugins/oat \
   --importPath=@abapify/oat \
@@ -146,7 +146,7 @@ Just create `tsdown.config.ts` and the nx-tsdown plugin will automatically creat
 Check what targets were inferred:
 
 ```bash
-npx nx show project [package-name] --json | jq '.targets | keys'
+bunx nx show project [package-name] --json | jq '.targets | keys'
 ```
 
 You should see: `["build", "lint", "nx-release-publish", "test", "test:coverage", "test:watch", "typecheck"]`
@@ -155,7 +155,7 @@ You should see: `["build", "lint", "nx-release-publish", "test", "test:coverage"
 
 - **Cross-package**: `@abapify/[package-name]`
 - **Internal files**: `../relative/path` (no extensions for TS files)
-- **Workspace deps**: Use `*` (not `workspace:*`)
+- **Workspace deps**: Use `workspace:*` (bun supports this protocol)
 
 ## File Organization
 
