@@ -1,6 +1,6 @@
 # ABAP Code Review CI/CD Pipeline - Project Plan
 
-**Specification Reference**: `/specs/cicd/abap-cicd-pipeline.md`  
+**Specification Reference**: `openspec/specs/cicd/abap-cicd-pipeline.md`  
 **GitHub Project**: https://github.com/orgs/abapify/projects/3  
 **Epic Issue**: [#2](https://github.com/abapify/js/issues/2)
 

@@ -1,93 +1,78 @@
 # Project Documentation Structure
 
-This directory contains all project documentation organized in a logical hierarchy for easy navigation and maintenance.
+This directory contains supplementary documentation. **Specifications have moved to OpenSpec.**
+
+## Specs → OpenSpec
+
+Design contracts and specifications are now managed via [OpenSpec](https://openspec.dev/):
+
+```
+openspec/
+├── specs/              # Source of truth (organized by domain)
+│   ├── adk/            # ABAP Development Kit
+│   ├── adt-cli/        # ADT CLI design and plugins
+│   ├── adt-client/     # ADT API client
+│   ├── cicd/           # CI/CD pipeline
+│   └── oat/            # OAT file format
+├── changes/            # Proposed changes (one folder per change)
+└── config.yaml         # Project configuration
+```
+
+Use `/opsx:propose`, `/opsx:apply`, and `/opsx:archive` to manage changes.
 
 ## Structure Overview
 
 ```
 docs/
-├── specs/              # Design Contracts (WHAT & WHY)
+├── architecture/       # Architecture documentation
+├── design/             # Design documentation
+├── examples/           # Usage examples
+├── migration/          # Migration guides
 ├── planning/           # Project Management (WHEN & HOW)
 ├── history/            # Historical Context (WHAT HAPPENED)
-├── roadmaps/           # Long-term Vision (WHERE WE'RE GOING)
-└── README.md          # This file
+├── changelogs/         # Changelog records
+└── README.md           # This file
 ```
 
 ## Directory Purposes
 
-### `/specs/` - Design Contracts
+### `/docs/architecture/` - Architecture Docs
 
-**Stable, versioned specifications that define system architecture**
+Implementation-focused documentation describing how components work.
 
-- Architecture specifications
-- API contracts and interfaces
-- Technical design documents
-- Integration specifications
-- **Change Policy**: Requires critical review, prefer additions over modifications
-
-### `/planning/` - Project Management
+### `/docs/planning/` - Project Management
 
 **Dynamic project coordination and execution tracking**
 
 - Current sprint status
 - Implementation plans
 - Task breakdowns
-- Dependency management
 - **Update Frequency**: Daily/weekly as work progresses
 
-### `/history/` - Historical Context
+### `/docs/history/` - Historical Context
 
 **Detailed records of completed work and decisions**
 
 - Daily work summaries
 - Technical decision logs
 - Implementation retrospectives
-- Lessons learned
-- **Purpose**: Preserve institutional knowledge for future reference
-
-### `/roadmaps/` - Long-term Vision
-
-**Strategic direction and future planning**
-
-- Product roadmaps
-- Technology evolution plans
-- Feature prioritization
-- Strategic initiatives
-- **Scope**: Quarterly/yearly planning horizon
 
 ## Navigation Guidelines
 
 ### For Current Work
 
-1. Check `/planning/current-sprint.md` for active tasks
-2. Reference relevant `/specs/` for implementation contracts
-3. Update `/history/` with daily progress
+1. Check `openspec/changes/` for active change proposals
+2. Reference `openspec/specs/` for specification contracts
+3. Check `docs/planning/` for sprint status
 
 ### For New Features
 
-1. Start with `/roadmaps/` for strategic alignment
-2. Create specifications in `/specs/`
-3. Plan implementation in `/planning/`
-4. Document progress in `/history/`
+1. Check `openspec/specs/` for existing specifications
+2. Use `/opsx:propose "description"` to create a structured change proposal
+3. Implement with `/opsx:apply` and archive with `/opsx:archive`
 
 ### For Context Research
 
-1. Search `/history/` for similar past work
-2. Review `/specs/` for architectural constraints
-3. Check `/planning/` for current priorities
-
-## Integration with Development
-
-This documentation structure integrates with:
-
-- **Git workflow**: Daily summaries track actual commits and changes
-- **Issue tracking**: Planning documents reference GitHub issues
-- **Code reviews**: Specifications provide review criteria
-- **AI assistance**: Structured context for better collaboration
-
-## Maintenance
-
-- **Specs**: Update only with formal review process
-- **Planning**: Update as work progresses
-- **History**: Add daily summaries consistently
-- **Roadmaps**: Review quarterly, update as needed
+1. Search `docs/history/` for similar past work
+2. Review `openspec/specs/` for architectural constraints
+3. Check `docs/planning/` for current priorities

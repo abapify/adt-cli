@@ -61,19 +61,20 @@ Recommended usage:
 - Encode repeatable tasks (release steps, migration scripts, verification flows).
 - Prefer small, composable workflows over monolithic ones.
 
-## Planning System (Repo-level, outside `.windsurf/`)
+## Specification & Planning System (OpenSpec)
 
-You’ve also defined a local planning system in `/planning/` that I honor:
+This project uses [OpenSpec](https://openspec.dev/) for specification-driven development:
 
-- `/planning/abap-code-review.md`: Kanban-style tracking
-- `/planning/current-sprint.md`: Active sprint focus
-- `/planning/roadmap.md`: Long-term milestones
-- `/planning/README.md`: System overview
+- `openspec/specs/`: Source of truth for system specifications (organized by domain)
+- `openspec/changes/`: Active change proposals (one folder per change)
+- `openspec/config.yaml`: Project configuration and AI context
+- `docs/planning/`: Roadmap, sprint tracking, and project coordination
 
 Behavior:
 
-- I check `/planning/` when starting work on this project.
-- I update the planning docs as work progresses and reference GitHub issues as needed.
+- I check `openspec/specs/` for existing specifications before making changes.
+- I use `/opsx:propose` to create structured change proposals.
+- I update planning docs as work progresses and reference GitHub issues as needed.
 
 ## Memory: Internal vs. Workspace-Committable
 
@@ -83,7 +84,7 @@ Behavior:
   - Not committed to git.
 
 - Workspace Memory (Committable):
-  - Documents under `.windsurf/` and the `/planning/` directory.
+  - Documents under `.windsurf/` and the `openspec/` directory.
   - Version-controlled, reviewed, and shared with the team.
   - Treated as the source of truth for standards, workflows, and processes.
 

@@ -6,32 +6,33 @@ trigger: always_on
 
 ## Planning System
 
-This workspace uses a local planning system in the /planning/ directory for project coordination and memory persistence.
+This workspace uses [OpenSpec](https://openspec.dev/) for project planning and specification management.
 
-## Key Files
+## Key Locations
 
-- /planning/abap-code-review.md - Main project plan with kanban-style status tracking
-- /planning/current-sprint.md - Current development focus and active tasks
-- /planning/roadmap.md - Long-term roadmap and milestones
-- /planning/README.md - Planning system documentation
+- `openspec/specs/` — Source of truth for system specifications (organized by domain)
+- `openspec/changes/` — Active proposed changes (one folder per change)
+- `openspec/config.yaml` — Project configuration and AI context
+- `docs/planning/` — Roadmap, sprint tracking, and project coordination
 
 ## AI Assistant Workflow
 
-1. **Always check /planning/ files first** when starting work on this project
-2. **Read current project status** from planning files to understand context
-3. **Update planning files** as work progresses to maintain project memory
-4. **Sync with GitHub Issues** using label-based status tracking
-5. **Reference GitHub issue numbers** in planning files for traceability
+1. **Check `openspec/specs/`** for existing specifications before making changes
+2. **Check `openspec/changes/`** for active change proposals to understand context
+3. **Use `/opsx:propose`** to create new change proposals with specs, design, and tasks
+4. **Use `/opsx:apply`** to implement tasks from a change proposal
+5. **Use `/opsx:archive`** to finalize completed changes and merge specs
+6. **Sync with GitHub Issues** using label-based status tracking
 
 ## GitHub Integration
 
 - GitHub Issues: External collaboration and detailed requirements
-- Local Planning: Detailed progress tracking and AI coordination
+- OpenSpec Changes: Structured change proposals with specs and tasks
 - Status sync through labels: status:ready → status:in-progress → status:review → status:done
 
 ## Memory Persistence
 
-The /planning/ directory serves as persistent project memory that survives:
+The `openspec/` directory serves as persistent project memory that survives:
 
 - Container rebuilds
 - Repository clones
