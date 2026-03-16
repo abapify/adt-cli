@@ -187,9 +187,9 @@ this.handlers.set(
 );
 ```
 
-### With OAT Format
+### With abapGit Format
 
-ADK specifications serve as the canonical representation for OAT metadata storage, ensuring type safety and consistency across the entire toolchain.
+ADK specifications serve as the canonical representation for abapGit metadata storage, ensuring type safety and consistency across the entire toolchain.
 
 ## Quality Requirements
 

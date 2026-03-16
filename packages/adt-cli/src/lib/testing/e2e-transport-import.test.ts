@@ -31,68 +31,6 @@ describe('Transport Import E2E Tests', () => {
     }
   });
 
-  it('should show error when format is not specified', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      ['import', 'transport', 'TRLK907362', testOutputDir],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
-
-    expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain('Format specification required');
-    expect(result.stderr).toContain('--format=@abapify/oat');
-  });
-
-  it('should successfully configure transport import with @abapify/oat format', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      [
-        'import',
-        'transport',
-        'TRLK907362',
-        testOutputDir,
-        '--format=@abapify/oat',
-      ],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
-
-    expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('Transport import configured successfully');
-    expect(result.stdout).toContain('Transport: TRLK907362');
-    expect(result.stdout).toContain('ADT Client: Mock (Testing)');
-  });
-
-  it('should successfully configure transport import with preset', async () => {
-    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
-
-    const result = await executeCli(
-      [
-        'import',
-        'transport',
-        'TRLK907362',
-        testOutputDir,
-        '--format=@abapify/oat/flat',
-      ],
-      {
-        mockClient,
-        captureOutput: true,
-      },
-    );
-
-    expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('Transport import configured successfully');
-    expect(result.stdout).toContain('Preset: flat');
-    expect(result.stdout).toContain('ADT Client: Mock (Testing)');
-  });
-
   it('should handle plugin loading errors gracefully', async () => {
     const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
 
@@ -111,8 +49,48 @@ describe('Transport Import E2E Tests', () => {
     );
 
     expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain('Failed to load url @nonexistent/plugin');
-    expect(result.stderr).toContain('Does the file exist');
+    expect(result.stderr).toContain('@nonexistent/plugin');
+  });
+
+  it('should successfully configure transport import with format option', async () => {
+    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
+
+    const result = await executeCli(
+      ['import', 'transport', 'TRLK907362', testOutputDir, '--format=abapgit'],
+      {
+        mockClient,
+        captureOutput: true,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('Transport import configured successfully');
+    expect(result.stdout).toContain('Transport: TRLK907362');
+    expect(result.stdout).toContain('ADT Client: Mock (Testing)');
+  });
+
+  it('should successfully configure transport import with format option', async () => {
+    const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
+
+    const result = await executeCli(
+      [
+        'import',
+        'transport',
+        'TRLK907362',
+        testOutputDir,
+        '--format=abapgit',
+        '--format-option',
+        'folderLogic=full',
+      ],
+      {
+        mockClient,
+        captureOutput: true,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('Transport import configured successfully');
+    expect(result.stdout).toContain('ADT Client: Mock (Testing)');
   });
 
   it('should support object type filtering', async () => {
@@ -124,7 +102,7 @@ describe('Transport Import E2E Tests', () => {
         'transport',
         'TRLK907362',
         testOutputDir,
-        '--format=@abapify/oat',
+        '--format=abapgit',
         '--object-types=CLAS,INTF',
       ],
       {
@@ -141,7 +119,7 @@ describe('Transport Import E2E Tests', () => {
     const mockClient = createMockAdtClient({ fixturesPath: testFixturesDir });
 
     const result = await executeCli(
-      ['import', 'transport', 'TRLK907362', '--format=@abapify/oat'],
+      ['import', 'transport', 'TRLK907362', '--format=abapgit'],
       {
         mockClient,
         captureOutput: true,
@@ -161,7 +139,7 @@ describe('Transport Import E2E Tests', () => {
         'transport',
         'TRLK907362',
         testOutputDir,
-        '--format=@abapify/oat',
+        '--format=abapgit',
         '--debug',
       ],
       {

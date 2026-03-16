@@ -18,8 +18,8 @@ Create a platform-agnostic, developer-friendly CI/CD pipeline for ABAP code revi
   - CI/CD pipeline specification
 - [ ] **Transport Import Stage** (#3)
   - Extract ABAP objects from transport requests
-  - OAT format serialization
-  - Multiple output format support (OAT, abapGit, JSON)
+  - abapGit format serialization
+  - Multiple output format support (abapGit, JSON)
 - [ ] **Quality Check Stage** (#4)
   - ATC integration with transport objects
   - Multi-platform output (GitLab, GitHub, SARIF, console)

@@ -40,7 +40,7 @@ adt outline ZIF_MY_INTERFACE
 adt import package ZTEST_PKG
 
 # Export local files back to SAP
-adt export package ZTEST_PKG ./oat-ztest_pkg --create --transport NPLK900123
+adt export package ZTEST_PKG ./abapgit-ztest_pkg --create --transport NPLK900123
 ```
 
 ## Commands
@@ -101,12 +101,12 @@ Download an ABAP package from SAP to local files.
 | `-o, --output <path>`        | Output directory                        |
 | `-t, --object-types <types>` | Comma-separated types, e.g. `CLAS,INTF` |
 | `--sub-packages`             | Include subpackages                     |
-| `--format <format>`          | `oat` (default) \| `abapgit` \| `json`  |
+| `--format <format>`          | `abapgit` (default)                     |
 | `--debug`                    | Debug output                            |
 
 ```bash
 adt import package ZTEST_PKG
-adt import package ZTEST_PKG --object-types CLAS,INTF --format oat
+adt import package ZTEST_PKG --object-types CLAS,INTF --format abapgit
 ```
 
 #### `adt export package <packageName> [sourceFolder] [options]`
@@ -123,10 +123,10 @@ Deploy local files to SAP.
 
 ```bash
 # Dry run
-adt export package ZTEST_PKG ./oat-ztest_pkg
+adt export package ZTEST_PKG ./abapgit-ztest_pkg
 
 # Deploy with transport
-adt export package ZTEST_PKG ./oat-ztest_pkg --create --transport NPLK900123
+adt export package ZTEST_PKG ./abapgit-ztest_pkg --create --transport NPLK900123
 ```
 
 ### Object Inspection
@@ -203,7 +203,7 @@ const config: CliConfig = {
     },
   },
   defaults: {
-    format: 'oat',
+    format: 'abapgit',
     outputPath: './output',
   },
 };

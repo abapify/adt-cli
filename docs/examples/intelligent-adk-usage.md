@@ -82,8 +82,8 @@ if (domainObj.kind === 'Domain') {
 ## Plugin Integration
 
 ```typescript
-// Example: Enhanced OAT Plugin using intelligent objects
-class EnhancedOatPlugin implements FormatPlugin {
+// Example: Enhanced abapGit Plugin using intelligent objects
+class EnhancedAbapGitPlugin implements FormatPlugin {
   async serialize(
     objects: AdkObjectBase[],
     targetPath: string,
@@ -101,7 +101,7 @@ class EnhancedOatPlugin implements FormatPlugin {
         const methods = classObj.getMethods();
         const isAbstract = classObj.isAbstract();
 
-        // Enhanced metadata for OAT format
+        // Enhanced metadata for abapGit format
         const enhancedMetadata = {
           ...metadata,
           methodCount: methods.length,

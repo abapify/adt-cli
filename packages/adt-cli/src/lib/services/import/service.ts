@@ -18,7 +18,7 @@ export interface TransportImportOptions {
   outputPath: string;
   /** Filter by object types (e.g., ['CLAS', 'INTF']) - if not specified, imports all */
   objectTypes?: string[];
-  /** Format plugin name or package (e.g., 'oat', '@abapify/oat') */
+  /** Format plugin name or package (e.g., 'abapgit', '@abapify/adt-plugin-abapgit') */
   format: string;
   /** Format-specific options provided via CLI */
   formatOptions?: Record<string, FormatOptionValue>;
@@ -38,7 +38,7 @@ export interface PackageImportOptions {
   objectTypes?: string[];
   /** Include subpackages */
   includeSubpackages?: boolean;
-  /** Format plugin name or package (e.g., 'oat', '@abapify/oat') */
+  /** Format plugin name or package (e.g., 'abapgit', '@abapify/adt-plugin-abapgit') */
   format: string;
   /** Enable debug output */
   debug?: boolean;

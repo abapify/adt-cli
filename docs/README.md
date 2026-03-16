@@ -12,8 +12,7 @@ openspec/
 │   ├── adk/            # ABAP Development Kit
 │   ├── adt-cli/        # ADT CLI design and plugins
 │   ├── adt-client/     # ADT API client
-│   ├── cicd/           # CI/CD pipeline
-│   └── oat/            # OAT file format
+│   └── cicd/           # CI/CD pipeline
 ├── changes/            # Proposed changes (one folder per change)
 └── config.yaml         # Project configuration
 ```

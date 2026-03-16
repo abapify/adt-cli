@@ -122,19 +122,15 @@ export class ConfigLoader implements IConfigLoader {
       plugins: {
         formats: [
           {
-            name: '@abapify/oat',
+            name: '@abapify/adt-plugin-abapgit',
             config: {
               enabled: true,
-              options: {
-                fileStructure: 'hierarchical',
-                includeMetadata: true,
-              },
             },
           },
         ],
       },
       defaults: {
-        format: 'oat',
+        format: 'abapgit',
       },
     };
   }

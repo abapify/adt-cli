@@ -19,7 +19,7 @@ export const importPackageCommand = new Command('package')
   .option('--sub-packages', 'Include subpackages', false)
   .option(
     '--format <format>',
-    'Output format: abapgit | oat | @abapify/abapgit | @abapify/oat',
+    'Output format: abapgit | @abapify/adt-plugin-abapgit',
     'abapgit',
   )
   .option('--debug', 'Enable debug output', false)

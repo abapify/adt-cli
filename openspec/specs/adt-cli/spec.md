@@ -115,7 +115,7 @@ The ADT CLI SHALL communicate directly with SAP ADT REST APIs, eliminating middl
 ```bash
 # Complete transport analysis in single command chain
 adt auth login --service-key ./service-key.json
-adt import transport TR001 ./output --format oat
+adt import transport TR001 ./output --format abapgit
 adt atc --transport TR001 --format gitlab --output results.json
 adt report generate --transport TR001 --template summary
 ```
@@ -215,7 +215,7 @@ adt auth login --token $SAP_TOKEN --endpoint $SAP_ENDPOINT
 
 ```bash
 # Import transport contents
-adt import transport TR001 ./output --format oat
+adt import transport TR001 ./output --format abapgit
 
 # Get individual objects
 adt get object ZCL_TEST --type class --output ./objects/
@@ -303,11 +303,11 @@ class AdkObjectHandler<T extends Spec<unknown, Kind>> {
 }
 ```
 
-### With OAT Format
+### With abapGit Format
 
 **Standardized Object Storage**
 
-- OAT format as the canonical object representation
+- abapGit format as the canonical object representation
 - Git-friendly project structure
 - Consistent metadata storage using ADK specifications
 - Version control optimized serialization

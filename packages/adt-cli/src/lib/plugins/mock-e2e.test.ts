@@ -14,52 +14,6 @@ import path from 'path';
 import { tmpdir } from 'os';
 
 /**
- * Mock OAT plugin for testing
- *
- * Note: This implements the FormatPlugin interface with serializeObject
- * which is the required method. The serialize method is optional/legacy.
- */
-class MockOatPlugin implements FormatPlugin {
-  readonly name = '@abapify/oat';
-  readonly version = '1.0.0';
-  readonly description = 'Mock OAT format plugin for testing';
-
-  async serializeObject(
-    object: AdkObject,
-    targetPath: string,
-    context: SerializationContext,
-  ): Promise<SerializeObjectResult> {
-    const filesCreated: string[] = [];
-
-    // Create target directory
-    await fs.mkdir(targetPath, { recursive: true });
-
-    const fileName = `${object.name.toLowerCase()}.${object.kind.toLowerCase()}.yml`;
-    const filePath = path.join(targetPath, fileName);
-
-    const yamlContent = `kind: ${object.kind}
-name: ${object.name}
-type: ${object.type}`;
-
-    await fs.writeFile(filePath, yamlContent, 'utf-8');
-    filesCreated.push(filePath);
-
-    return {
-      success: true,
-      filesCreated,
-    };
-  }
-
-  getSupportedObjectTypes(): string[] {
-    return ['Class', 'Interface', 'Domain'];
-  }
-
-  validateConfig(): { valid: boolean; errors: string[]; warnings?: string[] } {
-    return { valid: true, errors: [] };
-  }
-}
-
-/**
  * Mock abapGit plugin for testing
  *
  * Note: This implements the FormatPlugin interface with serializeObject
@@ -140,8 +94,7 @@ describe('Plugin Architecture E2E Tests', () => {
     configLoader = new ConfigLoader();
     authRegistry = new AuthRegistry();
 
-    // Register mock plugins manually for testing
-    pluginRegistry.register(new MockOatPlugin());
+    // Register mock plugin manually for testing
     pluginRegistry.register(new MockAbapGitPlugin());
   });
 
@@ -157,7 +110,7 @@ describe('Plugin Architecture E2E Tests', () => {
         mock: { enabled: true },
       },
       plugins: {
-        formats: [{ name: '@abapify/oat' }, { name: '@abapify/abapgit' }],
+        formats: [{ name: '@abapify/abapgit' }],
       },
     };
 
@@ -168,7 +121,6 @@ describe('Plugin Architecture E2E Tests', () => {
 
     // Check available formats
     const formats = pluginRegistry.getAvailableFormats();
-    expect(formats).toContain('@abapify/oat');
     expect(formats).toContain('@abapify/abapgit');
   });
 
@@ -178,15 +130,15 @@ describe('Plugin Architecture E2E Tests', () => {
 
   it('should handle multiple plugins with format selection', async () => {
     // Config would be used in a real CLI scenario - kept for documentation
-    // Simulate CLI behavior: multiple plugins available, no default
+    // Simulate CLI behavior: one plugin available (abapgit is default)
     const availableFormats = pluginRegistry.getAvailableFormats();
-    expect(availableFormats).toHaveLength(2);
+    expect(availableFormats).toHaveLength(1);
 
-    // User would be prompted to choose - simulate choosing OAT
-    const selectedFormat = '@abapify/oat';
+    // Select abapgit format
+    const selectedFormat = '@abapify/abapgit';
     const plugin = pluginRegistry.getPlugin(selectedFormat);
     expect(plugin).toBeDefined();
-    expect(plugin!.name).toBe('@abapify/oat');
+    expect(plugin!.name).toBe('@abapify/abapgit');
   });
 
   it('should handle default format from config', async () => {
@@ -196,10 +148,10 @@ describe('Plugin Architecture E2E Tests', () => {
         mock: { enabled: true },
       },
       plugins: {
-        formats: [{ name: '@abapify/oat' }, { name: '@abapify/abapgit' }],
+        formats: [{ name: '@abapify/abapgit' }],
       },
       defaults: {
-        format: 'oat', // Default format specified
+        format: 'abapgit', // Default format specified
       },
     };
 
@@ -208,11 +160,11 @@ describe('Plugin Architecture E2E Tests', () => {
 
     // CLI would use default format without prompting
     const defaultFormat = config.defaults?.format;
-    expect(defaultFormat).toBe('oat');
+    expect(defaultFormat).toBe('abapgit');
 
-    const plugin = pluginRegistry.getPlugin(`@abapify/${defaultFormat}`);
+    const plugin = pluginRegistry.getPlugin('@abapify/abapgit');
     expect(plugin).toBeDefined();
-    expect(plugin!.name).toBe('@abapify/oat');
+    expect(plugin!.name).toBe('@abapify/abapgit');
   });
 
   it('should validate plugin configurations', async () => {
@@ -224,13 +176,9 @@ describe('Plugin Architecture E2E Tests', () => {
       plugins: {
         formats: [
           {
-            name: '@abapify/oat',
+            name: '@abapify/abapgit',
             config: {
               enabled: true,
-              options: {
-                fileStructure: 'hierarchical',
-                includeMetadata: true,
-              },
             },
           },
         ],
@@ -242,7 +190,7 @@ describe('Plugin Architecture E2E Tests', () => {
 
     // Validate individual plugins
     const pluginValidations = pluginRegistry.validatePlugins();
-    expect(pluginValidations).toHaveLength(2); // Both registered plugins
+    expect(pluginValidations).toHaveLength(1); // One registered plugin
     expect(pluginValidations.every((v) => v.valid)).toBe(true);
   });
 
@@ -253,7 +201,7 @@ describe('Plugin Architecture E2E Tests', () => {
         mock: { enabled: true },
       },
       plugins: {
-        formats: [{ name: '@abapify/oat' }],
+        formats: [{ name: '@abapify/abapgit' }],
       },
     };
 
@@ -267,7 +215,7 @@ describe('Plugin Architecture E2E Tests', () => {
         },
       },
       plugins: {
-        formats: [{ name: '@abapify/oat' }],
+        formats: [{ name: '@abapify/abapgit' }],
       },
     };
 
@@ -312,16 +260,12 @@ describe('Plugin Architecture E2E Tests', () => {
   });
 
   it('should support plugin-specific options', async () => {
-    const plugin = pluginRegistry.getPlugin('@abapify/oat');
-    expect(plugin).toBeDefined();
-
-    const supportedTypes = plugin!.getSupportedObjectTypes();
-    expect(supportedTypes).toContain('Class');
-    expect(supportedTypes).toContain('Interface');
-    expect(supportedTypes).toContain('Domain');
-
     const abapGitPlugin = pluginRegistry.getPlugin('@abapify/abapgit');
+    expect(abapGitPlugin).toBeDefined();
+
     const abapGitTypes = abapGitPlugin!.getSupportedObjectTypes();
-    expect(abapGitTypes).toContain('Program'); // Different from OAT
+    expect(abapGitTypes).toContain('Class');
+    expect(abapGitTypes).toContain('Interface');
+    expect(abapGitTypes).toContain('Program');
   });
 });

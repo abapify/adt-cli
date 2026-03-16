@@ -44,7 +44,7 @@ export const importTransportCommand = new Command('transport')
   )
   .option(
     '--format <format>',
-    'Output format: abapgit | oat | @abapify/abapgit | @abapify/oat',
+    'Output format: abapgit | @abapify/adt-plugin-abapgit',
     'abapgit',
   )
   .option(

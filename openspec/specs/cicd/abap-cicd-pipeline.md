@@ -65,7 +65,7 @@ The ADT CLI provides a complete end-to-end workflow that can be used in any CI/C
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ • GitLab Format │    │ • Console Output │    │ • OAT Format    │
+│ • GitLab Format │    │ • Console Output │    │ • abapGit Format│
 │ • GitHub Format │    │ • JSON Reports   │    │ • abapGit Format│
 │ • SARIF Format  │    │ • SARIF Format   │    │ • JSON Format   │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
@@ -82,11 +82,11 @@ The ADT CLI provides a complete end-to-end workflow that can be used in any CI/C
 #### 2. Transport Import Stage
 
 ```bash
-adt import transport $TRANSPORT_NUMBER ./transport-content --format oat --debug
+adt import transport $TRANSPORT_NUMBER ./transport-content --format abapgit --debug
 ```
 
 - Extract and serialize all ABAP objects from the transport request
-- Support multiple output formats (OAT, abapGit, JSON)
+- Support multiple output formats (abapGit, JSON)
 - Provide detailed logging for troubleshooting
 
 #### 3. Quality Check Stage
@@ -166,7 +166,7 @@ adt atc -t $TRANSPORT_NUMBER --format gitlab --output atc-results.json
 #### 4. **Developer-Friendly Design**
 
 - **Simple CLI Interface**: Intuitive commands that developers can run anywhere
-- **Multiple Output Formats**: OAT, abapGit, JSON with environment-specific formatting
+- **Multiple Output Formats**: abapGit, JSON with environment-specific formatting
 - **Debug-Friendly**: Comprehensive logging and troubleshooting support
 
 #### 5. **Intelligent Output Generation**

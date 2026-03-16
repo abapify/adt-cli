@@ -39,7 +39,7 @@ export interface ExportObjectResult {
 export interface ExportOptions {
   /** Source directory containing serialized files */
   sourcePath: string;
-  /** Format plugin name (e.g., 'oat', '@abapify/oat') */
+  /** Format plugin name (e.g., 'abapgit', '@abapify/adt-plugin-abapgit') */
   format: string;
   /** Transport request for changes */
   transportRequest?: string;

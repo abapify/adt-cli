@@ -23,8 +23,7 @@
     "abap",
     "export",
     "deploy",
-    "abapgit",
-    "oat"
+    "abapgit"
   ],
   "dependencies": {
     "@abapify/adt-plugin": "^0.1.7",
