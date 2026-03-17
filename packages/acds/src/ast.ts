@@ -112,10 +112,11 @@ export interface FieldDefinition extends AstNode {
   notNull: boolean;
 }
 
-/** Include directive: include <typename>; */
+/** Include directive: include <typename>; or include <typename> with suffix <suffix>; */
 export interface IncludeDirective extends AstNode {
   kind: 'include';
   name: string;
+  suffix?: string;
 }
 
 export type TableMember = FieldDefinition | IncludeDirective;

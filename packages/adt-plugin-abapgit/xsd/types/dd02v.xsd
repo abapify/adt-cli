@@ -8,6 +8,7 @@
       <xs:element name="TABNAME" type="xs:string"/>
       <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
       <xs:element name="TABCLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGDEP" type="xs:string" minOccurs="0"/>
       <xs:element name="CLIDEP" type="xs:string" minOccurs="0"/>
       <xs:element name="SQLTAB" type="xs:string" minOccurs="0"/>
       <xs:element name="DATCLASS" type="xs:string" minOccurs="0"/>

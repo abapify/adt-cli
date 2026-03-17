@@ -31,6 +31,7 @@ import {
   Null,
   As,
   Include,
+  Suffix,
   True,
   False,
   Abap,
@@ -123,6 +124,11 @@ export class CdsParser extends CstParser {
   private includeDirective = this.RULE('includeDirective', () => {
     this.CONSUME(Include);
     this.SUBRULE(this.cdsName);
+    this.OPTION(() => {
+      this.CONSUME(With);
+      this.CONSUME(Suffix);
+      this.SUBRULE2(this.cdsName);
+    });
     this.CONSUME(Semicolon);
   });
 

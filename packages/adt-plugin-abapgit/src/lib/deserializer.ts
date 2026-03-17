@@ -27,7 +27,7 @@ import {
 /**
  * Parse abapGit filename to extract object info
  */
-function parseAbapGitFilename(filename: string): {
+export function parseAbapGitFilename(filename: string): {
   name: string;
   type: string;
   suffix?: string;

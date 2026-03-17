@@ -14,6 +14,7 @@ export type TablSchema =
               TABNAME: string;
               DDLANGUAGE?: string;
               TABCLASS?: string;
+              LANGDEP?: string;
               CLIDEP?: string;
               SQLTAB?: string;
               DATCLASS?: string;
@@ -66,6 +67,7 @@ export type TablSchema =
           TABNAME: string;
           DDLANGUAGE?: string;
           TABCLASS?: string;
+          LANGDEP?: string;
           CLIDEP?: string;
           SQLTAB?: string;
           DATCLASS?: string;
@@ -113,6 +115,7 @@ export type TablSchema =
             TABNAME: string;
             DDLANGUAGE?: string;
             TABCLASS?: string;
+            LANGDEP?: string;
             CLIDEP?: string;
             SQLTAB?: string;
             DATCLASS?: string;

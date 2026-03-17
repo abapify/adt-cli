@@ -45,6 +45,55 @@ define table zage_transparent_table {
 }
 `;
 
+/** Structure with ALL builtin field types (matches zage_structure.tabl.xml fixture) */
+const CDS_ALL_TYPES = `
+@EndUserText.label : 'Simple structure'
+@AbapCatalog.enhancement.category : #EXTENSIBLE_ANY
+define structure zage_structure {
+  char_field       : abap.char(10);
+  numc_field       : abap.numc(5);
+  string_field     : abap.string;
+  int1_field       : abap.int1;
+  int2_field       : abap.int2;
+  int4_field       : abap.int4;
+  int8_field       : abap.int8;
+  dec_field        : abap.dec(15,2);
+  fltp_field       : abap.fltp;
+  dats_field       : abap.dats;
+  tims_field       : abap.tims;
+  raw_field        : abap.raw(16);
+  rawstring_field  : abap.rawstring;
+  currency_code    : abap.cuky(5);
+  unit_code        : abap.unit(2);
+  utclong_field    : abap.utclong;
+  country_code     : land1;
+  language         : spras;
+  client           : mandt;
+}
+`;
+
+/** Structure with include directives */
+const CDS_WITH_INCLUDES = `
+@EndUserText.label : 'Structure with includes'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+define structure ztest_with_include {
+  field1 : abap.char(10);
+  include zage_structure1;
+  field2 : abap.numc(5);
+}
+`;
+
+/** Structure with include + suffix directives */
+const CDS_WITH_INCLUDES_SUFFIX = `
+@EndUserText.label : 'Structure with includes and suffix'
+define structure ztest_include_suffix {
+  field1 : abap.char(10);
+  include zage_structure1;
+  include zage_structure1 with suffix _xx;
+  field2 : abap.numc(5);
+}
+`;
+
 /** Table with data element references */
 const CDS_TABLE_DATA_ELEMENTS = `
 @EndUserText.label : 'Table with data elements'
@@ -368,5 +417,259 @@ describe('CDS-to-abapGit mapping', () => {
     assert.strictEqual(keyField.FIELDNAME, 'KEY_FIELD');
     assert.strictEqual(valueField.KEYFLAG, undefined);
     assert.strictEqual(valueField.NOTNULL, undefined);
+  });
+});
+
+describe('CDS-to-abapGit field type mapping (all builtin types)', () => {
+  // Parse once, reuse for all type-specific tests
+  const { ast } = parse(CDS_ALL_TYPES);
+  const def = ast.definitions[0] as any;
+  const entries = buildDD03P(def.members, 'ZAGE_STRUCTURE');
+
+  /** Helper to find entry by field name */
+  function field(name: string) {
+    const entry = entries.find((e) => e.FIELDNAME === name);
+    assert.ok(entry, `Field ${name} should exist in DD03P entries`);
+    return entry!;
+  }
+
+  it('char(10): INTTYPE=C, INTLEN=000020, DATATYPE=CHAR, LENG=000010', () => {
+    const f = field('CHAR_FIELD');
+    assert.strictEqual(f.INTTYPE, 'C');
+    assert.strictEqual(f.INTLEN, '000020');
+    assert.strictEqual(f.DATATYPE, 'CHAR');
+    assert.strictEqual(f.LENG, '000010');
+    assert.strictEqual(f.MASK, '  CHAR');
+    assert.strictEqual(f.POSITION, '0001');
+  });
+
+  it('numc(5): INTTYPE=N, INTLEN=000010, DATATYPE=NUMC, LENG=000005', () => {
+    const f = field('NUMC_FIELD');
+    assert.strictEqual(f.INTTYPE, 'N');
+    assert.strictEqual(f.INTLEN, '000010');
+    assert.strictEqual(f.DATATYPE, 'NUMC');
+    assert.strictEqual(f.LENG, '000005');
+    assert.strictEqual(f.MASK, '  NUMC');
+  });
+
+  it('string: INTTYPE=g, INTLEN=000008, DATATYPE=STRG, no LENG', () => {
+    const f = field('STRING_FIELD');
+    assert.strictEqual(f.INTTYPE, 'g');
+    assert.strictEqual(f.INTLEN, '000008');
+    assert.strictEqual(f.DATATYPE, 'STRG');
+    assert.strictEqual(f.LENG, undefined, 'string should not have LENG');
+    assert.strictEqual(f.MASK, '  STRG');
+  });
+
+  it('int1: INTTYPE=X, INTLEN=000001, DATATYPE=INT1, LENG=000003', () => {
+    const f = field('INT1_FIELD');
+    assert.strictEqual(f.INTTYPE, 'X');
+    assert.strictEqual(f.INTLEN, '000001');
+    assert.strictEqual(f.DATATYPE, 'INT1');
+    assert.strictEqual(f.LENG, '000003');
+    assert.strictEqual(f.MASK, '  INT1');
+  });
+
+  it('int2: INTTYPE=X, INTLEN=000002, DATATYPE=INT2, LENG=000005', () => {
+    const f = field('INT2_FIELD');
+    assert.strictEqual(f.INTTYPE, 'X');
+    assert.strictEqual(f.INTLEN, '000002');
+    assert.strictEqual(f.DATATYPE, 'INT2');
+    assert.strictEqual(f.LENG, '000005');
+    assert.strictEqual(f.MASK, '  INT2');
+  });
+
+  it('int4: INTTYPE=X, INTLEN=000004, DATATYPE=INT4, LENG=000010', () => {
+    const f = field('INT4_FIELD');
+    assert.strictEqual(f.INTTYPE, 'X');
+    assert.strictEqual(f.INTLEN, '000004');
+    assert.strictEqual(f.DATATYPE, 'INT4');
+    assert.strictEqual(f.LENG, '000010');
+    assert.strictEqual(f.MASK, '  INT4');
+  });
+
+  it('int8: INTTYPE=8, INTLEN=000008, DATATYPE=INT8, LENG=000019', () => {
+    const f = field('INT8_FIELD');
+    assert.strictEqual(f.INTTYPE, '8');
+    assert.strictEqual(f.INTLEN, '000008');
+    assert.strictEqual(f.DATATYPE, 'INT8');
+    assert.strictEqual(f.LENG, '000019');
+    assert.strictEqual(f.MASK, '  INT8');
+  });
+
+  it('dec(15,2): INTTYPE=P, INTLEN=000008, DATATYPE=DEC, LENG=000015, DECIMALS=000002', () => {
+    const f = field('DEC_FIELD');
+    assert.strictEqual(f.INTTYPE, 'P');
+    assert.strictEqual(f.INTLEN, '000008');
+    assert.strictEqual(f.DATATYPE, 'DEC');
+    assert.strictEqual(f.LENG, '000015');
+    assert.strictEqual(f.DECIMALS, '000002');
+    assert.strictEqual(f.MASK, '  DEC');
+  });
+
+  it('fltp: INTTYPE=F, INTLEN=000008, DATATYPE=FLTP, LENG=000016, DECIMALS=000016', () => {
+    const f = field('FLTP_FIELD');
+    assert.strictEqual(f.INTTYPE, 'F');
+    assert.strictEqual(f.INTLEN, '000008');
+    assert.strictEqual(f.DATATYPE, 'FLTP');
+    assert.strictEqual(f.LENG, '000016');
+    assert.strictEqual(f.DECIMALS, '000016');
+    assert.strictEqual(f.MASK, '  FLTP');
+  });
+
+  it('dats: INTTYPE=D, INTLEN=000016, DATATYPE=DATS, LENG=000008, SHLPORIGIN=T', () => {
+    const f = field('DATS_FIELD');
+    assert.strictEqual(f.INTTYPE, 'D');
+    assert.strictEqual(f.INTLEN, '000016');
+    assert.strictEqual(f.DATATYPE, 'DATS');
+    assert.strictEqual(f.LENG, '000008');
+    assert.strictEqual(f.SHLPORIGIN, 'T');
+    assert.strictEqual(f.MASK, '  DATS');
+  });
+
+  it('tims: INTTYPE=T, INTLEN=000012, DATATYPE=TIMS, LENG=000006, SHLPORIGIN=T', () => {
+    const f = field('TIMS_FIELD');
+    assert.strictEqual(f.INTTYPE, 'T');
+    assert.strictEqual(f.INTLEN, '000012');
+    assert.strictEqual(f.DATATYPE, 'TIMS');
+    assert.strictEqual(f.LENG, '000006');
+    assert.strictEqual(f.SHLPORIGIN, 'T');
+    assert.strictEqual(f.MASK, '  TIMS');
+  });
+
+  it('raw(16): INTTYPE=X, INTLEN=000016, DATATYPE=RAW, LENG=000016', () => {
+    const f = field('RAW_FIELD');
+    assert.strictEqual(f.INTTYPE, 'X');
+    assert.strictEqual(f.INTLEN, '000016');
+    assert.strictEqual(f.DATATYPE, 'RAW');
+    assert.strictEqual(f.LENG, '000016');
+    assert.strictEqual(f.MASK, '  RAW');
+  });
+
+  it('rawstring: INTTYPE=y, INTLEN=000008, DATATYPE=RSTR, no LENG', () => {
+    const f = field('RAWSTRING_FIELD');
+    assert.strictEqual(f.INTTYPE, 'y');
+    assert.strictEqual(f.INTLEN, '000008');
+    assert.strictEqual(f.DATATYPE, 'RSTR');
+    assert.strictEqual(f.LENG, undefined, 'rawstring should not have LENG');
+    assert.strictEqual(f.MASK, '  RSTR');
+  });
+
+  it('cuky(5): INTTYPE=C, INTLEN=000010, DATATYPE=CUKY, LENG=000005', () => {
+    const f = field('CURRENCY_CODE');
+    assert.strictEqual(f.INTTYPE, 'C');
+    assert.strictEqual(f.INTLEN, '000010');
+    assert.strictEqual(f.DATATYPE, 'CUKY');
+    assert.strictEqual(f.LENG, '000005');
+    assert.strictEqual(f.MASK, '  CUKY');
+  });
+
+  it('unit(2): INTTYPE=C, INTLEN=000004, DATATYPE=UNIT, LENG=000002', () => {
+    const f = field('UNIT_CODE');
+    assert.strictEqual(f.INTTYPE, 'C');
+    assert.strictEqual(f.INTLEN, '000004');
+    assert.strictEqual(f.DATATYPE, 'UNIT');
+    assert.strictEqual(f.LENG, '000002');
+    assert.strictEqual(f.MASK, '  UNIT');
+  });
+
+  it('utclong: INTTYPE=p, INTLEN=000008, DATATYPE=UTCL, LENG=000027', () => {
+    const f = field('UTCLONG_FIELD');
+    assert.strictEqual(f.INTTYPE, 'p');
+    assert.strictEqual(f.INTLEN, '000008');
+    assert.strictEqual(f.DATATYPE, 'UTCL');
+    assert.strictEqual(f.LENG, '000027');
+    assert.strictEqual(f.MASK, '  UTCL');
+  });
+
+  it('named type (data element): ROLLNAME, COMPTYPE=E, no INTTYPE/DATATYPE', () => {
+    const f = field('COUNTRY_CODE');
+    assert.strictEqual(f.ROLLNAME, 'LAND1');
+    assert.strictEqual(f.COMPTYPE, 'E');
+    assert.strictEqual(f.INTTYPE, undefined);
+    assert.strictEqual(f.DATATYPE, undefined);
+    assert.strictEqual(f.LENG, undefined);
+  });
+
+  it('all fields have consecutive POSITION values', () => {
+    for (let i = 0; i < entries.length; i++) {
+      const expected = String(i + 1).padStart(4, '0');
+      assert.strictEqual(
+        entries[i].POSITION,
+        expected,
+        `Field ${entries[i].FIELDNAME} should have POSITION=${expected}`,
+      );
+    }
+  });
+
+  it('all fields have ADMINFIELD=0', () => {
+    for (const entry of entries) {
+      assert.strictEqual(
+        entry.ADMINFIELD,
+        '0',
+        `Field ${entry.FIELDNAME} should have ADMINFIELD=0`,
+      );
+    }
+  });
+});
+
+describe('CDS-to-abapGit DD02V LANGDEP', () => {
+  it('buildDD02V includes LANGDEP=X', () => {
+    const { ast } = parse(CDS_STRUCTURE);
+    const def = ast.definitions[0] as any;
+    const dd02v = buildDD02V(def, 'E', 'AGE Test Structure');
+    assert.strictEqual(dd02v.LANGDEP, 'X');
+  });
+});
+
+describe('CDS-to-abapGit include directives', () => {
+  it('generates .INCLUDE entry for plain include', () => {
+    const { ast } = parse(CDS_WITH_INCLUDES);
+    const def = ast.definitions[0] as any;
+    const entries = buildDD03P(def.members);
+
+    // field1 at position 1
+    assert.strictEqual(entries[0].FIELDNAME, 'FIELD1');
+    assert.strictEqual(entries[0].POSITION, '0001');
+
+    // .INCLUDE at position 2
+    assert.strictEqual(entries[1].FIELDNAME, '.INCLUDE');
+    assert.strictEqual(entries[1].POSITION, '0002');
+    assert.strictEqual(entries[1].PRECFIELD, 'ZAGE_STRUCTURE1');
+    assert.strictEqual(entries[1].MASK, '      S');
+    assert.strictEqual(entries[1].COMPTYPE, 'S');
+
+    // field2 at position 3
+    assert.strictEqual(entries[2].FIELDNAME, 'FIELD2');
+    assert.strictEqual(entries[2].POSITION, '0003');
+
+    assert.strictEqual(entries.length, 3);
+  });
+
+  it('generates .INCLUDE and .INCLU-<SUFFIX> for include with suffix', () => {
+    const { ast } = parse(CDS_WITH_INCLUDES_SUFFIX);
+    const def = ast.definitions[0] as any;
+    const entries = buildDD03P(def.members);
+
+    // field1 at position 1
+    assert.strictEqual(entries[0].FIELDNAME, 'FIELD1');
+    assert.strictEqual(entries[0].POSITION, '0001');
+
+    // .INCLUDE at position 2 (plain include)
+    assert.strictEqual(entries[1].FIELDNAME, '.INCLUDE');
+    assert.strictEqual(entries[1].POSITION, '0002');
+    assert.strictEqual(entries[1].PRECFIELD, 'ZAGE_STRUCTURE1');
+
+    // .INCLU-_XX at position 3 (include with suffix _xx)
+    assert.strictEqual(entries[2].FIELDNAME, '.INCLU-_XX');
+    assert.strictEqual(entries[2].POSITION, '0003');
+    assert.strictEqual(entries[2].PRECFIELD, 'ZAGE_STRUCTURE1');
+    assert.strictEqual(entries[2].COMPTYPE, 'S');
+
+    // field2 at position 4
+    assert.strictEqual(entries[3].FIELDNAME, 'FIELD2');
+    assert.strictEqual(entries[3].POSITION, '0004');
+
+    assert.strictEqual(entries.length, 4);
   });
 });

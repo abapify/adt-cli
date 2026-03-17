@@ -1,0 +1,37 @@
+{
+  "name": "@abapify/adt-diff",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.1.0",
+  "description": "Diff CLI plugin for adt-cli - compare local serialized files against SAP remote source",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./commands/diff": "./dist/commands/diff.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "sap",
+    "adt",
+    "abap",
+    "diff",
+    "compare",
+    "abapgit"
+  ],
+  "dependencies": {
+    "@abapify/adk": "workspace:*",
+    "@abapify/adt-plugin": "workspace:*",
+    "@abapify/adt-plugin-abapgit": "workspace:*",
+    "chalk": "^5.6.2",
+    "diff": "^8.0.3",
+    "fast-xml-parser": "^5.5.5"
+  },
+  "module": "./dist/index.mjs"
+}

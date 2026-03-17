@@ -1,0 +1,12 @@
+{
+  "name": "adt-diff",
+  "targets": {
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": ["{projectRoot}/tests/**/*.ts", "{projectRoot}/src/**/*.ts"]
+    }
+  }
+}

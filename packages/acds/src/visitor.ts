@@ -102,7 +102,10 @@ export class CdsVisitor extends BaseCstVisitor {
 
   includeDirective(ctx: Record<string, CstNode[]>): IncludeDirective {
     const name = this.visit(ctx.cdsName[0]) as string;
-    return { kind: 'include', name };
+    const suffix = ctx.cdsName?.[1]
+      ? (this.visit(ctx.cdsName[1]) as string)
+      : undefined;
+    return { kind: 'include', name, ...(suffix !== undefined && { suffix }) };
   }
 
   fieldDefinition(ctx: Record<string, CstNode[] | IToken[]>): FieldDefinition {

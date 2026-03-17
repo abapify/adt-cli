@@ -92,6 +92,11 @@ export default {
             minOccurs: '0',
           },
           {
+            name: 'LANGDEP',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
             name: 'CLIDEP',
             type: 'xs:string',
             minOccurs: '0',

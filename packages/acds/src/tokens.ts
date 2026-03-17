@@ -145,6 +145,12 @@ export const Include = createToken({
   longer_alt: Identifier,
 });
 
+export const Suffix = createToken({
+  name: 'Suffix',
+  pattern: /suffix/,
+  longer_alt: Identifier,
+});
+
 export const True = createToken({
   name: 'True',
   pattern: /true/,
@@ -210,6 +216,7 @@ export const allTokens = [
   Null,
   As,
   Include,
+  Suffix,
   True,
   False,
   Abap,

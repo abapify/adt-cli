@@ -23,5 +23,7 @@ export default {
     '@abapify/adt-export/commands/roundtrip',
     // Activate - bulk activate inactive objects
     '@abapify/adt-export/commands/activate',
+    // Diff - compare local abapGit files against SAP remote
+    '@abapify/adt-diff/commands/diff',
   ],
 } as AdtConfig;

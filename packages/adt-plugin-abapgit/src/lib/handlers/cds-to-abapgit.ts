@@ -11,6 +11,7 @@ import type {
   Annotation,
   AnnotationValue,
   FieldDefinition,
+  IncludeDirective,
   BuiltinTypeRef,
   TableMember,
 } from '@abapify/acds';
@@ -23,10 +24,12 @@ export interface DD02VData {
   TABNAME?: string;
   DDLANGUAGE?: string;
   TABCLASS?: string;
+  LANGDEP?: string;
   DDTEXT?: string;
+  MASTERLANG?: string;
   CONTFLAG?: string;
   EXCLASS?: string;
-  MASTERLANG?: string;
+  AUTHCLASS?: string;
   CLIDEP?: string;
   BUFFERED?: string;
   MATEFLAG?: string;
@@ -38,14 +41,19 @@ export interface DD03PData {
   KEYFLAG?: string;
   ROLLNAME?: string;
   ADMINFIELD?: string;
-  NOTNULL?: string;
-  COMPTYPE?: string;
   INTTYPE?: string;
   INTLEN?: string;
+  NOTNULL?: string;
   DATATYPE?: string;
   LENG?: string;
   DECIMALS?: string;
+  SHLPORIGIN?: string;
   MASK?: string;
+  COMPTYPE?: string;
+  REFTABLE?: string;
+  REFFIELD?: string;
+  PRECFIELD?: string;
+  DDTEXT?: string;
 }
 
 // ============================================
@@ -142,11 +150,12 @@ export function buildDD02V(
   );
 
   // Build result in standard abapGit DD02V field order:
-  // TABNAME, DDLANGUAGE, TABCLASS, CLIDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
+  // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, CLIDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
   const result: DD02VData = {};
   result.TABNAME = def.name.toUpperCase();
   result.DDLANGUAGE = language;
   result.TABCLASS = tabclass;
+  result.LANGDEP = 'X';
   if (hasClientField) result.CLIDEP = 'X';
   result.DDTEXT = description;
   result.MASTERLANG = language;
@@ -164,57 +173,79 @@ export function buildDD02V(
 interface BuiltinType {
   datatype: string;
   inttype: string;
+  /** Fixed DDIC length (for types without user-specified length) */
   length?: number;
+  /** Fixed DDIC decimals (e.g. FLTP always has 16) */
   decimals?: number;
+  /** Fixed internal byte length (overrides computed INTLEN) */
   fixedIntlen?: number;
+  /** Whether this type has no LENG in the DDIC (variable-length types) */
+  noLeng?: boolean;
+  /** SHLPORIGIN value for search help (T = table-driven) */
+  shlporigin?: string;
 }
 
+// DDIC INTTYPE/INTLEN mapping based on SAP abapGit serialization:
+// - INT1/INT2/INT4 use INTTYPE=X with raw byte-size INTLEN
+// - DATS/TIMS/DATN/TIMN use Unicode-doubled INTLEN
+// - String/rawstring have fixedIntlen=8 and no LENG
 const BUILTIN_TYPES: Record<string, BuiltinType> = {
   char: { datatype: 'CHAR', inttype: 'C' },
   clnt: { datatype: 'CLNT', inttype: 'C', length: 3 },
   numc: { datatype: 'NUMC', inttype: 'N' },
-  dats: { datatype: 'DATS', inttype: 'D', length: 8 },
-  tims: { datatype: 'TIMS', inttype: 'T', length: 6 },
-  string: { datatype: 'STRG', inttype: 'g', fixedIntlen: 8 },
-  xstring: { datatype: 'RSTR', inttype: 'h', fixedIntlen: 8 },
-  int1: { datatype: 'INT1', inttype: 'b', fixedIntlen: 3 },
-  int2: { datatype: 'INT2', inttype: 's', fixedIntlen: 5 },
-  int4: { datatype: 'INT4', inttype: 'I', fixedIntlen: 4 },
-  int8: { datatype: 'INT8', inttype: '8', fixedIntlen: 8 },
-  fltp: { datatype: 'FLTP', inttype: 'F', fixedIntlen: 8 },
+  dats: {
+    datatype: 'DATS',
+    inttype: 'D',
+    length: 8,
+    fixedIntlen: 16,
+    shlporigin: 'T',
+  },
+  datn: {
+    datatype: 'DATN',
+    inttype: 'D',
+    length: 8,
+    fixedIntlen: 16,
+    shlporigin: 'T',
+  },
+  tims: {
+    datatype: 'TIMS',
+    inttype: 'T',
+    length: 6,
+    fixedIntlen: 12,
+    shlporigin: 'T',
+  },
+  timn: {
+    datatype: 'TIMN',
+    inttype: 'T',
+    length: 6,
+    fixedIntlen: 12,
+    shlporigin: 'T',
+  },
+  string: { datatype: 'STRG', inttype: 'g', fixedIntlen: 8, noLeng: true },
+  xstring: { datatype: 'RSTR', inttype: 'y', fixedIntlen: 8, noLeng: true },
+  int1: { datatype: 'INT1', inttype: 'X', length: 3, fixedIntlen: 1 },
+  int2: { datatype: 'INT2', inttype: 'X', length: 5, fixedIntlen: 2 },
+  int4: { datatype: 'INT4', inttype: 'X', length: 10, fixedIntlen: 4 },
+  int8: { datatype: 'INT8', inttype: '8', length: 19, fixedIntlen: 8 },
+  fltp: {
+    datatype: 'FLTP',
+    inttype: 'F',
+    length: 16,
+    decimals: 16,
+    fixedIntlen: 8,
+  },
   dec: { datatype: 'DEC', inttype: 'P' },
   curr: { datatype: 'CURR', inttype: 'P' },
   quan: { datatype: 'QUAN', inttype: 'P' },
   raw: { datatype: 'RAW', inttype: 'X' },
-  rawstring: { datatype: 'RSTR', inttype: 'h', fixedIntlen: 8 },
+  rawstring: { datatype: 'RSTR', inttype: 'y', fixedIntlen: 8, noLeng: true },
   lang: { datatype: 'LANG', inttype: 'C', length: 1 },
-  unit: { datatype: 'UNIT', inttype: 'C' },
-  cuky: { datatype: 'CUKY', inttype: 'C' },
+  unit: { datatype: 'UNIT', inttype: 'C', length: 3 },
+  cuky: { datatype: 'CUKY', inttype: 'C', length: 5 },
   d16n: { datatype: 'D16N', inttype: 'a', fixedIntlen: 8 },
   d34n: { datatype: 'D34N', inttype: 'e', fixedIntlen: 16 },
-  utclong: { datatype: 'UTCL', inttype: 'p', fixedIntlen: 8 },
+  utclong: { datatype: 'UTCL', inttype: 'p', length: 27, fixedIntlen: 8 },
 };
-
-/**
- * Types that always get a MASK (2 spaces + DATATYPE)
- */
-const MASK_TYPES = new Set([
-  'clnt',
-  'string',
-  'xstring',
-  'rawstring',
-  'lang',
-  'unit',
-  'cuky',
-  'dats',
-  'tims',
-  'dec',
-  'curr',
-  'quan',
-  'd16n',
-  'd34n',
-  'utclong',
-]);
 
 /** Zero-pad number to given width */
 function zeroPad(n: number, width: number): string {
@@ -249,7 +280,11 @@ function computeIntlen(builtin: BuiltinType, length?: number): number {
 }
 
 /** Build a DD03P entry from a single field definition */
-function buildFieldDD03P(field: FieldDefinition): DD03PData {
+function buildFieldDD03P(
+  field: FieldDefinition,
+  position: number,
+  tableName: string,
+): DD03PData {
   // Compute all values first
   const isKey = field.isKey;
   const notNull = field.notNull;
@@ -261,18 +296,52 @@ function buildFieldDD03P(field: FieldDefinition): DD03PData {
   let leng: string | undefined;
   let decimals: string | undefined;
   let mask: string | undefined;
+  let shlporigin: string | undefined;
+  let reftable: string | undefined;
+  let reffield: string | undefined;
 
   if (field.type.kind === 'builtin') {
     const bt = field.type as BuiltinTypeRef;
     const typeInfo = BUILTIN_TYPES[bt.name];
     if (typeInfo) {
+      // Use explicit CDS length, or fall back to fixed DDIC length
       const length = bt.length ?? typeInfo.length;
       inttype = typeInfo.inttype;
       intlen = zeroPad(computeIntlen(typeInfo, length), 6);
       datatype = typeInfo.datatype;
-      if (length !== undefined) leng = zeroPad(length, 6);
-      if (bt.decimals !== undefined) decimals = zeroPad(bt.decimals, 6);
-      if (MASK_TYPES.has(bt.name)) mask = `  ${typeInfo.datatype}`;
+
+      // LENG: skip for variable-length types (string, xstring, rawstring)
+      if (!typeInfo.noLeng && length !== undefined) {
+        leng = zeroPad(length, 6);
+      }
+
+      // DECIMALS: use explicit CDS decimals, or fixed DDIC decimals
+      const dec = bt.decimals ?? typeInfo.decimals;
+      if (dec !== undefined) decimals = zeroPad(dec, 6);
+
+      // MASK: all builtin types get "  DATATYPE"
+      mask = `  ${typeInfo.datatype}`;
+
+      // SHLPORIGIN (date/time types)
+      if (typeInfo.shlporigin) shlporigin = typeInfo.shlporigin;
+
+      // REFTABLE/REFFIELD for currency and quantity fields
+      // These come from CDS annotations on the field
+      // Annotation value is 'tablename.fieldname' — we only need the field part
+      if (bt.name === 'curr' || bt.name === 'quan') {
+        const refAnnotation = getAnnotation(
+          field.annotations,
+          bt.name === 'curr'
+            ? 'Semantics.amount.currencyCode'
+            : 'Semantics.quantity.unitOfMeasure',
+        );
+        if (refAnnotation) {
+          reftable = tableName;
+          // Strip table prefix if present (e.g. 'ztest.currency_code' → 'CURRENCY_CODE')
+          const parts = refAnnotation.split('.');
+          reffield = parts[parts.length - 1].toUpperCase();
+        }
+      }
     }
   } else {
     // Named type (data element reference)
@@ -280,10 +349,10 @@ function buildFieldDD03P(field: FieldDefinition): DD03PData {
     comptype = 'E';
   }
 
-  // Build in standard abapGit DD03P field order:
-  // FIELDNAME, KEYFLAG, ROLLNAME, ADMINFIELD, INTTYPE, INTLEN, NOTNULL, DATATYPE, LENG, DECIMALS, MASK, COMPTYPE
+  // Build in standard abapGit DD03P field order
   const result: DD03PData = {};
   result.FIELDNAME = field.name.toUpperCase();
+  result.POSITION = zeroPad(position, 4);
   if (isKey) result.KEYFLAG = 'X';
   if (rollname) result.ROLLNAME = rollname;
   result.ADMINFIELD = '0';
@@ -293,6 +362,9 @@ function buildFieldDD03P(field: FieldDefinition): DD03PData {
   if (datatype) result.DATATYPE = datatype;
   if (leng) result.LENG = leng;
   if (decimals) result.DECIMALS = decimals;
+  if (shlporigin) result.SHLPORIGIN = shlporigin;
+  if (reftable) result.REFTABLE = reftable;
+  if (reffield) result.REFFIELD = reffield;
   if (mask) result.MASK = mask;
   if (comptype) result.COMPTYPE = comptype;
 
@@ -302,9 +374,47 @@ function buildFieldDD03P(field: FieldDefinition): DD03PData {
 /**
  * Build DD03P entries from table/structure members
  */
-export function buildDD03P(members: TableMember[]): DD03PData[] {
-  const fields = members.filter(
-    (m): m is FieldDefinition => !('kind' in m && m.kind === 'include'),
-  );
-  return fields.map((field) => buildFieldDD03P(field));
+export function buildDD03P(
+  members: TableMember[],
+  tableName: string = '',
+): DD03PData[] {
+  const entries: DD03PData[] = [];
+  let position = 0;
+
+  for (const member of members) {
+    if ('kind' in member && member.kind === 'include') {
+      const inc = member as IncludeDirective;
+      const includeName = inc.name.toUpperCase();
+      position++;
+
+      if (inc.suffix) {
+        // Include with suffix → .INCLU-<SUFFIX> entry
+        entries.push({
+          FIELDNAME: `.INCLU-${inc.suffix.toUpperCase()}`,
+          POSITION: zeroPad(position, 4),
+          ADMINFIELD: '0',
+          PRECFIELD: includeName,
+          MASK: '      S',
+          COMPTYPE: 'S',
+        });
+      } else {
+        // Plain include → .INCLUDE entry
+        entries.push({
+          FIELDNAME: '.INCLUDE',
+          POSITION: zeroPad(position, 4),
+          ADMINFIELD: '0',
+          PRECFIELD: includeName,
+          MASK: '      S',
+          COMPTYPE: 'S',
+        });
+      }
+    } else {
+      // Regular field definition
+      const field = member as FieldDefinition;
+      position++;
+      entries.push(buildFieldDD03P(field, position, tableName));
+    }
+  }
+
+  return entries;
 }

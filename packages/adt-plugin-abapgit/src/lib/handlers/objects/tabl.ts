@@ -85,7 +85,7 @@ async function serializeTabl(
   const dd02v = buildDD02V(def, lang, obj.description ?? '');
 
   // Build DD03P from AST field definitions
-  const dd03pEntries = buildDD03P(def.members);
+  const dd03pEntries = buildDD03P(def.members, def.name.toUpperCase());
 
   // Construct the full abapGit values
   const values: Record<string, unknown> = {
