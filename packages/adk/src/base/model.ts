@@ -849,6 +849,33 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     this.cache.delete(key);
     this.dirty.delete(key);
   }
+
+  // ============================================
+  // Public Fetch Utilities
+  // ============================================
+
+  /**
+   * Fetch a text resource from an ADT endpoint.
+   * Delegates to the underlying ADT client's fetch.
+   *
+   * @param url - ADT endpoint path (e.g., '/sap/bc/adt/ddic/dataelements/spras')
+   * @param headers - Optional HTTP headers (defaults to no Accept header, letting server choose)
+   * @returns Response content as text, or undefined if 404
+   */
+  async fetchText(
+    url: string,
+    headers?: Record<string, string>,
+  ): Promise<string | undefined> {
+    try {
+      const response = await this.ctx.client.fetch(url, {
+        method: 'GET',
+        headers: headers ?? {},
+      });
+      return toText(response);
+    } catch {
+      return undefined;
+    }
+  }
 }
 
 /**

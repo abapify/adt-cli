@@ -5,7 +5,7 @@
  * and mapped to abapGit DD02V/DD03P XML format.
  */
 
-import { describe, it } from 'node:test';
+import { describe, it, before } from 'node:test';
 import assert from 'node:assert';
 
 // Import handler to trigger registration
@@ -133,6 +133,7 @@ function createMockTable(overrides?: {
     abapLanguageVersion: '',
     dataSync: { name, type, description, language, masterLanguage: language },
     getSource: async () => cdsSource,
+    fetchText: async () => undefined, // No ADT server in tests
   };
 }
 
@@ -366,10 +367,10 @@ describe('CDS-to-abapGit mapping', () => {
     assert.strictEqual(dd02v.EXCLASS, '1');
   });
 
-  it('buildDD03P maps builtin type fields', () => {
+  it('buildDD03P maps builtin type fields', async () => {
     const { ast } = parse(CDS_STRUCTURE);
     const def = ast.definitions[0] as any;
-    const entries = buildDD03P(def.members);
+    const entries = await buildDD03P(def.members);
 
     assert.strictEqual(entries.length, 3);
 
@@ -388,10 +389,10 @@ describe('CDS-to-abapGit mapping', () => {
     assert.strictEqual(entries[2].DECIMALS, '000002');
   });
 
-  it('buildDD03P maps data element references', () => {
+  it('buildDD03P maps data element references', async () => {
     const { ast } = parse(CDS_TRANSPARENT_TABLE);
     const def = ast.definitions[0] as any;
-    const entries = buildDD03P(def.members);
+    const entries = await buildDD03P(def.members);
 
     // MANDT — data element reference
     const mandt = entries[0];
@@ -402,10 +403,10 @@ describe('CDS-to-abapGit mapping', () => {
     assert.strictEqual(mandt.NOTNULL, 'X');
   });
 
-  it('buildDD03P maps key and not null flags', () => {
+  it('buildDD03P maps key and not null flags', async () => {
     const { ast } = parse(CDS_TRANSPARENT_TABLE);
     const def = ast.definitions[0] as any;
-    const entries = buildDD03P(def.members);
+    const entries = await buildDD03P(def.members);
 
     // key_field: key, not null, builtin
     const keyField = entries[1];
@@ -424,7 +425,11 @@ describe('CDS-to-abapGit field type mapping (all builtin types)', () => {
   // Parse once, reuse for all type-specific tests
   const { ast } = parse(CDS_ALL_TYPES);
   const def = ast.definitions[0] as any;
-  const entries = buildDD03P(def.members, 'ZAGE_STRUCTURE');
+  let entries: Awaited<ReturnType<typeof buildDD03P>>;
+
+  before(async () => {
+    entries = await buildDD03P(def.members, 'ZAGE_STRUCTURE');
+  });
 
   /** Helper to find entry by field name */
   function field(name: string) {
@@ -623,10 +628,10 @@ describe('CDS-to-abapGit DD02V LANGDEP', () => {
 });
 
 describe('CDS-to-abapGit include directives', () => {
-  it('generates .INCLUDE entry for plain include', () => {
+  it('generates .INCLUDE entry for plain include', async () => {
     const { ast } = parse(CDS_WITH_INCLUDES);
     const def = ast.definitions[0] as any;
-    const entries = buildDD03P(def.members);
+    const entries = await buildDD03P(def.members);
 
     // field1 at position 1
     assert.strictEqual(entries[0].FIELDNAME, 'FIELD1');
@@ -646,10 +651,10 @@ describe('CDS-to-abapGit include directives', () => {
     assert.strictEqual(entries.length, 3);
   });
 
-  it('generates .INCLUDE and .INCLU-<SUFFIX> for include with suffix', () => {
+  it('generates .INCLUDE and .INCLU-<SUFFIX> for include with suffix', async () => {
     const { ast } = parse(CDS_WITH_INCLUDES_SUFFIX);
     const def = ast.definitions[0] as any;
-    const entries = buildDD03P(def.members);
+    const entries = await buildDD03P(def.members);
 
     // field1 at position 1
     assert.strictEqual(entries[0].FIELDNAME, 'FIELD1');

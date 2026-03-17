@@ -3,6 +3,11 @@
  *
  * Transforms @abapify/acds AST nodes into DD02V (header) and DD03P (field)
  * data structures for abapGit XML serialization.
+ *
+ * When a TypeResolver is provided, named type references are resolved via
+ * ADT to determine whether they are data elements or structures, and to
+ * extract metadata (search help origin, description) that is not available
+ * from the CDS source alone.
  */
 
 import type {
@@ -54,6 +59,28 @@ export interface DD03PData {
   REFFIELD?: string;
   PRECFIELD?: string;
   DDTEXT?: string;
+}
+
+// ============================================
+// Type Resolver — resolves named types via ADT
+// ============================================
+
+/** Result of resolving a named type reference */
+export interface ResolvedType {
+  /** 'E' = data element, 'S' = structure */
+  comptype: 'E' | 'S';
+  /** Search help origin (e.g. 'D' for domain search help) */
+  shlporigin?: string;
+  /** Description text (used for include DDTEXT) */
+  description?: string;
+}
+
+/**
+ * Resolves named type references by querying ADT endpoints.
+ * Caches results to avoid duplicate HTTP requests.
+ */
+export interface TypeResolver {
+  resolve(name: string): Promise<ResolvedType>;
 }
 
 // ============================================
@@ -280,11 +307,12 @@ function computeIntlen(builtin: BuiltinType, length?: number): number {
 }
 
 /** Build a DD03P entry from a single field definition */
-function buildFieldDD03P(
+async function buildFieldDD03P(
   field: FieldDefinition,
   position: number,
   tableName: string,
-): DD03PData {
+  resolver?: TypeResolver,
+): Promise<DD03PData> {
   // Compute all values first
   const isKey = field.isKey;
   const notNull = field.notNull;
@@ -344,9 +372,18 @@ function buildFieldDD03P(
       }
     }
   } else {
-    // Named type (data element reference)
+    // Named type reference — resolve via ADT if available
     rollname = field.type.name.toUpperCase();
-    comptype = 'E';
+    comptype = 'E'; // Default: data element
+    if (resolver) {
+      const resolved = await resolver.resolve(field.type.name);
+      comptype = resolved.comptype;
+      if (resolved.shlporigin) shlporigin = resolved.shlporigin;
+      if (resolved.comptype === 'S') {
+        datatype = 'STRU';
+        mask = '  STRUS';
+      }
+    }
   }
 
   // Build in standard abapGit DD03P field order
@@ -374,10 +411,11 @@ function buildFieldDD03P(
 /**
  * Build DD03P entries from table/structure members
  */
-export function buildDD03P(
+export async function buildDD03P(
   members: TableMember[],
   tableName: string = '',
-): DD03PData[] {
+  resolver?: TypeResolver,
+): Promise<DD03PData[]> {
   const entries: DD03PData[] = [];
   let position = 0;
 
@@ -387,32 +425,43 @@ export function buildDD03P(
       const includeName = inc.name.toUpperCase();
       position++;
 
+      // Resolve include description via ADT if available
+      let ddtext: string | undefined;
+      if (resolver) {
+        const resolved = await resolver.resolve(inc.name);
+        ddtext = resolved.description;
+      }
+
       if (inc.suffix) {
         // Include with suffix → .INCLU-<SUFFIX> entry
-        entries.push({
+        const entry: DD03PData = {
           FIELDNAME: `.INCLU-${inc.suffix.toUpperCase()}`,
           POSITION: zeroPad(position, 4),
           ADMINFIELD: '0',
           PRECFIELD: includeName,
           MASK: '      S',
           COMPTYPE: 'S',
-        });
+        };
+        if (ddtext) entry.DDTEXT = ddtext;
+        entries.push(entry);
       } else {
         // Plain include → .INCLUDE entry
-        entries.push({
+        const entry: DD03PData = {
           FIELDNAME: '.INCLUDE',
           POSITION: zeroPad(position, 4),
           ADMINFIELD: '0',
           PRECFIELD: includeName,
           MASK: '      S',
           COMPTYPE: 'S',
-        });
+        };
+        if (ddtext) entry.DDTEXT = ddtext;
+        entries.push(entry);
       }
     } else {
       // Regular field definition
       const field = member as FieldDefinition;
       position++;
-      entries.push(buildFieldDD03P(field, position, tableName));
+      entries.push(await buildFieldDD03P(field, position, tableName, resolver));
     }
   }
 

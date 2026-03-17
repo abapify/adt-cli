@@ -14,6 +14,8 @@
  * - source/main GET: CDS source with annotations and field definitions
  *   → parsed via @abapify/acds into AST
  *   → mapped into DD02V annotations and DD03P field entries
+ * - Per named type: /sap/bc/adt/ddic/dataelements/{name} or /structures/{name}
+ *   → resolves COMPTYPE (E vs S), SHLPORIGIN, description (DDTEXT)
  */
 
 import {
@@ -26,6 +28,7 @@ import { tabl } from '../../../schemas/generated';
 import { createHandler } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 import { buildDD02V, buildDD03P } from '../cds-to-abapgit';
+import type { TypeResolver, ResolvedType } from '../cds-to-abapgit';
 import type { AdkObject } from '../adk';
 
 /**
@@ -40,6 +43,64 @@ function stripEmpty<T extends Record<string, unknown>>(obj: T): Partial<T> {
     }
   }
   return result as Partial<T>;
+}
+
+/**
+ * Create a TypeResolver that resolves named types via ADT endpoints.
+ * Tries data element first, then structure. Caches results.
+ */
+function createAdtTypeResolver(obj: AdkTable | AdkStructure): TypeResolver {
+  const cache = new Map<string, ResolvedType>();
+
+  return {
+    async resolve(name: string): Promise<ResolvedType> {
+      const key = name.toLowerCase();
+      if (cache.has(key)) return cache.get(key)!;
+
+      // Try data element first
+      const dtelXml = await obj.fetchText(
+        `/sap/bc/adt/ddic/dataelements/${encodeURIComponent(key)}`,
+      );
+      if (dtelXml) {
+        const result: ResolvedType = { comptype: 'E' };
+
+        // Extract searchHelp → SHLPORIGIN=D
+        const searchHelpMatch = dtelXml.match(
+          /<dtel:searchHelp>[^<]+<\/dtel:searchHelp>/,
+        );
+        if (searchHelpMatch) {
+          result.shlporigin = 'D';
+        }
+
+        // Extract description for potential reuse
+        const descMatch = dtelXml.match(/adtcore:description="([^"]+)"/);
+        if (descMatch) result.description = descMatch[1];
+
+        cache.set(key, result);
+        return result;
+      }
+
+      // Try structure
+      const structXml = await obj.fetchText(
+        `/sap/bc/adt/ddic/structures/${encodeURIComponent(key)}`,
+      );
+      if (structXml) {
+        const result: ResolvedType = { comptype: 'S' };
+
+        // Extract description for include DDTEXT
+        const descMatch = structXml.match(/adtcore:description="([^"]+)"/);
+        if (descMatch) result.description = descMatch[1];
+
+        cache.set(key, result);
+        return result;
+      }
+
+      // Fallback: assume data element
+      const fallback: ResolvedType = { comptype: 'E' };
+      cache.set(key, fallback);
+      return fallback;
+    },
+  };
 }
 
 /**
@@ -84,8 +145,15 @@ async function serializeTabl(
   // Build DD02V from AST annotations
   const dd02v = buildDD02V(def, lang, obj.description ?? '');
 
-  // Build DD03P from AST field definitions
-  const dd03pEntries = buildDD03P(def.members, def.name.toUpperCase());
+  // Create type resolver for named type resolution via ADT
+  const resolver = createAdtTypeResolver(obj);
+
+  // Build DD03P from AST field definitions (async for type resolution)
+  const dd03pEntries = await buildDD03P(
+    def.members,
+    def.name.toUpperCase(),
+    resolver,
+  );
 
   // Construct the full abapGit values
   const values: Record<string, unknown> = {
