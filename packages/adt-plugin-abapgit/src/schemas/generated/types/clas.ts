@@ -39,6 +39,30 @@ export type ClasSchema =
       };
     }
   | {
+      values: {
+        VSEOCLASS?: {
+          CLSNAME: string;
+          LANGU?: string;
+          DESCRIPT?: string;
+          STATE?: string;
+          CATEGORY?: string;
+          EXPOSURE?: string;
+          CLSFINAL?: string;
+          CLSABSTRCT?: string;
+          CLSCCINCL?: string;
+          FIXPT?: string;
+          UNICODE?: string;
+          WITH_UNIT_TESTS?: string;
+          DURATION?: string;
+          RISK?: string;
+          MSG_ID?: string;
+          REFCLSNAME?: string;
+          SHRM_ENABLED?: string;
+          ABAP_LANGUAGE_VERSION?: string;
+        };
+      };
+    }
+  | {
       abap: {
         values: {
           VSEOCLASS?: {

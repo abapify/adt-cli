@@ -47,6 +47,10 @@ export default {
       abstract: true,
     },
     {
+      name: 'values',
+      type: 'asx:AbapValuesType',
+    },
+    {
       name: 'abap',
       type: 'asx:AbapType',
     },
@@ -66,7 +70,7 @@ export default {
     },
     {
       name: 'Dd04vType',
-      all: {
+      sequence: {
         element: [
           {
             name: 'ROLLNAME',
@@ -78,27 +82,7 @@ export default {
             minOccurs: '0',
           },
           {
-            name: 'DDTEXT',
-            type: 'xs:string',
-            minOccurs: '0',
-          },
-          {
             name: 'DOMNAME',
-            type: 'xs:string',
-            minOccurs: '0',
-          },
-          {
-            name: 'DATATYPE',
-            type: 'xs:string',
-            minOccurs: '0',
-          },
-          {
-            name: 'LENG',
-            type: 'xs:string',
-            minOccurs: '0',
-          },
-          {
-            name: 'DECIMALS',
             type: 'xs:string',
             minOccurs: '0',
           },
@@ -119,6 +103,11 @@ export default {
           },
           {
             name: 'SCRLEN3',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
+            name: 'DDTEXT',
             type: 'xs:string',
             minOccurs: '0',
           },
@@ -148,7 +137,32 @@ export default {
             minOccurs: '0',
           },
           {
+            name: 'DATATYPE',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
+            name: 'LENG',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
+            name: 'DECIMALS',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
+            name: 'OUTPUTLEN',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
             name: 'REFKIND',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
+            name: 'REFTYPE',
             type: 'xs:string',
             minOccurs: '0',
           },
@@ -165,8 +179,7 @@ export default {
       sequence: {
         element: [
           {
-            name: 'values',
-            type: 'asx:AbapValuesType',
+            ref: 'asx:values',
           },
         ],
       },

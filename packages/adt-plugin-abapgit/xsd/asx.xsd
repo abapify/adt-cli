@@ -19,9 +19,12 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Global element definition for values -->
+  <xs:element name="values" type="asx:AbapValuesType"/>
+
   <xs:complexType name="AbapType">
     <xs:sequence>
-      <xs:element name="values" type="asx:AbapValuesType"/>
+      <xs:element ref="asx:values"/>
     </xs:sequence>
     <xs:attribute name="version" type="xs:string" default="1.0"/>
   </xs:complexType>

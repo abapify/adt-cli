@@ -55,4 +55,6 @@ export class AdkTableType extends AdkMainObject<
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('TTYP', TableTypeKind, AdkTableType);
+registerObjectType('TTYP', TableTypeKind, AdkTableType, {
+  endpoint: 'ddic/tabletypes',
+});

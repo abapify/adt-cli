@@ -52,4 +52,4 @@ export class AdkDomain extends AdkMainObject<typeof DomainKind, DomainXml> {
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('DOMA', DomainKind, AdkDomain);
+registerObjectType('DOMA', DomainKind, AdkDomain, { endpoint: 'ddic/domains' });

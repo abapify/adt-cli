@@ -8,7 +8,8 @@ import {
   access,
   glob as nativeGlob,
 } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, relative, resolve, dirname } from 'node:path';
+import { existsSync } from 'node:fs';
 import type { FileTree } from '@abapify/adt-plugin';
 
 /**
@@ -117,4 +118,95 @@ export class MemoryFileTree implements FileTree {
  */
 export function createFileTree(sourcePath: string): FileTree {
   return new FsFileTree(sourcePath);
+}
+
+/**
+ * FileTree wrapper that filters glob results to only include specified files.
+ * Metadata files (.abapgit.xml) always pass through.
+ */
+export class FilteredFileTree implements FileTree {
+  private readonly allowedFiles: Set<string>;
+
+  constructor(
+    private readonly inner: FileTree,
+    files: string[],
+  ) {
+    this.allowedFiles = new Set(files);
+  }
+
+  get root(): string {
+    return this.inner.root;
+  }
+
+  async glob(pattern: string): Promise<string[]> {
+    const all = await this.inner.glob(pattern);
+    return all.filter((f) => this.isAllowed(f));
+  }
+
+  read(path: string): Promise<string> {
+    return this.inner.read(path);
+  }
+
+  readBuffer(path: string): Promise<Buffer> {
+    return this.inner.readBuffer(path);
+  }
+
+  exists(path: string): Promise<boolean> {
+    return this.inner.exists(path);
+  }
+
+  readdir(path: string): Promise<string[]> {
+    return this.inner.readdir(path);
+  }
+
+  private isAllowed(filePath: string): boolean {
+    // Always allow metadata files
+    if (filePath.endsWith('.abapgit.xml')) return true;
+
+    // Check if any allowed file pattern matches
+    const filename = filePath.split('/').pop()!;
+    // Match the base name (before type extension) — e.g. "zage_fixed_values"
+    // from "zage_fixed_values.doma.xml" to also include companion .abap files
+    for (const allowed of this.allowedFiles) {
+      if (filePath === allowed || filename === allowed) return true;
+      // Match companion files: same base name (e.g., myobj.clas.xml matches myobj.clas.abap)
+      const allowedBase = allowed.replace(/\.\w+$/, ''); // strip last extension
+      const fileBase = filename.replace(/\.\w+$/, ''); // strip last extension
+      if (fileBase === allowedBase) return true;
+    }
+    return false;
+  }
+}
+
+/**
+ * Walk up from a directory to find the nearest ancestor containing .abapgit.xml.
+ * Returns the resolved absolute path to the repo root, or undefined if not found.
+ */
+export function findAbapGitRoot(startDir: string): string | undefined {
+  let dir = resolve(startDir);
+  const root = resolve('/');
+
+  while (dir !== root) {
+    if (existsSync(join(dir, '.abapgit.xml'))) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return undefined;
+}
+
+/**
+ * Convert absolute file paths to paths relative to the repo root.
+ */
+export function resolveFilesRelativeToRoot(
+  files: string[],
+  cwd: string,
+  repoRoot: string,
+): string[] {
+  return files.map((f) => {
+    const abs = resolve(cwd, f);
+    return relative(repoRoot, abs);
+  });
 }

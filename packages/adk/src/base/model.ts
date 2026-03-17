@@ -15,6 +15,7 @@
 
 import type { AdkContext } from './context';
 import type { AdkKind } from './kinds';
+import { toText } from './fetch-utils';
 
 /**
  * Lock handle returned by lock operations
@@ -680,7 +681,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
         `${this.objectUri}/source/main`,
         { method: 'GET', headers: { Accept: 'text/plain' } },
       );
-      const currentSource = await response.text();
+      const currentSource = await toText(response);
       if (
         this.normalizeSource(currentSource) ===
         this.normalizeSource(self._pendingSource)
@@ -793,14 +794,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   <adtcore:objectReference adtcore:uri="${this.objectUri}" adtcore:type="${this.type}" adtcore:name="${this.name}"/>
 </adtcore:objectReferences>`;
 
-    await this.ctx.client.fetch('/sap/bc/adt/activation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/xml',
-        Accept: 'application/xml',
+    await this.ctx.client.fetch(
+      '/sap/bc/adt/activation?method=activate&preauditRequested=true',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/xml',
+          Accept: 'application/xml',
+        },
+        body: activationXml,
       },
-      body: activationXml,
-    });
+    );
 
     return this;
   }

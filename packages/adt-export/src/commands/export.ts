@@ -13,7 +13,12 @@ import type {
 } from '@abapify/adt-plugin';
 import { AdkObjectSet, AdkPackage, type AdkContext } from '@abapify/adk';
 import type { ExportResult } from '../types';
-import { createFileTree } from '../utils/filetree';
+import {
+  createFileTree,
+  FilteredFileTree,
+  findAbapGitRoot,
+  resolveFilesRelativeToRoot,
+} from '../utils/filetree';
 
 /**
  * Format shortcuts - map short names to actual package names
@@ -108,7 +113,16 @@ function displayExportResults(
  */
 export const exportCommand: CliCommandPlugin = {
   name: 'export',
+  alias: 'deploy',
   description: 'Export local files to SAP (deploy serialized objects)',
+
+  arguments: [
+    {
+      name: '[files...]',
+      description:
+        'Specific files to deploy (e.g., zage_fixed_values.doma.xml). Omit to deploy all.',
+    },
+  ],
 
   options: [
     {
@@ -139,8 +153,14 @@ export const exportCommand: CliCommandPlugin = {
       default: false,
     },
     {
-      flags: '--no-activate',
-      description: 'Save inactive (skip activation)',
+      flags: '--activate',
+      description: 'Activate objects after deploy (use --no-activate to skip)',
+      default: true,
+    },
+    {
+      flags: '--unlock',
+      description:
+        'Force-unlock objects locked by current user before saving (auto-retry on 403)',
       default: false,
     },
     {
@@ -152,6 +172,7 @@ export const exportCommand: CliCommandPlugin = {
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
     const options = args as {
+      files?: string[];
       source: string;
       format: string;
       transport?: string;
@@ -159,6 +180,7 @@ export const exportCommand: CliCommandPlugin = {
       types?: string;
       dryRun?: boolean;
       activate?: boolean;
+      unlock?: boolean;
       abapLanguageVersion?: string;
     };
 
@@ -176,16 +198,42 @@ export const exportCommand: CliCommandPlugin = {
       process.exit(1);
     }
 
+    // When specific files are provided, auto-resolve the abapGit repo root
+    const specificFiles =
+      options.files && options.files.length > 0 ? options.files : undefined;
+    let sourcePath = options.source;
+
+    if (specificFiles) {
+      const repoRoot = findAbapGitRoot(ctx.cwd);
+      if (!repoRoot) {
+        ctx.logger.error('❌ No .abapgit.xml found in any parent directory.');
+        ctx.logger.error(
+          '   Run this command from within an abapGit repository.',
+        );
+        process.exit(1);
+      }
+      sourcePath = repoRoot;
+    }
+
     ctx.logger.info('🚀 Starting export...');
-    ctx.logger.info(`📁 Source: ${options.source}`);
+    ctx.logger.info(`📁 Source: ${sourcePath}`);
     ctx.logger.info(`🎯 Format: ${options.format}`);
+    if (specificFiles) ctx.logger.info(`📄 Files: ${specificFiles.join(', ')}`);
     if (options.transport)
       ctx.logger.info(`🚚 Transport: ${options.transport}`);
     if (options.package) ctx.logger.info(`📦 Package: ${options.package}`);
     if (options.dryRun) ctx.logger.info(`🔍 Mode: Dry run (no changes)`);
 
-    // Create FileTree from source path
-    const fileTree = createFileTree(options.source);
+    // Create FileTree — wrap with filter when deploying specific files
+    let fileTree = createFileTree(sourcePath);
+    if (specificFiles) {
+      const relFiles = resolveFilesRelativeToRoot(
+        specificFiles,
+        ctx.cwd,
+        sourcePath,
+      );
+      fileTree = new FilteredFileTree(fileTree, relFiles);
+    }
 
     // Parse object types filter
     const objectTypes = options.types
@@ -322,6 +370,18 @@ export const exportCommand: CliCommandPlugin = {
             if (!exists) {
               ctx.logger.info(`   📦 Creating subpackage ${pkgName}...`);
               try {
+                // Build transport config — SAP requires both softwareComponent
+                // and transportLayer when transport element is present
+                const swComp = parentPkg?.transport?.softwareComponent?.name;
+                const trLayer = parentPkg?.transport?.transportLayer?.name;
+                const transportConfig =
+                  swComp || trLayer
+                    ? {
+                        softwareComponent: { name: swComp ?? '' },
+                        transportLayer: { name: trLayer ?? '' },
+                      }
+                    : undefined;
+
                 await AdkPackage.create(
                   pkgName,
                   {
@@ -331,17 +391,15 @@ export const exportCommand: CliCommandPlugin = {
                     attributes: {
                       packageType: 'development',
                       ...(options.abapLanguageVersion
-                        ? { languageVersion: options.abapLanguageVersion }
+                        ? {
+                            languageVersion: options.abapLanguageVersion as
+                              | ''
+                              | '2'
+                              | '5',
+                          }
                         : {}),
                     },
-                    transport: {
-                      softwareComponent: parentPkg?.transport?.softwareComponent
-                        ? { name: parentPkg.transport.softwareComponent.name }
-                        : undefined,
-                      transportLayer: parentPkg?.transport?.transportLayer
-                        ? { name: parentPkg.transport.transportLayer.name }
-                        : undefined,
-                    },
+                    ...(transportConfig ? { transport: transportConfig } : {}),
                   },
                   { transport: options.transport },
                   adkContext,
@@ -372,9 +430,17 @@ export const exportCommand: CliCommandPlugin = {
           if (!targetPkg) continue;
 
           try {
+            // Save local _data before load() — load() overwrites _data with
+            // SAP's current server state, destroying abapGit-sourced fields.
+            const localData = (obj as any)._data;
+
             // Try loading existing object from SAP
             await obj.load();
             const currentPkg = (obj as any).package as string | undefined;
+
+            // Restore the abapGit-sourced data (load was only for package check)
+            (obj as any)._data = localData;
+
             if (!currentPkg || currentPkg === targetPkg) continue;
 
             // Object exists in wrong package — delete so deploy recreates it
@@ -411,16 +477,40 @@ export const exportCommand: CliCommandPlugin = {
       }
 
       // ============================================
+      // Pre-deploy: force-unlock all objects (--unlock)
+      // ============================================
+      if (options.unlock && !options.dryRun) {
+        ctx.logger.info(
+          `\n� --unlock: Force-unlocking all ${objectSet.size} objects...`,
+        );
+        let unlocked = 0;
+        for (const obj of objectSet) {
+          try {
+            await (client as any).fetch(`${obj.objectUri}?_action=UNLOCK`, {
+              method: 'POST',
+              headers: { 'X-sap-adt-sessiontype': 'stateful' },
+            });
+            unlocked++;
+          } catch {
+            // Object wasn't locked — that's fine, ignore
+          }
+        }
+        if (unlocked > 0) {
+          ctx.logger.info(`   🔓 ${unlocked} object(s) unlocked`);
+        }
+      }
+
+      // ============================================
       // Deploy using AdkObjectSet (save + activate)
       // ============================================
       if (!options.dryRun) {
-        ctx.logger.info(`\n🚀 Deploying ${objectSet.size} objects...`);
+        ctx.logger.info(`\n� Deploying ${objectSet.size} objects...`);
 
         // Use AdkObjectSet.deploy() for save inactive + bulk activate
         // Use 'upsert' mode: tries lock first (update existing), falls back to create if not found
         const deployResult = await objectSet.deploy({
           transport: options.transport,
-          activate: options.activate !== false,
+          activate: options.activate,
           mode: 'upsert',
           onProgress: (saved, total, obj) => {
             if (obj._unchanged) {

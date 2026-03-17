@@ -34,6 +34,22 @@ async function resolvePackagePath(packageName: string): Promise<string[]> {
 }
 
 /**
+ * Options for importing a single object by name (search-based)
+ */
+export interface ObjectImportOptions {
+  /** Object name to search for (e.g., 'ZAGE_DOMA_CASE_SENSITIVE') */
+  objectName: string;
+  /** Output directory for serialized files */
+  outputPath: string;
+  /** Format plugin name or package (e.g., 'abapgit', '@abapify/adt-plugin-abapgit') */
+  format: string;
+  /** Format-specific options provided via CLI */
+  formatOptions?: Record<string, FormatOptionValue>;
+  /** Enable debug output */
+  debug?: boolean;
+}
+
+/**
  * Options for importing a transport request
  */
 export interface TransportImportOptions {
@@ -77,6 +93,10 @@ export interface ImportResult {
   transportNumber?: string;
   /** Package name (for package imports) */
   packageName?: string;
+  /** Object name (for single-object imports) */
+  objectName?: string;
+  /** Object type (for single-object imports) */
+  objectType?: string;
   /** Description of the imported content */
   description: string;
   /** Total objects found */
@@ -317,8 +337,9 @@ export class ImportService {
     let objectsToImport = allObjects;
     if (options.objectTypes && options.objectTypes.length > 0) {
       const types = options.objectTypes.map((t) => t.toUpperCase());
-      objectsToImport = allObjects.filter((obj: { type: string }) =>
-        types.includes(obj.type),
+      objectsToImport = allObjects.filter(
+        (obj: { type: string }) =>
+          types.includes(obj.type) || types.includes(obj.type.split('/')[0]),
       );
       if (options.debug) {
         console.log(
@@ -407,6 +428,176 @@ export class ImportService {
       packageName: options.packageName,
       description: pkg.description || `Package ${options.packageName}`,
       totalObjects: objectsToImport.length,
+      results,
+      objectsByType,
+      outputPath: options.outputPath,
+    };
+  }
+
+  /**
+   * Import a single object by name (search-based resolution)
+   *
+   * Flow:
+   * 1. quickSearch for the object name
+   * 2. Find exact match — if ambiguous, report all matches
+   * 3. Extract ADT type from search result
+   * 4. Load via ADK factory + format plugin → local file
+   *
+   * @param options - Import options including object name, output path, and format
+   * @returns Import result with statistics
+   */
+  async importObject(options: ObjectImportOptions): Promise<ImportResult> {
+    if (options.debug) {
+      console.log(`🔍 Searching for object: ${options.objectName}`);
+      console.log(`📁 Output path: ${options.outputPath}`);
+      console.log(`🎯 Format: ${options.format}`);
+    }
+
+    // Step 1: Search for the object via quickSearch
+    const ctx = getGlobalContext();
+    const searchResult =
+      await ctx.client.adt.repository.informationsystem.search.quickSearch({
+        query: options.objectName,
+        maxResults: 10,
+      });
+
+    type SearchObject = {
+      name?: string;
+      type?: string;
+      uri?: string;
+      description?: string;
+      packageName?: string;
+    };
+
+    // Handle different response shapes from quickSearch
+    const resultsAny = searchResult as Record<string, unknown>;
+    if (options.debug) {
+      console.log(
+        `🔎 Raw search result keys: ${Object.keys(resultsAny).join(', ')}`,
+      );
+    }
+    let rawObjects: SearchObject | SearchObject[] | undefined;
+    if ('objectReference' in resultsAny && resultsAny.objectReference) {
+      rawObjects = resultsAny.objectReference as SearchObject | SearchObject[];
+    } else if (
+      'objectReferences' in resultsAny &&
+      resultsAny.objectReferences
+    ) {
+      const refs = resultsAny.objectReferences as {
+        objectReference?: SearchObject | SearchObject[];
+      };
+      rawObjects = refs.objectReference;
+    } else if ('mainObject' in resultsAny && resultsAny.mainObject) {
+      const main = resultsAny.mainObject as {
+        objectReference?: SearchObject | SearchObject[];
+      };
+      rawObjects = main.objectReference;
+    }
+    const objects: SearchObject[] = rawObjects
+      ? Array.isArray(rawObjects)
+        ? rawObjects
+        : [rawObjects]
+      : [];
+
+    // Step 2: Find exact match (case-insensitive)
+    const exactMatch = objects.find(
+      (obj: SearchObject) =>
+        String(obj.name || '').toUpperCase() ===
+        options.objectName.toUpperCase(),
+    );
+
+    if (!exactMatch) {
+      // Show similar objects as a hint
+      const similar = objects
+        .filter((obj: SearchObject) =>
+          String(obj.name || '')
+            .toUpperCase()
+            .includes(options.objectName.toUpperCase()),
+        )
+        .slice(0, 5);
+
+      const hint =
+        similar.length > 0
+          ? `\n💡 Similar objects:\n${similar.map((o: SearchObject) => `   • ${o.name} (${o.type}) – ${o.packageName}`).join('\n')}`
+          : '';
+
+      throw new Error(
+        `Object '${options.objectName}' not found in the system.${hint}`,
+      );
+    }
+
+    // Extract base type (e.g. "DOMA/DD" → "DOMA")
+    const fullType = String(exactMatch.type || '');
+    const slashIndex = fullType.indexOf('/');
+    const baseType =
+      slashIndex >= 0 ? fullType.substring(0, slashIndex) : fullType;
+
+    if (options.debug) {
+      console.log(
+        `✅ Resolved: ${exactMatch.name} (${baseType}) in package ${exactMatch.packageName}`,
+      );
+    }
+
+    // Step 3: Load format plugin
+    const plugin = await loadFormatPlugin(options.format);
+    const configFormatOptions = await this.getConfigFormatOptions(
+      options.format,
+    );
+
+    if (!plugin.instance.registry.isSupported(baseType)) {
+      throw new Error(
+        `Object type '${baseType}' is not supported by format plugin '${plugin.name}'.`,
+      );
+    }
+
+    // Step 4: Load ADK object via factory
+    const factory = createAdkFactory(ctx);
+    const adkObject = factory.get(String(exactMatch.name), baseType);
+    await (adkObject as any).load();
+
+    // Step 5: Serialize via format plugin
+    const context: ImportContext = {
+      resolvePackagePath,
+      formatOptions: options.formatOptions,
+      configFormatOptions,
+    };
+
+    const results = { success: 0, skipped: 0, failed: 0 };
+    const objectsByType: Record<string, number> = {};
+
+    const result = await plugin.instance.format.import(
+      adkObject as any,
+      options.outputPath,
+      context,
+    );
+
+    if (result.success) {
+      objectsByType[baseType] = 1;
+      results.success = 1;
+      if (options.debug) {
+        console.log(`  ✅ ${baseType} ${exactMatch.name}`);
+      }
+    } else {
+      results.failed = 1;
+      if (options.debug) {
+        console.log(
+          `  ❌ ${baseType} ${exactMatch.name}: ${result.errors?.join(', ') || 'unknown error'}`,
+        );
+      }
+    }
+
+    // Call afterImport hook if available
+    if (plugin.instance.hooks?.afterImport) {
+      await plugin.instance.hooks.afterImport(options.outputPath);
+    }
+
+    return {
+      objectName: String(exactMatch.name),
+      objectType: baseType,
+      description:
+        String(exactMatch.description || '') ||
+        `${baseType} ${exactMatch.name}`,
+      totalObjects: 1,
       results,
       objectsByType,
       outputPath: options.outputPath,

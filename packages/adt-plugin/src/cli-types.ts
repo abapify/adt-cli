@@ -130,6 +130,12 @@ export interface CliCommandPlugin {
   name: string;
 
   /**
+   * Command alias (alternate name)
+   * @example alias: 'deploy' allows `adt deploy` in addition to `adt export`
+   */
+  alias?: string;
+
+  /**
    * Command description shown in help
    */
   description: string;

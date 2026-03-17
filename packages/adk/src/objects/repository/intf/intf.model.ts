@@ -76,4 +76,6 @@ export class AdkInterface extends AdkMainObject<
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('INTF', InterfaceKind, AdkInterface);
+registerObjectType('INTF', InterfaceKind, AdkInterface, {
+  endpoint: 'oo/interfaces',
+});

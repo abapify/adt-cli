@@ -22,6 +22,13 @@ export type DevcSchema =
       };
     }
   | {
+      values: {
+        DEVC?: {
+          CTEXT: string;
+        };
+      };
+    }
+  | {
       abap: {
         values: {
           DEVC?: {

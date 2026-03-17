@@ -31,7 +31,7 @@ export const packageHandler = createHandler(AdkPackage, {
 
   // Git → SAP: Map abapGit values to ADK data (type inferred from AdkPackage)
   // Note: DEVC doesn't have DEVCLASS in abapGit XML, name comes from filename
-  fromAbapGit: ({ DEVC }) => ({
+  fromAbapGit: ({ DEVC } = {}) => ({
     name: '', // Package name must be set by deserializer from filename
     description: DEVC?.CTEXT,
   }),

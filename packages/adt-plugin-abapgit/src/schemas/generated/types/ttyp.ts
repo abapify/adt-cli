@@ -35,6 +35,26 @@ export type TtypSchema =
       };
     }
   | {
+      values: {
+        DD40V?: {
+          TYPENAME: string;
+          DDLANGUAGE?: string;
+          ROWTYPE?: string;
+          ROWKIND?: string;
+          DATATYPE?: string;
+          ACCESSMODE?: string;
+          KEYDEF?: string;
+          KEYKIND?: string;
+          GENERIC?: string;
+          LENG?: string;
+          DECIMALS?: string;
+          DDTEXT?: string;
+          TYPELEN?: string;
+          DEFFDNAME?: string;
+        };
+      };
+    }
+  | {
       abap: {
         values: {
           DD40V?: {

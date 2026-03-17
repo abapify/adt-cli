@@ -28,7 +28,7 @@ export const programHandler = createHandler(AdkProgram, {
 
   // Git → SAP: Map abapGit values to ADK data
   // Returns data matching AbapProgramSchema structure
-  fromAbapGit: ({ PROGDIR, TPOOL }) => {
+  fromAbapGit: ({ PROGDIR, TPOOL } = {}) => {
     // Extract description from TPOOL (text pool) if available
     // TPOOL.item can be a single object or an array
     let descriptionEntry: { ID?: string; ENTRY?: string } | undefined;

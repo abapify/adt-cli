@@ -100,8 +100,7 @@ export default {
       sequence: {
         element: [
           {
-            name: 'values',
-            type: 'asx:AbapValuesType',
+            ref: 'asx:values',
           },
         ],
       },

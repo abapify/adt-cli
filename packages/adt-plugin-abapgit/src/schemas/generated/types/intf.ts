@@ -28,6 +28,19 @@ export type IntfSchema =
       };
     }
   | {
+      values: {
+        VSEOINTERF?: {
+          CLSNAME: string;
+          LANGU?: string;
+          DESCRIPT?: string;
+          EXPOSURE?: string;
+          STATE?: string;
+          UNICODE?: string;
+          ABAP_LANGUAGE_VERSION?: string;
+        };
+      };
+    }
+  | {
       abap: {
         values: {
           VSEOINTERF?: {

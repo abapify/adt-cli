@@ -250,14 +250,17 @@ export class AdkObjectSet {
 </adtcore:objectReferences>`;
 
     try {
-      const response = await this.ctx.client.fetch('/sap/bc/adt/activation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/xml',
-          Accept: 'application/xml',
+      const response = await this.ctx.client.fetch(
+        '/sap/bc/adt/activation?method=activate&preauditRequested=true',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/xml',
+            Accept: 'application/xml',
+          },
+          body: activationXml,
         },
-        body: activationXml,
-      });
+      );
 
       // NOTE: Could parse actual response XML for detailed messages
       return {

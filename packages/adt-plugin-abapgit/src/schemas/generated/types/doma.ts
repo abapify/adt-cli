@@ -44,6 +44,35 @@ export type DomaSchema =
       };
     }
   | {
+      values: {
+        DD01V?: {
+          DOMNAME: string;
+          DDLANGUAGE?: string;
+          DATATYPE?: string;
+          LENG?: string;
+          OUTPUTLEN?: string;
+          DECIMALS?: string;
+          LOWERCASE?: string;
+          SIGNFLAG?: string;
+          VALEXI?: string;
+          ENTITYTAB?: string;
+          CONVEXIT?: string;
+          DDTEXT?: string;
+          DOMMASTER?: string;
+        };
+        DD07V_TAB?: {
+          DD07V?: {
+            DOMNAME?: string;
+            VALPOS?: string;
+            DDLANGUAGE?: string;
+            DOMVALUE_L?: string;
+            DOMVALUE_H?: string;
+            DDTEXT?: string;
+          }[];
+        };
+      };
+    }
+  | {
       abap: {
         values: {
           DD01V?: {

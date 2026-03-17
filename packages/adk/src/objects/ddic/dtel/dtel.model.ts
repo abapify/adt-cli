@@ -56,4 +56,6 @@ export class AdkDataElement extends AdkMainObject<
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('DTEL', DataElementKind, AdkDataElement);
+registerObjectType('DTEL', DataElementKind, AdkDataElement, {
+  endpoint: 'ddic/dataelements',
+});

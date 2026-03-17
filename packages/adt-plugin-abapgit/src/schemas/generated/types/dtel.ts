@@ -13,21 +13,23 @@ export type DtelSchema =
             DD04V?: {
               ROLLNAME: string;
               DDLANGUAGE?: string;
-              DDTEXT?: string;
               DOMNAME?: string;
-              DATATYPE?: string;
-              LENG?: string;
-              DECIMALS?: string;
               HEADLEN?: string;
               SCRLEN1?: string;
               SCRLEN2?: string;
               SCRLEN3?: string;
+              DDTEXT?: string;
               REPTEXT?: string;
               SCRTEXT_S?: string;
               SCRTEXT_M?: string;
               SCRTEXT_L?: string;
               DTELMASTER?: string;
+              DATATYPE?: string;
+              LENG?: string;
+              DECIMALS?: string;
+              OUTPUTLEN?: string;
               REFKIND?: string;
+              REFTYPE?: string;
               ABAP_LANGUAGE_VERSION?: string;
             };
           };
@@ -39,26 +41,54 @@ export type DtelSchema =
       };
     }
   | {
+      values: {
+        DD04V?: {
+          ROLLNAME: string;
+          DDLANGUAGE?: string;
+          DOMNAME?: string;
+          HEADLEN?: string;
+          SCRLEN1?: string;
+          SCRLEN2?: string;
+          SCRLEN3?: string;
+          DDTEXT?: string;
+          REPTEXT?: string;
+          SCRTEXT_S?: string;
+          SCRTEXT_M?: string;
+          SCRTEXT_L?: string;
+          DTELMASTER?: string;
+          DATATYPE?: string;
+          LENG?: string;
+          DECIMALS?: string;
+          OUTPUTLEN?: string;
+          REFKIND?: string;
+          REFTYPE?: string;
+          ABAP_LANGUAGE_VERSION?: string;
+        };
+      };
+    }
+  | {
       abap: {
         values: {
           DD04V?: {
             ROLLNAME: string;
             DDLANGUAGE?: string;
-            DDTEXT?: string;
             DOMNAME?: string;
-            DATATYPE?: string;
-            LENG?: string;
-            DECIMALS?: string;
             HEADLEN?: string;
             SCRLEN1?: string;
             SCRLEN2?: string;
             SCRLEN3?: string;
+            DDTEXT?: string;
             REPTEXT?: string;
             SCRTEXT_S?: string;
             SCRTEXT_M?: string;
             SCRTEXT_L?: string;
             DTELMASTER?: string;
+            DATATYPE?: string;
+            LENG?: string;
+            DECIMALS?: string;
+            OUTPUTLEN?: string;
             REFKIND?: string;
+            REFTYPE?: string;
             ABAP_LANGUAGE_VERSION?: string;
           };
         };

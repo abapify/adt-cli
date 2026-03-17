@@ -168,7 +168,11 @@ export {
   isTypeRegistered,
   getRegisteredTypes,
   getRegisteredKinds,
+  getEndpointForType,
+  getObjectUri,
   ADT_TYPE_MAPPINGS,
+  type NameTransform,
+  type RegisterObjectTypeOptions,
 } from './base/registry';
 
 // ADK kinds and type mapping

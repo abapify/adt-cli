@@ -1,9 +1,13 @@
 import { basename } from 'path';
+import {
+  getEndpointForType,
+  getObjectUri as adkGetObjectUri,
+} from '@abapify/adk';
 
 export interface ObjectTypeMapping {
   endpoint: string;
   description: string;
-  sections?: Record<string, string>; // Optional section mappings
+  sections?: Record<string, string>;
 }
 
 export interface ParsedAbapFile {
@@ -20,70 +24,35 @@ export interface ObjectTypeInfo {
   section?: string;
 }
 
-// Map ABAP object types to SAP ADT endpoints
-// Based on ABAP file format naming convention: <name>.<type>.[<section>].abap
-const ABAP_OBJECT_MAPPINGS: Record<string, ObjectTypeMapping> = {
-  // Object-Oriented Programming
+/**
+ * Section mappings for object types that have sub-sources.
+ * Endpoints come from the ADK registry; this only holds section info.
+ */
+const SECTION_MAPPINGS: Record<string, Record<string, string>> = {
   clas: {
-    endpoint: 'oo/classes',
-    description: 'Class',
-    sections: {
-      // Main class file (no section)
-      '': 'source/main',
-      // Class sections
-      definitions: 'source/definitions',
-      implementations: 'source/implementations',
-      macros: 'source/macros',
-      testclasses: 'source/testclasses',
-    },
+    '': 'source/main',
+    definitions: 'source/definitions',
+    implementations: 'source/implementations',
+    macros: 'source/macros',
+    testclasses: 'source/testclasses',
   },
-  intf: {
-    endpoint: 'oo/interfaces',
-    description: 'Interface',
-    // Interfaces typically don't have sections
-  },
+};
 
-  // Programs and Includes
-  prog: {
-    endpoint: 'programs/programs',
-    description: 'Program',
-  },
-  incl: {
-    endpoint: 'programs/includes',
-    description: 'Include',
-  },
-
-  // Function Groups
-  fugr: {
-    endpoint: 'functions/groups',
-    description: 'Function Group',
-  },
-
-  // Data Dictionary
-  dtel: {
-    endpoint: 'ddic/dataelements',
-    description: 'Data Element',
-  },
-  doma: {
-    endpoint: 'ddic/domains',
-    description: 'Domain',
-  },
-  tabl: {
-    endpoint: 'ddic/tables',
-    description: 'Table',
-  },
-  ttyp: {
-    endpoint: 'ddic/tabletypes',
-    description: 'Table Type',
-  },
-
-  // Transformations and Web Services
-  xslt: {
-    endpoint: 'transformations',
-    description: 'XSLT Transformation',
-  },
-
-  // Additional object types can be easily added here
+/**
+ * Human-readable descriptions for object types.
+ * Kept here since ADK registry doesn't carry descriptions.
+ */
+const TYPE_DESCRIPTIONS: Record<string, string> = {
+  clas: 'Class',
+  intf: 'Interface',
+  prog: 'Program',
+  incl: 'Include',
+  fugr: 'Function Group',
+  dtel: 'Data Element',
+  doma: 'Domain',
+  tabl: 'Table',
+  ttyp: 'Table Type',
+  xslt: 'XSLT Transformation',
 };
 
 /**
@@ -117,7 +86,7 @@ export function parseAbapFilename(filename: string): ParsedAbapFile | null {
 
 /**
  * Generic function to detect ABAP object type information from filename
- * Uses the parsed filename structure and object mappings
+ * Uses the parsed filename structure and ADK registry for endpoint resolution
  */
 export function detectObjectTypeFromFilename(
   filename: string,
@@ -127,16 +96,17 @@ export function detectObjectTypeFromFilename(
     return null;
   }
 
-  const mapping = ABAP_OBJECT_MAPPINGS[parsed.type];
-  if (!mapping) {
+  const adtType = parsed.type.toUpperCase();
+  const endpoint = getEndpointForType(adtType);
+  if (!endpoint) {
     return null;
   }
 
   return {
-    type: parsed.type.toUpperCase(),
+    type: adtType,
     name: parsed.name.toUpperCase(),
-    endpoint: mapping.endpoint,
-    description: mapping.description,
+    endpoint,
+    description: TYPE_DESCRIPTIONS[parsed.type] ?? adtType,
     section: parsed.section,
   };
 }
@@ -146,7 +116,10 @@ export function detectObjectTypeFromFilename(
  * Returns the base URI for object operations (without source path)
  */
 export function objectInfoToUri(objectInfo: ObjectTypeInfo): string {
-  return `/sap/bc/adt/${objectInfo.endpoint}/${objectInfo.name.toLowerCase()}`;
+  return (
+    adkGetObjectUri(objectInfo.type, objectInfo.name) ??
+    `/sap/bc/adt/${objectInfo.endpoint}/${objectInfo.name.toLowerCase()}`
+  );
 }
 
 /**
@@ -166,11 +139,11 @@ export function getSourcePath(
   objectInfo: ObjectTypeInfo,
   version?: 'active' | 'inactive',
 ): string {
-  const mapping = ABAP_OBJECT_MAPPINGS[objectInfo.type.toLowerCase()];
+  const sections = SECTION_MAPPINGS[objectInfo.type.toLowerCase()];
 
   // Check if object type has section mappings and if section is provided
-  if (mapping?.sections && objectInfo.section) {
-    const sectionPath = mapping.sections[objectInfo.section];
+  if (sections && objectInfo.section) {
+    const sectionPath = sections[objectInfo.section];
     if (sectionPath) {
       return version ? `${sectionPath}?version=${version}` : sectionPath;
     }

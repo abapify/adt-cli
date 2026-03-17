@@ -14,15 +14,16 @@ export type TablSchema =
               TABNAME: string;
               DDLANGUAGE?: string;
               TABCLASS?: string;
+              CLIDEP?: string;
               SQLTAB?: string;
               DATCLASS?: string;
-              BUFFERED?: string;
+              DDTEXT?: string;
               MASTERLANG?: string;
+              BUFFERED?: string;
               MATEFLAG?: string;
               CONTFLAG?: string;
               SHLPEXI?: string;
               EXCLASS?: string;
-              DDTEXT?: string;
               AUTHCLASS?: string;
             };
             DD03P_TABLE?: {
@@ -36,14 +37,14 @@ export type TablSchema =
                 ADMINFIELD?: string;
                 INTTYPE?: string;
                 INTLEN?: string;
+                NOTNULL?: string;
                 DATATYPE?: string;
                 LENG?: string;
                 DECIMALS?: string;
-                NOTNULL?: string;
                 DOMNAME?: string;
                 SHLPORIGIN?: string;
-                COMPTYPE?: string;
                 MASK?: string;
+                COMPTYPE?: string;
                 REFTABLE?: string;
                 REFFIELD?: string;
                 CONRFLAG?: string;
@@ -60,21 +61,68 @@ export type TablSchema =
       };
     }
   | {
+      values: {
+        DD02V?: {
+          TABNAME: string;
+          DDLANGUAGE?: string;
+          TABCLASS?: string;
+          CLIDEP?: string;
+          SQLTAB?: string;
+          DATCLASS?: string;
+          DDTEXT?: string;
+          MASTERLANG?: string;
+          BUFFERED?: string;
+          MATEFLAG?: string;
+          CONTFLAG?: string;
+          SHLPEXI?: string;
+          EXCLASS?: string;
+          AUTHCLASS?: string;
+        };
+        DD03P_TABLE?: {
+          DD03P?: {
+            TABNAME?: string;
+            FIELDNAME?: string;
+            DDLANGUAGE?: string;
+            POSITION?: string;
+            KEYFLAG?: string;
+            ROLLNAME?: string;
+            ADMINFIELD?: string;
+            INTTYPE?: string;
+            INTLEN?: string;
+            NOTNULL?: string;
+            DATATYPE?: string;
+            LENG?: string;
+            DECIMALS?: string;
+            DOMNAME?: string;
+            SHLPORIGIN?: string;
+            MASK?: string;
+            COMPTYPE?: string;
+            REFTABLE?: string;
+            REFFIELD?: string;
+            CONRFLAG?: string;
+            PRECFIELD?: string;
+            DDTEXT?: string;
+          }[];
+        };
+      };
+    }
+  | {
       abap: {
         values: {
           DD02V?: {
             TABNAME: string;
             DDLANGUAGE?: string;
             TABCLASS?: string;
+            CLIDEP?: string;
             SQLTAB?: string;
             DATCLASS?: string;
-            BUFFERED?: string;
+            DDTEXT?: string;
             MASTERLANG?: string;
+            BUFFERED?: string;
             MATEFLAG?: string;
             CONTFLAG?: string;
             SHLPEXI?: string;
             EXCLASS?: string;
-            DDTEXT?: string;
             AUTHCLASS?: string;
           };
           DD03P_TABLE?: {
@@ -88,14 +136,14 @@ export type TablSchema =
               ADMINFIELD?: string;
               INTTYPE?: string;
               INTLEN?: string;
+              NOTNULL?: string;
               DATATYPE?: string;
               LENG?: string;
               DECIMALS?: string;
-              NOTNULL?: string;
               DOMNAME?: string;
               SHLPORIGIN?: string;
-              COMPTYPE?: string;
               MASK?: string;
+              COMPTYPE?: string;
               REFTABLE?: string;
               REFFIELD?: string;
               CONRFLAG?: string;

@@ -47,6 +47,10 @@ export default {
       abstract: true,
     },
     {
+      name: 'values',
+      type: 'asx:AbapValuesType',
+    },
+    {
       name: 'abap',
       type: 'asx:AbapType',
     },
@@ -88,6 +92,11 @@ export default {
             minOccurs: '0',
           },
           {
+            name: 'CLIDEP',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
             name: 'SQLTAB',
             type: 'xs:string',
             minOccurs: '0',
@@ -98,12 +107,17 @@ export default {
             minOccurs: '0',
           },
           {
-            name: 'BUFFERED',
+            name: 'DDTEXT',
             type: 'xs:string',
             minOccurs: '0',
           },
           {
             name: 'MASTERLANG',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
+            name: 'BUFFERED',
             type: 'xs:string',
             minOccurs: '0',
           },
@@ -124,11 +138,6 @@ export default {
           },
           {
             name: 'EXCLASS',
-            type: 'xs:string',
-            minOccurs: '0',
-          },
-          {
-            name: 'DDTEXT',
             type: 'xs:string',
             minOccurs: '0',
           },
@@ -190,6 +199,11 @@ export default {
             minOccurs: '0',
           },
           {
+            name: 'NOTNULL',
+            type: 'xs:string',
+            minOccurs: '0',
+          },
+          {
             name: 'DATATYPE',
             type: 'xs:string',
             minOccurs: '0',
@@ -205,11 +219,6 @@ export default {
             minOccurs: '0',
           },
           {
-            name: 'NOTNULL',
-            type: 'xs:string',
-            minOccurs: '0',
-          },
-          {
             name: 'DOMNAME',
             type: 'xs:string',
             minOccurs: '0',
@@ -220,12 +229,12 @@ export default {
             minOccurs: '0',
           },
           {
-            name: 'COMPTYPE',
+            name: 'MASK',
             type: 'xs:string',
             minOccurs: '0',
           },
           {
-            name: 'MASK',
+            name: 'COMPTYPE',
             type: 'xs:string',
             minOccurs: '0',
           },
@@ -275,8 +284,7 @@ export default {
       sequence: {
         element: [
           {
-            name: 'values',
-            type: 'asx:AbapValuesType',
+            ref: 'asx:values',
           },
         ],
       },

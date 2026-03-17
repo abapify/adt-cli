@@ -81,18 +81,19 @@ export async function* deserialize(
   // Get ADK factory for creating objects
   const adk = createAdk(client);
 
-  // Resolve folder logic from .abapgit.xml (if present)
+  // Resolve folder logic from .abapgit.xml (optional — defaults used when missing)
   let folderLogic: import('./folder-logic').FolderLogic = 'prefix';
-  let startDir = 'src';
-  try {
-    if (await fileTree.exists('.abapgit.xml')) {
+  let startDir = '';
+  const hasAbapGitXml = await fileTree.exists('.abapgit.xml');
+  if (hasAbapGitXml) {
+    try {
       const xml = await fileTree.read('.abapgit.xml');
       const meta = parseAbapGitMetadata(xml);
       folderLogic = meta.folderLogic;
       startDir = stripSlashes(meta.startingFolder);
+    } catch {
+      // Fall through to defaults if XML parsing fails
     }
-  } catch {
-    // Fall through to defaults
   }
 
   // Find all XML files (these define the objects)
@@ -160,7 +161,7 @@ export async function* deserialize(
       const xmlContent = await fileTree.read(objFiles.xmlFile);
       const parsed = handler.schema.parse(xmlContent);
       // Schema parses to { abapGit: { abap: { values: ... } } }
-      const values = (parsed as any)?.abapGit?.abap?.values;
+      const values = (parsed as any)?.abapGit?.abap?.values ?? {};
 
       // Read source files, mapping suffixes using handler's suffixToSourceKey
       const sources: Record<string, string> = {};
@@ -189,7 +190,11 @@ export async function* deserialize(
       const fullData = { ...payload, name: objectName };
 
       // Create ADK object with data (pre-loaded, no need to call load())
-      const adkObject = adk.getWithData(fullData, objFiles.type) as AdkObject;
+      // Use payload type if available (e.g., TABL/DS for structures),
+      // falling back to filename-derived type
+      const adkType =
+        typeof payload.type === 'string' ? payload.type : objFiles.type;
+      const adkObject = adk.getWithData(fullData, adkType) as AdkObject;
 
       // Set sources on object using handler's setSources method
       if (Object.keys(sources).length > 0) {
@@ -211,22 +216,31 @@ export async function* deserialize(
         (adkObject as any)._pendingDescription = payload.description;
       }
 
-      // Resolve packageRef using abapGit folder logic
+      // Resolve packageRef
       if (options?.rootPackage) {
         const data = (adkObject as any)._data;
         if (data && !data.packageRef) {
-          const sourceDir = objFiles.xmlFile.split('/').slice(0, -1).join('/');
-          // Strip starting folder prefix to get relative path
-          const relDir = sourceDir.startsWith(startDir)
-            ? sourceDir.slice(startDir.length).replace(/^\/+/, '')
-            : sourceDir;
+          if (hasAbapGitXml) {
+            // Folder logic: resolve subpackage from directory structure
+            const sourceDir = objFiles.xmlFile
+              .split('/')
+              .slice(0, -1)
+              .join('/');
+            // Strip starting folder prefix to get relative path
+            const relDir = sourceDir.startsWith(startDir)
+              ? sourceDir.slice(startDir.length).replace(/^\/+/, '')
+              : sourceDir;
 
-          const pkgName = resolvePackageFromDir(
-            relDir,
-            folderLogic,
-            options.rootPackage,
-          );
-          data.packageRef = { name: pkgName };
+            const pkgName = resolvePackageFromDir(
+              relDir,
+              folderLogic,
+              options.rootPackage,
+            );
+            data.packageRef = { name: pkgName };
+          } else {
+            // No .abapgit.xml: assign rootPackage directly
+            data.packageRef = { name: options.rootPackage };
+          }
         }
       }
 

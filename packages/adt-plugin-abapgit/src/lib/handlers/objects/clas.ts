@@ -109,7 +109,7 @@ export const classHandler = createHandler(AdkClass, {
   },
 
   // Git → SAP: Map abapGit values to ADK data (type inferred from AdkClass)
-  fromAbapGit: ({ VSEOCLASS }) => ({
+  fromAbapGit: ({ VSEOCLASS } = {}) => ({
     // Required - uppercase for SAP
     name: (VSEOCLASS?.CLSNAME ?? '').toUpperCase(),
     type: 'CLAS/OC', // ADT object type

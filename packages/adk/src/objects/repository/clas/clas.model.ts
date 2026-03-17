@@ -256,4 +256,4 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('CLAS', ClassKind, AdkClass);
+registerObjectType('CLAS', ClassKind, AdkClass, { endpoint: 'oo/classes' });

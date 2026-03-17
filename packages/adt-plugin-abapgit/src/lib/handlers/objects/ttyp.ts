@@ -30,12 +30,25 @@ export const tableTypeHandler = createHandler(AdkTableType, {
     };
   },
 
-  fromAbapGit: ({ DD40V }) =>
+  fromAbapGit: ({ DD40V } = {}) =>
     ({
       name: (DD40V?.TYPENAME ?? '').toUpperCase(),
       type: 'TTYP/TT',
       description: DD40V?.DDTEXT,
       language: sapLangToIso(DD40V?.DDLANGUAGE),
       masterLanguage: sapLangToIso(DD40V?.DDLANGUAGE),
+      rowType: {
+        typeName: DD40V?.ROWTYPE || undefined,
+        typeKind: DD40V?.ROWKIND || undefined,
+        builtInType: DD40V?.DATATYPE ? { dataType: DD40V.DATATYPE } : undefined,
+      },
+      accessType: DD40V?.ACCESSMODE || undefined,
+      primaryKey: {
+        definition: DD40V?.KEYDEF || undefined,
+        kind: DD40V?.KEYKIND || undefined,
+      },
+      secondaryKeys: {
+        allowed: 'N',
+      },
     }) as { name: string } & Record<string, unknown>,
 });

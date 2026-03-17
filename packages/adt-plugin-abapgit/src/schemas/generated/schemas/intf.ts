@@ -47,6 +47,10 @@ export default {
       abstract: true,
     },
     {
+      name: 'values',
+      type: 'asx:AbapValuesType',
+    },
+    {
       name: 'abap',
       type: 'asx:AbapType',
     },
@@ -110,8 +114,7 @@ export default {
       sequence: {
         element: [
           {
-            name: 'values',
-            type: 'asx:AbapValuesType',
+            ref: 'asx:values',
           },
         ],
       },
