@@ -17,13 +17,14 @@
  *
  * Usage:
  *   adt diff zage_structure.tabl.xml
- *   adt diff zcl_myclass.clas.xml
- *   adt diff zif_myintf.intf.xml --no-color
+ *   adt diff *.tabl.xml
+ *   adt diff zcl_myclass.clas.xml --no-color
  */
 
 import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
-import { createAdk, type AdtClient } from '@abapify/adk';
+import { createAdk, type AdtClient, type AdkFactory } from '@abapify/adk';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { glob as nativeGlob } from 'node:fs/promises';
 import { resolve, basename, dirname, join } from 'node:path';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
@@ -34,6 +35,24 @@ import {
   type ObjectHandler,
 } from '@abapify/adt-plugin-abapgit';
 import { tablXmlToCdsDdl } from '../lib/abapgit-to-cds';
+
+/**
+ * Expand glob patterns to matching file paths.
+ * Passes through literal filenames unchanged.
+ */
+async function expandGlobs(patterns: string[], cwd: string): Promise<string[]> {
+  const results: string[] = [];
+  for (const pattern of patterns) {
+    if (/[*?[\]{}]/.test(pattern)) {
+      for await (const match of nativeGlob(pattern, { cwd })) {
+        results.push(match);
+      }
+    } else {
+      results.push(pattern);
+    }
+  }
+  return results;
+}
 
 /**
  * Collect all local files belonging to one abapGit object.
@@ -222,6 +241,269 @@ function printDiff(
   return true;
 }
 
+/** Result of diffing a single file */
+interface DiffResult {
+  objectName: string;
+  objectType: string;
+  hasDifferences: boolean;
+  fileCount: number;
+  identicalCount: number;
+  error?: string;
+}
+
+/**
+ * Diff a single abapGit XML file against SAP remote.
+ * Returns a result object indicating whether differences were found.
+ */
+async function diffSingleFile(
+  filePath: string,
+  ctx: CliContext,
+  adk: AdkFactory,
+  options: {
+    contextLines: number;
+    useColor: boolean;
+    format: string;
+  },
+): Promise<DiffResult> {
+  const { contextLines, useColor, format } = options;
+  const fullPath = resolve(ctx.cwd, filePath);
+
+  if (!existsSync(fullPath)) {
+    return {
+      objectName: filePath,
+      objectType: '?',
+      hasDifferences: false,
+      fileCount: 0,
+      identicalCount: 0,
+      error: `File not found: ${fullPath}`,
+    };
+  }
+
+  // Parse filename to detect type
+  const filename = basename(fullPath);
+  const parsed = parseAbapGitFilename(filename);
+  if (!parsed) {
+    return {
+      objectName: filename,
+      objectType: '?',
+      hasDifferences: false,
+      fileCount: 0,
+      identicalCount: 0,
+      error: `Cannot parse filename: ${filename}. Expected abapGit format: name.type.xml`,
+    };
+  }
+
+  if (parsed.extension !== 'xml') {
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: false,
+      fileCount: 0,
+      identicalCount: 0,
+      error: `Expected .xml metadata file, got .${parsed.extension}. Pass the .xml file, not .abap.`,
+    };
+  }
+
+  // Validate --format option
+  if (format === 'ddl' && parsed.type !== 'TABL') {
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: false,
+      fileCount: 0,
+      identicalCount: 0,
+      error: `DDL format is only supported for TABL objects. Got: ${parsed.type}`,
+    };
+  }
+
+  // Look up handler from abapGit registry
+  const handler = getHandler(parsed.type);
+  if (!handler) {
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: false,
+      fileCount: 0,
+      identicalCount: 0,
+      error: `Unsupported object type: ${parsed.type}. Supported: ${getSupportedTypes().join(', ')}`,
+    };
+  }
+
+  // Collect local files for this object
+  const objectName = parsed.name.toLowerCase();
+  const localFiles = collectLocalFiles(
+    fullPath,
+    objectName,
+    handler.fileExtension,
+  );
+
+  console.log(
+    `\n${useColor ? chalk.bold('Diff:') : 'Diff:'} ${parsed.name} (${parsed.type}) — ${localFiles.size} file(s)`,
+  );
+
+  // Parse local XML to extract ADK type info via fromAbapGit
+  const localXml = readFileSync(fullPath, 'utf-8');
+  let adkType = parsed.type;
+
+  if (handler.fromAbapGit) {
+    try {
+      const parsedXml = handler.schema.parse(localXml);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const values = (parsedXml as any)?.abapGit?.abap?.values ?? {};
+      const payload = handler.fromAbapGit(values);
+      if (typeof payload.type === 'string') {
+        adkType = payload.type;
+      }
+    } catch {
+      // Fall through — use filename-derived type
+    }
+  }
+
+  // Fetch remote ADK object
+  console.log(
+    `${useColor ? chalk.dim('Fetching') : 'Fetching'} ${parsed.name} (${adkType}) from SAP...`,
+  );
+
+  const remoteObj = adk.get(parsed.name, adkType);
+
+  try {
+    await remoteObj.load();
+  } catch (error) {
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: false,
+      fileCount: localFiles.size,
+      identicalCount: 0,
+      error: `Failed to load remote object: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  // ========================================
+  // DDL format: compare CDS DDL source
+  // ========================================
+  if (format === 'ddl') {
+    const localDdl = tablXmlToCdsDdl(localXml);
+
+    let remoteDdl: string;
+    try {
+      remoteDdl = await remoteObj.getSource();
+    } catch (error) {
+      return {
+        objectName: parsed.name,
+        objectType: parsed.type,
+        hasDifferences: false,
+        fileCount: 1,
+        identicalCount: 0,
+        error: `Failed to fetch remote DDL source: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+
+    const ddlFile = `${objectName}.tabl.acds`;
+    const diffFound = printDiff(
+      ddlFile,
+      ddlFile,
+      localDdl,
+      remoteDdl,
+      contextLines,
+      useColor,
+    );
+
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: diffFound,
+      fileCount: 1,
+      identicalCount: diffFound ? 0 : 1,
+    };
+  }
+
+  // Serialize remote using the same handler → produces SerializedFile[]
+  let remoteFiles;
+  try {
+    remoteFiles = await handler.serialize(remoteObj);
+  } catch (error) {
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: false,
+      fileCount: localFiles.size,
+      identicalCount: 0,
+      error: `Failed to serialize remote object: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  // Build remote file map (lowercase path → content)
+  const remoteMap = new Map<string, string>();
+  for (const f of remoteFiles) {
+    remoteMap.set(f.path.toLowerCase(), f.content);
+  }
+
+  // Diff each file
+  let hasDifferences = false;
+  let identicalCount = 0;
+
+  for (const [localPath, localContent] of localFiles) {
+    const remoteContent = remoteMap.get(localPath);
+    if (remoteContent === undefined) {
+      console.log(
+        useColor
+          ? chalk.yellow(`\n  + Only in local: ${localPath}`)
+          : `\n  + Only in local: ${localPath}`,
+      );
+      hasDifferences = true;
+      continue;
+    }
+
+    // For XML files: normalize both through schema, projecting remote
+    // onto local's field set to strip serializer-added extras
+    const isXml = localPath.endsWith('.xml');
+    let diffLocal = localContent;
+    let diffRemote = remoteContent;
+    if (isXml) {
+      [diffLocal, diffRemote] = normalizeXmlPair(
+        localContent,
+        remoteContent,
+        handler,
+      );
+    }
+
+    const diffFound = printDiff(
+      localPath,
+      localPath,
+      diffLocal,
+      diffRemote,
+      contextLines,
+      useColor,
+    );
+    if (diffFound) {
+      hasDifferences = true;
+    } else {
+      identicalCount++;
+    }
+  }
+
+  // Files present in remote but not locally
+  for (const [remotePath] of remoteMap) {
+    if (!localFiles.has(remotePath)) {
+      console.log(
+        useColor
+          ? chalk.yellow(`\n  - Only in remote: ${remotePath}`)
+          : `\n  - Only in remote: ${remotePath}`,
+      );
+      hasDifferences = true;
+    }
+  }
+
+  return {
+    objectName: parsed.name,
+    objectType: parsed.type,
+    hasDifferences,
+    fileCount: localFiles.size,
+    identicalCount,
+  };
+}
+
 export const diffCommand: CliCommandPlugin = {
   name: 'diff',
   description:
@@ -229,8 +511,8 @@ export const diffCommand: CliCommandPlugin = {
 
   arguments: [
     {
-      name: '<file>',
-      description: `Local .xml file to compare (e.g., zcl_myclass.clas.xml). Supported types: ${getSupportedTypes().join(', ')}`,
+      name: '[files...]',
+      description: `Local .xml files or glob patterns to compare (e.g., zcl_myclass.clas.xml, *.tabl.xml). Supported types: ${getSupportedTypes().join(', ')}`,
     },
   ],
 
@@ -253,31 +535,14 @@ export const diffCommand: CliCommandPlugin = {
   ],
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
-    const filePath = args.file as string;
+    const filePatterns = (args.files as string[]) ?? [];
     const contextLines = parseInt(String(args.context ?? '3'), 10);
     const useColor = args.color !== false;
     const format = String(args.format ?? 'xml').toLowerCase();
 
-    // Resolve file path
-    const fullPath = resolve(ctx.cwd, filePath);
-    if (!existsSync(fullPath)) {
-      ctx.logger.error(`File not found: ${fullPath}`);
-      process.exit(1);
-    }
-
-    // Parse filename to detect type
-    const filename = basename(fullPath);
-    const parsed = parseAbapGitFilename(filename);
-    if (!parsed) {
+    if (filePatterns.length === 0) {
       ctx.logger.error(
-        `Cannot parse filename: ${filename}. Expected abapGit format: name.type.xml`,
-      );
-      process.exit(1);
-    }
-
-    if (parsed.extension !== 'xml') {
-      ctx.logger.error(
-        `Expected .xml metadata file, got .${parsed.extension}. Pass the .xml file, not .abap.`,
+        'No files specified. Usage: adt diff <file...> or adt diff *.tabl.xml',
       );
       process.exit(1);
     }
@@ -288,33 +553,12 @@ export const diffCommand: CliCommandPlugin = {
       process.exit(1);
     }
 
-    if (format === 'ddl' && parsed.type !== 'TABL') {
-      ctx.logger.error(
-        `DDL format is only supported for TABL objects. Got: ${parsed.type}`,
-      );
+    // Expand glob patterns
+    const files = await expandGlobs(filePatterns, ctx.cwd);
+    if (files.length === 0) {
+      ctx.logger.error('No files matched the given pattern(s).');
       process.exit(1);
     }
-
-    // Look up handler from abapGit registry
-    const handler = getHandler(parsed.type);
-    if (!handler) {
-      ctx.logger.error(
-        `Unsupported object type: ${parsed.type}. Supported: ${getSupportedTypes().join(', ')}`,
-      );
-      process.exit(1);
-    }
-
-    // Collect local files for this object
-    const objectName = parsed.name.toLowerCase();
-    const localFiles = collectLocalFiles(
-      fullPath,
-      objectName,
-      handler.fileExtension,
-    );
-
-    console.log(
-      `\n${useColor ? chalk.bold('Diff:') : 'Diff:'} ${parsed.name} (${parsed.type}) — ${localFiles.size} file(s)`,
-    );
 
     // Need ADT client for remote comparison
     if (!ctx.getAdtClient) {
@@ -322,184 +566,83 @@ export const diffCommand: CliCommandPlugin = {
       process.exit(1);
     }
 
-    // Parse local XML to extract ADK type info via fromAbapGit
-    const localXml = readFileSync(fullPath, 'utf-8');
-    let adkType = parsed.type;
-
-    if (handler.fromAbapGit) {
-      try {
-        const parsedXml = handler.schema.parse(localXml);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const values = (parsedXml as any)?.abapGit?.abap?.values ?? {};
-        const payload = handler.fromAbapGit(values);
-        if (typeof payload.type === 'string') {
-          adkType = payload.type;
-        }
-      } catch {
-        // Fall through — use filename-derived type
-      }
-    }
-
-    // Fetch remote ADK object
-    console.log(
-      `${useColor ? chalk.dim('Fetching') : 'Fetching'} ${parsed.name} (${adkType}) from SAP...`,
-    );
-
+    // Create ADT client and ADK once, shared across all files
     const client = await ctx.getAdtClient!();
     const adk = createAdk(client as AdtClient);
-    const remoteObj = adk.get(parsed.name, adkType);
-
-    try {
-      await remoteObj.load();
-    } catch (error) {
-      ctx.logger.error(
-        `Failed to load remote object: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      process.exit(1);
-    }
-
-    // ========================================
-    // DDL format: compare CDS DDL source
-    // ========================================
-    if (format === 'ddl') {
-      // Local: convert abapGit XML → CDS DDL
-      const localXml = readFileSync(fullPath, 'utf-8');
-      const localDdl = tablXmlToCdsDdl(localXml);
-
-      // Remote: fetch CDS source directly from SAP
-      let remoteDdl: string;
-      try {
-        remoteDdl = await remoteObj.getSource();
-      } catch (error) {
-        ctx.logger.error(
-          `Failed to fetch remote DDL source: ${error instanceof Error ? error.message : String(error)}`,
-        );
-        process.exit(1);
-      }
-
-      const ddlFile = `${objectName}.tabl.acds`;
-      const diffFound = printDiff(
-        ddlFile,
-        ddlFile,
-        localDdl,
-        remoteDdl,
-        contextLines,
-        useColor,
-      );
-
-      console.log('');
-      if (diffFound) {
-        console.log(
-          useColor ? chalk.red('Differences found.') : 'Differences found.',
-        );
-        process.exit(1);
-      } else {
-        console.log(
-          useColor
-            ? chalk.green('No differences found. (DDL source identical)')
-            : 'No differences found. (DDL source identical)',
-        );
-      }
-      return;
-    }
-
-    // Serialize remote using the same handler → produces SerializedFile[]
-    let remoteFiles;
-    try {
-      remoteFiles = await handler.serialize(remoteObj);
-    } catch (error) {
-      ctx.logger.error(
-        `Failed to serialize remote object: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      process.exit(1);
-    }
-
-    // Build remote file map (lowercase path → content)
-    const remoteMap = new Map<string, string>();
-    for (const f of remoteFiles) {
-      remoteMap.set(f.path.toLowerCase(), f.content);
-    }
 
     // Diff each file
-    let hasDifferences = false;
-    let identicalCount = 0;
-
-    for (const [localPath, localContent] of localFiles) {
-      const remoteContent = remoteMap.get(localPath);
-      if (remoteContent === undefined) {
-        console.log(
-          useColor
-            ? chalk.yellow(`\n  + Only in local: ${localPath}`)
-            : `\n  + Only in local: ${localPath}`,
-        );
-        hasDifferences = true;
-        continue;
-      }
-
-      // For XML files: normalize both through schema, projecting remote
-      // onto local's field set to strip serializer-added extras
-      const isXml = localPath.endsWith('.xml');
-      let diffLocal = localContent;
-      let diffRemote = remoteContent;
-      if (isXml) {
-        [diffLocal, diffRemote] = normalizeXmlPair(
-          localContent,
-          remoteContent,
-          handler,
-        );
-      }
-
-      const diffFound = printDiff(
-        localPath,
-        localPath,
-        diffLocal,
-        diffRemote,
+    const results: DiffResult[] = [];
+    for (const file of files) {
+      const result = await diffSingleFile(file, ctx, adk, {
         contextLines,
         useColor,
-      );
-      if (diffFound) {
-        hasDifferences = true;
-      } else {
-        identicalCount++;
-      }
-    }
+        format,
+      });
 
-    // Files present in remote but not locally
-    for (const [remotePath] of remoteMap) {
-      if (!localFiles.has(remotePath)) {
-        console.log(
-          useColor
-            ? chalk.yellow(`\n  - Only in remote: ${remotePath}`)
-            : `\n  - Only in remote: ${remotePath}`,
-        );
-        hasDifferences = true;
+      if (result.error) {
+        ctx.logger.error(result.error);
       }
+
+      results.push(result);
     }
 
     // Summary
+    const totalFiles = results.length;
+    const withDiffs = results.filter((r) => r.hasDifferences).length;
+    const withErrors = results.filter((r) => r.error).length;
+    const identical = totalFiles - withDiffs - withErrors;
+
     console.log('');
-    if (!hasDifferences) {
+    if (totalFiles === 1) {
+      // Single-file mode: keep original concise output
+      const r = results[0];
+      if (r.error) {
+        // Error already printed above
+        process.exit(1);
+      }
+      if (r.hasDifferences) {
+        console.log(
+          useColor
+            ? chalk.red('Differences found.') +
+                (r.identicalCount > 0
+                  ? chalk.dim(` (${r.identicalCount} file(s) identical)`)
+                  : '')
+            : `Differences found.${r.identicalCount > 0 ? ` (${r.identicalCount} file(s) identical)` : ''}`,
+        );
+        process.exit(1);
+      }
       console.log(
         useColor
           ? chalk.green(
-              `No differences found. (${identicalCount} file(s) identical)`,
+              `No differences found. (${r.identicalCount} file(s) identical)`,
             )
-          : `No differences found. (${identicalCount} file(s) identical)`,
+          : `No differences found. (${r.identicalCount} file(s) identical)`,
       );
       return;
     }
 
+    // Multi-file summary
+    const parts: string[] = [
+      `${totalFiles} object(s) checked`,
+      `${identical} identical`,
+    ];
+    if (withDiffs > 0) parts.push(`${withDiffs} with differences`);
+    if (withErrors > 0) parts.push(`${withErrors} with errors`);
+    const summary = parts.join(', ');
+
+    if (withDiffs > 0 || withErrors > 0) {
+      console.log(
+        useColor
+          ? chalk.red(`Diff summary: ${summary}`)
+          : `Diff summary: ${summary}`,
+      );
+      process.exit(1);
+    }
     console.log(
       useColor
-        ? chalk.red('Differences found.') +
-            (identicalCount > 0
-              ? chalk.dim(` (${identicalCount} file(s) identical)`)
-              : '')
-        : `Differences found.${identicalCount > 0 ? ` (${identicalCount} file(s) identical)` : ''}`,
+        ? chalk.green(`Diff summary: ${summary}`)
+        : `Diff summary: ${summary}`,
     );
-
-    // Exit with non-zero if differences exist (standard diff convention)
-    process.exit(1);
   },
 };
 
