@@ -5,113 +5,63 @@
  * Mode: Flattened
  */
 
-export type TablSchema =
-  | {
-      abapGit: {
+export type TablSchema = {
+    abapGit: {
         abap: {
-          values: {
-            DD02V?: {
-              TABNAME: string;
-              DDLANGUAGE?: string;
-              TABCLASS?: string;
-              LANGDEP?: string;
-              CLIDEP?: string;
-              SQLTAB?: string;
-              DATCLASS?: string;
-              DDTEXT?: string;
-              MASTERLANG?: string;
-              BUFFERED?: string;
-              MATEFLAG?: string;
-              CONTFLAG?: string;
-              SHLPEXI?: string;
-              EXCLASS?: string;
-              AUTHCLASS?: string;
+            values: {
+                DD02V?: {
+                    TABNAME: string;
+                    DDLANGUAGE?: string;
+                    TABCLASS?: string;
+                    LANGDEP?: string;
+                    CLIDEP?: string;
+                    SQLTAB?: string;
+                    DATCLASS?: string;
+                    DDTEXT?: string;
+                    MASTERLANG?: string;
+                    BUFFERED?: string;
+                    MATEFLAG?: string;
+                    CONTFLAG?: string;
+                    SHLPEXI?: string;
+                    EXCLASS?: string;
+                    AUTHCLASS?: string;
+                };
+                DD03P_TABLE?: {
+                    DD03P?: {
+                        FIELDNAME?: string;
+                        POSITION?: string;
+                        KEYFLAG?: string;
+                        ROLLNAME?: string;
+                        ADMINFIELD?: string;
+                        INTTYPE?: string;
+                        INTLEN?: string;
+                        REFTABLE?: string;
+                        REFFIELD?: string;
+                        DATATYPE?: string;
+                        LENG?: string;
+                        DECIMALS?: string;
+                        NOTNULL?: string;
+                        DOMNAME?: string;
+                        PRECFIELD?: string;
+                        MASK?: string;
+                        DDTEXT?: string;
+                        SHLPORIGIN?: string;
+                        COMPTYPE?: string;
+                        TABNAME?: string;
+                        DDLANGUAGE?: string;
+                        CONRFLAG?: string;
+                    }[];
+                };
             };
-            DD03P_TABLE?: {
-              DD03P?: {
-                TABNAME?: string;
-                FIELDNAME?: string;
-                DDLANGUAGE?: string;
-                POSITION?: string;
-                KEYFLAG?: string;
-                ROLLNAME?: string;
-                ADMINFIELD?: string;
-                INTTYPE?: string;
-                INTLEN?: string;
-                NOTNULL?: string;
-                DATATYPE?: string;
-                LENG?: string;
-                DECIMALS?: string;
-                DOMNAME?: string;
-                SHLPORIGIN?: string;
-                MASK?: string;
-                COMPTYPE?: string;
-                REFTABLE?: string;
-                REFFIELD?: string;
-                CONRFLAG?: string;
-                PRECFIELD?: string;
-                DDTEXT?: string;
-              }[];
-            };
-          };
-          version?: string;
+            version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-      };
-    }
-  | {
-      values: {
+    };
+} | {
+    values: {
         DD02V?: {
-          TABNAME: string;
-          DDLANGUAGE?: string;
-          TABCLASS?: string;
-          LANGDEP?: string;
-          CLIDEP?: string;
-          SQLTAB?: string;
-          DATCLASS?: string;
-          DDTEXT?: string;
-          MASTERLANG?: string;
-          BUFFERED?: string;
-          MATEFLAG?: string;
-          CONTFLAG?: string;
-          SHLPEXI?: string;
-          EXCLASS?: string;
-          AUTHCLASS?: string;
-        };
-        DD03P_TABLE?: {
-          DD03P?: {
-            TABNAME?: string;
-            FIELDNAME?: string;
-            DDLANGUAGE?: string;
-            POSITION?: string;
-            KEYFLAG?: string;
-            ROLLNAME?: string;
-            ADMINFIELD?: string;
-            INTTYPE?: string;
-            INTLEN?: string;
-            NOTNULL?: string;
-            DATATYPE?: string;
-            LENG?: string;
-            DECIMALS?: string;
-            DOMNAME?: string;
-            SHLPORIGIN?: string;
-            MASK?: string;
-            COMPTYPE?: string;
-            REFTABLE?: string;
-            REFFIELD?: string;
-            CONRFLAG?: string;
-            PRECFIELD?: string;
-            DDTEXT?: string;
-          }[];
-        };
-      };
-    }
-  | {
-      abap: {
-        values: {
-          DD02V?: {
             TABNAME: string;
             DDLANGUAGE?: string;
             TABCLASS?: string;
@@ -127,34 +77,81 @@ export type TablSchema =
             SHLPEXI?: string;
             EXCLASS?: string;
             AUTHCLASS?: string;
-          };
-          DD03P_TABLE?: {
+        };
+        DD03P_TABLE?: {
             DD03P?: {
-              TABNAME?: string;
-              FIELDNAME?: string;
-              DDLANGUAGE?: string;
-              POSITION?: string;
-              KEYFLAG?: string;
-              ROLLNAME?: string;
-              ADMINFIELD?: string;
-              INTTYPE?: string;
-              INTLEN?: string;
-              NOTNULL?: string;
-              DATATYPE?: string;
-              LENG?: string;
-              DECIMALS?: string;
-              DOMNAME?: string;
-              SHLPORIGIN?: string;
-              MASK?: string;
-              COMPTYPE?: string;
-              REFTABLE?: string;
-              REFFIELD?: string;
-              CONRFLAG?: string;
-              PRECFIELD?: string;
-              DDTEXT?: string;
+                FIELDNAME?: string;
+                POSITION?: string;
+                KEYFLAG?: string;
+                ROLLNAME?: string;
+                ADMINFIELD?: string;
+                INTTYPE?: string;
+                INTLEN?: string;
+                REFTABLE?: string;
+                REFFIELD?: string;
+                DATATYPE?: string;
+                LENG?: string;
+                DECIMALS?: string;
+                NOTNULL?: string;
+                DOMNAME?: string;
+                PRECFIELD?: string;
+                MASK?: string;
+                DDTEXT?: string;
+                SHLPORIGIN?: string;
+                COMPTYPE?: string;
+                TABNAME?: string;
+                DDLANGUAGE?: string;
+                CONRFLAG?: string;
             }[];
-          };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DD02V?: {
+                TABNAME: string;
+                DDLANGUAGE?: string;
+                TABCLASS?: string;
+                LANGDEP?: string;
+                CLIDEP?: string;
+                SQLTAB?: string;
+                DATCLASS?: string;
+                DDTEXT?: string;
+                MASTERLANG?: string;
+                BUFFERED?: string;
+                MATEFLAG?: string;
+                CONTFLAG?: string;
+                SHLPEXI?: string;
+                EXCLASS?: string;
+                AUTHCLASS?: string;
+            };
+            DD03P_TABLE?: {
+                DD03P?: {
+                    FIELDNAME?: string;
+                    POSITION?: string;
+                    KEYFLAG?: string;
+                    ROLLNAME?: string;
+                    ADMINFIELD?: string;
+                    INTTYPE?: string;
+                    INTLEN?: string;
+                    REFTABLE?: string;
+                    REFFIELD?: string;
+                    DATATYPE?: string;
+                    LENG?: string;
+                    DECIMALS?: string;
+                    NOTNULL?: string;
+                    DOMNAME?: string;
+                    PRECFIELD?: string;
+                    MASK?: string;
+                    DDTEXT?: string;
+                    SHLPORIGIN?: string;
+                    COMPTYPE?: string;
+                    TABNAME?: string;
+                    DDLANGUAGE?: string;
+                    CONRFLAG?: string;
+                }[];
+            };
         };
         version?: string;
-      };
     };
+};

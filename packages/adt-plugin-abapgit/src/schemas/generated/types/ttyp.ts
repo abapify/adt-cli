@@ -5,59 +5,36 @@
  * Mode: Flattened
  */
 
-export type TtypSchema =
-  | {
-      abapGit: {
+export type TtypSchema = {
+    abapGit: {
         abap: {
-          values: {
-            DD40V?: {
-              TYPENAME: string;
-              DDLANGUAGE?: string;
-              ROWTYPE?: string;
-              ROWKIND?: string;
-              DATATYPE?: string;
-              ACCESSMODE?: string;
-              KEYDEF?: string;
-              KEYKIND?: string;
-              GENERIC?: string;
-              LENG?: string;
-              DECIMALS?: string;
-              DDTEXT?: string;
-              TYPELEN?: string;
-              DEFFDNAME?: string;
+            values: {
+                DD40V?: {
+                    TYPENAME: string;
+                    DDLANGUAGE?: string;
+                    ROWTYPE?: string;
+                    ROWKIND?: string;
+                    DATATYPE?: string;
+                    ACCESSMODE?: string;
+                    KEYDEF?: string;
+                    KEYKIND?: string;
+                    GENERIC?: string;
+                    LENG?: string;
+                    DECIMALS?: string;
+                    DDTEXT?: string;
+                    TYPELEN?: string;
+                    DEFFDNAME?: string;
+                };
             };
-          };
-          version?: string;
+            version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-      };
-    }
-  | {
-      values: {
+    };
+} | {
+    values: {
         DD40V?: {
-          TYPENAME: string;
-          DDLANGUAGE?: string;
-          ROWTYPE?: string;
-          ROWKIND?: string;
-          DATATYPE?: string;
-          ACCESSMODE?: string;
-          KEYDEF?: string;
-          KEYKIND?: string;
-          GENERIC?: string;
-          LENG?: string;
-          DECIMALS?: string;
-          DDTEXT?: string;
-          TYPELEN?: string;
-          DEFFDNAME?: string;
-        };
-      };
-    }
-  | {
-      abap: {
-        values: {
-          DD40V?: {
             TYPENAME: string;
             DDLANGUAGE?: string;
             ROWTYPE?: string;
@@ -72,8 +49,28 @@ export type TtypSchema =
             DDTEXT?: string;
             TYPELEN?: string;
             DEFFDNAME?: string;
-          };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DD40V?: {
+                TYPENAME: string;
+                DDLANGUAGE?: string;
+                ROWTYPE?: string;
+                ROWKIND?: string;
+                DATATYPE?: string;
+                ACCESSMODE?: string;
+                KEYDEF?: string;
+                KEYKIND?: string;
+                GENERIC?: string;
+                LENG?: string;
+                DECIMALS?: string;
+                DDTEXT?: string;
+                TYPELEN?: string;
+                DEFFDNAME?: string;
+            };
         };
         version?: string;
-      };
     };
+};

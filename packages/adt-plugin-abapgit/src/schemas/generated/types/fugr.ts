@@ -6,44 +6,44 @@
  */
 
 export type FugrSchema = {
-  abapGit: {
-    abap: {
-      values: {
-        AREAT?: string;
-        INCLUDES?: {
-          SOBJ_NAME?: string[];
-        };
-        FUNCTIONS?: {
-          item?: {
-            FUNCNAME: string;
-            SHORT_TEXT?: string;
-            IMPORT?: {
-              RSIMP?: {
-                PARAMETER?: string;
-                TYP?: string;
-                DBFIELD?: string;
-                DEFAULT?: string;
-                OPTIONAL?: string;
-                REFERENCE?: string;
-              }[];
+    abapGit: {
+        abap: {
+            values: {
+                AREAT?: string;
+                INCLUDES?: {
+                    SOBJ_NAME?: string[];
+                };
+                FUNCTIONS?: {
+                    item?: {
+                        FUNCNAME: string;
+                        SHORT_TEXT?: string;
+                        IMPORT?: {
+                            RSIMP?: {
+                                PARAMETER?: string;
+                                TYP?: string;
+                                DBFIELD?: string;
+                                DEFAULT?: string;
+                                OPTIONAL?: string;
+                                REFERENCE?: string;
+                            }[];
+                        };
+                        EXPORT?: {
+                            RSEXP?: {
+                                PARAMETER?: string;
+                                TYP?: string;
+                                DBFIELD?: string;
+                                DEFAULT?: string;
+                                OPTIONAL?: string;
+                                REFERENCE?: string;
+                            }[];
+                        };
+                    }[];
+                };
             };
-            EXPORT?: {
-              RSEXP?: {
-                PARAMETER?: string;
-                TYP?: string;
-                DBFIELD?: string;
-                DEFAULT?: string;
-                OPTIONAL?: string;
-                REFERENCE?: string;
-              }[];
-            };
-          }[];
+            version?: string;
         };
-      };
-      version?: string;
+        version: string;
+        serializer: string;
+        serializer_version: string;
     };
-    version: string;
-    serializer: string;
-    serializer_version: string;
-  };
 };

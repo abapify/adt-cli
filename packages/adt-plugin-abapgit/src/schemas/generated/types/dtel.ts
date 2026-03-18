@@ -5,71 +5,42 @@
  * Mode: Flattened
  */
 
-export type DtelSchema =
-  | {
-      abapGit: {
+export type DtelSchema = {
+    abapGit: {
         abap: {
-          values: {
-            DD04V?: {
-              ROLLNAME: string;
-              DDLANGUAGE?: string;
-              DOMNAME?: string;
-              HEADLEN?: string;
-              SCRLEN1?: string;
-              SCRLEN2?: string;
-              SCRLEN3?: string;
-              DDTEXT?: string;
-              REPTEXT?: string;
-              SCRTEXT_S?: string;
-              SCRTEXT_M?: string;
-              SCRTEXT_L?: string;
-              DTELMASTER?: string;
-              DATATYPE?: string;
-              LENG?: string;
-              DECIMALS?: string;
-              OUTPUTLEN?: string;
-              REFKIND?: string;
-              REFTYPE?: string;
-              ABAP_LANGUAGE_VERSION?: string;
+            values: {
+                DD04V?: {
+                    ROLLNAME: string;
+                    DDLANGUAGE?: string;
+                    DOMNAME?: string;
+                    HEADLEN?: string;
+                    SCRLEN1?: string;
+                    SCRLEN2?: string;
+                    SCRLEN3?: string;
+                    DDTEXT?: string;
+                    REPTEXT?: string;
+                    SCRTEXT_S?: string;
+                    SCRTEXT_M?: string;
+                    SCRTEXT_L?: string;
+                    DTELMASTER?: string;
+                    DATATYPE?: string;
+                    LENG?: string;
+                    DECIMALS?: string;
+                    OUTPUTLEN?: string;
+                    REFKIND?: string;
+                    REFTYPE?: string;
+                    ABAP_LANGUAGE_VERSION?: string;
+                };
             };
-          };
-          version?: string;
+            version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-      };
-    }
-  | {
-      values: {
+    };
+} | {
+    values: {
         DD04V?: {
-          ROLLNAME: string;
-          DDLANGUAGE?: string;
-          DOMNAME?: string;
-          HEADLEN?: string;
-          SCRLEN1?: string;
-          SCRLEN2?: string;
-          SCRLEN3?: string;
-          DDTEXT?: string;
-          REPTEXT?: string;
-          SCRTEXT_S?: string;
-          SCRTEXT_M?: string;
-          SCRTEXT_L?: string;
-          DTELMASTER?: string;
-          DATATYPE?: string;
-          LENG?: string;
-          DECIMALS?: string;
-          OUTPUTLEN?: string;
-          REFKIND?: string;
-          REFTYPE?: string;
-          ABAP_LANGUAGE_VERSION?: string;
-        };
-      };
-    }
-  | {
-      abap: {
-        values: {
-          DD04V?: {
             ROLLNAME: string;
             DDLANGUAGE?: string;
             DOMNAME?: string;
@@ -90,8 +61,34 @@ export type DtelSchema =
             REFKIND?: string;
             REFTYPE?: string;
             ABAP_LANGUAGE_VERSION?: string;
-          };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DD04V?: {
+                ROLLNAME: string;
+                DDLANGUAGE?: string;
+                DOMNAME?: string;
+                HEADLEN?: string;
+                SCRLEN1?: string;
+                SCRLEN2?: string;
+                SCRLEN3?: string;
+                DDTEXT?: string;
+                REPTEXT?: string;
+                SCRTEXT_S?: string;
+                SCRTEXT_M?: string;
+                SCRTEXT_L?: string;
+                DTELMASTER?: string;
+                DATATYPE?: string;
+                LENG?: string;
+                DECIMALS?: string;
+                OUTPUTLEN?: string;
+                REFKIND?: string;
+                REFTYPE?: string;
+                ABAP_LANGUAGE_VERSION?: string;
+            };
         };
         version?: string;
-      };
     };
+};

@@ -5,36 +5,33 @@
  * Mode: Flattened
  */
 
-export type DevcSchema =
-  | {
-      abapGit: {
+export type DevcSchema = {
+    abapGit: {
         abap: {
-          values: {
-            DEVC?: {
-              CTEXT: string;
+            values: {
+                DEVC?: {
+                    CTEXT: string;
+                };
             };
-          };
-          version?: string;
+            version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-      };
-    }
-  | {
-      values: {
+    };
+} | {
+    values: {
         DEVC?: {
-          CTEXT: string;
-        };
-      };
-    }
-  | {
-      abap: {
-        values: {
-          DEVC?: {
             CTEXT: string;
-          };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DEVC?: {
+                CTEXT: string;
+            };
         };
         version?: string;
-      };
     };
+};

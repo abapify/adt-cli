@@ -5,45 +5,29 @@
  * Mode: Flattened
  */
 
-export type IntfSchema =
-  | {
-      abapGit: {
+export type IntfSchema = {
+    abapGit: {
         abap: {
-          values: {
-            VSEOINTERF?: {
-              CLSNAME: string;
-              LANGU?: string;
-              DESCRIPT?: string;
-              EXPOSURE?: string;
-              STATE?: string;
-              UNICODE?: string;
-              ABAP_LANGUAGE_VERSION?: string;
+            values: {
+                VSEOINTERF?: {
+                    CLSNAME: string;
+                    LANGU?: string;
+                    DESCRIPT?: string;
+                    EXPOSURE?: string;
+                    STATE?: string;
+                    UNICODE?: string;
+                    ABAP_LANGUAGE_VERSION?: string;
+                };
             };
-          };
-          version?: string;
+            version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-      };
-    }
-  | {
-      values: {
+    };
+} | {
+    values: {
         VSEOINTERF?: {
-          CLSNAME: string;
-          LANGU?: string;
-          DESCRIPT?: string;
-          EXPOSURE?: string;
-          STATE?: string;
-          UNICODE?: string;
-          ABAP_LANGUAGE_VERSION?: string;
-        };
-      };
-    }
-  | {
-      abap: {
-        values: {
-          VSEOINTERF?: {
             CLSNAME: string;
             LANGU?: string;
             DESCRIPT?: string;
@@ -51,8 +35,21 @@ export type IntfSchema =
             STATE?: string;
             UNICODE?: string;
             ABAP_LANGUAGE_VERSION?: string;
-          };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            VSEOINTERF?: {
+                CLSNAME: string;
+                LANGU?: string;
+                DESCRIPT?: string;
+                EXPOSURE?: string;
+                STATE?: string;
+                UNICODE?: string;
+                ABAP_LANGUAGE_VERSION?: string;
+            };
         };
         version?: string;
-      };
     };
+};
