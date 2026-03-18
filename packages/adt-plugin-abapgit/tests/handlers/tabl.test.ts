@@ -619,7 +619,21 @@ describe('CDS-to-abapGit field type mapping (all builtin types)', () => {
 });
 
 describe('CDS-to-abapGit DD02V LANGDEP', () => {
-  it('buildDD02V does not emit LANGDEP (cannot determine from CDS)', () => {
+  it('buildDD02V sets LANGDEP=X when structure has spras field', () => {
+    const { ast } = parse(CDS_ALL_TYPES);
+    const def = ast.definitions[0] as any;
+    const dd02v = buildDD02V(def, 'E', 'Simple structure');
+    assert.strictEqual(dd02v.LANGDEP, 'X');
+  });
+
+  it('buildDD02V omits LANGDEP when no language field present', () => {
+    const { ast } = parse(CDS_TRANSPARENT_TABLE);
+    const def = ast.definitions[0] as any;
+    const dd02v = buildDD02V(def, 'E', 'Test Table');
+    assert.strictEqual(dd02v.LANGDEP, undefined);
+  });
+
+  it('buildDD02V omits LANGDEP for simple structure without spras', () => {
     const { ast } = parse(CDS_STRUCTURE);
     const def = ast.definitions[0] as any;
     const dd02v = buildDD02V(def, 'E', 'AGE Test Structure');

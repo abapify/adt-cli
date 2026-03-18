@@ -166,16 +166,24 @@ export function buildDD02V(
     'AbapCatalog.enhancement.category',
   );
 
+  // Detect language-dependent structure/table:
+  // LANGDEP=X when any field references data element SPRAS or builtin type abap.lang
+  const hasLanguageField = def.members.some((m) => {
+    if ('kind' in m && m.kind === 'include') return false;
+    const f = m as FieldDefinition;
+    if (f.type.kind === 'named') return f.type.name.toUpperCase() === 'SPRAS';
+    if (f.type.kind === 'builtin')
+      return (f.type as BuiltinTypeRef).name === 'lang';
+    return false;
+  });
+
   // Build result in standard abapGit DD02V field order:
-  // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, CLIDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
-  //
-  // NOTE: LANGDEP and CLIDEP are real DD02V database values that cannot be
-  // reliably determined from CDS source alone. abapGit reads them from SAP
-  // and only emits them when set. We omit them here to avoid roundtrip mismatches.
+  // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
   const result: DD02VData = {};
   result.TABNAME = def.name.toUpperCase();
   result.DDLANGUAGE = language;
   result.TABCLASS = tabclass;
+  if (hasLanguageField) result.LANGDEP = 'X';
   result.DDTEXT = description;
   result.MASTERLANG = language;
   if (deliveryClass) result.CONTFLAG = deliveryClass;
