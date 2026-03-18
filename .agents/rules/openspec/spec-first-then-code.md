@@ -7,6 +7,8 @@ description: When making any changes for any of spec-driven packages
 
 ## Core Philosophy
 
+> For key locations and memory persistence, see [project-planning-memory](project-planning-memory.md).
+
 - Specifications are design contracts (stable, versioned, change-resistant)
 - Documentation describes implementation (living, refactorable)
 - Specs define WHAT and WHY before coding HOW

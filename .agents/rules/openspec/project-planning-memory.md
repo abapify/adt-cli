@@ -18,6 +18,8 @@ This workspace uses [OpenSpec](https://openspec.dev/) for project planning and s
 
 ## AI Assistant Workflow
 
+> For the critical review process and spec change severity rules, see [spec-first-then-code](spec-first-then-code.md).
+
 1. **Check `openspec/specs/`** for existing specifications before making changes
 2. **Check `openspec/changes/`** for active change proposals to understand context
 3. **Use `/opsx:propose`** to create new change proposals with specs, design, and tasks

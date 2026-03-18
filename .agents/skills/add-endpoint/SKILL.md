@@ -43,7 +43,7 @@ If you have a running SAP system connection:
    # Example using curl or adt-cli:
    # GET /sap/bc/adt/{path}/{objectname}
    ```
-2. Save the raw response to `tmp/` for reference:
+2. Save the raw response to `tmp/` for reference (see [tmp-folder-testing](../../rules/development/tmp-folder-testing.md)):
    ```bash
    # adt get ZOBJECT_NAME -o tmp/response.xml
    ```
@@ -141,12 +141,14 @@ export default {
 
 **Key rules for schema literals:**
 
+> See [xsd-best-practices](../../rules/adt/xsd-best-practices.md) for XSD validity rules and edge cases.
+
 - Must end with `} as const`
 - One root element per schema document
 - Use `$imports` for schemas you depend on (adtcore, abapoo, abapsource, etc.)
 - Names follow XSD conventions: `complexType` names are PascalCase
 - Look at existing schemas (e.g. `interfaces.ts`, `packagesV1.ts`) for common base types
-- Existing schemas were auto-generated from XSD sources in `packages/adt-schemas/.xsd/`; manually created schemas should be documented accordingly
+- Existing schemas were auto-generated from XSD sources in `packages/adt-schemas/.xsd/`; manually created schemas should be documented accordingly (see [file-lifecycle](../../rules/development/file-lifecycle.md))
 
 ### 2b: Add the typed wrapper in typed.ts
 
@@ -370,21 +372,18 @@ export const registry = {
 
 ## Step 6: Build and Verify
 
+> Follow the verification checklist in [after-changes](../../rules/verification/after-changes.md).
+
 ```bash
 # Build affected packages in dependency order
-npx nx build adt-schemas
-npx nx build adt-contracts
-npx nx build adt-fixtures
+bunx nx build adt-schemas
+bunx nx build adt-contracts
+bunx nx build adt-fixtures
 
-# Type check everything
-npx nx typecheck
-
-# Run tests
-npx nx test adt-schemas
-npx nx test adt-contracts
-
-# Lint
-npx nx lint
+# Type check, test, lint
+bunx nx typecheck
+bunx nx test adt-schemas adt-contracts
+bunx nx lint
 ```
 
 ### Quick smoke test (optional)
@@ -467,6 +466,6 @@ application/vnd.sap.adt.{object-type}.v{version}+xml
 - [ ] Module index updated (or new module registered in main `adt/index.ts`)
 - [ ] Fixture XML created in `adt-fixtures/src/fixtures/{module}/`
 - [ ] Fixture registered in `adt-fixtures/src/fixtures/registry.ts`
-- [ ] `npx nx build adt-schemas adt-contracts adt-fixtures` passes
-- [ ] `npx nx typecheck` passes
-- [ ] `npx nx test adt-schemas adt-contracts` passes
+- [ ] `bunx nx build adt-schemas adt-contracts adt-fixtures` passes
+- [ ] `bunx nx typecheck` passes
+- [ ] `bunx nx test adt-schemas adt-contracts` passes

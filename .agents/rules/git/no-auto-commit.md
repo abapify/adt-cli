@@ -15,6 +15,16 @@ Before committing:
 2. Wait for the user to confirm
 3. Only then execute `git commit`
 
+## Exception: `$monitor-ci` Skill
+
+When the `$monitor-ci` skill is active (CI self-healing workflow), autonomous commits and pushes are permitted for:
+
+- Applying self-healing fixes
+- Retrying CI with empty commits
+- Updating lockfiles for pre-CI failures
+
+The skill has its own git safety rules (never `git add -A`, stage only fix-related files).
+
 ## Applies To
 
 - All AI assistants (Devin, Windsurf, Claude, etc.)

@@ -75,7 +75,9 @@ Before writing code, gather details about the object type from live system or re
 
 ## Step 2: Create the ADT Schema and Contract
 
-Follow the full **add-endpoint** skill for this step. Here is a summary specific to object types:
+Follow the full **$add-endpoint** skill for this step. Here is a summary specific to object types:
+
+> **Rules:** See [xsd-best-practices](../../rules/adt/xsd-best-practices.md) for XSD validity, [file-lifecycle](../../rules/development/file-lifecycle.md) for generated vs hand-maintained files, and [adt-ddic-mapping](../../rules/adt/adt-ddic-mapping.md) for DDIC object specifics.
 
 ### Schema (adt-schemas)
 
@@ -352,6 +354,8 @@ registerObjectType('PROG', ProgramKind, AdkProgram);
 ```
 
 **IMPORTANT:** Both `savePendingSources()` AND `checkPendingSourcesUnchanged()` must be implemented.
+
+> See [adk-save-logic](../../rules/adt/adk-save-logic.md) for edge cases around upsert, lock failures (405), and 422 "already exists" handling.
 
 - `checkPendingSourcesUnchanged()` runs **before** lock — compares pending source with SAP, sets `_unchanged = true` if identical
 - `savePendingSources()` runs **after** lock — does the actual PUT
@@ -780,25 +784,16 @@ export { AdkProgram } from '@abapify/adk';
 
 ## Step 8: Build and Verify
 
+> Follow the verification checklist in [after-changes](../../rules/verification/after-changes.md).
+
 ```bash
 # Build all affected packages in dependency order
-npx nx build adt-schemas
-npx nx build adt-contracts
-npx nx build adk
-npx nx build adt-plugin-abapgit
-npx nx build adt-fixtures
+bunx nx build adt-schemas adt-contracts adk adt-plugin-abapgit adt-fixtures
 
-# Full type check
-npx nx typecheck
-
-# Run tests
-npx nx test adt-schemas
-npx nx test adt-contracts
-npx nx test adk
-npx nx test adt-plugin-abapgit
-
-# Lint
-npx nx lint
+# Full type check, tests, lint
+bunx nx typecheck
+bunx nx test adt-schemas adt-contracts adk adt-plugin-abapgit
+bunx nx lint
 ```
 
 ### Quick smoke tests
@@ -879,7 +874,7 @@ expect(handler).toBeDefined();
 
 ### Verification
 
-- [ ] `npx nx build adt-schemas adt-contracts adk adt-plugin-abapgit adt-fixtures` passes
-- [ ] `npx nx typecheck` passes
-- [ ] `npx nx test adt-schemas adt-contracts adk adt-plugin-abapgit` passes
-- [ ] `npx nx lint` passes
+- [ ] `bunx nx build adt-schemas adt-contracts adk adt-plugin-abapgit adt-fixtures` passes
+- [ ] `bunx nx typecheck` passes
+- [ ] `bunx nx test adt-schemas adt-contracts adk adt-plugin-abapgit` passes
+- [ ] `bunx nx lint` passes

@@ -74,20 +74,20 @@ Symlinked to `.windsurf/rules/` and `.cognition/rules/` for tool compatibility.
 | [`git/no-auto-commit`](.agents/rules/git/no-auto-commit.md) | Never commit or push without explicit user approval |
 | [`development/coding-conventions`](.agents/rules/development/coding-conventions.md) | TS strict, ESM only, naming, formatting, import conventions |
 | [`development/file-lifecycle`](.agents/rules/development/file-lifecycle.md) | Generated/downloaded file guardrails |
-| [`planning/project-planning-memory`](.agents/rules/planning/project-planning-memory.md) | OpenSpec workflow and project memory |
+| [`openspec/project-planning-memory`](.agents/rules/openspec/project-planning-memory.md) | OpenSpec workflow and project memory |
 | [`verification/after-changes`](.agents/rules/verification/after-changes.md) | Build, typecheck, test, lint, format checklist |
 
 ### On Demand (model_decision)
 | Rule | Description |
 | ---- | ----------- |
-| [`planning/spec-first-then-code`](.agents/rules/planning/spec-first-then-code.md) | Check specs before coding |
+| [`openspec/spec-first-then-code`](.agents/rules/openspec/spec-first-then-code.md) | Check specs before coding |
 | [`development/tmp-folder-testing`](.agents/rules/development/tmp-folder-testing.md) | Use `tmp/` for scratch files |
 | [`development/package-versions`](.agents/rules/development/package-versions.md) | Always install latest versions |
 | [`adt/adk-save-logic`](.agents/rules/adt/adk-save-logic.md) | ADK upsert/lock edge cases |
 | [`adt/adt-ddic-mapping`](.agents/rules/adt/adt-ddic-mapping.md) | DDIC object → schema mapping |
 | [`adt/xsd-best-practices`](.agents/rules/adt/xsd-best-practices.md) | XSD validity and builder rules |
-| [`development/tooling/nx-monorepo-setup`](.agents/rules/development/tooling/nx-monorepo-setup.md) | Package creation, config templates |
-| [`development/tooling/nx-circular-dependencies`](.agents/rules/development/tooling/nx-circular-dependencies.md) | Fix false circular dep issues |
+| [`nx/nx-monorepo-setup`](.agents/rules/nx/nx-monorepo-setup.md) | Package creation, config templates |
+| [`nx/nx-circular-dependencies`](.agents/rules/nx/nx-circular-dependencies.md) | Fix false circular dep issues |
 
 ### File-Scoped (glob)
 | Rule | Glob | Description |

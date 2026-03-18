@@ -12,5 +12,5 @@ description: Core coding conventions for the abapify monorepo. TypeScript strict
 - PascalCase for types/classes/interfaces; camelCase for variables/functions
 - 2-space indentation (Prettier enforced)
 - Cross-package imports: `@abapify/<package-name>`
-- Internal file imports: relative paths, no extension (`../utils/parse`)
-- `workspace:*` protocol for local workspace deps
+- Internal file imports: extensionless relative paths — see [bundler-imports](bundler-imports.md) for details
+- `workspace:*` protocol for local workspace deps — see `$link-workspace-packages` skill for setup

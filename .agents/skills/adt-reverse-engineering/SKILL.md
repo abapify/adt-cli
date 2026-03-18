@@ -99,7 +99,7 @@ curl -u "$SAP_USER:$SAP_PASSWORD" \
   -v 2>tmp/headers.txt >tmp/response.xml
 ```
 
-**Save ALL raw responses to `tmp/`** — they become fixtures later.
+**Save ALL raw responses to `tmp/`** (see [tmp-folder-testing](../../rules/development/tmp-folder-testing.md)) — they become fixtures later.
 
 ---
 
@@ -303,7 +303,7 @@ grep -r 'xmlns.*sap.com/adt' packages/adt-fixtures/
 
 ## Step 5: Analyze and Document Findings
 
-After gathering data from the sources above, create a structured analysis in `tmp/`.
+After gathering data from the sources above, create a structured analysis in `tmp/` (see [tmp-folder-testing](../../rules/development/tmp-folder-testing.md)).
 
 ### 5a: Create endpoint analysis file
 
