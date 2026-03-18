@@ -385,11 +385,9 @@ async function buildFieldDD03P(
     }
   }
 
-  // Build in standard abapGit DD03P field order
-  //
-  // NOTE: POSITION is a real DD03P database value. abapGit emits it
-  // inconsistently (only for some transparent tables). We omit it to
-  // avoid roundtrip mismatches — SAP auto-computes it on import.
+  // Build in standard abapGit DD03P field order (matches DD03P structure definition):
+  // FIELDNAME, KEYFLAG, ROLLNAME, ADMINFIELD, INTTYPE, INTLEN, NOTNULL,
+  // DATATYPE, LENG, DECIMALS, SHLPORIGIN, MASK, COMPTYPE, REFTABLE, REFFIELD
   const result: DD03PData = {};
   result.FIELDNAME = field.name.toUpperCase();
   if (isKey) result.KEYFLAG = 'X';
@@ -402,10 +400,10 @@ async function buildFieldDD03P(
   if (leng) result.LENG = leng;
   if (decimals) result.DECIMALS = decimals;
   if (shlporigin) result.SHLPORIGIN = shlporigin;
-  if (reftable) result.REFTABLE = reftable;
-  if (reffield) result.REFFIELD = reffield;
   if (mask) result.MASK = mask;
   if (comptype) result.COMPTYPE = comptype;
+  if (reftable) result.REFTABLE = reftable;
+  if (reffield) result.REFFIELD = reffield;
 
   return result;
 }
