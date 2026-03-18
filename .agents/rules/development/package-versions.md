@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: Always install latest package versions when adding dependencies. Never hardcode specific versions.
+---
+
 # Package Versions: Always Install Latest
 
 ## Rule

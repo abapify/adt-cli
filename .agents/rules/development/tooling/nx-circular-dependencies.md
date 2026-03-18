@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: Fix false circular dependencies in Nx caused by config files. Use .nxignore and ESLint ignores.
+---
+
 # Nx Circular Dependencies: Config File Exclusions
 
 ## Problem

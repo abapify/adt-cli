@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: Nx monorepo setup rules - package creation workflow, config templates, plugin inference, import conventions.
+---
+
 # Nx Monorepo Setup Rules
 
 > **See**: [`.agents/rules/development/tooling/nx-monorepo.md`](../../../.agents/rules/development/tooling/nx-monorepo.md) for complete Nx plugin inference system documentation.

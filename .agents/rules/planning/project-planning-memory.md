@@ -1,5 +1,6 @@
 ---
 trigger: always_on
+description: OpenSpec-based project planning. Check openspec/specs/ and openspec/changes/ before making changes.
 ---
 
 # Project Planning and Memory Persistence Rule
