@@ -377,7 +377,7 @@ export const diffCommand: CliCommandPlugin = {
         process.exit(1);
       }
 
-      const ddlFile = `${objectName}.tabl.ddl`;
+      const ddlFile = `${objectName}.tabl.acds`;
       const diffFound = printDiff(
         ddlFile,
         ddlFile,
