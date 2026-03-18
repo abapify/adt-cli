@@ -258,7 +258,7 @@ describe('buildCdsDdl', () => {
       expect(result).toContain('f_char : abap.char(10)');
       expect(result).toContain('f_numc : abap.numc(5)');
       expect(result).toContain('f_raw  : abap.raw(16)');
-      expect(result).toContain('f_cuky : abap.cuky(5)');
+      expect(result).toContain('f_cuky : abap.cuky');
       expect(result).toContain('f_unit : abap.unit(2)');
     });
 
@@ -599,7 +599,7 @@ describe('tablXmlToCdsDdl', () => {
 
     // Reference fields
     expect(ddl).toContain('currency_code');
-    expect(ddl).toContain('abap.cuky(5)');
+    expect(ddl).toContain('abap.cuky');
     expect(ddl).toContain('unit_code');
     expect(ddl).toContain('abap.unit(2)');
 

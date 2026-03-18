@@ -33,6 +33,7 @@ import {
   parseAbapGitFilename,
   type ObjectHandler,
 } from '@abapify/adt-plugin-abapgit';
+import { tablXmlToCdsDdl } from '../lib/abapgit-to-cds';
 
 /**
  * Collect all local files belonging to one abapGit object.
@@ -243,12 +244,19 @@ export const diffCommand: CliCommandPlugin = {
       description: 'Number of context lines in diff',
       default: '3',
     },
+    {
+      flags: '-f, --format <format>',
+      description:
+        'Comparison format: xml (default) or ddl (TABL only — compare CDS DDL source)',
+      default: 'xml',
+    },
   ],
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
     const filePath = args.file as string;
     const contextLines = parseInt(String(args.context ?? '3'), 10);
     const useColor = args.color !== false;
+    const format = String(args.format ?? 'xml').toLowerCase();
 
     // Resolve file path
     const fullPath = resolve(ctx.cwd, filePath);
@@ -270,6 +278,19 @@ export const diffCommand: CliCommandPlugin = {
     if (parsed.extension !== 'xml') {
       ctx.logger.error(
         `Expected .xml metadata file, got .${parsed.extension}. Pass the .xml file, not .abap.`,
+      );
+      process.exit(1);
+    }
+
+    // Validate --format option
+    if (format !== 'xml' && format !== 'ddl') {
+      ctx.logger.error(`Unknown format: ${format}. Supported: xml, ddl`);
+      process.exit(1);
+    }
+
+    if (format === 'ddl' && parsed.type !== 'TABL') {
+      ctx.logger.error(
+        `DDL format is only supported for TABL objects. Got: ${parsed.type}`,
       );
       process.exit(1);
     }
@@ -335,6 +356,51 @@ export const diffCommand: CliCommandPlugin = {
         `Failed to load remote object: ${error instanceof Error ? error.message : String(error)}`,
       );
       process.exit(1);
+    }
+
+    // ========================================
+    // DDL format: compare CDS DDL source
+    // ========================================
+    if (format === 'ddl') {
+      // Local: convert abapGit XML → CDS DDL
+      const localXml = readFileSync(fullPath, 'utf-8');
+      const localDdl = tablXmlToCdsDdl(localXml);
+
+      // Remote: fetch CDS source directly from SAP
+      let remoteDdl: string;
+      try {
+        remoteDdl = await remoteObj.getSource();
+      } catch (error) {
+        ctx.logger.error(
+          `Failed to fetch remote DDL source: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        process.exit(1);
+      }
+
+      const ddlFile = `${objectName}.tabl.ddl`;
+      const diffFound = printDiff(
+        ddlFile,
+        ddlFile,
+        localDdl,
+        remoteDdl,
+        contextLines,
+        useColor,
+      );
+
+      console.log('');
+      if (diffFound) {
+        console.log(
+          useColor ? chalk.red('Differences found.') : 'Differences found.',
+        );
+        process.exit(1);
+      } else {
+        console.log(
+          useColor
+            ? chalk.green('No differences found. (DDL source identical)')
+            : 'No differences found. (DDL source identical)',
+        );
+      }
+      return;
     }
 
     // Serialize remote using the same handler → produces SerializedFile[]

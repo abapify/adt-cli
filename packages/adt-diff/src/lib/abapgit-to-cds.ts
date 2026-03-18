@@ -95,6 +95,7 @@ const DATATYPE_TO_CDS: Record<string, string> = {
 /** Types that never take a length parameter in CDS */
 const NO_LENGTH_TYPES = new Set([
   'clnt',
+  'cuky',
   'dats',
   'datn',
   'tims',
@@ -215,6 +216,7 @@ export function buildCdsDdl(
   // --- Definition header ---
   const keyword = isStructure ? 'define structure' : 'define table';
   lines.push(`${keyword} ${tableName.toLowerCase()} {`);
+  lines.push(''); // Blank line after opening brace (SAP format)
 
   // --- Sort fields by POSITION ---
   const sorted = [...dd03pEntries].sort((a, b) => {
@@ -236,7 +238,11 @@ export function buildCdsDdl(
   // --- Emit fields ---
   for (const info of fieldInfos) {
     if (info.kind === 'include') {
-      lines.push(`  include ${info.name};`);
+      if (info.suffix) {
+        lines.push(`  include ${info.name} with suffix ${info.suffix};`);
+      } else {
+        lines.push(`  include ${info.name};`);
+      }
     } else {
       // Field annotations (e.g., @Semantics.amount.currencyCode)
       for (const ann of info.annotations) {
@@ -248,9 +254,10 @@ export function buildCdsDdl(
     }
   }
 
+  lines.push(''); // Blank line before closing brace (SAP format)
   lines.push('}');
 
-  return lines.join('\n');
+  return lines.join('\n') + '\n'; // Trailing newline (SAP format)
 }
 
 // ============================================
@@ -270,6 +277,8 @@ interface FieldInfo {
 interface IncludeInfo {
   kind: 'include';
   name: string;
+  /** Optional suffix for `include ... with suffix <suffix>` */
+  suffix?: string;
 }
 
 type MemberInfo = FieldInfo | IncludeInfo;
@@ -287,12 +296,22 @@ function buildFieldInfos(
     const entry = entries[i];
     const fieldName = entry.FIELDNAME ?? '';
 
-    // Skip .INCLU-_XX entries (part of include pair, handled with .INCLUDE)
-    if (fieldName === '.INCLU-_XX' || fieldName.startsWith('.INCLU-')) {
+    // .INCLU-<SUFFIX> entries → include with suffix
+    if (fieldName.startsWith('.INCLU-')) {
+      const includeName = entry.PRECFIELD ?? '';
+      if (includeName) {
+        // Extract suffix from .INCLU-<SUFFIX> (e.g., ".INCLU-_XX" → "_xx")
+        const suffix = fieldName.slice('.INCLU-'.length).toLowerCase();
+        result.push({
+          kind: 'include',
+          name: includeName.toLowerCase(),
+          suffix,
+        });
+      }
       continue;
     }
 
-    // Include directive
+    // Include directive → plain include
     if (fieldName === '.INCLUDE') {
       const includeName = entry.PRECFIELD ?? '';
       if (includeName) {
