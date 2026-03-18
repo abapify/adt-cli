@@ -5,6 +5,9 @@ description: Verification checklist after making changes. Build, typecheck, test
 
 # After Making Changes
 
+**NEVER tell the user to "try it" or "run it again" — verify it yourself first.**
+If you changed code, YOU must build and test before declaring it done.
+
 ```bash
 bunx nx build <package>   # verify it compiles
 bunx nx typecheck         # full type check

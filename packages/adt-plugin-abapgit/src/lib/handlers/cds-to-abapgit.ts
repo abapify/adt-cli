@@ -166,6 +166,11 @@ export function buildDD02V(
     'AbapCatalog.enhancement.category',
   );
 
+  const dataMaintenance = getAnnotation(
+    def.annotations,
+    'AbapCatalog.dataMaintenance',
+  );
+
   // Detect language-dependent structure/table:
   // LANGDEP=X when any field references data element SPRAS or builtin type abap.lang
   const hasLanguageField = def.members.some((m) => {
@@ -190,7 +195,7 @@ export function buildDD02V(
   });
 
   // Build result in standard abapGit DD02V field order:
-  // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, CLIDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
+  // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, CLIDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS, MATEFLAG
   const result: DD02VData = {};
   result.TABNAME = def.name.toUpperCase();
   result.DDLANGUAGE = language;
@@ -202,6 +207,8 @@ export function buildDD02V(
   if (deliveryClass) result.CONTFLAG = deliveryClass;
   if (enhancementCategory)
     result.EXCLASS = ENHANCEMENT_CATEGORY_MAP[enhancementCategory];
+  if (dataMaintenance)
+    result.MATEFLAG = DATA_MAINTENANCE_MAP[dataMaintenance] ?? '';
 
   return result;
 }

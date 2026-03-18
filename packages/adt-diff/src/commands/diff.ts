@@ -262,10 +262,10 @@ async function diffSingleFile(
   options: {
     contextLines: number;
     useColor: boolean;
-    format: string;
+    source: boolean;
   },
 ): Promise<DiffResult> {
-  const { contextLines, useColor, format } = options;
+  const { contextLines, useColor, source } = options;
   const fullPath = resolve(ctx.cwd, filePath);
 
   if (!existsSync(fullPath)) {
@@ -304,15 +304,15 @@ async function diffSingleFile(
     };
   }
 
-  // Validate --format option
-  if (format === 'ddl' && parsed.type !== 'TABL') {
+  // Validate --source option
+  if (source && parsed.type !== 'TABL') {
     return {
       objectName: parsed.name,
       objectType: parsed.type,
       hasDifferences: false,
       fileCount: 0,
       identicalCount: 0,
-      error: `DDL format is only supported for TABL objects. Got: ${parsed.type}`,
+      error: `Source format is only supported for TABL objects. Got: ${parsed.type}`,
     };
   }
 
@@ -380,14 +380,14 @@ async function diffSingleFile(
   }
 
   // ========================================
-  // DDL format: compare CDS DDL source
+  // Source format: compare ADK source (e.g. CDS DDL)
   // ========================================
-  if (format === 'ddl') {
-    const localDdl = tablXmlToCdsDdl(localXml);
+  if (source) {
+    const localSource = tablXmlToCdsDdl(localXml);
 
-    let remoteDdl: string;
+    let remoteSource: string;
     try {
-      remoteDdl = await remoteObj.getSource();
+      remoteSource = await remoteObj.getSource();
     } catch (error) {
       return {
         objectName: parsed.name,
@@ -395,16 +395,34 @@ async function diffSingleFile(
         hasDifferences: false,
         fileCount: 1,
         identicalCount: 0,
-        error: `Failed to fetch remote DDL source: ${error instanceof Error ? error.message : String(error)}`,
+        error: `Failed to fetch remote source: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
 
-    const ddlFile = `${objectName}.tabl.acds`;
+    // Project remote onto local's annotation set — same principle as XML path.
+    // If local XML doesn't have a field (e.g. MATEFLAG), strip the
+    // corresponding annotation from remote so it doesn't appear as a diff.
+    const localAnnotations = new Set(
+      localSource
+        .split('\n')
+        .filter((l) => l.startsWith('@'))
+        .map((l) => l.split(':')[0].trim()),
+    );
+    remoteSource = remoteSource
+      .split('\n')
+      .filter((l) => {
+        if (!l.startsWith('@')) return true;
+        const name = l.split(':')[0].trim();
+        return localAnnotations.has(name);
+      })
+      .join('\n');
+
+    const sourceFile = `${objectName}.tabl.acds`;
     const diffFound = printDiff(
-      ddlFile,
-      ddlFile,
-      localDdl,
-      remoteDdl,
+      sourceFile,
+      sourceFile,
+      localSource,
+      remoteSource,
       contextLines,
       useColor,
     );
@@ -527,10 +545,9 @@ export const diffCommand: CliCommandPlugin = {
       default: '3',
     },
     {
-      flags: '-f, --format <format>',
+      flags: '-s, --source',
       description:
-        'Comparison format: xml (default) or ddl (TABL only — compare CDS DDL source)',
-      default: 'xml',
+        'Compare ADK source instead of XML (TABL only)',
     },
   ],
 
@@ -538,18 +555,12 @@ export const diffCommand: CliCommandPlugin = {
     const filePatterns = (args.files as string[]) ?? [];
     const contextLines = parseInt(String(args.context ?? '3'), 10);
     const useColor = args.color !== false;
-    const format = String(args.format ?? 'xml').toLowerCase();
+    const source = args.source === true;
 
     if (filePatterns.length === 0) {
       ctx.logger.error(
         'No files specified. Usage: adt diff <file...> or adt diff *.tabl.xml',
       );
-      process.exit(1);
-    }
-
-    // Validate --format option
-    if (format !== 'xml' && format !== 'ddl') {
-      ctx.logger.error(`Unknown format: ${format}. Supported: xml, ddl`);
       process.exit(1);
     }
 
@@ -576,7 +587,7 @@ export const diffCommand: CliCommandPlugin = {
       const result = await diffSingleFile(file, ctx, adk, {
         contextLines,
         useColor,
-        format,
+        source,
       });
 
       if (result.error) {
