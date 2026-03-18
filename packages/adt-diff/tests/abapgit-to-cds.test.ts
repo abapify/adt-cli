@@ -527,9 +527,10 @@ describe('parseTablXml', () => {
     expect(dd02v.TABCLASS).toBe('TRANSP');
     expect(dd02v.CONTFLAG).toBe('A');
 
-    // Has key fields
+    // Has key fields (CLIENT is the only field)
     const keyFields = dd03p.filter((f) => f.KEYFLAG === 'X');
-    expect(keyFields.length).toBe(2);
+    expect(keyFields.length).toBe(1);
+    expect(keyFields[0].FIELDNAME).toBe('CLIENT');
   });
 });
 
@@ -632,10 +633,10 @@ describe('tablXmlToCdsDdl', () => {
       '@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE',
     );
 
-    // Key fields
-    expect(ddl).toContain('key mandt');
+    // Key fields (CLIENT is the only field, builtin CLNT type)
+    expect(ddl).toContain('key client');
+    expect(ddl).toContain('abap.clnt');
     expect(ddl).toContain('not null');
-    expect(ddl).toContain('key key_field');
   });
 
   it('should convert zage_structure1.tabl.xml to CDS DDL', () => {
