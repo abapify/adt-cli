@@ -267,7 +267,7 @@ describe('TABL handler', () => {
       assert.ok(xml.includes('<COMPTYPE>E</COMPTYPE>'));
     });
 
-    it('does not emit CLIDEP (cannot determine reliably from CDS)', async () => {
+    it('emits CLIDEP=X when table has key field with abap.clnt type', async () => {
       const mock = createMockTable({
         name: 'ZTABLE_DTEL',
         description: 'Table with data elements',
@@ -277,9 +277,8 @@ describe('TABL handler', () => {
       const files = await handler!.serialize(mock as any);
       const xml = files[0].content;
 
-      // CLIDEP is a DD02V database value — abapGit reads it from SAP.
-      // We cannot reliably determine it from CDS source alone.
-      assert.ok(!xml.includes('<CLIDEP>'));
+      // CLIDEP=X when any key field uses abap.clnt or data element MANDT
+      assert.ok(xml.includes('<CLIDEP>X</CLIDEP>'));
     });
   });
 
@@ -638,6 +637,37 @@ describe('CDS-to-abapGit DD02V LANGDEP', () => {
     const def = ast.definitions[0] as any;
     const dd02v = buildDD02V(def, 'E', 'AGE Test Structure');
     assert.strictEqual(dd02v.LANGDEP, undefined);
+  });
+});
+
+describe('CDS-to-abapGit DD02V CLIDEP', () => {
+  it('buildDD02V sets CLIDEP=X when table has key field with mandt data element', () => {
+    const { ast } = parse(CDS_TRANSPARENT_TABLE);
+    const def = ast.definitions[0] as any;
+    const dd02v = buildDD02V(def, 'E', 'AGE Test Transparent Table');
+    assert.strictEqual(dd02v.CLIDEP, 'X');
+  });
+
+  it('buildDD02V sets CLIDEP=X when table has key field with abap.clnt builtin', () => {
+    const { ast } = parse(CDS_TABLE_DATA_ELEMENTS);
+    const def = ast.definitions[0] as any;
+    const dd02v = buildDD02V(def, 'E', 'Table with data elements');
+    assert.strictEqual(dd02v.CLIDEP, 'X');
+  });
+
+  it('buildDD02V omits CLIDEP for structures (no key fields)', () => {
+    const { ast } = parse(CDS_STRUCTURE);
+    const def = ast.definitions[0] as any;
+    const dd02v = buildDD02V(def, 'E', 'AGE Test Structure');
+    assert.strictEqual(dd02v.CLIDEP, undefined);
+  });
+
+  it('buildDD02V omits CLIDEP when structure has non-key mandt field', () => {
+    // CDS_ALL_TYPES has `client : mandt` but it's NOT a key field
+    const { ast } = parse(CDS_ALL_TYPES);
+    const def = ast.definitions[0] as any;
+    const dd02v = buildDD02V(def, 'E', 'Simple structure');
+    assert.strictEqual(dd02v.CLIDEP, undefined);
   });
 });
 

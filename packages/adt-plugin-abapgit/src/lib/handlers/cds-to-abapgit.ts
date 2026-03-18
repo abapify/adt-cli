@@ -177,13 +177,26 @@ export function buildDD02V(
     return false;
   });
 
+  // Detect client-dependent table:
+  // CLIDEP=X when any key field references data element MANDT or builtin type abap.clnt
+  const hasClientKeyField = def.members.some((m) => {
+    if ('kind' in m && m.kind === 'include') return false;
+    const f = m as FieldDefinition;
+    if (!f.isKey) return false;
+    if (f.type.kind === 'named') return f.type.name.toUpperCase() === 'MANDT';
+    if (f.type.kind === 'builtin')
+      return (f.type as BuiltinTypeRef).name === 'clnt';
+    return false;
+  });
+
   // Build result in standard abapGit DD02V field order:
-  // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
+  // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, CLIDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
   const result: DD02VData = {};
   result.TABNAME = def.name.toUpperCase();
   result.DDLANGUAGE = language;
   result.TABCLASS = tabclass;
   if (hasLanguageField) result.LANGDEP = 'X';
+  if (hasClientKeyField) result.CLIDEP = 'X';
   result.DDTEXT = description;
   result.MASTERLANG = language;
   if (deliveryClass) result.CONTFLAG = deliveryClass;
