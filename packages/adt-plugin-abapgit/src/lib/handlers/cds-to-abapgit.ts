@@ -166,24 +166,16 @@ export function buildDD02V(
     'AbapCatalog.enhancement.category',
   );
 
-  // CLIDEP — set to 'X' if table has a client-type field
-  const fields = def.members.filter(
-    (m): m is FieldDefinition => !('kind' in m && m.kind === 'include'),
-  );
-  const hasClientField = fields.some(
-    (f) =>
-      (f.type.kind === 'builtin' && f.type.name === 'clnt') ||
-      (f.type.kind === 'named' && f.type.name.toLowerCase() === 'mandt'),
-  );
-
   // Build result in standard abapGit DD02V field order:
   // TABNAME, DDLANGUAGE, TABCLASS, LANGDEP, CLIDEP, DDTEXT, MASTERLANG, CONTFLAG, EXCLASS
+  //
+  // NOTE: LANGDEP and CLIDEP are real DD02V database values that cannot be
+  // reliably determined from CDS source alone. abapGit reads them from SAP
+  // and only emits them when set. We omit them here to avoid roundtrip mismatches.
   const result: DD02VData = {};
   result.TABNAME = def.name.toUpperCase();
   result.DDLANGUAGE = language;
   result.TABCLASS = tabclass;
-  result.LANGDEP = 'X';
-  if (hasClientField) result.CLIDEP = 'X';
   result.DDTEXT = description;
   result.MASTERLANG = language;
   if (deliveryClass) result.CONTFLAG = deliveryClass;
@@ -309,7 +301,6 @@ function computeIntlen(builtin: BuiltinType, length?: number): number {
 /** Build a DD03P entry from a single field definition */
 async function buildFieldDD03P(
   field: FieldDefinition,
-  position: number,
   tableName: string,
   resolver?: TypeResolver,
 ): Promise<DD03PData> {
@@ -387,9 +378,12 @@ async function buildFieldDD03P(
   }
 
   // Build in standard abapGit DD03P field order
+  //
+  // NOTE: POSITION is a real DD03P database value. abapGit emits it
+  // inconsistently (only for some transparent tables). We omit it to
+  // avoid roundtrip mismatches — SAP auto-computes it on import.
   const result: DD03PData = {};
   result.FIELDNAME = field.name.toUpperCase();
-  result.POSITION = zeroPad(position, 4);
   if (isKey) result.KEYFLAG = 'X';
   if (rollname) result.ROLLNAME = rollname;
   result.ADMINFIELD = '0';
@@ -417,13 +411,11 @@ export async function buildDD03P(
   resolver?: TypeResolver,
 ): Promise<DD03PData[]> {
   const entries: DD03PData[] = [];
-  let position = 0;
 
   for (const member of members) {
     if ('kind' in member && member.kind === 'include') {
       const inc = member as IncludeDirective;
       const includeName = inc.name.toUpperCase();
-      position++;
 
       // Resolve include description via ADT if available
       let ddtext: string | undefined;
@@ -436,7 +428,6 @@ export async function buildDD03P(
         // Include with suffix → .INCLU-<SUFFIX> entry
         const entry: DD03PData = {
           FIELDNAME: `.INCLU-${inc.suffix.toUpperCase()}`,
-          POSITION: zeroPad(position, 4),
           ADMINFIELD: '0',
           PRECFIELD: includeName,
           MASK: '      S',
@@ -448,7 +439,6 @@ export async function buildDD03P(
         // Plain include → .INCLUDE entry
         const entry: DD03PData = {
           FIELDNAME: '.INCLUDE',
-          POSITION: zeroPad(position, 4),
           ADMINFIELD: '0',
           PRECFIELD: includeName,
           MASK: '      S',
@@ -460,8 +450,7 @@ export async function buildDD03P(
     } else {
       // Regular field definition
       const field = member as FieldDefinition;
-      position++;
-      entries.push(await buildFieldDD03P(field, position, tableName, resolver));
+      entries.push(await buildFieldDD03P(field, tableName, resolver));
     }
   }
 

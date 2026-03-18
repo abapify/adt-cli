@@ -192,7 +192,7 @@ describe('TABL handler', () => {
       assert.ok(xml.includes('<INTTYPE>P</INTTYPE>'));
     });
 
-    it('sets POSITION for fields', async () => {
+    it('does not emit POSITION (SAP auto-computes on import)', async () => {
       const mock = createMockTable({
         name: 'ZAGE_STRUCTURE',
         type: 'TABL/DS',
@@ -203,10 +203,9 @@ describe('TABL handler', () => {
       const files = await handler!.serialize(mock as any);
       const xml = files[0].content;
 
-      // All fields should have POSITION
-      assert.ok(xml.includes('<POSITION>0001</POSITION>'));
-      assert.ok(xml.includes('<POSITION>0002</POSITION>'));
-      assert.ok(xml.includes('<POSITION>0003</POSITION>'));
+      // POSITION should NOT be emitted — abapGit reads it from DD03P but
+      // our serializer cannot determine it from CDS source alone
+      assert.ok(!xml.includes('<POSITION>'));
     });
   });
 
@@ -268,7 +267,7 @@ describe('TABL handler', () => {
       assert.ok(xml.includes('<COMPTYPE>E</COMPTYPE>'));
     });
 
-    it('detects client-dependent table', async () => {
+    it('does not emit CLIDEP (cannot determine reliably from CDS)', async () => {
       const mock = createMockTable({
         name: 'ZTABLE_DTEL',
         description: 'Table with data elements',
@@ -278,7 +277,9 @@ describe('TABL handler', () => {
       const files = await handler!.serialize(mock as any);
       const xml = files[0].content;
 
-      assert.ok(xml.includes('<CLIDEP>X</CLIDEP>'));
+      // CLIDEP is a DD02V database value — abapGit reads it from SAP.
+      // We cannot reliably determine it from CDS source alone.
+      assert.ok(!xml.includes('<CLIDEP>'));
     });
   });
 
@@ -379,7 +380,7 @@ describe('CDS-to-abapGit mapping', () => {
     assert.strictEqual(entries[0].INTTYPE, 'C');
     assert.strictEqual(entries[0].DATATYPE, 'CHAR');
     assert.strictEqual(entries[0].LENG, '000010');
-    assert.strictEqual(entries[0].POSITION, '0001');
+    assert.strictEqual(entries[0].POSITION, undefined);
 
     // AMOUNT: abap.curr(15,2)
     assert.strictEqual(entries[2].FIELDNAME, 'AMOUNT');
@@ -445,7 +446,7 @@ describe('CDS-to-abapGit field type mapping (all builtin types)', () => {
     assert.strictEqual(f.DATATYPE, 'CHAR');
     assert.strictEqual(f.LENG, '000010');
     assert.strictEqual(f.MASK, '  CHAR');
-    assert.strictEqual(f.POSITION, '0001');
+    assert.strictEqual(f.POSITION, undefined);
   });
 
   it('numc(5): INTTYPE=N, INTLEN=000010, DATATYPE=NUMC, LENG=000005', () => {
@@ -596,13 +597,12 @@ describe('CDS-to-abapGit field type mapping (all builtin types)', () => {
     assert.strictEqual(f.LENG, undefined);
   });
 
-  it('all fields have consecutive POSITION values', () => {
-    for (let i = 0; i < entries.length; i++) {
-      const expected = String(i + 1).padStart(4, '0');
+  it('no fields have POSITION (not emitted by our serializer)', () => {
+    for (const entry of entries) {
       assert.strictEqual(
-        entries[i].POSITION,
-        expected,
-        `Field ${entries[i].FIELDNAME} should have POSITION=${expected}`,
+        entry.POSITION,
+        undefined,
+        `Field ${entry.FIELDNAME} should not have POSITION`,
       );
     }
   });
@@ -619,11 +619,11 @@ describe('CDS-to-abapGit field type mapping (all builtin types)', () => {
 });
 
 describe('CDS-to-abapGit DD02V LANGDEP', () => {
-  it('buildDD02V includes LANGDEP=X', () => {
+  it('buildDD02V does not emit LANGDEP (cannot determine from CDS)', () => {
     const { ast } = parse(CDS_STRUCTURE);
     const def = ast.definitions[0] as any;
     const dd02v = buildDD02V(def, 'E', 'AGE Test Structure');
-    assert.strictEqual(dd02v.LANGDEP, 'X');
+    assert.strictEqual(dd02v.LANGDEP, undefined);
   });
 });
 
@@ -633,20 +633,20 @@ describe('CDS-to-abapGit include directives', () => {
     const def = ast.definitions[0] as any;
     const entries = await buildDD03P(def.members);
 
-    // field1 at position 1
+    // field1
     assert.strictEqual(entries[0].FIELDNAME, 'FIELD1');
-    assert.strictEqual(entries[0].POSITION, '0001');
+    assert.strictEqual(entries[0].POSITION, undefined);
 
-    // .INCLUDE at position 2
+    // .INCLUDE
     assert.strictEqual(entries[1].FIELDNAME, '.INCLUDE');
-    assert.strictEqual(entries[1].POSITION, '0002');
+    assert.strictEqual(entries[1].POSITION, undefined);
     assert.strictEqual(entries[1].PRECFIELD, 'ZAGE_STRUCTURE1');
     assert.strictEqual(entries[1].MASK, '      S');
     assert.strictEqual(entries[1].COMPTYPE, 'S');
 
-    // field2 at position 3
+    // field2
     assert.strictEqual(entries[2].FIELDNAME, 'FIELD2');
-    assert.strictEqual(entries[2].POSITION, '0003');
+    assert.strictEqual(entries[2].POSITION, undefined);
 
     assert.strictEqual(entries.length, 3);
   });
@@ -656,24 +656,24 @@ describe('CDS-to-abapGit include directives', () => {
     const def = ast.definitions[0] as any;
     const entries = await buildDD03P(def.members);
 
-    // field1 at position 1
+    // field1
     assert.strictEqual(entries[0].FIELDNAME, 'FIELD1');
-    assert.strictEqual(entries[0].POSITION, '0001');
+    assert.strictEqual(entries[0].POSITION, undefined);
 
-    // .INCLUDE at position 2 (plain include)
+    // .INCLUDE (plain include)
     assert.strictEqual(entries[1].FIELDNAME, '.INCLUDE');
-    assert.strictEqual(entries[1].POSITION, '0002');
+    assert.strictEqual(entries[1].POSITION, undefined);
     assert.strictEqual(entries[1].PRECFIELD, 'ZAGE_STRUCTURE1');
 
-    // .INCLU-_XX at position 3 (include with suffix _xx)
+    // .INCLU-_XX (include with suffix _xx)
     assert.strictEqual(entries[2].FIELDNAME, '.INCLU-_XX');
-    assert.strictEqual(entries[2].POSITION, '0003');
+    assert.strictEqual(entries[2].POSITION, undefined);
     assert.strictEqual(entries[2].PRECFIELD, 'ZAGE_STRUCTURE1');
     assert.strictEqual(entries[2].COMPTYPE, 'S');
 
-    // field2 at position 4
+    // field2
     assert.strictEqual(entries[3].FIELDNAME, 'FIELD2');
-    assert.strictEqual(entries[3].POSITION, '0004');
+    assert.strictEqual(entries[3].POSITION, undefined);
 
     assert.strictEqual(entries.length, 4);
   });
