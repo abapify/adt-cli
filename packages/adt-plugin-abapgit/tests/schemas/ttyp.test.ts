@@ -55,6 +55,36 @@ const scenario: SchemaScenario<TtypSchema> = {
         assert.strictEqual(dd40v.DDTEXT, 'AGE Test Structure Table Type');
       },
     },
+    {
+      path: 'ttyp/zage_strtab_v2.ttyp.xml',
+      validate: (data) => {
+        const root = (data as any).abapGit;
+        const dd40v = root.abap.values.DD40V!;
+        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_STRTAB_V2');
+        assert.strictEqual(dd40v.ROWTYPE, 'STRING');
+        assert.strictEqual(dd40v.ROWKIND, 'S');
+        assert.strictEqual(dd40v.DATATYPE, 'STRG');
+        assert.strictEqual(dd40v.ACCESSMODE, 'T');
+        assert.strictEqual(dd40v.KEYDEF, 'D');
+        assert.strictEqual(dd40v.KEYKIND, 'N');
+        assert.strictEqual(dd40v.DDTEXT, 'AGE Test String Table v2');
+      },
+    },
+    {
+      path: 'ttyp/zage_ttyp_string.ttyp.xml',
+      validate: (data) => {
+        const root = (data as any).abapGit;
+        const dd40v = root.abap.values.DD40V!;
+        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_TTYP_STRING');
+        assert.strictEqual(dd40v.DATATYPE, 'STRG');
+        assert.strictEqual(dd40v.ACCESSMODE, 'T');
+        assert.strictEqual(dd40v.TYPELEN, '000008');
+        assert.strictEqual(dd40v.ABAP_LANGUAGE_VERSION, '5');
+        assert.strictEqual(dd40v.DDTEXT, 'table of string');
+        // No ROWTYPE — uses predefined DATATYPE
+        assert.strictEqual(dd40v.ROWTYPE, undefined);
+      },
+    },
   ],
 };
 
