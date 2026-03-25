@@ -5,7 +5,7 @@
 import { AdkClass, type ClassIncludeType } from '../adk';
 import { clas } from '../../../schemas/generated';
 import { createHandler } from '../base';
-import { sapLangToIso, isoToSapLang } from '../lang';
+import { sapLangToIso, isoToSapLang, abapLangVerToAdt, abapLangVerFromAdt } from '../lang';
 
 /**
  * Map ADK ClassIncludeType to abapGit file suffix convention
@@ -89,7 +89,7 @@ export const classHandler = createHandler(AdkClass, {
         MSG_ID: data.messageClassRef?.name,
 
         // ABAP language version
-        ABAP_LANGUAGE_VERSION: data.abapLanguageVersion,
+        ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(data.abapLanguageVersion),
 
         // Test classes flag
         ...(hasTestClasses ? { WITH_UNIT_TESTS: 'X' } : {}),
@@ -137,7 +137,7 @@ export const classHandler = createHandler(AdkClass, {
     messageClassRef: VSEOCLASS?.MSG_ID ? { name: VSEOCLASS.MSG_ID } : undefined,
 
     // ABAP language version
-    abapLanguageVersion: VSEOCLASS?.ABAP_LANGUAGE_VERSION,
+    abapLanguageVersion: abapLangVerToAdt(VSEOCLASS?.ABAP_LANGUAGE_VERSION),
   }),
 
   // Git → SAP: Set source files on ADK object (symmetric with getSources)

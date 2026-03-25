@@ -51,7 +51,7 @@ adt-cli
                 └── adt-plugin (interface)
 ```
 
-Foundation packages (no `@abapify` deps): `ts-xsd`, `speci`, `logger`.
+Foundation packages (no `@abapify` deps): `ts-xsd`, `speci`, `logger`, `acds`.
 
 ## Type Flow (Core Architecture)
 
@@ -98,6 +98,7 @@ Symlinked to `.windsurf/rules/` and `.cognition/rules/` for tool compatibility.
 
 Each package has its own `AGENTS.md` with detailed conventions:
 
+- [`packages/acds/AGENTS.md`](packages/acds/AGENTS.md) — ABAP CDS parser, tokenizer, AST types
 - [`packages/adt-cli/AGENTS.md`](packages/adt-cli/AGENTS.md) — CLI commands, service pattern, client initialization
 - [`packages/adt-client/AGENTS.md`](packages/adt-client/AGENTS.md) — Contract-driven REST client, schema conventions, type inference
 - [`packages/adt-contracts/AGENTS.md`](packages/adt-contracts/AGENTS.md) — Contract testing framework, schema integration

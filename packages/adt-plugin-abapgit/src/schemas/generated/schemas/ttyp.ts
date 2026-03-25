@@ -141,6 +141,11 @@ export default {
             type: "xs:string",
             minOccurs: "0",
           },
+          {
+            name: "ABAP_LANGUAGE_VERSION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
         ],
       },
     },

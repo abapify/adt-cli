@@ -24,6 +24,7 @@ export type TtypSchema = {
                     DDTEXT?: string;
                     TYPELEN?: string;
                     DEFFDNAME?: string;
+                    ABAP_LANGUAGE_VERSION?: string;
                 };
             };
             version?: string;
@@ -49,6 +50,7 @@ export type TtypSchema = {
             DDTEXT?: string;
             TYPELEN?: string;
             DEFFDNAME?: string;
+            ABAP_LANGUAGE_VERSION?: string;
         };
     };
 } | {
@@ -69,6 +71,7 @@ export type TtypSchema = {
                 DDTEXT?: string;
                 TYPELEN?: string;
                 DEFFDNAME?: string;
+                ABAP_LANGUAGE_VERSION?: string;
             };
         };
         version?: string;

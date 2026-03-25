@@ -5,7 +5,7 @@
 import { AdkDataElement } from '../adk';
 import { dtel } from '../../../schemas/generated';
 import { createHandler } from '../base';
-import { isoToSapLang, sapLangToIso } from '../lang';
+import { isoToSapLang, sapLangToIso, abapLangVerToAdt } from '../lang';
 
 /**
  * Map ADT typeKind → abapGit REFKIND
@@ -192,7 +192,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
       description: DD04V?.DDTEXT,
       language: sapLangToIso(DD04V?.DDLANGUAGE),
       masterLanguage: sapLangToIso(DD04V?.DDLANGUAGE),
-      abapLanguageVersion: DD04V?.ABAP_LANGUAGE_VERSION,
+      abapLanguageVersion: abapLangVerToAdt(DD04V?.ABAP_LANGUAGE_VERSION),
       dataElement: {
         // SAP's strict xs:sequence parser requires ALL elements to be present.
         // Every field in the dataelements.xsd sequence must have an explicit value.
