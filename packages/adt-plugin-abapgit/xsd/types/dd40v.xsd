@@ -18,6 +18,7 @@
       <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
       <xs:element name="TYPELEN" type="xs:string" minOccurs="0"/>
       <xs:element name="DEFFDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
 </xs:schema>

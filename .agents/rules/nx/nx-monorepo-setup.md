@@ -1,6 +1,9 @@
-# Nx Monorepo Setup Rules
+---
+trigger: model_decision
+description: Nx monorepo setup rules - package creation workflow, config templates, plugin inference, import conventions.
+---
 
-> **See**: [`.agents/rules/development/tooling/nx-monorepo.md`](../../../.agents/rules/development/tooling/nx-monorepo.md) for complete Nx plugin inference system documentation.
+# Nx Monorepo Setup Rules
 
 ## Quick Reference
 
@@ -153,13 +156,15 @@ You should see: `["build", "lint", "nx-release-publish", "test", "test:coverage"
 
 ## Import Rules
 
+> See [coding-conventions](../development/coding-conventions.md) and [bundler-imports](../development/bundler-imports.md) for full details.
+
 - **Cross-package**: `@abapify/[package-name]`
-- **Internal files**: `../relative/path` (no extensions for TS files)
-- **Workspace deps**: Use `workspace:*` (bun supports this protocol)
+- **Internal files**: `../relative/path` (extensionless)
+- **Workspace deps**: `workspace:*`
 
 ## File Organization
 
 - **Source code**: `packages/[name]/src/`
-- **Temporary files**: `tmp/` (never commit)
+- **Temporary files**: `tmp/` — see [tmp-folder-testing](../development/tmp-folder-testing.md)
 - **Build output**: `packages/[name]/dist/`
 - **Tests**: Co-located with source (`*.test.ts`)

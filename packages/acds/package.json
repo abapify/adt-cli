@@ -1,0 +1,31 @@
+{
+  "name": "@abapify/acds",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.1",
+  "description": "ABAP CDS source parser — tokenizer, parser, and AST for all DDL-based ABAP source types",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "chevrotain": "^11.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "abap",
+    "cds",
+    "parser",
+    "ddl",
+    "sap",
+    "adt"
+  ],
+  "author": "abapify",
+  "license": "MIT"
+}

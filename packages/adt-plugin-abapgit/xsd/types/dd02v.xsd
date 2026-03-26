@@ -2,21 +2,24 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!-- TYPE ONLY - no element declaration! -->
   <!-- DD02V: Table/Structure header metadata -->
+  <!-- Field order matches standard abapGit LCL_OBJECT_TABL output -->
   <xs:complexType name="Dd02vType">
-    <xs:all>
+    <xs:sequence>
       <xs:element name="TABNAME" type="xs:string"/>
       <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
       <xs:element name="TABCLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGDEP" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLIDEP" type="xs:string" minOccurs="0"/>
       <xs:element name="SQLTAB" type="xs:string" minOccurs="0"/>
       <xs:element name="DATCLASS" type="xs:string" minOccurs="0"/>
-      <xs:element name="BUFFERED" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
       <xs:element name="MASTERLANG" type="xs:string" minOccurs="0"/>
+      <xs:element name="BUFFERED" type="xs:string" minOccurs="0"/>
       <xs:element name="MATEFLAG" type="xs:string" minOccurs="0"/>
       <xs:element name="CONTFLAG" type="xs:string" minOccurs="0"/>
       <xs:element name="SHLPEXI" type="xs:string" minOccurs="0"/>
       <xs:element name="EXCLASS" type="xs:string" minOccurs="0"/>
-      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
       <xs:element name="AUTHCLASS" type="xs:string" minOccurs="0"/>
-    </xs:all>
+    </xs:sequence>
   </xs:complexType>
 </xs:schema>

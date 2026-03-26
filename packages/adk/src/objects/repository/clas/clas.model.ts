@@ -81,7 +81,7 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
    * Save main source code
    * Requires object to be locked first
    */
-  async saveMainSource(
+  override async saveMainSource(
     source: string,
     options?: { lockHandle?: string; transport?: string },
   ): Promise<void> {
@@ -154,6 +154,7 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
     if (!pendingSources) return;
 
     const errors: Error[] = [];
+    const deferred: [string, string][] = [];
 
     for (const [key, source] of Object.entries(pendingSources)) {
       try {
@@ -167,16 +168,29 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
           );
         }
       } catch (e) {
-        // 409 Conflict means the include is already locked in the transport
-        // This is expected when the object is already in a transport request
-        // We can skip this include and continue with others
         const errorMsg = e instanceof Error ? e.message : String(e);
+        // 409 Conflict means the include is already locked in the transport
         if (errorMsg.includes('409') || errorMsg.includes('Conflict')) {
-          // Skip - include already in transport, will be saved with transport release
+          continue;
+        }
+        // Include doesn't have an inactive version — defer for retry after activation
+        // This happens on BTP when testclasses/localtypes includes don't exist yet
+        if (
+          errorMsg.includes('does not have any inactive version') ||
+          errorMsg.includes('ResourceNotFound')
+        ) {
+          deferred.push([key, source]);
           continue;
         }
         errors.push(e instanceof Error ? e : new Error(String(e)));
       }
+    }
+
+    // Store deferred sources for retry after activation
+    if (deferred.length > 0) {
+      (
+        this as unknown as { _deferredSources: [string, string][] }
+      )._deferredSources = deferred;
     }
 
     // Clear pending sources after save
@@ -184,7 +198,7 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
       ._pendingSources;
     delete (this as unknown as { _pendingSource?: string })._pendingSource;
 
-    // If there were non-conflict errors, throw the first one
+    // If there were non-recoverable errors, throw the first one
     if (errors.length > 0) {
       throw errors[0];
     }
@@ -256,4 +270,4 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('CLAS', ClassKind, AdkClass);
+registerObjectType('CLAS', ClassKind, AdkClass, { endpoint: 'oo/classes' });

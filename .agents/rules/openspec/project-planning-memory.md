@@ -1,5 +1,6 @@
 ---
 trigger: always_on
+description: OpenSpec-based project planning. Check openspec/specs/ and openspec/changes/ before making changes.
 ---
 
 # Project Planning and Memory Persistence Rule
@@ -16,6 +17,8 @@ This workspace uses [OpenSpec](https://openspec.dev/) for project planning and s
 - `docs/planning/` — Roadmap, sprint tracking, and project coordination
 
 ## AI Assistant Workflow
+
+> For the critical review process and spec change severity rules, see [spec-first-then-code](spec-first-then-code.md).
 
 1. **Check `openspec/specs/`** for existing specifications before making changes
 2. **Check `openspec/changes/`** for active change proposals to understand context

@@ -177,7 +177,7 @@ Failed tasks: <taskId1>, <taskId2>
 Local verification: passed|enhanced|failed-pushing-to-ci"
 ```
 
-**Git Safety**: Only stage and commit files that were modified as part of the fix. Users may have concurrent local changes (local publish, WIP features, config tweaks) that must NOT be committed. NEVER use `git add -A` or `git add .` — always stage specific files by name.
+**Git Safety**: Only stage and commit files that were modified as part of the fix. Users may have concurrent local changes (local publish, WIP features, config tweaks) that must NOT be committed. NEVER use `git add -A` or `git add .` — always stage specific files by name. (This skill is exempt from [no-auto-commit](../../rules/git/no-auto-commit.md) for self-healing commits only.)
 
 ### Unverified Fix Flow (No Verification Attempted)
 

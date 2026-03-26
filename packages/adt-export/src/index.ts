@@ -15,7 +15,14 @@
  */
 
 export { exportCommand } from './commands/export';
-export { createFileTree, FsFileTree, MemoryFileTree } from './utils/filetree';
+export {
+  createFileTree,
+  FsFileTree,
+  MemoryFileTree,
+  FilteredFileTree,
+  findAbapGitRoot,
+  resolveFilesRelativeToRoot,
+} from './utils/filetree';
 export type {
   FileTree,
   ExportResult,

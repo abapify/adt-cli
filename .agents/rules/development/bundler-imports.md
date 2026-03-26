@@ -1,7 +1,7 @@
 ---
 trigger: glob
 description: Enforce extensionless imports for internal files in bundled TypeScript packages.
-globs: *.ts
+globs: '**/*.ts'
 ---
 
 ## Rule: Use Extensionless Imports for Internal Files

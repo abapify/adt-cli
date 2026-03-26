@@ -146,6 +146,8 @@ Generators provide a starting point. Modify the output as needed to:
 
 ### 9. Format and Verify
 
+> See [after-changes](../../rules/verification/after-changes.md) for this project's verification commands.
+
 Format all generated/modified files:
 
 ```bash

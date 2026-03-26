@@ -4,7 +4,6 @@
     "esbenp.prettier-vscode",
     "larshp.standalone-abap-development",
     "vitest.explorer",
-    "connor4312.nodejs-testing",
     "eamodio.gitlens",
     "dbaeumer.vscode-eslint"
   ]

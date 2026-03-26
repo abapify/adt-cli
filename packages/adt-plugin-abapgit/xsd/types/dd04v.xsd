@@ -3,26 +3,28 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:complexType name="Dd04vType">
-    <xs:all>
+    <xs:sequence>
       <xs:element name="ROLLNAME" type="xs:string"/>
       <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
-      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
       <xs:element name="DOMNAME" type="xs:string" minOccurs="0"/>
-      <xs:element name="DATATYPE" type="xs:string" minOccurs="0"/>
-      <xs:element name="LENG" type="xs:string" minOccurs="0"/>
-      <xs:element name="DECIMALS" type="xs:string" minOccurs="0"/>
       <xs:element name="HEADLEN" type="xs:string" minOccurs="0"/>
       <xs:element name="SCRLEN1" type="xs:string" minOccurs="0"/>
       <xs:element name="SCRLEN2" type="xs:string" minOccurs="0"/>
       <xs:element name="SCRLEN3" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
       <xs:element name="REPTEXT" type="xs:string" minOccurs="0"/>
       <xs:element name="SCRTEXT_S" type="xs:string" minOccurs="0"/>
       <xs:element name="SCRTEXT_M" type="xs:string" minOccurs="0"/>
       <xs:element name="SCRTEXT_L" type="xs:string" minOccurs="0"/>
       <xs:element name="DTELMASTER" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATATYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="LENG" type="xs:string" minOccurs="0"/>
+      <xs:element name="DECIMALS" type="xs:string" minOccurs="0"/>
+      <xs:element name="OUTPUTLEN" type="xs:string" minOccurs="0"/>
       <xs:element name="REFKIND" type="xs:string" minOccurs="0"/>
+      <xs:element name="REFTYPE" type="xs:string" minOccurs="0"/>
       <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
-    </xs:all>
+    </xs:sequence>
   </xs:complexType>
 
 </xs:schema>

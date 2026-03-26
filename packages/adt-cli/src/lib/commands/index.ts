@@ -1,4 +1,5 @@
 // Export all commands directly
+export { importObjectCommand } from './import/object';
 export { importPackageCommand } from './import/package';
 export { importTransportCommand } from './import/transport';
 // Export commands moved to @abapify/adt-export plugin
@@ -19,3 +20,5 @@ export { createCtsCommand } from './cts';
 export { createReplCommand } from './repl';
 export { packageGetCommand } from './package';
 export { lsCommand } from './ls';
+export { unlockCommand } from './unlock';
+export { checkCommand } from './check';

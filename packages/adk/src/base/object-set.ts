@@ -250,14 +250,17 @@ export class AdkObjectSet {
 </adtcore:objectReferences>`;
 
     try {
-      const response = await this.ctx.client.fetch('/sap/bc/adt/activation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/xml',
-          Accept: 'application/xml',
+      const response = await this.ctx.client.fetch(
+        '/sap/bc/adt/activation?method=activate&preauditRequested=true',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/xml',
+            Accept: 'application/xml',
+          },
+          body: activationXml,
         },
-        body: activationXml,
-      });
+      );
 
       // NOTE: Could parse actual response XML for detailed messages
       return {
@@ -312,6 +315,41 @@ export class AdkObjectSet {
         }
 
         activationResult = await savedSet.activateAll();
+
+        // Step 2b: Retry deferred sources after activation
+        // Some includes (e.g., testclasses) may not exist until activation creates them
+        for (const r of saveResult.results) {
+          if (!r.success) continue;
+          const obj = r.object as any;
+          const deferred = obj._deferredSources as
+            | [string, string][]
+            | undefined;
+          if (deferred && deferred.length > 0) {
+            try {
+              // Re-lock for deferred source saves
+              const lock = await r.object.lock();
+              for (const [key, source] of deferred) {
+                await obj.saveIncludeSource(key, source, {
+                  lockHandle: lock.handle,
+                  transport: saveOptions.transport,
+                });
+              }
+              delete obj._deferredSources;
+              // Re-activate after saving deferred sources
+              const deferredSet = new AdkObjectSet(this.ctx);
+              deferredSet.add(r.object);
+              await deferredSet.activateAll();
+            } catch {
+              // Deferred source retry failed — not critical, continue
+            } finally {
+              try {
+                await r.object.unlock();
+              } catch {
+                // Ignore unlock failures
+              }
+            }
+          }
+        }
       }
 
       return {

@@ -15,6 +15,7 @@
 
 import type { AdkContext } from './context';
 import type { AdkKind } from './kinds';
+import { toText } from './fetch-utils';
 
 /**
  * Lock handle returned by lock operations
@@ -572,7 +573,13 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       throw new Error(`Save not supported for ${this.kind}.`);
     }
 
-    const data = { [wrapperKey]: await this.data() };
+    const rawData = await this.data();
+    // Strip abapLanguageVersion from save payload — SAP infers it from
+    // the package, and including it triggers S_ABPLNGVS authorization
+    // checks that may fail (matching Eclipse ADT behavior).
+    const { abapLanguageVersion: _, ...saveData } =
+      rawData as Record<string, unknown>;
+    const data = { [wrapperKey]: saveData };
 
     if (mode === 'create') {
       await contract.post({ corrNr: options.transport }, data);
@@ -680,7 +687,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
         `${this.objectUri}/source/main`,
         { method: 'GET', headers: { Accept: 'text/plain' } },
       );
-      const currentSource = await response.text();
+      const currentSource = await toText(response);
       if (
         this.normalizeSource(currentSource) ===
         this.normalizeSource(self._pendingSource)
@@ -793,14 +800,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   <adtcore:objectReference adtcore:uri="${this.objectUri}" adtcore:type="${this.type}" adtcore:name="${this.name}"/>
 </adtcore:objectReferences>`;
 
-    await this.ctx.client.fetch('/sap/bc/adt/activation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/xml',
-        Accept: 'application/xml',
+    await this.ctx.client.fetch(
+      '/sap/bc/adt/activation?method=activate&preauditRequested=true',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/xml',
+          Accept: 'application/xml',
+        },
+        body: activationXml,
       },
-      body: activationXml,
-    });
+    );
 
     return this;
   }
@@ -844,6 +854,33 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   protected invalidate(key: string): void {
     this.cache.delete(key);
     this.dirty.delete(key);
+  }
+
+  // ============================================
+  // Public Fetch Utilities
+  // ============================================
+
+  /**
+   * Fetch a text resource from an ADT endpoint.
+   * Delegates to the underlying ADT client's fetch.
+   *
+   * @param url - ADT endpoint path (e.g., '/sap/bc/adt/ddic/dataelements/spras')
+   * @param headers - Optional HTTP headers (defaults to no Accept header, letting server choose)
+   * @returns Response content as text, or undefined if 404
+   */
+  async fetchText(
+    url: string,
+    headers?: Record<string, string>,
+  ): Promise<string | undefined> {
+    try {
+      const response = await this.ctx.client.fetch(url, {
+        method: 'GET',
+        headers: headers ?? {},
+      });
+      return toText(response);
+    } catch {
+      return undefined;
+    }
   }
 }
 

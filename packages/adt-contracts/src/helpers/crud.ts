@@ -121,6 +121,9 @@ export interface ObjectStructureOptions {
  * Base CRUD contract type (always present)
  */
 export interface CrudContractBase<S extends Serializable<unknown>> {
+  /** The schema used for XML serialization/deserialization */
+  readonly bodySchema: S;
+
   /** GET {basePath}/{name} - Retrieve object metadata */
   get: (
     name: string,
@@ -326,6 +329,9 @@ export function crud<
   } = options;
 
   return {
+    /** Schema for XML serialization/deserialization */
+    bodySchema: schema,
+
     /**
      * GET {basePath}/{name}
      * Retrieve object metadata

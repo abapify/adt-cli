@@ -19,5 +19,11 @@ export default {
     '@abapify/adt-aunit/commands/aunit',
     // Export plugin - deploy local files to SAP (aliased as 'deploy')
     '@abapify/adt-export/commands/export',
+    // Roundtrip test - deploy, reimport, compare
+    '@abapify/adt-export/commands/roundtrip',
+    // Activate - bulk activate inactive objects
+    '@abapify/adt-export/commands/activate',
+    // Diff - compare local abapGit files against SAP remote
+    '@abapify/adt-diff/commands/diff',
   ],
 } as AdtConfig;

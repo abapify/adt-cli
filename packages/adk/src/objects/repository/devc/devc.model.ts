@@ -162,7 +162,7 @@ export class AdkPackage
 
       // Return as AbapObject array
       return objRefs.map((ref) => ({
-        type: ref.type?.split('/')[0] ?? '', // Extract main type from "CLAS/OC" -> "CLAS"
+        type: ref.type ?? '',
         name: ref.name,
         description: ref.description ?? '',
         uri: ref.uri ?? '',
@@ -264,12 +264,29 @@ export class AdkPackage
   ): Promise<AdkPackage> {
     const context = ctx ?? getGlobalContext();
     const pkg = new AdkPackage(context, name);
-    // Merge provided data with defaults
+    // SAP requires ALL elements in the Package sequence, even if empty.
+    // The sequence is: attributes, superPackage, extensionAlias, switch,
+    // applicationComponent, transport, translation, useAccesses,
+    // packageInterfaces, subPackages.
+    // Missing elements cause "System expected the element ..." errors.
     pkg.setData({
       name,
       type: 'DEVC/K',
       description: data.description ?? name,
       responsible: data.responsible ?? '',
+      attributes: {
+        packageType: 'development',
+        ...data.attributes,
+      },
+      superPackage: data.superPackage ?? {},
+      extensionAlias: data.extensionAlias ?? {},
+      switch: data.switch ?? {},
+      applicationComponent: data.applicationComponent ?? {},
+      transport: data.transport ?? {},
+      translation: data.translation ?? {},
+      useAccesses: data.useAccesses ?? {},
+      packageInterfaces: data.packageInterfaces ?? {},
+      subPackages: data.subPackages ?? {},
       ...data,
     } as PackageXml);
     await pkg.save({ transport: options?.transport, mode: 'create' });
@@ -279,4 +296,7 @@ export class AdkPackage
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('DEVC', PackageKind, AdkPackage);
+registerObjectType('DEVC', PackageKind, AdkPackage, {
+  endpoint: 'packages',
+  nameTransform: 'preserve',
+});

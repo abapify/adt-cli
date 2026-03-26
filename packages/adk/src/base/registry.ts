@@ -25,10 +25,17 @@ export type AdkObjectConstructor<
   T extends AdkObject<AdkKind, any> = AdkObject<AdkKind, any>,
 > = new (ctx: AdkContext, nameOrData: string | any) => T;
 
+/** How to transform object name for the URI path segment */
+export type NameTransform = 'lowercase' | 'preserve';
+
 /** Registry entry with constructor and kind */
 export interface RegistryEntry {
   readonly kind: AdkKind;
   readonly constructor: AdkObjectConstructor;
+  /** ADT REST endpoint path segment (e.g., 'oo/classes', 'ddic/tabletypes') */
+  readonly endpoint?: string;
+  /** How to transform the object name in URIs (default: lowercase) */
+  readonly nameTransform?: NameTransform;
 }
 
 // ============================================
@@ -79,21 +86,36 @@ const adtToKind = new Map<string, AdkKind>();
 /** ADK kind to ADT main type mapping (reverse) */
 const kindToAdt = new Map<AdkKind, string>();
 
+/** Options for registerObjectType */
+export interface RegisterObjectTypeOptions {
+  /** ADT REST endpoint path segment (e.g., 'oo/classes', 'ddic/tabletypes') */
+  endpoint?: string;
+  /** How to transform the object name in URIs (default: 'lowercase') */
+  nameTransform?: NameTransform;
+}
+
 /**
  * Register an ADK object type
  *
- * @param adtMainType - Main ADT type (e.g., "DEVC", "CLAS")
+ * @param adtType - ADT type, either main (e.g., "CLAS") or full (e.g., "TABL/DS")
  * @param kind - ADK kind constant
  * @param constructor - Object constructor
+ * @param options - Optional endpoint and name transform settings
  */
 export function registerObjectType(
-  adtMainType: string,
+  adtType: string,
   kind: AdkKind,
   constructor: AdkObjectConstructor,
+  options?: RegisterObjectTypeOptions,
 ): void {
-  const normalizedType = adtMainType.toUpperCase();
+  const normalizedType = adtType.toUpperCase();
 
-  registry.set(normalizedType, { kind, constructor });
+  registry.set(normalizedType, {
+    kind,
+    constructor,
+    endpoint: options?.endpoint,
+    nameTransform: options?.nameTransform,
+  });
   adtToKind.set(normalizedType, kind);
   kindToAdt.set(kind, normalizedType);
 }
@@ -101,10 +123,18 @@ export function registerObjectType(
 /**
  * Resolve ADT type to registry entry
  *
+ * Tries full type first (e.g., "TABL/DS"), then falls back to main type (e.g., "TABL").
+ * This allows registering subtypes with different constructors/endpoints.
+ *
  * @param adtType - Full or main ADT type (e.g., "DEVC/K" or "DEVC")
  * @returns Registry entry or undefined if not found
  */
 export function resolveType(adtType: string): RegistryEntry | undefined {
+  const normalized = adtType.toUpperCase();
+  // Try full type first (e.g., "TABL/DS")
+  const fullMatch = registry.get(normalized);
+  if (fullMatch) return fullMatch;
+  // Fall back to main type (e.g., "TABL")
   const mainType = getMainType(adtType);
   return registry.get(mainType);
 }
@@ -154,6 +184,36 @@ export function getRegisteredTypes(): string[] {
  */
 export function getRegisteredKinds(): AdkKind[] {
   return Array.from(kindToAdt.keys());
+}
+
+/**
+ * Get ADT REST endpoint for a type (e.g., 'oo/classes', 'ddic/tabletypes')
+ */
+export function getEndpointForType(adtType: string): string | undefined {
+  return registry.get(getMainType(adtType))?.endpoint;
+}
+
+/**
+ * Build the full ADT object URI for a given type and name.
+ *
+ * @example
+ * getObjectUri('CLAS', 'ZCL_MY_CLASS')  // '/sap/bc/adt/oo/classes/zcl_my_class'
+ * getObjectUri('DEVC', 'ZPACKAGE')       // '/sap/bc/adt/packages/ZPACKAGE'
+ * getObjectUri('TTYP', 'ZAGE_TTYP_STRTAB') // '/sap/bc/adt/ddic/tabletypes/zage_ttyp_strtab'
+ */
+export function getObjectUri(
+  adtType: string,
+  name: string,
+): string | undefined {
+  const entry = resolveType(adtType);
+  if (!entry?.endpoint) return undefined;
+
+  const transformedName =
+    entry.nameTransform === 'preserve'
+      ? encodeURIComponent(name)
+      : encodeURIComponent(name.toLowerCase());
+
+  return `/sap/bc/adt/${entry.endpoint}/${transformedName}`;
 }
 
 // ============================================
