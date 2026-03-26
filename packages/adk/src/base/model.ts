@@ -573,7 +573,13 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       throw new Error(`Save not supported for ${this.kind}.`);
     }
 
-    const data = { [wrapperKey]: await this.data() };
+    const rawData = await this.data();
+    // Strip abapLanguageVersion from save payload — SAP infers it from
+    // the package, and including it triggers S_ABPLNGVS authorization
+    // checks that may fail (matching Eclipse ADT behavior).
+    const { abapLanguageVersion: _, ...saveData } =
+      rawData as Record<string, unknown>;
+    const data = { [wrapperKey]: saveData };
 
     if (mode === 'create') {
       await contract.post({ corrNr: options.transport }, data);

@@ -35,6 +35,47 @@ import {
   type ObjectHandler,
 } from '@abapify/adt-plugin-abapgit';
 import { tablXmlToCdsDdl } from '../lib/abapgit-to-cds';
+import { adtContract } from '@abapify/adt-contracts';
+
+/**
+ * ADT schema lookup for --raw mode.
+ *
+ * Maps abapGit type codes to raw CRUD contract schemas (NOT speci-proxied).
+ * Each entry has:
+ * - schema: the TypedSchema with .build() for XML serialization
+ * - wrapperKey: the root element key expected by build()
+ */
+const adtSchemaMap: Record<
+  string,
+  { schema: { build: (data: unknown, options?: { pretty?: boolean }) => string }; wrapperKey: string }
+> = {
+  TTYP: {
+    schema: adtContract.ddic.tabletypes.bodySchema,
+    wrapperKey: 'tableType',
+  },
+  DOMA: { schema: adtContract.ddic.domains.bodySchema, wrapperKey: 'domain' },
+  DTEL: {
+    schema: adtContract.ddic.dataelements.bodySchema,
+    wrapperKey: 'wbobj',
+  },
+  CLAS: { schema: adtContract.oo.classes.bodySchema, wrapperKey: 'abapClass' },
+  INTF: {
+    schema: adtContract.oo.interfaces.bodySchema,
+    wrapperKey: 'abapInterface',
+  },
+  PROG: {
+    schema: adtContract.programs.programs.bodySchema,
+    wrapperKey: 'abapProgram',
+  },
+  FUGR: {
+    schema: adtContract.functions.groups.bodySchema,
+    wrapperKey: 'abapFunctionGroup',
+  },
+  DEVC: {
+    schema: adtContract.packages.bodySchema,
+    wrapperKey: 'package',
+  },
+};
 
 /**
  * Expand glob patterns to matching file paths.
@@ -263,9 +304,10 @@ async function diffSingleFile(
     contextLines: number;
     useColor: boolean;
     source: boolean;
+    raw: boolean;
   },
 ): Promise<DiffResult> {
-  const { contextLines, useColor, source } = options;
+  const { contextLines, useColor, source, raw } = options;
   const fullPath = resolve(ctx.cwd, filePath);
 
   if (!existsSync(fullPath)) {
@@ -313,6 +355,18 @@ async function diffSingleFile(
       fileCount: 0,
       identicalCount: 0,
       error: `Source format is only supported for TABL objects. Got: ${parsed.type}`,
+    };
+  }
+
+  // Validate mutual exclusion of --source and --raw
+  if (source && raw) {
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: false,
+      fileCount: 0,
+      identicalCount: 0,
+      error: '--source and --raw are mutually exclusive',
     };
   }
 
@@ -423,6 +477,96 @@ async function diffSingleFile(
       sourceFile,
       localSource,
       remoteSource,
+      contextLines,
+      useColor,
+    );
+
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: diffFound,
+      fileCount: 1,
+      identicalCount: diffFound ? 0 : 1,
+    };
+  }
+
+  // ========================================
+  // Raw mode: compare ADT-level XML payloads
+  // ========================================
+  if (raw) {
+    const adtSchema = adtSchemaMap[parsed.type];
+    if (!adtSchema) {
+      return {
+        objectName: parsed.name,
+        objectType: parsed.type,
+        hasDifferences: false,
+        fileCount: 1,
+        identicalCount: 0,
+        error: `Raw mode not supported for ${parsed.type}: no ADT schema mapping. Supported: ${Object.keys(adtSchemaMap).join(', ')}`,
+      };
+    }
+
+    const { schema: rawSchema, wrapperKey } = adtSchema;
+
+    // Build remote ADT XML from loaded data
+    let remoteAdtXml: string;
+    try {
+      const remoteData = await remoteObj.data();
+      remoteAdtXml = rawSchema.build({ [wrapperKey]: remoteData }, { pretty: true });
+    } catch (e) {
+      return {
+        objectName: parsed.name,
+        objectType: parsed.type,
+        hasDifferences: false,
+        fileCount: 1,
+        identicalCount: 0,
+        error: `Failed to build remote ADT XML: ${e instanceof Error ? e.message : String(e)}`,
+      };
+    }
+
+    // Parse local abapGit XML → fromAbapGit() → local ADK data
+    let localAdtXml: string | undefined;
+    if (handler.fromAbapGit) {
+      try {
+        const parsedXml = handler.schema.parse(localXml);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const values = (parsedXml as any)?.abapGit?.abap?.values ?? {};
+        const localPayload = handler.fromAbapGit(values);
+
+        // Merge local overrides onto remote's full data (remote is template)
+        const remoteData = await remoteObj.data();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const merged = { ...(remoteData as any), ...localPayload };
+        localAdtXml = rawSchema.build({ [wrapperKey]: merged }, { pretty: true });
+      } catch (e) {
+        return {
+          objectName: parsed.name,
+          objectType: parsed.type,
+          hasDifferences: false,
+          fileCount: 1,
+          identicalCount: 0,
+          error: `Failed to build local ADT XML: ${e instanceof Error ? e.message : String(e)}`,
+        };
+      }
+    }
+
+    if (!localAdtXml) {
+      return {
+        objectName: parsed.name,
+        objectType: parsed.type,
+        hasDifferences: false,
+        fileCount: 1,
+        identicalCount: 0,
+        error: `Raw mode not supported for ${parsed.type}: no fromAbapGit() mapping`,
+      };
+    }
+
+    const xmlFile = `${objectName}.${parsed.type.toLowerCase()}.adt.xml`;
+    const diffFound = printDiff(
+      xmlFile,
+      xmlFile,
+      localAdtXml,
+      remoteAdtXml,
       contextLines,
       useColor,
     );
@@ -549,6 +693,11 @@ export const diffCommand: CliCommandPlugin = {
       description:
         'Compare ADK source instead of XML (TABL only)',
     },
+    {
+      flags: '-r, --raw',
+      description:
+        'Compare ADT-level XML payloads (what GET returns vs what PUT would send)',
+    },
   ],
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
@@ -556,6 +705,7 @@ export const diffCommand: CliCommandPlugin = {
     const contextLines = parseInt(String(args.context ?? '3'), 10);
     const useColor = args.color !== false;
     const source = args.source === true;
+    const raw = args.raw === true;
 
     if (filePatterns.length === 0) {
       ctx.logger.error(
@@ -588,6 +738,7 @@ export const diffCommand: CliCommandPlugin = {
         contextLines,
         useColor,
         source,
+        raw,
       });
 
       if (result.error) {

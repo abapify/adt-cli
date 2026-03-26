@@ -86,6 +86,9 @@
     },
     {
       "path": "./packages/acds"
+    },
+    {
+      "path": "./packages/adt-diff"
     }
   ]
 }

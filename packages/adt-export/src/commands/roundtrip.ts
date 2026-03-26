@@ -341,13 +341,21 @@ export const roundtripCommand: CliCommandPlugin = {
     );
 
     if (deployResult.save.failed > 0) {
-      ctx.logger.error('❌ Deploy had failures — aborting roundtrip.');
+      ctx.logger.warn(
+        `⚠️ ${deployResult.save.failed} object(s) failed to deploy — continuing roundtrip for ${deployResult.save.success + deployResult.save.unchanged} successful objects`,
+      );
+    }
+
+    if (deployResult.save.success + deployResult.save.unchanged === 0) {
+      ctx.logger.error('❌ No objects deployed successfully — aborting.');
       process.exit(1);
     }
 
-    // Collect deployed objects for reimport
-    for (const obj of objectSet) {
-      deployedObjects.push(obj);
+    // Collect only successfully deployed objects for reimport
+    for (const result of deployResult.save.results) {
+      if (result.success) {
+        deployedObjects.push(result.object);
+      }
     }
 
     // ── Phase 2: Import back from SAP ──
@@ -456,6 +464,10 @@ export const roundtripCommand: CliCommandPlugin = {
         join(tmpDir, reimportedRelPath),
         'utf-8',
       ).trim();
+
+      // Normalize line endings (SAP returns CRLF, git uses LF)
+      origContent = origContent.replace(/\r\n/g, '\n');
+      reimContent = reimContent.replace(/\r\n/g, '\n');
 
       // Normalize XML files before comparison
       const isXml = origName.endsWith('.xml');

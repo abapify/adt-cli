@@ -16,6 +16,9 @@
       "path": "../adt-export"
     },
     {
+      "path": "../adt-diff"
+    },
+    {
       "path": "../adt-atc"
     },
     {

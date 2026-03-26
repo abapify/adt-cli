@@ -98,11 +98,13 @@ export function abapLangVerToAdt(
 
 /**
  * Convert ADT API abapLanguageVersion to abapGit ABAP_LANGUAGE_VERSION code.
- * Returns undefined if not set or standard ABAP.
+ * Returns undefined if not set or standard ABAP (default — should not be emitted).
  */
 export function abapLangVerFromAdt(
   adtValue: string | undefined,
 ): string | undefined {
   if (!adtValue) return undefined;
+  // Standard ABAP is the default — omit from abapGit XML
+  if (adtValue === 'standard' || adtValue === 'X') return undefined;
   return ABAP_LANG_VER_FROM_ADT[adtValue] ?? adtValue;
 }

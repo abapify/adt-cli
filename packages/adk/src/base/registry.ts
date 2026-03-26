@@ -199,7 +199,7 @@ export function getEndpointForType(adtType: string): string | undefined {
  * @example
  * getObjectUri('CLAS', 'ZCL_MY_CLASS')  // '/sap/bc/adt/oo/classes/zcl_my_class'
  * getObjectUri('DEVC', 'ZPACKAGE')       // '/sap/bc/adt/packages/ZPACKAGE'
- * getObjectUri('TTYP', 'ZAGE_STRING_TABLE') // '/sap/bc/adt/ddic/tabletypes/zage_string_table'
+ * getObjectUri('TTYP', 'ZAGE_TTYP_STRTAB') // '/sap/bc/adt/ddic/tabletypes/zage_ttyp_strtab'
  */
 export function getObjectUri(
   adtType: string,

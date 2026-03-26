@@ -5,7 +5,12 @@
 import { AdkDataElement } from '../adk';
 import { dtel } from '../../../schemas/generated';
 import { createHandler } from '../base';
-import { isoToSapLang, sapLangToIso, abapLangVerToAdt } from '../lang';
+import {
+  isoToSapLang,
+  sapLangToIso,
+  abapLangVerToAdt,
+  abapLangVerFromAdt,
+} from '../lang';
 
 /**
  * Map ADT typeKind → abapGit REFKIND
@@ -169,6 +174,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
         OUTPUTLEN: effectiveOutputLen,
         REFKIND: TYPEKIND_TO_REFKIND[typeKind] || undefined,
         REFTYPE: TYPEKIND_TO_REFTYPE[typeKind],
+        ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(data?.abapLanguageVersion),
       },
     };
   },

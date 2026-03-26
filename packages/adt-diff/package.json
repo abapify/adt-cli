@@ -27,6 +27,7 @@
   ],
   "dependencies": {
     "@abapify/adk": "workspace:*",
+    "@abapify/adt-contracts": "workspace:*",
     "@abapify/adt-plugin": "workspace:*",
     "@abapify/adt-plugin-abapgit": "workspace:*",
     "chalk": "^5.6.2",

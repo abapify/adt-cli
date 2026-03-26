@@ -165,14 +165,21 @@ export class FilteredFileTree implements FileTree {
 
     // Check if any allowed file pattern matches
     const filename = filePath.split('/').pop()!;
-    // Match the base name (before type extension) — e.g. "zage_fixed_values"
-    // from "zage_fixed_values.doma.xml" to also include companion .abap files
     for (const allowed of this.allowedFiles) {
+      // Exact path or filename match
       if (filePath === allowed || filename === allowed) return true;
-      // Match companion files: same base name (e.g., myobj.clas.xml matches myobj.clas.abap)
-      const allowedBase = allowed.replace(/\.\w+$/, ''); // strip last extension
-      const fileBase = filename.replace(/\.\w+$/, ''); // strip last extension
-      if (fileBase === allowedBase) return true;
+
+      // Match companion files by {name}.{type} prefix
+      // e.g., myobj.clas.xml → base "myobj.clas"
+      // matches myobj.clas.abap, myobj.clas.testclasses.abap,
+      //         myobj.clas.locals_def.abap, etc.
+      const allowedName = allowed.split('/').pop()!;
+      const allowedBase = allowedName.replace(/\.\w+$/, ''); // strip last extension
+      // startsWith covers both simple companions (myobj.clas.abap)
+      // and multi-extension companions (myobj.clas.testclasses.abap)
+      if (filename !== allowedName && filename.startsWith(allowedBase + '.')) {
+        return true;
+      }
     }
     return false;
   }

@@ -18,6 +18,17 @@ description: Complex logic handling for ADK object save, upsert, and locking.
 
 **Note:** Both paths must wrap their `save({ mode: 'create' })` calls in try/catch blocks that check `isAlreadyExistsError(e)`.
 
+## abapLanguageVersion Must NOT Be Sent in PUT/POST
+
+`saveViaContract()` strips `abapLanguageVersion` from the payload before sending.
+Eclipse ADT never sends this attribute either — SAP infers it from the package.
+
+**Why:** Including `adtcore:abapLanguageVersion` triggers an `S_ABPLNGVS` authorization
+check on the server. On BTP Cloud systems this auth object may not be assigned,
+causing a **403 Forbidden** after the lock is already acquired — leading to phantom locks.
+
+The value is kept in `_data` for reading/display, just excluded from the HTTP body.
+
 ## Endpoint Behaviors
 - **TABL Lock:** Can succeed for existing objects, but subsequent metadata PUT returns `405 Method Not Allowed`.
 - **TTYP Lock:** Returns `405` when object doesn't exist (instead of `404`).

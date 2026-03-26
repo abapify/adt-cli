@@ -111,7 +111,7 @@ export const unlockCommand = new Command('unlock')
   .description('Unlock SAP objects (force-release stale locks)')
   .argument(
     '<objectNames...>',
-    'Object name(s) to unlock (e.g., ZAGE_STRING_TABLE ZAGE_STRUCT_TABLE_TYPE)',
+    'Object name(s) to unlock (e.g., ZAGE_TTYP_STRTAB ZAGE_TTYP_STRUCT)',
   )
   .option('--lock-handle <handle>', 'Specific lock handle (if known)')
   .option(

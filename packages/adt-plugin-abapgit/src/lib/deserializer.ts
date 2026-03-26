@@ -16,6 +16,7 @@ import {
   resolvePackageFromDir,
   stripSlashes,
 } from './folder-logic';
+import { abapLangVerToAdt } from './handlers/lang';
 
 /**
  * abapGit file naming convention:
@@ -245,10 +246,13 @@ export async function* deserialize(
       }
 
       // Set abapLanguageVersion if provided and not already set
+      // Map numeric codes ("5") to ADT values ("cloudDevelopment")
       if (options?.abapLanguageVersion) {
         const data = (adkObject as any)._data;
         if (data && !data.abapLanguageVersion) {
-          data.abapLanguageVersion = options.abapLanguageVersion;
+          data.abapLanguageVersion =
+            abapLangVerToAdt(options.abapLanguageVersion) ??
+            options.abapLanguageVersion;
         }
       }
 

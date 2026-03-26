@@ -322,7 +322,7 @@ describe('DTEL handler toAbapGit', () => {
     );
   });
 
-  it('does not emit ABAP_LANGUAGE_VERSION', async () => {
+  it('emits ABAP_LANGUAGE_VERSION when set', async () => {
     const mock = createMockDtel({
       name: 'ZTEST_ALV',
       description: 'Cloud Element',
@@ -334,8 +334,24 @@ describe('DTEL handler toAbapGit', () => {
     const xml = xmlFile!.content;
 
     assert.ok(
+      xml.includes('<ABAP_LANGUAGE_VERSION>5</ABAP_LANGUAGE_VERSION>'),
+      `ABAP_LANGUAGE_VERSION should be emitted as '5' for cloudDevelopment. XML:\n${xml}`,
+    );
+  });
+
+  it('omits ABAP_LANGUAGE_VERSION when not set', async () => {
+    const mock = createMockDtel({
+      name: 'ZTEST_NO_ALV',
+      description: 'Standard Element',
+    });
+
+    const files = await handler!.serialize(mock as any);
+    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
+    const xml = xmlFile!.content;
+
+    assert.ok(
       !xml.includes('<ABAP_LANGUAGE_VERSION'),
-      `ABAP_LANGUAGE_VERSION should never be emitted by DTEL handler. XML:\n${xml}`,
+      `ABAP_LANGUAGE_VERSION should be omitted when not set. XML:\n${xml}`,
     );
   });
 
