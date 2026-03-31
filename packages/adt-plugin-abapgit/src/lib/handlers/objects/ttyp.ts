@@ -176,15 +176,14 @@ export const tableTypeHandler = createHandler(AdkTableType, {
       rowType: {
         typeKind: rowKind,
         typeName: isPredefined ? '' : DD40V?.ROWTYPE || '',
-        // SAP's strict xs:sequence parser requires ALL elements in builtInType
-        // to be present. Default length/decimals to 0 instead of omitting.
-        builtInType: ddicCode
-          ? {
-              dataType: adtDataType,
-              length: DD40V?.LENG ? Number(DD40V.LENG) : 0,
-              decimals: DD40V?.DECIMALS ? Number(DD40V.DECIMALS) : 0,
-            }
-          : undefined,
+        // SAP's strict xs:sequence parser requires builtInType element
+        // to be present even when logically empty (e.g. refToDictionaryType).
+        // Default all fields to avoid "expected element builtInType" errors.
+        builtInType: {
+          dataType: ddicCode ? adtDataType : '',
+          length: DD40V?.LENG ? Number(DD40V.LENG) : 0,
+          decimals: DD40V?.DECIMALS ? Number(DD40V.DECIMALS) : 0,
+        },
         rangeType: '',
       },
       accessType,

@@ -1,4 +1,5 @@
 import { createServer, type Server } from 'node:http';
+import { spawn } from 'node:child_process';
 import { parse as parseUrl } from 'node:url';
 import type { AuthPlugin, AuthPluginOptions, CookieAuthResult } from '../types';
 import {
@@ -15,6 +16,45 @@ import {
 const DEFAULT_PORT = 3000;
 const DEFAULT_REDIRECT_PATH = '/callback';
 const DEFAULT_TIMEOUT_MS = 300_000; // 5 minutes
+
+/**
+ * Copy text to system clipboard (best-effort, never throws).
+ * Tries platform-appropriate commands: pbcopy (macOS), clip.exe (WSL), xclip/xsel (Linux).
+ */
+async function copyToClipboard(text: string): Promise<void> {
+  const candidates =
+    process.platform === 'darwin'
+      ? [['pbcopy']]
+      : process.platform === 'win32'
+        ? [['clip']]
+        : [
+            ['clip.exe'],
+            ['xclip', '-selection', 'clipboard'],
+            ['xsel', '--clipboard'],
+          ];
+
+  for (const [cmd, ...args] of candidates) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(cmd, args, {
+          stdio: ['pipe', 'ignore', 'ignore'],
+        });
+        child.on('error', reject);
+        child.on('close', (code) =>
+          code === 0
+            ? resolve()
+            : reject(new Error(`${cmd} exited with code ${code}`)),
+        );
+        child.stdin.write(text);
+        child.stdin.end();
+      });
+      return;
+    } catch {
+      continue;
+    }
+  }
+  throw new Error('No clipboard utility available');
+}
 
 interface OAuthTokenResponse {
   access_token: string;
@@ -235,9 +275,26 @@ const authPlugin: AuthPlugin = {
     const timeout =
       typeof timeoutMs === 'number' ? timeoutMs : DEFAULT_TIMEOUT_MS;
 
+    // Extract log from options (passed by AuthManager during refresh, or by CLI)
+    const log = (options as { log?: (msg: string) => void }).log ?? console.log;
+
+    // Wrap browser opener: always print the URL and try clipboard copy before opening
+    const wrappedBrowserOpener = async (url: string) => {
+      log(`🔗 Open this URL to authenticate:\n   ${url}`);
+
+      try {
+        await copyToClipboard(url);
+        log('📋 URL copied to clipboard');
+      } catch {
+        // Clipboard not available — URL is already printed above
+      }
+
+      await browserOpener(url);
+    };
+
     const tokenData = await performPkceFlow(
       parsed,
-      browserOpener,
+      wrappedBrowserOpener,
       port,
       timeout,
       typeof redirectUri === 'string' ? redirectUri : undefined,

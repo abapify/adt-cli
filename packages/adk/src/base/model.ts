@@ -480,6 +480,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       }
     }
 
+    // For upsert mode, check existence before locking.
+    // On BTP, locking a non-existent DDIC object creates a draft that
+    // persists even after unlock, blocking subsequent POST (create) attempts.
+    // A lightweight GET avoids this problem entirely.
+    if (mode === 'upsert') {
+      const exists = await this.checkObjectExists();
+      if (!exists) {
+        return this.fallbackToCreate(options);
+      }
+    }
+
     // Lock if not already locked (skip for create mode - object doesn't exist yet)
     const wasLocked = this.isLocked;
     const needsLock = mode !== 'create';
@@ -523,8 +534,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
       return this;
     } catch (e: unknown) {
-      // For upsert with PUT failure (404/405), try POST (create)
+      // For upsert with PUT failure (404/405/S_ABPLNGVS), try POST (create)
       if (mode === 'upsert' && this.shouldFallbackToCreate(e)) {
+        // Unlock before falling back to create — the lock from the upsert
+        // attempt blocks the POST (create) request on BTP systems.
+        if (needsLock && !wasLocked) {
+          try {
+            await this.unlock();
+          } catch {
+            // ignore unlock errors during fallback
+          }
+        }
         return this.fallbackToCreate(options);
       }
       // If PUT returns 422 "already exists" directly in upsert mode
@@ -583,23 +603,14 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
     const rawData = await this.data();
 
-    // For UPDATE (PUT): strip abapLanguageVersion — SAP infers it from
-    // the package, and including it triggers S_ABPLNGVS authorization
-    // checks that may fail on BTP Cloud (matching Eclipse ADT behavior).
-    //
-    // For CREATE (POST): keep abapLanguageVersion — SAP requires it to
-    // match the package's language version for authorization validation.
-    // Omitting it on on-premise systems triggers S_ABPLNGVS failures.
-    const saveData =
-      mode === 'update'
-        ? (() => {
-            const { abapLanguageVersion: _, ...rest } = rawData as Record<
-              string,
-              unknown
-            >;
-            return rest;
-          })()
-        : rawData;
+    // Strip abapLanguageVersion from the payload for both PUT and POST.
+    // Eclipse ADT never sends this attribute — SAP infers it from the package.
+    // Including it triggers S_ABPLNGVS authorization checks that fail on BTP.
+    const { abapLanguageVersion: _, ...rest } = rawData as Record<
+      string,
+      unknown
+    >;
+    const saveData = rest;
     const data = { [wrapperKey]: saveData };
 
     if (mode === 'create') {
@@ -610,6 +621,27 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
         { corrNr: options.transport, lockHandle: options.lockHandle },
         data,
       );
+    }
+  }
+
+  /**
+   * Check if the object exists on the SAP system.
+   *
+   * Used by upsert mode to decide between update and create paths upfront.
+   * On BTP, locking a non-existent DDIC object creates a draft that persists
+   * even after unlock, blocking subsequent POST (create) attempts. Checking
+   * existence first with GET avoids this problem entirely.
+   */
+  protected async checkObjectExists(): Promise<boolean> {
+    const contract = this.crudContract;
+    if (!contract?.get) return true; // assume exists if no contract
+    try {
+      await contract.get(this.name);
+      return true;
+    } catch (e) {
+      if (this.shouldFallbackToCreate(e)) return false;
+      // Unexpected error — rethrow; the caller will handle it.
+      throw e;
     }
   }
 
@@ -648,11 +680,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
    * In upsert mode, both should trigger a fallback to POST (create).
    */
   protected shouldFallbackToCreate(e: unknown): boolean {
-    return (
-      this.isNotFoundError(e) ||
-      (e instanceof Error &&
-        (e.message.includes('405') || e.message.includes('Method Not Allowed')))
-    );
+    if (this.isNotFoundError(e)) return true;
+    if (e instanceof Error) {
+      const msg = e.message;
+      if (msg.includes('405') || msg.includes('Method Not Allowed')) return true;
+      // S_ABPLNGVS 403 on PUT: BTP creates a draft when locking a new DDIC
+      // object, so the lock succeeds even though the object doesn't exist.
+      // The subsequent PUT fails with S_ABPLNGVS. Fall back to POST (create)
+      // which handles language version authorization correctly.
+      if (msg.includes('403') && msg.includes('S_ABPLNGVS')) return true;
+    }
+    return false;
   }
 
   /**
