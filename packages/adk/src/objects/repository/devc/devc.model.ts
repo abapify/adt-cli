@@ -209,6 +209,39 @@ export class AdkPackage
     return this.ctx.client.adt.packages;
   }
 
+  /**
+   * Get skeleton data for package creation (POST).
+   *
+   * SAP requires ALL elements in the Package xs:sequence, even if empty.
+   * The sequence order is: attributes, superPackage, extensionAlias, switch,
+   * applicationComponent, transport, translation, useAccesses,
+   * packageInterfaces, subPackages.
+   * Missing elements cause "System expected the element ..." 400 errors.
+   */
+  protected override async getSkeletonData(): Promise<Record<string, unknown>> {
+    const rawData = await this.data();
+    const d = rawData as Record<string, unknown>;
+    return {
+      name: d.name,
+      type: d.type ?? 'DEVC/K',
+      description: d.description ?? '',
+      language: d.language ?? 'EN',
+      masterLanguage: d.masterLanguage ?? 'EN',
+      responsible: d.responsible ?? '',
+      // All xs:sequence elements required by SAP (even if empty)
+      attributes: d.attributes ?? { packageType: 'development' },
+      superPackage: d.superPackage ?? {},
+      extensionAlias: d.extensionAlias ?? {},
+      switch: d.switch ?? {},
+      applicationComponent: d.applicationComponent ?? {},
+      transport: d.transport ?? {},
+      translation: d.translation ?? {},
+      useAccesses: d.useAccesses ?? {},
+      packageInterfaces: d.packageInterfaces ?? {},
+      subPackages: d.subPackages ?? {},
+    };
+  }
+
   // Lock/unlock inherited from AdkObject using generic lock service
 
   // ============================================

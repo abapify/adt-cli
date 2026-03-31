@@ -390,11 +390,56 @@ export class AdkFunctionModule extends AdkObject<
   }
 
   /**
+   * Extract the body of a FUNCTION...ENDFUNCTION block.
+   *
+   * SAP reconstructs the FUNCTION header when returning source code:
+   *   Local:  `FUNCTION zage_fm.`                         (lowercase, period inline)
+   *   SAP:    `FUNCTION ZAGE_FM\n " template comment"\n.` (uppercase, period on own line)
+   *
+   * The body between the header and ENDFUNCTION is identical, so we compare
+   * only that part. The header ends at the first period that terminates the
+   * FUNCTION statement (either inline `FUNCTION name.` or on a separate line `.`).
+   */
+  private extractFunctionBody(source: string): string {
+    const lines = source.split('\n');
+    let bodyStart = 0;
+    let bodyEnd = lines.length;
+
+    // Find the end of the FUNCTION header — the first line whose trimmed
+    // content is just "." or that ends with "." on the FUNCTION line itself.
+    for (let i = 0; i < lines.length; i++) {
+      const trimmed = lines[i].trimEnd();
+      if (i === 0 && /^FUNCTION\s+\S+\.\s*$/i.test(trimmed)) {
+        // Period on the same line as FUNCTION
+        bodyStart = i + 1;
+        break;
+      }
+      if (i > 0 && trimmed === '.') {
+        // Period on its own line (SAP style)
+        bodyStart = i + 1;
+        break;
+      }
+    }
+
+    // Find ENDFUNCTION
+    for (let i = lines.length - 1; i >= bodyStart; i--) {
+      if (/^\s*ENDFUNCTION\.\s*$/i.test(lines[i].trimEnd())) {
+        bodyEnd = i;
+        break;
+      }
+    }
+
+    return lines.slice(bodyStart, bodyEnd).join('\n');
+  }
+
+  /**
    * Pre-lock comparison for FM source.
    *
-   * Overrides base to strip parameter comment block before comparing,
-   * so unchanged detection works correctly even though the abapGit source
-   * includes the block but SAP source doesn't.
+   * Overrides base to:
+   * 1. Strip parameter comment block from local source
+   * 2. Extract only the function body (between FUNCTION header and ENDFUNCTION)
+   *    from both local and SAP source, because SAP reconstructs the FUNCTION
+   *    header with uppercase name and template comments.
    */
   protected override async checkPendingSourcesUnchanged(): Promise<void> {
     const self = this as unknown as { _pendingSource?: string };
@@ -408,9 +453,11 @@ export class AdkFunctionModule extends AdkObject<
         ),
       );
       const cleanPending = this.stripParameterCommentBlock(self._pendingSource);
+      const localBody = this.extractFunctionBody(cleanPending);
+      const sapBody = this.extractFunctionBody(currentSource);
       if (
-        this.normalizeSource(currentSource) ===
-        this.normalizeSource(cleanPending)
+        this.normalizeSource(localBody) ===
+        this.normalizeSource(sapBody)
       ) {
         this._unchanged = true;
         delete self._pendingSource;

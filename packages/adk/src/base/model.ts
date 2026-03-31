@@ -23,7 +23,7 @@ export type { LockHandle } from '@abapify/adt-locks';
 /**
  * Save mode for create/update operations
  * - 'update': PUT to existing object (default, fails if doesn't exist)
- * - 'create': POST to create new object (fails if already exists)
+ * - 'create': POST to create new object (skips POST if already exists, then updates)
  * - 'upsert': Try PUT first, fall back to POST if 404
  */
 export type SaveMode = 'update' | 'create' | 'upsert';
@@ -472,8 +472,16 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     // This follows the Eclipse ADT pattern:
     //   1. POST minimal object (name, description, package)
     //   2. Lock → PUT full metadata / PUT source → Unlock → Activate
+    //
+    // Before POSTing, check if the object already exists on SAP.
+    // This prevents "already exists" / "already locked" errors when
+    // re-running a deploy against objects that were partially created
+    // (e.g. stale CTS locks on BTP that survive object deletion).
     if (mode === 'create') {
-      await this.saveViaContract('create', { transport });
+      const alreadyExists = await this.checkObjectExists();
+      if (!alreadyExists) {
+        await this.saveViaContract('create', { transport });
+      }
       // Object now exists — update with full data + sources
       return this.save({ ...options, mode: 'update' });
     }
