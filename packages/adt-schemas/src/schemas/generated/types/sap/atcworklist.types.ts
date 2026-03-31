@@ -5,34 +5,58 @@
  * Mode: Flattened
  */
 
-export type AtcworklistSchema =
-  | {
-      worklist: {
+export type AtcworklistSchema = {
+    worklist: {
         objectSets: {
-          objectSet?: {
-            name?: string;
-            title?: string;
-            kind?: string;
-          }[];
+            objectSet?: {
+                name?: string;
+                title?: string;
+                kind?: string;
+            }[];
         };
         objects: {
-          object?: {
-            extension?: unknown;
-            findings: {
-              finding?: {
+            object?: {
                 extension?: unknown;
-                quickfixes: {
-                  manual?: boolean;
-                  automatic?: boolean;
-                  pseudo?: boolean;
-                  ai_enabled?: boolean;
-                  aiBasedQF?: boolean;
-                };
-                tags?: {
-                  tag?: {
-                    name?: string;
-                    value?: string;
-                  }[];
+                findings: {
+                    finding?: {
+                        extension?: unknown;
+                        quickfixes: {
+                            manual?: boolean;
+                            automatic?: boolean;
+                            pseudo?: boolean;
+                            ai_enabled?: boolean;
+                            aiBasedQF?: boolean;
+                        };
+                        tags?: {
+                            tag?: {
+                                name?: string;
+                                value?: string;
+                            }[];
+                        };
+                        uri?: string;
+                        parentUri?: string;
+                        type?: string;
+                        name?: string;
+                        packageName?: string;
+                        description?: string;
+                        location?: string;
+                        effectOnTransports?: string;
+                        priority?: string;
+                        checkTitle?: string;
+                        checkId?: string;
+                        messageTitle?: string;
+                        messageId?: string;
+                        exemptionKind?: string;
+                        exemptionApproval?: string;
+                        noExemption?: string;
+                        quickfixInfo?: string;
+                        contactPerson?: string;
+                        lastChangedBy?: string;
+                        processor?: string;
+                        checksum?: number;
+                        remarkText?: string;
+                        remarkLink?: string;
+                    }[];
                 };
                 uri?: string;
                 parentUri?: string;
@@ -40,77 +64,51 @@ export type AtcworklistSchema =
                 name?: string;
                 packageName?: string;
                 description?: string;
-                location?: string;
-                effectOnTransports?: string;
-                priority?: string;
-                checkTitle?: string;
-                checkId?: string;
-                messageTitle?: string;
-                messageId?: string;
-                exemptionKind?: string;
-                exemptionApproval?: string;
-                noExemption?: string;
-                quickfixInfo?: string;
-                contactPerson?: string;
-                lastChangedBy?: string;
-                processor?: string;
-                checksum?: number;
-                remarkText?: string;
-                remarkLink?: string;
-              }[];
-            };
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-            author?: string;
-            objectTypeId?: string;
-          }[];
+                author?: string;
+                objectTypeId?: string;
+            }[];
         };
         scaAttributes?: {
-          scaAttribute?: {
-            attributeName?: string;
-            refAttributeName?: string;
-            label?: boolean;
-            labelS?: string;
-            labelM?: string;
-            labelL?: string;
-          }[];
+            scaAttribute?: {
+                attributeName?: string;
+                refAttributeName?: string;
+                label?: boolean;
+                labelS?: string;
+                labelM?: string;
+                labelL?: string;
+            }[];
         };
         descriptionTags: {
-          tagWithDescription?: {
-            name: string;
-            descriptions: {
-              description?: {
-                value?: string;
-                description?: string;
-              }[];
-            };
-          }[];
+            tagWithDescription?: {
+                name: string;
+                descriptions: {
+                    description?: {
+                        value?: string;
+                        description?: string;
+                    }[];
+                };
+            }[];
         };
         infos: {
-          info?: {
-            type: string;
-            description: string;
-          }[];
+            info?: {
+                type: string;
+                description: string;
+            }[];
         };
         id: string;
         timestamp: string;
         usedObjectSet?: string;
         objectSetIsComplete?: boolean;
-      };
-    }
-  | {
-      worklistRun: {
+    };
+} | {
+    worklistRun: {
         worklistId: string;
         worklistTimestamp: string;
         infos: {
-          info?: {
-            type: string;
-            description: string;
-          }[];
+            info?: {
+                type: string;
+                description: string;
+            }[];
         };
-      };
     };
+};

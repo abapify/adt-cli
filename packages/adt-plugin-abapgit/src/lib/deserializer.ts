@@ -17,6 +17,7 @@ import {
   stripSlashes,
 } from './folder-logic';
 import { abapLangVerToAdt } from './handlers/lang';
+import { extractFunctionDescriptors } from './handlers/objects/fugr';
 
 /**
  * abapGit file naming convention:
@@ -119,6 +120,11 @@ export async function* deserialize(
     if (!parsed) continue;
     if (!supportedTypes.has(parsed.type.toLowerCase())) continue;
 
+    // For compound objects (e.g., FUGR), multiple XML files share the same
+    // name:type key. Only the main XML (no suffix) is the metadata file;
+    // include XMLs (with suffix, e.g., PROGDIR) are sub-artifacts.
+    if (parsed.suffix) continue;
+
     const key = `${parsed.name}:${parsed.type}`;
 
     if (!objectMap.has(key)) {
@@ -217,21 +223,27 @@ export async function* deserialize(
         (adkObject as any)._pendingDescription = payload.description;
       }
 
-      // Resolve packageRef
+      // Compute relative directory and store on object for package resolution
+      // This metadata is always computed so the export command can auto-detect
+      // the root package from SAP and resolve packages later if needed.
+      if (hasAbapGitXml) {
+        const sourceDir = objFiles.xmlFile
+          .split('/')
+          .slice(0, -1)
+          .join('/');
+        const relDir = sourceDir.startsWith(startDir)
+          ? sourceDir.slice(startDir.length).replace(/^\/+/, '')
+          : sourceDir;
+        (adkObject as any)._relDir = relDir;
+        (adkObject as any)._folderLogic = folderLogic;
+      }
+
+      // Resolve packageRef when rootPackage is explicitly provided
       if (options?.rootPackage) {
         const data = (adkObject as any)._data;
         if (data && !data.packageRef) {
           if (hasAbapGitXml) {
-            // Folder logic: resolve subpackage from directory structure
-            const sourceDir = objFiles.xmlFile
-              .split('/')
-              .slice(0, -1)
-              .join('/');
-            // Strip starting folder prefix to get relative path
-            const relDir = sourceDir.startsWith(startDir)
-              ? sourceDir.slice(startDir.length).replace(/^\/+/, '')
-              : sourceDir;
-
+            const relDir = (adkObject as any)._relDir ?? '';
             const pkgName = resolvePackageFromDir(
               relDir,
               folderLogic,
@@ -257,6 +269,54 @@ export async function* deserialize(
       }
 
       yield adkObject;
+
+      // For compound objects (FUGR), yield child objects (function modules)
+      if (objFiles.type === 'FUGR' && payload._functions) {
+        const fmDescriptors = extractFunctionDescriptors(payload._functions);
+        const fmSources = (adkObject as any)._pendingFmSources as
+          | Record<string, string>
+          | undefined;
+
+        for (const fm of fmDescriptors) {
+          try {
+            // Build FM data object with _groupName for factory construction
+            const fmData: Record<string, unknown> = {
+              name: fm.funcName,
+              type: 'FUGR/FF',
+              _groupName: objectName, // parent FUGR name
+              description: fm.shortText ?? '',
+              processingType: fm.processingType,
+              basXMLEnabled: fm.basXMLEnabled,
+            };
+
+            const fmObject = adk.getWithData(fmData, 'FUGR/FF') as AdkObject;
+
+            // Set FM source if available
+            const fmSourceKey = fm.funcName.toLowerCase();
+            const fmSource = fmSources?.[fmSourceKey];
+            if (fmSource) {
+              (fmObject as any)._pendingSource = fmSource;
+            }
+
+            // Set abapLanguageVersion if provided
+            if (options?.abapLanguageVersion) {
+              const fmObjData = (fmObject as any)._data;
+              if (fmObjData && !fmObjData.abapLanguageVersion) {
+                fmObjData.abapLanguageVersion =
+                  abapLangVerToAdt(options.abapLanguageVersion) ??
+                  options.abapLanguageVersion;
+              }
+            }
+
+            yield fmObject;
+          } catch (fmError) {
+            console.error(
+              `Failed to deserialize FM ${fm.funcName} in FUGR ${objectName}:`,
+              fmError,
+            );
+          }
+        }
+      }
     } catch (error) {
       // Log error but continue with other objects
       console.error(

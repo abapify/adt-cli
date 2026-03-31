@@ -15,6 +15,14 @@ export type { SerializedFile, ObjectHandler } from './lib/handlers/base';
 // Filename parser — shared utility for abapGit file naming convention
 export { parseAbapGitFilename } from './lib/deserializer';
 
+// Folder logic — package resolution from directory paths
+export {
+  resolvePackageFromDir,
+  reverseResolveRootPackage,
+  parseAbapGitMetadata,
+  type FolderLogic,
+} from './lib/folder-logic';
+
 // Re-export types from @abapify/adt-plugin for convenience
 export type {
   AdtPlugin,

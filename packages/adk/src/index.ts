@@ -47,6 +47,7 @@ export type {
   PackageResponse,
   ProgramResponse,
   FunctionGroupResponse,
+  FunctionModuleResponse,
   TransportGetResponse,
   DomainResponse,
   DataElementResponse,
@@ -108,6 +109,13 @@ export type {
   FunctionGroupXml, // Raw API response type
 } from './objects/repository/fugr';
 export { AdkFunctionGroup } from './objects/repository/fugr';
+
+// Function module types and class (child of function group)
+export type {
+  AbapFunctionModule,
+  FunctionModuleXml, // Raw API response type
+} from './objects/repository/fugr';
+export { AdkFunctionModule } from './objects/repository/fugr';
 
 // DDIC types and classes
 export {

@@ -155,6 +155,67 @@ export default {
       },
     },
     {
+      name: "FugrTableParamType",
+      all: {
+        element: [
+          {
+            name: "PARAMETER",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DBSTRUCT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TYP",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "OPTIONAL",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "FugrExceptionType",
+      all: {
+        element: [
+          {
+            name: "EXCEPTION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "FugrDocParamType",
+      all: {
+        element: [
+          {
+            name: "PARAMETER",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "KIND",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "STEXT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
       name: "FugrImportType",
       sequence: {
         element: [
@@ -181,6 +242,58 @@ export default {
       },
     },
     {
+      name: "FugrChangingType",
+      sequence: {
+        element: [
+          {
+            name: "RSCHA",
+            type: "FugrParamType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FugrTablesType",
+      sequence: {
+        element: [
+          {
+            name: "RSTBL",
+            type: "FugrTableParamType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FugrExceptionsType",
+      sequence: {
+        element: [
+          {
+            name: "RSEXC",
+            type: "FugrExceptionType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FugrDocumentationType",
+      sequence: {
+        element: [
+          {
+            name: "RSFDO",
+            type: "FugrDocParamType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
       name: "FugrFunctionItemType",
       all: {
         element: [
@@ -189,7 +302,32 @@ export default {
             type: "xs:string",
           },
           {
+            name: "GLOBAL_FLAG",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "REMOTE_CALL",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "UPDATE_TASK",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
             name: "SHORT_TEXT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "REMOTE_BASXML",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "EXCEPTION_CLASSES",
             type: "xs:string",
             minOccurs: "0",
           },
@@ -199,8 +337,28 @@ export default {
             minOccurs: "0",
           },
           {
+            name: "CHANGING",
+            type: "FugrChangingType",
+            minOccurs: "0",
+          },
+          {
             name: "EXPORT",
             type: "FugrExportType",
+            minOccurs: "0",
+          },
+          {
+            name: "TABLES",
+            type: "FugrTablesType",
+            minOccurs: "0",
+          },
+          {
+            name: "EXCEPTION",
+            type: "FugrExceptionsType",
+            minOccurs: "0",
+          },
+          {
+            name: "DOCUMENTATION",
+            type: "FugrDocumentationType",
             minOccurs: "0",
           },
         ],

@@ -5,169 +5,165 @@
  * Mode: Flattened
  */
 
-export type QuickfixesSchema =
-  | {
-      evaluationRequest: {
+export type QuickfixesSchema = {
+    evaluationRequest: {
         affectedObjects?: {
-          unit?: {
-            content: string;
-            objectReference: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
-            };
-            link?: {
-              href: string;
-              rel?: string;
-              type?: string;
-              hreflang?: string;
-              title?: string;
-              length?: number;
-              etag?: string;
-              _text?: string;
+            unit?: {
+                content: string;
+                objectReference: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                };
+                link?: {
+                    href: string;
+                    rel?: string;
+                    type?: string;
+                    hreflang?: string;
+                    title?: string;
+                    length?: number;
+                    etag?: string;
+                    _text?: string;
+                }[];
             }[];
-          }[];
         };
-      };
-    }
-  | {
-      evaluationResults: {
+    };
+} | {
+    evaluationResults: {
         evaluationResult?: {
-          objectReference: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-          };
-          userContent?: string;
-          affectedObjects?: {
-            objectReference?: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
-            }[];
-          };
+            objectReference: {
+                extension?: unknown;
+                uri?: string;
+                parentUri?: string;
+                type?: string;
+                name?: string;
+                packageName?: string;
+                description?: string;
+            };
+            userContent?: string;
+            affectedObjects?: {
+                objectReference?: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                }[];
+            };
         }[];
-      };
-    }
-  | {
-      proposalRequest: {
+    };
+} | {
+    proposalRequest: {
         input: {
-          content: string;
-          objectReference: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-          };
-          link?: {
-            href: string;
-            rel?: string;
-            type?: string;
-            hreflang?: string;
-            title?: string;
-            length?: number;
-            etag?: string;
-            _text?: string;
-          }[];
-        };
-        affectedObjects?: {
-          unit?: {
             content: string;
             objectReference: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
+                extension?: unknown;
+                uri?: string;
+                parentUri?: string;
+                type?: string;
+                name?: string;
+                packageName?: string;
+                description?: string;
             };
             link?: {
-              href: string;
-              rel?: string;
-              type?: string;
-              hreflang?: string;
-              title?: string;
-              length?: number;
-              etag?: string;
-              _text?: string;
+                href: string;
+                rel?: string;
+                type?: string;
+                hreflang?: string;
+                title?: string;
+                length?: number;
+                etag?: string;
+                _text?: string;
             }[];
-          }[];
+        };
+        affectedObjects?: {
+            unit?: {
+                content: string;
+                objectReference: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                };
+                link?: {
+                    href: string;
+                    rel?: string;
+                    type?: string;
+                    hreflang?: string;
+                    title?: string;
+                    length?: number;
+                    etag?: string;
+                    _text?: string;
+                }[];
+            }[];
         };
         userContent?: string;
-      };
-    }
-  | {
-      proposalResult: {
+    };
+} | {
+    proposalResult: {
         deltas: {
-          unit?: {
-            content: string;
-            objectReference: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
-            };
-            link?: {
-              href: string;
-              rel?: string;
-              type?: string;
-              hreflang?: string;
-              title?: string;
-              length?: number;
-              etag?: string;
-              _text?: string;
+            unit?: {
+                content: string;
+                objectReference: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                };
+                link?: {
+                    href: string;
+                    rel?: string;
+                    type?: string;
+                    hreflang?: string;
+                    title?: string;
+                    length?: number;
+                    etag?: string;
+                    _text?: string;
+                }[];
             }[];
-          }[];
         };
         selection?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         };
         variableSourceStates?: {
-          objectReferences?: {
-            objectReference: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
+            objectReferences?: {
+                objectReference: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                }[];
+                name?: string;
             }[];
-            name?: string;
-          }[];
-          keepCursor?: boolean;
+            keepCursor?: boolean;
         };
         statusMessages?: {
-          statusMessage?: {
-            severity: 'info' | 'warning';
-            message: string;
-            id?: string;
-          }[];
+            statusMessage?: {
+                severity: "info" | "warning";
+                message: string;
+                id?: string;
+            }[];
         };
-      };
     };
+};

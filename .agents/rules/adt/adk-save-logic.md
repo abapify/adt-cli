@@ -48,3 +48,22 @@ The value is kept in `_data` for reading/display, just excluded from the HTTP bo
 
 - Use `--package ROOT_PACKAGE` when deploying new objects to BTP so the format plugin resolves `packageRef` for each object.
 - SAP's strict `xs:sequence` parser requires ALL elements in a sequence to be present, even when logically empty (e.g., `builtInType` in TTYP with `refToDictionaryType`). Default empty fields to `""` or `0` instead of omitting them.
+
+## FM processingType Ignored During POST
+
+SAP ADT ignores `processingType` in the POST body when creating function modules. All FMs are created with `processingType="normal"` regardless of the XML payload.
+
+**Fix**: `AdkFunctionModule.savePendingSources()` PUTs metadata before source to apply the correct processingType after creation.
+
+## ETag Refresh After Metadata PUT
+
+When you PUT metadata on an ADT object, SAP increments the internal object version. This invalidates cached ETags for **all** related endpoints (metadata, source, etc.), but the client only updates the cache for the specific URL that was PUT.
+
+**Pattern**: After a metadata PUT, always GET sibling endpoints (e.g., `source/main`) to refresh their cached ETags before PUTting to them. Otherwise → HTTP 412 Precondition Failed (If-Match mismatch).
+
+```
+1. GET source/main  → ETag E1 cached
+2. PUT metadata     → Object version changes silently
+3. GET source/main  → ETag E2 cached (REQUIRED refresh!)
+4. PUT source/main  → Uses E2, succeeds
+```

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <!-- Function module parameter type -->
+
+  <!-- ============================================ -->
+  <!-- Parameter types (match SAP internal tables)  -->
+  <!-- ============================================ -->
+
+  <!-- RSIMP - Import parameter (also reused for RSCHA Changing) -->
   <xs:complexType name="FugrParamType">
     <xs:all>
       <xs:element name="PARAMETER" type="xs:string" minOccurs="0"/>
@@ -12,41 +17,108 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- Import parameters container -->
+  <!-- RSTBL - Tables parameter (uses DBSTRUCT instead of DBFIELD) -->
+  <xs:complexType name="FugrTableParamType">
+    <xs:all>
+      <xs:element name="PARAMETER" type="xs:string" minOccurs="0"/>
+      <xs:element name="DBSTRUCT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYP" type="xs:string" minOccurs="0"/>
+      <xs:element name="OPTIONAL" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- RSEXC - Exception -->
+  <xs:complexType name="FugrExceptionType">
+    <xs:all>
+      <xs:element name="EXCEPTION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- RSFDO - Parameter documentation -->
+  <xs:complexType name="FugrDocParamType">
+    <xs:all>
+      <xs:element name="PARAMETER" type="xs:string" minOccurs="0"/>
+      <xs:element name="KIND" type="xs:string" minOccurs="0"/>
+      <xs:element name="STEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- ============================================ -->
+  <!-- Parameter containers                          -->
+  <!-- ============================================ -->
+
   <xs:complexType name="FugrImportType">
     <xs:sequence>
       <xs:element name="RSIMP" type="FugrParamType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Export parameters container -->
   <xs:complexType name="FugrExportType">
     <xs:sequence>
       <xs:element name="RSEXP" type="FugrParamType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Function module item type -->
+  <xs:complexType name="FugrChangingType">
+    <xs:sequence>
+      <xs:element name="RSCHA" type="FugrParamType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FugrTablesType">
+    <xs:sequence>
+      <xs:element name="RSTBL" type="FugrTableParamType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FugrExceptionsType">
+    <xs:sequence>
+      <xs:element name="RSEXC" type="FugrExceptionType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FugrDocumentationType">
+    <xs:sequence>
+      <xs:element name="RSFDO" type="FugrDocParamType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ============================================ -->
+  <!-- Function module item                          -->
+  <!-- ============================================ -->
+
   <xs:complexType name="FugrFunctionItemType">
     <xs:all>
       <xs:element name="FUNCNAME" type="xs:string"/>
+      <xs:element name="GLOBAL_FLAG" type="xs:string" minOccurs="0"/>
+      <xs:element name="REMOTE_CALL" type="xs:string" minOccurs="0"/>
+      <xs:element name="UPDATE_TASK" type="xs:string" minOccurs="0"/>
       <xs:element name="SHORT_TEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="REMOTE_BASXML" type="xs:string" minOccurs="0"/>
+      <xs:element name="EXCEPTION_CLASSES" type="xs:string" minOccurs="0"/>
       <xs:element name="IMPORT" type="FugrImportType" minOccurs="0"/>
+      <xs:element name="CHANGING" type="FugrChangingType" minOccurs="0"/>
       <xs:element name="EXPORT" type="FugrExportType" minOccurs="0"/>
+      <xs:element name="TABLES" type="FugrTablesType" minOccurs="0"/>
+      <xs:element name="EXCEPTION" type="FugrExceptionsType" minOccurs="0"/>
+      <xs:element name="DOCUMENTATION" type="FugrDocumentationType" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
 
-  <!-- Functions container -->
+  <!-- ============================================ -->
+  <!-- Containers                                    -->
+  <!-- ============================================ -->
+
   <xs:complexType name="FugrFunctionsType">
     <xs:sequence>
       <xs:element name="item" type="FugrFunctionItemType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Includes container -->
   <xs:complexType name="FugrIncludesType">
     <xs:sequence>
       <xs:element name="SOBJ_NAME" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
+
 </xs:schema>

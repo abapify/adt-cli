@@ -37,6 +37,7 @@ export type {
   TransportGetResponse,
   ProgramResponse as ProgramResponseUnion,
   FunctionGroupResponse as FunctionGroupResponseUnion,
+  FunctionModuleResponse as FunctionModuleResponseUnion,
   DomainResponse,
   DataElementResponse,
   TableResponse,
@@ -63,6 +64,7 @@ import type {
   PackageResponse as _PackageResponse,
   ProgramResponse as _ProgramResponse,
   FunctionGroupResponse as _FunctionGroupResponse,
+  FunctionModuleResponse as _FunctionModuleResponse,
 } from '@abapify/adt-client';
 
 /**
@@ -96,6 +98,11 @@ export type ProgramResponse = _ProgramResponse;
  * Function group response type - single root element (no union needed)
  */
 export type FunctionGroupResponse = _FunctionGroupResponse;
+
+/**
+ * Function module response type - single root element (no union needed)
+ */
+export type FunctionModuleResponse = _FunctionModuleResponse;
 
 // ============================================
 // ADK Contract Proxy

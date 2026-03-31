@@ -5,84 +5,9 @@
  * Mode: Flattened
  */
 
-export type TracesSchema =
-  | {
-      activations: {
+export type TracesSchema = {
+    activations: {
         activation?: {
-          activationId: string;
-          deletionTime: string;
-          description: string;
-          enabled: boolean;
-          userFilter: string;
-          serverFilter: string;
-          requestTypeFilter: string;
-          requestNameFilter: string;
-          sensitiveDataAllowed: boolean;
-          createUser: string;
-          createTime: string;
-          changeUser: string;
-          changeTime: string;
-          components: {
-            component?: {
-              component: string;
-              traceLevel: number;
-            }[];
-          };
-          numberOfTraces?: number;
-          maxNumberOfTraces?: number;
-          noContent?: boolean;
-        }[];
-      };
-    }
-  | {
-      activation: {
-        activationId: string;
-        deletionTime: string;
-        description: string;
-        enabled: boolean;
-        userFilter: string;
-        serverFilter: string;
-        requestTypeFilter: string;
-        requestNameFilter: string;
-        sensitiveDataAllowed: boolean;
-        createUser: string;
-        createTime: string;
-        changeUser: string;
-        changeTime: string;
-        components: {
-          component?: {
-            component: string;
-            traceLevel: number;
-          }[];
-        };
-        numberOfTraces?: number;
-        maxNumberOfTraces?: number;
-        noContent?: boolean;
-      };
-    }
-  | {
-      traces: {
-        trace?: {
-          traceId: string;
-          user: string;
-          server: string;
-          creationTime: string;
-          description: string;
-          deletionTime: string;
-          requestType: string;
-          requestName: string;
-          eppTransactionId: string;
-          eppRootContextId: string;
-          eppConnectionId: string;
-          eppConnectionCounter: number;
-          properties: {
-            property?: {
-              component: string;
-              key: string;
-              value: string;
-            }[];
-          };
-          activation?: {
             activationId: string;
             deletionTime: string;
             description: string;
@@ -97,40 +22,111 @@ export type TracesSchema =
             changeUser: string;
             changeTime: string;
             components: {
-              component?: {
-                component: string;
-                traceLevel: number;
-              }[];
+                component?: {
+                    component: string;
+                    traceLevel: number;
+                }[];
             };
             numberOfTraces?: number;
             maxNumberOfTraces?: number;
             noContent?: boolean;
-          };
-          recordsSummary?: {
-            componentNames?: {
-              componentName?: string[];
-            };
-            numberOfRecords: number;
-            minRecordsTimestamp: string;
-            maxRecordsTimestamp: string;
-            contentSize: number;
-          };
-          originalImportMetadata?: {
-            originalTraceId: string;
-            originalTraceSystem: string;
-            originalTraceClient: string;
-            originalTraceServer: string;
-            originalTraceUser: string;
-            originalChangeUser: string;
-            originalCreateUser: string;
-            originalHeaderUserAttributeDev: string;
-            originalHeaderTimestamp: string;
-          };
         }[];
-      };
-    }
-  | {
-      trace: {
+    };
+} | {
+    activation: {
+        activationId: string;
+        deletionTime: string;
+        description: string;
+        enabled: boolean;
+        userFilter: string;
+        serverFilter: string;
+        requestTypeFilter: string;
+        requestNameFilter: string;
+        sensitiveDataAllowed: boolean;
+        createUser: string;
+        createTime: string;
+        changeUser: string;
+        changeTime: string;
+        components: {
+            component?: {
+                component: string;
+                traceLevel: number;
+            }[];
+        };
+        numberOfTraces?: number;
+        maxNumberOfTraces?: number;
+        noContent?: boolean;
+    };
+} | {
+    traces: {
+        trace?: {
+            traceId: string;
+            user: string;
+            server: string;
+            creationTime: string;
+            description: string;
+            deletionTime: string;
+            requestType: string;
+            requestName: string;
+            eppTransactionId: string;
+            eppRootContextId: string;
+            eppConnectionId: string;
+            eppConnectionCounter: number;
+            properties: {
+                property?: {
+                    component: string;
+                    key: string;
+                    value: string;
+                }[];
+            };
+            activation?: {
+                activationId: string;
+                deletionTime: string;
+                description: string;
+                enabled: boolean;
+                userFilter: string;
+                serverFilter: string;
+                requestTypeFilter: string;
+                requestNameFilter: string;
+                sensitiveDataAllowed: boolean;
+                createUser: string;
+                createTime: string;
+                changeUser: string;
+                changeTime: string;
+                components: {
+                    component?: {
+                        component: string;
+                        traceLevel: number;
+                    }[];
+                };
+                numberOfTraces?: number;
+                maxNumberOfTraces?: number;
+                noContent?: boolean;
+            };
+            recordsSummary?: {
+                componentNames?: {
+                    componentName?: string[];
+                };
+                numberOfRecords: number;
+                minRecordsTimestamp: string;
+                maxRecordsTimestamp: string;
+                contentSize: number;
+            };
+            originalImportMetadata?: {
+                originalTraceId: string;
+                originalTraceSystem: string;
+                originalTraceClient: string;
+                originalTraceServer: string;
+                originalTraceUser: string;
+                originalChangeUser: string;
+                originalCreateUser: string;
+                originalHeaderUserAttributeDev: string;
+                originalHeaderTimestamp: string;
+            };
+        }[];
+    };
+} | {
+    trace: {
         traceId: string;
         user: string;
         server: string;
@@ -144,104 +140,102 @@ export type TracesSchema =
         eppConnectionId: string;
         eppConnectionCounter: number;
         properties: {
-          property?: {
-            component: string;
-            key: string;
-            value: string;
-          }[];
+            property?: {
+                component: string;
+                key: string;
+                value: string;
+            }[];
         };
         activation?: {
-          activationId: string;
-          deletionTime: string;
-          description: string;
-          enabled: boolean;
-          userFilter: string;
-          serverFilter: string;
-          requestTypeFilter: string;
-          requestNameFilter: string;
-          sensitiveDataAllowed: boolean;
-          createUser: string;
-          createTime: string;
-          changeUser: string;
-          changeTime: string;
-          components: {
-            component?: {
-              component: string;
-              traceLevel: number;
-            }[];
-          };
-          numberOfTraces?: number;
-          maxNumberOfTraces?: number;
-          noContent?: boolean;
+            activationId: string;
+            deletionTime: string;
+            description: string;
+            enabled: boolean;
+            userFilter: string;
+            serverFilter: string;
+            requestTypeFilter: string;
+            requestNameFilter: string;
+            sensitiveDataAllowed: boolean;
+            createUser: string;
+            createTime: string;
+            changeUser: string;
+            changeTime: string;
+            components: {
+                component?: {
+                    component: string;
+                    traceLevel: number;
+                }[];
+            };
+            numberOfTraces?: number;
+            maxNumberOfTraces?: number;
+            noContent?: boolean;
         };
         recordsSummary?: {
-          componentNames?: {
-            componentName?: string[];
-          };
-          numberOfRecords: number;
-          minRecordsTimestamp: string;
-          maxRecordsTimestamp: string;
-          contentSize: number;
+            componentNames?: {
+                componentName?: string[];
+            };
+            numberOfRecords: number;
+            minRecordsTimestamp: string;
+            maxRecordsTimestamp: string;
+            contentSize: number;
         };
         originalImportMetadata?: {
-          originalTraceId: string;
-          originalTraceSystem: string;
-          originalTraceClient: string;
-          originalTraceServer: string;
-          originalTraceUser: string;
-          originalChangeUser: string;
-          originalCreateUser: string;
-          originalHeaderUserAttributeDev: string;
-          originalHeaderTimestamp: string;
+            originalTraceId: string;
+            originalTraceSystem: string;
+            originalTraceClient: string;
+            originalTraceServer: string;
+            originalTraceUser: string;
+            originalChangeUser: string;
+            originalCreateUser: string;
+            originalHeaderUserAttributeDev: string;
+            originalHeaderTimestamp: string;
         };
-      };
-    }
-  | {
-      records: {
-        record?: {
-          traceId: string;
-          recordNumber: number;
-          parentNumber?: number;
-          creationTime: string;
-          traceComponent?: string;
-          traceObject?: string;
-          traceProcedure?: string;
-          traceLevel: number;
-          callStack?: string;
-          message?: string;
-          contentType?: string;
-          hierarchyType?: string;
-          hierarchyNumber?: number;
-          hierarchiesLevel?: number;
-          content?: string;
-          contentLength?: number;
-          properties?: {
-            property?: {
-              component: string;
-              key: string;
-              value: string;
-            }[];
-          };
-          options?: {
-            noSensitiveData?: boolean;
-            callStackOffset?: number;
-            fullCallStack?: boolean;
-            highlighting?: string;
-          };
-          processedObjects?: string;
-        }[];
-      };
-    }
-  | {
-      uriMapping: {
-        objectReference: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
-        };
-      };
     };
+} | {
+    records: {
+        record?: {
+            traceId: string;
+            recordNumber: number;
+            parentNumber?: number;
+            creationTime: string;
+            traceComponent?: string;
+            traceObject?: string;
+            traceProcedure?: string;
+            traceLevel: number;
+            callStack?: string;
+            message?: string;
+            contentType?: string;
+            hierarchyType?: string;
+            hierarchyNumber?: number;
+            hierarchiesLevel?: number;
+            content?: string;
+            contentLength?: number;
+            properties?: {
+                property?: {
+                    component: string;
+                    key: string;
+                    value: string;
+                }[];
+            };
+            options?: {
+                noSensitiveData?: boolean;
+                callStackOffset?: number;
+                fullCallStack?: boolean;
+                highlighting?: string;
+            };
+            processedObjects?: string;
+        }[];
+    };
+} | {
+    uriMapping: {
+        objectReference: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+        };
+    };
+};

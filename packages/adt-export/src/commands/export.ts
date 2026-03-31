@@ -333,14 +333,15 @@ export const exportCommand: CliCommandPlugin = {
     if (options.dryRun) ctx.logger.info(`🔍 Mode: Dry run (no changes)`);
 
     // Create FileTree — wrap with filter when deploying specific files
-    let fileTree = createFileTree(sourcePath);
+    const fullFileTree = createFileTree(sourcePath);
+    let fileTree = fullFileTree;
     if (specificFiles) {
       const relFiles = resolveFilesRelativeToRoot(
         specificFiles,
         ctx.cwd,
         sourcePath,
       );
-      fileTree = new FilteredFileTree(fileTree, relFiles);
+      fileTree = new FilteredFileTree(fullFileTree, relFiles);
     }
 
     // Parse object types filter
@@ -430,9 +431,17 @@ export const exportCommand: CliCommandPlugin = {
       }
 
       // Derive effective root package: either explicit --package or
-      // the shortest packageRef resolved by the format plugin (from package.devc.xml).
+      // auto-detected from SAP by reverse-resolving folder logic.
+      //
+      // When --package is provided, it's used as the root for folder logic.
+      // When omitted, we try to auto-detect the root package by:
+      //   1. Looking for existing objects on SAP → get their current package
+      //   2. Using folder logic + relDir to back-derive the root package
+      //   3. Setting packageRef on all objects using the derived root
       let effectiveRootPackage = options.package;
+
       if (!effectiveRootPackage) {
+        // First try: find root from objects that already have packageRef
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
             | string
@@ -443,6 +452,153 @@ export const exportCommand: CliCommandPlugin = {
               pkgName.length < effectiveRootPackage.length)
           ) {
             effectiveRootPackage = pkgName;
+          }
+        }
+      }
+
+      if (!effectiveRootPackage) {
+        // Second try: auto-detect from SAP by querying existing objects
+        ctx.logger.info('📦 Auto-detecting root package from SAP...');
+
+        // Helper: try to derive root from one object on SAP
+        const tryDeriveRoot = async (
+          obj: any,
+        ): Promise<string | undefined> => {
+          const relDir = obj._relDir as string | undefined;
+          const objFolderLogic = obj._folderLogic as string | undefined;
+          if (relDir === undefined || !objFolderLogic) return undefined;
+
+          try {
+            const localData = obj._data;
+            await obj.load();
+            const sapPkg = obj.package as string | undefined;
+            obj._data = localData;
+
+            if (sapPkg) {
+              const {
+                reverseResolveRootPackage,
+              } = await import('@abapify/adt-plugin-abapgit');
+              return reverseResolveRootPackage(
+                sapPkg,
+                relDir,
+                objFolderLogic as any,
+              );
+            }
+          } catch {
+            // Object doesn't exist on SAP
+          }
+          return undefined;
+        };
+
+        // First: try objects in the deployment set
+        for (const obj of objectSet) {
+          const root = await tryDeriveRoot(obj);
+          if (root) {
+            effectiveRootPackage = root;
+            ctx.logger.info(
+              `   📦 Derived root package: ${root} (from ${obj.name})`,
+            );
+            break;
+          }
+        }
+
+        // Second: if no objects in set exist on SAP, scan full file tree
+        // for reference objects (e.g., deploying a new FUGR but sibling exists)
+        if (!effectiveRootPackage) {
+          ctx.logger.debug?.(
+            '   No objects in deployment set found on SAP, scanning full repo...',
+          );
+          const {
+            parseAbapGitMetadata,
+          } = await import('@abapify/adt-plugin-abapgit');
+
+          // Read folder logic from .abapgit.xml
+          let repoFolderLogic: string = 'prefix';
+          let repoStartDir = 'src';
+          if (await fullFileTree.exists('.abapgit.xml')) {
+            try {
+              const xml = await fullFileTree.read('.abapgit.xml');
+              const meta = parseAbapGitMetadata(xml);
+              repoFolderLogic = meta.folderLogic;
+              repoStartDir = meta.startingFolder
+                .replace(/^\/+/, '')
+                .replace(/\/+$/, '');
+            } catch {
+              // Fall through to defaults
+            }
+          }
+
+          // Scan full file tree for other objects to use as references
+          const allXmlFiles = await fullFileTree.glob('**/*.xml');
+          const {
+            parseAbapGitFilename,
+          } = await import('@abapify/adt-plugin-abapgit');
+
+          for (const xmlPath of allXmlFiles) {
+            if (
+              xmlPath.endsWith('.abapgit.xml') ||
+              xmlPath.endsWith('package.devc.xml')
+            )
+              continue;
+
+            const filename = xmlPath.split('/').pop()!;
+            const parsed = parseAbapGitFilename(filename);
+            if (!parsed || parsed.suffix) continue;
+
+            // Compute relDir for this object
+            const sourceDir = xmlPath
+              .split('/')
+              .slice(0, -1)
+              .join('/');
+            const relDir = sourceDir.startsWith(repoStartDir)
+              ? sourceDir.slice(repoStartDir.length).replace(/^\/+/, '')
+              : sourceDir;
+
+            // Try to GET this object from SAP
+            const { createAdk } = await import('@abapify/adk');
+            const refAdk = createAdk(client as any);
+            try {
+              const refObj = refAdk.getWithData(
+                { name: parsed.name, type: parsed.type },
+                parsed.type,
+              );
+              (refObj as any)._relDir = relDir;
+              (refObj as any)._folderLogic = repoFolderLogic;
+              const root = await tryDeriveRoot(refObj);
+              if (root) {
+                effectiveRootPackage = root;
+                ctx.logger.info(
+                  `   📦 Derived root package: ${root} (from ${parsed.name} in repo)`,
+                );
+                break;
+              }
+            } catch {
+              // Object doesn't exist or can't be loaded
+            }
+          }
+        }
+
+        // If root was detected, resolve packageRef for all objects that don't have one
+        if (effectiveRootPackage) {
+          const {
+            resolvePackageFromDir,
+          } = await import('@abapify/adt-plugin-abapgit');
+          for (const obj of objectSet) {
+            const data = (obj as any)._data;
+            if (data && !data.packageRef) {
+              const relDir = (obj as any)._relDir as string | undefined;
+              const objFolderLogic = (obj as any)._folderLogic as
+                | string
+                | undefined;
+              if (relDir !== undefined && objFolderLogic) {
+                const pkgName = resolvePackageFromDir(
+                  relDir,
+                  objFolderLogic as any,
+                  effectiveRootPackage,
+                );
+                data.packageRef = { name: pkgName };
+              }
+            }
           }
         }
       }

@@ -5,26 +5,23 @@
  * Mode: Flattened
  */
 
-export type AtcresultquerySchema =
-  | {
-      activeResultQuery: {
+export type AtcresultquerySchema = {
+    activeResultQuery: {
         includeAggregates: boolean;
         includeFindings: boolean;
         contactPerson: string;
         queryEnabled: boolean;
-      };
-    }
-  | {
-      specificResultQuery: {
+    };
+} | {
+    specificResultQuery: {
         includeAggregates: boolean;
         includeFindings: boolean;
         contactPerson: string;
         queryEnabled: boolean;
         displayId: string;
-      };
-    }
-  | {
-      userResultQuery: {
+    };
+} | {
+    userResultQuery: {
         includeAggregates: boolean;
         includeFindings: boolean;
         contactPerson: string;
@@ -32,5 +29,5 @@ export type AtcresultquerySchema =
         createdBy: string;
         ageMin: number;
         ageMax: number;
-      };
     };
+};

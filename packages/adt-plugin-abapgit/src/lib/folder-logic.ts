@@ -111,6 +111,55 @@ export function resolvePackageFromDir(
 }
 
 /**
+ * Reverse of resolvePackageFromDir — given a SAP package name and the
+ * relative directory of an object, back-derive the root package.
+ *
+ * PREFIX mode: sapPackage 'ZABAPGIT_EXAMPLES_FUGR' + dir 'fugr' → 'ZABAPGIT_EXAMPLES'
+ * FULL mode: cannot derive root (returns undefined)
+ *
+ * @param sapPackage - Actual SAP package name (from GET response)
+ * @param relDir - Directory path relative to starting folder
+ * @param folderLogic - Folder logic mode
+ * @returns Root package name, or undefined if it cannot be derived
+ */
+export function reverseResolveRootPackage(
+  sapPackage: string,
+  relDir: string,
+  folderLogic: FolderLogic,
+): string | undefined {
+  if (!relDir || relDir === '.' || relDir === '/') {
+    return sapPackage; // Object is at root level — its package IS the root
+  }
+
+  const normalized = stripSlashes(relDir);
+  if (!normalized) return sapPackage;
+
+  const parts = normalized.split('/').filter(Boolean);
+  if (parts.length === 0) return sapPackage;
+
+  switch (folderLogic) {
+    case 'prefix': {
+      // In PREFIX mode: ROOT + _PART1 + _PART2 = sapPackage
+      // So ROOT = sapPackage minus the suffix
+      const suffix = '_' + parts.map((p) => p.toUpperCase()).join('_');
+      if (sapPackage.toUpperCase().endsWith(suffix)) {
+        return sapPackage.slice(0, -suffix.length);
+      }
+      return undefined;
+    }
+
+    case 'full':
+    case 'full-with-root':
+      // In FULL mode, package name IS the last directory segment —
+      // cannot reliably derive the root
+      return undefined;
+
+    default:
+      return undefined;
+  }
+}
+
+/**
  * Parse folder logic from a string value (CLI option or config)
  */
 export function parseFolderLogic(value: unknown): FolderLogic | undefined {

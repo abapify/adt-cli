@@ -456,8 +456,8 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
    *
    * Modes:
    * - 'update' (default): PUT to existing object
-   * - 'create': POST to create new object
-   * - 'upsert': Try PUT first, fall back to POST if 404
+   * - 'create': POST skeleton, then lock → PUT/source → unlock (Eclipse ADT pattern)
+   * - 'upsert': Check existence, create if needed, then update
    *
    * @param options - Save options
    * @returns this (for chaining)
@@ -467,6 +467,16 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
     // Reset per-save-attempt state
     this._unchanged = false;
+
+    // Create mode: POST skeleton, then continue with update flow.
+    // This follows the Eclipse ADT pattern:
+    //   1. POST minimal object (name, description, package)
+    //   2. Lock → PUT full metadata / PUT source → Unlock → Activate
+    if (mode === 'create') {
+      await this.saveViaContract('create', { transport });
+      // Object now exists — update with full data + sources
+      return this.save({ ...options, mode: 'update' });
+    }
 
     // Check if object has pending sources (from abapGit deserialization)
     const hasPendingSources = this.hasPendingSources();
@@ -484,9 +494,10 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     // On BTP, locking a non-existent DDIC object creates a draft that
     // persists even after unlock, blocking subsequent POST (create) attempts.
     // A lightweight GET avoids this problem entirely.
+    let confirmedExists = false;
     if (mode === 'upsert') {
-      const exists = await this.checkObjectExists();
-      if (!exists) {
+      confirmedExists = await this.checkObjectExists();
+      if (!confirmedExists) {
         return this.fallbackToCreate(options);
       }
     }
@@ -499,8 +510,16 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
         await this.lock(transport);
       } catch (e) {
         // For upsert, fallback to create if object doesn't exist (404)
-        // or endpoint doesn't support the operation (405 - common for DDIC types)
-        if (mode === 'upsert' && this.shouldFallbackToCreate(e)) {
+        // or endpoint doesn't support the operation (405 - common for DDIC types).
+        // But ONLY if checkObjectExists hasn't already confirmed the object exists.
+        // If the object exists and LOCK fails (e.g., 403 S_ABPLNGVS), it's a real
+        // auth error — falling back to create would just produce a confusing
+        // "already exists" error.
+        if (
+          mode === 'upsert' &&
+          !confirmedExists &&
+          this.shouldFallbackToCreate(e)
+        ) {
           return this.fallbackToCreate(options);
         }
         throw e;
@@ -587,7 +606,10 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
    * Generic implementation using wrapperKey and crudContract.
    * Objects that don't support save leave wrapperKey/crudContract undefined.
    *
-   * @param mode - 'create' (POST) or 'update' (PUT)
+   * For 'create' mode: POSTs skeleton data (minimal fields).
+   * For 'update' mode: PUTs full data (all fields except abapLanguageVersion).
+   *
+   * @param mode - 'create' (POST skeleton) or 'update' (PUT full)
    * @param options - Contract options (transport, lockHandle)
    */
   protected async saveViaContract(
@@ -601,27 +623,52 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       throw new Error(`Save not supported for ${this.kind}.`);
     }
 
-    const rawData = await this.data();
-
-    // Strip abapLanguageVersion from the payload for both PUT and POST.
-    // Eclipse ADT never sends this attribute — SAP infers it from the package.
-    // Including it triggers S_ABPLNGVS authorization checks that fail on BTP.
-    const { abapLanguageVersion: _, ...rest } = rawData as Record<
-      string,
-      unknown
-    >;
-    const saveData = rest;
-    const data = { [wrapperKey]: saveData };
-
     if (mode === 'create') {
+      // POST skeleton — minimal fields only (Eclipse ADT pattern)
+      const skeleton = await this.getSkeletonData();
+      const data = { [wrapperKey]: skeleton };
       await contract.post({ corrNr: options.transport }, data);
     } else {
+      const rawData = await this.data();
+
+      // Strip abapLanguageVersion from the payload.
+      // Eclipse ADT never sends this attribute — SAP infers it from the package.
+      // Including it triggers S_ABPLNGVS authorization checks that fail on BTP.
+      const { abapLanguageVersion: _, ...rest } = rawData as Record<
+        string,
+        unknown
+      >;
+      const saveData = rest;
+      const data = { [wrapperKey]: saveData };
+
       await contract.put(
         this.name,
         { corrNr: options.transport, lockHandle: options.lockHandle },
         data,
       );
     }
+  }
+
+  /**
+   * Get skeleton data for object creation (POST).
+   *
+   * Returns only the minimal fields needed to create the object on SAP.
+   * SAP creates the object structure (includes, etc.) from these fields.
+   * Full metadata and source code are sent via PUT in the update step.
+   *
+   * Override in subclasses that need different skeleton fields.
+   */
+  protected async getSkeletonData(): Promise<Record<string, unknown>> {
+    const rawData = await this.data();
+    const d = rawData as Record<string, unknown>;
+    return {
+      name: d.name,
+      type: d.type,
+      description: d.description ?? '',
+      language: d.language ?? 'EN',
+      masterLanguage: d.masterLanguage ?? 'EN',
+      packageRef: d.packageRef,
+    };
   }
 
   /**
@@ -683,7 +730,8 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     if (this.isNotFoundError(e)) return true;
     if (e instanceof Error) {
       const msg = e.message;
-      if (msg.includes('405') || msg.includes('Method Not Allowed')) return true;
+      if (msg.includes('405') || msg.includes('Method Not Allowed'))
+        return true;
       // S_ABPLNGVS 403 on PUT: BTP creates a draft when locking a new DDIC
       // object, so the lock succeeds even though the object doesn't exist.
       // The subsequent PUT fails with S_ABPLNGVS. Fall back to POST (create)

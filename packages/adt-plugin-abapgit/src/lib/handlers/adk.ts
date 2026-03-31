@@ -11,6 +11,7 @@ export {
   AdkPackage,
   AdkProgram,
   AdkFunctionGroup,
+  AdkFunctionModule,
   AdkDomain,
   AdkDataElement,
   AdkTable,

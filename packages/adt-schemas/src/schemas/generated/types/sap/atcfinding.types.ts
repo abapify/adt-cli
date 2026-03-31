@@ -5,32 +5,31 @@
  * Mode: Flattened
  */
 
-export type AtcfindingSchema =
-  | {
-      finding: {
+export type AtcfindingSchema = {
+    finding: {
         extension?: unknown;
         link?: {
-          href: string;
-          rel?: string;
-          type?: string;
-          hreflang?: string;
-          title?: string;
-          length?: number;
-          etag?: string;
-          _text?: string;
+            href: string;
+            rel?: string;
+            type?: string;
+            hreflang?: string;
+            title?: string;
+            length?: number;
+            etag?: string;
+            _text?: string;
         }[];
         quickfixes: {
-          manual?: boolean;
-          automatic?: boolean;
-          pseudo?: boolean;
-          ai_enabled?: boolean;
-          aiBasedQF?: boolean;
+            manual?: boolean;
+            automatic?: boolean;
+            pseudo?: boolean;
+            ai_enabled?: boolean;
+            aiBasedQF?: boolean;
         };
         tags?: {
-          tag?: {
-            name?: string;
-            value?: string;
-          }[];
+            tag?: {
+                name?: string;
+                value?: string;
+            }[];
         };
         uri?: string;
         parentUri?: string;
@@ -55,50 +54,47 @@ export type AtcfindingSchema =
         checksum?: number;
         remarkText?: string;
         remarkLink?: string;
-      };
-    }
-  | {
-      findingReferences: {
-        findingReference?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
-        }[];
-      };
-    }
-  | {
-      items: {
-        item?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
-          processor?: string;
-          status?: number;
-          remarkText?: string;
-          remarkLink?: string;
-        }[];
-      };
-    }
-  | {
-      remarks: {
-        remark?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
-          remarkText?: string;
-          remarkLink?: string;
-        }[];
-      };
     };
+} | {
+    findingReferences: {
+        findingReference?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+        }[];
+    };
+} | {
+    items: {
+        item?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+            processor?: string;
+            status?: number;
+            remarkText?: string;
+            remarkLink?: string;
+        }[];
+    };
+} | {
+    remarks: {
+        remark?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+            remarkText?: string;
+            remarkLink?: string;
+        }[];
+    };
+};

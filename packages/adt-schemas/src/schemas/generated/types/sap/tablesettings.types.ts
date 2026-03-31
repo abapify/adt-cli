@@ -5,40 +5,39 @@
  * Mode: Flattened
  */
 
-export type TablesettingsSchema =
-  | {
-      tableSettings: {
+export type TablesettingsSchema = {
+    tableSettings: {
         containerRef?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         };
         adtTemplate?: {
-          adtProperty?: {
-            $value?: string;
-            key?: string;
-          }[];
-          name?: string;
+            adtProperty?: {
+                $value?: string;
+                key?: string;
+            }[];
+            name?: string;
         };
         dataClassCategory: string;
         sizeCategory: string;
         buffering: {
-          allowed: 'N' | 'X' | 'A';
-          type: unknown;
-          areaKeyFields: string;
+            allowed: "N" | "X" | "A";
+            type: unknown;
+            areaKeyFields: string;
         };
-        storageType: '' | 'R' | 'C';
-        sharingType: '' | 'R' | 'L' | 'W' | 'T' | 'S';
-        loadUnit: '' | 'A' | 'P' | 'Q';
+        storageType: "" | "R" | "C";
+        sharingType: "" | "R" | "L" | "W" | "T" | "S";
+        loadUnit: "" | "A" | "P" | "Q";
         translation: {
-          value?: '' | 'N' | 'X' | 'L' | 'T';
-          granularity?: '' | '1' | '2';
-          isVisible?: boolean;
-          isEditable?: boolean;
+            value?: "" | "N" | "X" | "L" | "T";
+            granularity?: "" | "1" | "2";
+            isVisible?: boolean;
+            isEditable?: boolean;
         };
         loggingEnabled: boolean;
         supportsLoggingAssessment: boolean;
@@ -49,31 +48,18 @@ export type TablesettingsSchema =
         changedAt?: string;
         createdAt?: string;
         createdBy?: string;
-        version?:
-          | ''
-          | 'active'
-          | 'inactive'
-          | 'workingArea'
-          | 'new'
-          | 'partlyActive'
-          | 'activeWithInactiveVersion';
+        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
         description?: string;
         descriptionTextLimit?: number;
         language?: string;
-      };
-    }
-  | {
-      loggingAssessment: {
+    };
+} | {
+    loggingAssessment: {
         allowed: boolean;
-        rating:
-          | ''
-          | 'REQUIRED'
-          | 'NOT_REQUIRED'
-          | 'MAY_BE_REQUIRED'
-          | 'UNDEFINED';
+        rating: "" | "REQUIRED" | "NOT_REQUIRED" | "MAY_BE_REQUIRED" | "UNDEFINED";
         reason: string;
         isVisible?: boolean;
         isEditable?: boolean;
         name?: string;
-      };
     };
+};

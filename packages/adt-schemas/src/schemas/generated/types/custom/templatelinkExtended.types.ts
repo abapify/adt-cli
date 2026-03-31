@@ -5,24 +5,22 @@
  * Mode: Flattened
  */
 
-export type TemplatelinkExtendedSchema =
-  | {
-      templateLinks: {
+export type TemplatelinkExtendedSchema = {
+    templateLinks: {
         templateLink?: {
-          template: string;
-          rel: string;
-          type?: string;
-          title?: string;
-          _text?: string;
+            template: string;
+            rel: string;
+            type?: string;
+            title?: string;
+            _text?: string;
         }[];
-      };
-    }
-  | {
-      templateLink: {
+    };
+} | {
+    templateLink: {
         template: string;
         rel: string;
         type?: string;
         title?: string;
         _text?: string;
-      };
     };
+};

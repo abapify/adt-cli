@@ -5,52 +5,50 @@
  * Mode: Flattened
  */
 
-export type AdtcoreObjectSetsSchema =
-  | {
-      objectSets: {
+export type AdtcoreObjectSetsSchema = {
+    objectSets: {
         objectSet?: {
-          objectReferences?: {
-            objectReference: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
-            }[];
-            name?: string;
-          };
-          kind?: string;
+            objectReferences?: {
+                objectReference: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                }[];
+                name?: string;
+            };
+            kind?: string;
         }[];
-      };
-    }
-  | {
-      mainObject: {
+    };
+} | {
+    mainObject: {
         containerRef?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         };
         adtTemplate?: {
-          adtProperty?: {
-            $value?: string;
-            key?: string;
-          }[];
-          name?: string;
+            adtProperty?: {
+                $value?: string;
+                key?: string;
+            }[];
+            name?: string;
         };
         packageRef?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         };
         name: string;
         type: string;
@@ -58,14 +56,7 @@ export type AdtcoreObjectSetsSchema =
         changedAt?: string;
         createdAt?: string;
         createdBy?: string;
-        version?:
-          | ''
-          | 'active'
-          | 'inactive'
-          | 'workingArea'
-          | 'new'
-          | 'partlyActive'
-          | 'activeWithInactiveVersion';
+        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
         description?: string;
         descriptionTextLimit?: number;
         language?: string;
@@ -73,24 +64,22 @@ export type AdtcoreObjectSetsSchema =
         masterLanguage?: string;
         responsible?: string;
         abapLanguageVersion?: string;
-      };
-    }
-  | {
-      objectReferences: {
+    };
+} | {
+    objectReferences: {
         objectReference: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         }[];
         name?: string;
-      };
-    }
-  | {
-      objectReference: {
+    };
+} | {
+    objectReference: {
         extension?: unknown;
         uri?: string;
         parentUri?: string;
@@ -98,12 +87,11 @@ export type AdtcoreObjectSetsSchema =
         name?: string;
         packageName?: string;
         description?: string;
-      };
-    }
-  | {
-      content: {
+    };
+} | {
+    content: {
         $value?: string;
         type?: string;
         encoding?: string;
-      };
     };
+};

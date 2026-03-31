@@ -6,52 +6,52 @@
  */
 
 export type ChecklistSchema = {
-  messages: {
-    msg?: {
-      shortText: {
-        txt: string[];
-      };
-      longText?: {
-        txt: string[];
-      };
-      t100Key?: {
-        msgno?: number;
-        msgid?: string;
-        msgv1?: string;
-        msgv2?: string;
-        msgv3?: string;
-        msgv4?: string;
-      };
-      correctionHint?: {
-        number?: number;
-        kind?: string;
-        line?: number;
-        column?: number;
-        word?: string;
-      }[];
-      link?: {
-        href: string;
-        rel?: string;
-        type?: string;
-        hreflang?: string;
-        title?: string;
-        length?: number;
-        etag?: string;
-        _text?: string;
-      }[];
-      objDescr: string;
-      type: unknown;
-      line?: number;
-      offset?: number;
-      href?: string;
-      forceSupported?: boolean;
-      code?: string;
-    }[];
-    properties: {
-      checkExecuted?: boolean;
-      activationExecuted?: boolean;
-      generationExecuted?: boolean;
+    messages: {
+        msg?: {
+            shortText: {
+                txt: string[];
+            };
+            longText?: {
+                txt: string[];
+            };
+            t100Key?: {
+                msgno?: number;
+                msgid?: string;
+                msgv1?: string;
+                msgv2?: string;
+                msgv3?: string;
+                msgv4?: string;
+            };
+            correctionHint?: {
+                number?: number;
+                kind?: string;
+                line?: number;
+                column?: number;
+                word?: string;
+            }[];
+            link?: {
+                href: string;
+                rel?: string;
+                type?: string;
+                hreflang?: string;
+                title?: string;
+                length?: number;
+                etag?: string;
+                _text?: string;
+            }[];
+            objDescr: string;
+            type: unknown;
+            line?: number;
+            offset?: number;
+            href?: string;
+            forceSupported?: boolean;
+            code?: string;
+        }[];
+        properties: {
+            checkExecuted?: boolean;
+            activationExecuted?: boolean;
+            generationExecuted?: boolean;
+        };
+        forceSupported?: boolean;
     };
-    forceSupported?: boolean;
-  };
 };

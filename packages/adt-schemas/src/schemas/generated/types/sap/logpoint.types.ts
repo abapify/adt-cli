@@ -5,71 +5,29 @@
  * Mode: Flattened
  */
 
-export type LogpointSchema =
-  | {
-      logpoint: {
+export type LogpointSchema = {
+    logpoint: {
         location?: {
-          includePosition?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-          };
-          mainProgram?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-          };
+            includePosition?: {
+                extension?: unknown;
+                uri?: string;
+                parentUri?: string;
+                type?: string;
+                name?: string;
+                packageName?: string;
+                description?: string;
+            };
+            mainProgram?: {
+                extension?: unknown;
+                uri?: string;
+                parentUri?: string;
+                type?: string;
+                name?: string;
+                packageName?: string;
+                description?: string;
+            };
         };
         definition?: {
-          description?: string;
-          subKey?: string;
-          fields?: string;
-          condition?: string;
-          rollareaCounter?: number;
-          usageType?: string;
-          createdBy?: string;
-          changedBy?: string;
-          changedAt?: string;
-          expiresAt?: string;
-          activityType?: string;
-          retentionTimeInDays?: number;
-        };
-        activation?: {
-          users?: {
-            user?: {
-              name?: string;
-            }[];
-          };
-          servers?: {
-            server?: {
-              name?: string;
-            }[];
-          };
-          state?: string;
-          activatedBy?: string;
-          activeSince?: string;
-          activeUntil?: string;
-          inactivatedBy?: string;
-          inactiveSince?: string;
-        };
-      };
-    }
-  | {
-      logpointList: {
-        logpoint: {
-          summary?: {
-            shortInfo: string;
-            executions: number;
-          };
-          definition?: {
             description?: string;
             subKey?: string;
             fields?: string;
@@ -82,17 +40,17 @@ export type LogpointSchema =
             expiresAt?: string;
             activityType?: string;
             retentionTimeInDays?: number;
-          };
-          activation?: {
+        };
+        activation?: {
             users?: {
-              user?: {
-                name?: string;
-              }[];
+                user?: {
+                    name?: string;
+                }[];
             };
             servers?: {
-              server?: {
-                name?: string;
-              }[];
+                server?: {
+                    name?: string;
+                }[];
             };
             state?: string;
             activatedBy?: string;
@@ -100,63 +58,102 @@ export type LogpointSchema =
             activeUntil?: string;
             inactivatedBy?: string;
             inactiveSince?: string;
-          };
-          link?: {
-            href: string;
-            rel?: string;
-            type?: string;
-            hreflang?: string;
-            title?: string;
-            length?: number;
-            etag?: string;
-            _text?: string;
-          }[];
-          location?: {
+        };
+    };
+} | {
+    logpointList: {
+        logpoint: {
+            summary?: {
+                shortInfo: string;
+                executions: number;
+            };
+            definition?: {
+                description?: string;
+                subKey?: string;
+                fields?: string;
+                condition?: string;
+                rollareaCounter?: number;
+                usageType?: string;
+                createdBy?: string;
+                changedBy?: string;
+                changedAt?: string;
+                expiresAt?: string;
+                activityType?: string;
+                retentionTimeInDays?: number;
+            };
+            activation?: {
+                users?: {
+                    user?: {
+                        name?: string;
+                    }[];
+                };
+                servers?: {
+                    server?: {
+                        name?: string;
+                    }[];
+                };
+                state?: string;
+                activatedBy?: string;
+                activeSince?: string;
+                activeUntil?: string;
+                inactivatedBy?: string;
+                inactiveSince?: string;
+            };
+            link?: {
+                href: string;
+                rel?: string;
+                type?: string;
+                hreflang?: string;
+                title?: string;
+                length?: number;
+                etag?: string;
+                _text?: string;
+            }[];
+            location?: {
+                includePosition?: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                };
+                mainProgram?: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                };
+            };
+        };
+    };
+} | {
+    locationCheck: {
+        location?: {
             includePosition?: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
+                extension?: unknown;
+                uri?: string;
+                parentUri?: string;
+                type?: string;
+                name?: string;
+                packageName?: string;
+                description?: string;
             };
             mainProgram?: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
+                extension?: unknown;
+                uri?: string;
+                parentUri?: string;
+                type?: string;
+                name?: string;
+                packageName?: string;
+                description?: string;
             };
-          };
-        };
-      };
-    }
-  | {
-      locationCheck: {
-        location?: {
-          includePosition?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-          };
-          mainProgram?: {
-            extension?: unknown;
-            uri?: string;
-            parentUri?: string;
-            type?: string;
-            name?: string;
-            packageName?: string;
-            description?: string;
-          };
         };
         message?: string;
         possible?: boolean;
-      };
     };
+};

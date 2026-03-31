@@ -10,3 +10,8 @@ export { AdkFunctionGroup } from './fugr.model';
 
 // Schema-inferred type for raw API response
 export type { FunctionGroupXml } from './fugr.model';
+
+// Function Module (child object)
+export type { AbapFunctionModule } from './func';
+export { AdkFunctionModule } from './func';
+export type { FunctionModuleXml } from './func';
