@@ -6,11 +6,23 @@
  *
  * Uses _action=UNLOCK without a lock handle, which SAP allows
  * for locks owned by the current user/session.
+ *
+ * Automatically deregisters entries from the lock store so the
+ * persisted registry stays in sync.
  */
 
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
-import { getObjectUri, getRegisteredTypes } from '@abapify/adk';
+import {
+  getObjectUri,
+  getRegisteredTypes,
+  tryGetGlobalContext,
+} from '@abapify/adk';
+import {
+  createLockService,
+  FileLockStore,
+  type LockService,
+} from '@abapify/adt-locks';
 
 type SearchObject = {
   name?: string;
@@ -77,34 +89,17 @@ async function resolveObjectUri(
   };
 }
 
-async function performUnlock(
+/**
+ * Get or create the lock service.
+ * Prefers the global ADK context's service (shares the same store),
+ * falls back to creating a fresh one with the default FileLockStore.
+ */
+function getLockService(
   client: Awaited<ReturnType<typeof getAdtClientV2>>,
-  objectUri: string,
-  objectName: string,
-  lockHandle?: string,
-): Promise<void> {
-  const query = lockHandle
-    ? `?_action=UNLOCK&lockHandle=${lockHandle}`
-    : '?_action=UNLOCK';
-
-  try {
-    await client.fetch(`${objectUri}${query}`, {
-      method: 'POST',
-      headers: {
-        'X-sap-adt-sessiontype': 'stateful',
-      },
-    });
-    console.log(`✅ ${objectName} unlocked`);
-  } catch (unlockError: unknown) {
-    const msg =
-      unlockError instanceof Error ? unlockError.message : String(unlockError);
-
-    if (msg.includes('not locked') || msg.includes('not enqueued')) {
-      console.log(`ℹ️  ${objectName} is not locked`);
-    } else {
-      throw new Error(`Unlock failed for ${objectName}: ${msg}`);
-    }
-  }
+): LockService {
+  const globalCtx = tryGetGlobalContext();
+  if (globalCtx?.lockService) return globalCtx.lockService;
+  return createLockService(client, { store: new FileLockStore() });
 }
 
 export const unlockCommand = new Command('unlock')
@@ -126,6 +121,7 @@ export const unlockCommand = new Command('unlock')
     ) => {
       try {
         const client = await getAdtClientV2();
+        const locks = getLockService(client);
         let failed = 0;
 
         for (const objectName of objectNames) {
@@ -141,7 +137,23 @@ export const unlockCommand = new Command('unlock')
             );
             console.log(`   📍 ${display}`);
 
-            await performUnlock(client, uri, objectName, options.lockHandle);
+            try {
+              await locks.unlock(uri, {
+                lockHandle: options.lockHandle,
+              });
+              console.log(`✅ ${objectName} unlocked`);
+            } catch (unlockError: unknown) {
+              const msg =
+                unlockError instanceof Error
+                  ? unlockError.message
+                  : String(unlockError);
+
+              if (msg.includes('not locked') || msg.includes('not enqueued')) {
+                console.log(`ℹ️  ${objectName} is not locked`);
+              } else {
+                throw new Error(`Unlock failed for ${objectName}: ${msg}`);
+              }
+            }
           } catch (err) {
             console.error(
               `   ❌ ${err instanceof Error ? err.message : String(err)}`,

@@ -66,8 +66,18 @@ export default {
             minOccurs: "0",
           },
           {
+            name: "DD09L",
+            type: "asx:Dd09lType",
+            minOccurs: "0",
+          },
+          {
             name: "DD03P_TABLE",
             type: "asx:Dd03pTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "TABL_EXTRAS",
+            type: "asx:TablExtrasType",
             minOccurs: "0",
           },
         ],
@@ -155,6 +165,68 @@ export default {
       },
     },
     {
+      name: "Dd09lType",
+      sequence: {
+        element: [
+          {
+            name: "TABNAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "AS4LOCAL",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TABKAT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TABART",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "BUFALLOW",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "PUFFERUNG",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "SCHFELDANZ",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "PROTOKOLL",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "SPEESSION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "UESSION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "ROESSION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
       name: "Dd03pType",
       sequence: {
         element: [
@@ -204,6 +276,16 @@ export default {
             minOccurs: "0",
           },
           {
+            name: "PRECFIELD",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "NOTNULL",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
             name: "DATATYPE",
             type: "xs:string",
             minOccurs: "0",
@@ -219,17 +301,7 @@ export default {
             minOccurs: "0",
           },
           {
-            name: "NOTNULL",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
             name: "DOMNAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "PRECFIELD",
             type: "xs:string",
             minOccurs: "0",
           },
@@ -239,12 +311,12 @@ export default {
             minOccurs: "0",
           },
           {
-            name: "DDTEXT",
+            name: "SHLPORIGIN",
             type: "xs:string",
             minOccurs: "0",
           },
           {
-            name: "SHLPORIGIN",
+            name: "DDTEXT",
             type: "xs:string",
             minOccurs: "0",
           },
@@ -280,6 +352,50 @@ export default {
             type: "Dd03pType",
             minOccurs: "0",
             maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "TddatType",
+      sequence: {
+        element: [
+          {
+            name: "TABNAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "CCLASS",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "VIEWGRANT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TVDIR",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "GENERICRANGE",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "TablExtrasType",
+      sequence: {
+        element: [
+          {
+            name: "TDDAT",
+            type: "TddatType",
+            minOccurs: "0",
           },
         ],
       },

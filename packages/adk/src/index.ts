@@ -14,6 +14,9 @@
 // Base types
 export type { AbapObject } from './base/types';
 export type { AdkContext } from './base/context';
+export type { LockRegistry, LockEntry } from './base/lock-registry';
+export type { LockStore, LockService } from '@abapify/adt-locks';
+export { createLockService } from '@abapify/adt-locks';
 export {
   AdkObject,
   AdkMainObject,

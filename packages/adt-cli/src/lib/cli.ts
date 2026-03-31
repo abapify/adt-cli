@@ -21,6 +21,7 @@ import {
   packageGetCommand,
   lsCommand,
   unlockCommand,
+  locksCommand,
   checkCommand,
 } from './commands';
 import { refreshCommand } from './commands/auth/refresh';
@@ -205,6 +206,9 @@ export async function createCLI(options?: {
 
   // Unlock command (force-release stale locks)
   program.addCommand(unlockCommand);
+
+  // Locks command (list/cleanup persisted lock handles)
+  program.addCommand(locksCommand);
 
   // Check command (syntax check / checkruns)
   program.addCommand(checkCommand);

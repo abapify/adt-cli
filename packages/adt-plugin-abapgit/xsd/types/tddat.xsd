@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- TYPE ONLY - no element declaration! -->
+  <!-- TDDAT: Table maintenance dialog configuration -->
+  <xs:complexType name="TddatType">
+    <xs:sequence>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="CCLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="VIEWGRANT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TVDIR" type="xs:string" minOccurs="0"/>
+      <xs:element name="GENERICRANGE" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- TABL_EXTRAS wrapper -->
+  <xs:complexType name="TablExtrasType">
+    <xs:sequence>
+      <xs:element name="TDDAT" type="TddatType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

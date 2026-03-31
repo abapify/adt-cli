@@ -190,3 +190,107 @@ describe('abapGit package directory mapping', () => {
     assert.equal(packageDir, 'zabapgit_examples');
   });
 });
+
+describe('DDIC nested package resolution (abapgit-examples restructure)', () => {
+  it('resolves ddic/doma to DDIC_DOMA subpackage', () => {
+    assert.equal(
+      __testing.resolvePackageFromDir(
+        'ddic/doma',
+        'prefix',
+        'ZABAPGIT_EXAMPLES',
+      ),
+      'ZABAPGIT_EXAMPLES_DDIC_DOMA',
+    );
+  });
+
+  it('resolves ddic/dtel to DDIC_DTEL subpackage', () => {
+    assert.equal(
+      __testing.resolvePackageFromDir(
+        'ddic/dtel',
+        'prefix',
+        'ZABAPGIT_EXAMPLES',
+      ),
+      'ZABAPGIT_EXAMPLES_DDIC_DTEL',
+    );
+  });
+
+  it('resolves ddic/struc to DDIC_STRUC subpackage', () => {
+    assert.equal(
+      __testing.resolvePackageFromDir(
+        'ddic/struc',
+        'prefix',
+        'ZABAPGIT_EXAMPLES',
+      ),
+      'ZABAPGIT_EXAMPLES_DDIC_STRUC',
+    );
+  });
+
+  it('resolves ddic/tabl to DDIC_TABL subpackage', () => {
+    assert.equal(
+      __testing.resolvePackageFromDir(
+        'ddic/tabl',
+        'prefix',
+        'ZABAPGIT_EXAMPLES',
+      ),
+      'ZABAPGIT_EXAMPLES_DDIC_TABL',
+    );
+  });
+
+  it('resolves ddic/ttyp to DDIC_TTYP subpackage', () => {
+    assert.equal(
+      __testing.resolvePackageFromDir(
+        'ddic/ttyp',
+        'prefix',
+        'ZABAPGIT_EXAMPLES',
+      ),
+      'ZABAPGIT_EXAMPLES_DDIC_TTYP',
+    );
+  });
+
+  it('resolves ddic (parent) stays as DDIC subpackage', () => {
+    assert.equal(
+      __testing.resolvePackageFromDir('ddic', 'prefix', 'ZABAPGIT_EXAMPLES'),
+      'ZABAPGIT_EXAMPLES_DDIC',
+    );
+  });
+
+  it('round-trips ddic/doma through calculatePackageDir', () => {
+    const dir = __testing.calculatePackageDir(
+      [
+        'ZABAPGIT_EXAMPLES',
+        'ZABAPGIT_EXAMPLES_DDIC',
+        'ZABAPGIT_EXAMPLES_DDIC_DOMA',
+      ],
+      'prefix',
+    );
+    assert.equal(dir, 'ddic/doma');
+
+    const pkg = __testing.resolvePackageFromDir(
+      dir,
+      'prefix',
+      'ZABAPGIT_EXAMPLES',
+    );
+    assert.equal(pkg, 'ZABAPGIT_EXAMPLES_DDIC_DOMA');
+  });
+
+  it('round-trips all DDIC type subfolders', () => {
+    const types = ['DOMA', 'DTEL', 'STRUC', 'TABL', 'TTYP'];
+    for (const type of types) {
+      const fullName = `ZABAPGIT_EXAMPLES_DDIC_${type}`;
+      const dir = __testing.calculatePackageDir(
+        ['ZABAPGIT_EXAMPLES', 'ZABAPGIT_EXAMPLES_DDIC', fullName],
+        'prefix',
+      );
+      const resolved = __testing.resolvePackageFromDir(
+        dir,
+        'prefix',
+        'ZABAPGIT_EXAMPLES',
+      );
+      assert.equal(
+        resolved,
+        fullName,
+        `Round-trip failed for ${type}: dir='${dir}' resolved='${resolved}'`,
+      );
+    }
+  });
+});

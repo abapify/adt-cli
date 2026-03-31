@@ -8,13 +8,13 @@ Parses `.acds` (ABAP CDS DDL) source code into a fully typed Abstract Syntax Tre
 
 ### Supported Definitions
 
-| CDS Construct    | AST Node              | Example                              |
-| ---------------- | --------------------- | ------------------------------------ |
-| Table            | `TableDefinition`     | `define table ztable { ... }`        |
-| Structure        | `StructureDefinition` | `define structure zstruct { ... }`   |
-| Simple type      | `SimpleTypeDefinition`| `define type ztype : abap.char(10);` |
-| Service          | `ServiceDefinition`   | `define service zsvc { ... }`        |
-| Metadata ext.    | `MetadataExtension`   | `annotate entity ZView with { ... }` |
+| CDS Construct | AST Node               | Example                              |
+| ------------- | ---------------------- | ------------------------------------ |
+| Table         | `TableDefinition`      | `define table ztable { ... }`        |
+| Structure     | `StructureDefinition`  | `define structure zstruct { ... }`   |
+| Simple type   | `SimpleTypeDefinition` | `define type ztype : abap.char(10);` |
+| Service       | `ServiceDefinition`    | `define service zsvc { ... }`        |
+| Metadata ext. | `MetadataExtension`    | `annotate entity ZView with { ... }` |
 
 ### Parser Features
 
@@ -48,9 +48,9 @@ const result = parse(`
 
 if (result.errors.length === 0) {
   const table = result.ast.definitions[0]; // TableDefinition
-  console.log(table.kind);       // 'table'
-  console.log(table.name);       // 'ztable'
-  console.log(table.members);    // [FieldDefinition, FieldDefinition, ...]
+  console.log(table.kind); // 'table'
+  console.log(table.name); // 'ztable'
+  console.log(table.members); // [FieldDefinition, FieldDefinition, ...]
   console.log(table.annotations); // [Annotation, Annotation]
 }
 ```
@@ -85,8 +85,8 @@ type CdsDefinition =
   | SimpleTypeDefinition
   | ServiceDefinition
   | MetadataExtension
-  | RoleDefinition         // Phase 2 placeholder
-  | ViewEntityDefinition;  // Phase 3 placeholder
+  | RoleDefinition // Phase 2 placeholder
+  | ViewEntityDefinition; // Phase 3 placeholder
 ```
 
 #### Definitions
@@ -142,24 +142,35 @@ interface FieldDefinition {
 type TypeRef = BuiltinTypeRef | NamedTypeRef;
 
 // abap.char(10), abap.dec(11,2)
-interface BuiltinTypeRef { kind: 'builtin'; name: string; length?: number; decimals?: number }
+interface BuiltinTypeRef {
+  kind: 'builtin';
+  name: string;
+  length?: number;
+  decimals?: number;
+}
 
 // Data element or qualified name
-interface NamedTypeRef { kind: 'named'; name: string }
+interface NamedTypeRef {
+  kind: 'named';
+  name: string;
+}
 ```
 
 #### Annotations
 
 ```typescript
-interface Annotation { key: string; value: AnnotationValue }
+interface Annotation {
+  key: string;
+  value: AnnotationValue;
+}
 
 type AnnotationValue =
-  | { kind: 'string';  value: string }
-  | { kind: 'enum';    value: string }     // #TRANSPARENT → 'TRANSPARENT'
+  | { kind: 'string'; value: string }
+  | { kind: 'enum'; value: string } // #TRANSPARENT → 'TRANSPARENT'
   | { kind: 'boolean'; value: boolean }
-  | { kind: 'number';  value: number }
-  | { kind: 'array';   items: AnnotationValue[] }
-  | { kind: 'object';  properties: AnnotationProperty[] }
+  | { kind: 'number'; value: number }
+  | { kind: 'array'; items: AnnotationValue[] }
+  | { kind: 'object'; properties: AnnotationProperty[] };
 ```
 
 #### Errors
@@ -184,14 +195,14 @@ Source string
   → CdsSourceFile                     ast.ts
 ```
 
-| Module       | Responsibility                          |
-| ------------ | --------------------------------------- |
+| Module       | Responsibility                                  |
+| ------------ | ----------------------------------------------- |
 | `tokens.ts`  | Token definitions (keywords, symbols, literals) |
-| `parser.ts`  | Grammar rules (CST production)          |
-| `visitor.ts` | CST → typed AST transformation          |
-| `ast.ts`     | AST node type definitions               |
-| `errors.ts`  | Error normalization (lex + parse)       |
-| `index.ts`   | `parse()` entry point + re-exports      |
+| `parser.ts`  | Grammar rules (CST production)                  |
+| `visitor.ts` | CST → typed AST transformation                  |
+| `ast.ts`     | AST node type definitions                       |
+| `errors.ts`  | Error normalization (lex + parse)               |
+| `index.ts`   | `parse()` entry point + re-exports              |
 
 ## Roadmap
 

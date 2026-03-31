@@ -23,6 +23,7 @@ import {
   type TableDefinition,
   type StructureDefinition,
 } from '@abapify/acds';
+import { tablesettings, type InferTypedSchema } from '@abapify/adt-schemas';
 import { AdkTable, AdkStructure } from '../adk';
 import { tabl } from '../../../schemas/generated';
 import { createHandler } from '../base';
@@ -103,6 +104,57 @@ function createAdtTypeResolver(obj: AdkTable | AdkStructure): TypeResolver {
   };
 }
 
+type TableSettings = Extract<
+  InferTypedSchema<typeof tablesettings>,
+  { tableSettings: unknown }
+>['tableSettings'];
+
+/**
+ * Parse ADT table settings XML into DD09L data for abapGit serialization.
+ *
+ * Uses the typed `tablesettings` schema from @abapify/adt-schemas to parse
+ * the ADT endpoint response (/sap/bc/adt/ddic/db/settings/{name}).
+ *
+ * Mapping:
+ *   tableSettings.sizeCategory       → DD09L.TABKAT
+ *   tableSettings.dataClassCategory  → DD09L.TABART
+ *   tableSettings.buffering.allowed  → DD09L.BUFALLOW
+ *   tableSettings.buffering.type     → DD09L.PUFFERUNG
+ *   tableSettings.buffering.areaKeyFields → DD09L.SCHFELDANZ
+ *   tableSettings.loggingEnabled     → DD09L.PROTOKOLL
+ */
+function parseSettingsToDD09L(
+  settingsXml: string,
+  tableName: string,
+): Record<string, string> | undefined {
+  let settings: TableSettings;
+  try {
+    const parsed = tablesettings.parse(settingsXml);
+    if (!('tableSettings' in parsed)) return undefined;
+    settings = parsed.tableSettings;
+  } catch {
+    return undefined;
+  }
+
+  // Build DD09L in abapGit field order (matches dd09l.xsd sequence)
+  const dd09l: Record<string, string> = {};
+  dd09l.TABNAME = tableName;
+  dd09l.AS4LOCAL = 'A'; // Active version
+  if (settings.sizeCategory) dd09l.TABKAT = settings.sizeCategory;
+  if (settings.dataClassCategory) dd09l.TABART = settings.dataClassCategory;
+  if (settings.buffering?.allowed) dd09l.BUFALLOW = settings.buffering.allowed;
+
+  const bufType = settings.buffering?.type as string | undefined;
+  if (bufType) dd09l.PUFFERUNG = bufType;
+
+  const areaKeyFields = settings.buffering?.areaKeyFields;
+  if (areaKeyFields && areaKeyFields !== '0') dd09l.SCHFELDANZ = areaKeyFields;
+
+  if (settings.loggingEnabled) dd09l.PROTOKOLL = 'X';
+
+  return dd09l;
+}
+
 /**
  * Shared serialize logic for tables and structures.
  * Both use CDS source → DD02V/DD03P mapping.
@@ -159,6 +211,22 @@ async function serializeTabl(
   const values: Record<string, unknown> = {
     DD02V: stripEmpty(dd02v),
   };
+
+  // Fetch DD09L (technical settings) for tables only
+  // Structures don't have technical settings
+  if ('getSettings' in obj && typeof obj.getSettings === 'function') {
+    try {
+      const settingsXml = await (obj as AdkTable).getSettings();
+      if (settingsXml) {
+        const dd09l = parseSettingsToDD09L(settingsXml, def.name.toUpperCase());
+        if (dd09l) {
+          values.DD09L = stripEmpty(dd09l);
+        }
+      }
+    } catch {
+      // Settings not available (e.g., new table, no ADT endpoint), skip DD09L
+    }
+  }
 
   if (dd03pEntries.length > 0) {
     values.DD03P_TABLE = {

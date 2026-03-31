@@ -11,6 +11,7 @@
  */
 
 import type { AdtClient } from './adt';
+import type { LockStore, LockService } from '@abapify/adt-locks';
 
 /**
  * Context provided to all ADK objects
@@ -35,4 +36,22 @@ export interface AdkContext {
    * - client.fetch() - Raw HTTP for edge cases
    */
   readonly client: AdtClient;
+
+  /**
+   * Optional lock store for persisting lock handles to disk.
+   *
+   * When provided, lock()/unlock() will register/deregister entries
+   * so that stale locks can be recovered after process crashes.
+   * If not provided, locks are only held in memory (default behavior).
+   */
+  readonly lockStore?: LockStore;
+
+  /**
+   * Lock service for centralized lock/unlock operations.
+   *
+   * Provides HTTP lock/unlock + automatic store registration.
+   * Used by ADK models, CLI commands, and export logic so that
+   * every lock operation is tracked in a single store.
+   */
+  readonly lockService?: LockService;
 }

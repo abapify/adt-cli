@@ -6,6 +6,7 @@ description: Complex logic handling for ADK object save, upsert, and locking.
 # ADK Save and Upsert Logic
 
 ## Upsert Fallback Handling
+
 `AdkObject.save()` upsert fallback has **TWO** catch paths that both need `422 "already exists"` handling to correctly mark objects as unchanged instead of failing.
 
 1. **Lock Catch:**
@@ -30,6 +31,7 @@ causing a **403 Forbidden** after the lock is already acquired — leading to ph
 The value is kept in `_data` for reading/display, just excluded from the HTTP body.
 
 ## Endpoint Behaviors
+
 - **TABL Lock:** Can succeed for existing objects, but subsequent metadata PUT returns `405 Method Not Allowed`.
 - **TTYP Lock:** Returns `405` when object doesn't exist (instead of `404`).
 - **Create (POST):** Returns `422` (or "Unprocessable") with "already exists" message if object exists.

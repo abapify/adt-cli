@@ -18,6 +18,8 @@
 
 import type { AdkContext } from './context';
 import type { AdtClient } from './adt';
+import type { LockStore, LockService } from '@abapify/adt-locks';
+import { createLockService } from '@abapify/adt-locks';
 
 // =============================================================================
 // Global State
@@ -50,12 +52,20 @@ let globalContext: AdkContext | null = null;
  * const transport = await AdkTransportRequest.get('S0DK900001');
  * ```
  */
-export function initializeAdk(client: AdtClient): void {
+export function initializeAdk(
+  client: AdtClient,
+  options?: { lockStore?: LockStore; lockService?: LockService },
+): void {
   if (!client) {
     throw new Error('ADK initialization failed: client is required');
   }
 
-  globalContext = { client };
+  const lockStore = options?.lockStore;
+  // Create lock service from client + store (caller can also provide their own)
+  const lockService =
+    options?.lockService ?? createLockService(client, { store: lockStore });
+
+  globalContext = { client, lockStore, lockService };
 }
 
 /**

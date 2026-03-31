@@ -15,16 +15,10 @@
 
 import type { AdkContext } from './context';
 import type { AdkKind } from './kinds';
+import type { LockHandle } from '@abapify/adt-locks';
 import { toText } from './fetch-utils';
 
-/**
- * Lock handle returned by lock operations
- */
-export interface LockHandle {
-  handle: string;
-  correlationNumber?: string;
-  correlationUser?: string;
-}
+export type { LockHandle } from '@abapify/adt-locks';
 
 /**
  * Save mode for create/update operations
@@ -376,6 +370,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     // Response format: <asx:abap>...<DATA><LOCK_HANDLE>xxx</LOCK_HANDLE><CORRNR>yyy</CORRNR>...</DATA>...</asx:abap>
     const responseText = String(response);
     this._lockHandle = this.parseLockResponse(responseText);
+
+    // Persist lock entry so it can be recovered after crashes
+    this.ctx.lockStore?.register({
+      objectUri: this.objectUri,
+      objectName: this.name,
+      objectType: this.kind,
+      lockHandle: this._lockHandle.handle,
+      transport: this._lockHandle.correlationNumber,
+      lockedAt: new Date().toISOString(),
+    });
+
     return this._lockHandle;
   }
 
@@ -397,6 +402,9 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     // Use contract's unlock method
     await contract.unlock(this.name, { lockHandle: this._lockHandle.handle });
     this._lockHandle = undefined;
+
+    // Remove persisted lock entry
+    this.ctx.lockStore?.deregister(this.objectUri);
   }
 
   /**
@@ -574,11 +582,24 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     }
 
     const rawData = await this.data();
-    // Strip abapLanguageVersion from save payload — SAP infers it from
+
+    // For UPDATE (PUT): strip abapLanguageVersion — SAP infers it from
     // the package, and including it triggers S_ABPLNGVS authorization
-    // checks that may fail (matching Eclipse ADT behavior).
-    const { abapLanguageVersion: _, ...saveData } =
-      rawData as Record<string, unknown>;
+    // checks that may fail on BTP Cloud (matching Eclipse ADT behavior).
+    //
+    // For CREATE (POST): keep abapLanguageVersion — SAP requires it to
+    // match the package's language version for authorization validation.
+    // Omitting it on on-premise systems triggers S_ABPLNGVS failures.
+    const saveData =
+      mode === 'update'
+        ? (() => {
+            const { abapLanguageVersion: _, ...rest } = rawData as Record<
+              string,
+              unknown
+            >;
+            return rest;
+          })()
+        : rawData;
     const data = { [wrapperKey]: saveData };
 
     if (mode === 'create') {

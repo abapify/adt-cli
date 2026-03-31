@@ -89,6 +89,9 @@
     },
     {
       "path": "./packages/adt-diff"
+    },
+    {
+      "path": "./packages/adt-locks"
     }
   ]
 }

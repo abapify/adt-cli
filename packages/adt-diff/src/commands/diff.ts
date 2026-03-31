@@ -25,7 +25,7 @@ import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
 import { createAdk, type AdtClient, type AdkFactory } from '@abapify/adk';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { glob as nativeGlob } from 'node:fs/promises';
-import { resolve, basename, dirname, join } from 'node:path';
+import { resolve, basename, dirname, join, relative } from 'node:path';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
 import {
@@ -47,7 +47,12 @@ import { adtContract } from '@abapify/adt-contracts';
  */
 const adtSchemaMap: Record<
   string,
-  { schema: { build: (data: unknown, options?: { pretty?: boolean }) => string }; wrapperKey: string }
+  {
+    schema: {
+      build: (data: unknown, options?: { pretty?: boolean }) => string;
+    };
+    wrapperKey: string;
+  }
 > = {
   TTYP: {
     schema: adtContract.ddic.tabletypes.bodySchema,
@@ -93,6 +98,51 @@ async function expandGlobs(patterns: string[], cwd: string): Promise<string[]> {
     }
   }
   return results;
+}
+
+/**
+ * Walk up from a directory to find the nearest ancestor containing .abapgit.xml.
+ * Returns the resolved absolute path to the repo root, or undefined if not found.
+ */
+function findAbapGitRoot(startDir: string): string | undefined {
+  let dir = resolve(startDir);
+  const root = resolve('/');
+
+  while (dir !== root) {
+    if (existsSync(join(dir, '.abapgit.xml'))) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return undefined;
+}
+
+/**
+ * Scan an abapGit repository directory for all supported XML metadata files.
+ * Returns relative paths to each .xml file (excluding .abapgit.xml and package.devc.xml).
+ */
+async function scanAbapGitFiles(repoRoot: string): Promise<string[]> {
+  const supportedTypes = new Set(
+    getSupportedTypes().map((t) => t.toLowerCase()),
+  );
+  const files: string[] = [];
+
+  for await (const match of nativeGlob('**/*.xml', { cwd: repoRoot })) {
+    if (match.endsWith('.abapgit.xml')) continue;
+    if (match.endsWith('package.devc.xml')) continue;
+
+    const filename = basename(match);
+    const parsed = parseAbapGitFilename(filename);
+    if (!parsed) continue;
+    if (parsed.extension !== 'xml') continue;
+    if (!supportedTypes.has(parsed.type.toLowerCase())) continue;
+
+    files.push(match);
+  }
+
+  return files.sort();
 }
 
 /**
@@ -233,6 +283,7 @@ function normalizeXmlPair(
 /**
  * Print a unified diff with optional color.
  * Returns true if differences were found.
+ * When silent=true, skips printing but still detects differences.
  */
 function printDiff(
   localLabel: string,
@@ -241,6 +292,7 @@ function printDiff(
   remoteContent: string,
   contextLines: number,
   useColor: boolean,
+  silent = false,
 ): boolean {
   const local = localContent.endsWith('\n')
     ? localContent
@@ -250,6 +302,8 @@ function printDiff(
     : remoteContent + '\n';
 
   if (local === remote) return false;
+
+  if (silent) return true;
 
   const patch = createTwoFilesPatch(
     `a/${localLabel}`,
@@ -305,9 +359,10 @@ async function diffSingleFile(
     useColor: boolean;
     source: boolean;
     raw: boolean;
+    summary?: boolean;
   },
 ): Promise<DiffResult> {
-  const { contextLines, useColor, source, raw } = options;
+  const { contextLines, useColor, source, raw, summary } = options;
   const fullPath = resolve(ctx.cwd, filePath);
 
   if (!existsSync(fullPath)) {
@@ -391,9 +446,11 @@ async function diffSingleFile(
     handler.fileExtension,
   );
 
-  console.log(
-    `\n${useColor ? chalk.bold('Diff:') : 'Diff:'} ${parsed.name} (${parsed.type}) — ${localFiles.size} file(s)`,
-  );
+  if (!summary) {
+    console.log(
+      `\n${useColor ? chalk.bold('Diff:') : 'Diff:'} ${parsed.name} (${parsed.type}) — ${localFiles.size} file(s)`,
+    );
+  }
 
   // Parse local XML to extract ADK type info via fromAbapGit
   const localXml = readFileSync(fullPath, 'utf-8');
@@ -414,9 +471,11 @@ async function diffSingleFile(
   }
 
   // Fetch remote ADK object
-  console.log(
-    `${useColor ? chalk.dim('Fetching') : 'Fetching'} ${parsed.name} (${adkType}) from SAP...`,
-  );
+  if (!summary) {
+    console.log(
+      `${useColor ? chalk.dim('Fetching') : 'Fetching'} ${parsed.name} (${adkType}) from SAP...`,
+    );
+  }
 
   const remoteObj = adk.get(parsed.name, adkType);
 
@@ -479,6 +538,7 @@ async function diffSingleFile(
       remoteSource,
       contextLines,
       useColor,
+      summary,
     );
 
     return {
@@ -512,7 +572,10 @@ async function diffSingleFile(
     let remoteAdtXml: string;
     try {
       const remoteData = await remoteObj.data();
-      remoteAdtXml = rawSchema.build({ [wrapperKey]: remoteData }, { pretty: true });
+      remoteAdtXml = rawSchema.build(
+        { [wrapperKey]: remoteData },
+        { pretty: true },
+      );
     } catch (e) {
       return {
         objectName: parsed.name,
@@ -537,7 +600,10 @@ async function diffSingleFile(
         const remoteData = await remoteObj.data();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const merged = { ...(remoteData as any), ...localPayload };
-        localAdtXml = rawSchema.build({ [wrapperKey]: merged }, { pretty: true });
+        localAdtXml = rawSchema.build(
+          { [wrapperKey]: merged },
+          { pretty: true },
+        );
       } catch (e) {
         return {
           objectName: parsed.name,
@@ -569,6 +635,7 @@ async function diffSingleFile(
       remoteAdtXml,
       contextLines,
       useColor,
+      summary,
     );
 
     return {
@@ -608,11 +675,13 @@ async function diffSingleFile(
   for (const [localPath, localContent] of localFiles) {
     const remoteContent = remoteMap.get(localPath);
     if (remoteContent === undefined) {
-      console.log(
-        useColor
-          ? chalk.yellow(`\n  + Only in local: ${localPath}`)
-          : `\n  + Only in local: ${localPath}`,
-      );
+      if (!summary) {
+        console.log(
+          useColor
+            ? chalk.yellow(`\n  + Only in local: ${localPath}`)
+            : `\n  + Only in local: ${localPath}`,
+        );
+      }
       hasDifferences = true;
       continue;
     }
@@ -637,6 +706,7 @@ async function diffSingleFile(
       diffRemote,
       contextLines,
       useColor,
+      summary,
     );
     if (diffFound) {
       hasDifferences = true;
@@ -648,11 +718,13 @@ async function diffSingleFile(
   // Files present in remote but not locally
   for (const [remotePath] of remoteMap) {
     if (!localFiles.has(remotePath)) {
-      console.log(
-        useColor
-          ? chalk.yellow(`\n  - Only in remote: ${remotePath}`)
-          : `\n  - Only in remote: ${remotePath}`,
-      );
+      if (!summary) {
+        console.log(
+          useColor
+            ? chalk.yellow(`\n  - Only in remote: ${remotePath}`)
+            : `\n  - Only in remote: ${remotePath}`,
+        );
+      }
       hasDifferences = true;
     }
   }
@@ -674,7 +746,7 @@ export const diffCommand: CliCommandPlugin = {
   arguments: [
     {
       name: '[files...]',
-      description: `Local .xml files or glob patterns to compare (e.g., zcl_myclass.clas.xml, *.tabl.xml). Supported types: ${getSupportedTypes().join(', ')}`,
+      description: `Local .xml files or glob patterns to compare (e.g., zcl_myclass.clas.xml, *.tabl.xml). When omitted, scans the abapGit repo in the current directory. Supported types: ${getSupportedTypes().join(', ')}`,
     },
   ],
 
@@ -690,13 +762,22 @@ export const diffCommand: CliCommandPlugin = {
     },
     {
       flags: '-s, --source',
-      description:
-        'Compare ADK source instead of XML (TABL only)',
+      description: 'Compare ADK source instead of XML (TABL only)',
     },
     {
       flags: '-r, --raw',
       description:
         'Compare ADT-level XML payloads (what GET returns vs what PUT would send)',
+    },
+    {
+      flags: '-p, --package <name>',
+      description:
+        'Scan all abapGit files in the current directory (package name is informational)',
+    },
+    {
+      flags: '-f, --full',
+      description:
+        'Show full unified diffs (default in single-file mode; in package/multi-file mode only summary is shown unless --full is given)',
     },
   ],
 
@@ -706,20 +787,50 @@ export const diffCommand: CliCommandPlugin = {
     const useColor = args.color !== false;
     const source = args.source === true;
     const raw = args.raw === true;
+    const packageName = args.package as string | undefined;
+    const fullDiffs = args.full === true;
 
-    if (filePatterns.length === 0) {
-      ctx.logger.error(
-        'No files specified. Usage: adt diff <file...> or adt diff *.tabl.xml',
+    let files: string[];
+    let scanMode = false;
+    let repoRoot: string | undefined;
+
+    if (filePatterns.length > 0) {
+      // Explicit files/globs — expand as before
+      files = await expandGlobs(filePatterns, ctx.cwd);
+      if (files.length === 0) {
+        ctx.logger.error('No files matched the given pattern(s).');
+        process.exit(1);
+      }
+    } else {
+      // No files given — scan mode.
+      // If --package given, or auto-detect abapGit repo root from cwd.
+      repoRoot = findAbapGitRoot(ctx.cwd);
+      if (!repoRoot) {
+        ctx.logger.error(
+          packageName
+            ? 'No .abapgit.xml found in current directory or parents.'
+            : 'No files specified and no .abapgit.xml found. Usage: adt diff <file...> or run from an abapGit repo directory.',
+        );
+        process.exit(1);
+      }
+
+      scanMode = true;
+      const scannedFiles = await scanAbapGitFiles(repoRoot);
+      if (scannedFiles.length === 0) {
+        ctx.logger.error('No supported abapGit objects found in repository.');
+        process.exit(1);
+      }
+
+      // Convert to paths relative to cwd
+      files = scannedFiles.map((f) => relative(ctx.cwd, join(repoRoot!, f)));
+
+      ctx.logger.info(
+        `📦 Scanning ${scannedFiles.length} object(s) in ${repoRoot}${packageName ? ` (package: ${packageName})` : ''}...`,
       );
-      process.exit(1);
     }
 
-    // Expand glob patterns
-    const files = await expandGlobs(filePatterns, ctx.cwd);
-    if (files.length === 0) {
-      ctx.logger.error('No files matched the given pattern(s).');
-      process.exit(1);
-    }
+    // In scan mode default to summary (suppress diffs), unless --full
+    const summaryMode = scanMode && !fullDiffs;
 
     // Need ADT client for remote comparison
     if (!ctx.getAdtClient) {
@@ -739,9 +850,10 @@ export const diffCommand: CliCommandPlugin = {
         useColor,
         source,
         raw,
+        summary: summaryMode,
       });
 
-      if (result.error) {
+      if (result.error && !summaryMode) {
         ctx.logger.error(result.error);
       }
 
@@ -755,6 +867,57 @@ export const diffCommand: CliCommandPlugin = {
     const identical = totalFiles - withDiffs - withErrors;
 
     console.log('');
+
+    if (scanMode) {
+      // Package/scan mode: always show per-object status table
+      for (const r of results) {
+        let icon: string;
+        let line: string;
+        if (r.error) {
+          icon = '⚠️';
+          line = `${r.objectType} ${r.objectName}: ${r.error}`;
+        } else if (r.hasDifferences) {
+          icon = '❌';
+          line = `${r.objectType} ${r.objectName}`;
+        } else {
+          icon = '✅';
+          line = `${r.objectType} ${r.objectName}`;
+        }
+
+        if (useColor) {
+          if (r.error) {
+            console.log(chalk.yellow(`   ${icon} ${line}`));
+          } else if (r.hasDifferences) {
+            console.log(chalk.red(`   ${icon} ${line}`));
+          } else {
+            console.log(chalk.green(`   ${icon} ${line}`));
+          }
+        } else {
+          console.log(`   ${icon} ${line}`);
+        }
+      }
+
+      console.log('');
+      const summaryParts: string[] = [
+        `${totalFiles} object(s)`,
+        `${identical} identical`,
+      ];
+      if (withDiffs > 0) summaryParts.push(`${withDiffs} changed`);
+      if (withErrors > 0) summaryParts.push(`${withErrors} errors`);
+      const summaryLine = summaryParts.join(', ');
+
+      if (withDiffs > 0 || withErrors > 0) {
+        console.log(
+          useColor ? chalk.red(`📋 ${summaryLine}`) : `📋 ${summaryLine}`,
+        );
+        process.exit(1);
+      }
+      console.log(
+        useColor ? chalk.green(`📋 ${summaryLine}`) : `📋 ${summaryLine}`,
+      );
+      return;
+    }
+
     if (totalFiles === 1) {
       // Single-file mode: keep original concise output
       const r = results[0];
@@ -783,27 +946,27 @@ export const diffCommand: CliCommandPlugin = {
       return;
     }
 
-    // Multi-file summary
+    // Multi-file summary (explicit glob, not scan mode)
     const parts: string[] = [
       `${totalFiles} object(s) checked`,
       `${identical} identical`,
     ];
     if (withDiffs > 0) parts.push(`${withDiffs} with differences`);
     if (withErrors > 0) parts.push(`${withErrors} with errors`);
-    const summary = parts.join(', ');
+    const summaryText = parts.join(', ');
 
     if (withDiffs > 0 || withErrors > 0) {
       console.log(
         useColor
-          ? chalk.red(`Diff summary: ${summary}`)
-          : `Diff summary: ${summary}`,
+          ? chalk.red(`Diff summary: ${summaryText}`)
+          : `Diff summary: ${summaryText}`,
       );
       process.exit(1);
     }
     console.log(
       useColor
-        ? chalk.green(`Diff summary: ${summary}`)
-        : `Diff summary: ${summary}`,
+        ? chalk.green(`Diff summary: ${summaryText}`)
+        : `Diff summary: ${summaryText}`,
     );
   },
 };

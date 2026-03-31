@@ -552,9 +552,21 @@ export class AdkTransportRequest extends AdkObject<
       );
     }
 
+    const lockHandle: LockHandle = { handle: handleMatch[1] };
+
     // Store in base class for @requiresLock decorator
-    this['_lockHandle'] = { handle: handleMatch[1] };
-    return { handle: handleMatch[1] };
+    this['_lockHandle'] = lockHandle;
+
+    // Persist lock entry so it can be recovered after crashes
+    this.ctx.lockStore?.register({
+      objectUri: this.objectUri,
+      objectName: this.name,
+      objectType: this.kind,
+      lockHandle: lockHandle.handle,
+      lockedAt: new Date().toISOString(),
+    });
+
+    return lockHandle;
   }
 
   /**
@@ -576,6 +588,9 @@ export class AdkTransportRequest extends AdkObject<
     );
 
     this['_lockHandle'] = undefined;
+
+    // Remove persisted lock entry
+    this.ctx.lockStore?.deregister(this.objectUri);
   }
 }
 

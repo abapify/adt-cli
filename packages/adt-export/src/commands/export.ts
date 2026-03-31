@@ -11,8 +11,17 @@ import type {
   AdtPlugin,
   ExportOptions,
 } from '@abapify/adt-plugin';
-import { AdkObjectSet, AdkPackage, type AdkContext } from '@abapify/adk';
-import type { ExportResult } from '../types';
+import {
+  AdkObjectSet,
+  AdkPackage,
+  type AdkContext,
+  tryGetGlobalContext,
+} from '@abapify/adk';
+import type {
+  ExportResult,
+  VerificationResult,
+  VerificationDetail,
+} from '../types';
 import {
   createFileTree,
   FilteredFileTree,
@@ -98,6 +107,98 @@ function displayExportResults(
 }
 
 /**
+ * Verify that deployed objects ended up in the expected SAP packages.
+ *
+ * Reloads each object from SAP and compares its current package
+ * against the target package resolved from the abapGit folder structure.
+ */
+async function verifyPackageAssignments(
+  objectSet: Iterable<import('@abapify/adk').AdkObject>,
+  logger: CliContext['logger'],
+): Promise<VerificationResult> {
+  const verification: VerificationResult = {
+    total: 0,
+    correct: 0,
+    mismatched: 0,
+    errors: 0,
+    details: [],
+  };
+
+  for (const obj of objectSet) {
+    const targetPkg = (obj as any)._data?.packageRef?.name as
+      | string
+      | undefined;
+    if (!targetPkg) continue;
+
+    verification.total++;
+    const detail: VerificationDetail = {
+      type: obj.type,
+      name: obj.name,
+      expectedPackage: targetPkg,
+      status: 'error',
+    };
+
+    try {
+      // Reload from SAP to get current server state
+      await obj.load();
+      const actualPkg = (obj as any).package as string | undefined;
+      detail.actualPackage = actualPkg ?? '';
+
+      if (actualPkg === targetPkg) {
+        detail.status = 'correct';
+        verification.correct++;
+      } else {
+        detail.status = 'mismatched';
+        verification.mismatched++;
+        logger.warn(
+          `   ⚠️ ${obj.name}: expected ${targetPkg}, got ${actualPkg ?? '(none)'}`,
+        );
+      }
+    } catch (err) {
+      detail.status = 'error';
+      detail.error = err instanceof Error ? err.message : String(err);
+      verification.errors++;
+      logger.warn(`   ⚠️ ${obj.name}: verification failed — ${detail.error}`);
+    }
+
+    verification.details.push(detail);
+  }
+
+  return verification;
+}
+
+/**
+ * Display verification results in console
+ */
+function displayVerificationResults(
+  verification: VerificationResult,
+  logger: CliContext['logger'],
+): void {
+  logger.info(`\n📋 Package Verification Results:`);
+  logger.info(`   Total:      ${verification.total}`);
+  logger.info(`   ✅ Correct:   ${verification.correct}`);
+  if (verification.mismatched > 0) {
+    logger.error(`   ❌ Mismatched: ${verification.mismatched}`);
+  }
+  if (verification.errors > 0) {
+    logger.warn(`   ⚠️ Errors:    ${verification.errors}`);
+  }
+
+  // Show mismatched details
+  const mismatches = verification.details.filter(
+    (d) => d.status === 'mismatched',
+  );
+  if (mismatches.length > 0) {
+    logger.error('\n❌ Package mismatches:');
+    for (const m of mismatches) {
+      logger.error(
+        `   ${m.type} ${m.name}: expected ${m.expectedPackage}, got ${m.actualPackage ?? '(none)'}`,
+      );
+    }
+  }
+}
+
+/**
  * Export Command Plugin
  *
  * Exports local serialized files to SAP system.
@@ -164,6 +265,12 @@ export const exportCommand: CliCommandPlugin = {
       default: false,
     },
     {
+      flags: '--verify',
+      description:
+        'After deploy, verify each object ended up in the correct package on SAP',
+      default: false,
+    },
+    {
       flags: '--abap-language-version <version>',
       description:
         'ABAP language version for new objects (2=keyUser, 5=cloud). Required for BTP systems.',
@@ -181,6 +288,7 @@ export const exportCommand: CliCommandPlugin = {
       dryRun?: boolean;
       activate?: boolean;
       unlock?: boolean;
+      verify?: boolean;
       abapLanguageVersion?: string;
     };
 
@@ -265,7 +373,13 @@ export const exportCommand: CliCommandPlugin = {
 
       // Get ADT client and create ADK context
       const client = await ctx.getAdtClient!();
-      const adkContext: AdkContext = { client: client as any };
+      // Use global context's lock store/service if available (initialized by CLI)
+      const globalCtx = tryGetGlobalContext();
+      const adkContext: AdkContext = {
+        client: client as any,
+        lockStore: globalCtx?.lockStore,
+        lockService: globalCtx?.lockService,
+      };
 
       ctx.logger.info('🔍 Scanning files and building object tree...');
 
@@ -315,8 +429,26 @@ export const exportCommand: CliCommandPlugin = {
         return;
       }
 
+      // Derive effective root package: either explicit --package or
+      // the shortest packageRef resolved by the format plugin (from package.devc.xml).
+      let effectiveRootPackage = options.package;
+      if (!effectiveRootPackage) {
+        for (const obj of objectSet) {
+          const pkgName = (obj as any)._data?.packageRef?.name as
+            | string
+            | undefined;
+          if (
+            pkgName &&
+            (!effectiveRootPackage ||
+              pkgName.length < effectiveRootPackage.length)
+          ) {
+            effectiveRootPackage = pkgName;
+          }
+        }
+      }
+
       // Log package assignments (resolved by format plugin)
-      if (options.package) {
+      if (effectiveRootPackage) {
         const pkgMap = new Map<string, string[]>();
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
@@ -328,9 +460,9 @@ export const exportCommand: CliCommandPlugin = {
           }
         }
         if (pkgMap.size > 0) {
-          ctx.logger.info(`� Package resolution: ${options.package}`);
+          ctx.logger.info(`📦 Package resolution: ${effectiveRootPackage}`);
           for (const [pkg, objects] of pkgMap) {
-            if (pkg !== options.package) {
+            if (pkg !== effectiveRootPackage) {
               ctx.logger.info(`   📁 ${pkg}: ${objects.join(', ')}`);
             }
           }
@@ -341,75 +473,285 @@ export const exportCommand: CliCommandPlugin = {
       // Pre-deploy: ensure subpackages exist
       // Collect all unique target packages and create any that
       // don't exist on the SAP system yet.
+      // Packages are created top-down so that parent packages
+      // exist before their children (correct superPackage).
       // ============================================
-      if (options.package && !options.dryRun) {
-        // Collect unique subpackage names (exclude root package)
-        const subPackages = new Set<string>();
+      if (effectiveRootPackage && !options.dryRun) {
+        // Collect unique subpackage names from object targets
+        const leafPackages = new Set<string>();
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
             | string
             | undefined;
-          if (pkgName && pkgName !== options.package) {
-            subPackages.add(pkgName);
+          if (pkgName && pkgName !== effectiveRootPackage) {
+            leafPackages.add(pkgName);
           }
         }
 
-        if (subPackages.size > 0) {
-          ctx.logger.info(`\n📦 Checking ${subPackages.size} subpackage(s)...`);
-
-          // Read parent package to inherit software component, transport layer & responsible
-          let parentPkg: AdkPackage | undefined;
-          try {
-            parentPkg = await AdkPackage.get(options.package, adkContext);
-          } catch {
-            // Parent package read failed — proceed without inherited values
+        if (leafPackages.size > 0) {
+          // Expand to include all intermediate packages in the hierarchy.
+          // With PREFIX logic ROOT_A_B requires ROOT_A as an intermediate.
+          const allSubPkgs = new Set<string>();
+          const rootPrefix = effectiveRootPackage + '_';
+          for (const pkg of leafPackages) {
+            allSubPkgs.add(pkg);
+            if (pkg.startsWith(rootPrefix)) {
+              const suffix = pkg.slice(rootPrefix.length);
+              const parts = suffix.split('_');
+              let current = effectiveRootPackage;
+              for (const part of parts) {
+                current += '_' + part;
+                allSubPkgs.add(current);
+              }
+            }
           }
 
-          for (const pkgName of subPackages) {
-            const exists = await AdkPackage.exists(pkgName, adkContext);
-            if (!exists) {
-              ctx.logger.info(`   📦 Creating subpackage ${pkgName}...`);
-              try {
-                // Build transport config — SAP requires both softwareComponent
-                // and transportLayer when transport element is present
-                const swComp = parentPkg?.transport?.softwareComponent?.name;
-                const trLayer = parentPkg?.transport?.transportLayer?.name;
-                const transportConfig =
-                  swComp || trLayer
-                    ? {
-                        softwareComponent: { name: swComp ?? '' },
-                        transportLayer: { name: trLayer ?? '' },
-                      }
-                    : undefined;
+          // Sort by name length — shorter names are higher in the hierarchy
+          // and must be created first so they can serve as super packages.
+          const sortedPkgs = [...allSubPkgs].sort(
+            (a, b) => a.length - b.length,
+          );
 
-                await AdkPackage.create(
-                  pkgName,
-                  {
-                    description: pkgName,
-                    responsible: parentPkg?.dataSync?.responsible ?? '',
-                    superPackage: { name: options.package },
-                    attributes: {
-                      packageType: 'development',
-                      ...(options.abapLanguageVersion
-                        ? {
-                            languageVersion: options.abapLanguageVersion as
-                              | ''
-                              | '2'
-                              | '5',
-                          }
-                        : {}),
+          ctx.logger.info(
+            `\n📦 Checking ${sortedPkgs.length} subpackage(s)...`,
+          );
+
+          // Read root package to inherit software component, transport layer & responsible
+          let rootPkg: AdkPackage | undefined;
+          try {
+            rootPkg = await AdkPackage.get(effectiveRootPackage, adkContext);
+          } catch {
+            // Root package read failed — proceed without inherited values
+          }
+
+          // Build transport config once — SAP requires both softwareComponent
+          // and transportLayer when transport element is present
+          const swComp = rootPkg?.transport?.softwareComponent?.name;
+          const trLayer = rootPkg?.transport?.transportLayer?.name;
+          const transportConfig =
+            swComp || trLayer
+              ? {
+                  softwareComponent: { name: swComp ?? '' },
+                  transportLayer: { name: trLayer ?? '' },
+                }
+              : undefined;
+
+          // Track known packages for super-package resolution
+          const knownPackages = new Set<string>([effectiveRootPackage]);
+          const fixedPackages: string[] = [];
+
+          for (const pkgName of sortedPkgs) {
+            // Resolve expected super package: longest known package
+            // that is a proper prefix of this one (with '_' separator).
+            let expectedSuper = effectiveRootPackage;
+            for (const candidate of knownPackages) {
+              if (
+                pkgName.startsWith(candidate + '_') &&
+                candidate.length > expectedSuper.length
+              ) {
+                expectedSuper = candidate;
+              }
+            }
+
+            const exists = await AdkPackage.exists(pkgName, adkContext);
+            if (exists) {
+              knownPackages.add(pkgName);
+
+              // Verify super package — fix if wrong (e.g. from a prior buggy deploy)
+              try {
+                const pkg = await AdkPackage.get(pkgName, adkContext);
+                const currentSuper = pkg.superPackage?.name ?? '';
+                if (currentSuper && currentSuper !== expectedSuper) {
+                  ctx.logger.info(
+                    `   📦 Fixing ${pkgName}: ${currentSuper} → ${expectedSuper}`,
+                  );
+                  // Use raw HTTP calls matching the exact SAP ADT sequence:
+                  // 1. LOCK (accessMode=MODIFY)
+                  // 2. GET ?version=inactive
+                  // 3. PUT ?lockHandle=...  (with modified superPackage)
+                  // 4. UNLOCK ?lockHandle=...
+                  const pkgUri = `/sap/bc/adt/packages/${encodeURIComponent(pkgName)}`;
+                  const acceptHeader =
+                    'application/vnd.sap.adt.packages.v2+xml, application/vnd.sap.adt.packages.v1+xml';
+
+                  // Force-unlock first in case a previous run left it locked
+                  if (options.unlock) {
+                    try {
+                      const lockSvc = adkContext.lockService;
+                      if (lockSvc) {
+                        await lockSvc.unlock(pkgUri);
+                      } else {
+                        await client.fetch(`${pkgUri}?_action=UNLOCK`, {
+                          method: 'POST',
+                          headers: {
+                            'X-sap-adt-sessiontype': 'stateful',
+                          },
+                        });
+                      }
+                    } catch {
+                      // Not locked — fine
+                    }
+                  }
+
+                  // Step 1: LOCK
+                  const lockQuery = new URLSearchParams({
+                    _action: 'LOCK',
+                    accessMode: 'MODIFY',
+                  });
+                  if (options.transport) {
+                    lockQuery.set('corrNr', options.transport);
+                  }
+                  const lockResp = await client.fetch(
+                    `${pkgUri}?${lockQuery}`,
+                    {
+                      method: 'POST',
+                      headers: {
+                        'X-sap-adt-sessiontype': 'stateful',
+                        Accept:
+                          'application/*,application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result',
+                      },
                     },
-                    ...(transportConfig ? { transport: transportConfig } : {}),
-                  },
-                  { transport: options.transport },
-                  adkContext,
-                );
-                ctx.logger.info(`   ✅ Created ${pkgName}`);
-              } catch (createErr) {
+                  );
+                  // Extract lockHandle from response XML
+                  const lockXml =
+                    typeof lockResp === 'string' ? lockResp : String(lockResp);
+                  const handleMatch = lockXml.match(
+                    /LOCK_HANDLE[^>]*>([^<]+)</,
+                  );
+                  const lockHandle = handleMatch?.[1] ?? '';
+                  if (!lockHandle) {
+                    throw new Error(
+                      'Failed to extract lock handle from lock response',
+                    );
+                  }
+
+                  try {
+                    // Step 2: GET inactive version (fresh ETag + modifiable copy)
+                    const inactiveXml = (await client.fetch(
+                      `${pkgUri}?version=inactive`,
+                      {
+                        method: 'GET',
+                        headers: { Accept: acceptHeader },
+                      },
+                    )) as string;
+
+                    // Step 3: PUT with modified superPackage
+                    // Replace the superPackage reference in the XML
+                    // The XML uses adtcore:name and adtcore:uri attributes
+                    let modifiedXml = inactiveXml;
+                    // Replace superPackage name attribute (adtcore:name="...")
+                    modifiedXml = modifiedXml.replace(
+                      /(<pak:superPackage[^>]*adtcore:name=")([^"]*)(")/,
+                      `$1${expectedSuper}$3`,
+                    );
+                    // Replace superPackage URI attribute (adtcore:uri="...")
+                    modifiedXml = modifiedXml.replace(
+                      /(<pak:superPackage[^>]*adtcore:uri=")([^"]*)(")/,
+                      `$1/sap/bc/adt/packages/${expectedSuper.toLowerCase()}$3`,
+                    );
+
+                    await client.fetch(
+                      `${pkgUri}?lockHandle=${encodeURIComponent(lockHandle)}`,
+                      {
+                        method: 'PUT',
+                        headers: {
+                          'Content-Type':
+                            'application/vnd.sap.adt.packages.v2+xml',
+                          Accept: acceptHeader,
+                        },
+                        body: modifiedXml,
+                      },
+                    );
+                    ctx.logger.info(`   ✅ Fixed ${pkgName}`);
+                    fixedPackages.push(pkgName);
+                  } finally {
+                    // Step 4: UNLOCK (always, to prevent orphan locks)
+                    try {
+                      await client.fetch(
+                        `${pkgUri}?_action=UNLOCK&lockHandle=${encodeURIComponent(lockHandle)}`,
+                        {
+                          method: 'POST',
+                          headers: {
+                            'X-sap-adt-sessiontype': 'stateful',
+                          },
+                        },
+                      );
+                    } catch {
+                      // Best-effort unlock
+                    }
+                  }
+                }
+              } catch (fixErr) {
                 ctx.logger.warn(
-                  `   ⚠️ Failed to create ${pkgName}: ${createErr instanceof Error ? createErr.message : String(createErr)}`,
+                  `   ⚠️ Could not fix super package for ${pkgName}: ${fixErr instanceof Error ? fixErr.message : String(fixErr)}`,
                 );
               }
+              continue;
+            }
+
+            ctx.logger.info(
+              `   📦 Creating subpackage ${pkgName} (in ${expectedSuper})...`,
+            );
+            try {
+              await AdkPackage.create(
+                pkgName,
+                {
+                  description: pkgName,
+                  responsible: rootPkg?.dataSync?.responsible ?? '',
+                  superPackage: { name: expectedSuper },
+                  attributes: {
+                    packageType: 'development',
+                    ...(options.abapLanguageVersion
+                      ? {
+                          languageVersion: options.abapLanguageVersion as
+                            | ''
+                            | '2'
+                            | '5',
+                        }
+                      : {}),
+                  },
+                  ...(transportConfig ? { transport: transportConfig } : {}),
+                },
+                { transport: options.transport },
+                adkContext,
+              );
+              knownPackages.add(pkgName);
+              ctx.logger.info(`   ✅ Created ${pkgName}`);
+            } catch (createErr) {
+              ctx.logger.warn(
+                `   ⚠️ Failed to create ${pkgName}: ${createErr instanceof Error ? createErr.message : String(createErr)}`,
+              );
+            }
+          }
+
+          // Step 5: Activate fixed packages so changes move from inactive → active
+          if (fixedPackages.length > 0) {
+            const refs = fixedPackages
+              .map(
+                (p) =>
+                  `  <adtcore:objectReference adtcore:uri="/sap/bc/adt/packages/${encodeURIComponent(p)}" adtcore:type="DEVC/K" adtcore:name="${p}"/>`,
+              )
+              .join('\n');
+            const activationXml = `<?xml version="1.0" encoding="UTF-8"?>\n<adtcore:objectReferences xmlns:adtcore="http://www.sap.com/adt/core">\n${refs}\n</adtcore:objectReferences>`;
+            try {
+              await client.fetch(
+                '/sap/bc/adt/activation?method=activate&preauditRequested=true',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/xml',
+                    Accept: 'application/xml',
+                  },
+                  body: activationXml,
+                },
+              );
+              ctx.logger.info(
+                `   ✅ Activated ${fixedPackages.length} fixed package(s)`,
+              );
+            } catch (actErr) {
+              ctx.logger.warn(
+                `   ⚠️ Package activation failed: ${actErr instanceof Error ? actErr.message : String(actErr)}`,
+              );
             }
           }
         }
@@ -421,7 +763,7 @@ export const exportCommand: CliCommandPlugin = {
       // already exists in a different package we must delete it
       // first and let the deploy recreate it in the correct one.
       // ============================================
-      if (options.package && !options.dryRun) {
+      if (effectiveRootPackage && !options.dryRun) {
         let deletedForReassign = 0;
         for (const obj of objectSet) {
           const targetPkg = (obj as any)._data?.packageRef?.name as
@@ -481,15 +823,20 @@ export const exportCommand: CliCommandPlugin = {
       // ============================================
       if (options.unlock && !options.dryRun) {
         ctx.logger.info(
-          `\n� --unlock: Force-unlocking all ${objectSet.size} objects...`,
+          `\n🔓 --unlock: Force-unlocking all ${objectSet.size} objects...`,
         );
         let unlocked = 0;
+        const lockSvc = adkContext.lockService;
         for (const obj of objectSet) {
           try {
-            await (client as any).fetch(`${obj.objectUri}?_action=UNLOCK`, {
-              method: 'POST',
-              headers: { 'X-sap-adt-sessiontype': 'stateful' },
-            });
+            if (lockSvc) {
+              await lockSvc.unlock(obj.objectUri);
+            } else {
+              await (client as any).fetch(`${obj.objectUri}?_action=UNLOCK`, {
+                method: 'POST',
+                headers: { 'X-sap-adt-sessiontype': 'stateful' },
+              });
+            }
             unlocked++;
           } catch {
             // Object wasn't locked — that's fine, ignore
@@ -591,6 +938,20 @@ export const exportCommand: CliCommandPlugin = {
           `\n🔍 Dry run: ${objectSet.size} objects would be saved`,
         );
       }
+
+      // ============================================
+      // Post-deploy: verify package assignments
+      // ============================================
+      if (options.verify && !options.dryRun) {
+        ctx.logger.info(
+          `\n🔍 Verifying package assignments for ${objectSet.size} objects...`,
+        );
+        result.verification = await verifyPackageAssignments(
+          objectSet,
+          ctx.logger,
+        );
+        displayVerificationResults(result.verification, ctx.logger);
+      }
     } catch (error) {
       ctx.logger.error(
         `❌ Export failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -601,8 +962,8 @@ export const exportCommand: CliCommandPlugin = {
     // Display results
     displayExportResults(result, ctx.logger);
 
-    // Exit with error if there were failures
-    if (result.failed > 0) {
+    // Exit with error if there were failures or verification mismatches
+    if (result.failed > 0 || (result.verification?.mismatched ?? 0) > 0) {
       process.exit(1);
     }
   },

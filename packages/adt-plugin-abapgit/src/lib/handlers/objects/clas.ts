@@ -5,7 +5,12 @@
 import { AdkClass, type ClassIncludeType } from '../adk';
 import { clas } from '../../../schemas/generated';
 import { createHandler } from '../base';
-import { sapLangToIso, isoToSapLang, abapLangVerToAdt, abapLangVerFromAdt } from '../lang';
+import {
+  sapLangToIso,
+  isoToSapLang,
+  abapLangVerToAdt,
+  abapLangVerFromAdt,
+} from '../lang';
 
 /**
  * Map ADK ClassIncludeType to abapGit file suffix convention
@@ -79,9 +84,7 @@ export const classHandler = createHandler(AdkClass, {
     const data = cls.dataSync;
     const includes = data.include ?? [];
     const hasTestClasses =
-      includes.some(
-        (inc) => String(inc.includeType) === 'testclasses',
-      ) ||
+      includes.some((inc) => String(inc.includeType) === 'testclasses') ||
       (data as any).hasTests === true ||
       (data as any).withUnitTests === true;
 

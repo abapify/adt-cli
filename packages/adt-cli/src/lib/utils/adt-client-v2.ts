@@ -21,6 +21,7 @@ import {
 } from '@abapify/adt-client';
 import type { AdtAdapterConfig } from '@abapify/adt-client';
 import { initializeAdk, isAdkInitialized } from '@abapify/adk';
+import { FileLockStore } from '@abapify/adt-locks';
 import {
   loadAuthSession,
   isExpired,
@@ -360,7 +361,7 @@ export async function getAdtClientV2(
   // Initialize ADK global context if not already done
   // This allows ADK objects to be used without passing context explicitly
   if (!isAdkInitialized()) {
-    initializeAdk(adtClient);
+    initializeAdk(adtClient, { lockStore: new FileLockStore() });
   }
 
   return adtClient;

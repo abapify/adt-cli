@@ -4,12 +4,12 @@
 
 **ABAP CDS source parser** — tokenizes, parses, and produces a typed AST from `.acds` DDL source code.
 
-| Feature            | Description                                          |
-| ------------------ | ---------------------------------------------------- |
-| **Chevrotain**     | Lexer + CstParser + visitor pattern                  |
-| **Error recovery** | Returns partial AST + structured errors              |
-| **Phase 1**        | TABL, Structure, DRTY, SRVD, DDLX                   |
-| **Single export**  | `parse(source) → { ast, errors }`                    |
+| Feature            | Description                             |
+| ------------------ | --------------------------------------- |
+| **Chevrotain**     | Lexer + CstParser + visitor pattern     |
+| **Error recovery** | Returns partial AST + structured errors |
+| **Phase 1**        | TABL, Structure, DRTY, SRVD, DDLX       |
+| **Single export**  | `parse(source) → { ast, errors }`       |
 
 ## Architecture
 
@@ -23,14 +23,14 @@ Source string
 
 ### Key Files
 
-| File          | Purpose                                      |
-| ------------- | -------------------------------------------- |
-| `src/index.ts`   | `parse()` entry point, re-exports all types  |
+| File             | Purpose                                                    |
+| ---------------- | ---------------------------------------------------------- |
+| `src/index.ts`   | `parse()` entry point, re-exports all types                |
 | `src/tokens.ts`  | Chevrotain token definitions (keywords, symbols, literals) |
-| `src/parser.ts`  | Grammar rules (`CdsParser` extends `CstParser`) |
-| `src/visitor.ts` | CST → AST transformation (`CdsVisitor`)      |
-| `src/ast.ts`     | AST node interfaces and union types          |
-| `src/errors.ts`  | Error normalization (lex errors + parse errors) |
+| `src/parser.ts`  | Grammar rules (`CdsParser` extends `CstParser`)            |
+| `src/visitor.ts` | CST → AST transformation (`CdsVisitor`)                    |
+| `src/ast.ts`     | AST node interfaces and union types                        |
+| `src/errors.ts`  | Error normalization (lex errors + parse errors)            |
 
 ### AST Node Hierarchy
 
@@ -97,6 +97,7 @@ bunx nx test acds
 ```
 
 Tests live in `src/parser.test.ts` and cover:
+
 - Table definitions (key fields, annotations, decimal types, includes, builtin types)
 - Structure definitions
 - Simple type definitions (builtin + named)

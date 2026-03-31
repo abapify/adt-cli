@@ -14,7 +14,9 @@
 
   <!-- Include types (brought into asx namespace) -->
   <xs:include schemaLocation="types/dd02v.xsd"/>
+  <xs:include schemaLocation="types/dd09l.xsd"/>
   <xs:include schemaLocation="types/dd03p.xsd"/>
+  <xs:include schemaLocation="types/tddat.xsd"/>
 
   <!-- Redefine AbapValuesType to include TABL-specific elements -->
   <xs:redefine schemaLocation="asx.xsd">
@@ -23,7 +25,9 @@
         <xs:extension base="asx:AbapValuesType">
           <xs:sequence>
             <xs:element name="DD02V" type="asx:Dd02vType" minOccurs="0"/>
+            <xs:element name="DD09L" type="asx:Dd09lType" minOccurs="0"/>
             <xs:element name="DD03P_TABLE" type="asx:Dd03pTableType" minOccurs="0"/>
+            <xs:element name="TABL_EXTRAS" type="asx:TablExtrasType" minOccurs="0"/>
           </xs:sequence>
         </xs:extension>
       </xs:complexContent>

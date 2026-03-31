@@ -26,6 +26,19 @@ export type TablSchema = {
                     EXCLASS?: string;
                     AUTHCLASS?: string;
                 };
+                DD09L?: {
+                    TABNAME?: string;
+                    AS4LOCAL?: string;
+                    TABKAT?: string;
+                    TABART?: string;
+                    BUFALLOW?: string;
+                    PUFFERUNG?: string;
+                    SCHFELDANZ?: string;
+                    PROTOKOLL?: string;
+                    SPEESSION?: string;
+                    UESSION?: string;
+                    ROESSION?: string;
+                };
                 DD03P_TABLE?: {
                     DD03P?: {
                         FIELDNAME?: string;
@@ -37,20 +50,29 @@ export type TablSchema = {
                         INTLEN?: string;
                         REFTABLE?: string;
                         REFFIELD?: string;
+                        PRECFIELD?: string;
+                        NOTNULL?: string;
                         DATATYPE?: string;
                         LENG?: string;
                         DECIMALS?: string;
-                        NOTNULL?: string;
                         DOMNAME?: string;
-                        PRECFIELD?: string;
                         MASK?: string;
-                        DDTEXT?: string;
                         SHLPORIGIN?: string;
+                        DDTEXT?: string;
                         COMPTYPE?: string;
                         TABNAME?: string;
                         DDLANGUAGE?: string;
                         CONRFLAG?: string;
                     }[];
+                };
+                TABL_EXTRAS?: {
+                    TDDAT?: {
+                        TABNAME?: string;
+                        CCLASS?: string;
+                        VIEWGRANT?: string;
+                        TVDIR?: string;
+                        GENERICRANGE?: string;
+                    };
                 };
             };
             version?: string;
@@ -78,6 +100,19 @@ export type TablSchema = {
             EXCLASS?: string;
             AUTHCLASS?: string;
         };
+        DD09L?: {
+            TABNAME?: string;
+            AS4LOCAL?: string;
+            TABKAT?: string;
+            TABART?: string;
+            BUFALLOW?: string;
+            PUFFERUNG?: string;
+            SCHFELDANZ?: string;
+            PROTOKOLL?: string;
+            SPEESSION?: string;
+            UESSION?: string;
+            ROESSION?: string;
+        };
         DD03P_TABLE?: {
             DD03P?: {
                 FIELDNAME?: string;
@@ -89,20 +124,29 @@ export type TablSchema = {
                 INTLEN?: string;
                 REFTABLE?: string;
                 REFFIELD?: string;
+                PRECFIELD?: string;
+                NOTNULL?: string;
                 DATATYPE?: string;
                 LENG?: string;
                 DECIMALS?: string;
-                NOTNULL?: string;
                 DOMNAME?: string;
-                PRECFIELD?: string;
                 MASK?: string;
-                DDTEXT?: string;
                 SHLPORIGIN?: string;
+                DDTEXT?: string;
                 COMPTYPE?: string;
                 TABNAME?: string;
                 DDLANGUAGE?: string;
                 CONRFLAG?: string;
             }[];
+        };
+        TABL_EXTRAS?: {
+            TDDAT?: {
+                TABNAME?: string;
+                CCLASS?: string;
+                VIEWGRANT?: string;
+                TVDIR?: string;
+                GENERICRANGE?: string;
+            };
         };
     };
 } | {
@@ -125,6 +169,19 @@ export type TablSchema = {
                 EXCLASS?: string;
                 AUTHCLASS?: string;
             };
+            DD09L?: {
+                TABNAME?: string;
+                AS4LOCAL?: string;
+                TABKAT?: string;
+                TABART?: string;
+                BUFALLOW?: string;
+                PUFFERUNG?: string;
+                SCHFELDANZ?: string;
+                PROTOKOLL?: string;
+                SPEESSION?: string;
+                UESSION?: string;
+                ROESSION?: string;
+            };
             DD03P_TABLE?: {
                 DD03P?: {
                     FIELDNAME?: string;
@@ -136,20 +193,29 @@ export type TablSchema = {
                     INTLEN?: string;
                     REFTABLE?: string;
                     REFFIELD?: string;
+                    PRECFIELD?: string;
+                    NOTNULL?: string;
                     DATATYPE?: string;
                     LENG?: string;
                     DECIMALS?: string;
-                    NOTNULL?: string;
                     DOMNAME?: string;
-                    PRECFIELD?: string;
                     MASK?: string;
-                    DDTEXT?: string;
                     SHLPORIGIN?: string;
+                    DDTEXT?: string;
                     COMPTYPE?: string;
                     TABNAME?: string;
                     DDLANGUAGE?: string;
                     CONRFLAG?: string;
                 }[];
+            };
+            TABL_EXTRAS?: {
+                TDDAT?: {
+                    TABNAME?: string;
+                    CCLASS?: string;
+                    VIEWGRANT?: string;
+                    TVDIR?: string;
+                    GENERICRANGE?: string;
+                };
             };
         };
         version?: string;

@@ -7,7 +7,12 @@
 import { AdkTableType } from '../adk';
 import { ttyp } from '../../../schemas/generated';
 import { createHandler } from '../base';
-import { isoToSapLang, sapLangToIso, abapLangVerToAdt, abapLangVerFromAdt } from '../lang';
+import {
+  isoToSapLang,
+  sapLangToIso,
+  abapLangVerToAdt,
+  abapLangVerFromAdt,
+} from '../lang';
 
 // ============================================
 // DD40V ↔ ADT API enum mappings
@@ -101,10 +106,20 @@ export const tableTypeHandler = createHandler(AdkTableType, {
 
   toAbapGit: (obj) => {
     const data = obj.dataSync;
-    const accessMode = ACCESS_MODE_FROM_ADT[data?.accessType ?? ''] ?? data?.accessType ?? '';
-    const keyDef = KEY_DEF_FROM_ADT[data?.primaryKey?.definition ?? ''] ?? data?.primaryKey?.definition ?? '';
-    const keyKind = KEY_KIND_FROM_ADT[data?.primaryKey?.kind ?? ''] ?? data?.primaryKey?.kind ?? '';
-    const rowKind = ROW_KIND_FROM_ADT[data?.rowType?.typeKind ?? ''] ?? data?.rowType?.typeKind ?? '';
+    const accessMode =
+      ACCESS_MODE_FROM_ADT[data?.accessType ?? ''] ?? data?.accessType ?? '';
+    const keyDef =
+      KEY_DEF_FROM_ADT[data?.primaryKey?.definition ?? ''] ??
+      data?.primaryKey?.definition ??
+      '';
+    const keyKind =
+      KEY_KIND_FROM_ADT[data?.primaryKey?.kind ?? ''] ??
+      data?.primaryKey?.kind ??
+      '';
+    const rowKind =
+      ROW_KIND_FROM_ADT[data?.rowType?.typeKind ?? ''] ??
+      data?.rowType?.typeKind ??
+      '';
 
     // Map ADT dataType (STRING) → DDIC code (STRG)
     const adtDataType = data?.rowType?.builtInType?.dataType ?? '';
@@ -137,7 +152,8 @@ export const tableTypeHandler = createHandler(AdkTableType, {
   },
 
   fromAbapGit: ({ DD40V } = {}) => {
-    const accessType = ACCESS_MODE_TO_ADT[DD40V?.ACCESSMODE ?? ''] ?? DD40V?.ACCESSMODE;
+    const accessType =
+      ACCESS_MODE_TO_ADT[DD40V?.ACCESSMODE ?? ''] ?? DD40V?.ACCESSMODE;
     const keyDef = KEY_DEF_TO_ADT[DD40V?.KEYDEF ?? ''] ?? DD40V?.KEYDEF;
     const keyKind = KEY_KIND_TO_ADT[DD40V?.KEYKIND ?? ''] ?? DD40V?.KEYKIND;
     const rowKind = ROW_KIND_TO_ADT[DD40V?.ROWKIND ?? ''] ?? DD40V?.ROWKIND;
@@ -159,7 +175,7 @@ export const tableTypeHandler = createHandler(AdkTableType, {
       abapLanguageVersion: abapLangVerToAdt(DD40V?.ABAP_LANGUAGE_VERSION),
       rowType: {
         typeKind: rowKind,
-        typeName: isPredefined ? '' : (DD40V?.ROWTYPE || ''),
+        typeName: isPredefined ? '' : DD40V?.ROWTYPE || '',
         // SAP's strict xs:sequence parser requires ALL elements in builtInType
         // to be present. Default length/decimals to 0 instead of omitting.
         builtInType: ddicCode
