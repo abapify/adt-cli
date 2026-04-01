@@ -267,6 +267,18 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
 
       // Make request
       logger?.debug(`HTTP ${options.method} ${url.toString()}`);
+      {
+        const safeHeaders = {
+          ...headers,
+          // Mask Authorization value for security
+          ...(headers.Authorization
+            ? { Authorization: headers.Authorization.substring(0, 10) + '***' }
+            : {}),
+        };
+        logger?.debug(
+          'Request headers: ' + JSON.stringify(safeHeaders, null, 2),
+        );
+      }
       const response = await fetch(url.toString(), {
         method: options.method,
         headers,
@@ -275,6 +287,15 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
 
       // Process response for session management (cookies, CSRF, ETags)
       sessionManager.processResponse(response, url.pathname);
+      logger?.debug(`Response: ${response.status} ${response.statusText}`);
+      logger?.debug(
+        'Response headers: ' +
+          JSON.stringify(
+            Object.fromEntries(response.headers.entries()),
+            null,
+            2,
+          ),
+      );
 
       // Check for HTTP errors
       if (!response.ok) {

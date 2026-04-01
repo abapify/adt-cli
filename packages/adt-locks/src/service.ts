@@ -94,6 +94,12 @@ export function createLockService(
 ): LockService {
   const store = serviceOptions?.store;
 
+  /** Headers for lock/unlock operations — stateful session with security session reuse */
+  const lockHeaders = {
+    'X-sap-adt-sessiontype': 'stateful',
+    'x-sap-security-session': 'use',
+  };
+
   return {
     async lock(objectUri, options) {
       const query = options?.transport
@@ -102,7 +108,7 @@ export function createLockService(
 
       const response = await client.fetch(`${objectUri}${query}`, {
         method: 'POST',
-        headers: { 'X-sap-adt-sessiontype': 'stateful' },
+        headers: lockHeaders,
       });
 
       const handle = parseLockResponse(String(response));
@@ -122,12 +128,12 @@ export function createLockService(
 
     async unlock(objectUri, options) {
       const query = options?.lockHandle
-        ? `?_action=UNLOCK&lockHandle=${encodeURIComponent(options.lockHandle)}`
-        : '?_action=UNLOCK';
+        ? `?_action=UNLOCK&accessMode=MODIFY&lockHandle=${encodeURIComponent(options.lockHandle)}`
+        : '?_action=UNLOCK&accessMode=MODIFY';
 
       await client.fetch(`${objectUri}${query}`, {
         method: 'POST',
-        headers: { 'X-sap-adt-sessiontype': 'stateful' },
+        headers: lockHeaders,
       });
 
       store?.deregister(objectUri);
@@ -144,10 +150,10 @@ export function createLockService(
 
       for (const entry of entries) {
         try {
-          const query = `?_action=UNLOCK&lockHandle=${encodeURIComponent(entry.lockHandle)}`;
+          const query = `?_action=UNLOCK&accessMode=MODIFY&lockHandle=${encodeURIComponent(entry.lockHandle)}`;
           await client.fetch(`${entry.objectUri}${query}`, {
             method: 'POST',
-            headers: { 'X-sap-adt-sessiontype': 'stateful' },
+            headers: lockHeaders,
           });
           store?.deregister(entry.objectUri);
           ok++;

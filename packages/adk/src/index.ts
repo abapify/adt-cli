@@ -181,6 +181,8 @@ export {
   getRegisteredKinds,
   getEndpointForType,
   getObjectUri,
+  getObjectRootUri,
+  normalizeObjectName,
   ADT_TYPE_MAPPINGS,
   type NameTransform,
   type RegisterObjectTypeOptions,

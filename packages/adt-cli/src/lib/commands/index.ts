@@ -21,5 +21,6 @@ export { createReplCommand } from './repl';
 export { packageGetCommand } from './package';
 export { lsCommand } from './ls';
 export { unlockCommand } from './unlock';
+export { lockCommand } from './lock';
 export { locksCommand } from './locks';
 export { checkCommand } from './check';

@@ -169,7 +169,7 @@ describe('LockService.unlock()', () => {
     });
 
     expect(client.fetch).toHaveBeenCalledWith(
-      '/sap/bc/adt/oo/classes/zcl_test?_action=UNLOCK&lockHandle=HANDLE_XYZ',
+      '/sap/bc/adt/oo/classes/zcl_test?_action=UNLOCK&accessMode=MODIFY&lockHandle=HANDLE_XYZ',
       expect.objectContaining({ method: 'POST' }),
     );
   });
@@ -181,7 +181,7 @@ describe('LockService.unlock()', () => {
     await service.unlock('/sap/bc/adt/oo/classes/zcl_test');
 
     expect(client.fetch).toHaveBeenCalledWith(
-      '/sap/bc/adt/oo/classes/zcl_test?_action=UNLOCK',
+      '/sap/bc/adt/oo/classes/zcl_test?_action=UNLOCK&accessMode=MODIFY',
       expect.objectContaining({ method: 'POST' }),
     );
   });

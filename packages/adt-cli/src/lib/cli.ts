@@ -21,6 +21,7 @@ import {
   packageGetCommand,
   lsCommand,
   unlockCommand,
+  lockCommand,
   locksCommand,
   checkCommand,
 } from './commands';
@@ -203,6 +204,9 @@ export async function createCLI(options?: {
 
   // Deploy command moved to @abapify/adt-export plugin
   // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
+
+  // Lock command (acquire lock, persist handle)
+  program.addCommand(lockCommand);
 
   // Unlock command (force-release stale locks)
   program.addCommand(unlockCommand);

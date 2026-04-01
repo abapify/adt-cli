@@ -36,6 +36,8 @@ export interface RegistryEntry {
   readonly endpoint?: string;
   /** How to transform the object name in URIs (default: lowercase) */
   readonly nameTransform?: NameTransform;
+  /** Optional name normalizer — e.g., strip SAPL prefix for FUGR */
+  readonly normalizeName?: (name: string) => string;
 }
 
 // ============================================
@@ -92,6 +94,8 @@ export interface RegisterObjectTypeOptions {
   endpoint?: string;
   /** How to transform the object name in URIs (default: 'lowercase') */
   nameTransform?: NameTransform;
+  /** Optional name normalizer — e.g., strip SAPL prefix for FUGR */
+  normalizeName?: (name: string) => string;
 }
 
 /**
@@ -115,6 +119,7 @@ export function registerObjectType(
     constructor,
     endpoint: options?.endpoint,
     nameTransform: options?.nameTransform,
+    normalizeName: options?.normalizeName,
   });
   adtToKind.set(normalizedType, kind);
   kindToAdt.set(kind, normalizedType);
@@ -208,12 +213,86 @@ export function getObjectUri(
   const entry = resolveType(adtType);
   if (!entry?.endpoint) return undefined;
 
+  const normalized = entry.normalizeName ? entry.normalizeName(name) : name;
   const transformedName =
     entry.nameTransform === 'preserve'
-      ? encodeURIComponent(name)
-      : encodeURIComponent(name.toLowerCase());
+      ? encodeURIComponent(normalized)
+      : encodeURIComponent(normalized.toLowerCase());
 
   return `/sap/bc/adt/${entry.endpoint}/${transformedName}`;
+}
+
+/**
+ * Normalize an object name using type-specific rules.
+ *
+ * If `adtType` is provided, applies that type's normalizer only.
+ * Otherwise, collects all possible normalized forms from every registered type.
+ *
+ * @returns Array of candidate names (always includes the original).
+ *
+ * @example
+ * normalizeObjectName('SAPLZAGE_FUGR')          // ['SAPLZAGE_FUGR', 'ZAGE_FUGR']
+ * normalizeObjectName('SAPLZAGE_FUGR', 'FUGR')  // ['ZAGE_FUGR']
+ * normalizeObjectName('ZCLAS_TEST')              // ['ZCLAS_TEST']  (no normalizer matches)
+ */
+export function normalizeObjectName(
+  name: string,
+  adtType?: string,
+): string[] {
+  if (adtType) {
+    const entry = resolveType(adtType);
+    const normalized = entry?.normalizeName?.(name) ?? name;
+    return [normalized];
+  }
+
+  // No type hint — collect all distinct candidates from every registered normalizer
+  const candidates = new Set<string>([name]);
+  for (const entry of registry.values()) {
+    if (entry.normalizeName) {
+      candidates.add(entry.normalizeName(name));
+    }
+  }
+  return Array.from(candidates);
+}
+
+/**
+ * Extract the root object URI from a full (possibly sub-resource) URI.
+ *
+ * SAP locks must target the object root, not sub-resources like `/source/main`.
+ * This function matches against registered endpoint prefixes and strips
+ * everything after the object name segment.
+ *
+ * @returns The root object URI, or the original URI unchanged if no endpoint matches.
+ *
+ * @example
+ * getObjectRootUri('/sap/bc/adt/functions/groups/zage_fugr/source/main')
+ *   // → '/sap/bc/adt/functions/groups/zage_fugr'
+ * getObjectRootUri('/sap/bc/adt/oo/classes/zcl_test/includes/testclasses')
+ *   // → '/sap/bc/adt/oo/classes/zcl_test'
+ * getObjectRootUri('/sap/bc/adt/oo/classes/zcl_test')
+ *   // → '/sap/bc/adt/oo/classes/zcl_test'  (already root)
+ */
+export function getObjectRootUri(uri: string): string {
+  const ADT_PREFIX = '/sap/bc/adt/';
+
+  // Collect all registered endpoints, sorted longest-first to avoid partial matches
+  const endpoints: string[] = [];
+  for (const entry of registry.values()) {
+    if (entry.endpoint) endpoints.push(entry.endpoint);
+  }
+  endpoints.sort((a, b) => b.length - a.length);
+
+  for (const endpoint of endpoints) {
+    const prefix = `${ADT_PREFIX}${endpoint}/`;
+    if (uri.startsWith(prefix)) {
+      // Next segment after the endpoint prefix is the object name
+      const rest = uri.slice(prefix.length);
+      const objectName = rest.split('/')[0];
+      return `${prefix}${objectName}`;
+    }
+  }
+
+  return uri;
 }
 
 // ============================================

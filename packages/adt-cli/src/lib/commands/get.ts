@@ -8,6 +8,7 @@
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
 import { render, router, createGenericPage } from '../ui';
+import { normalizeObjectName } from '@abapify/adk';
 
 /**
  * Extract base object type from ADT type string
@@ -51,11 +52,12 @@ export const getCommand = new Command('get')
         packageName?: string;
       };
 
-      // Find exact match
-      const exactMatch = objects.find(
-        (obj: SearchObject) =>
-          String(obj.name || '').toUpperCase() === objectName.toUpperCase(),
-      );
+      // Find exact match (also try normalized names, e.g., strip SAPL for FUGR)
+      const candidates = normalizeObjectName(objectName);
+      const exactMatch = objects.find((obj: SearchObject) => {
+        const objName = String(obj.name || '').toUpperCase();
+        return candidates.some((c) => c.toUpperCase() === objName);
+      });
 
       if (!exactMatch) {
         console.log(`❌ Object '${objectName}' not found`);
