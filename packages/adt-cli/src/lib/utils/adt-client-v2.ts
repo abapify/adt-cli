@@ -111,7 +111,7 @@ async function tryAutoRefresh(
 
   try {
     const refreshedSession = await refreshCredentials(session, {
-      log: progress.step,
+      log: progress.persist,
     });
     if (!refreshedSession) {
       throw new Error('Refresh returned null');
@@ -315,7 +315,7 @@ export async function getAdtClientV2(
       try {
         // Refresh credentials using the auth plugin (opens browser for SAML)
         const refreshedSession = await refreshCredentials(currentSession, {
-          log: progress.step,
+          log: progress.persist,
         });
         if (!refreshedSession) {
           throw new Error('Refresh returned null');

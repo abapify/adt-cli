@@ -16,6 +16,7 @@ import {
 const DEFAULT_PORT = 3000;
 const DEFAULT_REDIRECT_PATH = '/callback';
 const DEFAULT_TIMEOUT_MS = 300_000; // 5 minutes
+const MAX_PORT_RETRIES = 5; // Try up to 5 consecutive ports on EADDRINUSE
 
 /**
  * Copy text to system clipboard (best-effort, never throws).
@@ -271,7 +272,8 @@ const authPlugin: AuthPlugin = {
       }
     }
 
-    const port = typeof callbackPort === 'number' ? callbackPort : DEFAULT_PORT;
+    const startPort =
+      typeof callbackPort === 'number' ? callbackPort : DEFAULT_PORT;
     const timeout =
       typeof timeoutMs === 'number' ? timeoutMs : DEFAULT_TIMEOUT_MS;
 
@@ -292,23 +294,54 @@ const authPlugin: AuthPlugin = {
       await browserOpener(url);
     };
 
-    const tokenData = await performPkceFlow(
-      parsed,
-      wrappedBrowserOpener,
-      port,
-      timeout,
-      typeof redirectUri === 'string' ? redirectUri : undefined,
+    // Try ports starting from startPort, retrying on EADDRINUSE
+    const hasExplicitRedirect = typeof redirectUri === 'string';
+    let lastError: Error | undefined;
+
+    for (let attempt = 0; attempt < MAX_PORT_RETRIES; attempt++) {
+      const port = startPort + attempt;
+      // When redirectUri is explicitly set, use it as-is (don't rewrite for new port)
+      const effectiveRedirectUri = hasExplicitRedirect
+        ? redirectUri
+        : undefined;
+
+      try {
+        const tokenData = await performPkceFlow(
+          parsed,
+          wrappedBrowserOpener,
+          port,
+          timeout,
+          effectiveRedirectUri,
+        );
+
+        const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
+
+        return {
+          method: 'cookie',
+          credentials: {
+            cookies: `Authorization: Bearer ${tokenData.access_token}`,
+            expiresAt,
+          },
+        };
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          'code' in err &&
+          (err as NodeJS.ErrnoException).code === 'EADDRINUSE'
+        ) {
+          lastError = err;
+          log(`⚠️  Port ${port} in use, trying ${port + 1}...`);
+          continue;
+        }
+        throw err; // Non-port error — rethrow immediately
+      }
+    }
+
+    throw new Error(
+      `All ports ${startPort}-${startPort + MAX_PORT_RETRIES - 1} are in use. ` +
+        `Free a port or set callbackPort in plugin options.`,
+      { cause: lastError },
     );
-
-    const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
-
-    return {
-      method: 'cookie',
-      credentials: {
-        cookies: `Authorization: Bearer ${tokenData.access_token}`,
-        expiresAt,
-      },
-    };
   },
 };
 
