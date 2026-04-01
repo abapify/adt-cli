@@ -80,9 +80,14 @@ export class AdkObjectSet {
 
   /**
    * Add a single object to the set
+   *
+   * Propagates the set's context (lockService, lockStore) to the object
+   * so that objects created by plugins with a bare { client } context
+   * inherit the services configured on the set.
    */
   add(object: AdkObject): this {
     if (!this.objects.includes(object)) {
+      object.adoptContext(this.ctx);
       this.objects.push(object);
     }
     return this;

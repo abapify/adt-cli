@@ -95,6 +95,7 @@ export const functionModulesContract = contract({
       responses: { 200: undefined },
       headers: {
         'X-sap-adt-sessiontype': 'stateful',
+        'x-sap-security-session': 'use',
         Accept:
           'application/*,application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result',
       },
@@ -114,8 +115,13 @@ export const functionModulesContract = contract({
   ) =>
     http.post(basePath + '/${fmName}', {
       responses: { 200: undefined },
+      headers: {
+        'X-sap-adt-sessiontype': 'stateful',
+        'x-sap-security-session': 'use',
+      },
       query: {
         _action: 'UNLOCK',
+        accessMode: 'MODIFY',
         lockHandle: options.lockHandle,
       },
     }),

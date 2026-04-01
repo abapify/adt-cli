@@ -415,6 +415,7 @@ export function crud<
         responses: { 200: undefined },
         headers: {
           'X-sap-adt-sessiontype': 'stateful',
+          'x-sap-security-session': 'use',
           Accept:
             'application/*,application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result',
         },
@@ -432,8 +433,13 @@ export function crud<
     unlock: (name: string, unlockOptions: UnlockOptions) =>
       http.post(`${basePath}/${nameTransform(name)}`, {
         responses: { 200: undefined },
+        headers: {
+          'X-sap-adt-sessiontype': 'stateful',
+          'x-sap-security-session': 'use',
+        },
         query: {
           _action: 'UNLOCK',
+          accessMode: 'MODIFY',
           lockHandle: unlockOptions.lockHandle,
         },
       }),

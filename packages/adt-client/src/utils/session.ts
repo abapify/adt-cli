@@ -280,6 +280,7 @@ export class SessionManager {
   private cookieStore = new CookieStore();
   private csrfManager = new CsrfTokenManager();
   private etagManager = new ETagManager();
+  private securitySessionActive = false;
 
   constructor(private logger?: Logger) {}
 
@@ -334,6 +335,11 @@ export class SessionManager {
   getRequestHeaders(method: string, url?: string): Record<string, string> {
     const headers: Record<string, string> = {};
 
+    // Reuse the security session for all requests after creation
+    if (this.securitySessionActive) {
+      headers['x-sap-security-session'] = 'use';
+    }
+
     // Add cookies if we have any
     const cookieHeader = this.cookieStore.getCookieHeader();
     if (cookieHeader) {
@@ -382,67 +388,135 @@ export class SessionManager {
   }
 
   /**
-   * Initialize CSRF token by making a preflight request
-   * Should be called before first write operation
+   * Initialize CSRF token using the Eclipse ADT security session flow:
    *
-   * NOTE: This method is kept for backward compatibility and non-contract usage.
-   * For contract-based usage, use the sessionsContract from adt/core/http/sessions.contract
+   * 1. GET /sessions + x-sap-security-session: create  → create security session
+   * 2. GET /sessions + x-sap-security-session: use + x-csrf-token: Fetch → get CSRF token
+   * 3. DELETE /sessions/<id> + x-sap-security-session: use + x-csrf-token → destroy session
+   *
+   * The CSRF token survives the session deletion and remains valid for
+   * all subsequent lock/unlock operations. Deleting the session frees
+   * the slot — SAP allows only one security session per user.
+   *
+   * @param baseUrl - SAP system base URL
+   * @param authHeader - Authorization header (Basic/Bearer), or undefined for cookie auth
+   * @param client - SAP client number
+   * @param language - SAP language
    */
   async initializeCsrf(
     baseUrl: string,
-    authHeader: string,
+    authHeader?: string,
     client?: string,
     language?: string,
   ): Promise<boolean> {
-    const url = new URL('/sap/bc/adt/core/http/sessions', baseUrl);
+    const sessionsUrl = new URL('/sap/bc/adt/core/http/sessions', baseUrl);
 
     if (client) {
-      url.searchParams.append('sap-client', client);
+      sessionsUrl.searchParams.append('sap-client', client);
     }
     if (language) {
-      url.searchParams.append('sap-language', language);
+      sessionsUrl.searchParams.append('sap-language', language);
     }
 
-    const headers: Record<string, string> = {
-      Authorization: authHeader,
-      'x-csrf-token': 'Fetch',
-      Accept: 'application/vnd.sap.adt.core.http.session.v3+xml',
-      'X-sap-adt-sessiontype': 'stateful',
+    /** Build common headers, optionally including Authorization and cookies */
+    const baseHeaders = (): Record<string, string> => {
+      const h: Record<string, string> = {
+        Accept: 'application/vnd.sap.adt.core.http.session.v3+xml',
+        'X-sap-adt-sessiontype': 'stateful',
+      };
+      if (authHeader) h.Authorization = authHeader;
+      const cookie = this.cookieStore.getCookieHeader();
+      if (cookie) h.Cookie = cookie;
+      return h;
     };
 
-    // Include existing cookies if any
-    const cookieHeader = this.cookieStore.getCookieHeader();
-    if (cookieHeader) {
-      headers.Cookie = cookieHeader;
-    }
-
     try {
-      this.logger?.debug('Session: Initializing CSRF token');
-      const response = await fetch(url.toString(), {
+      // ── Step 1: Create security session ──────────────────────────
+      this.logger?.debug('Session: Creating security session');
+      const createResponse = await fetch(sessionsUrl.toString(), {
         method: 'GET',
-        headers,
+        headers: {
+          ...baseHeaders(),
+          'x-sap-security-session': 'create',
+        },
       });
 
-      if (!response.ok) {
+      if (!createResponse.ok) {
         this.logger?.warn(
-          `Session: CSRF initialization failed with status ${response.status}`,
+          `Session: Security session creation failed with status ${createResponse.status}`,
         );
         return false;
       }
 
-      // Process response to extract cookies and CSRF
-      this.processResponse(response);
+      // Extract cookies (sap-contextid) from the create response
+      this.processResponse(createResponse);
 
-      const success = this.csrfManager.hasCached();
-      if (success) {
-        this.logger?.debug('Session: CSRF token initialized successfully');
-      } else {
+      // Extract session URL from response body for later DELETE
+      const createBody = await createResponse.text();
+      const sessionHrefMatch = createBody.match(
+        /href="([^"]*\/sessions\/[^"]*)"/,
+      );
+      const sessionPath = sessionHrefMatch?.[1];
+
+      // ── Step 2: Fetch CSRF token within the session ──────────────
+      this.logger?.debug('Session: Fetching CSRF token');
+      const csrfResponse = await fetch(sessionsUrl.toString(), {
+        method: 'GET',
+        headers: {
+          ...baseHeaders(),
+          'x-sap-security-session': 'use',
+          'x-csrf-token': 'Fetch',
+        },
+      });
+
+      if (!csrfResponse.ok) {
         this.logger?.warn(
-          'Session: CSRF initialization succeeded but no token found',
+          `Session: CSRF fetch failed with status ${csrfResponse.status}`,
         );
+        return false;
       }
 
-      return success;
+      this.processResponse(csrfResponse);
+
+      const success = this.csrfManager.hasCached();
+      if (!success) {
+        this.logger?.warn(
+          'Session: CSRF fetch succeeded but no token found in response',
+        );
+        return false;
+      }
+
+      this.securitySessionActive = true;
+      this.logger?.debug('Session: CSRF token acquired');
+
+      // ── Step 3: Delete the security session (token stays valid) ──
+      // Frees the session slot — SAP allows one security session per user.
+      if (sessionPath) {
+        const deleteUrl = new URL(sessionPath, baseUrl);
+        if (client) deleteUrl.searchParams.append('sap-client', client);
+
+        try {
+          this.logger?.debug(
+            `Session: Deleting security session ${sessionPath}`,
+          );
+          await fetch(deleteUrl.toString(), {
+            method: 'DELETE',
+            headers: {
+              ...baseHeaders(),
+              'x-sap-security-session': 'use',
+              'x-csrf-token': this.csrfManager.getCached()!,
+            },
+          });
+          this.logger?.debug('Session: Security session deleted');
+        } catch {
+          // Best-effort — session will time out anyway
+          this.logger?.debug(
+            'Session: Failed to delete security session (will expire)',
+          );
+        }
+      }
+
+      return true;
     } catch (error) {
       this.logger?.error(
         `Session: CSRF initialization error: ${error instanceof Error ? error.message : String(error)}`,
@@ -457,6 +531,7 @@ export class SessionManager {
   clear(): void {
     this.cookieStore.clear();
     this.csrfManager.clear();
+    this.securitySessionActive = false;
     this.logger?.debug('Session: Cleared all session state (cookies and CSRF)');
   }
 

@@ -6,7 +6,7 @@
  * via the parent group's URL path and require the group name for all operations.
  */
 
-import { AdkObject, type LockHandle } from '../../../../base/model';
+import { AdkObject } from '../../../../base/model';
 import { FunctionModule as FunctionModuleKind } from '../../../../base/kinds';
 import { getGlobalContext } from '../../../../base/global-context';
 import { toText } from '../../../../base/fetch-utils';
@@ -136,64 +136,8 @@ export class AdkFunctionModule extends AdkObject<
     return this;
   }
 
-  /**
-   * Lock the function module for modification
-   *
-   * Overrides base to pass groupName as first arg to contract.lock()
-   */
-  override async lock(transport?: string): Promise<LockHandle> {
-    if (this._lockHandle) return this._lockHandle;
-
-    const contract = this.crudContract;
-    if (!contract?.lock) {
-      throw new Error(
-        `Lock not supported for ${this.kind}. Provide crudContract with lock() method.`,
-      );
-    }
-
-    const response = await contract.lock(this.groupName, this.name, {
-      corrNr: transport,
-    });
-
-    const responseText = String(response);
-    this._lockHandle = this.parseLockResponse(responseText);
-
-    // Persist lock entry so it can be recovered after crashes
-    this.ctx.lockStore?.register({
-      objectUri: this.objectUri,
-      objectName: this.name,
-      objectType: this.kind,
-      lockHandle: this._lockHandle.handle,
-      transport: this._lockHandle.correlationNumber,
-      lockedAt: new Date().toISOString(),
-    });
-
-    return this._lockHandle;
-  }
-
-  /**
-   * Unlock the function module
-   *
-   * Overrides base to pass groupName as first arg to contract.unlock()
-   */
-  override async unlock(): Promise<void> {
-    if (!this._lockHandle) return;
-
-    const contract = this.crudContract;
-    if (!contract?.unlock) {
-      throw new Error(
-        `Unlock not supported for ${this.kind}. Provide crudContract with unlock() method.`,
-      );
-    }
-
-    await contract.unlock(this.groupName, this.name, {
-      lockHandle: this._lockHandle.handle,
-    });
-    this._lockHandle = undefined;
-
-    // Remove persisted lock entry
-    this.ctx.lockStore?.deregister(this.objectUri);
-  }
+  // lock() and unlock() are inherited from base AdkObject — they delegate to
+  // ctx.lockService using this.objectUri which already includes the group path.
 
   /**
    * Get skeleton data for FM creation (POST).

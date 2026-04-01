@@ -1,16 +1,17 @@
 /**
  * Unlock Command
  *
- * Force-unlock SAP objects that are stuck in locked state
- * (e.g., from a crashed session or failed deploy).
+ * Unlock SAP objects that are stuck in locked state.
  *
- * Resolves lock handles from the persisted lock store (~/.adt/locks.json)
- * when not explicitly provided. Handle-less unlock only works within the
- * same stateful session that acquired the lock, so a fresh CLI invocation
- * must always send a lock handle.
+ * Lock handle resolution order:
+ * 1. Explicit --lock-handle flag
+ * 2. Persisted lock store (~/.adt/locks.json)
+ * 3. (with --force) Re-lock to recover handle, then unlock
+ * 4. Fail with helpful message
  *
- * Automatically deregisters entries from the lock store so the
- * persisted registry stays in sync.
+ * --force mode: acquires a lock (which returns the existing handle
+ * for same-user locks) then immediately unlocks with that handle.
+ * Only works for objects locked by the current user.
  */
 
 import { Command } from 'commander';
@@ -120,7 +121,7 @@ async function resolveObjectUri(
 }
 
 /**
- * Resolve the lock handle to use: explicit flag → persisted store → undefined.
+ * Resolve the lock handle: explicit flag → persisted store → undefined.
  */
 function resolveLockHandle(
   uri: string,
@@ -147,8 +148,65 @@ function getLockService(
   return createLockService(client, { store: lockStore });
 }
 
+/**
+ * Attempt to unlock a single object URI.
+ *
+ * @returns true if unlocked, false if object was not locked
+ * @throws on unexpected errors
+ */
+async function unlockUri(
+  locks: LockService,
+  uri: string,
+  label: string,
+  options: { lockHandle?: string; force?: boolean },
+): Promise<boolean> {
+  const handle = options.lockHandle;
+
+  // Case 1: We have a handle — use it directly
+  if (handle) {
+    try {
+      await locks.unlock(uri, { lockHandle: handle });
+      console.log(`✅ ${label} unlocked`);
+      return true;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('not locked') || msg.includes('not enqueued')) {
+        console.log(`ℹ️  ${label} is not locked`);
+        return false;
+      }
+      throw err;
+    }
+  }
+
+  // Case 2: No handle + --force — lock to recover handle, then unlock
+  if (options.force) {
+    try {
+      console.log(`   🔄 Force-unlock: acquiring lock to recover handle...`);
+      await locks.forceUnlock(uri);
+      console.log(`✅ ${label} force-unlocked`);
+      return true;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('not locked') || msg.includes('not enqueued')) {
+        console.log(`ℹ️  ${label} is not locked`);
+        return false;
+      }
+      throw err;
+    }
+  }
+
+  // Case 3: No handle, no --force — fail with guidance
+  throw new Error(
+    `No lock handle available for ${label}.\n` +
+      `   💡 Options:\n` +
+      `      --force              Re-lock to recover handle, then unlock\n` +
+      `      --lock-handle <h>    Provide handle explicitly\n` +
+      `      adt locks            Show persisted lock handles`,
+  );
+}
+
 export const unlockCommand = new Command('unlock')
-  .description('Unlock SAP objects (force-release stale locks)')
+  .description('Unlock SAP objects (release stale locks)')
   .argument(
     '[objectNames...]',
     'Object name(s) to unlock (e.g., ZAGE_TTYP_STRTAB ZAGE_TTYP_STRUCT)',
@@ -159,10 +217,19 @@ export const unlockCommand = new Command('unlock')
     'Object type (CLAS, INTF, TTYP, TABL, DOMA, DTEL, PROG, FUGR, DEVC)',
   )
   .option('--uri <uri>', 'Direct object URI (skips search)')
+  .option(
+    '--force',
+    'Re-lock to recover handle, then unlock (same-user locks only)',
+  )
   .action(
     async (
       objectNames: string[],
-      options: { lockHandle?: string; type?: string; uri?: string },
+      options: {
+        lockHandle?: string;
+        type?: string;
+        uri?: string;
+        force?: boolean;
+      },
     ) => {
       try {
         // --uri without object names: unlock the URI directly
@@ -171,34 +238,13 @@ export const unlockCommand = new Command('unlock')
           console.log(`\n🔓 Unlocking: ${label} (via --uri)`);
 
           const handle = resolveLockHandle(options.uri, options.lockHandle);
-
           const client = await getAdtClientV2();
           const locks = getLockService(client);
 
-          try {
-            await locks.unlock(options.uri, { lockHandle: handle });
-            console.log(`✅ ${label} unlocked`);
-          } catch (unlockError: unknown) {
-            const msg =
-              unlockError instanceof Error
-                ? unlockError.message
-                : String(unlockError);
-
-            if (msg.includes('not locked') || msg.includes('not enqueued')) {
-              console.log(`ℹ️  ${label} is not locked`);
-            } else if (msg.includes('Missing lock handle') && !handle) {
-              console.error(
-                `   ❌ ${msg}\n` +
-                  `   💡 Handle-less unlock requires the same session that locked the object.\n` +
-                  `      Provide a handle: adt unlock --uri ${options.uri} --lock-handle <handle>\n` +
-                  `      Or check persisted locks: adt locks`,
-              );
-              process.exit(1);
-            } else {
-              console.error(`   ❌ Unlock failed: ${msg}`);
-              process.exit(1);
-            }
-          }
+          await unlockUri(locks, options.uri, label, {
+            lockHandle: handle,
+            force: options.force,
+          });
           return;
         }
 
@@ -228,28 +274,10 @@ export const unlockCommand = new Command('unlock')
 
             const handle = resolveLockHandle(uri, options.lockHandle);
 
-            try {
-              await locks.unlock(uri, { lockHandle: handle });
-              console.log(`✅ ${objectName} unlocked`);
-            } catch (unlockError: unknown) {
-              const msg =
-                unlockError instanceof Error
-                  ? unlockError.message
-                  : String(unlockError);
-
-              if (msg.includes('not locked') || msg.includes('not enqueued')) {
-                console.log(`ℹ️  ${objectName} is not locked`);
-              } else if (msg.includes('Missing lock handle') && !handle) {
-                throw new Error(
-                  `${msg}\n` +
-                    `   💡 No persisted lock handle found for this object.\n` +
-                    `      Provide a handle: adt unlock ${objectName} --lock-handle <handle>\n` +
-                    `      Or check persisted locks: adt locks`,
-                );
-              } else {
-                throw new Error(`Unlock failed for ${objectName}: ${msg}`);
-              }
-            }
+            await unlockUri(locks, uri, objectName, {
+              lockHandle: handle,
+              force: options.force,
+            });
           } catch (err) {
             console.error(
               `   ❌ ${err instanceof Error ? err.message : String(err)}`,

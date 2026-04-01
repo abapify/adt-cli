@@ -12,9 +12,15 @@ All ADK objects extend `AdkObject<Kind, Data>`. The base class provides:
 
 - **save()** — Orchestrates create/update/upsert with lock management
 - **load()** — Fetches object data from SAP
-- **lock()/unlock()** — Object locking with CTS transport integration
+- **lock()/unlock()** — Delegates to `ctx.lockService` (`@abapify/adt-locks`). Requires `lockService` in `AdkContext` (set by `initializeAdk()` or manually).
 - **saveViaContract()** — Typed contract call (POST for create, PUT for update)
 - **savePendingSources()** — PUT source code with lock handle
+
+### Lock Architecture
+
+All lock/unlock operations delegate to `@abapify/adt-locks` `LockService` — there is no direct lock logic in ADK. The lock service uses CSRF tokens from the security session (see `adt-client/AGENTS.md` for the 3-step session protocol).
+
+If `ctx.lockService` is missing, lock/unlock will throw: `"Lock not available: no lockService in context. Did you call initializeAdk()?"`
 
 ### Save Flow (Critical)
 

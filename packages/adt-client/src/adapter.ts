@@ -97,6 +97,8 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
       }
 
       // For write operations, ensure CSRF token is initialized
+      // Uses the 3-step Eclipse ADT security session flow:
+      // create session → fetch CSRF → delete session
       const needsCsrf = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(
         options.method.toUpperCase(),
       );
@@ -104,48 +106,12 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
         logger?.debug(
           'Adapter: Initializing CSRF token before write operation',
         );
-        const authForCsrf =
-          authHeader || (cookieHeader ? undefined : undefined);
-        if (authForCsrf) {
-          await sessionManager.initializeCsrf(
-            baseUrl,
-            authForCsrf,
-            client,
-            language,
-          );
-        } else if (cookieHeader) {
-          // For cookie auth, make a GET request to sessions endpoint to get CSRF
-          const sessionsUrl = new URL(
-            '/sap/bc/adt/core/http/sessions',
-            baseUrl,
-          );
-          if (client) sessionsUrl.searchParams.append('sap-client', client);
-          if (language)
-            sessionsUrl.searchParams.append('sap-language', language);
-
-          const csrfHeaders: Record<string, string> = {
-            'x-csrf-token': 'Fetch',
-            Accept: 'application/vnd.sap.adt.core.http.session.v3+xml',
-            'X-sap-adt-sessiontype': 'stateful',
-          };
-          const cookieHeader2 = sessionManager.getCookieHeader();
-          if (cookieHeader2) csrfHeaders.Cookie = cookieHeader2;
-
-          try {
-            const csrfResponse = await fetch(sessionsUrl.toString(), {
-              method: 'GET',
-              headers: csrfHeaders,
-            });
-            if (csrfResponse.ok) {
-              sessionManager.processResponse(csrfResponse);
-              logger?.debug(
-                'Adapter: CSRF token initialized from sessions endpoint',
-              );
-            }
-          } catch (e) {
-            logger?.warn('Adapter: Failed to initialize CSRF token');
-          }
-        }
+        await sessionManager.initializeCsrf(
+          baseUrl,
+          authHeader, // undefined for cookie auth — SessionManager uses stored cookies
+          client,
+          language,
+        );
       }
 
       // Prepare headers (pass URL for ETag lookup on PUT/PATCH)
@@ -323,10 +289,23 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
           logger?.error(`Response body: ${errorBody}`);
         }
 
-        // On 403, clear session and let caller retry
+        // On 403, only clear session if it looks like an auth/CSRF issue.
+        // Lock conflicts ("currently editing") are NOT session problems —
+        // clearing the session would destroy the security session context
+        // and break all subsequent lock/unlock operations.
         if (response.status === 403) {
-          sessionManager.clear();
-          logger?.warn('Session cleared due to 403 Forbidden response');
+          const isLockConflict =
+            adtError.exception?.type === 'ExceptionResourceNoAccess' &&
+            (adtError.message.includes('currently editing') ||
+              adtError.message.includes('is being edited'));
+          if (!isLockConflict) {
+            sessionManager.clear();
+            logger?.warn('Session cleared due to 403 Forbidden response');
+          } else {
+            logger?.warn(
+              'Lock conflict (403) — session preserved (object locked by another session)',
+            );
+          }
         }
         throw adtError;
       }

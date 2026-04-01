@@ -63,6 +63,20 @@ SAP XSD files
   → adt-client (executes contracts, full type inference at call site)
 ```
 
+## Session & Lock Architecture
+
+SAP ADT uses a **security session protocol** for CSRF tokens. Locks are bound to the security session — a CSRF token obtained without the proper flow is invalid for lock/unlock.
+
+**3-step flow** (implemented in `SessionManager.initializeCsrf()`):
+
+1. `GET /sessions` + `x-sap-security-session: create` → security session + cookies
+2. `GET /sessions` + `x-sap-security-session: use` + `x-csrf-token: Fetch` → CSRF token
+3. `DELETE /sessions/<id>` + `x-sap-security-session: use` → free slot (token survives)
+
+All subsequent requests include `x-sap-security-session: use`. SAP allows **1 security session per user** — always DELETE after getting the token.
+
+**Lock flow**: `adt-locks/LockService` is the single lock implementation. All lock/unlock operations in `adk/model.ts`, `adt-export`, and CLI commands delegate to it. See [`packages/adt-client/AGENTS.md`](packages/adt-client/AGENTS.md) for full protocol details.
+
 ## Rules Index
 
 All AI agent rules live in `.agents/rules/` (single source of truth).

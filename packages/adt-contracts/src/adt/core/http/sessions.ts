@@ -13,6 +13,10 @@ export const sessionsContract = {
    * Get or create an HTTP session
    * Also initializes CSRF token for subsequent requests
    *
+   * Uses x-sap-security-session: create to establish a proper security session.
+   * All subsequent operations should use x-sap-security-session: use to stay
+   * within the same security session (required for lock/unlock).
+   *
    * @returns Session information with CSRF token and links
    */
   getSession: () =>
@@ -24,6 +28,7 @@ export const sessionsContract = {
         Accept: 'application/vnd.sap.adt.core.http.session.v3+xml',
         'x-csrf-token': 'Fetch',
         'X-sap-adt-sessiontype': 'stateful',
+        'x-sap-security-session': 'create',
       },
     }),
 };

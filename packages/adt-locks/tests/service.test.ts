@@ -174,18 +174,6 @@ describe('LockService.unlock()', () => {
     );
   });
 
-  it('sends POST with _action=UNLOCK without handle (same-user unlock)', async () => {
-    const client = createMockClient(vi.fn().mockResolvedValue(''));
-    const service = createLockService(client);
-
-    await service.unlock('/sap/bc/adt/oo/classes/zcl_test');
-
-    expect(client.fetch).toHaveBeenCalledWith(
-      '/sap/bc/adt/oo/classes/zcl_test?_action=UNLOCK&accessMode=MODIFY',
-      expect.objectContaining({ method: 'POST' }),
-    );
-  });
-
   it('deregisters entry from store after successful unlock', async () => {
     const client = createMockClient(vi.fn().mockResolvedValue(''));
     const store = createMockStore();
@@ -218,6 +206,83 @@ describe('LockService.unlock()', () => {
 
     expect(client.fetch).toHaveBeenCalledWith(
       expect.stringContaining('lockHandle=H%2BA%2FN%3DD%20LE'),
+      expect.anything(),
+    );
+  });
+});
+
+// ── forceUnlock ──────────────────────────────────────────────────────
+
+describe('LockService.forceUnlock()', () => {
+  it('locks to recover handle, then unlocks with that handle', async () => {
+    let callCount = 0;
+    const client = createMockClient(
+      vi.fn().mockImplementation(() => {
+        callCount++;
+        // First call is lock → return XML with handle
+        // Second call is unlock → return empty
+        return callCount === 1
+          ? Promise.resolve(LOCK_RESPONSE_XML)
+          : Promise.resolve('');
+      }),
+    );
+    const store = createMockStore();
+    const service = createLockService(client, { store });
+
+    await service.forceUnlock('/sap/bc/adt/oo/classes/zcl_test');
+
+    // Should have called fetch twice: lock then unlock
+    expect(client.fetch).toHaveBeenCalledTimes(2);
+
+    // First call: LOCK
+    expect(client.fetch).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('_action=LOCK'),
+      expect.objectContaining({ method: 'POST' }),
+    );
+
+    // Second call: UNLOCK with the recovered handle
+    expect(client.fetch).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('_action=UNLOCK&accessMode=MODIFY&lockHandle=HANDLE_XYZ'),
+      expect.objectContaining({ method: 'POST' }),
+    );
+
+    // Store should be empty after force-unlock (registered on lock, deregistered on unlock)
+    expect(store._entries).toHaveLength(0);
+  });
+
+  it('propagates lock errors (e.g., locked by another user)', async () => {
+    const client = createMockClient(
+      vi.fn().mockRejectedValue(new Error('403 Forbidden - locked by OTHERUSER')),
+    );
+    const service = createLockService(client);
+
+    await expect(
+      service.forceUnlock('/sap/bc/adt/oo/classes/zcl_test'),
+    ).rejects.toThrow('403 Forbidden');
+  });
+
+  it('passes transport option through to lock', async () => {
+    let callCount = 0;
+    const client = createMockClient(
+      vi.fn().mockImplementation(() => {
+        callCount++;
+        return callCount === 1
+          ? Promise.resolve(LOCK_RESPONSE_XML)
+          : Promise.resolve('');
+      }),
+    );
+    const service = createLockService(client);
+
+    await service.forceUnlock('/sap/bc/adt/oo/classes/zcl_test', {
+      transport: 'DEVK900001',
+    });
+
+    // Lock call should include transport
+    expect(client.fetch).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('corrNr=DEVK900001'),
       expect.anything(),
     );
   });

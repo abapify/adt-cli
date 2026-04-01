@@ -147,7 +147,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     return lastSlash > 0 ? uri.substring(0, lastSlash) : uri;
   }
 
-  protected readonly ctx: AdkContext;
+  protected ctx: AdkContext;
   protected _data?: D;
   protected _name: string;
   protected cache = new Map<string, unknown>();
@@ -173,6 +173,21 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       // Cast to access name property which may exist on schema-inferred types
       this._name = (dataOrName as AdkObjectData).name;
     }
+  }
+
+  // ============================================
+  // Context Management
+  // ============================================
+
+  /**
+   * Adopt a richer context (merge services into existing context).
+   *
+   * Used by AdkObjectSet to propagate lockService / lockStore
+   * to objects created by plugins that only have { client }.
+   * Keeps the original client reference intact.
+   */
+  adoptContext(ctx: AdkContext): void {
+    this.ctx = { ...this.ctx, ...ctx };
   }
 
   // ============================================
@@ -343,7 +358,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   /**
    * Lock the object for modification
    *
-   * Uses the CRUD contract's lock() method.
+   * Delegates to the lock service (single lock mechanism).
    *
    * The lock response contains:
    * - LOCK_HANDLE: Required for subsequent PUT/unlock operations
@@ -356,29 +371,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   async lock(transport?: string): Promise<LockHandle> {
     if (this._lockHandle) return this._lockHandle;
 
-    const contract = this.crudContract;
-    if (!contract?.lock) {
+    const lockService = this.ctx.lockService;
+    if (!lockService) {
       throw new Error(
-        `Lock not supported for ${this.kind}. Provide crudContract with lock() method.`,
+        `Lock not available: no lockService in context. Did you call initializeAdk()?`,
       );
     }
 
-    // Use contract's lock method
-    const response = await contract.lock(this.name, { corrNr: transport });
-
-    // Parse lock response XML
-    // Response format: <asx:abap>...<DATA><LOCK_HANDLE>xxx</LOCK_HANDLE><CORRNR>yyy</CORRNR>...</DATA>...</asx:abap>
-    const responseText = String(response);
-    this._lockHandle = this.parseLockResponse(responseText);
-
-    // Persist lock entry so it can be recovered after crashes
-    this.ctx.lockStore?.register({
-      objectUri: this.objectUri,
+    this._lockHandle = await lockService.lock(this.objectUri, {
+      transport,
       objectName: this.name,
       objectType: this.kind,
-      lockHandle: this._lockHandle.handle,
-      transport: this._lockHandle.correlationNumber,
-      lockedAt: new Date().toISOString(),
     });
 
     return this._lockHandle;
@@ -387,50 +390,22 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   /**
    * Unlock the object
    *
-   * Uses the CRUD contract's unlock() method.
+   * Delegates to the lock service (single lock mechanism).
    */
   async unlock(): Promise<void> {
     if (!this._lockHandle) return;
 
-    const contract = this.crudContract;
-    if (!contract?.unlock) {
+    const lockService = this.ctx.lockService;
+    if (!lockService) {
       throw new Error(
-        `Unlock not supported for ${this.kind}. Provide crudContract with unlock() method.`,
+        `Unlock not available: no lockService in context. Did you call initializeAdk()?`,
       );
     }
 
-    // Use contract's unlock method
-    await contract.unlock(this.name, { lockHandle: this._lockHandle.handle });
+    await lockService.unlock(this.objectUri, {
+      lockHandle: this._lockHandle.handle,
+    });
     this._lockHandle = undefined;
-
-    // Remove persisted lock entry
-    this.ctx.lockStore?.deregister(this.objectUri);
-  }
-
-  /**
-   * Parse lock response XML to extract lock handle and correlation info
-   */
-  protected parseLockResponse(responseText: string): LockHandle {
-    const lockHandleMatch = responseText.match(
-      /<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/,
-    );
-
-    if (!lockHandleMatch) {
-      // Don't expose raw SAP response in error message for security
-      throw new Error(
-        'Failed to parse lock handle from SAP response. The response format may have changed.',
-      );
-    }
-
-    // Extract CORRNR (transport request) - this is the transport assigned to the object
-    const corrNrMatch = responseText.match(/<CORRNR>([^<]+)<\/CORRNR>/);
-    const corrUserMatch = responseText.match(/<CORRUSER>([^<]+)<\/CORRUSER>/);
-
-    return {
-      handle: lockHandleMatch[1],
-      correlationNumber: corrNrMatch?.[1],
-      correlationUser: corrUserMatch?.[1],
-    };
   }
 
   /**

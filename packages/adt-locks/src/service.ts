@@ -42,8 +42,8 @@ export interface LockOptions {
 }
 
 export interface UnlockOptions {
-  /** Lock handle — if omitted, attempts handle-less unlock (same-user locks) */
-  lockHandle?: string;
+  /** Lock handle — REQUIRED. SAP always requires an explicit handle for unlock. */
+  lockHandle: string;
 }
 
 /**
@@ -78,8 +78,15 @@ export function parseLockResponse(xml: string): LockHandle {
 export interface LockService {
   /** Acquire a lock on an ADT object */
   lock(objectUri: string, options?: LockOptions): Promise<LockHandle>;
-  /** Release a lock on an ADT object */
-  unlock(objectUri: string, options?: UnlockOptions): Promise<void>;
+  /** Release a lock on an ADT object (lock handle required) */
+  unlock(objectUri: string, options: UnlockOptions): Promise<void>;
+  /**
+   * Force-unlock: acquire a lock to recover the handle, then immediately unlock.
+   * Works when the object is locked by the current user but the handle was lost
+   * (e.g., crashed session). If the object is locked by another user, the lock
+   * call will fail with 403/409.
+   */
+  forceUnlock(objectUri: string, options?: LockOptions): Promise<void>;
   /** List all persisted lock entries (from store) */
   list(): LockEntry[];
   /** Try to UNLOCK every persisted entry, removing successful ones from store */
@@ -94,8 +101,16 @@ export function createLockService(
 ): LockService {
   const store = serviceOptions?.store;
 
-  /** Headers for lock/unlock operations — stateful session with security session reuse */
+  /** Headers for lock operations — stateful session with security session reuse */
   const lockHeaders = {
+    'X-sap-adt-sessiontype': 'stateful',
+    'x-sap-security-session': 'use',
+    Accept:
+      'application/*,application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result',
+  };
+
+  /** Headers for unlock operations */
+  const unlockHeaders = {
     'X-sap-adt-sessiontype': 'stateful',
     'x-sap-security-session': 'use',
   };
@@ -127,16 +142,20 @@ export function createLockService(
     },
 
     async unlock(objectUri, options) {
-      const query = options?.lockHandle
-        ? `?_action=UNLOCK&accessMode=MODIFY&lockHandle=${encodeURIComponent(options.lockHandle)}`
-        : '?_action=UNLOCK&accessMode=MODIFY';
+      const query = `?_action=UNLOCK&accessMode=MODIFY&lockHandle=${encodeURIComponent(options.lockHandle)}`;
 
       await client.fetch(`${objectUri}${query}`, {
         method: 'POST',
-        headers: lockHeaders,
+        headers: unlockHeaders,
       });
 
       store?.deregister(objectUri);
+    },
+
+    async forceUnlock(objectUri, options) {
+      // Lock to recover/acquire the handle, then immediately unlock
+      const handle = await this.lock(objectUri, options);
+      await this.unlock(objectUri, { lockHandle: handle.handle });
     },
 
     list() {
@@ -153,7 +172,7 @@ export function createLockService(
           const query = `?_action=UNLOCK&accessMode=MODIFY&lockHandle=${encodeURIComponent(entry.lockHandle)}`;
           await client.fetch(`${entry.objectUri}${query}`, {
             method: 'POST',
-            headers: lockHeaders,
+            headers: unlockHeaders,
           });
           store?.deregister(entry.objectUri);
           ok++;

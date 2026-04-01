@@ -17,6 +17,7 @@ import {
   type AdkContext,
   tryGetGlobalContext,
 } from '@abapify/adk';
+import { createLockService, FileLockStore } from '@abapify/adt-locks';
 import type {
   ExportResult,
   VerificationResult,
@@ -374,12 +375,16 @@ export const exportCommand: CliCommandPlugin = {
 
       // Get ADT client and create ADK context
       const client = await ctx.getAdtClient!();
-      // Use global context's lock store/service if available (initialized by CLI)
+      // Reuse global context's lock service if available, otherwise create one
       const globalCtx = tryGetGlobalContext();
+      const lockStore = globalCtx?.lockStore ?? new FileLockStore();
+      const lockService =
+        globalCtx?.lockService ??
+        createLockService(client as any, { store: lockStore });
       const adkContext: AdkContext = {
         client: client as any,
-        lockStore: globalCtx?.lockStore,
-        lockService: globalCtx?.lockService,
+        lockStore,
+        lockService,
       };
 
       ctx.logger.info('🔍 Scanning files and building object tree...');
@@ -735,51 +740,24 @@ export const exportCommand: CliCommandPlugin = {
                     try {
                       const lockSvc = adkContext.lockService;
                       if (lockSvc) {
-                        await lockSvc.unlock(pkgUri);
-                      } else {
-                        await client.fetch(`${pkgUri}?_action=UNLOCK`, {
-                          method: 'POST',
-                          headers: {
-                            'X-sap-adt-sessiontype': 'stateful',
-                          },
-                        });
+                        await lockSvc.forceUnlock(pkgUri);
                       }
                     } catch {
                       // Not locked — fine
                     }
                   }
 
-                  // Step 1: LOCK
-                  const lockQuery = new URLSearchParams({
-                    _action: 'LOCK',
-                    accessMode: 'MODIFY',
+                  // Step 1: LOCK via lockService
+                  const lockSvc = adkContext.lockService;
+                  if (!lockSvc) {
+                    throw new Error('lockService not available in context');
+                  }
+                  const lockResult = await lockSvc.lock(pkgUri, {
+                    transport: options.transport,
+                    objectName: pkgName,
+                    objectType: 'DEVC/K',
                   });
-                  if (options.transport) {
-                    lockQuery.set('corrNr', options.transport);
-                  }
-                  const lockResp = await client.fetch(
-                    `${pkgUri}?${lockQuery}`,
-                    {
-                      method: 'POST',
-                      headers: {
-                        'X-sap-adt-sessiontype': 'stateful',
-                        Accept:
-                          'application/*,application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result',
-                      },
-                    },
-                  );
-                  // Extract lockHandle from response XML
-                  const lockXml =
-                    typeof lockResp === 'string' ? lockResp : String(lockResp);
-                  const handleMatch = lockXml.match(
-                    /LOCK_HANDLE[^>]*>([^<]+)</,
-                  );
-                  const lockHandle = handleMatch?.[1] ?? '';
-                  if (!lockHandle) {
-                    throw new Error(
-                      'Failed to extract lock handle from lock response',
-                    );
-                  }
+                  const lockHandle = lockResult.handle;
 
                   try {
                     // Step 2: GET inactive version (fresh ETag + modifiable copy)
@@ -823,15 +801,7 @@ export const exportCommand: CliCommandPlugin = {
                   } finally {
                     // Step 4: UNLOCK (always, to prevent orphan locks)
                     try {
-                      await client.fetch(
-                        `${pkgUri}?_action=UNLOCK&lockHandle=${encodeURIComponent(lockHandle)}`,
-                        {
-                          method: 'POST',
-                          headers: {
-                            'X-sap-adt-sessiontype': 'stateful',
-                          },
-                        },
-                      );
+                      await lockSvc.unlock(pkgUri, { lockHandle });
                     } catch {
                       // Best-effort unlock
                     }
@@ -983,23 +953,20 @@ export const exportCommand: CliCommandPlugin = {
         );
         let unlocked = 0;
         const lockSvc = adkContext.lockService;
-        for (const obj of objectSet) {
-          try {
-            if (lockSvc) {
-              await lockSvc.unlock(obj.objectUri);
-            } else {
-              await (client as any).fetch(`${obj.objectUri}?_action=UNLOCK`, {
-                method: 'POST',
-                headers: { 'X-sap-adt-sessiontype': 'stateful' },
-              });
+        if (!lockSvc) {
+          ctx.logger.warn('⚠️ lockService not available — skipping force-unlock');
+        } else {
+          for (const obj of objectSet) {
+            try {
+              await lockSvc.forceUnlock(obj.objectUri);
+              unlocked++;
+            } catch {
+              // Object wasn't locked or locked by another user — ignore
             }
-            unlocked++;
-          } catch {
-            // Object wasn't locked — that's fine, ignore
           }
-        }
-        if (unlocked > 0) {
-          ctx.logger.info(`   🔓 ${unlocked} object(s) unlocked`);
+          if (unlocked > 0) {
+            ctx.logger.info(`   🔓 ${unlocked} object(s) unlocked`);
+          }
         }
       }
 
