@@ -440,9 +440,9 @@ export const exportCommand: CliCommandPlugin = {
       //
       // When --package is provided, it's used as the root for folder logic.
       // When omitted, we try to auto-detect the root package by:
-      //   1. Looking for existing objects on SAP → get their current package
-      //   2. Using folder logic + relDir to back-derive the root package
-      //   3. Setting packageRef on all objects using the derived root
+      //   1. Looking for objects that already have packageRef (from format plugin)
+      //   2. Querying existing deployment-set objects on SAP → reverse-resolve root
+      // If neither works and folder logic is PREFIX, we require -p flag.
       let effectiveRootPackage = options.package;
 
       if (!effectiveRootPackage) {
@@ -462,7 +462,7 @@ export const exportCommand: CliCommandPlugin = {
       }
 
       if (!effectiveRootPackage) {
-        // Second try: auto-detect from SAP by querying existing objects
+        // Second try: auto-detect from SAP by querying deployment-set objects
         ctx.logger.info('📦 Auto-detecting root package from SAP...');
 
         // Helper: try to derive root from one object on SAP
@@ -495,7 +495,6 @@ export const exportCommand: CliCommandPlugin = {
           return undefined;
         };
 
-        // First: try objects in the deployment set
         for (const obj of objectSet) {
           const root = await tryDeriveRoot(obj);
           if (root) {
@@ -504,82 +503,6 @@ export const exportCommand: CliCommandPlugin = {
               `   📦 Derived root package: ${root} (from ${obj.name})`,
             );
             break;
-          }
-        }
-
-        // Second: if no objects in set exist on SAP, scan full file tree
-        // for reference objects (e.g., deploying a new FUGR but sibling exists)
-        if (!effectiveRootPackage) {
-          ctx.logger.debug?.(
-            '   No objects in deployment set found on SAP, scanning full repo...',
-          );
-          const {
-            parseAbapGitMetadata,
-          } = await import('@abapify/adt-plugin-abapgit');
-
-          // Read folder logic from .abapgit.xml
-          let repoFolderLogic: string = 'prefix';
-          let repoStartDir = 'src';
-          if (await fullFileTree.exists('.abapgit.xml')) {
-            try {
-              const xml = await fullFileTree.read('.abapgit.xml');
-              const meta = parseAbapGitMetadata(xml);
-              repoFolderLogic = meta.folderLogic;
-              repoStartDir = meta.startingFolder
-                .replace(/^\/+/, '')
-                .replace(/\/+$/, '');
-            } catch {
-              // Fall through to defaults
-            }
-          }
-
-          // Scan full file tree for other objects to use as references
-          const allXmlFiles = await fullFileTree.glob('**/*.xml');
-          const {
-            parseAbapGitFilename,
-          } = await import('@abapify/adt-plugin-abapgit');
-
-          for (const xmlPath of allXmlFiles) {
-            if (
-              xmlPath.endsWith('.abapgit.xml') ||
-              xmlPath.endsWith('package.devc.xml')
-            )
-              continue;
-
-            const filename = xmlPath.split('/').pop()!;
-            const parsed = parseAbapGitFilename(filename);
-            if (!parsed || parsed.suffix) continue;
-
-            // Compute relDir for this object
-            const sourceDir = xmlPath
-              .split('/')
-              .slice(0, -1)
-              .join('/');
-            const relDir = sourceDir.startsWith(repoStartDir)
-              ? sourceDir.slice(repoStartDir.length).replace(/^\/+/, '')
-              : sourceDir;
-
-            // Try to GET this object from SAP
-            const { createAdk } = await import('@abapify/adk');
-            const refAdk = createAdk(client as any);
-            try {
-              const refObj = refAdk.getWithData(
-                { name: parsed.name, type: parsed.type },
-                parsed.type,
-              );
-              (refObj as any)._relDir = relDir;
-              (refObj as any)._folderLogic = repoFolderLogic;
-              const root = await tryDeriveRoot(refObj);
-              if (root) {
-                effectiveRootPackage = root;
-                ctx.logger.info(
-                  `   📦 Derived root package: ${root} (from ${parsed.name} in repo)`,
-                );
-                break;
-              }
-            } catch {
-              // Object doesn't exist or can't be loaded
-            }
           }
         }
 
@@ -608,6 +531,28 @@ export const exportCommand: CliCommandPlugin = {
         }
       }
 
+      // If still no root package and folder logic is PREFIX, require -p flag.
+      // PREFIX repos can't derive the root package name from folder structure alone.
+      if (!effectiveRootPackage) {
+        const hasPrefixObjects = [...objectSet].some(
+          (obj) =>
+            ((obj as any)._folderLogic as string | undefined)
+              ?.toLowerCase() === 'prefix',
+        );
+        if (hasPrefixObjects) {
+          ctx.logger.error(
+            '❌ Root package cannot be determined for PREFIX folder logic.',
+          );
+          ctx.logger.info(
+            '   Use -p <PACKAGE> to specify the root ABAP package.',
+          );
+          ctx.logger.info(
+            '   Example: npx adt deploy -p ZABAPGIT_EXAMPLES ...',
+          );
+          process.exit(1);
+        }
+      }
+
       // Log package assignments (resolved by format plugin)
       if (effectiveRootPackage) {
         const pkgMap = new Map<string, string[]>();
@@ -631,6 +576,25 @@ export const exportCommand: CliCommandPlugin = {
       }
 
       // ============================================
+      // Pre-deploy: validate root package exists on SAP
+      // ============================================
+      if (effectiveRootPackage && !options.dryRun) {
+        const rootExists = await AdkPackage.exists(
+          effectiveRootPackage,
+          adkContext,
+        );
+        if (!rootExists) {
+          ctx.logger.error(
+            `❌ Root package ${effectiveRootPackage} does not exist on SAP.`,
+          );
+          ctx.logger.info(
+            '   Create it first in ADT/Eclipse, or use -p with an existing package.',
+          );
+          process.exit(1);
+        }
+      }
+
+      // ============================================
       // Pre-deploy: ensure subpackages exist
       // Collect all unique target packages and create any that
       // don't exist on the SAP system yet.
@@ -650,6 +614,11 @@ export const exportCommand: CliCommandPlugin = {
         }
 
         if (leafPackages.size > 0) {
+          // Track packages that failed creation and don't exist on SAP.
+          // Objects targeting these packages will be skipped during deploy
+          // to prevent cascade failures (FUGR fails → child FMs fail).
+          const failedPackages = new Set<string>();
+
           // Expand to include all intermediate packages in the hierarchy.
           // With PREFIX logic ROOT_A_B requires ROOT_A as an intermediate.
           const allSubPkgs = new Set<string>();
@@ -678,12 +647,7 @@ export const exportCommand: CliCommandPlugin = {
           );
 
           // Read root package to inherit software component, transport layer & responsible
-          let rootPkg: AdkPackage | undefined;
-          try {
-            rootPkg = await AdkPackage.get(effectiveRootPackage, adkContext);
-          } catch {
-            // Root package read failed — proceed without inherited values
-          }
+          const rootPkg = await AdkPackage.get(effectiveRootPackage, adkContext);
 
           // Build transport config once — SAP requires both softwareComponent
           // and transportLayer when transport element is present
@@ -819,11 +783,19 @@ export const exportCommand: CliCommandPlugin = {
               `   📦 Creating subpackage ${pkgName} (in ${expectedSuper})...`,
             );
             try {
+              // Use root package's responsible, but fall back to the
+              // authenticated user when root is a system package like $TMP
+              // (whose responsible is 'SAP', which SAP rejects on creation).
+              let responsible = rootPkg?.dataSync?.responsible ?? '';
+              if (!responsible || responsible.toUpperCase() === 'SAP') {
+                responsible = (client as any).username?.toUpperCase?.() ?? '';
+              }
+
               await AdkPackage.create(
                 pkgName,
                 {
                   description: pkgName,
-                  responsible: rootPkg?.dataSync?.responsible ?? '',
+                  responsible,
                   superPackage: { name: expectedSuper },
                   attributes: {
                     packageType: 'development',
@@ -844,9 +816,33 @@ export const exportCommand: CliCommandPlugin = {
               knownPackages.add(pkgName);
               ctx.logger.info(`   ✅ Created ${pkgName}`);
             } catch (createErr) {
-              ctx.logger.warn(
-                `   ⚠️ Failed to create ${pkgName}: ${createErr instanceof Error ? createErr.message : String(createErr)}`,
-              );
+              const errMsg =
+                createErr instanceof Error
+                  ? createErr.message
+                  : String(createErr);
+              // Check if the package actually exists now (race condition or partial success)
+              const existsNow = await AdkPackage.exists(pkgName, adkContext);
+              if (existsNow) {
+                knownPackages.add(pkgName);
+                ctx.logger.info(
+                  `   ✅ ${pkgName} already exists`,
+                );
+              } else {
+                failedPackages.add(pkgName);
+                // Provide actionable guidance for common failures
+                if (errMsg.includes('409') || errMsg.includes('change request') || errMsg.includes('authorization')) {
+                  ctx.logger.warn(
+                    `   ⚠️ Failed to create ${pkgName}: ${errMsg}`,
+                  );
+                  ctx.logger.warn(
+                    `      💡 Hint: Use -t <transport> for non-local packages, or -p '$TMP' for local development`,
+                  );
+                } else {
+                  ctx.logger.warn(
+                    `   ⚠️ Failed to create ${pkgName}: ${errMsg}`,
+                  );
+                }
+              }
             }
           }
 
@@ -877,6 +873,80 @@ export const exportCommand: CliCommandPlugin = {
             } catch (actErr) {
               ctx.logger.warn(
                 `   ⚠️ Package activation failed: ${actErr instanceof Error ? actErr.message : String(actErr)}`,
+              );
+            }
+          }
+        }
+      }
+
+      // ============================================
+      // Pre-deploy: remove objects targeting unavailable packages
+      // If subpackage creation failed and the package doesn't exist,
+      // skip all objects targeting it to prevent cascade failures.
+      // ============================================
+      const unavailablePackages = new Set<string>();
+      if (effectiveRootPackage && !options.dryRun) {
+        // Collect failed packages from the subpackage creation phase
+        // (failedPackages is only in scope inside the leafPackages block above,
+        // so we re-check: any packageRef that doesn't exist on SAP is unavailable)
+        const objectsByPkg = new Map<string, any[]>();
+        for (const obj of objectSet) {
+          const pkgName = (obj as any)._data?.packageRef?.name as
+            | string
+            | undefined;
+          if (pkgName && pkgName !== effectiveRootPackage) {
+            if (!objectsByPkg.has(pkgName)) objectsByPkg.set(pkgName, []);
+            objectsByPkg.get(pkgName)!.push(obj);
+          }
+        }
+        for (const [pkgName] of objectsByPkg) {
+          const exists = await AdkPackage.exists(pkgName, adkContext);
+          if (!exists) {
+            unavailablePackages.add(pkgName);
+          }
+        }
+
+        if (unavailablePackages.size > 0) {
+          // Remove objects targeting unavailable packages from the object set
+          const removedObjects: string[] = [];
+          const removedNames = new Set<string>();
+          for (const obj of [...objectSet]) {
+            const pkgName = (obj as any)._data?.packageRef?.name as
+              | string
+              | undefined;
+            if (pkgName && unavailablePackages.has(pkgName)) {
+              objectSet.remove(obj);
+              removedObjects.push(`${(obj as any).kind} ${obj.name}`);
+              removedNames.add(obj.name.toUpperCase());
+            }
+          }
+
+          // Also remove child objects whose parent was removed.
+          // E.g., function modules whose parent function group was skipped.
+          if (removedNames.size > 0) {
+            for (const obj of [...objectSet]) {
+              const groupName = (obj as any).groupName as string | undefined;
+              const containerName = (
+                (obj as any)._data?.containerRef?.name as string | undefined
+              )?.toUpperCase();
+              const parentName = groupName?.toUpperCase() ?? containerName;
+              if (parentName && removedNames.has(parentName)) {
+                objectSet.remove(obj);
+                removedObjects.push(`${(obj as any).kind} ${obj.name}`);
+              }
+            }
+          }
+
+          if (removedObjects.length > 0) {
+            ctx.logger.warn(
+              `\n⚠️ Skipping ${removedObjects.length} object(s) — target package does not exist:`,
+            );
+            for (const name of removedObjects) {
+              ctx.logger.warn(`   ⏭️ ${name}`);
+            }
+            for (const pkg of unavailablePackages) {
+              ctx.logger.warn(
+                `   📦 ${pkg} — create it first, or use -p <existing-package>`,
               );
             }
           }
