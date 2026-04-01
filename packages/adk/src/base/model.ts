@@ -498,6 +498,18 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       }
     }
 
+    // For metadata-only objects (no pending sources), fetch SAP state and
+    // compare using recursive subset match. Only fields present in local data
+    // are checked; SAP's extra metadata (timestamps, links, etc.) is ignored.
+    // Empty-like values (null, "", false, [], {}) are treated as equivalent
+    // to handle SAP's default normalization. Works for DDIC types.
+    if (!hasPendingSources && mode !== 'create') {
+      await this.checkMetadataUnchanged();
+      if (this._unchanged) {
+        return this;
+      }
+    }
+
     // For upsert mode, check existence before locking.
     // On BTP, locking a non-existent DDIC object creates a draft that
     // persists even after unlock, blocking subsequent POST (create) attempts.
@@ -812,6 +824,81 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       }
     } catch {
       // Source doesn't exist on SAP (404) — needs saving
+    }
+  }
+
+  /**
+   * Check if metadata-only objects are unchanged on SAP.
+   *
+   * For objects without source code (DDIC types like DOMA, DTEL, TABL, TTYP),
+   * fetches the current SAP state and compares only the fields present in
+   * the local data. SAP returns extra volatile fields (timestamps, links,
+   * version, etc.) that are ignored — only semantic fields matter.
+   */
+  protected async checkMetadataUnchanged(): Promise<void> {
+    const contract = this.crudContract;
+    const wrapperKey = this.wrapperKey;
+    if (!contract?.get || !wrapperKey) return;
+
+    try {
+      const sapResponse = await contract.get(this.name);
+      const sapData = sapResponse?.[wrapperKey];
+      if (!sapData) return;
+
+      const localData = await this.data();
+
+      // Recursive subset match: checks that every field in `local`
+      // has the same value in `sap`. Extra fields in `sap` are ignored.
+      // "Empty-like" values (null, undefined, "", false, [], {}) are treated
+      // as equivalent, since SAP normalizes defaults differently than
+      // abapGit serialization (e.g., style "" → "00", missing → false).
+      const isEmpty = (v: unknown): boolean =>
+        v == null ||
+        v === '' ||
+        v === false ||
+        (Array.isArray(v) && v.length === 0) ||
+        (typeof v === 'object' && v !== null && Object.keys(v).length === 0);
+
+      const isSubsetMatch = (
+        local: unknown,
+        sap: unknown,
+      ): boolean => {
+        if (local === sap) return true;
+
+        // Both empty-like → match (handles null/undefined/""/false/[]/{}
+        // combinations between local and SAP representations)
+        if (isEmpty(local) && isEmpty(sap)) return true;
+
+        // Local is empty-like but SAP has a value → "use default" match
+        // (SAP may store a different representation of the default)
+        if (isEmpty(local) && sap != null) return true;
+
+        if (local == null || sap == null) return false;
+        if (typeof local !== typeof sap) return false;
+
+        if (Array.isArray(local)) {
+          if (!Array.isArray(sap)) return false;
+          if (local.length !== sap.length) return false;
+          return local.every((item, i) => isSubsetMatch(item, sap[i]));
+        }
+
+        if (typeof local === 'object') {
+          const localObj = local as Record<string, unknown>;
+          const sapObj = sap as Record<string, unknown>;
+          return Object.keys(localObj).every((key) => {
+            if (key === 'abapLanguageVersion') return true;
+            return isSubsetMatch(localObj[key], sapObj[key]);
+          });
+        }
+
+        return local === sap;
+      };
+
+      if (isSubsetMatch(localData, sapData)) {
+        this._unchanged = true;
+      }
+    } catch {
+      // Object doesn't exist on SAP (404) or comparison failed — needs saving
     }
   }
 

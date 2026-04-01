@@ -49,7 +49,7 @@ export interface BulkSaveOptions extends SaveOptions {
   /** Continue saving remaining objects if one fails (default: true) */
   continueOnError?: boolean;
   /** Callback for progress reporting */
-  onProgress?: (saved: number, total: number, current: AdkObject) => void;
+  onProgress?: (processed: number, total: number, current: AdkObject) => void;
 }
 
 /**
@@ -184,6 +184,7 @@ export class AdkObjectSet {
 
     const total = this.objects.length;
     let saved = 0;
+    let processed = 0;
 
     for (const obj of this.objects) {
       try {
@@ -198,7 +199,8 @@ export class AdkObjectSet {
           result.success++;
           result.results.push({ object: obj, success: true });
         }
-        onProgress?.(saved, total, obj);
+        processed++;
+        onProgress?.(processed, total, obj);
       } catch (error) {
         result.failed++;
         result.results.push({
