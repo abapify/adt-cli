@@ -1,5 +1,4 @@
 import nx from '@nx/eslint-plugin';
-import importPlugin from 'eslint-plugin-import';
 import * as jsoncParser from 'jsonc-eslint-parser';
 
 export default [
@@ -92,30 +91,5 @@ export default [
       ],
     },
   },
-  // Enforce extensionless internal imports and enable autofix for ADK sources
-  {
-    files: ['packages/adk/src/**/*.{ts,tsx,js,jsx}'],
-    plugins: {
-      import: importPlugin,
-    },
-    settings: {
-      'import/resolver': {
-        // Let ESLint resolve TS paths and respect tsconfig for DX
-        typescript: {
-          project: './tsconfig.base.json',
-          alwaysTryTypes: true,
-        },
-        node: {
-          extensions: ['.ts', '.tsx', '.js', '.jsx'],
-        },
-      },
-    },
-    rules: {
-      // Remove file extensions from internal imports (autofixable)
-      // Keeps package imports intact via "ignorePackages"
-      'import/extensions': ['error', 'never'],
-      // Additional helpful fix: cleans up needless "./index" patterns
-      'import/no-useless-path-segments': ['error', { noUselessIndex: true }],
-    },
-  },
+
 ];
