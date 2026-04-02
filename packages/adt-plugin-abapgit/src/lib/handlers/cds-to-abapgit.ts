@@ -435,7 +435,7 @@ async function buildFieldDD03P(
  */
 export async function buildDD03P(
   members: TableMember[],
-  tableName: string = '',
+  tableName = '',
   resolver?: TypeResolver,
 ): Promise<DD03PData[]> {
   const entries: DD03PData[] = [];

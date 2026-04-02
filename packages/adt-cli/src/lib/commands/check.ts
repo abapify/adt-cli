@@ -157,7 +157,7 @@ async function resolvePackageObjects(
  */
 function buildCheckObjectListXml(
   objects: Array<{ uri: string }>,
-  version: string = 'active',
+  version = 'active',
 ): string {
   const checkObjects = objects
     .map(

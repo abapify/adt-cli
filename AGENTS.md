@@ -111,6 +111,18 @@ Symlinked to `.windsurf/rules/` and `.cognition/rules/` for tool compatibility.
 | ----------------------------------------------------------------------------- | --------- | ------------------------------------------ |
 | [`development/bundler-imports`](.agents/rules/development/bundler-imports.md) | `**/*.ts` | Extensionless imports for bundled packages |
 
+## Known Gotchas
+
+### bun.lock excluded from Nx file walker
+
+`bun.lock` is in `.git/info/exclude` to prevent JFrog Artifactory URLs from reaching GitHub. Nx's Rust file walker uses the `ignore` crate, which reads `.git/info/exclude` but (unlike `git`) has **no concept of the git index** — tracked files matching ignore patterns are still skipped. This means Nx never sees the lockfile and `externalNodes` in the project graph is empty.
+
+**Consequence**: Any Nx plugin that infers `{ externalDependencies: [...] }` in target inputs will fail. The `@nx/eslint/plugin` does this for the `lint` target.
+
+**Workaround**: The `lint` target's inputs are overridden in `nx.json` `targetDefaults` to drop `externalDependencies`. If a new plugin introduces similar inputs, add the same override for that target.
+
+**Do NOT**: Remove `bun.lock` from `.git/info/exclude` — the JFrog constraint is intentional.
+
 ## Package-Level Guides
 
 Each package has its own `AGENTS.md` with detailed conventions:
