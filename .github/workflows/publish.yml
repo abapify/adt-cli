@@ -36,9 +36,7 @@ jobs:
         run: bun install
 
       - name: Publish packages
-        run: |
-          rm -f bun.lock
-          npx nx release publish
+        run: npx nx release publish
         shell: bash
         env:
           NPM_CONFIG_PROVENANCE: true
