@@ -286,7 +286,9 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
         if (response.status === 412) {
           const sentETag = headers['If-Match'] ?? '(none)';
           const diag = `[If-Match: ${sentETag}, URL: ${url.pathname}]`;
-          logger?.error(`ETag mismatch: ${options.method} ${url.pathname} sent If-Match: ${sentETag}`);
+          logger?.error(
+            `ETag mismatch: ${options.method} ${url.pathname} sent If-Match: ${sentETag}`,
+          );
           // Append diagnostic to the error message so it surfaces in error handlers
           Object.defineProperty(adtError, 'message', {
             value: `${adtError.message} ${diag}`,

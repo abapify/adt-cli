@@ -104,12 +104,12 @@ See [SERVICE-ARCHITECTURE.md](./docs/SERVICE-ARCHITECTURE.md) for detailed examp
 
 ### Key Invariants
 
-| Rule | Why |
-|------|-----|
-| Always create security session before any write | CSRF token must be session-bound |
-| Always DELETE the session after getting CSRF | SAP limits 1 security session per user |
-| Never clear session state on lock-conflict 403 | Destroys CSRF → breaks all subsequent locks |
-| All requests get `x-sap-security-session: use` | SessionManager adds it via `getRequestHeaders()` |
+| Rule                                            | Why                                              |
+| ----------------------------------------------- | ------------------------------------------------ |
+| Always create security session before any write | CSRF token must be session-bound                 |
+| Always DELETE the session after getting CSRF    | SAP limits 1 security session per user           |
+| Never clear session state on lock-conflict 403  | Destroys CSRF → breaks all subsequent locks      |
+| All requests get `x-sap-security-session: use`  | SessionManager adds it via `getRequestHeaders()` |
 
 ### 403 Error Handling
 
@@ -121,10 +121,12 @@ The adapter distinguishes lock conflicts from auth failures:
 ### Session URL Extraction
 
 The session URL comes from the create response XML:
+
 ```xml
 <atom:link href="/sap/bc/adt/core/http/sessions/2A020DE92DC311F1..."
            rel="http://www.sap.com/adt/categories/core/http/sessions/securitysession"/>
 ```
+
 Parsed with: `/href="([^"]*\/sessions\/[^"]*)"/`
 
 ## Critical Rules

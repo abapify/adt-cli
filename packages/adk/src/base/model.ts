@@ -854,10 +854,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
         (Array.isArray(v) && v.length === 0) ||
         (typeof v === 'object' && v !== null && Object.keys(v).length === 0);
 
-      const isSubsetMatch = (
-        local: unknown,
-        sap: unknown,
-      ): boolean => {
+      const isSubsetMatch = (local: unknown, sap: unknown): boolean => {
         if (local === sap) return true;
 
         // Both empty-like → match (handles null/undefined/""/false/[]/{}
@@ -971,14 +968,11 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     if (options?.transport) params.set('corrNr', options.transport);
 
     const qs = params.toString();
-    await this.ctx.client.fetch(
-      `${sourceUrl}${qs ? '?' + qs : ''}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
-        body: self._pendingSource,
-      },
-    );
+    await this.ctx.client.fetch(`${sourceUrl}${qs ? '?' + qs : ''}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'text/plain' },
+      body: self._pendingSource,
+    });
 
     delete self._pendingSource;
   }

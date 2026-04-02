@@ -47,9 +47,7 @@ export const functionModulesContract = contract({
       body: fmodulesSchema,
       responses: { 200: fmodulesSchema },
       headers: { Accept: accept, 'Content-Type': contentType },
-      query: queryOptions?.corrNr
-        ? { corrNr: queryOptions.corrNr }
-        : undefined,
+      query: queryOptions?.corrNr ? { corrNr: queryOptions.corrNr } : undefined,
     }),
 
   /** PUT .../fmodules/{fmName} - Update function module metadata */

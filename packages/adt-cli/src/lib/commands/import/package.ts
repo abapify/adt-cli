@@ -17,7 +17,10 @@ export const importPackageCommand = new Command('package')
     '-t, --object-types <types>',
     'Comma-separated object types (e.g., CLAS,INTF,DDLS). Default: all supported by format',
   )
-  .option('--no-sub-packages', 'Exclude subpackages (by default subpackages are included)')
+  .option(
+    '--no-sub-packages',
+    'Exclude subpackages (by default subpackages are included)',
+  )
   .option(
     '--format <format>',
     'Output format: abapgit | @abapify/adt-plugin-abapgit',

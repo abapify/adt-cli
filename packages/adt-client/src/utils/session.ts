@@ -238,7 +238,9 @@ export class ETagManager {
       // DEBUG: trace ETag caching for functions/groups
       if (key.includes('functions/groups') && !key.includes('fmodules')) {
         const prev = this.etags.get(key);
-        console.error(`[ETAG-TRACE] CACHE url=${key} etag=${headerValue} prev=${prev ?? '(none)'}`);
+        console.error(
+          `[ETAG-TRACE] CACHE url=${key} etag=${headerValue} prev=${prev ?? '(none)'}`,
+        );
       }
       this.etags.set(key, headerValue);
     }
@@ -265,7 +267,9 @@ export class ETagManager {
       const key = this.normalizeUrl(url);
       // DEBUG: trace ETag clear for functions/groups
       if (key.includes('functions/groups') && !key.includes('fmodules')) {
-        console.error(`[ETAG-TRACE] CLEAR url=${key} had=${this.etags.get(key) ?? '(none)'}`);
+        console.error(
+          `[ETAG-TRACE] CLEAR url=${key} had=${this.etags.get(key) ?? '(none)'}`,
+        );
       }
       this.etags.delete(key);
     } else {

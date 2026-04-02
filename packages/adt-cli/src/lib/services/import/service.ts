@@ -234,7 +234,9 @@ export class ImportService {
             return;
           }
 
-          console.log(`  🔄 [${progress}/${total}] ${objRef.type} ${objRef.name}`);
+          console.log(
+            `  🔄 [${progress}/${total}] ${objRef.type} ${objRef.name}`,
+          );
 
           // Load the ADK object
           const adkObject = await objRef.load();
@@ -370,7 +372,9 @@ export class ImportService {
           if (!plugin.instance.registry.isSupported(obj.type)) {
             results.skipped++;
             if (options.debug) {
-              console.log(`  ⏭️ [${progress}/${total}] ${obj.type} ${obj.name}: type not supported`);
+              console.log(
+                `  ⏭️ [${progress}/${total}] ${obj.type} ${obj.name}: type not supported`,
+              );
             }
             return;
           }

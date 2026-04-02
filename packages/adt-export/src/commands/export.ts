@@ -332,9 +332,8 @@ export const exportCommand: CliCommandPlugin = {
       const abapGitXmlPath = join(sourcePath, '.abapgit.xml');
       if (existsSync(abapGitXmlPath)) {
         const xml = readFileSync(abapGitXmlPath, 'utf-8');
-        const {
-          parseAbapGitMetadata,
-        } = await import('@abapify/adt-plugin-abapgit');
+        const { parseAbapGitMetadata } =
+          await import('@abapify/adt-plugin-abapgit');
         const { folderLogic } = parseAbapGitMetadata(xml);
         if (folderLogic === 'prefix') {
           ctx.logger.error(
@@ -343,9 +342,7 @@ export const exportCommand: CliCommandPlugin = {
           ctx.logger.info(
             '   Use -p <PACKAGE> to specify the root ABAP package.',
           );
-          ctx.logger.info(
-            '   Example: npx adt export -p ZABAPGIT_EXAMPLES',
-          );
+          ctx.logger.info('   Example: npx adt export -p ZABAPGIT_EXAMPLES');
           process.exit(1);
         }
       }
@@ -581,7 +578,10 @@ export const exportCommand: CliCommandPlugin = {
           );
 
           // Read root package to inherit software component, transport layer & responsible
-          const rootPkg = await AdkPackage.get(effectiveRootPackage, adkContext);
+          const rootPkg = await AdkPackage.get(
+            effectiveRootPackage,
+            adkContext,
+          );
 
           // Build transport config once — SAP requires both softwareComponent
           // and transportLayer when transport element is present
@@ -758,13 +758,15 @@ export const exportCommand: CliCommandPlugin = {
               const existsNow = await AdkPackage.exists(pkgName, adkContext);
               if (existsNow) {
                 knownPackages.add(pkgName);
-                ctx.logger.info(
-                  `   ✅ ${pkgName} already exists`,
-                );
+                ctx.logger.info(`   ✅ ${pkgName} already exists`);
               } else {
                 failedPackages.add(pkgName);
                 // Provide actionable guidance for common failures
-                if (errMsg.includes('409') || errMsg.includes('change request') || errMsg.includes('authorization')) {
+                if (
+                  errMsg.includes('409') ||
+                  errMsg.includes('change request') ||
+                  errMsg.includes('authorization')
+                ) {
                   ctx.logger.warn(
                     `   ⚠️ Failed to create ${pkgName}: ${errMsg}`,
                   );
@@ -958,7 +960,9 @@ export const exportCommand: CliCommandPlugin = {
         let unlocked = 0;
         const lockSvc = adkContext.lockService;
         if (!lockSvc) {
-          ctx.logger.warn('⚠️ lockService not available — skipping force-unlock');
+          ctx.logger.warn(
+            '⚠️ lockService not available — skipping force-unlock',
+          );
         } else {
           for (const obj of objectSet) {
             try {

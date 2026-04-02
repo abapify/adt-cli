@@ -43,6 +43,7 @@ save({ mode: 'create' })
 **SAP ADT ignores `processingType` during POST creation of function modules.** All FMs are created with `processingType="normal"` regardless of what's in the XML body.
 
 **Fix**: `AdkFunctionModule.savePendingSources()` PUTs metadata before source to apply processingType. This adds:
+
 1. `saveViaContract('update')` — PUT full metadata including processingType
 2. GET source — refresh cached ETag (see below)
 3. PUT source — with fresh ETag
@@ -71,28 +72,28 @@ Deleting an object with a lock handle removes the object but leaves a CTS-level 
 
 Key overrides from base `AdkObject`:
 
-| Method | Override Reason |
-|--------|----------------|
-| `load()` | Passes `groupName` as first arg to contract |
-| `lock()/unlock()` | Passes `groupName` to contract |
-| `saveViaContract()` | Passes `groupName` to contract.post()/put() |
-| `savePendingSources()` | PUT metadata first (processingType fix), refresh ETag, strip parameter comment block |
-| `checkPendingSourcesUnchanged()` | Strip parameter comment block before comparing |
-| `getSkeletonData()` | Returns name, type, description, processingType, basXMLEnabled (no packageRef) |
+| Method                           | Override Reason                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| `load()`                         | Passes `groupName` as first arg to contract                                          |
+| `lock()/unlock()`                | Passes `groupName` to contract                                                       |
+| `saveViaContract()`              | Passes `groupName` to contract.post()/put()                                          |
+| `savePendingSources()`           | PUT metadata first (processingType fix), refresh ETag, strip parameter comment block |
+| `checkPendingSourcesUnchanged()` | Strip parameter comment block before comparing                                       |
+| `getSkeletonData()`              | Returns name, type, description, processingType, basXMLEnabled (no packageRef)       |
 
 ## File Locations
 
-| Purpose | Location |
-|---------|----------|
-| Base model | `src/base/model.ts` |
-| Object registry | `src/base/registry.ts` |
-| ADK factory | `src/factory.ts` |
-| Function group | `src/objects/repository/fugr/fugr.model.ts` |
+| Purpose         | Location                                         |
+| --------------- | ------------------------------------------------ |
+| Base model      | `src/base/model.ts`                              |
+| Object registry | `src/base/registry.ts`                           |
+| ADK factory     | `src/factory.ts`                                 |
+| Function group  | `src/objects/repository/fugr/fugr.model.ts`      |
 | Function module | `src/objects/repository/fugr/func/func.model.ts` |
-| Class | `src/objects/repository/clas/clas.model.ts` |
-| Interface | `src/objects/repository/intf/intf.model.ts` |
-| Package | `src/objects/repository/devc/devc.model.ts` |
-| Object set | `src/base/object-set.ts` |
+| Class           | `src/objects/repository/clas/clas.model.ts`      |
+| Interface       | `src/objects/repository/intf/intf.model.ts`      |
+| Package         | `src/objects/repository/devc/devc.model.ts`      |
+| Object set      | `src/base/object-set.ts`                         |
 
 ## Common Tasks
 

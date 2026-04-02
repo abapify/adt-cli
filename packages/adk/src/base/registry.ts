@@ -235,10 +235,7 @@ export function getObjectUri(
  * normalizeObjectName('SAPLZAGE_FUGR', 'FUGR')  // ['ZAGE_FUGR']
  * normalizeObjectName('ZCLAS_TEST')              // ['ZCLAS_TEST']  (no normalizer matches)
  */
-export function normalizeObjectName(
-  name: string,
-  adtType?: string,
-): string[] {
+export function normalizeObjectName(name: string, adtType?: string): string[] {
   if (adtType) {
     const entry = resolveType(adtType);
     const normalized = entry?.normalizeName?.(name) ?? name;

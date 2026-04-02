@@ -275,16 +275,9 @@ export class AdkFunctionModule extends AdkObject<
     for (let i = 0; i < lines.length; i++) {
       const trimmed = lines[i].trimEnd();
 
-      if (
-        !inBlock &&
-        trimmed.startsWith('*"') &&
-        trimmed.includes('---')
-      ) {
+      if (!inBlock && trimmed.startsWith('*"') && trimmed.includes('---')) {
         // Start of comment block — check if next line is Local Interface
-        if (
-          i + 1 < lines.length &&
-          lines[i + 1].trimEnd().startsWith('*"')
-        ) {
+        if (i + 1 < lines.length && lines[i + 1].trimEnd().startsWith('*"')) {
           inBlock = true;
           continue;
         }
@@ -420,18 +413,15 @@ export class AdkFunctionModule extends AdkObject<
 
     try {
       const currentSource = await toText(
-        await this.ctx.client.fetch(
-          `${this.objectUri}/source/main`,
-          { method: 'GET', headers: { Accept: 'text/plain' } },
-        ),
+        await this.ctx.client.fetch(`${this.objectUri}/source/main`, {
+          method: 'GET',
+          headers: { Accept: 'text/plain' },
+        }),
       );
       const cleanPending = this.stripParameterCommentBlock(self._pendingSource);
       const localBody = this.extractFunctionBody(cleanPending);
       const sapBody = this.extractFunctionBody(currentSource);
-      if (
-        this.normalizeSource(localBody) ===
-        this.normalizeSource(sapBody)
-      ) {
+      if (this.normalizeSource(localBody) === this.normalizeSource(sapBody)) {
         this._unchanged = true;
         delete self._pendingSource;
       }

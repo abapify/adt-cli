@@ -227,10 +227,7 @@ export async function* deserialize(
       // This metadata is always computed so the export command can auto-detect
       // the root package from SAP and resolve packages later if needed.
       if (hasAbapGitXml) {
-        const sourceDir = objFiles.xmlFile
-          .split('/')
-          .slice(0, -1)
-          .join('/');
+        const sourceDir = objFiles.xmlFile.split('/').slice(0, -1).join('/');
         const relDir = sourceDir.startsWith(startDir)
           ? sourceDir.slice(startDir.length).replace(/^\/+/, '')
           : sourceDir;

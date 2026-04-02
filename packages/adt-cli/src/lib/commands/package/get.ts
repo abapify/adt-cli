@@ -88,11 +88,9 @@ export const packageGetCommand = new Command('package')
       let objects: PackageObject[] | undefined;
       if (options.objects) {
         const pkg = await AdkPackage.get(name.toUpperCase());
-        objects = (
-          options.subPackages
-            ? await pkg.getAllObjects()
-            : await pkg.getObjects()
-        ) as unknown as PackageObject[];
+        objects = (options.subPackages
+          ? await pkg.getAllObjects()
+          : await pkg.getObjects()) as unknown as PackageObject[];
       }
 
       // JSON output (includes objects when --objects is passed)

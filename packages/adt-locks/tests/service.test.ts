@@ -244,7 +244,9 @@ describe('LockService.forceUnlock()', () => {
     // Second call: UNLOCK with the recovered handle
     expect(client.fetch).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining('_action=UNLOCK&accessMode=MODIFY&lockHandle=HANDLE_XYZ'),
+      expect.stringContaining(
+        '_action=UNLOCK&accessMode=MODIFY&lockHandle=HANDLE_XYZ',
+      ),
       expect.objectContaining({ method: 'POST' }),
     );
 
@@ -254,7 +256,9 @@ describe('LockService.forceUnlock()', () => {
 
   it('propagates lock errors (e.g., locked by another user)', async () => {
     const client = createMockClient(
-      vi.fn().mockRejectedValue(new Error('403 Forbidden - locked by OTHERUSER')),
+      vi
+        .fn()
+        .mockRejectedValue(new Error('403 Forbidden - locked by OTHERUSER')),
     );
     const service = createLockService(client);
 
