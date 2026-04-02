@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "ADT XML schemas generated from SAP XSD definitions",
   "type": "module",
   "types": "./dist/index.d.mts",

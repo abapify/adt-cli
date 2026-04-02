@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Diff CLI plugin for adt-cli - compare local serialized files against SAP remote source",
   "type": "module",
   "main": "./dist/index.mjs",

@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "ABAP Test Cockpit (ATC) CLI plugin for adt-cli",
   "type": "module",
   "main": "./dist/index.mjs",

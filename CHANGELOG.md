@@ -1,3 +1,72 @@
+## 0.2.0 (2026-04-02)
+
+### 🚀 Features
+
+- add PROG (Program) and FUGR (Function Group) ABAP object type support ([d3ebf34](https://github.com/abapify/adt-cli/commit/d3ebf34))
+- enhance service key authentication and add redirect URI support ([4e2276f](https://github.com/abapify/adt-cli/commit/4e2276f))
+- fix ADT export XML serialization and live-test on BTP + on-prem ([dbe608b](https://github.com/abapify/adt-cli/commit/dbe608b))
+- optimize export by skipping unchanged sources and auto-creating packages ([172d91c](https://github.com/abapify/adt-cli/commit/172d91c))
+- move single-source save lifecycle to base class and add default unchanged detection ([b6f58a5](https://github.com/abapify/adt-cli/commit/b6f58a5))
+- add nx format:write pre-commit instruction to GitHub Copilot config ([185db86](https://github.com/abapify/adt-cli/commit/185db86))
+- add @fission-ai/openspec dependency for spec management ([f185730](https://github.com/abapify/adt-cli/commit/f185730))
+- remove OAT format everywhere, make abapgit the default ([4596efd](https://github.com/abapify/adt-cli/commit/4596efd))
+- abapGit roundtrip - export, deploy, and structure support ([0da189a](https://github.com/abapify/adt-cli/commit/0da189a))
+- add adt diff command and fix CDS-to-abapGit serialization ([130168d](https://github.com/abapify/adt-cli/commit/130168d))
+- resolve DDIC metadata via ADT for zero-diff TABL serialization ([a8198fa](https://github.com/abapify/adt-cli/commit/a8198fa))
+- **adk:** add FunctionModule support with POST-then-PUT save flow, fix ETag refresh after metadata PUT ([5db28a6](https://github.com/abapify/adt-cli/commit/5db28a6))
+- **adk:** improve FUNC save reliability — skip POST if exists, compare function body only, add DEVC skeleton ([b9469e0](https://github.com/abapify/adt-cli/commit/b9469e0))
+- **adk:** add metadata-only unchanged detection, fix bulk save progress counter ([ee2f4dc](https://github.com/abapify/adt-cli/commit/ee2f4dc))
+- **adk,adt-cli:** add FUGR name normalization, lock handle persistence, and root URI extraction ([ee2c300](https://github.com/abapify/adt-cli/commit/ee2c300))
+- **adk,adt-cli:** centralize lock operations in LockService, add force-unlock, remove duplicate lock logic ([66da454](https://github.com/abapify/adt-cli/commit/66da454))
+- **adk,adt-cli:** fix ETag invalidation after lock acquisition, improve DEVC subpackage filtering, add --objects to package get ([979aad9](https://github.com/abapify/adt-cli/commit/979aad9))
+- **adt-auth:** add port retry logic for OAuth callback server, fix refresh logging ([cef30df](https://github.com/abapify/adt-cli/commit/cef30df))
+- **adt-contracts:** split Accept vs Content-Type headers in crud() ([f16f525](https://github.com/abapify/adt-cli/commit/f16f525))
+- **adt-diff:** add --format ddl option and fix CDS DDL generation ([5ba5e65](https://github.com/abapify/adt-cli/commit/5ba5e65))
+- **adt-diff:** support multi-file and glob patterns in diff command ([c0c3128](https://github.com/abapify/adt-cli/commit/c0c3128))
+- **adt-diff:** rename --format to --source, add annotation filtering for CDS comparison ([07a59da](https://github.com/abapify/adt-cli/commit/07a59da))
+- **adt-diff:** add --raw mode, fix abapLanguageVersion auth issue, defer CLAS include saves ([e0b4c04](https://github.com/abapify/adt-cli/commit/e0b4c04))
+- **adt-export:** remove full-repo scan fallback, add package validation and cascade skip logic ([e6fe28b](https://github.com/abapify/adt-cli/commit/e6fe28b))
+- **cds-to-abapgit:** detect LANGDEP from spras/lang fields in CDS ([ff711e8](https://github.com/abapify/adt-cli/commit/ff711e8))
+- **ddic:** add abapGit handlers for TABL and TTYP object types ([41b6a4b](https://github.com/abapify/adt-cli/commit/41b6a4b))
+
+### 🩹 Fixes
+
+- remove package-lock.json and switch nx to use bun as package manager ([44b7ff9](https://github.com/abapify/adt-cli/commit/44b7ff9))
+- restore package-lock.json, revert packageManager to npm, add legacy-peer-deps ([1bbf03d](https://github.com/abapify/adt-cli/commit/1bbf03d))
+- correct .gitignore corruption and add FUGR fromAbapGit comment ([cbb35d4](https://github.com/abapify/adt-cli/commit/cbb35d4))
+- update fast-xml-parser dependency to version 5.5.3 ([7e0b6d6](https://github.com/abapify/adt-cli/commit/7e0b6d6))
+- preserve targetNamespace xmlns in stripUnusedNamespaces + null guard in config-loader ([caad1a5](https://github.com/abapify/adt-cli/commit/caad1a5))
+- address all SonarQube findings for PR #81 ([#81](https://github.com/abapify/adt-cli/issues/81))
+- exclude generated schema files from SonarQube analysis to fix quality gate ([014ad88](https://github.com/abapify/adt-cli/commit/014ad88))
+- add SonarCloud organization and project key to sonar-project.properties ([394c670](https://github.com/abapify/adt-cli/commit/394c670))
+- resolve SonarCloud quality gate failures ([e8cfed9](https://github.com/abapify/adt-cli/commit/e8cfed9))
+- address remaining SonarQube findings - complexity, duplication, and code quality ([11a3408](https://github.com/abapify/adt-cli/commit/11a3408))
+- update sonar-project.properties with exclusions and project key ([dc374f8](https://github.com/abapify/adt-cli/commit/dc374f8))
+- use [^<]+ in XML tag regexes to require non-empty content ([b459ea7](https://github.com/abapify/adt-cli/commit/b459ea7))
+- simplify sonar exclusions to **/generated/** ([ecc42c5](https://github.com/abapify/adt-cli/commit/ecc42c5))
+- simplify sonar exclusions to **/generated/** ([2c2dad3](https://github.com/abapify/adt-cli/commit/2c2dad3))
+- remove trailing blank lines from sonar-project.properties ([56b8e5e](https://github.com/abapify/adt-cli/commit/56b8e5e))
+- run nx format:write to fix formatting on OpenSpec files ([5c9fcb1](https://github.com/abapify/adt-cli/commit/5c9fcb1))
+- resolve merge conflict and fix SonarQube duplication findings ([f1edc75](https://github.com/abapify/adt-cli/commit/f1edc75))
+- resolve SonarQube quality gate failures (security hotspot + duplication) ([12bd3b8](https://github.com/abapify/adt-cli/commit/12bd3b8))
+- address Copilot and Devin review findings ([a6c4707](https://github.com/abapify/adt-cli/commit/a6c4707))
+- **abapgit:** align dd02v and dd03p field order ([d7578d3](https://github.com/abapify/adt-cli/commit/d7578d3))
+- **adk:** robust upsert fallback for DDIC objects (405/422 handling) ([ac0d580](https://github.com/abapify/adt-cli/commit/ac0d580))
+- **adk:** address PR review findings - reset \_unchanged, deduplicate fallback, case-insensitive error matching ([2816dd4](https://github.com/abapify/adt-cli/commit/2816dd4))
+- **adk:** remove false from isEmpty in checkMetadataUnchanged ([7b3bbeb](https://github.com/abapify/adt-cli/commit/7b3bbeb))
+- **adt-diff:** use .acds extension for CDS DDL diff display ([b1357ac](https://github.com/abapify/adt-cli/commit/b1357ac))
+- **adt-diff:** align zage_tabl test expectations with fixture ([591ea22](https://github.com/abapify/adt-cli/commit/591ea22))
+- **adt-export:** convert static import of lazy-loaded library to dynamic import ([a5ded59](https://github.com/abapify/adt-cli/commit/a5ded59))
+- **cds-to-abapgit:** stop emitting LANGDEP, CLIDEP, POSITION from CDS source ([0d06b3c](https://github.com/abapify/adt-cli/commit/0d06b3c))
+- **cds-to-abapgit:** correct DD03P field ordering to match SAP ([20a4ac7](https://github.com/abapify/adt-cli/commit/20a4ac7))
+- **cds-to-abapgit:** detect CLIDEP for client-dependent tables ([50e1200](https://github.com/abapify/adt-cli/commit/50e1200))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.1.8 (2026-03-11)
 
 ### 🚀 Features

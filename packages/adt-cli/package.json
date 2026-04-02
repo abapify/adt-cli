@@ -4,7 +4,7 @@
     "access": "public"
   },
   "type": "module",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",

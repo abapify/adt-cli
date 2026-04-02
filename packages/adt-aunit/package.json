@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "ABAP Unit Test CLI plugin for adt-cli with JUnit XML output for GitLab CI",
   "type": "module",
   "main": "./dist/index.mjs",

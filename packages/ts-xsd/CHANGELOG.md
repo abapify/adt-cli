@@ -1,0 +1,16 @@
+## 0.2.0 (2026-04-02)
+
+### 🚀 Features
+
+- fix ADT export XML serialization and live-test on BTP + on-prem ([dbe608b](https://github.com/abapify/adt-cli/commit/dbe608b))
+
+### 🩹 Fixes
+
+- address remaining SonarQube findings - complexity, duplication, and code quality ([11a3408](https://github.com/abapify/adt-cli/commit/11a3408))
+- address all SonarQube findings for PR #81 ([#81](https://github.com/abapify/adt-cli/issues/81))
+- preserve targetNamespace xmlns in stripUnusedNamespaces + null guard in config-loader ([caad1a5](https://github.com/abapify/adt-cli/commit/caad1a5))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+- ThePlenkov @ThePlenkov

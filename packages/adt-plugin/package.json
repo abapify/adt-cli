@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.8",
+  "version": "0.2.0",
   "type": "module",
   "description": "ADT Plugin interface and factory for abapify",
   "types": "./dist/index.d.mts",

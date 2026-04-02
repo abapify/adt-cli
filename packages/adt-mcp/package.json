@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "MCP server for SAP ADT operations – exposes adt-cli features as MCP tools",
   "type": "module",
   "types": "./dist/index.d.mts",
