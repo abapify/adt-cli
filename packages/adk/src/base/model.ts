@@ -466,7 +466,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
     // For updates with pending sources, compare with SAP before locking.
     // This avoids acquiring a lock only to discover nothing changed.
-    if (hasPendingSources && mode !== 'create') {
+    if (hasPendingSources) {
       await this.checkPendingSourcesUnchanged();
       if (this._unchanged) {
         return this;
@@ -478,7 +478,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     // are checked; SAP's extra metadata (timestamps, links, etc.) is ignored.
     // Empty-like values (null, "", false, [], {}) are treated as equivalent
     // to handle SAP's default normalization. Works for DDIC types.
-    if (!hasPendingSources && mode !== 'create') {
+    if (!hasPendingSources) {
       await this.checkMetadataUnchanged();
       if (this._unchanged) {
         return this;
@@ -497,10 +497,9 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       }
     }
 
-    // Lock if not already locked (skip for create mode - object doesn't exist yet)
+    // Lock if not already locked (create mode already returned above)
     const wasLocked = this.isLocked;
-    const needsLock = mode !== 'create';
-    if (needsLock && !wasLocked) {
+    if (!wasLocked) {
       try {
         await this.lock(transport);
       } catch (e) {
@@ -531,11 +530,11 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       // SAP changes the object's internal version when a lock is acquired,
       // which invalidates all cached ETags (metadata AND source).
       // Without this, the subsequent PUT sends a stale If-Match header → HTTP 412.
-      if (needsLock && !wasLocked) {
+      if (!wasLocked) {
         await this.refreshETagsAfterLock();
       }
 
-      if (hasPendingSources && mode !== 'create') {
+      if (hasPendingSources) {
         // Save sources only - skip metadata PUT which SAP often rejects
         await this.savePendingSources({
           lockHandle: this._lockHandle?.handle,
@@ -560,7 +559,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       if (mode === 'upsert' && this.shouldFallbackToCreate(e)) {
         // Unlock before falling back to create — the lock from the upsert
         // attempt blocks the POST (create) request on BTP systems.
-        if (needsLock && !wasLocked) {
+        if (!wasLocked) {
           try {
             await this.unlock();
           } catch {
@@ -577,7 +576,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       throw e;
     } finally {
       // Unlock if we locked it
-      if (needsLock && !wasLocked) {
+      if (!wasLocked) {
         await this.unlock();
       }
     }

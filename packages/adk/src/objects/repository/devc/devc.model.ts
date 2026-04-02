@@ -170,11 +170,11 @@ export class AdkPackage
 
       // Return as AbapObject array
       return objRefs.map((ref) => ({
+        kind: ref.type ?? '',
         type: ref.type ?? '',
         name: ref.name,
         description: ref.description ?? '',
-        uri: ref.uri ?? '',
-        packageName: ref.packageName ?? '',
+        package: ref.packageName ?? '',
       }));
     });
   }
