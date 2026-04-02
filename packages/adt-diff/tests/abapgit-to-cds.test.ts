@@ -19,7 +19,9 @@ import {
 // Fixture helpers
 // ============================================
 
-async function loadFixture(key: keyof typeof fixtures.ddic.tabl): Promise<string> {
+async function loadFixture(
+  key: keyof typeof fixtures.ddic.tabl,
+): Promise<string> {
   return fixtures.ddic.tabl[key].load();
 }
 
