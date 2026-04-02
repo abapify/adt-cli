@@ -11,3 +11,5 @@ e2e/
 # - Imports @abapify/adt-codegen which creates false circular dependencies
 #   (adt-contracts:codegen → adt-codegen:build → ... → adt-contracts:build)
 **/adt.config.ts
+
+git_modules/
