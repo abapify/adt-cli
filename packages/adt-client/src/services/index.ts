@@ -18,3 +18,10 @@ export {
   type CreateTransportOptions,
   type ListTransportsOptions,
 } from './transports';
+
+export {
+  UserService,
+  createUserService,
+  type UserInfo,
+  type CurrentUserInfo,
+} from './users';
