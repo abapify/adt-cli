@@ -11,6 +11,8 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./commands/export": "./dist/commands/export.mjs",
+    "./commands/roundtrip": "./dist/commands/roundtrip.mjs",
+    "./commands/activate": "./dist/commands/activate.mjs",
     "./package.json": "./package.json"
   },
   "files": [
@@ -26,9 +28,13 @@
     "abapgit"
   ],
   "dependencies": {
-    "@abapify/adt-plugin": "^0.1.7",
     "@abapify/adk": "^0.1.7",
-    "@abapify/adt-plugin-abapgit": "^0.1.7"
+    "@abapify/adt-locks": "^0.1.8",
+    "@abapify/adt-plugin": "^0.1.7",
+    "@abapify/adt-plugin-abapgit": "^0.1.7",
+    "chalk": "^5.6.2",
+    "diff": "^8.0.3",
+    "fast-xml-parser": "^5.5.5"
   },
   "module": "./dist/index.mjs"
 }

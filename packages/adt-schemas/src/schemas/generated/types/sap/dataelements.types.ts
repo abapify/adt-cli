@@ -6,43 +6,34 @@
  */
 
 export type DataelementsSchema = {
-  dataElement: {
-    typeKind:
-      | 'domain'
-      | 'predefinedAbapType'
-      | 'refToPredefinedAbapType'
-      | 'refToDictionaryType'
-      | 'refToClifType';
-    typeName?: string;
-    dataType?: string;
-    dataTypeLength?: number;
-    dataTypeLengthEnabled?: boolean;
-    dataTypeDecimals?: number;
-    dataTypeDecimalsEnabled?: boolean;
-    shortFieldLabel?: string;
-    shortFieldLength?: number;
-    shortFieldMaxLength?: number;
-    mediumFieldLabel?: string;
-    mediumFieldLength?: number;
-    mediumFieldMaxLength?: number;
-    longFieldLabel?: string;
-    longFieldLength?: number;
-    longFieldMaxLength?: number;
-    headingFieldLabel?: string;
-    headingFieldLength?: number;
-    headingFieldMaxLength?: number;
-    searchHelp?: string;
-    searchHelpParameter?: string;
-    setGetParameter?: string;
-    defaultComponentName?: string;
-    deactivateInputHistory?: boolean;
-    changeDocument?: boolean;
-    leftToRightDirection?: boolean;
-    deactivateBIDIFiltering?: boolean;
-    documentationStatus?:
-      | 'required'
-      | 'notUsedInScreens'
-      | 'explainedByShortText'
-      | 'postponed';
-  };
+    dataElement: {
+        typeKind: "domain" | "predefinedAbapType" | "refToPredefinedAbapType" | "refToDictionaryType" | "refToClifType";
+        typeName?: string;
+        dataType?: string;
+        dataTypeLength?: number;
+        dataTypeLengthEnabled?: boolean;
+        dataTypeDecimals?: number;
+        dataTypeDecimalsEnabled?: boolean;
+        shortFieldLabel?: string;
+        shortFieldLength?: number;
+        shortFieldMaxLength?: number;
+        mediumFieldLabel?: string;
+        mediumFieldLength?: number;
+        mediumFieldMaxLength?: number;
+        longFieldLabel?: string;
+        longFieldLength?: number;
+        longFieldMaxLength?: number;
+        headingFieldLabel?: string;
+        headingFieldLength?: number;
+        headingFieldMaxLength?: number;
+        searchHelp?: string;
+        searchHelpParameter?: string;
+        setGetParameter?: string;
+        defaultComponentName?: string;
+        deactivateInputHistory?: boolean;
+        changeDocument?: boolean;
+        leftToRightDirection?: boolean;
+        deactivateBIDIFiltering?: boolean;
+        documentationStatus?: "required" | "notUsedInScreens" | "explainedByShortText" | "postponed";
+    };
 };

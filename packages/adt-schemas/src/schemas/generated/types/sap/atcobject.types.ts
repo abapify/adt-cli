@@ -6,23 +6,48 @@
  */
 
 export type AtcobjectSchema = {
-  object: {
-    extension?: unknown;
-    findings: {
-      finding?: {
+    object: {
         extension?: unknown;
-        quickfixes: {
-          manual?: boolean;
-          automatic?: boolean;
-          pseudo?: boolean;
-          ai_enabled?: boolean;
-          aiBasedQF?: boolean;
-        };
-        tags?: {
-          tag?: {
-            name?: string;
-            value?: string;
-          }[];
+        findings: {
+            finding?: {
+                extension?: unknown;
+                quickfixes: {
+                    manual?: boolean;
+                    automatic?: boolean;
+                    pseudo?: boolean;
+                    ai_enabled?: boolean;
+                    aiBasedQF?: boolean;
+                };
+                tags?: {
+                    tag?: {
+                        name?: string;
+                        value?: string;
+                    }[];
+                };
+                uri?: string;
+                parentUri?: string;
+                type?: string;
+                name?: string;
+                packageName?: string;
+                description?: string;
+                location?: string;
+                effectOnTransports?: string;
+                priority?: string;
+                checkTitle?: string;
+                checkId?: string;
+                messageTitle?: string;
+                messageId?: string;
+                exemptionKind?: string;
+                exemptionApproval?: string;
+                noExemption?: string;
+                quickfixInfo?: string;
+                contactPerson?: string;
+                lastChangedBy?: string;
+                processor?: string;
+                checksum?: number;
+                remarkText?: string;
+                remarkLink?: string;
+            }[];
         };
         uri?: string;
         parentUri?: string;
@@ -30,32 +55,7 @@ export type AtcobjectSchema = {
         name?: string;
         packageName?: string;
         description?: string;
-        location?: string;
-        effectOnTransports?: string;
-        priority?: string;
-        checkTitle?: string;
-        checkId?: string;
-        messageTitle?: string;
-        messageId?: string;
-        exemptionKind?: string;
-        exemptionApproval?: string;
-        noExemption?: string;
-        quickfixInfo?: string;
-        contactPerson?: string;
-        lastChangedBy?: string;
-        processor?: string;
-        checksum?: number;
-        remarkText?: string;
-        remarkLink?: string;
-      }[];
+        author?: string;
+        objectTypeId?: string;
     };
-    uri?: string;
-    parentUri?: string;
-    type?: string;
-    name?: string;
-    packageName?: string;
-    description?: string;
-    author?: string;
-    objectTypeId?: string;
-  };
 };

@@ -5,48 +5,45 @@
  * Mode: Flattened
  */
 
-export type DomaSchema =
-  | {
-      abapGit: {
+export type DomaSchema = {
+    abapGit: {
         abap: {
-          values: {
-            DD01V?: {
-              DOMNAME: string;
-              DDLANGUAGE?: string;
-              DATATYPE?: string;
-              LENG?: string;
-              OUTPUTLEN?: string;
-              DECIMALS?: string;
-              LOWERCASE?: string;
-              SIGNFLAG?: string;
-              VALEXI?: string;
-              ENTITYTAB?: string;
-              CONVEXIT?: string;
-              DDTEXT?: string;
-              DOMMASTER?: string;
+            values: {
+                DD01V?: {
+                    DOMNAME: string;
+                    DDLANGUAGE?: string;
+                    DATATYPE?: string;
+                    LENG?: string;
+                    OUTPUTLEN?: string;
+                    DECIMALS?: string;
+                    LOWERCASE?: string;
+                    SIGNFLAG?: string;
+                    VALEXI?: string;
+                    ENTITYTAB?: string;
+                    CONVEXIT?: string;
+                    DDTEXT?: string;
+                    DOMMASTER?: string;
+                };
+                DD07V_TAB?: {
+                    DD07V?: {
+                        DOMNAME?: string;
+                        VALPOS?: string;
+                        DDLANGUAGE?: string;
+                        DOMVALUE_L?: string;
+                        DOMVALUE_H?: string;
+                        DDTEXT?: string;
+                    }[];
+                };
             };
-            DD07V_TAB?: {
-              DD07V?: {
-                DOMNAME?: string;
-                VALPOS?: string;
-                DDLANGUAGE?: string;
-                DOMVALUE_L?: string;
-                DOMVALUE_H?: string;
-                DDTEXT?: string;
-              }[];
-            };
-          };
-          version?: string;
+            version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-      };
-    }
-  | {
-      abap: {
-        values: {
-          DD01V?: {
+    };
+} | {
+    values: {
+        DD01V?: {
             DOMNAME: string;
             DDLANGUAGE?: string;
             DATATYPE?: string;
@@ -60,18 +57,47 @@ export type DomaSchema =
             CONVEXIT?: string;
             DDTEXT?: string;
             DOMMASTER?: string;
-          };
-          DD07V_TAB?: {
+        };
+        DD07V_TAB?: {
             DD07V?: {
-              DOMNAME?: string;
-              VALPOS?: string;
-              DDLANGUAGE?: string;
-              DOMVALUE_L?: string;
-              DOMVALUE_H?: string;
-              DDTEXT?: string;
+                DOMNAME?: string;
+                VALPOS?: string;
+                DDLANGUAGE?: string;
+                DOMVALUE_L?: string;
+                DOMVALUE_H?: string;
+                DDTEXT?: string;
             }[];
-          };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DD01V?: {
+                DOMNAME: string;
+                DDLANGUAGE?: string;
+                DATATYPE?: string;
+                LENG?: string;
+                OUTPUTLEN?: string;
+                DECIMALS?: string;
+                LOWERCASE?: string;
+                SIGNFLAG?: string;
+                VALEXI?: string;
+                ENTITYTAB?: string;
+                CONVEXIT?: string;
+                DDTEXT?: string;
+                DOMMASTER?: string;
+            };
+            DD07V_TAB?: {
+                DD07V?: {
+                    DOMNAME?: string;
+                    VALPOS?: string;
+                    DDLANGUAGE?: string;
+                    DOMVALUE_L?: string;
+                    DOMVALUE_H?: string;
+                    DDTEXT?: string;
+                }[];
+            };
         };
         version?: string;
-      };
     };
+};

@@ -6,15 +6,15 @@
  */
 
 export type AtctagdescriptionSchema = {
-  descriptionTags: {
-    tagWithDescription?: {
-      name: string;
-      descriptions: {
-        description?: {
-          value?: string;
-          description?: string;
+    descriptionTags: {
+        tagWithDescription?: {
+            name: string;
+            descriptions: {
+                description?: {
+                    value?: string;
+                    description?: string;
+                }[];
+            };
         }[];
-      };
-    }[];
-  };
+    };
 };

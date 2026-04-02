@@ -14,6 +14,9 @@
 // Base types
 export type { AbapObject } from './base/types';
 export type { AdkContext } from './base/context';
+export type { LockRegistry, LockEntry } from './base/lock-registry';
+export type { LockStore, LockService } from '@abapify/adt-locks';
+export { createLockService } from '@abapify/adt-locks';
 export {
   AdkObject,
   AdkMainObject,
@@ -44,6 +47,7 @@ export type {
   PackageResponse,
   ProgramResponse,
   FunctionGroupResponse,
+  FunctionModuleResponse,
   TransportGetResponse,
   DomainResponse,
   DataElementResponse,
@@ -105,6 +109,13 @@ export type {
   FunctionGroupXml, // Raw API response type
 } from './objects/repository/fugr';
 export { AdkFunctionGroup } from './objects/repository/fugr';
+
+// Function module types and class (child of function group)
+export type {
+  AbapFunctionModule,
+  FunctionModuleXml, // Raw API response type
+} from './objects/repository/fugr';
+export { AdkFunctionModule } from './objects/repository/fugr';
 
 // DDIC types and classes
 export {
@@ -168,7 +179,13 @@ export {
   isTypeRegistered,
   getRegisteredTypes,
   getRegisteredKinds,
+  getEndpointForType,
+  getObjectUri,
+  getObjectRootUri,
+  normalizeObjectName,
   ADT_TYPE_MAPPINGS,
+  type NameTransform,
+  type RegisterObjectTypeOptions,
 } from './base/registry';
 
 // ADK kinds and type mapping

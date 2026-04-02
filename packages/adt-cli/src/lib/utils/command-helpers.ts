@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { createCliLogger } from './logger-config';
 import type { Logger } from '@abapify/logger';
+import { IconRegistry } from './icon-registry';
 
 /**
  * Extract global options from a command by traversing up to the root
@@ -45,9 +46,10 @@ export function handleCommandError(error: unknown, operation: string): never {
 
 /**
  * Detailed error handler for import commands (transport / package).
- * Prints error message, code, HTTP status, cause, and stack trace then exits.
+ * Prints error message, code, HTTP status, and cause then exits.
+ * Stack traces are only shown when --debug is enabled.
  */
-export function handleImportError(error: unknown): never {
+export function handleImportError(error: unknown, debug = false): never {
   const errorMsg = error instanceof Error ? error.message : String(error);
   const errorCode =
     error instanceof Error && 'code' in error
@@ -77,8 +79,42 @@ export function handleImportError(error: unknown): never {
         : '';
     console.error(`   Cause: ${causeMsg}${causeCode ? ` (${causeCode})` : ''}`);
   }
-  if (error instanceof Error && error.stack) {
+  if (debug && error instanceof Error && error.stack) {
     console.error(`   Stack: ${error.stack}`);
   }
   process.exit(1);
+}
+
+/**
+ * Display import results in a standard format.
+ *
+ * Used by both `import transport` and `import package` commands to
+ * avoid duplicating the same output formatting code.
+ */
+export function displayImportResults(
+  result: {
+    description: string;
+    results: { success: number; skipped: number; failed: number };
+    objectsByType: Record<string, number>;
+    outputPath: string;
+  },
+  label: string,
+  identifier: string,
+): void {
+  console.log(`\n✅ ${label} import complete!`);
+  console.log(`📦 ${label}: ${identifier}`);
+  console.log(`📝 Description: ${result.description}`);
+  console.log(
+    `📊 Results: ${result.results.success} success, ${result.results.skipped} skipped, ${result.results.failed} failed`,
+  );
+
+  if (Object.keys(result.objectsByType).length > 0) {
+    console.log(`\n📋 Objects by type:`);
+    for (const [type, count] of Object.entries(result.objectsByType)) {
+      const icon = IconRegistry.getIcon(type);
+      console.log(`   ${icon} ${type}: ${count}`);
+    }
+  }
+
+  console.log(`\n✨ Files written to: ${result.outputPath}`);
 }

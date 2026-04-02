@@ -69,6 +69,7 @@ export type { ClassResponse, InterfaceResponse } from '@abapify/adt-contracts';
 export type { Package as PackageResponse } from '@abapify/adt-contracts';
 export type { ProgramResponse } from '@abapify/adt-contracts';
 export type { FunctionGroupResponse } from '@abapify/adt-contracts';
+export type { FunctionModuleResponse } from '@abapify/adt-contracts';
 export type {
   DomainResponse,
   DataElementResponse,

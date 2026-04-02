@@ -49,7 +49,7 @@ export interface BulkSaveOptions extends SaveOptions {
   /** Continue saving remaining objects if one fails (default: true) */
   continueOnError?: boolean;
   /** Callback for progress reporting */
-  onProgress?: (saved: number, total: number, current: AdkObject) => void;
+  onProgress?: (processed: number, total: number, current: AdkObject) => void;
 }
 
 /**
@@ -80,9 +80,14 @@ export class AdkObjectSet {
 
   /**
    * Add a single object to the set
+   *
+   * Propagates the set's context (lockService, lockStore) to the object
+   * so that objects created by plugins with a bare { client } context
+   * inherit the services configured on the set.
    */
   add(object: AdkObject): this {
     if (!this.objects.includes(object)) {
+      object.adoptContext(this.ctx);
       this.objects.push(object);
     }
     return this;
@@ -184,6 +189,7 @@ export class AdkObjectSet {
 
     const total = this.objects.length;
     let saved = 0;
+    let processed = 0;
 
     for (const obj of this.objects) {
       try {
@@ -198,7 +204,6 @@ export class AdkObjectSet {
           result.success++;
           result.results.push({ object: obj, success: true });
         }
-        onProgress?.(saved, total, obj);
       } catch (error) {
         result.failed++;
         result.results.push({
@@ -208,9 +213,13 @@ export class AdkObjectSet {
         });
 
         if (!continueOnError) {
+          processed++;
+          onProgress?.(processed, total, obj);
           break;
         }
       }
+      processed++;
+      onProgress?.(processed, total, obj);
     }
 
     return result;
@@ -250,14 +259,17 @@ export class AdkObjectSet {
 </adtcore:objectReferences>`;
 
     try {
-      const response = await this.ctx.client.fetch('/sap/bc/adt/activation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/xml',
-          Accept: 'application/xml',
+      const response = await this.ctx.client.fetch(
+        '/sap/bc/adt/activation?method=activate&preauditRequested=true',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/xml',
+            Accept: 'application/xml',
+          },
+          body: activationXml,
         },
-        body: activationXml,
-      });
+      );
 
       // NOTE: Could parse actual response XML for detailed messages
       return {
@@ -312,6 +324,41 @@ export class AdkObjectSet {
         }
 
         activationResult = await savedSet.activateAll();
+
+        // Step 2b: Retry deferred sources after activation
+        // Some includes (e.g., testclasses) may not exist until activation creates them
+        for (const r of saveResult.results) {
+          if (!r.success) continue;
+          const obj = r.object as any;
+          const deferred = obj._deferredSources as
+            | [string, string][]
+            | undefined;
+          if (deferred && deferred.length > 0) {
+            try {
+              // Re-lock for deferred source saves
+              const lock = await r.object.lock();
+              for (const [key, source] of deferred) {
+                await obj.saveIncludeSource(key, source, {
+                  lockHandle: lock.handle,
+                  transport: saveOptions.transport,
+                });
+              }
+              delete obj._deferredSources;
+              // Re-activate after saving deferred sources
+              const deferredSet = new AdkObjectSet(this.ctx);
+              deferredSet.add(r.object);
+              await deferredSet.activateAll();
+            } catch {
+              // Deferred source retry failed — not critical, continue
+            } finally {
+              try {
+                await r.object.unlock();
+              } catch {
+                // Ignore unlock failures
+              }
+            }
+          }
+        }
       }
 
       return {

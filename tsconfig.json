@@ -77,6 +77,21 @@
     },
     {
       "path": "./packages/adt-export"
+    },
+    {
+      "path": "./packages/adt-aunit"
+    },
+    {
+      "path": "./packages/adt-mcp"
+    },
+    {
+      "path": "./packages/acds"
+    },
+    {
+      "path": "./packages/adt-diff"
+    },
+    {
+      "path": "./packages/adt-locks"
     }
   ]
 }

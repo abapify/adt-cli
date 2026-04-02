@@ -5,7 +5,12 @@
 import { AdkClass, type ClassIncludeType } from '../adk';
 import { clas } from '../../../schemas/generated';
 import { createHandler } from '../base';
-import { sapLangToIso, isoToSapLang } from '../lang';
+import {
+  sapLangToIso,
+  isoToSapLang,
+  abapLangVerToAdt,
+  abapLangVerFromAdt,
+} from '../lang';
 
 /**
  * Map ADK ClassIncludeType to abapGit file suffix convention
@@ -29,6 +34,26 @@ const SUFFIX_TO_SOURCE_KEY = Object.fromEntries(
     .filter(([, suffix]) => suffix !== undefined)
     .map(([key, suffix]) => [suffix, key]),
 ) as Record<string, ClassIncludeType>;
+
+/**
+ * Map ADT category enum → abapGit numeric code
+ * SAP ADT returns string names, abapGit uses numeric codes from SEOCLASSDF-CATEGORY
+ */
+const CATEGORY_FROM_ADT: Record<string, string> = {
+  generalObjectType: '00',
+  exitClass: '01',
+  testClass: '02',
+  areaClass: '03',
+  factoryClass: '04',
+  persistentClass: '30',
+  exceptionClass: '40',
+  bspClass: '60',
+  staticTypedLcpClass: '70',
+  behaviorPool: '80',
+  rfcProxyClass: '90',
+  entityEventHandler: '100',
+  communicationConnectionClass: '110',
+};
 
 /**
  * Map visibility to EXPOSURE code (ADK → abapGit)
@@ -58,9 +83,18 @@ export const classHandler = createHandler(AdkClass, {
   toAbapGit: (cls) => {
     const data = cls.dataSync;
     const includes = data.include ?? [];
-    const hasTestClasses = includes.some(
-      (inc) => String(inc.includeType) === 'testclasses',
-    );
+    const hasTestClasses =
+      includes.some((inc) => String(inc.includeType) === 'testclasses') ||
+      (data as any).hasTests === true ||
+      (data as any).withUnitTests === true;
+
+    // Map ADT category enum to abapGit numeric code, omit default (00)
+    const categoryCode =
+      CATEGORY_FROM_ADT[data.category ?? ''] ?? data.category ?? '00';
+
+    // Map visibility to EXPOSURE code, omit default (2 = public)
+    const exposureCode =
+      VISIBILITY_TO_EXPOSURE[data.visibility ?? 'public'] ?? '2';
 
     return {
       VSEOCLASS: {
@@ -72,9 +106,9 @@ export const classHandler = createHandler(AdkClass, {
         DESCRIPT: data.description ?? '',
         STATE: '1', // Active
 
-        // Class attributes - access via dataSync.*
-        CATEGORY: data.category ?? '00',
-        EXPOSURE: VISIBILITY_TO_EXPOSURE[data.visibility ?? 'public'] ?? '2',
+        // Class attributes — omit defaults (abapGit convention)
+        CATEGORY: categoryCode !== '00' ? categoryCode : undefined,
+        EXPOSURE: exposureCode !== '2' ? exposureCode : undefined,
         CLSFINAL: data.final ? 'X' : undefined,
         CLSABSTRCT: data.abstract ? 'X' : undefined,
         SHRM_ENABLED: data.sharedMemoryEnabled ? 'X' : undefined,
@@ -82,14 +116,14 @@ export const classHandler = createHandler(AdkClass, {
         // Source attributes
         CLSCCINCL: 'X', // Class constructor include
         FIXPT: data.fixPointArithmetic ? 'X' : undefined,
-        UNICODE: data.activeUnicodeCheck ? 'X' : undefined,
+        UNICODE: 'X', // Always true on modern SAP systems
 
         // References
         REFCLSNAME: data.superClassRef?.name,
         MSG_ID: data.messageClassRef?.name,
 
         // ABAP language version
-        ABAP_LANGUAGE_VERSION: data.abapLanguageVersion,
+        ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(data.abapLanguageVersion),
 
         // Test classes flag
         ...(hasTestClasses ? { WITH_UNIT_TESTS: 'X' } : {}),
@@ -130,6 +164,9 @@ export const classHandler = createHandler(AdkClass, {
     fixPointArithmetic: VSEOCLASS?.FIXPT === 'X',
     activeUnicodeCheck: VSEOCLASS?.UNICODE === 'X',
 
+    // Test classes flag (preserved for roundtrip when includes are not available)
+    withUnitTests: VSEOCLASS?.WITH_UNIT_TESTS === 'X',
+
     // References (name only - URI resolved by ADK)
     superClassRef: VSEOCLASS?.REFCLSNAME
       ? { name: VSEOCLASS.REFCLSNAME }
@@ -137,7 +174,7 @@ export const classHandler = createHandler(AdkClass, {
     messageClassRef: VSEOCLASS?.MSG_ID ? { name: VSEOCLASS.MSG_ID } : undefined,
 
     // ABAP language version
-    abapLanguageVersion: VSEOCLASS?.ABAP_LANGUAGE_VERSION,
+    abapLanguageVersion: abapLangVerToAdt(VSEOCLASS?.ABAP_LANGUAGE_VERSION),
   }),
 
   // Git → SAP: Set source files on ADK object (symmetric with getSources)

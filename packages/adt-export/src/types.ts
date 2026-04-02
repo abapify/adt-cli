@@ -21,6 +21,8 @@ export interface ExportResult {
   failed: number;
   /** Detailed object results */
   objects: ExportObjectResult[];
+  /** Package verification results (only when --verify is used) */
+  verification?: VerificationResult;
 }
 
 /**
@@ -30,6 +32,34 @@ export interface ExportObjectResult {
   type: string;
   name: string;
   status: 'saved' | 'activated' | 'skipped' | 'failed';
+  error?: string;
+}
+
+/**
+ * Package verification result
+ */
+export interface VerificationResult {
+  /** Total objects verified */
+  total: number;
+  /** Objects in the correct package */
+  correct: number;
+  /** Objects in the wrong package */
+  mismatched: number;
+  /** Objects that couldn't be verified (e.g., load failed) */
+  errors: number;
+  /** Detailed per-object results */
+  details: VerificationDetail[];
+}
+
+/**
+ * Per-object verification detail
+ */
+export interface VerificationDetail {
+  type: string;
+  name: string;
+  expectedPackage: string;
+  actualPackage?: string;
+  status: 'correct' | 'mismatched' | 'error';
   error?: string;
 }
 

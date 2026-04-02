@@ -2,6 +2,7 @@
 
 import { Command } from 'commander';
 import {
+  importObjectCommand,
   importPackageCommand,
   importTransportCommand,
   searchCommand,
@@ -19,6 +20,10 @@ import {
   createReplCommand,
   packageGetCommand,
   lsCommand,
+  unlockCommand,
+  lockCommand,
+  locksCommand,
+  checkCommand,
 } from './commands';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
@@ -190,6 +195,7 @@ export async function createCLI(options?: {
     .command('import')
     .description('Import ABAP objects to various formats (abapGit, etc.)');
 
+  importCmd.addCommand(importObjectCommand);
   importCmd.addCommand(importPackageCommand);
   importCmd.addCommand(importTransportCommand);
 
@@ -198,6 +204,18 @@ export async function createCLI(options?: {
 
   // Deploy command moved to @abapify/adt-export plugin
   // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
+
+  // Lock command (acquire lock, persist handle)
+  program.addCommand(lockCommand);
+
+  // Unlock command (force-release stale locks)
+  program.addCommand(unlockCommand);
+
+  // Locks command (list/cleanup persisted lock handles)
+  program.addCommand(locksCommand);
+
+  // Check command (syntax check / checkruns)
+  program.addCommand(checkCommand);
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());

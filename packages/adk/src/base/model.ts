@@ -14,21 +14,17 @@
  */
 
 import type { AdkContext } from './context';
+import type { AdtClient } from './adt';
 import type { AdkKind } from './kinds';
+import type { LockHandle } from '@abapify/adt-locks';
+import { toText } from './fetch-utils';
 
-/**
- * Lock handle returned by lock operations
- */
-export interface LockHandle {
-  handle: string;
-  correlationNumber?: string;
-  correlationUser?: string;
-}
+export type { LockHandle } from '@abapify/adt-locks';
 
 /**
  * Save mode for create/update operations
  * - 'update': PUT to existing object (default, fails if doesn't exist)
- * - 'create': POST to create new object (fails if already exists)
+ * - 'create': POST to create new object (skips POST if already exists, then updates)
  * - 'upsert': Try PUT first, fall back to POST if 404
  */
 export type SaveMode = 'update' | 'create' | 'upsert';
@@ -152,7 +148,13 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     return lastSlash > 0 ? uri.substring(0, lastSlash) : uri;
   }
 
-  protected readonly ctx: AdkContext;
+  protected ctx: AdkContext;
+
+  /** Public access to the ADT client for plugins and external code */
+  get client(): AdtClient {
+    return this.ctx.client;
+  }
+
   protected _data?: D;
   protected _name: string;
   protected cache = new Map<string, unknown>();
@@ -178,6 +180,21 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       // Cast to access name property which may exist on schema-inferred types
       this._name = (dataOrName as AdkObjectData).name;
     }
+  }
+
+  // ============================================
+  // Context Management
+  // ============================================
+
+  /**
+   * Adopt a richer context (merge services into existing context).
+   *
+   * Used by AdkObjectSet to propagate lockService / lockStore
+   * to objects created by plugins that only have { client }.
+   * Keeps the original client reference intact.
+   */
+  adoptContext(ctx: AdkContext): void {
+    this.ctx = { ...this.ctx, ...ctx };
   }
 
   // ============================================
@@ -348,7 +365,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   /**
    * Lock the object for modification
    *
-   * Uses the CRUD contract's lock() method.
+   * Delegates to the lock service (single lock mechanism).
    *
    * The lock response contains:
    * - LOCK_HANDLE: Required for subsequent PUT/unlock operations
@@ -361,67 +378,41 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   async lock(transport?: string): Promise<LockHandle> {
     if (this._lockHandle) return this._lockHandle;
 
-    const contract = this.crudContract;
-    if (!contract?.lock) {
+    const lockService = this.ctx.lockService;
+    if (!lockService) {
       throw new Error(
-        `Lock not supported for ${this.kind}. Provide crudContract with lock() method.`,
+        `Lock not available: no lockService in context. Did you call initializeAdk()?`,
       );
     }
 
-    // Use contract's lock method
-    const response = await contract.lock(this.name, { corrNr: transport });
+    this._lockHandle = await lockService.lock(this.objectUri, {
+      transport,
+      objectName: this.name,
+      objectType: this.kind,
+    });
 
-    // Parse lock response XML
-    // Response format: <asx:abap>...<DATA><LOCK_HANDLE>xxx</LOCK_HANDLE><CORRNR>yyy</CORRNR>...</DATA>...</asx:abap>
-    const responseText = String(response);
-    this._lockHandle = this.parseLockResponse(responseText);
     return this._lockHandle;
   }
 
   /**
    * Unlock the object
    *
-   * Uses the CRUD contract's unlock() method.
+   * Delegates to the lock service (single lock mechanism).
    */
   async unlock(): Promise<void> {
     if (!this._lockHandle) return;
 
-    const contract = this.crudContract;
-    if (!contract?.unlock) {
+    const lockService = this.ctx.lockService;
+    if (!lockService) {
       throw new Error(
-        `Unlock not supported for ${this.kind}. Provide crudContract with unlock() method.`,
+        `Unlock not available: no lockService in context. Did you call initializeAdk()?`,
       );
     }
 
-    // Use contract's unlock method
-    await contract.unlock(this.name, { lockHandle: this._lockHandle.handle });
+    await lockService.unlock(this.objectUri, {
+      lockHandle: this._lockHandle.handle,
+    });
     this._lockHandle = undefined;
-  }
-
-  /**
-   * Parse lock response XML to extract lock handle and correlation info
-   */
-  protected parseLockResponse(responseText: string): LockHandle {
-    const lockHandleMatch = responseText.match(
-      /<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/,
-    );
-
-    if (!lockHandleMatch) {
-      // Don't expose raw SAP response in error message for security
-      throw new Error(
-        'Failed to parse lock handle from SAP response. The response format may have changed.',
-      );
-    }
-
-    // Extract CORRNR (transport request) - this is the transport assigned to the object
-    const corrNrMatch = responseText.match(/<CORRNR>([^<]+)<\/CORRNR>/);
-    const corrUserMatch = responseText.match(/<CORRUSER>([^<]+)<\/CORRUSER>/);
-
-    return {
-      handle: lockHandleMatch[1],
-      correlationNumber: corrNrMatch?.[1],
-      correlationUser: corrUserMatch?.[1],
-    };
   }
 
   /**
@@ -447,8 +438,8 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
    *
    * Modes:
    * - 'update' (default): PUT to existing object
-   * - 'create': POST to create new object
-   * - 'upsert': Try PUT first, fall back to POST if 404
+   * - 'create': POST skeleton, then lock → PUT/source → unlock (Eclipse ADT pattern)
+   * - 'upsert': Check existence, create if needed, then update
    *
    * @param options - Save options
    * @returns this (for chaining)
@@ -459,28 +450,77 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     // Reset per-save-attempt state
     this._unchanged = false;
 
+    // Create mode: POST skeleton, then continue with update flow.
+    // This follows the Eclipse ADT pattern:
+    //   1. POST minimal object (name, description, package)
+    //   2. Lock → PUT full metadata / PUT source → Unlock → Activate
+    //
+    // Before POSTing, check if the object already exists on SAP.
+    // This prevents "already exists" / "already locked" errors when
+    // re-running a deploy against objects that were partially created
+    // (e.g. stale CTS locks on BTP that survive object deletion).
+    if (mode === 'create') {
+      const alreadyExists = await this.checkObjectExists();
+      if (!alreadyExists) {
+        await this.saveViaContract('create', { transport });
+      }
+      // Object now exists — update with full data + sources
+      return this.save({ ...options, mode: 'update' });
+    }
+
     // Check if object has pending sources (from abapGit deserialization)
     const hasPendingSources = this.hasPendingSources();
 
     // For updates with pending sources, compare with SAP before locking.
     // This avoids acquiring a lock only to discover nothing changed.
-    if (hasPendingSources && mode !== 'create') {
+    if (hasPendingSources) {
       await this.checkPendingSourcesUnchanged();
       if (this._unchanged) {
         return this;
       }
     }
 
-    // Lock if not already locked (skip for create mode - object doesn't exist yet)
+    // For metadata-only objects (no pending sources), fetch SAP state and
+    // compare using recursive subset match. Only fields present in local data
+    // are checked; SAP's extra metadata (timestamps, links, etc.) is ignored.
+    // Empty-like values (null, "", false, [], {}) are treated as equivalent
+    // to handle SAP's default normalization. Works for DDIC types.
+    if (!hasPendingSources) {
+      await this.checkMetadataUnchanged();
+      if (this._unchanged) {
+        return this;
+      }
+    }
+
+    // For upsert mode, check existence before locking.
+    // On BTP, locking a non-existent DDIC object creates a draft that
+    // persists even after unlock, blocking subsequent POST (create) attempts.
+    // A lightweight GET avoids this problem entirely.
+    let confirmedExists = false;
+    if (mode === 'upsert') {
+      confirmedExists = await this.checkObjectExists();
+      if (!confirmedExists) {
+        return this.fallbackToCreate(options);
+      }
+    }
+
+    // Lock if not already locked (create mode already returned above)
     const wasLocked = this.isLocked;
-    const needsLock = mode !== 'create';
-    if (needsLock && !wasLocked) {
+    if (!wasLocked) {
       try {
         await this.lock(transport);
       } catch (e) {
         // For upsert, fallback to create if object doesn't exist (404)
-        // or endpoint doesn't support the operation (405 - common for DDIC types)
-        if (mode === 'upsert' && this.shouldFallbackToCreate(e)) {
+        // or endpoint doesn't support the operation (405 - common for DDIC types).
+        // But ONLY if checkObjectExists hasn't already confirmed the object exists.
+        // If the object exists and LOCK fails (e.g., 403 S_ABPLNGVS), it's a real
+        // auth error — falling back to create would just produce a confusing
+        // "already exists" error.
+        if (
+          mode === 'upsert' &&
+          !confirmedExists &&
+          this.shouldFallbackToCreate(e)
+        ) {
           return this.fallbackToCreate(options);
         }
         throw e;
@@ -493,7 +533,15 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       const effectiveTransport =
         transport ?? this._lockHandle?.correlationNumber;
 
-      if (hasPendingSources && mode !== 'create') {
+      // Refresh cached ETags after locking.
+      // SAP changes the object's internal version when a lock is acquired,
+      // which invalidates all cached ETags (metadata AND source).
+      // Without this, the subsequent PUT sends a stale If-Match header → HTTP 412.
+      if (!wasLocked) {
+        await this.refreshETagsAfterLock();
+      }
+
+      if (hasPendingSources) {
         // Save sources only - skip metadata PUT which SAP often rejects
         await this.savePendingSources({
           lockHandle: this._lockHandle?.handle,
@@ -514,8 +562,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
       return this;
     } catch (e: unknown) {
-      // For upsert with PUT failure (404/405), try POST (create)
+      // For upsert with PUT failure (404/405/S_ABPLNGVS), try POST (create)
       if (mode === 'upsert' && this.shouldFallbackToCreate(e)) {
+        // Unlock before falling back to create — the lock from the upsert
+        // attempt blocks the POST (create) request on BTP systems.
+        if (!wasLocked) {
+          try {
+            await this.unlock();
+          } catch {
+            // ignore unlock errors during fallback
+          }
+        }
         return this.fallbackToCreate(options);
       }
       // If PUT returns 422 "already exists" directly in upsert mode
@@ -526,7 +583,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       throw e;
     } finally {
       // Unlock if we locked it
-      if (needsLock && !wasLocked) {
+      if (!wasLocked) {
         await this.unlock();
       }
     }
@@ -558,7 +615,10 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
    * Generic implementation using wrapperKey and crudContract.
    * Objects that don't support save leave wrapperKey/crudContract undefined.
    *
-   * @param mode - 'create' (POST) or 'update' (PUT)
+   * For 'create' mode: POSTs skeleton data (minimal fields).
+   * For 'update' mode: PUTs full data (all fields except abapLanguageVersion).
+   *
+   * @param mode - 'create' (POST skeleton) or 'update' (PUT full)
    * @param options - Contract options (transport, lockHandle)
    */
   protected async saveViaContract(
@@ -572,16 +632,84 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       throw new Error(`Save not supported for ${this.kind}.`);
     }
 
-    const data = { [wrapperKey]: await this.data() };
-
     if (mode === 'create') {
+      // POST skeleton — minimal fields only (Eclipse ADT pattern)
+      const skeleton = await this.getSkeletonData();
+      const data = { [wrapperKey]: skeleton };
       await contract.post({ corrNr: options.transport }, data);
     } else {
+      const rawData = await this.data();
+
+      // Strip abapLanguageVersion from the payload.
+      // Eclipse ADT never sends this attribute — SAP infers it from the package.
+      // Including it triggers S_ABPLNGVS authorization checks that fail on BTP.
+      const { abapLanguageVersion: _, ...rest } = rawData as Record<
+        string,
+        unknown
+      >;
+      const saveData = rest;
+      const data = { [wrapperKey]: saveData };
+
+      // Ensure fresh ETag before PUT.
+      // The lock POST and other intermediate requests may cache an ETag
+      // under the same URL that differs from the object's current ETag.
+      // A fresh GET right before PUT guarantees the If-Match header is correct.
+      if (contract.get) {
+        try {
+          await contract.get(this.name);
+        } catch {
+          this.ctx.client.clearETag();
+        }
+      }
+
       await contract.put(
         this.name,
         { corrNr: options.transport, lockHandle: options.lockHandle },
         data,
       );
+    }
+  }
+
+  /**
+   * Get skeleton data for object creation (POST).
+   *
+   * Returns only the minimal fields needed to create the object on SAP.
+   * SAP creates the object structure (includes, etc.) from these fields.
+   * Full metadata and source code are sent via PUT in the update step.
+   *
+   * Override in subclasses that need different skeleton fields.
+   */
+  protected async getSkeletonData(): Promise<Record<string, unknown>> {
+    const rawData = await this.data();
+    const d = rawData as Record<string, unknown>;
+    return {
+      name: d.name,
+      type: d.type,
+      description: d.description ?? '',
+      language: d.language ?? 'EN',
+      masterLanguage: d.masterLanguage ?? 'EN',
+      packageRef: d.packageRef,
+    };
+  }
+
+  /**
+   * Check if the object exists on the SAP system.
+   *
+   * Used by upsert mode to decide between update and create paths upfront.
+   * On BTP, locking a non-existent DDIC object creates a draft that persists
+   * even after unlock, blocking subsequent POST (create) attempts. Checking
+   * existence first with GET avoids this problem entirely.
+   */
+  protected async checkObjectExists(): Promise<boolean> {
+    const contract = this.crudContract;
+    if (!contract?.get) return true; // assume exists if no contract
+    try {
+      await contract.get(this.name);
+      return true;
+    } catch (e) {
+      if (this.shouldFallbackToCreate(e)) return false;
+      // Unexpected error — rethrow; the caller will handle it.
+      throw e;
     }
   }
 
@@ -620,11 +748,18 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
    * In upsert mode, both should trigger a fallback to POST (create).
    */
   protected shouldFallbackToCreate(e: unknown): boolean {
-    return (
-      this.isNotFoundError(e) ||
-      (e instanceof Error &&
-        (e.message.includes('405') || e.message.includes('Method Not Allowed')))
-    );
+    if (this.isNotFoundError(e)) return true;
+    if (e instanceof Error) {
+      const msg = e.message;
+      if (msg.includes('405') || msg.includes('Method Not Allowed'))
+        return true;
+      // S_ABPLNGVS 403 on PUT: BTP creates a draft when locking a new DDIC
+      // object, so the lock succeeds even though the object doesn't exist.
+      // The subsequent PUT fails with S_ABPLNGVS. Fall back to POST (create)
+      // which handles language version authorization correctly.
+      if (msg.includes('403') && msg.includes('S_ABPLNGVS')) return true;
+    }
+    return false;
   }
 
   /**
@@ -680,7 +815,7 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
         `${this.objectUri}/source/main`,
         { method: 'GET', headers: { Accept: 'text/plain' } },
       );
-      const currentSource = await response.text();
+      const currentSource = await toText(response);
       if (
         this.normalizeSource(currentSource) ===
         this.normalizeSource(self._pendingSource)
@@ -690,6 +825,120 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       }
     } catch {
       // Source doesn't exist on SAP (404) — needs saving
+    }
+  }
+
+  /**
+   * Check if metadata-only objects are unchanged on SAP.
+   *
+   * For objects without source code (DDIC types like DOMA, DTEL, TABL, TTYP),
+   * fetches the current SAP state and compares only the fields present in
+   * the local data. SAP returns extra volatile fields (timestamps, links,
+   * version, etc.) that are ignored — only semantic fields matter.
+   */
+  protected async checkMetadataUnchanged(): Promise<void> {
+    const contract = this.crudContract;
+    const wrapperKey = this.wrapperKey;
+    if (!contract?.get || !wrapperKey) return;
+
+    try {
+      const sapResponse = await contract.get(this.name);
+      const sapData = sapResponse?.[wrapperKey];
+      if (!sapData) return;
+
+      const localData = await this.data();
+
+      // Recursive subset match: checks that every field in `local`
+      // has the same value in `sap`. Extra fields in `sap` are ignored.
+      // "Empty-like" values (null, undefined, "", false, [], {}) are treated
+      // as equivalent, since SAP normalizes defaults differently than
+      // abapGit serialization (e.g., style "" → "00", missing → false).
+      const isEmpty = (v: unknown): boolean =>
+        v == null ||
+        v === '' ||
+        v === false ||
+        (Array.isArray(v) && v.length === 0) ||
+        (typeof v === 'object' && v !== null && Object.keys(v).length === 0);
+
+      const isSubsetMatch = (local: unknown, sap: unknown): boolean => {
+        if (local === sap) return true;
+
+        // Both empty-like → match (handles null/undefined/""/false/[]/{}
+        // combinations between local and SAP representations)
+        if (isEmpty(local) && isEmpty(sap)) return true;
+
+        // Local is empty-like but SAP has a value → "use default" match
+        // (SAP may store a different representation of the default)
+        if (isEmpty(local) && sap != null) return true;
+
+        if (local == null || sap == null) return false;
+        if (typeof local !== typeof sap) return false;
+
+        if (Array.isArray(local)) {
+          if (!Array.isArray(sap)) return false;
+          if (local.length !== sap.length) return false;
+          return local.every((item, i) => isSubsetMatch(item, sap[i]));
+        }
+
+        if (typeof local === 'object') {
+          const localObj = local as Record<string, unknown>;
+          const sapObj = sap as Record<string, unknown>;
+          return Object.keys(localObj).every((key) => {
+            if (key === 'abapLanguageVersion') return true;
+            return isSubsetMatch(localObj[key], sapObj[key]);
+          });
+        }
+
+        return local === sap;
+      };
+
+      if (isSubsetMatch(localData, sapData)) {
+        this._unchanged = true;
+      }
+    } catch {
+      // Object doesn't exist on SAP (404) or comparison failed — needs saving
+    }
+  }
+
+  /**
+   * Refresh cached ETags after acquiring a lock.
+   *
+   * SAP changes the object's internal version when a lock is acquired,
+   * which invalidates any cached ETags. Without refreshing, the next
+   * PUT sends a stale If-Match header and SAP returns HTTP 412.
+   *
+   * For objects with pending sources: re-GET {objectUri}/source/main
+   * For metadata-only objects: re-GET via crudContract.get()
+   *
+   * Subclasses with multiple source endpoints (e.g., AdkClass with includes)
+   * should override this to refresh all relevant endpoints.
+   */
+  protected async refreshETagsAfterLock(): Promise<void> {
+    if (this.hasPendingSources()) {
+      // Re-fetch source to refresh cached ETag for the source URL
+      const sourceUrl = `${this.objectUri}/source/main`;
+      try {
+        await this.ctx.client.fetch(sourceUrl, {
+          method: 'GET',
+          headers: { Accept: 'text/plain' },
+        });
+      } catch {
+        // Source endpoint may not exist yet (new object) — clear any stale
+        // ETag so the subsequent PUT won't send a stale If-Match header
+        this.ctx.client.clearETag(sourceUrl);
+      }
+    } else {
+      // Re-fetch metadata to refresh cached ETag for the metadata URL
+      const contract = this.crudContract;
+      if (contract?.get) {
+        try {
+          await contract.get(this.name);
+        } catch {
+          // Clear all ETags — we can't easily reconstruct the metadata URL
+          // since the contract may use a different path than objectUri
+          this.ctx.client.clearETag();
+        }
+      }
     }
   }
 
@@ -707,19 +956,29 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     const self = this as unknown as { _pendingSource?: string };
     if (!self._pendingSource) return;
 
+    const sourceUrl = `${this.objectUri}/source/main`;
+
+    // Ensure fresh ETag for the source URL before PUT.
+    // Intermediate requests (lock POST, etc.) may leave a stale ETag cached.
+    try {
+      await this.ctx.client.fetch(sourceUrl, {
+        method: 'GET',
+        headers: { Accept: 'text/plain' },
+      });
+    } catch {
+      this.ctx.client.clearETag(sourceUrl);
+    }
+
     const params = new URLSearchParams();
     if (options?.lockHandle) params.set('lockHandle', options.lockHandle);
     if (options?.transport) params.set('corrNr', options.transport);
 
     const qs = params.toString();
-    await this.ctx.client.fetch(
-      `${this.objectUri}/source/main${qs ? '?' + qs : ''}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
-        body: self._pendingSource,
-      },
-    );
+    await this.ctx.client.fetch(`${sourceUrl}${qs ? '?' + qs : ''}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'text/plain' },
+      body: self._pendingSource,
+    });
 
     delete self._pendingSource;
   }
@@ -793,14 +1052,17 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   <adtcore:objectReference adtcore:uri="${this.objectUri}" adtcore:type="${this.type}" adtcore:name="${this.name}"/>
 </adtcore:objectReferences>`;
 
-    await this.ctx.client.fetch('/sap/bc/adt/activation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/xml',
-        Accept: 'application/xml',
+    await this.ctx.client.fetch(
+      '/sap/bc/adt/activation?method=activate&preauditRequested=true',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/xml',
+          Accept: 'application/xml',
+        },
+        body: activationXml,
       },
-      body: activationXml,
-    });
+    );
 
     return this;
   }
@@ -844,6 +1106,33 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   protected invalidate(key: string): void {
     this.cache.delete(key);
     this.dirty.delete(key);
+  }
+
+  // ============================================
+  // Public Fetch Utilities
+  // ============================================
+
+  /**
+   * Fetch a text resource from an ADT endpoint.
+   * Delegates to the underlying ADT client's fetch.
+   *
+   * @param url - ADT endpoint path (e.g., '/sap/bc/adt/ddic/dataelements/spras')
+   * @param headers - Optional HTTP headers (defaults to no Accept header, letting server choose)
+   * @returns Response content as text, or undefined if 404
+   */
+  async fetchText(
+    url: string,
+    headers?: Record<string, string>,
+  ): Promise<string | undefined> {
+    try {
+      const response = await this.ctx.client.fetch(url, {
+        method: 'GET',
+        headers: headers ?? {},
+      });
+      return toText(response);
+    } catch {
+      return undefined;
+    }
   }
 }
 

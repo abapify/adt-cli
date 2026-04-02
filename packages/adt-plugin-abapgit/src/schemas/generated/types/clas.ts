@@ -5,43 +5,40 @@
  * Mode: Flattened
  */
 
-export type ClasSchema =
-  | {
-      abapGit: {
+export type ClasSchema = {
+    abapGit: {
         abap: {
-          values: {
-            VSEOCLASS?: {
-              CLSNAME: string;
-              LANGU?: string;
-              DESCRIPT?: string;
-              STATE?: string;
-              CATEGORY?: string;
-              EXPOSURE?: string;
-              CLSFINAL?: string;
-              CLSABSTRCT?: string;
-              CLSCCINCL?: string;
-              FIXPT?: string;
-              UNICODE?: string;
-              WITH_UNIT_TESTS?: string;
-              DURATION?: string;
-              RISK?: string;
-              MSG_ID?: string;
-              REFCLSNAME?: string;
-              SHRM_ENABLED?: string;
-              ABAP_LANGUAGE_VERSION?: string;
+            values: {
+                VSEOCLASS?: {
+                    CLSNAME: string;
+                    LANGU?: string;
+                    DESCRIPT?: string;
+                    STATE?: string;
+                    CATEGORY?: string;
+                    EXPOSURE?: string;
+                    CLSFINAL?: string;
+                    CLSABSTRCT?: string;
+                    CLSCCINCL?: string;
+                    FIXPT?: string;
+                    UNICODE?: string;
+                    WITH_UNIT_TESTS?: string;
+                    DURATION?: string;
+                    RISK?: string;
+                    MSG_ID?: string;
+                    REFCLSNAME?: string;
+                    SHRM_ENABLED?: string;
+                    ABAP_LANGUAGE_VERSION?: string;
+                };
             };
-          };
-          version?: string;
+            version?: string;
         };
         version: string;
         serializer: string;
         serializer_version: string;
-      };
-    }
-  | {
-      abap: {
-        values: {
-          VSEOCLASS?: {
+    };
+} | {
+    values: {
+        VSEOCLASS?: {
             CLSNAME: string;
             LANGU?: string;
             DESCRIPT?: string;
@@ -60,8 +57,32 @@ export type ClasSchema =
             REFCLSNAME?: string;
             SHRM_ENABLED?: string;
             ABAP_LANGUAGE_VERSION?: string;
-          };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            VSEOCLASS?: {
+                CLSNAME: string;
+                LANGU?: string;
+                DESCRIPT?: string;
+                STATE?: string;
+                CATEGORY?: string;
+                EXPOSURE?: string;
+                CLSFINAL?: string;
+                CLSABSTRCT?: string;
+                CLSCCINCL?: string;
+                FIXPT?: string;
+                UNICODE?: string;
+                WITH_UNIT_TESTS?: string;
+                DURATION?: string;
+                RISK?: string;
+                MSG_ID?: string;
+                REFCLSNAME?: string;
+                SHRM_ENABLED?: string;
+                ABAP_LANGUAGE_VERSION?: string;
+            };
         };
         version?: string;
-      };
     };
+};

@@ -6,12 +6,13 @@
  */
 
 import type { AdkObject, AdkKind } from '@abapify/adk';
-import { getTypeForKind } from '@abapify/adk';
+import { getTypeForKind, getMainType } from '@abapify/adk';
 import type {
   AbapGitSchema,
   InferAbapGitType,
   InferValuesType,
 } from './abapgit-schema';
+import { formatAbapGitXml } from './xml-format';
 
 /**
  * Extract the data type (D) from an AdkObject<K, D>
@@ -109,16 +110,22 @@ const handlerRegistry = new Map<AbapObjectType, ObjectHandler>();
 
 /**
  * Get handler for object type
+ *
+ * Tries the full type first (e.g., 'TABL/DS'), then falls back to the
+ * main type (e.g., 'CLAS/OC' → 'CLAS'). This matches ADK's resolveType()
+ * behaviour and handles quickSearch results that return subtypes.
  */
 export function getHandler(type: AbapObjectType): ObjectHandler | undefined {
-  return handlerRegistry.get(type);
+  return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
 /**
  * Check if object type is supported
+ *
+ * Tries the full type first, then falls back to the main type.
  */
 export function isSupported(type: AbapObjectType): boolean {
-  return handlerRegistry.has(type);
+  return handlerRegistry.has(type) || handlerRegistry.has(getMainType(type));
 }
 
 /**
@@ -374,7 +381,7 @@ export function createHandler<
     type = derivedType;
   }
 
-  const fileExtension = type.toLowerCase();
+  const fileExtension = getMainType(type).toLowerCase();
 
   // Create handler context with utilities
   const ctx: HandlerContext<T, InferAbapGitType<TSchema>> = {
@@ -403,6 +410,7 @@ export function createHandler<
       // Construct full AbapGitType payload
       const fullPayload = {
         abap: {
+          version: '1.0', // Explicit version attribute for asx:abap
           values,
         },
         version: definition.version,
@@ -411,7 +419,9 @@ export function createHandler<
       } as InferAbapGitType<TSchema>;
 
       // Build XML with pretty formatting for readability
-      return definition.schema.build(fullPayload, { pretty: true });
+      const xml = definition.schema.build(fullPayload, { pretty: true });
+
+      return formatAbapGitXml(xml);
     },
 
     createFile(

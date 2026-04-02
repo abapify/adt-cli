@@ -6,90 +6,90 @@
  */
 
 export type AunitResultSchema = {
-  runResult: {
-    program?: {
-      testClasses?: {
-        testClass?: {
-          testMethods?: {
-            testMethod?: {
-              alerts?: {
+    runResult: {
+        program?: {
+            testClasses?: {
+                testClass?: {
+                    testMethods?: {
+                        testMethod?: {
+                            alerts?: {
+                                alert?: {
+                                    title?: string;
+                                    details?: {
+                                        detail?: {
+                                            text?: string;
+                                        }[];
+                                    };
+                                    stack?: {
+                                        stackEntry?: {
+                                            uri?: string;
+                                            type?: string;
+                                            name?: string;
+                                            description?: string;
+                                        }[];
+                                    };
+                                    kind?: string;
+                                    severity?: string;
+                                }[];
+                            };
+                            uri?: string;
+                            name?: string;
+                            executionTime?: string;
+                            uriType?: string;
+                            unit?: string;
+                        }[];
+                    };
+                    alerts?: {
+                        alert?: {
+                            title?: string;
+                            details?: {
+                                detail?: {
+                                    text?: string;
+                                }[];
+                            };
+                            stack?: {
+                                stackEntry?: {
+                                    uri?: string;
+                                    type?: string;
+                                    name?: string;
+                                    description?: string;
+                                }[];
+                            };
+                            kind?: string;
+                            severity?: string;
+                        }[];
+                    };
+                    uri?: string;
+                    name?: string;
+                    uriType?: string;
+                    durationCategory?: string;
+                    riskLevel?: string;
+                }[];
+            };
+            alerts?: {
                 alert?: {
-                  title?: string;
-                  details?: {
-                    detail?: {
-                      text?: string;
-                    }[];
-                  };
-                  stack?: {
-                    stackEntry?: {
-                      uri?: string;
-                      type?: string;
-                      name?: string;
-                      description?: string;
-                    }[];
-                  };
-                  kind?: string;
-                  severity?: string;
+                    title?: string;
+                    details?: {
+                        detail?: {
+                            text?: string;
+                        }[];
+                    };
+                    stack?: {
+                        stackEntry?: {
+                            uri?: string;
+                            type?: string;
+                            name?: string;
+                            description?: string;
+                        }[];
+                    };
+                    kind?: string;
+                    severity?: string;
                 }[];
-              };
-              uri?: string;
-              name?: string;
-              executionTime?: string;
-              uriType?: string;
-              unit?: string;
-            }[];
-          };
-          alerts?: {
-            alert?: {
-              title?: string;
-              details?: {
-                detail?: {
-                  text?: string;
-                }[];
-              };
-              stack?: {
-                stackEntry?: {
-                  uri?: string;
-                  type?: string;
-                  name?: string;
-                  description?: string;
-                }[];
-              };
-              kind?: string;
-              severity?: string;
-            }[];
-          };
-          uri?: string;
-          name?: string;
-          uriType?: string;
-          durationCategory?: string;
-          riskLevel?: string;
+            };
+            uri?: string;
+            type?: string;
+            name?: string;
+            uriType?: string;
         }[];
-      };
-      alerts?: {
-        alert?: {
-          title?: string;
-          details?: {
-            detail?: {
-              text?: string;
-            }[];
-          };
-          stack?: {
-            stackEntry?: {
-              uri?: string;
-              type?: string;
-              name?: string;
-              description?: string;
-            }[];
-          };
-          kind?: string;
-          severity?: string;
-        }[];
-      };
-      uri?: string;
-      type?: string;
-      name?: string;
-      uriType?: string;
-    }[];
-  };
+    };
 };

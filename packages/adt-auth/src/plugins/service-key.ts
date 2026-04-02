@@ -1,4 +1,5 @@
 import { createServer, type Server } from 'node:http';
+import { spawn } from 'node:child_process';
 import { parse as parseUrl } from 'node:url';
 import type { AuthPlugin, AuthPluginOptions, CookieAuthResult } from '../types';
 import {
@@ -15,6 +16,46 @@ import {
 const DEFAULT_PORT = 3000;
 const DEFAULT_REDIRECT_PATH = '/callback';
 const DEFAULT_TIMEOUT_MS = 300_000; // 5 minutes
+const MAX_PORT_RETRIES = 5; // Try up to 5 consecutive ports on EADDRINUSE
+
+/**
+ * Copy text to system clipboard (best-effort, never throws).
+ * Tries platform-appropriate commands: pbcopy (macOS), clip.exe (WSL), xclip/xsel (Linux).
+ */
+async function copyToClipboard(text: string): Promise<void> {
+  const candidates =
+    process.platform === 'darwin'
+      ? [['pbcopy']]
+      : process.platform === 'win32'
+        ? [['clip']]
+        : [
+            ['clip.exe'],
+            ['xclip', '-selection', 'clipboard'],
+            ['xsel', '--clipboard'],
+          ];
+
+  for (const [cmd, ...args] of candidates) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(cmd, args, {
+          stdio: ['pipe', 'ignore', 'ignore'],
+        });
+        child.on('error', reject);
+        child.on('close', (code) =>
+          code === 0
+            ? resolve()
+            : reject(new Error(`${cmd} exited with code ${code}`)),
+        );
+        child.stdin.write(text);
+        child.stdin.end();
+      });
+      return;
+    } catch {
+      continue;
+    }
+  }
+  throw new Error('No clipboard utility available');
+}
 
 interface OAuthTokenResponse {
   access_token: string;
@@ -231,27 +272,85 @@ const authPlugin: AuthPlugin = {
       }
     }
 
-    const port = typeof callbackPort === 'number' ? callbackPort : DEFAULT_PORT;
+    const startPort =
+      typeof callbackPort === 'number' ? callbackPort : DEFAULT_PORT;
     const timeout =
       typeof timeoutMs === 'number' ? timeoutMs : DEFAULT_TIMEOUT_MS;
 
-    const tokenData = await performPkceFlow(
-      parsed,
-      browserOpener,
-      port,
-      timeout,
-      typeof redirectUri === 'string' ? redirectUri : undefined,
-    );
+    // Extract log from options (passed by AuthManager during refresh, or by CLI)
+    const log = (options as { log?: (msg: string) => void }).log ?? console.log;
 
-    const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
+    // Wrap browser opener: always print the URL and try clipboard copy before opening
+    const wrappedBrowserOpener = async (url: string) => {
+      log(`🔗 Open this URL to authenticate:\n   ${url}`);
 
-    return {
-      method: 'cookie',
-      credentials: {
-        cookies: `Authorization: Bearer ${tokenData.access_token}`,
-        expiresAt,
-      },
+      try {
+        await copyToClipboard(url);
+        log('📋 URL copied to clipboard');
+      } catch {
+        // Clipboard not available — URL is already printed above
+      }
+
+      await browserOpener(url);
     };
+
+    // Try ports starting from startPort, retrying on EADDRINUSE
+    const hasExplicitRedirect = typeof redirectUri === 'string';
+    let lastError: Error | undefined;
+
+    for (let attempt = 0; attempt < MAX_PORT_RETRIES; attempt++) {
+      const port = startPort + attempt;
+      // When redirectUri is explicitly set, use it as-is (don't rewrite for new port)
+      const effectiveRedirectUri = hasExplicitRedirect
+        ? redirectUri
+        : undefined;
+
+      try {
+        const tokenData = await performPkceFlow(
+          parsed,
+          wrappedBrowserOpener,
+          port,
+          timeout,
+          effectiveRedirectUri,
+        );
+
+        const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
+
+        return {
+          method: 'cookie',
+          credentials: {
+            cookies: `Authorization: Bearer ${tokenData.access_token}`,
+            expiresAt,
+          },
+        };
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          'code' in err &&
+          (err as NodeJS.ErrnoException).code === 'EADDRINUSE'
+        ) {
+          // When an explicit redirectUri is set, retrying on a different port
+          // is pointless because the OAuth callback will still go to the
+          // original port encoded in the redirect URI.
+          if (hasExplicitRedirect) {
+            throw new Error(
+              `Port ${port} is in use and redirectUri is explicitly set — cannot retry on a different port`,
+              { cause: err },
+            );
+          }
+          lastError = err;
+          log(`⚠️  Port ${port} in use, trying ${port + 1}...`);
+          continue;
+        }
+        throw err; // Non-port error — rethrow immediately
+      }
+    }
+
+    throw new Error(
+      `All ports ${startPort}-${startPort + MAX_PORT_RETRIES - 1} are in use. ` +
+        `Free a port or set callbackPort in plugin options.`,
+      { cause: lastError },
+    );
   },
 };
 

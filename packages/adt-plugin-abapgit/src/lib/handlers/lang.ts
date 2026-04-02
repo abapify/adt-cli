@@ -65,3 +65,46 @@ export function isoToSapLang(isoLang: string | undefined): string {
   if (upper.length === 1) return upper;
   return ISO_TO_SAP[upper] ?? 'E';
 }
+
+// ============================================
+// ABAP Language Version mapping
+// ============================================
+
+/**
+ * abapGit numeric code → ADT API string value
+ *
+ * abapGit serializes ABAP_LANGUAGE_VERSION as a numeric string (e.g. "5").
+ * SAP ADT REST API expects descriptive strings (e.g. "cloudDevelopment").
+ */
+const ABAP_LANG_VER_TO_ADT: Record<string, string> = {
+  '2': 'keyUser',
+  '5': 'cloudDevelopment',
+};
+const ABAP_LANG_VER_FROM_ADT: Record<string, string> = Object.fromEntries(
+  Object.entries(ABAP_LANG_VER_TO_ADT).map(([k, v]) => [v, k]),
+);
+
+/**
+ * Convert abapGit ABAP_LANGUAGE_VERSION code to ADT API value.
+ * Returns undefined if not set or standard ABAP.
+ * Passes through values that are already in ADT format (e.g. "cloudDevelopment").
+ */
+export function abapLangVerToAdt(
+  abapGitCode: string | undefined,
+): string | undefined {
+  if (!abapGitCode) return undefined;
+  return ABAP_LANG_VER_TO_ADT[abapGitCode] ?? abapGitCode;
+}
+
+/**
+ * Convert ADT API abapLanguageVersion to abapGit ABAP_LANGUAGE_VERSION code.
+ * Returns undefined if not set or standard ABAP (default — should not be emitted).
+ */
+export function abapLangVerFromAdt(
+  adtValue: string | undefined,
+): string | undefined {
+  if (!adtValue) return undefined;
+  // Standard ABAP is the default — omit from abapGit XML
+  if (adtValue === 'standard' || adtValue === 'X') return undefined;
+  return ABAP_LANG_VER_FROM_ADT[adtValue] ?? adtValue;
+}

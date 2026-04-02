@@ -73,6 +73,62 @@ client.fetch('/arbitrary/endpoint', { method: 'GET' })
 
 See [SERVICE-ARCHITECTURE.md](./docs/SERVICE-ARCHITECTURE.md) for detailed examples.
 
+## SAP Security Session Protocol (CRITICAL)
+
+**Locks are bound to the security session.** A CSRF token obtained without the security session flow is NOT valid for lock/unlock operations.
+
+### Eclipse ADT 3-Step Flow (What We Implement)
+
+```
+1. GET /sap/bc/adt/core/http/sessions
+   + x-sap-security-session: create
+   → Creates security session, returns session URL in atom:link
+
+2. GET /sap/bc/adt/core/http/sessions
+   + x-sap-security-session: use
+   + x-csrf-token: Fetch
+   → Returns CSRF token BOUND to the security session
+
+3. DELETE /sap/bc/adt/core/http/sessions/<ID>
+   + x-sap-security-session: use
+   + x-csrf-token: <token from step 2>
+   → Destroys session (frees slot — SAP allows 1 per user)
+   → CSRF token REMAINS VALID after deletion
+
+4. All subsequent requests automatically include:
+   + x-sap-security-session: use
+   → Lock/unlock use the same CSRF token
+```
+
+**Implementation**: `SessionManager.initializeCsrf()` in `src/utils/session.ts`
+
+### Key Invariants
+
+| Rule                                            | Why                                              |
+| ----------------------------------------------- | ------------------------------------------------ |
+| Always create security session before any write | CSRF token must be session-bound                 |
+| Always DELETE the session after getting CSRF    | SAP limits 1 security session per user           |
+| Never clear session state on lock-conflict 403  | Destroys CSRF → breaks all subsequent locks      |
+| All requests get `x-sap-security-session: use`  | SessionManager adds it via `getRequestHeaders()` |
+
+### 403 Error Handling
+
+The adapter distinguishes lock conflicts from auth failures:
+
+- **Lock conflict** (`ExceptionResourceNoAccess` + "currently editing"): Session is PRESERVED. The object is locked by another session, but our session is still valid.
+- **Auth/CSRF failure** (any other 403): Session is cleared and will re-initialize on next write.
+
+### Session URL Extraction
+
+The session URL comes from the create response XML:
+
+```xml
+<atom:link href="/sap/bc/adt/core/http/sessions/2A020DE92DC311F1..."
+           rel="http://www.sap.com/adt/categories/core/http/sessions/securitysession"/>
+```
+
+Parsed with: `/href="([^"]*\/sessions\/[^"]*)"/`
+
 ## Critical Rules
 
 ### Rule 0: NO CONSOLE USAGE

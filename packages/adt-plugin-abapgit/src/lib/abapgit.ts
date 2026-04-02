@@ -7,7 +7,7 @@ import type { AdtClient } from '@abapify/adk';
 import { AbapGitSerializer } from './serializer';
 import { getSupportedTypes, isSupported } from './handlers';
 import { deserialize } from './deserializer';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 import {
@@ -145,6 +145,8 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
   // Lifecycle hooks
   hooks: {
     async afterImport(targetPath) {
+      // Ensure target directory exists before writing metadata
+      mkdirSync(targetPath, { recursive: true });
       // Generate .abapgit.xml metadata file after import completes
       const abapgitXmlPath = join(targetPath, '.abapgit.xml');
       const abapgitXmlContent = generateAbapGitXml(currentFolderLogic);

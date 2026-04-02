@@ -5,129 +5,127 @@
  * Mode: Flattened
  */
 
-export type AtcresultSchema =
-  | {
-      resultList: {
+export type AtcresultSchema = {
+    resultList: {
         result?: {
-          displayId: string;
-          title: string;
-          checkVariant: string;
-          runSeries: string;
-          createdAt: string;
-          aggregates: {
-            numPrio1: number;
-            numPrio2: number;
-            numPrio3: number;
-            numPrio4: number;
-            numFailure: number;
-          };
-          objects: {
-            object?: {
-              extension?: unknown;
-              findings: {
-                finding?: {
-                  extension?: unknown;
-                  quickfixes: {
-                    manual?: boolean;
-                    automatic?: boolean;
-                    pseudo?: boolean;
-                    ai_enabled?: boolean;
-                    aiBasedQF?: boolean;
-                  };
-                  tags?: {
-                    tag?: {
-                      name?: string;
-                      value?: string;
-                    }[];
-                  };
-                  uri?: string;
-                  parentUri?: string;
-                  type?: string;
-                  name?: string;
-                  packageName?: string;
-                  description?: string;
-                  location?: string;
-                  effectOnTransports?: string;
-                  priority?: string;
-                  checkTitle?: string;
-                  checkId?: string;
-                  messageTitle?: string;
-                  messageId?: string;
-                  exemptionKind?: string;
-                  exemptionApproval?: string;
-                  noExemption?: string;
-                  quickfixInfo?: string;
-                  contactPerson?: string;
-                  lastChangedBy?: string;
-                  processor?: string;
-                  checksum?: number;
-                  remarkText?: string;
-                  remarkLink?: string;
+            displayId: string;
+            title: string;
+            checkVariant: string;
+            runSeries: string;
+            createdAt: string;
+            aggregates: {
+                numPrio1: number;
+                numPrio2: number;
+                numPrio3: number;
+                numPrio4: number;
+                numFailure: number;
+            };
+            objects: {
+                object?: {
+                    extension?: unknown;
+                    findings: {
+                        finding?: {
+                            extension?: unknown;
+                            quickfixes: {
+                                manual?: boolean;
+                                automatic?: boolean;
+                                pseudo?: boolean;
+                                ai_enabled?: boolean;
+                                aiBasedQF?: boolean;
+                            };
+                            tags?: {
+                                tag?: {
+                                    name?: string;
+                                    value?: string;
+                                }[];
+                            };
+                            uri?: string;
+                            parentUri?: string;
+                            type?: string;
+                            name?: string;
+                            packageName?: string;
+                            description?: string;
+                            location?: string;
+                            effectOnTransports?: string;
+                            priority?: string;
+                            checkTitle?: string;
+                            checkId?: string;
+                            messageTitle?: string;
+                            messageId?: string;
+                            exemptionKind?: string;
+                            exemptionApproval?: string;
+                            noExemption?: string;
+                            quickfixInfo?: string;
+                            contactPerson?: string;
+                            lastChangedBy?: string;
+                            processor?: string;
+                            checksum?: number;
+                            remarkText?: string;
+                            remarkLink?: string;
+                        }[];
+                    };
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                    author?: string;
+                    objectTypeId?: string;
                 }[];
-              };
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
-              author?: string;
-              objectTypeId?: string;
-            }[];
-          };
-          descriptionTags: {
-            tagWithDescription?: {
-              name: string;
-              descriptions: {
-                description?: {
-                  value?: string;
-                  description?: string;
+            };
+            descriptionTags: {
+                tagWithDescription?: {
+                    name: string;
+                    descriptions: {
+                        description?: {
+                            value?: string;
+                            description?: string;
+                        }[];
+                    };
                 }[];
-              };
-            }[];
-          };
-          scaAttributes?: {
-            scaAttribute?: {
-              attributeName?: string;
-              refAttributeName?: string;
-              label?: boolean;
-              labelS?: string;
-              labelM?: string;
-              labelL?: string;
-            }[];
-          };
-          infos: {
-            info?: {
-              type: string;
-              description: string;
-            }[];
-          };
+            };
+            scaAttributes?: {
+                scaAttribute?: {
+                    attributeName?: string;
+                    refAttributeName?: string;
+                    label?: boolean;
+                    labelS?: string;
+                    labelM?: string;
+                    labelL?: string;
+                }[];
+            };
+            infos: {
+                info?: {
+                    type: string;
+                    description: string;
+                }[];
+            };
         }[];
-      };
-    }
-  | {
-      queryChoice: {
+    };
+} | {
+    queryChoice: {
         activeResultQuery?: {
-          includeAggregates: boolean;
-          includeFindings: boolean;
-          contactPerson: string;
-          queryEnabled: boolean;
+            includeAggregates: boolean;
+            includeFindings: boolean;
+            contactPerson: string;
+            queryEnabled: boolean;
         };
         specificResultQuery?: {
-          includeAggregates: boolean;
-          includeFindings: boolean;
-          contactPerson: string;
-          queryEnabled: boolean;
-          displayId: string;
+            includeAggregates: boolean;
+            includeFindings: boolean;
+            contactPerson: string;
+            queryEnabled: boolean;
+            displayId: string;
         };
         userResultQuery?: {
-          includeAggregates: boolean;
-          includeFindings: boolean;
-          contactPerson: string;
-          queryEnabled: boolean;
-          createdBy: string;
-          ageMin: number;
-          ageMax: number;
+            includeAggregates: boolean;
+            includeFindings: boolean;
+            contactPerson: string;
+            queryEnabled: boolean;
+            createdBy: string;
+            ageMin: number;
+            ageMax: number;
         };
-      };
     };
+};

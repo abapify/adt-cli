@@ -76,4 +76,6 @@ export class AdkProgram extends AdkMainObject<typeof ProgramKind, ProgramXml> {
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('PROG', ProgramKind, AdkProgram);
+registerObjectType('PROG', ProgramKind, AdkProgram, {
+  endpoint: 'programs/programs',
+});

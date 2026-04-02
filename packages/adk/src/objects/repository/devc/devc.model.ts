@@ -113,6 +113,9 @@ export class AdkPackage
   async getSubpackages(): Promise<AbapPackage[]> {
     return this.lazy('subpackages', async () => {
       // Search for subpackages using repository search
+      // NOTE: SAP quickSearch with packageName is hierarchical — it returns
+      // ALL descendant DEVC packages, not just direct children. We load each
+      // package and then filter by superPackage to keep only direct children.
       const response =
         await this.ctx.client.adt.repository.informationsystem.search.quickSearch(
           {
@@ -129,13 +132,18 @@ export class AdkPackage
         (ref) => ref.type === 'DEVC/K' && ref.name !== this.name,
       );
 
-      // Create AdkPackage instances for each subpackage
-      return Promise.all(
+      // Load all candidate packages and filter to direct children only
+      const loaded = await Promise.all(
         subpkgRefs.map(async (ref) => {
           const pkg = new AdkPackage(this.ctx, ref.name);
           await pkg.load();
           return pkg;
         }),
+      );
+
+      return loaded.filter(
+        (pkg) =>
+          pkg.superPackage?.name?.toUpperCase() === this.name.toUpperCase(),
       );
     });
   }
@@ -162,11 +170,11 @@ export class AdkPackage
 
       // Return as AbapObject array
       return objRefs.map((ref) => ({
-        type: ref.type?.split('/')[0] ?? '', // Extract main type from "CLAS/OC" -> "CLAS"
+        kind: ref.type ?? '',
+        type: ref.type ?? '',
         name: ref.name,
         description: ref.description ?? '',
-        uri: ref.uri ?? '',
-        packageName: ref.packageName ?? '',
+        package: ref.packageName ?? '',
       }));
     });
   }
@@ -180,7 +188,15 @@ export class AdkPackage
         subpackages.map((pkg) => pkg.getAllObjects()),
       );
 
-      return [...direct, ...nested.flat()];
+      // Deduplicate by type+name — SAP quickSearch may return
+      // the same object at multiple package hierarchy levels
+      const seen = new Set<string>();
+      return [...direct, ...nested.flat()].filter((obj) => {
+        const key = `${obj.type}:${obj.name}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     });
   }
 
@@ -207,6 +223,39 @@ export class AdkPackage
   }
   protected override get crudContract(): any {
     return this.ctx.client.adt.packages;
+  }
+
+  /**
+   * Get skeleton data for package creation (POST).
+   *
+   * SAP requires ALL elements in the Package xs:sequence, even if empty.
+   * The sequence order is: attributes, superPackage, extensionAlias, switch,
+   * applicationComponent, transport, translation, useAccesses,
+   * packageInterfaces, subPackages.
+   * Missing elements cause "System expected the element ..." 400 errors.
+   */
+  protected override async getSkeletonData(): Promise<Record<string, unknown>> {
+    const rawData = await this.data();
+    const d = rawData as Record<string, unknown>;
+    return {
+      name: d.name,
+      type: d.type ?? 'DEVC/K',
+      description: d.description ?? '',
+      language: d.language ?? 'EN',
+      masterLanguage: d.masterLanguage ?? 'EN',
+      responsible: d.responsible ?? '',
+      // All xs:sequence elements required by SAP (even if empty)
+      attributes: d.attributes ?? { packageType: 'development' },
+      superPackage: d.superPackage ?? {},
+      extensionAlias: d.extensionAlias ?? {},
+      switch: d.switch ?? {},
+      applicationComponent: d.applicationComponent ?? {},
+      transport: d.transport ?? {},
+      translation: d.translation ?? {},
+      useAccesses: d.useAccesses ?? {},
+      packageInterfaces: d.packageInterfaces ?? {},
+      subPackages: d.subPackages ?? {},
+    };
   }
 
   // Lock/unlock inherited from AdkObject using generic lock service
@@ -264,12 +313,29 @@ export class AdkPackage
   ): Promise<AdkPackage> {
     const context = ctx ?? getGlobalContext();
     const pkg = new AdkPackage(context, name);
-    // Merge provided data with defaults
+    // SAP requires ALL elements in the Package sequence, even if empty.
+    // The sequence is: attributes, superPackage, extensionAlias, switch,
+    // applicationComponent, transport, translation, useAccesses,
+    // packageInterfaces, subPackages.
+    // Missing elements cause "System expected the element ..." errors.
     pkg.setData({
       name,
       type: 'DEVC/K',
       description: data.description ?? name,
       responsible: data.responsible ?? '',
+      attributes: {
+        packageType: 'development',
+        ...data.attributes,
+      },
+      superPackage: data.superPackage ?? {},
+      extensionAlias: data.extensionAlias ?? {},
+      switch: data.switch ?? {},
+      applicationComponent: data.applicationComponent ?? {},
+      transport: data.transport ?? {},
+      translation: data.translation ?? {},
+      useAccesses: data.useAccesses ?? {},
+      packageInterfaces: data.packageInterfaces ?? {},
+      subPackages: data.subPackages ?? {},
       ...data,
     } as PackageXml);
     await pkg.save({ transport: options?.transport, mode: 'create' });
@@ -279,4 +345,7 @@ export class AdkPackage
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('DEVC', PackageKind, AdkPackage);
+registerObjectType('DEVC', PackageKind, AdkPackage, {
+  endpoint: 'packages',
+  nameTransform: 'preserve',
+});

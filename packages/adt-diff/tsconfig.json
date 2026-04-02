@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "ES2022"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": "../adt-plugin-abapgit"
+    },
+    {
+      "path": "../adt-plugin"
+    },
+    {
+      "path": "../adt-contracts"
+    },
+    {
+      "path": "../adk"
+    },
+    {
+      "path": "../adt-fixtures"
+    }
+  ]
+}

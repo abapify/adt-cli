@@ -16,6 +16,9 @@
       "path": "../adt-export"
     },
     {
+      "path": "../adt-diff"
+    },
+    {
       "path": "../adt-atc"
     },
     {
@@ -35,6 +38,9 @@
     },
     {
       "path": "../adt-plugin/tsconfig.lib.json"
+    },
+    {
+      "path": "../adt-locks/tsconfig.lib.json"
     },
     {
       "path": "../adt-config/tsconfig.lib.json"

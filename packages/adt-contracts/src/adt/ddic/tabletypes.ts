@@ -23,6 +23,5 @@ export const tabletypesContract = crud({
   basePath: '/sap/bc/adt/ddic/tabletypes',
   schema: tabletypeSchema,
   contentType: 'application/vnd.sap.adt.tabletype.v1+xml',
-  accept:
-    'application/vnd.sap.adt.tabletypes.v2+xml, application/vnd.sap.adt.tabletypes.v1+xml, application/vnd.sap.adt.blues.v1+xml',
+  accept: 'application/vnd.sap.adt.tabletype.v1+xml',
 });

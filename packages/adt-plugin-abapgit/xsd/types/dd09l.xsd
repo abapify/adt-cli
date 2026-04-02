@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- TYPE ONLY - no element declaration! -->
+  <!-- DD09L: Table technical settings (storage parameters, buffering) -->
+  <!-- Field order matches standard abapGit LCL_OBJECT_TABL output -->
+  <xs:complexType name="Dd09lType">
+    <xs:sequence>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="AS4LOCAL" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABKAT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABART" type="xs:string" minOccurs="0"/>
+      <xs:element name="BUFALLOW" type="xs:string" minOccurs="0"/>
+      <xs:element name="PUFFERUNG" type="xs:string" minOccurs="0"/>
+      <xs:element name="SCHFELDANZ" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROTOKOLL" type="xs:string" minOccurs="0"/>
+      <xs:element name="SPEESSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="UESSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROESSION" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

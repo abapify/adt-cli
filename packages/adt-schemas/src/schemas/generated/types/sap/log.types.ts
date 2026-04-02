@@ -5,101 +5,98 @@
  * Mode: Flattened
  */
 
-export type LogSchema =
-  | {
-      logKeys: {
+export type LogSchema = {
+    logKeys: {
         link?: {
-          href: string;
-          rel?: string;
-          type?: string;
-          hreflang?: string;
-          title?: string;
-          length?: number;
-          etag?: string;
-          _text?: string;
+            href: string;
+            rel?: string;
+            type?: string;
+            hreflang?: string;
+            title?: string;
+            length?: number;
+            etag?: string;
+            _text?: string;
         }[];
         progVersion?: {
-          key?: {
-            link?: {
-              href: string;
-              rel?: string;
-              type?: string;
-              hreflang?: string;
-              title?: string;
-              length?: number;
-              etag?: string;
-              _text?: string;
+            key?: {
+                link?: {
+                    href: string;
+                    rel?: string;
+                    type?: string;
+                    hreflang?: string;
+                    title?: string;
+                    length?: number;
+                    etag?: string;
+                    _text?: string;
+                }[];
+                value?: string;
+                calls?: number;
+                lastCall?: string;
             }[];
-            value?: string;
-            calls?: number;
-            lastCall?: string;
-          }[];
-          generatedAt?: string;
+            generatedAt?: string;
         }[];
         base?: string;
-      };
-    }
-  | {
-      logEntry: {
+    };
+} | {
+    logEntry: {
         fieldList: {
-          field?: {
-            value: {
-              link?: {
-                href: string;
-                rel?: string;
-                type?: string;
-                hreflang?: string;
-                title?: string;
-                length?: number;
-                etag?: string;
-                _text?: string;
-              }[];
-              e?: {
-                t?: boolean;
-                v?: string;
-                y?: string;
-              };
-              s?: {
-                c: unknown[];
-                t?: boolean;
-              };
-              t?: {
-                c?: unknown[];
-                t?: boolean;
-              };
-            };
-            name?: string;
-          }[];
+            field?: {
+                value: {
+                    link?: {
+                        href: string;
+                        rel?: string;
+                        type?: string;
+                        hreflang?: string;
+                        title?: string;
+                        length?: number;
+                        etag?: string;
+                        _text?: string;
+                    }[];
+                    e?: {
+                        t?: boolean;
+                        v?: string;
+                        y?: string;
+                    };
+                    s?: {
+                        c: unknown[];
+                        t?: boolean;
+                    };
+                    t?: {
+                        c?: unknown[];
+                        t?: boolean;
+                    };
+                };
+                name?: string;
+            }[];
         };
         link?: {
-          href: string;
-          rel?: string;
-          type?: string;
-          hreflang?: string;
-          title?: string;
-          length?: number;
-          etag?: string;
-          _text?: string;
+            href: string;
+            rel?: string;
+            type?: string;
+            hreflang?: string;
+            title?: string;
+            length?: number;
+            etag?: string;
+            _text?: string;
         }[];
-      };
-    }
-  | {
-      collectionSummary: {
+    };
+} | {
+    collectionSummary: {
         success?: {
-          server: {
-            name?: string;
-          };
+            server: {
+                name?: string;
+            };
         };
         unreached?: {
-          server: {
-            name?: string;
-          };
+            server: {
+                name?: string;
+            };
         };
         failed?: {
-          server?: string;
-          returnCode?: number;
-          errorMessage?: string;
+            server?: string;
+            returnCode?: number;
+            errorMessage?: string;
         }[];
         collectedLogs?: number;
-      };
     };
+};

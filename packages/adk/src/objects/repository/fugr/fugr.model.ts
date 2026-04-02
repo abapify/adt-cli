@@ -79,4 +79,9 @@ export class AdkFunctionGroup extends AdkMainObject<
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('FUGR', FunctionGroupKind, AdkFunctionGroup);
+registerObjectType('FUGR', FunctionGroupKind, AdkFunctionGroup, {
+  endpoint: 'functions/groups',
+  // SAPL{name} is the main program of function group {name} — strip the prefix
+  normalizeName: (name) =>
+    name.toUpperCase().startsWith('SAPL') ? name.slice(4) : name,
+});

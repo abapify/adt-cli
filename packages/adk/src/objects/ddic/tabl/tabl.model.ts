@@ -23,6 +23,7 @@ import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
 
 import type { TableResponse } from '../../../base/adt';
+import { toText } from '../../../base/fetch-utils';
 
 /**
  * Table/Structure data type - unwrap from blueSource wrapper root element
@@ -38,6 +39,39 @@ export class AdkTable extends AdkMainObject<typeof TableKind, TableXml> {
 
   get objectUri(): string {
     return `/sap/bc/adt/ddic/tables/${encodeURIComponent(this.name.toLowerCase())}`;
+  }
+
+  /**
+   * Get CDS-style table source code from SAP
+   * Returns the ABAP source definition (annotations + field definitions)
+   */
+  async getSource(): Promise<string> {
+    return this.lazy('source', async () => {
+      const response = await this.ctx.client.fetch(
+        `${this.objectUri}/source/main`,
+        { method: 'GET', headers: { Accept: 'text/plain' } },
+      );
+      return toText(response);
+    });
+  }
+
+  /**
+   * Get table technical settings (DD09L data)
+   * Returns XML from /sap/bc/adt/ddic/db/settings/{name}
+   */
+  async getSettings(): Promise<string> {
+    return this.lazy('settings', async () => {
+      const response = await this.ctx.client.fetch(
+        `/sap/bc/adt/ddic/db/settings/${encodeURIComponent(this.name.toLowerCase())}`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/vnd.sap.adt.table.settings.v2+xml',
+          },
+        },
+      );
+      return toText(response);
+    });
   }
 
   protected override get wrapperKey() {
@@ -67,6 +101,20 @@ export class AdkStructure extends AdkMainObject<
     return `/sap/bc/adt/ddic/structures/${encodeURIComponent(this.name.toLowerCase())}`;
   }
 
+  /**
+   * Get CDS-style structure source code from SAP
+   * Returns the ABAP source definition (annotations + field definitions)
+   */
+  async getSource(): Promise<string> {
+    return this.lazy('source', async () => {
+      const response = await this.ctx.client.fetch(
+        `${this.objectUri}/source/main`,
+        { method: 'GET', headers: { Accept: 'text/plain' } },
+      );
+      return toText(response);
+    });
+  }
+
   protected override get wrapperKey() {
     return 'blueSource';
   }
@@ -82,6 +130,7 @@ export class AdkStructure extends AdkMainObject<
 
 // Self-register with ADK registry
 import { registerObjectType } from '../../../base/registry';
-registerObjectType('TABL', TableKind, AdkTable);
-// Note: Structure uses same main type TABL but different ADK kind
-// Registration uses TABL main type - structures will be resolved via subtype logic
+registerObjectType('TABL', TableKind, AdkTable, { endpoint: 'ddic/tables' });
+registerObjectType('TABL/DS', StructureKind, AdkStructure, {
+  endpoint: 'ddic/structures',
+});

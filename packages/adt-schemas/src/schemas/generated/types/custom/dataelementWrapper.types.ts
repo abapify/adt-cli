@@ -6,91 +6,75 @@
  */
 
 export type DataelementWrapperSchema = {
-  wbobj: {
-    containerRef?: {
-      extension?: unknown;
-      uri?: string;
-      parentUri?: string;
-      type?: string;
-      name?: string;
-      packageName?: string;
-      description?: string;
+    wbobj: {
+        containerRef?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+        };
+        adtTemplate?: {
+            adtProperty?: {
+                $value?: string;
+                key?: string;
+            }[];
+            name?: string;
+        };
+        packageRef?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+        };
+        dataElement?: {
+            typeKind: "domain" | "predefinedAbapType" | "refToPredefinedAbapType" | "refToDictionaryType" | "refToClifType";
+            typeName?: string;
+            dataType?: string;
+            dataTypeLength?: number;
+            dataTypeLengthEnabled?: boolean;
+            dataTypeDecimals?: number;
+            dataTypeDecimalsEnabled?: boolean;
+            shortFieldLabel?: string;
+            shortFieldLength?: number;
+            shortFieldMaxLength?: number;
+            mediumFieldLabel?: string;
+            mediumFieldLength?: number;
+            mediumFieldMaxLength?: number;
+            longFieldLabel?: string;
+            longFieldLength?: number;
+            longFieldMaxLength?: number;
+            headingFieldLabel?: string;
+            headingFieldLength?: number;
+            headingFieldMaxLength?: number;
+            searchHelp?: string;
+            searchHelpParameter?: string;
+            setGetParameter?: string;
+            defaultComponentName?: string;
+            deactivateInputHistory?: boolean;
+            changeDocument?: boolean;
+            leftToRightDirection?: boolean;
+            deactivateBIDIFiltering?: boolean;
+            documentationStatus?: "required" | "notUsedInScreens" | "explainedByShortText" | "postponed";
+        };
+        name: string;
+        type: string;
+        changedBy?: string;
+        changedAt?: string;
+        createdAt?: string;
+        createdBy?: string;
+        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        description?: string;
+        descriptionTextLimit?: number;
+        language?: string;
+        masterSystem?: string;
+        masterLanguage?: string;
+        responsible?: string;
+        abapLanguageVersion?: string;
     };
-    adtTemplate?: {
-      adtProperty?: {
-        $value?: string;
-        key?: string;
-      }[];
-      name?: string;
-    };
-    packageRef?: {
-      extension?: unknown;
-      uri?: string;
-      parentUri?: string;
-      type?: string;
-      name?: string;
-      packageName?: string;
-      description?: string;
-    };
-    dataElement?: {
-      typeKind:
-        | 'domain'
-        | 'predefinedAbapType'
-        | 'refToPredefinedAbapType'
-        | 'refToDictionaryType'
-        | 'refToClifType';
-      typeName?: string;
-      dataType?: string;
-      dataTypeLength?: number;
-      dataTypeLengthEnabled?: boolean;
-      dataTypeDecimals?: number;
-      dataTypeDecimalsEnabled?: boolean;
-      shortFieldLabel?: string;
-      shortFieldLength?: number;
-      shortFieldMaxLength?: number;
-      mediumFieldLabel?: string;
-      mediumFieldLength?: number;
-      mediumFieldMaxLength?: number;
-      longFieldLabel?: string;
-      longFieldLength?: number;
-      longFieldMaxLength?: number;
-      headingFieldLabel?: string;
-      headingFieldLength?: number;
-      headingFieldMaxLength?: number;
-      searchHelp?: string;
-      searchHelpParameter?: string;
-      setGetParameter?: string;
-      defaultComponentName?: string;
-      deactivateInputHistory?: boolean;
-      changeDocument?: boolean;
-      leftToRightDirection?: boolean;
-      deactivateBIDIFiltering?: boolean;
-      documentationStatus?:
-        | 'required'
-        | 'notUsedInScreens'
-        | 'explainedByShortText'
-        | 'postponed';
-    };
-    name: string;
-    type: string;
-    changedBy?: string;
-    changedAt?: string;
-    createdAt?: string;
-    createdBy?: string;
-    version?:
-      | ''
-      | 'active'
-      | 'inactive'
-      | 'workingArea'
-      | 'new'
-      | 'partlyActive'
-      | 'activeWithInactiveVersion';
-    description?: string;
-    descriptionTextLimit?: number;
-    language?: string;
-    masterSystem?: string;
-    masterLanguage?: string;
-    responsible?: string;
-    abapLanguageVersion?: string;
-  };
 };

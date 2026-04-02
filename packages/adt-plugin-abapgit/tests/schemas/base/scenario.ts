@@ -86,6 +86,11 @@ export function createTypedSchema<T>(schema: SchemaLike): TypedSchema<T> {
   };
 }
 
+/** Extract the abapGit root from parsed schema data (avoids `as any` in every validator) */
+export function extractAbapGitRoot(data: unknown): any {
+  return (data as any).abapGit;
+}
+
 /** Fixture test definition */
 export interface FixtureTest<T> {
   /** Path to fixture file relative to tests/fixtures/ */

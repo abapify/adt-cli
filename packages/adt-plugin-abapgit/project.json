@@ -2,7 +2,7 @@
   "name": "adt-plugin-abapgit",
   "targets": {
     "codegen": {
-      "command": "npx ts-xsd codegen --verbose",
+      "command": "bunx ts-xsd codegen --verbose",
       "options": {
         "cwd": "{projectRoot}"
       },

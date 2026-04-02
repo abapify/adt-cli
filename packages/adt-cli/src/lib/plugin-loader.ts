@@ -85,6 +85,11 @@ function pluginToCommand(
 ): Command {
   const cmd = new Command(plugin.name).description(plugin.description);
 
+  // Add alias if specified
+  if (plugin.alias) {
+    cmd.alias(plugin.alias);
+  }
+
   // Add options
   if (plugin.options) {
     for (const opt of plugin.options) {
@@ -129,7 +134,7 @@ function pluginToCommand(
       const args: Record<string, unknown> = { ...options };
       if (plugin.arguments) {
         plugin.arguments.forEach((argDef, index) => {
-          const argName = argDef.name.replace(/[<>[\]]/g, '');
+          const argName = argDef.name.replace(/[<>[\].]/g, '');
           args[argName] = actionArgs[index];
         });
       }

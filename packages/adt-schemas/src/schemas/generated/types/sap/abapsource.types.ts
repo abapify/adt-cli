@@ -5,68 +5,66 @@
  * Mode: Flattened
  */
 
-export type AbapsourceSchema =
-  | {
-      syntaxConfigurations: {
+export type AbapsourceSchema = {
+    syntaxConfigurations: {
         syntaxConfiguration?: {
-          language?: {
+            language?: {
+                version?: string;
+                description?: string;
+                link?: {
+                    href: string;
+                    rel?: string;
+                    type?: string;
+                    hreflang?: string;
+                    title?: string;
+                    length?: number;
+                    etag?: string;
+                    _text?: string;
+                }[];
+            };
+            objectUsage?: {
+                link?: {
+                    href: string;
+                    rel?: string;
+                    type?: string;
+                    hreflang?: string;
+                    title?: string;
+                    length?: number;
+                    etag?: string;
+                    _text?: string;
+                }[];
+                restricted?: boolean;
+            };
+        }[];
+    };
+} | {
+    syntaxConfiguration: {
+        language?: {
             version?: string;
             description?: string;
             link?: {
-              href: string;
-              rel?: string;
-              type?: string;
-              hreflang?: string;
-              title?: string;
-              length?: number;
-              etag?: string;
-              _text?: string;
+                href: string;
+                rel?: string;
+                type?: string;
+                hreflang?: string;
+                title?: string;
+                length?: number;
+                etag?: string;
+                _text?: string;
             }[];
-          };
-          objectUsage?: {
-            link?: {
-              href: string;
-              rel?: string;
-              type?: string;
-              hreflang?: string;
-              title?: string;
-              length?: number;
-              etag?: string;
-              _text?: string;
-            }[];
-            restricted?: boolean;
-          };
-        }[];
-      };
-    }
-  | {
-      syntaxConfiguration: {
-        language?: {
-          version?: string;
-          description?: string;
-          link?: {
-            href: string;
-            rel?: string;
-            type?: string;
-            hreflang?: string;
-            title?: string;
-            length?: number;
-            etag?: string;
-            _text?: string;
-          }[];
         };
         objectUsage?: {
-          link?: {
-            href: string;
-            rel?: string;
-            type?: string;
-            hreflang?: string;
-            title?: string;
-            length?: number;
-            etag?: string;
-            _text?: string;
-          }[];
-          restricted?: boolean;
+            link?: {
+                href: string;
+                rel?: string;
+                type?: string;
+                hreflang?: string;
+                title?: string;
+                length?: number;
+                etag?: string;
+                _text?: string;
+            }[];
+            restricted?: boolean;
         };
-      };
     };
+};

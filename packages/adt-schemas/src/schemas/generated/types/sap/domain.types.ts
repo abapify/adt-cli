@@ -6,127 +6,120 @@
  */
 
 export type DomainSchema = {
-  domain: {
-    containerRef?: {
-      extension?: unknown;
-      uri?: string;
-      parentUri?: string;
-      type?: string;
-      name?: string;
-      packageName?: string;
-      description?: string;
-    };
-    adtTemplate?: {
-      adtProperty?: {
-        $value?: string;
-        key?: string;
-      }[];
-      name?: string;
-    };
-    packageRef?: {
-      extension?: unknown;
-      uri?: string;
-      parentUri?: string;
-      type?: string;
-      name?: string;
-      packageName?: string;
-      description?: string;
-    };
-    content: {
-      typeInformation?: {
-        datatype: string;
-        length: number;
-        decimals: number;
-      };
-      outputInformation?: {
-        length: number;
-        style: string;
-        conversionExit?: string;
-        signExists?: boolean;
-        lowercase?: boolean;
-        ampmFormat?: boolean;
-      };
-      valueInformation: {
-        valueTableRef: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+    domain: {
+        containerRef?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         };
-        appendExists?: boolean;
-        fixValues: {
-          fixValue?: {
-            position: number;
-            low: string;
-            high: string;
-            text: string;
-            contributingAppendRef?: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
+        adtTemplate?: {
+            adtProperty?: {
+                $value?: string;
+                key?: string;
+            }[];
+            name?: string;
+        };
+        packageRef?: {
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
+        };
+        content: {
+            typeInformation?: {
+                datatype: string;
+                length: number;
+                decimals: number;
             };
-            switchRef?: {
-              extension?: unknown;
-              uri?: string;
-              parentUri?: string;
-              type?: string;
-              name?: string;
-              packageName?: string;
-              description?: string;
-              state?: '' | 'undefined' | 'on' | 'off' | 'stand-by';
+            outputInformation?: {
+                length: number;
+                style: string;
+                conversionExit?: string;
+                signExists?: boolean;
+                lowercase?: boolean;
+                ampmFormat?: boolean;
             };
-          }[];
+            valueInformation: {
+                valueTableRef: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                };
+                appendExists?: boolean;
+                fixValues: {
+                    fixValue?: {
+                        position: number;
+                        low: string;
+                        high: string;
+                        text: string;
+                        contributingAppendRef?: {
+                            extension?: unknown;
+                            uri?: string;
+                            parentUri?: string;
+                            type?: string;
+                            name?: string;
+                            packageName?: string;
+                            description?: string;
+                        };
+                        switchRef?: {
+                            extension?: unknown;
+                            uri?: string;
+                            parentUri?: string;
+                            type?: string;
+                            name?: string;
+                            packageName?: string;
+                            description?: string;
+                            state?: "" | "undefined" | "on" | "off" | "stand-by";
+                        };
+                    }[];
+                };
+            };
+            appendInformation?: {
+                appendedDomainRef?: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                };
+                switchRef?: {
+                    extension?: unknown;
+                    uri?: string;
+                    parentUri?: string;
+                    type?: string;
+                    name?: string;
+                    packageName?: string;
+                    description?: string;
+                    state?: "" | "undefined" | "on" | "off" | "stand-by";
+                };
+            };
         };
-      };
-      appendInformation?: {
-        appendedDomainRef?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
-        };
-        switchRef?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
-          state?: '' | 'undefined' | 'on' | 'off' | 'stand-by';
-        };
-      };
+        name: string;
+        type: string;
+        changedBy?: string;
+        changedAt?: string;
+        createdAt?: string;
+        createdBy?: string;
+        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        description?: string;
+        descriptionTextLimit?: number;
+        language?: string;
+        masterSystem?: string;
+        masterLanguage?: string;
+        responsible?: string;
+        abapLanguageVersion?: string;
     };
-    name: string;
-    type: string;
-    changedBy?: string;
-    changedAt?: string;
-    createdAt?: string;
-    createdBy?: string;
-    version?:
-      | ''
-      | 'active'
-      | 'inactive'
-      | 'workingArea'
-      | 'new'
-      | 'partlyActive'
-      | 'activeWithInactiveVersion';
-    description?: string;
-    descriptionTextLimit?: number;
-    language?: string;
-    masterSystem?: string;
-    masterLanguage?: string;
-    responsible?: string;
-    abapLanguageVersion?: string;
-  };
 };

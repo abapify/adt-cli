@@ -6,24 +6,24 @@
  */
 
 export type DebuggerSchema = {
-  memorySizes: {
-    abap?: {
-      staticVariables: number;
-      stackUsed: number;
-      stackAllocated: number;
-      dynamicMemoryObjectsUsed: number;
-      dynamicMemoryObjectsAllocated: number;
+    memorySizes: {
+        abap?: {
+            staticVariables: number;
+            stackUsed: number;
+            stackAllocated: number;
+            dynamicMemoryObjectsUsed: number;
+            dynamicMemoryObjectsAllocated: number;
+        };
+        internal: {
+            used: number;
+            allocated: number;
+            peakUsed: number;
+        };
+        external: {
+            used: number;
+            allocated: number;
+            peakUsed: number;
+            numberOfInternalSessions: number;
+        };
     };
-    internal: {
-      used: number;
-      allocated: number;
-      peakUsed: number;
-    };
-    external: {
-      used: number;
-      allocated: number;
-      peakUsed: number;
-      numberOfInternalSessions: number;
-    };
-  };
 };

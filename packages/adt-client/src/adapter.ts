@@ -30,7 +30,13 @@ export interface AdtAdapterConfig extends AdtConnectionConfig {
 /**
  * Create ADT HTTP adapter with Basic or SAML Authentication and plugin support
  */
-export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
+/** Extended adapter with ETag management */
+export interface AdtHttpAdapter extends HttpAdapter {
+  /** Clear cached ETag for a specific URL, or all ETags if no URL given */
+  clearETag(url?: string): void;
+}
+
+export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
   const {
     baseUrl,
     username,
@@ -97,6 +103,8 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
       }
 
       // For write operations, ensure CSRF token is initialized
+      // Uses the 3-step Eclipse ADT security session flow:
+      // create session → fetch CSRF → delete session
       const needsCsrf = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(
         options.method.toUpperCase(),
       );
@@ -104,48 +112,12 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
         logger?.debug(
           'Adapter: Initializing CSRF token before write operation',
         );
-        const authForCsrf =
-          authHeader || (cookieHeader ? undefined : undefined);
-        if (authForCsrf) {
-          await sessionManager.initializeCsrf(
-            baseUrl,
-            authForCsrf,
-            client,
-            language,
-          );
-        } else if (cookieHeader) {
-          // For cookie auth, make a GET request to sessions endpoint to get CSRF
-          const sessionsUrl = new URL(
-            '/sap/bc/adt/core/http/sessions',
-            baseUrl,
-          );
-          if (client) sessionsUrl.searchParams.append('sap-client', client);
-          if (language)
-            sessionsUrl.searchParams.append('sap-language', language);
-
-          const csrfHeaders: Record<string, string> = {
-            'x-csrf-token': 'Fetch',
-            Accept: 'application/vnd.sap.adt.core.http.session.v3+xml',
-            'X-sap-adt-sessiontype': 'stateful',
-          };
-          const cookieHeader2 = sessionManager.getCookieHeader();
-          if (cookieHeader2) csrfHeaders.Cookie = cookieHeader2;
-
-          try {
-            const csrfResponse = await fetch(sessionsUrl.toString(), {
-              method: 'GET',
-              headers: csrfHeaders,
-            });
-            if (csrfResponse.ok) {
-              sessionManager.processResponse(csrfResponse);
-              logger?.debug(
-                'Adapter: CSRF token initialized from sessions endpoint',
-              );
-            }
-          } catch (e) {
-            logger?.warn('Adapter: Failed to initialize CSRF token');
-          }
-        }
+        await sessionManager.initializeCsrf(
+          baseUrl,
+          authHeader, // undefined for cookie auth — SessionManager uses stored cookies
+          client,
+          language,
+        );
       }
 
       // Prepare headers (pass URL for ETag lookup on PUT/PATCH)
@@ -267,6 +239,20 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
 
       // Make request
       logger?.debug(`HTTP ${options.method} ${url.toString()}`);
+      {
+        const safeHeaders = {
+          ...headers,
+          // Mask sensitive headers for security
+          ...(headers.Authorization
+            ? { Authorization: headers.Authorization.substring(0, 10) + '***' }
+            : {}),
+          ...(headers.Cookie ? { Cookie: '***' } : {}),
+          ...(headers['x-csrf-token'] ? { 'x-csrf-token': '***' } : {}),
+        };
+        logger?.debug(
+          'Request headers: ' + JSON.stringify(safeHeaders, null, 2),
+        );
+      }
       const response = await fetch(url.toString(), {
         method: options.method,
         headers,
@@ -275,6 +261,15 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
 
       // Process response for session management (cookies, CSRF, ETags)
       sessionManager.processResponse(response, url.pathname);
+      logger?.debug(`Response: ${response.status} ${response.statusText}`);
+      logger?.debug(
+        'Response headers: ' +
+          JSON.stringify(
+            Object.fromEntries(response.headers.entries()),
+            null,
+            2,
+          ),
+      );
 
       // Check for HTTP errors
       if (!response.ok) {
@@ -289,6 +284,21 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
           errorBody,
         );
 
+        // For 412 Precondition Failed, include ETag diagnostic info in error
+        if (response.status === 412) {
+          const sentETag = headers['If-Match'] ?? '(none)';
+          const diag = `[If-Match: ${sentETag}, URL: ${url.pathname}]`;
+          logger?.error(
+            `ETag mismatch: ${options.method} ${url.pathname} sent If-Match: ${sentETag}`,
+          );
+          // Append diagnostic to the error message so it surfaces in error handlers
+          Object.defineProperty(adtError, 'message', {
+            value: `${adtError.message} ${diag}`,
+            writable: true,
+            configurable: true,
+          });
+        }
+
         logger?.error(
           `Request failed - ${adtError.message} (${options.method} ${url.toString()})`,
         );
@@ -302,10 +312,23 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
           logger?.error(`Response body: ${errorBody}`);
         }
 
-        // On 403, clear session and let caller retry
+        // On 403, only clear session if it looks like an auth/CSRF issue.
+        // Lock conflicts ("currently editing") are NOT session problems —
+        // clearing the session would destroy the security session context
+        // and break all subsequent lock/unlock operations.
         if (response.status === 403) {
-          sessionManager.clear();
-          logger?.warn('Session cleared due to 403 Forbidden response');
+          const isLockConflict =
+            adtError.exception?.type === 'ExceptionResourceNoAccess' &&
+            (adtError.message.includes('currently editing') ||
+              adtError.message.includes('is being edited'));
+          if (!isLockConflict) {
+            sessionManager.clear();
+            logger?.warn('Session cleared due to 403 Forbidden response');
+          } else {
+            logger?.warn(
+              'Lock conflict (403) — session preserved (object locked by another session)',
+            );
+          }
         }
         throw adtError;
       }
@@ -384,6 +407,10 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
 
       // Return just the data (matching Speci's HttpAdapter interface)
       return data as TResponse;
+    },
+
+    clearETag(url?: string) {
+      sessionManager.clearETag(url);
     },
   };
 }

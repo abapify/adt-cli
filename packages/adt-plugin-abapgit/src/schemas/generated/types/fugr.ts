@@ -6,44 +6,79 @@
  */
 
 export type FugrSchema = {
-  abapGit: {
-    abap: {
-      values: {
-        AREAT?: string;
-        INCLUDES?: {
-          SOBJ_NAME?: string[];
-        };
-        FUNCTIONS?: {
-          item?: {
-            FUNCNAME: string;
-            SHORT_TEXT?: string;
-            IMPORT?: {
-              RSIMP?: {
-                PARAMETER?: string;
-                TYP?: string;
-                DBFIELD?: string;
-                DEFAULT?: string;
-                OPTIONAL?: string;
-                REFERENCE?: string;
-              }[];
+    abapGit: {
+        abap: {
+            values: {
+                AREAT?: string;
+                INCLUDES?: {
+                    SOBJ_NAME?: string[];
+                };
+                FUNCTIONS?: {
+                    item?: {
+                        FUNCNAME: string;
+                        GLOBAL_FLAG?: string;
+                        REMOTE_CALL?: string;
+                        UPDATE_TASK?: string;
+                        SHORT_TEXT?: string;
+                        REMOTE_BASXML?: string;
+                        EXCEPTION_CLASSES?: string;
+                        IMPORT?: {
+                            RSIMP?: {
+                                PARAMETER?: string;
+                                TYP?: string;
+                                DBFIELD?: string;
+                                DEFAULT?: string;
+                                OPTIONAL?: string;
+                                REFERENCE?: string;
+                            }[];
+                        };
+                        CHANGING?: {
+                            RSCHA?: {
+                                PARAMETER?: string;
+                                TYP?: string;
+                                DBFIELD?: string;
+                                DEFAULT?: string;
+                                OPTIONAL?: string;
+                                REFERENCE?: string;
+                            }[];
+                        };
+                        EXPORT?: {
+                            RSEXP?: {
+                                PARAMETER?: string;
+                                TYP?: string;
+                                DBFIELD?: string;
+                                DEFAULT?: string;
+                                OPTIONAL?: string;
+                                REFERENCE?: string;
+                            }[];
+                        };
+                        TABLES?: {
+                            RSTBL?: {
+                                PARAMETER?: string;
+                                DBSTRUCT?: string;
+                                TYP?: string;
+                                OPTIONAL?: string;
+                            }[];
+                        };
+                        EXCEPTION?: {
+                            RSEXC?: {
+                                EXCEPTION?: string;
+                            }[];
+                        };
+                        DOCUMENTATION?: {
+                            RSFDO?: {
+                                PARAMETER?: string;
+                                KIND?: string;
+                                STEXT?: string;
+                            }[];
+                        };
+                    }[];
+                };
             };
-            EXPORT?: {
-              RSEXP?: {
-                PARAMETER?: string;
-                TYP?: string;
-                DBFIELD?: string;
-                DEFAULT?: string;
-                OPTIONAL?: string;
-                REFERENCE?: string;
-              }[];
-            };
-          }[];
+            version?: string;
         };
-      };
-      version?: string;
+        version: string;
+        serializer: string;
+        serializer_version: string;
     };
-    version: string;
-    serializer: string;
-    serializer_version: string;
-  };
 };

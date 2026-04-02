@@ -6,8 +6,8 @@
  */
 
 export type AtcinfoSchema = {
-  info: {
-    type: string;
-    description: string;
-  };
+    info: {
+        type: string;
+        description: string;
+    };
 };

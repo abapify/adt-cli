@@ -31,7 +31,7 @@ export const functionGroupsContract = crud({
   schema: groups,
   contentType: 'application/vnd.sap.adt.functions.groups.v3+xml',
   accept:
-    'application/vnd.sap.adt.functions.groups.v2+xml, application/vnd.sap.adt.functions.groups.v1+xml',
+    'application/vnd.sap.adt.functions.groups.v3+xml, application/vnd.sap.adt.functions.groups.v2+xml, application/vnd.sap.adt.functions.groups.v1+xml',
   sources: ['main'] as const,
 });
 

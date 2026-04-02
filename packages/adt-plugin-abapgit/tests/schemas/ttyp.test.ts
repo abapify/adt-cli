@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import {
   runSchemaTests,
   createTypedSchema,
+  extractAbapGitRoot,
   type SchemaScenario,
 } from './base/scenario.ts';
 import { ttyp as ttypSchema } from '../../src/schemas/generated/schemas/index.ts';
@@ -21,9 +22,9 @@ const scenario: SchemaScenario<TtypSchema> = {
   schema,
   fixtures: [
     {
-      path: 'ttyp/zage_string_table.ttyp.xml',
+      path: 'ttyp/zage_ttyp_strtab.ttyp.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');
@@ -32,27 +33,60 @@ const scenario: SchemaScenario<TtypSchema> = {
 
         // DD40V content
         const dd40v = root.abap.values.DD40V!;
-        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_STRING_TABLE');
+        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_TTYP_STRTAB');
         assert.strictEqual(dd40v.DDLANGUAGE, 'E');
         assert.strictEqual(dd40v.ROWTYPE, 'STRING');
         assert.strictEqual(dd40v.ROWKIND, 'S');
         assert.strictEqual(dd40v.ACCESSMODE, 'T');
         assert.strictEqual(dd40v.KEYDEF, 'D');
         assert.strictEqual(dd40v.KEYKIND, 'N');
-        assert.strictEqual(dd40v.DDTEXT, 'AGE Test String Table Type');
+        assert.strictEqual(dd40v.DDTEXT, 'AGE Test String Table');
+        assert.strictEqual(dd40v.ABAP_LANGUAGE_VERSION, '5');
       },
     },
     {
-      path: 'ttyp/zage_struct_table_type.ttyp.xml',
+      path: 'ttyp/zage_ttyp_struct.ttyp.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // DD40V content
         const dd40v = root.abap.values.DD40V!;
-        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_STRUCT_TABLE_TYPE');
+        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_TTYP_STRUCT');
         assert.strictEqual(dd40v.ROWTYPE, 'ZAGE_STRUCTURE');
         assert.strictEqual(dd40v.DATATYPE, 'STRU');
-        assert.strictEqual(dd40v.DDTEXT, 'AGE Test Structure Table Type');
+        assert.strictEqual(dd40v.DDTEXT, 'AGE Test Structure Table');
+        assert.strictEqual(dd40v.ABAP_LANGUAGE_VERSION, '5');
+      },
+    },
+    {
+      path: 'ttyp/zage_ttyp_strtab2.ttyp.xml',
+      validate: (data) => {
+        const root = extractAbapGitRoot(data);
+        const dd40v = root.abap.values.DD40V!;
+        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_TTYP_STRTAB2');
+        assert.strictEqual(dd40v.ROWTYPE, 'STRING');
+        assert.strictEqual(dd40v.ROWKIND, 'S');
+        assert.strictEqual(dd40v.DATATYPE, 'STRG');
+        assert.strictEqual(dd40v.ACCESSMODE, 'T');
+        assert.strictEqual(dd40v.KEYDEF, 'D');
+        assert.strictEqual(dd40v.KEYKIND, 'N');
+        assert.strictEqual(dd40v.DDTEXT, 'AGE Test String Table v2');
+        assert.strictEqual(dd40v.ABAP_LANGUAGE_VERSION, '5');
+      },
+    },
+    {
+      path: 'ttyp/zage_ttyp_string.ttyp.xml',
+      validate: (data) => {
+        const root = extractAbapGitRoot(data);
+        const dd40v = root.abap.values.DD40V!;
+        assert.strictEqual(dd40v.TYPENAME, 'ZAGE_TTYP_STRING');
+        assert.strictEqual(dd40v.DATATYPE, 'STRG');
+        assert.strictEqual(dd40v.ACCESSMODE, 'T');
+        assert.strictEqual(dd40v.TYPELEN, '000008');
+        assert.strictEqual(dd40v.ABAP_LANGUAGE_VERSION, '5');
+        assert.strictEqual(dd40v.DDTEXT, 'table of string');
+        // No ROWTYPE — uses predefined DATATYPE
+        assert.strictEqual(dd40v.ROWTYPE, undefined);
       },
     },
   ],

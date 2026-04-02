@@ -11,5 +11,5 @@ export { programHandler } from './prog';
 export { functionGroupHandler } from './fugr';
 export { domainHandler } from './doma';
 export { dataElementHandler } from './dtel';
-export { tableHandler } from './tabl';
+export { tableHandler, structureHandler } from './tabl';
 export { tableTypeHandler } from './ttyp';

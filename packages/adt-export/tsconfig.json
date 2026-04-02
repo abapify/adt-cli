@@ -17,10 +17,13 @@
       "path": "../adt-plugin-abapgit"
     },
     {
-      "path": "../adk"
+      "path": "../adt-plugin"
     },
     {
-      "path": "../adt-plugin"
+      "path": "../adt-locks"
+    },
+    {
+      "path": "../adk"
     }
   ]
 }

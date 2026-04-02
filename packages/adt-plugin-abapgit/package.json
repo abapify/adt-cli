@@ -18,9 +18,11 @@
     "xsd"
   ],
   "dependencies": {
+    "@abapify/acds": "workspace:*",
     "@abapify/adk": "^0.1.7",
     "@abapify/adt-atc": "^0.1.7",
     "@abapify/adt-plugin": "^0.1.7",
+    "@abapify/adt-schemas": "workspace:*",
     "@abapify/ts-xsd": "^0.1.7"
   }
 }

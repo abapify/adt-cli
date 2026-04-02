@@ -1,0 +1,14 @@
+{
+  "name": "@abapify/adt-locks",
+  "version": "0.1.8",
+  "description": "ADT lock/unlock operations and lock store management",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@abapify/adt-client": "^0.1.7"
+  }
+}

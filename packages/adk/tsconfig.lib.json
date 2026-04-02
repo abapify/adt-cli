@@ -17,6 +17,9 @@
       "path": "../adt-schemas"
     },
     {
+      "path": "../adt-locks/tsconfig.lib.json"
+    },
+    {
       "path": "../adt-client"
     }
   ]

@@ -5,9 +5,8 @@
  * Mode: Flattened
  */
 
-export type AtcexemptionSchema =
-  | {
-      exemptionProposal: {
+export type AtcexemptionSchema = {
+    exemptionProposal: {
         finding?: string;
         package: string;
         subObject?: string;
@@ -15,31 +14,31 @@ export type AtcexemptionSchema =
         subObjectTypeDescr: string;
         objectTypeDescr: string;
         restriction: {
-          thisFinding: {
-            $value?: boolean;
-            enabled: boolean;
-          };
-          rangeOfFindings: {
-            restrictByObject: {
-              $value?: string;
-              subobject?: boolean;
-              object?: boolean;
-              package?: boolean;
+            thisFinding: {
+                $value?: boolean;
+                enabled: boolean;
             };
-            restrictByCheck: {
-              $value?: string;
-              message?: boolean;
-              check?: boolean;
+            rangeOfFindings: {
+                restrictByObject: {
+                    $value?: string;
+                    subobject?: boolean;
+                    object?: boolean;
+                    package?: boolean;
+                };
+                restrictByCheck: {
+                    $value?: string;
+                    message?: boolean;
+                    check?: boolean;
+                };
+                restrictByValidity?: {
+                    $value?: string;
+                    unrestricted?: boolean;
+                    date?: boolean;
+                    component_release?: boolean;
+                    support_package?: boolean;
+                };
+                enabled: boolean;
             };
-            restrictByValidity?: {
-              $value?: string;
-              unrestricted?: boolean;
-              date?: boolean;
-              component_release?: boolean;
-              support_package?: boolean;
-            };
-            enabled: boolean;
-          };
         };
         approver: string;
         apprIsArea?: string;
@@ -54,91 +53,89 @@ export type AtcexemptionSchema =
         validUntil: string;
         supportPackage?: string;
         reasons?: {
-          reason?: {
-            id?: string;
-            justificationMandatory?: boolean;
-            title?: string;
-          }[];
+            reason?: {
+                id?: string;
+                justificationMandatory?: boolean;
+                title?: string;
+            }[];
         };
         validities?: {
-          validity?: {
-            id?: string;
-            value?: string;
-          }[];
-        };
-      };
-    }
-  | {
-      exemptionApply: {
-        exemptionProposal: {
-          finding?: string;
-          package: string;
-          subObject?: string;
-          subObjectType?: string;
-          subObjectTypeDescr: string;
-          objectTypeDescr: string;
-          restriction: {
-            thisFinding: {
-              $value?: boolean;
-              enabled: boolean;
-            };
-            rangeOfFindings: {
-              restrictByObject: {
-                $value?: string;
-                subobject?: boolean;
-                object?: boolean;
-                package?: boolean;
-              };
-              restrictByCheck: {
-                $value?: string;
-                message?: boolean;
-                check?: boolean;
-              };
-              restrictByValidity?: {
-                $value?: string;
-                unrestricted?: boolean;
-                date?: boolean;
-                component_release?: boolean;
-                support_package?: boolean;
-              };
-              enabled: boolean;
-            };
-          };
-          approver: string;
-          apprIsArea?: string;
-          reason: string;
-          validity: string;
-          release: string;
-          softwareComponent: string;
-          softwareComponentDescription: string;
-          justification: string;
-          notify: string;
-          checkClass: string;
-          validUntil: string;
-          supportPackage?: string;
-          reasons?: {
-            reason?: {
-              id?: string;
-              justificationMandatory?: boolean;
-              title?: string;
-            }[];
-          };
-          validities?: {
             validity?: {
-              id?: string;
-              value?: string;
+                id?: string;
+                value?: string;
             }[];
-          };
+        };
+    };
+} | {
+    exemptionApply: {
+        exemptionProposal: {
+            finding?: string;
+            package: string;
+            subObject?: string;
+            subObjectType?: string;
+            subObjectTypeDescr: string;
+            objectTypeDescr: string;
+            restriction: {
+                thisFinding: {
+                    $value?: boolean;
+                    enabled: boolean;
+                };
+                rangeOfFindings: {
+                    restrictByObject: {
+                        $value?: string;
+                        subobject?: boolean;
+                        object?: boolean;
+                        package?: boolean;
+                    };
+                    restrictByCheck: {
+                        $value?: string;
+                        message?: boolean;
+                        check?: boolean;
+                    };
+                    restrictByValidity?: {
+                        $value?: string;
+                        unrestricted?: boolean;
+                        date?: boolean;
+                        component_release?: boolean;
+                        support_package?: boolean;
+                    };
+                    enabled: boolean;
+                };
+            };
+            approver: string;
+            apprIsArea?: string;
+            reason: string;
+            validity: string;
+            release: string;
+            softwareComponent: string;
+            softwareComponentDescription: string;
+            justification: string;
+            notify: string;
+            checkClass: string;
+            validUntil: string;
+            supportPackage?: string;
+            reasons?: {
+                reason?: {
+                    id?: string;
+                    justificationMandatory?: boolean;
+                    title?: string;
+                }[];
+            };
+            validities?: {
+                validity?: {
+                    id?: string;
+                    value?: string;
+                }[];
+            };
         };
         status: {
-          message: string;
-          type: string;
+            message: string;
+            type: string;
         };
-      };
-    }
-  | {
-      status: {
+    };
+} | {
+    status: {
         message: string;
         type: string;
-      };
     };
+};

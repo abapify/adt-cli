@@ -147,3 +147,4 @@ secrets
 package-lock.json
 
 .nx/polygraph
+.devin/config.local.json

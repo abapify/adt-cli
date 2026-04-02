@@ -27,7 +27,6 @@ import type {
   TransportCreateOptions,
   TransportUpdateOptions,
   ReleaseResult,
-  LockHandle,
 } from './transport.types';
 import { AdkTransportObject } from './transport-object';
 
@@ -524,59 +523,10 @@ export class AdkTransportRequest extends AdkObject<
   }
 
   // ===========================================================================
-  // Lock Operations (override base class)
+  // Lock Operations — inherited from base class via ctx.lockService.
+  // Transport objectUri is /sap/bc/adt/cts/transportrequests/{number}
+  // which the lock service uses directly.
   // ===========================================================================
-
-  /**
-   * Lock this transport for modification
-   * Overrides base class to use transport-specific endpoint
-   */
-  override async lock(): Promise<LockHandle> {
-    const response = await this.ctx.client.fetch(
-      `/sap/bc/adt/cts/transportrequests/${this.number}?_action=LOCK&accessMode=MODIFY`,
-      {
-        method: 'POST',
-        headers: {
-          Accept: 'application/vnd.sap.as+xml',
-          'Content-Type': 'application/xml',
-        },
-      },
-    );
-
-    const handleMatch = String(response).match(
-      /<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/,
-    );
-    if (!handleMatch?.[1]) {
-      throw new Error(
-        `Failed to acquire lock for ${this.number} - no handle returned`,
-      );
-    }
-
-    // Store in base class for @requiresLock decorator
-    this['_lockHandle'] = { handle: handleMatch[1] };
-    return { handle: handleMatch[1] };
-  }
-
-  /**
-   * Unlock this transport
-   * Overrides base class to use transport-specific endpoint
-   */
-  override async unlock(): Promise<void> {
-    const handle = this['_lockHandle'];
-    if (!handle) return;
-
-    await this.ctx.client.fetch(
-      `/sap/bc/adt/cts/transportrequests/${this.number}?_action=UNLOCK&lockHandle=${encodeURIComponent(handle.handle)}`,
-      {
-        method: 'POST',
-        headers: {
-          Accept: 'application/vnd.sap.as+xml',
-        },
-      },
-    );
-
-    this['_lockHandle'] = undefined;
-  }
 }
 
 // =============================================================================

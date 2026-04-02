@@ -6,37 +6,37 @@
  */
 
 export type AtcSchema = {
-  customizing: {
-    properties: {
-      property?: {
-        name?: string;
-        value?: string;
-      }[];
+    customizing: {
+        properties: {
+            property?: {
+                name?: string;
+                value?: string;
+            }[];
+        };
+        exemption: {
+            reasons: {
+                reason?: {
+                    id?: string;
+                    justificationMandatory?: boolean;
+                    title?: string;
+                }[];
+            };
+            validities: {
+                validity?: {
+                    id?: string;
+                    value?: string;
+                }[];
+            };
+        };
+        scaAttributes?: {
+            scaAttribute?: {
+                attributeName?: string;
+                refAttributeName?: string;
+                label?: boolean;
+                labelS?: string;
+                labelM?: string;
+                labelL?: string;
+            }[];
+        };
     };
-    exemption: {
-      reasons: {
-        reason?: {
-          id?: string;
-          justificationMandatory?: boolean;
-          title?: string;
-        }[];
-      };
-      validities: {
-        validity?: {
-          id?: string;
-          value?: string;
-        }[];
-      };
-    };
-    scaAttributes?: {
-      scaAttribute?: {
-        attributeName?: string;
-        refAttributeName?: string;
-        label?: boolean;
-        labelS?: string;
-        labelM?: string;
-        labelL?: string;
-      }[];
-    };
-  };
 };

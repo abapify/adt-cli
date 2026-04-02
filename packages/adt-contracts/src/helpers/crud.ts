@@ -26,7 +26,7 @@
  */
 
 import { http } from '@abapify/speci/rest';
-import type { Serializable } from '@abapify/speci/rest';
+import type { Serializable, RestEndpointDescriptor } from '@abapify/speci/rest';
 
 /**
  * Common ADT query parameters for CRUD operations
@@ -62,11 +62,13 @@ export interface SourcePutOptions {
  * Source operations contract
  */
 export interface SourceContract {
-  get: (name: string) => ReturnType<typeof http.get>;
+  get: (
+    name: string,
+  ) => RestEndpointDescriptor<'GET', string, never, { 200: string }>;
   put: (
     name: string,
     options?: SourcePutOptions,
-  ) => ReturnType<typeof http.put>;
+  ) => RestEndpointDescriptor<'PUT', string, string, { 200: string }>;
 }
 
 /**
@@ -121,54 +123,62 @@ export interface ObjectStructureOptions {
  * Base CRUD contract type (always present)
  */
 export interface CrudContractBase<S extends Serializable<unknown>> {
+  /** The schema used for XML serialization/deserialization */
+  readonly bodySchema: S;
+
   /** GET {basePath}/{name} - Retrieve object metadata */
   get: (
     name: string,
     options?: Pick<CrudQueryParams, 'version'>,
-  ) => ReturnType<typeof http.get>;
+  ) => RestEndpointDescriptor<'GET', string, never, { 200: S }>;
 
   /** POST {basePath} - Create new object */
   post: (
     options?: Pick<CrudQueryParams, 'corrNr'>,
-  ) => ReturnType<typeof http.post>;
+  ) => RestEndpointDescriptor<'POST', string, S, { 200: S }>;
 
   /** PUT {basePath}/{name} - Update object */
   put: (
     name: string,
     options?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>,
-  ) => ReturnType<typeof http.put>;
+  ) => RestEndpointDescriptor<'PUT', string, S, { 200: S }>;
 
   /** DELETE {basePath}/{name} - Delete object */
   delete: (
     name: string,
     options?: Pick<CrudQueryParams, 'corrNr' | 'lockHandle'>,
-  ) => ReturnType<typeof http.delete>;
+  ) => RestEndpointDescriptor<'DELETE', string, never, { 204: undefined }>;
 
   /** POST {basePath}/{name}?_action=LOCK - Lock object for modification */
-  lock: (name: string, options?: LockOptions) => ReturnType<typeof http.post>;
+  lock: (
+    name: string,
+    options?: LockOptions,
+  ) => RestEndpointDescriptor<'POST', string, never, { 200: undefined }>;
 
   /** POST {basePath}/{name}?_action=UNLOCK - Unlock object */
   unlock: (
     name: string,
     options: UnlockOptions,
-  ) => ReturnType<typeof http.post>;
+  ) => RestEndpointDescriptor<'POST', string, never, { 200: undefined }>;
 
   /** GET {basePath}/{name}/objectstructure - Get object structure (includes, methods, etc.) */
   objectstructure: (
     name: string,
     options?: ObjectStructureOptions,
-  ) => ReturnType<typeof http.get>;
+  ) => RestEndpointDescriptor<'GET', string, never, { 200: undefined }>;
 }
 
 /**
  * Source operations (get/put for source code)
  */
 export interface SourceOperations {
-  get: (name: string) => ReturnType<typeof http.get>;
+  get: (
+    name: string,
+  ) => RestEndpointDescriptor<'GET', string, never, { 200: string }>;
   put: (
     name: string,
     options?: SourcePutOptions,
-  ) => ReturnType<typeof http.put>;
+  ) => RestEndpointDescriptor<'PUT', string, string, { 200: string }>;
 }
 
 /**
@@ -188,12 +198,12 @@ export type IncludesContract<Includes extends readonly string[]> = {
   get: (
     name: string,
     includeType: Includes[number],
-  ) => ReturnType<typeof http.get>;
+  ) => RestEndpointDescriptor<'GET', string, never, { 200: string }>;
   put: (
     name: string,
     includeType: Includes[number],
     options?: SourcePutOptions,
-  ) => ReturnType<typeof http.put>;
+  ) => RestEndpointDescriptor<'PUT', string, string, { 200: string }>;
 } & {
   /** Shorthand accessors for specific includes */
   [K in Includes[number]]: SourceOperations;
@@ -326,6 +336,9 @@ export function crud<
   } = options;
 
   return {
+    /** Schema for XML serialization/deserialization */
+    bodySchema: schema,
+
     /**
      * GET {basePath}/{name}
      * Retrieve object metadata
@@ -409,6 +422,7 @@ export function crud<
         responses: { 200: undefined },
         headers: {
           'X-sap-adt-sessiontype': 'stateful',
+          'x-sap-security-session': 'use',
           Accept:
             'application/*,application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result',
         },
@@ -426,8 +440,13 @@ export function crud<
     unlock: (name: string, unlockOptions: UnlockOptions) =>
       http.post(`${basePath}/${nameTransform(name)}`, {
         responses: { 200: undefined },
+        headers: {
+          'X-sap-adt-sessiontype': 'stateful',
+          'x-sap-security-session': 'use',
+        },
         query: {
           _action: 'UNLOCK',
+          accessMode: 'MODIFY',
           lockHandle: unlockOptions.lockHandle,
         },
       }),

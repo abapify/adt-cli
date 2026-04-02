@@ -5,43 +5,42 @@
  * Mode: Flattened
  */
 
-export type AdtcoreSchema =
-  | {
-      mainObject: {
+export type AdtcoreSchema = {
+    mainObject: {
         containerRef?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         };
         link?: {
-          href: string;
-          rel?: string;
-          type?: string;
-          hreflang?: string;
-          title?: string;
-          length?: number;
-          etag?: string;
-          _text?: string;
+            href: string;
+            rel?: string;
+            type?: string;
+            hreflang?: string;
+            title?: string;
+            length?: number;
+            etag?: string;
+            _text?: string;
         }[];
         adtTemplate?: {
-          adtProperty?: {
-            $value?: string;
-            key?: string;
-          }[];
-          name?: string;
+            adtProperty?: {
+                $value?: string;
+                key?: string;
+            }[];
+            name?: string;
         };
         packageRef?: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         };
         name: string;
         type: string;
@@ -49,14 +48,7 @@ export type AdtcoreSchema =
         changedAt?: string;
         createdAt?: string;
         createdBy?: string;
-        version?:
-          | ''
-          | 'active'
-          | 'inactive'
-          | 'workingArea'
-          | 'new'
-          | 'partlyActive'
-          | 'activeWithInactiveVersion';
+        version?: "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
         description?: string;
         descriptionTextLimit?: number;
         language?: string;
@@ -64,24 +56,22 @@ export type AdtcoreSchema =
         masterLanguage?: string;
         responsible?: string;
         abapLanguageVersion?: string;
-      };
-    }
-  | {
-      objectReferences: {
+    };
+} | {
+    objectReferences: {
         objectReference: {
-          extension?: unknown;
-          uri?: string;
-          parentUri?: string;
-          type?: string;
-          name?: string;
-          packageName?: string;
-          description?: string;
+            extension?: unknown;
+            uri?: string;
+            parentUri?: string;
+            type?: string;
+            name?: string;
+            packageName?: string;
+            description?: string;
         }[];
         name?: string;
-      };
-    }
-  | {
-      objectReference: {
+    };
+} | {
+    objectReference: {
         extension?: unknown;
         uri?: string;
         parentUri?: string;
@@ -89,12 +79,11 @@ export type AdtcoreSchema =
         name?: string;
         packageName?: string;
         description?: string;
-      };
-    }
-  | {
-      content: {
+    };
+} | {
+    content: {
         $value?: string;
         type?: string;
         encoding?: string;
-      };
     };
+};

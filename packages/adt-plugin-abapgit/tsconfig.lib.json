@@ -12,6 +12,9 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
+      "path": "../adt-schemas"
+    },
+    {
       "path": "../ts-xsd"
     },
     {
@@ -22,6 +25,9 @@
     },
     {
       "path": "../adk/tsconfig.lib.json"
+    },
+    {
+      "path": "../acds"
     }
   ]
 }
