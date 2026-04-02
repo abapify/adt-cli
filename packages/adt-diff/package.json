@@ -34,5 +34,8 @@
     "diff": "^8.0.3",
     "fast-xml-parser": "^5.5.5"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "devDependencies": {
+    "@abapify/adt-fixtures": "workspace:*"
+  }
 }

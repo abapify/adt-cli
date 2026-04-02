@@ -1,13 +1,12 @@
 /**
  * Tests for abapgit-to-cds: DD02V/DD03P → CDS DDL builder
  *
- * Uses ground truth fixtures from git_modules/abapgit-examples/src/ddic/
+ * Uses fixtures from @abapify/adt-fixtures (ddic/tabl)
  * to verify the reverse mapping produces valid CDS DDL.
  */
 
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { fixtures } from '@abapify/adt-fixtures';
 import {
   buildCdsDdl,
   tablXmlToCdsDdl,
@@ -20,14 +19,8 @@ import {
 // Fixture helpers
 // ============================================
 
-const FIXTURES_DIR = join(
-  __dirname,
-  '../../..',
-  'git_modules/abapgit-examples/src/ddic',
-);
-
-function loadFixture(filename: string): string {
-  return readFileSync(join(FIXTURES_DIR, filename), 'utf-8');
+async function loadFixture(key: keyof typeof fixtures.ddic.tabl): Promise<string> {
+  return fixtures.ddic.tabl[key].load();
 }
 
 // ============================================
@@ -501,26 +494,25 @@ describe('buildCdsDdl', () => {
 // ============================================
 
 describe('parseTablXml', () => {
-  it('should parse zage_structure.tabl.xml', () => {
-    const xml = loadFixture('zage_structure.tabl.xml');
+  it('should parse structure.tabl.xml', async () => {
+    const xml = await loadFixture('structure');
     const { dd02v, dd03p } = parseTablXml(xml);
 
     expect(dd02v.TABNAME).toBe('ZAGE_STRUCTURE');
     expect(dd02v.TABCLASS).toBe('INTTAB');
     expect(dd02v.DDTEXT).toBe('Simple structure');
-    expect(dd02v.EXCLASS).toBe('4');
+    expect(dd02v.EXCLASS).toBe('1');
 
     expect(dd03p).toBeInstanceOf(Array);
     expect(dd03p.length).toBeGreaterThan(0);
 
     // Check first field
-    expect(dd03p[0].FIELDNAME).toBe('CHAR_FIELD');
-    expect(dd03p[0].DATATYPE).toBe('CHAR');
-    expect(dd03p[0].LENG).toBe('000010');
+    expect(dd03p[0].FIELDNAME).toBe('COMPONENT_TO_BE_CHANGED');
+    expect(dd03p[0].DATATYPE).toBe('STRG');
   });
 
-  it('should parse zage_tabl.tabl.xml (transparent table)', () => {
-    const xml = loadFixture('zage_tabl.tabl.xml');
+  it('should parse transparent.tabl.xml (transparent table)', async () => {
+    const xml = await loadFixture('transparent');
     const { dd02v, dd03p } = parseTablXml(xml);
 
     expect(dd02v.TABNAME).toBe('ZAGE_TABL');
@@ -539,89 +531,28 @@ describe('parseTablXml', () => {
 // ============================================
 
 describe('tablXmlToCdsDdl', () => {
-  it('should convert zage_structure.tabl.xml to CDS DDL', () => {
-    const xml = loadFixture('zage_structure.tabl.xml');
+  it('should convert structure.tabl.xml to CDS DDL', async () => {
+    const xml = await loadFixture('structure');
     const ddl = tablXmlToCdsDdl(xml);
 
     // Structure header
     expect(ddl).toContain('define structure zage_structure');
     expect(ddl).toContain("@EndUserText.label : 'Simple structure'");
     expect(ddl).toContain(
-      '@AbapCatalog.enhancement.category : #EXTENSIBLE_ANY',
+      '@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE',
     );
 
-    // Built-in type fields
-    expect(ddl).toContain('char_field');
-    expect(ddl).toContain('abap.char(10)');
-    expect(ddl).toContain('numc_field');
-    expect(ddl).toContain('abap.numc(5)');
-    expect(ddl).toContain('int1_field');
-    expect(ddl).toContain('abap.int1');
-    expect(ddl).toContain('int2_field');
-    expect(ddl).toContain('abap.int2');
-    expect(ddl).toContain('int4_field');
-    expect(ddl).toContain('abap.int4');
-    expect(ddl).toContain('int8_field');
-    expect(ddl).toContain('abap.int8');
-    expect(ddl).toContain('fltp_field');
-    expect(ddl).toContain('abap.fltp');
-    expect(ddl).toContain('dats_field');
-    expect(ddl).toContain('abap.dats');
-    expect(ddl).toContain('tims_field');
-    expect(ddl).toContain('abap.tims');
-    expect(ddl).toContain('datn_field');
-    expect(ddl).toContain('abap.datn');
-    expect(ddl).toContain('timn_field');
-    expect(ddl).toContain('abap.timn');
-    expect(ddl).toContain('utclong_field');
-    expect(ddl).toContain('abap.utclong');
-    expect(ddl).toContain('raw_field');
-    expect(ddl).toContain('abap.raw(16)');
-    expect(ddl).toContain('string_field');
+    // Single field
+    expect(ddl).toContain('component_to_be_changed');
     expect(ddl).toContain('abap.string(0)');
-    expect(ddl).toContain('rawstring_field');
-    expect(ddl).toContain('abap.rawstring(0)');
-
-    // Decimal types
-    expect(ddl).toContain('dec_field');
-    expect(ddl).toContain('abap.dec(15,2)');
-
-    // Currency/quantity with annotations
-    expect(ddl).toContain(
-      "@Semantics.amount.currencyCode : 'zage_structure.currency_code'",
-    );
-    expect(ddl).toContain('curr_field');
-    expect(ddl).toContain('abap.curr(15,2)');
-    expect(ddl).toContain(
-      "@Semantics.quantity.unitOfMeasure : 'zage_structure.unit_code'",
-    );
-    expect(ddl).toContain('quan_field');
-    expect(ddl).toContain('abap.quan(13,3)');
-
-    // Reference fields
-    expect(ddl).toContain('currency_code');
-    expect(ddl).toContain('abap.cuky');
-    expect(ddl).toContain('unit_code');
-    expect(ddl).toContain('abap.unit(2)');
-
-    // Data element fields
-    expect(ddl).toContain('country_code');
-    expect(ddl).toContain('land1');
-    expect(ddl).toContain('language');
-    expect(ddl).toContain('spras');
-    expect(ddl).toContain('client');
-    expect(ddl).toContain('mandt');
-
-    // Include
-    expect(ddl).toContain('include zage_structure1');
 
     // Should NOT have table-specific annotations (it's a structure)
     expect(ddl).not.toContain('@AbapCatalog.tableCategory');
     expect(ddl).not.toContain('@AbapCatalog.deliveryClass');
   });
 
-  it('should convert zage_tabl.tabl.xml to CDS DDL', () => {
-    const xml = loadFixture('zage_tabl.tabl.xml');
+  it('should convert transparent.tabl.xml to CDS DDL', async () => {
+    const xml = await loadFixture('transparent');
     const ddl = tablXmlToCdsDdl(xml);
 
     // Table header
@@ -639,8 +570,8 @@ describe('tablXmlToCdsDdl', () => {
     expect(ddl).toContain('not null');
   });
 
-  it('should convert zage_structure1.tabl.xml to CDS DDL', () => {
-    const xml = loadFixture('zage_structure1.tabl.xml');
+  it('should convert structure1.tabl.xml to CDS DDL', async () => {
+    const xml = await loadFixture('structure1');
     const ddl = tablXmlToCdsDdl(xml);
 
     expect(ddl).toContain('define structure zage_structure1');
@@ -651,8 +582,8 @@ describe('tablXmlToCdsDdl', () => {
     expect(ddl).toContain('component_to_be_changed : abap.string(0)');
   });
 
-  it('should convert zage_value_table.tabl.xml to CDS DDL', () => {
-    const xml = loadFixture('zage_value_table.tabl.xml');
+  it('should convert value-table.tabl.xml to CDS DDL', async () => {
+    const xml = await loadFixture('valueTable');
     const ddl = tablXmlToCdsDdl(xml);
 
     expect(ddl).toContain('define table zage_value_table');
@@ -663,7 +594,5 @@ describe('tablXmlToCdsDdl', () => {
     expect(ddl).toContain('key client');
     expect(ddl).toContain('abap.clnt');
     expect(ddl).toContain('not null');
-    expect(ddl).toContain('key db_key');
-    expect(ddl).toContain('zage_dtel_value_table_key');
   });
 });

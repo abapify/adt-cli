@@ -44,4 +44,12 @@ export const registry = {
       quickSearch: 'repository/search/quickSearch.xml',
     },
   },
+  ddic: {
+    tabl: {
+      structure: 'ddic/tabl/structure.tabl.xml',
+      structure1: 'ddic/tabl/structure1.tabl.xml',
+      transparent: 'ddic/tabl/transparent.tabl.xml',
+      valueTable: 'ddic/tabl/value-table.tabl.xml',
+    },
+  },
 } as const;
