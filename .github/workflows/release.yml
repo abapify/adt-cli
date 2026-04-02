@@ -4,10 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       specifier:
-        description: 'Version specifier (e.g. patch, minor, major, 1.2.3)'
-        required: false
-        default: 'patch'
-        type: string
+        description: 'Version bump level (auto = conventional commits)'
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+        default: auto
       dry_run:
         description: 'Dry run (preview changes without publishing)'
         required: false
@@ -77,19 +85,17 @@ jobs:
 
       - name: Version, changelog & tag (dry run)
         if: ${{ inputs.dry_run }}
-        run: npx nx release "$NX_RELEASE_SPECIFIER" --verbose --dry-run ${{ inputs.first_release && '--first-release' || '' }}
+        run: npx nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --dry-run ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NX_RELEASE_SPECIFIER: ${{ inputs.specifier }}
 
       - name: Version, changelog & tag
         if: ${{ !inputs.dry_run }}
-        run: npx nx release "$NX_RELEASE_SPECIFIER" --verbose --skip-publish ${{ inputs.first_release && '--first-release' || '' }}
+        run: npx nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --skip-publish ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NX_RELEASE_SPECIFIER: ${{ inputs.specifier }}
 
       - name: Push commit and tags
         if: ${{ !inputs.dry_run }}
