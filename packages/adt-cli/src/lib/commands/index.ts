@@ -24,3 +24,4 @@ export { unlockCommand } from './unlock';
 export { lockCommand } from './lock';
 export { locksCommand } from './locks';
 export { checkCommand } from './check';
+export { userCommand } from './user';

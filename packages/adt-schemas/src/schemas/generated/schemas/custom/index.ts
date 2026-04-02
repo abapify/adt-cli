@@ -15,4 +15,5 @@ export { default as transportmanagmentSingle } from './transportmanagmentSingle'
 export { default as atcRun } from './atcRun';
 export { default as aunitRun } from './aunitRun';
 export { default as aunitResult } from './aunitResult';
+export { default as atomFeed } from './atomFeed';
 export { default as adtcoreObjectSets } from './adtcoreObjectSets';

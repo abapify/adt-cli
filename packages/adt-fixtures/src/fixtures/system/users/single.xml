@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
+  <atom:author>
+    <atom:name>SAP AG</atom:name>
+  </atom:author>
+  <atom:title>Users</atom:title>
+  <atom:updated>2026-04-02T21:07:57Z</atom:updated>
+  <atom:entry>
+    <atom:id>DEVELOPER</atom:id>
+    <atom:link href="/sap/bc/adt/system/users/DEVELOPER" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:title>Developer User</atom:title>
+  </atom:entry>
+</atom:feed>

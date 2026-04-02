@@ -24,19 +24,33 @@ export const atctagdescription = toSpeciSchema(adtSchemas.atctagdescription);
 export const atcworklist = toSpeciSchema(adtSchemas.atcworklist);
 export const atom = toSpeciSchema(adtSchemas.atom);
 export const atomExtended = toSpeciSchema(adtSchemas.atomExtended);
+export const atomFeed = toSpeciSchema(adtSchemas.atomFeed);
+export const aunitResult = toSpeciSchema(adtSchemas.aunitResult);
+export const aunitRun = toSpeciSchema(adtSchemas.aunitRun);
+export const blueSource = toSpeciSchema(adtSchemas.blueSource);
 export const checklist = toSpeciSchema(adtSchemas.checklist);
 export const checkrun = toSpeciSchema(adtSchemas.checkrun);
 export const classes = toSpeciSchema(adtSchemas.classes);
 export const configuration = toSpeciSchema(adtSchemas.configuration);
 export const configurations = toSpeciSchema(adtSchemas.configurations);
+export const dataelementWrapper = toSpeciSchema(adtSchemas.dataelementWrapper);
+export const dataelements = toSpeciSchema(adtSchemas.dataelements);
 export const debuggerSchema = toSpeciSchema(adtSchemas.debuggerSchema);
 export const discovery = toSpeciSchema(adtSchemas.discovery);
+export const domain = toSpeciSchema(adtSchemas.domain);
+export const exception = toSpeciSchema(adtSchemas.exception);
+export const fincludes = toSpeciSchema(adtSchemas.fincludes);
+export const fmodules = toSpeciSchema(adtSchemas.fmodules);
+export const groups = toSpeciSchema(adtSchemas.groups);
 export const http = toSpeciSchema(adtSchemas.http);
 export const interfaces = toSpeciSchema(adtSchemas.interfaces);
 export const log = toSpeciSchema(adtSchemas.log);
 export const logpoint = toSpeciSchema(adtSchemas.logpoint);
 export const packagesV1 = toSpeciSchema(adtSchemas.packagesV1);
+export const programs = toSpeciSchema(adtSchemas.programs);
 export const quickfixes = toSpeciSchema(adtSchemas.quickfixes);
+export const tablesettings = toSpeciSchema(adtSchemas.tablesettings);
+export const tabletype = toSpeciSchema(adtSchemas.tabletype);
 export const templatelink = toSpeciSchema(adtSchemas.templatelink);
 export const templatelinkExtended = toSpeciSchema(
   adtSchemas.templatelinkExtended,
@@ -51,18 +65,6 @@ export const transportmanagmentSingle = toSpeciSchema(
   adtSchemas.transportmanagmentSingle,
 );
 export const transportsearch = toSpeciSchema(adtSchemas.transportsearch);
-export const aunitRun = toSpeciSchema(adtSchemas.aunitRun);
-export const aunitResult = toSpeciSchema(adtSchemas.aunitResult);
-export const programs = toSpeciSchema(adtSchemas.programs);
-export const groups = toSpeciSchema(adtSchemas.groups);
-export const fmodules = toSpeciSchema(adtSchemas.fmodules);
-export const fincludes = toSpeciSchema(adtSchemas.fincludes);
-export const domain = toSpeciSchema(adtSchemas.domain);
-export const dataelements = toSpeciSchema(adtSchemas.dataelements);
-export const dataelementWrapper = toSpeciSchema(adtSchemas.dataelementWrapper);
-export const tabletype = toSpeciSchema(adtSchemas.tabletype);
-export const tablesettings = toSpeciSchema(adtSchemas.tablesettings);
-export const blueSource = toSpeciSchema(adtSchemas.blueSource);
 
 // ============================================================================
 // JSON Schemas (re-exported directly - they use zod, not ts-xsd)

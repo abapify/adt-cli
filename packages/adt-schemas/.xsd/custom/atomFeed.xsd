@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Atom Feed Schema
+  Extends atomExtended.xsd with feed/entry structure.
+
+  Used by: GET /sap/bc/adt/system/users (search + single user)
+  Response is a standard Atom feed with entries.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    targetNamespace="http://www.w3.org/2005/Atom"
+    elementFormDefault="qualified">
+
+  <xsd:include schemaLocation="atomExtended.xsd"/>
+
+  <!-- Atom feed (root element) -->
+  <xsd:element name="feed" type="atom:feedType"/>
+
+  <!-- Atom entry (inside feed) -->
+  <xsd:element name="entry" type="atom:entryType"/>
+
+  <!-- Atom id element -->
+  <xsd:element name="id" type="xsd:string"/>
+
+  <!-- Atom updated element -->
+  <xsd:element name="updated" type="xsd:string"/>
+
+  <!-- Atom author element -->
+  <xsd:element name="author" type="atom:authorType"/>
+
+  <!-- Atom name element (used inside author) -->
+  <xsd:element name="name" type="xsd:string"/>
+
+  <xsd:complexType name="authorType">
+    <xsd:sequence>
+      <xsd:element ref="atom:name" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="entryType">
+    <xsd:sequence>
+      <xsd:element ref="atom:id" minOccurs="0"/>
+      <xsd:element ref="atom:title" minOccurs="0"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:updated" minOccurs="0"/>
+      <xsd:element ref="atom:author" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="feedType">
+    <xsd:sequence>
+      <xsd:element ref="atom:author" minOccurs="0"/>
+      <xsd:element ref="atom:title" minOccurs="0"/>
+      <xsd:element ref="atom:updated" minOccurs="0"/>
+      <xsd:element ref="atom:id" minOccurs="0"/>
+      <xsd:element ref="atom:entry" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+</xsd:schema>

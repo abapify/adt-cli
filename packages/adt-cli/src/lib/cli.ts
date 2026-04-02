@@ -24,6 +24,7 @@ import {
   lockCommand,
   locksCommand,
   checkCommand,
+  userCommand,
 } from './commands';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
@@ -216,6 +217,9 @@ export async function createCLI(options?: {
 
   // Check command (syntax check / checkruns)
   program.addCommand(checkCommand);
+
+  // User lookup command
+  program.addCommand(userCommand);
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());

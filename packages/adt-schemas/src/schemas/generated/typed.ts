@@ -61,6 +61,7 @@ import type { TransportmanagmentSingleSchema } from './types/custom/transportman
 import type { AtcRunSchema } from './types/custom/atcRun.types';
 import type { AunitRunSchema } from './types/custom/aunitRun.types';
 import type { AunitResultSchema } from './types/custom/aunitResult.types';
+import type { AtomFeedSchema } from './types/custom/atomFeed.types';
 
 // SAP schemas
 import _atom from './schemas/sap/atom';
@@ -159,3 +160,5 @@ import _aunitRun from './schemas/custom/aunitRun';
 export const aunitRun: TypedSchema<AunitRunSchema> = typedSchema<AunitRunSchema>(_aunitRun);
 import _aunitResult from './schemas/custom/aunitResult';
 export const aunitResult: TypedSchema<AunitResultSchema> = typedSchema<AunitResultSchema>(_aunitResult);
+import _atomFeed from './schemas/custom/atomFeed';
+export const atomFeed: TypedSchema<AtomFeedSchema> = typedSchema<AtomFeedSchema>(_atomFeed);
