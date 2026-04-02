@@ -76,11 +76,11 @@
       "fallbackCurrentVersionResolver": "disk"
     },
     "changelog": {
+      "automaticFromRef": true,
       "workspaceChangelog": {
-        "createRelease": "github",
-        "file": "CHANGELOG.md"
+        "createRelease": "github"
       },
-      "projectChangelogs": false
+      "projectChangelogs": true
     },
     "git": {
       "commitMessage": "chore(release): publish {version} [skip ci]",

@@ -12,11 +12,11 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/ts-xsd": "^0.1.7",
+    "@abapify/ts-xsd": "workspace:*",
     "zod": "^3.24.0 || ^4.0.0"
   },
   "devDependencies": {
-    "@abapify/adt-fixtures": "^0.1.7"
+    "@abapify/adt-fixtures": "workspace:*"
   },
   "files": [
     "dist"

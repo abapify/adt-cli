@@ -28,10 +28,10 @@
     "abapgit"
   ],
   "dependencies": {
-    "@abapify/adk": "^0.1.7",
-    "@abapify/adt-locks": "^0.1.8",
-    "@abapify/adt-plugin": "^0.1.7",
-    "@abapify/adt-plugin-abapgit": "^0.1.7",
+    "@abapify/adk": "workspace:*",
+    "@abapify/adt-locks": "workspace:*",
+    "@abapify/adt-plugin": "workspace:*",
+    "@abapify/adt-plugin-abapgit": "workspace:*",
     "chalk": "^5.6.2",
     "diff": "^8.0.3",
     "fast-xml-parser": "^5.5.5"

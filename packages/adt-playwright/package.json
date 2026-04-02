@@ -16,9 +16,9 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-auth": "^0.1.7",
-    "@abapify/adt-config": "^0.1.7",
-    "@abapify/browser-auth": "^0.1.7",
+    "@abapify/adt-auth": "workspace:*",
+    "@abapify/adt-config": "workspace:*",
+    "@abapify/browser-auth": "workspace:*",
     "playwright": "^1.57.0"
   },
   "devDependencies": {

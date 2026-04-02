@@ -21,7 +21,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/logger": "^0.1.7",
+    "@abapify/logger": "workspace:*",
     "proxy-agent": "^6.4.0"
   },
   "keywords": [

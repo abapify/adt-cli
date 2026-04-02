@@ -18,6 +18,6 @@
     "dist"
   ],
   "dependencies": {
-    "@abapify/adk": "^0.1.7"
+    "@abapify/adk": "workspace:*"
   }
 }
