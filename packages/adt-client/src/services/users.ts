@@ -67,14 +67,25 @@ export class UserService {
 
   /** Look up a specific user by exact username */
   async getUserByName(username: string): Promise<UserInfo[]> {
-    const result = await this.adt.system.users.get(username.toUpperCase());
+    const normalized = username.trim().toUpperCase();
+    if (!normalized) {
+      throw new Error('username is required');
+    }
+    const result = await this.adt.system.users.get(normalized);
     return toUserInfoList(extractEntries(result));
   }
 
   /** Search users by wildcard query */
   async searchUsers(query: string, maxcount = 50): Promise<UserInfo[]> {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) {
+      throw new Error('query is required');
+    }
+    if (!Number.isInteger(maxcount) || maxcount <= 0) {
+      throw new Error('maxcount must be a positive integer');
+    }
     const result = await this.adt.system.users.search({
-      querystring: query,
+      querystring: normalizedQuery,
       maxcount,
     });
     return toUserInfoList(extractEntries(result));

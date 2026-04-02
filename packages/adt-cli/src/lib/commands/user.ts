@@ -56,20 +56,27 @@ export const userCommand = new Command('user')
         if (!options.json)
           console.log(`🔍 Looking up user: ${query.toUpperCase()}...\n`);
         const users = await userService.getUserByName(query);
-        if (users.length === 0) {
+        if (options.json) {
+          displayUsers(users, true);
+        } else if (users.length === 0) {
           console.log('No user found.');
         } else {
-          displayUsers(users, options.json);
+          displayUsers(users, false);
         }
       } else {
         const maxcount = Number.parseInt(options.max, 10);
+        if (!Number.isInteger(maxcount) || maxcount <= 0) {
+          throw new Error('--max must be a positive integer');
+        }
         if (!options.json)
           console.log(`🔍 Searching users: "${query}" (max: ${maxcount})...\n`);
         const users = await userService.searchUsers(query, maxcount);
-        if (users.length === 0) {
+        if (options.json) {
+          displayUsers(users, true);
+        } else if (users.length === 0) {
           console.log('No users found matching your query.');
         } else {
-          displayUsers(users, options.json);
+          displayUsers(users, false);
         }
       }
 
