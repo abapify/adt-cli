@@ -192,60 +192,20 @@ describe('abapGit package directory mapping', () => {
 });
 
 describe('DDIC nested package resolution (abapgit-examples restructure)', () => {
-  it('resolves ddic/doma to DDIC_DOMA subpackage', () => {
-    assert.equal(
-      __testing.resolvePackageFromDir(
-        'ddic/doma',
-        'prefix',
-        'ZABAPGIT_EXAMPLES',
-      ),
-      'ZABAPGIT_EXAMPLES_DDIC_DOMA',
-    );
-  });
+  const ddicTypes = ['doma', 'dtel', 'struc', 'tabl', 'ttyp'];
 
-  it('resolves ddic/dtel to DDIC_DTEL subpackage', () => {
-    assert.equal(
-      __testing.resolvePackageFromDir(
-        'ddic/dtel',
-        'prefix',
-        'ZABAPGIT_EXAMPLES',
-      ),
-      'ZABAPGIT_EXAMPLES_DDIC_DTEL',
-    );
-  });
-
-  it('resolves ddic/struc to DDIC_STRUC subpackage', () => {
-    assert.equal(
-      __testing.resolvePackageFromDir(
-        'ddic/struc',
-        'prefix',
-        'ZABAPGIT_EXAMPLES',
-      ),
-      'ZABAPGIT_EXAMPLES_DDIC_STRUC',
-    );
-  });
-
-  it('resolves ddic/tabl to DDIC_TABL subpackage', () => {
-    assert.equal(
-      __testing.resolvePackageFromDir(
-        'ddic/tabl',
-        'prefix',
-        'ZABAPGIT_EXAMPLES',
-      ),
-      'ZABAPGIT_EXAMPLES_DDIC_TABL',
-    );
-  });
-
-  it('resolves ddic/ttyp to DDIC_TTYP subpackage', () => {
-    assert.equal(
-      __testing.resolvePackageFromDir(
-        'ddic/ttyp',
-        'prefix',
-        'ZABAPGIT_EXAMPLES',
-      ),
-      'ZABAPGIT_EXAMPLES_DDIC_TTYP',
-    );
-  });
+  for (const type of ddicTypes) {
+    it(`resolves ddic/${type} to DDIC_${type.toUpperCase()} subpackage`, () => {
+      assert.equal(
+        __testing.resolvePackageFromDir(
+          `ddic/${type}`,
+          'prefix',
+          'ZABAPGIT_EXAMPLES',
+        ),
+        `ZABAPGIT_EXAMPLES_DDIC_${type.toUpperCase()}`,
+      );
+    });
+  }
 
   it('resolves ddic (parent) stays as DDIC subpackage', () => {
     assert.equal(

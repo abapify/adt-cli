@@ -50,7 +50,7 @@ function renderObjectsSection(
     a[0].localeCompare(b[0]),
   )) {
     console.log(chalk.dim(`  ${type} (${list.length})`));
-    for (const obj of list.sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const obj of [...list].sort((a, b) => a.name.localeCompare(b.name))) {
       const nameStr = adtLink({
         name: obj.name,
         type: obj.type,

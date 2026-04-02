@@ -12,6 +12,7 @@ import type {
   InferAbapGitType,
   InferValuesType,
 } from './abapgit-schema';
+import { formatAbapGitXml } from './xml-format';
 
 /**
  * Extract the data type (D) from an AdkObject<K, D>
@@ -418,28 +419,9 @@ export function createHandler<
       } as InferAbapGitType<TSchema>;
 
       // Build XML with pretty formatting for readability
-      let xml = definition.schema.build(fullPayload, { pretty: true });
+      const xml = definition.schema.build(fullPayload, { pretty: true });
 
-      // Format attributes on separate lines for better diff readability
-      xml = xml.replace(
-        /<([^\s>]+)((?:\s+[^\s=]+="[^"]*")+)\s*(\/?)>/g,
-        (match, tag, attrs, selfClose) => {
-          const attrList = attrs
-            .trim()
-            .split(/\s+(?=[^\s=]+=)/)
-            .map((a: string) => `\n  ${a}`)
-            .join('');
-          return `<${tag}${attrList}\n${selfClose ? '/' : ''}>`;
-        },
-      );
-
-      // Move xmlns:asx from root to asx:abap element (abapGit format convention)
-      xml = xml.replace(
-        /(<abapGit[^>]*)\s+xmlns:asx="http:\/\/www\.sap\.com\/abapxml"([^>]*>[\s\S]*?)(<asx:abap)/,
-        '$1$2$3\n  xmlns:asx="http://www.sap.com/abapxml"',
-      );
-
-      return xml;
+      return formatAbapGitXml(xml);
     },
 
     createFile(

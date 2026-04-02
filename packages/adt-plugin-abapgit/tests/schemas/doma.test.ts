@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import {
   runSchemaTests,
   createTypedSchema,
+  extractAbapGitRoot,
   type SchemaScenario,
 } from './base/scenario.ts';
 import { doma as domaSchema } from '../../src/schemas/generated/schemas/index.ts';
@@ -24,7 +25,7 @@ const scenario: SchemaScenario<DomaSchema> = {
       path: 'doma/zage_fixed_values.doma.xml',
       validate: (data) => {
         // Schema is union type - assert to the abapGit variant
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');
@@ -63,7 +64,7 @@ const scenario: SchemaScenario<DomaSchema> = {
     {
       path: 'doma/zage_doma_case_sensitive.doma.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd01v = root.abap.values.DD01V!;
         assert.strictEqual(dd01v.DOMNAME, 'ZAGE_DOMA_CASE_SENSITIVE');
         assert.strictEqual(dd01v.DATATYPE, 'CHAR');
@@ -77,7 +78,7 @@ const scenario: SchemaScenario<DomaSchema> = {
     {
       path: 'doma/zage_doma_char_with_length.doma.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd01v = root.abap.values.DD01V!;
         assert.strictEqual(dd01v.DOMNAME, 'ZAGE_DOMA_CHAR_WITH_LENGTH');
         assert.strictEqual(dd01v.DATATYPE, 'CHAR');
@@ -90,7 +91,7 @@ const scenario: SchemaScenario<DomaSchema> = {
     {
       path: 'doma/zage_doma_conversion.doma.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd01v = root.abap.values.DD01V!;
         assert.strictEqual(dd01v.DOMNAME, 'ZAGE_DOMA_CONVERSION');
         assert.strictEqual(dd01v.DATATYPE, 'CHAR');
@@ -102,7 +103,7 @@ const scenario: SchemaScenario<DomaSchema> = {
     {
       path: 'doma/zage_doma_intervals.doma.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd01v = root.abap.values.DD01V!;
         assert.strictEqual(dd01v.DOMNAME, 'ZAGE_DOMA_INTERVALS');
         assert.strictEqual(dd01v.DATATYPE, 'NUMC');
@@ -128,7 +129,7 @@ const scenario: SchemaScenario<DomaSchema> = {
     {
       path: 'doma/zage_doma_value_table.doma.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd01v = root.abap.values.DD01V!;
         assert.strictEqual(dd01v.DOMNAME, 'ZAGE_DOMA_VALUE_TABLE');
         assert.strictEqual(dd01v.DATATYPE, 'NUMC');

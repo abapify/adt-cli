@@ -17,27 +17,11 @@
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
 import {
-  getObjectUri,
-  getRegisteredTypes,
-  normalizeObjectName,
-  tryGetGlobalContext,
-} from '@abapify/adk';
-import {
-  createLockService,
-  FileLockStore,
-  type LockService,
-} from '@abapify/adt-locks';
-
-type SearchObject = {
-  name?: string;
-  type?: string;
-  uri?: string;
-  description?: string;
-  packageName?: string;
-};
-
-/** Shared lock store instance — used for both handle lookup and lock service */
-const lockStore = new FileLockStore();
+  resolveObjectUri,
+  getLockService,
+  lockStore,
+} from '../utils/lock-helpers';
+import type { LockService } from '@abapify/adt-locks';
 
 /**
  * Find a persisted lock handle for the given URI.
@@ -58,68 +42,6 @@ function findPersistedHandle(uri: string): string | undefined {
   return undefined;
 }
 
-async function resolveObjectUri(
-  client: Awaited<ReturnType<typeof getAdtClientV2>>,
-  objectName: string,
-  typeHint?: string,
-  uriOverride?: string,
-): Promise<{ uri: string; display: string }> {
-  // Direct URI override
-  if (uriOverride) {
-    return { uri: uriOverride, display: `${objectName} (via --uri)` };
-  }
-
-  // Type hint → construct URI from ADK registry (normalizeName applied inside getObjectUri)
-  if (typeHint) {
-    const uri = getObjectUri(typeHint, objectName);
-    if (uri) {
-      return { uri, display: `${objectName} (${typeHint.toUpperCase()})` };
-    }
-    console.warn(
-      `⚠️  Type '${typeHint}' has no registered endpoint. Falling back to search...`,
-    );
-  }
-
-  // Collect all normalized name candidates (e.g., strip SAPL prefix for FUGR)
-  const candidates = normalizeObjectName(objectName, typeHint);
-
-  // Search-based resolution
-  const searchResult =
-    await client.adt.repository.informationsystem.search.quickSearch({
-      query: objectName,
-      maxResults: 10,
-    });
-
-  const rawObjects =
-    'objectReference' in searchResult ? searchResult.objectReference : [];
-  const objects: SearchObject[] = Array.isArray(rawObjects)
-    ? rawObjects
-    : rawObjects
-      ? [rawObjects]
-      : [];
-
-  // Try exact match against all normalized candidates
-  const exactMatch = objects.find((obj) => {
-    const objName = String(obj.name || '').toUpperCase();
-    return candidates.some((c) => c.toUpperCase() === objName);
-  });
-
-  if (!exactMatch?.uri) {
-    const typeList = getRegisteredTypes().join(', ');
-    throw new Error(
-      `Object '${objectName}' not found via search.\n` +
-        `💡 Try specifying the type: adt unlock ${objectName} --type TTYP\n` +
-        `   Registered types: ${typeList}\n` +
-        `   Or provide a direct URI: adt unlock ${objectName} --uri /sap/bc/adt/...`,
-    );
-  }
-
-  return {
-    uri: exactMatch.uri,
-    display: `${exactMatch.name} (${exactMatch.type}) - ${exactMatch.description ?? ''}`,
-  };
-}
-
 /**
  * Resolve the lock handle: explicit flag → persisted store → undefined.
  */
@@ -133,19 +55,6 @@ function resolveLockHandle(
     console.log(`   🔑 Found persisted lock handle`);
   }
   return persisted;
-}
-
-/**
- * Get or create the lock service.
- * Prefers the global ADK context's service (shares the same store),
- * falls back to creating a fresh one with the shared FileLockStore.
- */
-function getLockService(
-  client: Awaited<ReturnType<typeof getAdtClientV2>>,
-): LockService {
-  const globalCtx = tryGetGlobalContext();
-  if (globalCtx?.lockService) return globalCtx.lockService;
-  return createLockService(client, { store: lockStore });
 }
 
 /**
@@ -164,35 +73,12 @@ async function unlockUri(
 
   // Case 1: We have a handle — use it directly
   if (handle) {
-    try {
-      await locks.unlock(uri, { lockHandle: handle });
-      console.log(`✅ ${label} unlocked`);
-      return true;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('not locked') || msg.includes('not enqueued')) {
-        console.log(`ℹ️  ${label} is not locked`);
-        return false;
-      }
-      throw err;
-    }
+    return unlockWithHandle(locks, uri, label, handle);
   }
 
   // Case 2: No handle + --force — lock to recover handle, then unlock
   if (options.force) {
-    try {
-      console.log(`   🔄 Force-unlock: acquiring lock to recover handle...`);
-      await locks.forceUnlock(uri);
-      console.log(`✅ ${label} force-unlocked`);
-      return true;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('not locked') || msg.includes('not enqueued')) {
-        console.log(`ℹ️  ${label} is not locked`);
-        return false;
-      }
-      throw err;
-    }
+    return forceUnlockUri(locks, uri, label);
   }
 
   // Case 3: No handle, no --force — fail with guidance
@@ -203,6 +89,51 @@ async function unlockUri(
       `      --lock-handle <h>    Provide handle explicitly\n` +
       `      adt locks            Show persisted lock handles`,
   );
+}
+
+/** Unlock using an explicit handle, treating "not locked" as success. */
+async function unlockWithHandle(
+  locks: LockService,
+  uri: string,
+  label: string,
+  handle: string,
+): Promise<boolean> {
+  try {
+    await locks.unlock(uri, { lockHandle: handle });
+    console.log(`✅ ${label} unlocked`);
+    return true;
+  } catch (err: unknown) {
+    if (isNotLockedError(err)) {
+      console.log(`ℹ️  ${label} is not locked`);
+      return false;
+    }
+    throw err;
+  }
+}
+
+/** Force-unlock: acquire lock to recover handle, then release. */
+async function forceUnlockUri(
+  locks: LockService,
+  uri: string,
+  label: string,
+): Promise<boolean> {
+  try {
+    console.log(`   🔄 Force-unlock: acquiring lock to recover handle...`);
+    await locks.forceUnlock(uri);
+    console.log(`✅ ${label} force-unlocked`);
+    return true;
+  } catch (err: unknown) {
+    if (isNotLockedError(err)) {
+      console.log(`ℹ️  ${label} is not locked`);
+      return false;
+    }
+    throw err;
+  }
+}
+
+function isNotLockedError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes('not locked') || msg.includes('not enqueued');
 }
 
 export const unlockCommand = new Command('unlock')
@@ -232,15 +163,15 @@ export const unlockCommand = new Command('unlock')
       },
     ) => {
       try {
+        const client = await getAdtClientV2();
+        const locks = getLockService(client);
+
         // --uri without object names: unlock the URI directly
         if (options.uri && objectNames.length === 0) {
           const label = options.uri.split('/').pop() || options.uri;
           console.log(`\n🔓 Unlocking: ${label} (via --uri)`);
 
           const handle = resolveLockHandle(options.uri, options.lockHandle);
-          const client = await getAdtClientV2();
-          const locks = getLockService(client);
-
           await unlockUri(locks, options.uri, label, {
             lockHandle: handle,
             force: options.force,
@@ -255,8 +186,6 @@ export const unlockCommand = new Command('unlock')
           process.exit(1);
         }
 
-        const client = await getAdtClientV2();
-        const locks = getLockService(client);
         let failed = 0;
 
         for (const objectName of objectNames) {
@@ -266,6 +195,7 @@ export const unlockCommand = new Command('unlock')
             const { uri, display } = await resolveObjectUri(
               client,
               objectName,
+              'unlock',
               options.type,
               // URI override only makes sense for single object
               objectNames.length === 1 ? options.uri : undefined,

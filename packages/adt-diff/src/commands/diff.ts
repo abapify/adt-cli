@@ -147,7 +147,7 @@ async function scanAbapGitFiles(repoRoot: string): Promise<string[]> {
     files.push(match);
   }
 
-  return files.sort();
+  return [...files].sort((a: string, b: string) => a.localeCompare(b));
 }
 
 /**

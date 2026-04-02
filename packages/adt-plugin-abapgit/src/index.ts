@@ -15,6 +15,13 @@ export type { SerializedFile, ObjectHandler } from './lib/handlers/base';
 // Filename parser — shared utility for abapGit file naming convention
 export { parseAbapGitFilename } from './lib/deserializer';
 
+// XML formatting utilities — shared across serializers and roundtrip
+export {
+  formatXmlAttributes,
+  moveNamespaceToAbap,
+  formatAbapGitXml,
+} from './lib/handlers/xml-format';
+
 // Folder logic — package resolution from directory paths
 export {
   resolvePackageFromDir,

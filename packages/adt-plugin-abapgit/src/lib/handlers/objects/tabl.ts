@@ -30,6 +30,7 @@ import { createHandler } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 import { buildDD02V, buildDD03P } from '../cds-to-abapgit';
 import type { TypeResolver, ResolvedType } from '../cds-to-abapgit';
+import { formatAbapGitXml } from '../xml-format';
 
 /**
  * Strip undefined/empty-string values from an object
@@ -245,25 +246,8 @@ async function serializeTabl<T extends AdkTable | AdkStructure>(
   };
 
   // Build XML using the schema
-  let xml = tabl.build(fullPayload as any, { pretty: true });
-
-  // Format attributes on separate lines for readability
-  xml = xml.replace(
-    /<([^\s>]+)((?:\s+[^\s=]+="[^"]*")+)\s*(\/?)>/g,
-    (match, tag, attrs, selfClose) => {
-      const attrList = attrs
-        .trim()
-        .split(/\s+(?=[^\s=]+=)/)
-        .map((a: string) => `\n  ${a}`)
-        .join('');
-      return `<${tag}${attrList}\n${selfClose ? '/' : ''}>`;
-    },
-  );
-
-  // Move xmlns:asx from root to asx:abap element (abapGit format convention)
-  xml = xml.replace(
-    /(<abapGit[^>]*)\s+xmlns:asx="http:\/\/www\.sap\.com\/abapxml"([^>]*>[\s\S]*?)(<asx:abap)/,
-    '$1$2$3\n  xmlns:asx="http://www.sap.com/abapxml"',
+  const xml = formatAbapGitXml(
+    tabl.build(fullPayload as any, { pretty: true }),
   );
 
   return [ctx.createFile(`${objectName}.tabl.xml`, xml)];

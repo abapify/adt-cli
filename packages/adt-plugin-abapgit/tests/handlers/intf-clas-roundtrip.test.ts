@@ -28,6 +28,48 @@ function loadFixture(relativePath: string): string {
   return readFileSync(join(fixturesDir, relativePath), 'utf-8');
 }
 
+function createMockClasObject(adkData: any) {
+  return {
+    name: adkData.name,
+    type: adkData.type,
+    kind: 'Class',
+    description: adkData.description ?? '',
+    dataSync: {
+      language: adkData.language,
+      masterLanguage: adkData.masterLanguage,
+      description: adkData.description,
+      category: (adkData as any).category,
+      visibility: (adkData as any).visibility,
+      final: (adkData as any).final,
+      abstract: (adkData as any).abstract,
+      sharedMemoryEnabled: (adkData as any).sharedMemoryEnabled,
+      fixPointArithmetic: (adkData as any).fixPointArithmetic,
+      activeUnicodeCheck: (adkData as any).activeUnicodeCheck,
+      withUnitTests: (adkData as any).withUnitTests,
+      superClassRef: (adkData as any).superClassRef,
+      messageClassRef: (adkData as any).messageClassRef,
+      abapLanguageVersion: (adkData as any).abapLanguageVersion,
+      include: [],
+    },
+    getIncludeSource: () => Promise.resolve(''),
+  };
+}
+
+function assertFieldsRoundtrip(
+  reValues: any,
+  originalValues: any,
+  rootKey: string,
+  fields: string[],
+): void {
+  for (const field of fields) {
+    assert.strictEqual(
+      reValues[rootKey]?.[field],
+      originalValues[rootKey]?.[field],
+      `${field} should roundtrip`,
+    );
+  }
+}
+
 // ============================================
 // INTF Roundtrip
 // ============================================
@@ -124,36 +166,14 @@ describe('INTF handler roundtrip', () => {
       const reValues = reparsed.abapGit.abap.values;
 
       // Step 6: Compare key VSEOINTERF fields
-      assert.strictEqual(
-        reValues.VSEOINTERF.CLSNAME,
-        values.VSEOINTERF.CLSNAME,
-        'CLSNAME should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOINTERF.LANGU,
-        values.VSEOINTERF.LANGU,
-        'LANGU should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOINTERF.DESCRIPT,
-        values.VSEOINTERF.DESCRIPT,
-        'DESCRIPT should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOINTERF.EXPOSURE,
-        values.VSEOINTERF.EXPOSURE,
-        'EXPOSURE should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOINTERF.STATE,
-        values.VSEOINTERF.STATE,
-        'STATE should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOINTERF.UNICODE,
-        values.VSEOINTERF.UNICODE,
-        'UNICODE should roundtrip',
-      );
+      assertFieldsRoundtrip(reValues, values, 'VSEOINTERF', [
+        'CLSNAME',
+        'LANGU',
+        'DESCRIPT',
+        'EXPOSURE',
+        'STATE',
+        'UNICODE',
+      ]);
     });
   });
 });
@@ -294,30 +314,7 @@ describe('CLAS handler roundtrip', () => {
       assert.strictEqual(adkData.description, 'Sample class');
 
       // Step 3: Create mock ADK object (simulates what adk.getWithData returns)
-      const mockAdkObject = {
-        name: adkData.name,
-        type: adkData.type,
-        kind: 'Class',
-        description: adkData.description ?? '',
-        dataSync: {
-          language: adkData.language,
-          masterLanguage: adkData.masterLanguage,
-          description: adkData.description,
-          category: (adkData as any).category,
-          visibility: (adkData as any).visibility,
-          final: (adkData as any).final,
-          abstract: (adkData as any).abstract,
-          sharedMemoryEnabled: (adkData as any).sharedMemoryEnabled,
-          fixPointArithmetic: (adkData as any).fixPointArithmetic,
-          activeUnicodeCheck: (adkData as any).activeUnicodeCheck,
-          withUnitTests: (adkData as any).withUnitTests,
-          superClassRef: (adkData as any).superClassRef,
-          messageClassRef: (adkData as any).messageClassRef,
-          abapLanguageVersion: (adkData as any).abapLanguageVersion,
-          include: [],
-        },
-        getIncludeSource: () => Promise.resolve(''),
-      };
+      const mockAdkObject = createMockClasObject(adkData);
 
       // Step 4: Serialize (calls toAbapGit internally)
       const files = await handler!.serialize(mockAdkObject as any);
@@ -329,46 +326,16 @@ describe('CLAS handler roundtrip', () => {
       const reValues = reparsed.abapGit.abap.values;
 
       // Step 6: Compare key VSEOCLASS fields
-      assert.strictEqual(
-        reValues.VSEOCLASS.CLSNAME,
-        values.VSEOCLASS.CLSNAME,
-        'CLSNAME should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOCLASS.LANGU,
-        values.VSEOCLASS.LANGU,
-        'LANGU should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOCLASS.DESCRIPT,
-        values.VSEOCLASS.DESCRIPT,
-        'DESCRIPT should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOCLASS.STATE,
-        values.VSEOCLASS.STATE,
-        'STATE should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOCLASS.CLSCCINCL,
-        values.VSEOCLASS.CLSCCINCL,
-        'CLSCCINCL should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOCLASS.FIXPT,
-        values.VSEOCLASS.FIXPT,
-        'FIXPT should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOCLASS.UNICODE,
-        values.VSEOCLASS.UNICODE,
-        'UNICODE should roundtrip',
-      );
-      assert.strictEqual(
-        reValues.VSEOCLASS.WITH_UNIT_TESTS,
-        values.VSEOCLASS.WITH_UNIT_TESTS,
-        'WITH_UNIT_TESTS should roundtrip',
-      );
+      assertFieldsRoundtrip(reValues, values, 'VSEOCLASS', [
+        'CLSNAME',
+        'LANGU',
+        'DESCRIPT',
+        'STATE',
+        'CLSCCINCL',
+        'FIXPT',
+        'UNICODE',
+        'WITH_UNIT_TESTS',
+      ]);
     });
 
     it('round-trips class with superclass reference', async () => {
@@ -408,30 +375,7 @@ describe('CLAS handler roundtrip', () => {
       assert.strictEqual((adkData as any).visibility, 'protected');
 
       // Create mock ADK object → serialize → re-parse
-      const mockAdkObject = {
-        name: adkData.name,
-        type: adkData.type,
-        kind: 'Class',
-        description: adkData.description ?? '',
-        dataSync: {
-          language: adkData.language,
-          masterLanguage: adkData.masterLanguage,
-          description: adkData.description,
-          category: (adkData as any).category,
-          visibility: (adkData as any).visibility,
-          final: (adkData as any).final,
-          abstract: (adkData as any).abstract,
-          sharedMemoryEnabled: (adkData as any).sharedMemoryEnabled,
-          fixPointArithmetic: (adkData as any).fixPointArithmetic,
-          activeUnicodeCheck: (adkData as any).activeUnicodeCheck,
-          withUnitTests: (adkData as any).withUnitTests,
-          superClassRef: (adkData as any).superClassRef,
-          messageClassRef: (adkData as any).messageClassRef,
-          abapLanguageVersion: (adkData as any).abapLanguageVersion,
-          include: [],
-        },
-        getIncludeSource: () => Promise.resolve(''),
-      };
+      const mockAdkObject = createMockClasObject(adkData);
 
       const files = await handler!.serialize(mockAdkObject as any);
       const xmlFile = files.find((f) => f.path.endsWith('.clas.xml'));

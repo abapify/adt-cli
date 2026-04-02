@@ -91,6 +91,32 @@ function createMockDtel(overrides?: {
 describe('DTEL handler toAbapGit', () => {
   const handler = getHandler('DTEL');
 
+  async function serializeDtel(mock: any): Promise<string> {
+    const files = await handler!.serialize(mock as any);
+    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
+    assert.ok(xmlFile, 'Should produce a .dtel.xml file');
+    return xmlFile!.content;
+  }
+
+  function assertXmlTag(
+    xml: string,
+    tag: string,
+    value: string,
+    message?: string,
+  ): void {
+    assert.ok(
+      xml.includes(`<${tag}>${value}</${tag}>`),
+      message ?? `${tag} should be ${value}. XML:\n${xml}`,
+    );
+  }
+
+  function assertXmlNoTag(xml: string, tag: string, message?: string): void {
+    assert.ok(
+      !xml.includes(`<${tag}`),
+      message ?? `${tag} should be absent. XML:\n${xml}`,
+    );
+  }
+
   it('handler is registered', () => {
     assert.ok(handler, 'DTEL handler should be registered');
     assert.strictEqual(handler!.type, 'DTEL');
@@ -115,85 +141,34 @@ describe('DTEL handler toAbapGit', () => {
     );
 
     // Check DD04V fields derived from obj.name / obj.description
-    assert.ok(
-      xml.includes('<ROLLNAME>ZTEST_DTEL</ROLLNAME>'),
-      `ROLLNAME should be object name. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DDTEXT>Test Data Element</DDTEXT>'),
-      `DDTEXT should be description. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'ROLLNAME', 'ZTEST_DTEL');
+    assertXmlTag(xml, 'DDTEXT', 'Test Data Element');
 
     // Check DD04V fields derived from dataElement
-    assert.ok(
-      xml.includes('<DOMNAME>ZTEST_DOMAIN</DOMNAME>'),
-      `DOMNAME should be typeName from dataElement. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<REFKIND>D</REFKIND>'),
-      `REFKIND should be D for domain typeKind. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'DOMNAME', 'ZTEST_DOMAIN');
+    assertXmlTag(xml, 'REFKIND', 'D');
 
     // Check language mapping (ISO EN → SAP E)
-    assert.ok(
-      xml.includes('<DDLANGUAGE>E</DDLANGUAGE>'),
-      `DDLANGUAGE should be SAP lang code. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DTELMASTER>E</DTELMASTER>'),
-      `DTELMASTER should be SAP lang code. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'DDLANGUAGE', 'E');
+    assertXmlTag(xml, 'DTELMASTER', 'E');
 
     // Check field labels
-    assert.ok(
-      xml.includes('<REPTEXT>Heading</REPTEXT>'),
-      `REPTEXT should be headingFieldLabel. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRTEXT_S>Short</SCRTEXT_S>'),
-      `SCRTEXT_S should be shortFieldLabel. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRTEXT_M>Medium Text</SCRTEXT_M>'),
-      `SCRTEXT_M should be mediumFieldLabel. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRTEXT_L>Long Text Label</SCRTEXT_L>'),
-      `SCRTEXT_L should be longFieldLabel. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'REPTEXT', 'Heading');
+    assertXmlTag(xml, 'SCRTEXT_S', 'Short');
+    assertXmlTag(xml, 'SCRTEXT_M', 'Medium Text');
+    assertXmlTag(xml, 'SCRTEXT_L', 'Long Text Label');
 
     // Check field lengths
-    assert.ok(
-      xml.includes('<HEADLEN>55</HEADLEN>'),
-      `HEADLEN should be headingFieldLength. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRLEN1>10</SCRLEN1>'),
-      `SCRLEN1 should be shortFieldLength. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRLEN2>20</SCRLEN2>'),
-      `SCRLEN2 should be mediumFieldLength. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRLEN3>40</SCRLEN3>'),
-      `SCRLEN3 should be longFieldLength. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'HEADLEN', '55');
+    assertXmlTag(xml, 'SCRLEN1', '10');
+    assertXmlTag(xml, 'SCRLEN2', '20');
+    assertXmlTag(xml, 'SCRLEN3', '40');
 
     // Domain-based DTELs should NOT have DATATYPE/LENG/OUTPUTLEN
     // (those are inherited from the domain)
-    assert.ok(
-      !xml.includes('<DATATYPE'),
-      `DATATYPE should be omitted for domain-based DTELs. XML:\n${xml}`,
-    );
-    assert.ok(
-      !xml.includes('<LENG'),
-      `LENG should be omitted for domain-based DTELs. XML:\n${xml}`,
-    );
-    assert.ok(
-      !xml.includes('<OUTPUTLEN'),
-      `OUTPUTLEN should be omitted for domain-based DTELs. XML:\n${xml}`,
-    );
+    assertXmlNoTag(xml, 'DATATYPE');
+    assertXmlNoTag(xml, 'LENG');
+    assertXmlNoTag(xml, 'OUTPUTLEN');
   });
 
   it('serializes predefined type data element correctly', async () => {
@@ -219,22 +194,11 @@ describe('DTEL handler toAbapGit', () => {
       },
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
-    assert.ok(
-      xml.includes('<ROLLNAME>ZTEST_PREDEFINED</ROLLNAME>'),
-      'ROLLNAME should be set',
-    );
-    assert.ok(
-      xml.includes('<DATATYPE>CHAR</DATATYPE>'),
-      `DATATYPE should be CHAR. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<LENG>000010</LENG>'),
-      `LENG should be zero-padded. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'ROLLNAME', 'ZTEST_PREDEFINED');
+    assertXmlTag(xml, 'DATATYPE', 'CHAR');
+    assertXmlTag(xml, 'LENG', '000010');
 
     // predefinedAbapType → REFKIND empty (not 'D')
     assert.ok(
@@ -243,16 +207,10 @@ describe('DTEL handler toAbapGit', () => {
     );
 
     // OUTPUTLEN should be derived for CHAR(10) → 000010
-    assert.ok(
-      xml.includes('<OUTPUTLEN>000010</OUTPUTLEN>'),
-      `OUTPUTLEN should be derived for CHAR type. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'OUTPUTLEN', '000010');
 
     // Empty typeName → DOMNAME should be omitted entirely
-    assert.ok(
-      !xml.includes('<DOMNAME'),
-      `DOMNAME should be omitted when typeName is empty. XML:\n${xml}`,
-    );
+    assertXmlNoTag(xml, 'DOMNAME');
   });
 
   it('serializes reference type data element correctly', async () => {
@@ -273,28 +231,14 @@ describe('DTEL handler toAbapGit', () => {
       },
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
-    assert.ok(
-      xml.includes('<DOMNAME>ZCL_SOME_CLASS</DOMNAME>'),
-      `DOMNAME should be typeName for ref types. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<REFKIND>R</REFKIND>'),
-      `REFKIND should be R for ref types. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<REFTYPE>C</REFTYPE>'),
-      `REFTYPE should be C for refToClifType. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'DOMNAME', 'ZCL_SOME_CLASS');
+    assertXmlTag(xml, 'REFKIND', 'R');
+    assertXmlTag(xml, 'REFTYPE', 'C');
 
     // Reference types should emit DATATYPE=REF (abapGit convention)
-    assert.ok(
-      xml.includes('<DATATYPE>REF</DATATYPE>'),
-      `DATATYPE should be REF for reference types. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'DATATYPE', 'REF');
   });
 
   it('handles missing dataElement gracefully', async () => {
@@ -306,20 +250,10 @@ describe('DTEL handler toAbapGit', () => {
     });
 
     // Should not throw
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    assert.ok(xmlFile, 'Should still produce XML file');
-
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
     // Base fields should still be present
-    assert.ok(
-      xml.includes('<ROLLNAME>ZTEST_EMPTY</ROLLNAME>'),
-      `ROLLNAME should still be set from obj.name. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DDTEXT>Empty DTEL</DDTEXT>'),
-      `DDTEXT should still be set from obj.description. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'ROLLNAME', 'ZTEST_EMPTY');
+    assertXmlTag(xml, 'DDTEXT', 'Empty DTEL');
   });
 
   it('emits ABAP_LANGUAGE_VERSION when set', async () => {
@@ -329,14 +263,9 @@ describe('DTEL handler toAbapGit', () => {
       abapLanguageVersion: 'cloudDevelopment',
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
-    assert.ok(
-      xml.includes('<ABAP_LANGUAGE_VERSION>5</ABAP_LANGUAGE_VERSION>'),
-      `ABAP_LANGUAGE_VERSION should be emitted as '5' for cloudDevelopment. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'ABAP_LANGUAGE_VERSION', '5');
   });
 
   it('omits ABAP_LANGUAGE_VERSION when not set', async () => {
@@ -345,14 +274,9 @@ describe('DTEL handler toAbapGit', () => {
       description: 'Standard Element',
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
-    assert.ok(
-      !xml.includes('<ABAP_LANGUAGE_VERSION'),
-      `ABAP_LANGUAGE_VERSION should be omitted when not set. XML:\n${xml}`,
-    );
+    assertXmlNoTag(xml, 'ABAP_LANGUAGE_VERSION');
   });
 
   it('derives OUTPUTLEN for DEC type with decimals', async () => {
@@ -378,19 +302,11 @@ describe('DTEL handler toAbapGit', () => {
       },
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
     // DEC(13,2): intDigits=11, separators=3, outputLen=13+1+3=17
-    assert.ok(
-      xml.includes('<OUTPUTLEN>000017</OUTPUTLEN>'),
-      `OUTPUTLEN for DEC(13,2) should be 000017. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DECIMALS>000002</DECIMALS>'),
-      `DECIMALS should be zero-padded. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'OUTPUTLEN', '000017');
+    assertXmlTag(xml, 'DECIMALS', '000002');
   });
 
   it('derives OUTPUTLEN for INT4 type', async () => {
@@ -416,15 +332,10 @@ describe('DTEL handler toAbapGit', () => {
       },
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
     // INT4 always has OUTPUTLEN 000010
-    assert.ok(
-      xml.includes('<OUTPUTLEN>000010</OUTPUTLEN>'),
-      `OUTPUTLEN for INT4 should be 000010. XML:\n${xml}`,
-    );
+    assertXmlTag(xml, 'OUTPUTLEN', '000010');
   });
 
   it('omits OUTPUTLEN for domain-based data elements', async () => {
@@ -433,15 +344,10 @@ describe('DTEL handler toAbapGit', () => {
       description: 'Domain Element',
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
     // Domain-based DTELs have no dataType → OUTPUTLEN should be absent
-    assert.ok(
-      !xml.includes('<OUTPUTLEN'),
-      `OUTPUTLEN should be omitted for domain-based elements. XML:\n${xml}`,
-    );
+    assertXmlNoTag(xml, 'OUTPUTLEN');
   });
 
   it('produces XML elements in canonical DD04V order', async () => {
@@ -467,9 +373,7 @@ describe('DTEL handler toAbapGit', () => {
       },
     });
 
-    const files = await handler!.serialize(mock as any);
-    const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
-    const xml = xmlFile!.content;
+    const xml = await serializeDtel(mock);
 
     // Verify canonical order: ROLLNAME before DDLANGUAGE before HEADLEN ...
     const rollnameIdx = xml.indexOf('<ROLLNAME>');

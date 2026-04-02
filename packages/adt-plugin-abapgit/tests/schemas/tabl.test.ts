@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import {
   runSchemaTests,
   createTypedSchema,
+  extractAbapGitRoot,
   type SchemaScenario,
 } from './base/scenario.ts';
 import { tabl as tablSchema } from '../../src/schemas/generated/schemas/index.ts';
@@ -23,7 +24,7 @@ const scenario: SchemaScenario<TablSchema> = {
     {
       path: 'tabl/zage_structure.tabl.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');
@@ -59,7 +60,7 @@ const scenario: SchemaScenario<TablSchema> = {
     {
       path: 'tabl/zage_transparent_table.tabl.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // DD02V
         const dd02v = root.abap.values.DD02V!;

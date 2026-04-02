@@ -11,93 +11,7 @@
 
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
-import {
-  getObjectUri,
-  getRegisteredTypes,
-  normalizeObjectName,
-  tryGetGlobalContext,
-} from '@abapify/adk';
-import {
-  createLockService,
-  FileLockStore,
-  type LockService,
-} from '@abapify/adt-locks';
-
-type SearchObject = {
-  name?: string;
-  type?: string;
-  uri?: string;
-  description?: string;
-  packageName?: string;
-};
-
-/** Shared lock store instance */
-const lockStore = new FileLockStore();
-
-async function resolveObjectUri(
-  client: Awaited<ReturnType<typeof getAdtClientV2>>,
-  objectName: string,
-  typeHint?: string,
-  uriOverride?: string,
-): Promise<{ uri: string; display: string }> {
-  if (uriOverride) {
-    return { uri: uriOverride, display: `${objectName} (via --uri)` };
-  }
-
-  if (typeHint) {
-    const uri = getObjectUri(typeHint, objectName);
-    if (uri) {
-      return { uri, display: `${objectName} (${typeHint.toUpperCase()})` };
-    }
-    console.warn(
-      `⚠️  Type '${typeHint}' has no registered endpoint. Falling back to search...`,
-    );
-  }
-
-  const candidates = normalizeObjectName(objectName, typeHint);
-
-  const searchResult =
-    await client.adt.repository.informationsystem.search.quickSearch({
-      query: objectName,
-      maxResults: 10,
-    });
-
-  const rawObjects =
-    'objectReference' in searchResult ? searchResult.objectReference : [];
-  const objects: SearchObject[] = Array.isArray(rawObjects)
-    ? rawObjects
-    : rawObjects
-      ? [rawObjects]
-      : [];
-
-  const exactMatch = objects.find((obj) => {
-    const objName = String(obj.name || '').toUpperCase();
-    return candidates.some((c) => c.toUpperCase() === objName);
-  });
-
-  if (!exactMatch?.uri) {
-    const typeList = getRegisteredTypes().join(', ');
-    throw new Error(
-      `Object '${objectName}' not found via search.\n` +
-        `💡 Try specifying the type: adt lock ${objectName} --type TTYP\n` +
-        `   Registered types: ${typeList}\n` +
-        `   Or provide a direct URI: adt lock ${objectName} --uri /sap/bc/adt/...`,
-    );
-  }
-
-  return {
-    uri: exactMatch.uri,
-    display: `${exactMatch.name} (${exactMatch.type}) - ${exactMatch.description ?? ''}`,
-  };
-}
-
-function getLockService(
-  client: Awaited<ReturnType<typeof getAdtClientV2>>,
-): LockService {
-  const globalCtx = tryGetGlobalContext();
-  if (globalCtx?.lockService) return globalCtx.lockService;
-  return createLockService(client, { store: lockStore });
-}
+import { resolveObjectUri, getLockService } from '../utils/lock-helpers';
 
 export const lockCommand = new Command('lock')
   .description('Lock a SAP object (persists handle for later unlock)')
@@ -117,13 +31,13 @@ export const lockCommand = new Command('lock')
       options: { type?: string; uri?: string; transport?: string },
     ) => {
       try {
+        const client = await getAdtClientV2();
+        const locks = getLockService(client);
+
         // --uri without object names: lock the URI directly
         if (options.uri && objectNames.length === 0) {
           const label = options.uri.split('/').pop() || options.uri;
           console.log(`\n🔒 Locking: ${label} (via --uri)`);
-
-          const client = await getAdtClientV2();
-          const locks = getLockService(client);
 
           const handle = await locks.lock(options.uri, {
             objectName: label,
@@ -145,8 +59,6 @@ export const lockCommand = new Command('lock')
           process.exit(1);
         }
 
-        const client = await getAdtClientV2();
-        const locks = getLockService(client);
         let failed = 0;
 
         for (const objectName of objectNames) {
@@ -156,6 +68,7 @@ export const lockCommand = new Command('lock')
             const { uri, display } = await resolveObjectUri(
               client,
               objectName,
+              'lock',
               options.type,
               objectNames.length === 1 ? options.uri : undefined,
             );

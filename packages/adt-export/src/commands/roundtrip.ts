@@ -45,6 +45,7 @@ import { tmpdir } from 'node:os';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
+import { formatXmlAttributes } from '@abapify/adt-plugin-abapgit';
 
 /**
  * Format shortcuts
@@ -121,17 +122,7 @@ function normalizeXml(xml: string): string {
     let normalized = builder.build(obj);
 
     // Format attributes on separate lines for better diff readability
-    normalized = normalized.replace(
-      /<([^\s>]+)((?:\s+[^\s=]+="[^"]*")+)\s*(\/?)>/g,
-      (match, tag, attrs, selfClose) => {
-        const attrList = attrs
-          .trim()
-          .split(/\s+(?=[^\s=]+=)/)
-          .map((a: string) => `\n  ${a}`)
-          .join('');
-        return `<${tag}${attrList}\n${selfClose ? '/' : ''}>`;
-      },
-    );
+    normalized = formatXmlAttributes(normalized);
 
     return normalized;
   } catch (err) {

@@ -18,7 +18,7 @@ import type { LockEntry } from '../src/types';
 function makeTmpDir(): string {
   const dir = join(
     tmpdir(),
-    `adt-locks-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    `adt-locks-test-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;

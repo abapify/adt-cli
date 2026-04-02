@@ -25,6 +25,19 @@ function parseDtelResponse(xml: string): any {
   return dataelementWrapper.parse(xml);
 }
 
+function createMockDtelFromWbobj(wbobj: any) {
+  return {
+    name: wbobj.name,
+    type: wbobj.type,
+    kind: 'DataElement',
+    description: wbobj.description ?? '',
+    language: wbobj.language ?? '',
+    masterLanguage: wbobj.masterLanguage ?? '',
+    abapLanguageVersion: wbobj.abapLanguageVersion ?? '',
+    dataSync: wbobj,
+  };
+}
+
 /**
  * Mock SAP ADT XML response for a domain-based data element
  *
@@ -155,16 +168,7 @@ describe('DTEL end-to-end: SAP XML → schema parse → handler serialize', () =
     const wbobj = parsed.wbobj;
 
     // Step 2: Create mock ADK object using parsed data (this is what load() does)
-    const mockAdkObject = {
-      name: wbobj.name,
-      type: wbobj.type,
-      kind: 'DataElement',
-      description: wbobj.description ?? '',
-      language: wbobj.language ?? '',
-      masterLanguage: wbobj.masterLanguage ?? '',
-      abapLanguageVersion: wbobj.abapLanguageVersion ?? '',
-      dataSync: wbobj,
-    };
+    const mockAdkObject = createMockDtelFromWbobj(wbobj);
 
     // Step 3: Serialize using handler (this is what format.import does)
     const handler = getHandler('DTEL');
@@ -223,16 +227,7 @@ describe('DTEL end-to-end: SAP XML → schema parse → handler serialize', () =
     const parsed = parseDtelResponse(SAP_DTEL_RESPONSE_PREDEFINED);
     const wbobj = parsed.wbobj;
 
-    const mockAdkObject = {
-      name: wbobj.name,
-      type: wbobj.type,
-      kind: 'DataElement',
-      description: wbobj.description ?? '',
-      language: wbobj.language ?? '',
-      masterLanguage: wbobj.masterLanguage ?? '',
-      abapLanguageVersion: wbobj.abapLanguageVersion ?? '',
-      dataSync: wbobj,
-    };
+    const mockAdkObject = createMockDtelFromWbobj(wbobj);
 
     const handler = getHandler('DTEL');
     const files = await handler!.serialize(mockAdkObject as any);

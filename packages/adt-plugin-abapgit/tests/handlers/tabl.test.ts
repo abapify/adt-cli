@@ -150,35 +150,29 @@ describe('TABL handler', () => {
   });
 
   describe('serialize — structure', () => {
-    it('produces DD02V with TABCLASS=INTTAB', async () => {
+    let xml: string;
+    let files: { path: string; content: string }[];
+
+    before(async () => {
       const mock = createMockTable({
         name: 'ZAGE_STRUCTURE',
         type: 'TABL/DS',
         description: 'AGE Test Structure',
         cdsSource: CDS_STRUCTURE,
       });
+      files = await handler!.serialize(mock as any);
+      xml = files[0].content;
+    });
 
-      const files = await handler!.serialize(mock as any);
+    it('produces DD02V with TABCLASS=INTTAB', () => {
       assert.strictEqual(files.length, 1);
-
-      const xml = files[0].content;
       assert.ok(xml.includes('<TABNAME>ZAGE_STRUCTURE</TABNAME>'));
       assert.ok(xml.includes('<TABCLASS>INTTAB</TABCLASS>'));
       assert.ok(xml.includes('<DDTEXT>AGE Test Structure</DDTEXT>'));
       assert.ok(xml.includes('<EXCLASS>1</EXCLASS>'));
     });
 
-    it('produces DD03P entries for all fields', async () => {
-      const mock = createMockTable({
-        name: 'ZAGE_STRUCTURE',
-        type: 'TABL/DS',
-        description: 'AGE Test Structure',
-        cdsSource: CDS_STRUCTURE,
-      });
-
-      const files = await handler!.serialize(mock as any);
-      const xml = files[0].content;
-
+    it('produces DD03P entries for all fields', () => {
       // PARTNER_ID — abap.char(10)
       assert.ok(xml.includes('<FIELDNAME>PARTNER_ID</FIELDNAME>'));
       assert.ok(xml.includes('<DATATYPE>CHAR</DATATYPE>'));
@@ -192,17 +186,7 @@ describe('TABL handler', () => {
       assert.ok(xml.includes('<INTTYPE>P</INTTYPE>'));
     });
 
-    it('does not emit POSITION (SAP auto-computes on import)', async () => {
-      const mock = createMockTable({
-        name: 'ZAGE_STRUCTURE',
-        type: 'TABL/DS',
-        description: 'AGE Test Structure',
-        cdsSource: CDS_STRUCTURE,
-      });
-
-      const files = await handler!.serialize(mock as any);
-      const xml = files[0].content;
-
+    it('does not emit POSITION (SAP auto-computes on import)', () => {
       // POSITION should NOT be emitted — abapGit reads it from DD03P but
       // our serializer cannot determine it from CDS source alone
       assert.ok(!xml.includes('<POSITION>'));
@@ -210,58 +194,34 @@ describe('TABL handler', () => {
   });
 
   describe('serialize — transparent table', () => {
-    it('produces DD02V with TABCLASS=TRANSP and CONTFLAG', async () => {
+    let xml: string;
+
+    before(async () => {
       const mock = createMockTable({
         name: 'ZAGE_TRANSPARENT_TABLE',
         description: 'AGE Test Transparent Table',
         cdsSource: CDS_TRANSPARENT_TABLE,
       });
-
       const files = await handler!.serialize(mock as any);
-      const xml = files[0].content;
+      xml = files[0].content;
+    });
 
+    it('produces DD02V with TABCLASS=TRANSP and CONTFLAG', () => {
       assert.ok(xml.includes('<TABCLASS>TRANSP</TABCLASS>'));
       assert.ok(xml.includes('<CONTFLAG>A</CONTFLAG>'));
       assert.ok(xml.includes('<EXCLASS>1</EXCLASS>'));
     });
 
-    it('marks key fields with KEYFLAG', async () => {
-      const mock = createMockTable({
-        name: 'ZAGE_TRANSPARENT_TABLE',
-        description: 'AGE Test Transparent Table',
-        cdsSource: CDS_TRANSPARENT_TABLE,
-      });
-
-      const files = await handler!.serialize(mock as any);
-      const xml = files[0].content;
-
+    it('marks key fields with KEYFLAG', () => {
       // Should have KEYFLAG for key fields
       assert.ok(xml.includes('<KEYFLAG>X</KEYFLAG>'));
     });
 
-    it('marks not null fields with NOTNULL', async () => {
-      const mock = createMockTable({
-        name: 'ZAGE_TRANSPARENT_TABLE',
-        description: 'AGE Test Transparent Table',
-        cdsSource: CDS_TRANSPARENT_TABLE,
-      });
-
-      const files = await handler!.serialize(mock as any);
-      const xml = files[0].content;
-
+    it('marks not null fields with NOTNULL', () => {
       assert.ok(xml.includes('<NOTNULL>X</NOTNULL>'));
     });
 
-    it('handles data element reference (mandt)', async () => {
-      const mock = createMockTable({
-        name: 'ZAGE_TRANSPARENT_TABLE',
-        description: 'AGE Test Transparent Table',
-        cdsSource: CDS_TRANSPARENT_TABLE,
-      });
-
-      const files = await handler!.serialize(mock as any);
-      const xml = files[0].content;
-
+    it('handles data element reference (mandt)', () => {
       // MANDT field references data element
       assert.ok(xml.includes('<ROLLNAME>MANDT</ROLLNAME>'));
       assert.ok(xml.includes('<COMPTYPE>E</COMPTYPE>'));
@@ -438,163 +398,173 @@ describe('CDS-to-abapGit field type mapping (all builtin types)', () => {
     return entry!;
   }
 
-  it('char(10): INTTYPE=C, INTLEN=000020, DATATYPE=CHAR, LENG=000010', () => {
-    const f = field('CHAR_FIELD');
-    assert.strictEqual(f.INTTYPE, 'C');
-    assert.strictEqual(f.INTLEN, '000020');
-    assert.strictEqual(f.DATATYPE, 'CHAR');
-    assert.strictEqual(f.LENG, '000010');
-    assert.strictEqual(f.MASK, '  CHAR');
-    assert.strictEqual(f.POSITION, undefined);
-  });
+  const FIELD_TYPE_EXPECTATIONS: Array<{
+    field: string;
+    INTTYPE?: string;
+    INTLEN?: string;
+    DATATYPE?: string;
+    LENG?: string;
+    DECIMALS?: string;
+    MASK?: string;
+    SHLPORIGIN?: string;
+    ROLLNAME?: string;
+    COMPTYPE?: string;
+  }> = [
+    {
+      field: 'CHAR_FIELD',
+      INTTYPE: 'C',
+      INTLEN: '000020',
+      DATATYPE: 'CHAR',
+      LENG: '000010',
+      MASK: '  CHAR',
+    },
+    {
+      field: 'NUMC_FIELD',
+      INTTYPE: 'N',
+      INTLEN: '000010',
+      DATATYPE: 'NUMC',
+      LENG: '000005',
+      MASK: '  NUMC',
+    },
+    {
+      field: 'STRING_FIELD',
+      INTTYPE: 'g',
+      INTLEN: '000008',
+      DATATYPE: 'STRG',
+      MASK: '  STRG',
+    },
+    {
+      field: 'INT1_FIELD',
+      INTTYPE: 'X',
+      INTLEN: '000001',
+      DATATYPE: 'INT1',
+      LENG: '000003',
+      MASK: '  INT1',
+    },
+    {
+      field: 'INT2_FIELD',
+      INTTYPE: 'X',
+      INTLEN: '000002',
+      DATATYPE: 'INT2',
+      LENG: '000005',
+      MASK: '  INT2',
+    },
+    {
+      field: 'INT4_FIELD',
+      INTTYPE: 'X',
+      INTLEN: '000004',
+      DATATYPE: 'INT4',
+      LENG: '000010',
+      MASK: '  INT4',
+    },
+    {
+      field: 'INT8_FIELD',
+      INTTYPE: '8',
+      INTLEN: '000008',
+      DATATYPE: 'INT8',
+      LENG: '000019',
+      MASK: '  INT8',
+    },
+    {
+      field: 'DEC_FIELD',
+      INTTYPE: 'P',
+      INTLEN: '000008',
+      DATATYPE: 'DEC',
+      LENG: '000015',
+      DECIMALS: '000002',
+      MASK: '  DEC',
+    },
+    {
+      field: 'FLTP_FIELD',
+      INTTYPE: 'F',
+      INTLEN: '000008',
+      DATATYPE: 'FLTP',
+      LENG: '000016',
+      DECIMALS: '000016',
+      MASK: '  FLTP',
+    },
+    {
+      field: 'DATS_FIELD',
+      INTTYPE: 'D',
+      INTLEN: '000016',
+      DATATYPE: 'DATS',
+      LENG: '000008',
+      SHLPORIGIN: 'T',
+      MASK: '  DATS',
+    },
+    {
+      field: 'TIMS_FIELD',
+      INTTYPE: 'T',
+      INTLEN: '000012',
+      DATATYPE: 'TIMS',
+      LENG: '000006',
+      SHLPORIGIN: 'T',
+      MASK: '  TIMS',
+    },
+    {
+      field: 'RAW_FIELD',
+      INTTYPE: 'X',
+      INTLEN: '000016',
+      DATATYPE: 'RAW',
+      LENG: '000016',
+      MASK: '  RAW',
+    },
+    {
+      field: 'RAWSTRING_FIELD',
+      INTTYPE: 'y',
+      INTLEN: '000008',
+      DATATYPE: 'RSTR',
+      MASK: '  RSTR',
+    },
+    {
+      field: 'CURRENCY_CODE',
+      INTTYPE: 'C',
+      INTLEN: '000010',
+      DATATYPE: 'CUKY',
+      LENG: '000005',
+      MASK: '  CUKY',
+    },
+    {
+      field: 'UNIT_CODE',
+      INTTYPE: 'C',
+      INTLEN: '000004',
+      DATATYPE: 'UNIT',
+      LENG: '000002',
+      MASK: '  UNIT',
+    },
+    {
+      field: 'UTCLONG_FIELD',
+      INTTYPE: 'p',
+      INTLEN: '000008',
+      DATATYPE: 'UTCL',
+      LENG: '000027',
+      MASK: '  UTCL',
+    },
+    { field: 'COUNTRY_CODE', ROLLNAME: 'LAND1', COMPTYPE: 'E' },
+    { field: 'LANGUAGE', ROLLNAME: 'SPRAS', COMPTYPE: 'E' },
+    { field: 'CLIENT', ROLLNAME: 'MANDT', COMPTYPE: 'E' },
+  ];
 
-  it('numc(5): INTTYPE=N, INTLEN=000010, DATATYPE=NUMC, LENG=000005', () => {
-    const f = field('NUMC_FIELD');
-    assert.strictEqual(f.INTTYPE, 'N');
-    assert.strictEqual(f.INTLEN, '000010');
-    assert.strictEqual(f.DATATYPE, 'NUMC');
-    assert.strictEqual(f.LENG, '000005');
-    assert.strictEqual(f.MASK, '  NUMC');
-  });
-
-  it('string: INTTYPE=g, INTLEN=000008, DATATYPE=STRG, no LENG', () => {
-    const f = field('STRING_FIELD');
-    assert.strictEqual(f.INTTYPE, 'g');
-    assert.strictEqual(f.INTLEN, '000008');
-    assert.strictEqual(f.DATATYPE, 'STRG');
-    assert.strictEqual(f.LENG, undefined, 'string should not have LENG');
-    assert.strictEqual(f.MASK, '  STRG');
-  });
-
-  it('int1: INTTYPE=X, INTLEN=000001, DATATYPE=INT1, LENG=000003', () => {
-    const f = field('INT1_FIELD');
-    assert.strictEqual(f.INTTYPE, 'X');
-    assert.strictEqual(f.INTLEN, '000001');
-    assert.strictEqual(f.DATATYPE, 'INT1');
-    assert.strictEqual(f.LENG, '000003');
-    assert.strictEqual(f.MASK, '  INT1');
-  });
-
-  it('int2: INTTYPE=X, INTLEN=000002, DATATYPE=INT2, LENG=000005', () => {
-    const f = field('INT2_FIELD');
-    assert.strictEqual(f.INTTYPE, 'X');
-    assert.strictEqual(f.INTLEN, '000002');
-    assert.strictEqual(f.DATATYPE, 'INT2');
-    assert.strictEqual(f.LENG, '000005');
-    assert.strictEqual(f.MASK, '  INT2');
-  });
-
-  it('int4: INTTYPE=X, INTLEN=000004, DATATYPE=INT4, LENG=000010', () => {
-    const f = field('INT4_FIELD');
-    assert.strictEqual(f.INTTYPE, 'X');
-    assert.strictEqual(f.INTLEN, '000004');
-    assert.strictEqual(f.DATATYPE, 'INT4');
-    assert.strictEqual(f.LENG, '000010');
-    assert.strictEqual(f.MASK, '  INT4');
-  });
-
-  it('int8: INTTYPE=8, INTLEN=000008, DATATYPE=INT8, LENG=000019', () => {
-    const f = field('INT8_FIELD');
-    assert.strictEqual(f.INTTYPE, '8');
-    assert.strictEqual(f.INTLEN, '000008');
-    assert.strictEqual(f.DATATYPE, 'INT8');
-    assert.strictEqual(f.LENG, '000019');
-    assert.strictEqual(f.MASK, '  INT8');
-  });
-
-  it('dec(15,2): INTTYPE=P, INTLEN=000008, DATATYPE=DEC, LENG=000015, DECIMALS=000002', () => {
-    const f = field('DEC_FIELD');
-    assert.strictEqual(f.INTTYPE, 'P');
-    assert.strictEqual(f.INTLEN, '000008');
-    assert.strictEqual(f.DATATYPE, 'DEC');
-    assert.strictEqual(f.LENG, '000015');
-    assert.strictEqual(f.DECIMALS, '000002');
-    assert.strictEqual(f.MASK, '  DEC');
-  });
-
-  it('fltp: INTTYPE=F, INTLEN=000008, DATATYPE=FLTP, LENG=000016, DECIMALS=000016', () => {
-    const f = field('FLTP_FIELD');
-    assert.strictEqual(f.INTTYPE, 'F');
-    assert.strictEqual(f.INTLEN, '000008');
-    assert.strictEqual(f.DATATYPE, 'FLTP');
-    assert.strictEqual(f.LENG, '000016');
-    assert.strictEqual(f.DECIMALS, '000016');
-    assert.strictEqual(f.MASK, '  FLTP');
-  });
-
-  it('dats: INTTYPE=D, INTLEN=000016, DATATYPE=DATS, LENG=000008, SHLPORIGIN=T', () => {
-    const f = field('DATS_FIELD');
-    assert.strictEqual(f.INTTYPE, 'D');
-    assert.strictEqual(f.INTLEN, '000016');
-    assert.strictEqual(f.DATATYPE, 'DATS');
-    assert.strictEqual(f.LENG, '000008');
-    assert.strictEqual(f.SHLPORIGIN, 'T');
-    assert.strictEqual(f.MASK, '  DATS');
-  });
-
-  it('tims: INTTYPE=T, INTLEN=000012, DATATYPE=TIMS, LENG=000006, SHLPORIGIN=T', () => {
-    const f = field('TIMS_FIELD');
-    assert.strictEqual(f.INTTYPE, 'T');
-    assert.strictEqual(f.INTLEN, '000012');
-    assert.strictEqual(f.DATATYPE, 'TIMS');
-    assert.strictEqual(f.LENG, '000006');
-    assert.strictEqual(f.SHLPORIGIN, 'T');
-    assert.strictEqual(f.MASK, '  TIMS');
-  });
-
-  it('raw(16): INTTYPE=X, INTLEN=000016, DATATYPE=RAW, LENG=000016', () => {
-    const f = field('RAW_FIELD');
-    assert.strictEqual(f.INTTYPE, 'X');
-    assert.strictEqual(f.INTLEN, '000016');
-    assert.strictEqual(f.DATATYPE, 'RAW');
-    assert.strictEqual(f.LENG, '000016');
-    assert.strictEqual(f.MASK, '  RAW');
-  });
-
-  it('rawstring: INTTYPE=y, INTLEN=000008, DATATYPE=RSTR, no LENG', () => {
-    const f = field('RAWSTRING_FIELD');
-    assert.strictEqual(f.INTTYPE, 'y');
-    assert.strictEqual(f.INTLEN, '000008');
-    assert.strictEqual(f.DATATYPE, 'RSTR');
-    assert.strictEqual(f.LENG, undefined, 'rawstring should not have LENG');
-    assert.strictEqual(f.MASK, '  RSTR');
-  });
-
-  it('cuky(5): INTTYPE=C, INTLEN=000010, DATATYPE=CUKY, LENG=000005', () => {
-    const f = field('CURRENCY_CODE');
-    assert.strictEqual(f.INTTYPE, 'C');
-    assert.strictEqual(f.INTLEN, '000010');
-    assert.strictEqual(f.DATATYPE, 'CUKY');
-    assert.strictEqual(f.LENG, '000005');
-    assert.strictEqual(f.MASK, '  CUKY');
-  });
-
-  it('unit(2): INTTYPE=C, INTLEN=000004, DATATYPE=UNIT, LENG=000002', () => {
-    const f = field('UNIT_CODE');
-    assert.strictEqual(f.INTTYPE, 'C');
-    assert.strictEqual(f.INTLEN, '000004');
-    assert.strictEqual(f.DATATYPE, 'UNIT');
-    assert.strictEqual(f.LENG, '000002');
-    assert.strictEqual(f.MASK, '  UNIT');
-  });
-
-  it('utclong: INTTYPE=p, INTLEN=000008, DATATYPE=UTCL, LENG=000027', () => {
-    const f = field('UTCLONG_FIELD');
-    assert.strictEqual(f.INTTYPE, 'p');
-    assert.strictEqual(f.INTLEN, '000008');
-    assert.strictEqual(f.DATATYPE, 'UTCL');
-    assert.strictEqual(f.LENG, '000027');
-    assert.strictEqual(f.MASK, '  UTCL');
-  });
-
-  it('named type (data element): ROLLNAME, COMPTYPE=E, no INTTYPE/DATATYPE', () => {
-    const f = field('COUNTRY_CODE');
-    assert.strictEqual(f.ROLLNAME, 'LAND1');
-    assert.strictEqual(f.COMPTYPE, 'E');
-    assert.strictEqual(f.INTTYPE, undefined);
-    assert.strictEqual(f.DATATYPE, undefined);
-    assert.strictEqual(f.LENG, undefined);
-  });
+  for (const exp of FIELD_TYPE_EXPECTATIONS) {
+    it(`${exp.field}: INTTYPE=${exp.INTTYPE ?? 'n/a'}, DATATYPE=${exp.DATATYPE ?? 'n/a'}`, () => {
+      const f = field(exp.field);
+      if (exp.INTTYPE !== undefined) assert.strictEqual(f.INTTYPE, exp.INTTYPE);
+      if (exp.INTLEN !== undefined) assert.strictEqual(f.INTLEN, exp.INTLEN);
+      if (exp.DATATYPE !== undefined)
+        assert.strictEqual(f.DATATYPE, exp.DATATYPE);
+      if (exp.LENG !== undefined) assert.strictEqual(f.LENG, exp.LENG);
+      if (exp.DECIMALS !== undefined)
+        assert.strictEqual(f.DECIMALS, exp.DECIMALS);
+      if (exp.MASK !== undefined) assert.strictEqual(f.MASK, exp.MASK);
+      if (exp.SHLPORIGIN !== undefined)
+        assert.strictEqual(f.SHLPORIGIN, exp.SHLPORIGIN);
+      if (exp.ROLLNAME !== undefined)
+        assert.strictEqual(f.ROLLNAME, exp.ROLLNAME);
+      if (exp.COMPTYPE !== undefined)
+        assert.strictEqual(f.COMPTYPE, exp.COMPTYPE);
+      assert.strictEqual(f.POSITION, undefined);
+    });
+  }
 
   it('no fields have POSITION (not emitted by our serializer)', () => {
     for (const entry of entries) {

@@ -546,11 +546,6 @@ export const exportCommand: CliCommandPlugin = {
         }
 
         if (leafPackages.size > 0) {
-          // Track packages that failed creation and don't exist on SAP.
-          // Objects targeting these packages will be skipped during deploy
-          // to prevent cascade failures (FUGR fails → child FMs fail).
-          const failedPackages = new Set<string>();
-
           // Expand to include all intermediate packages in the hierarchy.
           // With PREFIX logic ROOT_A_B requires ROOT_A as an intermediate.
           const allSubPkgs = new Set<string>();
@@ -761,7 +756,6 @@ export const exportCommand: CliCommandPlugin = {
                 knownPackages.add(pkgName);
                 ctx.logger.info(`   ✅ ${pkgName} already exists`);
               } else {
-                failedPackages.add(pkgName);
                 // Provide actionable guidance for common failures
                 if (
                   errMsg.includes('409') ||
@@ -823,9 +817,8 @@ export const exportCommand: CliCommandPlugin = {
       // ============================================
       const unavailablePackages = new Set<string>();
       if (effectiveRootPackage && !options.dryRun) {
-        // Collect failed packages from the subpackage creation phase
-        // (failedPackages is only in scope inside the leafPackages block above,
-        // so we re-check: any packageRef that doesn't exist on SAP is unavailable)
+        // Check which sub-packages actually exist on SAP; skip objects
+        // targeting unavailable ones to prevent cascade failures.
         const objectsByPkg = new Map<string, any[]>();
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as

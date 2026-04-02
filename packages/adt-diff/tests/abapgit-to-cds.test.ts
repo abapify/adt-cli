@@ -25,6 +25,20 @@ async function loadFixture(
   return fixtures.ddic.tabl[key].load();
 }
 
+/** Factory for DD02V with sensible defaults (structure) */
+function dd02v(overrides?: Partial<DD02VData>): DD02VData {
+  return { TABNAME: 'ZTEST', TABCLASS: 'INTTAB', ...overrides };
+}
+
+/** Factory for a single DD03P entry */
+function dd03p(
+  name: string,
+  pos: string,
+  overrides?: Partial<DD03PData>,
+): DD03PData {
+  return { FIELDNAME: name, POSITION: pos, ADMINFIELD: '0', ...overrides };
+}
+
 // ============================================
 // Unit tests: buildCdsDdl
 // ============================================
@@ -32,27 +46,22 @@ async function loadFixture(
 describe('buildCdsDdl', () => {
   describe('structure (INTTAB)', () => {
     it('should generate define structure for TABCLASS=INTTAB', () => {
-      const dd02v: DD02VData = {
-        TABNAME: 'ZTEST_STRUCT',
-        TABCLASS: 'INTTAB',
-        DDTEXT: 'Test structure',
-        EXCLASS: '4',
-      };
-
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'FIELD1',
-          POSITION: '0001',
-          ADMINFIELD: '0',
-          INTTYPE: 'C',
-          INTLEN: '000020',
-          DATATYPE: 'CHAR',
-          LENG: '000010',
-          MASK: '  CHAR',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+      const result = buildCdsDdl(
+        dd02v({
+          TABNAME: 'ZTEST_STRUCT',
+          DDTEXT: 'Test structure',
+          EXCLASS: '4',
+        }),
+        [
+          dd03p('FIELD1', '0001', {
+            INTTYPE: 'C',
+            INTLEN: '000020',
+            DATATYPE: 'CHAR',
+            LENG: '000010',
+            MASK: '  CHAR',
+          }),
+        ],
+      );
       expect(result).toContain('define structure ztest_struct');
       expect(result).toContain("@EndUserText.label : 'Test structure'");
       expect(result).toContain(
@@ -122,86 +131,59 @@ describe('buildCdsDdl', () => {
 
   describe('builtin types', () => {
     it('should map all fixed-length types without parameters', () => {
-      const dd02v: DD02VData = {
-        TABNAME: 'ZTEST',
-        TABCLASS: 'INTTAB',
-      };
-
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'F_INT1',
-          POSITION: '0001',
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('F_INT1', '0001', {
           DATATYPE: 'INT1',
           LENG: '000003',
           INTTYPE: 'X',
-        },
-        {
-          FIELDNAME: 'F_INT2',
-          POSITION: '0002',
+        }),
+        dd03p('F_INT2', '0002', {
           DATATYPE: 'INT2',
           LENG: '000005',
           INTTYPE: 'X',
-        },
-        {
-          FIELDNAME: 'F_INT4',
-          POSITION: '0003',
+        }),
+        dd03p('F_INT4', '0003', {
           DATATYPE: 'INT4',
           LENG: '000010',
           INTTYPE: 'X',
-        },
-        {
-          FIELDNAME: 'F_INT8',
-          POSITION: '0004',
+        }),
+        dd03p('F_INT8', '0004', {
           DATATYPE: 'INT8',
           LENG: '000019',
           INTTYPE: '8',
-        },
-        {
-          FIELDNAME: 'F_DATS',
-          POSITION: '0005',
+        }),
+        dd03p('F_DATS', '0005', {
           DATATYPE: 'DATS',
           LENG: '000008',
           INTTYPE: 'D',
-        },
-        {
-          FIELDNAME: 'F_TIMS',
-          POSITION: '0006',
+        }),
+        dd03p('F_TIMS', '0006', {
           DATATYPE: 'TIMS',
           LENG: '000006',
           INTTYPE: 'T',
-        },
-        {
-          FIELDNAME: 'F_FLTP',
-          POSITION: '0007',
+        }),
+        dd03p('F_FLTP', '0007', {
           DATATYPE: 'FLTP',
           LENG: '000016',
           DECIMALS: '000016',
           INTTYPE: 'F',
-        },
-        {
-          FIELDNAME: 'F_CLNT',
-          POSITION: '0008',
+        }),
+        dd03p('F_CLNT', '0008', {
           DATATYPE: 'CLNT',
           LENG: '000003',
           INTTYPE: 'C',
-        },
-        {
-          FIELDNAME: 'F_LANG',
-          POSITION: '0009',
+        }),
+        dd03p('F_LANG', '0009', {
           DATATYPE: 'LANG',
           LENG: '000001',
           INTTYPE: 'C',
-        },
-        {
-          FIELDNAME: 'F_UTCL',
-          POSITION: '0010',
+        }),
+        dd03p('F_UTCL', '0010', {
           DATATYPE: 'UTCL',
           LENG: '000027',
           INTTYPE: 'p',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+        }),
+      ]);
       expect(result).toContain('f_int1 : abap.int1');
       expect(result).toContain('f_int2 : abap.int2');
       expect(result).toContain('f_int4 : abap.int4');
@@ -215,41 +197,13 @@ describe('buildCdsDdl', () => {
     });
 
     it('should map types with length', () => {
-      const dd02v: DD02VData = { TABNAME: 'ZTEST', TABCLASS: 'INTTAB' };
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'F_CHAR',
-          POSITION: '0001',
-          DATATYPE: 'CHAR',
-          LENG: '000010',
-        },
-        {
-          FIELDNAME: 'F_NUMC',
-          POSITION: '0002',
-          DATATYPE: 'NUMC',
-          LENG: '000005',
-        },
-        {
-          FIELDNAME: 'F_RAW',
-          POSITION: '0003',
-          DATATYPE: 'RAW',
-          LENG: '000016',
-        },
-        {
-          FIELDNAME: 'F_CUKY',
-          POSITION: '0004',
-          DATATYPE: 'CUKY',
-          LENG: '000005',
-        },
-        {
-          FIELDNAME: 'F_UNIT',
-          POSITION: '0005',
-          DATATYPE: 'UNIT',
-          LENG: '000002',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('F_CHAR', '0001', { DATATYPE: 'CHAR', LENG: '000010' }),
+        dd03p('F_NUMC', '0002', { DATATYPE: 'NUMC', LENG: '000005' }),
+        dd03p('F_RAW', '0003', { DATATYPE: 'RAW', LENG: '000016' }),
+        dd03p('F_CUKY', '0004', { DATATYPE: 'CUKY', LENG: '000005' }),
+        dd03p('F_UNIT', '0005', { DATATYPE: 'UNIT', LENG: '000002' }),
+      ]);
       expect(result).toContain('f_char : abap.char(10)');
       expect(result).toContain('f_numc : abap.numc(5)');
       expect(result).toContain('f_raw  : abap.raw(16)');
@@ -258,61 +212,39 @@ describe('buildCdsDdl', () => {
     });
 
     it('should map decimal types with length and decimals', () => {
-      const dd02v: DD02VData = { TABNAME: 'ZTEST', TABCLASS: 'INTTAB' };
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'F_DEC',
-          POSITION: '0001',
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('F_DEC', '0001', {
           DATATYPE: 'DEC',
           LENG: '000015',
           DECIMALS: '000002',
-        },
-        {
-          FIELDNAME: 'F_CURR',
-          POSITION: '0002',
+        }),
+        dd03p('F_CURR', '0002', {
           DATATYPE: 'CURR',
           LENG: '000015',
           DECIMALS: '000002',
           REFTABLE: 'ZTEST',
           REFFIELD: 'F_CUKY',
-        },
-        {
-          FIELDNAME: 'F_QUAN',
-          POSITION: '0003',
+        }),
+        dd03p('F_QUAN', '0003', {
           DATATYPE: 'QUAN',
           LENG: '000013',
           DECIMALS: '000003',
           REFTABLE: 'ZTEST',
           REFFIELD: 'F_UNIT',
-        },
-        {
-          FIELDNAME: 'F_CUKY',
-          POSITION: '0004',
-          DATATYPE: 'CUKY',
-          LENG: '000005',
-        },
-        {
-          FIELDNAME: 'F_UNIT',
-          POSITION: '0005',
-          DATATYPE: 'UNIT',
-          LENG: '000003',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+        }),
+        dd03p('F_CUKY', '0004', { DATATYPE: 'CUKY', LENG: '000005' }),
+        dd03p('F_UNIT', '0005', { DATATYPE: 'UNIT', LENG: '000003' }),
+      ]);
       expect(result).toContain('f_dec  : abap.dec(15,2)');
       expect(result).toContain('f_curr : abap.curr(15,2)');
       expect(result).toContain('f_quan : abap.quan(13,3)');
     });
 
     it('should map variable-length types (string, rawstring)', () => {
-      const dd02v: DD02VData = { TABNAME: 'ZTEST', TABCLASS: 'INTTAB' };
-      const dd03p: DD03PData[] = [
-        { FIELDNAME: 'F_STRING', POSITION: '0001', DATATYPE: 'STRG' },
-        { FIELDNAME: 'F_RSTR', POSITION: '0002', DATATYPE: 'RSTR' },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('F_STRING', '0001', { DATATYPE: 'STRG' }),
+        dd03p('F_RSTR', '0002', { DATATYPE: 'RSTR' }),
+      ]);
       expect(result).toContain('f_string : abap.string(0)');
       expect(result).toContain('f_rstr   : abap.rawstring(0)');
     });
@@ -320,23 +252,10 @@ describe('buildCdsDdl', () => {
 
   describe('data element references', () => {
     it('should emit data element name for COMPTYPE=E fields', () => {
-      const dd02v: DD02VData = { TABNAME: 'ZTEST', TABCLASS: 'INTTAB' };
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'COUNTRY_CODE',
-          POSITION: '0001',
-          ROLLNAME: 'LAND1',
-          COMPTYPE: 'E',
-        },
-        {
-          FIELDNAME: 'LANGUAGE',
-          POSITION: '0002',
-          ROLLNAME: 'SPRAS',
-          COMPTYPE: 'E',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('COUNTRY_CODE', '0001', { ROLLNAME: 'LAND1', COMPTYPE: 'E' }),
+        dd03p('LANGUAGE', '0002', { ROLLNAME: 'SPRAS', COMPTYPE: 'E' }),
+      ]);
       expect(result).toContain('country_code : land1');
       expect(result).toContain('language     : spras');
     });
@@ -344,26 +263,16 @@ describe('buildCdsDdl', () => {
 
   describe('currency/quantity annotations', () => {
     it('should emit @Semantics.amount.currencyCode for CURR fields', () => {
-      const dd02v: DD02VData = { TABNAME: 'ZTEST', TABCLASS: 'INTTAB' };
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'AMOUNT',
-          POSITION: '0001',
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('AMOUNT', '0001', {
           DATATYPE: 'CURR',
           LENG: '000015',
           DECIMALS: '000002',
           REFTABLE: 'ZTEST',
           REFFIELD: 'CURRENCY',
-        },
-        {
-          FIELDNAME: 'CURRENCY',
-          POSITION: '0002',
-          DATATYPE: 'CUKY',
-          LENG: '000005',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+        }),
+        dd03p('CURRENCY', '0002', { DATATYPE: 'CUKY', LENG: '000005' }),
+      ]);
       expect(result).toContain(
         "@Semantics.amount.currencyCode : 'ztest.currency'",
       );
@@ -371,26 +280,16 @@ describe('buildCdsDdl', () => {
     });
 
     it('should emit @Semantics.quantity.unitOfMeasure for QUAN fields', () => {
-      const dd02v: DD02VData = { TABNAME: 'ZTEST', TABCLASS: 'INTTAB' };
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'QUANTITY',
-          POSITION: '0001',
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('QUANTITY', '0001', {
           DATATYPE: 'QUAN',
           LENG: '000013',
           DECIMALS: '000003',
           REFTABLE: 'ZTEST',
           REFFIELD: 'UOM',
-        },
-        {
-          FIELDNAME: 'UOM',
-          POSITION: '0002',
-          DATATYPE: 'UNIT',
-          LENG: '000003',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+        }),
+        dd03p('UOM', '0002', { DATATYPE: 'UNIT', LENG: '000003' }),
+      ]);
       expect(result).toContain(
         "@Semantics.quantity.unitOfMeasure : 'ztest.uom'",
       );
@@ -400,37 +299,20 @@ describe('buildCdsDdl', () => {
 
   describe('includes', () => {
     it('should emit include directive for .INCLUDE entries', () => {
-      const dd02v: DD02VData = { TABNAME: 'ZTEST', TABCLASS: 'INTTAB' };
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'FIELD1',
-          POSITION: '0001',
-          DATATYPE: 'CHAR',
-          LENG: '000010',
-        },
-        {
-          FIELDNAME: '.INCLUDE',
-          POSITION: '0002',
+      const result = buildCdsDdl(dd02v(), [
+        dd03p('FIELD1', '0001', { DATATYPE: 'CHAR', LENG: '000010' }),
+        dd03p('.INCLUDE', '0002', {
           PRECFIELD: 'ZOTHER_STRUCT',
           MASK: '      S',
           COMPTYPE: 'S',
-        },
-        {
-          FIELDNAME: '.INCLU-_XX',
-          POSITION: '0003',
+        }),
+        dd03p('.INCLU-_XX', '0003', {
           PRECFIELD: 'ZOTHER_STRUCT',
           MASK: '      S',
           COMPTYPE: 'S',
-        },
-        {
-          FIELDNAME: 'FIELD2',
-          POSITION: '0004',
-          DATATYPE: 'NUMC',
-          LENG: '000005',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+        }),
+        dd03p('FIELD2', '0004', { DATATYPE: 'NUMC', LENG: '000005' }),
+      ]);
       expect(result).toContain('field1 : abap.char(10)');
       expect(result).toContain('include zother_struct;');
       expect(result).toContain('field2 : abap.numc(5)');
@@ -441,29 +323,15 @@ describe('buildCdsDdl', () => {
 
   describe('key fields and not null', () => {
     it('should emit key keyword and not null for key fields', () => {
-      const dd02v: DD02VData = {
-        TABNAME: 'ZTEST',
-        TABCLASS: 'TRANSP',
-        CONTFLAG: 'A',
-      };
-      const dd03p: DD03PData[] = [
-        {
-          FIELDNAME: 'KEY1',
-          POSITION: '0001',
+      const result = buildCdsDdl(dd02v({ TABCLASS: 'TRANSP', CONTFLAG: 'A' }), [
+        dd03p('KEY1', '0001', {
           KEYFLAG: 'X',
           DATATYPE: 'CHAR',
           LENG: '000010',
           NOTNULL: 'X',
-        },
-        {
-          FIELDNAME: 'DATA1',
-          POSITION: '0002',
-          DATATYPE: 'CHAR',
-          LENG: '000040',
-        },
-      ];
-
-      const result = buildCdsDdl(dd02v, dd03p);
+        }),
+        dd03p('DATA1', '0002', { DATATYPE: 'CHAR', LENG: '000040' }),
+      ]);
       expect(result).toMatch(/key key1\s+: abap\.char\(10\) not null/);
       expect(result).toMatch(/data1\s+: abap\.char\(40\)/);
       expect(result).not.toMatch(/data1\s+: abap\.char\(40\) not null/);
@@ -478,12 +346,7 @@ describe('buildCdsDdl', () => {
       ['3', '#EXTENSIBLE_CHARACTER'],
       ['4', '#EXTENSIBLE_ANY'],
     ])('should map EXCLASS %s to %s', (exclass, expected) => {
-      const dd02v: DD02VData = {
-        TABNAME: 'ZTEST',
-        TABCLASS: 'INTTAB',
-        EXCLASS: exclass,
-      };
-      const result = buildCdsDdl(dd02v, []);
+      const result = buildCdsDdl(dd02v({ EXCLASS: exclass }), []);
       expect(result).toContain(
         `@AbapCatalog.enhancement.category : ${expected}`,
       );

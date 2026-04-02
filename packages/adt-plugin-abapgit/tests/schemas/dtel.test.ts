@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import {
   runSchemaTests,
   createTypedSchema,
+  extractAbapGitRoot,
   type SchemaScenario,
 } from './base/scenario.ts';
 import { dtel as dtelSchema } from '../../src/schemas/generated/schemas/index.ts';
@@ -24,7 +25,7 @@ const scenario: SchemaScenario<DtelSchema> = {
       path: 'dtel/zage_dtel_with_domain.dtel.xml',
       validate: (data) => {
         // Schema is union type - assert to the abapGit variant
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');
@@ -53,7 +54,7 @@ const scenario: SchemaScenario<DtelSchema> = {
     {
       path: 'dtel/zage_dtel_predefined_type.dtel.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd04v = root.abap.values.DD04V!;
         assert.strictEqual(dd04v.ROLLNAME, 'ZAGE_DTEL_PREDEFINED_TYPE');
         assert.strictEqual(dd04v.DATATYPE, 'CHAR');
@@ -67,7 +68,7 @@ const scenario: SchemaScenario<DtelSchema> = {
     {
       path: 'dtel/zage_dtel_with_decimals.dtel.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd04v = root.abap.values.DD04V!;
         assert.strictEqual(dd04v.ROLLNAME, 'ZAGE_DTEL_WITH_DECIMALS');
         assert.strictEqual(dd04v.DATATYPE, 'CURR');
@@ -80,7 +81,7 @@ const scenario: SchemaScenario<DtelSchema> = {
     {
       path: 'dtel/zage_dtel_ref_to_clas.dtel.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd04v = root.abap.values.DD04V!;
         assert.strictEqual(dd04v.ROLLNAME, 'ZAGE_DTEL_REF_TO_CLAS');
         assert.strictEqual(dd04v.DOMNAME, 'CL_ABAP_MATH');
@@ -93,7 +94,7 @@ const scenario: SchemaScenario<DtelSchema> = {
     {
       path: 'dtel/zage_dtel_ref_to_ddic.dtel.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd04v = root.abap.values.DD04V!;
         assert.strictEqual(dd04v.ROLLNAME, 'ZAGE_DTEL_REF_TO_DDIC');
         assert.strictEqual(dd04v.DOMNAME, 'ZAGE_DTEL_WITH_DOMAIN');
@@ -106,7 +107,7 @@ const scenario: SchemaScenario<DtelSchema> = {
     {
       path: 'dtel/zage_dtel_ref_to_predefined.dtel.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd04v = root.abap.values.DD04V!;
         assert.strictEqual(dd04v.ROLLNAME, 'ZAGE_DTEL_REF_TO_PREDEFINED');
         assert.strictEqual(dd04v.DOMNAME, 'ABAP_BOOLEAN');
@@ -120,7 +121,7 @@ const scenario: SchemaScenario<DtelSchema> = {
     {
       path: 'dtel/zage_dtel_value_table_key.dtel.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd04v = root.abap.values.DD04V!;
         assert.strictEqual(dd04v.ROLLNAME, 'ZAGE_DTEL_VALUE_TABLE_KEY');
         assert.strictEqual(dd04v.DOMNAME, 'ZAGE_DOMA_VALUE_TABLE');

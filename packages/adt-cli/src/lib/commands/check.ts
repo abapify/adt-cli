@@ -18,14 +18,7 @@ import { Command } from 'commander';
 import { XMLParser } from 'fast-xml-parser';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
 import { getObjectUri } from '@abapify/adk';
-
-type SearchObject = {
-  name?: string;
-  type?: string;
-  uri?: string;
-  description?: string;
-  packageName?: string;
-};
+import { normalizeSearchResults } from '../utils/lock-helpers';
 
 type CheckMessage = {
   uri?: string;
@@ -72,25 +65,9 @@ async function resolveObjectUri(
       maxResults: 10,
     });
 
-  const resultsAny = searchResult as Record<string, unknown>;
-  let rawObjects: SearchObject | SearchObject[] | undefined;
-  if ('objectReferences' in resultsAny && resultsAny.objectReferences) {
-    const refs = resultsAny.objectReferences as {
-      objectReference?: SearchObject | SearchObject[];
-    };
-    rawObjects = refs.objectReference;
-  } else if ('mainObject' in resultsAny && resultsAny.mainObject) {
-    const main = resultsAny.mainObject as {
-      objectReference?: SearchObject | SearchObject[];
-    };
-    rawObjects = main.objectReference;
-  }
-
-  const objects: SearchObject[] = rawObjects
-    ? Array.isArray(rawObjects)
-      ? rawObjects
-      : [rawObjects]
-    : [];
+  const objects = normalizeSearchResults(
+    searchResult as Record<string, unknown>,
+  );
 
   // Find exact match
   const match = objects.find(
@@ -123,25 +100,9 @@ async function resolvePackageObjects(
       packageName,
     });
 
-  const resultsAny = searchResult as Record<string, unknown>;
-  let rawObjects: SearchObject | SearchObject[] | undefined;
-  if ('objectReferences' in resultsAny && resultsAny.objectReferences) {
-    const refs = resultsAny.objectReferences as {
-      objectReference?: SearchObject | SearchObject[];
-    };
-    rawObjects = refs.objectReference;
-  } else if ('mainObject' in resultsAny && resultsAny.mainObject) {
-    const main = resultsAny.mainObject as {
-      objectReference?: SearchObject | SearchObject[];
-    };
-    rawObjects = main.objectReference;
-  }
-
-  const objects: SearchObject[] = rawObjects
-    ? Array.isArray(rawObjects)
-      ? rawObjects
-      : [rawObjects]
-    : [];
+  const objects = normalizeSearchResults(
+    searchResult as Record<string, unknown>,
+  );
 
   return objects
     .filter((o) => o.uri)

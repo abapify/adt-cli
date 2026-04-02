@@ -16,6 +16,7 @@
 import { AdkFunctionGroup } from '../adk';
 import { fugr } from '../../../schemas/generated';
 import { createHandler } from '../base';
+import { formatAbapGitXml } from '../xml-format';
 
 /**
  * Map ADT processingType to abapGit REMOTE_CALL flag
@@ -98,24 +99,7 @@ export const functionGroupHandler = createHandler(AdkFunctionGroup, {
     };
     let xmlContent = fugr.build(fullPayload, { pretty: true });
 
-    // Format attributes on separate lines for readability
-    xmlContent = xmlContent.replace(
-      /<([^\s>]+)((?:\s+[^\s=]+="[^"]*")+)\s*(\/?)>/g,
-      (match, tag, attrs, selfClose) => {
-        const attrList = attrs
-          .trim()
-          .split(/\s+(?=[^\s=]+=)/)
-          .map((a: string) => `\n  ${a}`)
-          .join('');
-        return `<${tag}${attrList}\n${selfClose ? '/' : ''}>`;
-      },
-    );
-
-    // Move xmlns:asx from root to asx:abap element
-    xmlContent = xmlContent.replace(
-      /(<abapGit[^>]*)\s+xmlns:asx="http:\/\/www\.sap\.com\/abapxml"([^>]*>[\s\S]*?)(<asx:abap)/,
-      '$1$2$3\n  xmlns:asx="http://www.sap.com/abapxml"',
-    );
+    xmlContent = formatAbapGitXml(xmlContent);
 
     files.push(ctx.createFile(`${objectName}.fugr.xml`, xmlContent));
 
@@ -136,7 +120,7 @@ export const functionGroupHandler = createHandler(AdkFunctionGroup, {
 
     // 3. TOP-include PROGDIR metadata (best-effort defaults)
     const data = ctx.getData(obj);
-    const fixpt = data.fixPointArithmetic ? 'X' : 'X'; // almost always X
+    const fixpt = data.fixPointArithmetic ? 'X' : '';
     files.push(
       ctx.createFile(
         `${objectName}.fugr.l${objectName}top.xml`,

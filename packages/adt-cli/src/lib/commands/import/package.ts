@@ -1,8 +1,10 @@
 import { Command } from 'commander';
 import { ImportService } from '../../services/import/service';
-import { IconRegistry } from '../../utils/icon-registry';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
-import { handleImportError } from '../../utils/command-helpers';
+import {
+  handleImportError,
+  displayImportResults,
+} from '../../utils/command-helpers';
 
 export const importPackageCommand = new Command('package')
   .argument('<packageName>', 'ABAP package name to import')
@@ -57,24 +59,11 @@ export const importPackageCommand = new Command('package')
         debug: options.debug,
       });
 
-      // Display results
-      console.log(`\n✅ Package import complete!`);
-      console.log(`📦 Package: ${result.packageName}`);
-      console.log(`📝 Description: ${result.description}`);
-      console.log(
-        `📊 Results: ${result.results.success} success, ${result.results.skipped} skipped, ${result.results.failed} failed`,
+      displayImportResults(
+        result,
+        'Package',
+        result.packageName ?? packageName,
       );
-
-      // Show object type breakdown
-      if (Object.keys(result.objectsByType).length > 0) {
-        console.log(`\n📋 Objects by type:`);
-        for (const [type, count] of Object.entries(result.objectsByType)) {
-          const icon = IconRegistry.getIcon(type);
-          console.log(`   ${icon} ${type}: ${count}`);
-        }
-      }
-
-      console.log(`\n✨ Files written to: ${result.outputPath}`);
     } catch (error) {
       handleImportError(error, options.debug);
     }

@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import {
   runSchemaTests,
   createTypedSchema,
+  extractAbapGitRoot,
   type SchemaScenario,
 } from './base/scenario.ts';
 import { intf as intfSchema } from '../../src/schemas/generated/schemas/index.ts';
@@ -24,7 +25,7 @@ const scenario: SchemaScenario<IntfSchema> = {
       path: 'intf/zif_age_test.intf.xml',
       validate: (data) => {
         // Schema is union type - assert to the abapGit variant
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');

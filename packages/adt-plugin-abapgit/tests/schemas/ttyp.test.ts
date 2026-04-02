@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import {
   runSchemaTests,
   createTypedSchema,
+  extractAbapGitRoot,
   type SchemaScenario,
 } from './base/scenario.ts';
 import { ttyp as ttypSchema } from '../../src/schemas/generated/schemas/index.ts';
@@ -23,7 +24,7 @@ const scenario: SchemaScenario<TtypSchema> = {
     {
       path: 'ttyp/zage_ttyp_strtab.ttyp.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // Envelope
         assert.strictEqual(root.version, 'v1.0.0');
@@ -46,7 +47,7 @@ const scenario: SchemaScenario<TtypSchema> = {
     {
       path: 'ttyp/zage_ttyp_struct.ttyp.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
 
         // DD40V content
         const dd40v = root.abap.values.DD40V!;
@@ -60,7 +61,7 @@ const scenario: SchemaScenario<TtypSchema> = {
     {
       path: 'ttyp/zage_ttyp_strtab2.ttyp.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd40v = root.abap.values.DD40V!;
         assert.strictEqual(dd40v.TYPENAME, 'ZAGE_TTYP_STRTAB2');
         assert.strictEqual(dd40v.ROWTYPE, 'STRING');
@@ -76,7 +77,7 @@ const scenario: SchemaScenario<TtypSchema> = {
     {
       path: 'ttyp/zage_ttyp_string.ttyp.xml',
       validate: (data) => {
-        const root = (data as any).abapGit;
+        const root = extractAbapGitRoot(data);
         const dd40v = root.abap.values.DD40V!;
         assert.strictEqual(dd40v.TYPENAME, 'ZAGE_TTYP_STRING');
         assert.strictEqual(dd40v.DATATYPE, 'STRG');
