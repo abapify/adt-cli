@@ -398,7 +398,8 @@ export const exportCommand: CliCommandPlugin = {
       }
 
       // Get ADT client and create ADK context
-      const client = await ctx.getAdtClient!();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = (await ctx.getAdtClient!()) as any;
       // Reuse global context's lock service if available, otherwise create one
       const globalCtx = tryGetGlobalContext();
       const lockStore = globalCtx?.lockStore ?? new FileLockStore();

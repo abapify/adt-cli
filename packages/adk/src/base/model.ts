@@ -14,6 +14,7 @@
  */
 
 import type { AdkContext } from './context';
+import type { AdtClient } from './adt';
 import type { AdkKind } from './kinds';
 import type { LockHandle } from '@abapify/adt-locks';
 import { toText } from './fetch-utils';
@@ -148,6 +149,12 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   }
 
   protected ctx: AdkContext;
+
+  /** Public access to the ADT client for plugins and external code */
+  get client(): AdtClient {
+    return this.ctx.client;
+  }
+
   protected _data?: D;
   protected _name: string;
   protected cache = new Map<string, unknown>();

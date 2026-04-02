@@ -63,7 +63,7 @@ export const domainHandler = createHandler(AdkDomain, {
     };
   },
 
-  fromAbapGit: ({ DD01V, DD07V_TAB } = {}) => {
+  fromAbapGit: ({ DD01V, DD07V_TAB }) => {
     const fixValues =
       DD07V_TAB?.DD07V?.map((fv, idx) => ({
         position: Number(fv.VALPOS ?? idx + 1),

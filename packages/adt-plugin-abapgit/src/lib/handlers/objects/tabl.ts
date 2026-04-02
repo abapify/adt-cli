@@ -30,13 +30,12 @@ import { createHandler } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 import { buildDD02V, buildDD03P } from '../cds-to-abapgit';
 import type { TypeResolver, ResolvedType } from '../cds-to-abapgit';
-import type { AdkObject } from '../adk';
 
 /**
  * Strip undefined/empty-string values from an object
  * to avoid emitting empty XML elements
  */
-function stripEmpty<T extends Record<string, unknown>>(obj: T): Partial<T> {
+function stripEmpty<T extends object>(obj: T): Partial<T> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value !== undefined && value !== '') {
@@ -159,11 +158,11 @@ function parseSettingsToDD09L(
  * Shared serialize logic for tables and structures.
  * Both use CDS source → DD02V/DD03P mapping.
  */
-async function serializeTabl(
-  obj: AdkTable | AdkStructure,
+async function serializeTabl<T extends AdkTable | AdkStructure>(
+  obj: T,
   ctx: {
-    getObjectName: (obj: AdkObject) => string;
-    toAbapGitXml: (obj: AdkObject) => string;
+    getObjectName: (obj: T) => string;
+    toAbapGitXml: (obj: T) => string;
     createFile: (
       path: string,
       content: string,

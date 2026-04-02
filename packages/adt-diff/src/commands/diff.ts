@@ -22,7 +22,7 @@
  */
 
 import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
-import { createAdk, type AdtClient, type AdkFactory } from '@abapify/adk';
+import { createAdk, AdkObject, type AdtClient, type AdkFactory } from '@abapify/adk';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { glob as nativeGlob } from 'node:fs/promises';
 import { resolve, basename, dirname, join, relative } from 'node:path';
@@ -477,7 +477,20 @@ async function diffSingleFile(
     );
   }
 
-  const remoteObj = adk.get(parsed.name, adkType);
+  const remoteObjRaw = adk.get(parsed.name, adkType);
+
+  // Narrow to AdkObject (excludes AdkGenericObject for unregistered types)
+  if (!(remoteObjRaw instanceof AdkObject)) {
+    return {
+      objectName: parsed.name,
+      objectType: parsed.type,
+      hasDifferences: false,
+      fileCount: localFiles.size,
+      identicalCount: 0,
+      error: `Unsupported ADK type: ${adkType} (no registered handler)`,
+    };
+  }
+  const remoteObj = remoteObjRaw;
 
   try {
     await remoteObj.load();
@@ -500,7 +513,7 @@ async function diffSingleFile(
 
     let remoteSource: string;
     try {
-      remoteSource = await remoteObj.getSource();
+      remoteSource = await (remoteObj as unknown as { getSource(): Promise<string> }).getSource();
     } catch (error) {
       return {
         objectName: parsed.name,

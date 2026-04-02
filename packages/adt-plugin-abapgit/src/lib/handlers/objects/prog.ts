@@ -28,15 +28,10 @@ export const programHandler = createHandler(AdkProgram, {
 
   // Git → SAP: Map abapGit values to ADK data
   // Returns data matching AbapProgramSchema structure
-  fromAbapGit: ({ PROGDIR, TPOOL } = {}) => {
+  fromAbapGit: ({ PROGDIR, TPOOL }) => {
     // Extract description from TPOOL (text pool) if available
-    // TPOOL.item can be a single object or an array
-    let descriptionEntry: { ID?: string; ENTRY?: string } | undefined;
-    if (Array.isArray(TPOOL?.item)) {
-      descriptionEntry = TPOOL.item.find((t: { ID?: string }) => t.ID === 'R');
-    } else if (TPOOL?.item?.ID === 'R') {
-      descriptionEntry = TPOOL.item;
-    }
+    const items = TPOOL?.item ?? [];
+    const descriptionEntry = items.find((t) => t.ID === 'R');
 
     // SUBC can be parsed as number or string depending on XML parser
     const subc = String(PROGDIR?.SUBC ?? '');

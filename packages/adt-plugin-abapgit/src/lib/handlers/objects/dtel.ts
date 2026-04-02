@@ -179,7 +179,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
     };
   },
 
-  fromAbapGit: ({ DD04V } = {}) => {
+  fromAbapGit: ({ DD04V }) => {
     // Map REFKIND + REFTYPE to ADT typeKind enum
     const refKind = DD04V?.REFKIND ?? '';
     const refType = DD04V?.REFTYPE ?? '';

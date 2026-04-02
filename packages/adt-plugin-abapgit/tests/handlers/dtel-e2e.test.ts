@@ -11,13 +11,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
-import { parseXml, type Schema } from '@abapify/ts-xsd';
-
-// Import the raw schema literals (these are the generated schema JS objects)
-// The dataelementWrapper imports adtcore + dataelements schemas
-import dataelementWrapperSchema from '../../../adt-schemas/src/schemas/generated/schemas/custom/dataelementWrapper.ts';
-import adtcoreSchema from '../../../adt-schemas/src/schemas/generated/schemas/sap/adtcore.ts';
-import dataelementsSchema from '../../../adt-schemas/src/schemas/generated/schemas/sap/dataelements.ts';
+import { dataelementWrapper } from '@abapify/adt-schemas';
 
 // Import handler to trigger registration
 import '../../src/lib/handlers/objects/dtel.ts';
@@ -28,13 +22,7 @@ import { getHandler } from '../../src/lib/handlers/base.ts';
  * Replicates what the adt-client adapter does at runtime
  */
 function parseDtelResponse(xml: string): any {
-  // The schema needs its $imports resolved - we do this manually since
-  // we're not using the TypedSchema wrapper
-  const schema = {
-    ...dataelementWrapperSchema,
-    $imports: [adtcoreSchema, dataelementsSchema],
-  };
-  return parseXml(schema as unknown as Schema, xml);
+  return dataelementWrapper.parse(xml);
 }
 
 /**

@@ -165,7 +165,7 @@ export const functionGroupHandler = createHandler(AdkFunctionGroup, {
       const funcName = fm.name.toLowerCase();
       try {
         const source =
-          await obj.ctx.client.adt.functions.groups.fmodules.source.main.get(
+          await obj.client.adt.functions.groups.fmodules.source.main.get(
             obj.name,
             fm.name,
           );
@@ -183,7 +183,7 @@ export const functionGroupHandler = createHandler(AdkFunctionGroup, {
   },
 
   // Git → SAP: Map abapGit values to ADK data
-  fromAbapGit: ({ AREAT, FUNCTIONS } = {}) => ({
+  fromAbapGit: ({ AREAT, FUNCTIONS }) => ({
     name: '', // Resolved from filename by deserializer
     type: 'FUGR/F',
     description: AREAT,
@@ -252,7 +252,7 @@ async function discoverFunctionModules(
   obj: InstanceType<typeof AdkFunctionGroup>,
 ): Promise<FmDescriptor[]> {
   try {
-    const response = await obj.ctx.client.adt.functions.groups.objectstructure(
+    const response = await obj.client.adt.functions.groups.objectstructure(
       obj.name,
     );
 
@@ -292,7 +292,7 @@ async function serializeFunctions(
 
   for (const fm of fmItems) {
     try {
-      const response = await obj.ctx.client.adt.functions.groups.fmodules.get(
+      const response = await obj.client.adt.functions.groups.fmodules.get(
         obj.name,
         fm.name,
       );

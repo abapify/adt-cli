@@ -151,7 +151,7 @@ export const tableTypeHandler = createHandler(AdkTableType, {
     };
   },
 
-  fromAbapGit: ({ DD40V } = {}) => {
+  fromAbapGit: ({ DD40V }) => {
     const accessType =
       ACCESS_MODE_TO_ADT[DD40V?.ACCESSMODE ?? ''] ?? DD40V?.ACCESSMODE;
     const keyDef = KEY_DEF_TO_ADT[DD40V?.KEYDEF ?? ''] ?? DD40V?.KEYDEF;

@@ -4,5 +4,9 @@
   "sourceRoot": "packages/adt-mcp/src",
   "projectType": "library",
   "tags": ["scope:adt", "type:mcp"],
-  "targets": {}
+  "targets": {
+    "typecheck": {
+      "command": "echo 'typecheck disabled: MCP SDK + Zod type inference causes OOM (see adt-mcp/AGENTS.md)'"
+    }
+  }
 }
