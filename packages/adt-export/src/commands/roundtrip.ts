@@ -13,7 +13,6 @@
 import type {
   CliCommandPlugin,
   CliContext,
-  AdtPlugin,
   ExportOptions,
   ImportContext,
 } from '@abapify/adt-plugin';
@@ -31,6 +30,7 @@ import {
   findAbapGitRoot,
   resolveFilesRelativeToRoot,
 } from '../utils/filetree';
+import { loadFormatPlugin } from '../utils/format-plugin';
 import {
   mkdirSync,
   rmSync,
@@ -45,27 +45,6 @@ import { tmpdir } from 'node:os';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
-
-/**
- * Format shortcuts
- */
-const FORMAT_SHORTCUTS: Record<string, string> = {
-  abapgit: '@abapify/adt-plugin-abapgit',
-  ag: '@abapify/adt-plugin-abapgit',
-};
-
-async function loadFormatPlugin(formatSpec: string): Promise<AdtPlugin> {
-  const packageName = FORMAT_SHORTCUTS[formatSpec] ?? formatSpec;
-  const pluginModule = await import(packageName);
-  const PluginClass =
-    pluginModule.default || pluginModule[Object.keys(pluginModule)[0]];
-  if (!PluginClass) {
-    throw new Error(`No plugin class found in ${packageName}`);
-  }
-  return typeof PluginClass === 'function' && PluginClass.prototype
-    ? new PluginClass()
-    : PluginClass;
-}
 
 /**
  * Resolve full package path from SAP (walks super packages upward)

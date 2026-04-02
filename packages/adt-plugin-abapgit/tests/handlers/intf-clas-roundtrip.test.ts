@@ -70,26 +70,55 @@ function assertFieldsRoundtrip(
   }
 }
 
+/**
+ * Registers a `before` hook that fetches the handler and an `it` test that
+ * asserts handler metadata (type + fileExtension).  Returns a getter for the
+ * handler so that subsequent tests in the same `describe` scope can use it.
+ */
+function describeHandlerSetup(
+  type: string,
+): () => NonNullable<ReturnType<typeof getHandler>> {
+  let handler: ReturnType<typeof getHandler>;
+
+  before(() => {
+    handler = getHandler(type);
+    assert.ok(handler, `${type} handler should be registered`);
+  });
+
+  it('handler is registered with correct metadata', () => {
+    assert.strictEqual(handler!.type, type);
+    assert.strictEqual(handler!.fileExtension, type.toLowerCase());
+  });
+
+  return () => handler!;
+}
+
+/**
+ * Serialize a mock ADK object via the handler, locate the produced XML file,
+ * re-parse it through the handler's schema and return the abapGit values.
+ */
+async function serializeAndReparse(
+  handler: NonNullable<ReturnType<typeof getHandler>>,
+  mockObj: unknown,
+  ext: string,
+) {
+  const files = await handler.serialize(mockObj as any);
+  const xmlFile = files.find((f) => f.path.endsWith(`.${ext}.xml`));
+  assert.ok(xmlFile, `Should produce .${ext}.xml file`);
+  const reparsed = handler.schema.parse(xmlFile!.content) as any;
+  return reparsed.abapGit.abap.values;
+}
+
 // ============================================
 // INTF Roundtrip
 // ============================================
 
 describe('INTF handler roundtrip', () => {
-  let handler: ReturnType<typeof getHandler>;
-
-  before(() => {
-    handler = getHandler('INTF');
-    assert.ok(handler, 'INTF handler should be registered');
-  });
-
-  it('handler is registered with correct metadata', () => {
-    assert.strictEqual(handler!.type, 'INTF');
-    assert.strictEqual(handler!.fileExtension, 'intf');
-  });
+  const getIntfHandler = describeHandlerSetup('INTF');
 
   describe('fromAbapGit', () => {
     it('maps VSEOINTERF to ADK data', () => {
-      const result = handler!.fromAbapGit!({
+      const result = getIntfHandler().fromAbapGit!({
         VSEOINTERF: {
           CLSNAME: 'ZIF_TEST_INTF',
           LANGU: 'E',
@@ -108,7 +137,7 @@ describe('INTF handler roundtrip', () => {
     });
 
     it('maps ABAP_LANGUAGE_VERSION correctly', () => {
-      const result = handler!.fromAbapGit!({
+      const result = getIntfHandler().fromAbapGit!({
         VSEOINTERF: {
           CLSNAME: 'ZIF_CLOUD',
           ABAP_LANGUAGE_VERSION: '5',
@@ -123,7 +152,7 @@ describe('INTF handler roundtrip', () => {
     });
 
     it('handles empty/missing VSEOINTERF gracefully', () => {
-      const result = handler!.fromAbapGit!({});
+      const result = getIntfHandler().fromAbapGit!({});
       assert.strictEqual(result.name, '');
       assert.strictEqual(result.type, 'INTF/OI');
     });
@@ -131,14 +160,15 @@ describe('INTF handler roundtrip', () => {
 
   describe('fixture roundtrip: parse → fromAbapGit → mock ADK → serialize → compare', () => {
     it('round-trips zif_age_test.intf.xml', async () => {
+      const handler = getIntfHandler();
       const xml = loadFixture('intf/zif_age_test.intf.xml');
 
       // Step 1: Parse fixture XML
-      const parsed = handler!.schema.parse(xml) as any;
+      const parsed = handler.schema.parse(xml) as any;
       const values = parsed.abapGit.abap.values;
 
       // Step 2: fromAbapGit → ADK data
-      const adkData = handler!.fromAbapGit!(values);
+      const adkData = handler.fromAbapGit!(values);
       assert.strictEqual(adkData.name, 'ZIF_AGE_TEST');
       assert.strictEqual(adkData.description, 'Test interface');
 
@@ -156,14 +186,12 @@ describe('INTF handler roundtrip', () => {
         getSource: async () => '',
       };
 
-      // Step 4: Serialize (calls toAbapGit internally)
-      const files = await handler!.serialize(mockAdkObject as any);
-      const xmlFile = files.find((f) => f.path.endsWith('.intf.xml'));
-      assert.ok(xmlFile, 'Should produce .intf.xml file');
-
-      // Step 5: Re-parse the serialized XML
-      const reparsed = handler!.schema.parse(xmlFile!.content) as any;
-      const reValues = reparsed.abapGit.abap.values;
+      // Step 4–5: Serialize → re-parse
+      const reValues = await serializeAndReparse(
+        handler,
+        mockAdkObject,
+        'intf',
+      );
 
       // Step 6: Compare key VSEOINTERF fields
       assertFieldsRoundtrip(reValues, values, 'VSEOINTERF', [
@@ -183,21 +211,11 @@ describe('INTF handler roundtrip', () => {
 // ============================================
 
 describe('CLAS handler roundtrip', () => {
-  let handler: ReturnType<typeof getHandler>;
-
-  before(() => {
-    handler = getHandler('CLAS');
-    assert.ok(handler, 'CLAS handler should be registered');
-  });
-
-  it('handler is registered with correct metadata', () => {
-    assert.strictEqual(handler!.type, 'CLAS');
-    assert.strictEqual(handler!.fileExtension, 'clas');
-  });
+  const getClasHandler = describeHandlerSetup('CLAS');
 
   describe('fromAbapGit', () => {
     it('maps VSEOCLASS to ADK data — basic public class', () => {
-      const result = handler!.fromAbapGit!({
+      const result = getClasHandler().fromAbapGit!({
         VSEOCLASS: {
           CLSNAME: 'ZCL_TEST',
           LANGU: 'E',
@@ -224,7 +242,7 @@ describe('CLAS handler roundtrip', () => {
     });
 
     it('maps abstract final class attributes', () => {
-      const result = handler!.fromAbapGit!({
+      const result = getClasHandler().fromAbapGit!({
         VSEOCLASS: {
           CLSNAME: 'ZCL_ABSTRACT',
           CLSABSTRCT: 'X',
@@ -240,7 +258,7 @@ describe('CLAS handler roundtrip', () => {
     });
 
     it('maps superclass and message class references', () => {
-      const result = handler!.fromAbapGit!({
+      const result = getClasHandler().fromAbapGit!({
         VSEOCLASS: {
           CLSNAME: 'ZCL_CHILD',
           REFCLSNAME: 'ZCL_PARENT',
@@ -257,7 +275,7 @@ describe('CLAS handler roundtrip', () => {
     });
 
     it('maps ABAP_LANGUAGE_VERSION correctly', () => {
-      const result = handler!.fromAbapGit!({
+      const result = getClasHandler().fromAbapGit!({
         VSEOCLASS: {
           CLSNAME: 'ZCL_CLOUD',
           ABAP_LANGUAGE_VERSION: '5',
@@ -271,13 +289,13 @@ describe('CLAS handler roundtrip', () => {
     });
 
     it('handles empty/missing VSEOCLASS gracefully', () => {
-      const result = handler!.fromAbapGit!({});
+      const result = getClasHandler().fromAbapGit!({});
       assert.strictEqual(result.name, '');
       assert.strictEqual(result.type, 'CLAS/OC');
     });
 
     it('maps shared memory flag', () => {
-      const result = handler!.fromAbapGit!({
+      const result = getClasHandler().fromAbapGit!({
         VSEOCLASS: {
           CLSNAME: 'ZCL_SHARED',
           SHRM_ENABLED: 'X',
@@ -290,7 +308,7 @@ describe('CLAS handler roundtrip', () => {
 
   describe('suffixToSourceKey mapping', () => {
     it('maps abapGit suffixes to ADK source keys', () => {
-      const mapping = handler!.suffixToSourceKey;
+      const mapping = getClasHandler().suffixToSourceKey;
       assert.ok(mapping, 'suffixToSourceKey should be defined');
       assert.strictEqual(mapping!['locals_def'], 'definitions');
       assert.strictEqual(mapping!['locals_imp'], 'implementations');
@@ -302,28 +320,27 @@ describe('CLAS handler roundtrip', () => {
 
   describe('fixture roundtrip: parse → fromAbapGit → mock ADK → serialize → compare', () => {
     it('round-trips zcl_age_sample_class.clas.xml', async () => {
+      const handler = getClasHandler();
       const xml = loadFixture('clas/zcl_age_sample_class.clas.xml');
 
       // Step 1: Parse fixture XML
-      const parsed = handler!.schema.parse(xml) as any;
+      const parsed = handler.schema.parse(xml) as any;
       const values = parsed.abapGit.abap.values;
 
       // Step 2: fromAbapGit → ADK data
-      const adkData = handler!.fromAbapGit!(values);
+      const adkData = handler.fromAbapGit!(values);
       assert.strictEqual(adkData.name, 'ZCL_AGE_SAMPLE_CLASS');
       assert.strictEqual(adkData.description, 'Sample class');
 
       // Step 3: Create mock ADK object (simulates what adk.getWithData returns)
       const mockAdkObject = createMockClasObject(adkData);
 
-      // Step 4: Serialize (calls toAbapGit internally)
-      const files = await handler!.serialize(mockAdkObject as any);
-      const xmlFile = files.find((f) => f.path.endsWith('.clas.xml'));
-      assert.ok(xmlFile, 'Should produce .clas.xml file');
-
-      // Step 5: Re-parse the serialized XML
-      const reparsed = handler!.schema.parse(xmlFile!.content) as any;
-      const reValues = reparsed.abapGit.abap.values;
+      // Step 4–5: Serialize → re-parse
+      const reValues = await serializeAndReparse(
+        handler,
+        mockAdkObject,
+        'clas',
+      );
 
       // Step 6: Compare key VSEOCLASS fields
       assertFieldsRoundtrip(reValues, values, 'VSEOCLASS', [
@@ -339,6 +356,7 @@ describe('CLAS handler roundtrip', () => {
     });
 
     it('round-trips class with superclass reference', async () => {
+      const handler = getClasHandler();
       // Build from scratch to test superclass ref roundtrip
       // Use non-default EXPOSURE (protected=1) to verify it survives roundtrip
       const inputValues = {
@@ -359,7 +377,7 @@ describe('CLAS handler roundtrip', () => {
       };
 
       // fromAbapGit
-      const adkData = handler!.fromAbapGit!(inputValues);
+      const adkData = handler.fromAbapGit!(inputValues);
       assert.strictEqual(adkData.name, 'ZCL_CHILD_CLASS');
       assert.deepStrictEqual((adkData as any).superClassRef, {
         name: 'ZCL_PARENT_CLASS',
@@ -376,13 +394,11 @@ describe('CLAS handler roundtrip', () => {
 
       // Create mock ADK object → serialize → re-parse
       const mockAdkObject = createMockClasObject(adkData);
-
-      const files = await handler!.serialize(mockAdkObject as any);
-      const xmlFile = files.find((f) => f.path.endsWith('.clas.xml'));
-      assert.ok(xmlFile, 'Should produce .clas.xml file');
-
-      const reparsed = handler!.schema.parse(xmlFile!.content) as any;
-      const reValues = reparsed.abapGit.abap.values;
+      const reValues = await serializeAndReparse(
+        handler,
+        mockAdkObject,
+        'clas',
+      );
 
       // Verify all fields survive roundtrip
       assert.strictEqual(reValues.VSEOCLASS.CLSNAME, 'ZCL_CHILD_CLASS');

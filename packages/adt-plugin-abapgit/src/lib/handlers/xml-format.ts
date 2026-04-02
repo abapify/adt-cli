@@ -4,14 +4,43 @@
  * Centralizes XML post-processing that was previously duplicated
  * across base.ts, fugr.ts, tabl.ts, and roundtrip.ts.
  *
- * All regexes use flat (non-nested) quantifiers to avoid
+ * Uses indexOf-based parsing instead of regex to avoid
  * super-linear backtracking (SonarQube S5852).
  */
 
-/** Simple tag regex — no nested quantifiers */
-const TAG_WITH_ATTRS_RE = /<([\w:.-]+)\s([^>]+)>/g;
-/** Flat attribute extractor */
-const ATTR_RE = /[\w:.-]+="[^"]*"/g;
+/**
+ * Extract `name="value"` attribute pairs from an XML attribute string
+ * using indexOf-based scanning (no regex).
+ */
+function extractAttributes(content: string): string[] {
+  const attrs: string[] = [];
+  let i = 0;
+  while (i < content.length) {
+    // Skip whitespace
+    while (
+      i < content.length &&
+      (content[i] === ' ' || content[i] === '\n' || content[i] === '\t')
+    )
+      i++;
+    if (i >= content.length) break;
+
+    // Find '=' for attribute name boundary
+    const eqIdx = content.indexOf('=', i);
+    if (eqIdx === -1) break;
+
+    // Find opening quote
+    const openQuote = content.indexOf('"', eqIdx + 1);
+    if (openQuote === -1) break;
+
+    // Find closing quote
+    const closeQuote = content.indexOf('"', openQuote + 1);
+    if (closeQuote === -1) break;
+
+    attrs.push(content.slice(i, closeQuote + 1));
+    i = closeQuote + 1;
+  }
+  return attrs;
+}
 
 /**
  * Format XML attributes on separate lines for better diff readability.
@@ -23,20 +52,61 @@ const ATTR_RE = /[\w:.-]+="[^"]*"/g;
  *   b="2"
  * >
  * ```
+ *
+ * Uses indexOf-based scanning to avoid regex backtracking (S5852).
  */
 export function formatXmlAttributes(xml: string): string {
-  return xml.replace(
-    TAG_WITH_ATTRS_RE,
-    (match, tag: string, content: string) => {
-      const isSelfClosing = content.trimEnd().endsWith('/');
-      const attrContent = isSelfClosing
-        ? content.slice(0, content.lastIndexOf('/'))
-        : content;
-      const attrs = attrContent.match(ATTR_RE);
-      if (!attrs || attrs.length === 0) return match;
-      return `<${tag}${attrs.map((a) => `\n  ${a}`).join('')}\n${isSelfClosing ? '/' : ''}>`;
-    },
-  );
+  let result = '';
+  let pos = 0;
+
+  while (pos < xml.length) {
+    const openBracket = xml.indexOf('<', pos);
+    if (openBracket === -1) {
+      result += xml.slice(pos);
+      break;
+    }
+
+    // Copy everything before '<'
+    result += xml.slice(pos, openBracket);
+
+    const closeBracket = xml.indexOf('>', openBracket);
+    if (closeBracket === -1) {
+      result += xml.slice(openBracket);
+      break;
+    }
+
+    const tagContent = xml.slice(openBracket + 1, closeBracket);
+    const spaceIdx = tagContent.indexOf(' ');
+
+    // No attributes, or special tags (</, <!, <?)
+    if (
+      spaceIdx === -1 ||
+      tagContent[0] === '/' ||
+      tagContent[0] === '!' ||
+      tagContent[0] === '?'
+    ) {
+      result += xml.slice(openBracket, closeBracket + 1);
+      pos = closeBracket + 1;
+      continue;
+    }
+
+    const tag = tagContent.slice(0, spaceIdx);
+    const attrPart = tagContent.slice(spaceIdx + 1);
+    const isSelfClosing = attrPart.trimEnd().endsWith('/');
+    const attrContent = isSelfClosing
+      ? attrPart.slice(0, attrPart.lastIndexOf('/'))
+      : attrPart;
+
+    const attrs = extractAttributes(attrContent);
+    if (attrs.length === 0) {
+      result += xml.slice(openBracket, closeBracket + 1);
+    } else {
+      result += `<${tag}${attrs.map((a) => `\n  ${a}`).join('')}\n${isSelfClosing ? '/' : ''}>`;
+    }
+    pos = closeBracket + 1;
+  }
+
+  return result;
 }
 
 /**

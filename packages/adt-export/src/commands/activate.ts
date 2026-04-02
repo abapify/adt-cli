@@ -13,7 +13,6 @@
 import type {
   CliCommandPlugin,
   CliContext,
-  AdtPlugin,
   ExportOptions,
 } from '@abapify/adt-plugin';
 import {
@@ -32,28 +31,8 @@ import {
   findAbapGitRoot,
   resolveFilesRelativeToRoot,
 } from '../utils/filetree';
+import { loadFormatPlugin } from '../utils/format-plugin';
 import { glob as nativeGlob } from 'node:fs/promises';
-
-/**
- * Format shortcuts
- */
-const FORMAT_SHORTCUTS: Record<string, string> = {
-  abapgit: '@abapify/adt-plugin-abapgit',
-  ag: '@abapify/adt-plugin-abapgit',
-};
-
-async function loadFormatPlugin(formatSpec: string): Promise<AdtPlugin> {
-  const packageName = FORMAT_SHORTCUTS[formatSpec] ?? formatSpec;
-  const pluginModule = await import(packageName);
-  const PluginClass =
-    pluginModule.default || pluginModule[Object.keys(pluginModule)[0]];
-  if (!PluginClass) {
-    throw new Error(`No plugin class found in ${packageName}`);
-  }
-  return typeof PluginClass === 'function' && PluginClass.prototype
-    ? new PluginClass()
-    : PluginClass;
-}
 
 /**
  * Expand glob patterns in a list of file arguments.

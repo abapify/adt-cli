@@ -369,72 +369,48 @@ describe('metadata extension', () => {
 // ============================================
 
 describe('annotation values', () => {
-  it('parses string literal annotation', () => {
-    const result = parse(`
-      @EndUserText.label : 'Hello World'
-      define type ztest : abap.char(1);
-    `);
+  const ANNOTATION_CASES = [
+    {
+      name: 'string literal',
+      source: `@EndUserText.label : 'Hello World'\ndefine type ztest : abap.char(1);`,
+      expected: { kind: 'string', value: 'Hello World' },
+    },
+    {
+      name: 'enum',
+      source: `@AbapCatalog.tableCategory : #TRANSPARENT\ndefine type ztest : abap.char(1);`,
+      expected: { kind: 'enum', value: 'TRANSPARENT' },
+    },
+    {
+      name: 'boolean',
+      source: `@AbapCatalog.entityBuffer.definitionAllowed: true\ndefine type ztest : abap.char(1);`,
+      expected: { kind: 'boolean', value: true },
+    },
+    {
+      name: 'number',
+      source: `@SomeAnnotation.count: 42\ndefine type ztest : abap.char(1);`,
+      expected: { kind: 'number', value: 42 },
+    },
+    {
+      name: 'array',
+      source: `@Scope: [#VIEW, #ENTITY]\ndefine type ztest : abap.char(1);`,
+      expected: {
+        kind: 'array',
+        items: [
+          { kind: 'enum', value: 'VIEW' },
+          { kind: 'enum', value: 'ENTITY' },
+        ],
+      },
+    },
+  ];
 
-    expect(result.errors).toHaveLength(0);
-    const def = result.ast.definitions[0] as SimpleTypeDefinition;
-    expect(def.annotations[0].value).toEqual({
-      kind: 'string',
-      value: 'Hello World',
+  for (const { name, source, expected } of ANNOTATION_CASES) {
+    it(`parses ${name} annotation`, () => {
+      const result = parse(source);
+      expect(result.errors).toHaveLength(0);
+      const def = result.ast.definitions[0] as SimpleTypeDefinition;
+      expect(def.annotations[0].value).toEqual(expected);
     });
-  });
-
-  it('parses enum annotation', () => {
-    const result = parse(`
-      @AbapCatalog.tableCategory : #TRANSPARENT
-      define type ztest : abap.char(1);
-    `);
-
-    expect(result.errors).toHaveLength(0);
-    const def = result.ast.definitions[0] as SimpleTypeDefinition;
-    expect(def.annotations[0].value).toEqual({
-      kind: 'enum',
-      value: 'TRANSPARENT',
-    });
-  });
-
-  it('parses boolean annotation', () => {
-    const result = parse(`
-      @AbapCatalog.entityBuffer.definitionAllowed: true
-      define type ztest : abap.char(1);
-    `);
-
-    expect(result.errors).toHaveLength(0);
-    const def = result.ast.definitions[0] as SimpleTypeDefinition;
-    expect(def.annotations[0].value).toEqual({ kind: 'boolean', value: true });
-  });
-
-  it('parses number annotation', () => {
-    const result = parse(`
-      @SomeAnnotation.count: 42
-      define type ztest : abap.char(1);
-    `);
-
-    expect(result.errors).toHaveLength(0);
-    const def = result.ast.definitions[0] as SimpleTypeDefinition;
-    expect(def.annotations[0].value).toEqual({ kind: 'number', value: 42 });
-  });
-
-  it('parses array annotation', () => {
-    const result = parse(`
-      @Scope: [#VIEW, #ENTITY]
-      define type ztest : abap.char(1);
-    `);
-
-    expect(result.errors).toHaveLength(0);
-    const def = result.ast.definitions[0] as SimpleTypeDefinition;
-    expect(def.annotations[0].value).toEqual({
-      kind: 'array',
-      items: [
-        { kind: 'enum', value: 'VIEW' },
-        { kind: 'enum', value: 'ENTITY' },
-      ],
-    });
-  });
+  }
 });
 
 // ============================================

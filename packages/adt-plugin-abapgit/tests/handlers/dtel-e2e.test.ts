@@ -25,6 +25,22 @@ function parseDtelResponse(xml: string): any {
   return dataelementWrapper.parse(xml);
 }
 
+/**
+ * Assert that an XML string contains all expected `<TAG>value</TAG>` pairs.
+ * Each expectation is a tuple of [tag, value, label] used for the error message.
+ */
+function assertXmlContains(
+  xml: string,
+  expectations: Array<[tag: string, value: string, label: string]>,
+) {
+  for (const [tag, value, label] of expectations) {
+    assert.ok(
+      xml.includes(`<${tag}>${value}</${tag}>`),
+      `${label} should be set. XML:\n${xml}`,
+    );
+  }
+}
+
 function createMockDtelFromWbobj(wbobj: any) {
   return {
     name: wbobj.name,
@@ -181,46 +197,18 @@ describe('DTEL end-to-end: SAP XML → schema parse → handler serialize', () =
     const xml = xmlFile!.content;
 
     // Verify ALL key fields are populated (not empty)
-    assert.ok(
-      xml.includes('<ROLLNAME>ZTEST_DTEL_DOMAIN</ROLLNAME>'),
-      `ROLLNAME should be set. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DDTEXT>Domain-based data element</DDTEXT>'),
-      `DDTEXT should be set. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DOMNAME>ZTEST_DOMAIN</DOMNAME>'),
-      `DOMNAME should be set from dataElement.typeName. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DDLANGUAGE>E</DDLANGUAGE>'),
-      `DDLANGUAGE should be E (mapped from EN). XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<DTELMASTER>E</DTELMASTER>'),
-      `DTELMASTER should be E (mapped from EN). XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<REFKIND>D</REFKIND>'),
-      `REFKIND should be D for domain. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRTEXT_S>Short</SCRTEXT_S>'),
-      `SCRTEXT_S should be set. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRTEXT_M>Medium Text</SCRTEXT_M>'),
-      `SCRTEXT_M should be set. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<SCRTEXT_L>Long Description</SCRTEXT_L>'),
-      `SCRTEXT_L should be set. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<REPTEXT>Heading Text</REPTEXT>'),
-      `REPTEXT should be set. XML:\n${xml}`,
-    );
+    assertXmlContains(xml, [
+      ['ROLLNAME', 'ZTEST_DTEL_DOMAIN', 'ROLLNAME'],
+      ['DDTEXT', 'Domain-based data element', 'DDTEXT'],
+      ['DOMNAME', 'ZTEST_DOMAIN', 'DOMNAME (from dataElement.typeName)'],
+      ['DDLANGUAGE', 'E', 'DDLANGUAGE (mapped from EN)'],
+      ['DTELMASTER', 'E', 'DTELMASTER (mapped from EN)'],
+      ['REFKIND', 'D', 'REFKIND (domain)'],
+      ['SCRTEXT_S', 'Short', 'SCRTEXT_S'],
+      ['SCRTEXT_M', 'Medium Text', 'SCRTEXT_M'],
+      ['SCRTEXT_L', 'Long Description', 'SCRTEXT_L'],
+      ['REPTEXT', 'Heading Text', 'REPTEXT'],
+    ]);
   });
 
   it('full chain with predefined type', async () => {
@@ -234,14 +222,10 @@ describe('DTEL end-to-end: SAP XML → schema parse → handler serialize', () =
     const xmlFile = files.find((f) => f.path.endsWith('.dtel.xml'));
     const xml = xmlFile!.content;
 
-    assert.ok(
-      xml.includes('<DATATYPE>CHAR</DATATYPE>'),
-      `DATATYPE should be CHAR. XML:\n${xml}`,
-    );
-    assert.ok(
-      xml.includes('<LENG>000010</LENG>'),
-      `LENG should be zero-padded 10. XML:\n${xml}`,
-    );
+    assertXmlContains(xml, [
+      ['DATATYPE', 'CHAR', 'DATATYPE'],
+      ['LENG', '000010', 'LENG (zero-padded 10)'],
+    ]);
     assert.ok(
       !xml.includes('<REFKIND>D</REFKIND>'),
       'REFKIND should NOT be D for predefined type',
