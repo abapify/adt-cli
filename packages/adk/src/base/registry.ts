@@ -193,9 +193,10 @@ export function getRegisteredKinds(): AdkKind[] {
 
 /**
  * Get ADT REST endpoint for a type (e.g., 'oo/classes', 'ddic/tabletypes')
+ * Checks exact type first (e.g., 'TABL/DS') before falling back to main type.
  */
 export function getEndpointForType(adtType: string): string | undefined {
-  return registry.get(getMainType(adtType))?.endpoint;
+  return resolveType(adtType)?.endpoint;
 }
 
 /**

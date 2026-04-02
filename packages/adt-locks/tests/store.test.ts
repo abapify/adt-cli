@@ -9,7 +9,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { existsSync, readFileSync, rmSync, mkdirSync } from 'node:fs';
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  rmSync,
+  mkdirSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { FileLockStore } from '../src/store';
@@ -127,7 +133,7 @@ describe('FileLockStore', () => {
 
   it('list() returns empty array when file is corrupted', () => {
     const filePath = join(dir, 'locks.json');
-    require('node:fs').writeFileSync(filePath, 'NOT_JSON');
+    writeFileSync(filePath, 'NOT_JSON');
     expect(store.list()).toEqual([]);
   });
 

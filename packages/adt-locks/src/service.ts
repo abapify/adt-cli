@@ -126,7 +126,15 @@ export function createLockService(
         headers: lockHeaders,
       });
 
-      const handle = parseLockResponse(String(response));
+      // The adapter may return a string (text/xml) or a parsed object;
+      // parseLockResponse needs the raw XML string.
+      const body =
+        typeof response === 'string'
+          ? response
+          : (response as Response)?.text
+            ? await (response as Response).text()
+            : JSON.stringify(response);
+      const handle = parseLockResponse(body);
 
       store?.register({
         objectUri,

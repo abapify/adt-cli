@@ -329,6 +329,15 @@ const authPlugin: AuthPlugin = {
           'code' in err &&
           (err as NodeJS.ErrnoException).code === 'EADDRINUSE'
         ) {
+          // When an explicit redirectUri is set, retrying on a different port
+          // is pointless because the OAuth callback will still go to the
+          // original port encoded in the redirect URI.
+          if (hasExplicitRedirect) {
+            throw new Error(
+              `Port ${port} is in use and redirectUri is explicitly set — cannot retry on a different port`,
+              { cause: err },
+            );
+          }
           lastError = err;
           log(`⚠️  Port ${port} in use, trying ${port + 1}...`);
           continue;

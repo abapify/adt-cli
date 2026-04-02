@@ -204,8 +204,6 @@ export class AdkObjectSet {
           result.success++;
           result.results.push({ object: obj, success: true });
         }
-        processed++;
-        onProgress?.(processed, total, obj);
       } catch (error) {
         result.failed++;
         result.results.push({
@@ -215,9 +213,13 @@ export class AdkObjectSet {
         });
 
         if (!continueOnError) {
+          processed++;
+          onProgress?.(processed, total, obj);
           break;
         }
       }
+      processed++;
+      onProgress?.(processed, total, obj);
     }
 
     return result;

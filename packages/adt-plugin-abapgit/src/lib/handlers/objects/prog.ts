@@ -30,8 +30,10 @@ export const programHandler = createHandler(AdkProgram, {
   // Returns data matching AbapProgramSchema structure
   fromAbapGit: ({ PROGDIR, TPOOL }) => {
     // Extract description from TPOOL (text pool) if available
-    const items = TPOOL?.item ?? [];
-    const descriptionEntry = items.find((t) => t.ID === 'R');
+    // TPOOL.item can be a single object or an array depending on XML parser
+    const rawItems = TPOOL?.item ?? [];
+    const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+    const descriptionEntry = items.find((t: any) => t.ID === 'R');
 
     // SUBC can be parsed as number or string depending on XML parser
     const subc = String(PROGDIR?.SUBC ?? '');
