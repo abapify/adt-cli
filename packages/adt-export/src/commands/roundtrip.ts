@@ -45,7 +45,6 @@ import { tmpdir } from 'node:os';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
-import { formatXmlAttributes } from '@abapify/adt-plugin-abapgit';
 
 /**
  * Format shortcuts
@@ -98,7 +97,7 @@ async function resolvePackagePath(packageName: string): Promise<string[]> {
  * - Normalize whitespace and indentation
  * - Format attributes on separate lines
  */
-function normalizeXml(xml: string): string {
+async function normalizeXml(xml: string): Promise<string> {
   try {
     const parser = new XMLParser({
       ignoreAttributes: false,
@@ -122,10 +121,11 @@ function normalizeXml(xml: string): string {
     let normalized = builder.build(obj);
 
     // Format attributes on separate lines for better diff readability
+    const { formatXmlAttributes } = await import('@abapify/adt-plugin-abapgit');
     normalized = formatXmlAttributes(normalized);
 
     return normalized;
-  } catch (err) {
+  } catch (_err) {
     // If parsing fails, return trimmed original
     return xml.trim();
   }
@@ -463,8 +463,8 @@ export const roundtripCommand: CliCommandPlugin = {
       // Normalize XML files before comparison
       const isXml = origName.endsWith('.xml');
       if (isXml) {
-        origContent = normalizeXml(origContent);
-        reimContent = normalizeXml(reimContent);
+        origContent = await normalizeXml(origContent);
+        reimContent = await normalizeXml(reimContent);
 
         // Save normalized files for inspection
         if (options.keepTmp) {
