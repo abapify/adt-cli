@@ -10,7 +10,6 @@
  */
 
 import { createAdtAdapter, type AdtAdapterConfig } from './adapter';
-import type { AdtHttpAdapter } from './adapter';
 import {
   createAdtClient as createAdtContractClient,
   type AdtClientType,
