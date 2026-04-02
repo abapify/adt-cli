@@ -235,6 +235,11 @@ export class ETagManager {
     if (headerValue) {
       // Normalize URL to just the path (remove query params)
       const key = this.normalizeUrl(url);
+      // DEBUG: trace ETag caching for functions/groups
+      if (key.includes('functions/groups') && !key.includes('fmodules')) {
+        const prev = this.etags.get(key);
+        console.error(`[ETAG-TRACE] CACHE url=${key} etag=${headerValue} prev=${prev ?? '(none)'}`);
+      }
       this.etags.set(key, headerValue);
     }
   }
@@ -244,7 +249,12 @@ export class ETagManager {
    */
   get(url: string): string | undefined {
     const key = this.normalizeUrl(url);
-    return this.etags.get(key);
+    const val = this.etags.get(key);
+    // DEBUG: trace ETag retrieval for functions/groups
+    if (key.includes('functions/groups') && !key.includes('fmodules')) {
+      console.error(`[ETAG-TRACE] GET   url=${key} etag=${val ?? '(none)'}`);
+    }
+    return val;
   }
 
   /**
@@ -253,22 +263,30 @@ export class ETagManager {
   clear(url?: string): void {
     if (url) {
       const key = this.normalizeUrl(url);
+      // DEBUG: trace ETag clear for functions/groups
+      if (key.includes('functions/groups') && !key.includes('fmodules')) {
+        console.error(`[ETAG-TRACE] CLEAR url=${key} had=${this.etags.get(key) ?? '(none)'}`);
+      }
       this.etags.delete(key);
     } else {
+      console.error(`[ETAG-TRACE] CLEAR ALL`);
       this.etags.clear();
     }
   }
 
   /**
-   * Normalize URL to use as cache key (remove query params, trailing slashes)
+   * Normalize URL to use as cache key.
+   * Removes query params, trailing slashes, and lowercases the path.
+   * SAP ADT URLs are case-insensitive, so /fmodules/ZAGE_FM and
+   * /fmodules/zage_fm must share the same ETag cache entry.
    */
   private normalizeUrl(url: string): string {
     try {
       const parsed = new URL(url);
-      return parsed.pathname.replace(/\/$/, '');
+      return parsed.pathname.replace(/\/$/, '').toLowerCase();
     } catch {
       // If not a full URL, just use the path
-      return url.split('?')[0].replace(/\/$/, '');
+      return url.split('?')[0].replace(/\/$/, '').toLowerCase();
     }
   }
 }

@@ -122,6 +122,6 @@ export const importTransportCommand = new Command('transport')
 
       console.log(`\n✨ Files written to: ${result.outputPath}`);
     } catch (error) {
-      handleImportError(error);
+      handleImportError(error, options.debug);
     }
   });

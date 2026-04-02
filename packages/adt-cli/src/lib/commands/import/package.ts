@@ -17,7 +17,7 @@ export const importPackageCommand = new Command('package')
     '-t, --object-types <types>',
     'Comma-separated object types (e.g., CLAS,INTF,DDLS). Default: all supported by format',
   )
-  .option('--sub-packages', 'Include subpackages', false)
+  .option('--no-sub-packages', 'Exclude subpackages (by default subpackages are included)')
   .option(
     '--format <format>',
     'Output format: abapgit | @abapify/adt-plugin-abapgit',
@@ -73,6 +73,6 @@ export const importPackageCommand = new Command('package')
 
       console.log(`\n✨ Files written to: ${result.outputPath}`);
     } catch (error) {
-      handleImportError(error);
+      handleImportError(error, options.debug);
     }
   });

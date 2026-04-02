@@ -7,6 +7,10 @@ import {
   getGlobalContext,
   createAdkFactory,
 } from '@abapify/adk';
+import { Readable } from 'node:stream';
+
+/** Default number of concurrent SAP requests during import */
+const IMPORT_CONCURRENCY = 5;
 
 /**
  * Resolve full package path from root to the given package.
@@ -209,76 +213,73 @@ export class ImportService {
     // Track results
     const results = { success: 0, skipped: 0, failed: 0 };
     const objectsByType: Record<string, number> = {};
+    const total = objectsToImport.length;
+    let processed = 0;
 
-    if (options.debug) {
-      console.log(`📦 Processing ${objectsToImport.length} objects...`);
-    }
+    console.log(`📦 Processing ${total} objects...`);
 
-    // Process each object
-    for (const objRef of objectsToImport) {
-      try {
-        // Check if plugin supports this object type
-        if (!plugin.instance.registry.isSupported(objRef.type)) {
-          results.skipped++;
-          if (options.debug) {
-            console.log(
-              `  ⏭️ ${objRef.type} ${objRef.name}: type not supported`,
-            );
+    // Process objects in parallel using Node.js stream concurrency
+    await Readable.from(objectsToImport).forEach(
+      async (objRef) => {
+        const progress = ++processed;
+        try {
+          // Check if plugin supports this object type
+          if (!plugin.instance.registry.isSupported(objRef.type)) {
+            results.skipped++;
+            if (options.debug) {
+              console.log(
+                `  ⏭️ [${progress}/${total}] ${objRef.type} ${objRef.name}: type not supported`,
+              );
+            }
+            return;
           }
-          continue;
-        }
 
-        // Load the ADK object
-        const adkObject = await objRef.load();
+          console.log(`  🔄 [${progress}/${total}] ${objRef.type} ${objRef.name}`);
 
-        if (!adkObject) {
-          results.skipped++;
-          if (options.debug) {
-            console.log(`  ⏭️ ${objRef.type} ${objRef.name}: failed to load`);
+          // Load the ADK object
+          const adkObject = await objRef.load();
+
+          if (!adkObject) {
+            results.skipped++;
+            if (options.debug) {
+              console.log(`  ⏭️ ${objRef.type} ${objRef.name}: failed to load`);
+            }
+            return;
           }
-          continue;
-        }
 
-        // Build import context - plugin handles path logic based on its format rules
-        // CLI provides a resolver function to get full package hierarchy from SAP
-        const context: ImportContext = {
-          resolvePackagePath,
-          formatOptions: options.formatOptions,
-          configFormatOptions,
-        };
+          // Build import context - plugin handles path logic based on its format rules
+          // CLI provides a resolver function to get full package hierarchy from SAP
+          const context: ImportContext = {
+            resolvePackagePath,
+            formatOptions: options.formatOptions,
+            configFormatOptions,
+          };
 
-        // Delegate to plugin - import object from SAP to local files
-        const result = await plugin.instance.format.import(
-          adkObject as any, // ADK object type
-          options.outputPath,
-          context,
-        );
+          // Delegate to plugin - import object from SAP to local files
+          const result = await plugin.instance.format.import(
+            adkObject as any, // ADK object type
+            options.outputPath,
+            context,
+          );
 
-        if (result.success) {
-          // Track statistics
-          objectsByType[objRef.type] = (objectsByType[objRef.type] || 0) + 1;
-          results.success++;
-
-          if (options.debug) {
-            console.log(`  ✅ ${objRef.type} ${objRef.name}`);
-          }
-        } else {
-          results.failed++;
-          if (options.debug) {
+          if (result.success) {
+            objectsByType[objRef.type] = (objectsByType[objRef.type] || 0) + 1;
+            results.success++;
+          } else {
+            results.failed++;
             console.log(
               `  ❌ ${objRef.type} ${objRef.name}: ${result.errors?.join(', ') || 'unknown error'}`,
             );
           }
-        }
-      } catch (error) {
-        results.failed++;
-        if (options.debug) {
+        } catch (error) {
+          results.failed++;
           console.log(
             `  ❌ ${objRef.type} ${objRef.name}: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
-      }
-    }
+      },
+      { concurrency: IMPORT_CONCURRENCY },
+    );
 
     // Call afterImport hook if available
     if (plugin.instance.hooks?.afterImport) {
@@ -322,16 +323,18 @@ export class ImportService {
     }
 
     // Fetch package
-    if (options.debug) {
-      console.log(`📦 Fetching package: ${options.packageName}`);
-    }
+    console.log(`🔍 Fetching package: ${options.packageName}`);
     const pkg = await AdkPackage.get(options.packageName);
 
     // Get objects from package
-    // NOTE: Consider ADK enhancement - getObjects({ recursive: true }) instead of separate methods
-    const allObjects = options.includeSubpackages
-      ? await pkg.getAllObjects() // includes subpackages
-      : await pkg.getObjects(); // direct objects only
+    let allObjects;
+    if (options.includeSubpackages) {
+      console.log(`📦 Scanning subpackages…`);
+      allObjects = await pkg.getAllObjects();
+    } else {
+      allObjects = await pkg.getObjects();
+    }
+    console.log(`📋 Found ${allObjects.length} objects`);
 
     // Filter by object types if specified
     let objectsToImport = allObjects;
@@ -351,73 +354,72 @@ export class ImportService {
     // Track results
     const results = { success: 0, skipped: 0, failed: 0 };
     const objectsByType: Record<string, number> = {};
+    const total = objectsToImport.length;
+    let processed = 0;
 
-    if (options.debug) {
-      console.log(`📦 Processing ${objectsToImport.length} objects...`);
-    }
+    // Shared context/factory — created once, safe to reuse across workers
+    const ctx = getGlobalContext();
+    const factory = createAdkFactory(ctx);
 
-    // Process each object - AbapObject has type, name, uri
-    for (const obj of objectsToImport) {
-      try {
-        // Check if plugin supports this object type
-        if (!plugin.instance.registry.isSupported(obj.type)) {
-          results.skipped++;
-          if (options.debug) {
-            console.log(`  ⏭️ ${obj.type} ${obj.name}: type not supported`);
+    // Process objects in parallel using Node.js stream concurrency
+    await Readable.from(objectsToImport).forEach(
+      async (obj) => {
+        const progress = ++processed;
+        try {
+          // Check if plugin supports this object type
+          if (!plugin.instance.registry.isSupported(obj.type)) {
+            results.skipped++;
+            if (options.debug) {
+              console.log(`  ⏭️ [${progress}/${total}] ${obj.type} ${obj.name}: type not supported`);
+            }
+            return;
           }
-          continue;
-        }
 
-        // Load the ADK object using the factory
-        const ctx = getGlobalContext();
-        const factory = createAdkFactory(ctx);
-        const adkObject = factory.get(obj.name, obj.type);
-        await (adkObject as any).load();
+          console.log(`  🔄 [${progress}/${total}] ${obj.type} ${obj.name}`);
 
-        if (!adkObject) {
-          results.skipped++;
-          if (options.debug) {
-            console.log(`  ⏭️ ${obj.type} ${obj.name}: failed to load`);
+          // Load the ADK object using the factory
+          const adkObject = factory.get(obj.name, obj.type);
+          await (adkObject as any).load();
+
+          if (!adkObject) {
+            results.skipped++;
+            if (options.debug) {
+              console.log(`  ⏭️ ${obj.type} ${obj.name}: failed to load`);
+            }
+            return;
           }
-          continue;
-        }
 
-        // Build import context
-        const context: ImportContext = {
-          resolvePackagePath,
-          configFormatOptions,
-        };
+          // Build import context
+          const context: ImportContext = {
+            resolvePackagePath,
+            configFormatOptions,
+          };
 
-        // Delegate to plugin - import object from SAP to local files
-        const result = await plugin.instance.format.import(
-          adkObject as any,
-          options.outputPath,
-          context,
-        );
+          // Delegate to plugin - import object from SAP to local files
+          const result = await plugin.instance.format.import(
+            adkObject as any,
+            options.outputPath,
+            context,
+          );
 
-        if (result.success) {
-          objectsByType[obj.type] = (objectsByType[obj.type] || 0) + 1;
-          results.success++;
-          if (options.debug) {
-            console.log(`  ✅ ${obj.type} ${obj.name}`);
-          }
-        } else {
-          results.failed++;
-          if (options.debug) {
+          if (result.success) {
+            objectsByType[obj.type] = (objectsByType[obj.type] || 0) + 1;
+            results.success++;
+          } else {
+            results.failed++;
             console.log(
               `  ❌ ${obj.type} ${obj.name}: ${result.errors?.join(', ') || 'unknown error'}`,
             );
           }
-        }
-      } catch (error) {
-        results.failed++;
-        if (options.debug) {
+        } catch (error) {
+          results.failed++;
           console.log(
             `  ❌ ${obj.type} ${obj.name}: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
-      }
-    }
+      },
+      { concurrency: IMPORT_CONCURRENCY },
+    );
 
     // Call afterImport hook if available
     if (plugin.instance.hooks?.afterImport) {

@@ -109,16 +109,22 @@ const handlerRegistry = new Map<AbapObjectType, ObjectHandler>();
 
 /**
  * Get handler for object type
+ *
+ * Tries the full type first (e.g., 'TABL/DS'), then falls back to the
+ * main type (e.g., 'CLAS/OC' → 'CLAS'). This matches ADK's resolveType()
+ * behaviour and handles quickSearch results that return subtypes.
  */
 export function getHandler(type: AbapObjectType): ObjectHandler | undefined {
-  return handlerRegistry.get(type);
+  return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
 /**
  * Check if object type is supported
+ *
+ * Tries the full type first, then falls back to the main type.
  */
 export function isSupported(type: AbapObjectType): boolean {
-  return handlerRegistry.has(type);
+  return handlerRegistry.has(type) || handlerRegistry.has(getMainType(type));
 }
 
 /**

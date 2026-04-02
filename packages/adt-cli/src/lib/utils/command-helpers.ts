@@ -45,9 +45,10 @@ export function handleCommandError(error: unknown, operation: string): never {
 
 /**
  * Detailed error handler for import commands (transport / package).
- * Prints error message, code, HTTP status, cause, and stack trace then exits.
+ * Prints error message, code, HTTP status, and cause then exits.
+ * Stack traces are only shown when --debug is enabled.
  */
-export function handleImportError(error: unknown): never {
+export function handleImportError(error: unknown, debug = false): never {
   const errorMsg = error instanceof Error ? error.message : String(error);
   const errorCode =
     error instanceof Error && 'code' in error
@@ -77,7 +78,7 @@ export function handleImportError(error: unknown): never {
         : '';
     console.error(`   Cause: ${causeMsg}${causeCode ? ` (${causeCode})` : ''}`);
   }
-  if (error instanceof Error && error.stack) {
+  if (debug && error instanceof Error && error.stack) {
     console.error(`   Stack: ${error.stack}`);
   }
   process.exit(1);

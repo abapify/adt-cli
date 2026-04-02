@@ -527,6 +527,14 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       const effectiveTransport =
         transport ?? this._lockHandle?.correlationNumber;
 
+      // Refresh cached ETags after locking.
+      // SAP changes the object's internal version when a lock is acquired,
+      // which invalidates all cached ETags (metadata AND source).
+      // Without this, the subsequent PUT sends a stale If-Match header → HTTP 412.
+      if (needsLock && !wasLocked) {
+        await this.refreshETagsAfterLock();
+      }
+
       if (hasPendingSources && mode !== 'create') {
         // Save sources only - skip metadata PUT which SAP often rejects
         await this.savePendingSources({
@@ -635,6 +643,18 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
       >;
       const saveData = rest;
       const data = { [wrapperKey]: saveData };
+
+      // Ensure fresh ETag before PUT.
+      // The lock POST and other intermediate requests may cache an ETag
+      // under the same URL that differs from the object's current ETag.
+      // A fresh GET right before PUT guarantees the If-Match header is correct.
+      if (contract.get) {
+        try {
+          await contract.get(this.name);
+        } catch {
+          this.ctx.client.clearETag();
+        }
+      }
 
       await contract.put(
         this.name,
@@ -878,6 +898,48 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   }
 
   /**
+   * Refresh cached ETags after acquiring a lock.
+   *
+   * SAP changes the object's internal version when a lock is acquired,
+   * which invalidates any cached ETags. Without refreshing, the next
+   * PUT sends a stale If-Match header and SAP returns HTTP 412.
+   *
+   * For objects with pending sources: re-GET {objectUri}/source/main
+   * For metadata-only objects: re-GET via crudContract.get()
+   *
+   * Subclasses with multiple source endpoints (e.g., AdkClass with includes)
+   * should override this to refresh all relevant endpoints.
+   */
+  protected async refreshETagsAfterLock(): Promise<void> {
+    if (this.hasPendingSources()) {
+      // Re-fetch source to refresh cached ETag for the source URL
+      const sourceUrl = `${this.objectUri}/source/main`;
+      try {
+        await this.ctx.client.fetch(sourceUrl, {
+          method: 'GET',
+          headers: { Accept: 'text/plain' },
+        });
+      } catch {
+        // Source endpoint may not exist yet (new object) — clear any stale
+        // ETag so the subsequent PUT won't send a stale If-Match header
+        this.ctx.client.clearETag(sourceUrl);
+      }
+    } else {
+      // Re-fetch metadata to refresh cached ETag for the metadata URL
+      const contract = this.crudContract;
+      if (contract?.get) {
+        try {
+          await contract.get(this.name);
+        } catch {
+          // Clear all ETags — we can't easily reconstruct the metadata URL
+          // since the contract may use a different path than objectUri
+          this.ctx.client.clearETag();
+        }
+      }
+    }
+  }
+
+  /**
    * Save pending sources to SAP.
    *
    * Default handles single-source objects (_pendingSource) by PUTting
@@ -891,13 +953,26 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
     const self = this as unknown as { _pendingSource?: string };
     if (!self._pendingSource) return;
 
+    const sourceUrl = `${this.objectUri}/source/main`;
+
+    // Ensure fresh ETag for the source URL before PUT.
+    // Intermediate requests (lock POST, etc.) may leave a stale ETag cached.
+    try {
+      await this.ctx.client.fetch(sourceUrl, {
+        method: 'GET',
+        headers: { Accept: 'text/plain' },
+      });
+    } catch {
+      this.ctx.client.clearETag(sourceUrl);
+    }
+
     const params = new URLSearchParams();
     if (options?.lockHandle) params.set('lockHandle', options.lockHandle);
     if (options?.transport) params.set('corrNr', options.transport);
 
     const qs = params.toString();
     await this.ctx.client.fetch(
-      `${this.objectUri}/source/main${qs ? '?' + qs : ''}`,
+      `${sourceUrl}${qs ? '?' + qs : ''}`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'text/plain' },

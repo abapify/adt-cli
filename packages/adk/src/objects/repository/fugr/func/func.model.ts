@@ -218,6 +218,35 @@ export class AdkFunctionModule extends AdkObject<
     }
   }
 
+  /**
+   * Refresh cached ETags after acquiring a lock.
+   *
+   * FM's savePendingSources() does a metadata PUT first (to apply processingType),
+   * then a source PUT. Both need fresh ETags after locking.
+   * The contract uses groupName + name (potentially UPPERCASE), so we must
+   * refresh via the contract to match the same cache key.
+   */
+  protected override async refreshETagsAfterLock(): Promise<void> {
+    // Refresh metadata ETag (needed by saveViaContract in savePendingSources)
+    try {
+      await this.crudContract.get(this.groupName, this.name);
+    } catch {
+      // Object may be newly created — clear stale ETags to avoid 412
+      this.ctx.client.clearETag();
+    }
+    // Refresh source ETag (needed by source PUT in savePendingSources)
+    const sourceUrl = `${this.objectUri}/source/main`;
+    try {
+      await this.ctx.client.fetch(sourceUrl, {
+        method: 'GET',
+        headers: { Accept: 'text/plain' },
+      });
+    } catch {
+      // Source may not exist yet — clear stale ETag to avoid 412
+      this.ctx.client.clearETag(sourceUrl);
+    }
+  }
+
   // ============================================
   // Source code handling
   // ============================================

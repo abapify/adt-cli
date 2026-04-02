@@ -324,6 +324,33 @@ export const exportCommand: CliCommandPlugin = {
       sourcePath = repoRoot;
     }
 
+    // Early check: PREFIX folder logic requires an explicit --package flag.
+    // Fail before scanning files / loading plugins / authenticating with SAP.
+    if (!options.package) {
+      const { readFileSync, existsSync } = await import('node:fs');
+      const { join } = await import('node:path');
+      const abapGitXmlPath = join(sourcePath, '.abapgit.xml');
+      if (existsSync(abapGitXmlPath)) {
+        const xml = readFileSync(abapGitXmlPath, 'utf-8');
+        const {
+          parseAbapGitMetadata,
+        } = await import('@abapify/adt-plugin-abapgit');
+        const { folderLogic } = parseAbapGitMetadata(xml);
+        if (folderLogic === 'prefix') {
+          ctx.logger.error(
+            '❌ Root package is required for PREFIX folder logic.',
+          );
+          ctx.logger.info(
+            '   Use -p <PACKAGE> to specify the root ABAP package.',
+          );
+          ctx.logger.info(
+            '   Example: npx adt export -p ZABAPGIT_EXAMPLES',
+          );
+          process.exit(1);
+        }
+      }
+    }
+
     ctx.logger.info('🚀 Starting export...');
     ctx.logger.info(`📁 Source: ${sourcePath}`);
     ctx.logger.info(`🎯 Format: ${options.format}`);
@@ -436,17 +463,16 @@ export const exportCommand: CliCommandPlugin = {
       }
 
       // Derive effective root package: either explicit --package or
-      // auto-detected from SAP by reverse-resolving folder logic.
+      // resolved from objects that already have packageRef (e.g., from .abapgit.xml).
       //
       // When --package is provided, it's used as the root for folder logic.
-      // When omitted, we try to auto-detect the root package by:
-      //   1. Looking for objects that already have packageRef (from format plugin)
-      //   2. Querying existing deployment-set objects on SAP → reverse-resolve root
-      // If neither works and folder logic is PREFIX, we require -p flag.
+      // When omitted, we look at objects that already have packageRef from
+      // the format plugin and pick the shortest (= root-most) one.
+      // If no root can be determined and folder logic is PREFIX, we require -p flag.
       let effectiveRootPackage = options.package;
 
       if (!effectiveRootPackage) {
-        // First try: find root from objects that already have packageRef
+        // Find root from objects that already have packageRef
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
             | string
@@ -458,98 +484,6 @@ export const exportCommand: CliCommandPlugin = {
           ) {
             effectiveRootPackage = pkgName;
           }
-        }
-      }
-
-      if (!effectiveRootPackage) {
-        // Second try: auto-detect from SAP by querying deployment-set objects
-        ctx.logger.info('📦 Auto-detecting root package from SAP...');
-
-        // Helper: try to derive root from one object on SAP
-        const tryDeriveRoot = async (
-          obj: any,
-        ): Promise<string | undefined> => {
-          const relDir = obj._relDir as string | undefined;
-          const objFolderLogic = obj._folderLogic as string | undefined;
-          if (relDir === undefined || !objFolderLogic) return undefined;
-
-          try {
-            const localData = obj._data;
-            await obj.load();
-            const sapPkg = obj.package as string | undefined;
-            obj._data = localData;
-
-            if (sapPkg) {
-              const {
-                reverseResolveRootPackage,
-              } = await import('@abapify/adt-plugin-abapgit');
-              return reverseResolveRootPackage(
-                sapPkg,
-                relDir,
-                objFolderLogic as any,
-              );
-            }
-          } catch {
-            // Object doesn't exist on SAP
-          }
-          return undefined;
-        };
-
-        for (const obj of objectSet) {
-          const root = await tryDeriveRoot(obj);
-          if (root) {
-            effectiveRootPackage = root;
-            ctx.logger.info(
-              `   📦 Derived root package: ${root} (from ${obj.name})`,
-            );
-            break;
-          }
-        }
-
-        // If root was detected, resolve packageRef for all objects that don't have one
-        if (effectiveRootPackage) {
-          const {
-            resolvePackageFromDir,
-          } = await import('@abapify/adt-plugin-abapgit');
-          for (const obj of objectSet) {
-            const data = (obj as any)._data;
-            if (data && !data.packageRef) {
-              const relDir = (obj as any)._relDir as string | undefined;
-              const objFolderLogic = (obj as any)._folderLogic as
-                | string
-                | undefined;
-              if (relDir !== undefined && objFolderLogic) {
-                const pkgName = resolvePackageFromDir(
-                  relDir,
-                  objFolderLogic as any,
-                  effectiveRootPackage,
-                );
-                data.packageRef = { name: pkgName };
-              }
-            }
-          }
-        }
-      }
-
-      // If still no root package and folder logic is PREFIX, require -p flag.
-      // PREFIX repos can't derive the root package name from folder structure alone.
-      if (!effectiveRootPackage) {
-        const hasPrefixObjects = [...objectSet].some(
-          (obj) =>
-            ((obj as any)._folderLogic as string | undefined)
-              ?.toLowerCase() === 'prefix',
-        );
-        if (hasPrefixObjects) {
-          ctx.logger.error(
-            '❌ Root package cannot be determined for PREFIX folder logic.',
-          );
-          ctx.logger.info(
-            '   Use -p <PACKAGE> to specify the root ABAP package.',
-          );
-          ctx.logger.info(
-            '   Example: npx adt deploy -p ZABAPGIT_EXAMPLES ...',
-          );
-          process.exit(1);
         }
       }
 

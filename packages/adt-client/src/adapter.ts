@@ -30,7 +30,13 @@ export interface AdtAdapterConfig extends AdtConnectionConfig {
 /**
  * Create ADT HTTP adapter with Basic or SAML Authentication and plugin support
  */
-export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
+/** Extended adapter with ETag management */
+export interface AdtHttpAdapter extends HttpAdapter {
+  /** Clear cached ETag for a specific URL, or all ETags if no URL given */
+  clearETag(url?: string): void;
+}
+
+export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
   const {
     baseUrl,
     username,
@@ -276,6 +282,19 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
           errorBody,
         );
 
+        // For 412 Precondition Failed, include ETag diagnostic info in error
+        if (response.status === 412) {
+          const sentETag = headers['If-Match'] ?? '(none)';
+          const diag = `[If-Match: ${sentETag}, URL: ${url.pathname}]`;
+          logger?.error(`ETag mismatch: ${options.method} ${url.pathname} sent If-Match: ${sentETag}`);
+          // Append diagnostic to the error message so it surfaces in error handlers
+          Object.defineProperty(adtError, 'message', {
+            value: `${adtError.message} ${diag}`,
+            writable: true,
+            configurable: true,
+          });
+        }
+
         logger?.error(
           `Request failed - ${adtError.message} (${options.method} ${url.toString()})`,
         );
@@ -384,6 +403,10 @@ export function createAdtAdapter(config: AdtAdapterConfig): HttpAdapter {
 
       // Return just the data (matching Speci's HttpAdapter interface)
       return data as TResponse;
+    },
+
+    clearETag(url?: string) {
+      sessionManager.clearETag(url);
     },
   };
 }

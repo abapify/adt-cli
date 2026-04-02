@@ -247,6 +247,36 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
       ._pendingSources;
   }
 
+  /**
+   * Refresh cached ETags for all pending source endpoints after locking.
+   * Classes have multiple source URLs (main + includes) that all need fresh ETags.
+   */
+  protected override async refreshETagsAfterLock(): Promise<void> {
+    const pendingSources = (
+      this as unknown as { _pendingSources?: Record<string, string> }
+    )._pendingSources;
+    if (!pendingSources) {
+      return super.refreshETagsAfterLock();
+    }
+
+    const basePath = `/sap/bc/adt/oo/classes/${this.name.toLowerCase()}`;
+    for (const key of Object.keys(pendingSources)) {
+      const endpoint =
+        key === 'main'
+          ? `${basePath}/source/main`
+          : `${basePath}/includes/${key}`;
+      try {
+        await this.ctx.client.fetch(endpoint, {
+          method: 'GET',
+          headers: { Accept: 'text/plain' },
+        });
+      } catch {
+        // Include may not exist yet — clear stale ETag to avoid 412
+        this.ctx.client.clearETag(endpoint);
+      }
+    }
+  }
+
   // ============================================
   // CRUD contract config - enables save()
   // ============================================

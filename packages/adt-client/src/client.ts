@@ -10,6 +10,7 @@
  */
 
 import { createAdtAdapter, type AdtAdapterConfig } from './adapter';
+import type { AdtHttpAdapter } from './adapter';
 import {
   createAdtClient as createAdtContractClient,
   type AdtClientType,
@@ -69,6 +70,8 @@ interface AdtClientReturn {
   adt: AdtClientType;
   services: AdtServices;
   fetch: (url: string, options?: FetchOptions) => Promise<unknown>;
+  /** Clear cached ETag for a specific URL, or all ETags if no URL given */
+  clearETag: (url?: string) => void;
 }
 
 export function createAdtClient(config: AdtAdapterConfig): AdtClientReturn {
@@ -124,6 +127,12 @@ export function createAdtClient(config: AdtAdapterConfig): AdtClientReturn {
      * @returns Raw response
      */
     fetch: fetchFn,
+
+    /**
+     * Clear cached ETag for a specific URL, or all ETags if no URL given.
+     * Use after operations that may invalidate server-side ETags.
+     */
+    clearETag: (url?: string) => adapter.clearETag(url),
   };
 }
 

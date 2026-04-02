@@ -113,6 +113,9 @@ export class AdkPackage
   async getSubpackages(): Promise<AbapPackage[]> {
     return this.lazy('subpackages', async () => {
       // Search for subpackages using repository search
+      // NOTE: SAP quickSearch with packageName is hierarchical — it returns
+      // ALL descendant DEVC packages, not just direct children. We load each
+      // package and then filter by superPackage to keep only direct children.
       const response =
         await this.ctx.client.adt.repository.informationsystem.search.quickSearch(
           {
@@ -129,13 +132,18 @@ export class AdkPackage
         (ref) => ref.type === 'DEVC/K' && ref.name !== this.name,
       );
 
-      // Create AdkPackage instances for each subpackage
-      return Promise.all(
+      // Load all candidate packages and filter to direct children only
+      const loaded = await Promise.all(
         subpkgRefs.map(async (ref) => {
           const pkg = new AdkPackage(this.ctx, ref.name);
           await pkg.load();
           return pkg;
         }),
+      );
+
+      return loaded.filter(
+        (pkg) =>
+          pkg.superPackage?.name?.toUpperCase() === this.name.toUpperCase(),
       );
     });
   }
@@ -180,7 +188,15 @@ export class AdkPackage
         subpackages.map((pkg) => pkg.getAllObjects()),
       );
 
-      return [...direct, ...nested.flat()];
+      // Deduplicate by type+name — SAP quickSearch may return
+      // the same object at multiple package hierarchy levels
+      const seen = new Set<string>();
+      return [...direct, ...nested.flat()].filter((obj) => {
+        const key = `${obj.type}:${obj.name}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     });
   }
 
