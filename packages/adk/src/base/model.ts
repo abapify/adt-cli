@@ -850,13 +850,14 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
 
       // Recursive subset match: checks that every field in `local`
       // has the same value in `sap`. Extra fields in `sap` are ignored.
-      // "Empty-like" values (null, undefined, "", false, [], {}) are treated
+      // "Empty-like" values (null, undefined, "", [], {}) are treated
       // as equivalent, since SAP normalizes defaults differently than
-      // abapGit serialization (e.g., style "" → "00", missing → false).
+      // abapGit serialization (e.g., style "" → "00", missing → undefined).
+      // Note: `false` is NOT empty-like — an explicit `false` must be
+      // compared against SAP's value to detect boolean flag toggles.
       const isEmpty = (v: unknown): boolean =>
         v == null ||
         v === '' ||
-        v === false ||
         (Array.isArray(v) && v.length === 0) ||
         (typeof v === 'object' && v !== null && Object.keys(v).length === 0);
 
