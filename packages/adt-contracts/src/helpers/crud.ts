@@ -62,7 +62,9 @@ export interface SourcePutOptions {
  * Source operations contract
  */
 export interface SourceContract {
-  get: (name: string) => RestEndpointDescriptor<'GET', string, never, { 200: string }>;
+  get: (
+    name: string,
+  ) => RestEndpointDescriptor<'GET', string, never, { 200: string }>;
   put: (
     name: string,
     options?: SourcePutOptions,
@@ -148,7 +150,10 @@ export interface CrudContractBase<S extends Serializable<unknown>> {
   ) => RestEndpointDescriptor<'DELETE', string, never, { 204: undefined }>;
 
   /** POST {basePath}/{name}?_action=LOCK - Lock object for modification */
-  lock: (name: string, options?: LockOptions) => RestEndpointDescriptor<'POST', string, never, { 200: undefined }>;
+  lock: (
+    name: string,
+    options?: LockOptions,
+  ) => RestEndpointDescriptor<'POST', string, never, { 200: undefined }>;
 
   /** POST {basePath}/{name}?_action=UNLOCK - Unlock object */
   unlock: (
@@ -167,7 +172,9 @@ export interface CrudContractBase<S extends Serializable<unknown>> {
  * Source operations (get/put for source code)
  */
 export interface SourceOperations {
-  get: (name: string) => RestEndpointDescriptor<'GET', string, never, { 200: string }>;
+  get: (
+    name: string,
+  ) => RestEndpointDescriptor<'GET', string, never, { 200: string }>;
   put: (
     name: string,
     options?: SourcePutOptions,

@@ -22,7 +22,12 @@
  */
 
 import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
-import { createAdk, AdkObject, type AdtClient, type AdkFactory } from '@abapify/adk';
+import {
+  createAdk,
+  AdkObject,
+  type AdtClient,
+  type AdkFactory,
+} from '@abapify/adk';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { glob as nativeGlob } from 'node:fs/promises';
 import { resolve, basename, dirname, join, relative } from 'node:path';
@@ -513,7 +518,9 @@ async function diffSingleFile(
 
     let remoteSource: string;
     try {
-      remoteSource = await (remoteObj as unknown as { getSource(): Promise<string> }).getSource();
+      remoteSource = await (
+        remoteObj as unknown as { getSource(): Promise<string> }
+      ).getSource();
     } catch (error) {
       return {
         objectName: parsed.name,
