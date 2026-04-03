@@ -80,6 +80,7 @@ const targetSchemas = [
   'custom/atcRun',
   'custom/aunitRun',
   'custom/aunitResult',
+  'custom/atomFeed',
 ];
 
 export default defineConfig({

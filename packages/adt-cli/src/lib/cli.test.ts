@@ -7,4 +7,10 @@ describe('ADT CLI', () => {
     expect(program).toBeDefined();
     expect(program.name()).toBe('adt');
   });
+
+  it('should register user command', async () => {
+    const program = await createCLI();
+    const commandNames = program.commands.map((c) => c.name());
+    expect(commandNames).toContain('user');
+  });
 });

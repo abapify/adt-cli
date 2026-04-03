@@ -90,4 +90,8 @@ export {
   type TransportTask,
   type CreateTransportOptions,
   type ListTransportsOptions,
+  UserService,
+  createUserService,
+  type UserInfo,
+  type CurrentUserInfo,
 } from './services';

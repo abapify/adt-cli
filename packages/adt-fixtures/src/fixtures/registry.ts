@@ -44,6 +44,12 @@ export const registry = {
       quickSearch: 'repository/search/quickSearch.xml',
     },
   },
+  system: {
+    users: {
+      single: 'system/users/single.xml',
+      search: 'system/users/search.xml',
+    },
+  },
   ddic: {
     tabl: {
       structure: 'ddic/tabl/structure.tabl.xml',
