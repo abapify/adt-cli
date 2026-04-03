@@ -30,6 +30,7 @@ export type SystemInformation = z.infer<typeof systeminformationSchema>;
  * Matches the interface of XML schemas for consistency
  */
 export const systeminformation = {
+  _infer: {} as SystemInformation,
   parse: (json: string): SystemInformation => {
     return systeminformationSchema.parse(JSON.parse(json));
   },

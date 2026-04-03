@@ -56,12 +56,11 @@ export class UserService {
   /** Get the currently authenticated user via systeminformation */
   async getCurrentUser(): Promise<CurrentUserInfo> {
     const sysInfo = await this.adt.core.http.systeminformation.getSystemInfo();
-    const info = sysInfo as Record<string, unknown>;
     return {
-      userName: String(info.userName ?? ''),
-      userFullName: info.userFullName ? String(info.userFullName) : undefined,
-      systemID: String(info.systemID ?? ''),
-      client: String(info.client ?? ''),
+      userName: sysInfo.userName ?? '',
+      userFullName: sysInfo.userFullName,
+      systemID: sysInfo.systemID ?? '',
+      client: sysInfo.client ?? '',
     };
   }
 
