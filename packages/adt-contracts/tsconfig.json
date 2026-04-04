@@ -11,12 +11,6 @@
   "include": ["src/**/*.ts", "tests/**/*.ts"],
   "references": [
     {
-      "path": "../adt-client"
-    },
-    {
-      "path": "../adt-auth"
-    },
-    {
       "path": "../adt-schemas"
     },
     {
