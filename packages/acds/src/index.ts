@@ -74,7 +74,7 @@ export type {
   StructureDefinition,
   SimpleTypeDefinition,
   ServiceDefinition,
-  MetadataExtension,
+  MetadataExtensionFull,
   ViewEntityDefinition,
   RoleDefinition,
   FieldDefinition,
@@ -96,6 +96,13 @@ export type {
   NamedTypeRef,
   SourceLocation,
   AstNode,
+  // New for view entity
+  DataSource,
+  JoinClause,
+  JoinCondition,
+  ProjectionField,
+  WhereCondition,
+  OrderByItem,
 } from './ast';
 
 export type { CdsParseError } from './errors';

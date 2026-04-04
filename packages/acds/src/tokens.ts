@@ -169,6 +169,95 @@ export const Abap = createToken({
   longer_alt: Identifier,
 });
 
+export const View = createToken({
+  name: 'View',
+  pattern: /view/,
+  longer_alt: Identifier,
+});
+
+export const From = createToken({
+  name: 'From',
+  pattern: /from/,
+  longer_alt: Identifier,
+});
+
+export const Join = createToken({
+  name: 'Join',
+  pattern: /join/,
+  longer_alt: Identifier,
+});
+
+export const On = createToken({
+  name: 'On',
+  pattern: /on/,
+  longer_alt: Identifier,
+});
+
+export const Inner = createToken({
+  name: 'Inner',
+  pattern: /inner/,
+  longer_alt: Identifier,
+});
+
+export const Left = createToken({
+  name: 'Left',
+  pattern: /left/,
+  longer_alt: Identifier,
+});
+
+export const Outer = createToken({
+  name: 'Outer',
+  pattern: /outer/,
+  longer_alt: Identifier,
+});
+
+export const Association = createToken({
+  name: 'Association',
+  pattern: /association/,
+  longer_alt: Identifier,
+});
+
+export const Cardinality = createToken({
+  name: 'Cardinality',
+  pattern: /\[(\d+)\.\.(\*|\d+)\]/,
+});
+
+export const Where = createToken({
+  name: 'Where',
+  pattern: /where/,
+  longer_alt: Identifier,
+});
+
+export const GroupBy = createToken({
+  name: 'GroupBy',
+  pattern: /group by/,
+  longer_alt: Identifier,
+});
+
+export const OrderBy = createToken({
+  name: 'OrderBy',
+  pattern: /order by/,
+  longer_alt: Identifier,
+});
+
+export const Descending = createToken({
+  name: 'Descending',
+  pattern: /desc/,
+  longer_alt: Identifier,
+});
+
+export const Union = createToken({
+  name: 'Union',
+  pattern: /union/,
+  longer_alt: Identifier,
+});
+
+export const Distinct = createToken({
+  name: 'Distinct',
+  pattern: /distinct/,
+  longer_alt: Identifier,
+});
+
 // ============================================
 // Symbols
 // ============================================
@@ -220,6 +309,22 @@ export const allTokens = [
   True,
   False,
   Abap,
+  View,
+  // EntityKeyword removed - redundant with Entity
+  From,
+  Join,
+  On,
+  Inner,
+  Outer,
+  // Association removed - not used
+  // Cardinality removed - not used
+  Where,
+  // GroupBy removed - not used (pattern "group by" conflicts)
+  // OrderBy removed - not used (pattern "order by" conflicts)
+  // Ascending removed - matches "as" prefix
+  Descending,
+  // Union removed - not used
+  Distinct,
 
   // Identifier (catch-all for names)
   Identifier,

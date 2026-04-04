@@ -188,12 +188,75 @@ export interface RoleDefinition extends AstNode {
   // Phase 2: grant clauses, conditions
 }
 
-/** define view entity <name> as select from ... { ... } */
+// ============================================
+// Phase 3: View Entity (DDLS)
+// ============================================
+
+/** Data source in a view entity: table, view, or association */
+export interface DataSource extends AstNode {
+  name: string;
+  alias?: string;
+}
+
+/** Join type */
+export type JoinKind = 'inner' | 'leftOuter' | 'leftOuterJoin' | 'association';
+
+/** Join condition */
+export interface JoinCondition extends AstNode {
+  leftField: string;
+  rightField: string;
+}
+
+/** Join clause */
+export interface JoinClause extends AstNode {
+  kind: JoinKind;
+  target: DataSource;
+  on: JoinCondition[];
+}
+
+/** Field projection in view entity */
+export interface ProjectionField extends AstNode {
+  annotations: Annotation[];
+  name: string;
+  alias?: string;
+  expression?: string;
+}
+
+/** Order by clause */
+export interface OrderByItem extends AstNode {
+  expression: string;
+  direction: 'asc' | 'desc';
+}
+
+/** Where condition */
+export interface WhereCondition extends AstNode {
+  expression: string;
+}
+
+/** define view entity <name> as select from ... [join ...] { ... } [where ...] [group by ...] [order by ...] */
 export interface ViewEntityDefinition extends AstNode {
   kind: 'viewEntity';
   name: string;
   annotations: Annotation[];
-  // Phase 3: datasource, fields, joins, associations
+  datasource: DataSource;
+  joins: JoinClause[];
+  fields: ProjectionField[];
+  where?: WhereCondition;
+  groupBy?: string[];
+  orderBy?: OrderByItem[];
+  distinct: boolean;
+}
+
+// ============================================
+// Phase 2: Metadata Extension enhanced (DDLX)
+// ============================================
+
+/** Full metadata extension with element overrides */
+export interface MetadataExtensionFull extends AstNode {
+  kind: 'metadataExtension';
+  entity: string;
+  annotations: Annotation[];
+  elements: AnnotatedElement[];
 }
 
 // ============================================
@@ -205,7 +268,7 @@ export type CdsDefinition =
   | StructureDefinition
   | SimpleTypeDefinition
   | ServiceDefinition
-  | MetadataExtension
+  | MetadataExtensionFull
   | RoleDefinition
   | ViewEntityDefinition;
 

@@ -13,17 +13,24 @@ import type {
   BuiltinTypeRef,
   CdsDefinition,
   CdsSourceFile,
+  DataSource,
   ExposeStatement,
   FieldDefinition,
   IncludeDirective,
-  MetadataExtension,
+  JoinClause,
+  JoinCondition,
+  MetadataExtensionFull,
   NamedTypeRef,
+  OrderByItem,
+  ProjectionField,
   ServiceDefinition,
   SimpleTypeDefinition,
   StructureDefinition,
   TableDefinition,
   TableMember,
   TypeRef,
+  ViewEntityDefinition,
+  WhereCondition,
 } from './ast';
 
 // Generate the base visitor class from the parser's grammar
@@ -72,7 +79,10 @@ export class CdsVisitor extends BaseCstVisitor {
     if (ctx.simpleTypeDefinition) {
       return this.visit(ctx.simpleTypeDefinition[0]) as SimpleTypeDefinition;
     }
-    return this.visit(ctx.serviceDefinition[0]) as ServiceDefinition;
+    if (ctx.serviceDefinition) {
+      return this.visit(ctx.serviceDefinition[0]) as ServiceDefinition;
+    }
+    return this.visit(ctx.viewEntityDefinition[0]) as ViewEntityDefinition;
   }
 
   tableDefinition(ctx: Record<string, CstNode[] | IToken[]>): TableDefinition {
@@ -144,9 +154,111 @@ export class CdsVisitor extends BaseCstVisitor {
     return { entity, alias };
   }
 
+  viewEntityDefinition(
+    ctx: Record<string, CstNode[] | IToken[]>,
+  ): ViewEntityDefinition {
+    const name = this.visit((ctx.cdsName as CstNode[])[0]) as string;
+    const datasource = this.visit(ctx.dataSource?.[0] as CstNode) as DataSource;
+    const joins: JoinClause[] = (ctx.joinClause ?? []).map((node) =>
+      this.visit(node as CstNode),
+    ) as JoinClause[];
+    const fields: ProjectionField[] = (ctx.projectionField ?? []).map((node) =>
+      this.visit(node as CstNode),
+    ) as ProjectionField[];
+    const where = ctx.whereCondition
+      ? (this.visit(ctx.whereCondition[0] as CstNode) as WhereCondition)
+      : undefined;
+    const groupBy = ctx.cdsName
+      ? ctx.cdsName
+          .slice(2)
+          .map((node) => this.visit(node as CstNode) as string)
+      : undefined;
+    const orderBy = ctx.orderByItem
+      ? ctx.orderByItem.map(
+          (node) => this.visit(node as CstNode) as OrderByItem,
+        )
+      : undefined;
+    const distinct = !!(ctx.Distinct as IToken[] | undefined)?.length;
+    return {
+      kind: 'viewEntity',
+      name,
+      annotations: [],
+      datasource,
+      joins,
+      fields,
+      where,
+      groupBy,
+      orderBy,
+      distinct,
+    };
+  }
+
+  dataSource(ctx: Record<string, CstNode[]>): DataSource {
+    const names = (ctx.cdsName ?? []).map((node) => this.visit(node) as string);
+    return {
+      name: names[0],
+      alias: names[1],
+    };
+  }
+
+  joinClause(ctx: Record<string, CstNode[]>): JoinClause {
+    const kind: JoinClause['kind'] = ctx.Inner
+      ? 'inner'
+      : ctx.Left
+        ? 'leftOuter'
+        : 'association';
+    const target = this.visit(ctx.dataSource?.[0] as CstNode) as DataSource;
+    const on: JoinCondition[] =
+      (ctx.joinCondition?.map((node) =>
+        this.visit(node as CstNode),
+      ) as JoinCondition[]) ?? [];
+    return { kind, target, on };
+  }
+
+  joinCondition(ctx: Record<string, CstNode[]>): JoinCondition {
+    const cdsNameArray = ctx.cdsName as CstNode[] | undefined;
+    const names = (cdsNameArray ?? []).map(
+      (node) => this.visit(node) as string,
+    );
+    return {
+      leftField: `${names[0]}.${names[1]}`,
+      rightField: `${names[2]}.${names[3]}`,
+    };
+  }
+
+  projectionField(ctx: Record<string, CstNode[]>): ProjectionField {
+    const annotations: Annotation[] = (ctx.annotation ?? []).map(
+      (node) => this.visit(node as CstNode) as Annotation,
+    );
+    const cdsNameArray = ctx.cdsName as CstNode[] | undefined;
+    const names = (cdsNameArray ?? []).map(
+      (node) => this.visit(node) as string,
+    );
+    return {
+      annotations,
+      name: names[0],
+      alias: names[1],
+    };
+  }
+
+  whereCondition(ctx: Record<string, CstNode[]>): WhereCondition {
+    const cdsNameArray = ctx.cdsName as CstNode[] | undefined;
+    const expression = (cdsNameArray ?? [])
+      .map((node) => this.visit(node) as string)
+      .join('.');
+    return { expression };
+  }
+
+  orderByItem(ctx: Record<string, IToken[]>): OrderByItem {
+    const cdsNameArray = ctx.cdsName as unknown as CstNode[] | undefined;
+    const expr = this.visit(cdsNameArray?.[0] as CstNode) as string;
+    const direction: OrderByItem['direction'] = ctx.Descending ? 'desc' : 'asc';
+    return { expression: expr, direction };
+  }
+
   annotateStatement(
     ctx: Record<string, CstNode[] | IToken[]>,
-  ): MetadataExtension {
+  ): MetadataExtensionFull {
     const entity = this.visit((ctx.cdsName as CstNode[])[0]) as string;
     const elements: AnnotatedElement[] = (
       (ctx.annotatedElement as CstNode[]) ?? []
@@ -265,7 +377,10 @@ export class CdsVisitor extends BaseCstVisitor {
       ctx.Service?.[0] ??
       ctx.Entity?.[0] ??
       ctx.Key?.[0] ??
-      ctx.Expose?.[0];
+      ctx.Expose?.[0] ??
+      ctx.View?.[0] ??
+      ctx.From?.[0] ??
+      ctx.Where?.[0];
     return token?.image ?? '';
   }
 

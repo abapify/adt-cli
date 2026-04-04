@@ -39,6 +39,22 @@ import {
   StringLiteral,
   NumberLiteral,
   EnumLiteral,
+  View,
+  From,
+  Join,
+  On,
+  Inner,
+  Outer,
+  Left,
+  // Association,
+  // Cardinality,
+  Where,
+  GroupBy,
+  OrderBy,
+  // Ascending removed - matches "as" prefix
+  Descending,
+  // Union,
+  Distinct,
 } from './tokens';
 
 export class CdsParser extends CstParser {
@@ -79,6 +95,7 @@ export class CdsParser extends CstParser {
       { ALT: () => this.SUBRULE(this.structureDefinition) },
       { ALT: () => this.SUBRULE(this.simpleTypeDefinition) },
       { ALT: () => this.SUBRULE(this.serviceDefinition) },
+      { ALT: () => this.SUBRULE(this.viewEntityDefinition) },
     ]);
   });
 
@@ -183,6 +200,117 @@ export class CdsParser extends CstParser {
       this.SUBRULE2(this.cdsName);
     });
     this.CONSUME(Semicolon);
+  });
+
+  // ============================================
+  // View Entity definition (DDLS - RAP)
+  // ============================================
+
+  private viewEntityDefinition = this.RULE('viewEntityDefinition', () => {
+    this.CONSUME(View);
+    this.CONSUME(Entity);
+    this.SUBRULE(this.cdsName);
+    this.CONSUME(As);
+    this.CONSUME(From);
+    this.SUBRULE2(this.dataSource);
+    this.MANY(() => {
+      this.SUBRULE(this.joinClause);
+    });
+    this.CONSUME(LBrace);
+    this.MANY2(() => {
+      this.SUBRULE(this.projectionField);
+    });
+    this.CONSUME(RBrace);
+    this.OPTION(() => {
+      this.CONSUME(Where);
+      this.SUBRULE(this.whereCondition);
+    });
+    this.OPTION2(() => {
+      this.CONSUME(GroupBy);
+      this.MANY_SEP({
+        SEP: Comma,
+        DEF: () => {
+          this.SUBRULE2(this.cdsName);
+        },
+      });
+    });
+    this.OPTION3(() => {
+      this.CONSUME(OrderBy);
+      this.MANY_SEP2({
+        SEP: Comma,
+        DEF: () => {
+          this.SUBRULE(this.orderByItem);
+        },
+      });
+    });
+    this.OPTION4(() => {
+      this.CONSUME(Distinct);
+    });
+  });
+
+  private dataSource = this.RULE('dataSource', () => {
+    this.SUBRULE(this.cdsName);
+    this.OPTION(() => {
+      this.CONSUME(As);
+      this.SUBRULE2(this.cdsName);
+    });
+  });
+
+  private joinClause = this.RULE('joinClause', () => {
+    this.OR([
+      { ALT: () => this.CONSUME(Inner) },
+      { ALT: () => this.CONSUME(Left) },
+    ]);
+    this.OR2([
+      { ALT: () => this.CONSUME(Join) },
+      { ALT: () => this.CONSUME(Outer) },
+    ]);
+    this.SUBRULE(this.dataSource);
+    this.CONSUME(On);
+    this.CONSUME(LBrace);
+    this.MANY_SEP({
+      SEP: Comma,
+      DEF: () => {
+        this.SUBRULE(this.joinCondition);
+      },
+    });
+    this.CONSUME(RBrace);
+  });
+
+  private joinCondition = this.RULE('joinCondition', () => {
+    this.SUBRULE(this.cdsName);
+    this.CONSUME(Dot);
+    this.SUBRULE2(this.cdsName);
+    this.CONSUME(Colon);
+    this.SUBRULE3(this.cdsName);
+    this.CONSUME2(Dot);
+    this.SUBRULE4(this.cdsName);
+  });
+
+  private projectionField = this.RULE('projectionField', () => {
+    this.MANY(() => {
+      this.SUBRULE(this.annotation);
+    });
+    this.SUBRULE(this.cdsName);
+    this.OPTION(() => {
+      this.CONSUME(As);
+      this.SUBRULE2(this.cdsName);
+    });
+    this.CONSUME(Semicolon);
+  });
+
+  private whereCondition = this.RULE('whereCondition', () => {
+    this.MANY(() => {
+      this.SUBRULE(this.cdsName);
+      this.CONSUME(Dot);
+    });
+  });
+
+  private orderByItem = this.RULE('orderByItem', () => {
+    this.SUBRULE(this.cdsName);
+    this.OPTION(() => {
+      this.CONSUME(Descending);
+    });
   });
 
   // ============================================
@@ -322,6 +450,11 @@ export class CdsParser extends CstParser {
       { ALT: () => this.CONSUME(Entity) },
       { ALT: () => this.CONSUME(Key) },
       { ALT: () => this.CONSUME(Expose) },
+      { ALT: () => this.CONSUME(View) },
+      { ALT: () => this.CONSUME(From) },
+      { ALT: () => this.CONSUME(Where) },
+      { ALT: () => this.CONSUME(GroupBy) },
+      { ALT: () => this.CONSUME(OrderBy) },
     ]);
   });
 

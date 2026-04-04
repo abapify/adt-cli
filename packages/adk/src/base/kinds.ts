@@ -33,6 +33,11 @@ export const TableType = 'TableType' as const;
 export const MessageClass = 'MessageClass' as const;
 export const EnhancementSpot = 'EnhancementSpot' as const;
 
+// ABAP CDS / RAP
+export const CdsView = 'CdsView' as const;
+export const CdsMetadataExtension = 'CdsMetadataExtension' as const;
+export const CdsService = 'CdsService' as const;
+
 /** Union type of all ADK kinds */
 export type AdkKind =
   | typeof TransportRequest
@@ -50,7 +55,10 @@ export type AdkKind =
   | typeof Domain
   | typeof TableType
   | typeof MessageClass
-  | typeof EnhancementSpot;
+  | typeof EnhancementSpot
+  | typeof CdsView
+  | typeof CdsMetadataExtension
+  | typeof CdsService;
 
 // ============================================
 // Type-safe Kind → Object mapping
