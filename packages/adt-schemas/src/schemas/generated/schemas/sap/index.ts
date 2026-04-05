@@ -42,3 +42,6 @@ export { default as xml } from './xml';
 export { default as abapoo } from './abapoo';
 export { default as abapsource } from './abapsource';
 export { default as Ecore } from './Ecore';
+export { default as behaviourdefinition } from './behaviourdefinition';
+export { default as ddls } from './ddls';
+export { default as rapgenerator } from './rapgenerator';

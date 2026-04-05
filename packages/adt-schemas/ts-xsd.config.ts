@@ -62,6 +62,10 @@ const targetSchemas = [
   'sap/quickfixes',
   'sap/log',
   'sap/templatelink',
+  // RAP (RESTful ABAP Programming) schemas
+  'sap/behaviourdefinition',
+  'sap/ddls',
+  'sap/rapgenerator',
   // Data Dictionary
   'sap/domain',
   'sap/dataelements',

@@ -58,4 +58,9 @@ export const registry = {
       valueTable: 'ddic/tabl/value-table.tabl.xml',
     },
   },
+  rap: {
+    behaviourdefinition: 'rap/behaviourdefinition.xml',
+    ddls: 'rap/ddls.xml',
+    rapgenerator: 'rap/rapgenerator.xml',
+  },
 } as const;

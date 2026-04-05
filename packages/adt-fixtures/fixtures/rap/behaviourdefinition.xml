@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  RAP Behaviour Definition Fixture
+  
+  Sample response from GET /sap/bc/adt/rap/behaviours/zbdemo_behavior
+  Content-Type: application/vnd.sap.adt.rap.behaviours.v1+xml
+-->
+<behaviour xmlns="http://www.sap.com/adt/rap/behaviours"
+           xmlns:adtcore="http://www.sap.com/adt/core"
+           adtcore:name="ZBDEMO_BEHAVIOR"
+           adtcore:uri="/sap/bc/adt/rap/behaviours/zbdemo_behavior"
+           adtcore:version="active"
+           baseType="ZBDEMO"
+           implementationClass="ZCL_BD_ZBDEMO_BEHAVIOR"
+           projectType="BDEF"
+           draftEnabled="true"
+           unmanagedPersistence="false"
+           withLock="true"
+           withFeatures="true"
+           authorization="ZBDEMO_AUTH">
+  <adtcore:description xml:lang="en">Demo RAP Behavior Definition</adtcore:description>
+  <adtcore:package ref="/sap/bc/adt/packages/ZBDEMO" name="ZBDEMO"/>
+  <behaviorDef>
+    <define for="ZBDEMO"
+            create="mandatory"
+            update="mandatory"
+            delete="mandatory">
+      <class entity="ZBDEMO"
+             implementation="ZCL_BD_ZBDEMO_BEHAVIOR"
+             persistent="ZBDEMO_TAB"
+             create="ZCL_BD_ZBDEMO_BEHAVIOR~CREATE"
+             modify="ZCL_BD_ZBDEMO_BEHAVIOR~MODIFY"
+             delete="ZCL_BD_ZBDEMO_BEHAVIOR~DELETE"/>
+      <association name="Items"
+                   to="ZBDEMO_ITEM"
+                   cardinality="ONE_TO_MANY"
+                   on="ZBDEMO_ID = ZBDEMO_ITEM-PARENT_ID"/>
+      <action name="CalculateTotal"
+              for="ZBDEMO"
+              implementation="ZCL_BD_ZBDEMO_BEHAVIOR~CALCULATE_TOTAL"
+              result="ZDECIMALS18"/>
+      <validation name="ValidateData"
+                  for="ZBDEMO"
+                  implementation="ZCL_BD_ZBDEMO_BEHAVIOR~VALIDATE_DATA"/>
+    </define>
+  </behaviorDef>
+</behaviour>
