@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  RAP Behaviour Definition Schema
+  Based on SAP ADT REST API for Behaviour Definitions
+  
+  Namespace: http://www.sap.com/adt/rap/behaviours
+  Content-Type: application/vnd.sap.adt.rap.behaviours.v1+xml
+  
+  Used by: /sap/bc/adt/rap/behaviours
+  
+  Note: This schema includes basic types to avoid dependencies on base SAP schemas.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    targetNamespace="http://www.sap.com/adt/rap/behaviours"
+    elementFormDefault="qualified"
+    attributeFormDefault="qualified">
+
+  <!-- Atom namespace for feed elements -->
+  <xsd:import namespace="http://www.w3.org/2005/Atom" schemaLocation="atom.xsd"/>
+
+  <!-- Root element for behaviour definition list -->
+  <xsd:element name="behaviourDefinitions" type="rap:BehaviourDefinitionsType"/>
+
+  <!-- Root element for single behaviour definition -->
+  <xsd:element name="behaviourDefinition" type="rap:BehaviourDefinitionType"/>
+
+  <!-- Behaviour Definitions Collection Type -->
+  <xsd:complexType name="BehaviourDefinitionsType">
+    <xsd:sequence>
+      <xsd:element ref="atom:entry" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="totalResults" type="xsd:integer" use="optional"/>
+    <xsd:attribute name="startIndex" type="xsd:integer" use="optional"/>
+  </xsd:complexType>
+
+  <!-- Single Behaviour Definition Type -->
+  <xsd:complexType name="BehaviourDefinitionType">
+    <xsd:sequence>
+      <xsd:element ref="atom:title" minOccurs="0"/>
+      <xsd:element ref="atom:summary" minOccurs="0"/>
+      <xsd:element ref="atom:updated" minOccurs="0"/>
+      <xsd:element ref="atom:author" minOccurs="0"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="description" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="behavior" type="rap:BehaviorType" minOccurs="0"/>
+      <xsd:element name="implementation" type="rap:ImplementationType" minOccurs="0"/>
+      <xsd:element name="projection" type="rap:ProjectionType" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+    <xsd:attribute name="version" type="xsd:string" use="optional"/>
+    <xsd:attribute name="abstract" type="xsd:boolean" use="optional"/>
+    <xsd:attribute name="draftEnabled" type="xsd:boolean" use="optional"/>
+  </xsd:complexType>
+
+  <!-- Behavior section with entity implementations -->
+  <xsd:complexType name="BehaviorType">
+    <xsd:sequence>
+      <xsd:element name="implementation" type="rap:EntityImplementationType" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="literal" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Entity implementation details -->
+  <xsd:complexType name="EntityImplementationType">
+    <xsd:sequence>
+      <xsd:element name="type" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="name" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="alias" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="entity" type="xsd:string" use="required"/>
+    <xsd:attribute name="lock" type="xsd:boolean" use="optional"/>
+  </xsd:complexType>
+
+  <!-- Implementation type for behavior class -->
+  <xsd:complexType name="ImplementationType">
+    <xsd:sequence>
+      <xsd:element name="className" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="interfaceName" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="persistentAlias" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="type" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <!-- Projection type for behavior projection -->
+  <xsd:complexType name="ProjectionType">
+    <xsd:sequence>
+      <xsd:element name="alias" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="entity" type="rap:ProjectionEntityType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Projection entity definition -->
+  <xsd:complexType name="ProjectionEntityType">
+    <xsd:sequence>
+      <xsd:element name="alias" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+    <xsd:attribute name="implementationType" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+</xsd:schema>

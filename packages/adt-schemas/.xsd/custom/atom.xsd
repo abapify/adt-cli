@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Atom Feed Schema (RFC 4287) - Standalone Custom Version
+  
+  Namespace: http://www.w3.org/2005/Atom
+  
+  This is a complete standalone schema for Atom feeds used by SAP ADT.
+  It provides all the elements and types needed for RAP schema generation.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.w3.org/2005/Atom"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <!-- Root feed element -->
+  <xsd:element name="feed" type="atom:FeedType"/>
+  
+  <!-- Root entry element -->
+  <xsd:element name="entry" type="atom:EntryType"/>
+  
+  <!-- Text constructs -->
+  <xsd:element name="title" type="atom:TextType"/>
+  <xsd:element name="subtitle" type="atom:TextType"/>
+  <xsd:element name="summary" type="atom:TextType"/>
+  <xsd:element name="content" type="atom:ContentType"/>
+  
+  <!-- Person constructs -->
+  <xsd:element name="author" type="atom:PersonType"/>
+  <xsd:element name="contributor" type="atom:PersonType"/>
+  
+  <!-- Metadata elements -->
+  <xsd:element name="id" type="xsd:anyURI"/>
+  <xsd:element name="updated" type="xsd:dateTime"/>
+  <xsd:element name="published" type="xsd:dateTime"/>
+  <xsd:element name="category" type="atom:CategoryType"/>
+  <xsd:element name="link" type="atom:LinkType"/>
+  <xsd:element name="generator" type="atom:GeneratorType"/>
+  <xsd:element name="icon" type="xsd:anyURI"/>
+  <xsd:element name="logo" type="xsd:anyURI"/>
+  
+  <!-- Rights element -->
+  <xsd:element name="rights" type="atom:TextType"/>
+  
+  <!-- Feed type -->
+  <xsd:complexType name="FeedType">
+    <xsd:sequence>
+      <xsd:element ref="atom:title" minOccurs="1"/>
+      <xsd:element ref="atom:id" minOccurs="1"/>
+      <xsd:element ref="atom:updated" minOccurs="1"/>
+      <xsd:element ref="atom:author" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:category" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:contributor" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:generator" minOccurs="0"/>
+      <xsd:element ref="atom:icon" minOccurs="0"/>
+      <xsd:element ref="atom:logo" minOccurs="0"/>
+      <xsd:element ref="atom:rights" minOccurs="0"/>
+      <xsd:element ref="atom:subtitle" minOccurs="0"/>
+      <xsd:element ref="atom:entry" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+  <!-- Entry type -->
+  <xsd:complexType name="EntryType">
+    <xsd:sequence>
+      <xsd:element ref="atom:title" minOccurs="1"/>
+      <xsd:element ref="atom:id" minOccurs="1"/>
+      <xsd:element ref="atom:updated" minOccurs="1"/>
+      <xsd:element ref="atom:published" minOccurs="0"/>
+      <xsd:element ref="atom:author" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:category" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:contributor" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="atom:generator" minOccurs="0"/>
+      <xsd:element ref="atom:icon" minOccurs="0"/>
+      <xsd:element ref="atom:logo" minOccurs="0"/>
+      <xsd:element ref="atom:rights" minOccurs="0"/>
+      <xsd:element ref="atom:summary" minOccurs="0"/>
+      <xsd:element ref="atom:content" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+  <!-- Text type (can be plain text, HTML, or XHTML) -->
+  <xsd:complexType name="TextType" mixed="true">
+    <xsd:sequence>
+      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="type" type="atom:TextTypeType" use="optional" default="text"/>
+    <xsd:attribute name="src" type="xsd:anyURI" use="optional"/>
+  </xsd:complexType>
+  
+  <!-- Content type -->
+  <xsd:complexType name="ContentType" mixed="true">
+    <xsd:sequence>
+      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="type" type="atom:ContentTypeType" use="optional"/>
+    <xsd:attribute name="src" type="xsd:anyURI" use="optional"/>
+  </xsd:complexType>
+  
+  <!-- Person type -->
+  <xsd:complexType name="PersonType">
+    <xsd:sequence>
+      <xsd:element ref="atom:name" minOccurs="1"/>
+      <xsd:element ref="atom:uri" minOccurs="0"/>
+      <xsd:element ref="atom:email" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+  <!-- Category type -->
+  <xsd:complexType name="CategoryType">
+    <xsd:attribute name="term" type="xsd:string" use="required"/>
+    <xsd:attribute name="scheme" type="xsd:anyURI" use="optional"/>
+    <xsd:attribute name="label" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  
+  <!-- Link type -->
+  <xsd:complexType name="LinkType">
+    <xsd:attribute name="href" type="xsd:anyURI" use="required"/>
+    <xsd:attribute name="rel" type="atom:linkRelType" use="optional" default="alternate"/>
+    <xsd:attribute name="type" type="xsd:string" use="optional"/>
+    <xsd:attribute name="hreflang" type="xsd:language" use="optional"/>
+    <xsd:attribute name="title" type="xsd:string" use="optional"/>
+    <xsd:attribute name="length" type="xsd:integer" use="optional"/>
+  </xsd:complexType>
+  
+  <!-- Generator type -->
+  <xsd:complexType name="GeneratorType" mixed="true">
+    <xsd:sequence>
+      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="uri" type="xsd:anyURI" use="optional"/>
+    <xsd:attribute name="version" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  
+  <!-- Simple types -->
+  <xsd:simpleType name="TextTypeType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="text"/>
+      <xsd:enumeration value="html"/>
+      <xsd:enumeration value="xhtml"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:simpleType name="ContentTypeType">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value=".*/.*"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:simpleType name="linkRelType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="alternate"/>
+      <xsd:enumeration value="related"/>
+      <xsd:enumeration value="self"/>
+      <xsd:enumeration value="enclosure"/>
+      <xsd:enumeration value="via"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  
+  <!-- Name, URI, Email elements -->
+  <xsd:element name="name" type="xsd:string"/>
+  <xsd:element name="uri" type="xsd:anyURI"/>
+  <xsd:element name="email" type="xsd:string"/>
+
+</xsd:schema>

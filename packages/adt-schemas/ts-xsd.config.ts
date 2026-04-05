@@ -30,8 +30,8 @@ import { deriveRootTypeName } from '@abapify/ts-xsd';
 // Target schemas - exported with typed wrappers
 // Dependencies are auto-discovered via autoLink from XSD imports
 const targetSchemas = [
-  // SAP schemas
-  'sap/atom',
+  // Atom namespace (custom standalone version)
+  'custom/atom',
   'sap/adtcore',
   'sap/exception', // ADT error response format
   'sap/classes',
@@ -62,6 +62,11 @@ const targetSchemas = [
   'sap/quickfixes',
   'sap/log',
   'sap/templatelink',
+  // RAP - RESTful ABAP Programming (custom schemas with no SAP dependencies)
+  'custom/rap/atom', // RAP atom feed schema
+  'custom/rap/behaviourdefinition',
+  'custom/rap/ddls',
+  'custom/rap/rapgenerator',
   // Data Dictionary
   'sap/domain',
   'sap/dataelements',

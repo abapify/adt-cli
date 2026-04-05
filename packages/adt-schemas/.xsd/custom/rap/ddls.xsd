@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CDS View Entity (DDLS) Schema
+  Based on SAP ADT REST API for CDS View Entities
+  
+  Namespace: http://www.sap.com/adt/ddl/ddls
+  Content-Type: application/vnd.sap.adt.ddl.ddls.v1+xml
+  
+  Used by: /sap/bc/adt/ddl/ddls
+  
+  Note: This schema includes basic types to avoid dependencies on base SAP schemas.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    targetNamespace="http://www.sap.com/adt/ddl/ddls"
+    elementFormDefault="qualified"
+    attributeFormDefault="qualified">
+
+  <!-- Atom namespace for feed elements -->
+  <xsd:import namespace="http://www.w3.org/2005/Atom" schemaLocation="atom.xsd"/>
+
+  <!-- Root element for DDLS list -->
+  <xsd:element name="ddls" type="ddls:DdlsType"/>
+
+  <!-- Root element for single DDLS object -->
+  <xsd:element name="ddlsObject" type="ddls:DdlsObjectType"/>
+
+  <!-- DDLS Collection Type -->
+  <xsd:complexType name="DdlsType">
+    <xsd:sequence>
+      <xsd:element ref="atom:entry" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="totalResults" type="xsd:integer" use="optional"/>
+    <xsd:attribute name="startIndex" type="xsd:integer" use="optional"/>
+  </xsd:complexType>
+
+  <!-- Single DDLS Object Type -->
+  <xsd:complexType name="DdlsObjectType">
+    <xsd:sequence>
+      <xsd:element ref="atom:title" minOccurs="0"/>
+      <xsd:element ref="atom:summary" minOccurs="0"/>
+      <xsd:element ref="atom:updated" minOccurs="0"/>
+      <xsd:element ref="atom:author" minOccurs="0"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="description" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="ddlDefinition" type="ddls:DdlDefinitionType" minOccurs="0"/>
+      <xsd:element name="parentReference" type="ddls:ParentReferenceType" minOccurs="0"/>
+      <xsd:element name="annotations" type="ddls:AnnotationsType" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+    <xsd:attribute name="exposed" type="xsd:boolean" use="optional"/>
+    <xsd:attribute name="draftEnabled" type="xsd:boolean" use="optional"/>
+    <xsd:attribute name="version" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <!-- DDL Definition type containing the CDS view source -->
+  <xsd:complexType name="DdlDefinitionType">
+    <xsd:sequence>
+      <xsd:element name="ddlSource" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="semantic" type="ddls:SemanticType" minOccurs="0"/>
+      <xsd:element name="parameters" type="ddls:ParametersType" minOccurs="0"/>
+      <xsd:element name="elements" type="ddls:ElementsType" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Semantic definition for view type -->
+  <xsd:complexType name="SemanticType">
+    <xsd:sequence>
+      <xsd:element name="keyAlias" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="mandatoryElement" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="type" type="xsd:string" use="required"/>
+  </xsd:complexType>
+
+  <!-- Parameters for parameterized views -->
+  <xsd:complexType name="ParametersType">
+    <xsd:sequence>
+      <xsd:element name="parameter" type="ddls:ParameterType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Parameter definition -->
+  <xsd:complexType name="ParameterType">
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string"/>
+      <xsd:element name="type" type="xsd:string"/>
+      <xsd:element name="defaultValue" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Elements (columns) of the view -->
+  <xsd:complexType name="ElementsType">
+    <xsd:sequence>
+      <xsd:element name="element" type="ddls:ElementType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Element definition -->
+  <xsd:complexType name="ElementType">
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string"/>
+      <xsd:element name="alias" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="dataType" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="label" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="semantics" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Parent reference for view extensions -->
+  <xsd:complexType name="ParentReferenceType">
+    <xsd:sequence>
+      <xsd:element name="parentName" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="parentPackage" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Annotations for CDS metadata -->
+  <xsd:complexType name="AnnotationsType">
+    <xsd:sequence>
+      <xsd:element name="annotation" type="ddls:AnnotationType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Single annotation -->
+  <xsd:complexType name="AnnotationType">
+    <xsd:sequence>
+      <xsd:element name="property" type="ddls:AnnotationPropertyType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+  </xsd:complexType>
+
+  <!-- Annotation property -->
+  <xsd:complexType name="AnnotationPropertyType">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:string">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+</xsd:schema>

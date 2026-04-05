@@ -11,10 +11,10 @@
   "include": ["src/**/*.ts", "tests/**/*.ts"],
   "references": [
     {
-      "path": "../speci"
+      "path": "../adt-schemas"
     },
     {
-      "path": "../adt-schemas"
+      "path": "../speci"
     },
     {
       "path": "../adt-fixtures"

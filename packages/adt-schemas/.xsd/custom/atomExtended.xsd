@@ -11,7 +11,7 @@
     targetNamespace="http://www.w3.org/2005/Atom"
     elementFormDefault="qualified">
 
-  <xsd:include schemaLocation="../sap/atom.xsd"/>
+  <xsd:include schemaLocation="atom.xsd"/>
 
   <!-- Atom title element (missing from SAP's atom.xsd) -->
   <xsd:element name="title" type="xsd:string"/>
