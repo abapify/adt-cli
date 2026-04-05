@@ -33,6 +33,11 @@ export const TableType = 'TableType' as const;
 export const MessageClass = 'MessageClass' as const;
 export const EnhancementSpot = 'EnhancementSpot' as const;
 
+// RAP - ABAP RESTful Application Programming Model
+export const BehaviourDefinition = 'BehaviourDefinition' as const;
+export const CDSView = 'CDSView' as const;
+export const CDSEntity = 'CDSEntity' as const;
+
 /** Union type of all ADK kinds */
 export type AdkKind =
   | typeof TransportRequest
@@ -50,7 +55,10 @@ export type AdkKind =
   | typeof Domain
   | typeof TableType
   | typeof MessageClass
-  | typeof EnhancementSpot;
+  | typeof EnhancementSpot
+  | typeof BehaviourDefinition
+  | typeof CDSView
+  | typeof CDSEntity;
 
 // ============================================
 // Type-safe Kind → Object mapping
@@ -72,6 +80,9 @@ import type { AdkDomain } from '../objects/ddic/doma/doma.model';
 import type { AdkDataElement } from '../objects/ddic/dtel/dtel.model';
 import type { AdkTable, AdkStructure } from '../objects/ddic/tabl/tabl.model';
 import type { AdkTableType } from '../objects/ddic/ttyp/ttyp.model';
+import type { AdkBehaviourDefinition } from '../objects/rap/bdef/bdef.model';
+import type { AdkCDSView } from '../objects/rap/cds/cds-view.model';
+import type { AdkCDSEntity } from '../objects/rap/cds/cds-entity.model';
 
 /**
  * Maps ADK kind to concrete object type
@@ -108,4 +119,10 @@ export type AdkObjectForKind<K extends AdkKind> = K extends typeof Class
                         ? AdkStructure
                         : K extends typeof TableType
                           ? AdkTableType
-                          : AdkObject; // fallback
+                          : K extends typeof BehaviourDefinition
+                            ? AdkBehaviourDefinition
+                            : K extends typeof CDSView
+                              ? AdkCDSView
+                              : K extends typeof CDSEntity
+                                ? AdkCDSEntity
+                                : AdkObject; // fallback
