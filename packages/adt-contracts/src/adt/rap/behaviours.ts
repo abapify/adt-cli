@@ -11,18 +11,20 @@
 
 import { crud } from '../../helpers/crud';
 import { http } from '../../base';
-import { adtcore, type InferTypedSchema } from '../../schemas';
+import { behaviourdefinition, type InferTypedSchema } from '../../schemas';
 
 const basePath = '/sap/bc/adt/rap/behaviours';
 const contentType = 'application/vnd.sap.adt.rap.behaviours.v1+xml';
 const accept = contentType;
 
-export type BehaviorDefinitionResponse = InferTypedSchema<typeof adtcore>;
+export type BehaviorDefinitionResponse = InferTypedSchema<
+  typeof behaviourdefinition
+>;
 
 export const behaviourDefinitionsContract = {
   ...crud({
     basePath,
-    schema: adtcore,
+    schema: behaviourdefinition,
     contentType,
     accept,
   }),

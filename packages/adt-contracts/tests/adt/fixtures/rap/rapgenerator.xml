@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  RAP Generator Workspace Fixture
+  
+  Sample response from GET /sap/bc/adt/rap/generator
+  Content-Type: application/vnd.sap.adt.rap.generator.v1+xml
+-->
+<workspace xmlns="http://www.sap.com/adt/rap/generator"
+           xmlns:adtcore="http://www.sap.com/adt/core"
+           adtcore:name="RAP Generator"
+           adtcore:uri="/sap/bc/adt/rap/generator"
+           workspaceId="WORKSPACE_001"
+           templateId="BUSINESS_OBJECT"
+           status="NEW">
+  <adtcore:description xml:lang="en">RAP Generator Workspace</adtcore:description>
+  <workspaceContent>
+    <templates>
+      <template xmlns="http://www.sap.com/adt/rap/generator"
+                xmlns:adtcore="http://www.sap.com/adt/core"
+                adtcore:name="Business Object"
+                adtcore:uri="/sap/bc/adt/rap/generator/templates/BUSINESS_OBJECT"
+                adtcore:version="active"
+                templateId="BUSINESS_OBJECT"
+                templateType="BUSINESS_OBJECT"
+                category="RAP"
+                description="Create a new RAP Business Object with Behavior Definition, View Entity, and Service Binding"
+                icon="business-object">
+        <templateContent objectType="BDEF">
+          <wizardStep stepId="step1" title="Basic Information" description="Enter basic object information" sequence="1" mandatory="true">
+            <field name="objectName" label="Object Name" type="TEXT" mandatory="true" maxLength="30" placeholder="ZMY_OBJECT" helpId="objectName"/>
+            <field name="package" label="Package" type="PACKAGE" mandatory="true" helpId="package"/>
+            <field name="description" label="Description" type="TEXT" mandatory="true" maxLength="60"/>
+          </wizardStep>
+          <wizardStep stepId="step2" title="Data Model" description="Define the data model" sequence="2" mandatory="true">
+            <field name="entityType" label="Entity Type" type="ENUM" mandatory="true">
+              <enumValue value="DRAFT_ENABLED" label="Draft Enabled" selected="true"/>
+              <enumValue value="STANDARD" label="Standard"/>
+              <enumValue value="UNMANAGED" label="Unmanaged"/>
+            </field>
+            <field name="persistenceType" label="Persistence" type="ENUM" mandatory="true">
+              <enumValue value="MANAGED" label="Managed (with Draft)" selected="true"/>
+              <enumValue value="UNMANAGED" label="Unmanaged"/>
+            </field>
+            <field name="fields" label="Fields (JSON)" type="TEXT_AREA" mandatory="false" placeholder='[{"name":"Field1","type":"CHAR","length":20}]'/>
+          </wizardStep>
+          <wizardStep stepId="step3" title="Behavior" description="Define behavior options" sequence="3" mandatory="false">
+            <field name="enableFeatures" label="Enable Features" type="BOOLEAN" defaultValue="true"/>
+            <field name="enableEtag" label="Enable ETag" type="BOOLEAN" defaultValue="true"/>
+            <info type="TIP">Enable features to support optimistic locking and field-level control</info>
+          </wizardStep>
+          <preview objectType="BDEF" package="$PACKAGE$">
+            <objectPreview xmlns="http://www.sap.com/adt/rap/generator"
+                           xmlns:adtcore="http://www.sap.com/adt/core"
+                           adtcore:name="$OBJECT_NAME$"
+                           adtcore:uri="/sap/bc/adt/rap/behaviours/$OBJECT_NAME_LOWER$">
+              <objectStatus state="PENDING" message="Ready to generate"/>
+            </objectPreview>
+            <objectPreview xmlns="http://www.sap.com/adt/rap/generator"
+                           xmlns:adtcore="http://www.sap.com/adt/core"
+                           adtcore:name="$OBJECT_NAME$_VIEW"
+                           adtcore:uri="/sap/bc/adt/ddl/ddls/$OBJECT_NAME_LOWER$_view">
+              <objectStatus state="PENDING" message="Ready to generate"/>
+            </objectPreview>
+          </preview>
+        </templateContent>
+        <parameter name="objectName" value="" type="TEXT"/>
+        <parameter name="package" value="" type="PACKAGE"/>
+        <parameter name="description" value="" type="TEXT"/>
+      </template>
+      <template xmlns="http://www.sap.com/adt/rap/generator"
+                xmlns:adtcore="http://www.sap.com/adt/core"
+                adtcore:name="Consumption View"
+                adtcore:uri="/sap/bc/adt/rap/generator/templates/CONSUMPTION_VIEW"
+                adtcore:version="active"
+                templateId="CONSUMPTION_VIEW"
+                templateType="CONSUMPTION_VIEW"
+                category="RAP"
+                description="Create a CDS Projection View for OData exposure">
+        <parameter name="baseView" value="" type="OBJECT"/>
+      </template>
+    </templates>
+    <generatedObjects>
+      <adtcore:objectReferences xmlns:adtcore="http://www.sap.com/adt/core">
+        <adtcore:objectReference adtcore:uri="/sap/bc/adt/rap/behaviours/zbdemo_behavior" adtcore:name="ZBDEMO_BEHAVIOR" adtcore:type="BDEF"/>
+        <adtcore:objectReference adtcore:uri="/sap/bc/adt/ddl/ddls/zbdemo_view" adtcore:name="ZBDEMO_VIEW" adtcore:type="DDLS"/>
+      </adtcore:objectReferences>
+    </generatedObjects>
+  </workspaceContent>
+</workspace>

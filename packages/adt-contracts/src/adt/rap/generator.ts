@@ -9,7 +9,7 @@
  */
 
 import { http } from '../../base';
-import { adtcore } from '../../schemas';
+import { rapgenerator } from '../../schemas';
 
 const basePath = '/sap/bc/adt/rap/generator';
 const contentType = 'application/vnd.sap.adt.rap.generator.v1+xml';
@@ -18,7 +18,7 @@ const accept = contentType;
 export const rapGeneratorContract = {
   getWorkspace: () =>
     http.get(basePath, {
-      responses: { 200: adtcore },
+      responses: { 200: rapgenerator },
       headers: {
         Accept: accept,
       },
@@ -26,7 +26,7 @@ export const rapGeneratorContract = {
 
   create: (options?: { corrNr?: string }) =>
     http.post(basePath, {
-      responses: { 200: adtcore },
+      responses: { 200: rapgenerator },
       headers: {
         Accept: accept,
         'Content-Type': contentType,
@@ -41,19 +41,19 @@ export const rapGeneratorContract = {
 
   getTemplate: (templateId: string) =>
     http.get(`${basePath}/templates/${templateId}`, {
-      responses: { 200: adtcore },
+      responses: { 200: rapgenerator },
       headers: { Accept: accept },
     }),
 
   listTemplates: () =>
     http.get(`${basePath}/templates`, {
-      responses: { 200: adtcore },
+      responses: { 200: rapgenerator },
       headers: { Accept: accept },
     }),
 
   generate: (templateId: string, options?: { corrNr?: string }) =>
     http.post(`${basePath}/templates/${templateId}/generate`, {
-      responses: { 200: adtcore },
+      responses: { 200: rapgenerator },
       headers: {
         Accept: accept,
         'Content-Type': contentType,

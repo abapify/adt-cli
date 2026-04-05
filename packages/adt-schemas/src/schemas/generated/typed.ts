@@ -49,6 +49,9 @@ import type { DomainSchema } from './types/sap/domain.types';
 import type { DataelementsSchema } from './types/sap/dataelements.types';
 import type { TabletypeSchema } from './types/sap/tabletype.types';
 import type { TablesettingsSchema } from './types/sap/tablesettings.types';
+import type { BehaviourdefinitionSchema } from './types/sap/behaviourdefinition.types';
+import type { DdlsSchema } from './types/sap/ddls.types';
+import type { RapgeneratorSchema } from './types/sap/rapgenerator.types';
 import type { DataelementWrapperSchema } from './types/custom/dataelementWrapper.types';
 import type { BlueSourceSchema } from './types/custom/blueSource.types';
 import type { AtomExtendedSchema } from './types/custom/atomExtended.types';
@@ -134,6 +137,12 @@ import _tabletype from './schemas/sap/tabletype';
 export const tabletype: TypedSchema<TabletypeSchema> = typedSchema<TabletypeSchema>(_tabletype);
 import _tablesettings from './schemas/sap/tablesettings';
 export const tablesettings: TypedSchema<TablesettingsSchema> = typedSchema<TablesettingsSchema>(_tablesettings);
+import _behaviourdefinition from './schemas/sap/behaviourdefinition';
+export const behaviourdefinition: TypedSchema<BehaviourdefinitionSchema> = typedSchema<BehaviourdefinitionSchema>(_behaviourdefinition);
+import _ddls from './schemas/sap/ddls';
+export const ddls: TypedSchema<DdlsSchema> = typedSchema<DdlsSchema>(_ddls);
+import _rapgenerator from './schemas/sap/rapgenerator';
+export const rapgenerator: TypedSchema<RapgeneratorSchema> = typedSchema<RapgeneratorSchema>(_rapgenerator);
 
 // Custom schemas
 import _dataelementWrapper from './schemas/custom/dataelementWrapper';

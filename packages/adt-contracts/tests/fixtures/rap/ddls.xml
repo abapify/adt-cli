@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  RAP CDS View Entity Fixture (DDLS)
+  
+  Sample response from GET /sap/bc/adt/ddl/ddls/zbdemo_view
+  Content-Type: application/vnd.sap.adt.ddl.ddlsource.v2+xml
+-->
+<ddlsource xmlns="http://www.sap.com/adt/ddl/ddls"
+           xmlns:adtcore="http://www.sap.com/adt/core"
+           adtcore:name="ZBDEMO_VIEW"
+           adtcore:uri="/sap/bc/adt/ddl/ddls/zbdemo_view"
+           adtcore:version="active"
+           ddlType="VIEW_ENTITY"
+           exposed="false"
+           draftEnabled="true"
+           root="true"
+           abstract="false"
+           final="false"
+           objectType="DDLS"
+           entityType="ZBDEMO_VIEW"
+           projectType="DDLS"
+           parentType="BDEF"
+           parentName="ZBDEMO_BEHAVIOR"
+           implementationType="PROJECTED_AS_DRAFT_PERSISTENCE">
+  <adtcore:description xml:lang="en">Demo RAP View Entity</adtcore:description>
+  <adtcore:package ref="/sap/bc/adt/packages/ZBDEMO" name="ZBDEMO"/>
+  <ddlSource>
+    <define name="ZBDEMO_VIEW" alias="VIEW">
+      <entity name="ZBDEMO_VIEW">
+        <draft table="ZBDEMO_DRAFT" enable="true"/>
+        <persistent table="ZBDEMO" action="ZBDEMO~MODIFY"/>
+        <element name="ID" type="SYSUUID" key="true" notNull="true" label="UUID" description="Unique Identifier"/>
+        <element name="Name" type="S_CHAR" notNull="true" length="100" label="Name" description="Object Name"/>
+        <element name="CreatedAt" type="DATS" notNull="true" label="Created At" description="Creation Date"/>
+        <element name="CreatedBy" type="S_USER" notNull="true" label="Created By" description="Created By User"/>
+        <element name="LastChangedAt" type="TSTMP" notNull="true" label="Last Changed At" description="Last Change Timestamp"/>
+        <key>
+          <element>ID</element>
+        </key>
+        <association name="Items" to="ZBDEMO_ITEM_VIEW" cardinality="ONE_TO_MANY"/>
+      </entity>
+    </define>
+  </ddlSource>
+</ddlsource>

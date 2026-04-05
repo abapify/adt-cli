@@ -11,19 +11,19 @@
 
 import { crud } from '../../helpers/crud';
 import { http } from '../../base';
-import { adtcore, type InferTypedSchema } from '../../schemas';
+import { ddls, adtcore, type InferTypedSchema } from '../../schemas';
 
 const basePath = '/sap/bc/adt/ddl/ddls';
 const contentType = 'application/vnd.sap.adt.ddl.ddlsource.v2+xml';
 const accept =
   'application/vnd.sap.adt.ddl.ddlsource.v2+xml, application/vnd.sap.adt.ddl.ddlsource.v1+xml';
 
-export type DdlsResponse = InferTypedSchema<typeof adtcore>;
+export type DdlsResponse = InferTypedSchema<typeof ddls>;
 
 export const ddlsContract = {
   ...crud({
     basePath,
-    schema: adtcore,
+    schema: ddls,
     contentType,
     accept,
     nameTransform: (name: string) => name.toLowerCase(),

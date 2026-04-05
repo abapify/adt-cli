@@ -67,6 +67,15 @@ export const transportmanagmentSingle = toSpeciSchema(
 export const transportsearch = toSpeciSchema(adtSchemas.transportsearch);
 
 // ============================================================================
+// RAP Schemas (RESTful ABAP Programming)
+// ============================================================================
+export const behaviourdefinition = toSpeciSchema(
+  adtSchemas.behaviourdefinition,
+);
+export const ddls = toSpeciSchema(adtSchemas.ddls);
+export const rapgenerator = toSpeciSchema(adtSchemas.rapgenerator);
+
+// ============================================================================
 // JSON Schemas (re-exported directly - they use zod, not ts-xsd)
 // ============================================================================
 export {
