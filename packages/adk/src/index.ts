@@ -160,6 +160,16 @@ export {
   type TransportResponse,
 } from './objects/cts';
 
+// RAP - ABAP RESTful Application Programming Model
+export {
+  AdkBehaviourDefinition,
+  AdkCDSView,
+  AdkCDSEntity,
+  type BehaviourDefinitionXml,
+  type CDSViewXml,
+  type CDSEntityXml,
+} from './objects/rap';
+
 // Factory and registry
 export type { AdkFactory } from './factory';
 export {
