@@ -83,7 +83,12 @@ export function registerGetFeaturesTool(
         const discovery = (await client.fetch('/sap/bc/adt/discovery', {
           method: 'GET',
           headers: { Accept: 'application/json' },
-        })) as { workspaces?: Array<{ title: string; collections?: Array<{ href: string; title: string }> }> };
+        })) as {
+          workspaces?: Array<{
+            title: string;
+            collections?: Array<{ href: string; title: string }>;
+          }>;
+        };
 
         // Extract all service paths from the discovery document
         const services = new Set<string>();
@@ -97,14 +102,24 @@ export function registerGetFeaturesTool(
 
         // Feature detection heuristics based on known ADT paths
         const features: Record<string, boolean> = {
-          atc: services.has('/sap/bc/adt/atc') || [...services].some((s) => s.includes('/atc')),
+          atc:
+            services.has('/sap/bc/adt/atc') ||
+            [...services].some((s) => s.includes('/atc')),
           cts: [...services].some((s) => s.includes('/cts')),
-          aunit: [...services].some((s) => s.includes('/abapunit') || s.includes('/aunit')),
+          aunit: [...services].some(
+            (s) => s.includes('/abapunit') || s.includes('/aunit'),
+          ),
           abapgit: [...services].some((s) => s.includes('/abapgit')),
-          rap: [...services].some((s) => s.includes('/businessservices') || s.includes('/rap')),
-          ui5: [...services].some((s) => s.includes('/ui5') || s.includes('/bsp')),
+          rap: [...services].some(
+            (s) => s.includes('/businessservices') || s.includes('/rap'),
+          ),
+          ui5: [...services].some(
+            (s) => s.includes('/ui5') || s.includes('/bsp'),
+          ),
           classicBadi: [...services].some((s) => s.includes('/enhancements')),
-          prettyPrinter: [...services].some((s) => s.includes('/prettyprinter')),
+          prettyPrinter: [...services].some((s) =>
+            s.includes('/prettyprinter'),
+          ),
           dataPreview: [...services].some((s) => s.includes('/datapreview')),
           navigation: [...services].some((s) => s.includes('/navigation')),
         };

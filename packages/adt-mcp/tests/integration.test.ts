@@ -590,7 +590,11 @@ describe('adt-mcp integration tests', () => {
         packageName: 'ZPACKAGE',
         transport: 'DEVK900001',
       });
-      const data = json as { status: string; objectName: string; objectType: string };
+      const data = json as {
+        status: string;
+        objectName: string;
+        objectType: string;
+      };
       assert.strictEqual(data.status, 'created');
       assert.strictEqual(data.objectName, 'ZCL_NEW');
       assert.strictEqual(data.objectType, 'CLAS');
@@ -646,7 +650,11 @@ describe('adt-mcp integration tests', () => {
         ...connArgs(),
         packageName: 'ZPACKAGE',
       });
-      const data = json as { status: string; packageName: string; count: number };
+      const data = json as {
+        status: string;
+        packageName: string;
+        count: number;
+      };
       assert.ok(
         data.status === 'activated' || data.status === 'no_inactive_objects',
         'should return activated or no_inactive_objects status',
@@ -716,7 +724,10 @@ describe('adt-mcp integration tests', () => {
       });
       const data = json as { status: string; lockHandle: string };
       assert.strictEqual(data.status, 'locked');
-      assert.ok(typeof data.lockHandle === 'string', 'should return lockHandle');
+      assert.ok(
+        typeof data.lockHandle === 'string',
+        'should return lockHandle',
+      );
     });
   });
 
@@ -769,7 +780,10 @@ describe('adt-mcp integration tests', () => {
         ...connArgs(),
         sourceCode: 'class zcl_example definition.\nendclass.',
       });
-      assert.ok(typeof json === 'string', 'should return formatted source as string');
+      assert.ok(
+        typeof json === 'string',
+        'should return formatted source as string',
+      );
     });
   });
 
@@ -804,7 +818,11 @@ describe('adt-mcp integration tests', () => {
       const { json } = await callTool('get_features', connArgs());
       const data = json as { features: Record<string, boolean> };
       assert.ok(data.features, 'should return features object');
-      assert.strictEqual(typeof data.features.atc, 'boolean', 'features.atc should be boolean');
+      assert.strictEqual(
+        typeof data.features.atc,
+        'boolean',
+        'features.atc should be boolean',
+      );
     });
   });
 

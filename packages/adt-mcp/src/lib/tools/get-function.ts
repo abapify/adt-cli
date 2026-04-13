@@ -21,9 +21,7 @@ export function registerGetFunctionTool(
     'Read ABAP function module metadata (parameters, exceptions) and optionally its source code.',
     {
       ...connectionShape,
-      groupName: z
-        .string()
-        .describe('Function group name (e.g. ZFUGR_UTIL)'),
+      groupName: z.string().describe('Function group name (e.g. ZFUGR_UTIL)'),
       functionName: z
         .string()
         .describe('Function module name (e.g. Z_MY_FUNCTION)'),

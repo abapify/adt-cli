@@ -322,7 +322,11 @@ function matchRoute(
   }
 
   // Function module source – GET .../fmodules/{name}/source/main
-  if (m === 'GET' && url.includes('/fmodules/') && url.includes('/source/main')) {
+  if (
+    m === 'GET' &&
+    url.includes('/fmodules/') &&
+    url.includes('/source/main')
+  ) {
     return {
       status: 200,
       body: fixtures.sourceCode,
@@ -340,7 +344,11 @@ function matchRoute(
   }
 
   // Function group source – GET /sap/bc/adt/functions/groups/{name}/source/main
-  if (m === 'GET' && url.startsWith('/sap/bc/adt/functions/groups/') && url.includes('/source/main')) {
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/functions/groups/') &&
+    url.includes('/source/main')
+  ) {
     return {
       status: 200,
       body: fixtures.sourceCode,
@@ -349,7 +357,15 @@ function matchRoute(
   }
 
   // Function group metadata – GET /sap/bc/adt/functions/groups/{name}
-  if (m === 'GET' && url.startsWith('/sap/bc/adt/functions/groups/') && !url.includes('?')) {
+  // Must exclude objectstructure, source, and fmodule sub-paths
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/functions/groups/') &&
+    !url.includes('?') &&
+    !url.includes('/objectstructure') &&
+    !url.includes('/source/') &&
+    !url.includes('/fmodules/')
+  ) {
     return {
       status: 200,
       body: JSON.stringify(fixtures.functionGroup),
@@ -376,7 +392,10 @@ function matchRoute(
   }
 
   // Pretty printer – POST /sap/bc/adt/prettyprinter/prettifySource
-  if (m === 'POST' && url.startsWith('/sap/bc/adt/prettyprinter/prettifySource')) {
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/prettyprinter/prettifySource')
+  ) {
     return {
       status: 200,
       body: fixtures.prettySource,
@@ -412,7 +431,11 @@ function matchRoute(
   }
 
   // abapGit export – GET /sap/bc/adt/abapgit/repos/{name}/export
-  if (m === 'GET' && url.includes('/sap/bc/adt/abapgit/repos/') && url.includes('/export')) {
+  if (
+    m === 'GET' &&
+    url.includes('/sap/bc/adt/abapgit/repos/') &&
+    url.includes('/export')
+  ) {
     return {
       status: 200,
       body: JSON.stringify(fixtures.gitExport),

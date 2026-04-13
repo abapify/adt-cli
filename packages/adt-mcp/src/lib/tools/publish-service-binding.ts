@@ -27,7 +27,9 @@ export function registerPublishServiceBindingTool(
       unpublish: z
         .boolean()
         .optional()
-        .describe('If true, unpublishes (deactivates) the service binding instead (default: false)'),
+        .describe(
+          'If true, unpublishes (deactivates) the service binding instead (default: false)',
+        ),
     },
     async (args) => {
       try {

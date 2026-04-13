@@ -31,10 +31,7 @@ export function registerLockObjectTool(
         .string()
         .optional()
         .describe('Object type (e.g. CLAS, PROG, INTF, FUGR)'),
-      transport: z
-        .string()
-        .optional()
-        .describe('Transport request number'),
+      transport: z.string().optional().describe('Transport request number'),
     },
     async (args) => {
       try {

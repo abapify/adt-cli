@@ -27,11 +27,15 @@ export function registerGetTypeHierarchyTool(
       objectType: z
         .enum(['CLAS', 'INTF'])
         .optional()
-        .describe('Object type: CLAS (class) or INTF (interface). Auto-detected if omitted.'),
+        .describe(
+          'Object type: CLAS (class) or INTF (interface). Auto-detected if omitted.',
+        ),
       includeSubTypes: z
         .boolean()
         .optional()
-        .describe('Whether to include sub-types (subclasses/implementors) in the result (default: false)'),
+        .describe(
+          'Whether to include sub-types (subclasses/implementors) in the result (default: false)',
+        ),
     },
     async (args) => {
       try {

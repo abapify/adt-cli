@@ -32,7 +32,9 @@ async function getSourceCode(
   const name = objectName.toLowerCase();
   switch (objectType) {
     case 'PROG':
-      return (await client.adt.programs.programs.source.main.get(name)) as string;
+      return (await client.adt.programs.programs.source.main.get(
+        name,
+      )) as string;
     case 'CLAS':
       return (await client.adt.oo.classes.source.main.get(name)) as string;
     case 'INTF':
@@ -94,13 +96,13 @@ export function registerCloneObjectTool(
       sourceObjectType: z
         .string()
         .describe('Object type of the source: PROG, CLAS, or INTF'),
-      targetObjectName: z
-        .string()
-        .describe('Name for the new (cloned) object'),
+      targetObjectName: z.string().describe('Name for the new (cloned) object'),
       targetDescription: z
         .string()
         .optional()
-        .describe('Description for the clone (defaults to source description with "Copy of" prefix)'),
+        .describe(
+          'Description for the clone (defaults to source description with "Copy of" prefix)',
+        ),
       targetPackage: z
         .string()
         .optional()
@@ -138,9 +140,13 @@ export function registerCloneObjectTool(
               method: 'GET',
               headers: { Accept: 'application/json' },
             })) as Record<string, unknown>;
-            const desc = (meta as Record<string, Record<string, string>>)?.abapClass?.description
-              ?? (meta as Record<string, Record<string, string>>)?.abapProgram?.description
-              ?? (meta as Record<string, Record<string, string>>)?.abapInterface?.description;
+            const desc =
+              (meta as Record<string, Record<string, string>>)?.abapClass
+                ?.description ??
+              (meta as Record<string, Record<string, string>>)?.abapProgram
+                ?.description ??
+              (meta as Record<string, Record<string, string>>)?.abapInterface
+                ?.description;
             if (desc) description = `Copy of ${String(desc)}`;
           } catch {
             // ignore metadata fetch failure, use default description

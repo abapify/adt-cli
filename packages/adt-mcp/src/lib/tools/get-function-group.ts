@@ -21,13 +21,13 @@ export function registerGetFunctionGroupTool(
     'Read ABAP function group metadata (description, includes). Optionally includes source code.',
     {
       ...connectionShape,
-      groupName: z
-        .string()
-        .describe('Function group name (e.g. ZFUGR_UTIL)'),
+      groupName: z.string().describe('Function group name (e.g. ZFUGR_UTIL)'),
       includeSource: z
         .boolean()
         .optional()
-        .describe('Whether to also return the main include source code (default: false)'),
+        .describe(
+          'Whether to also return the main include source code (default: false)',
+        ),
     },
     async (args) => {
       try {

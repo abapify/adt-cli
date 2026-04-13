@@ -43,7 +43,8 @@ export function registerPrettyPrintTool(
           content: [
             {
               type: 'text' as const,
-              text: typeof result === 'string' ? result : JSON.stringify(result),
+              text:
+                typeof result === 'string' ? result : JSON.stringify(result),
             },
           ],
         };

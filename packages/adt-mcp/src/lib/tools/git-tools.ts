@@ -47,11 +47,7 @@ export function registerGetGitTypesTool(
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify(
-                { packageName, objects: result },
-                null,
-                2,
-              ),
+              text: JSON.stringify({ packageName, objects: result }, null, 2),
             },
           ],
         };
@@ -100,11 +96,7 @@ export function registerGitExportTool(
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify(
-                { packageName, export: result },
-                null,
-                2,
-              ),
+              text: JSON.stringify({ packageName, export: result }, null, 2),
             },
           ],
         };
