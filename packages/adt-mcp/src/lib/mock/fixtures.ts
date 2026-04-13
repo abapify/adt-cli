@@ -311,4 +311,155 @@ export const fixtures = {
       },
     ],
   },
+
+  // Function group metadata – returned for GET /sap/bc/adt/functions/groups/{name}
+  functionGroup: {
+    abapFunctionGroup: {
+      name: 'ZFUGR_UTIL',
+      type: 'FUGR',
+      description: 'Utility function group',
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: { uri: '/sap/bc/adt/packages/zpackage' },
+    },
+  },
+
+  // Function module metadata – returned for GET /sap/bc/adt/functions/groups/{g}/fmodules/{fm}
+  functionModule: {
+    abapFunctionModule: {
+      name: 'Z_MY_FUNCTION',
+      type: 'FUGR/FF',
+      description: 'My utility function module',
+      processingType: 'normal',
+      remoteEnabledMode: 'notRemoteEnabled',
+      parameters: {
+        importParameters: {
+          parameter: [
+            {
+              name: 'IV_INPUT',
+              type: 'TYPE',
+              associatedType: 'STRING',
+              optional: true,
+            },
+          ],
+        },
+        exportParameters: {
+          parameter: [
+            {
+              name: 'EV_OUTPUT',
+              type: 'TYPE',
+              associatedType: 'STRING',
+            },
+          ],
+        },
+      },
+    },
+  },
+
+  // Object structure – returned for GET {objectUri}/objectstructure
+  objectStructure: {
+    objectStructure: {
+      objectReference: {
+        uri: '/sap/bc/adt/oo/classes/zcl_example',
+        type: 'CLAS/OC',
+        name: 'ZCL_EXAMPLE',
+        description: 'Example class',
+      },
+      includes: {
+        include: [
+          {
+            uri: '/sap/bc/adt/oo/classes/zcl_example/includes/definitions',
+            type: 'CLAS/OC/D',
+            name: 'ZCL_EXAMPLE',
+          },
+          {
+            uri: '/sap/bc/adt/oo/classes/zcl_example/includes/implementations',
+            type: 'CLAS/OC/M',
+            name: 'ZCL_EXAMPLE',
+          },
+        ],
+      },
+    },
+  },
+
+  // Type hierarchy – returned for GET /sap/bc/adt/oo/typeinfo
+  typeHierarchy: {
+    typeInfo: {
+      objectReference: {
+        uri: '/sap/bc/adt/oo/classes/zcl_example',
+        type: 'CLAS/OC',
+        name: 'ZCL_EXAMPLE',
+      },
+      superClasses: {
+        superClass: [
+          {
+            uri: '/sap/bc/adt/oo/classes/object',
+            type: 'CLAS/OC',
+            name: 'OBJECT',
+          },
+        ],
+      },
+      interfaces: {
+        interface: [],
+      },
+    },
+  },
+
+  // Pretty-printed source – returned for POST /sap/bc/adt/prettyprinter/prettifySource
+  prettySource:
+    'CLASS zcl_example DEFINITION PUBLIC FINAL CREATE PUBLIC.\n  PUBLIC SECTION.\n    METHODS: do_something.\nENDCLASS.\n',
+
+  // Installed software components – GET /sap/bc/adt/system/softwarecomponents
+  softwareComponents: {
+    softwareComponents: {
+      softwareComponent: [
+        {
+          name: 'SAP_BASIS',
+          release: '756',
+          patchLevel: '0012',
+          description: 'SAP Basis Component',
+        },
+        {
+          name: 'SAP_ABA',
+          release: '756',
+          patchLevel: '0012',
+          description: 'Cross-Application Component',
+        },
+      ],
+    },
+  },
+
+  // abapGit exportable objects – GET /sap/bc/adt/abapgit/objects
+  gitObjects: {
+    abapgitObjects: {
+      object: [
+        {
+          name: 'ZCL_EXAMPLE',
+          type: 'CLAS',
+          uri: '/sap/bc/adt/oo/classes/zcl_example',
+        },
+        {
+          name: 'ZPROG_EXAMPLE',
+          type: 'PROG',
+          uri: '/sap/bc/adt/programs/programs/zprog_example',
+        },
+      ],
+    },
+  },
+
+  // abapGit export – GET /sap/bc/adt/abapgit/repos/{name}/export
+  gitExport: {
+    files: [
+      {
+        path: 'src/zcl_example.clas.abap',
+        content:
+          'CLASS zcl_example DEFINITION PUBLIC FINAL CREATE PUBLIC.\nENDCLASS.',
+      },
+      {
+        path: 'src/zcl_example.clas.xml',
+        content:
+          '<?xml version="1.0" ?><abapGit version="v1.0.0"><asx:abap></asx:abap></abapGit>',
+      },
+    ],
+  },
 };

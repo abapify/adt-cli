@@ -321,6 +321,105 @@ function matchRoute(
     };
   }
 
+  // Function module source – GET .../fmodules/{name}/source/main
+  if (m === 'GET' && url.includes('/fmodules/') && url.includes('/source/main')) {
+    return {
+      status: 200,
+      body: fixtures.sourceCode,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Function modules metadata – GET /sap/bc/adt/functions/groups/{g}/fmodules/{fm}
+  if (m === 'GET' && url.includes('/fmodules/')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.functionModule),
+      contentType: 'application/json',
+    };
+  }
+
+  // Function group source – GET /sap/bc/adt/functions/groups/{name}/source/main
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/functions/groups/') && url.includes('/source/main')) {
+    return {
+      status: 200,
+      body: fixtures.sourceCode,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Function group metadata – GET /sap/bc/adt/functions/groups/{name}
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/functions/groups/') && !url.includes('?')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.functionGroup),
+      contentType: 'application/json',
+    };
+  }
+
+  // Object structure – GET {objectUri}/objectstructure
+  if (m === 'GET' && url.includes('/objectstructure')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.objectStructure),
+      contentType: 'application/json',
+    };
+  }
+
+  // Type hierarchy – GET /sap/bc/adt/oo/typeinfo
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/oo/typeinfo')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.typeHierarchy),
+      contentType: 'application/json',
+    };
+  }
+
+  // Pretty printer – POST /sap/bc/adt/prettyprinter/prettifySource
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/prettyprinter/prettifySource')) {
+    return {
+      status: 200,
+      body: fixtures.prettySource,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Software components – GET /sap/bc/adt/system/softwarecomponents
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/system/softwarecomponents')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.softwareComponents),
+      contentType: 'application/json',
+    };
+  }
+
+  // Service binding publish – POST/DELETE /sap/bc/adt/businessservices/bindings/{name}/publishedstates
+  if (
+    (m === 'POST' || m === 'DELETE') &&
+    url.includes('/sap/bc/adt/businessservices/bindings/') &&
+    url.includes('/publishedstates')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // abapGit exportable objects – GET /sap/bc/adt/abapgit/objects
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/abapgit/objects')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.gitObjects),
+      contentType: 'application/json',
+    };
+  }
+
+  // abapGit export – GET /sap/bc/adt/abapgit/repos/{name}/export
+  if (m === 'GET' && url.includes('/sap/bc/adt/abapgit/repos/') && url.includes('/export')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.gitExport),
+      contentType: 'application/json',
+    };
+  }
+
   // CSRF token fetch (used by write operations)
   if (m === 'HEAD') {
     return {
