@@ -105,8 +105,8 @@ Look in `packages/adt-contracts/src/adt/` for the relevant domain. If the endpoi
 // src/lib/tools/my-new-tool.ts
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
 
 export function registerMyNewTool(server: McpServer, ctx: ToolContext): void {
   server.tool(
