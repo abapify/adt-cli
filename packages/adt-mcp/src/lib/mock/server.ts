@@ -119,13 +119,61 @@ function matchRoute(
     };
   }
 
-  // CSRF token fetch (used by write operations) – only for known write endpoints
+  // Source – get class/interface/program main source
   if (
-    m === 'HEAD' &&
-    (url.startsWith('/sap/bc/adt/cts/transportrequests') ||
-      url.startsWith('/sap/bc/adt/atc/runs') ||
-      url.startsWith('/sap/bc/adt/atc/worklists'))
+    m === 'GET' &&
+    (url.includes('/source/main') || url.includes('/includes/testclasses'))
   ) {
+    const body = url.includes('/includes/testclasses')
+      ? fixtures.classTestclasses
+      : fixtures.clasSource;
+    return { status: 200, body, contentType: 'text/plain' };
+  }
+
+  // Source – update (PUT)
+  if (m === 'PUT' && url.includes('/source/main')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // Lock – acquire
+  if (m === 'POST' && url.includes('_action=LOCK')) {
+    return {
+      status: 200,
+      body: fixtures.lockResponse,
+      contentType: 'application/vnd.sap.as+xml',
+    };
+  }
+
+  // Lock – release (unlock)
+  if (m === 'POST' && url.includes('_action=UNLOCK')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // Activation
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/activation')) {
+    return { status: 200, body: '', contentType: 'application/xml' };
+  }
+
+  // Syntax check (checkruns)
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/checkruns')) {
+    return {
+      status: 200,
+      body: fixtures.checkRunResult,
+      contentType: 'application/vnd.sap.adt.checkmessages+xml',
+    };
+  }
+
+  // AUnit – run tests
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/abapunit/testruns')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.aunitResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // CSRF token fetch (used by write operations)
+  if (m === 'HEAD') {
     return {
       status: 200,
       body: '',

@@ -124,4 +124,43 @@ export const fixtures = {
       },
     ],
   },
+
+  clasSource: `CLASS zcl_example DEFINITION\n  PUBLIC\n  FINAL\n  CREATE PUBLIC.\n\n  PUBLIC SECTION.\n  PROTECTED SECTION.\n  PRIVATE SECTION.\nENDCLASS.\n\nCLASS zcl_example IMPLEMENTATION.\nENDCLASS.`,
+
+  classTestclasses: `CLASS ltc_example DEFINITION FINAL FOR TESTING\n  DURATION SHORT RISK LEVEL HARMLESS.\n\n  PRIVATE SECTION.\n    METHODS: test_something FOR TESTING.\nENDCLASS.\n\nCLASS ltc_example IMPLEMENTATION.\n  METHOD test_something.\n    cl_abap_unit_assert=>assert_true( abap_true ).\n  ENDMETHOD.\nENDCLASS.`,
+
+  aunitResult: {
+    runResult: {
+      program: [
+        {
+          name: 'ZCL_EXAMPLE',
+          type: 'CLAS',
+          uri: '/sap/bc/adt/oo/classes/zcl_example',
+          testClasses: {
+            testClass: [
+              {
+                name: 'LTC_EXAMPLE',
+                uri: '/sap/bc/adt/oo/classes/zcl_example/testclasses',
+                riskLevel: 'harmless',
+                durationCategory: 'short',
+                testMethods: {
+                  testMethod: [
+                    {
+                      name: 'TEST_SOMETHING',
+                      executionTime: '0.001',
+                      alerts: { alert: [] },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+
+  checkRunResult: `<?xml version="1.0" encoding="utf-8"?><checkRunReports xmlns:chkrun="http://www.sap.com/adt/checkrun" xmlns:adtcore="http://www.sap.com/adt/core"><checkReport reporter="abapCheckRun" triggeringUri="/sap/bc/adt/oo/classes/zcl_example" status="OK" statusText="No problems found"><checkMessageList/></checkReport></checkRunReports>`,
+
+  lockResponse: `<?xml version="1.0" encoding="utf-8"?><asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0"><asx:values><DATA><LOCK_HANDLE>TEST_LOCK_HANDLE_123</LOCK_HANDLE><CORRNR>DEVK900001</CORRNR><CORRUSER>DEVELOPER</CORRUSER></DATA></asx:values></asx:abap>`,
 };

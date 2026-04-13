@@ -265,6 +265,145 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
+  // ── get_source ─────────────────────────────────────────────────
+
+  describe('get_source tool', () => {
+    it('fetches class source code', async () => {
+      const { json } = await callTool('get_source', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const source = json as string;
+      assert.ok(
+        typeof source === 'string' &&
+          source.toLowerCase().includes('zcl_example'),
+        'should return ABAP source containing class name',
+      );
+    });
+  });
+
+  // ── update_source ─────────────────────────────────────────────
+
+  describe('update_source tool', () => {
+    it('updates class source code', async () => {
+      const { json } = await callTool('update_source', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+        sourceCode: 'CLASS zcl_example DEFINITION.\nENDCLASS.',
+      });
+      const data = json as { success: boolean; message: string };
+      assert.strictEqual(data.success, true);
+    });
+  });
+
+  // ── activate_object ───────────────────────────────────────────
+
+  describe('activate_object tool', () => {
+    it('activates a single object', async () => {
+      const { json } = await callTool('activate_object', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as { success: boolean; activated: unknown[] };
+      assert.strictEqual(data.success, true);
+      assert.strictEqual(data.activated.length, 1);
+    });
+
+    it('activates multiple objects in batch', async () => {
+      const { json } = await callTool('activate_object', {
+        ...connArgs(),
+        objects: [
+          { name: 'ZCL_EXAMPLE', type: 'CLAS' },
+          { name: 'ZIF_EXAMPLE', type: 'INTF' },
+        ],
+      });
+      const data = json as { success: boolean; activated: unknown[] };
+      assert.strictEqual(data.success, true);
+      assert.strictEqual(data.activated.length, 2);
+    });
+  });
+
+  // ── check_syntax ──────────────────────────────────────────────
+
+  describe('check_syntax tool', () => {
+    it('runs syntax check and returns results', async () => {
+      const { json } = await callTool('check_syntax', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as {
+        objectName: string;
+        hasErrors: boolean;
+        messageCount: number;
+      };
+      assert.strictEqual(data.objectName, 'ZCL_EXAMPLE');
+      assert.strictEqual(data.hasErrors, false);
+    });
+  });
+
+  // ── run_unit_tests ─────────────────────────────────────────────
+
+  describe('run_unit_tests tool', () => {
+    it('runs unit tests and returns results', async () => {
+      const { json } = await callTool('run_unit_tests', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as {
+        objectName: string;
+        totalTests: number;
+        passed: boolean;
+      };
+      assert.strictEqual(data.objectName, 'ZCL_EXAMPLE');
+      assert.ok(typeof data.totalTests === 'number');
+    });
+  });
+
+  // ── get_test_classes ──────────────────────────────────────────
+
+  describe('get_test_classes tool', () => {
+    it('returns test class names from testclasses include', async () => {
+      const { json } = await callTool('get_test_classes', {
+        ...connArgs(),
+        className: 'ZCL_EXAMPLE',
+      });
+      const data = json as {
+        className: string;
+        testClasses: string[];
+        testClassCount: number;
+      };
+      assert.strictEqual(data.className, 'ZCL_EXAMPLE');
+      assert.ok(data.testClassCount > 0, 'should find at least one test class');
+      assert.ok(
+        data.testClasses.includes('LTC_EXAMPLE'),
+        'should identify LTC_EXAMPLE as test class',
+      );
+    });
+  });
+
+  // ── list_package_objects ──────────────────────────────────────
+
+  describe('list_package_objects tool', () => {
+    it('lists objects in a package', async () => {
+      const { json } = await callTool('list_package_objects', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as {
+        packageName: string;
+        count: number;
+        objects: unknown[];
+      };
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+      assert.ok(data.count > 0, 'should return objects');
+    });
+  });
+
   // ── tool listing ───────────────────────────────────────────────
 
   describe('tool listing', () => {
@@ -282,6 +421,13 @@ describe('adt-mcp integration tests', () => {
         'cts_release_transport',
         'cts_delete_transport',
         'atc_run',
+        'get_source',
+        'update_source',
+        'activate_object',
+        'check_syntax',
+        'run_unit_tests',
+        'get_test_classes',
+        'list_package_objects',
       ];
       for (const name of expected) {
         assert.ok(names.has(name), `tool "${name}" should be listed`);

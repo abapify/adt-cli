@@ -33,6 +33,13 @@ Every tool accepts connection parameters (`baseUrl`, `client`, `username`, `pass
 | `system_info`           | `adt info`                | Get SAP system and/or session information          |
 | `search_objects`        | `adt search <query>`      | Search ABAP objects in repository                  |
 | `get_object`            | `adt get <name>`          | Get details about a specific ABAP object           |
+| `get_source`            | `adt get <name>`          | Get main ABAP source code for an object            |
+| `update_source`         | —                         | Update ABAP source code (lock → PUT → unlock)      |
+| `activate_object`       | —                         | Activate one or more ABAP objects                  |
+| `check_syntax`          | `adt check <name>`        | Run ADT syntax check on an ABAP object             |
+| `run_unit_tests`        | `adt aunit run`           | Run ABAP Unit tests for an object                  |
+| `get_test_classes`      | —                         | Get test classes (FOR TESTING) of an ABAP class    |
+| `list_package_objects`  | `adt check --package`     | List all ABAP objects in a package                 |
 | `cts_list_transports`   | `adt cts tr list`         | List transport requests                            |
 | `cts_get_transport`     | `adt cts tr get <tr>`     | Get transport request details                      |
 | `cts_create_transport`  | `adt cts tr create`       | Create a new transport request (not yet supported) |
@@ -135,6 +142,13 @@ npx nx lint adt-mcp
 | `adt info`             | `adt-cli/commands/info.ts`             | `system_info`           | ✅         |
 | `adt search`           | `adt-cli/commands/search.ts`           | `search_objects`        | ✅         |
 | `adt get`              | `adt-cli/commands/get.ts`              | `get_object`            | ✅         |
+| `adt get` (source)     | `adk/model.ts`                         | `get_source`            | ✅         |
+| —                      | `adt-locks/service.ts`                 | `update_source`         | ✅         |
+| —                      | `adk/model.ts`                         | `activate_object`       | ✅         |
+| `adt check`            | `adt-cli/commands/check.ts`            | `check_syntax`          | ✅         |
+| `adt aunit run`        | `adt-aunit/commands/aunit.ts`          | `run_unit_tests`        | ✅         |
+| —                      | ADT classes includes endpoint          | `get_test_classes`      | ✅         |
+| `adt check --package`  | `adt-cli/commands/check.ts`            | `list_package_objects`  | ✅         |
 | `adt cts tr list`      | `adt-cli/commands/cts/tr/list.ts`      | `cts_list_transports`   | ✅         |
 | `adt cts tr get`       | `adt-cli/commands/cts/tr/get.ts`       | `cts_get_transport`     | ✅         |
 | `adt cts tr create`    | `adt-cli/commands/cts/tr/create.ts`    | `cts_create_transport`  | 🚧 Not yet |
