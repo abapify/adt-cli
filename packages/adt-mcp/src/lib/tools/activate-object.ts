@@ -3,7 +3,9 @@
  *
  * CLI equivalent: `adt activate` (from @abapify/adt-export plugin)
  *
- * Posts an activation request to SAP ADT and returns the result.
+ * Posts an adtcore:objectReferences body to the activation endpoint via the
+ * typed activation contract. Uses the `adtcore` schema (from adt-contracts) for
+ * request serialisation – no manual XML string building.
  */
 
 import { z } from 'zod';
@@ -11,6 +13,14 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types.js';
 import { connectionShape } from './shared-schemas.js';
 import { extractObjectReferences, resolveObjectUriFromType } from './utils.js';
+import type { InferTypedSchema } from '@abapify/adt-schemas';
+import { adtcore } from '@abapify/adt-schemas';
+
+/** objectReferences variant of InferTypedSchema<typeof adtcore> */
+type ObjectReferencesBody = Extract<
+  InferTypedSchema<typeof adtcore>,
+  { objectReferences: unknown }
+>;
 
 /** Single object descriptor for batch activation */
 const objectDescriptor = z.object({
@@ -44,7 +54,6 @@ export function registerActivateObjectTool(
       try {
         const client = ctx.getClient(args);
 
-        // Build list of {uri, type, name}
         type ObjRef = { uri: string; type: string; name: string };
         const toActivate: ObjRef[] = [];
 
@@ -103,29 +112,21 @@ export function registerActivateObjectTool(
           });
         }
 
-        // Build activation XML (matches ADT activation endpoint format)
-        const refs = toActivate
-          .map(
-            (o) =>
-              `  <adtcore:objectReference adtcore:uri="${o.uri}" adtcore:type="${o.type}" adtcore:name="${o.name}"/>`,
-          )
-          .join('\n');
-
-        const activationXml = `<?xml version="1.0" encoding="UTF-8"?>
-<adtcore:objectReferences xmlns:adtcore="http://www.sap.com/adt/core">
-${refs}
-</adtcore:objectReferences>`;
-
-        await client.fetch(
-          '/sap/bc/adt/activation?method=activate&preauditRequested=true',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/xml',
-              Accept: 'application/xml',
-            },
-            body: activationXml,
+        // Build typed request body – schema.build() (called by the adapter) serialises to XML
+        const body: ObjectReferencesBody = {
+          objectReferences: {
+            objectReference: toActivate.map((o) => ({
+              uri: o.uri,
+              type: o.type,
+              name: o.name,
+            })),
           },
+        };
+
+        // Use the typed activation contract – adapter calls adtcore.build(body) for the request
+        await client.adt.activation.activate.post(
+          { method: 'activate', preauditRequested: true },
+          body,
         );
 
         return {
@@ -161,3 +162,4 @@ ${refs}
     },
   );
 }
+

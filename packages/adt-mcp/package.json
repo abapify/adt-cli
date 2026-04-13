@@ -32,7 +32,7 @@
     "@abapify/adt-client": "workspace:*",
     "@abapify/adt-contracts": "workspace:*",
     "@abapify/adt-locks": "workspace:*",
-    "fast-xml-parser": "^5.3.1",
+    "@abapify/adt-schemas": "workspace:*",
     "zod": "^3.24.0"
   }
 }

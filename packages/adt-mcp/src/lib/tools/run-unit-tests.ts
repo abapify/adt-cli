@@ -4,6 +4,9 @@
  * CLI equivalent: `adt aunit` (from @abapify/adt-aunit plugin)
  *
  * Reuses the AUnit contract from adt-contracts via client.adt.aunit.testruns.post().
+ * Follows the same body-typing pattern as packages/adt-aunit (local interface that
+ * includes objectReferences, which the auto-generated AunitRunSchema omits because it
+ * references the adtcoreObjectSets XSD externally).
  */
 
 import { z } from 'zod';
@@ -11,14 +14,56 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types.js';
 import { connectionShape } from './shared-schemas.js';
 import { extractObjectReferences, resolveObjectUriFromType } from './utils.js';
+import type { InferTypedSchema } from '@abapify/adt-schemas';
+import { aunitResult } from '@abapify/adt-schemas';
 
-/** Minimal run configuration for AUnit testruns */
-function buildRunConfiguration(targetUris: string[], withCoverage = false) {
+type AunitResultData = InferTypedSchema<typeof aunitResult>;
+type AunitProgram = NonNullable<AunitResultData['runResult']['program']>[number];
+
+/**
+ * Full run-configuration body type including objectReferences.
+ *
+ * The auto-generated AunitRunSchema omits `objectReferences` inside `objectSet`
+ * because the XSD references it from a separate adtcoreObjectSets schema.  The
+ * schema's build() method handles it correctly at runtime.  This interface
+ * mirrors the same workaround used in packages/adt-aunit/src/commands/aunit.ts.
+ */
+interface RunConfigurationBody {
+  runConfiguration: {
+    external?: { coverage?: { active?: string } };
+    options?: {
+      uriType?: { value?: string };
+      testDeterminationStrategy?: {
+        sameProgram?: string;
+        assignedTests?: string;
+        appendAssignedTestsPreview?: string;
+      };
+      testRiskLevels?: {
+        harmless?: string;
+        dangerous?: string;
+        critical?: string;
+      };
+      testDurations?: { short?: string; medium?: string; long?: string };
+      withNavigationUri?: { enabled?: string };
+    };
+    objectSets: {
+      objectSet: Array<{
+        kind: string;
+        objectReferences?: {
+          objectReference: Array<{ uri: string }>;
+        };
+      }>;
+    };
+  };
+}
+
+function buildRunConfiguration(
+  targetUris: string[],
+  withCoverage = false,
+): RunConfigurationBody {
   return {
     runConfiguration: {
-      external: {
-        coverage: { active: withCoverage ? 'true' : 'false' },
-      },
+      external: { coverage: { active: withCoverage ? 'true' : 'false' } },
       options: {
         uriType: { value: 'semantic' },
         testDeterminationStrategy: {
@@ -48,53 +93,37 @@ function buildRunConfiguration(targetUris: string[], withCoverage = false) {
   };
 }
 
-/** Normalize AUnit response into a simple summary */
-function normalizeResult(response: unknown): {
+/** Normalize AUnit response into a simple summary using proper schema types */
+function normalizeResult(response: AunitResultData): {
   totalTests: number;
   passCount: number;
   failCount: number;
   errorCount: number;
-  programs: unknown[];
+  programs: AunitProgram[];
 } {
-  const runResult =
-    (response as Record<string, unknown>).runResult ??
-    (response as Record<string, unknown>);
-  const programs = Array.isArray((runResult as Record<string, unknown>).program)
-    ? ((runResult as Record<string, unknown>).program as unknown[])
-    : [];
-
+  const programs = response.runResult.program ?? [];
   let totalTests = 0;
   let passCount = 0;
   let failCount = 0;
   let errorCount = 0;
 
   for (const prog of programs) {
-    const p = prog as Record<string, unknown>;
-    const testClasses = ((p.testClasses as Record<string, unknown>)
-      ?.testClass ?? []) as unknown[];
+    const testClasses = prog.testClasses?.testClass ?? [];
     for (const tc of Array.isArray(testClasses) ? testClasses : [testClasses]) {
-      const t = tc as Record<string, unknown>;
-      const methods = ((t.testMethods as Record<string, unknown>)?.testMethod ??
-        []) as unknown[];
+      const methods = tc?.testMethods?.testMethod ?? [];
       for (const tm of Array.isArray(methods) ? methods : [methods]) {
-        const m = tm as Record<string, unknown>;
         totalTests++;
-        const alerts = Array.isArray(
-          (m.alerts as Record<string, unknown>)?.alert,
-        )
-          ? ((m.alerts as Record<string, unknown>).alert as unknown[])
-          : [];
-        if (alerts.length === 0) {
+        const alerts = tm?.alerts?.alert ?? [];
+        const alertArr = Array.isArray(alerts) ? alerts : [alerts];
+        if (alertArr.length === 0) {
           passCount++;
         } else {
-          const hasFail = alerts.some((a) => {
-            const al = a as Record<string, unknown>;
-            return al.kind === 'failedAssertion' || al.severity === 'critical';
-          });
-          const hasError = alerts.some((a) => {
-            const al = a as Record<string, unknown>;
-            return al.kind === 'error' || al.severity === 'fatal';
-          });
+          const hasFail = alertArr.some(
+            (a) => a?.kind === 'failedAssertion' || a?.severity === 'critical',
+          );
+          const hasError = alertArr.some(
+            (a) => a?.kind === 'error' || a?.severity === 'fatal',
+          );
           if (hasError) errorCount++;
           else if (hasFail) failCount++;
           else passCount++;
@@ -169,10 +198,13 @@ export function registerRunUnitTestsTool(
           args.withCoverage ?? false,
         );
 
-        // Use the typed AUnit contract from adt-client
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const response = await (client.adt.aunit.testruns.post as any)(body);
-        const result = normalizeResult(response);
+        // Use the typed AUnit contract – adapter calls aunitRun.build(body) for the request
+        // and aunitResult.parse(responseXml) for the response automatically.
+        // Body is typed via RunConfigurationBody (see comment above buildRunConfiguration).
+        const response = await client.adt.aunit.testruns.post(
+          body as Parameters<typeof client.adt.aunit.testruns.post>[0],
+        );
+        const result = normalizeResult(response as AunitResultData);
 
         return {
           content: [
