@@ -14,6 +14,13 @@ import { registerCtsCreateTransportTool } from './cts-create-transport.js';
 import { registerCtsReleaseTransportTool } from './cts-release-transport.js';
 import { registerCtsDeleteTransportTool } from './cts-delete-transport.js';
 import { registerAtcRunTool } from './atc-run.js';
+import { registerGetSourceTool } from './get-source.js';
+import { registerUpdateSourceTool } from './update-source.js';
+import { registerActivateObjectTool } from './activate-object.js';
+import { registerCheckSyntaxTool } from './check-syntax.js';
+import { registerRunUnitTestsTool } from './run-unit-tests.js';
+import { registerGetTestClassesTool } from './get-test-classes.js';
+import { registerListPackageObjectsTool } from './list-package-objects.js';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerDiscoveryTool(server, ctx);
@@ -26,4 +33,11 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerCtsReleaseTransportTool(server, ctx);
   registerCtsDeleteTransportTool(server, ctx);
   registerAtcRunTool(server, ctx);
+  registerGetSourceTool(server, ctx);
+  registerUpdateSourceTool(server, ctx);
+  registerActivateObjectTool(server, ctx);
+  registerCheckSyntaxTool(server, ctx);
+  registerRunUnitTestsTool(server, ctx);
+  registerGetTestClassesTool(server, ctx);
+  registerListPackageObjectsTool(server, ctx);
 }

@@ -25,6 +25,7 @@ import {
   locksCommand,
   checkCommand,
   userCommand,
+  sourceCommand,
 } from './commands';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
@@ -217,6 +218,9 @@ export async function createCLI(options?: {
 
   // Check command (syntax check / checkruns)
   program.addCommand(checkCommand);
+
+  // Source command (read/write ABAP source code)
+  program.addCommand(sourceCommand);
 
   // User lookup command
   program.addCommand(userCommand);

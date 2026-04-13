@@ -119,13 +119,76 @@ function matchRoute(
     };
   }
 
-  // CSRF token fetch (used by write operations) – only for known write endpoints
+  // Source read – GET .../source/main (programs, classes, interfaces, functions)
   if (
-    m === 'HEAD' &&
-    (url.startsWith('/sap/bc/adt/cts/transportrequests') ||
-      url.startsWith('/sap/bc/adt/atc/runs') ||
-      url.startsWith('/sap/bc/adt/atc/worklists'))
+    m === 'GET' &&
+    url.includes('/source/main') &&
+    !url.includes('informationsystem')
   ) {
+    return {
+      status: 200,
+      body: fixtures.sourceCode,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Test classes include – GET .../includes/testclasses
+  if (m === 'GET' && url.includes('/includes/testclasses')) {
+    return {
+      status: 200,
+      body: fixtures.testClassesSource,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Lock – POST ?_action=LOCK
+  if (m === 'POST' && url.includes('_action=LOCK')) {
+    return {
+      status: 200,
+      body: fixtures.lockResponse,
+      contentType: 'application/xml',
+    };
+  }
+
+  // Unlock – POST ?_action=UNLOCK
+  if (m === 'POST' && url.includes('_action=UNLOCK')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // Source write – PUT .../source/main
+  if (m === 'PUT' && url.includes('/source/main')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // Activation – POST /sap/bc/adt/activation
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/activation')) {
+    return {
+      status: 200,
+      body: fixtures.activationResult,
+      contentType: 'application/xml',
+    };
+  }
+
+  // Syntax check – POST /sap/bc/adt/checkruns
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/checkruns')) {
+    return {
+      status: 200,
+      body: fixtures.checkRunsResult,
+      contentType: 'application/xml',
+    };
+  }
+
+  // AUnit test run – POST /sap/bc/adt/abapunit/testruns
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/abapunit/testruns')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.aunitResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // CSRF token fetch (used by write operations)
+  if (m === 'HEAD') {
     return {
       status: 200,
       body: '',
