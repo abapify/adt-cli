@@ -18,7 +18,9 @@ import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { aunitResult } from '@abapify/adt-schemas';
 
 type AunitResultData = InferTypedSchema<typeof aunitResult>;
-type AunitProgram = NonNullable<AunitResultData['runResult']['program']>[number];
+type AunitProgram = NonNullable<
+  AunitResultData['runResult']['program']
+>[number];
 
 /**
  * Full run-configuration body type including objectReferences.

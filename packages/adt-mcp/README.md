@@ -61,12 +61,12 @@ Add to your MCP server list:
 
 Every tool requires these connection parameters (passed per-call, never stored):
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `baseUrl` | string | ✅ | SAP system base URL, e.g. `https://my-system.example.com:8000` |
-| `client` | string | — | SAP client number, e.g. `100` |
-| `username` | string | — | Username for basic auth |
-| `password` | string | — | Password for basic auth |
+| Parameter  | Type   | Required | Description                                                    |
+| ---------- | ------ | -------- | -------------------------------------------------------------- |
+| `baseUrl`  | string | ✅       | SAP system base URL, e.g. `https://my-system.example.com:8000` |
+| `client`   | string | —        | SAP client number, e.g. `100`                                  |
+| `username` | string | —        | Username for basic auth                                        |
+| `password` | string | —        | Password for basic auth                                        |
 
 > **Security note:** credentials are forwarded directly to the SAP system per request. The MCP server holds no state and persists no credentials.
 
@@ -77,6 +77,7 @@ Every tool requires these connection parameters (passed per-call, never stored):
 ### Discovery & System
 
 #### `discovery`
+
 Discover available ADT services on the SAP system. Useful for checking what endpoints the system supports before using other tools.
 
 **Parameters:** connection only
@@ -86,15 +87,17 @@ Discover available ADT services on the SAP system. Useful for checking what endp
 ---
 
 #### `system_info`
+
 Get SAP system and/or session information.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `scope` | `"session"` \| `"system"` \| `"both"` | `"both"` | What information to retrieve |
+| Parameter | Type                                  | Default  | Description                  |
+| --------- | ------------------------------------- | -------- | ---------------------------- |
+| `scope`   | `"session"` \| `"system"` \| `"both"` | `"both"` | What information to retrieve |
 
 **Returns:**
+
 ```json
 {
   "session": { "user": "DEVELOPER", "client": "100", "language": "EN", ... },
@@ -107,16 +110,18 @@ Get SAP system and/or session information.
 ### Object Repository
 
 #### `search_objects`
+
 Search for ABAP objects in the repository. Supports wildcards.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `query` | string | ✅ | Search term, e.g. `ZCL_*` or `MY_CLASS` |
-| `maxResults` | number | `50` | Maximum number of results |
+| Parameter    | Type   | Default | Description                             |
+| ------------ | ------ | ------- | --------------------------------------- |
+| `query`      | string | ✅      | Search term, e.g. `ZCL_*` or `MY_CLASS` |
+| `maxResults` | number | `50`    | Maximum number of results               |
 
 **Returns:**
+
 ```json
 {
   "count": 3,
@@ -129,19 +134,23 @@ Search for ABAP objects in the repository. Supports wildcards.
 ---
 
 #### `get_object`
+
 Get details about a specific ABAP object by name. Performs an exact-match search and returns the object metadata plus a list of similar objects if no exact match is found.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type   | Description                 |
+| ------------ | ------ | --------------------------- |
 | `objectName` | string | ABAP object name to look up |
 
 **Returns:**
+
 ```json
 { "found": true, "object": { "name": "ZCL_MY_CLASS", "type": "CLAS/OC", "uri": "...", ... } }
 ```
+
 or, when not found:
+
 ```json
 { "found": false, "message": "Object 'FOO' not found", "similar": [...] }
 ```
@@ -151,13 +160,14 @@ or, when not found:
 ### Source Code
 
 #### `get_source`
+
 Fetch the raw ABAP source code for a program, class, interface, or function group.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `objectName` | string | ABAP object name |
+| Parameter    | Type    | Description                                                                              |
+| ------------ | ------- | ---------------------------------------------------------------------------------------- |
+| `objectName` | string  | ABAP object name                                                                         |
 | `objectType` | string? | Object type hint (`PROG`, `CLAS`, `INTF`, …). Skips the search round-trip when provided. |
 
 **Returns:** Plain ABAP source text.
@@ -167,18 +177,20 @@ Fetch the raw ABAP source code for a program, class, interface, or function grou
 ---
 
 #### `update_source`
+
 Write new ABAP source code to an existing object. Internally performs the full SAP ADT lock→PUT→unlock cycle.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `objectName` | string | ABAP object name |
-| `objectType` | string? | Object type hint |
-| `sourceCode` | string | New ABAP source code |
-| `transport` | string? | Transport request number (required for transportable objects) |
+| Parameter    | Type    | Description                                                   |
+| ------------ | ------- | ------------------------------------------------------------- |
+| `objectName` | string  | ABAP object name                                              |
+| `objectType` | string? | Object type hint                                              |
+| `sourceCode` | string  | New ABAP source code                                          |
+| `transport`  | string? | Transport request number (required for transportable objects) |
 
 **Returns:**
+
 ```json
 { "status": "updated", "object": "ZCL_MY_CLASS" }
 ```
@@ -188,12 +200,13 @@ Write new ABAP source code to an existing object. Internally performs the full S
 ---
 
 #### `get_test_classes`
+
 Retrieve the test class definitions (`FOR TESTING`) embedded in an ABAP class. Returns the raw source of the testclasses include.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type   | Description                          |
+| ----------- | ------ | ------------------------------------ |
 | `className` | string | ABAP class name, e.g. `ZCL_MY_CLASS` |
 
 **Returns:** Plain ABAP source of the local test class include.
@@ -203,22 +216,24 @@ Retrieve the test class definitions (`FOR TESTING`) embedded in an ABAP class. R
 ### Activation & Syntax
 
 #### `activate_object`
+
 Activate one or more ABAP objects. Supports single-object and batch modes.
 
 **Single object mode:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `objectName` | string | ABAP object name |
+| Parameter    | Type   | Description                             |
+| ------------ | ------ | --------------------------------------- |
+| `objectName` | string | ABAP object name                        |
 | `objectType` | string | Object type (`PROG`, `CLAS`, `INTF`, …) |
 
 **Batch mode:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter | Type                              | Description                        |
+| --------- | --------------------------------- | ---------------------------------- |
 | `objects` | `Array<{objectName, objectType}>` | Objects to activate in one request |
 
 **Returns:**
+
 ```json
 { "status": "activated", "count": 2, "objects": [{ "name": "ZCL_FOO", "type": "CLAS" }, ...] }
 ```
@@ -226,17 +241,19 @@ Activate one or more ABAP objects. Supports single-object and batch modes.
 ---
 
 #### `check_syntax`
+
 Run an ABAP syntax check on an object and return structured check messages. Uses the `checkrun` schema — no XML parsing in tool code.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `objectName` | string | ✅ | ABAP object name |
-| `objectType` | string? | — | Object type hint for faster resolution |
-| `version` | `"active"` \| `"inactive"` \| `"new"` | `"active"` | Version to check |
+| Parameter    | Type                                  | Default    | Description                            |
+| ------------ | ------------------------------------- | ---------- | -------------------------------------- |
+| `objectName` | string                                | ✅         | ABAP object name                       |
+| `objectType` | string?                               | —          | Object type hint for faster resolution |
+| `version`    | `"active"` \| `"inactive"` \| `"new"` | `"active"` | Version to check                       |
 
 **Returns:**
+
 ```json
 {
   "hasErrors": false,
@@ -258,17 +275,19 @@ Run an ABAP syntax check on an object and return structured check messages. Uses
 ### Unit Testing
 
 #### `run_unit_tests`
+
 Run ABAP Unit tests on an object or package and receive pass/fail counts broken down by test method.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `objectName` | string | ✅ | Object name (class, program, or package) |
-| `objectType` | string? | — | Type hint (`CLAS`, `PROG`, `DEVC`, …) |
-| `withCoverage` | boolean | `false` | Whether to collect code coverage data |
+| Parameter      | Type    | Default | Description                              |
+| -------------- | ------- | ------- | ---------------------------------------- |
+| `objectName`   | string  | ✅      | Object name (class, program, or package) |
+| `objectType`   | string? | —       | Type hint (`CLAS`, `PROG`, `DEVC`, …)    |
+| `withCoverage` | boolean | `false` | Whether to collect code coverage data    |
 
 **Returns:**
+
 ```json
 {
   "totalTests": 5,
@@ -284,17 +303,19 @@ Run ABAP Unit tests on an object or package and receive pass/fail counts broken 
 ### Package Management
 
 #### `list_package_objects`
+
 List ABAP objects contained in a package. Uses `quickSearch` with a `packageName` filter.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `packageName` | string | ✅ | Package name, e.g. `ZPACKAGE` |
-| `objectType` | string? | — | Filter by type (`CLAS`, `PROG`, …) |
-| `maxResults` | number | `200` | Maximum result count |
+| Parameter     | Type    | Default | Description                        |
+| ------------- | ------- | ------- | ---------------------------------- |
+| `packageName` | string  | ✅      | Package name, e.g. `ZPACKAGE`      |
+| `objectType`  | string? | —       | Filter by type (`CLAS`, `PROG`, …) |
+| `maxResults`  | number  | `200`   | Maximum result count               |
 
 **Returns:**
+
 ```json
 {
   "packageName": "ZPACKAGE",
@@ -308,25 +329,27 @@ List ABAP objects contained in a package. Uses `quickSearch` with a `packageName
 ### Change & Transport System (CTS)
 
 #### `cts_list_transports`
+
 List transport requests from the CTS.
 
 **Parameters:**
 
-| Parameter | Type | Default |
-|-----------|------|---------|
-| `maxResults` | number | `50` |
+| Parameter    | Type   | Default |
+| ------------ | ------ | ------- |
+| `maxResults` | number | `50`    |
 
 **Returns:** Array of transport request descriptors.
 
 ---
 
 #### `cts_get_transport`
+
 Get details for a specific transport request.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter     | Type   | Description                         |
+| ------------- | ------ | ----------------------------------- |
 | `transportId` | string | Transport number, e.g. `DEVK900001` |
 
 **Returns:** Full transport descriptor including tasks and objects.
@@ -334,26 +357,28 @@ Get details for a specific transport request.
 ---
 
 #### `cts_create_transport`
+
 Create a new transport request.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `description` | string | ✅ | Transport description |
-| `type` | `"K"` \| `"W"` | `"K"` | Workbench (`K`) or Customizing (`W`) |
+| Parameter     | Type           | Default | Description                          |
+| ------------- | -------------- | ------- | ------------------------------------ |
+| `description` | string         | ✅      | Transport description                |
+| `type`        | `"K"` \| `"W"` | `"K"`   | Workbench (`K`) or Customizing (`W`) |
 
 > 🚧 Not yet implemented — returns a clear error until the underlying client method is available.
 
 ---
 
 #### `cts_release_transport`
+
 Release a transport request.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter     | Type   | Description      |
+| ------------- | ------ | ---------------- |
 | `transportId` | string | Transport number |
 
 > 🚧 Not yet implemented.
@@ -361,12 +386,13 @@ Release a transport request.
 ---
 
 #### `cts_delete_transport`
+
 Delete a transport request.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter     | Type   | Description      |
+| ------------- | ------ | ---------------- |
 | `transportId` | string | Transport number |
 
 ---
@@ -374,15 +400,17 @@ Delete a transport request.
 ### ABAP Test Cockpit (ATC)
 
 #### `atc_run`
+
 Run ABAP Test Cockpit checks on an object or package and return the resulting findings worklist.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type   | Description                                                 |
+| ----------- | ------ | ----------------------------------------------------------- |
 | `objectUri` | string | ADT URI of the target, e.g. `/sap/bc/adt/packages/ZPACKAGE` |
 
 **Returns:**
+
 ```json
 { "status": "completed", "worklist": { ... } }
 ```
@@ -512,25 +540,24 @@ bunx nx test adt-mcp       # tests (runs integration suite)
 
 ## Feature Parity Map
 
-| CLI Command | MCP Tool | Status |
-|---|---|---|
-| `adt discovery` | `discovery` | ✅ |
-| `adt info` | `system_info` | ✅ |
-| `adt search` | `search_objects` | ✅ |
-| `adt get` | `get_object` | ✅ |
-| `adt source get` | `get_source` | ✅ |
-| `adt source put` | `update_source` | ✅ |
-| `adt activate` | `activate_object` | ✅ |
-| `adt check` | `check_syntax` | ✅ |
-| `adt aunit run` | `run_unit_tests` | ✅ |
-| `adt atc run` | `atc_run` | ✅ |
-| `adt cts tr list` | `cts_list_transports` | ✅ |
-| `adt cts tr get` | `cts_get_transport` | ✅ |
-| `adt cts tr delete` | `cts_delete_transport` | ✅ |
-| `adt cts tr create` | `cts_create_transport` | 🚧 Not yet |
-| `adt cts tr release` | `cts_release_transport` | 🚧 Not yet |
-| `adt ls` | — | 🔜 Future |
-| `adt cts search` | — | 🔜 Future |
-| `adt import package` | — | 🔜 Future |
-| `adt import transport` | — | 🔜 Future |
-
+| CLI Command            | MCP Tool                | Status     |
+| ---------------------- | ----------------------- | ---------- |
+| `adt discovery`        | `discovery`             | ✅         |
+| `adt info`             | `system_info`           | ✅         |
+| `adt search`           | `search_objects`        | ✅         |
+| `adt get`              | `get_object`            | ✅         |
+| `adt source get`       | `get_source`            | ✅         |
+| `adt source put`       | `update_source`         | ✅         |
+| `adt activate`         | `activate_object`       | ✅         |
+| `adt check`            | `check_syntax`          | ✅         |
+| `adt aunit run`        | `run_unit_tests`        | ✅         |
+| `adt atc run`          | `atc_run`               | ✅         |
+| `adt cts tr list`      | `cts_list_transports`   | ✅         |
+| `adt cts tr get`       | `cts_get_transport`     | ✅         |
+| `adt cts tr delete`    | `cts_delete_transport`  | ✅         |
+| `adt cts tr create`    | `cts_create_transport`  | 🚧 Not yet |
+| `adt cts tr release`   | `cts_release_transport` | 🚧 Not yet |
+| `adt ls`               | —                       | 🔜 Future  |
+| `adt cts search`       | —                       | 🔜 Future  |
+| `adt import package`   | —                       | 🔜 Future  |
+| `adt import transport` | —                       | 🔜 Future  |

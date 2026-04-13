@@ -18,25 +18,25 @@ Work with a SAP ABAP system via the `@abapify/adt-mcp` MCP server.
 
 The adt-mcp server exposes 17 tools covering the full ABAP development cycle:
 
-| Tool | Purpose |
-|---|---|
-| `search_objects` | Find objects by name/wildcard |
-| `get_object` | Get metadata for a specific object |
-| `get_source` | Fetch ABAP source code |
-| `update_source` | Write new source (lock → PUT → unlock) |
-| `activate_object` | Activate one or more objects |
-| `check_syntax` | Run syntax check, get structured messages |
-| `run_unit_tests` | Run ABAP Unit, get pass/fail counts |
-| `get_test_classes` | Fetch test class source for a class |
-| `list_package_objects` | List objects in a package |
-| `atc_run` | Run ATC checks, get findings |
-| `system_info` | SAP system and session details |
-| `discovery` | Available ADT services |
-| `cts_list_transports` | List transport requests |
-| `cts_get_transport` | Transport details |
-| `cts_create_transport` | Create transport (🚧 not yet implemented) |
+| Tool                    | Purpose                                    |
+| ----------------------- | ------------------------------------------ |
+| `search_objects`        | Find objects by name/wildcard              |
+| `get_object`            | Get metadata for a specific object         |
+| `get_source`            | Fetch ABAP source code                     |
+| `update_source`         | Write new source (lock → PUT → unlock)     |
+| `activate_object`       | Activate one or more objects               |
+| `check_syntax`          | Run syntax check, get structured messages  |
+| `run_unit_tests`        | Run ABAP Unit, get pass/fail counts        |
+| `get_test_classes`      | Fetch test class source for a class        |
+| `list_package_objects`  | List objects in a package                  |
+| `atc_run`               | Run ATC checks, get findings               |
+| `system_info`           | SAP system and session details             |
+| `discovery`             | Available ADT services                     |
+| `cts_list_transports`   | List transport requests                    |
+| `cts_get_transport`     | Transport details                          |
+| `cts_create_transport`  | Create transport (🚧 not yet implemented)  |
 | `cts_release_transport` | Release transport (🚧 not yet implemented) |
-| `cts_delete_transport` | Delete transport |
+| `cts_delete_transport`  | Delete transport                           |
 
 ---
 
@@ -92,17 +92,17 @@ run_unit_tests    objectName=ZCL_FOO  objectType=CLAS
 
 `get_source`, `update_source`, `activate_object`, `check_syntax`, and `run_unit_tests` all accept an optional `objectType`. When you already know the type, always pass it:
 
-| ABAP type | `objectType` value |
-|---|---|
-| Class | `CLAS` |
-| Program | `PROG` |
-| Interface | `INTF` |
-| Function group | `FUGR` |
-| Package | `DEVC` |
-| Data element | `DTEL` |
-| Domain | `DOMA` |
-| Table | `TABL` |
-| Message class | `MSAG` |
+| ABAP type      | `objectType` value |
+| -------------- | ------------------ |
+| Class          | `CLAS`             |
+| Program        | `PROG`             |
+| Interface      | `INTF`             |
+| Function group | `FUGR`             |
+| Package        | `DEVC`             |
+| Data element   | `DTEL`             |
+| Domain         | `DOMA`             |
+| Table          | `TABL`             |
+| Message class  | `MSAG`             |
 
 ### Batch activation is more efficient
 
@@ -135,13 +135,13 @@ If the user asks about unit tests for a class, use `get_test_classes` to retriev
 
 All tools return `isError: true` with a descriptive message when something goes wrong. Common causes:
 
-| Error | Likely cause |
-|---|---|
-| `Object '...' not found` | Object name does not exist or is misspelled |
-| `Activation failed` | Syntax errors or missing transport |
-| `lock` / `409 Conflict` | Object is locked by another user |
-| `403 Forbidden` | Wrong credentials or missing authorisation |
-| `404` on source read | Object type mismatch, or inactive object has no source yet |
+| Error                    | Likely cause                                               |
+| ------------------------ | ---------------------------------------------------------- |
+| `Object '...' not found` | Object name does not exist or is misspelled                |
+| `Activation failed`      | Syntax errors or missing transport                         |
+| `lock` / `409 Conflict`  | Object is locked by another user                           |
+| `403 Forbidden`          | Wrong credentials or missing authorisation                 |
+| `404` on source read     | Object type mismatch, or inactive object has no source yet |
 
 When `update_source` fails, the lock is automatically released (best-effort) before the error is returned.
 

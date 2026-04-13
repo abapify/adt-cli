@@ -39,18 +39,22 @@ packages/adt-mcp/
 ## Key Invariants
 
 ### 1. One file per tool
+
 Each MCP tool lives in `src/lib/tools/<tool-name>.ts` and exports a single `register<ToolName>Tool(server, ctx)` function. Registration is wired in `tools/index.ts`.
 
 ### 2. Schema-based serialisation – no manual XML
+
 Request bodies and response parsing **must** go through the typed schemas in `@abapify/adt-schemas`. The `@abapify/adt-client` adapter calls `schema.build()` / `schema.parse()` automatically when a contract is used.
 
 **Correct:**
+
 ```typescript
 // body: ObjectReferencesBody (typed against adtcore schema)
 await client.adt.activation.activate.post(params, body);
 ```
 
 **Wrong:**
+
 ```typescript
 // ❌ manual XML string + third-party parser
 const xml = `<adtcore:objectReferences ...>`;
@@ -60,22 +64,31 @@ const parsed = new XMLParser().parse(rawXml);
 If a required endpoint has no contract yet, add one to `@abapify/adt-contracts` first.
 
 ### 3. No external XML parser dependency
+
 `fast-xml-parser`, `xml2js`, and similar libraries must not be used. The XSD→schema→contract pipeline handles all XML.
 
 ### 4. Stateless server – connection-per-call
+
 Each tool call creates its own `AdtClient` via `ctx.getClient(args)`. The server holds no session, no cached client, and no credentials between calls.
 
 ### 5. All tools return JSON text
+
 Every tool handler returns:
+
 ```typescript
-{ content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
+{
+  content: [{ type: 'text', text: JSON.stringify(result, null, 2) }];
+}
 ```
+
 or on error:
+
 ```typescript
 { isError: true, content: [{ type: 'text', text: 'Descriptive error message' }] }
 ```
 
 ### 6. Zod for input validation
+
 All tool inputs are declared with `z.string()`, `z.number()`, etc. The shared `connectionShape` (from `shared-schemas.ts`) is spread into every tool's schema.
 
 ---
@@ -106,14 +119,23 @@ export function registerMyNewTool(server: McpServer, ctx: ToolContext): void {
     async (args) => {
       try {
         const client = ctx.getClient(args);
-        const result = await client.adt.someNamespace.someEndpoint(args.myParam);
+        const result = await client.adt.someNamespace.someEndpoint(
+          args.myParam,
+        );
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+          content: [
+            { type: 'text' as const, text: JSON.stringify(result, null, 2) },
+          ],
         };
       } catch (error) {
         return {
           isError: true,
-          content: [{ type: 'text' as const, text: `My new tool failed: ${error instanceof Error ? error.message : String(error)}` }],
+          content: [
+            {
+              type: 'text' as const,
+              text: `My new tool failed: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
         };
       }
     },
@@ -154,10 +176,11 @@ let objectUri = args.objectType
   : undefined;
 
 if (!objectUri) {
-  const searchResult = await client.adt.repository.informationsystem.search.quickSearch({
-    query: args.objectName,
-    maxResults: 10,
-  });
+  const searchResult =
+    await client.adt.repository.informationsystem.search.quickSearch({
+      query: args.objectName,
+      maxResults: 10,
+    });
   const match = extractObjectReferences(searchResult).find(
     (o) => String(o.name ?? '').toUpperCase() === args.objectName.toUpperCase(),
   );
@@ -187,11 +210,13 @@ Always unlock in a `finally`-equivalent catch block to avoid stuck locks.
 ## Mock Server
 
 `createMockAdtServer()` starts an in-process `http.Server` on a random port. It:
+
 - Returns a fresh random CSRF token per instance (no hardcoded secrets)
 - Routes requests via `matchRoute(method, url)` in `server.ts`
 - Loads static XML/JSON fixtures from `fixtures.ts`
 
 To add a new endpoint to the mock:
+
 1. Add the fixture string/object to `fixtures.ts`
 2. Add an `if` branch in `matchRoute()` in `server.ts`
 3. Add the corresponding `describe` + `it` in `integration.test.ts`
@@ -214,16 +239,17 @@ bunx nx format:write       # Prettier (run before every commit)
 
 `adt-mcp` may depend on:
 
-| Package | Purpose |
-|---------|---------|
-| `@abapify/adt-client` | Typed ADT client (contracts + HTTP adapter) |
-| `@abapify/adt-contracts` | ADT endpoint contracts |
-| `@abapify/adt-schemas` | Schema types for typed body/response |
-| `@abapify/adt-locks` | Lock/unlock protocol implementation |
-| `@modelcontextprotocol/sdk` | MCP server primitives |
-| `zod` | Input validation |
+| Package                     | Purpose                                     |
+| --------------------------- | ------------------------------------------- |
+| `@abapify/adt-client`       | Typed ADT client (contracts + HTTP adapter) |
+| `@abapify/adt-contracts`    | ADT endpoint contracts                      |
+| `@abapify/adt-schemas`      | Schema types for typed body/response        |
+| `@abapify/adt-locks`        | Lock/unlock protocol implementation         |
+| `@modelcontextprotocol/sdk` | MCP server primitives                       |
+| `zod`                       | Input validation                            |
 
 It must **not** depend on:
+
 - `@abapify/adt-cli` (would create a circular via plugin system)
 - `fast-xml-parser`, `xml2js`, or any other XML parser
 - Any SAP domain plugin packages (`@abapify/adt-atc`, etc.) — use contracts instead

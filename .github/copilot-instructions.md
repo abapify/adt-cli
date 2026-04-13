@@ -32,13 +32,13 @@ bunx nx affected -t lint --base=HEAD~1   # check lint
 
 ## Available Skills
 
-| Skill | When to use |
-|---|---|
-| `adt-mcp` | Work with a SAP ABAP system via the MCP server (read/write source, activate, unit tests, transports, ATC) |
-| `add-endpoint` | Add a new ADT endpoint contract + schema + fixture |
-| `add-object-type` | Add full ABAP object type support (ADK model + abapGit handler) |
-| `adt-export` | Export, deploy, diff, roundtrip, or unlock ADT objects |
-| `adt-reverse-engineering` | Research unknown SAP ADT REST endpoints |
-| `openspec-propose` | Propose a new change with design, specs, and tasks |
-| `openspec-apply-change` | Implement tasks from an OpenSpec change |
-| `monitor-ci` | Monitor CI pipeline and self-heal failures |
+| Skill                     | When to use                                                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `adt-mcp`                 | Work with a SAP ABAP system via the MCP server (read/write source, activate, unit tests, transports, ATC) |
+| `add-endpoint`            | Add a new ADT endpoint contract + schema + fixture                                                        |
+| `add-object-type`         | Add full ABAP object type support (ADK model + abapGit handler)                                           |
+| `adt-export`              | Export, deploy, diff, roundtrip, or unlock ADT objects                                                    |
+| `adt-reverse-engineering` | Research unknown SAP ADT REST endpoints                                                                   |
+| `openspec-propose`        | Propose a new change with design, specs, and tasks                                                        |
+| `openspec-apply-change`   | Implement tasks from an OpenSpec change                                                                   |
+| `monitor-ci`              | Monitor CI pipeline and self-heal failures                                                                |
