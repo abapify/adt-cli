@@ -6,8 +6,8 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createAdtClient, type AdtClient } from '@abapify/adt-client';
-import { registerTools } from './tools/index.js';
-import type { ConnectionParams, ToolContext } from './types.js';
+import { registerTools } from './tools/index';
+import type { ConnectionParams, ToolContext } from './types';
 
 export interface McpServerOptions {
   /** Override the client factory – useful for injecting a mock client in tests. */

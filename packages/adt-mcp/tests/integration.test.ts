@@ -12,13 +12,13 @@ import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createMcpServer } from '../src/lib/server.js';
+import { createMcpServer } from '../src/lib/server';
 import {
   createMockAdtServer,
   type MockAdtServer,
-} from '../src/lib/mock/server.js';
+} from '../src/lib/mock/server';
 import { createAdtClient, type AdtClient } from '@abapify/adt-client';
-import type { ConnectionParams } from '../src/lib/types.js';
+import type { ConnectionParams } from '../src/lib/types';
 
 let mockAdt: MockAdtServer;
 let mockPort: number;
@@ -265,6 +265,154 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
+  // ── get_source ─────────────────────────────────────────────────
+
+  describe('get_source tool', () => {
+    it('fetches source for a known class by type+name', async () => {
+      const { json } = await callTool('get_source', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as { source: string };
+      assert.ok(data.source, 'should have source property');
+      assert.ok(
+        data.source.includes('CLASS'),
+        'should return ABAP source text',
+      );
+    });
+
+    it('fetches source by name only (search-based resolution)', async () => {
+      const { json } = await callTool('get_source', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+      });
+      const data = json as { source: string };
+      assert.ok(data.source, 'should have source property');
+      assert.ok(data.source.length > 0, 'should return source');
+    });
+  });
+
+  // ── update_source ──────────────────────────────────────────────
+
+  describe('update_source tool', () => {
+    it('updates source code and returns status', async () => {
+      const { json } = await callTool('update_source', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+        sourceCode: 'CLASS zcl_example DEFINITION.\nENDCLASS.\n',
+      });
+      const data = json as { status: string; object: string };
+      assert.strictEqual(data.status, 'updated');
+      assert.strictEqual(data.object, 'ZCL_EXAMPLE');
+    });
+  });
+
+  // ── activate_object ────────────────────────────────────────────
+
+  describe('activate_object tool', () => {
+    it('activates a single object', async () => {
+      const { json } = await callTool('activate_object', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as { status: string; count: number };
+      assert.strictEqual(data.status, 'activated');
+      assert.strictEqual(data.count, 1);
+    });
+
+    it('activates multiple objects in batch mode', async () => {
+      const { json } = await callTool('activate_object', {
+        ...connArgs(),
+        objects: [
+          { objectName: 'ZCL_EXAMPLE', objectType: 'CLAS' },
+          { objectName: 'ZIF_EXAMPLE', objectType: 'INTF' },
+        ],
+      });
+      const data = json as { status: string; count: number };
+      assert.strictEqual(data.status, 'activated');
+      assert.strictEqual(data.count, 2);
+    });
+  });
+
+  // ── check_syntax ───────────────────────────────────────────────
+
+  describe('check_syntax tool', () => {
+    it('runs syntax check and returns structured result', async () => {
+      const { json } = await callTool('check_syntax', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as {
+        hasErrors: boolean;
+        hasWarnings: boolean;
+        reports: unknown[];
+      };
+      assert.strictEqual(typeof data.hasErrors, 'boolean');
+      assert.strictEqual(typeof data.hasWarnings, 'boolean');
+      assert.ok(Array.isArray(data.reports));
+    });
+  });
+
+  // ── run_unit_tests ─────────────────────────────────────────────
+
+  describe('run_unit_tests tool', () => {
+    it('runs AUnit tests and returns counts', async () => {
+      const { json } = await callTool('run_unit_tests', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as {
+        totalTests: number;
+        passCount: number;
+        failCount: number;
+        errorCount: number;
+      };
+      assert.ok(typeof data.totalTests === 'number');
+      assert.ok(typeof data.passCount === 'number');
+    });
+  });
+
+  // ── get_test_classes ───────────────────────────────────────────
+
+  describe('get_test_classes tool', () => {
+    it('returns test class source for a class', async () => {
+      const { json } = await callTool('get_test_classes', {
+        ...connArgs(),
+        className: 'ZCL_EXAMPLE',
+      });
+      const data = json as { source: string };
+      assert.ok(data.source, 'should have source property');
+      assert.ok(
+        data.source.includes('FOR TESTING'),
+        'should return test class source with FOR TESTING',
+      );
+    });
+  });
+
+  // ── list_package_objects ───────────────────────────────────────
+
+  describe('list_package_objects tool', () => {
+    it('lists objects in a package', async () => {
+      const { json } = await callTool('list_package_objects', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as {
+        packageName: string;
+        count: number;
+        objects: unknown[];
+      };
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+      assert.ok(typeof data.count === 'number');
+      assert.ok(Array.isArray(data.objects));
+    });
+  });
+
   // ── tool listing ───────────────────────────────────────────────
 
   describe('tool listing', () => {
@@ -282,6 +430,13 @@ describe('adt-mcp integration tests', () => {
         'cts_release_transport',
         'cts_delete_transport',
         'atc_run',
+        'get_source',
+        'update_source',
+        'activate_object',
+        'check_syntax',
+        'run_unit_tests',
+        'get_test_classes',
+        'list_package_objects',
       ];
       for (const name of expected) {
         assert.ok(names.has(name), `tool "${name}" should be listed`);

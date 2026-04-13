@@ -124,4 +124,57 @@ export const fixtures = {
       },
     ],
   },
+
+  // Source code fixture – returned for GET .../source/main
+  sourceCode:
+    'CLASS zcl_example DEFINITION PUBLIC FINAL CREATE PUBLIC.\n  PUBLIC SECTION.\n    METHODS: do_something.\nENDCLASS.\n',
+
+  // Test classes source – returned for GET .../includes/testclasses
+  testClassesSource:
+    'CLASS ltc_example DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.\n  PRIVATE SECTION.\n    METHODS: test_something FOR TESTING.\nENDCLASS.\n',
+
+  // Lock handle XML – returned for POST ?_action=LOCK
+  lockResponse:
+    '<asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0"><asx:values><DATA><LOCK_HANDLE>MOCK_LOCK_HANDLE_001</LOCK_HANDLE><CORRNR>DEVK900001</CORRNR><CORRUSER>DEVELOPER</CORRUSER></DATA></asx:values></asx:abap>',
+
+  // Activation result – returned for POST /sap/bc/adt/activation
+  activationResult:
+    '<adtcore:objectReferences xmlns:adtcore="http://www.sap.com/adt/core"/>',
+
+  // Checkruns result – returned for POST /sap/bc/adt/checkruns
+  checkRunsResult:
+    '<?xml version="1.0" encoding="UTF-8"?><chkrun:checkRunReports xmlns:chkrun="http://www.sap.com/adt/checkrun"><chkrun:checkReport chkrun:reporter="syntax" chkrun:triggeringUri="/sap/bc/adt/oo/classes/zcl_example" chkrun:status="ok"/></chkrun:checkRunReports>',
+
+  // AUnit test run result
+  aunitResult: {
+    runResult: {
+      program: [
+        {
+          uri: '/sap/bc/adt/oo/classes/zcl_example',
+          type: 'CLAS/OC',
+          name: 'ZCL_EXAMPLE',
+          testClasses: {
+            testClass: [
+              {
+                name: 'LTC_EXAMPLE',
+                uri: '/sap/bc/adt/oo/classes/zcl_example/includes/testclasses',
+                riskLevel: 'harmless',
+                durationCategory: 'short',
+                testMethods: {
+                  testMethod: [
+                    {
+                      name: 'TEST_SOMETHING',
+                      uri: '/sap/bc/adt/oo/classes/zcl_example/includes/testclasses',
+                      executionTime: '0.001',
+                      alerts: { alert: [] },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
 };

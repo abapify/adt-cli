@@ -6,8 +6,8 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
 
 export function registerCtsListTransportsTool(
   server: McpServer,
