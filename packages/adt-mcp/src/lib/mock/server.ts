@@ -59,7 +59,20 @@ function matchRoute(
     };
   }
 
-  // Quick search
+  // Grep / content search (userannotation=userwhere) – must come before general search
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/search') &&
+    url.includes('userannotation=userwhere')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.grepResults),
+      contentType: 'application/json',
+    };
+  }
+
+  // Quick search (general – name pattern)
   if (
     m === 'GET' &&
     url.startsWith('/sap/bc/adt/repository/informationsystem/search')
@@ -69,6 +82,91 @@ function matchRoute(
       body: JSON.stringify(fixtures.searchResults),
       contentType: 'application/json',
     };
+  }
+
+  // Usages / find-references
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/usages')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.usagesResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // Call hierarchy – callers
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/callers')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.callersResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // Call hierarchy – callees
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/callees')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.calleesResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // Navigation target – find definition
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/navigation/target')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.navigationTarget),
+      contentType: 'application/json',
+    };
+  }
+
+  // Data preview – get_table_contents and run_query
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/datapreview/freestyle')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.tableContents),
+      contentType: 'application/json',
+    };
+  }
+
+  // DDIC tables – get_table (specific path, before generic DDIC)
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/ddic/tables/')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.tableDefinition),
+      contentType: 'application/json',
+    };
+  }
+
+  // CTS – create transport
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/cts/transportrequests') &&
+    !url.includes('/sap/bc/adt/cts/transportrequests/')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.transportCreate),
+      contentType: 'application/json',
+    };
+  }
+
+  // CTS – release transport (_action=RELEASE)
+  if (
+    m === 'POST' &&
+    /\/sap\/bc\/adt\/cts\/transportrequests\/\w+/.test(url) &&
+    url.includes('_action=RELEASE')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
   }
 
   // CTS – list transports
@@ -160,6 +258,18 @@ function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  // Inactive objects – GET /sap/bc/adt/activation/inactive_objects
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/activation/inactive_objects')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.inactiveObjects),
+      contentType: 'application/json',
+    };
+  }
+
   // Activation – POST /sap/bc/adt/activation
   if (m === 'POST' && url.startsWith('/sap/bc/adt/activation')) {
     return {
@@ -167,6 +277,30 @@ function matchRoute(
       body: fixtures.activationResult,
       contentType: 'application/xml',
     };
+  }
+
+  // Object create – POST to object-type paths (programs, classes, interfaces, functions, packages)
+  if (
+    m === 'POST' &&
+    (url.startsWith('/sap/bc/adt/programs/programs') ||
+      url.startsWith('/sap/bc/adt/oo/classes') ||
+      url.startsWith('/sap/bc/adt/oo/interfaces') ||
+      url.startsWith('/sap/bc/adt/functions/groups') ||
+      url.startsWith('/sap/bc/adt/packages'))
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // Object delete – DELETE to object-type paths
+  if (
+    m === 'DELETE' &&
+    (url.startsWith('/sap/bc/adt/programs/programs/') ||
+      url.startsWith('/sap/bc/adt/oo/classes/') ||
+      url.startsWith('/sap/bc/adt/oo/interfaces/') ||
+      url.startsWith('/sap/bc/adt/functions/groups/') ||
+      url.startsWith('/sap/bc/adt/packages/'))
+  ) {
+    return { status: 204, body: '', contentType: 'text/plain' };
   }
 
   // Syntax check – POST /sap/bc/adt/checkruns

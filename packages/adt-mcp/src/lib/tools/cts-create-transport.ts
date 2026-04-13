@@ -3,18 +3,22 @@
  *
  * CLI equivalent: `adt cts tr create`
  *
- * Note: The underlying ADT client transport service `create()` method is not
- * yet implemented. This tool returns a clear error until it is.
+ * Uses the transportrequests.create() contract with the transportmanagmentCreate schema
+ * to build and POST the XML request body.
  */
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
+import type { InferTypedSchema } from '@abapify/adt-schemas';
+import { transportmanagmentCreate } from '@abapify/adt-schemas';
+
+type CreateBody = InferTypedSchema<typeof transportmanagmentCreate>;
 
 export function registerCtsCreateTransportTool(
   server: McpServer,
-  _ctx: ToolContext,
+  ctx: ToolContext,
 ): void {
   server.tool(
     'cts_create_transport',
@@ -28,19 +32,65 @@ export function registerCtsCreateTransportTool(
         .describe(
           'Transport type: K (Workbench) or W (Customizing). Default: K',
         ),
-      target: z.string().optional().describe('Target system (default: LOCAL)'),
+      target: z.string().optional().describe('Target system'),
       project: z.string().optional().describe('CTS project name'),
     },
-    async (_args) => {
-      return {
-        isError: true,
-        content: [
-          {
-            type: 'text' as const,
-            text: 'Create transport is not supported: the underlying ADT client transport service "create" method is not yet implemented.',
+    async (args) => {
+      try {
+        const client = ctx.getClient(args);
+
+        const body: CreateBody = {
+          root: {
+            request: {
+              desc: args.description,
+              type: args.type ?? 'K',
+              ...(args.target ? { target: args.target } : {}),
+              ...(args.project ? { cts_project: args.project } : {}),
+            },
           },
-        ],
-      };
+        };
+
+        const response = await client.adt.cts.transportrequests.create(body);
+
+        // Extract transport number from response
+        const data = response as Record<string, unknown>;
+        const request =
+          (data.root as Record<string, unknown>)?.request ??
+          data.request ??
+          data;
+        const trkorr =
+          (request as Record<string, unknown>)?.trkorr ??
+          (request as Record<string, unknown>)?.number ??
+          '';
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                {
+                  status: 'created',
+                  transport: String(trkorr),
+                  description: args.description,
+                  type: args.type ?? 'K',
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text' as const,
+              text: `Create transport failed: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
     },
   );
 }

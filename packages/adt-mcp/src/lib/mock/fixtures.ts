@@ -101,6 +101,19 @@ export const fixtures = {
     },
   },
 
+  // Transport create response – returned for POST /sap/bc/adt/cts/transportrequests
+  transportCreate: {
+    root: {
+      request: {
+        trkorr: 'DEVK900099',
+        as4text: 'New transport',
+        as4user: 'DEVELOPER',
+        trstatus: 'D',
+        trfunction: 'K',
+      },
+    },
+  },
+
   atcRun: {
     worklistId: 'WL_001',
     id: 'RUN_001',
@@ -176,5 +189,126 @@ export const fixtures = {
         },
       ],
     },
+  },
+
+  // Grep / content search results – returned for GET .../informationsystem/search?userannotation=userwhere
+  grepResults: {
+    objectReference: [
+      {
+        name: 'ZCL_EXAMPLE',
+        type: 'CLAS/OC',
+        uri: '/sap/bc/adt/oo/classes/zcl_example',
+        description: 'Example class',
+        packageName: 'ZPACKAGE',
+      },
+    ],
+  },
+
+  // DDIC table definition – returned for GET /sap/bc/adt/ddic/tables/{name}
+  tableDefinition: {
+    blueSource: {
+      name: 'MARA',
+      description: 'General Material Data',
+      type: 'TABL/DT',
+      element: [
+        { name: 'MANDT', type: 'CLNT', length: '3', description: 'Client' },
+        {
+          name: 'MATNR',
+          type: 'CHAR',
+          length: '18',
+          description: 'Material Number',
+        },
+        {
+          name: 'MBRSH',
+          type: 'CHAR',
+          length: '1',
+          description: 'Industry Sector',
+        },
+      ],
+    },
+  },
+
+  // Data preview result – returned for POST /sap/bc/adt/datapreview/freestyle
+  tableContents: {
+    columns: {
+      column: [
+        { name: 'MANDT', type: 'C', length: '3' },
+        { name: 'MATNR', type: 'C', length: '18' },
+        { name: 'MBRSH', type: 'C', length: '1' },
+      ],
+    },
+    rows: {
+      row: [
+        {
+          cell: [
+            { _text: '100' },
+            { _text: 'Z_EXAMPLE_MATERIAL' },
+            { _text: 'A' },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Navigation target – returned for GET /sap/bc/adt/navigation/target
+  navigationTarget: {
+    objectReference: {
+      uri: '/sap/bc/adt/oo/classes/zcl_example',
+      type: 'CLAS/OC',
+      name: 'ZCL_EXAMPLE',
+      description: 'Example class',
+    },
+  },
+
+  // Usages / references – returned for GET .../informationsystem/usages
+  usagesResult: {
+    usages: {
+      usage: [
+        {
+          uri: '/sap/bc/adt/programs/programs/zprog_example',
+          name: 'ZPROG_EXAMPLE',
+          type: 'PROG',
+          location: 'line 42',
+        },
+      ],
+    },
+  },
+
+  // Call hierarchy callers – returned for GET .../informationsystem/callers
+  callersResult: {
+    callers: {
+      caller: [
+        {
+          uri: '/sap/bc/adt/programs/programs/zprog_main',
+          name: 'ZPROG_MAIN',
+          type: 'PROG',
+        },
+      ],
+    },
+  },
+
+  // Call hierarchy callees – returned for GET .../informationsystem/callees
+  calleesResult: {
+    callees: {
+      callee: [
+        {
+          uri: '/sap/bc/adt/functions/groups/zfugr_util',
+          name: 'ZFUGR_UTIL',
+          type: 'FUGR',
+        },
+      ],
+    },
+  },
+
+  // Inactive objects – returned for GET /sap/bc/adt/activation/inactive_objects
+  inactiveObjects: {
+    objectReference: [
+      {
+        name: 'ZCL_EXAMPLE',
+        type: 'CLAS/OC',
+        uri: '/sap/bc/adt/oo/classes/zcl_example',
+        description: 'Example class',
+      },
+    ],
   },
 };

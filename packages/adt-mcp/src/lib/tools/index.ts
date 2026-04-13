@@ -21,8 +21,22 @@ import { registerCheckSyntaxTool } from './check-syntax';
 import { registerRunUnitTestsTool } from './run-unit-tests';
 import { registerGetTestClassesTool } from './get-test-classes';
 import { registerListPackageObjectsTool } from './list-package-objects';
+// New tools – high-priority feature parity (#H1–#H8)
+import { registerGrepObjectsTool } from './grep-objects';
+import { registerGrepPackagesTool } from './grep-packages';
+import { registerGetTableTool } from './get-table';
+import { registerGetTableContentsTool } from './get-table-contents';
+import { registerRunQueryTool } from './run-query';
+import { registerFindDefinitionTool } from './find-definition';
+import { registerFindReferencesTool } from './find-references';
+import { registerGetCallersOfTool } from './get-callers-of';
+import { registerGetCalleesOfTool } from './get-callees-of';
+import { registerCreateObjectTool } from './create-object';
+import { registerDeleteObjectTool } from './delete-object';
+import { registerActivatePackageTool } from './activate-package';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
+  // Existing tools
   registerDiscoveryTool(server, ctx);
   registerSystemInfoTool(server, ctx);
   registerSearchObjectsTool(server, ctx);
@@ -40,4 +54,17 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerRunUnitTestsTool(server, ctx);
   registerGetTestClassesTool(server, ctx);
   registerListPackageObjectsTool(server, ctx);
+  // New tools – feature parity with vibing-steampunk
+  registerGrepObjectsTool(server, ctx);
+  registerGrepPackagesTool(server, ctx);
+  registerGetTableTool(server, ctx);
+  registerGetTableContentsTool(server, ctx);
+  registerRunQueryTool(server, ctx);
+  registerFindDefinitionTool(server, ctx);
+  registerFindReferencesTool(server, ctx);
+  registerGetCallersOfTool(server, ctx);
+  registerGetCalleesOfTool(server, ctx);
+  registerCreateObjectTool(server, ctx);
+  registerDeleteObjectTool(server, ctx);
+  registerActivatePackageTool(server, ctx);
 }
