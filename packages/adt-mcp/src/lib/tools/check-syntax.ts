@@ -14,6 +14,13 @@ import { connectionShape } from './shared-schemas.js';
 import { resolveObjectUri, type SourceObjectType } from './utils.js';
 import { XMLParser } from 'fast-xml-parser';
 
+/** Shared XML parser options for ADT response parsing */
+const XML_PARSER_OPTIONS = {
+  ignoreAttributes: false,
+  attributeNamePrefix: '',
+  removeNSPrefix: true,
+} as const;
+
 /** Build the checkObjectList XML for the checkruns endpoint */
 function buildCheckObjectListXml(
   objects: Array<{ uri: string }>,
@@ -58,11 +65,7 @@ function parseCheckRunResponse(response: unknown): {
   let data: Record<string, unknown>;
 
   if (typeof response === 'string') {
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: '',
-      removeNSPrefix: true,
-    });
+    const parser = new XMLParser(XML_PARSER_OPTIONS);
     data = parser.parse(response) as Record<string, unknown>;
   } else {
     data = response as Record<string, unknown>;

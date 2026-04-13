@@ -172,7 +172,8 @@ function matchRoute(
     };
   }
 
-  // CSRF token fetch (used by write operations)
+  // CSRF token fetch – respond to all HEAD requests so write operations (lock,
+  // PUT source, activation, checkruns, etc.) can obtain a CSRF token.
   if (m === 'HEAD') {
     return {
       status: 200,

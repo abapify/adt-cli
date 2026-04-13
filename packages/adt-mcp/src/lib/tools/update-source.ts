@@ -41,7 +41,7 @@ export function registerUpdateSourceTool(
       );
       const client = ctx.getClient(args);
       const locks = createLockService(client);
-      let lockHandle: string | undefined;
+      let lockHandle: string | null = null;
 
       try {
         // 1. Acquire lock
@@ -74,7 +74,7 @@ export function registerUpdateSourceTool(
 
         // 4. Unlock
         await locks.unlock(objectUri, { lockHandle });
-        lockHandle = undefined;
+        lockHandle = null;
 
         return {
           content: [
@@ -93,7 +93,7 @@ export function registerUpdateSourceTool(
         };
       } catch (error) {
         // Best-effort unlock on failure
-        if (lockHandle) {
+        if (lockHandle !== null) {
           try {
             await locks.unlock(objectUri, { lockHandle });
           } catch {

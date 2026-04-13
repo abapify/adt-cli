@@ -72,6 +72,11 @@ export function registerRunUnitTestsTool(
 
         const body = buildRunBody(objectUri);
 
+        // The aunit.testruns.post contract has no declared parameters (body
+        // is schema-typed inside the descriptor), so speci's client reads
+        // the body from args[0]. The `as any` cast is intentional here:
+        // the generated RestClient type does not surface the body parameter
+        // in the method signature (body is embedded in the descriptor).
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = (await (client.adt.aunit.testruns.post as any)(
           body,
