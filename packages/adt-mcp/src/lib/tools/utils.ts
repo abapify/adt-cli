@@ -10,7 +10,13 @@ export interface SearchObject {
   packageName?: string;
 }
 
-/** Minimal structural type for the ADT client subset used by resolveObjectUri. */
+/**
+ * Minimal structural type for the ADT client subset used by resolveObjectUri.
+ *
+ * Using a structural (duck-typed) interface rather than importing the full
+ * AdtClient type avoids coupling utils.ts to @abapify/adt-client and keeps
+ * this utility testable with any object that satisfies the shape.
+ */
 type QuickSearchClient = {
   adt: {
     repository: {

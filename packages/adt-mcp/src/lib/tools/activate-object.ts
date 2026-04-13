@@ -12,7 +12,7 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types.js';
 import { connectionShape } from './shared-schemas.js';
-import { extractObjectReferences, resolveObjectUriFromType } from './utils.js';
+import { resolveObjectUri } from './utils.js';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { adtcore } from '@abapify/adt-schemas';
 
@@ -77,32 +77,22 @@ export function registerActivateObjectTool(
         }
 
         for (const obj of rawObjects) {
-          let uri = resolveObjectUriFromType(obj.objectType, obj.objectName);
+          const uri = await resolveObjectUri(
+            client,
+            obj.objectName,
+            obj.objectType,
+          );
 
           if (!uri) {
-            const searchResult =
-              await client.adt.repository.informationsystem.search.quickSearch({
-                query: obj.objectName,
-                maxResults: 10,
-              });
-            const hits = extractObjectReferences(searchResult);
-            const match = hits.find(
-              (o) =>
-                String(o.name ?? '').toUpperCase() ===
-                obj.objectName.toUpperCase(),
-            );
-            if (!match?.uri) {
-              return {
-                isError: true,
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `Object '${obj.objectName}' not found`,
-                  },
-                ],
-              };
-            }
-            uri = match.uri;
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Object '${obj.objectName}' not found`,
+                },
+              ],
+            };
           }
 
           toActivate.push({
