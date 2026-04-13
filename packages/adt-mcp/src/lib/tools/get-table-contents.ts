@@ -27,7 +27,7 @@ export function registerGetTableContentsTool(
       where: z
         .string()
         .optional()
-        .describe('WHERE clause (ABAP SQL syntax, e.g. "MATNR LIKE \'Z%\'"'),
+        .describe('WHERE clause (ABAP SQL syntax, e.g. "MATNR LIKE \'Z%\'")'),
       columns: z
         .array(z.string())
         .optional()
