@@ -12,7 +12,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
 import type { ToolContext } from '../types.js';
 import { connectionShape } from './shared-schemas.js';
-import { extractObjectReferences, resolveObjectUriFromType } from './utils.js';
+import { resolveObjectUri } from './utils.js';
 
 export function registerUpdateSourceTool(
   server: McpServer,
@@ -38,46 +38,36 @@ export function registerUpdateSourceTool(
     },
     async (args) => {
       const client = ctx.getClient(args);
-      let objectUri: string | undefined = args.objectType
-        ? resolveObjectUriFromType(args.objectType, args.objectName)
-        : undefined;
+      let objectUri: string | undefined;
+
+      try {
+        objectUri = await resolveObjectUri(
+          client,
+          args.objectName,
+          args.objectType,
+        );
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text' as const,
+              text: `Search failed: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
 
       if (!objectUri) {
-        try {
-          const searchResult =
-            await client.adt.repository.informationsystem.search.quickSearch({
-              query: args.objectName,
-              maxResults: 10,
-            });
-          const objects = extractObjectReferences(searchResult);
-          const match = objects.find(
-            (o) =>
-              String(o.name ?? '').toUpperCase() ===
-              args.objectName.toUpperCase(),
-          );
-          if (!match?.uri) {
-            return {
-              isError: true,
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `Object '${args.objectName}' not found`,
-                },
-              ],
-            };
-          }
-          objectUri = match.uri;
-        } catch (error) {
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text' as const,
-                text: `Search failed: ${error instanceof Error ? error.message : String(error)}`,
-              },
-            ],
-          };
-        }
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text' as const,
+              text: `Object '${args.objectName}' not found`,
+            },
+          ],
+        };
       }
 
       const lockService = createLockService(client);

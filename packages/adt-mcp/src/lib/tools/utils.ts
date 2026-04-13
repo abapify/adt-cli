@@ -10,6 +10,22 @@ export interface SearchObject {
   packageName?: string;
 }
 
+/** Minimal structural type for the ADT client subset used by resolveObjectUri. */
+type QuickSearchClient = {
+  adt: {
+    repository: {
+      informationsystem: {
+        search: {
+          quickSearch(params: {
+            query: string;
+            maxResults: number;
+          }): Promise<unknown>;
+        };
+      };
+    };
+  };
+};
+
 /**
  * Extract object references from various ADT search response shapes.
  */
@@ -70,4 +86,35 @@ export function resolveObjectUriFromType(
     default:
       return undefined;
   }
+}
+
+/**
+ * Resolve the ADT URI for an ABAP object by name and optional type.
+ *
+ * Tries type-based resolution first (no network round-trip), then falls back
+ * to a quickSearch if the type is unknown or not mapped. Returns undefined
+ * when the object cannot be found.
+ */
+export async function resolveObjectUri(
+  client: QuickSearchClient,
+  objectName: string,
+  objectType?: string,
+): Promise<string | undefined> {
+  if (objectType) {
+    const uri = resolveObjectUriFromType(objectType, objectName);
+    if (uri) return uri;
+  }
+
+  const searchResult =
+    await client.adt.repository.informationsystem.search.quickSearch({
+      query: objectName,
+      maxResults: 10,
+    });
+
+  const objects = extractObjectReferences(searchResult);
+  const match = objects.find(
+    (o) => String(o.name ?? '').toUpperCase() === objectName.toUpperCase(),
+  );
+
+  return match?.uri;
 }

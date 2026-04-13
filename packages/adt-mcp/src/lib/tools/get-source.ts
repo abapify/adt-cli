@@ -10,7 +10,7 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types.js';
 import { connectionShape } from './shared-schemas.js';
-import { extractObjectReferences, resolveObjectUriFromType } from './utils.js';
+import { resolveObjectUri } from './utils.js';
 
 export function registerGetSourceTool(
   server: McpServer,
@@ -33,35 +33,21 @@ export function registerGetSourceTool(
       try {
         const client = ctx.getClient(args);
 
-        // Resolve object URI – prefer type-based resolution (faster, no extra round-trip)
-        let objectUri: string | undefined = args.objectType
-          ? resolveObjectUriFromType(args.objectType, args.objectName)
-          : undefined;
-
+        const objectUri = await resolveObjectUri(
+          client,
+          args.objectName,
+          args.objectType,
+        );
         if (!objectUri) {
-          const searchResult =
-            await client.adt.repository.informationsystem.search.quickSearch({
-              query: args.objectName,
-              maxResults: 10,
-            });
-          const objects = extractObjectReferences(searchResult);
-          const match = objects.find(
-            (o) =>
-              String(o.name ?? '').toUpperCase() ===
-              args.objectName.toUpperCase(),
-          );
-          if (!match?.uri) {
-            return {
-              isError: true,
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `Object '${args.objectName}' not found`,
-                },
-              ],
-            };
-          }
-          objectUri = match.uri;
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text' as const,
+                text: `Object '${args.objectName}' not found`,
+              },
+            ],
+          };
         }
 
         const source = await client.fetch(`${objectUri}/source/main`, {
