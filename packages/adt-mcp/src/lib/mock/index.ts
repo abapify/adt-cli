@@ -1,2 +1,2 @@
-export { createMockAdtServer, type MockAdtServer } from './server.js';
-export { fixtures } from './fixtures.js';
+export { createMockAdtServer, type MockAdtServer } from './server';
+export { fixtures } from './fixtures';

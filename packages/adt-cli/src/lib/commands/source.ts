@@ -53,25 +53,38 @@ const getSourceCommand = new Command('get')
   .description('Print ABAP source code for an object to stdout')
   .argument('<objectName>', 'ABAP object name')
   .option('--type <type>', 'Object type hint (e.g. CLAS, PROG, INTF)')
-  .action(async (objectName: string, options: { type?: string }) => {
-    try {
-      const client = await getAdtClientV2();
-      const uri = await resolveUri(client, objectName, options.type);
+  .option('--json', 'Output result as JSON')
+  .action(
+    async (objectName: string, options: { type?: string; json?: boolean }) => {
+      try {
+        const client = await getAdtClientV2();
+        const uri = await resolveUri(client, objectName, options.type);
 
-      const source = await client.fetch(`${uri}/source/main`, {
-        method: 'GET',
-        headers: { Accept: 'text/plain' },
-      });
+        const source = await client.fetch(`${uri}/source/main`, {
+          method: 'GET',
+          headers: { Accept: 'text/plain' },
+        });
 
-      process.stdout.write(String(source));
-    } catch (error) {
-      console.error(
-        '❌ Get source failed:',
-        error instanceof Error ? error.message : String(error),
-      );
-      process.exit(1);
-    }
-  });
+        if (options.json) {
+          console.log(
+            JSON.stringify(
+              { objectName, uri, source: String(source) },
+              null,
+              2,
+            ),
+          );
+        } else {
+          process.stdout.write(String(source));
+        }
+      } catch (error) {
+        console.error(
+          '❌ Get source failed:',
+          error instanceof Error ? error.message : String(error),
+        );
+        process.exit(1);
+      }
+    },
+  );
 
 const putSourceCommand = new Command('put')
   .description('Write ABAP source code from a file to an existing object')
@@ -82,11 +95,12 @@ const putSourceCommand = new Command('put')
     '--transport <transport>',
     'Transport request number for transportable objects',
   )
+  .option('--json', 'Output result as JSON')
   .action(
     async (
       objectName: string,
       file: string,
-      options: { type?: string; transport?: string },
+      options: { type?: string; transport?: string; json?: boolean },
     ) => {
       try {
         const client = await getAdtClientV2();
@@ -94,32 +108,46 @@ const putSourceCommand = new Command('put')
         const sourceCode = await readFile(file, 'utf8');
 
         const lockService = createLockService(client);
+        let lockHandle: string | undefined;
 
-        console.log(`🔒 Locking ${objectName}...`);
+        if (!options.json) console.log(`🔄 Locking ${objectName}...`);
         const lock = await lockService.lock(uri, {
           transport: options.transport,
           objectName,
         });
+        lockHandle = lock.handle;
 
         try {
-          const params = new URLSearchParams({ lockHandle: lock.handle });
+          const params = new URLSearchParams({ lockHandle });
           if (options.transport) params.set('corrNr', options.transport);
 
-          console.log(`✏️  Writing source to ${uri}...`);
+          if (!options.json) console.log(`🔄 Writing source to ${uri}...`);
           await client.fetch(`${uri}/source/main?${params.toString()}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'text/plain' },
             body: sourceCode,
           });
 
-          await lockService.unlock(uri, { lockHandle: lock.handle });
-          console.log(`✅ Source written and lock released for ${objectName}`);
+          await lockService.unlock(uri, { lockHandle });
+          lockHandle = undefined;
+
+          if (options.json) {
+            console.log(
+              JSON.stringify({ objectName, uri, status: 'written' }, null, 2),
+            );
+          } else {
+            console.log(
+              `✅ Source written and lock released for ${objectName}`,
+            );
+          }
         } catch (err) {
-          // Best-effort unlock
-          try {
-            await lockService.unlock(uri, { lockHandle: lock.handle });
-          } catch {
-            // ignore
+          // Best-effort unlock (only if not already unlocked)
+          if (lockHandle) {
+            try {
+              await lockService.unlock(uri, { lockHandle });
+            } catch {
+              // ignore
+            }
           }
           throw err;
         }

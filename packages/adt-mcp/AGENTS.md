@@ -189,7 +189,7 @@ if (!objectUri) {
 }
 ```
 
-`resolveObjectUriFromType` lives in `utils.ts` and covers the most common SAP object types (PROG, CLAS, INTF, FUGR, DEVC, TABL, DOMA, DTEL, MSAG). Extend it if you need to handle new types.
+`resolveObjectUriFromType` lives in `utils.ts` and covers the most common SAP object types (PROG, CLAS, INTF, FUGR, DEVC, TABL, DOMA, DTEL, TTYP). Extend it if you need to handle new types.
 
 ---
 

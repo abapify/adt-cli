@@ -3,24 +3,24 @@
  */
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { registerDiscoveryTool } from './discovery.js';
-import { registerSystemInfoTool } from './system-info.js';
-import { registerSearchObjectsTool } from './search-objects.js';
-import { registerGetObjectTool } from './get-object.js';
-import { registerCtsListTransportsTool } from './cts-list-transports.js';
-import { registerCtsGetTransportTool } from './cts-get-transport.js';
-import { registerCtsCreateTransportTool } from './cts-create-transport.js';
-import { registerCtsReleaseTransportTool } from './cts-release-transport.js';
-import { registerCtsDeleteTransportTool } from './cts-delete-transport.js';
-import { registerAtcRunTool } from './atc-run.js';
-import { registerGetSourceTool } from './get-source.js';
-import { registerUpdateSourceTool } from './update-source.js';
-import { registerActivateObjectTool } from './activate-object.js';
-import { registerCheckSyntaxTool } from './check-syntax.js';
-import { registerRunUnitTestsTool } from './run-unit-tests.js';
-import { registerGetTestClassesTool } from './get-test-classes.js';
-import { registerListPackageObjectsTool } from './list-package-objects.js';
+import type { ToolContext } from '../types';
+import { registerDiscoveryTool } from './discovery';
+import { registerSystemInfoTool } from './system-info';
+import { registerSearchObjectsTool } from './search-objects';
+import { registerGetObjectTool } from './get-object';
+import { registerCtsListTransportsTool } from './cts-list-transports';
+import { registerCtsGetTransportTool } from './cts-get-transport';
+import { registerCtsCreateTransportTool } from './cts-create-transport';
+import { registerCtsReleaseTransportTool } from './cts-release-transport';
+import { registerCtsDeleteTransportTool } from './cts-delete-transport';
+import { registerAtcRunTool } from './atc-run';
+import { registerGetSourceTool } from './get-source';
+import { registerUpdateSourceTool } from './update-source';
+import { registerActivateObjectTool } from './activate-object';
+import { registerCheckSyntaxTool } from './check-syntax';
+import { registerRunUnitTestsTool } from './run-unit-tests';
+import { registerGetTestClassesTool } from './get-test-classes';
+import { registerListPackageObjectsTool } from './list-package-objects';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerDiscoveryTool(server, ctx);

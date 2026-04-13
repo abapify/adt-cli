@@ -16,7 +16,7 @@ import {
   type ServerResponse,
 } from 'node:http';
 import { randomBytes } from 'node:crypto';
-import { fixtures } from './fixtures.js';
+import { fixtures } from './fixtures';
 
 export interface MockAdtServer {
   start: () => Promise<{ port: number }>;

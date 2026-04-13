@@ -115,6 +115,7 @@ export async function resolveObjectUri(
     await client.adt.repository.informationsystem.search.quickSearch({
       query: objectName,
       maxResults: 10,
+      ...(objectType ? { objectType } : {}),
     });
 
   const objects = extractObjectReferences(searchResult);

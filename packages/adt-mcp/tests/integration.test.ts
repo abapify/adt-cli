@@ -12,13 +12,13 @@ import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createMcpServer } from '../src/lib/server.js';
+import { createMcpServer } from '../src/lib/server';
 import {
   createMockAdtServer,
   type MockAdtServer,
-} from '../src/lib/mock/server.js';
+} from '../src/lib/mock/server';
 import { createAdtClient, type AdtClient } from '@abapify/adt-client';
-import type { ConnectionParams } from '../src/lib/types.js';
+import type { ConnectionParams } from '../src/lib/types';
 
 let mockAdt: MockAdtServer;
 let mockPort: number;
@@ -274,8 +274,10 @@ describe('adt-mcp integration tests', () => {
         objectName: 'ZCL_EXAMPLE',
         objectType: 'CLAS',
       });
+      const data = json as { source: string };
+      assert.ok(data.source, 'should have source property');
       assert.ok(
-        typeof json === 'string' && json.includes('CLASS'),
+        data.source.includes('CLASS'),
         'should return ABAP source text',
       );
     });
@@ -285,10 +287,9 @@ describe('adt-mcp integration tests', () => {
         ...connArgs(),
         objectName: 'ZCL_EXAMPLE',
       });
-      assert.ok(
-        typeof json === 'string' && json.length > 0,
-        'should return source',
-      );
+      const data = json as { source: string };
+      assert.ok(data.source, 'should have source property');
+      assert.ok(data.source.length > 0, 'should return source');
     });
   });
 
@@ -384,8 +385,10 @@ describe('adt-mcp integration tests', () => {
         ...connArgs(),
         className: 'ZCL_EXAMPLE',
       });
+      const data = json as { source: string };
+      assert.ok(data.source, 'should have source property');
       assert.ok(
-        typeof json === 'string' && json.includes('FOR TESTING'),
+        data.source.includes('FOR TESTING'),
         'should return test class source with FOR TESTING',
       );
     });

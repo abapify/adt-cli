@@ -8,8 +8,8 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
 
 export function registerGetTestClassesTool(
   server: McpServer,
@@ -36,7 +36,12 @@ export function registerGetTestClassesTool(
         );
 
         return {
-          content: [{ type: 'text' as const, text: String(source) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ source: String(source) }),
+            },
+          ],
         };
       } catch (error) {
         return {

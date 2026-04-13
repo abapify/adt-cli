@@ -6,9 +6,9 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
-import { extractObjectReferences } from './utils.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
+import { extractObjectReferences } from './utils';
 
 export function registerSearchObjectsTool(
   server: McpServer,

@@ -8,9 +8,9 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
-import { resolveObjectUri } from './utils.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
+import { resolveObjectUri } from './utils';
 
 export function registerGetSourceTool(
   server: McpServer,
@@ -56,7 +56,12 @@ export function registerGetSourceTool(
         });
 
         return {
-          content: [{ type: 'text' as const, text: String(source) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ source: String(source) }),
+            },
+          ],
         };
       } catch (error) {
         return {

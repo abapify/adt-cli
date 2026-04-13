@@ -19,13 +19,16 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     {
+      "path": "../adt-schemas"
+    },
+    {
+      "path": "../adt-locks"
+    },
+    {
       "path": "../adt-contracts"
     },
     {
       "path": "../adt-client"
-    },
-    {
-      "path": "../adt-locks"
     }
   ]
 }

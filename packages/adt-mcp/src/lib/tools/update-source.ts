@@ -10,9 +10,9 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
-import { resolveObjectUri } from './utils.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
+import { resolveObjectUri } from './utils';
 
 export function registerUpdateSourceTool(
   server: McpServer,

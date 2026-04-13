@@ -10,9 +10,9 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
-import { resolveObjectUri } from './utils.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
+import { resolveObjectUri } from './utils';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { adtcore } from '@abapify/adt-schemas';
 
