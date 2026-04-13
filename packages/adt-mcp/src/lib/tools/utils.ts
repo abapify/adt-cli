@@ -65,6 +65,7 @@ export function resolveObjectUriFromType(
     case 'TTYP':
       return `/sap/bc/adt/ddic/tabletypes/${n}`;
     case 'DEVC':
+      // Package names are case-sensitive in SAP ADT (preserved, not lowercased)
       return `/sap/bc/adt/packages/${encodeURIComponent(objectName)}`;
     default:
       return undefined;
