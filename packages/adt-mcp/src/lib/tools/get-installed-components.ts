@@ -7,7 +7,6 @@
  * ADT endpoint: GET /sap/bc/adt/system/softwarecomponents
  */
 
-import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
@@ -129,7 +128,12 @@ export function registerGetFeaturesTool(
             {
               type: 'text' as const,
               text: JSON.stringify(
-                { features, discoveryServices: [...services].sort() },
+                {
+                  features,
+                  discoveryServices: [...services].sort((a, b) =>
+                    a.localeCompare(b),
+                  ),
+                },
                 null,
                 2,
               ),

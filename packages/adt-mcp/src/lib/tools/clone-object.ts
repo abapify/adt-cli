@@ -201,7 +201,7 @@ export function registerCloneObjectTool(
             {
               method: 'PUT',
               headers: { 'Content-Type': 'text/plain' },
-              body: sourceCode as string,
+              body: sourceCode,
             },
           );
         } finally {

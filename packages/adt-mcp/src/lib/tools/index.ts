@@ -29,14 +29,18 @@ import { registerGetTableContentsTool } from './get-table-contents';
 import { registerRunQueryTool } from './run-query';
 import { registerFindDefinitionTool } from './find-definition';
 import { registerFindReferencesTool } from './find-references';
-import { registerGetCallersOfTool } from './get-callers-of';
-import { registerGetCalleesOfTool } from './get-callees-of';
+import {
+  registerGetCallersOfTool,
+  registerGetCalleesOfTool,
+} from './call-hierarchy';
 import { registerCreateObjectTool } from './create-object';
 import { registerDeleteObjectTool } from './delete-object';
 import { registerActivatePackageTool } from './activate-package';
 // Medium-priority feature parity (#M1–#M10)
-import { registerGetFunctionGroupTool } from './get-function-group';
-import { registerGetFunctionTool } from './get-function';
+import {
+  registerGetFunctionGroupTool,
+  registerGetFunctionTool,
+} from './function-tools';
 import { registerLockObjectTool } from './lock-object';
 import { registerUnlockObjectTool } from './unlock-object';
 import { registerGetObjectStructureTool } from './get-object-structure';
