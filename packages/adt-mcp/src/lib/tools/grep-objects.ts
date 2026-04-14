@@ -22,9 +22,7 @@ export function registerGrepObjectsTool(
     'Regex search for a pattern within ABAP object source code. Provide either a list of object URIs or name+type pairs to resolve them.',
     {
       ...connectionShape,
-      pattern: z
-        .string()
-        .describe('Search pattern (regex or literal string)'),
+      pattern: z.string().describe('Search pattern (regex or literal string)'),
       objectUris: z
         .array(z.string())
         .optional()
@@ -50,15 +48,15 @@ export function registerGrepObjectsTool(
         const client = ctx.getClient(args);
         const maxResults = args.maxResults ?? 50;
 
-        // Resolve URIs from name/type pairs if provided
-        let uris: string[] = args.objectUris ?? [];
+        // Resolve URIs from name/type pairs if provided (in parallel)
+        const uris: string[] = args.objectUris ? [...args.objectUris] : [];
         if (args.objects && args.objects.length > 0) {
-          for (const obj of args.objects) {
-            const uri = await resolveObjectUri(
-              client,
-              obj.objectName,
-              obj.objectType,
-            );
+          const resolved = await Promise.all(
+            args.objects.map((obj) =>
+              resolveObjectUri(client, obj.objectName, obj.objectType),
+            ),
+          );
+          for (const uri of resolved) {
             if (uri) uris.push(uri);
           }
         }

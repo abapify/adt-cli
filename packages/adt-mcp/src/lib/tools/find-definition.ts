@@ -51,8 +51,7 @@ export function registerFindDefinitionTool(
         });
 
         if (args.objectType) params.set('objectType', args.objectType);
-        if (args.parentObjectName)
-          params.set('context', args.parentObjectName);
+        if (args.parentObjectName) params.set('context', args.parentObjectName);
         if (args.parentObjectType)
           params.set('contextType', args.parentObjectType);
 

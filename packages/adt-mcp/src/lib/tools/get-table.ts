@@ -12,13 +12,18 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
 
-export function registerGetTableTool(server: McpServer, ctx: ToolContext): void {
+export function registerGetTableTool(
+  server: McpServer,
+  ctx: ToolContext,
+): void {
   server.tool(
     'get_table',
     'Read DDIC table or structure definition (fields, keys, data elements)',
     {
       ...connectionShape,
-      tableName: z.string().describe('DDIC table or structure name (e.g. MARA, VBAK)'),
+      tableName: z
+        .string()
+        .describe('DDIC table or structure name (e.g. MARA, VBAK)'),
     },
     async (args) => {
       try {

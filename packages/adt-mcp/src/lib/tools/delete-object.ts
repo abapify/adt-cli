@@ -31,7 +31,9 @@ export function registerDeleteObjectTool(
       transport: z
         .string()
         .optional()
-        .describe('Transport request number (required for transportable objects)'),
+        .describe(
+          'Transport request number (required for transportable objects)',
+        ),
     },
     async (args) => {
       try {
@@ -68,10 +70,12 @@ export function registerDeleteObjectTool(
             };
           }
 
-          const params = args.transport
-            ? `?corrNr=${encodeURIComponent(args.transport)}`
-            : '';
-          await client.fetch(`${uri}${params}`, { method: 'DELETE' });
+          const params = new URLSearchParams();
+          if (args.transport) params.set('corrNr', args.transport);
+          const qs = params.toString();
+          await client.fetch(`${uri}${qs ? `?${qs}` : ''}`, {
+            method: 'DELETE',
+          });
         }
 
         return {

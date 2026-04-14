@@ -198,46 +198,6 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
-  // ── cts_create_transport ──────────────────────────────────────
-
-  describe('cts_create_transport tool', () => {
-    it('returns a not-yet-implemented error', async () => {
-      const { raw } = await callTool('cts_create_transport', {
-        ...connArgs(),
-        description: 'Test transport',
-      });
-      const result = raw as {
-        isError?: boolean;
-        content: Array<{ type: string; text: string }>;
-      };
-      assert.strictEqual(result.isError, true);
-      assert.ok(
-        result.content[0]?.text.includes('not yet implemented'),
-        'error message should mention not yet implemented',
-      );
-    });
-  });
-
-  // ── cts_release_transport ─────────────────────────────────────
-
-  describe('cts_release_transport tool', () => {
-    it('returns a not-yet-implemented error', async () => {
-      const { raw } = await callTool('cts_release_transport', {
-        ...connArgs(),
-        transport: 'DEVK900001',
-      });
-      const result = raw as {
-        isError?: boolean;
-        content: Array<{ type: string; text: string }>;
-      };
-      assert.strictEqual(result.isError, true);
-      assert.ok(
-        result.content[0]?.text.includes('not yet implemented'),
-        'error message should mention not yet implemented',
-      );
-    });
-  });
-
   // ── cts_delete_transport ───────────────────────────────────────
 
   describe('cts_delete_transport tool', () => {

@@ -33,7 +33,8 @@ export function registerCtsReleaseTransportTool(
           {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/vnd.sap.adt.transportorganizer.v1+xml',
+              'Content-Type':
+                'application/vnd.sap.adt.transportorganizer.v1+xml',
               Accept: 'application/vnd.sap.adt.transportorganizer.v1+xml',
             },
           },

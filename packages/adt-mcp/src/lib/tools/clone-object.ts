@@ -184,15 +184,18 @@ export function registerCloneObjectTool(
         }
 
         const lockService = createLockService(client);
-        const lockHandle = await lockService.lock(resolvedTargetUri, {
-          transport: args.transport,
-          objectName: targetName,
-          objectType: sourceType,
-        });
+        let lockHandleStr: string | undefined;
 
         try {
+          const lockResult = await lockService.lock(resolvedTargetUri, {
+            transport: args.transport,
+            objectName: targetName,
+            objectType: sourceType,
+          });
+          lockHandleStr = lockResult.handle;
+
           const putParams = new URLSearchParams({
-            lockHandle: lockHandle.handle,
+            lockHandle: lockHandleStr,
             ...(args.transport ? { corrNr: args.transport } : {}),
           });
 
@@ -204,10 +207,23 @@ export function registerCloneObjectTool(
               body: sourceCode,
             },
           );
-        } finally {
+
           await lockService.unlock(resolvedTargetUri, {
-            lockHandle: lockHandle.handle,
+            lockHandle: lockHandleStr,
           });
+          lockHandleStr = undefined;
+        } catch (lockError) {
+          // Best-effort unlock on failure
+          if (lockHandleStr) {
+            try {
+              await lockService.unlock(resolvedTargetUri, {
+                lockHandle: lockHandleStr,
+              });
+            } catch {
+              // ignore unlock errors in error path
+            }
+          }
+          throw lockError;
         }
 
         return {

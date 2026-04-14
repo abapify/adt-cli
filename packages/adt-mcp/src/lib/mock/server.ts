@@ -361,7 +361,6 @@ function matchRoute(
   if (
     m === 'GET' &&
     url.startsWith('/sap/bc/adt/functions/groups/') &&
-    !url.includes('?') &&
     !url.includes('/objectstructure') &&
     !url.includes('/source/') &&
     !url.includes('/fmodules/')

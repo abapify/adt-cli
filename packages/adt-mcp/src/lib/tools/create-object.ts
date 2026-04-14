@@ -27,7 +27,7 @@ export function registerCreateObjectTool(
 ): void {
   server.tool(
     'create_object',
-    'Create a new ABAP object. Supported types: PROG (program), CLAS (class), INTF (interface), FUGR (function group), DEVC (package)',
+    'Create a new ABAP object. Supported types: PROG (program), CLAS (class), INTF (interface), FUGR (function group). For packages use create_package.',
     {
       ...connectionShape,
       objectName: z
@@ -35,11 +35,7 @@ export function registerCreateObjectTool(
         .describe(
           'Name of the new object (uppercase, e.g. ZCL_MY_CLASS, ZPACKAGE)',
         ),
-      objectType: z
-        .string()
-        .describe(
-          'Object type: PROG, CLAS, INTF, FUGR, or DEVC',
-        ),
+      objectType: z.string().describe('Object type: PROG, CLAS, INTF, or FUGR'),
       description: z.string().describe('Short description of the object'),
       packageName: z
         .string()

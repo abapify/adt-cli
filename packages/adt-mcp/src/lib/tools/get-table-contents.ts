@@ -18,12 +18,10 @@ export function registerGetTableContentsTool(
 ): void {
   server.tool(
     'get_table_contents',
-    'Read data from a DDIC table with optional WHERE filter, column selection, and row limit',
+    'Read data from a DDIC table with optional WHERE filter, column selection, and row limit. WARNING: the WHERE clause is sent as-is to the SAP data preview endpoint — avoid untrusted input.',
     {
       ...connectionShape,
-      tableName: z
-        .string()
-        .describe('DDIC table name (e.g. MARA, VBAK, T001)'),
+      tableName: z.string().describe('DDIC table name (e.g. MARA, VBAK, T001)'),
       where: z
         .string()
         .optional()

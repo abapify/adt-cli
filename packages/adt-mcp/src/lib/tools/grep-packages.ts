@@ -21,9 +21,7 @@ export function registerGrepPackagesTool(
     'Regex search for a pattern across all ABAP source code within a package (and optionally its subpackages)',
     {
       ...connectionShape,
-      pattern: z
-        .string()
-        .describe('Search pattern (regex or literal string)'),
+      pattern: z.string().describe('Search pattern (regex or literal string)'),
       packageName: z
         .string()
         .describe('ABAP package name to search within (e.g. ZPACKAGE)'),

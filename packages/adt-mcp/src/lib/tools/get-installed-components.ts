@@ -100,27 +100,26 @@ export function registerGetFeaturesTool(
         }
 
         // Feature detection heuristics based on known ADT paths
+        const serviceList = [...services];
         const features: Record<string, boolean> = {
           atc:
             services.has('/sap/bc/adt/atc') ||
-            [...services].some((s) => s.includes('/atc')),
-          cts: [...services].some((s) => s.includes('/cts')),
-          aunit: [...services].some(
+            serviceList.some((s) => s.includes('/atc')),
+          cts: serviceList.some((s) => s.includes('/cts')),
+          aunit: serviceList.some(
             (s) => s.includes('/abapunit') || s.includes('/aunit'),
           ),
-          abapgit: [...services].some((s) => s.includes('/abapgit')),
-          rap: [...services].some(
+          abapgit: serviceList.some((s) => s.includes('/abapgit')),
+          rap: serviceList.some(
             (s) => s.includes('/businessservices') || s.includes('/rap'),
           ),
-          ui5: [...services].some(
+          ui5: serviceList.some(
             (s) => s.includes('/ui5') || s.includes('/bsp'),
           ),
-          classicBadi: [...services].some((s) => s.includes('/enhancements')),
-          prettyPrinter: [...services].some((s) =>
-            s.includes('/prettyprinter'),
-          ),
-          dataPreview: [...services].some((s) => s.includes('/datapreview')),
-          navigation: [...services].some((s) => s.includes('/navigation')),
+          classicBadi: serviceList.some((s) => s.includes('/enhancements')),
+          prettyPrinter: serviceList.some((s) => s.includes('/prettyprinter')),
+          dataPreview: serviceList.some((s) => s.includes('/datapreview')),
+          navigation: serviceList.some((s) => s.includes('/navigation')),
         };
 
         return {

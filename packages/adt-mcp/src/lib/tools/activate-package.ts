@@ -27,9 +27,7 @@ export function registerActivatePackageTool(
     'Batch-activate all inactive objects in a package. Returns the count and list of activated objects.',
     {
       ...connectionShape,
-      packageName: z
-        .string()
-        .describe('ABAP package name (e.g. ZPACKAGE)'),
+      packageName: z.string().describe('ABAP package name (e.g. ZPACKAGE)'),
     },
     async (args) => {
       try {

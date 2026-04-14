@@ -70,7 +70,11 @@ export function registerRunQueryTool(
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify({ query: trimmedQuery, data: result }, null, 2),
+              text: JSON.stringify(
+                { query: trimmedQuery, data: result },
+                null,
+                2,
+              ),
             },
           ],
         };
