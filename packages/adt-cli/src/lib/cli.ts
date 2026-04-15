@@ -33,6 +33,14 @@ import {
   programCommand,
   interfaceCommand,
 } from './commands/object';
+import {
+  domainCommand,
+  dataelementCommand,
+  tableCommand,
+  structureCommand,
+} from './commands/ddic';
+import { createDatapreviewCommand } from './commands/datapreview';
+import { createAbapCommand } from './commands/abap';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
 // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
@@ -238,6 +246,18 @@ export async function createCLI(options?: {
   program.addCommand(classCommand);
   program.addCommand(programCommand);
   program.addCommand(interfaceCommand);
+
+  // DDIC commands (domain, dataelement, table, structure)
+  program.addCommand(domainCommand);
+  program.addCommand(dataelementCommand);
+  program.addCommand(tableCommand);
+  program.addCommand(structureCommand);
+
+  // Datapreview (OSQL queries)
+  program.addCommand(createDatapreviewCommand());
+
+  // ABAP execution (abap run)
+  program.addCommand(createAbapCommand());
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());

@@ -85,6 +85,56 @@ export class AdkTable extends AdkMainObject<typeof TableKind, TableXml> {
     const context = ctx ?? getGlobalContext();
     return new AdkTable(context, name).load();
   }
+
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkTable.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP database table on SAP.
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkTable> {
+    const context = ctx ?? getGlobalContext();
+    const table = new AdkTable(context, name.toUpperCase());
+    table.setData({
+      name: name.toUpperCase(),
+      type: 'TABL/DT',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as TableXml);
+    await table.save({ transport: options?.transport, mode: 'create' });
+    return table;
+  }
+
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const table = new AdkTable(context, name.toUpperCase());
+    await table.crudContract.delete(name.toUpperCase(), {
+      ...(options?.transport && { corrNr: options.transport }),
+      ...(options?.lockHandle && { lockHandle: options.lockHandle }),
+    });
+  }
 }
 
 /**
@@ -125,6 +175,56 @@ export class AdkStructure extends AdkMainObject<
   static async get(name: string, ctx?: AdkContext): Promise<AdkStructure> {
     const context = ctx ?? getGlobalContext();
     return new AdkStructure(context, name).load();
+  }
+
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkStructure.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP structure on SAP.
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkStructure> {
+    const context = ctx ?? getGlobalContext();
+    const struct = new AdkStructure(context, name.toUpperCase());
+    struct.setData({
+      name: name.toUpperCase(),
+      type: 'TABL/DS',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as TableXml);
+    await struct.save({ transport: options?.transport, mode: 'create' });
+    return struct;
+  }
+
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const struct = new AdkStructure(context, name.toUpperCase());
+    await struct.crudContract.delete(name.toUpperCase(), {
+      ...(options?.transport && { corrNr: options.transport }),
+      ...(options?.lockHandle && { lockHandle: options.lockHandle }),
+    });
   }
 }
 

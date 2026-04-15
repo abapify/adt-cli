@@ -86,7 +86,7 @@ export function buildObjectCrudCommands<
     activate(): Promise<T>;
     lock(transport?: string): Promise<{ handle: string }>;
     unlock(lockHandle: string): Promise<void>;
-    saveMainSource(
+    saveMainSource?(
       source: string,
       options?: { lockHandle?: string; transport?: string },
     ): Promise<void>;
@@ -297,6 +297,9 @@ export function buildObjectCrudCommands<
 
             try {
               progress.step(`💾 Writing source to ${name.toUpperCase()}...`);
+              if (!obj.saveMainSource) {
+                throw new Error(`${def.label} does not support source writes`);
+              }
               await obj.saveMainSource(source, {
                 lockHandle: lockHandle.handle,
                 transport: options.transport,

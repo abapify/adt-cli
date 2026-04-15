@@ -52,6 +52,56 @@ export class AdkDataElement extends AdkMainObject<
     const context = ctx ?? getGlobalContext();
     return new AdkDataElement(context, name).load();
   }
+
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkDataElement.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP data element on SAP.
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkDataElement> {
+    const context = ctx ?? getGlobalContext();
+    const dtel = new AdkDataElement(context, name.toUpperCase());
+    dtel.setData({
+      name: name.toUpperCase(),
+      type: 'DTEL',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as DataElementXml);
+    await dtel.save({ transport: options?.transport, mode: 'create' });
+    return dtel;
+  }
+
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const dtel = new AdkDataElement(context, name.toUpperCase());
+    await dtel.crudContract.delete(name.toUpperCase(), {
+      ...(options?.transport && { corrNr: options.transport }),
+      ...(options?.lockHandle && { lockHandle: options.lockHandle }),
+    });
+  }
 }
 
 // Self-register with ADK registry
