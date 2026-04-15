@@ -130,6 +130,9 @@ export {
   type TableTypeXml,
 } from './objects/ddic';
 
+// CDS types (DDL, DCL)
+export { AdkDdlSource, AdkDclSource } from './objects/cds';
+
 // CTS types (legacy complex transport)
 export type {
   TransportData,

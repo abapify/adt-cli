@@ -41,6 +41,7 @@ import {
 } from './commands/ddic';
 import { createDatapreviewCommand } from './commands/datapreview';
 import { createAbapCommand } from './commands/abap';
+import { ddlCommand, dclCommand } from './commands/cds';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
 // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
@@ -258,6 +259,10 @@ export async function createCLI(options?: {
 
   // ABAP execution (abap run)
   program.addCommand(createAbapCommand());
+
+  // CDS/RAP commands (DDL, DCL)
+  program.addCommand(ddlCommand);
+  program.addCommand(dclCommand);
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());
