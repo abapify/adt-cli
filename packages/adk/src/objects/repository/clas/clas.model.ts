@@ -289,12 +289,79 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
   }
 
   // ============================================
-  // Static Factory Method
+  // Static Factory Methods
   // ============================================
 
   static async get(name: string, ctx?: AdkContext): Promise<AdkClass> {
     const context = ctx ?? getGlobalContext();
     return new AdkClass(context, name).load();
+  }
+
+  /**
+   * Check if a class exists on SAP
+   */
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkClass.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP class on SAP
+   *
+   * @param name - Class name (e.g., 'ZCL_MY_CLASS')
+   * @param description - Short description
+   * @param packageName - Package to assign the class to
+   * @param options - Save options (transport)
+   * @param ctx - Optional ADK context
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkClass> {
+    const context = ctx ?? getGlobalContext();
+    const cls = new AdkClass(context, name.toUpperCase());
+    cls.setData({
+      name: name.toUpperCase(),
+      type: 'CLAS/OC',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as ClassXml);
+    await cls.save({ transport: options?.transport, mode: 'create' });
+    return cls;
+  }
+
+  /**
+   * Delete an ABAP class from SAP
+   *
+   * @param name - Class name
+   * @param options - Delete options (transport)
+   * @param ctx - Optional ADK context
+   */
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const cls = new AdkClass(context, name.toUpperCase());
+    const contract = cls.crudContract;
+    await contract.delete(name.toUpperCase(), {
+      corrNr: options?.transport,
+      lockHandle: options?.lockHandle,
+    });
   }
 }
 

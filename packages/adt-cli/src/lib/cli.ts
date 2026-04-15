@@ -27,6 +27,12 @@ import {
   userCommand,
   sourceCommand,
 } from './commands';
+import { createPackageCommand } from './commands/package';
+import {
+  classCommand,
+  programCommand,
+  interfaceCommand,
+} from './commands/object';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
 // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
@@ -175,8 +181,11 @@ export async function createCLI(options?: {
   // Object inspector command
   program.addCommand(getCommand);
 
-  // Get subcommands for specific object types
+  // Get subcommands for specific object types (legacy: adt get package <name>)
   getCommand.addCommand(packageGetCommand);
+
+  // Package commands (adt package create/list/delete/activate/stat/get)
+  program.addCommand(createPackageCommand());
 
   // ATC (ABAP Test Cockpit) command - now loaded as plugin from @abapify/adt-atc
   // Add '@abapify/adt-atc/commands/atc' to adt.config.ts commands array to enable
@@ -224,6 +233,11 @@ export async function createCLI(options?: {
 
   // User lookup command
   program.addCommand(userCommand);
+
+  // Object CRUD commands (class, program, interface)
+  program.addCommand(classCommand);
+  program.addCommand(programCommand);
+  program.addCommand(interfaceCommand);
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());

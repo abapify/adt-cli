@@ -341,6 +341,26 @@ export class AdkPackage
     await pkg.save({ transport: options?.transport, mode: 'create' });
     return pkg;
   }
+
+  /**
+   * Delete an ABAP package from SAP
+   *
+   * @param name - Package name
+   * @param options - Delete options (transport, lockHandle)
+   * @param ctx - Optional ADK context (uses global context if not provided)
+   */
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const pkg = new AdkPackage(context, name.toUpperCase());
+    await pkg.crudContract.delete(name.toUpperCase(), {
+      ...(options?.transport && { corrNr: options.transport }),
+      ...(options?.lockHandle && { lockHandle: options.lockHandle }),
+    });
+  }
 }
 
 // Self-register with ADK registry

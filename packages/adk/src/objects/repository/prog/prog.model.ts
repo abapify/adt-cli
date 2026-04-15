@@ -65,12 +65,79 @@ export class AdkProgram extends AdkMainObject<typeof ProgramKind, ProgramXml> {
   }
 
   // ============================================
-  // Static Factory Method
+  // Static Factory Methods
   // ============================================
 
   static async get(name: string, ctx?: AdkContext): Promise<AdkProgram> {
     const context = ctx ?? getGlobalContext();
     return new AdkProgram(context, name).load();
+  }
+
+  /**
+   * Check if a program exists on SAP
+   */
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkProgram.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP program on SAP
+   *
+   * @param name - Program name (e.g., 'ZMYPROGRAM')
+   * @param description - Short description
+   * @param packageName - Package to assign the program to
+   * @param options - Save options (transport)
+   * @param ctx - Optional ADK context
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkProgram> {
+    const context = ctx ?? getGlobalContext();
+    const prog = new AdkProgram(context, name.toUpperCase());
+    prog.setData({
+      name: name.toUpperCase(),
+      type: 'PROG/P',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as ProgramXml);
+    await prog.save({ transport: options?.transport, mode: 'create' });
+    return prog;
+  }
+
+  /**
+   * Delete an ABAP program from SAP
+   *
+   * @param name - Program name
+   * @param options - Delete options (transport)
+   * @param ctx - Optional ADK context
+   */
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const prog = new AdkProgram(context, name.toUpperCase());
+    const contract = prog.crudContract;
+    await contract.delete(name.toUpperCase(), {
+      corrNr: options?.transport,
+      lockHandle: options?.lockHandle,
+    });
   }
 }
 
