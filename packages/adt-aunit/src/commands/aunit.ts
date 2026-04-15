@@ -18,6 +18,7 @@ const ansi = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
 };
 import { outputJunitReport } from '../formatters';
+import { outputSonarReport } from '../formatters';
 import type {
   AunitResult,
   AunitProgram,
@@ -472,13 +473,13 @@ export const aunitCommand: CliCommandPlugin = {
     },
     {
       flags: '--format <format>',
-      description: 'Output format: console, json, junit',
+      description: 'Output format: console, json, junit, sonar',
       default: 'console',
     },
     {
       flags: '--output <file>',
       description:
-        'Output file (required for junit format, e.g., aunit-report.xml)',
+        'Output file (required for junit/sonar format, e.g., aunit-report.xml)',
     },
   ],
 
@@ -516,9 +517,12 @@ export const aunitCommand: CliCommandPlugin = {
       process.exit(1);
     }
 
-    // Validate output file for junit format
-    if (options.format === 'junit' && !options.output) {
-      ctx.logger.error('❌ --output is required for junit format');
+    // Validate output file for junit/sonar format
+    if (
+      (options.format === 'junit' || options.format === 'sonar') &&
+      !options.output
+    ) {
+      ctx.logger.error(`❌ --output is required for ${options.format} format`);
       process.exit(1);
     }
 
@@ -554,13 +558,18 @@ export const aunitCommand: CliCommandPlugin = {
       await outputJunitReport(result, options.output);
       // Also print summary to console
       displayResults(result, ctx.adtSystemName);
+    } else if (options.format === 'sonar' && options.output) {
+      outputSonarReport(result, options.output);
+      // Also print summary to console
+      displayResults(result, ctx.adtSystemName);
     } else {
       displayResults(result, ctx.adtSystemName);
     }
 
-    // Exit with error code if tests failed
-    if (result.failCount > 0 || result.errorCount > 0) {
-      process.exit(1);
+    // Exit with non-zero code equal to number of failures+errors (sapcli convention)
+    const failures = result.failCount + result.errorCount;
+    if (failures > 0) {
+      process.exit(failures > 125 ? 125 : failures);
     }
   },
 };
