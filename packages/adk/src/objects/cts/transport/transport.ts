@@ -390,6 +390,42 @@ export class AdkTransportRequest extends AdkObject<
     await this.ctx.client.adt.cts.transportrequests.delete(this.number);
   }
 
+  /**
+   * Reassign ownership of this transport (and optionally all tasks) to a new user.
+   *
+   * @param newOwner - SAP username to become the new owner
+   * @param recursive - When true, also reassign all modifiable tasks
+   */
+  async reassign(newOwner: string, recursive = false): Promise<void> {
+    const xml =
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<tm:root xmlns:tm="http://www.sap.com/cts/adt/tm"` +
+      ` tm:useraction="changeowner"` +
+      ` tm:targetuser="${escapeXml(newOwner)}"/>`;
+
+    await this.ctx.client.fetch(
+      `/sap/bc/adt/cts/transportrequests/${this.number}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/vnd.sap.adt.transportorganizer.v1+xml',
+          Accept: 'application/vnd.sap.adt.transportorganizer.v1+xml',
+        },
+        body: xml,
+      },
+    );
+
+    (this.itemData as { owner?: string }).owner = newOwner;
+
+    if (recursive) {
+      for (const task of this.tasks) {
+        if (task.status !== 'R') {
+          await task.reassign(newOwner);
+        }
+      }
+    }
+  }
+
   // ===========================================================================
   // Static Factory
   // ===========================================================================
