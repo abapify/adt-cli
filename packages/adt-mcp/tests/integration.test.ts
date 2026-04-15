@@ -414,6 +414,14 @@ describe('adt-mcp integration tests', () => {
       assert.strictEqual(data.pattern, 'METHOD');
       assert.ok(data.results !== undefined);
     });
+
+    it('rejects unscoped searches', async () => {
+      const { raw } = await callTool('grep_objects', {
+        ...connArgs(),
+        pattern: 'METHOD',
+      });
+      assert.strictEqual(raw.isError, true);
+    });
   });
 
   // ── grep_packages ──────────────────────────────────────────────

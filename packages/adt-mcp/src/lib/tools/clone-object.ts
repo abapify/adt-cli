@@ -140,10 +140,7 @@ export function registerCloneObjectTool(
         .describe(
           'Description for the clone (defaults to source description with "Copy of" prefix)',
         ),
-      targetPackage: z
-        .string()
-        .optional()
-        .describe('Package for the clone (defaults to same package as source)'),
+      targetPackage: z.string().optional().describe('Package for the clone'),
       transport: z
         .string()
         .optional()

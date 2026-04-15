@@ -10,6 +10,14 @@ export interface SearchObject {
   packageName?: string;
 }
 
+export interface DiscoveryWorkspace {
+  title?: string;
+  collections: Array<{
+    href: string;
+    title?: string;
+  }>;
+}
+
 /**
  * Minimal structural type for the ADT client subset used by resolveObjectUri.
  *
@@ -55,6 +63,43 @@ export function extractObjectReferences(results: unknown): SearchObject[] {
 
   if (!rawObjects) return [];
   return Array.isArray(rawObjects) ? rawObjects : [rawObjects];
+}
+
+/**
+ * Normalize discovery responses from either the typed Atom service document
+ * shape or the legacy JSON mock shape used by older tests.
+ */
+export function extractDiscoveryWorkspaces(
+  discovery: unknown,
+): DiscoveryWorkspace[] {
+  const result = discovery as
+    | {
+        service?: {
+          workspace?: Array<{
+            title?: string;
+            collection?: Array<{ href: string; title?: string }>;
+          }>;
+        };
+        workspaces?: Array<{
+          title?: string;
+          collections?: Array<{ href: string; title?: string }>;
+        }>;
+      }
+    | undefined;
+
+  const typedWorkspaces = result?.service?.workspace?.map((workspace) => ({
+    title: workspace.title,
+    collections: workspace.collection ?? [],
+  }));
+
+  if (typedWorkspaces && typedWorkspaces.length > 0) {
+    return typedWorkspaces;
+  }
+
+  return (result?.workspaces ?? []).map((workspace) => ({
+    title: workspace.title,
+    collections: workspace.collections ?? [],
+  }));
 }
 
 /**

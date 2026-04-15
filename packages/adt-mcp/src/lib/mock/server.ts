@@ -28,13 +28,14 @@ function matchRoute(
   url: string,
 ): { status: number; body: string; contentType: string } | undefined {
   const m = method.toUpperCase();
+  const pathname = url.split('?')[0];
 
   // Discovery
   if (m === 'GET' && url.startsWith('/sap/bc/adt/discovery')) {
     return {
       status: 200,
-      body: JSON.stringify(fixtures.discovery),
-      contentType: 'application/json',
+      body: fixtures.discovery,
+      contentType: 'application/atomsvc+xml',
     };
   }
 
@@ -163,10 +164,13 @@ function matchRoute(
   // CTS – release transport (_action=RELEASE)
   if (
     m === 'POST' &&
-    /\/sap\/bc\/adt\/cts\/transportrequests\/\w+/.test(url) &&
-    url.includes('_action=RELEASE')
+    /\/sap\/bc\/adt\/cts\/transportrequests\/\w+/.test(pathname)
   ) {
-    return { status: 200, body: '', contentType: 'text/plain' };
+    return {
+      status: 200,
+      body: fixtures.transportRelease,
+      contentType: 'application/vnd.sap.adt.transportorganizer.v1+xml',
+    };
   }
 
   // CTS – list transports

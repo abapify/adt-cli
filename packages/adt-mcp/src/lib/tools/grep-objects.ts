@@ -61,6 +61,18 @@ export function registerGrepObjectsTool(
           }
         }
 
+        if (uris.length === 0) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text' as const,
+                text: 'Specify at least one valid object URI or resolvable object name/type pair',
+              },
+            ],
+          };
+        }
+
         // Build query parameters
         const params = new URLSearchParams({
           userannotation: 'userwhere',

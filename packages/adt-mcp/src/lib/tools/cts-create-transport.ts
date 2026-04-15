@@ -77,6 +77,18 @@ export function registerCtsCreateTransportTool(
           getStringField(request, 'number') ??
           '';
 
+        if (!transportNumber) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text' as const,
+                text: `Create transport failed: transport number missing in response ${JSON.stringify(response)}`,
+              },
+            ],
+          };
+        }
+
         return {
           content: [
             {

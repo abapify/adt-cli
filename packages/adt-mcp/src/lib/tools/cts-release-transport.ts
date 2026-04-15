@@ -3,7 +3,7 @@
  *
  * CLI equivalent: `adt cts tr release <transport>`
  *
- * POSTs to /sap/bc/adt/cts/transportrequests/{trkorr}?_action=RELEASE
+ * POSTs a typed transport organizer body to /sap/bc/adt/cts/transportrequests/{trkorr}
  */
 
 import { z } from 'zod';
@@ -27,9 +27,13 @@ export function registerCtsReleaseTransportTool(
     async (args) => {
       try {
         const client = ctx.getClient(args);
+        // SAP expects a namespace-prefixed action attribute here.
+        const body =
+          '<?xml version="1.0" encoding="UTF-8"?>' +
+          '<tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="release"/>';
 
         await client.fetch(
-          `/sap/bc/adt/cts/transportrequests/${args.transport}?_action=RELEASE`,
+          `/sap/bc/adt/cts/transportrequests/${args.transport}`,
           {
             method: 'POST',
             headers: {
@@ -37,6 +41,7 @@ export function registerCtsReleaseTransportTool(
                 'application/vnd.sap.adt.transportorganizer.v1+xml',
               Accept: 'application/vnd.sap.adt.transportorganizer.v1+xml',
             },
+            body,
           },
         );
 

@@ -7,26 +7,25 @@
  */
 
 export const fixtures = {
-  discovery: {
-    workspaces: [
-      {
-        title: 'ADT Core Services',
-        collections: [
-          { href: '/sap/bc/adt/core', title: 'Core' },
-          { href: '/sap/bc/adt/repository', title: 'Repository' },
-        ],
-      },
-      {
-        title: 'CTS Services',
-        collections: [
-          {
-            href: '/sap/bc/adt/cts/transportrequests',
-            title: 'Transport Requests',
-          },
-        ],
-      },
-    ],
-  },
+  discovery:
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<app:service xmlns:app="http://www.w3.org/2007/app" xmlns:atom="http://www.w3.org/2005/Atom">\n' +
+    '  <app:workspace>\n' +
+    '    <atom:title>ADT Core Services</atom:title>\n' +
+    '    <app:collection href="/sap/bc/adt/core">\n' +
+    '      <atom:title>Core</atom:title>\n' +
+    '    </app:collection>\n' +
+    '    <app:collection href="/sap/bc/adt/repository">\n' +
+    '      <atom:title>Repository</atom:title>\n' +
+    '    </app:collection>\n' +
+    '  </app:workspace>\n' +
+    '  <app:workspace>\n' +
+    '    <atom:title>CTS Services</atom:title>\n' +
+    '    <app:collection href="/sap/bc/adt/cts/transportrequests">\n' +
+    '      <atom:title>Transport Requests</atom:title>\n' +
+    '    </app:collection>\n' +
+    '  </app:workspace>\n' +
+    '</app:service>',
 
   session: {
     session: {
@@ -113,6 +112,16 @@ export const fixtures = {
       },
     },
   },
+
+  transportRelease:
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<tm:root xmlns:tm="http://www.sap.com/cts/adt/tm">\n' +
+    '  <tm:workbench>\n' +
+    '    <tm:modifiable status="released" />\n' +
+    '    <tm:relstarted status="released" />\n' +
+    '    <tm:released status="released" />\n' +
+    '  </tm:workbench>\n' +
+    '</tm:root>',
 
   atcRun: {
     worklistId: 'WL_001',

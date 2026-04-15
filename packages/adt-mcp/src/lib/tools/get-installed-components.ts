@@ -10,6 +10,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
+import { extractDiscoveryWorkspaces } from './utils';
 
 export function registerGetInstalledComponentsTool(
   server: McpServer,
@@ -77,25 +78,14 @@ export function registerGetFeaturesTool(
     async (args) => {
       try {
         const client = ctx.getClient(args);
-
-        // Fetch the discovery document to understand available services
-        const discovery = (await client.fetch('/sap/bc/adt/discovery', {
-          method: 'GET',
-          headers: { Accept: 'application/json' },
-        })) as {
-          workspaces?: Array<{
-            title: string;
-            collections?: Array<{ href: string; title: string }>;
-          }>;
-        };
+        const discovery = await client.adt.discovery.getDiscovery();
+        const workspaces = extractDiscoveryWorkspaces(discovery);
 
         // Extract all service paths from the discovery document
         const services = new Set<string>();
-        if (discovery?.workspaces) {
-          for (const ws of discovery.workspaces) {
-            for (const col of ws.collections ?? []) {
-              services.add(col.href);
-            }
+        for (const workspace of workspaces) {
+          for (const collection of workspace.collections) {
+            services.add(collection.href);
           }
         }
 
