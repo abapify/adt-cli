@@ -14,6 +14,53 @@ import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
 import { resolveObjectUri } from './utils';
 
+type AdtClient = ReturnType<ToolContext['getClient']>;
+type QueryOptions = { corrNr?: string };
+type DeleteOperation = (
+  client: AdtClient,
+  objectName: string,
+  queryOptions: QueryOptions,
+) => Promise<void>;
+
+const deleteOperations: Record<string, DeleteOperation> = {
+  PROG: (client, objectName, queryOptions) =>
+    client.adt.programs.programs.delete(objectName.toLowerCase(), queryOptions),
+  CLAS: (client, objectName, queryOptions) =>
+    client.adt.oo.classes.delete(objectName.toLowerCase(), queryOptions),
+  INTF: (client, objectName, queryOptions) =>
+    client.adt.oo.interfaces.delete(objectName.toLowerCase(), queryOptions),
+  FUGR: (client, objectName, queryOptions) =>
+    client.adt.functions.groups.delete(objectName.toLowerCase(), queryOptions),
+  DEVC: (client, objectName, queryOptions) =>
+    client.adt.packages.delete(objectName, queryOptions),
+};
+
+function getDeleteOperation(objectType?: string): DeleteOperation | undefined {
+  return objectType ? deleteOperations[objectType] : undefined;
+}
+
+async function deleteByResolvedUri(
+  client: AdtClient,
+  objectName: string,
+  objectType: string | undefined,
+  transport: string | undefined,
+): Promise<boolean> {
+  const uri = await resolveObjectUri(client, objectName, objectType);
+  if (!uri) {
+    return false;
+  }
+
+  const params = new URLSearchParams();
+  if (transport) {
+    params.set('corrNr', transport);
+  }
+
+  const queryString = params.toString();
+  const deleteUri = queryString ? `${uri}?${queryString}` : uri;
+  await client.fetch(deleteUri, { method: 'DELETE' });
+  return true;
+}
+
 export function registerDeleteObjectTool(
   server: McpServer,
   ctx: ToolContext,
@@ -41,24 +88,18 @@ export function registerDeleteObjectTool(
         const objectName = args.objectName.toUpperCase();
         const objectType = args.objectType?.toUpperCase();
         const queryOptions = args.transport ? { corrNr: args.transport } : {};
-        const nameLower = objectName.toLowerCase();
 
-        // Use typed CRUD contracts for known types
-        if (objectType === 'PROG') {
-          await client.adt.programs.programs.delete(nameLower, queryOptions);
-        } else if (objectType === 'CLAS') {
-          await client.adt.oo.classes.delete(nameLower, queryOptions);
-        } else if (objectType === 'INTF') {
-          await client.adt.oo.interfaces.delete(nameLower, queryOptions);
-        } else if (objectType === 'FUGR') {
-          await client.adt.functions.groups.delete(nameLower, queryOptions);
-        } else if (objectType === 'DEVC') {
-          // Packages contract uses case-sensitive names
-          await client.adt.packages.delete(objectName, queryOptions);
+        const deleteOperation = getDeleteOperation(objectType);
+        if (deleteOperation) {
+          await deleteOperation(client, objectName, queryOptions);
         } else {
-          // Fall back to resolving the URI and issuing a raw DELETE
-          const uri = await resolveObjectUri(client, objectName, objectType);
-          if (!uri) {
+          const deleted = await deleteByResolvedUri(
+            client,
+            objectName,
+            objectType,
+            args.transport,
+          );
+          if (!deleted) {
             return {
               isError: true,
               content: [
@@ -69,13 +110,6 @@ export function registerDeleteObjectTool(
               ],
             };
           }
-
-          const params = new URLSearchParams();
-          if (args.transport) params.set('corrNr', args.transport);
-          const qs = params.toString();
-          await client.fetch(`${uri}${qs ? `?${qs}` : ''}`, {
-            method: 'DELETE',
-          });
         }
 
         return {

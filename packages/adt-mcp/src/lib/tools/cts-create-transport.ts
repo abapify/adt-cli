@@ -16,6 +16,20 @@ import { transportmanagmentCreate } from '@abapify/adt-schemas';
 
 type CreateBody = InferTypedSchema<typeof transportmanagmentCreate>;
 
+function getRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === 'object'
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function getStringField(
+  value: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined {
+  const rawValue = value?.[key];
+  return typeof rawValue === 'string' ? rawValue : undefined;
+}
+
 export function registerCtsCreateTransportTool(
   server: McpServer,
   ctx: ToolContext,
@@ -53,14 +67,14 @@ export function registerCtsCreateTransportTool(
         const response = await client.adt.cts.transportrequests.create(body);
 
         // Extract transport number from response
-        const data = response as Record<string, unknown>;
+        const data = getRecord(response);
         const request =
-          (data.root as Record<string, unknown>)?.request ??
-          data.request ??
+          getRecord(getRecord(data?.root)?.request) ??
+          getRecord(data?.request) ??
           data;
-        const trkorr =
-          (request as Record<string, unknown>)?.trkorr ??
-          (request as Record<string, unknown>)?.number ??
+        const transportNumber =
+          getStringField(request, 'trkorr') ??
+          getStringField(request, 'number') ??
           '';
 
         return {
@@ -70,7 +84,7 @@ export function registerCtsCreateTransportTool(
               text: JSON.stringify(
                 {
                   status: 'created',
-                  transport: String(trkorr),
+                  transport: transportNumber,
                   description: args.description,
                   type: args.type ?? 'K',
                 },

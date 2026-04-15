@@ -11,15 +11,12 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
+import {
+  createAdtObject,
+  CREATE_OBJECT_TYPES,
+  isCreateObjectType,
+} from './object-creation';
 import { connectionShape } from './shared-schemas';
-
-/** Object types supported by this tool */
-const SUPPORTED_TYPES = ['PROG', 'CLAS', 'INTF', 'FUGR', 'DEVC'] as const;
-type SupportedType = (typeof SUPPORTED_TYPES)[number];
-
-function isSupportedType(t: string): t is SupportedType {
-  return SUPPORTED_TYPES.includes(t.toUpperCase() as SupportedType);
-}
 
 export function registerCreateObjectTool(
   server: McpServer,
@@ -27,7 +24,7 @@ export function registerCreateObjectTool(
 ): void {
   server.tool(
     'create_object',
-    'Create a new ABAP object. Supported types: PROG (program), CLAS (class), INTF (interface), FUGR (function group). For packages use create_package.',
+    'Create a new ABAP object. Supported types: PROG (program), CLAS (class), INTF (interface), FUGR (function group), and DEVC (package).',
     {
       ...connectionShape,
       objectName: z
@@ -35,7 +32,9 @@ export function registerCreateObjectTool(
         .describe(
           'Name of the new object (uppercase, e.g. ZCL_MY_CLASS, ZPACKAGE)',
         ),
-      objectType: z.string().describe('Object type: PROG, CLAS, INTF, or FUGR'),
+      objectType: z
+        .string()
+        .describe('Object type: PROG, CLAS, INTF, FUGR, or DEVC'),
       description: z.string().describe('Short description of the object'),
       packageName: z
         .string()
@@ -56,81 +55,25 @@ export function registerCreateObjectTool(
         const objectType = args.objectType.toUpperCase();
         const objectName = args.objectName.toUpperCase();
 
-        if (!isSupportedType(objectType)) {
+        if (!isCreateObjectType(objectType)) {
           return {
             isError: true,
             content: [
               {
                 type: 'text' as const,
-                text: `Object type '${objectType}' is not supported. Supported types: ${SUPPORTED_TYPES.join(', ')}`,
+                text: `Object type '${objectType}' is not supported. Supported types: ${CREATE_OBJECT_TYPES.join(', ')}`,
               },
             ],
           };
         }
 
-        const packageRef = args.packageName
-          ? { uri: `/sap/bc/adt/packages/${args.packageName.toUpperCase()}` }
-          : undefined;
-
-        const queryOptions = args.transport ? { corrNr: args.transport } : {};
-
-        const commonFields = {
-          name: objectName,
+        await createAdtObject(client, {
+          objectType,
+          objectName,
           description: args.description,
-          language: 'EN',
-          masterLanguage: 'EN',
-          ...(packageRef ? { packageRef } : {}),
-        };
-
-        switch (objectType) {
-          case 'PROG':
-            await client.adt.programs.programs.post(queryOptions, {
-              abapProgram: { ...commonFields, type: 'PROG' },
-            });
-            break;
-
-          case 'CLAS':
-            await client.adt.oo.classes.post(queryOptions, {
-              abapClass: { ...commonFields, type: 'CLAS/OC' },
-            });
-            break;
-
-          case 'INTF':
-            await client.adt.oo.interfaces.post(queryOptions, {
-              abapInterface: { ...commonFields, type: 'INTF/OI' },
-            });
-            break;
-
-          case 'FUGR':
-            await client.adt.functions.groups.post(queryOptions, {
-              abapFunctionGroup: { ...commonFields, type: 'FUGR' },
-            });
-            break;
-
-          case 'DEVC': {
-            const pkgBody = {
-              package: {
-                name: objectName,
-                type: 'DEVC/K',
-                description: args.description,
-                language: 'EN',
-                masterLanguage: 'EN',
-                attributes: { packageType: 'development' },
-                superPackage: {},
-                extensionAlias: {},
-                switch: {},
-                applicationComponent: {},
-                transport: {},
-                translation: {},
-                useAccesses: {},
-                packageInterfaces: {},
-                subPackages: {},
-              },
-            };
-            await client.adt.packages.post(queryOptions, pkgBody);
-            break;
-          }
-        }
+          packageName: args.packageName,
+          transport: args.transport,
+        });
 
         return {
           content: [

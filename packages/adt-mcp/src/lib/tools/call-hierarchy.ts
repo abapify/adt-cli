@@ -63,20 +63,29 @@ async function fetchCallHierarchy(
   return { objectUri: resolvedUri, result };
 }
 
-export function registerGetCallersOfTool(
+type CallHierarchyToolConfig = {
+  endpoint: 'callers' | 'callees';
+  failureLabel: string;
+  resultKey: 'callers' | 'callees';
+  toolDescription: string;
+  toolName: 'get_callers_of' | 'get_callees_of';
+};
+
+function registerCallHierarchyTool(
   server: McpServer,
   ctx: ToolContext,
+  config: CallHierarchyToolConfig,
 ): void {
   server.tool(
-    'get_callers_of',
-    'Find all callers (upward call hierarchy) of an ABAP method, function module, or subroutine',
+    config.toolName,
+    config.toolDescription,
     callHierarchyShape,
     async (args) => {
       try {
         const client = ctx.getClient(args);
         const res = await fetchCallHierarchy(
           client,
-          'callers',
+          config.endpoint,
           args.objectName,
           args.objectType,
           args.objectUri,
@@ -101,7 +110,7 @@ export function registerGetCallersOfTool(
                 {
                   objectName: args.objectName,
                   objectUri: res.objectUri,
-                  callers: res.result,
+                  [config.resultKey]: res.result,
                 },
                 null,
                 2,
@@ -115,7 +124,7 @@ export function registerGetCallersOfTool(
           content: [
             {
               type: 'text' as const,
-              text: `Get callers failed: ${error instanceof Error ? error.message : String(error)}`,
+              text: `${config.failureLabel}: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
         };
@@ -124,63 +133,30 @@ export function registerGetCallersOfTool(
   );
 }
 
+export function registerGetCallersOfTool(
+  server: McpServer,
+  ctx: ToolContext,
+): void {
+  registerCallHierarchyTool(server, ctx, {
+    toolName: 'get_callers_of',
+    toolDescription:
+      'Find all callers (upward call hierarchy) of an ABAP method, function module, or subroutine',
+    endpoint: 'callers',
+    resultKey: 'callers',
+    failureLabel: 'Get callers failed',
+  });
+}
+
 export function registerGetCalleesOfTool(
   server: McpServer,
   ctx: ToolContext,
 ): void {
-  server.tool(
-    'get_callees_of',
-    'Find all callees (downward call hierarchy) of an ABAP method, function module, or subroutine',
-    callHierarchyShape,
-    async (args) => {
-      try {
-        const client = ctx.getClient(args);
-        const res = await fetchCallHierarchy(
-          client,
-          'callees',
-          args.objectName,
-          args.objectType,
-          args.objectUri,
-          args.maxResults ?? 50,
-        );
-        if (!res) {
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text' as const,
-                text: `Object '${args.objectName}' not found`,
-              },
-            ],
-          };
-        }
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  objectName: args.objectName,
-                  objectUri: res.objectUri,
-                  callees: res.result,
-                },
-                null,
-                2,
-              ),
-            },
-          ],
-        };
-      } catch (error) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `Get callees failed: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-        };
-      }
-    },
-  );
+  registerCallHierarchyTool(server, ctx, {
+    toolName: 'get_callees_of',
+    toolDescription:
+      'Find all callees (downward call hierarchy) of an ABAP method, function module, or subroutine',
+    endpoint: 'callees',
+    resultKey: 'callees',
+    failureLabel: 'Get callees failed',
+  });
 }

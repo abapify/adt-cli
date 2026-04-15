@@ -14,19 +14,18 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
+import {
+  createAdtObject,
+  isSourceBackedObjectType,
+  SOURCE_BACKED_OBJECT_TYPES,
+  type SourceBackedObjectType,
+} from './object-creation';
 import { connectionShape } from './shared-schemas';
 import { resolveObjectUri, resolveObjectUriFromType } from './utils';
 
-const CLONABLE_TYPES = ['PROG', 'CLAS', 'INTF'] as const;
-type ClonableType = (typeof CLONABLE_TYPES)[number];
-
-function isClonableType(t: string): t is ClonableType {
-  return CLONABLE_TYPES.includes(t.toUpperCase() as ClonableType);
-}
-
 async function getSourceCode(
   client: ReturnType<ToolContext['getClient']>,
-  objectType: ClonableType,
+  objectType: SourceBackedObjectType,
   objectName: string,
 ): Promise<string> {
   const name = objectName.toLowerCase();
@@ -42,42 +41,80 @@ async function getSourceCode(
   }
 }
 
-async function createNewObject(
+async function resolveCloneDescription(
   client: ReturnType<ToolContext['getClient']>,
-  objectType: ClonableType,
-  objectName: string,
-  description: string,
-  packageName: string | undefined,
-  transport: string | undefined,
-): Promise<void> {
-  const packageRef = packageName
-    ? { uri: `/sap/bc/adt/packages/${packageName.toUpperCase()}` }
-    : undefined;
-  const queryOptions = transport ? { corrNr: transport } : {};
-  const commonFields = {
-    name: objectName.toUpperCase(),
-    description,
-    language: 'EN',
-    masterLanguage: 'EN',
-    ...(packageRef ? { packageRef } : {}),
-  };
+  sourceType: SourceBackedObjectType,
+  sourceName: string,
+  targetDescription?: string,
+): Promise<string> {
+  if (targetDescription) {
+    return targetDescription;
+  }
 
-  switch (objectType) {
-    case 'PROG':
-      await client.adt.programs.programs.post(queryOptions, {
-        abapProgram: { ...commonFields, type: 'PROG' },
-      });
-      break;
-    case 'CLAS':
-      await client.adt.oo.classes.post(queryOptions, {
-        abapClass: { ...commonFields, type: 'CLAS/OC' },
-      });
-      break;
-    case 'INTF':
-      await client.adt.oo.interfaces.post(queryOptions, {
-        abapInterface: { ...commonFields, type: 'INTF/OI' },
-      });
-      break;
+  const sourceUri = resolveObjectUriFromType(sourceType, sourceName);
+  if (!sourceUri) {
+    return `Copy of ${sourceName}`;
+  }
+
+  try {
+    const meta = (await client.fetch(sourceUri, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    })) as Record<string, unknown>;
+    const desc =
+      (meta as Record<string, Record<string, string>>)?.abapClass
+        ?.description ??
+      (meta as Record<string, Record<string, string>>)?.abapProgram
+        ?.description ??
+      (meta as Record<string, Record<string, string>>)?.abapInterface
+        ?.description;
+
+    return desc ? `Copy of ${String(desc)}` : `Copy of ${sourceName}`;
+  } catch {
+    return `Copy of ${sourceName}`;
+  }
+}
+
+async function copySourceToClone(
+  client: ReturnType<ToolContext['getClient']>,
+  resolvedTargetUri: string,
+  sourceCode: string,
+  targetName: string,
+  sourceType: SourceBackedObjectType,
+  transport?: string,
+): Promise<void> {
+  const lockService = createLockService(client);
+  let lockHandle: string | undefined;
+
+  try {
+    const lockResult = await lockService.lock(resolvedTargetUri, {
+      transport,
+      objectName: targetName,
+      objectType: sourceType,
+    });
+    lockHandle = lockResult.handle;
+
+    const putParams = new URLSearchParams({
+      lockHandle,
+      ...(transport ? { corrNr: transport } : {}),
+    });
+
+    await client.fetch(
+      `${resolvedTargetUri}/source/main?${putParams.toString()}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'text/plain' },
+        body: sourceCode,
+      },
+    );
+  } finally {
+    if (lockHandle) {
+      try {
+        await lockService.unlock(resolvedTargetUri, { lockHandle });
+      } catch {
+        // ignore unlock errors in error paths
+      }
+    }
   }
 }
 
@@ -119,54 +156,37 @@ export function registerCloneObjectTool(
         const sourceName = args.sourceObjectName.toUpperCase();
         const targetName = args.targetObjectName.toUpperCase();
 
-        if (!isClonableType(sourceType)) {
+        if (!isSourceBackedObjectType(sourceType)) {
           return {
             isError: true,
             content: [
               {
                 type: 'text' as const,
-                text: `Object type '${sourceType}' is not supported for cloning. Supported types: ${CLONABLE_TYPES.join(', ')}`,
+                text: `Object type '${sourceType}' is not supported for cloning. Supported types: ${SOURCE_BACKED_OBJECT_TYPES.join(', ')}`,
               },
             ],
           };
         }
 
-        // 1. Get source object metadata (for description)
-        const sourceUri = resolveObjectUriFromType(sourceType, sourceName);
-        let description = args.targetDescription ?? `Copy of ${sourceName}`;
-        if (!args.targetDescription && sourceUri) {
-          try {
-            const meta = (await client.fetch(sourceUri, {
-              method: 'GET',
-              headers: { Accept: 'application/json' },
-            })) as Record<string, unknown>;
-            const desc =
-              (meta as Record<string, Record<string, string>>)?.abapClass
-                ?.description ??
-              (meta as Record<string, Record<string, string>>)?.abapProgram
-                ?.description ??
-              (meta as Record<string, Record<string, string>>)?.abapInterface
-                ?.description;
-            if (desc) description = `Copy of ${String(desc)}`;
-          } catch {
-            // ignore metadata fetch failure, use default description
-          }
-        }
+        const description = await resolveCloneDescription(
+          client,
+          sourceType,
+          sourceName,
+          args.targetDescription,
+        );
 
         // 2. Get source code
         const sourceCode = await getSourceCode(client, sourceType, sourceName);
 
         // 3. Create the target object
-        await createNewObject(
-          client,
-          sourceType,
-          targetName,
+        await createAdtObject(client, {
+          objectType: sourceType,
+          objectName: targetName,
           description,
-          args.targetPackage,
-          args.transport,
-        );
+          packageName: args.targetPackage,
+          transport: args.transport,
+        });
 
-        // 4. Copy the source code to the clone
         const resolvedTargetUri =
           resolveObjectUriFromType(sourceType, targetName) ??
           (await resolveObjectUri(client, targetName, sourceType));
@@ -183,48 +203,14 @@ export function registerCloneObjectTool(
           };
         }
 
-        const lockService = createLockService(client);
-        let lockHandleStr: string | undefined;
-
-        try {
-          const lockResult = await lockService.lock(resolvedTargetUri, {
-            transport: args.transport,
-            objectName: targetName,
-            objectType: sourceType,
-          });
-          lockHandleStr = lockResult.handle;
-
-          const putParams = new URLSearchParams({
-            lockHandle: lockHandleStr,
-            ...(args.transport ? { corrNr: args.transport } : {}),
-          });
-
-          await client.fetch(
-            `${resolvedTargetUri}/source/main?${putParams.toString()}`,
-            {
-              method: 'PUT',
-              headers: { 'Content-Type': 'text/plain' },
-              body: sourceCode,
-            },
-          );
-
-          await lockService.unlock(resolvedTargetUri, {
-            lockHandle: lockHandleStr,
-          });
-          lockHandleStr = undefined;
-        } catch (lockError) {
-          // Best-effort unlock on failure
-          if (lockHandleStr) {
-            try {
-              await lockService.unlock(resolvedTargetUri, {
-                lockHandle: lockHandleStr,
-              });
-            } catch {
-              // ignore unlock errors in error path
-            }
-          }
-          throw lockError;
-        }
+        await copySourceToClone(
+          client,
+          resolvedTargetUri,
+          sourceCode,
+          targetName,
+          sourceType,
+          args.transport,
+        );
 
         return {
           content: [
