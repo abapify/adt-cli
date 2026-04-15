@@ -1,0 +1,44 @@
+name: 'Copilot Setup Steps'
+
+# Run automatically when changed, and allow manual validation from the Actions tab.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # Must be named exactly `copilot-setup-steps` for Copilot to pick it up.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install pre-commit format hook for Copilot agent
+        run: |
+          mkdir -p .git/copilot-hooks
+          cat > .git/copilot-hooks/pre-commit << 'EOF'
+          #!/bin/sh
+          # Auto-format all staged files before committing.
+          # Runs nx format:write (Prettier) and re-stages any files it changed.
+          if command -v bunx >/dev/null 2>&1; then
+            bunx nx format:write --uncommitted
+          else
+            npx nx format:write --uncommitted
+          fi
+          git update-index --again
+          EOF
+          chmod +x .git/copilot-hooks/pre-commit

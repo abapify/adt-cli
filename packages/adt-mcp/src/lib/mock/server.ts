@@ -59,7 +59,20 @@ function matchRoute(
     };
   }
 
-  // Quick search
+  // Grep / content search (userannotation=userwhere) – must come before general search
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/search') &&
+    url.includes('userannotation=userwhere')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.grepResults),
+      contentType: 'application/json',
+    };
+  }
+
+  // Quick search (general – name pattern)
   if (
     m === 'GET' &&
     url.startsWith('/sap/bc/adt/repository/informationsystem/search')
@@ -69,6 +82,91 @@ function matchRoute(
       body: JSON.stringify(fixtures.searchResults),
       contentType: 'application/json',
     };
+  }
+
+  // Usages / find-references
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/usages')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.usagesResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // Call hierarchy – callers
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/callers')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.callersResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // Call hierarchy – callees
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/callees')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.calleesResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // Navigation target – find definition
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/navigation/target')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.navigationTarget),
+      contentType: 'application/json',
+    };
+  }
+
+  // Data preview – get_table_contents and run_query
+  if (m === 'POST' && url.startsWith('/sap/bc/adt/datapreview/freestyle')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.tableContents),
+      contentType: 'application/json',
+    };
+  }
+
+  // DDIC tables – get_table (specific path, before generic DDIC)
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/ddic/tables/')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.tableDefinition),
+      contentType: 'application/json',
+    };
+  }
+
+  // CTS – create transport
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/cts/transportrequests') &&
+    !url.includes('/sap/bc/adt/cts/transportrequests/')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.transportCreate),
+      contentType: 'application/json',
+    };
+  }
+
+  // CTS – release transport (_action=RELEASE)
+  if (
+    m === 'POST' &&
+    /\/sap\/bc\/adt\/cts\/transportrequests\/\w+/.test(url) &&
+    url.includes('_action=RELEASE')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
   }
 
   // CTS – list transports
@@ -160,6 +258,18 @@ function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  // Inactive objects – GET /sap/bc/adt/activation/inactive_objects
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/activation/inactive_objects')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.inactiveObjects),
+      contentType: 'application/json',
+    };
+  }
+
   // Activation – POST /sap/bc/adt/activation
   if (m === 'POST' && url.startsWith('/sap/bc/adt/activation')) {
     return {
@@ -167,6 +277,30 @@ function matchRoute(
       body: fixtures.activationResult,
       contentType: 'application/xml',
     };
+  }
+
+  // Object create – POST to object-type paths (programs, classes, interfaces, functions, packages)
+  if (
+    m === 'POST' &&
+    (url.startsWith('/sap/bc/adt/programs/programs') ||
+      url.startsWith('/sap/bc/adt/oo/classes') ||
+      url.startsWith('/sap/bc/adt/oo/interfaces') ||
+      url.startsWith('/sap/bc/adt/functions/groups') ||
+      url.startsWith('/sap/bc/adt/packages'))
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // Object delete – DELETE to object-type paths
+  if (
+    m === 'DELETE' &&
+    (url.startsWith('/sap/bc/adt/programs/programs/') ||
+      url.startsWith('/sap/bc/adt/oo/classes/') ||
+      url.startsWith('/sap/bc/adt/oo/interfaces/') ||
+      url.startsWith('/sap/bc/adt/functions/groups/') ||
+      url.startsWith('/sap/bc/adt/packages/'))
+  ) {
+    return { status: 204, body: '', contentType: 'text/plain' };
   }
 
   // Syntax check – POST /sap/bc/adt/checkruns
@@ -183,6 +317,127 @@ function matchRoute(
     return {
       status: 200,
       body: JSON.stringify(fixtures.aunitResult),
+      contentType: 'application/json',
+    };
+  }
+
+  // Function module source – GET .../fmodules/{name}/source/main
+  if (
+    m === 'GET' &&
+    url.includes('/fmodules/') &&
+    url.includes('/source/main')
+  ) {
+    return {
+      status: 200,
+      body: fixtures.sourceCode,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Function modules metadata – GET /sap/bc/adt/functions/groups/{g}/fmodules/{fm}
+  if (m === 'GET' && url.includes('/fmodules/')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.functionModule),
+      contentType: 'application/json',
+    };
+  }
+
+  // Function group source – GET /sap/bc/adt/functions/groups/{name}/source/main
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/functions/groups/') &&
+    url.includes('/source/main')
+  ) {
+    return {
+      status: 200,
+      body: fixtures.sourceCode,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Function group metadata – GET /sap/bc/adt/functions/groups/{name}
+  // Must exclude objectstructure, source, and fmodule sub-paths
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/functions/groups/') &&
+    !url.includes('/objectstructure') &&
+    !url.includes('/source/') &&
+    !url.includes('/fmodules/')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.functionGroup),
+      contentType: 'application/json',
+    };
+  }
+
+  // Object structure – GET {objectUri}/objectstructure
+  if (m === 'GET' && url.includes('/objectstructure')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.objectStructure),
+      contentType: 'application/json',
+    };
+  }
+
+  // Type hierarchy – GET /sap/bc/adt/oo/typeinfo
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/oo/typeinfo')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.typeHierarchy),
+      contentType: 'application/json',
+    };
+  }
+
+  // Pretty printer – POST /sap/bc/adt/prettyprinter/prettifySource
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/prettyprinter/prettifySource')
+  ) {
+    return {
+      status: 200,
+      body: fixtures.prettySource,
+      contentType: 'text/plain',
+    };
+  }
+
+  // Software components – GET /sap/bc/adt/system/softwarecomponents
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/system/softwarecomponents')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.softwareComponents),
+      contentType: 'application/json',
+    };
+  }
+
+  // Service binding publish – POST/DELETE /sap/bc/adt/businessservices/bindings/{name}/publishedstates
+  if (
+    (m === 'POST' || m === 'DELETE') &&
+    url.includes('/sap/bc/adt/businessservices/bindings/') &&
+    url.includes('/publishedstates')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // abapGit exportable objects – GET /sap/bc/adt/abapgit/objects
+  if (m === 'GET' && url.startsWith('/sap/bc/adt/abapgit/objects')) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.gitObjects),
+      contentType: 'application/json',
+    };
+  }
+
+  // abapGit export – GET /sap/bc/adt/abapgit/repos/{name}/export
+  if (
+    m === 'GET' &&
+    url.includes('/sap/bc/adt/abapgit/repos/') &&
+    url.includes('/export')
+  ) {
+    return {
+      status: 200,
+      body: JSON.stringify(fixtures.gitExport),
       contentType: 'application/json',
     };
   }

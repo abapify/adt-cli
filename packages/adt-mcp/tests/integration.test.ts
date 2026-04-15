@@ -198,46 +198,6 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
-  // ── cts_create_transport ──────────────────────────────────────
-
-  describe('cts_create_transport tool', () => {
-    it('returns a not-yet-implemented error', async () => {
-      const { raw } = await callTool('cts_create_transport', {
-        ...connArgs(),
-        description: 'Test transport',
-      });
-      const result = raw as {
-        isError?: boolean;
-        content: Array<{ type: string; text: string }>;
-      };
-      assert.strictEqual(result.isError, true);
-      assert.ok(
-        result.content[0]?.text.includes('not yet implemented'),
-        'error message should mention not yet implemented',
-      );
-    });
-  });
-
-  // ── cts_release_transport ─────────────────────────────────────
-
-  describe('cts_release_transport tool', () => {
-    it('returns a not-yet-implemented error', async () => {
-      const { raw } = await callTool('cts_release_transport', {
-        ...connArgs(),
-        transport: 'DEVK900001',
-      });
-      const result = raw as {
-        isError?: boolean;
-        content: Array<{ type: string; text: string }>;
-      };
-      assert.strictEqual(result.isError, true);
-      assert.ok(
-        result.content[0]?.text.includes('not yet implemented'),
-        'error message should mention not yet implemented',
-      );
-    });
-  });
-
   // ── cts_delete_transport ───────────────────────────────────────
 
   describe('cts_delete_transport tool', () => {
@@ -413,6 +373,488 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
+  // ── cts_create_transport ───────────────────────────────────────
+
+  describe('cts_create_transport tool', () => {
+    it('creates a transport and returns transport number', async () => {
+      const { json } = await callTool('cts_create_transport', {
+        ...connArgs(),
+        description: 'Test transport',
+        type: 'K',
+      });
+      const data = json as { status: string; transport: string };
+      assert.strictEqual(data.status, 'created');
+    });
+  });
+
+  // ── cts_release_transport ──────────────────────────────────────
+
+  describe('cts_release_transport tool', () => {
+    it('releases a transport and returns status', async () => {
+      const { json } = await callTool('cts_release_transport', {
+        ...connArgs(),
+        transport: 'DEVK900001',
+      });
+      const data = json as { status: string; transport: string };
+      assert.strictEqual(data.status, 'released');
+      assert.strictEqual(data.transport, 'DEVK900001');
+    });
+  });
+
+  // ── grep_objects ───────────────────────────────────────────────
+
+  describe('grep_objects tool', () => {
+    it('searches for a pattern within named objects', async () => {
+      const { json } = await callTool('grep_objects', {
+        ...connArgs(),
+        pattern: 'METHOD',
+        objects: [{ objectName: 'ZCL_EXAMPLE', objectType: 'CLAS' }],
+      });
+      const data = json as { pattern: string; results: unknown };
+      assert.strictEqual(data.pattern, 'METHOD');
+      assert.ok(data.results !== undefined);
+    });
+  });
+
+  // ── grep_packages ──────────────────────────────────────────────
+
+  describe('grep_packages tool', () => {
+    it('searches for a pattern across a package', async () => {
+      const { json } = await callTool('grep_packages', {
+        ...connArgs(),
+        pattern: 'METHOD',
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as { pattern: string; packageName: string };
+      assert.strictEqual(data.pattern, 'METHOD');
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+    });
+  });
+
+  // ── get_table ──────────────────────────────────────────────────
+
+  describe('get_table tool', () => {
+    it('returns DDIC table definition', async () => {
+      const { json } = await callTool('get_table', {
+        ...connArgs(),
+        tableName: 'MARA',
+      });
+      assert.ok(json !== undefined, 'should return table definition');
+    });
+  });
+
+  // ── get_table_contents ─────────────────────────────────────────
+
+  describe('get_table_contents tool', () => {
+    it('returns table data rows', async () => {
+      const { json } = await callTool('get_table_contents', {
+        ...connArgs(),
+        tableName: 'T001',
+        maxRows: 10,
+      });
+      const data = json as { table: string; query: string };
+      assert.strictEqual(data.table, 'T001');
+      assert.ok(data.query.includes('SELECT'));
+    });
+  });
+
+  // ── run_query ──────────────────────────────────────────────────
+
+  describe('run_query tool', () => {
+    it('executes a SQL query and returns results', async () => {
+      const { json } = await callTool('run_query', {
+        ...connArgs(),
+        query: "SELECT * FROM T001 WHERE MANDT = '100'",
+        maxRows: 5,
+      });
+      const data = json as { query: string };
+      assert.ok(data.query.includes('SELECT'));
+    });
+
+    it('rejects non-SELECT statements', async () => {
+      const { raw } = await callTool('run_query', {
+        ...connArgs(),
+        query: "DELETE FROM T001 WHERE MANDT = '100'",
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(result.isError, 'should return error for non-SELECT statement');
+    });
+  });
+
+  // ── find_definition ────────────────────────────────────────────
+
+  describe('find_definition tool', () => {
+    it('returns navigation target for a symbol', async () => {
+      const { json } = await callTool('find_definition', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      assert.ok(json !== undefined, 'should return navigation target');
+    });
+  });
+
+  // ── find_references ────────────────────────────────────────────
+
+  describe('find_references tool', () => {
+    it('returns usages for an object', async () => {
+      const { json } = await callTool('find_references', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as { objectName: string };
+      assert.strictEqual(data.objectName, 'ZCL_EXAMPLE');
+    });
+  });
+
+  // ── get_callers_of ─────────────────────────────────────────────
+
+  describe('get_callers_of tool', () => {
+    it('returns callers of an object', async () => {
+      const { json } = await callTool('get_callers_of', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as { objectName: string; callers: unknown };
+      assert.strictEqual(data.objectName, 'ZCL_EXAMPLE');
+      assert.ok(data.callers !== undefined);
+    });
+  });
+
+  // ── get_callees_of ─────────────────────────────────────────────
+
+  describe('get_callees_of tool', () => {
+    it('returns callees of an object', async () => {
+      const { json } = await callTool('get_callees_of', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as { objectName: string; callees: unknown };
+      assert.strictEqual(data.objectName, 'ZCL_EXAMPLE');
+      assert.ok(data.callees !== undefined);
+    });
+  });
+
+  // ── create_object ──────────────────────────────────────────────
+
+  describe('create_object tool', () => {
+    it('creates a CLAS object', async () => {
+      const { json } = await callTool('create_object', {
+        ...connArgs(),
+        objectName: 'ZCL_NEW',
+        objectType: 'CLAS',
+        description: 'New test class',
+        packageName: 'ZPACKAGE',
+        transport: 'DEVK900001',
+      });
+      const data = json as {
+        status: string;
+        objectName: string;
+        objectType: string;
+      };
+      assert.strictEqual(data.status, 'created');
+      assert.strictEqual(data.objectName, 'ZCL_NEW');
+      assert.strictEqual(data.objectType, 'CLAS');
+    });
+
+    it('creates a PROG object', async () => {
+      const { json } = await callTool('create_object', {
+        ...connArgs(),
+        objectName: 'ZPROG_NEW',
+        objectType: 'PROG',
+        description: 'New test program',
+        packageName: 'ZPACKAGE',
+        transport: 'DEVK900001',
+      });
+      const data = json as { status: string; objectType: string };
+      assert.strictEqual(data.status, 'created');
+      assert.strictEqual(data.objectType, 'PROG');
+    });
+
+    it('returns error for unsupported type', async () => {
+      const { raw } = await callTool('create_object', {
+        ...connArgs(),
+        objectName: 'ZFB01',
+        objectType: 'TRAN',
+        description: 'Unsupported type',
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(result.isError, 'should return error for unsupported type');
+    });
+  });
+
+  // ── delete_object ──────────────────────────────────────────────
+
+  describe('delete_object tool', () => {
+    it('deletes a CLAS object', async () => {
+      const { json } = await callTool('delete_object', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+        transport: 'DEVK900001',
+      });
+      const data = json as { status: string; objectName: string };
+      assert.strictEqual(data.status, 'deleted');
+      assert.strictEqual(data.objectName, 'ZCL_EXAMPLE');
+    });
+  });
+
+  // ── activate_package ───────────────────────────────────────────
+
+  describe('activate_package tool', () => {
+    it('activates all inactive objects in a package', async () => {
+      const { json } = await callTool('activate_package', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as {
+        status: string;
+        packageName: string;
+        count: number;
+      };
+      assert.ok(
+        data.status === 'activated' || data.status === 'no_inactive_objects',
+        'should return activated or no_inactive_objects status',
+      );
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+    });
+  });
+
+  // ── get_function_group ─────────────────────────────────────────
+
+  describe('get_function_group tool', () => {
+    it('returns function group metadata', async () => {
+      const { json } = await callTool('get_function_group', {
+        ...connArgs(),
+        groupName: 'ZFUGR_UTIL',
+      });
+      const data = json as { metadata: unknown };
+      assert.ok(data.metadata, 'should return metadata');
+    });
+
+    it('returns function group with source when includeSource is true', async () => {
+      const { json } = await callTool('get_function_group', {
+        ...connArgs(),
+        groupName: 'ZFUGR_UTIL',
+        includeSource: true,
+      });
+      const data = json as { metadata: unknown; source: string };
+      assert.ok(data.metadata, 'should return metadata');
+      assert.ok(typeof data.source === 'string', 'should return source string');
+    });
+  });
+
+  // ── get_function ──────────────────────────────────────────────
+
+  describe('get_function tool', () => {
+    it('returns function module metadata', async () => {
+      const { json } = await callTool('get_function', {
+        ...connArgs(),
+        groupName: 'ZFUGR_UTIL',
+        functionName: 'Z_MY_FUNCTION',
+      });
+      const data = json as { metadata: unknown };
+      assert.ok(data.metadata, 'should return metadata');
+    });
+
+    it('returns function module with source when includeSource is true', async () => {
+      const { json } = await callTool('get_function', {
+        ...connArgs(),
+        groupName: 'ZFUGR_UTIL',
+        functionName: 'Z_MY_FUNCTION',
+        includeSource: true,
+      });
+      const data = json as { metadata: unknown; source: string };
+      assert.ok(data.metadata, 'should return metadata');
+      assert.ok(typeof data.source === 'string', 'should return source string');
+    });
+  });
+
+  // ── lock_object ───────────────────────────────────────────────
+
+  describe('lock_object tool', () => {
+    it('acquires a lock and returns lock handle', async () => {
+      const { json } = await callTool('lock_object', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      const data = json as { status: string; lockHandle: string };
+      assert.strictEqual(data.status, 'locked');
+      assert.ok(
+        typeof data.lockHandle === 'string',
+        'should return lockHandle',
+      );
+    });
+  });
+
+  // ── unlock_object ─────────────────────────────────────────────
+
+  describe('unlock_object tool', () => {
+    it('releases a lock', async () => {
+      const { json } = await callTool('unlock_object', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+        lockHandle: 'MOCK_LOCK_HANDLE_001',
+      });
+      const data = json as { status: string };
+      assert.strictEqual(data.status, 'unlocked');
+    });
+  });
+
+  // ── get_object_structure ──────────────────────────────────────
+
+  describe('get_object_structure tool', () => {
+    it('returns object structure for a CLAS', async () => {
+      const { json } = await callTool('get_object_structure', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      assert.ok(json, 'should return object structure');
+    });
+  });
+
+  // ── get_type_hierarchy ────────────────────────────────────────
+
+  describe('get_type_hierarchy tool', () => {
+    it('returns type hierarchy for a class', async () => {
+      const { json } = await callTool('get_type_hierarchy', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+      });
+      assert.ok(json, 'should return type hierarchy');
+    });
+  });
+
+  // ── pretty_print ──────────────────────────────────────────────
+
+  describe('pretty_print tool', () => {
+    it('returns formatted ABAP source code', async () => {
+      const { json } = await callTool('pretty_print', {
+        ...connArgs(),
+        sourceCode: 'class zcl_example definition.\nendclass.',
+      });
+      assert.ok(
+        typeof json === 'string',
+        'should return formatted source as string',
+      );
+    });
+  });
+
+  // ── create_package ────────────────────────────────────────────
+
+  describe('create_package tool', () => {
+    it('creates a package', async () => {
+      const { json } = await callTool('create_package', {
+        ...connArgs(),
+        packageName: 'ZNEWPKG',
+        description: 'New test package',
+      });
+      const data = json as { status: string; packageName: string };
+      assert.strictEqual(data.status, 'created');
+      assert.strictEqual(data.packageName, 'ZNEWPKG');
+    });
+  });
+
+  // ── get_installed_components ──────────────────────────────────
+
+  describe('get_installed_components tool', () => {
+    it('returns installed software components', async () => {
+      const { json } = await callTool('get_installed_components', connArgs());
+      assert.ok(json, 'should return software components');
+    });
+  });
+
+  // ── get_features ──────────────────────────────────────────────
+
+  describe('get_features tool', () => {
+    it('returns feature detection result', async () => {
+      const { json } = await callTool('get_features', connArgs());
+      const data = json as { features: Record<string, boolean> };
+      assert.ok(data.features, 'should return features object');
+      assert.strictEqual(
+        typeof data.features.atc,
+        'boolean',
+        'features.atc should be boolean',
+      );
+    });
+  });
+
+  // ── clone_object ──────────────────────────────────────────────
+
+  describe('clone_object tool', () => {
+    it('clones a CLAS object', async () => {
+      const { json } = await callTool('clone_object', {
+        ...connArgs(),
+        sourceObjectName: 'ZCL_EXAMPLE',
+        sourceObjectType: 'CLAS',
+        targetObjectName: 'ZCL_EXAMPLE_COPY',
+        targetDescription: 'Copy of ZCL_EXAMPLE',
+      });
+      const data = json as { status: string; targetObject: { name: string } };
+      assert.strictEqual(data.status, 'cloned');
+      assert.strictEqual(data.targetObject.name, 'ZCL_EXAMPLE_COPY');
+    });
+  });
+
+  // ── publish_service_binding ───────────────────────────────────
+
+  describe('publish_service_binding tool', () => {
+    it('publishes a service binding', async () => {
+      const { json } = await callTool('publish_service_binding', {
+        ...connArgs(),
+        bindingName: 'ZUI_MYAPP_O4',
+      });
+      const data = json as { status: string; bindingName: string };
+      assert.strictEqual(data.status, 'published');
+      assert.strictEqual(data.bindingName, 'ZUI_MYAPP_O4');
+    });
+
+    it('unpublishes a service binding', async () => {
+      const { json } = await callTool('publish_service_binding', {
+        ...connArgs(),
+        bindingName: 'ZUI_MYAPP_O4',
+        unpublish: true,
+      });
+      const data = json as { status: string };
+      assert.strictEqual(data.status, 'unpublished');
+    });
+  });
+
+  // ── get_git_types ─────────────────────────────────────────────
+
+  describe('get_git_types tool', () => {
+    it('returns abapGit-eligible objects', async () => {
+      const { json } = await callTool('get_git_types', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as { packageName: string; objects: unknown };
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+      assert.ok(data.objects, 'should return objects');
+    });
+  });
+
+  // ── git_export ────────────────────────────────────────────────
+
+  describe('git_export tool', () => {
+    it('returns package export in abapGit format', async () => {
+      const { json } = await callTool('git_export', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as { packageName: string; export: unknown };
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+      assert.ok(data.export, 'should return export data');
+    });
+  });
+
   // ── tool listing ───────────────────────────────────────────────
 
   describe('tool listing', () => {
@@ -437,6 +879,34 @@ describe('adt-mcp integration tests', () => {
         'run_unit_tests',
         'get_test_classes',
         'list_package_objects',
+        // High-priority tools (#H1–#H8)
+        'grep_objects',
+        'grep_packages',
+        'get_table',
+        'get_table_contents',
+        'run_query',
+        'find_definition',
+        'find_references',
+        'get_callers_of',
+        'get_callees_of',
+        'create_object',
+        'delete_object',
+        'activate_package',
+        // Medium-priority tools (#M1–#M10)
+        'get_function_group',
+        'get_function',
+        'lock_object',
+        'unlock_object',
+        'get_object_structure',
+        'get_type_hierarchy',
+        'pretty_print',
+        'create_package',
+        'get_installed_components',
+        'get_features',
+        'clone_object',
+        'publish_service_binding',
+        'get_git_types',
+        'git_export',
       ];
       for (const name of expected) {
         assert.ok(names.has(name), `tool "${name}" should be listed`);
