@@ -142,7 +142,7 @@ export const abapRunCommand = new Command('run')
           });
           progress.done();
         } finally {
-          await cls.unlock(lockHandle.handle);
+          await cls.unlock();
         }
 
         // Step 4: Activate

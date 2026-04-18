@@ -15,15 +15,6 @@ import { getGlobalContext } from '../../base/global-context';
 import type { AdkContext } from '../../base/context';
 import { toText } from '../../base/fetch-utils';
 
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
 export class AdkDdlSource {
   readonly name: string;
   protected readonly ctx: AdkContext;
@@ -42,13 +33,14 @@ export class AdkDdlSource {
     return this.name;
   }
 
+  private get contract(): any {
+    return this.ctx.client.adt.ddic.ddl.sources;
+  }
+
   // ─── Source ────────────────────────────────────────────────────────────────
 
   async getSource(): Promise<string> {
-    const result = await this.ctx.client.fetch(
-      `${this.objectUri}/source/main`,
-      { method: 'GET', headers: { Accept: 'text/plain' } },
-    );
+    const result = await this.contract.source.main.get(this.name);
     return toText(result);
   }
 
@@ -56,17 +48,13 @@ export class AdkDdlSource {
     source: string,
     options?: { lockHandle?: string; transport?: string },
   ): Promise<void> {
-    const params = new URLSearchParams();
-    if (options?.lockHandle) params.set('lockHandle', options.lockHandle);
-    if (options?.transport) params.set('corrNr', options.transport);
-    const qs = params.toString();
-    await this.ctx.client.fetch(
-      `${this.objectUri}/source/main${qs ? '?' + qs : ''}`,
+    await this.contract.source.main.put(
+      this.name,
       {
-        method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
-        body: source,
+        ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
+        ...(options?.transport ? { corrNr: options.transport } : {}),
       },
+      source,
     );
   }
 
@@ -99,20 +87,11 @@ export class AdkDdlSource {
   // ─── Activate ──────────────────────────────────────────────────────────────
 
   async activate(): Promise<this> {
-    const activationXml = `<?xml version="1.0" encoding="UTF-8"?><adtcore:objectReferences xmlns:adtcore="http://www.sap.com/adt/core"><adtcore:objectReference adtcore:uri="${this.objectUri}" adtcore:name="${this.name}"/></adtcore:objectReferences>`;
-    await this.ctx.client.fetch(
-      '/sap/bc/adt/activation?method=activate&preauditRequested=true',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type':
-            'application/vnd.sap.adt.activation.request+xml; charset=utf-8',
-          Accept:
-            'application/xml, application/vnd.sap.adt.activationresults+xml',
-        },
-        body: activationXml,
+    await this.ctx.client.adt.activation.activate.post({}, {
+      objectReferences: {
+        objectReference: [{ uri: this.objectUri, name: this.name }],
       },
-    );
+    } as any);
     return this;
   }
 
@@ -142,7 +121,7 @@ export class AdkDdlSource {
    * Create a new CDS DDL source on SAP
    *
    * POST /sap/bc/adt/ddic/ddl/sources?corrNr=...
-   * with XML body containing the object metadata
+   * Body matches the `ddl:source` schema (extends abapsource:AbapSourceMainObject).
    */
   static async create(
     name: string,
@@ -155,25 +134,22 @@ export class AdkDdlSource {
     const nameU = name.toUpperCase();
     const pkgU = packageName.toUpperCase();
 
-    const params = new URLSearchParams();
-    if (options?.transport) params.set('corrNr', options.transport);
-    const qs = params.toString();
-
-    const body = `<?xml version="1.0" encoding="UTF-8"?>
-<ddl:source xmlns:ddl="http://www.sap.com/adt/ddl" xmlns:adtcore="http://www.sap.com/adt/core" adtcore:description="${escapeXml(description)}" adtcore:language="EN" adtcore:masterLanguage="EN" adtcore:name="${nameU}" adtcore:responsible="$TMP">
-  <adtcore:packageRef adtcore:name="${pkgU}" adtcore:type="DEVC/K" adtcore:uri="/sap/bc/adt/packages/${pkgU.toLowerCase()}"/>
-</ddl:source>`;
-
-    await context.client.fetch(
-      `/sap/bc/adt/ddic/ddl/sources${qs ? '?' + qs : ''}`,
+    await context.client.adt.ddic.ddl.sources.post(
+      options?.transport ? { corrNr: options.transport } : {},
       {
-        method: 'POST',
-        headers: {
-          'Content-Type':
-            'application/vnd.sap.adt.ddl.source.v2+xml; charset=utf-8',
+        source: {
+          name: nameU,
+          description,
+          language: 'EN',
+          masterLanguage: 'EN',
+          responsible: '$TMP',
+          packageRef: {
+            name: pkgU,
+            type: 'DEVC/K',
+            uri: `/sap/bc/adt/packages/${pkgU.toLowerCase()}`,
+          },
         },
-        body,
-      },
+      } as any,
     );
 
     return new AdkDdlSource(context, nameU);
@@ -185,13 +161,9 @@ export class AdkDdlSource {
     ctx?: AdkContext,
   ): Promise<void> {
     const context = ctx ?? getGlobalContext();
-    const obj = new AdkDdlSource(context, name);
-    const params = new URLSearchParams();
-    if (options?.transport) params.set('corrNr', options.transport);
-    if (options?.lockHandle) params.set('lockHandle', options.lockHandle);
-    const qs = params.toString();
-    await context.client.fetch(`${obj.objectUri}${qs ? '?' + qs : ''}`, {
-      method: 'DELETE',
+    await context.client.adt.ddic.ddl.sources.delete(name.toUpperCase(), {
+      ...(options?.transport ? { corrNr: options.transport } : {}),
+      ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
     });
   }
 }

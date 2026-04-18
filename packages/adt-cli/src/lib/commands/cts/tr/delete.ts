@@ -19,6 +19,7 @@ import { createCliLogger } from '../../../utils/logger-config';
 export const ctsDeleteCommand = new Command('delete')
   .description('Delete transport request (with mandatory confirmation)')
   .argument('<transport>', 'Transport number (e.g., BHFK900123)')
+  .option('-y, --yes', 'Skip interactive confirmation (non-interactive)')
   .option('--json', 'Output result as JSON')
   .action(async function (this: Command, transport: string, options) {
     const globalOpts = this.optsWithGlobals?.() ?? {};
@@ -47,8 +48,10 @@ export const ctsDeleteCommand = new Command('delete')
 
       progress.done();
 
-      const request = transportInfo?.request;
-      if (!request) {
+      // The service returns a normalized Transport with `number`, `desc`,
+      // `owner`, `status`, `tasks`. A missing/empty number indicates the
+      // transport was not found.
+      if (!transportInfo || !transportInfo.number) {
         console.error(`❌ Transport ${transport} not found`);
         process.exit(1);
       }
@@ -57,54 +60,32 @@ export const ctsDeleteCommand = new Command('delete')
       console.log(
         '\n⚠️  WARNING: You are about to DELETE a transport request\n',
       );
-      console.log(`   🚛 Transport: ${request.number}`);
-      console.log(`   📝 Description: ${request.desc || '-'}`);
-      console.log(`   👤 Owner: ${request.owner || '-'}`);
-      console.log(
-        `   📊 Status: ${request.status_text || request.status || '-'}`,
-      );
+      console.log(`   🚛 Transport: ${transportInfo.number}`);
+      console.log(`   📝 Description: ${transportInfo.desc || '-'}`);
+      console.log(`   👤 Owner: ${transportInfo.owner || '-'}`);
+      console.log(`   📊 Status: ${transportInfo.status || '-'}`);
 
-      // Count objects
-      const taskCount = request.task?.length || 0;
-      let objectCount = 0;
-      if (request.task) {
-        const tasks = Array.isArray(request.task)
-          ? request.task
-          : [request.task];
-        for (const task of tasks) {
-          if (task.abap_object) {
-            const objs = Array.isArray(task.abap_object)
-              ? task.abap_object
-              : [task.abap_object];
-            objectCount += objs.length;
-          }
-        }
-      }
-      if (request.all_objects?.abap_object) {
-        const objs = Array.isArray(request.all_objects.abap_object)
-          ? request.all_objects.abap_object
-          : [request.all_objects.abap_object];
-        objectCount = Math.max(objectCount, objs.length);
-      }
-
+      const taskCount = transportInfo.tasks?.length || 0;
       console.log(`   📁 Tasks: ${taskCount}`);
-      console.log(`   📦 Objects: ${objectCount}`);
       console.log('\n   ⛔ This action is IRREVERSIBLE!\n');
 
       // Step 3: Require user to type transport number to confirm
-      const confirmation = await input({
-        message: `Type the transport number to confirm deletion:`,
-        validate: (value) => {
-          if (value.trim().toUpperCase() === transport.toUpperCase()) {
-            return true;
-          }
-          return 'Transport number does not match. Type exactly to confirm.';
-        },
-      });
+      //         (skipped when -y/--yes is passed)
+      if (!options.yes) {
+        const confirmation = await input({
+          message: `Type the transport number to confirm deletion:`,
+          validate: (value) => {
+            if (value.trim().toUpperCase() === transport.toUpperCase()) {
+              return true;
+            }
+            return 'Transport number does not match. Type exactly to confirm.';
+          },
+        });
 
-      if (confirmation.trim().toUpperCase() !== transport.toUpperCase()) {
-        console.log('\n❌ Deletion cancelled');
-        process.exit(0);
+        if (confirmation.trim().toUpperCase() !== transport.toUpperCase()) {
+          console.log('\n❌ Deletion cancelled');
+          process.exit(0);
+        }
       }
 
       // Step 4: Delete the transport

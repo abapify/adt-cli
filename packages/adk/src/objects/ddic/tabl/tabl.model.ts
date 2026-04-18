@@ -23,7 +23,6 @@ import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
 
 import type { TableResponse } from '../../../base/adt';
-import { toText } from '../../../base/fetch-utils';
 
 /**
  * Table/Structure data type - unwrap from blueSource wrapper root element
@@ -47,11 +46,7 @@ export class AdkTable extends AdkMainObject<typeof TableKind, TableXml> {
    */
   async getSource(): Promise<string> {
     return this.lazy('source', async () => {
-      const response = await this.ctx.client.fetch(
-        `${this.objectUri}/source/main`,
-        { method: 'GET', headers: { Accept: 'text/plain' } },
-      );
-      return toText(response);
+      return this.ctx.client.adt.ddic.tables.source.main.get(this.name);
     });
   }
 
@@ -61,16 +56,7 @@ export class AdkTable extends AdkMainObject<typeof TableKind, TableXml> {
    */
   async getSettings(): Promise<string> {
     return this.lazy('settings', async () => {
-      const response = await this.ctx.client.fetch(
-        `/sap/bc/adt/ddic/db/settings/${encodeURIComponent(this.name.toLowerCase())}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/vnd.sap.adt.table.settings.v2+xml',
-          },
-        },
-      );
-      return toText(response);
+      return this.ctx.client.adt.ddic.tablesettings.get(this.name);
     });
   }
 
@@ -157,11 +143,7 @@ export class AdkStructure extends AdkMainObject<
    */
   async getSource(): Promise<string> {
     return this.lazy('source', async () => {
-      const response = await this.ctx.client.fetch(
-        `${this.objectUri}/source/main`,
-        { method: 'GET', headers: { Accept: 'text/plain' } },
-      );
-      return toText(response);
+      return this.ctx.client.adt.ddic.structures.source.main.get(this.name);
     });
   }
 

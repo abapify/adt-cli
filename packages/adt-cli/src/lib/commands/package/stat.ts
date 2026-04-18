@@ -25,25 +25,27 @@ export const packageStatCommand = new Command('stat')
 
     const pkgName = _name.toUpperCase();
 
+    let exists: boolean;
     try {
       await getAdtClientV2();
-
-      const exists = await AdkPackage.exists(pkgName);
-
-      if (options.json) {
-        console.log(JSON.stringify({ package: pkgName, exists }, null, 2));
-      } else {
-        if (exists) {
-          console.log(`✅ Package ${pkgName} exists`);
-        } else {
-          console.log(`❌ Package ${pkgName} not found`);
-        }
-      }
-
-      process.exit(exists ? 0 : 10);
+      exists = await AdkPackage.exists(pkgName);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('❌ Stat failed:', message);
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
+
+    if (options.json) {
+      console.log(JSON.stringify({ package: pkgName, exists }, null, 2));
+    } else if (exists) {
+      console.log(`✅ Package ${pkgName} exists`);
+    } else {
+      console.log(`❌ Package ${pkgName} not found`);
+    }
+
+    // Convention: 0 = found, 10 = not found. Use exitCode so harnesses that
+    // override process.exit (e.g. in-process CLI test runs) do not see a
+    // thrown exit interpreted as a failure.
+    process.exitCode = exists ? 0 : 10;
   });

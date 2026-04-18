@@ -15,12 +15,56 @@ import { normalizeSearchResults } from '../utils/lock-helpers';
 import { createLockService } from '@abapify/adt-locks';
 import { getObjectUri } from '@abapify/adk';
 
+type AdtClient = Awaited<ReturnType<typeof getAdtClientV2>>;
+
+interface SourceOp {
+  get: (name: string) => Promise<string>;
+  put: (
+    name: string,
+    opts: { lockHandle: string; corrNr?: string },
+    body: string,
+  ) => Promise<unknown>;
+}
+
+/**
+ * Pick the typed source.main contract for well-known object URIs.
+ * Returns `undefined` for object types that don't (yet) have a contract,
+ * in which case callers should fall back to generic client.fetch().
+ */
+function pickSourceContract(
+  client: AdtClient,
+  uri: string,
+): { op: SourceOp; objectName: string } | undefined {
+  // Patterns: /sap/bc/adt/<area>/<name>
+  const match = uri.match(
+    /^\/sap\/bc\/adt\/(oo\/classes|oo\/interfaces|programs\/programs|ddic\/ddl\/sources|ddic\/dcl\/sources)\/([^/?#]+)/i,
+  );
+  if (!match) return undefined;
+  const [, area, encodedName] = match;
+  const objectName = decodeURIComponent(encodedName);
+
+  switch (area.toLowerCase()) {
+    case 'oo/classes':
+      return { op: client.adt.oo.classes.source.main, objectName };
+    case 'oo/interfaces':
+      return { op: client.adt.oo.interfaces.source.main, objectName };
+    case 'programs/programs':
+      return { op: client.adt.programs.programs.source.main, objectName };
+    case 'ddic/ddl/sources':
+      return { op: client.adt.ddic.ddl.sources.source.main, objectName };
+    case 'ddic/dcl/sources':
+      return { op: client.adt.ddic.dcl.sources.source.main, objectName };
+    default:
+      return undefined;
+  }
+}
+
 /**
  * Resolve an object to its ADT URI.
  * Uses type-based registry lookup first, then falls back to quickSearch.
  */
 async function resolveUri(
-  client: Awaited<ReturnType<typeof getAdtClientV2>>,
+  client: AdtClient,
   objectName: string,
   objectType?: string,
 ): Promise<string> {
@@ -60,21 +104,26 @@ const getSourceCommand = new Command('get')
         const client = await getAdtClientV2();
         const uri = await resolveUri(client, objectName, options.type);
 
-        const source = await client.fetch(`${uri}/source/main`, {
-          method: 'GET',
-          headers: { Accept: 'text/plain' },
-        });
+        // Prefer typed source contract for well-known object types (CLAS/INTF/PROG/DDLS/DCLS)
+        const contract = pickSourceContract(client, uri);
+        let source: string;
+        if (contract) {
+          source = await contract.op.get(contract.objectName);
+        } else {
+          // TODO: generic fallback — remove once all object types have
+          // typed source contracts (e.g. FUGR/FUNC, DOMA source, etc.).
+          source = String(
+            await client.fetch(`${uri}/source/main`, {
+              method: 'GET',
+              headers: { Accept: 'text/plain' },
+            }),
+          );
+        }
 
         if (options.json) {
-          console.log(
-            JSON.stringify(
-              { objectName, uri, source: String(source) },
-              null,
-              2,
-            ),
-          );
+          console.log(JSON.stringify({ objectName, uri, source }, null, 2));
         } else {
-          process.stdout.write(String(source));
+          process.stdout.write(source);
         }
       } catch (error) {
         console.error(
@@ -118,15 +167,29 @@ const putSourceCommand = new Command('put')
         lockHandle = lock.handle;
 
         try {
-          const params = new URLSearchParams({ lockHandle });
-          if (options.transport) params.set('corrNr', options.transport);
-
           if (!options.json) console.log(`🔄 Writing source to ${uri}...`);
-          await client.fetch(`${uri}/source/main?${params.toString()}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'text/plain' },
-            body: sourceCode,
-          });
+
+          const contract = pickSourceContract(client, uri);
+          if (contract) {
+            await contract.op.put(
+              contract.objectName,
+              {
+                lockHandle,
+                ...(options.transport ? { corrNr: options.transport } : {}),
+              },
+              sourceCode,
+            );
+          } else {
+            // TODO: generic fallback — remove once all object types have
+            // typed source contracts.
+            const params = new URLSearchParams({ lockHandle });
+            if (options.transport) params.set('corrNr', options.transport);
+            await client.fetch(`${uri}/source/main?${params.toString()}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'text/plain' },
+              body: sourceCode,
+            });
+          }
 
           await lockService.unlock(uri, { lockHandle });
           lockHandle = undefined;

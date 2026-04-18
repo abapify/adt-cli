@@ -85,17 +85,13 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
     source: string,
     options?: { lockHandle?: string; transport?: string },
   ): Promise<void> {
-    const params = new URLSearchParams();
-    if (options?.lockHandle) params.set('lockHandle', options.lockHandle);
-    if (options?.transport) params.set('corrNr', options.transport);
-
-    await this.ctx.client.fetch(
-      `/sap/bc/adt/oo/classes/${this.name.toLowerCase()}/source/main${params.toString() ? '?' + params.toString() : ''}`,
+    await this.crudContract.source.main.put(
+      this.name,
       {
-        method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
-        body: source,
+        ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
+        ...(options?.transport ? { corrNr: options.transport } : {}),
       },
+      source,
     );
 
     // Invalidate cached source
@@ -111,23 +107,21 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
     source: string,
     options?: { lockHandle?: string; transport?: string },
   ): Promise<void> {
-    const params = new URLSearchParams();
-    if (options?.lockHandle) params.set('lockHandle', options.lockHandle);
-    if (options?.transport) params.set('corrNr', options.transport);
+    const putOptions = {
+      ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
+      ...(options?.transport ? { corrNr: options.transport } : {}),
+    };
 
-    const endpoint =
-      includeType === 'main'
-        ? `/sap/bc/adt/oo/classes/${this.name.toLowerCase()}/source/main`
-        : `/sap/bc/adt/oo/classes/${this.name.toLowerCase()}/includes/${includeType}`;
-
-    await this.ctx.client.fetch(
-      `${endpoint}${params.toString() ? '?' + params.toString() : ''}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
-        body: source,
-      },
-    );
+    if (includeType === 'main') {
+      await this.crudContract.source.main.put(this.name, putOptions, source);
+    } else {
+      await this.crudContract.includes.put(
+        this.name,
+        includeType,
+        putOptions,
+        source,
+      );
+    }
 
     // Invalidate cached source
     invalidateLazy(this, `source:${includeType}`);
@@ -266,10 +260,14 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
           ? `${basePath}/source/main`
           : `${basePath}/includes/${key}`;
       try {
-        await this.ctx.client.fetch(endpoint, {
-          method: 'GET',
-          headers: { Accept: 'text/plain' },
-        });
+        // Re-GET via the typed contract so the adapter refreshes its
+        // cached ETag for this URL (needed because a preceding lock
+        // invalidates the previously-cached source ETag).
+        if (key === 'main') {
+          await this.crudContract.source.main.get(this.name);
+        } else {
+          await this.crudContract.includes.get(this.name, key);
+        }
       } catch {
         // Include may not exist yet — clear stale ETag to avoid 412
         this.ctx.client.clearETag(endpoint);

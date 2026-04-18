@@ -73,8 +73,17 @@ export class TransportService {
   async get(trkorr: string): Promise<Transport> {
     const response = await this.adt.cts.transportrequests.get(trkorr);
 
-    // Single transport response has root/request structure
-    const request = (response as Record<string, unknown>)?.request ?? response;
+    // Single transport response may be shaped as
+    //   { root: { request: { ... } } }   (XML — ts-xsd keeps the root wrapper)
+    //   { request: { ... } }             (when the root is already unwrapped)
+    //   { ... }                          (flat)
+    const data = response as Record<string, unknown>;
+    const unwrapped =
+      data?.root && typeof data.root === 'object'
+        ? (data.root as Record<string, unknown>)
+        : data;
+    const request =
+      (unwrapped?.request as Record<string, unknown> | undefined) ?? unwrapped;
     return this.mapToTransport(request);
   }
 

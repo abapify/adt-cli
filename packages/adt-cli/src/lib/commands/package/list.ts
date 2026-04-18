@@ -92,7 +92,7 @@ export const packageListCommand = new Command('list')
       if (subpackages.length > 0) {
         console.log(chalk.underline(`\n▼ Subpackages (${subpackages.length})`));
         for (const sp of subpackages) {
-          const spObj = sp as Record<string, unknown>;
+          const spObj = sp as unknown as Record<string, unknown>;
           if (options.long) {
             console.log(
               `  ${chalk.cyan(String(spObj.name ?? ''))}  ${chalk.dim(String(spObj.description ?? ''))}`,
@@ -112,7 +112,9 @@ export const packageListCommand = new Command('list')
             // Group by type
             const byType = new Map<string, AbapObject[]>();
             for (const obj of objects) {
-              const type = String((obj as Record<string, unknown>).type ?? '');
+              const type = String(
+                (obj as unknown as Record<string, unknown>).type ?? '',
+              );
               const list = byType.get(type) ?? [];
               list.push(obj);
               byType.set(type, list);
@@ -122,7 +124,7 @@ export const packageListCommand = new Command('list')
             )) {
               console.log(chalk.dim(`  ${type} (${list.length})`));
               for (const obj of list) {
-                const o = obj as Record<string, unknown>;
+                const o = obj as unknown as Record<string, unknown>;
                 const pkgNote =
                   options.recursive && String(o.package ?? '') !== pkgName
                     ? chalk.dim(` [${String(o.package ?? '')}]`)
@@ -135,7 +137,7 @@ export const packageListCommand = new Command('list')
           } else {
             for (const obj of objects) {
               console.log(
-                `  ${String((obj as Record<string, unknown>).name ?? '')}`,
+                `  ${String((obj as unknown as Record<string, unknown>).name ?? '')}`,
               );
             }
           }

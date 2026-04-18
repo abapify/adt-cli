@@ -18,6 +18,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
+import type { DataPreviewFreestyleResponse } from '@abapify/adt-contracts';
 
 type OsqlResultColumn = {
   name: string;
@@ -33,46 +34,38 @@ type OsqlResult = {
   rows: OsqlResultRow[];
 };
 
-function parseAdtDataPreviewResponse(raw: unknown): OsqlResult {
-  // ADT returns: { columns: [...], rows: [...] }
-  // Each column: { name, isKey, type, description }
-  // Each row: { keyValue: { ... }, values: [...] }  OR flat object
-  if (!raw || typeof raw !== 'object') {
-    return { columns: [], rows: [] };
-  }
-  const obj = raw as Record<string, unknown>;
+/**
+ * Convert the typed freestyle response (columnar: each column has
+ * `metadata` + `dataPreviewContent[row]`) to the row-oriented
+ * `OsqlResult` shape used by the renderer below.
+ */
+function toOsqlResult(result: DataPreviewFreestyleResponse): OsqlResult {
+  const rawColumns = result.dataPreview?.columns ?? [];
 
-  // Handle SAP's columnar format
-  const columns: OsqlResultColumn[] = [];
+  const columns: OsqlResultColumn[] = rawColumns.map((col) => {
+    const meta = col.metadata ?? {};
+    return {
+      name: String(meta.name ?? ''),
+      isKey: Boolean(meta.isKey ?? meta.keyAttribute ?? false),
+      type: String(meta.type ?? ''),
+      description: String(meta.description ?? ''),
+    };
+  });
+
+  const rowCount = rawColumns.reduce(
+    (max, col) => Math.max(max, col.dataPreviewContent?.length ?? 0),
+    0,
+  );
+
   const rows: OsqlResultRow[] = [];
-
-  if (Array.isArray(obj['columns'])) {
-    for (const col of obj['columns'] as Record<string, unknown>[]) {
-      columns.push({
-        name: String(col['name'] ?? col['fieldName'] ?? ''),
-        isKey: Boolean(col['isKey'] ?? col['key'] ?? false),
-        type: String(col['type'] ?? col['dataType'] ?? ''),
-        description: String(col['description'] ?? col['label'] ?? ''),
-      });
-    }
-  }
-
-  if (Array.isArray(obj['rows'])) {
-    for (const row of obj['rows'] as Record<string, unknown>[]) {
-      const flat: OsqlResultRow = {};
-      // Rows can be flat or have a 'values' array matching columns
-      if (Array.isArray(row['values'])) {
-        const vals = row['values'] as (string | null)[];
-        for (let i = 0; i < columns.length; i++) {
-          flat[columns[i].name] = vals[i] ?? null;
-        }
-      } else {
-        for (const [k, v] of Object.entries(row)) {
-          flat[k] = v == null ? null : String(v);
-        }
-      }
-      rows.push(flat);
-    }
+  for (let r = 0; r < rowCount; r++) {
+    const row: OsqlResultRow = {};
+    rawColumns.forEach((col, i) => {
+      const name = columns[i].name;
+      const values = col.dataPreviewContent ?? [];
+      row[name] = values[r] ?? null;
+    });
+    rows.push(row);
   }
 
   return { columns, rows };
@@ -152,25 +145,13 @@ export const datapreviewOsqlCommand = new Command('osql')
         const client = await getAdtClientV2();
         const maxRows = parseInt(options.rows, 10) || 100;
 
-        const params = new URLSearchParams({
-          rowCount: String(maxRows),
-          outputFormat: 'json',
-        });
-
-        if (options.noaging) {
-          params.set('noaging', 'true');
-        }
-
-        const result = await client.fetch(
-          `/sap/bc/adt/datapreview/freestyle?${params.toString()}`,
+        const result = await client.adt.datapreview.freestyle.post(
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'text/plain',
-              Accept: 'application/json',
-            },
-            body: trimmed,
+            rowCount: maxRows,
+            outputFormat: 'json',
+            ...(options.noaging ? { noaging: true } : {}),
           },
+          trimmed,
         );
 
         if (options.output === 'json') {
@@ -178,9 +159,8 @@ export const datapreviewOsqlCommand = new Command('osql')
           return;
         }
 
-        // Parse and render as human table
-        const parsed = parseAdtDataPreviewResponse(result);
-        renderTable(parsed, options.noheadings);
+        // Render typed response as human-readable table
+        renderTable(toOsqlResult(result), options.noheadings);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.error('❌ Query failed:', message);
