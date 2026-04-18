@@ -1,5 +1,11 @@
 #!/usr/bin/env -S npx tsx
 
+// Bootstrap: side-effect import registers the abapGit FormatPlugin into the
+// global registry (`@abapify/adt-plugin`). This is the ONE sanctioned place
+// where adt-cli depends on `@abapify/adt-plugin-abapgit` directly — every
+// other consumer MUST go through `getFormatPlugin('abapgit')`.
+import '@abapify/adt-plugin-abapgit';
+
 import { Command } from 'commander';
 import {
   importObjectCommand,

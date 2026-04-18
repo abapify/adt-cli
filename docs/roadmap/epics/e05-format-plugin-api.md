@@ -111,3 +111,15 @@ Do NOT commit without approval.
 
 - Should plugin discovery scan `node_modules/@abapify/*` automatically (like the existing CLI command-plugin pattern), or require explicit registration in user config? Recommend automatic for parity with CLI-command plugins.
 - How does multi-file serialization round-trip (e.g. one ABAP class produces 6 files)? Confirm `SerializedFile[]` carries enough metadata.
+
+## Follow-ups discovered during implementation
+
+- **`diff()` on `FormatPlugin` was deferred.** The epic proposed `diff(local, remote): Promise<DiffResult>` as an optional method. It was dropped from v1 because current diff logic is abapGit-specific (field projection, XML normalization). Revisit when a second format (gCTS) needs diff support, so we have two data points to generalise from.
+
+- **`ObjectHandler` vs `FormatHandler`.** The concrete `ObjectHandler<T, TSchema>` in `adt-plugin-abapgit` is heavily parameterised on `AbapGitSchema` — moving it to `@abapify/adt-plugin` would drag abapgit types into the generic interface. Instead, we defined a narrower `FormatHandler` in `@abapify/adt-plugin` and rely on structural subtyping (the abapgit handler is a superset). New formats (gCTS, AFF) can define their own concrete handler shape as long as it satisfies `FormatHandler`.
+
+- **Dynamic-import fast path.** `loadFormatPlugin` in `adt-cli/src/lib/utils/format-loader.ts` still performs a dynamic `await import(pkg)` to obtain the legacy `AdtPlugin` instance (needed for import services and the bundled-binary preloaded-plugin code path). Once the `AdtPlugin`/`FormatPlugin` split is fully consumed by E08, the dynamic import can be replaced with a pure `getFormatPlugin(id)` lookup.
+
+- **Sourcemaps trip the literal grep.** The acceptance grep matches pre-existing compiled `dist/**/*.mjs.map` files (sourcemap `sourcesContent` embeds source as a single JSON line, so `.` inadvertently matches across what were originally multi-line imports). Run the grep with `--exclude-dir=dist --exclude-dir=node_modules` to see only real source hits (zero after this change).
+
+- **Bundler static-import assumption.** The previous `format-loader.ts` carried a comment noting that Bun's bundler required a static `import * as abapgitPlugin from '@abapify/adt-plugin-abapgit'`. We replaced it with dynamic import + side-effect bootstrap. If we see regressions in `adt-all` bundled binary resolution, reintroduce the static import only inside the bootstrap file (`cli.ts`), never in shared utilities.

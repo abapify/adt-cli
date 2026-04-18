@@ -44,3 +44,20 @@ export type {
 
 // Factory
 export { createPlugin } from './factory';
+
+// Format-plugin registry (serialization formats: abapGit, gCTS, AFF, …)
+export type {
+  FormatPlugin,
+  FormatHandler,
+  FormatHandlerSchema,
+  SerializedFile,
+  ParsedFormatFilename,
+} from './lib/format';
+export {
+  registerFormatPlugin,
+  getFormatPlugin,
+  requireFormatPlugin,
+  listFormatPlugins,
+  unregisterFormatPlugin,
+  clearFormatRegistry,
+} from './lib/format';
