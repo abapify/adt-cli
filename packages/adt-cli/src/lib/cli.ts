@@ -37,6 +37,7 @@ import {
   userCommand,
   sourceCommand,
   strustCommand,
+  checkinCommand,
 } from './commands';
 import { createPackageCommand } from './commands/package';
 import {
@@ -285,6 +286,9 @@ export async function createCLI(options?: {
 
   // Checkout command (download SAP objects to abapgit-compatible files)
   program.addCommand(createCheckoutCommand());
+
+  // Checkin command (push local abapGit/gCTS directory into SAP — inverse of checkout)
+  program.addCommand(checkinCommand);
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());

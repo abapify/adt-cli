@@ -98,3 +98,15 @@ Do NOT commit without approval.
 
 - SAP doesn't expose an atomic "transactional" object save. True rollback is a best-effort: release locks + log "manual cleanup needed" for partially-applied PUTs. Acceptable?
 - Should `checkin` honor `.gitignore`-style excludes in the source directory?
+
+## Follow-ups discovered during implementation (v0.1)
+
+- **`CheckinService.diff` is coarse-grained.** `diffObject()` currently treats "remote exists + local had pending sources" as `update`, and "remote 404" as `create`. No per-field comparison (SAP returns ETags which ADK's save() uses to short-circuit identical content on the server side — so `unchanged` via ETag still works, just post-PUT rather than in the plan). Revisit when `FormatPlugin.diff()` lands (see E05 follow-ups) to compute true file-level diffs up-front.
+
+- **Batch pre-flight lock then release.** `apply.ts` acquires all tier locks in a `BatchLockSession` purely to surface conflicts early, then releases and lets ADK's per-object `save({mode:'upsert'})` re-lock. This double-lock is cheap because the security session's CSRF token survives both cycles, but it means BatchLockSession is really a **validation primitive**, not an execution one. When ADK exposes a way to thread pre-acquired lock handles into `save()`, we can collapse the two cycles into one.
+
+- **gCTS format plugin currently rejects checkin.** `@abapify/adt-plugin-gcts` does not yet implement `format.export` (Git → SAP). `CheckinService` correctly surfaces this as a plugin-capability error on both CLI and MCP — proving the dispatch is format-agnostic — but a real gCTS checkin needs that plugin method (see E06 v0.1 follow-ups: "Git → SAP direction […] deferred alongside E08 checkin"). Adding it lights up gCTS checkin with zero further changes to `CheckinService`.
+
+- **E2E parity coverage is shallow for apply paths.** The mock server in `@abapify/adt-fixtures` doesn't yet model PUT-with-lock-handle + activation for every object type. The parity tests (`parity.checkin.test.ts`) therefore validate discovery + format dispatch + dry-run + MCP tool advertisement; lock/ETag/PUT apply paths are validated through the `tests/services/checkin/apply.test.ts` unit tests with mocked `LockService`. Extending the mock server with object-specific write routes is a separate epic-sized follow-up.
+
+- **Dependency tier list is pragmatic, not exhaustive.** `plan.ts` covers DDIC primitives, packages, app code, and CDS/RAP. Rare types (BAdI impl, XSLT, MSAG, etc.) fall into `other` and are applied last-tier. Extend `TIER_FOR_TYPE` as new object types get ADK/abapGit support.

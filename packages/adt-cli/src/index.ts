@@ -10,3 +10,21 @@ export {
   type TransportImportOptions,
   type ImportResult,
 } from './lib/services/import/service';
+
+// Checkin (E08) — inverse of checkout; pushes local abapGit/gCTS files → SAP.
+export {
+  CheckinService,
+  type CheckinOptions,
+  type CheckinResult,
+  type ChangePlan,
+  type ChangePlanEntry,
+  type ChangeAction,
+  type DependencyTier,
+  type ApplyResult,
+  type ApplyTierResult,
+  buildPlan,
+  classifyTier,
+  flattenPlanObjects,
+  diffObject,
+  applyPlan,
+} from './lib/services/checkin';

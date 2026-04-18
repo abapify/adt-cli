@@ -80,6 +80,8 @@ import { registerListPsesTool } from './list-pses';
 import { registerListCertsTool } from './list-certs';
 import { registerUploadCertTool } from './upload-cert';
 import { registerDeleteCertTool } from './delete-cert';
+// Checkin (E08) — inverse of import_package; pushes local files → SAP.
+import { registerCheckinTool } from './checkin';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Existing tools
@@ -155,4 +157,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerListCertsTool(server, ctx);
   registerUploadCertTool(server, ctx);
   registerDeleteCertTool(server, ctx);
+  // Checkin (E08)
+  registerCheckinTool(server, ctx);
 }
