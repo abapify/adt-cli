@@ -43,6 +43,8 @@ export interface LoadedFixtures {
   aunit: string;
   navigationTarget: string;
   usages: string;
+  usageReferencesScope: string;
+  usageReferencesResult: string;
   callers: string;
   callees: string;
   tableDefinition: string;
@@ -137,6 +139,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     aunit,
     navigationTarget,
     usages,
+    usageReferencesScope,
+    usageReferencesResult,
     callers,
     callees,
     tableDefinition,
@@ -213,6 +217,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     m.aunit.load(),
     m.navigationTarget.load(),
     m.usages.load(),
+    m.usageReferences.scope.load(),
+    m.usageReferences.result.load(),
     m.callers.load(),
     m.callees.load(),
     m.tableDefinition.load(),
@@ -290,6 +296,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     aunit,
     navigationTarget,
     usages,
+    usageReferencesScope,
+    usageReferencesResult,
     callers,
     callees,
     tableDefinition,
@@ -408,12 +416,38 @@ export function matchRoute(
     return { status: 200, body: f.search, contentType: 'application/json' };
   }
 
-  // Usages / references
+  // Usages / references (legacy GET — kept for backwards compatibility)
   if (
     m === 'GET' &&
     url.startsWith('/sap/bc/adt/repository/informationsystem/usages')
   ) {
     return { status: 200, body: f.usages, contentType: 'application/json' };
+  }
+
+  // Where-used 2-step POST flow
+  // Step 1: scope
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/usageReferences/scope')
+  ) {
+    return {
+      status: 200,
+      body: f.usageReferencesScope,
+      contentType:
+        'application/vnd.sap.adt.repository.usagereferences.scope.response.v1+xml',
+    };
+  }
+  // Step 2: search
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/repository/informationsystem/usageReferences')
+  ) {
+    return {
+      status: 200,
+      body: f.usageReferencesResult,
+      contentType:
+        'application/vnd.sap.adt.repository.usagereferences.result.v1+xml',
+    };
   }
 
   // Callers / callees

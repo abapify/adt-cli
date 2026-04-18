@@ -88,3 +88,11 @@ Do NOT commit without approval.
 - `deleteCertificate` path uses a 1-based numeric index for `{id}`; some
   SAP versions key by serial number or subject. Revisit when capture is
   available.
+
+## Real-SAP verification (TRL 2025-11)
+
+- `/sap/bc/adt/system/security/pses` returns **HTTP 404** on TRL BTP
+  Trial — endpoint not present. sapcli's STRUST support uses RFC
+  function modules (not ADT), which matches. Synthetic fixtures remain
+  the only option until an on-prem or ABAP Platform ADT capture is
+  available. See `packages/adt-cli/tests/real-e2e/backfill-synthetic.real.test.ts`.

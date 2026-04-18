@@ -1,0 +1,3091 @@
+{
+  "d": {
+    "results": [
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_GERMAN')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_GERMAN')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/ZMA_TEST_PAGE_GERMAN",
+        "title": "",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "Deutsches Layout",
+        "originalLanguage": "de",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1408614547000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_GERMAN')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_GERMAN')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_GERMAN')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_GERMAN')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_KPIMOD_TCG_S')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_KPIMOD_TCG_S')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/SAP_KPIMOD_TCG_S",
+        "title": "KPI Modeler",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"7BB60P5VDTCTKC7P2YDB9BIMF\",\"9Z7UONEL3ZP012EYNL9V5VGUF\",\"BTAD9Y6ZMTNSHE2D90939WETJ\",\"4J5122ZYWVJAT9NB301PO4A2V\",\"0G2WU5P09JF0WF2KEK4LJSW07\",\"BGHPLJ1XLNIRT38TFC66FZWUF\",\"CXRVAU2RW71JEDSUQSW9I2ZUV\",\"2P2IGS7KE1KICXZWHL2HK3C3R\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0008",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1414509998000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_KPIMOD_TCG_S')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_KPIMOD_TCG_S')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_KPIMOD_TCG_S')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_KPIMOD_TCG_S')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFiori2LaunchpadHome')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFiori2LaunchpadHome')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/Fiori2LaunchpadHome",
+        "title": "Fiori Wave2 Launchpad Home",
+        "catalogId": "",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1375950014000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFiori2LaunchpadHome')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFiori2LaunchpadHome')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFiori2LaunchpadHome')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFiori2LaunchpadHome')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_LUMIRA_GROUP')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_LUMIRA_GROUP')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/SAP_LUMIRA_GROUP",
+        "title": "SAP Lumira",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1385995297000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_LUMIRA_GROUP')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_LUMIRA_GROUP')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_LUMIRA_GROUP')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSAP_LUMIRA_GROUP')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_NO_USAGES')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_NO_USAGES')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/ZMA_TEST_PAGE_NO_USAGES",
+        "title": "My Page",
+        "catalogId": "/UI2/CATALOG_ALL",
+        "layout": "pageLayout",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": null,
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_NO_USAGES')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_NO_USAGES')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_NO_USAGES')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE_NO_USAGES')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/ZMA_TEST_PAGE",
+        "title": "My Page",
+        "catalogId": "/UI2/CATALOG_ALL",
+        "layout": "pageLayout",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1328881634000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FZMA_TEST_PAGE')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFLP_ADMIN_G')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFLP_ADMIN_G')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/FLP_ADMIN_G",
+        "title": "SAP Fiori Launchpad Admin Group",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TIH53H32GION4GZAUBNDE\",\"00O2TIH53H32GION4J71F3BPU\",\"00O2TIH53H32GION4K35BD9N6\",\"00O2TIH53H32GION4LA8M8NWY\",\"00O2TIH53H32GION4LA8M9JIQ\",\"00O2TIH53H32GION4MO6XAXHU\",\"00O2TIH53H32GION4N9FS16VM\",\"00O2TIH53H32GION4PBRHBCIA\",\"00O2TIH53H32GIONUIW7J8J3Z\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0009",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1482163067000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFLP_ADMIN_G')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFLP_ADMIN_G')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFLP_ADMIN_G')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FFLP_ADMIN_G')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FPAGE_ADMINISTRATION')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FPAGE_ADMINISTRATION')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/PAGE_ADMINISTRATION",
+        "title": "Configuration settings for page administration UI",
+        "catalogId": "/UI2/CATALOG_ALL",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1364377395000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FPAGE_ADMINISTRATION')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FPAGE_ADMINISTRATION')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FPAGE_ADMINISTRATION')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FPAGE_ADMINISTRATION')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FLAUNCH_PAGE')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FLAUNCH_PAGE')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/LAUNCH_PAGE",
+        "title": "Launchpage",
+        "catalogId": "/UI2/TILES_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1366295499000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FLAUNCH_PAGE')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FLAUNCH_PAGE')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FLAUNCH_PAGE')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FLAUNCH_PAGE')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSMART_BUSINESS')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSMART_BUSINESS')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/SMART_BUSINESS",
+        "title": "SAP Smart Business",
+        "catalogId": "",
+        "layout": "",
+        "originalLanguage": "de",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1373895010000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSMART_BUSINESS')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSMART_BUSINESS')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSMART_BUSINESS')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FSMART_BUSINESS')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ATC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ATC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_ATC",
+        "title": "ABAP Test Cockpit",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TNZFJMRDSHZVI6KLWARPU\",\"3WO90XU7SQ3AV807SKMZTXYKO\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1637753999000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ATC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ATC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ATC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ATC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_TMC",
+        "title": "Technical Monitoring",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRRNQ7BWAJNLBAAP\",\"3WO90XU93YRRNQ7BWKET89141\",\"3WO90XU93YRTHZF94U7AHUV2Q\",\"3WO90XU93YRROB58F770MACCX\",\"3WO90XU8VRH79ED41CYA07AV5\",\"3WO90XU7SQ3AYX2LTA29J3LIU\",\"3WO90XU93YRTLZNKF6GXEESP4\"],\"linkOrder\":[\"00O2TRBI954HOF7VZ76B2FFK3\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0007",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1705573810000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_A4C_DIC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_A4C_DIC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_A4C_DIC",
+        "title": "ABAP Dictionary",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR8GK6IODI4GZMV18WUB1\",\"00O2TR8GK6IODI4GZP0YCD7XR\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1554708887000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_A4C_DIC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_A4C_DIC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_A4C_DIC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_A4C_DIC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_BPM",
+        "title": "Workflow Administration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR9O0AVINKPVLYA2L5O6C\",\"00O2TR9O0AVINKPVLZNM1595W\",\"00O2TR8GK6IMJ9Y0GV3MG40XO\",\"00O2TR8GK6IODHN4JPW0H37PQ\",\"00O2TR8GK6IODHN4HSD2MFIQQ\",\"00O2TR9O0AVH4YUOUHKEE8ZJX\",\"3WO90XU7SQ3AR9QJA2M5I3I2F\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0007",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1607960775000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI_MON')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI_MON')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_UI_MON",
+        "title": "User Interface Monitoring",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRRVTHLG2T3ER8UL\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1669029848000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI_MON')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI_MON')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI_MON')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI_MON')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH_PER')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH_PER')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_ESH_PER",
+        "title": "My Enterprise Search",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR8GK6IOA5LYNUI7DAO9Z\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1542277094000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH_PER')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH_PER')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH_PER')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH_PER')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_DFN_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_DFN_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_DFN_PC",
+        "title": "Date Function",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1621507090000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_DFN_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_DFN_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_DFN_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_DFN_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_ESH",
+        "title": "Enterprise Search",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TRBI954FQGDESEHXBK04K\",\"00O2TRBI954FQGDESJDBXE1LW\",\"00O2TRBI954FQGDESM3A1DPR8\",\"3WO90XU93YRTPV9578W7CXPJZ\"],\"linkOrder\":[\"3WO90XU8VRH5U5ZUQWYP0MW5F\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0004",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1694076662000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ESH')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APJ')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APJ')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_APJ",
+        "title": "Application Jobs",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU8VRH78O2B2VLBSQY40\",\"3WO90XU93YRRNU0GZKPELIYMC\",\"3WO90XU7SQ3AVE15SAWBT1AVC\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0003",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1642598550000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APJ')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APJ')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APJ')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APJ')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RS_BW_WHM_MONITORS_GROUP')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RS_BW_WHM_MONITORS_GROUP')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "RS_BW_WHM_MONITORS_GROUP",
+        "title": "BW Monitors",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"5I3Y6060H25K3FW580323ZV63\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1416579268000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RS_BW_WHM_MONITORS_GROUP')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RS_BW_WHM_MONITORS_GROUP')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RS_BW_WHM_MONITORS_GROUP')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RS_BW_WHM_MONITORS_GROUP')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_SCE_100_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_SCE_100_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_SCE_100_PC",
+        "title": "Scope Extension Applications",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"25VIM45MBL5MBVKD0HO2QM94X\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1583133487000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_SCE_100_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_SCE_100_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_SCE_100_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_SCE_100_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_CDP_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_CDP_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_CDP_PC",
+        "title": "Customer Data Return",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRROKX0O1ZAN2M0S\",\"3WO90XU93YRROKX0OC5G9AGHO\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1628598816000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_CDP_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_CDP_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_CDP_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_CDP_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM_OINB')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM_OINB')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_BPM_OINB",
+        "title": "Business Process Management - One Inbox",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "X",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1584364722000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM_OINB')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM_OINB')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM_OINB')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_BPM_OINB')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_APPL_SUP_ENG_DEV_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_APPL_SUP_ENG_DEV_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_A4C_BCG_APPL_SUP_ENG_DEV_PC",
+        "title": "Development Support",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1623850919000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_APPL_SUP_ENG_DEV_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_APPL_SUP_ENG_DEV_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_APPL_SUP_ENG_DEV_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_APPL_SUP_ENG_DEV_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM_IRF')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM_IRF')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_ILM_IRF",
+        "title": "Information Retrieval",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TRBI954FQA0CQ8L78NHQJ\",\"00O2TRBI954FQA0CQAREJ50NF\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1520504953000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM_IRF')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM_IRF')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM_IRF')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM_IRF')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT_TST')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT_TST')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_EXT_TST",
+        "title": "Custom Apps and Services",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1516695063000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT_TST')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT_TST')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT_TST')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT_TST')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_UMM_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_UMM_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BW_BCG_UMM_PC",
+        "title": "Predictive Models",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR8GK6IMG1RN5SNI3L13Q\",\"00O2TR8GK6IMG1RN5LY3RC6OM\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1516273391000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_UMM_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_UMM_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_UMM_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_UMM_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_UI_ELEMENTS')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_UI_ELEMENTS')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_UI_WDR_UI_ELEMENTS",
+        "title": "Web Dynpro ABAP - UI Elements",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DGMPNR1UI73QVVRC8\",\"3WO90XZ1DGMPNR1UI73QVZZ1K\",\"3WO90XZ1DGMPNR1UINJYCNYNC\",\"3WO90XZ1DGMPNR1UIT7LBO2SO\",\"3WO90XZ1DGMPNR1UIVA2ZS4YW\",\"3WO90XZ1DGMPNR1UIYARDTN3C\",\"3WO90XZ1DGMPRH4KC47YSOGV9\",\"3WO90XZ1DGMPRGJDN8436803W\",\"3WO90XZ1DGMO15T0HLPGYQEJ3\",\"3WO90XZ1DGMPNR1UJ0SS69N3C\",\"3WO90XZ1DGMPNR1UJ2BCW8CVC\",\"3WO90XZ1DGMPV64992BRYC66Z\",\"3WO90XZ1DGMPV64994D087AE3\",\"3WO90XZ1DGMPV6499ZGBBJXP7\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0014",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1692255813000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_UI_ELEMENTS')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_UI_ELEMENTS')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_UI_ELEMENTS')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_UI_ELEMENTS')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TRA')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TRA')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_TRA",
+        "title": "Translation",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1597753209000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TRA')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TRA')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TRA')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TRA')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APPLICATION_LOG')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APPLICATION_LOG')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_APPLICATION_LOG",
+        "title": "Display Application Logs",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3AO27D3IUOVF39X\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1599574721000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APPLICATION_LOG')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APPLICATION_LOG')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APPLICATION_LOG')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_APPLICATION_LOG')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_HCM_BCG_EMP_MDT_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_HCM_BCG_EMP_MDT_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_HCM_BCG_EMP_MDT_PC",
+        "title": "Employee Master Data",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3CDZWDG7OTVQURZ\",\"3WO90XU8VRH79BHEOOQ0FP4QB\",\"3WO90XU8VRH79BHEP6A0V5Q9F\",\"3WO90XU8VRH5J66OEB4NR9DHO\",\"3WO90XU93YRRS6RVOP8ZJRJES\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0005",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1648565613000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_HCM_BCG_EMP_MDT_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_HCM_BCG_EMP_MDT_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_HCM_BCG_EMP_MDT_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_HCM_BCG_EMP_MDT_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_A4C_BCG_DEV_PC",
+        "title": "Development",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3ARG8BOY0CIRHXJ\",\"3WO90XU8VRH79AUJTA3Q8NA1T\",\"3WO90XU93YRRRNZO2OJ45HPB4\"],\"linkOrder\":[\"3WO90XU7SQ3ARG8BOY0EBVPFR\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0003",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1705590139000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_ILM",
+        "title": "Information Lifecycle Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TRBI954HC9X5XUAA5LLAD\",\"00O2TR9O0AVH10W3PIQ5U29K6\",\"00O2TR8GK6IMN7U08H1N2EJ31\",\"00O2TR9O0AVH4ZPJ23V8CKM7W\",\"00O2TRBI954HOCIBIIERHET0T\",\"00O2TRBI954HOCIBIJM0NCQCT\",\"00O2TRBI954HOCIBIL3AZRT65\",\"3WO90XU93YRRW8VRP1PIGXYKR\",\"3WO90XU8VRH7H3XVUCZ7TE25T\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0009",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1681581183000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ILM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FRAMEWORK_COMP')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FRAMEWORK_COMP')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_UI_WDR_FRAMEWORK_COMP",
+        "title": "Web Dynpro ABAP - Framework Components",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DGMPNR1UDARGTQ0Q0\",\"3WO90XZ1DGMPNR1UDF7HQYSKO\",\"3WO90XZ1DGMPNR1UDGOFL8YSO\",\"3WO90XZ1DGMPNR1UDJUOR9FS8\",\"3WO90XZ1DGMPNR1UDNAH4WPWO\",\"3WO90XZ1DGMO1EDSO8F8SKLT3\",\"3WO90XZ1DGMPV0B9FAOYLEZCK\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0007",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1687766003000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FRAMEWORK_COMP')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FRAMEWORK_COMP')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FRAMEWORK_COMP')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FRAMEWORK_COMP')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_APS_BCG_SUPPORT')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_APS_BCG_SUPPORT')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_APS_BCG_SUPPORT",
+        "title": "Cloud Support",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "X",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1573193056000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_APS_BCG_SUPPORT')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_APS_BCG_SUPPORT')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_APS_BCG_SUPPORT')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_APS_BCG_SUPPORT')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_EXT",
+        "title": "Extensibility",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU8VRH78XXXJCPXAXAY5\",\"3WO90XU93YRTM0KKAOPD1I7NC\",\"3WO90XU93YRTEG4MJHJTP9TC5\",\"3WO90XU93YRTEG4MJHJTPC9TX\",\"3WO90XU93YRTEG4MLBXQQDWW5\",\"3WO90XU93YRTEG4MO4PH7H0W5\",\"3WO90XU93YRTEG4MVE7ZWNIKL\",\"3WO90XU93YRTEG4MVE7ZWOKHX\",\"3WO90XU93YRTEG4MY075DXL1H\",\"00O2TR8GK6IMN14JZX1Z05BEC\",\"00O2TRBI954HNZHZMYDKYD8YM\",\"3WO90XU8VRH7D7PMCNZ8V1JUN\",\"3WO90XU93YRTEG4MO6ZNV0FK5\",\"3WO90XU8VRH78V28KJ5H120C1\",\"3WO90XU8VRH79AUKONQ5GQROH\",\"3WO90XU93YRTEG4MMMZJPPNT1\",\"3WO90XU8VRH78XXVNGE59VQ91\",\"3WO90XU8VRH5U6DFVCPUAQUWH\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0017",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1728638708000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_EXT')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_OM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_OM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_OM",
+        "title": "Output Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRRRSVHPOCIAHS04\",\"3WO90XU93YRTAVAQOMQQ9O1BM\",\"3WO90XU93YRTAVARPI3QP9ZN8\",\"3WO90XU93YRTAVAWB3XZXXZ95\",\"3WO90XU93YRTAVAWEEF91Z92X\",\"3WO90XU93YRTAVAWH6C5RRDTL\",\"3WO90XU93YRTAY2EHT3W524BB\",\"3WO90XU7SQ3ARE8JE09KFF1FL\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0008",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1637227998000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_OM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_OM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_OM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_OM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ARB')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ARB')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_ARB",
+        "title": "Ariba Network Integration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR8GK6IO6BU09G1BMQP9T\"],\"linkOrder\":[\"00O2TR8GK6IO6BU08EYT4DI0F\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1516183516000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ARB')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ARB')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ARB')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ARB')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_RAL')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_RAL')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_RAL",
+        "title": "Read Access Logging",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR9O0AVIR4S5WZQVASHO1\",\"00O2TR9O0AVIR4S5XKFXFSBXW\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1519555780000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_RAL')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_RAL')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_RAL')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_RAL')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FPM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FPM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_UI_WDR_FPM",
+        "title": "Web Dynpro ABAP - FPM",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DGMPNSRYHJAYCOXEW\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1648118891000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FPM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FPM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FPM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_FPM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_UI",
+        "title": "User Interface Configuration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TNVYGDVKWROOC2A61508P\",\"00O2TNZFJMRDP4HN0608SCC9P\",\"00O2TNZFJMRFIU409SAWW2N3O\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0003",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1586420208000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_UI')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_PAGE')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_PAGE')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "EPM_DEMO_PAGE",
+        "title": "Lanes Page for EPM demo",
+        "catalogId": "",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1370936675000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_PAGE')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_PAGE')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_PAGE')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_PAGE')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SEC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SEC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_SEC",
+        "title": "Security",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TRBI954FM15LZQA88WRLJ\",\"00O2TR9O0AVINWRCMWPFEP3ES\",\"00O2TNZFJMRDOUMBJ3YVLTGK4\",\"3WO90XU7SQ3CHF4HDXDLASZE3\",\"3WO90XU93YRTEFH3IAI1OAC9M\",\"3WO90XU7SQ3AVL3VKV0UR2TS8\",\"3WO90XU93YRTMHNNYPSUBFRRW\",\"3WO90XU8VRH5UP3M2CCUBN9EH\"],\"linkOrder\":[\"00O2TNZFJMRDSCGJ45AHL60R2\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0008",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1718006914000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SEC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SEC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SEC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SEC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_LANDING_PAGE')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_LANDING_PAGE')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SPB_LANDING_PAGE",
+        "title": "Suite Page Builder | Landing page",
+        "catalogId": "",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1366787211000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_LANDING_PAGE')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_LANDING_PAGE')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_LANDING_PAGE')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_LANDING_PAGE')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SL')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SL')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_SL",
+        "title": "Transport Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRRRTFHSF4TR08HW\",\"3WO90XU8VRH5MSA232FKRDC39\",\"3WO90XU8VRH5MSA232FKRGHV9\",\"3WO90XU7SQ3AVPH8M3YFUOMGY\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0004",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1651754064000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SL')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SL')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SL')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SL')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_IAM",
+        "title": "Identity and Access Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR9O0AVH8VCLF14G6US5U\",\"00O2TR9O0AVH8VCLJ47Z37AKR\",\"00O2TR9O0AVH8VCLFARQM3ITW\",\"00O2TR9O0AVH8VCLHWCRAS8JQ\",\"00O2TR9O0AVH8VCLILL29AFYH\",\"00O2TR9O0AVH8VCLIX437QHXN\",\"00O2TR9O0AVH8VCLIMA7COMKP\",\"00O2TR9O0AVH8VCLEUUY0GJRM\",\"00O2TR9O0AVH8VCLIO595224P\",\"3WO90XU8VRH754F36TRZ01S84\",\"3WO90XU93YRRSAKWGVCS8DZ3V\",\"3WO90XU93YRTIQ9ZPDLYYK09J\",\"3WO90XU93YRTIQ9ZPZ4VSPAAS\"],\"linkOrder\":[\"3WO90XU8VRH5MCHFUQUHUP8J9\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0013",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1713364229000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AOF_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AOF_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BW_BCG_AOF_PC",
+        "title": "SAP Analysis for Microsoft Office",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3AVEQ5FORVR030O\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1643274082000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AOF_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AOF_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AOF_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AOF_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC_MON_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC_MON_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_TMC_MON_PC",
+        "title": "Technical Monitoring",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRRRVB7NWBC4R5S4\",\"3WO90XU93YRRRVB7OOVM95O1W\",\"3WO90XU93YRRRVB7OSOQU0ZK4\",\"3WO90XU93YRTLWOEMMAMTOF37\",\"3WO90XU8VRH5QK7LRZ4GWMMC1\",\"3WO90XU8VRH5QK7LRRLG7QPHC\",\"3WO90XU7SQ3AZE77VZ085IRH8\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0006",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1705573829000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC_MON_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC_MON_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC_MON_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_TMC_MON_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_QAM_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_QAM_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_A4C_BCG_DEV_QAM_PC",
+        "title": "Quality Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1613658041000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_QAM_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_QAM_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_QAM_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_DEV_QAM_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_PAGE_ADMIN')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_PAGE_ADMIN')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SPB_PAGE_ADMIN",
+        "title": "Suite Page Builder | Page Admin",
+        "catalogId": "/UI2/CATALOG_ALL",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0000",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1366787244000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_PAGE_ADMIN')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_PAGE_ADMIN')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_PAGE_ADMIN')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SPB_PAGE_ADMIN')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_EXPORT')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_EXPORT')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_UI_WDR_EXPORT",
+        "title": "Web Dynpro ABAP - Export",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DGMPNR1UAUS279I5K\",\"3WO90XZ1DGMPNR1UAYNULB0A0\",\"3WO90XZ1DGMPNR1UB2PDFTOA0\",\"3WO90XZ1DGMPNR1UB3V83Y2AW\",\"3WO90XZ1DGMPNR1UB6DYBJ86G\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0005",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1646666015000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_EXPORT')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_EXPORT')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_EXPORT')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_EXPORT')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CDB_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CDB_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_CDB_PC",
+        "title": "Data Analysis",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU8VRH5Q0VIWARAKZHYC\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1658386432000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CDB_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CDB_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CDB_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CDB_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COL_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COL_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_COL_PC",
+        "title": "Collaboration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3AZ6JG8TP83H2TA\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1667973615000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COL_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COL_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COL_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COL_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SCR_TXT_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SCR_TXT_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_SCR_TXT_PC",
+        "title": "Text Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3CHZGOYS86XMCRH\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1620802451000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SCR_TXT_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SCR_TXT_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SCR_TXT_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SCR_TXT_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_ADMIN')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_ADMIN')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "RSAPC_ADMIN",
+        "title": "Content for Applications",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TQDCLCC2PHODZNLQ5HQ0Q\",\"00O2TQDCLCC2PHOE00Z0D9N98\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1544101106000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_ADMIN')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_ADMIN')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_ADMIN')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_ADMIN')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_ODP_MON_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_ODP_MON_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BW_BCG_ODP_MON_PC",
+        "title": "Operational Data Provisioning",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TRBI954FUGJJ9WL4CBMB2\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1540388720000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_ODP_MON_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_ODP_MON_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_ODP_MON_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_ODP_MON_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COT_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COT_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_COT_PC",
+        "title": "HANA Table Partitioning",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU8VRH5J5I14AUCLHPJY\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1628603448000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COT_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COT_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COT_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COT_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_SHELL_INTEGRATION')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_SHELL_INTEGRATION')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_UI_WDR_SHELL_INTEGRATION",
+        "title": "Web Dynpro ABAP - Shell Integration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DGMPNR1UF10N4925K\",\"3WO90XZ1DGMPNR1UFALTUPDM0\",\"3WO90XZ1DGMPNR1UFHX233ZU0\",\"3WO90XZ1DGMPNR1UFONL86PM0\",\"3WO90XZ1DGMPNR1UG3X2TOE94\",\"3WO90XZ1DGMPNR1UG5Z1O4YEG\",\"3WO90XZ1DGMPNR1UG5Z1OA1PK\",\"3WO90XZ1DGMPVINRIKPJTGM0I\",\"3WO90XZ1DGMPNR1UGA2WJAVXK\",\"3WO90XZ1DGMNXST8UU6DT0BJR\",\"3WO90XZ1DGMPO1II7U51B4NU4\",\"3WO90XZ1DGMNXS3C4RU2G0RBT\",\"3WO90XZ1DGMPVDE8T2577PLKI\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0013",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1702291438000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_SHELL_INTEGRATION')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_SHELL_INTEGRATION')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_SHELL_INTEGRATION')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_SHELL_INTEGRATION')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CPBR_FDT')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CPBR_FDT')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_CPBR_FDT",
+        "title": "ABAP Based Rule Framework",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TNZFJMRDSHJL8QDVIYXFR\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1584690722000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CPBR_FDT')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CPBR_FDT')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CPBR_FDT')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CPBR_FDT')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_XBE')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_XBE')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_XBE",
+        "title": "Enterprise Event Enablement",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3CE15331HKNCZ8S\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1590399814000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_XBE')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_XBE')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_XBE')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_XBE')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAS')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAS')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_IAS",
+        "title": "Additional Software",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRRRSVHSMO9QFS3O\"],\"linkOrder\":[\"3WO90XU8VRH75FT8636LV8ZUE\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1637228096000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAS')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAS')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAS')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_IAS')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_FLP')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_FLP')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_UI_FLP",
+        "title": "Fiori Launchpad (deprecated)",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DX1AO6VE27KIB1XP6\",\"3WO90XZ1DX195RZPVMYD4NIBW\",\"3WO90XZ1DX1AO6VE26NIOUKM2\",\"3WO90XZ1DX18XVVQHS6ODPU70\",\"3WO90XZ1DX18XVVQHRQ9K87X8\",\"3WO90XZ1DX1AO6VE7LRTIBXG5\",\"3WO90XZ1DX1AO6VE26NIOS44A\",\"3WO90XTQR1NU20MG18D2HDM8S\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0008",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1742989150000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_FLP')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_FLP')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_FLP')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_FLP')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_USER')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_USER')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "RSAPC_USER",
+        "title": "Content for Applications",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TQDCLCC2PHODYARKGCP9U\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1544101045000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_USER')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_USER')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_USER')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('RSAPC_USER')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_COM_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_COM_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_COM_PC",
+        "title": "Message Monitoring",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR9O0AVINZH6A977UFEXQ\",\"00O2TNZFJMRDSAVHB50HCDPB7\",\"00O2TR9O0AVINZH6CETDNL46B\",\"00O2TR9O0AVH186BKAENSC9FX\",\"00O2TNVYGDVKWSCCTJWCV9D8N\",\"3WO90XU8VRH5F7NGDPO3R8T92\"],\"linkOrder\":[\"3WO90XU8VRH5F7NGDPO3R6PEE\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0006",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1664208178000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_COM_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_COM_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_COM_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_COM_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CST_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CST_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_CST_PC",
+        "title": "System Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU93YRROKV0P8JTUYMUK\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1628509584000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CST_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CST_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CST_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CST_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_IC_LND_PC",
+        "title": "Business Configuration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TNVYGDVL05AID1QY0H9GP\",\"00O2TR9O0AVH8YLARAMGWYZZ7\",\"00O2TR9O0AVH8ZX0SNK7TC5P7\",\"00O2TNVYGDVMQPLAX9ZGW803F\",\"3WO90XU7SQ3CDZECL5K517P52\",\"3WO90XU93YRTEC9GFHSYNEIUJ\",\"3WO90XU7SQ3AVPMTJTY5M4BW4\",\"3WO90XU93YRTLQN9W6XBU4HZ2\",\"3WO90XU8VRH7H4Y7G45XETBYJ\",\"3WO90XU7SQ3CQ27OP89VI1PZM\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0010",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1685008456000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_COL')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_COL')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_COL",
+        "title": "Collaboration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DX1AZPRP422OLFC3N\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1668093969000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_COL')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_COL')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_COL')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_COL')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_MSCL_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_MSCL_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_A4C_BCG_MSCL_PC",
+        "title": "Software Component Lifecycle Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"ET091Q0TOOS8RJUD51ZYOJU5F\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1534154631000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_MSCL_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_MSCL_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_MSCL_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_A4C_BCG_MSCL_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_SM",
+        "title": "Collaboration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU8VRH5UAP31N890GRBT\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1697504776000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_SM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BNK_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BNK_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_BNK_PC",
+        "title": "Bank",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XU7SQ3CPYD7X64NJCPYD\",\"3WO90XU7SQ3CPYD7X7SRHN6GH\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1681907232000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BNK_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BNK_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BNK_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BNK_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_COM",
+        "title": "Communication Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR9O0AVH8VCLZ6YDQB2SR\",\"00O2TR9O0AVH8VCLZ6YDQDJAJ\",\"00O2TNVYGDVKWUWLDS6U1AC93\",\"00O2TR9O0AVH8VCLZ8IJAWGDN\",\"3WO90XU93YRROAI3097RWZHWK\",\"3WO90XU93YRROAI3097RX0JTW\",\"3WO90XU8VRH7CK3REUY4YQ84D\",\"3WO90XU7SQ3AZ3M99GA5LM16P\",\"3WO90XU93YRTPVLQ7XT9WKNIJ\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0009",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1693577522000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_COM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_SCE_100_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_SCE_100_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_IC_LND_SCE_100_PC",
+        "title": "Scope Extension Configuration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"ET0910T0611EF6PLHGNUXQT42\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1583018871000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_SCE_100_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_SCE_100_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_SCE_100_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_IC_LND_SCE_100_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_CATALOG')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_CATALOG')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "EPM_DEMO_CATALOG",
+        "title": "Catalog for EPM demo",
+        "catalogId": "",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1372322915000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_CATALOG')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_CATALOG')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_CATALOG')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('EPM_DEMO_CATALOG')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CCM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CCM')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_CCM",
+        "title": "Custom Code Migration",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR9O0AVIRJFPGF5EU7SJ7\"],\"linkOrder\":[\"C6RLCH7PFAKLLPQ2EDRWSW3F4\"]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1744356217000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CCM')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CCM')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CCM')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_CCM')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_ALV')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_ALV')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BASIS_BCG_UI_WDR_ALV",
+        "title": "Web Dynpro ABAP - ALV",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"3WO90XZ1DGMPNR1TUHTEN21IG\",\"3WO90XZ1DGMPNR1TUJ4FJ6IP4\",\"3WO90XZ1DGMPNR1TUM6D0E7U0\",\"3WO90XZ1DGMPNR1TUM6D08RVS\",\"3WO90XZ1DGMPNR1TUNA6UOE20\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0005",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1646665467000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_ALV')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_ALV')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_ALV')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BASIS_BCG_UI_WDR_ALV')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AQD')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AQD')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_BW_BCG_AQD",
+        "title": "Analytics - Query Design",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TRBI954HCMXWO5C4XEZP7\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1502920810000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AQD')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AQD')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AQD')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_BW_BCG_AQD')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_MYINBOX_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_MYINBOX_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_MYINBOX_PC",
+        "title": "My Inbox",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TRB60BRAJLFQSU22QJCRE\",\"00O2TRBI954FU86I81D0N6LQV\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1539155737000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_MYINBOX_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_MYINBOX_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_MYINBOX_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_MYINBOX_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BEL_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BEL_PC')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CA_BCG_BEL_PC",
+        "title": "Business Event Logs",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"16NEHZB6VJQQQ8VWQAC89MD04\",\"16NEHZB6VJQQQ8VWQCC2BDCNO\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1645698890000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BEL_PC')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BEL_PC')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BEL_PC')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CA_BCG_BEL_PC')/Bags"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ISM_ISO')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ISM_ISO')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "SAP_CORE_BCG_ISM_ISO",
+        "title": "Intelligent Scenario Management",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "{\"order\":[\"00O2TR9O0AVH8Z6YRV4RYT5D4\",\"00O2TNZFJMRFIU2R7OIW33EPH\",\"3WO90XU93YRTEJPFRXZI224ZU\"],\"linkOrder\":[]}",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0003",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1619187258000)/",
+        "outdated": "",
+        "Catalog": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ISM_ISO')/Catalog"
+          }
+        },
+        "allCatalogs": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ISM_ISO')/allCatalogs"
+          }
+        },
+        "PageChipInstances": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ISM_ISO')/PageChipInstances"
+          }
+        },
+        "Bags": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('SAP_CORE_BCG_ISM_ISO')/Bags"
+          }
+        }
+      }
+    ]
+  },
+  "_captured": {
+    "sid": "TRL",
+    "date": "2026-04-18"
+  }
+}

@@ -1,22 +1,62 @@
 /**
  * `adt wb where-used <object> [--type <TYPE>]` — find all usages of an object.
  *
- * Thin CLI wrapper over the same ADT endpoint used by the MCP tool
- * `find_references`:
+ * Uses the real SAP ADT 2-step POST flow (same protocol the MCP
+ * `find_references` tool speaks), exposed via the typed contract
+ * `client.adt.repository.informationsystem.usageReferences.{scope,search}`.
  *
- *     GET /sap/bc/adt/repository/informationsystem/usages
+ *   1. POST /repository/informationsystem/usageReferences/scope
+ *   2. POST /repository/informationsystem/usageReferences
  *
- * NOTE: sapcli and some Eclipse clients use
- * `/sap/bc/adt/repository/informationsystem/usageReferences` which accepts
- * a POST body describing the reference scope. The simpler `usages` GET is
- * what the existing MCP tool already speaks; the real-e2e test
- * (`parity.e15-wb.real.test.ts`) probes both endpoints and records which
- * one the target system serves.
+ * The older GET /usages endpoint does not exist on real SAP systems
+ * (verified on TRL, 2025-11).
  */
 
 import { Command } from 'commander';
+import {
+  buildUsageReferenceRequestXml,
+  buildUsageScopeRequestXml,
+} from '@abapify/adt-contracts';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
 import { resolveObjectUri } from './utils';
+
+interface Usage {
+  uri?: string;
+  parentUri?: string;
+  name?: string;
+  type?: string;
+  packageName?: string;
+}
+
+function parseUsages(xml: string, max: number): {
+  numberOfResults?: string;
+  description?: string;
+  usages: Usage[];
+} {
+  const numberOfResults = /numberOfResults="([^"]*)"/.exec(xml)?.[1];
+  const description = /resultDescription="([^"]*)"/.exec(xml)?.[1];
+  const refBlockRe =
+    /<usagereferences:referencedObject\s+([^>]*)>([\s\S]*?)<\/usagereferences:referencedObject>/g;
+  const usages: Usage[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = refBlockRe.exec(xml)) !== null && usages.length < max) {
+    const attrs = m[1];
+    const body = m[2];
+    const u: Usage = {
+      uri: /uri="([^"]*)"/.exec(attrs)?.[1],
+      parentUri: /parentUri="([^"]*)"/.exec(attrs)?.[1],
+    };
+    const adtObjAttrs = /<usagereferences:adtObject\s+([^/>]*)\/?>/.exec(body)?.[1];
+    if (adtObjAttrs) {
+      u.name = /adtcore:name="([^"]*)"/.exec(adtObjAttrs)?.[1];
+      u.type = /adtcore:type="([^"]*)"/.exec(adtObjAttrs)?.[1];
+    }
+    const pkgRef = /<adtcore:packageRef\s+([^/>]*)\/?>/.exec(body)?.[1];
+    if (pkgRef) u.packageName = /adtcore:name="([^"]*)"/.exec(pkgRef)?.[1];
+    usages.push(u);
+  }
+  return { numberOfResults, description, usages };
+}
 
 export const whereUsedCommand = new Command('where-used')
   .description('Find all usages (where-used) of an ABAP object or symbol')
@@ -39,19 +79,20 @@ export const whereUsedCommand = new Command('where-used')
         }
       }
 
-      const params = new URLSearchParams({
-        objectUri,
-        objectName,
-        maxResults: String(maxResults),
-      });
-      if (options.type) params.set('objectType', options.type);
+      const scopeXml =
+        await adtClient.adt.repository.informationsystem.usageReferences.scope.post(
+          { uri: objectUri, version: 'active' },
+          buildUsageScopeRequestXml(),
+        );
 
-      const result = await adtClient.fetch(
-        `/sap/bc/adt/repository/informationsystem/usages?${params.toString()}`,
-        { method: 'GET', headers: { Accept: 'application/json' } },
-      );
+      const searchXml =
+        await adtClient.adt.repository.informationsystem.usageReferences.search.post(
+          { uri: objectUri, version: 'active' },
+          buildUsageReferenceRequestXml(String(scopeXml)),
+        );
 
-      const payload = { objectName, objectUri, results: result };
+      const parsed = parseUsages(String(searchXml), maxResults);
+      const payload = { objectName, objectUri, ...parsed };
 
       if (options.json) {
         console.log(JSON.stringify(payload, null, 2));
@@ -60,17 +101,19 @@ export const whereUsedCommand = new Command('where-used')
 
       console.log(`🔍 Where-used: ${objectName}`);
       console.log(`   URI: ${objectUri}`);
-      const usages = extractUsages(result);
-      if (usages.length === 0) {
+      if (parsed.description) console.log(`   ${parsed.description}`);
+      if (parsed.usages.length === 0) {
         console.log('\nNo references found.');
         return;
       }
-      console.log(`\nFound ${usages.length} reference(s):`);
-      for (const u of usages) {
+      console.log(
+        `\nFound ${parsed.usages.length}${parsed.numberOfResults ? ` of ${parsed.numberOfResults}` : ''} reference(s):`,
+      );
+      for (const u of parsed.usages) {
         const head = `  • ${u.name ?? '(unnamed)'}${u.type ? ` (${u.type})` : ''}`;
         console.log(head);
         if (u.uri) console.log(`      ${u.uri}`);
-        if (u.location) console.log(`      ${u.location}`);
+        if (u.packageName) console.log(`      package: ${u.packageName}`);
       }
     } catch (error) {
       console.error(
@@ -80,16 +123,3 @@ export const whereUsedCommand = new Command('where-used')
       process.exit(1);
     }
   });
-
-function extractUsages(
-  raw: unknown,
-): Array<{ name?: string; type?: string; uri?: string; location?: string }> {
-  if (!raw || typeof raw !== 'object') return [];
-  const obj = raw as Record<string, unknown>;
-  const container = obj.usages as { usage?: unknown } | undefined;
-  const list = container?.usage ?? obj.usage;
-  if (!list) return [];
-  return Array.isArray(list)
-    ? (list as Array<Record<string, unknown>>)
-    : [list as Record<string, unknown>];
-}

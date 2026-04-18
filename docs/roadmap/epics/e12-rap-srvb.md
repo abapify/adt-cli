@@ -133,3 +133,11 @@ Follow-ups:
   `zcl_abapgit_object_srvb` when public clone available.
 - Pre-existing `adt-cli/src/lib/utils/object-uri.test.ts` failures
   remain — separate cleanup epic.
+
+## Real-SAP verification (TRL 2025-11)
+
+- `GET /sap/bc/adt/businessservices/bindings/<name>` returns **HTTP 406
+  Not Acceptable** for the standard binding vendor MIME on TRL. The
+  `/publishedstates` sub-endpoint returns **HTTP 404** on TRL for the
+  same names. Override via `ADT_REAL_SRVB_NAME=<NAME>` on a system
+  with a reachable binding to capture real responses.

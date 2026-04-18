@@ -182,6 +182,10 @@ export const registry = {
     aunit: 'mcp/aunit/result.json',
     navigationTarget: 'mcp/navigation/target.json',
     usages: 'mcp/usages/result.json',
+    usageReferences: {
+      scope: 'mcp/usageReferences/scope.xml',
+      result: 'mcp/usageReferences/result.xml',
+    },
     callers: 'mcp/callers/result.json',
     callees: 'mcp/callees/result.json',
     tableDefinition: 'mcp/tables/definition.json',

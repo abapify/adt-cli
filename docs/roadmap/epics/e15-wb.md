@@ -70,3 +70,27 @@ Spec: /mnt/wsl/workspace/ubuntu/adt-cli/docs/roadmap/epics/e15-wb.md
 Reference: /tmp/sapcli-ref/sapcli/sap/cli/wb.py and our existing MCP tools.
 Do NOT commit without approval.
 ```
+
+## Open questions (post-real-SAP sweep, TRL 2025-11)
+
+- **Where-used** is now fully verified on real SAP. The 2-step POST
+  `/usageReferences/{scope,search}` flow returns 187 hits for
+  `CL_ABAP_UNIT_ASSERT` on TRL. Real fixtures captured:
+  `adt-fixtures/src/fixtures/wb/real-usage-references-{scope,result}.xml`.
+  Typed contract lives at
+  `adt-contracts/src/adt/repository/informationsystem/usagereferences.ts`.
+  MCP `find_references` and CLI `wb where-used` both use it; the legacy
+  GET `/usages` MCP path is retired.
+- **Callers / callees**: both `/informationsystem/callers|callees` and
+  `/abapsource/callers|callees` return 404 on TRL BTP Trial. The MCP
+  tools and CLI still expose them with the original paths — they will
+  work on on-premise ABAP systems that implement them. Need a future
+  real capture from on-prem to promote their synthetic fixtures.
+- **Definition (`/sap/bc/adt/navigation/target`)**: SAP rejects GET with
+  405 everywhere. POST needs an undocumented body; all shapes tried
+  (empty, `<adtcore:objectReferences>`) return 400 "I::000". Until a
+  real Eclipse ADT network capture is available, MCP `find_definition`
+  and CLI `wb definition` use the repository information system search
+  to resolve the URI, which is sufficient for the "give me the ADT URI
+  for <symbol>" use case. Promote to a real POST contract once the
+  Eclipse body shape is captured.

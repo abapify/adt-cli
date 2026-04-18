@@ -132,3 +132,11 @@ Do NOT commit without approval.
 - **MCP tools in a single file.** The twelve gCTS MCP tools all live in `adt-mcp/src/lib/tools/gcts-tools.ts` rather than the one-file-per-tool convention noted in `adt-mcp/AGENTS.md`. Each tool is < 40 lines and is a direct contract passthrough — splitting felt like extra ceremony. Split if any tool grows non-trivial logic.
 - **Mock server fidelity.** `/sap/bc/cts_abapvcs/` routes echo canned fixtures and do NOT respect request bodies (e.g. `POST /repository` always returns `example-repo`). Fine for CLI/MCP wiring tests; insufficient for contract-body round-trip tests, which are covered by `adt-contracts/tests/contracts/gcts.test.ts` directly.
 - **Pre-existing test failures observed.** `packages/adt-cli/src/lib/utils/object-uri.test.ts` has 5 failing cases related to source URI trailing-slash / `version=inactive` defaults — these fail on `main` too and are unrelated to E07.
+
+## Real-SAP verification (TRL 2025-11)
+
+- `/sap/bc/cts_abapvcs/repository` returns **HTTP 403 Forbidden** on
+  TRL (Unified Connectivity gate). gCTS is not enabled on the BTP
+  Trial tenant. `/sap/bc/cts_abapvcs/config` also 403. The gCTS
+  contract + plugin remain correct per sapcli shape; real captures
+  need an on-prem ABAP 7.5+ or S/4HANA Cloud with gCTS enabled.

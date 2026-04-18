@@ -102,3 +102,13 @@ Do NOT commit without approval.
 - **Semantic validation** (action signatures vs CDS behavior projection) is explicitly out of scope per the epic; may become relevant once SRVD lands (E11) and full RAP round-trip tests are written.
 - **CTS stale lock behaviour on BTP**: same caveat as other source-based objects — a delete + immediate re-create may fail until the system-level lock clears (~15–30 min). The parity tests avoid hitting this path by using distinct object names for create/delete.
 - **abapGit BDEF xml layout**: the exact SKEY/DESCR layout emitted by `zcl_abapgit_object_bdef` was not available at implementation time (no public abapGit clone in the sandbox). The minimal `SKEY { TYPE, NAME }` shape implemented here matches the pattern used by other source-only handlers and round-trips cleanly; if upstream abapGit differs, adjust the XSD + handler together.
+
+## Real-SAP verification (TRL 2025-11)
+
+- `GET /sap/bc/adt/bo/behaviordefinitions/<name>` — probed several
+  standard RAP BDEF names on TRL; all return **HTTP 406 Not
+  Acceptable** for the standard BDEF vendor MIME, which usually means
+  the object isn't addressable by that name on Trial. No real fixture
+  captured; synthetic remains authoritative. Override via
+  `ADT_REAL_BDEF_NAME=<NAME>` when running the backfill sweep against
+  a system with known RAP BDEFs.

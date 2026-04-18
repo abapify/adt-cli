@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<usagereferences:usageReferenceResult numberOfResults="1" resultDescription="[MOCK] Where-Used List: ZCL_EXAMPLE (Class)" referencedObjectIdentifier="" xmlns:usagereferences="http://www.sap.com/adt/ris/usageReferences" xmlns:adtcore="http://www.sap.com/adt/core">
+  <usagereferences:scope>
+    <usagereferences:objectIdentifier displayName="ZCL_EXAMPLE (Class)" globalType="CLAS/OC"/>
+    <usagereferences:grade definitions="false" elements="false" indirectReferences="true"/>
+  </usagereferences:scope>
+  <usagereferences:referencedObjects>
+    <usagereferences:referencedObject uri="/sap/bc/adt/programs/programs/zprog_example" parentUri="/sap/bc/adt/programs/programs/zprog_example" isResult="true" canHaveChildren="false" usageInformation="line 42">
+      <usagereferences:adtObject adtcore:responsible="DEVELOPER" adtcore:name="ZPROG_EXAMPLE" adtcore:type="PROG/P">
+        <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/ztest_pkg" adtcore:type="DEVC/K" adtcore:name="ZTEST_PKG"/>
+      </usagereferences:adtObject>
+    </usagereferences:referencedObject>
+  </usagereferences:referencedObjects>
+</usagereferences:usageReferenceResult>

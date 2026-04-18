@@ -103,3 +103,10 @@ Follow-ups:
   `zcl_abapgit_object_srvd` when public clone available.
 - Pre-existing typecheck noise (IncludesContract duplicate export +
   devc.model.ts objectReferences) remains — separate cleanup epic.
+
+## Real-SAP verification (TRL 2025-11)
+
+- `GET /sap/bc/adt/ddic/srvd/sources/<name>` — `UI_FLIGHT` and others
+  return **HTTP 404** on TRL (object not present in this tenant's
+  repository). No real fixture captured. Override via
+  `ADT_REAL_SRVD_NAME=<NAME>` on a system that ships the target SRVD.

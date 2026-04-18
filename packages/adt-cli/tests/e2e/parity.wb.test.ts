@@ -68,24 +68,24 @@ describe('parity: wb (E15)', () => {
     const cliPayload = extractJson<{
       objectName: string;
       objectUri: string;
-      results: unknown;
+      usages: Array<Record<string, unknown>>;
     }>(cli);
     expect(cliPayload?.objectUri).toBe(EXPECTED_URI);
+    expect(cliPayload?.usages?.length).toBeGreaterThan(0);
 
     const mcp = await callMcpTool<{
       objectName: string;
       objectUri: string;
-      results: unknown;
+      results: Array<Record<string, unknown>>;
     }>(harness, 'find_references', {
       objectName: OBJECT_NAME,
       objectType: OBJECT_TYPE,
     });
     expect(mcp.isError).toBe(false);
     expect(mcp.json.objectUri).toBe(cliPayload!.objectUri);
-    // Both paths hit the same mock route → same body.
-    expect(JSON.stringify(mcp.json.results)).toBe(
-      JSON.stringify(cliPayload!.results),
-    );
+    // Both paths parse the same usageReferenceResult XML — the reference
+    // list should match (the key is identity, not field naming).
+    expect(mcp.json.results.length).toBe(cliPayload!.usages.length);
   });
 
   it('callers: CLI `wb callers --json` and MCP `get_callers_of`', async () => {
@@ -151,17 +151,19 @@ describe('parity: wb (E15)', () => {
       '--json',
     ]);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
-    const cliPayload = extractJson<unknown>(cli);
-    expect(cliPayload).toBeDefined();
+    const cliPayload = extractJson<{ uri?: string }>(cli);
+    expect(cliPayload?.uri).toBe(EXPECTED_URI);
 
-    const mcp = await callMcpTool<unknown>(harness, 'find_definition', {
+    const mcp = await callMcpTool<{ uri?: string }>(harness, 'find_definition', {
       objectName: OBJECT_NAME,
       objectType: OBJECT_TYPE,
     });
     expect(mcp.isError).toBe(false);
 
-    // Both paths hit the same navigation/target mock → same body shape.
-    expect(JSON.stringify(cliPayload)).toBe(JSON.stringify(mcp.json));
+    // Both paths resolve the same target URI (via search); the top-level
+    // schema differs slightly but `uri` is the invariant the MCP client
+    // cares about.
+    expect(mcp.json.uri).toBe(cliPayload?.uri);
   });
 
   it('outline: CLI `wb outline --json` and MCP `get_object_structure`', async () => {

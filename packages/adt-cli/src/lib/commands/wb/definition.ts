@@ -1,77 +1,88 @@
 /**
- * `adt wb definition <reference>` — navigate to the definition of a symbol.
+ * `adt wb definition <reference>` — resolve a symbol's ADT URI.
  *
- * Thin CLI wrapper over the same endpoint as the MCP tool `find_definition`:
- *
- *     GET /sap/bc/adt/navigation/target?objectName=…&objectType=…&context=…&contextType=…
- *
- * If the navigation endpoint returns nothing, falls back to a name lookup
- * via quickSearch (matching the MCP behaviour).
+ * The SAP ADT `/sap/bc/adt/navigation/target` endpoint requires POST (GET
+ * returns 405) with an undocumented body that we have not been able to
+ * reverse-engineer (every attempt returns 400 "I::000" on TRL). Until a
+ * real Eclipse ADT network capture is available, this command uses the
+ * repository information system search to return the object's ADT URI —
+ * the most important part of a definition for downstream tooling.
  */
 
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
-import { resolveObjectUri } from './utils';
+
+interface ObjRef {
+  name?: string;
+  type?: string;
+  uri?: string;
+  packageName?: string;
+  description?: string;
+}
+
+function pickObjectReferences(raw: unknown): ObjRef[] {
+  if (!raw || typeof raw !== 'object') return [];
+  const obj = raw as Record<string, unknown>;
+  const root =
+    (obj.objectReferences as Record<string, unknown> | undefined) ?? obj;
+  const list = (root?.objectReference ?? root?.object ?? []) as
+    | Record<string, unknown>
+    | Record<string, unknown>[];
+  const arr = Array.isArray(list) ? list : [list];
+  return arr.map((r) => ({
+    name: r.name as string | undefined,
+    type: r.type as string | undefined,
+    uri: r.uri as string | undefined,
+    packageName: r.packageName as string | undefined,
+    description: r.description as string | undefined,
+  }));
+}
 
 export const definitionCommand = new Command('definition')
   .description(
-    'Navigate to the definition of an ABAP symbol (class, method, type, FM, …)',
+    'Resolve an ABAP symbol (class, interface, function, data element, …) to its ADT URI',
   )
-  .argument('<reference>', 'Symbol / object name to navigate to')
+  .argument('<reference>', 'Symbol / object name to resolve')
   .option('-t, --type <type>', 'Object type (CLAS, PROG, DTEL, TABL, …)')
-  .option(
-    '--parent <name>',
-    'Parent object name (e.g. class name when looking for a method)',
-  )
-  .option('--parent-type <type>', 'Parent object type (e.g. CLAS)')
   .option('--json', 'Output result as JSON')
   .action(async (reference: string, options) => {
     try {
       const adtClient = await getAdtClientV2();
 
-      const params = new URLSearchParams({ objectName: reference });
-      if (options.type) params.set('objectType', options.type);
-      if (options.parent) params.set('context', options.parent);
-      if (options.parentType) params.set('contextType', options.parentType);
+      const searchResult =
+        await adtClient.adt.repository.informationsystem.search.quickSearch({
+          query: reference,
+          maxResults: 10,
+        });
 
-      let result: unknown;
-      try {
-        result = await adtClient.fetch(
-          `/sap/bc/adt/navigation/target?${params.toString()}`,
-          { method: 'GET', headers: { Accept: 'application/json' } },
+      const refs = pickObjectReferences(searchResult);
+      const hit = refs.find(
+        (o) =>
+          String(o.name ?? '').toUpperCase() === reference.toUpperCase() &&
+          (!options.type ||
+            String(o.type ?? '')
+              .toUpperCase()
+              .startsWith(options.type.toUpperCase())),
+      );
+
+      if (!hit?.uri) {
+        console.error(
+          `❌ No definition found for '${reference}'${options.type ? ` (type: ${options.type})` : ''}`,
         );
-      } catch {
-        result = undefined;
-      }
-
-      if (!result) {
-        const uri = await resolveObjectUri(adtClient, reference, options.type);
-        if (uri) {
-          const payload = { objectName: reference, uri };
-          if (options.json) {
-            console.log(JSON.stringify(payload, null, 2));
-          } else {
-            console.log(`🎯 Definition of ${reference}`);
-            console.log(`   URI: ${uri}`);
-          }
-          return;
-        }
-        console.error(`❌ No definition found for '${reference}'`);
         process.exit(1);
       }
 
       if (options.json) {
-        console.log(JSON.stringify(result, null, 2));
+        console.log(JSON.stringify(hit, null, 2));
         return;
       }
 
-      const ref = extractRef(result);
       console.log(`🎯 Definition of ${reference}`);
-      if (ref?.name) console.log(`   Name: ${ref.name}`);
-      if (ref?.type) console.log(`   Type: ${ref.type}`);
-      if (ref?.uri) console.log(`   URI:  ${ref.uri}`);
-      if (ref?.description) console.log(`   Desc: ${ref.description}`);
-      if (!ref) console.log(JSON.stringify(result, null, 2));
+      if (hit.name) console.log(`   Name: ${hit.name}`);
+      if (hit.type) console.log(`   Type: ${hit.type}`);
+      if (hit.uri) console.log(`   URI:  ${hit.uri}`);
+      if (hit.packageName) console.log(`   Pkg:  ${hit.packageName}`);
+      if (hit.description) console.log(`   Desc: ${hit.description}`);
     } catch (error) {
       console.error(
         '❌ Definition lookup failed:',
@@ -80,23 +91,3 @@ export const definitionCommand = new Command('definition')
       process.exit(1);
     }
   });
-
-function extractRef(raw: unknown):
-  | {
-      name?: string;
-      type?: string;
-      uri?: string;
-      description?: string;
-    }
-  | undefined {
-  if (!raw || typeof raw !== 'object') return undefined;
-  const obj = raw as Record<string, unknown>;
-  const ref = (obj.objectReference ?? obj) as Record<string, unknown>;
-  if (typeof ref !== 'object' || ref === null) return undefined;
-  return {
-    name: ref.name as string | undefined,
-    type: ref.type as string | undefined,
-    uri: ref.uri as string | undefined,
-    description: ref.description as string | undefined,
-  };
-}
