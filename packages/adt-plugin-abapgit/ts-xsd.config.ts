@@ -39,6 +39,7 @@ export default defineConfig({
         'tabl',
         'ttyp',
         'bdef',
+        'srvd',
       ],
     },
   },

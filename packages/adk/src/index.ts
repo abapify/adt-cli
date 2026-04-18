@@ -143,6 +143,7 @@ export { AdkDdlSource, AdkDclSource } from './objects/cds';
 
 // RAP types and classes
 export { AdkBehaviorDefinition } from './objects/repository/bdef';
+export { AdkServiceDefinition } from './objects/repository/srvd';
 
 // CTS types (legacy complex transport)
 export type {

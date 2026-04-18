@@ -53,6 +53,8 @@ const deleteOperations: Record<string, DeleteOperation> = {
       objectName.toLowerCase(),
       queryOptions,
     ),
+  SRVD: (client, objectName, queryOptions) =>
+    client.adt.ddic.srvd.sources.delete(objectName.toLowerCase(), queryOptions),
 };
 
 function getDeleteOperation(objectType?: string): DeleteOperation | undefined {
@@ -87,7 +89,7 @@ export function registerDeleteObjectTool(
 ): void {
   server.tool(
     'delete_object',
-    'Delete an ABAP object. Supports PROG, INCL, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF and falls back to direct URI deletion for other types.',
+    'Delete an ABAP object. Supports PROG, INCL, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF, SRVD and falls back to direct URI deletion for other types.',
     {
       ...connectionShape,
       objectName: z.string().describe('Name of the ABAP object to delete'),

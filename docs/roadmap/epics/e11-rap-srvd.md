@@ -66,3 +66,40 @@ Reads: AGENTS.md, docs/roadmap/README.md, e09-acds-parser.md.
 Capture a real SRVD source from any S/4HANA sample app for reference.
 Do NOT commit without approval.
 ```
+
+## Status: Landed
+
+- Contract: `client.adt.ddic.srvd.sources.*` at `/sap/bc/adt/ddic/srvd/sources`
+  (GET/POST/PUT/DELETE + lock/unlock + source.main.get/put).
+  Content-Type `application/vnd.sap.adt.ddic.srvd.v1+xml`, source is
+  `.asrvd` text via `textPlain` Serializable<string>.
+- Schema: `custom/srvdSource.xsd` extends `abapsource:AbapSourceMainObject`
+  (mirrors `ddlSource.xsd`). Regenerated `@abapify/adt-schemas` types +
+  `@abapify/adt-contracts` speci wrappers.
+- ADK: `AdkServiceDefinition` (lightweight source-based object).
+  Full lock/save/unlock flow via `ctx.lockService`.
+- CLI: `adt srvd <create|read|write|activate|delete>` via
+  `buildObjectCrudCommands`.
+- MCP: `get_srvd`, `create_srvd`, `delete_srvd`; extended `create_object` /
+  `delete_object` / `resolveObjectUriFromType` dispatch to include SRVD.
+- abapGit handler: `zui_name.srvd.xml` (metadata) + `zui_name.srvd.asrvd`
+  (source). SRVD added to abapgit plugin's XSD + codegen regenerated.
+- Filename mapping: `adtUriToAbapGitPath()` extended for SRVD URIs
+  (2 new test cases).
+- Mock server: SRVD routes (GET/POST/PUT/DELETE + source passthrough).
+- Fixtures: `ddic/srvd/single.xml` + `source.asrvd` (synthetic — no public
+  S/4HANA SDK sample available; structure mirrors real Eclipse ADT
+  envelope based on `ddlSource` + upstream `zcl_abapgit_object_srvd`).
+
+Tests: +23 contract scenarios, +10 ADK, +4 abapgit handler, +2 filename,
++5 parity = **44 new tests**. Full green across adt-contracts, adk,
+adt-plugin-abapgit, adt-schemas.
+
+Follow-ups:
+
+- Replace synthetic `single.xml` / `source.asrvd` fixtures with captures
+  from a real S/4HANA system when one becomes available.
+- abapGit SRVD XML layout needs verification against upstream
+  `zcl_abapgit_object_srvd` when public clone available.
+- Pre-existing typecheck noise (IncludesContract duplicate export +
+  devc.model.ts objectReferences) remains — separate cleanup epic.

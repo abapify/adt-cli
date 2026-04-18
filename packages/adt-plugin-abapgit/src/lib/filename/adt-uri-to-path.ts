@@ -132,6 +132,12 @@ const RULES: Rule[] = [
     build: (m) => `src/${applyNamespace(decodeURIComponent(m[1]))}.bdef.abdl`,
   },
 
+  // RAP Service Definition (SRVD) — `.asrvd` source
+  {
+    test: /^\/sap\/bc\/adt\/ddic\/srvd\/sources\/([^/]+?)(?:\/source\/main)?$/,
+    build: (m) => `src/${applyNamespace(decodeURIComponent(m[1]))}.srvd.asrvd`,
+  },
+
   // DDIC domain / data element / structure / table / type
   {
     test: /^\/sap\/bc\/adt\/ddic\/domains\/([^/]+)$/,

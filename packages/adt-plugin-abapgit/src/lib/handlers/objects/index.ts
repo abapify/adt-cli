@@ -14,3 +14,4 @@ export { dataElementHandler } from './dtel';
 export { tableHandler, structureHandler } from './tabl';
 export { tableTypeHandler } from './ttyp';
 export { behaviorDefinitionHandler } from './bdef';
+export { serviceDefinitionHandler } from './srvd';

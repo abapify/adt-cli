@@ -52,6 +52,13 @@ export {
   type DclSourcesContract,
   type DclSourceResponse,
 } from './dcl';
+export {
+  srvdContract,
+  srvdSourcesContract,
+  type SrvdContract,
+  type SrvdSourcesContract,
+  type SrvdSourceResponse,
+} from './srvd';
 
 import { domainsContract } from './domains';
 import { dataelementsContract } from './dataelements';
@@ -61,6 +68,7 @@ import { tablesettingsContract } from './tablesettings';
 import { tabletypesContract } from './tabletypes';
 import { ddlContract } from './ddl';
 import { dclContract } from './dcl';
+import { srvdContract } from './srvd';
 
 export interface DdicContract {
   domains: typeof domainsContract;
@@ -71,6 +79,7 @@ export interface DdicContract {
   tabletypes: typeof tabletypesContract;
   ddl: typeof ddlContract;
   dcl: typeof dclContract;
+  srvd: typeof srvdContract;
 }
 
 export const ddicContract: DdicContract = {
@@ -82,4 +91,5 @@ export const ddicContract: DdicContract = {
   tabletypes: tabletypesContract,
   ddl: ddlContract,
   dcl: dclContract,
+  srvd: srvdContract,
 };

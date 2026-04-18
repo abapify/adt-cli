@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fixture: GET /sap/bc/adt/ddic/srvd/sources/{name}
+
+  RAP Service Definition (SRVD) metadata envelope. Root is <srvd:source>
+  (namespace http://www.sap.com/adt/ddic/srvd) extending
+  abapsource:AbapSourceMainObject.
+
+  Sanitized: all IDs replaced with mock values per adt-fixtures/AGENTS.md rules.
+-->
+<srvd:source
+    xmlns:srvd="http://www.sap.com/adt/ddic/srvd"
+    xmlns:abapsource="http://www.sap.com/adt/abapsource"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    abapsource:fixPointArithmetic="true"
+    abapsource:activeUnicodeCheck="true"
+    abapsource:sourceUri="source/main"
+    adtcore:responsible="TESTUSER"
+    adtcore:masterLanguage="EN"
+    adtcore:masterSystem="MCK"
+    adtcore:abapLanguageVersion="standard"
+    adtcore:name="ZUI_MOCK_SRVD"
+    adtcore:type="SRVD/SRV"
+    adtcore:changedAt="2025-01-01T12:00:00Z"
+    adtcore:version="active"
+    adtcore:createdAt="2025-01-01T12:00:00Z"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
+    adtcore:description="Mock RAP service definition"
+    adtcore:language="EN">
+  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
+  <atom:link href="source/main" rel="http://www.sap.com/adt/relations/source" type="text/plain"/>
+  <atom:link href="source/main" rel="http://www.sap.com/adt/relations/source" type="text/plain;version=active"/>
+</srvd:source>

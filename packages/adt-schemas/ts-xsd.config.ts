@@ -85,6 +85,7 @@ const targetSchemas = [
   'custom/transportUseraction',
   'custom/ddlSource',
   'custom/dclSource',
+  'custom/srvdSource',
   'custom/acoverageResult',
   'custom/acoverageStatements',
 ];

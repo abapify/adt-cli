@@ -88,6 +88,10 @@ export const registry = {
     dcl: {
       source: 'ddic/dcl/source.xml',
     },
+    srvd: {
+      single: 'ddic/srvd/single.xml',
+      source: 'ddic/srvd/source.asrvd',
+    },
     domains: {
       single: 'ddic/domains/single.xml',
     },

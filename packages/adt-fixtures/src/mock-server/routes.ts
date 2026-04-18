@@ -93,6 +93,9 @@ export interface LoadedFixtures {
   // BDEF (RAP behavior definition)
   bdefSingle: string;
   bdefSource: string;
+  // SRVD (RAP service definition)
+  srvdSingle: string;
+  srvdSource: string;
 }
 
 /**
@@ -167,6 +170,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     gctsCommitResponse,
     bdefSingle,
     bdefSource,
+    srvdSingle,
+    srvdSource,
   ] = await Promise.all([
     m.discovery.load(),
     m.session.load(),
@@ -233,6 +238,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.gcts.commitResponse.load(),
     fixtures.bo.bdef.single.load(),
     fixtures.bo.bdef.source.load(),
+    fixtures.ddic.srvd.single.load(),
+    fixtures.ddic.srvd.source.load(),
   ]);
   return {
     discovery,
@@ -300,6 +307,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     gctsCommitResponse,
     bdefSingle,
     bdefSource,
+    srvdSingle,
+    srvdSource,
   };
 }
 
@@ -572,6 +581,39 @@ export function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/bo/behaviordefinitions/')) {
+    return { status: 204, body: '', contentType: 'text/plain' };
+  }
+
+  // ── SRVD (RAP service definition) ──────────────────────────────
+  // Endpoint: /sap/bc/adt/ddic/srvd/sources/{name}
+  //           /sap/bc/adt/ddic/srvd/sources/{name}/source/main
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/ddic\/srvd\/sources\/[^/?]+\/source\/main/.test(pathname)
+  ) {
+    return { status: 200, body: f.srvdSource, contentType: 'text/plain' };
+  }
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/ddic\/srvd\/sources\/[^/?]+/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.srvdSingle,
+      contentType: 'application/vnd.sap.adt.ddic.srvd.v1+xml',
+    };
+  }
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/ddic/srvd/sources') &&
+    !url.includes('_action=')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/srvd/sources/')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/srvd/sources/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
 

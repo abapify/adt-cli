@@ -66,6 +66,7 @@ import type { AtomFeedSchema } from './types/custom/atomFeed.types';
 import type { TransportUseractionSchema } from './types/custom/transportUseraction.types';
 import type { DdlSourceSchema } from './types/custom/ddlSource.types';
 import type { DclSourceSchema } from './types/custom/dclSource.types';
+import type { SrvdSourceSchema } from './types/custom/srvdSource.types';
 import type { AcoverageResultSchema } from './types/custom/acoverageResult.types';
 import type { AcoverageStatementsSchema } from './types/custom/acoverageStatements.types';
 
@@ -176,6 +177,8 @@ import _ddlSource from './schemas/custom/ddlSource';
 export const ddlSource: TypedSchema<DdlSourceSchema> = typedSchema<DdlSourceSchema>(_ddlSource);
 import _dclSource from './schemas/custom/dclSource';
 export const dclSource: TypedSchema<DclSourceSchema> = typedSchema<DclSourceSchema>(_dclSource);
+import _srvdSource from './schemas/custom/srvdSource';
+export const srvdSource: TypedSchema<SrvdSourceSchema> = typedSchema<SrvdSourceSchema>(_srvdSource);
 import _acoverageResult from './schemas/custom/acoverageResult';
 export const acoverageResult: TypedSchema<AcoverageResultSchema> = typedSchema<AcoverageResultSchema>(_acoverageResult);
 import _acoverageStatements from './schemas/custom/acoverageStatements';

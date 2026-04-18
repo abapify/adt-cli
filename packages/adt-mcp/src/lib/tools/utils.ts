@@ -138,6 +138,8 @@ export function resolveObjectUriFromType(
       return `/sap/bc/adt/packages/${encodeURIComponent(objectName)}`;
     case 'BDEF':
       return `/sap/bc/adt/bo/behaviordefinitions/${n}`;
+    case 'SRVD':
+      return `/sap/bc/adt/ddic/srvd/sources/${n}`;
     default:
       return undefined;
   }

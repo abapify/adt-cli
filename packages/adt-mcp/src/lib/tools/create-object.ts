@@ -24,7 +24,7 @@ export function registerCreateObjectTool(
 ): void {
   server.tool(
     'create_object',
-    'Create a new ABAP object. Supported types: PROG, CLAS, INTF, FUGR, DEVC, DOMA (domain), DTEL (data element), TABL (table), STRUCT (structure), DDLS (CDS DDL), DCLS (CDS DCL), BDEF (RAP behavior definition).',
+    'Create a new ABAP object. Supported types: PROG, CLAS, INTF, FUGR, DEVC, DOMA (domain), DTEL (data element), TABL (table), STRUCT (structure), DDLS (CDS DDL), DCLS (CDS DCL), BDEF (RAP behavior definition), SRVD (RAP service definition).',
     {
       ...connectionShape,
       objectName: z
@@ -35,7 +35,7 @@ export function registerCreateObjectTool(
       objectType: z
         .string()
         .describe(
-          'Object type: PROG, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF',
+          'Object type: PROG, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF, SRVD',
         ),
       description: z.string().describe('Short description of the object'),
       packageName: z

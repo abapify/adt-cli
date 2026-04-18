@@ -57,6 +57,7 @@ import { createDatapreviewCommand } from './commands/datapreview';
 import { createAbapCommand } from './commands/abap';
 import { ddlCommand, dclCommand } from './commands/cds';
 import { bdefCommand } from './commands/bdef';
+import { srvdCommand } from './commands/srvd';
 import { createCheckoutCommand } from './commands/checkout';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
@@ -288,6 +289,7 @@ export async function createCLI(options?: {
   program.addCommand(ddlCommand);
   program.addCommand(dclCommand);
   program.addCommand(bdefCommand);
+  program.addCommand(srvdCommand);
 
   // Checkout command (download SAP objects to abapgit-compatible files)
   program.addCommand(createCheckoutCommand());
