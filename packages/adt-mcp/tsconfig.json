@@ -19,16 +19,25 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     {
+      "path": "../adk"
+    },
+    {
       "path": "../adt-schemas"
     },
     {
       "path": "../adt-locks"
     },
     {
+      "path": "../adt-fixtures"
+    },
+    {
       "path": "../adt-contracts"
     },
     {
       "path": "../adt-client"
+    },
+    {
+      "path": "../adt-cli"
     }
   ]
 }

@@ -1,0 +1,20 @@
+{
+  "columns": {
+    "column": [
+      { "name": "MANDT", "type": "C", "length": "3" },
+      { "name": "MATNR", "type": "C", "length": "18" },
+      { "name": "MBRSH", "type": "C", "length": "1" }
+    ]
+  },
+  "rows": {
+    "row": [
+      {
+        "cell": [
+          { "_text": "100" },
+          { "_text": "Z_EXAMPLE_MATERIAL" },
+          { "_text": "A" }
+        ]
+      }
+    ]
+  }
+}

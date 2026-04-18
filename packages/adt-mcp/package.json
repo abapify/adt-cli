@@ -29,10 +29,13 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.0",
+    "@abapify/adt-cli": "workspace:*",
     "@abapify/adt-client": "workspace:*",
     "@abapify/adt-contracts": "workspace:*",
+    "@abapify/adt-fixtures": "workspace:*",
     "@abapify/adt-locks": "workspace:*",
     "@abapify/adt-schemas": "workspace:*",
+    "@abapify/adk": "workspace:*",
     "zod": "^3.24.0"
   }
 }

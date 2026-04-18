@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TODO-synthetic: Minimal transport-create response for the mock server.
+  Real SAP returns the full transport (same shape as /cts/transportrequests/{id}).
+  Only a stable number is required for ADK's AdkTransportRequest.create() to
+  succeed (looks up `root.request.number`). Mock transport number (MOCK_NEW).
+-->
+<tm:root
+    xmlns:tm="http://www.sap.com/cts/adt/tm"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    tm:useraction="newrequest"
+    tm:object_type="K"
+    adtcore:name="DEVK900099"
+    adtcore:type="RQRQ">
+  <tm:request
+      tm:number="DEVK900099"
+      tm:parent=""
+      tm:owner="TESTUSER"
+      tm:desc="New transport from mock"
+      tm:type="K"
+      tm:status="D"
+      tm:status_text="Modifiable"
+      tm:target="LOCAL"
+      tm:target_desc="Local"
+      tm:source_client="100"
+      tm:uri="/sap/bc/adt/cts/transportrequests/DEVK900099">
+    <tm:long_desc/>
+    <atom:link
+        href="/sap/bc/adt/cts/transportrequests/DEVK900099"
+        rel="http://www.sap.com/cts/relations/adturi"
+        type="application/vnd.sap.adt.transportrequests.v1+xml"
+        title="Transport Organizer ADT URI"/>
+  </tm:request>
+</tm:root>

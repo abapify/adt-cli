@@ -1,0 +1,31 @@
+{
+  "runResult": {
+    "program": [
+      {
+        "uri": "/sap/bc/adt/oo/classes/zcl_example",
+        "type": "CLAS/OC",
+        "name": "ZCL_EXAMPLE",
+        "testClasses": {
+          "testClass": [
+            {
+              "name": "LTC_EXAMPLE",
+              "uri": "/sap/bc/adt/oo/classes/zcl_example/includes/testclasses",
+              "riskLevel": "harmless",
+              "durationCategory": "short",
+              "testMethods": {
+                "testMethod": [
+                  {
+                    "name": "TEST_SOMETHING",
+                    "uri": "/sap/bc/adt/oo/classes/zcl_example/includes/testclasses",
+                    "executionTime": "0.001",
+                    "alerts": { "alert": [] }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
