@@ -27,6 +27,7 @@
 
 import { http } from '@abapify/speci/rest';
 import type { Serializable, RestEndpointDescriptor } from '@abapify/speci/rest';
+import { textPlain } from './text-schema';
 
 /**
  * Common ADT query parameters for CRUD operations
@@ -68,7 +69,12 @@ export interface SourceContract {
   put: (
     name: string,
     options?: SourcePutOptions,
-  ) => RestEndpointDescriptor<'PUT', string, string, { 200: string }>;
+  ) => RestEndpointDescriptor<
+    'PUT',
+    string,
+    Serializable<string>,
+    { 200: string }
+  >;
 }
 
 /**
@@ -178,7 +184,12 @@ export interface SourceOperations {
   put: (
     name: string,
     options?: SourcePutOptions,
-  ) => RestEndpointDescriptor<'PUT', string, string, { 200: string }>;
+  ) => RestEndpointDescriptor<
+    'PUT',
+    string,
+    Serializable<string>,
+    { 200: string }
+  >;
 }
 
 /**
@@ -203,7 +214,12 @@ export type IncludesContract<Includes extends readonly string[]> = {
     name: string,
     includeType: Includes[number],
     options?: SourcePutOptions,
-  ) => RestEndpointDescriptor<'PUT', string, string, { 200: string }>;
+  ) => RestEndpointDescriptor<
+    'PUT',
+    string,
+    Serializable<string>,
+    { 200: string }
+  >;
 } & {
   /** Shorthand accessors for specific includes */
   [K in Includes[number]]: SourceOperations;
@@ -240,7 +256,7 @@ function createSourceOperations(
       }),
     put: (name: string, options?: SourcePutOptions) =>
       http.put(`${basePath}/${nameTransform(name)}/source/${sourceType}`, {
-        body: undefined as unknown as string,
+        body: textPlain,
         responses: { 200: undefined as unknown as string },
         headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
         query: {
@@ -267,7 +283,7 @@ function createIncludeOperations(
       }),
     put: (name: string, options?: SourcePutOptions) =>
       http.put(`${basePath}/${nameTransform(name)}/includes/${includeType}`, {
-        body: undefined as unknown as string,
+        body: textPlain,
         responses: { 200: undefined as unknown as string },
         headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
         query: {
@@ -508,7 +524,7 @@ export function crud<
               http.put(
                 `${basePath}/${nameTransform(name)}/includes/${includeType}`,
                 {
-                  body: undefined as unknown as string,
+                  body: textPlain,
                   responses: { 200: undefined as unknown as string },
                   headers: {
                     Accept: 'text/plain',

@@ -35,6 +35,8 @@ export const configuration = toSpeciSchema(adtSchemas.configuration);
 export const configurations = toSpeciSchema(adtSchemas.configurations);
 export const dataelementWrapper = toSpeciSchema(adtSchemas.dataelementWrapper);
 export const dataelements = toSpeciSchema(adtSchemas.dataelements);
+export const dclSource = toSpeciSchema(adtSchemas.dclSource);
+export const ddlSource = toSpeciSchema(adtSchemas.ddlSource);
 export const debuggerSchema = toSpeciSchema(adtSchemas.debuggerSchema);
 export const discovery = toSpeciSchema(adtSchemas.discovery);
 export const domain = toSpeciSchema(adtSchemas.domain);
@@ -56,6 +58,9 @@ export const templatelinkExtended = toSpeciSchema(
   adtSchemas.templatelinkExtended,
 );
 export const traces = toSpeciSchema(adtSchemas.traces);
+export const transportUseraction = toSpeciSchema(
+  adtSchemas.transportUseraction,
+);
 export const transportfind = toSpeciSchema(adtSchemas.transportfind);
 export const transportmanagment = toSpeciSchema(adtSchemas.transportmanagment);
 export const transportmanagmentCreate = toSpeciSchema(

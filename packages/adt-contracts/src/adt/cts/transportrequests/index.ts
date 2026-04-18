@@ -13,6 +13,14 @@ import {
 import { valuehelp } from './valuehelp';
 import { reference } from './reference';
 import { searchconfiguration } from './searchconfiguration';
+import { useraction } from './useraction';
+
+export { useraction } from './useraction';
+export type {
+  UseractionContract,
+  ReassignOptions,
+  CreateRequestOptions,
+} from './useraction';
 
 /**
  * Transport response type - exported for consumers (ADK, etc.)
@@ -85,4 +93,5 @@ export const transportrequests = {
   reference,
   valuehelp,
   searchconfiguration,
+  useraction,
 };

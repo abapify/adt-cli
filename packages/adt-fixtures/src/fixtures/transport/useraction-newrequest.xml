@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="newrequest">
+  <tm:request tm:desc="Sample request" tm:type="K" tm:target="LOCAL" tm:cts_project="">
+    <tm:task tm:owner="TESTUSER"/>
+  </tm:request>
+</tm:root>

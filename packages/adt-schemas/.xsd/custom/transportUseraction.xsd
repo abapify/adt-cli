@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Transport User-Action Request Schema
+
+  POST /sap/bc/adt/cts/transportrequests/{trkorr}
+  POST /sap/bc/adt/cts/transportrequests  (for useraction="newrequest")
+
+  Covers the user-action XML body used for:
+    - release         (POST /{trkorr})
+    - changeowner     (POST /{trkorr}) - requires tm:targetuser
+    - newrequest      (POST /)         - requires nested tm:request/tm:task
+
+  Examples:
+    <tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="release"/>
+    <tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="changeowner" tm:targetuser="NEWUSER"/>
+    <tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="newrequest">
+      <tm:request tm:desc="..." tm:type="K" tm:target="LOCAL" tm:cts_project="">
+        <tm:task tm:owner="DEVELOPER"/>
+      </tm:request>
+    </tm:root>
+
+  Note: SAP ADT requires namespace-prefixed attributes (non-standard XML).
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:tm="http://www.sap.com/cts/adt/tm"
+    targetNamespace="http://www.sap.com/cts/adt/tm"
+    elementFormDefault="qualified"
+    attributeFormDefault="qualified">
+
+  <!-- Root element -->
+  <xsd:element name="root" type="tm:rootType"/>
+
+  <!-- Root type carries the user action attributes and an optional request -->
+  <xsd:complexType name="rootType">
+    <xsd:sequence>
+      <xsd:element name="request" type="tm:requestType" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+    <xsd:attribute name="useraction" type="xsd:string"/>
+    <xsd:attribute name="targetuser" type="xsd:string"/>
+    <xsd:attribute name="recursive" type="xsd:string"/>
+    <xsd:attribute name="useraction_desc" type="xsd:string"/>
+  </xsd:complexType>
+
+  <!-- Request type (used for newrequest) -->
+  <xsd:complexType name="requestType">
+    <xsd:sequence>
+      <xsd:element name="task" type="tm:taskType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="desc" type="xsd:string"/>
+    <xsd:attribute name="type" type="xsd:string"/>
+    <xsd:attribute name="target" type="xsd:string"/>
+    <xsd:attribute name="cts_project" type="xsd:string"/>
+  </xsd:complexType>
+
+  <!-- Task type -->
+  <xsd:complexType name="taskType">
+    <xsd:attribute name="owner" type="xsd:string"/>
+  </xsd:complexType>
+
+</xsd:schema>

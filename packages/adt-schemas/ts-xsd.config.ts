@@ -81,6 +81,9 @@ const targetSchemas = [
   'custom/aunitRun',
   'custom/aunitResult',
   'custom/atomFeed',
+  'custom/transportUseraction',
+  'custom/ddlSource',
+  'custom/dclSource',
 ];
 
 export default defineConfig({

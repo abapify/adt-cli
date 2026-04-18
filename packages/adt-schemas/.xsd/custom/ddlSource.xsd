@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CDS DDL Source Schema (DDLS)
+
+  GET/POST/PUT /sap/bc/adt/ddic/ddl/sources/{name}
+  Content-Type: application/vnd.sap.adt.ddl.source.v2+xml
+
+  The root element is <ddl:source> in the http://www.sap.com/adt/ddl
+  namespace and extends abapsource:AbapSourceMainObject (the standard
+  ABAP source object base type), so it automatically carries
+  adtcore + abapsource metadata (name, package, syntaxConfiguration,
+  etc.) via schema composition.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:ddl="http://www.sap.com/adt/ddl"
+    xmlns:abapsource="http://www.sap.com/adt/abapsource"
+    targetNamespace="http://www.sap.com/adt/ddl"
+    elementFormDefault="qualified"
+    attributeFormDefault="qualified">
+
+  <xsd:import namespace="http://www.sap.com/adt/abapsource"
+              schemaLocation="../sap/abapsource.xsd"/>
+
+  <xsd:element name="source" type="ddl:DdlSource"/>
+
+  <xsd:complexType name="DdlSource">
+    <xsd:complexContent>
+      <xsd:extension base="abapsource:AbapSourceMainObject">
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+</xsd:schema>

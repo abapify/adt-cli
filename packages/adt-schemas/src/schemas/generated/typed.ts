@@ -62,6 +62,9 @@ import type { AtcRunSchema } from './types/custom/atcRun.types';
 import type { AunitRunSchema } from './types/custom/aunitRun.types';
 import type { AunitResultSchema } from './types/custom/aunitResult.types';
 import type { AtomFeedSchema } from './types/custom/atomFeed.types';
+import type { TransportUseractionSchema } from './types/custom/transportUseraction.types';
+import type { DdlSourceSchema } from './types/custom/ddlSource.types';
+import type { DclSourceSchema } from './types/custom/dclSource.types';
 
 // SAP schemas
 import _atom from './schemas/sap/atom';
@@ -162,3 +165,9 @@ import _aunitResult from './schemas/custom/aunitResult';
 export const aunitResult: TypedSchema<AunitResultSchema> = typedSchema<AunitResultSchema>(_aunitResult);
 import _atomFeed from './schemas/custom/atomFeed';
 export const atomFeed: TypedSchema<AtomFeedSchema> = typedSchema<AtomFeedSchema>(_atomFeed);
+import _transportUseraction from './schemas/custom/transportUseraction';
+export const transportUseraction: TypedSchema<TransportUseractionSchema> = typedSchema<TransportUseractionSchema>(_transportUseraction);
+import _ddlSource from './schemas/custom/ddlSource';
+export const ddlSource: TypedSchema<DdlSourceSchema> = typedSchema<DdlSourceSchema>(_ddlSource);
+import _dclSource from './schemas/custom/dclSource';
+export const dclSource: TypedSchema<DclSourceSchema> = typedSchema<DclSourceSchema>(_dclSource);

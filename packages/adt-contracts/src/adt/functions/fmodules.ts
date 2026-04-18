@@ -10,6 +10,7 @@
  */
 
 import { http, contract } from '../../base';
+import { textPlain } from '../../helpers/text-schema';
 import {
   fmodules as fmodulesSchema,
   type InferTypedSchema,
@@ -143,7 +144,7 @@ export const functionModulesContract = contract({
         options?: { lockHandle?: string; corrNr?: string },
       ) =>
         http.put(basePath + '/${fmName}/source/main', {
-          body: undefined as unknown as string,
+          body: textPlain,
           responses: { 200: undefined as unknown as string },
           headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
           query: {

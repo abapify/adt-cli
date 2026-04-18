@@ -1,0 +1,32 @@
+{
+  "totalRows": 2,
+  "isHanaAnalyticalView": false,
+  "executedQueryString": "SELECT MANDT, BUKRS FROM T001 UP TO 2 ROWS",
+  "queryExecutionTime": 12,
+  "dataPreview": {
+    "columns": [
+      {
+        "metadata": {
+          "name": "MANDT",
+          "type": "CLNT",
+          "length": 3,
+          "description": "Client",
+          "isKey": true,
+          "keyAttribute": true
+        },
+        "dataPreviewContent": ["100", "100"]
+      },
+      {
+        "metadata": {
+          "name": "BUKRS",
+          "type": "CHAR",
+          "length": 4,
+          "description": "Company Code",
+          "isKey": true,
+          "keyAttribute": true
+        },
+        "dataPreviewContent": ["1000", "2000"]
+      }
+    ]
+  }
+}
