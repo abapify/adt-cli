@@ -9,7 +9,6 @@
 import { AdkObject } from '../../../../base/model';
 import { FunctionModule as FunctionModuleKind } from '../../../../base/kinds';
 import { getGlobalContext } from '../../../../base/global-context';
-import { toText } from '../../../../base/fetch-utils';
 import type { AdkContext } from '../../../../base/context';
 
 // Import response type from ADT integration layer
@@ -235,15 +234,11 @@ export class AdkFunctionModule extends AdkObject<
       this.ctx.client.clearETag();
     }
     // Refresh source ETag (needed by source PUT in savePendingSources)
-    const sourceUrl = `${this.objectUri}/source/main`;
     try {
-      await this.ctx.client.fetch(sourceUrl, {
-        method: 'GET',
-        headers: { Accept: 'text/plain' },
-      });
+      await this.crudContract.source.main.get(this.groupName, this.name);
     } catch {
       // Source may not exist yet — clear stale ETag to avoid 412
-      this.ctx.client.clearETag(sourceUrl);
+      this.ctx.client.clearETag(`${this.objectUri}/source/main`);
     }
   }
 
@@ -329,27 +324,19 @@ export class AdkFunctionModule extends AdkObject<
 
     // The metadata PUT changes the object's ETag, so we must refresh the
     // cached source ETag before the source PUT (otherwise If-Match fails).
-    const sourceUrl = `${this.objectUri}/source/main`;
-    await this.ctx.client.fetch(sourceUrl, {
-      method: 'GET',
-      headers: { Accept: 'text/plain' },
-    });
+    await this.crudContract.source.main.get(this.groupName, this.name);
 
     // Strip the parameter comment block before sending
     const cleanSource = this.stripParameterCommentBlock(self._pendingSource);
 
-    const params = new URLSearchParams();
-    if (options?.lockHandle) params.set('lockHandle', options.lockHandle);
-    if (options?.transport) params.set('corrNr', options.transport);
-
-    const qs = params.toString();
-    await this.ctx.client.fetch(
-      `${this.objectUri}/source/main${qs ? '?' + qs : ''}`,
+    await this.crudContract.source.main.put(
+      this.groupName,
+      this.name,
       {
-        method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
-        body: cleanSource,
+        ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
+        ...(options?.transport ? { corrNr: options.transport } : {}),
       },
+      cleanSource,
     );
 
     delete self._pendingSource;
@@ -412,11 +399,9 @@ export class AdkFunctionModule extends AdkObject<
     if (!self._pendingSource) return;
 
     try {
-      const currentSource = await toText(
-        await this.ctx.client.fetch(`${this.objectUri}/source/main`, {
-          method: 'GET',
-          headers: { Accept: 'text/plain' },
-        }),
+      const currentSource = await this.crudContract.source.main.get(
+        this.groupName,
+        this.name,
       );
       const cleanPending = this.stripParameterCommentBlock(self._pendingSource);
       const localBody = this.extractFunctionBody(cleanPending);
@@ -461,6 +446,70 @@ export class AdkFunctionModule extends AdkObject<
   ): Promise<AdkFunctionModule> {
     const context = ctx ?? getGlobalContext();
     return new AdkFunctionModule(context, groupName, name).load();
+  }
+
+  /**
+   * Check if a function module exists on SAP
+   */
+  static async exists(
+    groupName: string,
+    name: string,
+    ctx?: AdkContext,
+  ): Promise<boolean> {
+    try {
+      await AdkFunctionModule.get(groupName, name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP function module on SAP
+   */
+  static async create(
+    groupName: string,
+    name: string,
+    description: string,
+    options?: { transport?: string; processingType?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkFunctionModule> {
+    const context = ctx ?? getGlobalContext();
+    const fm = new AdkFunctionModule(
+      context,
+      groupName.toUpperCase(),
+      name.toUpperCase(),
+    );
+    fm.setData({
+      name: name.toUpperCase(),
+      type: 'FUGR/FF',
+      description,
+      processingType: options?.processingType ?? 'normal',
+    } as unknown as FunctionModuleXml);
+    await fm.save({ transport: options?.transport, mode: 'create' });
+    return fm;
+  }
+
+  /**
+   * Delete a function module from SAP
+   */
+  static async delete(
+    groupName: string,
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const fm = new AdkFunctionModule(
+      context,
+      groupName.toUpperCase(),
+      name.toUpperCase(),
+    );
+    const contract = fm.crudContract;
+    await contract.delete(groupName.toUpperCase(), name.toUpperCase(), {
+      corrNr: options?.transport,
+      lockHandle: options?.lockHandle,
+    });
   }
 }
 

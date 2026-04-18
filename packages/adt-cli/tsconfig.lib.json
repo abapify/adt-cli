@@ -19,6 +19,9 @@
       "path": "../adt-diff"
     },
     {
+      "path": "../adt-aunit"
+    },
+    {
       "path": "../adt-atc"
     },
     {

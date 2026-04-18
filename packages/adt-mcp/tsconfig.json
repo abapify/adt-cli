@@ -19,6 +19,12 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     {
+      "path": "../adt-plugin-abapgit"
+    },
+    {
+      "path": "../adt-aunit"
+    },
+    {
       "path": "../adk"
     },
     {

@@ -42,6 +42,9 @@ import {
   registerGetFunctionGroupTool,
   registerGetFunctionTool,
 } from './function-tools';
+import { registerCreateFunctionGroupTool } from './create-function-group';
+import { registerCreateFunctionModuleTool } from './create-function-module';
+import { registerDeleteFunctionModuleTool } from './delete-function-module';
 import { registerLockObjectTool } from './lock-object';
 import { registerUnlockObjectTool } from './unlock-object';
 import { registerGetObjectStructureTool } from './get-object-structure';
@@ -109,6 +112,9 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Medium-priority tools (#M1–#M10)
   registerGetFunctionGroupTool(server, ctx);
   registerGetFunctionTool(server, ctx);
+  registerCreateFunctionGroupTool(server, ctx);
+  registerCreateFunctionModuleTool(server, ctx);
+  registerDeleteFunctionModuleTool(server, ctx);
   registerLockObjectTool(server, ctx);
   registerUnlockObjectTool(server, ctx);
   registerGetObjectStructureTool(server, ctx);

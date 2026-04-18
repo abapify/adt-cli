@@ -34,6 +34,7 @@ import {
   interfaceCommand,
   includeCommand,
 } from './commands/object';
+import { functionCommand } from './commands/function';
 import {
   domainCommand,
   dataelementCommand,
@@ -250,6 +251,7 @@ export async function createCLI(options?: {
   program.addCommand(programCommand);
   program.addCommand(interfaceCommand);
   program.addCommand(includeCommand);
+  program.addCommand(functionCommand);
 
   // DDIC commands (domain, dataelement, table, structure)
   program.addCommand(domainCommand);

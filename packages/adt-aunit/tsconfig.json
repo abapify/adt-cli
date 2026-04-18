@@ -19,6 +19,18 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     {
+      "path": "../adt-fixtures"
+    },
+    {
+      "path": "../adt-plugin-abapgit"
+    },
+    {
+      "path": "../adt-contracts"
+    },
+    {
+      "path": "../adt-schemas"
+    },
+    {
       "path": "../adt-plugin"
     }
   ]
