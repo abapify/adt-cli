@@ -1,0 +1,11 @@
+@EndUserText.label: 'Projection on product'
+define view entity C_Product
+  as projection on I_Product
+{
+  key ProductId,
+      ProductName,
+      Currency,
+      Price,
+      CategoryId,
+      _Category
+}

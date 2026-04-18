@@ -1,0 +1,18 @@
+@EndUserText.label: 'Products interface view'
+@AccessControl.authorizationCheck: #CHECK
+@Metadata.allowExtensions: true
+@ObjectModel.usageType.serviceQuality: #A
+@ObjectModel.usageType.sizeCategory: #M
+define view entity I_Product
+  as select from zproducts
+{
+  key product_id     as ProductId,
+      product_name   as ProductName,
+      @Semantics.currencyCode: true
+      currency       as Currency,
+      @Semantics.amount.currencyCode: 'Currency'
+      price          as Price,
+      category_id    as CategoryId,
+      association[0..1] to I_Category as _Category
+        on zproducts.category_id = _Category.category_id
+}

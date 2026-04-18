@@ -2,14 +2,30 @@
 
 ## Package Overview
 
-**ABAP CDS source parser** — tokenizes, parses, and produces a typed AST from `.acds` DDL source code.
+**ABAP CDS source parser** — tokenizes, parses, and produces a typed AST from `.acds` DDL/DCL source code. Foundation for the RAP chain (E10 BDEF, E11 SRVD, E12 SRVB).
 
-| Feature            | Description                             |
-| ------------------ | --------------------------------------- |
-| **Chevrotain**     | Lexer + CstParser + visitor pattern     |
-| **Error recovery** | Returns partial AST + structured errors |
-| **Phase 1**        | TABL, Structure, DRTY, SRVD, DDLX       |
-| **Single export**  | `parse(source) → { ast, errors }`       |
+| Feature                 | Description                                                             |
+| ----------------------- | ----------------------------------------------------------------------- |
+| **Chevrotain**          | Lexer + CstParser + visitor pattern (LL(4))                             |
+| **Error recovery**      | Returns partial AST + structured errors                                 |
+| **Construct-scoped**    | Grammar topics live under `src/lib/grammar/` (docs + coverage metadata) |
+| **AST walker**          | `walkDefinitions`, `walkAnnotations`, `walkAssociations`, ...           |
+| **Semantic validators** | Cardinality + view-element sanity checks                                |
+| **Single entry**        | `parse(source) → { ast, errors }`                                       |
+
+## Grammar coverage
+
+| Topic          | Constructs                                                                                                                                                     |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ddl`          | `define table`, `define structure`, `define type`, `define view entity`, `define abstract entity`, `define custom entity`, `define service`, `annotate entity` |
+| `dcl`          | `define role … { grant select on <entity> [where …] }`                                                                                                         |
+| `annotations`  | `@Key`, `@Key:value`, arrays, nested objects, dotted property keys                                                                                             |
+| `associations` | `association`, `composition`, cardinality `[L..U]` / `[*]` / `[N]`, `of many/one`, `redirected to`, `on <expr>`, `as <alias>`                                  |
+| `parameters`   | `with parameters p : <type> [default <literal>]`, annotated parameters                                                                                         |
+| `projections`  | key / virtual / redirected modifiers, typed fields (abstract/custom entities), `where` clauses                                                                 |
+| `actions`      | _placeholder — owned by E10 (BDEF)_                                                                                                                            |
+
+The coverage metadata is exported at runtime via `GRAMMAR_COVERAGE` for tooling / docs.
 
 ## Architecture
 
@@ -23,28 +39,35 @@ Source string
 
 ### Key Files
 
-| File             | Purpose                                                    |
-| ---------------- | ---------------------------------------------------------- |
-| `src/index.ts`   | `parse()` entry point, re-exports all types                |
-| `src/tokens.ts`  | Chevrotain token definitions (keywords, symbols, literals) |
-| `src/parser.ts`  | Grammar rules (`CdsParser` extends `CstParser`)            |
-| `src/visitor.ts` | CST → AST transformation (`CdsVisitor`)                    |
-| `src/ast.ts`     | AST node interfaces and union types                        |
-| `src/errors.ts`  | Error normalization (lex errors + parse errors)            |
+| File                    | Purpose                                                               |
+| ----------------------- | --------------------------------------------------------------------- |
+| `src/index.ts`          | `parse()` entry point, re-exports all types and helpers               |
+| `src/tokens.ts`         | Chevrotain token definitions (keywords, symbols, literals, operators) |
+| `src/parser.ts`         | Grammar rules (`CdsParser extends CstParser`)                         |
+| `src/visitor.ts`        | CST → AST transformation (`CdsVisitor`)                               |
+| `src/ast.ts`            | AST node interfaces and union types                                   |
+| `src/errors.ts`         | Error normalization (lex + parse)                                     |
+| `src/lib/grammar/*.ts`  | Per-topic grammar docs + coverage exports                             |
+| `src/lib/ast/walker.ts` | AST iteration helpers (`walkDefinitions`, `walkAssociations`, ...)    |
+| `src/lib/ast/*.ts`      | Topic-scoped AST type re-exports                                      |
+| `src/lib/validate/*.ts` | Semantic validators (return `SemanticDiagnostic[]`)                   |
 
 ### AST Node Hierarchy
 
 ```
 CdsSourceFile
-  └── CdsDefinition (union)
-        ├── TableDefinition      (kind: 'table')
-        ├── StructureDefinition  (kind: 'structure')
-        ├── SimpleTypeDefinition (kind: 'simpleType')
-        ├── ServiceDefinition    (kind: 'service')
-        ├── MetadataExtension    (kind: 'metadataExtension')
-        ├── RoleDefinition       (kind: 'role')          — Phase 2
-        └── ViewEntityDefinition (kind: 'viewEntity')    — Phase 3
+  └── CdsDefinition (discriminated by `kind`)
+        ├── TableDefinition        (kind: 'table')
+        ├── StructureDefinition    (kind: 'structure')
+        ├── SimpleTypeDefinition   (kind: 'simpleType')
+        ├── ServiceDefinition      (kind: 'service')
+        ├── MetadataExtension      (kind: 'metadataExtension')
+        ├── RoleDefinition         (kind: 'role')
+        ├── ViewEntityDefinition   (kind: 'viewEntity')
+        ├── AbstractEntityDefinition (kind: 'abstractEntity')
+        └── CustomEntityDefinition (kind: 'customEntity')
 
+ViewMember  = ViewElement | AssociationDeclaration
 TableMember = FieldDefinition | IncludeDirective
 TypeRef     = BuiltinTypeRef  | NamedTypeRef
 ```
@@ -53,42 +76,35 @@ TypeRef     = BuiltinTypeRef  | NamedTypeRef
 
 ### Token Order Matters
 
-In `tokens.ts`, **keywords must come before `Identifier`** in the `allTokens` array. Keywords use `longer_alt: Identifier` to avoid matching identifier prefixes.
+In `tokens.ts`:
 
-### Adding a New Keyword
+1. Keywords **must** come before `Identifier` in `allTokens`.
+2. Keywords that share a prefix with other keywords (e.g. `association` / `as`, `one` / `on`) **must** be listed before the shorter keyword — otherwise Chevrotain reports the longer one as unreachable.
+3. Multi-character operators (`==`, `!=`, `<=`, `>=`) must precede their single-character equivalents.
 
-1. Create token with `longer_alt: Identifier` in `tokens.ts`
-2. Add to `allTokens` array **before** `Identifier`
-3. If the keyword can appear as a name, add it to the `cdsName` rule in `parser.ts`
-4. Import the token in `parser.ts`
+### `cdsName` vs keywords
+
+CDS sources commonly use keywords as identifiers (e.g. `@ObjectModel.association.type`). The `cdsName` rule in the parser accepts every keyword that can legally appear as a name. When adding a new keyword, **append it to the `cdsName` rule** if it might be used as an identifier anywhere.
 
 ### Parser Rules
 
-- The parser uses `recoveryEnabled: true` — malformed input produces partial CST + errors
-- `maxLookahead: 3` — keep grammar LL(3) compatible
-- The singleton `cdsParser` instance is reused across calls (set `.input` before parsing)
+- `recoveryEnabled: true` — malformed input produces partial CST + errors
+- `maxLookahead: 4` — keep grammar LL(4) compatible
+- The singleton `cdsParser` instance is reused across calls.
 
-### Visitor Pattern
+### Expressions
 
-- `CdsVisitor` extends the auto-generated `BaseCstVisitor` from Chevrotain
-- Each parser rule has a matching visitor method
-- Visitor methods return typed AST nodes; the visitor is validated at construction
+`on` and `where` clauses are captured as opaque `Expression { source, tokens }` structures — the parser does **not** produce an expression tree. Downstream consumers that need structural access should either:
 
-### Adding a New Definition Type
+1. Parse the token stream themselves; or
+2. Wait for the expression grammar to be expanded (tracked as open question in the epic).
 
-1. Add AST interface to `ast.ts` with a `kind` literal discriminant
-2. Add to `CdsDefinition` union type
-3. Add grammar rules to `parser.ts`
-4. Add visitor methods to `visitor.ts`
-5. Re-export the type from `index.ts`
-6. Add test cases to `parser.test.ts`
+## Consumers
 
-## Consumer
-
-This package is consumed by `@abapify/adt-plugin-abapgit`:
-
-- `cds-to-abapgit.ts` — imports AST types (`TableDefinition`, `FieldDefinition`, etc.) to map CDS AST → DD02V/DD03P structures
-- `objects/tabl.ts` — calls `parse()` on CDS source to produce abapGit XML
+- `@abapify/adt-plugin-abapgit` — imports `TableDefinition`, `FieldDefinition`, etc. to map CDS AST → DD02V/DD03P structures.
+- **E10 (BDEF)** — will consume `CdsSourceFile` and walker APIs to cross-reference behavior definitions against projection views.
+- **E11 (SRVD)** — resolves `ServiceDefinition.exposes[].entity` against parsed `ViewEntityDefinition`s.
+- **E12 (SRVB)** — uses `ServiceDefinition` to inventory exposed entities.
 
 ## Testing
 
@@ -96,22 +112,16 @@ This package is consumed by `@abapify/adt-plugin-abapgit`:
 bunx nx test acds
 ```
 
-Tests live in `src/parser.test.ts` and cover:
+Tests live in:
 
-- Table definitions (key fields, annotations, decimal types, includes, builtin types)
-- Structure definitions
-- Simple type definitions (builtin + named)
-- Service definitions (expose with/without alias)
-- Metadata extensions (annotated elements)
-- Annotation values (string, enum, boolean, number, array)
-- Comments (line + block)
-- Error handling (invalid + incomplete input)
+- `src/parser.test.ts` — legacy Phase 1 coverage (TABL/structure/type/service/annotate)
+- `tests/grammar/*.test.ts` — per-topic grammar coverage
+- `tests/fixtures.test.ts` — parses every file under `tests/fixtures/` without errors
+- `tests/walker.test.ts` — AST traversal helpers
+- `tests/validate.test.ts` — semantic validators
+
+**≥ 72 tests, 12 real-world fixtures** (from `git_modules/abap-file-formats` and hand-crafted).
 
 ## Dependencies
 
 - [`chevrotain`](https://chevrotain.io/) — Parser toolkit
-
-## Reference
-
-- [README.md](./README.md) — Full API reference
-- [adt-plugin-abapgit](../adt-plugin-abapgit/AGENTS.md) — Primary consumer

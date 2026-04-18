@@ -78,3 +78,59 @@ Do NOT commit without approval.
 ## Open questions
 
 - Tokenizer/parser approach: hand-written recursive-descent (current) vs PEG / Chevrotain? Recommend staying hand-written for predictability; revisit if grammar coverage stalls.
+
+## Delivered in this pass (2025-PR)
+
+- Chevrotain LL(4) grammar coverage for: `define view entity` (+ `as select from` / `as projection on`), `define abstract entity`, `define custom entity`, `define role` + `grant select on … [where …]`, `with parameters`, `association`/`composition` with full cardinality syntax (`[L..U]`, `[*]`, `[0..*]`, `[N]`, `[L..*]`), `redirected to`, `of many|one`, associations/compositions with `on` expressions.
+- New AST nodes: `ViewEntityDefinition`, `AbstractEntityDefinition`, `CustomEntityDefinition`, `RoleDefinition` (with grants), `AssociationDeclaration`, `Cardinality`, `ParameterDefinition`, `Expression` (opaque token bag for `on`/`where`).
+- `src/lib/grammar/*.ts` — per-topic grammar coverage metadata (`GRAMMAR_COVERAGE` exported at runtime).
+- `src/lib/ast/walker.ts` — `walkDefinitions`, `walkAnnotations`, `walkAssociations`, `walkFields`, `walkParameters`, `walkViewElements`, `findAnnotation`, plus `hasFields`/`hasMembers`/`hasParameters`/`isAssociation` type guards.
+- `src/lib/validate/*.ts` — semantic validators returning `SemanticDiagnostic[]` (`ACDS001`…`ACDS011` for cardinality + key/virtual combinations).
+- 78 tests (23 legacy + 32 new per-topic grammar + 5 walker + 5 validator + 6 fixtures + 7 integration), 12 real-world fixtures (6 from `git_modules/abap-file-formats` + 6 hand-crafted RAP examples).
+
+## Still out of scope — track as follow-ups
+
+- **Expression grammar**: `on` / `where` clauses return opaque `{ source, tokens }`. Structured parsing (boolean/comparison trees, function calls) is deferred.
+- **SQL surface inside view element list**: `cast(...)`, `case when`, arithmetic, aggregates, window functions. Current grammar only accepts `<qualified-name> [as <alias>]` as a projection element.
+- **Joins**: `inner join`, `left outer join`, `on` conditions between joined sources.
+- **Union / intersect / union all** at source level.
+- **`define aspect` (DRAS), `define hierarchy`, cache definitions (DTDC/DTSC), scalar functions (DSFD), view buffer (DTEB), annotation definitions (DDLA)** — these were observed in the abap-file-formats fixtures but are not required by E10/E11/E12. Add when the consuming epic needs them.
+- **BDEF / behavior definitions** — E10 owns this.
+- **`$projection.X` / `$parameters.X` system references** — the `$` prefix is not yet part of the identifier regex. Add when SRVD projections need it.
+
+## Handoff for E10 / E11 / E12
+
+To consume the parser from a RAP epic:
+
+```ts
+import {
+  parse,
+  walkViewElements,
+  walkAssociations,
+  walkParameters,
+  findAnnotation,
+  type ViewEntityDefinition,
+  type ServiceDefinition,
+  type AssociationDeclaration,
+} from '@abapify/acds';
+
+const { ast, errors } = parse(source);
+if (errors.length) throw new Error('CDS parse failed');
+
+const def = ast.definitions[0];
+if (def.kind === 'viewEntity') {
+  for (const { element } of walkViewElements(ast)) {
+    // element.expression, element.alias, element.isKey, ...
+  }
+  for (const { association } of walkAssociations(ast)) {
+    // association.target, association.cardinality, association.on, ...
+  }
+}
+if (def.kind === 'service') {
+  // ServiceDefinition.exposes: ExposeStatement[]
+}
+```
+
+- **E10 (BDEF)**: cross-reference `managed implementation in class … unique` against a `ViewEntityDefinition` parsed from the projection source. Use `walkAssociations` to enumerate child entities for `with draft` / `composition of` detection.
+- **E11 (SRVD)**: parse `.srvd.acds` → `ServiceDefinition`, iterate `exposes[]`, resolve each `entity` by parsing the corresponding DDLS source with this parser.
+- **E12 (SRVB)**: use `ServiceDefinition` as the binding inventory; no new parser needs to be introduced.

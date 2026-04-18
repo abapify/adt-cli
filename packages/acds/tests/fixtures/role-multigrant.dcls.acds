@@ -1,0 +1,6 @@
+define role Z_SALES_ROLE {
+  grant select on I_SalesOrderRoot
+    where I_SalesOrderRoot.CustomerId = 'LH';
+  grant select on I_SalesOrderItem
+    where I_SalesOrderItem.SalesOrderId = 'LH';
+}
