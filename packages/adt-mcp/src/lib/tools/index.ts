@@ -71,6 +71,10 @@ import { registerDeleteBdefTool } from './delete-bdef';
 import { registerGetSrvdTool } from './get-srvd';
 import { registerCreateSrvdTool } from './create-srvd';
 import { registerDeleteSrvdTool } from './delete-srvd';
+import { registerGetSrvbTool } from './get-srvb';
+import { registerCreateSrvbTool } from './create-srvb';
+import { registerDeleteSrvbTool } from './delete-srvb';
+import { registerUnpublishSrvbTool } from './unpublish-srvb';
 // CTS + package parity tools
 import { registerCtsUpdateTransportTool } from './cts-update-transport';
 import { registerCtsReassignTransportTool } from './cts-reassign-transport';
@@ -166,6 +170,10 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerGetSrvdTool(server, ctx);
   registerCreateSrvdTool(server, ctx);
   registerDeleteSrvdTool(server, ctx);
+  registerGetSrvbTool(server, ctx);
+  registerCreateSrvbTool(server, ctx);
+  registerDeleteSrvbTool(server, ctx);
+  registerUnpublishSrvbTool(server, ctx);
   // STRUST — PSE cert management (E04)
   registerListPsesTool(server, ctx);
   registerListCertsTool(server, ctx);

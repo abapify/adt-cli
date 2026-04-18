@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fixture: GET /sap/bc/adt/businessservices/bindings/{name}
+
+  SAP ADT wraps SRVB metadata in `srvb:serviceBinding` (namespace
+  http://www.sap.com/adt/ddic/ServiceBindings) extending
+  adtcore:AdtMainObject. SRVB is metadata-only: no source text.
+
+  Sanitized: all IDs replaced with mock values per
+  adt-fixtures/AGENTS.md rules.
+
+  TODO-synthetic: Replace with a real sanitized SAP response captured
+  from `adt fetch` when a public S/4HANA sample becomes available.
+  Shape mirrors the official servicebinding.xsd.
+-->
+<srvb:serviceBinding
+    xmlns:srvb="http://www.sap.com/adt/ddic/ServiceBindings"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    srvb:contract="ODATA_V4"
+    srvb:releaseSupported="true"
+    srvb:published="false"
+    srvb:repair="false"
+    srvb:bindingCreated="true"
+    adtcore:responsible="TESTUSER"
+    adtcore:masterLanguage="EN"
+    adtcore:masterSystem="MCK"
+    adtcore:abapLanguageVersion="standard"
+    adtcore:name="ZUI_MOCK_SRVB"
+    adtcore:type="SRVB/SVB"
+    adtcore:changedAt="2025-01-01T12:00:00Z"
+    adtcore:version="active"
+    adtcore:createdAt="2025-01-01T12:00:00Z"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
+    adtcore:description="Mock RAP service binding"
+    adtcore:language="EN">
+  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
+  <srvb:serviceDefinition adtcore:uri="/sap/bc/adt/ddic/srvd/sources/zui_mock_srvd" adtcore:type="SRVD/SRV" adtcore:name="ZUI_MOCK_SRVD"/>
+  <srvb:services srvb:name="ZUI_MOCK_SRVB_O4">
+    <srvb:content srvb:version="0001" srvb:releaseState="NOT_RELEASED">
+      <srvb:serviceDefinition adtcore:uri="/sap/bc/adt/ddic/srvd/sources/zui_mock_srvd" adtcore:type="SRVD/SRV" adtcore:name="ZUI_MOCK_SRVD"/>
+    </srvb:content>
+  </srvb:services>
+  <srvb:binding srvb:type="odataV4" srvb:version="4" srvb:category="odata_v4_ui">
+    <srvb:implementation adtcore:uri="" adtcore:type="" adtcore:name=""/>
+  </srvb:binding>
+</srvb:serviceBinding>

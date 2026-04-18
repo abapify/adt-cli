@@ -56,6 +56,7 @@ export const logpoint = toSpeciSchema(adtSchemas.logpoint);
 export const packagesV1 = toSpeciSchema(adtSchemas.packagesV1);
 export const programs = toSpeciSchema(adtSchemas.programs);
 export const quickfixes = toSpeciSchema(adtSchemas.quickfixes);
+export const servicebinding = toSpeciSchema(adtSchemas.servicebinding);
 export const srvdSource = toSpeciSchema(adtSchemas.srvdSource);
 export const tablesettings = toSpeciSchema(adtSchemas.tablesettings);
 export const tabletype = toSpeciSchema(adtSchemas.tabletype);

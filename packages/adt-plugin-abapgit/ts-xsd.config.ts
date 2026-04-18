@@ -40,6 +40,7 @@ export default defineConfig({
         'ttyp',
         'bdef',
         'srvd',
+        'srvb',
       ],
     },
   },

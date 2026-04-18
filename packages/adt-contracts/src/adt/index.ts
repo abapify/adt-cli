@@ -20,6 +20,7 @@ export * from './datapreview';
 export * from './runtime';
 export * from './gcts';
 export * from './bo';
+export * from './businessservices';
 
 /**
  * Complete ADT Contract
@@ -45,6 +46,10 @@ import { datapreviewContract, type DatapreviewContract } from './datapreview';
 import { runtimeContract, type RuntimeContract } from './runtime';
 import { gctsContract, type GctsContract } from './gcts';
 import { boContract, type BoContract } from './bo';
+import {
+  businessservicesContract,
+  type BusinessservicesContract,
+} from './businessservices';
 
 /**
  * Explicit type to avoid TS7056 "inferred type exceeds maximum length"
@@ -68,6 +73,7 @@ export interface AdtContract {
   runtime: RuntimeContract;
   gcts: GctsContract;
   bo: BoContract;
+  businessservices: BusinessservicesContract;
 }
 
 export const adtContract: AdtContract = {
@@ -89,6 +95,7 @@ export const adtContract: AdtContract = {
   runtime: runtimeContract,
   gcts: gctsContract,
   bo: boContract,
+  businessservices: businessservicesContract,
 };
 
 // Import RestClient from base for client type definition

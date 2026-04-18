@@ -59,6 +59,11 @@ describe('adtUriToAbapGitPath', () => {
       '/sap/bc/adt/ddic/srvd/sources/zui_foo/source/main',
       'src/zui_foo.srvd.asrvd',
     ],
+    ['/sap/bc/adt/businessservices/bindings/zui_foo', 'src/zui_foo.srvb.xml'],
+    [
+      '/sap/bc/adt/businessservices/bindings/zui_foo/publishedstates',
+      'src/zui_foo.srvb.xml',
+    ],
     ['/sap/bc/adt/ddic/domains/zd_foo', 'src/zd_foo.doma.xml'],
     ['/sap/bc/adt/ddic/dataelements/zd_foo', 'src/zd_foo.dtel.xml'],
     ['/sap/bc/adt/ddic/structures/zs_foo', 'src/zs_foo.tabl.xml'],

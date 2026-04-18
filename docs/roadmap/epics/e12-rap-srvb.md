@@ -75,3 +75,61 @@ Spec: /mnt/wsl/workspace/ubuntu/adt-cli/docs/roadmap/epics/e12-rap-srvb.md
 Reads: AGENTS.md, docs/roadmap/README.md, packages/adt-mcp/src/lib/tools/publish-service-binding.ts.
 Do NOT commit without approval.
 ```
+
+## Status: Landed
+
+- Contract: `client.adt.businessservices.bindings.*` at
+  `/sap/bc/adt/businessservices/bindings` (GET/POST/PUT/DELETE +
+  lock/unlock + `publish` / `unpublish` on `/publishedstates`).
+  Content-Type
+  `application/vnd.sap.adt.businessservices.servicebinding.v1+xml`.
+  Built on the `crud()` helper with the publish/unpublish endpoints
+  spliced on top. SRVB is metadata-only — no source text endpoints.
+- Schema: `sap/servicebinding.xsd` added to the adt-schemas target
+  list; regenerated `@abapify/adt-schemas` types + `@abapify/adt-contracts`
+  speci wrappers (`servicebinding` typed schema).
+- ADK: `AdkServiceBinding` (lightweight metadata-only object).
+  `getMetadata()`, `publish()`, `unpublish()`, `activate()` + full
+  lock/unlock via `ctx.lockService`. `getSource()` returns `''` for
+  uniform CLI parity.
+- CLI: `adt srvb <create|read|publish|unpublish|activate|delete>`
+  (custom command — `buildObjectCrudCommands` doesn't cover
+  publish/unpublish, and SRVB has no source so read/write differ from
+  siblings).
+- MCP:
+  - `get_srvb`, `create_srvb`, `delete_srvb`, `unpublish_srvb` new
+    dedicated tools.
+  - `publish_service_binding` retained for backward compatibility, now
+    **delegates to the typed SRVB contract** (no more
+    `client.fetch()` bypass). Accepts `unpublish: true` for legacy
+    callers.
+  - `create_object` / `delete_object` / `resolveObjectUriFromType`
+    dispatch extended to include SRVB.
+- abapGit handler: `zui_name.srvb.xml` (metadata-only — no source
+  file). SRVB added to abapgit plugin's XSD set + codegen regenerated.
+  Handler emits a minimal SKEY + BINDING block mirroring the upstream
+  `zcl_abapgit_object_srvb` conservative serializer.
+- Filename mapping: `adtUriToAbapGitPath()` extended for SRVB URIs
+  (including the `/publishedstates` suffix) + 2 new test cases.
+- Mock server: SRVB routes (GET/POST/PUT/DELETE + POST/DELETE on
+  `/publishedstates`).
+- Fixtures: `businessservices/binding.xml` (synthetic envelope mirroring
+  the official `servicebinding.xsd` — no public S/4HANA sample
+  available).
+
+Tests: +22 contract scenarios, +11 ADK, +3 abapgit handler, +2 filename,
++6 parity = **44 new tests**. Full green across adt-contracts (480),
+adk + abapgit (241 + 79). Typecheck + lint + format all green.
+`adt-cli`'s 5 pre-existing `object-uri.test.ts` failures remain
+(unrelated to SRVB — verified by stashing changes; confirmed failing on
+baseline).
+
+Follow-ups:
+
+- Replace synthetic `businessservices/binding.xml` fixture with a real
+  sanitized capture from a live S/4HANA system when one becomes
+  available.
+- abapGit SRVB XML layout needs verification against upstream
+  `zcl_abapgit_object_srvb` when public clone available.
+- Pre-existing `adt-cli/src/lib/utils/object-uri.test.ts` failures
+  remain — separate cleanup epic.

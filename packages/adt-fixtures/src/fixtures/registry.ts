@@ -75,6 +75,11 @@ export const registry = {
       source: 'bo/bdef/source.abdl',
     },
   },
+  businessservices: {
+    bindings: {
+      single: 'businessservices/binding.xml',
+    },
+  },
   ddic: {
     tabl: {
       structure: 'ddic/tabl/structure.tabl.xml',

@@ -96,6 +96,8 @@ export interface LoadedFixtures {
   // SRVD (RAP service definition)
   srvdSingle: string;
   srvdSource: string;
+  // SRVB (RAP service binding)
+  srvbSingle: string;
 }
 
 /**
@@ -172,6 +174,7 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     bdefSource,
     srvdSingle,
     srvdSource,
+    srvbSingle,
   ] = await Promise.all([
     m.discovery.load(),
     m.session.load(),
@@ -240,6 +243,7 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.bo.bdef.source.load(),
     fixtures.ddic.srvd.single.load(),
     fixtures.ddic.srvd.source.load(),
+    fixtures.businessservices.bindings.single.load(),
   ]);
   return {
     discovery,
@@ -309,6 +313,7 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     bdefSource,
     srvdSingle,
     srvdSource,
+    srvbSingle,
   };
 }
 
@@ -614,6 +619,59 @@ export function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/srvd/sources/')) {
+    return { status: 204, body: '', contentType: 'text/plain' };
+  }
+
+  // ── SRVB (RAP service binding) ─────────────────────────────────
+  // Endpoint: /sap/bc/adt/businessservices/bindings/{name}
+  //           /sap/bc/adt/businessservices/bindings/{name}/publishedstates
+  if (
+    m === 'POST' &&
+    /^\/sap\/bc\/adt\/businessservices\/bindings\/[^/?]+\/publishedstates/.test(
+      pathname,
+    )
+  ) {
+    // publish
+    return {
+      status: 200,
+      body: '{"status":"published"}',
+      contentType: 'application/json',
+    };
+  }
+  if (
+    m === 'DELETE' &&
+    /^\/sap\/bc\/adt\/businessservices\/bindings\/[^/?]+\/publishedstates/.test(
+      pathname,
+    )
+  ) {
+    // unpublish
+    return { status: 204, body: '', contentType: 'text/plain' };
+  }
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/businessservices\/bindings\/[^/?]+/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.srvbSingle,
+      contentType:
+        'application/vnd.sap.adt.businessservices.servicebinding.v1+xml',
+    };
+  }
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/businessservices/bindings') &&
+    !url.includes('_action=')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (m === 'PUT' && url.startsWith('/sap/bc/adt/businessservices/bindings/')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (
+    m === 'DELETE' &&
+    url.startsWith('/sap/bc/adt/businessservices/bindings/')
+  ) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
 

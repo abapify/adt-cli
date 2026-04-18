@@ -39,6 +39,7 @@ export { default as domain } from './domain';
 export { default as dataelements } from './dataelements';
 export { default as tabletype } from './tabletype';
 export { default as tablesettings } from './tablesettings';
+export { default as servicebinding } from './servicebinding';
 export { default as xml } from './xml';
 export { default as abapoo } from './abapoo';
 export { default as abapsource } from './abapsource';

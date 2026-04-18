@@ -35,6 +35,7 @@ export const CREATE_OBJECT_TYPES = [
   'DCLS',
   'BDEF',
   'SRVD',
+  'SRVB',
 ] as const;
 
 export const SOURCE_BACKED_OBJECT_TYPES = [
@@ -200,6 +201,12 @@ export async function createAdtObject(
     case 'SRVD':
       await client.adt.ddic.srvd.sources.post(queryOptions, {
         source: { ...commonFields, type: 'SRVD/SRV' },
+      } as any);
+      return;
+
+    case 'SRVB':
+      await client.adt.businessservices.bindings.post(queryOptions, {
+        serviceBinding: { ...commonFields, type: 'SRVB/SVB' },
       } as any);
       return;
   }

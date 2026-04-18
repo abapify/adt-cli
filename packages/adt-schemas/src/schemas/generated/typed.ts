@@ -50,6 +50,7 @@ import type { DomainSchema } from './types/sap/domain.types';
 import type { DataelementsSchema } from './types/sap/dataelements.types';
 import type { TabletypeSchema } from './types/sap/tabletype.types';
 import type { TablesettingsSchema } from './types/sap/tablesettings.types';
+import type { ServicebindingSchema } from './types/sap/servicebinding.types';
 import type { DataelementWrapperSchema } from './types/custom/dataelementWrapper.types';
 import type { BlueSourceSchema } from './types/custom/blueSource.types';
 import type { AtomExtendedSchema } from './types/custom/atomExtended.types';
@@ -143,6 +144,8 @@ import _tabletype from './schemas/sap/tabletype';
 export const tabletype: TypedSchema<TabletypeSchema> = typedSchema<TabletypeSchema>(_tabletype);
 import _tablesettings from './schemas/sap/tablesettings';
 export const tablesettings: TypedSchema<TablesettingsSchema> = typedSchema<TablesettingsSchema>(_tablesettings);
+import _servicebinding from './schemas/sap/servicebinding';
+export const servicebinding: TypedSchema<ServicebindingSchema> = typedSchema<ServicebindingSchema>(_servicebinding);
 
 // Custom schemas
 import _dataelementWrapper from './schemas/custom/dataelementWrapper';

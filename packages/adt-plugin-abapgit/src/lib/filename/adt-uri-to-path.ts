@@ -138,6 +138,14 @@ const RULES: Rule[] = [
     build: (m) => `src/${applyNamespace(decodeURIComponent(m[1]))}.srvd.asrvd`,
   },
 
+  // RAP Service Binding (SRVB) — metadata-only
+  // Also matches the `/publishedstates` suffix so publish/unpublish endpoints
+  // map to the same on-disk file.
+  {
+    test: /^\/sap\/bc\/adt\/businessservices\/bindings\/([^/]+?)(?:\/publishedstates)?$/,
+    build: (m) => `src/${applyNamespace(decodeURIComponent(m[1]))}.srvb.xml`,
+  },
+
   // DDIC domain / data element / structure / table / type
   {
     test: /^\/sap\/bc\/adt\/ddic\/domains\/([^/]+)$/,

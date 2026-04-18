@@ -140,6 +140,8 @@ export function resolveObjectUriFromType(
       return `/sap/bc/adt/bo/behaviordefinitions/${n}`;
     case 'SRVD':
       return `/sap/bc/adt/ddic/srvd/sources/${n}`;
+    case 'SRVB':
+      return `/sap/bc/adt/businessservices/bindings/${n}`;
     default:
       return undefined;
   }

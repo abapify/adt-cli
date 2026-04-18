@@ -68,6 +68,8 @@ const targetSchemas = [
   'sap/dataelements',
   'sap/tabletype',
   'sap/tablesettings',
+  // Business services
+  'sap/servicebinding', // RAP Service Binding (SRVB)
   // Custom schemas
   'custom/dataelementWrapper', // DTEL wrapper (SAP wraps inner dtel:dataElement in blue:wbobj)
   'custom/blueSource', // TABL/Structure wrapper (SAP uses blue:blueSource extending AbapSourceMainObject)
