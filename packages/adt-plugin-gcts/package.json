@@ -1,0 +1,23 @@
+{
+  "name": "@abapify/adt-plugin-gcts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.1.0",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "name": "adt-plugin-gcts"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@abapify/adk": "workspace:*",
+    "@abapify/adt-plugin": "workspace:*"
+  }
+}

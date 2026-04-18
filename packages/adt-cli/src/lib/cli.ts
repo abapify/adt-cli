@@ -5,6 +5,10 @@
 // where adt-cli depends on `@abapify/adt-plugin-abapgit` directly — every
 // other consumer MUST go through `getFormatPlugin('abapgit')`.
 import '@abapify/adt-plugin-abapgit';
+// Second built-in FormatPlugin — gCTS / AFF. Same self-registration pattern:
+// side-effect import is the one sanctioned coupling between adt-cli and the
+// plugin package; every other consumer uses `getFormatPlugin('gcts')`.
+import '@abapify/adt-plugin-gcts';
 
 import { Command } from 'commander';
 import {

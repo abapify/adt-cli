@@ -115,3 +115,19 @@ Do NOT commit without approval.
 ## Open questions
 
 - AFF (`SAP/abap-file-formats`) JSON-based metadata vs gCTS's `manifest.yml` — are they the same? If yes, this plugin is also "AFF format plugin". Worth confirming and updating naming.
+
+## Follow-ups discovered during implementation (v0.1)
+
+- **Terminology inversion.** The epic's acceptance says `adt export --format gcts <pkg>` produces a gCTS-shaped tree. In adt-cli's actual command set, `adt export` means _disk → SAP_ (deploy) and `adt import package` means _SAP → disk_ (pull). v0.1 implements the SAP → disk direction (`adt import package --format gcts ZMYPKG ./out`); the Git → SAP direction (`adt export --format gcts`) requires deserialization handlers and is deferred alongside E08 checkin. Update acceptance wording in a follow-up.
+
+- **Format naming — gcts vs aff.** The open question above is effectively resolved in v0.1: a single plugin with id `gcts` (alias `aff`) handles both. If a concrete layout divergence is found later we'll introduce a separate id rather than branching inside the plugin.
+
+- **AFF JSON schemas not yet vendored.** Handlers use loose typing on metadata payloads because `SAP/abap-file-formats` has not been pulled into `git_modules/` as a submodule. Once vendored, tighten the metadata types (`src/lib/format/types.ts`) and add schema-validation tests parallel to abapGit's XSD-round-trip tests.
+
+- **Package metadata shape is ad-hoc.** `devc.ts` invents a `package.softwareComponent` / `applicationComponent` / `packageType` payload. Replace with the real AFF devc schema when vendored.
+
+- **FUGR FM-level files deferred.** AFF emits one file per function module under the group directory. v0.1 only emits the group metadata — matches E04/E09 current FM support level. Revisit once ADK exposes FM iteration cleanly.
+
+- **No XSDs required.** Unlike abapGit, AFF is JSON-native. The plugin consciously does NOT use ts-xsd. If a future format needs XML (e.g. an SAPLink variant), it belongs in a separate plugin package.
+
+- **Bundler/static-import.** `adt-cli/src/lib/cli.ts` uses a side-effect-only `import '@abapify/adt-plugin-gcts';` (mirroring the abapgit import). If the bundled `adt-all` binary loses the registration, add a static named import inside `cli.ts` (never in shared utilities), as noted in E05's follow-ups.

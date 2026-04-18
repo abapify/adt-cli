@@ -92,6 +92,9 @@
     },
     {
       "path": "./packages/adt-locks"
+    },
+    {
+      "path": "./packages/adt-plugin-gcts"
     }
   ]
 }
