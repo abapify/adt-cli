@@ -59,6 +59,32 @@ import {
 } from '../shared/adt-client';
 
 // =============================================================================
+// Test DI hook (internal, used by tests/e2e harness)
+// =============================================================================
+
+let __testAdtClientOverride: AdtClient | null = null;
+
+/**
+ * @internal
+ * Install or clear a test AdtClient instance. When set, `getAdtClientV2()` will
+ * return this client instead of loading credentials from disk and constructing
+ * a real client. Intended solely for e2e harness usage.
+ *
+ * Pass `null` to clear the override.
+ */
+export function __setTestAdtClient(client: AdtClient | null): void {
+  __testAdtClientOverride = client;
+}
+
+/**
+ * @internal
+ * Inspect the current test override (mostly for diagnostics / test cleanup).
+ */
+export function __getTestAdtClient(): AdtClient | null {
+  return __testAdtClientOverride;
+}
+
+// =============================================================================
 // Client Options
 // =============================================================================
 
@@ -162,6 +188,12 @@ async function tryAutoRefresh(
 export async function getAdtClientV2(
   options?: AdtClientV2Options,
 ): Promise<AdtClient> {
+  // Test DI hook: if a test harness has injected a client, return it.
+  // Must short-circuit BEFORE touching disk-based auth / CLI context.
+  if (__testAdtClientOverride) {
+    return __testAdtClientOverride;
+  }
+
   // Merge with global CLI context (explicit options take precedence)
   const ctx = getCliContext();
   const effectiveOptions = {

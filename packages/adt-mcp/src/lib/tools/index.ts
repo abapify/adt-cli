@@ -13,6 +13,7 @@ import { registerCtsGetTransportTool } from './cts-get-transport';
 import { registerCtsCreateTransportTool } from './cts-create-transport';
 import { registerCtsReleaseTransportTool } from './cts-release-transport';
 import { registerCtsDeleteTransportTool } from './cts-delete-transport';
+import { registerCtsSearchTransportsTool } from './cts-search-transports';
 import { registerAtcRunTool } from './atc-run';
 import { registerGetSourceTool } from './get-source';
 import { registerUpdateSourceTool } from './update-source';
@@ -54,6 +55,22 @@ import {
 import { registerCloneObjectTool } from './clone-object';
 import { registerPublishServiceBindingTool } from './publish-service-binding';
 import { registerGetGitTypesTool, registerGitExportTool } from './git-tools';
+import { registerRunAbapTool } from './run-abap';
+import { registerGetDomainTool } from './get-domain';
+import { registerGetDataElementTool } from './get-data-element';
+import { registerGetStructureTool } from './get-structure';
+import { registerGetCdsDdlTool } from './get-cds-ddl';
+import { registerGetCdsDclTool } from './get-cds-dcl';
+// CTS + package parity tools
+import { registerCtsUpdateTransportTool } from './cts-update-transport';
+import { registerCtsReassignTransportTool } from './cts-reassign-transport';
+import { registerStatPackageTool } from './stat-package';
+import { registerGetPackageTool } from './get-package';
+import { registerLookupUserTool } from './lookup-user';
+// Import tools – mirror `adt import object|package|transport`
+import { registerImportObjectTool } from './import-object';
+import { registerImportPackageTool } from './import-package';
+import { registerImportTransportTool } from './import-transport';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Existing tools
@@ -66,6 +83,7 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerCtsCreateTransportTool(server, ctx);
   registerCtsReleaseTransportTool(server, ctx);
   registerCtsDeleteTransportTool(server, ctx);
+  registerCtsSearchTransportsTool(server, ctx);
   registerAtcRunTool(server, ctx);
   registerGetSourceTool(server, ctx);
   registerUpdateSourceTool(server, ctx);
@@ -102,4 +120,21 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerPublishServiceBindingTool(server, ctx);
   registerGetGitTypesTool(server, ctx);
   registerGitExportTool(server, ctx);
+  // Import tools
+  registerImportObjectTool(server, ctx);
+  registerImportPackageTool(server, ctx);
+  registerImportTransportTool(server, ctx);
+  // CTS + package parity tools
+  registerCtsUpdateTransportTool(server, ctx);
+  registerCtsReassignTransportTool(server, ctx);
+  registerStatPackageTool(server, ctx);
+  registerGetPackageTool(server, ctx);
+  registerLookupUserTool(server, ctx);
+  // DDIC/CDS read tools + ABAP run
+  registerRunAbapTool(server, ctx);
+  registerGetDomainTool(server, ctx);
+  registerGetDataElementTool(server, ctx);
+  registerGetStructureTool(server, ctx);
+  registerGetCdsDdlTool(server, ctx);
+  registerGetCdsDclTool(server, ctx);
 }
