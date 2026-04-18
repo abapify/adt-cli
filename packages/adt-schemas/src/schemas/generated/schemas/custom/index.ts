@@ -22,4 +22,5 @@ export { default as dclSource } from './dclSource';
 export { default as srvdSource } from './srvdSource';
 export { default as acoverageResult } from './acoverageResult';
 export { default as acoverageStatements } from './acoverageStatements';
+export { default as badi } from './badi';
 export { default as adtcoreObjectSets } from './adtcoreObjectSets';

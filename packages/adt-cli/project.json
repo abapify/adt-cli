@@ -10,6 +10,15 @@
   },
   "tags": [],
   "targets": {
+    "test:real": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx vitest run --config ./vitest.real.config.ts",
+        "cwd": "{projectRoot}"
+      },
+      "cache": false,
+      "dependsOn": ["build"]
+    },
     "bundle": {
       "executor": "nx:run-commands",
       "options": {

@@ -57,6 +57,7 @@ import { createDatapreviewCommand } from './commands/datapreview';
 import { createAbapCommand } from './commands/abap';
 import { ddlCommand, dclCommand } from './commands/cds';
 import { bdefCommand } from './commands/bdef';
+import { badiCommand } from './commands/badi';
 import { srvdCommand } from './commands/srvd';
 import { srvbCommand } from './commands/srvb';
 import { createCheckoutCommand } from './commands/checkout';
@@ -290,6 +291,7 @@ export async function createCLI(options?: {
   program.addCommand(ddlCommand);
   program.addCommand(dclCommand);
   program.addCommand(bdefCommand);
+  program.addCommand(badiCommand);
   program.addCommand(srvdCommand);
   program.addCommand(srvbCommand);
 

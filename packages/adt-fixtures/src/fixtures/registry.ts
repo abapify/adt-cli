@@ -75,6 +75,12 @@ export const registry = {
       source: 'bo/bdef/source.abdl',
     },
   },
+  enhancements: {
+    enhoxhh: {
+      single: 'enhancements/enhoxhh/single.xml',
+      source: 'enhancements/enhoxhh/source.abap',
+    },
+  },
   businessservices: {
     bindings: {
       single: 'businessservices/binding.xml',

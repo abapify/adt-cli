@@ -31,6 +31,7 @@ export const atomExtended = toSpeciSchema(adtSchemas.atomExtended);
 export const atomFeed = toSpeciSchema(adtSchemas.atomFeed);
 export const aunitResult = toSpeciSchema(adtSchemas.aunitResult);
 export const aunitRun = toSpeciSchema(adtSchemas.aunitRun);
+export const badi = toSpeciSchema(adtSchemas.badi);
 export const blueSource = toSpeciSchema(adtSchemas.blueSource);
 export const checklist = toSpeciSchema(adtSchemas.checklist);
 export const checkrun = toSpeciSchema(adtSchemas.checkrun);

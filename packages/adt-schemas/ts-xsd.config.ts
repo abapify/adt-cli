@@ -90,6 +90,7 @@ const targetSchemas = [
   'custom/srvdSource',
   'custom/acoverageResult',
   'custom/acoverageStatements',
+  'custom/badi', // BAdI / Enhancement Implementation (ENHO) wrapper
 ];
 
 export default defineConfig({

@@ -93,6 +93,9 @@ export interface LoadedFixtures {
   // BDEF (RAP behavior definition)
   bdefSingle: string;
   bdefSource: string;
+  // BAdI / Enhancement Implementation (ENHO/XHH)
+  badiSingle: string;
+  badiSource: string;
   // SRVD (RAP service definition)
   srvdSingle: string;
   srvdSource: string;
@@ -172,6 +175,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     gctsCommitResponse,
     bdefSingle,
     bdefSource,
+    badiSingle,
+    badiSource,
     srvdSingle,
     srvdSource,
     srvbSingle,
@@ -241,6 +246,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.gcts.commitResponse.load(),
     fixtures.bo.bdef.single.load(),
     fixtures.bo.bdef.source.load(),
+    fixtures.enhancements.enhoxhh.single.load(),
+    fixtures.enhancements.enhoxhh.source.load(),
     fixtures.ddic.srvd.single.load(),
     fixtures.ddic.srvd.source.load(),
     fixtures.businessservices.bindings.single.load(),
@@ -311,6 +318,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     gctsCommitResponse,
     bdefSingle,
     bdefSource,
+    badiSingle,
+    badiSource,
     srvdSingle,
     srvdSource,
     srvbSingle,
@@ -586,6 +595,41 @@ export function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/bo/behaviordefinitions/')) {
+    return { status: 204, body: '', contentType: 'text/plain' };
+  }
+
+  // ── BAdI / Enhancement Implementation (ENHO/XHH) ───────────────
+  // Endpoint: /sap/bc/adt/enhancements/enhoxhh/{name}
+  //           /sap/bc/adt/enhancements/enhoxhh/{name}/source/main
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/enhancements\/enhoxhh\/[^/?]+\/source\/main/.test(
+      pathname,
+    )
+  ) {
+    return { status: 200, body: f.badiSource, contentType: 'text/plain' };
+  }
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/enhancements\/enhoxhh\/[^/?]+/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.badiSingle,
+      contentType: 'application/vnd.sap.adt.enhancements.enhoxhh.v1+xml',
+    };
+  }
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/enhancements/enhoxhh') &&
+    !url.includes('_action=')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (m === 'PUT' && url.startsWith('/sap/bc/adt/enhancements/enhoxhh/')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (m === 'DELETE' && url.startsWith('/sap/bc/adt/enhancements/enhoxhh/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
 

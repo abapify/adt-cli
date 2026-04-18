@@ -70,6 +70,7 @@ import type { DclSourceSchema } from './types/custom/dclSource.types';
 import type { SrvdSourceSchema } from './types/custom/srvdSource.types';
 import type { AcoverageResultSchema } from './types/custom/acoverageResult.types';
 import type { AcoverageStatementsSchema } from './types/custom/acoverageStatements.types';
+import type { BadiSchema } from './types/custom/badi.types';
 
 // SAP schemas
 import _atom from './schemas/sap/atom';
@@ -186,3 +187,5 @@ import _acoverageResult from './schemas/custom/acoverageResult';
 export const acoverageResult: TypedSchema<AcoverageResultSchema> = typedSchema<AcoverageResultSchema>(_acoverageResult);
 import _acoverageStatements from './schemas/custom/acoverageStatements';
 export const acoverageStatements: TypedSchema<AcoverageStatementsSchema> = typedSchema<AcoverageStatementsSchema>(_acoverageStatements);
+import _badi from './schemas/custom/badi';
+export const badi: TypedSchema<BadiSchema> = typedSchema<BadiSchema>(_badi);
