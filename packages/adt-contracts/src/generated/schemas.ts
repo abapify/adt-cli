@@ -49,6 +49,7 @@ export const fincludes = toSpeciSchema(adtSchemas.fincludes);
 export const fmodules = toSpeciSchema(adtSchemas.fmodules);
 export const groups = toSpeciSchema(adtSchemas.groups);
 export const http = toSpeciSchema(adtSchemas.http);
+export const includes = toSpeciSchema(adtSchemas.includes);
 export const interfaces = toSpeciSchema(adtSchemas.interfaces);
 export const log = toSpeciSchema(adtSchemas.log);
 export const logpoint = toSpeciSchema(adtSchemas.logpoint);

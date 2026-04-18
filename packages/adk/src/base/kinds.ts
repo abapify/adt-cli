@@ -61,6 +61,7 @@ import type { AdkClass } from '../objects/repository/clas/clas.model';
 import type { AdkInterface } from '../objects/repository/intf/intf.model';
 import type { AdkPackage } from '../objects/repository/devc/devc.model';
 import type { AdkProgram } from '../objects/repository/prog/prog.model';
+import type { AdkInclude } from '../objects/repository/incl/incl.model';
 import type { AdkFunctionGroup } from '../objects/repository/fugr/fugr.model';
 import type { AdkFunctionModule } from '../objects/repository/fugr/func/func.model';
 import type {
@@ -90,22 +91,24 @@ export type AdkObjectForKind<K extends AdkKind> = K extends typeof Class
       ? AdkPackage
       : K extends typeof Program
         ? AdkProgram
-        : K extends typeof FunctionGroup
-          ? AdkFunctionGroup
-          : K extends typeof FunctionModule
-            ? AdkFunctionModule
-            : K extends typeof TransportRequest
-              ? AdkTransportRequest
-              : K extends typeof TransportTask
-                ? AdkTransportTask
-                : K extends typeof Domain
-                  ? AdkDomain
-                  : K extends typeof DataElement
-                    ? AdkDataElement
-                    : K extends typeof Table
-                      ? AdkTable
-                      : K extends typeof Structure
-                        ? AdkStructure
-                        : K extends typeof TableType
-                          ? AdkTableType
-                          : AdkObject; // fallback
+        : K extends typeof Include
+          ? AdkInclude
+          : K extends typeof FunctionGroup
+            ? AdkFunctionGroup
+            : K extends typeof FunctionModule
+              ? AdkFunctionModule
+              : K extends typeof TransportRequest
+                ? AdkTransportRequest
+                : K extends typeof TransportTask
+                  ? AdkTransportTask
+                  : K extends typeof Domain
+                    ? AdkDomain
+                    : K extends typeof DataElement
+                      ? AdkDataElement
+                      : K extends typeof Table
+                        ? AdkTable
+                        : K extends typeof Structure
+                          ? AdkStructure
+                          : K extends typeof TableType
+                            ? AdkTableType
+                            : AdkObject; // fallback

@@ -57,6 +57,7 @@ import { registerPublishServiceBindingTool } from './publish-service-binding';
 import { registerGetGitTypesTool, registerGitExportTool } from './git-tools';
 import { registerRunAbapTool } from './run-abap';
 import { registerGetDomainTool } from './get-domain';
+import { registerGetIncludeTool } from './get-include';
 import { registerGetDataElementTool } from './get-data-element';
 import { registerGetStructureTool } from './get-structure';
 import { registerGetCdsDdlTool } from './get-cds-ddl';
@@ -133,6 +134,7 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   // DDIC/CDS read tools + ABAP run
   registerRunAbapTool(server, ctx);
   registerGetDomainTool(server, ctx);
+  registerGetIncludeTool(server, ctx);
   registerGetDataElementTool(server, ctx);
   registerGetStructureTool(server, ctx);
   registerGetCdsDdlTool(server, ctx);

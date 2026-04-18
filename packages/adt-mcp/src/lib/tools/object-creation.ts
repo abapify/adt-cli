@@ -22,6 +22,7 @@ import { initializeAdk } from '@abapify/adk';
 
 export const CREATE_OBJECT_TYPES = [
   'PROG',
+  'INCL',
   'CLAS',
   'INTF',
   'FUGR',
@@ -36,6 +37,7 @@ export const CREATE_OBJECT_TYPES = [
 
 export const SOURCE_BACKED_OBJECT_TYPES = [
   'PROG',
+  'INCL',
   'CLAS',
   'INTF',
   'DDLS',
@@ -101,6 +103,12 @@ export async function createAdtObject(
       await client.adt.programs.programs.post(queryOptions, {
         abapProgram: { ...commonFields, type: 'PROG' },
       });
+      return;
+
+    case 'INCL':
+      await client.adt.programs.includes.post(queryOptions, {
+        abapInclude: { ...commonFields, type: 'PROG/I' },
+      } as any);
       return;
 
     case 'CLAS':

@@ -70,6 +70,7 @@ export interface LoadedFixtures {
   classMetadata: string;
   interfaceMetadata: string;
   programMetadata: string;
+  includeMetadata: string;
   functionGroupMetadata: string;
   // Coverage — sourced from jfilak/sapcli
   coverageMeasurements: string;
@@ -129,6 +130,7 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     classMetadata,
     interfaceMetadata,
     programMetadata,
+    includeMetadata,
     functionGroupMetadata,
     coverageMeasurements,
     coverageStatements,
@@ -179,6 +181,7 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.oo.class.load(),
     fixtures.oo.interface.load(),
     fixtures.programs.program.load(),
+    fixtures.programs.include.load(),
     fixtures.functions.functionGroup.load(),
     fixtures.aunit.coverageMeasurements.load(),
     fixtures.aunit.coverageStatements.load(),
@@ -230,6 +233,7 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     classMetadata,
     interfaceMetadata,
     programMetadata,
+    includeMetadata,
     functionGroupMetadata,
     coverageMeasurements,
     coverageStatements,
@@ -700,6 +704,16 @@ export function matchRoute(
   }
   if (
     m === 'GET' &&
+    /^\/sap\/bc\/adt\/programs\/includes\/[^/?]+$/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.includeMetadata,
+      contentType: 'application/vnd.sap.adt.programs.includes.v2+xml',
+    };
+  }
+  if (
+    m === 'GET' &&
     /^\/sap\/bc\/adt\/programs\/programs\/[^/?]+$/.test(pathname)
   ) {
     return {
@@ -712,6 +726,7 @@ export function matchRoute(
   if (
     m === 'PUT' &&
     (url.startsWith('/sap/bc/adt/programs/programs/') ||
+      url.startsWith('/sap/bc/adt/programs/includes/') ||
       url.startsWith('/sap/bc/adt/oo/classes/') ||
       url.startsWith('/sap/bc/adt/oo/interfaces/') ||
       url.startsWith('/sap/bc/adt/functions/groups/') ||
@@ -745,6 +760,7 @@ export function matchRoute(
   if (
     m === 'POST' &&
     (url.startsWith('/sap/bc/adt/programs/programs') ||
+      url.startsWith('/sap/bc/adt/programs/includes') ||
       url.startsWith('/sap/bc/adt/oo/classes') ||
       url.startsWith('/sap/bc/adt/oo/interfaces') ||
       url.startsWith('/sap/bc/adt/functions/groups') ||
@@ -757,6 +773,7 @@ export function matchRoute(
   if (
     m === 'DELETE' &&
     (url.startsWith('/sap/bc/adt/programs/programs/') ||
+      url.startsWith('/sap/bc/adt/programs/includes/') ||
       url.startsWith('/sap/bc/adt/oo/classes/') ||
       url.startsWith('/sap/bc/adt/oo/interfaces/') ||
       url.startsWith('/sap/bc/adt/functions/groups/') ||

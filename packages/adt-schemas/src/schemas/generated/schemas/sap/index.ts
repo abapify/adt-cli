@@ -10,6 +10,7 @@ export { default as classes } from './classes';
 export { default as interfaces } from './interfaces';
 export { default as packagesV1 } from './packagesV1';
 export { default as programs } from './programs';
+export { default as includes } from './includes';
 export { default as groups } from './groups';
 export { default as fmodules } from './fmodules';
 export { default as fincludes } from './fincludes';

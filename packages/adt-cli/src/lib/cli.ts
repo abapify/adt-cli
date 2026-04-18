@@ -32,6 +32,7 @@ import {
   classCommand,
   programCommand,
   interfaceCommand,
+  includeCommand,
 } from './commands/object';
 import {
   domainCommand,
@@ -244,10 +245,11 @@ export async function createCLI(options?: {
   // User lookup command
   program.addCommand(userCommand);
 
-  // Object CRUD commands (class, program, interface)
+  // Object CRUD commands (class, program, interface, include)
   program.addCommand(classCommand);
   program.addCommand(programCommand);
   program.addCommand(interfaceCommand);
+  program.addCommand(includeCommand);
 
   // DDIC commands (domain, dataelement, table, structure)
   program.addCommand(domainCommand);

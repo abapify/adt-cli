@@ -46,6 +46,7 @@ export type {
   InterfaceResponse,
   PackageResponse,
   ProgramResponse,
+  IncludeResponse,
   FunctionGroupResponse,
   FunctionModuleResponse,
   TransportGetResponse,
@@ -102,6 +103,13 @@ export type {
   ProgramXml, // Raw API response type
 } from './objects/repository/prog';
 export { AdkProgram } from './objects/repository/prog';
+
+// Include types and class
+export type {
+  AbapInclude,
+  IncludeXml, // Raw API response type
+} from './objects/repository/incl';
+export { AdkInclude } from './objects/repository/incl';
 
 // Function group types and class
 export type {

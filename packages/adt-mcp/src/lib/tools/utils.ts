@@ -117,6 +117,8 @@ export function resolveObjectUriFromType(
   switch (type) {
     case 'PROG':
       return `/sap/bc/adt/programs/programs/${n}`;
+    case 'INCL':
+      return `/sap/bc/adt/programs/includes/${n}`;
     case 'CLAS':
       return `/sap/bc/adt/oo/classes/${n}`;
     case 'INTF':

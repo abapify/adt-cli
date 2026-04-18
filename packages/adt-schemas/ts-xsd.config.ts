@@ -38,6 +38,7 @@ const targetSchemas = [
   'sap/interfaces',
   'sap/packagesV1',
   'sap/programs', // ABAP programs
+  'sap/includes', // ABAP program includes
   'sap/groups', // Function groups
   'sap/fmodules', // Function modules
   'sap/fincludes', // Function group includes

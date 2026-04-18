@@ -8,3 +8,4 @@
 export { classCommand } from './class';
 export { programCommand } from './program';
 export { interfaceCommand } from './interface';
+export { includeCommand } from './include';

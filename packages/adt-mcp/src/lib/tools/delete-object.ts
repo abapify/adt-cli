@@ -26,6 +26,8 @@ type DeleteOperation = (
 const deleteOperations: Record<string, DeleteOperation> = {
   PROG: (client, objectName, queryOptions) =>
     client.adt.programs.programs.delete(objectName.toLowerCase(), queryOptions),
+  INCL: (client, objectName, queryOptions) =>
+    client.adt.programs.includes.delete(objectName.toLowerCase(), queryOptions),
   CLAS: (client, objectName, queryOptions) =>
     client.adt.oo.classes.delete(objectName.toLowerCase(), queryOptions),
   INTF: (client, objectName, queryOptions) =>
@@ -80,7 +82,7 @@ export function registerDeleteObjectTool(
 ): void {
   server.tool(
     'delete_object',
-    'Delete an ABAP object. Supports PROG, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS and falls back to direct URI deletion for other types.',
+    'Delete an ABAP object. Supports PROG, INCL, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS and falls back to direct URI deletion for other types.',
     {
       ...connectionShape,
       objectName: z.string().describe('Name of the ABAP object to delete'),

@@ -42,6 +42,7 @@ export const registry = {
   },
   programs: {
     program: 'programs/program.xml',
+    include: 'programs/include.xml',
   },
   functions: {
     functionGroup: 'functions/functionGroup.xml',

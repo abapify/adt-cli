@@ -36,6 +36,7 @@ export type {
   PackageResponse as PackageResponseUnion,
   TransportGetResponse,
   ProgramResponse as ProgramResponseUnion,
+  IncludeResponse as IncludeResponseUnion,
   FunctionGroupResponse as FunctionGroupResponseUnion,
   FunctionModuleResponse as FunctionModuleResponseUnion,
   DomainResponse,
@@ -63,6 +64,7 @@ import type {
   InterfaceResponse as _InterfaceResponse,
   PackageResponse as _PackageResponse,
   ProgramResponse as _ProgramResponse,
+  IncludeResponse as _IncludeResponse,
   FunctionGroupResponse as _FunctionGroupResponse,
   FunctionModuleResponse as _FunctionModuleResponse,
 } from '@abapify/adt-client';
@@ -93,6 +95,11 @@ export type PackageResponse = Extract<_PackageResponse, { package: unknown }>;
  * Program response type - single root element (no union needed)
  */
 export type ProgramResponse = _ProgramResponse;
+
+/**
+ * Include response type - single root element (no union needed)
+ */
+export type IncludeResponse = _IncludeResponse;
 
 /**
  * Function group response type - single root element (no union needed)
