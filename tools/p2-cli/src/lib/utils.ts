@@ -3,10 +3,9 @@ import {
   existsSync,
   mkdirSync,
   readdirSync,
-  copyFileSync,
   rmSync,
 } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join } from 'node:path';
 
 /**
  * Execute shell command

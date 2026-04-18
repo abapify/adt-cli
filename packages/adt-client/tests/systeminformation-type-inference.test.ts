@@ -12,7 +12,7 @@ import type { SystemInformationJson } from '../src/adt/core/http/systeminformati
 
 describe('System Information Type Inference', () => {
   it('should infer SystemInformationJson response type from contract', async () => {
-    const client = createAdtClient({
+    const _client = createAdtClient({
       baseUrl: 'https://example.com',
       username: 'test',
       password: 'test',
@@ -53,13 +53,13 @@ describe('System Information Type Inference', () => {
         await client.core.http.systeminformation.getSystemInformation();
 
       // These property accesses should be type-safe
-      const systemId: string | undefined = sysInfo.systemID;
+      const _systemId: string | undefined = sysInfo.systemID;
       const client: string | undefined = sysInfo.client;
-      const userName: string | undefined = sysInfo.userName;
-      const language: string | undefined = sysInfo.language;
+      const _userName: string | undefined = sysInfo.userName;
+      const _language: string | undefined = sysInfo.language;
 
       assert.ok(true, 'Types are correct');
-    } catch (error) {
+    } catch (_error) {
       // Expected to fail at runtime - this is a COMPILE-TIME type test
       assert.ok(
         true,
@@ -88,7 +88,7 @@ describe('System Information Type Inference', () => {
       const hasUserName: boolean = 'userName' in sysInfo;
 
       assert.ok(hasSystemId || hasClient || hasUserName, 'Type guards work');
-    } catch (error) {
+    } catch (_error) {
       // Expected - compile-time type test
       assert.ok(true, 'Runtime failure expected');
     }

@@ -41,7 +41,7 @@ export const ctsDeleteCommand = new Command('delete')
       let transportInfo: any;
       try {
         transportInfo = await client.services.transports.get(transport);
-      } catch (err) {
+      } catch (_err) {
         console.error(`❌ Transport ${transport} not found or not accessible`);
         process.exit(1);
       }

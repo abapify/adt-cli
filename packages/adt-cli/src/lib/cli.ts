@@ -92,7 +92,7 @@ function applyInsecureSslFlag(): void {
         // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Commented out for testing proper cert validation
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // Silently ignore errors - session might not exist yet
   }
 }

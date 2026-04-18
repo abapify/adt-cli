@@ -30,7 +30,7 @@ export interface GctsHeader {
  *
  * Concrete handlers tighten this with per-type payload shapes.
  */
-export interface GctsMetadata<TPayload extends object = object> {
+export interface GctsMetadata<_TPayload extends object = object> {
   /** Format header (mandatory on every file). */
   header: GctsHeader;
   /** Type-specific payload. Extended per ABAP object type. */

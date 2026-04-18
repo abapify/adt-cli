@@ -188,7 +188,7 @@ export class AdkObjectSet {
     };
 
     const total = this.objects.length;
-    let saved = 0;
+    let _saved = 0;
     let processed = 0;
 
     for (const obj of this.objects) {
@@ -200,7 +200,7 @@ export class AdkObjectSet {
           result.unchanged++;
           result.results.push({ object: obj, success: true, unchanged: true });
         } else {
-          saved++;
+          _saved++;
           result.success++;
           result.results.push({ object: obj, success: true });
         }

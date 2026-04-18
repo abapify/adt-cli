@@ -98,6 +98,9 @@
     },
     {
       "path": "./packages/adt-plugin-gcts-cli"
+    },
+    {
+      "path": "./packages/adt-rfc"
     }
   ]
 }

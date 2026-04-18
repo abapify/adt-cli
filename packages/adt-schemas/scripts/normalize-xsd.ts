@@ -16,7 +16,7 @@ import {
   rmdirSync,
   existsSync,
 } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join } from 'node:path';
 
 const xsdDir = process.argv[2] || '.xsd/sap';
 

@@ -87,7 +87,7 @@ describe('Inferrable Type System', () => {
           }),
       };
 
-      const client = createClient(contract, {
+      const _client = createClient(contract, {
         baseUrl: 'http://test.com',
         adapter: mockAdapter,
       });
@@ -109,14 +109,14 @@ describe('Inferrable Type System', () => {
   describe('Request Body Type Inference', () => {
     it('should infer request body type from schema', () => {
       const contract = {
-        createUser: (userData: User) =>
+        createUser: (_userData: User) =>
           http.post('/users', {
             body: UserSchema,
             responses: { 201: UserSchema },
           }),
       };
 
-      const client = createClient(contract, {
+      const _client = createClient(contract, {
         baseUrl: 'http://test.com',
         adapter: mockAdapter,
       });
@@ -149,14 +149,14 @@ describe('Inferrable Type System', () => {
       const UserWithAddressSchema = createInferrable<UserWithAddress>();
 
       const contract = {
-        createUser: (userData: UserWithAddress) =>
+        createUser: (_userData: UserWithAddress) =>
           http.post('/users', {
             body: UserWithAddressSchema,
             responses: { 201: UserWithAddressSchema },
           }),
       };
 
-      const client = createClient(contract, {
+      const _client = createClient(contract, {
         baseUrl: 'http://test.com',
         adapter: mockAdapter,
       });
@@ -188,7 +188,7 @@ describe('Inferrable Type System', () => {
           }),
       };
 
-      const client = createClient(contract, {
+      const _client = createClient(contract, {
         baseUrl: 'http://test.com',
         adapter: mockAdapter,
       });
@@ -209,14 +209,14 @@ describe('Inferrable Type System', () => {
     it('current workaround - manual parameter typing works correctly', () => {
       // Current best practice: manually type the parameter
       const contract = {
-        createUser: (userData: User) =>
+        createUser: (_userData: User) =>
           http.post('/users', {
             body: UserSchema,
             responses: { 201: UserSchema },
           }),
       };
 
-      const client = createClient(contract, {
+      const _client = createClient(contract, {
         baseUrl: 'http://test.com',
         adapter: mockAdapter,
       });

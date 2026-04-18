@@ -1,5 +1,4 @@
-import { existsSync, mkdirSync, readdirSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { basename } from 'node:path';
 import { execSync } from 'node:child_process';
 import { ensureDir, findFiles } from '../lib/utils';
 
@@ -86,7 +85,7 @@ export async function decompile(
     console.log('❌ No Java decompiler found!');
     console.log('');
     console.log('Install one of these decompilers:');
-    for (const [key, config] of Object.entries(DECOMPILERS)) {
+    for (const [_key, config] of Object.entries(DECOMPILERS)) {
       console.log(`   ${config.name}: ${config.install}`);
     }
     process.exit(1);
