@@ -41,6 +41,7 @@ import {
   rfcCommand,
   createFlpCommand,
 } from './commands';
+import { createWbCommand } from './commands/wb';
 import { createPackageCommand } from './commands/package';
 import {
   classCommand,
@@ -308,6 +309,9 @@ export async function createCLI(options?: {
 
   // FLP command (E14) — Fiori Launchpad inventory (read-only)
   program.addCommand(createFlpCommand());
+
+  // Workbench navigation (E15) — where-used, callers, callees, definition, outline
+  program.addCommand(createWbCommand());
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());
