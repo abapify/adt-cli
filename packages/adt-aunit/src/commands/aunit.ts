@@ -10,10 +10,14 @@
 
 import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
 import { extractCoverageMeasurementId } from '@abapify/adt-contracts';
-import type {
-  AcoverageResultSchema,
-  AcoverageStatementsSchema,
+import {
+  acoverageResult,
+  acoverageStatements,
+  type InferTypedSchema,
 } from '@abapify/adt-schemas';
+
+type AcoverageResultSchema = InferTypedSchema<typeof acoverageResult>;
+type AcoverageStatementsSchema = InferTypedSchema<typeof acoverageStatements>;
 // Simple ANSI color helpers (no external dependency)
 const ansi = {
   red: (s: string) => `\x1b[31m${s}\x1b[0m`,

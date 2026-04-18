@@ -37,11 +37,15 @@
  */
 
 import { writeFileSync } from 'node:fs';
-import type {
-  AcoverageResultSchema,
-  AcoverageStatementsSchema,
+import {
+  acoverageResult,
+  acoverageStatements,
+  type InferTypedSchema,
 } from '@abapify/adt-schemas';
 import { adtUriToAbapGitPath } from '@abapify/adt-plugin-abapgit';
+
+type AcoverageResultSchema = InferTypedSchema<typeof acoverageResult>;
+type AcoverageStatementsSchema = InferTypedSchema<typeof acoverageStatements>;
 
 // ─── Counter mapping ──────────────────────────────────────────────────
 

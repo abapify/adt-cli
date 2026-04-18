@@ -68,9 +68,14 @@ import { adtContract } from '@abapify/adt-contracts';
 const adtSchemaMap: Record<
   string,
   {
-    schema: {
-      build: (data: unknown, options?: { pretty?: boolean }) => string;
-    };
+    // The actual schemas are TypedSchema<T> from adt-schemas. Each has a
+    // narrowly-typed build(data: T, ...) that is contravariantly incompatible
+    // with a unified (data: unknown, ...) signature. We widen to `any` here
+    // so the callers in this file (which know the wrapperKey) can pass the
+    // correct shape. See FormatHandler<T, TSchema> in adt-plugin for the
+    // same pattern.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    schema: { build: (data: any, options?: { pretty?: boolean }) => string };
     wrapperKey: string;
   }
 > = {

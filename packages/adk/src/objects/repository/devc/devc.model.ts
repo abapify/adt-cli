@@ -126,10 +126,15 @@ export class AdkPackage
           },
         );
 
-      // Parse object references - filter for DEVC type and exclude self
-      const refs = response.objectReferences?.objectReference ?? [];
+      // Parse object references - filter for DEVC type and exclude self.
+      // adtcore response is a union; narrow to the objectReferences variant.
+      const refs =
+        'objectReferences' in response
+          ? (response.objectReferences?.objectReference ?? [])
+          : [];
       const subpkgRefs = (Array.isArray(refs) ? refs : [refs]).filter(
-        (ref) => ref.type === 'DEVC/K' && ref.name !== this.name,
+        (ref): ref is typeof ref & { name: string } =>
+          !!ref.name && ref.type === 'DEVC/K' && ref.name !== this.name,
       );
 
       // Load all candidate packages and filter to direct children only
@@ -160,10 +165,15 @@ export class AdkPackage
           },
         );
 
-      // Parse object references - filter out packages (DEVC) and objects from other packages
-      const refs = response.objectReferences?.objectReference ?? [];
+      // Parse object references - filter out packages (DEVC) and objects from other packages.
+      // adtcore response is a union; narrow to the objectReferences variant.
+      const refs =
+        'objectReferences' in response
+          ? (response.objectReferences?.objectReference ?? [])
+          : [];
       const objRefs = (Array.isArray(refs) ? refs : [refs]).filter(
-        (ref) =>
+        (ref): ref is typeof ref & { name: string } =>
+          !!ref.name &&
           ref.type !== 'DEVC/K' &&
           ref.packageName?.toUpperCase() === this.name.toUpperCase(),
       );

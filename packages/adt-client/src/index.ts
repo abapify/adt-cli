@@ -60,7 +60,7 @@ export type {
   ObjectStructureOptions,
   SourceOperations,
   SourcesContract,
-  IncludesContract,
+  IncludesContractSkeleton,
 } from '@abapify/adt-contracts';
 
 // Re-export contract response types for ADK consumers

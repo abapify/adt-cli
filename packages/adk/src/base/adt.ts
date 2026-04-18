@@ -56,7 +56,7 @@ export type {
   ObjectStructureOptions,
   SourceOperations,
   SourcesContract,
-  IncludesContract,
+  IncludesContractSkeleton,
 } from '@abapify/adt-client';
 
 import type {

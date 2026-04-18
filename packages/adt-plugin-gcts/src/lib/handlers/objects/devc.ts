@@ -20,9 +20,9 @@ export const packageHandler = createHandler(AdkPackage, {
       },
       package: {
         // DEVCLASS is carried by filename/directory, not by metadata.
-        softwareComponent: pkg.dataSync?.softwareComponent,
-        applicationComponent: pkg.dataSync?.applicationComponent,
-        packageType: pkg.dataSync?.packageType,
+        softwareComponent: pkg.dataSync?.transport?.softwareComponent?.name,
+        applicationComponent: pkg.dataSync?.applicationComponent?.name,
+        packageType: pkg.dataSync?.attributes?.packageType,
       },
     };
   },

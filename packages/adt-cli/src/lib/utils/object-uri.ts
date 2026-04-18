@@ -116,10 +116,12 @@ export function detectObjectTypeFromFilename(
  * Returns the base URI for object operations (without source path)
  */
 export function objectInfoToUri(objectInfo: ObjectTypeInfo): string {
-  return (
+  const base =
     adkGetObjectUri(objectInfo.type, objectInfo.name) ??
-    `/sap/bc/adt/${objectInfo.endpoint}/${objectInfo.name.toLowerCase()}`
-  );
+    `/sap/bc/adt/${objectInfo.endpoint}/${objectInfo.name.toLowerCase()}`;
+  // Contract: deployment callers expect a trailing slash so that
+  // `${objectUri}${sourcePath}` composes into a valid source URL.
+  return base.endsWith('/') ? base : `${base}/`;
 }
 
 /**
@@ -137,7 +139,7 @@ export function filenameToObjectUri(filename: string): string | null {
  */
 export function getSourcePath(
   objectInfo: ObjectTypeInfo,
-  version?: 'active' | 'inactive',
+  version: 'active' | 'inactive' = 'inactive',
 ): string {
   const sections = SECTION_MAPPINGS[objectInfo.type.toLowerCase()];
 
@@ -145,12 +147,12 @@ export function getSourcePath(
   if (sections && objectInfo.section) {
     const sectionPath = sections[objectInfo.section];
     if (sectionPath) {
-      return version ? `${sectionPath}?version=${version}` : sectionPath;
+      return `${sectionPath}?version=${version}`;
     }
   }
 
   // Default to main source path
-  return version ? `source/main?version=${version}` : 'source/main';
+  return `source/main?version=${version}`;
 }
 
 /**

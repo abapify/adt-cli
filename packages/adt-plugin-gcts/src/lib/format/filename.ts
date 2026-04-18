@@ -86,9 +86,6 @@ export function parseGctsFilename(
 
   const extension = parts[parts.length - 1];
   const maybeSuffix = parts.length >= 4 ? parts[parts.length - 2] : undefined;
-  const typeLower = maybeSuffix
-    ? parts[parts.length - 3]
-    : parts[parts.length - 2];
   const nameParts = maybeSuffix
     ? parts.slice(0, parts.length - 3)
     : parts.slice(0, parts.length - 2);

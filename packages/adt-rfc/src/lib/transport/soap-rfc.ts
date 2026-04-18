@@ -273,8 +273,8 @@ export function parseRfcSoapResponse(xml: string): RfcResponse {
   if (!rfcRoot) return {};
 
   const result = nodeToValue(rfcRoot.node);
-  if (typeof result === 'string') {
-    // degenerate empty response
+  if (result === null || typeof result !== 'object') {
+    // degenerate scalar response (string, number, boolean, null)
     return {};
   }
   if (Array.isArray(result)) {

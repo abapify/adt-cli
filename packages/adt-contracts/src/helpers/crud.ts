@@ -204,7 +204,7 @@ export type SourcesContract<Sources extends readonly string[]> = {
  * Includes contract - nested under 'includes' property
  * Generated when includes option is provided
  */
-export type IncludesContract<Includes extends readonly string[]> = {
+export type IncludesContractSkeleton<Includes extends readonly string[]> = {
   /** Generic get/put for any include type */
   get: (
     name: string,
@@ -237,7 +237,7 @@ export type CrudContract<
     ? { source: SourcesContract<Sources> }
     : object) &
   (Includes extends readonly string[]
-    ? { includes: IncludesContract<Includes> }
+    ? { includes: IncludesContractSkeleton<Includes> }
     : object);
 
 /**
