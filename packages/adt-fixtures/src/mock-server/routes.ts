@@ -101,6 +101,12 @@ export interface LoadedFixtures {
   srvdSource: string;
   // SRVB (RAP service binding)
   srvbSingle: string;
+  // FLP (E14) — Page Builder OData
+  flpCatalogList: string;
+  flpCatalogSingle: string;
+  flpGroupList: string;
+  flpTileList: string;
+  flpTileSingle: string;
 }
 
 /**
@@ -180,6 +186,11 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     srvdSingle,
     srvdSource,
     srvbSingle,
+    flpCatalogList,
+    flpCatalogSingle,
+    flpGroupList,
+    flpTileList,
+    flpTileSingle,
   ] = await Promise.all([
     m.discovery.load(),
     m.session.load(),
@@ -251,6 +262,11 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.ddic.srvd.single.load(),
     fixtures.ddic.srvd.source.load(),
     fixtures.businessservices.bindings.single.load(),
+    fixtures.flp.catalogList.load(),
+    fixtures.flp.catalogSingle.load(),
+    fixtures.flp.groupList.load(),
+    fixtures.flp.tileList.load(),
+    fixtures.flp.tileSingle.load(),
   ]);
   return {
     discovery,
@@ -323,6 +339,11 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     srvdSingle,
     srvdSource,
     srvbSingle,
+    flpCatalogList,
+    flpCatalogSingle,
+    flpGroupList,
+    flpTileList,
+    flpTileSingle,
   };
 }
 
@@ -1297,6 +1318,40 @@ export function matchRoute(
         if (m === 'POST') return json('{}');
         if (m === 'DELETE') return json('{}');
       }
+    }
+  }
+
+  // ── FLP — /sap/opu/odata/UI2/PAGE_BUILDER_PERS/ — E14 ──────────────────
+  // Order matters: specific entity paths first, then entity-set lists.
+  if (url.startsWith('/sap/opu/odata/UI2/PAGE_BUILDER_PERS/')) {
+    const json = (body: string) =>
+      ({ status: 200, body, contentType: 'application/json' }) as RouteResult;
+
+    // /Chips('<id>') — single tile
+    if (/\/Chips\('[^']+'\)(\?.*)?$/.test(url) && m === 'GET') {
+      return json(f.flpTileSingle);
+    }
+    // /Catalogs('<id>')/Chips — tiles in a catalog
+    if (/\/Catalogs\('[^']+'\)\/Chips(\?.*)?$/.test(url) && m === 'GET') {
+      return json(f.flpTileList);
+    }
+    // /Catalogs('<id>') — single catalog
+    if (/\/Catalogs\('[^']+'\)(\?.*)?$/.test(url) && m === 'GET') {
+      return json(f.flpCatalogSingle);
+    }
+    // /Pages('<id>') — single page / group (reuse list fixture's first item)
+    if (/\/Pages\('[^']+'\)(\?.*)?$/.test(url) && m === 'GET') {
+      return json(f.flpGroupList);
+    }
+    // Entity-set lists
+    if (/\/Catalogs(\?.*)?$/.test(url) && m === 'GET') {
+      return json(f.flpCatalogList);
+    }
+    if (/\/Pages(\?.*)?$/.test(url) && m === 'GET') {
+      return json(f.flpGroupList);
+    }
+    if (/\/Chips(\?.*)?$/.test(url) && m === 'GET') {
+      return json(f.flpTileList);
     }
   }
 

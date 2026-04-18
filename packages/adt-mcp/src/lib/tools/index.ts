@@ -99,6 +99,11 @@ import { registerCheckinTool } from './checkin';
 import { registerGctsTools } from './gcts-tools';
 // RFC (E13) — classic RFC function modules via SOAP-over-HTTP
 import { registerCallRfcTool } from './call-rfc';
+// FLP (E14) — Fiori Launchpad inventory (Page Builder OData)
+import { registerListFlpCatalogsTool } from './list-flp-catalogs';
+import { registerListFlpGroupsTool } from './list-flp-groups';
+import { registerListFlpTilesTool } from './list-flp-tiles';
+import { registerGetFlpTileTool } from './get-flp-tile';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Existing tools
@@ -193,4 +198,9 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerGctsTools(server, ctx);
   // RFC (E13) — SOAP-over-HTTP RFC function module calls
   registerCallRfcTool(server, ctx);
+  // FLP (E14) — Page Builder OData catalog/group/tile inventory
+  registerListFlpCatalogsTool(server, ctx);
+  registerListFlpGroupsTool(server, ctx);
+  registerListFlpTilesTool(server, ctx);
+  registerGetFlpTileTool(server, ctx);
 }

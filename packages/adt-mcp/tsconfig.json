@@ -19,6 +19,9 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     {
+      "path": "../adt-rfc"
+    },
+    {
       "path": "../adt-plugin-abapgit"
     },
     {

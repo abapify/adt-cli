@@ -39,6 +39,7 @@ import {
   strustCommand,
   checkinCommand,
   rfcCommand,
+  createFlpCommand,
 } from './commands';
 import { createPackageCommand } from './commands/package';
 import {
@@ -304,6 +305,9 @@ export async function createCLI(options?: {
 
   // RFC command (E13) — invoke classic RFC function modules via SOAP-over-HTTP
   program.addCommand(rfcCommand);
+
+  // FLP command (E14) — Fiori Launchpad inventory (read-only)
+  program.addCommand(createFlpCommand());
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());

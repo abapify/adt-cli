@@ -136,6 +136,19 @@ export const registry = {
     commitResponse: 'gcts/commit-response.json',
   },
   /**
+   * FLP (Fiori Launchpad) fixtures — `/sap/opu/odata/UI2/PAGE_BUILDER_PERS/`
+   * (the same OData service sapcli's `sap/flp` talks to). Sanitised from
+   * real BTP Trial responses: all IDs mocked (SAP_MOCK_DEV_CAT etc.) and
+   * hostnames replaced with `mock-system.example.com`.
+   */
+  flp: {
+    catalogList: 'flp/catalog-list.json',
+    catalogSingle: 'flp/catalog-single.json',
+    groupList: 'flp/group-list.json',
+    tileList: 'flp/tile-list.json',
+    tileSingle: 'flp/tile-single.json',
+  },
+  /**
    * MCP mock-server fixtures.
    *
    * TODO-synthetic: Most entries below are *fabricated* minimal shapes used

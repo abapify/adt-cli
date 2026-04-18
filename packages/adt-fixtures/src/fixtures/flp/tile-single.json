@@ -1,0 +1,19 @@
+{
+  "d": {
+    "__metadata": {
+      "id": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FMOCK%2FTILE_1')",
+      "uri": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FMOCK%2FTILE_1')",
+      "type": "PAGE_BUILDER_PERS.Chip"
+    },
+    "id": "X-SAP-UI2-CHIP:/MOCK/TILE_1",
+    "title": "Mock Tile 1",
+    "description": "First mock tile",
+    "configuration": "",
+    "url": "",
+    "baseChipId": "",
+    "catalogId": "/UI2/CATALOG_ALL",
+    "catalogPageChipInstanceId": "",
+    "referenceChipId": "",
+    "isReadOnly": ""
+  }
+}

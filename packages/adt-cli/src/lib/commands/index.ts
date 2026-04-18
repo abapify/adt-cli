@@ -29,3 +29,4 @@ export { sourceCommand } from './source';
 export { strustCommand } from './strust';
 export { checkinCommand } from './checkin';
 export { rfcCommand } from './rfc';
+export { createFlpCommand } from './flp';
