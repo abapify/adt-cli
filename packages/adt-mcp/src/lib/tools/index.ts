@@ -82,6 +82,8 @@ import { registerUploadCertTool } from './upload-cert';
 import { registerDeleteCertTool } from './delete-cert';
 // Checkin (E08) — inverse of import_package; pushes local files → SAP.
 import { registerCheckinTool } from './checkin';
+// gCTS (E07) — /sap/bc/cts_abapvcs/* surface (separate from /sap/bc/adt)
+import { registerGctsTools } from './gcts-tools';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Existing tools
@@ -159,4 +161,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerDeleteCertTool(server, ctx);
   // Checkin (E08)
   registerCheckinTool(server, ctx);
+  // gCTS (E07) — /sap/bc/cts_abapvcs/*
+  registerGctsTools(server, ctx);
 }

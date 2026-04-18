@@ -1,0 +1,18 @@
+{
+  "commits": [
+    {
+      "id": "deadbeef00000000000000000000000000000001",
+      "author": "TESTUSER",
+      "authorMail": "testuser@example.com",
+      "date": "2025-01-15T10:00:00Z",
+      "message": "Initial commit"
+    },
+    {
+      "id": "deadbeef00000000000000000000000000000002",
+      "author": "TESTUSER",
+      "authorMail": "testuser@example.com",
+      "date": "2025-01-15T11:00:00Z",
+      "message": "Add package MOCK900001"
+    }
+  ]
+}

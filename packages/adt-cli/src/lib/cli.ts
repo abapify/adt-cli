@@ -66,6 +66,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadCommandPlugins, loadStaticPlugins } from './plugin-loader';
 import type { CliCommandPlugin } from '@abapify/adt-plugin';
+// gCTS CLI command plugin (E07) — auto-discovered: shipped as a required
+// dep of adt-cli and registered here so `adt gcts …` is always available.
+import { gctsCommand } from '@abapify/adt-plugin-gcts-cli';
 
 // Check for insecure SSL flag in stored session and apply it globally
 function applyInsecureSslFlag(): void {
@@ -292,6 +295,12 @@ export async function createCLI(options?: {
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());
+
+  // gCTS command-plugin (E07). Auto-registered here (not via adt.config.ts)
+  // because `@abapify/adt-plugin-gcts-cli` is a required dependency of
+  // `adt-cli`, matching the pattern used for the abapGit/gCTS *format*
+  // plugins above.
+  await loadStaticPlugins(program, [gctsCommand], process.cwd());
 
   // Load command plugins from config (adt.config.ts or --config)
   // NOTE: We need to parse --config early since plugins must be loaded before parseAsync()

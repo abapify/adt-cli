@@ -96,6 +96,25 @@ export const registry = {
     freestyle: 'datapreview/freestyle.json',
   },
   /**
+   * gCTS (git-enabled CTS) fixtures — `/sap/bc/cts_abapvcs/` surface.
+   *
+   * Shapes derived from sapcli (jfilak/sapcli) test fixtures and live gCTS
+   * responses. All IDs are mocked (MOCK900001, TESTUSER, etc.) per
+   * packages/adt-fixtures/AGENTS.md fixture-sanitization rules.
+   */
+  gcts: {
+    repositories: 'gcts/repositories.json',
+    repository: 'gcts/repository.json',
+    createResponse: 'gcts/create-response.json',
+    branches: 'gcts/branches.json',
+    createBranch: 'gcts/create-branch.json',
+    log: 'gcts/log.json',
+    pull: 'gcts/pull.json',
+    objects: 'gcts/objects.json',
+    config: 'gcts/config.json',
+    commitResponse: 'gcts/commit-response.json',
+  },
+  /**
    * MCP mock-server fixtures.
    *
    * TODO-synthetic: Most entries below are *fabricated* minimal shapes used

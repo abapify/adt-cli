@@ -79,6 +79,17 @@ export interface LoadedFixtures {
   strustPseList: string;
   strustCertList: string;
   strustCert: string;
+  // gCTS (E07) — real shapes from jfilak/sapcli gCTS test fixtures
+  gctsRepositories: string;
+  gctsRepository: string;
+  gctsCreateResponse: string;
+  gctsBranches: string;
+  gctsCreateBranch: string;
+  gctsLog: string;
+  gctsPull: string;
+  gctsObjects: string;
+  gctsConfig: string;
+  gctsCommitResponse: string;
 }
 
 /**
@@ -141,6 +152,16 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     strustPseList,
     strustCertList,
     strustCert,
+    gctsRepositories,
+    gctsRepository,
+    gctsCreateResponse,
+    gctsBranches,
+    gctsCreateBranch,
+    gctsLog,
+    gctsPull,
+    gctsObjects,
+    gctsConfig,
+    gctsCommitResponse,
   ] = await Promise.all([
     m.discovery.load(),
     m.session.load(),
@@ -195,6 +216,16 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.system.security.pseList.load(),
     fixtures.system.security.certList.load(),
     fixtures.system.security.cert.load(),
+    fixtures.gcts.repositories.load(),
+    fixtures.gcts.repository.load(),
+    fixtures.gcts.createResponse.load(),
+    fixtures.gcts.branches.load(),
+    fixtures.gcts.createBranch.load(),
+    fixtures.gcts.log.load(),
+    fixtures.gcts.pull.load(),
+    fixtures.gcts.objects.load(),
+    fixtures.gcts.config.load(),
+    fixtures.gcts.commitResponse.load(),
   ]);
   return {
     discovery,
@@ -250,6 +281,16 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     strustPseList,
     strustCertList,
     strustCert,
+    gctsRepositories,
+    gctsRepository,
+    gctsCreateResponse,
+    gctsBranches,
+    gctsCreateBranch,
+    gctsLog,
+    gctsPull,
+    gctsObjects,
+    gctsConfig,
+    gctsCommitResponse,
   };
 }
 
@@ -1005,6 +1046,70 @@ export function matchRoute(
       body: f.abapgitObjects,
       contentType: 'application/json',
     };
+  }
+
+  // ── gCTS (/sap/bc/cts_abapvcs/) — E07 ──────────────────────────────
+  // Order matters: more-specific paths first.
+  if (url.startsWith('/sap/bc/cts_abapvcs/repository')) {
+    const gctsPath = pathname.replace(
+      /^\/sap\/bc\/cts_abapvcs\/repository/,
+      '',
+    );
+    const json = (body: string) =>
+      ({ status: 200, body, contentType: 'application/json' }) as RouteResult;
+
+    // /repository (list + create)
+    if (gctsPath === '' || gctsPath === '/') {
+      if (m === 'GET') return json(f.gctsRepositories);
+      if (m === 'POST')
+        return {
+          status: 201,
+          body: f.gctsCreateResponse,
+          contentType: 'application/json',
+        };
+    }
+
+    // /repository/<rid>/...
+    const subMatch = /^\/([^/]+)(\/.*)?$/.exec(gctsPath);
+    if (subMatch) {
+      const sub = subMatch[2] ?? '';
+
+      // Branches: switch (GET /<current>/switch?branch=X)
+      if (/^\/branches\/[^/]+\/switch$/.test(sub) && m === 'GET') {
+        return json('{"result":"switched"}');
+      }
+      // Branches: delete / list / create
+      if (sub === '/branches') {
+        if (m === 'GET') return json(f.gctsBranches);
+        if (m === 'POST') return json(f.gctsCreateBranch);
+      }
+      if (/^\/branches\/[^/]+$/.test(sub) && m === 'DELETE') {
+        return json('{}');
+      }
+
+      // Config: single key get/delete
+      if (/^\/config\/[^/]+$/.test(sub)) {
+        if (m === 'GET') return json(f.gctsConfig);
+        if (m === 'DELETE') return json('{}');
+      }
+      if (sub === '/config' && m === 'POST') {
+        return json('{"result":{"key":"VCS_TARGET_DIR","value":"src/"}}');
+      }
+
+      if (sub === '/clone' && m === 'POST') return json(f.gctsRepository);
+      if (sub === '/pullByCommit' && m === 'GET') return json(f.gctsPull);
+      if (sub === '/push' && m === 'GET') return json('{}');
+      if (sub === '/getCommit' && m === 'GET') return json(f.gctsLog);
+      if (sub === '/getObjects' && m === 'GET') return json(f.gctsObjects);
+      if (sub === '/commit' && m === 'POST') return json(f.gctsCommitResponse);
+
+      // /<rid> — GET (fetch) / POST (setItem) / DELETE
+      if (sub === '') {
+        if (m === 'GET') return json(f.gctsRepository);
+        if (m === 'POST') return json('{}');
+        if (m === 'DELETE') return json('{}');
+      }
+    }
   }
 
   // abapGit export

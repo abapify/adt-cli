@@ -40,6 +40,9 @@
       "path": "../adt-plugin-gcts/tsconfig.lib.json"
     },
     {
+      "path": "../adt-plugin-gcts-cli/tsconfig.lib.json"
+    },
+    {
       "path": "../adt-plugin-abapgit/tsconfig.lib.json"
     },
     {
