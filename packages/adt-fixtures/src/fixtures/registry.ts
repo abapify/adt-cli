@@ -69,6 +69,12 @@ export const registry = {
       cert: 'system/security/cert.pem',
     },
   },
+  bo: {
+    bdef: {
+      single: 'bo/bdef/single.xml',
+      source: 'bo/bdef/source.abdl',
+    },
+  },
   ddic: {
     tabl: {
       structure: 'ddic/tabl/structure.tabl.xml',

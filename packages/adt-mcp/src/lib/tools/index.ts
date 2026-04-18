@@ -65,6 +65,9 @@ import { registerGetDataElementTool } from './get-data-element';
 import { registerGetStructureTool } from './get-structure';
 import { registerGetCdsDdlTool } from './get-cds-ddl';
 import { registerGetCdsDclTool } from './get-cds-dcl';
+import { registerGetBdefTool } from './get-bdef';
+import { registerCreateBdefTool } from './create-bdef';
+import { registerDeleteBdefTool } from './delete-bdef';
 // CTS + package parity tools
 import { registerCtsUpdateTransportTool } from './cts-update-transport';
 import { registerCtsReassignTransportTool } from './cts-reassign-transport';
@@ -154,6 +157,9 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerGetStructureTool(server, ctx);
   registerGetCdsDdlTool(server, ctx);
   registerGetCdsDclTool(server, ctx);
+  registerGetBdefTool(server, ctx);
+  registerCreateBdefTool(server, ctx);
+  registerDeleteBdefTool(server, ctx);
   // STRUST — PSE cert management (E04)
   registerListPsesTool(server, ctx);
   registerListCertsTool(server, ctx);

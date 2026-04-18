@@ -14,3 +14,4 @@ export type { ProgSchema as ProgAbapGitType } from './prog';
 export type { FugrSchema as FugrAbapGitType } from './fugr';
 export type { TablSchema as TablAbapGitType } from './tabl';
 export type { TtypSchema as TtypAbapGitType } from './ttyp';
+export type { BdefSchema as BdefAbapGitType } from './bdef';

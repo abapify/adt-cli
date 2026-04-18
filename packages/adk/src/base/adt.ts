@@ -149,6 +149,8 @@ export interface AdkContract {
   readonly functions: AdtContracts['functions'];
   /** DDIC contracts (domains, data elements, structures, tables, table types) */
   readonly ddic: AdtContracts['ddic'];
+  /** BO contracts (behavior definitions) */
+  readonly bo: AdtContracts['bo'];
 }
 
 /**
@@ -167,5 +169,6 @@ export function createAdkContract(client: AdtClient): AdkContract {
     programs: client.adt.programs,
     functions: client.adt.functions,
     ddic: client.adt.ddic,
+    bo: client.adt.bo,
   };
 }

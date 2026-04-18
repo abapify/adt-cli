@@ -49,6 +49,11 @@ describe('adtUriToAbapGitPath', () => {
 
     ['/sap/bc/adt/ddic/ddl/sources/zi_foo', 'src/zi_foo.ddls.asddls'],
     ['/sap/bc/adt/acm/dcl/sources/zi_foo', 'src/zi_foo.dcls.asdcls'],
+    ['/sap/bc/adt/bo/behaviordefinitions/zbp_foo', 'src/zbp_foo.bdef.abdl'],
+    [
+      '/sap/bc/adt/bo/behaviordefinitions/zbp_foo/source/main',
+      'src/zbp_foo.bdef.abdl',
+    ],
     ['/sap/bc/adt/ddic/domains/zd_foo', 'src/zd_foo.doma.xml'],
     ['/sap/bc/adt/ddic/dataelements/zd_foo', 'src/zd_foo.dtel.xml'],
     ['/sap/bc/adt/ddic/structures/zs_foo', 'src/zs_foo.tabl.xml'],

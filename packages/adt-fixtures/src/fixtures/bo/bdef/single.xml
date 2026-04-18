@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fixture: GET /sap/bc/adt/bo/behaviordefinitions/{name}
+
+  SAP ADT wraps BDEF metadata in the shared `blue:blueSource` envelope
+  (namespace http://www.sap.com/wbobj/blue) extending abapsource:AbapSourceMainObject.
+
+  Sanitized: all IDs replaced with mock values per adt-fixtures/AGENTS.md rules.
+-->
+<blue:blueSource
+    xmlns:blue="http://www.sap.com/wbobj/blue"
+    xmlns:abapsource="http://www.sap.com/adt/abapsource"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    abapsource:fixPointArithmetic="true"
+    abapsource:activeUnicodeCheck="true"
+    abapsource:sourceUri="source/main"
+    adtcore:responsible="TESTUSER"
+    adtcore:masterLanguage="EN"
+    adtcore:masterSystem="MCK"
+    adtcore:abapLanguageVersion="standard"
+    adtcore:name="ZMOCK_BDEF"
+    adtcore:type="BDEF/BDO"
+    adtcore:changedAt="2025-01-01T12:00:00Z"
+    adtcore:version="active"
+    adtcore:createdAt="2025-01-01T12:00:00Z"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
+    adtcore:description="Mock RAP behavior definition"
+    adtcore:language="EN">
+  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
+  <atom:link href="source/main" rel="http://www.sap.com/adt/relations/source" type="text/plain"/>
+  <atom:link href="source/main" rel="http://www.sap.com/adt/relations/source" type="text/plain;version=active"/>
+</blue:blueSource>

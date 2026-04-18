@@ -33,6 +33,7 @@ export const CREATE_OBJECT_TYPES = [
   'STRUCT',
   'DDLS',
   'DCLS',
+  'BDEF',
 ] as const;
 
 export const SOURCE_BACKED_OBJECT_TYPES = [
@@ -42,6 +43,7 @@ export const SOURCE_BACKED_OBJECT_TYPES = [
   'INTF',
   'DDLS',
   'DCLS',
+  'BDEF',
 ] as const;
 
 export type CreateObjectType = (typeof CREATE_OBJECT_TYPES)[number];
@@ -184,6 +186,12 @@ export async function createAdtObject(
     case 'DCLS':
       await client.adt.ddic.dcl.sources.post(queryOptions, {
         source: { ...commonFields, type: 'DCLS/DL' },
+      } as any);
+      return;
+
+    case 'BDEF':
+      await client.adt.bo.behaviordefinitions.post(queryOptions, {
+        blueSource: { ...commonFields, type: 'BDEF/BDO' },
       } as any);
       return;
   }

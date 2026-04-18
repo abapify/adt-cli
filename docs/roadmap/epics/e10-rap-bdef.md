@@ -79,3 +79,26 @@ Reads: AGENTS.md, docs/roadmap/README.md, e09-acds-parser.md, packages/adk/AGENT
 Reference: /tmp/sapcli-ref/sapcli/sap/cli/behaviordefinition.py.
 Do NOT commit without approval.
 ```
+
+## Delivered (2025-PR-103)
+
+- **Contract**: `packages/adt-contracts/src/adt/bo/behaviordefinitions.ts` — reuses the existing `blueSource` wrapper schema (namespace `http://www.sap.com/wbobj/blue`) that SAP serves for BDEF/TABL/STRUCT metadata; no new XSD in adt-schemas. `crud()` helper with `sources: ['main']` wires up `.abdl` source GET/PUT via the `textPlain` helper.
+- **ADK**: lightweight `AdkBehaviorDefinition` class (same pattern as `AdkDdlSource`) with static `kind = 'BehaviorDefinition'`, `objectUri`, `getSource/saveMainSource`, `lock/unlock` (via `ctx.lockService`), `activate`, `create/delete` factories.
+- **CLI**: `adt bdef <create|read|write|activate|delete>` via `buildObjectCrudCommands`.
+- **MCP**: dedicated `get_bdef`, `create_bdef`, `delete_bdef` tools **plus** BDEF dispatch added to generic `create_object`, `delete_object`, `resolveObjectUriFromType`, and `SOURCE_BACKED_OBJECT_TYPES` so `update_source` and `activate_object` work for BDEF.
+- **abapGit handler**: `packages/adt-plugin-abapgit/src/lib/handlers/objects/bdef.ts` with custom `serialize` producing `<name>.bdef.abdl` + `<name>.bdef.xml` (minimal `SKEY` metadata block, mirrors abapGit's `zcl_abapgit_object_bdef` serializer shape).
+- **Filename mapping**: `adtUriToAbapGitPath` now returns `src/<name>.bdef.abdl` for `/sap/bc/adt/bo/behaviordefinitions/<name>(/source/main)?`.
+- **Fixtures & mock**: `fixtures.bo.bdef.single` + `.source` preloaded into the mock ADT server; routes cover GET/POST/PUT/DELETE and `?_action=LOCK` (lock POSTs are delegated to the generic lock handler by excluding `_action=` from the BDEF POST route).
+- **Tests**:
+  - Contract: 6 operations × ~4 assertions = 23 cases in `tests/contracts/bdef.test.ts`
+  - Parity: 5 CLI+MCP operations in `tests/e2e/parity.bdef.test.ts`
+  - ADK unit: 10 cases in `packages/adk/tests/bdef.test.ts`
+  - abapGit handler: 4 cases in `packages/adt-plugin-abapgit/tests/handlers/bdef.test.ts`
+  - Filename mapping: +2 cases in `adt-uri-to-path.test.ts`
+
+## Open questions (follow-ups)
+
+- **SAP XSD for BDEF**: no official XSD is shipped; the real `.abdl` grammar is documented separately in SAP help. The `blueSource` wrapper covers only the ADT metadata envelope — the `.abdl` body is plain text. If deeper parsing is needed (action/entity symbol resolution), wire in `@abapify/acds` or a dedicated BDEF grammar. Out of scope for E10.
+- **Semantic validation** (action signatures vs CDS behavior projection) is explicitly out of scope per the epic; may become relevant once SRVD lands (E11) and full RAP round-trip tests are written.
+- **CTS stale lock behaviour on BTP**: same caveat as other source-based objects — a delete + immediate re-create may fail until the system-level lock clears (~15–30 min). The parity tests avoid hitting this path by using distinct object names for create/delete.
+- **abapGit BDEF xml layout**: the exact SKEY/DESCR layout emitted by `zcl_abapgit_object_bdef` was not available at implementation time (no public abapGit clone in the sandbox). The minimal `SKEY { TYPE, NAME }` shape implemented here matches the pattern used by other source-only handlers and round-trips cleanly; if upstream abapGit differs, adjust the XSD + handler together.

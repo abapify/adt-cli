@@ -126,6 +126,12 @@ const RULES: Rule[] = [
     build: (m) => `src/${applyNamespace(decodeURIComponent(m[1]))}.dcls.asdcls`,
   },
 
+  // RAP Behavior Definition (BDEF) — `.abdl` source
+  {
+    test: /^\/sap\/bc\/adt\/bo\/behaviordefinitions\/([^/]+?)(?:\/source\/main)?$/,
+    build: (m) => `src/${applyNamespace(decodeURIComponent(m[1]))}.bdef.abdl`,
+  },
+
   // DDIC domain / data element / structure / table / type
   {
     test: /^\/sap\/bc\/adt\/ddic\/domains\/([^/]+)$/,

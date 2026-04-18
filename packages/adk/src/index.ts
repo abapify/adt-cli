@@ -141,6 +141,9 @@ export {
 // CDS types (DDL, DCL)
 export { AdkDdlSource, AdkDclSource } from './objects/cds';
 
+// RAP types and classes
+export { AdkBehaviorDefinition } from './objects/repository/bdef';
+
 // CTS types (legacy complex transport)
 export type {
   TransportData,

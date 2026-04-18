@@ -136,6 +136,8 @@ export function resolveObjectUriFromType(
     case 'DEVC':
       // Package names are case-sensitive in SAP ADT (preserved, not lowercased)
       return `/sap/bc/adt/packages/${encodeURIComponent(objectName)}`;
+    case 'BDEF':
+      return `/sap/bc/adt/bo/behaviordefinitions/${n}`;
     default:
       return undefined;
   }

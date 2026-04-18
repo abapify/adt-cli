@@ -90,6 +90,9 @@ export interface LoadedFixtures {
   gctsObjects: string;
   gctsConfig: string;
   gctsCommitResponse: string;
+  // BDEF (RAP behavior definition)
+  bdefSingle: string;
+  bdefSource: string;
 }
 
 /**
@@ -162,6 +165,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     gctsObjects,
     gctsConfig,
     gctsCommitResponse,
+    bdefSingle,
+    bdefSource,
   ] = await Promise.all([
     m.discovery.load(),
     m.session.load(),
@@ -226,6 +231,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.gcts.objects.load(),
     fixtures.gcts.config.load(),
     fixtures.gcts.commitResponse.load(),
+    fixtures.bo.bdef.single.load(),
+    fixtures.bo.bdef.source.load(),
   ]);
   return {
     discovery,
@@ -291,6 +298,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     gctsObjects,
     gctsConfig,
     gctsCommitResponse,
+    bdefSingle,
+    bdefSource,
   };
 }
 
@@ -529,6 +538,41 @@ export function matchRoute(
   }
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/acm/dcl/sources/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
+  }
+
+  // ── BDEF (RAP behavior definition) ─────────────────────────────
+  // Endpoint: /sap/bc/adt/bo/behaviordefinitions/{name}
+  //           /sap/bc/adt/bo/behaviordefinitions/{name}/source/main
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/bo\/behaviordefinitions\/[^/?]+\/source\/main/.test(
+      pathname,
+    )
+  ) {
+    return { status: 200, body: f.bdefSource, contentType: 'text/plain' };
+  }
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/bo\/behaviordefinitions\/[^/?]+/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.bdefSingle,
+      contentType: 'application/vnd.sap.adt.blues.v1+xml',
+    };
+  }
+  if (
+    m === 'POST' &&
+    url.startsWith('/sap/bc/adt/bo/behaviordefinitions') &&
+    !url.includes('_action=')
+  ) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (m === 'PUT' && url.startsWith('/sap/bc/adt/bo/behaviordefinitions/')) {
+    return { status: 200, body: '', contentType: 'text/plain' };
+  }
+  if (m === 'DELETE' && url.startsWith('/sap/bc/adt/bo/behaviordefinitions/')) {
+    return { status: 204, body: '', contentType: 'text/plain' };
   }
 
   // ── OO Classrun (execute console class) ────────────────────────
