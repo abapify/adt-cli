@@ -38,6 +38,7 @@
     "@abapify/adk": "workspace:*",
     "@abapify/adt-aunit": "workspace:*",
     "@abapify/adt-plugin-abapgit": "workspace:*",
+    "@abapify/adt-rfc": "workspace:*",
     "zod": "^3.24.0"
   }
 }

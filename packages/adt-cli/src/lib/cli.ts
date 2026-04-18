@@ -38,6 +38,7 @@ import {
   sourceCommand,
   strustCommand,
   checkinCommand,
+  rfcCommand,
 } from './commands';
 import { createPackageCommand } from './commands/package';
 import {
@@ -300,6 +301,9 @@ export async function createCLI(options?: {
 
   // Checkin command (push local abapGit/gCTS directory into SAP — inverse of checkout)
   program.addCommand(checkinCommand);
+
+  // RFC command (E13) — invoke classic RFC function modules via SOAP-over-HTTP
+  program.addCommand(rfcCommand);
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());

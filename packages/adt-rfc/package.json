@@ -1,0 +1,28 @@
+{
+  "name": "@abapify/adt-rfc",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.1.0",
+  "description": "SAP RFC transport for @abapify — SOAP-over-HTTP RFC implementation (/sap/bc/soap/rfc)",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {},
+  "keywords": [
+    "sap",
+    "rfc",
+    "soap",
+    "abap",
+    "startrfc"
+  ],
+  "author": "Booking.com",
+  "license": "MIT"
+}

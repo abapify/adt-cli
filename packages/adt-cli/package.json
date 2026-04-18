@@ -26,6 +26,7 @@
     "@abapify/adt-plugin-abapgit": "workspace:*",
     "@abapify/adt-plugin-gcts": "workspace:*",
     "@abapify/adt-plugin-gcts-cli": "workspace:*",
+    "@abapify/adt-rfc": "workspace:*",
     "@abapify/adt-tui": "workspace:*",
     "@abapify/logger": "workspace:*",
     "@inquirer/prompts": "^7.9.0",

@@ -97,6 +97,8 @@ import { registerDeleteCertTool } from './delete-cert';
 import { registerCheckinTool } from './checkin';
 // gCTS (E07) — /sap/bc/cts_abapvcs/* surface (separate from /sap/bc/adt)
 import { registerGctsTools } from './gcts-tools';
+// RFC (E13) — classic RFC function modules via SOAP-over-HTTP
+import { registerCallRfcTool } from './call-rfc';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Existing tools
@@ -189,4 +191,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerCheckinTool(server, ctx);
   // gCTS (E07) — /sap/bc/cts_abapvcs/*
   registerGctsTools(server, ctx);
+  // RFC (E13) — SOAP-over-HTTP RFC function module calls
+  registerCallRfcTool(server, ctx);
 }

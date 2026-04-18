@@ -1318,5 +1318,26 @@ export function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  // ── SOAP-RFC (E13) ─────────────────────────────────────────────────────
+  // POST /sap/bc/soap/rfc?sap-client=<n> → returns a synthetic
+  // STFC_CONNECTION.Response that echoes REQUTEXT=hello (the only
+  // fixture we use from mock parity tests).
+  if (m === 'POST' && pathname === '/sap/bc/soap/rfc') {
+    return {
+      status: 200,
+      contentType: 'text/xml; charset=utf-8',
+      body:
+        `<?xml version="1.0" encoding="utf-8"?>` +
+        `<soap-env:Envelope xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/">` +
+        `<soap-env:Body>` +
+        `<rfc:STFC_CONNECTION.Response xmlns:rfc="urn:sap-com:document:sap:rfc:functions">` +
+        `<ECHOTEXT>hello</ECHOTEXT>` +
+        `<RESPTEXT>MOCK SAP SYSTEM Sysid: MCK</RESPTEXT>` +
+        `</rfc:STFC_CONNECTION.Response>` +
+        `</soap-env:Body>` +
+        `</soap-env:Envelope>`,
+    };
+  }
+
   return undefined;
 }
