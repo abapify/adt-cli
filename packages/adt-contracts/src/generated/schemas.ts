@@ -11,6 +11,10 @@ import { toSpeciSchema } from '../helpers/speci-schema';
 // ============================================================================
 // XML Schemas (wrapped for speci compatibility)
 // ============================================================================
+export const acoverageResult = toSpeciSchema(adtSchemas.acoverageResult);
+export const acoverageStatements = toSpeciSchema(
+  adtSchemas.acoverageStatements,
+);
 export const adtcore = toSpeciSchema(adtSchemas.adtcore);
 export const atc = toSpeciSchema(adtSchemas.atc);
 export const atcRun = toSpeciSchema(adtSchemas.atcRun);

@@ -25,6 +25,12 @@ export const registry = {
   aunit: {
     runRequest: 'aunit/run-request.xml',
     runResult: 'aunit/run-result.xml',
+    // Sourced from jfilak/sapcli test fixtures (fixtures_adt_acoverage /
+    // fixtures_adt_coverage). Real sanitized SAP responses for the
+    // /runtime/traces/coverage endpoints.
+    coverageMeasurements: 'aunit/coverage-measurements.xml',
+    coverageStatements: 'aunit/coverage-statements.xml',
+    coverageResults: 'aunit/coverage-results.xml',
   },
   packages: {
     tmp: 'packages/tmp.xml',

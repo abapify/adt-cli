@@ -367,6 +367,26 @@ describe('adt-mcp integration tests', () => {
       assert.ok(typeof data.totalTests === 'number');
       assert.ok(typeof data.passCount === 'number');
     });
+
+    it('runs AUnit tests with coverage and emits a JaCoCo report', async () => {
+      const { json } = await callTool('run_unit_tests', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+        coverage: true,
+        coverageFormat: 'jacoco',
+      });
+      const data = json as {
+        testResults: { totalTests: number };
+        coverage: { format: string; xml: string; warning?: string };
+      };
+      assert.ok(typeof data.testResults?.totalTests === 'number');
+      assert.strictEqual(data.coverage.format, 'jacoco');
+      assert.ok(
+        data.coverage.xml.includes('<!DOCTYPE report PUBLIC'),
+        `coverage XML must contain JaCoCo DOCTYPE; payload: ${JSON.stringify(data.coverage).slice(0, 500)}`,
+      );
+    });
   });
 
   // ── get_test_classes ───────────────────────────────────────────

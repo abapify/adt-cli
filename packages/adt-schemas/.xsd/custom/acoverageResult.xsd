@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ABAP Coverage Result Schema
+
+  Response of:
+    POST /sap/bc/adt/runtime/traces/coverage/measurements/{id}?withAdditionalTypeInfo=true
+  Content-Type: application/xml+scov
+
+  Sourced from jfilak/sapcli test fixtures (acoverage).
+
+  Tree of coverage nodes. Each node holds an adtcore:objectReference,
+  a list of <coverages>, optional atom:links and nested <nodes>.
+
+  Namespace: http://www.sap.com/adt/cov
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:cov="http://www.sap.com/adt/cov"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    targetNamespace="http://www.sap.com/adt/cov"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.sap.com/adt/core"
+      schemaLocation="../sap/adtcore.xsd"/>
+  <xsd:import namespace="http://www.w3.org/2005/Atom"
+      schemaLocation="../sap/atom.xsd"/>
+
+  <!-- Root element -->
+  <xsd:element name="result" type="cov:CoverageResult"/>
+
+  <!-- Coverage Result (root) -->
+  <xsd:complexType name="CoverageResult">
+    <xsd:sequence>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="nodes" type="cov:CoverageNodes"
+          minOccurs="0" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string"/>
+  </xsd:complexType>
+
+  <!-- Container for repeating <node> children -->
+  <xsd:complexType name="CoverageNodes">
+    <xsd:sequence>
+      <xsd:element name="node" type="cov:CoverageNode"
+          minOccurs="0" maxOccurs="unbounded" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Single coverage node (recursive via CoverageNodes) -->
+  <xsd:complexType name="CoverageNode">
+    <xsd:sequence>
+      <xsd:element ref="adtcore:objectReference" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="coverages" type="cov:CoverageList"
+          minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="nodes" type="cov:CoverageNodes"
+          minOccurs="0" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Container for repeating <coverage> children -->
+  <xsd:complexType name="CoverageList">
+    <xsd:sequence>
+      <xsd:element name="coverage" type="cov:CoverageMetric"
+          minOccurs="0" maxOccurs="unbounded" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Single coverage metric: branch | procedure | statement -->
+  <xsd:complexType name="CoverageMetric">
+    <xsd:attribute name="type" type="xsd:string"/>
+    <xsd:attribute name="total" type="xsd:int"/>
+    <xsd:attribute name="executed" type="xsd:int"/>
+  </xsd:complexType>
+
+</xsd:schema>

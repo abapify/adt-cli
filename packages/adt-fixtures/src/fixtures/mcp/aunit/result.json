@@ -1,5 +1,11 @@
 {
   "runResult": {
+    "link": [
+      {
+        "href": "/sap/bc/adt/runtime/traces/coverage/measurements/6D664D9B46CB1FE1859107ADE8729541",
+        "rel": "http://www.sap.com/adt/relations/runtime/traces/coverage/measurements"
+      }
+    ],
     "program": [
       {
         "uri": "/sap/bc/adt/oo/classes/zcl_example",

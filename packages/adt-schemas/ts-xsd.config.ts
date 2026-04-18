@@ -84,6 +84,8 @@ const targetSchemas = [
   'custom/transportUseraction',
   'custom/ddlSource',
   'custom/dclSource',
+  'custom/acoverageResult',
+  'custom/acoverageStatements',
 ];
 
 export default defineConfig({

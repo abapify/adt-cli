@@ -44,3 +44,9 @@ export const aunitContract = {
 };
 
 export type AunitContract = typeof aunitContract;
+
+export { extractCoverageMeasurementId } from './coverage-link';
+export type {
+  CoverageLinkCandidate,
+  CoverageLinkSource,
+} from './coverage-link';

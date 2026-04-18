@@ -15,6 +15,9 @@ export type { SerializedFile, ObjectHandler } from './lib/handlers/base';
 // Filename parser — shared utility for abapGit file naming convention
 export { parseAbapGitFilename } from './lib/deserializer';
 
+// ADT URI → abapGit on-disk filename (used for coverage / SonarQube reports)
+export { adtUriToAbapGitPath } from './lib/filename/adt-uri-to-path';
+
 // XML formatting utilities — shared across serializers and roundtrip
 export {
   formatXmlAttributes,

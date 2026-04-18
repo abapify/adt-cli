@@ -16,7 +16,7 @@ import {
  * Map ADK ClassIncludeType to abapGit file suffix convention
  * Used for serialization (SAP → Git)
  */
-const ABAPGIT_SUFFIX: Record<ClassIncludeType, string | undefined> = {
+export const ABAPGIT_SUFFIX: Record<ClassIncludeType, string | undefined> = {
   main: undefined, // main has no suffix
   definitions: 'locals_def',
   implementations: 'locals_imp',

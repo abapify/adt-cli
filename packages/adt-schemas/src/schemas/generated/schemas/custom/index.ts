@@ -19,4 +19,6 @@ export { default as atomFeed } from './atomFeed';
 export { default as transportUseraction } from './transportUseraction';
 export { default as ddlSource } from './ddlSource';
 export { default as dclSource } from './dclSource';
+export { default as acoverageResult } from './acoverageResult';
+export { default as acoverageStatements } from './acoverageStatements';
 export { default as adtcoreObjectSets } from './adtcoreObjectSets';

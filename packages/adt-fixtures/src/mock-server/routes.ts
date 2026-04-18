@@ -71,6 +71,9 @@ export interface LoadedFixtures {
   interfaceMetadata: string;
   programMetadata: string;
   functionGroupMetadata: string;
+  // Coverage — sourced from jfilak/sapcli
+  coverageMeasurements: string;
+  coverageStatements: string;
 }
 
 /**
@@ -127,6 +130,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     interfaceMetadata,
     programMetadata,
     functionGroupMetadata,
+    coverageMeasurements,
+    coverageStatements,
   ] = await Promise.all([
     m.discovery.load(),
     m.session.load(),
@@ -175,6 +180,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.oo.interface.load(),
     fixtures.programs.program.load(),
     fixtures.functions.functionGroup.load(),
+    fixtures.aunit.coverageMeasurements.load(),
+    fixtures.aunit.coverageStatements.load(),
   ]);
   return {
     discovery,
@@ -224,6 +231,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     interfaceMetadata,
     programMetadata,
     functionGroupMetadata,
+    coverageMeasurements,
+    coverageStatements,
   };
 }
 
@@ -768,6 +777,36 @@ export function matchRoute(
   // AUnit test run
   if (m === 'POST' && url.startsWith('/sap/bc/adt/abapunit/testruns')) {
     return { status: 200, body: f.aunit, contentType: 'application/json' };
+  }
+
+  // ABAP Coverage — statements bulk response
+  // GET /sap/bc/adt/runtime/traces/coverage/results/{id}/statements
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/runtime\/traces\/coverage\/results\/[^/]+\/statements/.test(
+      pathname,
+    )
+  ) {
+    return {
+      status: 200,
+      body: f.coverageStatements,
+      contentType: 'application/xml+scov',
+    };
+  }
+
+  // ABAP Coverage — measurement tree
+  // POST /sap/bc/adt/runtime/traces/coverage/measurements/{id}
+  if (
+    m === 'POST' &&
+    /^\/sap\/bc\/adt\/runtime\/traces\/coverage\/measurements\/[^/]+/.test(
+      pathname,
+    )
+  ) {
+    return {
+      status: 200,
+      body: f.coverageMeasurements,
+      contentType: 'application/xml+scov',
+    };
   }
 
   // Function module source

@@ -36,6 +36,8 @@
     "@abapify/adt-locks": "workspace:*",
     "@abapify/adt-schemas": "workspace:*",
     "@abapify/adk": "workspace:*",
+    "@abapify/adt-aunit": "workspace:*",
+    "@abapify/adt-plugin-abapgit": "workspace:*",
     "zod": "^3.24.0"
   }
 }
