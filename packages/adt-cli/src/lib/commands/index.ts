@@ -26,3 +26,4 @@ export { locksCommand } from './locks';
 export { checkCommand } from './check';
 export { userCommand } from './user';
 export { sourceCommand } from './source';
+export { strustCommand } from './strust';

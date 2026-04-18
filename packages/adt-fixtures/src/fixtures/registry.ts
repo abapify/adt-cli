@@ -63,6 +63,11 @@ export const registry = {
       single: 'system/users/single.xml',
       search: 'system/users/search.xml',
     },
+    security: {
+      pseList: 'system/security/pse-list.xml',
+      certList: 'system/security/cert-list.xml',
+      cert: 'system/security/cert.pem',
+    },
   },
   ddic: {
     tabl: {

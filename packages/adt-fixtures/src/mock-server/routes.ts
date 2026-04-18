@@ -75,6 +75,10 @@ export interface LoadedFixtures {
   // Coverage — sourced from jfilak/sapcli
   coverageMeasurements: string;
   coverageStatements: string;
+  // STRUST / system security — TODO-synthetic fixtures
+  strustPseList: string;
+  strustCertList: string;
+  strustCert: string;
 }
 
 /**
@@ -134,6 +138,9 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     functionGroupMetadata,
     coverageMeasurements,
     coverageStatements,
+    strustPseList,
+    strustCertList,
+    strustCert,
   ] = await Promise.all([
     m.discovery.load(),
     m.session.load(),
@@ -185,6 +192,9 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.functions.functionGroup.load(),
     fixtures.aunit.coverageMeasurements.load(),
     fixtures.aunit.coverageStatements.load(),
+    fixtures.system.security.pseList.load(),
+    fixtures.system.security.certList.load(),
+    fixtures.system.security.cert.load(),
   ]);
   return {
     discovery,
@@ -237,6 +247,9 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     functionGroupMetadata,
     coverageMeasurements,
     coverageStatements,
+    strustPseList,
+    strustCertList,
+    strustCert,
   };
 }
 
@@ -590,6 +603,79 @@ export function matchRoute(
       status: 200,
       body: f.packageMetadata,
       contentType: 'application/vnd.sap.adt.packages.v2+xml',
+    };
+  }
+
+  // ── STRUST / system security ───────────────────────────────────
+  // Certificate list under a PSE:
+  //   GET  /sap/bc/adt/system/security/pses/{ctx}/{applic}/certificates
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/system\/security\/pses\/[^/]+\/[^/]+\/certificates$/.test(
+      pathname,
+    )
+  ) {
+    return {
+      status: 200,
+      body: f.strustCertList,
+      contentType: 'application/atom+xml;type=feed',
+    };
+  }
+
+  // Single certificate — GET returns PEM text; DELETE removes it.
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/system\/security\/pses\/[^/]+\/[^/]+\/certificates\/[^/]+$/.test(
+      pathname,
+    )
+  ) {
+    return {
+      status: 200,
+      body: f.strustCert,
+      contentType: 'application/x-pem-file',
+    };
+  }
+  if (
+    m === 'DELETE' &&
+    /^\/sap\/bc\/adt\/system\/security\/pses\/[^/]+\/[^/]+\/certificates\/[^/]+$/.test(
+      pathname,
+    )
+  ) {
+    return { status: 204, body: '', contentType: 'text/plain' };
+  }
+
+  // Upload certificate — POST PEM body to /.../certificates
+  if (
+    m === 'POST' &&
+    /^\/sap\/bc\/adt\/system\/security\/pses\/[^/]+\/[^/]+\/certificates$/.test(
+      pathname,
+    )
+  ) {
+    return {
+      status: 200,
+      body: f.strustCertList,
+      contentType: 'application/atom+xml;type=feed',
+    };
+  }
+
+  // Single PSE metadata: GET /sap/bc/adt/system/security/pses/{ctx}/{applic}
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/system\/security\/pses\/[^/]+\/[^/]+$/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.strustCertList,
+      contentType: 'application/atom+xml;type=feed',
+    };
+  }
+
+  // PSE list: GET /sap/bc/adt/system/security/pses
+  if (m === 'GET' && pathname === '/sap/bc/adt/system/security/pses') {
+    return {
+      status: 200,
+      body: f.strustPseList,
+      contentType: 'application/atom+xml;type=feed',
     };
   }
 

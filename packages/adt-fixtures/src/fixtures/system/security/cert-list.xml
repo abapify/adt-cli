@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TODO-synthetic: fabricated response for
+  GET /sap/bc/adt/system/security/pses/{context}/{applic}/certificates.
+
+  Each certificate in the PSE is emitted as an atom:entry whose id is a
+  stable index (1-based) and whose title is the X.509 subject DN.
+-->
+<atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
+  <atom:author>
+    <atom:name>SAP AG</atom:name>
+  </atom:author>
+  <atom:title>Certificates of SSLC/DFAULT</atom:title>
+  <atom:updated>2026-04-02T21:08:03Z</atom:updated>
+  <atom:entry>
+    <atom:id>1</atom:id>
+    <atom:link href="/sap/bc/adt/system/security/pses/SSLC/DFAULT/certificates/1" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:title>CN=Mock Root CA, O=Example Corp, C=DE</atom:title>
+  </atom:entry>
+  <atom:entry>
+    <atom:id>2</atom:id>
+    <atom:link href="/sap/bc/adt/system/security/pses/SSLC/DFAULT/certificates/2" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:title>CN=Mock Intermediate CA, O=Example Corp, C=DE</atom:title>
+  </atom:entry>
+</atom:feed>

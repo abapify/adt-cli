@@ -26,6 +26,7 @@ import {
   checkCommand,
   userCommand,
   sourceCommand,
+  strustCommand,
 } from './commands';
 import { createPackageCommand } from './commands/package';
 import {
@@ -245,6 +246,9 @@ export async function createCLI(options?: {
 
   // User lookup command
   program.addCommand(userCommand);
+
+  // STRUST command (SSL PSE cert management)
+  program.addCommand(strustCommand);
 
   // Object CRUD commands (class, program, interface, include)
   program.addCommand(classCommand);

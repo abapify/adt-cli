@@ -75,6 +75,11 @@ import { registerLookupUserTool } from './lookup-user';
 import { registerImportObjectTool } from './import-object';
 import { registerImportPackageTool } from './import-package';
 import { registerImportTransportTool } from './import-transport';
+// STRUST — SSL PSE cert management
+import { registerListPsesTool } from './list-pses';
+import { registerListCertsTool } from './list-certs';
+import { registerUploadCertTool } from './upload-cert';
+import { registerDeleteCertTool } from './delete-cert';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Existing tools
@@ -145,4 +150,9 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerGetStructureTool(server, ctx);
   registerGetCdsDdlTool(server, ctx);
   registerGetCdsDclTool(server, ctx);
+  // STRUST — PSE cert management (E04)
+  registerListPsesTool(server, ctx);
+  registerListCertsTool(server, ctx);
+  registerUploadCertTool(server, ctx);
+  registerDeleteCertTool(server, ctx);
 }

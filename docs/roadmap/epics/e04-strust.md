@@ -69,3 +69,22 @@ Spec: /mnt/wsl/workspace/ubuntu/adt-cli/docs/roadmap/epics/e04-strust.md
 Read AGENTS.md + docs/roadmap/README.md. Reference: /tmp/sapcli-ref/sapcli/sap/cli/strust.py.
 Do NOT commit without approval.
 ```
+
+## Open questions (post-landing)
+
+- sapcli drives STRUST via **RFC** (`sap/rfc/strust.py`), not ADT. There is no
+  `sap/adt/strust.py` to reference. The ADT path `/sap/bc/adt/system/security/pses`
+  used here follows the `/sap/bc/adt/system/...` convention (cf. `system/users`)
+  but has **not been verified against a real SAP system**. All fixtures in
+  `packages/adt-fixtures/src/fixtures/system/security/` are marked
+  `TODO-synthetic` and must be replaced with real captures before this
+  surface is promoted from "stub" to "production".
+- Out-of-scope ops (CSR generation, PSE create/remove, ICM-notify) are
+  intentionally not implemented — they correspond to `sap strust createpse`,
+  `getcsr`, `removepse`, `createidentity`, which require RFC.
+- Shape of `uploadCertificate` response was assumed to be the same atom
+  cert-list feed — SAP may return an empty 204 instead. Verify when a real
+  ADT capture becomes available.
+- `deleteCertificate` path uses a 1-based numeric index for `{id}`; some
+  SAP versions key by serial number or subject. Revisit when capture is
+  available.
