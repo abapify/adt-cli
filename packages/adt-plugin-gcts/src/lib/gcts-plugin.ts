@@ -5,18 +5,20 @@
  * contract (used by registry consumers); this `AdtPlugin` provides the
  * behaviour expected by `adt-cli`'s higher-level import/export services.
  *
- * SAP → disk ("import") is fully implemented — this is the primary direction
- * a format plugin needs to support. disk → SAP ("export" in adt-cli's
- * terminology) is deferred: gCTS deserialization requires inverse mappings
- * that still need to be fleshed out per object type. When E08 revisits
- * checkin, the deserializer will slot in as `format.export`.
+ * SAP → disk ("import") serialises ADK objects to AFF JSON + source files.
+ * Disk → SAP ("export" in adt-cli terminology — Git → SAP direction) is
+ * delegated to `./deserializer.ts`, which yields AdkObjects for the
+ * `CheckinService` apply pipeline (E08). Together they close the
+ * round-trip that the E06 v0.1 follow-ups called out.
  */
 
 import { mkdirSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { createPlugin, type AdtPlugin } from '@abapify/adt-plugin';
+import type { AdtClient } from '@abapify/adk';
 import { getHandler, getSupportedTypes, isSupported } from './handlers/base';
 import './handlers/objects';
+import { deserialize } from './deserializer';
 
 export const gctsPlugin: AdtPlugin = createPlugin({
   name: 'gcts',
@@ -75,8 +77,11 @@ export const gctsPlugin: AdtPlugin = createPlugin({
       }
     },
 
-    // format.export (Git → SAP) intentionally omitted for v0.1. Tracked as
-    // follow-up in docs/roadmap/epics/e06-gcts-format-plugin.md.
+    // Git → SAP: deserialise a gCTS/AFF file tree into AdkObjects. The
+    // apply pipeline (diff/plan/lock/save) lives in CheckinService — this
+    // plugin only knows how to decode its own on-disk layout.
+    export: (fileTree, client, options?) =>
+      deserialize(fileTree, client as AdtClient, options),
   },
 });
 

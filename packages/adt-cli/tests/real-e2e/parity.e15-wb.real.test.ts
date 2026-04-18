@@ -84,21 +84,20 @@ describeReal('E15 wb (workbench navigation)', () => {
     const client = await getRealClient();
 
     // Step 1: scope
-    const scopeXml = await client.adt.repository.informationsystem.usageReferences.scope.post(
-      { uri: TARGET_URI, version: 'active' },
-      buildUsageScopeRequestXml(),
-    );
+    const scopeXml =
+      await client.adt.repository.informationsystem.usageReferences.scope.post(
+        { uri: TARGET_URI, version: 'active' },
+        buildUsageScopeRequestXml(),
+      );
     expect(String(scopeXml)).toContain('usageScopeResult');
-    captureFixture(
-      String(scopeXml),
-      'wb/real-usage-references-scope.xml',
-    );
+    captureFixture(String(scopeXml), 'wb/real-usage-references-scope.xml');
 
     // Step 2: search (echo the scope blob back)
-    const searchXml = await client.adt.repository.informationsystem.usageReferences.search.post(
-      { uri: TARGET_URI, version: 'active' },
-      buildUsageReferenceRequestXml(String(scopeXml)),
-    );
+    const searchXml =
+      await client.adt.repository.informationsystem.usageReferences.search.post(
+        { uri: TARGET_URI, version: 'active' },
+        buildUsageReferenceRequestXml(String(scopeXml)),
+      );
     const searchStr = String(searchXml);
     expect(searchStr).toContain('usageReferenceResult');
     captureFixture(searchStr, 'wb/real-usage-references-result.xml');

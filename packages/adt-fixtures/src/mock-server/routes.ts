@@ -428,7 +428,9 @@ export function matchRoute(
   // Step 1: scope
   if (
     m === 'POST' &&
-    url.startsWith('/sap/bc/adt/repository/informationsystem/usageReferences/scope')
+    url.startsWith(
+      '/sap/bc/adt/repository/informationsystem/usageReferences/scope',
+    )
   ) {
     return {
       status: 200,

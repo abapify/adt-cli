@@ -28,7 +28,10 @@ interface Usage {
   packageName?: string;
 }
 
-function parseUsages(xml: string, max: number): {
+function parseUsages(
+  xml: string,
+  max: number,
+): {
   numberOfResults?: string;
   description?: string;
   usages: Usage[];
@@ -46,7 +49,9 @@ function parseUsages(xml: string, max: number): {
       uri: /uri="([^"]*)"/.exec(attrs)?.[1],
       parentUri: /parentUri="([^"]*)"/.exec(attrs)?.[1],
     };
-    const adtObjAttrs = /<usagereferences:adtObject\s+([^/>]*)\/?>/.exec(body)?.[1];
+    const adtObjAttrs = /<usagereferences:adtObject\s+([^/>]*)\/?>/.exec(
+      body,
+    )?.[1];
     if (adtObjAttrs) {
       u.name = /adtcore:name="([^"]*)"/.exec(adtObjAttrs)?.[1];
       u.type = /adtcore:type="([^"]*)"/.exec(adtObjAttrs)?.[1];

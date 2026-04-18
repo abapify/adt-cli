@@ -42,8 +42,7 @@ export const SEARCH_REQUEST_MIME =
 export const SEARCH_RESPONSE_MIME =
   'application/vnd.sap.adt.repository.usagereferences.result.v1+xml';
 
-export const USAGEREFS_NAMESPACE =
-  'http://www.sap.com/adt/ris/usageReferences';
+export const USAGEREFS_NAMESPACE = 'http://www.sap.com/adt/ris/usageReferences';
 
 /**
  * Build the XML body for the step-1 scope request. sapcli always sends
@@ -70,8 +69,10 @@ export function buildUsageScopeRequestXml(): string {
 export function buildUsageReferenceRequestXml(scopeResultXml: string): string {
   // Strip the XML prolog and outer usageScopeResult tags, re-tag as <scope>.
   const noProlog = scopeResultXml.replace(/<\?xml[^>]+\?>\s*/, '');
-  const scopeElement = noProlog
-    .replace(/usagereferences:usageScopeResult/g, 'usagereferences:scope');
+  const scopeElement = noProlog.replace(
+    /usagereferences:usageScopeResult/g,
+    'usagereferences:scope',
+  );
 
   return (
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
@@ -91,18 +92,21 @@ export function buildUsageReferenceRequestXml(scopeResultXml: string): string {
  */
 const scope = contract({
   post: (params: { uri: string; version?: string }) =>
-    http.post('/sap/bc/adt/repository/informationsystem/usageReferences/scope', {
-      query: {
-        uri: params.uri,
-        version: params.version ?? 'active',
+    http.post(
+      '/sap/bc/adt/repository/informationsystem/usageReferences/scope',
+      {
+        query: {
+          uri: params.uri,
+          version: params.version ?? 'active',
+        },
+        body: textPlain,
+        responses: { 200: undefined as unknown as string },
+        headers: {
+          Accept: SCOPE_RESPONSE_MIME,
+          'Content-Type': SCOPE_REQUEST_MIME,
+        },
       },
-      body: textPlain,
-      responses: { 200: undefined as unknown as string },
-      headers: {
-        Accept: SCOPE_RESPONSE_MIME,
-        'Content-Type': SCOPE_REQUEST_MIME,
-      },
-    }),
+    ),
 });
 
 /**

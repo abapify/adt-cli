@@ -44,7 +44,10 @@ interface Reference {
  * XML returned by step 2. A lightweight regex walk is sufficient because the
  * schema is stable and the response is single-namespaced.
  */
-function parseReferences(xml: string, max: number): {
+function parseReferences(
+  xml: string,
+  max: number,
+): {
   numberOfResults?: string;
   description?: string;
   results: Reference[];
@@ -69,7 +72,9 @@ function parseReferences(xml: string, max: number): {
       usageInformation: /usageInformation="([^"]*)"/.exec(attrs)?.[1],
     };
 
-    const adtObjAttrs = /<usagereferences:adtObject\s+([^/>]*)\/?>/.exec(body)?.[1];
+    const adtObjAttrs = /<usagereferences:adtObject\s+([^/>]*)\/?>/.exec(
+      body,
+    )?.[1];
     if (adtObjAttrs) {
       ref.name = /adtcore:name="([^"]*)"/.exec(adtObjAttrs)?.[1];
       ref.type = /adtcore:type="([^"]*)"/.exec(adtObjAttrs)?.[1];
@@ -141,16 +146,18 @@ export function registerFindReferencesTool(
         }
 
         // Step 1: fetch the default scope
-        const scopeXml = await client.adt.repository.informationsystem.usageReferences.scope.post(
-          { uri: objectUri, version: 'active' },
-          buildUsageScopeRequestXml(),
-        );
+        const scopeXml =
+          await client.adt.repository.informationsystem.usageReferences.scope.post(
+            { uri: objectUri, version: 'active' },
+            buildUsageScopeRequestXml(),
+          );
 
         // Step 2: run the search, echoing the scope blob back
-        const searchXml = await client.adt.repository.informationsystem.usageReferences.search.post(
-          { uri: objectUri, version: 'active' },
-          buildUsageReferenceRequestXml(String(scopeXml)),
-        );
+        const searchXml =
+          await client.adt.repository.informationsystem.usageReferences.search.post(
+            { uri: objectUri, version: 'active' },
+            buildUsageReferenceRequestXml(String(scopeXml)),
+          );
 
         const parsed = parseReferences(String(searchXml), maxResults);
 

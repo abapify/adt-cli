@@ -118,7 +118,7 @@ Do NOT commit without approval.
 
 ## Follow-ups discovered during implementation (v0.1)
 
-- **Terminology inversion.** The epic's acceptance says `adt export --format gcts <pkg>` produces a gCTS-shaped tree. In adt-cli's actual command set, `adt export` means _disk → SAP_ (deploy) and `adt import package` means _SAP → disk_ (pull). v0.1 implements the SAP → disk direction (`adt import package --format gcts ZMYPKG ./out`); the Git → SAP direction (`adt export --format gcts`) requires deserialization handlers and is deferred alongside E08 checkin. Update acceptance wording in a follow-up.
+- **Terminology inversion (resolved).** The epic's acceptance said `adt export --format gcts <pkg>` produces a gCTS-shaped tree. In adt-cli's actual command set, `adt export` means _disk → SAP_ (deploy) and `adt import package` means _SAP → disk_ (pull). v0.1 shipped SAP → disk (`adt import package --format gcts ZMYPKG ./out`); the Git → SAP direction is now implemented via `format.export` in `src/lib/deserializer.ts` and consumed by `CheckinService` (E08). Open question remaining: richer directory → SAP-package resolution (AFF has no folder-logic analogue to `.abapgit.xml`), currently we either use `options.rootPackage` verbatim or leave `packageRef` unset.
 
 - **Format naming — gcts vs aff.** The open question above is effectively resolved in v0.1: a single plugin with id `gcts` (alias `aff`) handles both. If a concrete layout divergence is found later we'll introduce a separate id rather than branching inside the plugin.
 

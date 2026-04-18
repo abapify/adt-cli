@@ -5,7 +5,8 @@
  *   - dry-run against an empty directory (zero-discovery happy path).
  *   - dry-run over an abapGit-shaped directory (discovery + plan wiring).
  *   - format='gcts' dispatch (proves E05 format-agnosticism — both surfaces
- *     fail consistently today because gcts deserialisation is deferred).
+ *     successfully reconstruct AdkObjects from a gCTS-shaped tree now that
+ *     `@abapify/adt-plugin-gcts` implements `format.export`).
  *   - MCP tool is advertised.
  *   - unknown format is rejected — kept LAST because commander retains
  *     option defaults across `parseAsync` invocations.
@@ -109,11 +110,37 @@ describe('CLI + MCP parity (checkin)', () => {
     expect(mcpJson.totals.failed).toBe(0);
   });
 
-  it('parity: `--format gcts` is plumbed through the FormatPlugin registry', async () => {
-    // Both CLI and MCP dispatch to the gCTS plugin. Since the gCTS plugin
-    // does not yet implement Git → SAP deserialisation (deferred alongside
-    // E08 — see E06 follow-ups), both surfaces MUST fail consistently.
+  it('parity: `--format gcts` reconstructs AdkObjects from a gCTS-shaped tree', async () => {
+    // Write a minimal gCTS/AFF layout: one INTF (JSON metadata + .abap
+    // source). Both CLI and MCP dispatch to `@abapify/adt-plugin-gcts`,
+    // whose `format.export` deserialises this into an AdkObject. In
+    // dry-run the diff stage will see no such interface on the mock ADT
+    // server and tag it `create`; apply is skipped entirely.
     const dir = mkdtempSync(join(tmpdir(), 'adt-checkin-gcts-'));
+    const intfDir = join(dir, 'src', 'zpkg_checkin');
+    mkdirSync(intfDir, { recursive: true });
+
+    writeFileSync(
+      join(intfDir, 'zif_checkin_parity.intf.json'),
+      JSON.stringify(
+        {
+          header: {
+            formatVersion: '1.0',
+            description: 'Checkin parity interface',
+            originalLanguage: 'en',
+          },
+          interface: { unicodeChecksActive: true },
+        },
+        null,
+        2,
+      ) + '\n',
+      'utf-8',
+    );
+    writeFileSync(
+      join(intfDir, 'zif_checkin_parity.intf.abap'),
+      'INTERFACE zif_checkin_parity PUBLIC.\nENDINTERFACE.\n',
+      'utf-8',
+    );
 
     const cli = await runCliCommand(harness, [
       'checkin',
@@ -121,19 +148,115 @@ describe('CLI + MCP parity (checkin)', () => {
       '--format',
       'gcts',
       '--dry-run',
+      '--json',
     ]);
-    expect(cli.exitCode).toBe(1);
-    const cliErr = cli.stderr + cli.stdout;
-    expect(cliErr).toMatch(/gcts|format\.export|deserialise/i);
+    expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
+    const cliJson = cli.json as {
+      discovered: number;
+      format: string;
+      groups: Array<{
+        entries: Array<{ name: string; type: string; action: string }>;
+      }>;
+    };
+    expect(cliJson.format).toBe('gcts');
+    expect(cliJson.discovered).toBe(1);
+    const cliEntries = cliJson.groups.flatMap((g) => g.entries);
+    expect(cliEntries).toHaveLength(1);
+    // Name assertion is relaxed: the harness mock ADT server may serve a
+    // canned interface fixture for the INTF GET, and `diffObject` lets
+    // `load()` run. What we care about here is that the gCTS files were
+    // deserialised into exactly one INTF AdkObject — i.e. that
+    // `format.export` is wired end-to-end through both surfaces.
+    expect(cliEntries[0].type.toUpperCase()).toMatch(/^INTF/);
 
     const mcp = await callMcpTool(harness, 'checkin', {
       sourceDir: dir,
       format: 'gcts',
       dryRun: true,
     });
-    expect(mcp.isError).toBe(true);
-    const mcpErr = JSON.stringify(mcp.json);
-    expect(mcpErr).toMatch(/gcts|format\.export|deserialise/i);
+    expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
+    const mcpJson = mcp.json as {
+      discovered: number;
+      format: string;
+      totals: { failed: number };
+    };
+    expect(mcpJson.format).toBe('gcts');
+    expect(mcpJson.discovered).toBe(1);
+    expect(mcpJson.totals.failed).toBe(0);
+  });
+
+  it('parity: `--format abapgit` reconstructs AdkObjects from an abapGit-shaped tree', async () => {
+    // Parity companion to the gCTS case above: proves that the same
+    // CheckinService pipeline works identically against abapGit files.
+    const dir = mkdtempSync(join(tmpdir(), 'adt-checkin-ag-'));
+    const intfDir = join(dir, 'src');
+    mkdirSync(intfDir, { recursive: true });
+
+    writeFileSync(
+      join(dir, '.abapgit.xml'),
+      `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+    <asx:values>
+      <DATA>
+        <MASTER_LANGUAGE>E</MASTER_LANGUAGE>
+        <STARTING_FOLDER>/src/</STARTING_FOLDER>
+        <FOLDER_LOGIC>FULL</FOLDER_LOGIC>
+      </DATA>
+    </asx:values>
+  </asx:abap>
+</abapGit>
+`,
+      'utf-8',
+    );
+    writeFileSync(
+      join(intfDir, 'zif_checkin_parity.intf.xml'),
+      `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_INTF" serializer_version="v1.0.0">
+  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+    <asx:values>
+      <VSEOINTERF>
+        <CLSNAME>ZIF_CHECKIN_PARITY</CLSNAME>
+        <LANGU>E</LANGU>
+        <DESCRIPT>Checkin parity interface</DESCRIPT>
+        <EXPOSURE>2</EXPOSURE>
+        <STATE>1</STATE>
+        <UNICODE>X</UNICODE>
+      </VSEOINTERF>
+    </asx:values>
+  </asx:abap>
+</abapGit>
+`,
+      'utf-8',
+    );
+    writeFileSync(
+      join(intfDir, 'zif_checkin_parity.intf.abap'),
+      'INTERFACE zif_checkin_parity PUBLIC.\nENDINTERFACE.\n',
+      'utf-8',
+    );
+
+    const cli = await runCliCommand(harness, [
+      'checkin',
+      dir,
+      '--format',
+      'abapgit',
+      '--dry-run',
+      '--json',
+    ]);
+    expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
+    const cliJson = cli.json as { discovered: number; format: string };
+    expect(cliJson.format).toBe('abapgit');
+    expect(cliJson.discovered).toBe(1);
+
+    const mcp = await callMcpTool(harness, 'checkin', {
+      sourceDir: dir,
+      format: 'abapgit',
+      dryRun: true,
+    });
+    expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
+    const mcpJson = mcp.json as { discovered: number; format: string };
+    expect(mcpJson.format).toBe('abapgit');
+    expect(mcpJson.discovered).toBe(1);
   });
 
   it('parity: rejects unknown format spec', async () => {
