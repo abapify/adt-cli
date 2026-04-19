@@ -1,6 +1,16 @@
-# Format-Plugin API
+---
+title: Format Plugins
+sidebar_position: 4
+---
 
-_Status_: accepted (E05)
+# Format Plugins
+
+_Status_: accepted (E05). Implemented in `@abapify/adt-plugin-abapgit`
+(reference) and `@abapify/adt-plugin-gcts`. See also:
+[Plugins → Overview](../plugins/overview),
+[SDK → adt-plugin](../sdk/packages/adt-plugin),
+[SDK → adt-plugin-abapgit](../sdk/packages/adt-plugin-abapgit),
+[SDK → adt-plugin-gcts](../sdk/packages/adt-plugin-gcts).
 
 ## Problem
 

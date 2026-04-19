@@ -1,0 +1,19 @@
+# Netlify build config for the Docusaurus site under website/.
+#
+# The site is self-contained: website/ has its own package.json and build script
+# (`docusaurus build`), so Netlify only needs to install deps and build inside
+# that directory.
+#
+# NOTE: Netlify's public build runners resolve dependencies from the public npm
+# registry. If you are deploying from a network that requires a private mirror,
+# set BUN_CONFIG_REGISTRY as a build environment variable in the Netlify UI —
+# do not hardcode registry URLs here.
+
+[build]
+  base = "website"
+  command = "bun install && bun run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NX_DAEMON = "false"

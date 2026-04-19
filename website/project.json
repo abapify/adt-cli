@@ -1,0 +1,36 @@
+{
+  "name": "adt-cli-docs",
+  "sourceRoot": "website",
+  "projectType": "application",
+  "targets": {
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run start",
+        "cwd": "website"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run build",
+        "cwd": "website"
+      },
+      "outputs": ["{projectRoot}/build"]
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run serve",
+        "cwd": "website"
+      }
+    },
+    "clear": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun run clear",
+        "cwd": "website"
+      }
+    }
+  }
+}

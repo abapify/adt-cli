@@ -1,0 +1,23 @@
+{
+  "name": "adt-cli-docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "docusaurus": "bunx docusaurus",
+    "start": "bunx docusaurus start",
+    "build": "bunx docusaurus build",
+    "serve": "bunx docusaurus serve",
+    "clear": "bunx docusaurus clear"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.10.0",
+    "@docusaurus/preset-classic": "3.10.0",
+    "@easyops-cn/docusaurus-search-local": "0.55.1",
+    "prism-react-renderer": "2.4.1",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "engines": {
+    "node": ">=20.0"
+  }
+}

@@ -151,3 +151,8 @@ package-lock.json
 
 .nx/polygraph
 .devin/config.local.json
+
+# Docusaurus
+website/.docusaurus/
+website/build/
+website/node_modules/
