@@ -1,0 +1,38 @@
+{
+  "name": "@abapify/openai-codegen",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.1.0",
+  "description": "Deterministic OpenAPI → ABAP client code generator. Emits a single zero-dependency ABAP class per OpenAPI spec, targeting SAP Cloud / on-prem profiles, packaged as abapGit or gCTS.",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "bin": {
+    "openai-codegen": "./dist/cli.mjs"
+  },
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./cli": "./dist/cli.mjs",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@abapify/abap-ast": "workspace:*",
+    "@apidevtools/swagger-parser": "^10.1.0",
+    "commander": "^11.1.0",
+    "yaml": "^2.5.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "openapi",
+    "swagger",
+    "abap",
+    "codegen",
+    "sap",
+    "steampunk"
+  ],
+  "author": "abapify",
+  "license": "MIT"
+}
