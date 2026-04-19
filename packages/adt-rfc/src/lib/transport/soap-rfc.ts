@@ -110,8 +110,7 @@ interface Token {
   text?: string;
 }
 
-const TAG_RE =
-  /<\/?([A-Za-z_][\w.:-]*)\s*([^>]*?)\/?>|<!\[CDATA\[([\s\S]*?)\]\]>/g;
+const TAG_RE = /<\/?([A-Za-z_][\w.:-]*)[^>]*>|<!\[CDATA\[([\s\S]*?)\]\]>/g;
 
 function tokenize(xml: string): Token[] {
   const tokens: Token[] = [];
@@ -124,8 +123,8 @@ function tokenize(xml: string): Token[] {
       const text = xml.slice(lastIndex, m.index);
       if (text.trim().length > 0) tokens.push({ kind: 'text', text });
     }
-    if (m[3] !== undefined) {
-      tokens.push({ kind: 'text', text: m[3] });
+    if (m[2] !== undefined) {
+      tokens.push({ kind: 'text', text: m[2] });
     } else {
       const raw = m[0];
       const name = m[1];

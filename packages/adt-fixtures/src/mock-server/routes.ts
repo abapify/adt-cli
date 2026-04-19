@@ -1363,30 +1363,53 @@ export function matchRoute(
     const json = (body: string) =>
       ({ status: 200, body, contentType: 'application/json' }) as RouteResult;
 
+    // Strip query string so we can use simple endsWith/includes checks
+    // (avoids backtracking-prone regexes).
+    const path = url.split('?', 1)[0];
+    // An entity key like ('some-id') has no '/' inside and is at end.
+    const hasEntityKey = (segment: string): boolean => {
+      const idx = path.indexOf(`/${segment}('`);
+      if (idx === -1) return false;
+      const afterOpen = idx + segment.length + 3; // after "/<segment>('"
+      const closeIdx = path.indexOf("')", afterOpen);
+      if (closeIdx === -1) return false;
+      // Nothing (except maybe a trailing sub-path) should follow — here we
+      // require the key to terminate the path for single-entity endpoints.
+      return closeIdx + 2 === path.length;
+    };
+    const hasEntityKeySubpath = (segment: string, sub: string): boolean => {
+      const idx = path.indexOf(`/${segment}('`);
+      if (idx === -1) return false;
+      const afterOpen = idx + segment.length + 3;
+      const closeIdx = path.indexOf("')", afterOpen);
+      if (closeIdx === -1) return false;
+      return path.slice(closeIdx + 2) === `/${sub}`;
+    };
+
     // /Chips('<id>') — single tile
-    if (/\/Chips\('[^']+'\)(\?.*)?$/.test(url) && m === 'GET') {
+    if (m === 'GET' && hasEntityKey('Chips')) {
       return json(f.flpTileSingle);
     }
     // /Catalogs('<id>')/Chips — tiles in a catalog
-    if (/\/Catalogs\('[^']+'\)\/Chips(\?.*)?$/.test(url) && m === 'GET') {
+    if (m === 'GET' && hasEntityKeySubpath('Catalogs', 'Chips')) {
       return json(f.flpTileList);
     }
     // /Catalogs('<id>') — single catalog
-    if (/\/Catalogs\('[^']+'\)(\?.*)?$/.test(url) && m === 'GET') {
+    if (m === 'GET' && hasEntityKey('Catalogs')) {
       return json(f.flpCatalogSingle);
     }
     // /Pages('<id>') — single page / group (reuse list fixture's first item)
-    if (/\/Pages\('[^']+'\)(\?.*)?$/.test(url) && m === 'GET') {
+    if (m === 'GET' && hasEntityKey('Pages')) {
       return json(f.flpGroupList);
     }
     // Entity-set lists
-    if (/\/Catalogs(\?.*)?$/.test(url) && m === 'GET') {
+    if (m === 'GET' && path.endsWith('/Catalogs')) {
       return json(f.flpCatalogList);
     }
-    if (/\/Pages(\?.*)?$/.test(url) && m === 'GET') {
+    if (m === 'GET' && path.endsWith('/Pages')) {
       return json(f.flpGroupList);
     }
-    if (/\/Chips(\?.*)?$/.test(url) && m === 'GET') {
+    if (m === 'GET' && path.endsWith('/Chips')) {
       return json(f.flpTileList);
     }
   }

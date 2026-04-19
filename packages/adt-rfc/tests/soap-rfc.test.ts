@@ -113,7 +113,6 @@ describe('buildRfcSoapEnvelope / parseRfcSoapResponse round-trip', () => {
     // Simulated response echoes the REQUTEXT → ECHOTEXT verbatim
     const echoed = req
       .replace('<urn:STFC_CONNECTION ', '<rfc:STFC_CONNECTION.Response ')
-      .replace('urn:sap-com', 'urn:sap-com') // noop
       .replace('<REQUTEXT>', '<ECHOTEXT>')
       .replace('</REQUTEXT>', '</ECHOTEXT>')
       .replace('</urn:STFC_CONNECTION>', '</rfc:STFC_CONNECTION.Response>')

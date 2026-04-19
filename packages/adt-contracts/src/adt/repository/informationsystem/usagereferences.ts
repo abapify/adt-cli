@@ -68,7 +68,14 @@ export function buildUsageScopeRequestXml(): string {
  */
 export function buildUsageReferenceRequestXml(scopeResultXml: string): string {
   // Strip the XML prolog and outer usageScopeResult tags, re-tag as <scope>.
-  const noProlog = scopeResultXml.replace(/<\?xml[^>]+\?>\s*/, '');
+  // Use indexOf-based slicing for the prolog (linear, no regex backtracking).
+  let noProlog = scopeResultXml;
+  if (noProlog.startsWith('<?xml')) {
+    const prologEnd = noProlog.indexOf('?>');
+    if (prologEnd !== -1) {
+      noProlog = noProlog.slice(prologEnd + 2).replace(/^\s+/, '');
+    }
+  }
   const scopeElement = noProlog.replace(
     /usagereferences:usageScopeResult/g,
     'usagereferences:scope',

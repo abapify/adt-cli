@@ -140,9 +140,10 @@ export function parseGctsFilename(
  * Matches the `adtUriToAbapGitPath` helper in the abapGit plugin.
  */
 export function adtUriToGctsPath(uri: string): string | undefined {
-  const match = uri.match(/\/sap\/bc\/adt\/(.+)$/);
-  if (!match) return undefined;
-  const tail = match[1];
+  const ADT_PREFIX = '/sap/bc/adt/';
+  if (!uri.startsWith(ADT_PREFIX)) return undefined;
+  const tail = uri.slice(ADT_PREFIX.length);
+  if (tail.length === 0) return undefined;
 
   // Common ADT URI → (type, name) table. Mirrors abapGit's mapping.
   const TABLE: Array<[RegExp, string]> = [

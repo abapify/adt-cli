@@ -211,7 +211,7 @@ describeReal('E15 wb (workbench navigation)', () => {
       );
       captureFixture(
         body as unknown as Record<string, unknown>,
-        'wb/real-object-structure-class.json',
+        'wb/real-object-structure-class.xml',
       );
       expect(body).toBeDefined();
       return;

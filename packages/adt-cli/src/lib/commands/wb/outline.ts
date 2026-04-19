@@ -18,11 +18,11 @@ async function fetchObjectStructure(
   client: AdtClient,
   objectName: string,
   objectType: string | undefined,
-  version?: 'active' | 'inactive',
+  version: 'active' | 'inactive',
 ): Promise<unknown> {
   const name = objectName.toLowerCase();
   const type = objectType?.toUpperCase().split('/')[0];
-  const structureOptions = version ? { version } : {};
+  const structureOptions = { version };
 
   switch (type) {
     case 'PROG':
@@ -44,8 +44,7 @@ async function fetchObjectStructure(
         (type && resolveObjectUriFromType(type, objectName)) ||
         (await resolveObjectUri(client, objectName, objectType));
       if (!uri) throw new Error(`Object '${objectName}' not found`);
-      const q = version ? `?version=${version}` : '';
-      return client.fetch(`${uri}/objectstructure${q}`, {
+      return client.fetch(`${uri}/objectstructure?version=${version}`, {
         method: 'GET',
         headers: { Accept: 'application/json' },
       });
