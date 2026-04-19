@@ -110,7 +110,19 @@ interface Token {
   text?: string;
 }
 
-const TAG_RE = /<\/?([A-Za-z_][\w.:-]*)[^>]*>|<!\[CDATA\[([\s\S]*?)\]\]>/g;
+// Two non-overlapping alternatives: CDATA first (has an explicit ]]> terminator),
+// then a plain tag body `<[^>]*>`. The tag body is a single class with `>` as the
+// hard stop → no intra-alternative backtracking. Tag name is extracted post-match
+// via tagNameOf() to avoid CodeQL js/polynomial-redos flagged by splitting the
+// pattern into name + attrs within the same alternative.
+const TAG_RE = /<!\[CDATA\[([\s\S]*?)\]\]>|<([^>]*)>/g;
+
+const TAG_NAME_RE = /^\/?([A-Za-z_][\w.:-]*)/;
+
+function tagNameOf(inside: string): string | undefined {
+  const m = TAG_NAME_RE.exec(inside);
+  return m?.[1];
+}
 
 function tokenize(xml: string): Token[] {
   const tokens: Token[] = [];
@@ -123,12 +135,17 @@ function tokenize(xml: string): Token[] {
       const text = xml.slice(lastIndex, m.index);
       if (text.trim().length > 0) tokens.push({ kind: 'text', text });
     }
-    if (m[2] !== undefined) {
-      tokens.push({ kind: 'text', text: m[2] });
+    if (m[1] !== undefined) {
+      // CDATA content
+      tokens.push({ kind: 'text', text: m[1] });
     } else {
       const raw = m[0];
-      const name = m[1];
-      if (raw.startsWith('</')) {
+      const inside = m[2] ?? '';
+      const name = tagNameOf(inside);
+      if (!name) {
+        // malformed tag body without a name — treat as literal text
+        tokens.push({ kind: 'text', text: raw });
+      } else if (raw.startsWith('</')) {
         tokens.push({ kind: 'close', name });
       } else if (raw.endsWith('/>')) {
         tokens.push({ kind: 'self', name });

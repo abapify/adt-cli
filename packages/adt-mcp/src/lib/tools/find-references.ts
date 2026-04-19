@@ -18,6 +18,7 @@
  */
 
 import { z } from 'zod';
+import { DOMParser } from '@xmldom/xmldom';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
@@ -39,10 +40,13 @@ interface Reference {
   packageName?: string;
 }
 
+const NS_USAGE = 'http://www.sap.com/adt/ris/usageReferences';
+const NS_CORE = 'http://www.sap.com/adt/core';
+
 /**
  * Extract a compact list of referenced objects from the usageReferenceResult
- * XML returned by step 2. A lightweight regex walk is sufficient because the
- * schema is stable and the response is single-namespaced.
+ * XML returned by step 2. Uses a namespace-aware DOM walk (linear cost) so
+ * that we don't trip S5852 / js/polynomial-redos on crafted responses.
  */
 function parseReferences(
   xml: string,
@@ -52,41 +56,39 @@ function parseReferences(
   description?: string;
   results: Reference[];
 } {
-  const numberOfResults = /numberOfResults="([^"]*)"/.exec(xml)?.[1];
-  const description = /resultDescription="([^"]*)"/.exec(xml)?.[1];
+  const doc = new DOMParser({
+    onError: () => {
+      /* swallow parse warnings/errors – caller only cares about extracted fields */
+    },
+  }).parseFromString(xml, 'text/xml');
 
+  const root = doc.documentElement;
+  const numberOfResults = root?.getAttribute('numberOfResults') || undefined;
+  const description = root?.getAttribute('resultDescription') || undefined;
+
+  const refs = doc.getElementsByTagNameNS(NS_USAGE, 'referencedObject');
   const results: Reference[] = [];
-  // Each <usagereferences:referencedObject …>…</usagereferences:referencedObject>
-  const refBlockRe =
-    /<usagereferences:referencedObject\s+([^>]*)>([\s\S]*?)<\/usagereferences:referencedObject>/g;
-
-  let m: RegExpExecArray | null;
-  while ((m = refBlockRe.exec(xml)) !== null && results.length < max) {
-    const attrs = m[1];
-    const body = m[2];
-
+  for (let i = 0; i < refs.length && results.length < max; i++) {
+    const el = refs.item(i);
+    if (!el) continue;
     const ref: Reference = {
-      uri: /uri="([^"]*)"/.exec(attrs)?.[1],
-      parentUri: /parentUri="([^"]*)"/.exec(attrs)?.[1],
-      isResult: /isResult="([^"]*)"/.exec(attrs)?.[1],
-      usageInformation: /usageInformation="([^"]*)"/.exec(attrs)?.[1],
+      uri: el.getAttribute('uri') || undefined,
+      parentUri: el.getAttribute('parentUri') || undefined,
+      isResult: el.getAttribute('isResult') || undefined,
+      usageInformation: el.getAttribute('usageInformation') || undefined,
     };
-
-    const adtObjAttrs = /<usagereferences:adtObject\s+([^/>]*)\/?>/.exec(
-      body,
-    )?.[1];
-    if (adtObjAttrs) {
-      ref.name = /adtcore:name="([^"]*)"/.exec(adtObjAttrs)?.[1];
-      ref.type = /adtcore:type="([^"]*)"/.exec(adtObjAttrs)?.[1];
-      ref.responsible = /adtcore:responsible="([^"]*)"/.exec(adtObjAttrs)?.[1];
+    const adtObj = el.getElementsByTagNameNS(NS_USAGE, 'adtObject').item(0);
+    if (adtObj) {
+      ref.name = adtObj.getAttributeNS(NS_CORE, 'name') || undefined;
+      ref.type = adtObj.getAttributeNS(NS_CORE, 'type') || undefined;
+      ref.responsible =
+        adtObj.getAttributeNS(NS_CORE, 'responsible') || undefined;
     }
-
-    const pkgRef = /<adtcore:packageRef\s+([^/>]*)\/?>/.exec(body)?.[1];
+    const pkgRef = el.getElementsByTagNameNS(NS_CORE, 'packageRef').item(0);
     if (pkgRef) {
-      ref.packageName = /adtcore:name="([^"]*)"/.exec(pkgRef)?.[1];
-      ref.packageUri = /adtcore:uri="([^"]*)"/.exec(pkgRef)?.[1];
+      ref.packageName = pkgRef.getAttributeNS(NS_CORE, 'name') || undefined;
+      ref.packageUri = pkgRef.getAttributeNS(NS_CORE, 'uri') || undefined;
     }
-
     results.push(ref);
   }
 

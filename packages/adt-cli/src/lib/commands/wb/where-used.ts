@@ -13,6 +13,7 @@
  */
 
 import { Command } from 'commander';
+import { DOMParser } from '@xmldom/xmldom';
 import {
   buildUsageReferenceRequestXml,
   buildUsageScopeRequestXml,
@@ -28,6 +29,14 @@ interface Usage {
   packageName?: string;
 }
 
+const NS_USAGE = 'http://www.sap.com/adt/ris/usageReferences';
+const NS_CORE = 'http://www.sap.com/adt/core';
+
+/**
+ * Parse the `usagereferences:usageReferenceResult` XML using a real DOM
+ * parser (linear, namespace-aware) instead of regexes. This avoids the
+ * super-linear backtracking patterns flagged by S5852 / js/polynomial-redos.
+ */
 function parseUsages(
   xml: string,
   max: number,
@@ -36,28 +45,34 @@ function parseUsages(
   description?: string;
   usages: Usage[];
 } {
-  const numberOfResults = /numberOfResults="([^"]*)"/.exec(xml)?.[1];
-  const description = /resultDescription="([^"]*)"/.exec(xml)?.[1];
-  const refBlockRe =
-    /<usagereferences:referencedObject\s+([^>]*)>([\s\S]*?)<\/usagereferences:referencedObject>/g;
+  const doc = new DOMParser({
+    onError: () => {
+      /* swallow parse warnings/errors – caller only cares about extracted fields */
+    },
+  }).parseFromString(xml, 'text/xml');
+
+  const root = doc.documentElement;
+  const numberOfResults = root?.getAttribute('numberOfResults') || undefined;
+  const description = root?.getAttribute('resultDescription') || undefined;
+
+  const refs = doc.getElementsByTagNameNS(NS_USAGE, 'referencedObject');
   const usages: Usage[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = refBlockRe.exec(xml)) !== null && usages.length < max) {
-    const attrs = m[1];
-    const body = m[2];
+  for (let i = 0; i < refs.length && usages.length < max; i++) {
+    const el = refs.item(i);
+    if (!el) continue;
     const u: Usage = {
-      uri: /uri="([^"]*)"/.exec(attrs)?.[1],
-      parentUri: /parentUri="([^"]*)"/.exec(attrs)?.[1],
+      uri: el.getAttribute('uri') || undefined,
+      parentUri: el.getAttribute('parentUri') || undefined,
     };
-    const adtObjAttrs = /<usagereferences:adtObject\s+([^/>]*)\/?>/.exec(
-      body,
-    )?.[1];
-    if (adtObjAttrs) {
-      u.name = /adtcore:name="([^"]*)"/.exec(adtObjAttrs)?.[1];
-      u.type = /adtcore:type="([^"]*)"/.exec(adtObjAttrs)?.[1];
+    const adtObj = el.getElementsByTagNameNS(NS_USAGE, 'adtObject').item(0);
+    if (adtObj) {
+      u.name = adtObj.getAttributeNS(NS_CORE, 'name') || undefined;
+      u.type = adtObj.getAttributeNS(NS_CORE, 'type') || undefined;
     }
-    const pkgRef = /<adtcore:packageRef\s+([^/>]*)\/?>/.exec(body)?.[1];
-    if (pkgRef) u.packageName = /adtcore:name="([^"]*)"/.exec(pkgRef)?.[1];
+    const pkgRef = el.getElementsByTagNameNS(NS_CORE, 'packageRef').item(0);
+    if (pkgRef) {
+      u.packageName = pkgRef.getAttributeNS(NS_CORE, 'name') || undefined;
+    }
     usages.push(u);
   }
   return { numberOfResults, description, usages };
