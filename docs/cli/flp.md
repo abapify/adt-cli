@@ -11,34 +11,34 @@ Page-Builder APIs used by the FLP Designer.
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt flp list-catalogs` | List Fiori Launchpad catalogs. |
-| `adt flp list-groups` | List Fiori Launchpad groups (Page Builder "Pages"). |
-| `adt flp list-tiles` | List Fiori Launchpad tiles (CHIPs). |
-| `adt flp get-tile <id>` | Get a single Fiori Launchpad tile by ID. |
+| Command                 | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `adt flp list-catalogs` | List Fiori Launchpad catalogs.                      |
+| `adt flp list-groups`   | List Fiori Launchpad groups (Page Builder "Pages"). |
+| `adt flp list-tiles`    | List Fiori Launchpad tiles (CHIPs).                 |
+| `adt flp get-tile <id>` | Get a single Fiori Launchpad tile by ID.            |
 
 ## Options
 
 ### `list-catalogs` / `list-groups`
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description     |
+| -------- | --------------- |
 | `--json` | Output as JSON. |
 
 ### `list-tiles`
 
-| Flag | Description |
-| --- | --- |
+| Flag                 | Description                                        |
+| -------------------- | -------------------------------------------------- |
 | `-c, --catalog <id>` | Restrict to tiles belonging to a specific catalog. |
-| `--json` | Output as JSON. |
+| `--json`             | Output as JSON.                                    |
 
 ### `get-tile <id>`
 
-| Argument | Description |
-| --- | --- |
-| `<id>` | CHIP ID (e.g. `X-SAP-UI2-CHIP:/UI2/STATIC_APPLAUNCHER`). |
-| `--json` | Output as JSON. |
+| Argument | Description                                              |
+| -------- | -------------------------------------------------------- |
+| `<id>`   | CHIP ID (e.g. `X-SAP-UI2-CHIP:/UI2/STATIC_APPLAUNCHER`). |
+| `--json` | Output as JSON.                                          |
 
 ## Examples
 
@@ -57,4 +57,4 @@ adt flp get-tile 'X-SAP-UI2-CHIP:/UI2/STATIC_APPLAUNCHER' --json
 ## See also
 
 - [`rap`](./rap) — service definitions/bindings that power FLP apps
-- <!-- TODO: link after D1b --> MCP tools `flp_list_catalogs`, `flp_list_tiles`
+- MCP tools [`list_flp_catalogs`](/mcp/tools/list_flp_catalogs), [`list_flp_tiles`](/mcp/tools/list_flp_tiles), [`get_flp_tile`](/mcp/tools/get_flp_tile)

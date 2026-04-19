@@ -11,25 +11,25 @@ Manage authenticated sessions with SAP systems. Sessions are cached in
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt auth login` | Login to ADT — supports Basic Auth and Browser-based SSO. |
-| `adt auth logout` | Logout from ADT. |
-| `adt auth status` | Check authentication status. |
-| `adt auth list` (alias `ls`) | List all authenticated SAP systems. |
-| `adt auth set-default <sid>` | Set the default SAP system. |
-| `adt auth refresh` | Refresh an existing session (re-runs the plugin if credentials expired). |
+| Command                      | Description                                                              |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `adt auth login`             | Login to ADT — supports Basic Auth and Browser-based SSO.                |
+| `adt auth logout`            | Logout from ADT.                                                         |
+| `adt auth status`            | Check authentication status.                                             |
+| `adt auth list` (alias `ls`) | List all authenticated SAP systems.                                      |
+| `adt auth set-default <sid>` | Set the default SAP system.                                              |
+| `adt auth refresh`           | Refresh an existing session (re-runs the plugin if credentials expired). |
 
 ## Options
 
 ### `login`
 
-| Flag | Description |
-| --- | --- |
-| `--service-key <path>` | Path to a BTP service key JSON file for service-key login. |
-| `--redirect-uri <uri>` | OAuth callback redirect URI (e.g. Codespaces/tunnel URL). |
-| `--insecure` | Allow insecure SSL connections (ignore certificate errors). |
-| `--sid <sid>` *(global)* | System ID — skips the interactive destination picker. |
+| Flag                     | Description                                                 |
+| ------------------------ | ----------------------------------------------------------- |
+| `--service-key <path>`   | Path to a BTP service key JSON file for service-key login.  |
+| `--redirect-uri <uri>`   | OAuth callback redirect URI (e.g. Codespaces/tunnel URL).   |
+| `--insecure`             | Allow insecure SSL connections (ignore certificate errors). |
+| `--sid <sid>` _(global)_ | System ID — skips the interactive destination picker.       |
 
 If no `--sid` is provided and the config file (`adt.config.ts`) declares
 destinations, `adt` shows an interactive list; otherwise it falls back to a
@@ -37,15 +37,15 @@ fully manual URL + basic-auth prompt.
 
 ### `logout` / `status` / `refresh`
 
-| Flag | Description |
-| --- | --- |
+| Flag          | Description                                            |
+| ------------- | ------------------------------------------------------ |
 | `--sid <sid>` | System ID to operate on (defaults to current default). |
 
 ### `set-default`
 
-| Argument | Description |
-| --- | --- |
-| `<sid>` | System ID to set as default (e.g. `BHF`, `S0D`). |
+| Argument | Description                                      |
+| -------- | ------------------------------------------------ |
+| `<sid>`  | System ID to set as default (e.g. `BHF`, `S0D`). |
 
 ### `list`
 
@@ -74,4 +74,4 @@ adt auth logout --sid BHF
 ## See also
 
 - `@abapify/adt-auth` — the underlying session/credential library
-- <!-- TODO: link after D1b --> MCP tool `auth_status`
+- MCP server [overview](/mcp/overview) — how to expose the active session to AI clients

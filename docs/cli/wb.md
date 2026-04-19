@@ -11,52 +11,52 @@ the ADT "workbench" APIs used by Eclipse's navigation and hierarchy views.
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt wb where-used <object>` | Find all usages of an ABAP object or symbol. |
-| `adt wb callers <object>` | Find callers of a routine / class / function. |
-| `adt wb callees <object>` | Find things a routine / class / function calls. |
-| `adt wb definition <reference>` | Resolve a symbol / object name to its definition. |
-| `adt wb outline <object>` | Show the structural outline (includes, methods, attributes, ...). |
+| Command                         | Description                                                       |
+| ------------------------------- | ----------------------------------------------------------------- |
+| `adt wb where-used <object>`    | Find all usages of an ABAP object or symbol.                      |
+| `adt wb callers <object>`       | Find callers of a routine / class / function.                     |
+| `adt wb callees <object>`       | Find things a routine / class / function calls.                   |
+| `adt wb definition <reference>` | Resolve a symbol / object name to its definition.                 |
+| `adt wb outline <object>`       | Show the structural outline (includes, methods, attributes, ...). |
 
 ## Common options
 
 All subcommands share these flags (`callers`, `callees`, `where-used`,
 `outline`):
 
-| Flag | Description |
-| --- | --- |
+| Flag                | Description                                                |
+| ------------------- | ---------------------------------------------------------- |
 | `-t, --type <type>` | Object type (`CLAS`, `PROG`, `INTF`, `FUGR`, `TABL`, ...). |
-| `--uri <uri>` | Direct ADT URI (skips name resolution). |
+| `--uri <uri>`       | Direct ADT URI (skips name resolution).                    |
 
 ### `where-used`
 
-| Flag | Description |
-| --- | --- |
+| Flag                 | Description                                 |
+| -------------------- | ------------------------------------------- |
 | `-m, --max <number>` | Maximum number of results (default: `100`). |
-| `--json` | Output results as JSON. |
+| `--json`             | Output results as JSON.                     |
 
 ### `callers` / `callees`
 
-| Flag | Description |
-| --- | --- |
+| Flag                 | Description                                |
+| -------------------- | ------------------------------------------ |
 | `-m, --max <number>` | Maximum number of results (default: `50`). |
-| `--json` | Output results as JSON. |
+| `--json`             | Output results as JSON.                    |
 
 ### `definition`
 
-| Flag | Description |
-| --- | --- |
+| Flag                | Description                                        |
+| ------------------- | -------------------------------------------------- |
 | `-t, --type <type>` | Object type (`CLAS`, `PROG`, `DTEL`, `TABL`, ...). |
-| `--json` | Output result as JSON. |
+| `--json`            | Output result as JSON.                             |
 
 ### `outline`
 
-| Flag | Description |
-| --- | --- |
-| `-t, --type <type>` | Object type hint. |
-| `--version <v>` | Object version to inspect: `active` \| `inactive` (default: `active`). |
-| `--json` | Output as JSON (default pretty-prints JSON structure). |
+| Flag                | Description                                                            |
+| ------------------- | ---------------------------------------------------------------------- |
+| `-t, --type <type>` | Object type hint.                                                      |
+| `--version <v>`     | Object version to inspect: `active` \| `inactive` (default: `active`). |
+| `--json`            | Output as JSON (default pretty-prints JSON structure).                 |
 
 ## Examples
 
@@ -79,4 +79,4 @@ adt wb outline ZCL_DEMO --version inactive
 
 - [`get`](./get) — quick name → URI resolution
 - [`search`](./search) — fuzzy / wildcard search
-- <!-- TODO: link after D1b --> MCP tools `find_references`, `get_outline`
+- MCP tools [`find_references`](/mcp/tools/find_references), [`get_object_structure`](/mcp/tools/get_object_structure)

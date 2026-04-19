@@ -16,18 +16,18 @@ objects to run tests for.
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
-| `-p, --package <package>` | Run tests on package. |
-| `-o, --object <uri>` | Run tests on specific ADT object URI. |
-| `-c, --class <name>` | Run tests on ABAP class (e.g. `ZCL_MY_CLASS`). |
-| `-t, --transport <transport>` | Run tests on transport request (e.g. `NPLK900042`). |
-| `-f, --from-file <file>` | Run tests on objects listed in file (one URI per line). |
-| `--format <format>` | Output format: `console`, `json`, `junit`, `sonar`. |
-| `--output <file>` | Path to write the test report to (otherwise stdout). |
-| `--coverage` | Also request and write a coverage report. |
-| `--coverage-output <file>` | Destination file for the coverage report. |
-| `--coverage-format <format>` | Coverage format: `jacoco` \| `sonar-generic`. |
+| Flag                          | Description                                             |
+| ----------------------------- | ------------------------------------------------------- |
+| `-p, --package <package>`     | Run tests on package.                                   |
+| `-o, --object <uri>`          | Run tests on specific ADT object URI.                   |
+| `-c, --class <name>`          | Run tests on ABAP class (e.g. `ZCL_MY_CLASS`).          |
+| `-t, --transport <transport>` | Run tests on transport request (e.g. `NPLK900042`).     |
+| `-f, --from-file <file>`      | Run tests on objects listed in file (one URI per line). |
+| `--format <format>`           | Output format: `console`, `json`, `junit`, `sonar`.     |
+| `--output <file>`             | Path to write the test report to (otherwise stdout).    |
+| `--coverage`                  | Also request and write a coverage report.               |
+| `--coverage-output <file>`    | Destination file for the coverage report.               |
+| `--coverage-format <format>`  | Coverage format: `jacoco` \| `sonar-generic`.           |
 
 ## Examples
 
@@ -58,5 +58,5 @@ adt aunit -t DEVK900001 \
 ## See also
 
 - `@abapify/adt-aunit` — plugin source
-- <!-- TODO: link after D1b --> MCP tool `run_unit_tests`
+- MCP tool [`run_unit_tests`](/mcp/tools/run_unit_tests)
 - [`check`](./check) — static syntax checks (faster, but not runtime)

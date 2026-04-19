@@ -155,5 +155,3 @@ it('round-trips a class', async () => {
 
 See the [adt-plugin-abapgit AGENTS.md](https://github.com/abapify/adt-cli/blob/main/packages/adt-plugin-abapgit/AGENTS)
 for an exhaustive walkthrough of the XSD → codegen → handler pipeline.
-
-{/_ TODO(D2d): link to architecture page on format plugin lifecycle once written _/}

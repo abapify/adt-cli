@@ -5,6 +5,21 @@
 
 TypeScript monorepo providing a CLI and supporting libraries for [SAP ABAP Development Tools (ADT)](https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec8641126391014adc9fffe4e204223.html) REST APIs.
 
+## Documentation
+
+Full documentation is published at **[https://adt-cli.netlify.app](https://adt-cli.netlify.app)**.
+
+Key entry points:
+
+- [Getting Started](https://adt-cli.netlify.app/getting-started/installation) — install, authenticate, first commands
+- [CLI Reference](https://adt-cli.netlify.app/cli/overview) — every command and flag
+- [MCP Server](https://adt-cli.netlify.app/mcp/overview) — expose ADT to AI assistants
+- [SDK](https://adt-cli.netlify.app/sdk/packages/overview) — programmatic use from TypeScript
+- [Plugins](https://adt-cli.netlify.app/plugins/overview) — abapGit, gCTS, and writing your own
+- [Architecture](https://adt-cli.netlify.app/architecture/overview) — how the pieces fit together
+
+Sources: documentation lives under [`docs/`](./docs) and the Docusaurus site under [`website/`](./website). Contributions to either are welcome.
+
 ## Packages
 
 ### CLI

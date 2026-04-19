@@ -88,5 +88,3 @@ Both plugin classes have step-by-step guides:
 
 - [Writing a command plugin](./writing-command-plugin)
 - [Writing a format plugin](./writing-format-plugin)
-
-{/_ TODO(D2d): link to architecture page on plugin lifecycle once written _/}

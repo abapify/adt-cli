@@ -23,7 +23,7 @@ adt discovery
 
 `info` confirms the session. `discovery` lists the ADT services your system exposes — make sure `oo/classes`, `aunit`, and `cts/transports` are present.
 
-{/_ screenshot placeholder: adt info output — add in D3 _/}
+<!-- screenshot placeholder: adt info output — add in D3 -->
 
 ## Step 2 — Create a transport
 
@@ -52,7 +52,7 @@ adt package create ZTOUR_DEMO \
   --transport DEVK900555
 ```
 
-{/_ screenshot placeholder: package created — add in D3 _/}
+<!-- screenshot placeholder: package created — add in D3 -->
 
 Reference: [`adt package`](../cli/package.md).
 
@@ -143,7 +143,7 @@ ZCL_TOUR_DEMO
   1 passed, 0 failed, 0 skipped             Coverage 100%
 ```
 
-{/_ screenshot placeholder: aunit pass — add in D3 _/}
+<!-- screenshot placeholder: aunit pass — add in D3 -->
 
 Reference: [`adt aunit`](../cli/aunit.md).
 

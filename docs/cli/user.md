@@ -11,16 +11,16 @@ about the currently authenticated user.
 
 ## Arguments
 
-| Argument | Description |
-| --- | --- |
+| Argument  | Description                                             |
+| --------- | ------------------------------------------------------- |
 | `[query]` | Username or search query (supports wildcards like `*`). |
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
+| Flag                 | Description                                |
+| -------------------- | ------------------------------------------ |
 | `-m, --max <number>` | Maximum number of results (default: `50`). |
-| `--json` | Output results as JSON. |
+| `--json`             | Output results as JSON.                    |
 
 ## Examples
 
@@ -38,4 +38,4 @@ adt user 'PPL*' --json -m 10
 ## See also
 
 - [`info`](./info) — system and session metadata
-- <!-- TODO: link after D1b --> MCP tool `lookup_user`
+- MCP tool [`lookup_user`](/mcp/tools/lookup_user)

@@ -11,19 +11,19 @@ statements through the Eclipse ADT "Data Preview" / Freestyle endpoint.
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
+| Command                            | Description                                  |
+| ---------------------------------- | -------------------------------------------- |
 | `adt datapreview osql <statement>` | Execute an ABAP Open SQL `SELECT` statement. |
 
 ## Options — `osql`
 
-| Argument / Flag | Description |
-| --- | --- |
-| `<statement>` | ABAP SQL `SELECT` statement (quote it). |
-| `-o, --output <format>` | Output format: `human` (default) or `json`. |
-| `-r, --rows <n>` | Maximum number of rows to return (default: `100`). |
-| `--noheadings` | Suppress column headings. |
-| `--noaging` | Disable SAP aging (bypass browser cache flag). |
+| Argument / Flag         | Description                                        |
+| ----------------------- | -------------------------------------------------- |
+| `<statement>`           | ABAP SQL `SELECT` statement (quote it).            |
+| `-o, --output <format>` | Output format: `human` (default) or `json`.        |
+| `-r, --rows <n>`        | Maximum number of rows to return (default: `100`). |
+| `--noheadings`          | Suppress column headings.                          |
+| `--noaging`             | Disable SAP aging (bypass browser cache flag).     |
 
 ## Examples
 
@@ -40,6 +40,6 @@ adt datapreview osql 'SELECT bname FROM usr01' --noheadings -r 1000
 
 ## See also
 
-- <!-- TODO: link after D1b --> MCP tool `run_osql`
+- MCP tools [`run_query`](/mcp/tools/run_query), [`get_table_contents`](/mcp/tools/get_table_contents)
 - [`rfc`](./rfc) — invoke classic RFC function modules
 - [`abap run`](./abap-run) — run an ABAP snippet

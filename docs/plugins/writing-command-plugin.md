@@ -156,5 +156,3 @@ See existing plugins as reference:
 | CLI argument parsing            | Handled by the CLI shell from `options` / `arguments`                             |
 | Session / CSRF / auth           | Handled by the client; don't reimplement                                          |
 | Serialization to disk           | A [format plugin](./writing-format-plugin) if it makes sense as a reusable format |
-
-{/_ TODO(D2d): link to architecture page on command lifecycle once written _/}

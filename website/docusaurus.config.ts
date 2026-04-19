@@ -14,7 +14,7 @@ const config: Config = {
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenMarkdownLinks: 'throw',
 
   i18n: {
     defaultLocale: 'en',
@@ -62,21 +62,21 @@ const config: Config = {
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'docs',
+          to: '/getting-started/installation',
+          label: 'Getting Started',
           position: 'left',
-          label: 'Docs',
         },
+        { to: '/guides/overview', label: 'Guides', position: 'left' },
+        { to: '/cli/overview', label: 'CLI', position: 'left' },
+        { to: '/mcp/overview', label: 'MCP', position: 'left' },
+        { to: '/sdk/packages/overview', label: 'SDK', position: 'left' },
+        { to: '/plugins/overview', label: 'Plugins', position: 'left' },
         {
-          to: '/contributing/overview',
-          label: 'Roadmap',
+          to: '/architecture/overview',
+          label: 'Architecture',
           position: 'left',
         },
-        {
-          to: '/mcp/overview',
-          label: 'MCP integration',
-          position: 'left',
-        },
+        { to: '/contributing/overview', label: 'Roadmap', position: 'left' },
         {
           href: 'https://github.com/abapify/adt-cli',
           label: 'GitHub',

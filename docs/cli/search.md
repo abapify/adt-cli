@@ -11,16 +11,16 @@ Search for ABAP objects in the repository. Wraps the ADT "quick search" API
 
 ## Arguments
 
-| Argument | Description |
-| --- | --- |
+| Argument  | Description                                 |
+| --------- | ------------------------------------------- |
 | `<query>` | Search query (supports wildcards like `*`). |
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
+| Flag                 | Description                                |
+| -------------------- | ------------------------------------------ |
 | `-m, --max <number>` | Maximum number of results (default: `50`). |
-| `--json` | Output results as JSON. |
+| `--json`             | Output results as JSON.                    |
 
 ## Examples
 
@@ -39,4 +39,4 @@ adt search 'ZCL_DEMO*' --json | jq -r '.[].name'
 
 - [`get`](./get) — resolve an exact name to object metadata
 - [`ls`](./ls) — list objects of a known package
-- <!-- TODO: link after D1b --> MCP tool `search_objects`
+- MCP tools [`search_objects`](/mcp/tools/search_objects), [`grep_objects`](/mcp/tools/grep_objects)

@@ -91,6 +91,7 @@ Walk the source tree; generate markdown. These three don't overlap.
 **D1b MCP tool reference** — walks `packages/adt-mcp/src/lib/tools/`. 56 tools. One page per tool: name, description, Zod input schema (rendered as TS), output shape, example invocation, links to underlying contracts.
 
 **D1c SDK reference** — two sides:
+
 1. Per-package: `@abapify/adt-client`, `@abapify/adt-contracts`, `@abapify/adt-schemas`, `@abapify/adk`, `@abapify/speci`, `@abapify/adt-fixtures`, `@abapify/adt-locks`, `@abapify/adt-rfc`, `@abapify/acds`, `@abapify/ts-xsd` — purpose, public API, usage.
 2. Contract catalog: walk `adtContract` tree, document every namespace (`client.adt.cts.transportrequests`, `.oo.classes`, etc.) with HTTP endpoint, method, request/response type, and link to reference XSD.
 
@@ -99,6 +100,7 @@ Walk the source tree; generate markdown. These three don't overlap.
 **D2a Getting Started** — install (`npm i -g @abapify/adt-cli`), `adt auth login`, system info, first object read, first MCP tool call, configuring MCP in Claude/VSCode.
 
 **D2b CLI how-to guides per area** — task-oriented:
+
 - CTS (transports): search, create, release, reassign
 - Object lifecycle: class/interface/program CRUD + activate
 - DDIC: domain/dataelement/table/structure
@@ -112,12 +114,14 @@ Walk the source tree; generate markdown. These three don't overlap.
 - RFC calls
 
 **D2c Plugin guides** — for each plugin package: what it does, how to install/enable, configuration, extending with custom handler.
+
 - abapGit format: serializer, filename convention, per-object handlers
 - gCTS format (AFF-compatible)
 - gCTS CLI plugin
 - AUnit, ATC
 
 **D2d Architecture + Roadmap** — deep dives + cross-refs to `docs/roadmap/` epics.
+
 - Contracts pipeline (XSD → ts-xsd → schemas → contracts → client with worked example)
 - ADK object model (save/lock/unlock/ETag)
 - Format plugin API (E05)
@@ -125,13 +129,14 @@ Walk the source tree; generate markdown. These three don't overlap.
 - Real-SAP e2e harness
 - Port archived roadmap epics as architecture notes
 
-### D3 — Polish (sequential, 1 agent)
+### D3 — Polish (sequential, 1 agent) — **complete**
 
-- Cross-links across docs
-- Broken-link check via Docusaurus `onBrokenLinks: 'throw'`
-- Search (Algolia DocSearch config OR `@easyops-cn/docusaurus-search-local` plugin)
-- Netlify deploy docs + preview link
-- Root README.md updated: hero section + "Read the docs" CTA
+- Cross-links across docs (resolved TODO markers in CLI / plugin pages)
+- Broken-link check via Docusaurus `onBrokenLinks: 'throw'` **and** `onBrokenMarkdownLinks: 'throw'`
+- Search via `@easyops-cn/docusaurus-search-local` (hashed index, docs only)
+- Top-level navbar: Getting Started, Guides, CLI, MCP, SDK, Plugins, Architecture, Roadmap, GitHub
+- Netlify config documented (no hardcoded private registry)
+- Root `README.md` updated with Documentation section pointing at the hosted site
 
 ## Conventions enforced
 
@@ -147,6 +152,7 @@ Walk the source tree; generate markdown. These three don't overlap.
 ```
 cd website && bun install && bun run build
 ```
+
 Must complete without broken-link errors. Build output in `website/build/`.
 
 For D2 / D3, `bunx --cwd website run start` serves locally on :3000 for review.

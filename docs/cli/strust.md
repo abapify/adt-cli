@@ -11,12 +11,12 @@ X.509 certificates. Wraps `/sap/bc/adt/security/strust`.
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt strust list` | List Personal Security Environments (STRUST identities). |
-| `adt strust get <context> <applic>` | List certificates installed in a PSE. |
-| `adt strust put <context> <applic> <pem-file>` | Upload a PEM-encoded certificate into a PSE. |
-| `adt strust delete <context> <applic> <cert-id>` | Delete a certificate from a PSE. |
+| Command                                          | Description                                              |
+| ------------------------------------------------ | -------------------------------------------------------- |
+| `adt strust list`                                | List Personal Security Environments (STRUST identities). |
+| `adt strust get <context> <applic>`              | List certificates installed in a PSE.                    |
+| `adt strust put <context> <applic> <pem-file>`   | Upload a PEM-encoded certificate into a PSE.             |
+| `adt strust delete <context> <applic> <cert-id>` | Delete a certificate from a PSE.                         |
 
 The `<context>` is the PSE context (e.g. `SSLC` for SSL-client anonymous,
 `SSLS` for SSL-server) and `<applic>` is the application (e.g. `DFAULT`,
@@ -26,30 +26,30 @@ The `<context>` is the PSE context (e.g. `SSLC` for SSL-client anonymous,
 
 ### `list`
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description             |
+| -------- | ----------------------- |
 | `--json` | Output results as JSON. |
 
 ### `get <context> <applic>`
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description     |
+| -------- | --------------- |
 | `--json` | Output as JSON. |
 
 ### `put <context> <applic> <pem-file>`
 
-| Flag | Description |
-| --- | --- |
+| Flag         | Description                                   |
+| ------------ | --------------------------------------------- |
 | `<pem-file>` | Path to a PEM-encoded X.509 certificate file. |
-| `--json` | Output as JSON. |
+| `--json`     | Output as JSON.                               |
 
 ### `delete <context> <applic> <cert-id>`
 
-| Flag | Description |
-| --- | --- |
-| `<cert-id>` | Certificate id (from `adt strust get`). |
+| Flag        | Description                                  |
+| ----------- | -------------------------------------------- |
+| `<cert-id>` | Certificate id (from `adt strust get`).      |
 | `-y, --yes` | Skip confirmation prompt (default: `false`). |
-| `--json` | Output as JSON. |
+| `--json`    | Output as JSON.                              |
 
 ## Examples
 
@@ -69,5 +69,5 @@ adt strust delete SSLC ANONYM 123456789 -y
 
 ## See also
 
-- <!-- TODO: link after D1b --> MCP tool `strust_list`
+- MCP tools [`list_pses`](/mcp/tools/list_pses), [`list_certs`](/mcp/tools/list_certs), [`upload_cert`](/mcp/tools/upload_cert), [`delete_cert`](/mcp/tools/delete_cert)
 - SAP Note 510007 — STRUST basics
