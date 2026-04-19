@@ -1,0 +1,36 @@
+{
+  "name": "adt-cli-docs",
+  "sourceRoot": "website",
+  "projectType": "application",
+  "targets": {
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docusaurus start",
+        "cwd": "website"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docusaurus build",
+        "cwd": "website"
+      },
+      "outputs": ["{projectRoot}/build"]
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docusaurus serve",
+        "cwd": "website"
+      }
+    },
+    "clear": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docusaurus clear",
+        "cwd": "website"
+      }
+    }
+  }
+}
