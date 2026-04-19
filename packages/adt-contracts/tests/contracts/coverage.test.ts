@@ -151,11 +151,15 @@ describe('extractCoverageMeasurementId', () => {
   });
 
   it('finds the measurement id from a flat link array', () => {
+    // Atom link `rel` is an opaque relation-type URI per RFC 5988, not a
+    // network URL. Must match SAP wire format byte-for-byte.
+    const rel =
+      'http://www.sap.com/adt/relations/runtime/traces/coverage/measurements/coveredobjects'; // NOSONAR: link-relation identifier (not a URL)
     const id = extractCoverageMeasurementId({
       link: [
         {
           href: '/sap/bc/adt/runtime/traces/coverage/measurements/6D664D9B46CB1FE1859107ADE8729541/coveredobjects',
-          rel: 'http://www.sap.com/adt/relations/runtime/traces/coverage/measurements/coveredobjects',
+          rel,
         },
       ],
     });

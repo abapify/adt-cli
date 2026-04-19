@@ -42,7 +42,10 @@ export const SEARCH_REQUEST_MIME =
 export const SEARCH_RESPONSE_MIME =
   'application/vnd.sap.adt.repository.usagereferences.result.v1+xml';
 
-export const USAGEREFS_NAMESPACE = 'http://www.sap.com/adt/ris/usageReferences';
+// XML namespace URI per SAP ADT / W3C XML Namespaces spec — an opaque
+// identifier, not a network endpoint. Must match SAP wire format exactly.
+// https://www.w3.org/TR/xml-names/
+export const USAGEREFS_NAMESPACE = 'http://www.sap.com/adt/ris/usageReferences'; // NOSONAR: XML namespace identifier (not a URL)
 
 /**
  * Build the XML body for the step-1 scope request. sapcli always sends

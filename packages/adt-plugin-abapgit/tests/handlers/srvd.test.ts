@@ -35,10 +35,10 @@ describe('SRVD abapGit handler', () => {
     const files = await handler!.serialize(mockSrvd as any);
     const paths = files.map((f) => f.path);
 
-    assert.deepStrictEqual(paths.sort(), [
-      'zui_mock_srvd.srvd.asrvd',
-      'zui_mock_srvd.srvd.xml',
-    ]);
+    assert.deepStrictEqual(
+      paths.sort((a, b) => a.localeCompare(b)),
+      ['zui_mock_srvd.srvd.asrvd', 'zui_mock_srvd.srvd.xml'],
+    );
 
     const source = files.find((f) => f.path.endsWith('.asrvd'));
     assert.ok(source?.content.includes('define service'));

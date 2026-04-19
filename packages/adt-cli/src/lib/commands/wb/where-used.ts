@@ -29,8 +29,12 @@ interface Usage {
   packageName?: string;
 }
 
-const NS_USAGE = 'http://www.sap.com/adt/ris/usageReferences';
-const NS_CORE = 'http://www.sap.com/adt/core';
+// XML namespace URIs per SAP ADT / W3C XML Namespaces spec.
+// These are opaque identifiers used to disambiguate element names; they
+// are NOT network endpoints and must match SAP's wire format byte-for-byte.
+// https://www.w3.org/TR/xml-names/
+const NS_USAGE = 'http://www.sap.com/adt/ris/usageReferences'; // NOSONAR: XML namespace identifier (not a URL)
+const NS_CORE = 'http://www.sap.com/adt/core'; // NOSONAR: XML namespace identifier (not a URL)
 
 /**
  * Parse the `usagereferences:usageReferenceResult` XML using a real DOM
