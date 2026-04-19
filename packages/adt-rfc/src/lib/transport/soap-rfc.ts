@@ -110,12 +110,9 @@ interface Token {
   text?: string;
 }
 
-// Single linear alternative: a tag body bounded by `>`. `[^>]*` cannot exceed
-// the next `>`, so matching is O(N) with no backtracking. SOAP-RFC responses
-// from SAP do not include CDATA sections; if that ever changes, handle it
-// with a streaming scanner (not a regex) to keep parsing linear.
-const TAG_RE = /<([^>]*)>/g;
-
+// Linear tokenizer via split on '<' + indexOf('>'). Zero regex on the
+// hot path means CodeQL cannot flag it as polynomial-redos and the
+// runtime is guaranteed O(N).
 const TAG_NAME_RE = /^\/?([A-Za-z_][\w.:-]*)/;
 
 function tagNameOf(inside: string): string | undefined {
@@ -125,40 +122,49 @@ function tagNameOf(inside: string): string | undefined {
 
 function tokenize(xml: string): Token[] {
   const tokens: Token[] = [];
-  let lastIndex = 0;
-  TAG_RE.lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = TAG_RE.exec(xml)) !== null) {
-    // text segment between previous tag and this one
-    if (m.index > lastIndex) {
-      const text = xml.slice(lastIndex, m.index);
-      if (text.trim().length > 0) tokens.push({ kind: 'text', text });
+  const parts = xml.split('<');
+  // parts[0] is whatever text precedes the first '<'.
+  if (parts[0] && parts[0].trim().length > 0) {
+    tokens.push({ kind: 'text', text: parts[0] });
+  }
+  for (let i = 1; i < parts.length; i++) {
+    const part = parts[i];
+    const gt = part.indexOf('>');
+    if (gt < 0) {
+      // malformed (no '>'): treat everything as literal text
+      if (part.trim().length > 0) {
+        tokens.push({ kind: 'text', text: '<' + part });
+      }
+      continue;
     }
-    const raw = m[0];
-    const inside = m[1] ?? '';
-    // Skip XML prolog (<?xml ...?>), comments, and DOCTYPE — we never
-    // emit tokens for these and they are non-structural for RFC parsing.
+    const inside = part.slice(0, gt);
+    const trailing = part.slice(gt + 1);
+    // Skip XML prolog (<?...?>), DOCTYPE, comments (<!-- -->), and any
+    // directive (<!...) — non-structural for RFC parsing.
     if (
       inside.startsWith('?') ||
       inside.startsWith('!--') ||
       inside.startsWith('!DOCTYPE') ||
       inside.startsWith('!')
     ) {
-      lastIndex = TAG_RE.lastIndex;
+      if (trailing && trailing.trim().length > 0) {
+        tokens.push({ kind: 'text', text: trailing });
+      }
       continue;
     }
     const name = tagNameOf(inside);
     if (!name) {
-      // malformed tag body without a name — treat as literal text
-      tokens.push({ kind: 'text', text: raw });
-    } else if (raw.startsWith('</')) {
+      tokens.push({ kind: 'text', text: '<' + inside + '>' });
+    } else if (inside.startsWith('/')) {
       tokens.push({ kind: 'close', name });
-    } else if (raw.endsWith('/>')) {
+    } else if (inside.endsWith('/')) {
       tokens.push({ kind: 'self', name });
     } else {
       tokens.push({ kind: 'open', name });
     }
-    lastIndex = TAG_RE.lastIndex;
+    if (trailing && trailing.trim().length > 0) {
+      tokens.push({ kind: 'text', text: trailing });
+    }
   }
   return tokens;
 }
