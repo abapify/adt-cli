@@ -10,9 +10,9 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { getHandler } from '../../src/lib/handlers/base.ts';
+import { getHandler } from '../../src/lib/handlers/base';
 // Importing the object index triggers auto-registration of all handlers.
-import '../../src/lib/handlers/objects/index.ts';
+import '../../src/lib/handlers/objects/index';
 
 describe('BDEF abapGit handler', () => {
   it('is registered for type "BDEF"', () => {

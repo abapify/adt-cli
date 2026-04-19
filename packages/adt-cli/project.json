@@ -16,7 +16,7 @@
     "test:real": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx vitest run --config ./vitest.real.config.ts",
+        "command": "bunx vitest run --config ./vitest.real.config.ts",
         "cwd": "{projectRoot}"
       },
       "cache": false,

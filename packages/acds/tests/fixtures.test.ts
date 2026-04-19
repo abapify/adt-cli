@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { parse } from '../src/index';
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const FIXTURE_DIR = join(__dirname, 'fixtures');
+const __filename = fileURLToPath(import.meta.url);
+const __testDirname = dirname(__filename);
+const FIXTURE_DIR = join(__testDirname, 'fixtures');
 
 const fixtures = readdirSync(FIXTURE_DIR).filter((f) => f.endsWith('.acds'));
 

@@ -10,6 +10,9 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
+  deps: {
+    skipNodeModulesBundle: true,
+  },
   external: [
     '@abapify/adt-plugin',
     '@abapify/adt-contracts',

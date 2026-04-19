@@ -2,8 +2,9 @@
  * `adt wb outline <object>` — structural tree of an ABAP object.
  *
  * Mirrors the MCP tool `get_object_structure` — dispatches to typed
- * contract `objectstructure()` methods when available, falls back to a
- * generic fetch at `{objectUri}/objectstructure`.
+ * contract `objectstructure()` methods when available, falls back to
+ * the generic `repository.objectstructure` contract at
+ * `{objectUri}/objectstructure`.
  *
  * ADT endpoint (generic):
  *     GET {objectUri}/objectstructure
@@ -44,9 +45,9 @@ async function fetchObjectStructure(
         (type && resolveObjectUriFromType(type, objectName)) ||
         (await resolveObjectUri(client, objectName, objectType));
       if (!uri) throw new Error(`Object '${objectName}' not found`);
-      return client.fetch(`${uri}/objectstructure?version=${version}`, {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
+      return client.adt.repository.objectstructure.get({
+        objectUri: uri,
+        version,
       });
     }
   }

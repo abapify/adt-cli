@@ -127,8 +127,10 @@ export async function startAdtHarness(): Promise<AdtHarness> {
     logger: silentLogger,
   });
 
-  // 3. Inject the client into the CLI
-  __setTestAdtClient(client);
+  // 3. Inject the client into the CLI. Capture the release handle so
+  // teardown removes *this specific* override even if nested harnesses
+  // or concurrent suites push their own clients on top.
+  const releaseClientOverride = __setTestAdtClient(client);
 
   // 3b. Initialise ADK with the same client — CLI commands and MCP tools that
   // go through `@abapify/adk` (transports, DDIC/CDS, objects) require a
@@ -173,7 +175,8 @@ export async function startAdtHarness(): Promise<AdtHarness> {
       } catch {
         /* ignore */
       }
-      __setTestAdtClient(null);
+      // Remove *only* this harness's override — safe with nested harnesses.
+      releaseClientOverride();
     },
   };
 }

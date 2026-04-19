@@ -173,6 +173,6 @@ export function filenameToSourceUri(
 
   return {
     objectUri: objectInfoToUri(objectInfo),
-    sourcePath: getSourcePath(objectInfo, version),
+    sourcePath: getSourcePath(objectInfo, version ?? 'inactive'),
   };
 }

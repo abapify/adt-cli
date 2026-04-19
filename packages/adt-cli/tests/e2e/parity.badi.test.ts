@@ -99,12 +99,11 @@ describe('CLI + MCP parity (badi)', () => {
     ]);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
 
-    // MCP equivalent: write through the generic write-source flow not yet
-    // added for BAdI; assert create_badi as a no-op control (idempotent).
-    const mcp = await callMcpTool(harness, 'create_badi', {
-      badiName: 'ZE_MOCK_WRITE',
-      description: 'write control',
-      packageName: '$TMP',
+    const mcp = await callMcpTool(harness, 'update_source', {
+      objectName: 'ZE_MOCK_BADI',
+      objectType: 'ENHO',
+      sourceCode:
+        '* Updated BAdI source via MCP\nCLASS lcl_badi_v2 IMPLEMENTATION.\nENDCLASS.\n',
     });
     expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
   });

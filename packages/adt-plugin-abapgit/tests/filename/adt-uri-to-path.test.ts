@@ -4,7 +4,7 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { adtUriToAbapGitPath } from '../../src/lib/filename/adt-uri-to-path.ts';
+import { adtUriToAbapGitPath } from '../../src/lib/filename/adt-uri-to-path';
 
 describe('adtUriToAbapGitPath', () => {
   const cases: Array<[string, string | null]> = [

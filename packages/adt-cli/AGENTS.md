@@ -38,6 +38,26 @@ This file provides guidance to AI coding assistants when working with the `adt-c
 - **Separation**: CLI concerns (args, output) vs business logic
 - **Programmatic use**: Services can be called from other code
 
+### Services are a public API (reused by `@abapify/adt-mcp`)
+
+Service functions are re-exported from `packages/adt-cli/src/index.ts` so
+that `@abapify/adt-mcp` tool handlers can delegate to the same code paths
+the CLI uses. See the root-level `AGENTS.md` _MCP ↔ CLI Coupling_ section
+and `packages/adt-mcp/AGENTS.md` _Dependencies policy_ for the full
+rationale.
+
+Practical rules:
+
+- Keep service functions **transport-agnostic**: no `commander` calls, no
+  `process.exit()`, no interactive prompts, no direct `console.log` for
+  user messaging. Return structured result objects and surface errors via
+  thrown `Error`s.
+- If you add a new service, export it from `src/index.ts` alongside the
+  others, and add a parity test under `tests/e2e/parity.*.test.ts` that
+  drives the service via both a CLI command and an MCP tool.
+- If a CLI command needs behaviour that's currently inlined, extract it
+  into a service first — MCP will need the same behaviour next.
+
 **Example:**
 
 ```typescript

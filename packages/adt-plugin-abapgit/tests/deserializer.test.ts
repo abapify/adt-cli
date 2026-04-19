@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { deserialize } from '../src/lib/deserializer.ts';
+import { deserialize } from '../src/lib/deserializer';
 import type { FileTree } from '@abapify/adt-plugin';
 import * as fs from 'fs';
 import * as path from 'path';

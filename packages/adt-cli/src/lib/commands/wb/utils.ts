@@ -74,7 +74,7 @@ export function resolveObjectUriFromType(
     case 'TTYP':
       return `/sap/bc/adt/ddic/tabletypes/${n}`;
     case 'DEVC':
-      return `/sap/bc/adt/packages/${encodeURIComponent(objectName)}`;
+      return `/sap/bc/adt/packages/${encodeURIComponent(objectName.toUpperCase())}`;
     case 'BDEF':
       return `/sap/bc/adt/bo/behaviordefinitions/${n}`;
     case 'SRVD':

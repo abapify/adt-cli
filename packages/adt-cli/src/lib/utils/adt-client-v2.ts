@@ -62,26 +62,68 @@ import {
 // Test DI hook (internal, used by tests/e2e harness)
 // =============================================================================
 
-let __testAdtClientOverride: AdtClient | null = null;
+/**
+ * Stack of test overrides. Using a stack (instead of a single mutable slot)
+ * means nested / concurrent harness instances don't clobber each other's
+ * clients, and teardown is strict: each `__setTestAdtClient` call returns a
+ * `release` function that removes *only that* override, regardless of order.
+ *
+ * Concurrency note: Vitest's default `threads` pool gives each worker its
+ * own module graph, so in practice this state is already isolated per
+ * worker. But a stack keeps us safe if:
+ *   - a suite uses `test.concurrent` (shared module, shared state)
+ *   - the pool config is changed to `forks: { singleFork: false }` or similar
+ *   - multiple harnesses are constructed within a single test
+ * which is why we prefer a stack + explicit release handle here.
+ */
+const __testAdtClientOverrides: AdtClient[] = [];
 
 /**
  * @internal
- * Install or clear a test AdtClient instance. When set, `getAdtClientV2()` will
- * return this client instead of loading credentials from disk and constructing
- * a real client. Intended solely for e2e harness usage.
+ * Install a test AdtClient instance. When set, `getAdtClientV2()` will return
+ * the most recently pushed client instead of loading credentials from disk and
+ * constructing a real client. Intended solely for e2e harness usage.
  *
- * Pass `null` to clear the override.
+ * Returns a `release` function that removes **this specific** override from
+ * the stack. Callers (harness teardown) MUST call `release()` in an
+ * `afterEach` / `afterAll` / `finally` block.
+ *
+ * Backward compatibility: passing `null` pops the top of the stack (legacy
+ * behaviour used by older harness code paths). New code should prefer the
+ * returned release handle.
  */
-export function __setTestAdtClient(client: AdtClient | null): void {
-  __testAdtClientOverride = client;
+export function __setTestAdtClient(client: AdtClient | null): () => void {
+  if (client === null) {
+    // Legacy clear semantics: pop the most recent override.
+    __testAdtClientOverrides.pop();
+    return () => {
+      /* no-op: legacy clear has already happened */
+    };
+  }
+
+  __testAdtClientOverrides.push(client);
+  let released = false;
+  return function release(): void {
+    if (released) return;
+    released = true;
+    const idx = __testAdtClientOverrides.lastIndexOf(client);
+    if (idx !== -1) __testAdtClientOverrides.splice(idx, 1);
+  };
 }
 
 /**
  * @internal
  * Inspect the current test override (mostly for diagnostics / test cleanup).
+ * Returns the top of the stack, or `null` if no override is active.
  */
 export function __getTestAdtClient(): AdtClient | null {
-  return __testAdtClientOverride;
+  return __testAdtClientOverrides.length > 0
+    ? __testAdtClientOverrides[__testAdtClientOverrides.length - 1]
+    : null;
+}
+
+function __getActiveTestAdtClient(): AdtClient | undefined {
+  return __testAdtClientOverrides[__testAdtClientOverrides.length - 1];
 }
 
 // =============================================================================
@@ -188,10 +230,12 @@ async function tryAutoRefresh(
 export async function getAdtClientV2(
   options?: AdtClientV2Options,
 ): Promise<AdtClient> {
-  // Test DI hook: if a test harness has injected a client, return it.
-  // Must short-circuit BEFORE touching disk-based auth / CLI context.
-  if (__testAdtClientOverride) {
-    return __testAdtClientOverride;
+  // Test DI hook: if a test harness has injected a client, return the
+  // top-of-stack override. Must short-circuit BEFORE touching disk-based
+  // auth / CLI context.
+  const testOverride = __getActiveTestAdtClient();
+  if (testOverride) {
+    return testOverride;
   }
 
   // Merge with global CLI context (explicit options take precedence)
