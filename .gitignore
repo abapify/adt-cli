@@ -23,6 +23,9 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+# ...but NOT the adt-contracts contract directory named "coverage" (ADT runtime traces coverage endpoints)
+!packages/adt-contracts/src/adt/runtime/traces/coverage
+!packages/adt-contracts/src/adt/runtime/traces/coverage/**
 *.lcov
 
 # nyc test coverage
