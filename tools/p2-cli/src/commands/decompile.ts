@@ -114,7 +114,10 @@ export async function decompile(
     jarFiles = jarFiles.filter((jar) => {
       const jarName = basename(jar);
       return patterns.some((pattern) => {
-        const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+        // Escape regex metacharacters in user input before expanding the
+        // glob wildcard, to prevent regex-injection.
+        const escaped = pattern.replace(/[.+?^${}()|[\]\\/]/g, '\\$&');
+        const regex = new RegExp(escaped.replace(/\*/g, '.*'));
         return regex.test(jarName);
       });
     });

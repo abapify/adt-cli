@@ -65,15 +65,22 @@ export class MemoryFileTree implements FileTree {
   ) {}
 
   async glob(pattern: string): Promise<string[]> {
-    // Simple glob matching for testing
-    const regex = new RegExp(
-      '^' +
-        pattern
-          .replace(/\*\*/g, '.*')
-          .replace(/\*/g, '[^/]*')
-          .replace(/\./g, '\\.') +
-        '$',
-    );
+    // Simple glob matching for testing.
+    // Step 1: escape ALL regex metacharacters except '*' (our glob syntax).
+    //         This prevents metachars like '+', '(' in the pattern from
+    //         being interpreted as regex. Also avoids the
+    //         incomplete-sanitization pitfall where a later unconditional
+    //         escape of '.' re-mangled characters produced by earlier
+    //         wildcard expansions (e.g. '**' -> '.*' -> '\\.\\*').
+    // Step 2: expand '**' then '*' using a placeholder that contains no
+    //         regex metacharacters, so later passes leave it alone.
+    const escaped = pattern.replace(/[.+?^${}()|[\]\\/]/g, '\\$&');
+    const body = escaped
+      .replace(/\*\*/g, '\x00DOUBLESTAR\x00')
+      .replace(/\*/g, '[^/]*')
+      .split('\x00DOUBLESTAR\x00')
+      .join('.*');
+    const regex = new RegExp('^' + body + '$');
     return Array.from(this.files.keys()).filter((p) => regex.test(p));
   }
 

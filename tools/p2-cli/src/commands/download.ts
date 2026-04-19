@@ -75,7 +75,11 @@ export async function download(
     toDownload = bundles.filter((a) =>
       patterns.some((p) => {
         if (p.includes('*')) {
-          const regex = new RegExp('^' + p.replace(/\*/g, '.*') + '$');
+          // Escape regex metacharacters in user-supplied filter before
+          // expanding the glob wildcard. Prevents regex-injection when
+          // the filter contains characters like '.', '+', '(' etc.
+          const escaped = p.replace(/[.+?^${}()|[\]\\/]/g, '\\$&');
+          const regex = new RegExp('^' + escaped.replace(/\*/g, '.*') + '$');
           return regex.test(a.id);
         }
         return a.id.startsWith(p);

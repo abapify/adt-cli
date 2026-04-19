@@ -210,10 +210,26 @@ async function performPkceFlow(
           resolve(tokenData);
         }, 500);
       } catch (err) {
+        // Escape error message before embedding into HTML response to prevent
+        // reflected XSS / XSS-through-exception. The error message may contain
+        // data derived from the (attacker-controllable) OAuth callback URL
+        // (e.g. error_description) and must never be treated as trusted.
+        const rawMessage = err instanceof Error ? err.message : String(err);
+        const escaped = rawMessage.replace(/[&<>"']/g, (c) =>
+          c === '&'
+            ? '&amp;'
+            : c === '<'
+              ? '&lt;'
+              : c === '>'
+                ? '&gt;'
+                : c === '"'
+                  ? '&quot;'
+                  : '&#39;',
+        );
         res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(
           '<html><body style="font-family:Arial;text-align:center;padding:50px">' +
-            `<h2>Authentication failed</h2><p>${err instanceof Error ? err.message : String(err)}</p>` +
+            `<h2>Authentication failed</h2><p>${escaped}</p>` +
             '</body></html>',
         );
 

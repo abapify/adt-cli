@@ -12,7 +12,7 @@ import TextInput from 'ink-text-input';
 import { writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { NavigationProvider, useNavigation } from './lib/context';
 import { parseResponse } from './lib/parser';
 import { PageRenderer } from './lib/PageRenderer';
@@ -51,10 +51,15 @@ function openXmlInIde(xml: string, url: string): void {
  */
 function openInAdt(systemName: string, url: string): void {
   const adtUrl = `adt://${systemName}${url}`;
-  // Use xdg-open on Linux, open on macOS
-  exec(`xdg-open "${adtUrl}" 2>/dev/null || open "${adtUrl}"`, (error) => {
+  // Use execFile (arg array, no shell) to avoid shell-command injection
+  // via systemName/url. Try xdg-open (Linux), fall back to open (macOS).
+  execFile('xdg-open', [adtUrl], (error) => {
     if (error) {
-      console.error('Failed to open ADT link:', error.message);
+      execFile('open', [adtUrl], (err2) => {
+        if (err2) {
+          console.error('Failed to open ADT link:', err2.message);
+        }
+      });
     }
   });
 }

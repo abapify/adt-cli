@@ -30,15 +30,23 @@ function createMockFileTree(fixturesDir: string): FileTree {
 
   // Simple glob implementation for testing
   function matchGlob(pattern: string, filePath: string): boolean {
+    // Escape ALL regex metacharacters first so characters like '+', '?', '('
+    // in the pattern can't inject regex syntax. Then replace the escaped '*'
+    // placeholder with the glob wildcard expansion. This avoids the
+    // incomplete-sanitization pitfall of only escaping '.'.
+    const toRegex = (glob: string): string =>
+      glob
+        .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // note: '*' intentionally excluded
+        .replace(/\*/g, '[^/]*');
     // Handle **/*.xml pattern - should match both dir/file.xml and file.xml
     if (pattern.startsWith('**/')) {
       const suffix = pattern.slice(3); // Remove **/
-      const suffixRegex = suffix.replace(/\./g, '\\.').replace(/\*/g, '[^/]*');
+      const suffixRegex = toRegex(suffix);
       // Match either at root or in any subdirectory
       return new RegExp(`^(.*\\/)?${suffixRegex}$`).test(filePath);
     }
     // Simple * glob
-    const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '[^/]*');
+    const regexPattern = toRegex(pattern);
     return new RegExp(`^${regexPattern}$`).test(filePath);
   }
 

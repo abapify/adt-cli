@@ -68,10 +68,23 @@ function pathToRoute(filePath: string): RouteInfo | null {
   // [slug] → :slug (for pattern display)
   // [slug] → [^/]+ (for regex)
   const pattern = '/' + routePath.replace(/\[([^\]]+)\]/g, ':$1');
-  const regexPattern =
-    '^/' +
-    routePath.replace(/\[([^\]]+)\]/g, '([^/]+)').replace(/\//g, '\\/') +
-    '$';
+  // Build the regex in two passes over the route path, escaping every
+  // segment of literal text (so characters like '.', '+', '(' cannot be
+  // injected into the generated regex). `[slug]` placeholders become the
+  // capture group `([^/]+)` rather than a literal.
+  const escapeRegex = (s: string): string =>
+    s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+  let regexBody = '';
+  let cursor = 0;
+  const placeholder = /\[([^\]]+)\]/g;
+  let m: RegExpExecArray | null;
+  while ((m = placeholder.exec(routePath)) !== null) {
+    regexBody += escapeRegex(routePath.slice(cursor, m.index));
+    regexBody += '([^/]+)';
+    cursor = m.index + m[0].length;
+  }
+  regexBody += escapeRegex(routePath.slice(cursor));
+  const regexPattern = '^/' + regexBody + '$';
 
   const isDynamic = routePath.includes('[');
 
