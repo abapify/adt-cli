@@ -76,8 +76,8 @@ describe('parity: cts', () => {
 
     // Parity: same count and same transport numbers (order-independent).
     expect(mcp.json.count).toBe(cliList!.length);
-    const cliNumbers = cliList!.map((t) => t.number).sort();
-    const mcpNumbers = mcp.json.transports.map((t) => t.number).sort();
+    const cliNumbers = cliList!.map((t) => t.number).sort((a, b) => a.localeCompare(b));
+    const mcpNumbers = mcp.json.transports.map((t) => t.number).sort((a, b) => a.localeCompare(b));
     expect(cliNumbers).toEqual(mcpNumbers);
   });
 

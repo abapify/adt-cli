@@ -97,7 +97,9 @@ class MeasurementsTypedScenario extends TypedContractScenario<
     expect(Array.isArray(topNodes)).toBe(true);
     expect(topNodes?.[0]?.objectReference?.type).toBe('DEVC/K');
     const topCoverages = topNodes?.[0]?.coverages?.coverage ?? [];
-    const types = topCoverages.map((c) => c.type).sort();
+    const types = topCoverages
+      .map((c) => c.type)
+      .sort((a, b) => a.localeCompare(b));
     expect(types).toEqual(['branch', 'procedure', 'statement']);
   }
 }

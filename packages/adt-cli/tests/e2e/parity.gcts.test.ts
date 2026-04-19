@@ -62,8 +62,8 @@ describe('parity: gcts', () => {
       {},
     );
     expect(mcp.isError).toBe(false);
-    const cliRids = cliRepos!.map((r) => r.rid).sort();
-    const mcpRids = mcp.json.map((r) => r.rid).sort();
+    const cliRids = cliRepos!.map((r) => r.rid).sort((a, b) => a.localeCompare(b));
+    const mcpRids = mcp.json.map((r) => r.rid).sort((a, b) => a.localeCompare(b));
     expect(cliRids).toEqual(mcpRids);
   });
 

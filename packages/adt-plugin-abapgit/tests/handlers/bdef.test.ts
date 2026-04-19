@@ -35,10 +35,10 @@ describe('BDEF abapGit handler', () => {
     const files = await handler!.serialize(mockBdef as any);
     const paths = files.map((f) => f.path);
 
-    assert.deepStrictEqual(paths.sort(), [
-      'zbp_mock_bdef.bdef.abdl',
-      'zbp_mock_bdef.bdef.xml',
-    ]);
+    assert.deepStrictEqual(
+      paths.sort((a, b) => a.localeCompare(b)),
+      ['zbp_mock_bdef.bdef.abdl', 'zbp_mock_bdef.bdef.xml'],
+    );
 
     const source = files.find((f) => f.path.endsWith('.abdl'));
     assert.ok(source?.content.includes('managed implementation'));
