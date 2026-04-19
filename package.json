@@ -16,7 +16,8 @@
     "samples/*",
     "tools/*",
     "e2e/*",
-    "packages/plugins/*"
+    "packages/plugins/*",
+    "website"
   ],
   "scripts": {
     "prepare": "husky",

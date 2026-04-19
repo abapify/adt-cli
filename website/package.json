@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "docusaurus": "docusaurus",
-    "start": "docusaurus start",
-    "build": "docusaurus build",
-    "serve": "docusaurus serve",
-    "clear": "docusaurus clear"
+    "docusaurus": "bunx docusaurus",
+    "start": "bunx docusaurus start",
+    "build": "bunx docusaurus build",
+    "serve": "bunx docusaurus serve",
+    "clear": "bunx docusaurus clear"
   },
   "dependencies": {
     "@docusaurus/core": "3.8.1",
