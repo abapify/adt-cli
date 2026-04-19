@@ -28,19 +28,28 @@ bun add @abapify/adt-client
 export { createAdtClient, type AdtClient } from '@abapify/adt-client';
 export { adtContract, type AdtContract } from '@abapify/adt-client';
 export type {
-  AdtConnectionConfig, OperationResult, LockHandle, AdtError, Logger,
+  AdtConnectionConfig,
+  OperationResult,
+  LockHandle,
+  AdtError,
+  Logger,
 } from '@abapify/adt-client';
 
 // Adapter (advanced)
 export {
-  createAdtAdapter, type HttpAdapter, type AdtAdapterConfig,
+  createAdtAdapter,
+  type HttpAdapter,
+  type AdtAdapterConfig,
 } from '@abapify/adt-client';
 
 // Response plugins
 export {
-  type ResponsePlugin, type ResponseContext, type LogFunction,
+  type ResponsePlugin,
+  type ResponseContext,
+  type LogFunction,
   type FileLoggingConfig,
-  LoggingPlugin, FileLoggingPlugin,
+  LoggingPlugin,
+  FileLoggingPlugin,
 } from '@abapify/adt-client';
 ```
 
@@ -51,15 +60,19 @@ import { createAdtClient } from '@abapify/adt-client';
 
 const client = createAdtClient({
   baseUrl: 'https://sap.example.com',
-  username: 'USER', password: 'pass',
+  username: 'USER',
+  password: 'pass',
   client: '100',
 });
 
 // Two-layer API:
 const info = await client.adt.core.http.systeminformation.get();
-const search = await client.adt.repository.informationsystem.search.quickSearch({
-  query: 'ZCL_', maxResults: 50,
-});
+const search = await client.adt.repository.informationsystem.search.quickSearch(
+  {
+    query: 'ZCL_',
+    maxResults: 50,
+  },
+);
 ```
 
 ## Dependencies

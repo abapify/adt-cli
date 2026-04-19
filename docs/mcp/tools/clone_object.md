@@ -1,7 +1,7 @@
 ---
 title: clone_object
 sidebar_label: clone_object
-description: "Copy an ABAP object to a new name. Supported types: PROG, CLAS, INTF. Creates the new object and copies the source code."
+description: 'Copy an ABAP object to a new name. Supported types: PROG, CLAS, INTF. Creates the new object and copies the source code.'
 ---
 
 # `clone_object`
@@ -33,9 +33,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -47,13 +45,13 @@ See the source for the exact shape of `result`.
 {
   "name": "clone_object",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "sourceObjectName": "<sourceObjectName>",
-      "sourceObjectType": "<sourceObjectType>",
-      "targetObjectName": "<targetObjectName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "sourceObjectName": "<sourceObjectName>",
+    "sourceObjectType": "<sourceObjectType>",
+    "targetObjectName": "<targetObjectName>"
   }
 }
 ```

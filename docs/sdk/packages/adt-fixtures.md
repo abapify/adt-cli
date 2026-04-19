@@ -31,12 +31,17 @@ export type { FixtureHandle, Fixtures } from '@abapify/adt-fixtures';
 
 // Mock ADT HTTP server
 export {
-  createMockAdtServer, LockRegistry,
-  matchRoute, loadRouteFixtures,
+  createMockAdtServer,
+  LockRegistry,
+  matchRoute,
+  loadRouteFixtures,
 } from '@abapify/adt-fixtures';
 export type {
-  MockAdtServer, MockAdtServerOptions,
-  LockEntry, RouteResult, LoadedFixtures,
+  MockAdtServer,
+  MockAdtServerOptions,
+  LockEntry,
+  RouteResult,
+  LoadedFixtures,
 } from '@abapify/adt-fixtures';
 ```
 

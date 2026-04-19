@@ -21,21 +21,21 @@ adt source put <objectName> <file> [--type <type>] [--transport <tr>] [--json]
 
 ### `get`
 
-| Argument / Flag | Description |
-| --- | --- |
-| `<objectName>` | ABAP object name. |
+| Argument / Flag | Description                                     |
+| --------------- | ----------------------------------------------- |
+| `<objectName>`  | ABAP object name.                               |
 | `--type <type>` | Object type hint (e.g. `CLAS`, `PROG`, `INTF`). |
-| `--json` | Output result as JSON. |
+| `--json`        | Output result as JSON.                          |
 
 ### `put`
 
-| Argument / Flag | Description |
-| --- | --- |
-| `<objectName>` | ABAP object name. |
-| `<file>` | Path to the source file to upload. |
-| `--type <type>` | Object type hint (e.g. `CLAS`, `PROG`, `INTF`). |
+| Argument / Flag           | Description                                         |
+| ------------------------- | --------------------------------------------------- |
+| `<objectName>`            | ABAP object name.                                   |
+| `<file>`                  | Path to the source file to upload.                  |
+| `--type <type>`           | Object type hint (e.g. `CLAS`, `PROG`, `INTF`).     |
 | `--transport <transport>` | Transport request number for transportable objects. |
-| `--json` | Output result as JSON. |
+| `--json`                  | Output result as JSON.                              |
 
 ## Examples
 

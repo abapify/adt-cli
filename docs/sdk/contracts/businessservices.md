@@ -13,9 +13,9 @@ RAP service binding management.
 
 CRUD for `/sap/bc/adt/businessservices/bindings/...`, plus:
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.publishedstates.post(name)` | POST | `.../bindings/{name}/publishedstates` | Publish |
+| Method                          | HTTP   | Path                                  | Summary   |
+| ------------------------------- | ------ | ------------------------------------- | --------- |
+| `.publishedstates.post(name)`   | POST   | `.../bindings/{name}/publishedstates` | Publish   |
 | `.publishedstates.delete(name)` | DELETE | `.../bindings/{name}/publishedstates` | Unpublish |
 
 ## Schema

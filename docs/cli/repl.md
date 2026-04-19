@@ -12,21 +12,21 @@ hyperlinks, and lets you "walk" from one resource to the next.
 
 ## Arguments
 
-| Argument | Description |
-| --- | --- |
-| `[url]` | Optional starting URL path (defaults to `/sap/bc/adt/discovery`). |
+| Argument | Description                                                       |
+| -------- | ----------------------------------------------------------------- |
+| `[url]`  | Optional starting URL path (defaults to `/sap/bc/adt/discovery`). |
 
 ## Commands (inside the REPL)
 
-| Command | Description |
-| --- | --- |
-| `<n>` | Follow link number `n` from the last response. |
-| `back` | Pop the previous URL from the navigation stack. |
-| `get <path>` | Fetch an arbitrary path. |
-| `raw` | Print the raw body of the last response. |
-| `save <file>` | Save the last response to `<file>`. |
-| `help` | Show REPL help. |
-| `quit` / `exit` | Leave the REPL. |
+| Command         | Description                                     |
+| --------------- | ----------------------------------------------- |
+| `<n>`           | Follow link number `n` from the last response.  |
+| `back`          | Pop the previous URL from the navigation stack. |
+| `get <path>`    | Fetch an arbitrary path.                        |
+| `raw`           | Print the raw body of the last response.        |
+| `save <file>`   | Save the last response to `<file>`.             |
+| `help`          | Show REPL help.                                 |
+| `quit` / `exit` | Leave the REPL.                                 |
 
 ## Examples
 

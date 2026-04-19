@@ -1,7 +1,7 @@
 ---
 title: get_srvd
 sidebar_label: get_srvd
-description: "Fetch RAP Service Definition (SRVD) metadata, optionally including the .asrvd source code."
+description: 'Fetch RAP Service Definition (SRVD) metadata, optionally including the .asrvd source code.'
 ---
 
 # `get_srvd`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_srvd",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "srvdName": "<srvdName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "srvdName": "<srvdName>"
   }
 }
 ```

@@ -1,7 +1,7 @@
 ---
 title: import_package
 sidebar_label: import_package
-description: "Recursively import all objects in an ABAP package to a local folder in abapGit format. Mirrors `adt import package`."
+description: 'Recursively import all objects in an ABAP package to a local folder in abapGit format. Mirrors `adt import package`.'
 ---
 
 # `import_package`
@@ -32,9 +32,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -46,11 +44,11 @@ See the source for the exact shape of `result`.
 {
   "name": "import_package",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "packageName": "<packageName>"
   }
 }
 ```

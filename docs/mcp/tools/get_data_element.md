@@ -1,7 +1,7 @@
 ---
 title: get_data_element
 sidebar_label: get_data_element
-description: "Fetch DDIC data element metadata."
+description: 'Fetch DDIC data element metadata.'
 ---
 
 # `get_data_element`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_data_element",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "dataElementName": "<dataElementName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "dataElementName": "<dataElementName>"
   }
 }
 ```

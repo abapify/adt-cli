@@ -1,7 +1,7 @@
 ---
 title: get_callers_of
 sidebar_label: get_callers_of
-description: "Find all callers (upward call hierarchy) of an ABAP method, function module, or subroutine"
+description: 'Find all callers (upward call hierarchy) of an ABAP method, function module, or subroutine'
 ---
 
 # `get_callers_of`

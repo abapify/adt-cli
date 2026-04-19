@@ -23,8 +23,8 @@ Same CRUD surface for `/sap/bc/adt/oo/interfaces/...`.
 
 ### `client.adt.oo.classrun`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
+| Method             | HTTP | Path                                  | Summary             |
+| ------------------ | ---- | ------------------------------------- | ------------------- |
 | `.post(classname)` | POST | `/sap/bc/adt/oo/classrun/{classname}` | Run class (like F9) |
 
 ## Schema

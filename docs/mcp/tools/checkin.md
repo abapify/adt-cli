@@ -1,7 +1,7 @@
 ---
 title: checkin
 sidebar_label: checkin
-description: "Push a local abapGit/gCTS-formatted directory into SAP (inverse of `import_package`). Mirrors `adt checkin`."
+description: 'Push a local abapGit/gCTS-formatted directory into SAP (inverse of `import_package`). Mirrors `adt checkin`.'
 ---
 
 # `checkin`
@@ -36,9 +36,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -50,11 +48,11 @@ See the source for the exact shape of `result`.
 {
   "name": "checkin",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "sourceDir": "<sourceDir>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "sourceDir": "<sourceDir>"
   }
 }
 ```

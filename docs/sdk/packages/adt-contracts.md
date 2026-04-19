@@ -30,7 +30,11 @@ export * from '@abapify/adt-contracts/base';
 export * from '@abapify/adt-contracts';
 
 // Notable exports:
-export { adtContract, type AdtContract, type AdtClientType } from '@abapify/adt-contracts';
+export {
+  adtContract,
+  type AdtContract,
+  type AdtClientType,
+} from '@abapify/adt-contracts';
 ```
 
 ## Usage

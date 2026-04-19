@@ -23,7 +23,7 @@ adt --help
 
 ```ts
 // Bin: adt, adt-all
-export * from '@abapify/adt-cli';          // -> lib/cli, lib/plugins
+export * from '@abapify/adt-cli'; // -> lib/cli, lib/plugins
 
 // Programmatic services
 export {
@@ -37,12 +37,19 @@ export {
 // Checkin (E08)
 export {
   CheckinService,
-  type CheckinOptions, type CheckinResult,
-  type ChangePlan, type ChangePlanEntry, type ChangeAction,
+  type CheckinOptions,
+  type CheckinResult,
+  type ChangePlan,
+  type ChangePlanEntry,
+  type ChangeAction,
   type DependencyTier,
-  type ApplyResult, type ApplyTierResult,
-  buildPlan, classifyTier, flattenPlanObjects,
-  diffObject, applyPlan,
+  type ApplyResult,
+  type ApplyTierResult,
+  buildPlan,
+  classifyTier,
+  flattenPlanObjects,
+  diffObject,
+  applyPlan,
 } from '@abapify/adt-cli';
 ```
 

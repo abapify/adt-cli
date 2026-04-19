@@ -1,7 +1,7 @@
 ---
 title: call_rfc
 sidebar_label: call_rfc
-description: "Invoke a classic RFC function module on the SAP system via SOAP-over-HTTP (/sap/bc/soap/rfc). Use this for BAPIs, STFC_CONNECTION, custom RFC FMs, etc."
+description: 'Invoke a classic RFC function module on the SAP system via SOAP-over-HTTP (/sap/bc/soap/rfc). Use this for BAPIs, STFC_CONNECTION, custom RFC FMs, etc.'
 ---
 
 # `call_rfc`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,11 +42,11 @@ See the source for the exact shape of `result`.
 {
   "name": "call_rfc",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "functionModule": "<functionModule>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "functionModule": "<functionModule>"
   }
 }
 ```

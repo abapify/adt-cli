@@ -26,8 +26,11 @@ export default { commands: ['@abapify/adt-diff/commands/diff'] };
 ```ts
 export { diffCommand } from '@abapify/adt-diff';
 export {
-  buildCdsDdl, tablXmlToCdsDdl, parseTablXml,
-  type DD02VData, type DD03PData,
+  buildCdsDdl,
+  tablXmlToCdsDdl,
+  parseTablXml,
+  type DD02VData,
+  type DD03PData,
 } from '@abapify/adt-diff';
 ```
 

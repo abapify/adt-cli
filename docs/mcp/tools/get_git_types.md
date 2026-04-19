@@ -1,7 +1,7 @@
 ---
 title: get_git_types
 sidebar_label: get_git_types
-description: "List ABAP objects in a package that are eligible for abapGit export. Requires abapGit installed on the SAP system."
+description: 'List ABAP objects in a package that are eligible for abapGit export. Requires abapGit installed on the SAP system.'
 ---
 
 # `get_git_types`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_git_types",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "packageName": "<packageName>"
   }
 }
 ```

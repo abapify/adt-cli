@@ -24,66 +24,66 @@ adt gcts config <rid> list|get|set|unset [key] [value]
 
 ## `adt gcts repo`
 
-| Command | Description |
-| --- | --- |
-| `repo list` | List all gCTS repositories (`GET /repository`). |
-| `repo create <rid> <url>` | Create a new gCTS repository. |
-| `repo clone <rid>` | Clone repository on target system. |
-| `repo delete <rid>` (alias `rm`) | Delete a gCTS repository. |
-| `repo pull <rid>` | Pull a gCTS repository. |
-| `repo push <rid>` | Push a gCTS repository. |
-| `repo checkout <rid> <branch> [currentBranch]` | Check out a branch. |
+| Command                                        | Description                                     |
+| ---------------------------------------------- | ----------------------------------------------- |
+| `repo list`                                    | List all gCTS repositories (`GET /repository`). |
+| `repo create <rid> <url>`                      | Create a new gCTS repository.                   |
+| `repo clone <rid>`                             | Clone repository on target system.              |
+| `repo delete <rid>` (alias `rm`)               | Delete a gCTS repository.                       |
+| `repo pull <rid>`                              | Pull a gCTS repository.                         |
+| `repo push <rid>`                              | Push a gCTS repository.                         |
+| `repo checkout <rid> <branch> [currentBranch]` | Check out a branch.                             |
 
 ### `repo create` options
 
-| Flag | Description |
-| --- | --- |
-| `--vsid <vsid>` | Virtual system ID (default: `6IT`). |
-| `--role <role>` | Repository role (`SOURCE` \| `TARGET`). Default: `SOURCE`. |
-| `--type <type>` | Repository type (`GITHUB` \| `GIT`). Default: `GITHUB`. |
-| `--starting-folder <dir>` | Repository start dir (default: `src/`). |
-| `--vcs-token <token>` | VCS authentication token. |
-| `--json` | Output response as JSON. |
+| Flag                      | Description                                                |
+| ------------------------- | ---------------------------------------------------------- |
+| `--vsid <vsid>`           | Virtual system ID (default: `6IT`).                        |
+| `--role <role>`           | Repository role (`SOURCE` \| `TARGET`). Default: `SOURCE`. |
+| `--type <type>`           | Repository type (`GITHUB` \| `GIT`). Default: `GITHUB`.    |
+| `--starting-folder <dir>` | Repository start dir (default: `src/`).                    |
+| `--vcs-token <token>`     | VCS authentication token.                                  |
+| `--json`                  | Output response as JSON.                                   |
 
 All other repo subcommands accept `--json`.
 
 ## `adt gcts branch`
 
-| Command | Description |
-| --- | --- |
-| `branch list <rid>` | List branches of a repository. |
-| `branch create <rid> <name>` | Create a new branch. |
-| `branch delete <rid> <name>` | Delete a branch. |
-| `branch switch <rid> <target> [current]` | Switch branches. |
+| Command                                  | Description                    |
+| ---------------------------------------- | ------------------------------ |
+| `branch list <rid>`                      | List branches of a repository. |
+| `branch create <rid> <name>`             | Create a new branch.           |
+| `branch delete <rid> <name>`             | Delete a branch.               |
+| `branch switch <rid> <target> [current]` | Switch branches.               |
 
 ### `branch list` options
 
-| Flag | Description |
-| --- | --- |
-| `-r, --remote` | Show remote branches only. |
-| `-a, --all` | Show all branches (local + remote). |
-| `--json` | Output as JSON. |
+| Flag           | Description                         |
+| -------------- | ----------------------------------- |
+| `-r, --remote` | Show remote branches only.          |
+| `-a, --all`    | Show all branches (local + remote). |
+| `--json`       | Output as JSON.                     |
 
 ### `branch create` options
 
-| Flag | Description |
-| --- | --- |
+| Flag           | Description                 |
+| -------------- | --------------------------- |
 | `--local-only` | Create a local branch only. |
-| `--symbolic` | Create a symbolic ref. |
-| `--peeled` | Create a peeled ref. |
-| `--json` | Output response as JSON. |
+| `--symbolic`   | Create a symbolic ref.      |
+| `--peeled`     | Create a peeled ref.        |
+| `--json`       | Output response as JSON.    |
 
 ## `adt gcts commit <rid>`
 
 Commit a package or transport to the gCTS repository (auto-pushes).
 
-| Flag | Description |
-| --- | --- |
-| `-m, --message <text>` | Commit message (default: auto-generated). |
-| `-d, --devc <pkg>` | ABAP package name (defaults to `<rid>`). |
-| `--corrnr <tr>` | Transport number (mutually exclusive with `--devc`). |
-| `--description <text>` | Long commit description. |
-| `--json` | Output response as JSON. |
+| Flag                   | Description                                          |
+| ---------------------- | ---------------------------------------------------- |
+| `-m, --message <text>` | Commit message (default: auto-generated).            |
+| `-d, --devc <pkg>`     | ABAP package name (defaults to `<rid>`).             |
+| `--corrnr <tr>`        | Transport number (mutually exclusive with `--devc`). |
+| `--description <text>` | Long commit description.                             |
+| `--json`               | Output response as JSON.                             |
 
 ## `adt gcts log <rid>` / `objects <rid>`
 
@@ -94,12 +94,12 @@ Both support `--json`.
 
 Manage repository configuration (`GET/POST/DELETE /repository/<rid>/config`).
 
-| Argument | Description |
-| --- | --- |
+| Argument   | Description                                            |
+| ---------- | ------------------------------------------------------ |
 | `[action]` | `get` \| `set` \| `unset` \| `list` (default: `list`). |
-| `[key]` | Config key (required for `get`, `set`, `unset`). |
-| `[value]` | Config value (required for `set`). |
-| `--json` | Output as JSON. |
+| `[key]`    | Config key (required for `get`, `set`, `unset`).       |
+| `[value]`  | Config value (required for `set`).                     |
+| `--json`   | Output as JSON.                                        |
 
 ## Examples
 

@@ -12,16 +12,16 @@ where-used.
 
 ### `client.adt.repository.informationsystem.search`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.quickSearch(params)` | GET | `/sap/bc/adt/repository/informationsystem/search` | Repository quick search |
+| Method                 | HTTP | Path                                              | Summary                 |
+| ---------------------- | ---- | ------------------------------------------------- | ----------------------- |
+| `.quickSearch(params)` | GET  | `/sap/bc/adt/repository/informationsystem/search` | Repository quick search |
 
 ### `client.adt.repository.informationsystem.usagereferences`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.post(uri, body)` | POST | `/sap/bc/adt/repository/informationsystem/usageReferences` | Where-used |
-| `.snippets(uri, body)` | POST | `.../usageReferences/snippets` | Where-used code snippets |
+| Method                 | HTTP | Path                                                       | Summary                  |
+| ---------------------- | ---- | ---------------------------------------------------------- | ------------------------ |
+| `.post(uri, body)`     | POST | `/sap/bc/adt/repository/informationsystem/usageReferences` | Where-used               |
+| `.snippets(uri, body)` | POST | `.../usageReferences/snippets`                             | Where-used code snippets |
 
 ## Schema
 
@@ -30,10 +30,11 @@ Source: [`adt-contracts/src/adt/repository/informationsystem/`](https://github.c
 ## Example
 
 ```ts
-const results = await client.adt.repository.informationsystem.search.quickSearch({
-  query: 'ZCL_DEMO',
-  maxResults: 50,
-});
+const results =
+  await client.adt.repository.informationsystem.search.quickSearch({
+    query: 'ZCL_DEMO',
+    maxResults: 50,
+  });
 ```
 
 ## See also

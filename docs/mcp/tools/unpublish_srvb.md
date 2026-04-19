@@ -1,7 +1,7 @@
 ---
 title: unpublish_srvb
 sidebar_label: unpublish_srvb
-description: "Unpublish (deactivate) a RAP Service Binding (SRVB) so it is no longer exposed via the SAP Gateway."
+description: 'Unpublish (deactivate) a RAP Service Binding (SRVB) so it is no longer exposed via the SAP Gateway.'
 ---
 
 # `unpublish_srvb`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "unpublish_srvb",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "srvbName": "<srvbName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "srvbName": "<srvbName>"
   }
 }
 ```

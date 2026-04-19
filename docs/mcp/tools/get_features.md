@@ -1,7 +1,7 @@
 ---
 title: get_features
 sidebar_label: get_features
-description: "Probe the SAP system for available ADT features (abapGit, RAP, AMDP, UI5, ATC, CTS, etc.)."
+description: 'Probe the SAP system for available ADT features (abapGit, RAP, AMDP, UI5, ATC, CTS, etc.).'
 ---
 
 # `get_features`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,10 +40,10 @@ See the source for the exact shape of `result`.
 {
   "name": "get_features",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

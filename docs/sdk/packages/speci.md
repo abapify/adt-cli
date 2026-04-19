@@ -21,8 +21,11 @@ bun add @abapify/speci
 ```ts
 // @abapify/speci/rest
 import {
-  http, createClient, createFetchAdapter,
-  type HttpAdapter, type RestContract,
+  http,
+  createClient,
+  createFetchAdapter,
+  type HttpAdapter,
+  type RestContract,
 } from '@abapify/speci/rest';
 ```
 
@@ -36,7 +39,8 @@ import { http, createClient, createFetchAdapter } from '@abapify/speci/rest';
 
 const api = {
   users: {
-    get: (id: string) => http.get(`/users/${id}`, { responses: { 200: UserSchema } }),
+    get: (id: string) =>
+      http.get(`/users/${id}`, { responses: { 200: UserSchema } }),
   },
 };
 

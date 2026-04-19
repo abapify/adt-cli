@@ -1,7 +1,7 @@
 ---
 title: get_include
 sidebar_label: get_include
-description: "Fetch metadata for an ABAP program include (PROG/I)."
+description: 'Fetch metadata for an ABAP program include (PROG/I).'
 ---
 
 # `get_include`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_include",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "includeName": "<includeName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "includeName": "<includeName>"
   }
 }
 ```

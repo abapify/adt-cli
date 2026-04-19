@@ -12,9 +12,9 @@ system information.
 
 ### `client.adt.core.http.sessions`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.getSession()` | GET | `/sap/bc/adt/core/http/sessions` | Create a security session & fetch CSRF token |
+| Method          | HTTP | Path                             | Summary                                      |
+| --------------- | ---- | -------------------------------- | -------------------------------------------- |
+| `.getSession()` | GET  | `/sap/bc/adt/core/http/sessions` | Create a security session & fetch CSRF token |
 
 Request headers:
 
@@ -25,9 +25,9 @@ Request headers:
 
 ### `client.adt.core.http.systeminformation`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.get()` | GET | `/sap/bc/adt/core/http/systeminformation` | SID, client, release, language, … |
+| Method   | HTTP | Path                                      | Summary                           |
+| -------- | ---- | ----------------------------------------- | --------------------------------- |
+| `.get()` | GET  | `/sap/bc/adt/core/http/systeminformation` | SID, client, release, language, … |
 
 ## Schemas
 

@@ -10,17 +10,17 @@ artifacts.
 
 ## Sub-namespaces
 
-| Namespace | Path | Notes |
-|-----------|------|-------|
-| `.domains` | `/sap/bc/adt/ddic/domains/{name}` | DOMA |
-| `.dataelements` | `/sap/bc/adt/ddic/dataelements/{name}` | DTEL |
-| `.structures` | `/sap/bc/adt/ddic/structures/{name}/objectstructure` | TABL / DS |
-| `.tables` | `/sap/bc/adt/ddic/tables/{name}/objectstructure` | TABL / DT |
-| `.tabletypes` | `/sap/bc/adt/ddic/tabletypes/{name}` | TTYP |
-| `.tablesettings` | `/sap/bc/adt/ddic/tablesettings/{name}` | |
-| `.ddl` + `.ddl.sources` | `/sap/bc/adt/ddic/ddl/...` | CDS DDL (DDLS/DDIC view / table entity) |
-| `.dcl` + `.dcl.sources` | `/sap/bc/adt/ddic/dcl/...` | CDS DCL (access control) |
-| `.srvd` + `.srvd.sources` | `/sap/bc/adt/ddic/srvd/...` | CDS Service Definition |
+| Namespace                 | Path                                                 | Notes                                   |
+| ------------------------- | ---------------------------------------------------- | --------------------------------------- |
+| `.domains`                | `/sap/bc/adt/ddic/domains/{name}`                    | DOMA                                    |
+| `.dataelements`           | `/sap/bc/adt/ddic/dataelements/{name}`               | DTEL                                    |
+| `.structures`             | `/sap/bc/adt/ddic/structures/{name}/objectstructure` | TABL / DS                               |
+| `.tables`                 | `/sap/bc/adt/ddic/tables/{name}/objectstructure`     | TABL / DT                               |
+| `.tabletypes`             | `/sap/bc/adt/ddic/tabletypes/{name}`                 | TTYP                                    |
+| `.tablesettings`          | `/sap/bc/adt/ddic/tablesettings/{name}`              |                                         |
+| `.ddl` + `.ddl.sources`   | `/sap/bc/adt/ddic/ddl/...`                           | CDS DDL (DDLS/DDIC view / table entity) |
+| `.dcl` + `.dcl.sources`   | `/sap/bc/adt/ddic/dcl/...`                           | CDS DCL (access control)                |
+| `.srvd` + `.srvd.sources` | `/sap/bc/adt/ddic/srvd/...`                          | CDS Service Definition                  |
 
 Each object-type namespace mirrors the `crud()` surface (`get`, `list`,
 `post`, `put`, `delete`) plus source sub-routes where applicable.

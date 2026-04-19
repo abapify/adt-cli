@@ -1,7 +1,7 @@
 ---
 title: pretty_print
 sidebar_label: pretty_print
-description: "Format ABAP source code via the SAP pretty-printer. Returns the formatted code without modifying the object."
+description: 'Format ABAP source code via the SAP pretty-printer. Returns the formatted code without modifying the object.'
 ---
 
 # `pretty_print`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "pretty_print",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "sourceCode": "<sourceCode>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "sourceCode": "<sourceCode>"
   }
 }
 ```

@@ -1,7 +1,7 @@
 ---
 title: delete_cert
 sidebar_label: delete_cert
-description: "Delete a certificate from a STRUST PSE."
+description: 'Delete a certificate from a STRUST PSE.'
 ---
 
 # `delete_cert`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,13 +42,13 @@ See the source for the exact shape of `result`.
 {
   "name": "delete_cert",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "context": "<context>",
-      "applic": "<applic>",
-      "certId": "<certId>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "context": "<context>",
+    "applic": "<applic>",
+    "certId": "<certId>"
   }
 }
 ```

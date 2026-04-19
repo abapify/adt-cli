@@ -1,7 +1,7 @@
 ---
 title: git_export
 sidebar_label: git_export
-description: "Export an ABAP package in abapGit XML format. Requires abapGit installed on the SAP system. Returns a map of file paths to their content."
+description: 'Export an ABAP package in abapGit XML format. Requires abapGit installed on the SAP system. Returns a map of file paths to their content.'
 ---
 
 # `git_export`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "git_export",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "packageName": "<packageName>"
   }
 }
 ```

@@ -21,25 +21,25 @@ Base URL:
 
 ### `client.adt.flp.catalogs`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.list()` | GET | `.../CatalogCollection` | List catalogs |
-| `.get(id)` | GET | `.../CatalogCollection(id)` | Get one |
-| `.chips(id)` | GET | `.../CatalogCollection(id)/Chips` | Tiles in catalog |
+| Method       | HTTP | Path                              | Summary          |
+| ------------ | ---- | --------------------------------- | ---------------- |
+| `.list()`    | GET  | `.../CatalogCollection`           | List catalogs    |
+| `.get(id)`   | GET  | `.../CatalogCollection(id)`       | Get one          |
+| `.chips(id)` | GET  | `.../CatalogCollection(id)/Chips` | Tiles in catalog |
 
 ### `client.adt.flp.groups`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.list()` | GET | `.../PageCollection` | List groups/pages |
-| `.get(id)` | GET | `.../PageCollection(id)` | Get one |
+| Method     | HTTP | Path                     | Summary           |
+| ---------- | ---- | ------------------------ | ----------------- |
+| `.list()`  | GET  | `.../PageCollection`     | List groups/pages |
+| `.get(id)` | GET  | `.../PageCollection(id)` | Get one           |
 
 ### `client.adt.flp.tiles`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.list()` | GET | `.../TileCollection` | List tiles |
-| `.get(id)` | GET | `.../TileCollection(id)` | Get one |
+| Method     | HTTP | Path                     | Summary    |
+| ---------- | ---- | ------------------------ | ---------- |
+| `.list()`  | GET  | `.../TileCollection`     | List tiles |
+| `.get(id)` | GET  | `.../TileCollection(id)` | Get one    |
 
 ## Schema
 

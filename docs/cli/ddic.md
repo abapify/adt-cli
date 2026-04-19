@@ -15,12 +15,12 @@ omitted; use `checkin` / `import` for full payload updates.
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt <type> create <name> <description> <package>` | Create a new object. |
-| `adt <type> read <name>` | Read metadata. |
-| `adt <type> activate <names...>` | Activate one or more objects. |
-| `adt <type> delete <name>` | Delete an object. |
+| Command                                            | Description                   |
+| -------------------------------------------------- | ----------------------------- |
+| `adt <type> create <name> <description> <package>` | Create a new object.          |
+| `adt <type> read <name>`                           | Read metadata.                |
+| `adt <type> activate <names...>`                   | Activate one or more objects. |
+| `adt <type> delete <name>`                         | Delete an object.             |
 
 Replace `<type>` with `domain`, `dataelement`, `table`, or `structure`.
 

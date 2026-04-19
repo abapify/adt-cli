@@ -19,64 +19,64 @@ adt function module  create|read|write|activate|delete
 
 Generic CRUD (see [`objects`](./objects)):
 
-| Command | Description |
-| --- | --- |
-| `adt function group create <name> <description> <package>` | Create a new function group. |
-| `adt function group read <name>` | Read the top include source. |
-| `adt function group activate <names...>` | Activate one or more function groups. |
-| `adt function group delete <name>` | Delete a function group. |
+| Command                                                    | Description                           |
+| ---------------------------------------------------------- | ------------------------------------- |
+| `adt function group create <name> <description> <package>` | Create a new function group.          |
+| `adt function group read <name>`                           | Read the top include source.          |
+| `adt function group activate <names...>`                   | Activate one or more function groups. |
+| `adt function group delete <name>`                         | Delete a function group.              |
 
 ### `adt function module`
 
 Function modules are children of a function group — every subcommand takes
 **both** `<group>` and `<name>` as positional arguments.
 
-| Command | Description |
-| --- | --- |
+| Command                                                   | Description                                       |
+| --------------------------------------------------------- | ------------------------------------------------- |
 | `adt function module create <group> <name> <description>` | Create a new function module in a function group. |
-| `adt function module read <group> <name>` | Read source code of a function module. |
-| `adt function module write <group> <name> [file\|-]` | Write source code to a function module. |
-| `adt function module activate <group> <name>` | Activate a function module. |
-| `adt function module delete <group> <name>` | Delete a function module. |
+| `adt function module read <group> <name>`                 | Read source code of a function module.            |
+| `adt function module write <group> <name> [file\|-]`      | Write source code to a function module.           |
+| `adt function module activate <group> <name>`             | Activate a function module.                       |
+| `adt function module delete <group> <name>`               | Delete a function module.                         |
 
 ## Options
 
 ### `module create`
 
-| Flag | Description |
-| --- | --- |
-| `-t, --transport <corrnr>` | Transport request number. |
+| Flag                       | Description                                                          |
+| -------------------------- | -------------------------------------------------------------------- |
+| `-t, --transport <corrnr>` | Transport request number.                                            |
 | `--processing-type <type>` | Processing type (`normal`, `rfc`, `update`, ...). Default: `normal`. |
-| `--no-error-existing` | Skip if module already exists (default: error). |
-| `--json` | Output as JSON. |
+| `--no-error-existing`      | Skip if module already exists (default: error).                      |
+| `--json`                   | Output as JSON.                                                      |
 
 ### `module read`
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description                          |
+| -------- | ------------------------------------ |
 | `--json` | Output metadata as JSON (no source). |
 
 ### `module write`
 
-| Flag | Description |
-| --- | --- |
-| `[file]` | Source file path (use `-` for stdin). Default: `-`. |
-| `-t, --transport <corrnr>` | Transport request number. |
-| `--activate` | Activate after writing. |
+| Flag                       | Description                                         |
+| -------------------------- | --------------------------------------------------- |
+| `[file]`                   | Source file path (use `-` for stdin). Default: `-`. |
+| `-t, --transport <corrnr>` | Transport request number.                           |
+| `--activate`               | Activate after writing.                             |
 
 ### `module activate`
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description     |
+| -------- | --------------- |
 | `--json` | Output as JSON. |
 
 ### `module delete`
 
-| Flag | Description |
-| --- | --- |
+| Flag                       | Description               |
+| -------------------------- | ------------------------- |
 | `-t, --transport <corrnr>` | Transport request number. |
-| `-y, --yes` | Skip confirmation prompt. |
-| `--json` | Output as JSON. |
+| `-y, --yes`                | Skip confirmation prompt. |
+| `--json`                   | Output as JSON.           |
 
 ## Examples
 

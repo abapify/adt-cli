@@ -31,11 +31,18 @@ export default {
 ```ts
 export { exportCommand } from '@abapify/adt-export';
 export {
-  createFileTree, FsFileTree, MemoryFileTree, FilteredFileTree,
-  findAbapGitRoot, resolveFilesRelativeToRoot,
+  createFileTree,
+  FsFileTree,
+  MemoryFileTree,
+  FilteredFileTree,
+  findAbapGitRoot,
+  resolveFilesRelativeToRoot,
 } from '@abapify/adt-export';
 export type {
-  FileTree, ExportResult, ExportObjectResult, ExportOptions,
+  FileTree,
+  ExportResult,
+  ExportObjectResult,
+  ExportOptions,
 } from '@abapify/adt-export';
 ```
 

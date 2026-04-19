@@ -12,13 +12,13 @@ same surface (built with `buildObjectCrudCommands`): `create`, `read`, `write`,
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt <type> create <name> <description> <package>` | Create a new object. |
-| `adt <type> read <name>` | Read source (prints to stdout) or metadata (`--json`). |
-| `adt <type> write <name> [file\|-]` | Write source from file or stdin. |
-| `adt <type> activate <names...>` | Activate one or more objects. |
-| `adt <type> delete <name>` | Delete an object. |
+| Command                                            | Description                                            |
+| -------------------------------------------------- | ------------------------------------------------------ |
+| `adt <type> create <name> <description> <package>` | Create a new object.                                   |
+| `adt <type> read <name>`                           | Read source (prints to stdout) or metadata (`--json`). |
+| `adt <type> write <name> [file\|-]`                | Write source from file or stdin.                       |
+| `adt <type> activate <names...>`                   | Activate one or more objects.                          |
+| `adt <type> delete <name>`                         | Delete an object.                                      |
 
 Replace `<type>` with `class`, `interface`, `program`, or `include`.
 
@@ -26,39 +26,39 @@ Replace `<type>` with `class`, `interface`, `program`, or `include`.
 
 ### `create`
 
-| Flag | Description |
-| --- | --- |
-| `-t, --transport <corrnr>` | Transport request number. |
-| `--no-error-existing` | Skip if the object already exists (default: error). |
-| `--json` | Output as JSON. |
+| Flag                       | Description                                         |
+| -------------------------- | --------------------------------------------------- |
+| `-t, --transport <corrnr>` | Transport request number.                           |
+| `--no-error-existing`      | Skip if the object already exists (default: error). |
+| `--json`                   | Output as JSON.                                     |
 
 ### `read`
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description                          |
+| -------- | ------------------------------------ |
 | `--json` | Output metadata as JSON (no source). |
 
 ### `write`
 
-| Flag | Description |
-| --- | --- |
-| `[file]` | Source file path — `-` reads from stdin (default). |
-| `-t, --transport <corrnr>` | Transport request number. |
-| `--activate` | Activate after writing. |
+| Flag                       | Description                                        |
+| -------------------------- | -------------------------------------------------- |
+| `[file]`                   | Source file path — `-` reads from stdin (default). |
+| `-t, --transport <corrnr>` | Transport request number.                          |
+| `--activate`               | Activate after writing.                            |
 
 ### `activate`
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description            |
+| -------- | ---------------------- |
 | `--json` | Output result as JSON. |
 
 ### `delete`
 
-| Flag | Description |
-| --- | --- |
+| Flag                       | Description               |
+| -------------------------- | ------------------------- |
 | `-t, --transport <corrnr>` | Transport request number. |
-| `-y, --yes` | Skip confirmation prompt. |
-| `--json` | Output result as JSON. |
+| `-y, --yes`                | Skip confirmation prompt. |
+| `--json`                   | Output result as JSON.    |
 
 ## Examples
 

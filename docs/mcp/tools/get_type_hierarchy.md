@@ -1,7 +1,7 @@
 ---
 title: get_type_hierarchy
 sidebar_label: get_type_hierarchy
-description: "Get the type hierarchy (super/sub-types, implemented interfaces) of an ABAP class or interface."
+description: 'Get the type hierarchy (super/sub-types, implemented interfaces) of an ABAP class or interface.'
 ---
 
 # `get_type_hierarchy`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,11 +42,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_type_hierarchy",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectName": "<objectName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectName": "<objectName>"
   }
 }
 ```

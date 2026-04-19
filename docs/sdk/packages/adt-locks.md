@@ -33,13 +33,17 @@ export { FileLockStore } from '@abapify/adt-locks';
 
 // Service
 export type {
-  LockClient, LockService, LockOptions, UnlockOptions,
+  LockClient,
+  LockService,
+  LockOptions,
+  UnlockOptions,
 } from '@abapify/adt-locks';
 export { createLockService, parseLockResponse } from '@abapify/adt-locks';
 
 // Batch session
 export {
-  createBatchLockSession, type BatchLockSession,
+  createBatchLockSession,
+  type BatchLockSession,
 } from '@abapify/adt-locks';
 ```
 
@@ -53,7 +57,9 @@ const handle = await locks.lock('/sap/bc/adt/oo/classes/zcl_test');
 try {
   // ... mutate the object
 } finally {
-  await locks.unlock('/sap/bc/adt/oo/classes/zcl_test', { lockHandle: handle.handle });
+  await locks.unlock('/sap/bc/adt/oo/classes/zcl_test', {
+    lockHandle: handle.handle,
+  });
 }
 ```
 

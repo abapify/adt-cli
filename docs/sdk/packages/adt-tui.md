@@ -23,12 +23,23 @@ export { App, type AppProps } from '@abapify/adt-tui';
 export { Navigator } from '@abapify/adt-tui';
 export { PageRenderer } from '@abapify/adt-tui';
 export { NavigationProvider, useNavigation } from '@abapify/adt-tui';
-export { parseResponse, getActionName, categorizeLinks } from '@abapify/adt-tui';
+export {
+  parseResponse,
+  getActionName,
+  categorizeLinks,
+} from '@abapify/adt-tui';
 export { genericPage } from '@abapify/adt-tui';
 
 export type {
-  HypermediaLink, ParsedResponse, NavigationEntry, FetchFn,
-  PageProps, PageResult, MenuItem, PageComponent, Route,
+  HypermediaLink,
+  ParsedResponse,
+  NavigationEntry,
+  FetchFn,
+  PageProps,
+  PageResult,
+  MenuItem,
+  PageComponent,
+  Route,
 } from '@abapify/adt-tui';
 ```
 

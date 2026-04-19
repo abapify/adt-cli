@@ -1,7 +1,7 @@
 ---
 title: run_query
 sidebar_label: run_query
-description: "Execute a freestyle ABAP SQL SELECT query and return results as JSON. Only SELECT statements are supported."
+description: 'Execute a freestyle ABAP SQL SELECT query and return results as JSON. Only SELECT statements are supported.'
 ---
 
 # `run_query`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "run_query",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "query": "<query>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "query": "<query>"
   }
 }
 ```

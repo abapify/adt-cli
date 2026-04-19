@@ -1,7 +1,7 @@
 ---
 title: list_package_objects
 sidebar_label: list_package_objects
-description: "List ABAP objects contained in a package (uses quickSearch with packageName filter)"
+description: 'List ABAP objects contained in a package (uses quickSearch with packageName filter)'
 ---
 
 # `list_package_objects`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,11 +42,11 @@ See the source for the exact shape of `result`.
 {
   "name": "list_package_objects",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "packageName": "<packageName>"
   }
 }
 ```

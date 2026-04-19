@@ -1,7 +1,7 @@
 ---
 title: import_object
 sidebar_label: import_object
-description: "Import a single ABAP object (by name) into a local folder in abapGit format. Mirrors `adt import object`."
+description: 'Import a single ABAP object (by name) into a local folder in abapGit format. Mirrors `adt import object`.'
 ---
 
 # `import_object`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,12 +43,12 @@ See the source for the exact shape of `result`.
 {
   "name": "import_object",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectType": "<objectType>",
-      "objectName": "<objectName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectType": "<objectType>",
+    "objectName": "<objectName>"
   }
 }
 ```

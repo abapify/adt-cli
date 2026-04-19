@@ -1,7 +1,7 @@
 ---
 title: gcts_config
 sidebar_label: gcts_config
-description: "Get, set, unset, or list gCTS repository configuration entries"
+description: 'Get, set, unset, or list gCTS repository configuration entries'
 ---
 
 # `gcts_config`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,12 +43,12 @@ See the source for the exact shape of `result`.
 {
   "name": "gcts_config",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "rid": "<rid>",
-      "action": "<action>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "rid": "<rid>",
+    "action": "<action>"
   }
 }
 ```

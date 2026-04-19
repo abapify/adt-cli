@@ -1,7 +1,7 @@
 ---
 title: create_srvb
 sidebar_label: create_srvb
-description: "Create a new RAP Service Binding (SRVB) object."
+description: 'Create a new RAP Service Binding (SRVB) object.'
 ---
 
 # `create_srvb`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,13 +43,13 @@ See the source for the exact shape of `result`.
 {
   "name": "create_srvb",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "srvbName": "<srvbName>",
-      "description": "<description>",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "srvbName": "<srvbName>",
+    "description": "<description>",
+    "packageName": "<packageName>"
   }
 }
 ```

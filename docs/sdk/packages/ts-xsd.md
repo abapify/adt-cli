@@ -24,19 +24,19 @@ bun add @abapify/ts-xsd
 
 ```ts
 // XSD parse/build
-export * from '@abapify/ts-xsd';    // xsd module
+export * from '@abapify/ts-xsd'; // xsd module
 
 // Type inference
 export type * from '@abapify/ts-xsd'; // infer module: InferSchema, InferElement, …
 
 // Codegen
-export * from '@abapify/ts-xsd';    // codegen: generateSchemaLiteral, generateInterfaces
+export * from '@abapify/ts-xsd'; // codegen: generateSchemaLiteral, generateInterfaces
 
 // XML parse/build
-export * from '@abapify/ts-xsd';    // xml: parseXml, buildXml, typedSchema
+export * from '@abapify/ts-xsd'; // xml: parseXml, buildXml, typedSchema
 
 // Walker
-export * from '@abapify/ts-xsd';    // walkElements, walkComplexTypes, findSubstitutes
+export * from '@abapify/ts-xsd'; // walkElements, walkComplexTypes, findSubstitutes
 ```
 
 ## Usage

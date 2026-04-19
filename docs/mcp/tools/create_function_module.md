@@ -1,7 +1,7 @@
 ---
 title: create_function_module
 sidebar_label: create_function_module
-description: "Create a new ABAP function module in a function group. Wraps the typed fmodules contract."
+description: 'Create a new ABAP function module in a function group. Wraps the typed fmodules contract.'
 ---
 
 # `create_function_module`
@@ -32,9 +32,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -46,13 +44,13 @@ See the source for the exact shape of `result`.
 {
   "name": "create_function_module",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "groupName": "<groupName>",
-      "functionName": "<functionName>",
-      "description": "<description>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "groupName": "<groupName>",
+    "functionName": "<functionName>",
+    "description": "<description>"
   }
 }
 ```

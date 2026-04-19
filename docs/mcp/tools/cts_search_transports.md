@@ -1,12 +1,12 @@
 ---
 title: cts_search_transports
 sidebar_label: cts_search_transports
-description: "Search transport requests via /sap/bc/adt/cts/transports?_action=FIND. Filters: user (owner), trfunction (K/W/T/*), status (D/R/L/... client-side filter)."
+description: 'Search transport requests via /sap/bc/adt/cts/transports?_action=FIND. Filters: user (owner), trfunction (K/W/T/*), status (D/R/L/... client-side filter).'
 ---
 
 # `cts_search_transports`
 
-Search transport requests via /sap/bc/adt/cts/transports?_action=FIND. Filters: user (owner), trfunction (K/W/T/*), status (D/R/L/... client-side filter).
+Search transport requests via /sap/bc/adt/cts/transports?\_action=FIND. Filters: user (owner), trfunction (K/W/T/\*), status (D/R/L/... client-side filter).
 
 Defined in [`packages/adt-mcp/src/lib/tools/cts-search-transports.ts`](https://github.com/abapify/adt-cli/blob/main/packages/adt-mcp/src/lib/tools/cts-search-transports.ts).
 
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,10 +43,10 @@ See the source for the exact shape of `result`.
 {
   "name": "cts_search_transports",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

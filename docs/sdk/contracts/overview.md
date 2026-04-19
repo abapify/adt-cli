@@ -30,7 +30,9 @@ import { createAdtClient } from '@abapify/adt-client';
 
 const client = createAdtClient({
   baseUrl: 'https://sap.example.com',
-  username: 'USER', password: 'pass', client: '100',
+  username: 'USER',
+  password: 'pass',
+  client: '100',
 });
 
 // GET a class (typed via adt-schemas → adtcore/class)
@@ -49,29 +51,29 @@ shapes — come from
 
 ## Namespaces
 
-| Namespace | URL root | Page |
-|-----------|----------|------|
-| `discovery` | `/sap/bc/adt/discovery` | [Discovery](./discovery) |
-| `core.http` | `/sap/bc/adt/core/http/...` | [Core HTTP](./core-http) |
-| `cts` | `/sap/bc/adt/cts/...` | [CTS](./cts) |
-| `atc` | `/sap/bc/adt/atc/...` | [ATC](./atc) |
-| `aunit` | `/sap/bc/adt/abapunit/...` | [AUnit](./aunit) |
-| `oo` | `/sap/bc/adt/oo/...` | [OO](./oo) |
-| `packages` | `/sap/bc/adt/packages/...` | [Packages](./packages) |
-| `programs` | `/sap/bc/adt/programs/...` | [Programs](./programs) |
-| `ddic` | `/sap/bc/adt/ddic/...` | [DDIC](./ddic) |
-| `functions` | `/sap/bc/adt/functions/...` | [Functions](./functions) |
-| `system` | `/sap/bc/adt/system/...` | [System](./system) |
-| `repository` | `/sap/bc/adt/repository/...` | [Repository](./repository) |
-| `bo` | `/sap/bc/adt/bo/...` | [Business Objects](./bo) |
-| `businessservices` | `/sap/bc/adt/businessservices/...` | [Business Services](./businessservices) |
-| `datapreview` | `/sap/bc/adt/datapreview` | [Data Preview](./datapreview) |
-| `checkruns` | `/sap/bc/adt/checkruns` | [Check Runs](./checkruns) |
-| `activation` | `/sap/bc/adt/activation` | [Activation](./activation) |
-| `runtime.traces` | `/sap/bc/adt/runtime/traces/...` | [Runtime / Traces](./runtime-traces) |
-| `gcts` | `/sap/bc/cts_abapvcs/...` | [gCTS](./gcts) |
-| `flp` | `/sap/opu/odata/UI2/PAGE_BUILDER_PERS/...` | [FLP](./uifsa) |
-| `enhancements` | `/sap/bc/adt/enhancements/...` | [Enhancements](./enhancements) |
+| Namespace          | URL root                                   | Page                                    |
+| ------------------ | ------------------------------------------ | --------------------------------------- |
+| `discovery`        | `/sap/bc/adt/discovery`                    | [Discovery](./discovery)                |
+| `core.http`        | `/sap/bc/adt/core/http/...`                | [Core HTTP](./core-http)                |
+| `cts`              | `/sap/bc/adt/cts/...`                      | [CTS](./cts)                            |
+| `atc`              | `/sap/bc/adt/atc/...`                      | [ATC](./atc)                            |
+| `aunit`            | `/sap/bc/adt/abapunit/...`                 | [AUnit](./aunit)                        |
+| `oo`               | `/sap/bc/adt/oo/...`                       | [OO](./oo)                              |
+| `packages`         | `/sap/bc/adt/packages/...`                 | [Packages](./packages)                  |
+| `programs`         | `/sap/bc/adt/programs/...`                 | [Programs](./programs)                  |
+| `ddic`             | `/sap/bc/adt/ddic/...`                     | [DDIC](./ddic)                          |
+| `functions`        | `/sap/bc/adt/functions/...`                | [Functions](./functions)                |
+| `system`           | `/sap/bc/adt/system/...`                   | [System](./system)                      |
+| `repository`       | `/sap/bc/adt/repository/...`               | [Repository](./repository)              |
+| `bo`               | `/sap/bc/adt/bo/...`                       | [Business Objects](./bo)                |
+| `businessservices` | `/sap/bc/adt/businessservices/...`         | [Business Services](./businessservices) |
+| `datapreview`      | `/sap/bc/adt/datapreview`                  | [Data Preview](./datapreview)           |
+| `checkruns`        | `/sap/bc/adt/checkruns`                    | [Check Runs](./checkruns)               |
+| `activation`       | `/sap/bc/adt/activation`                   | [Activation](./activation)              |
+| `runtime.traces`   | `/sap/bc/adt/runtime/traces/...`           | [Runtime / Traces](./runtime-traces)    |
+| `gcts`             | `/sap/bc/cts_abapvcs/...`                  | [gCTS](./gcts)                          |
+| `flp`              | `/sap/opu/odata/UI2/PAGE_BUILDER_PERS/...` | [FLP](./uifsa)                          |
+| `enhancements`     | `/sap/bc/adt/enhancements/...`             | [Enhancements](./enhancements)          |
 
 ## See also
 

@@ -18,10 +18,14 @@ bun add @abapify/adt-puppeteer
 
 ```ts
 export type {
-  PuppeteerCredentials, PuppeteerAuthOptions, PuppeteerPluginOptions,
+  PuppeteerCredentials,
+  PuppeteerAuthOptions,
+  PuppeteerPluginOptions,
 } from '@abapify/adt-puppeteer';
 export type {
-  BrowserCredentials, BrowserAuthOptions, CookieData,
+  BrowserCredentials,
+  BrowserAuthOptions,
+  CookieData,
 } from '@abapify/adt-puppeteer';
 ```
 

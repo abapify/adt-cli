@@ -1,7 +1,7 @@
 ---
 title: cts_create_transport
 sidebar_label: cts_create_transport
-description: "Create a new transport request"
+description: 'Create a new transport request'
 ---
 
 # `cts_create_transport`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,11 +43,11 @@ See the source for the exact shape of `result`.
 {
   "name": "cts_create_transport",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "description": "<description>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "description": "<description>"
   }
 }
 ```

@@ -1,7 +1,7 @@
 ---
 title: get_structure
 sidebar_label: get_structure
-description: "Fetch DDIC structure metadata, optionally including the ABAP source."
+description: 'Fetch DDIC structure metadata, optionally including the ABAP source.'
 ---
 
 # `get_structure`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_structure",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "structureName": "<structureName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "structureName": "<structureName>"
   }
 }
 ```

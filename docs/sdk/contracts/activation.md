@@ -7,8 +7,8 @@ description: Activate ABAP objects.
 
 ## Methods
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
+| Method                    | HTTP | Path                                                | Summary          |
+| ------------------------- | ---- | --------------------------------------------------- | ---------------- |
 | `.activate.post(params?)` | POST | `/sap/bc/adt/activation{?method,preauditRequested}` | Activate objects |
 
 Request body: `adtcore:objectReferences`.
@@ -23,7 +23,11 @@ Body/response schema: `adtcore`.
 ```ts
 await client.adt.activation.activate.post(
   { preauditRequested: true },
-  { objectReferences: { objectReference: [{ uri: '/sap/bc/adt/oo/classes/zcl_demo' }] } },
+  {
+    objectReferences: {
+      objectReference: [{ uri: '/sap/bc/adt/oo/classes/zcl_demo' }],
+    },
+  },
 );
 ```
 

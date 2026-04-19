@@ -24,20 +24,33 @@ bun add @abapify/adt-plugin
 ```ts
 // Format plugin types
 export type {
-  AbapObjectType, FormatOptionValue,
-  ImportContext, ImportResult,
-  ExportContext, ExportOptions, ExportResult,
+  AbapObjectType,
+  FormatOptionValue,
+  ImportContext,
+  ImportResult,
+  ExportContext,
+  ExportOptions,
+  ExportResult,
   FileTree,
-  AdtPlugin, AdtPluginDefinition,
+  AdtPlugin,
+  AdtPluginDefinition,
 } from '@abapify/adt-plugin';
 
 // CLI command plugin types
 export type {
-  CliOption, CliArgument, CliContext, CliLogger, CliCommandPlugin,
+  CliOption,
+  CliArgument,
+  CliContext,
+  CliLogger,
+  CliCommandPlugin,
 } from '@abapify/adt-plugin';
 
 // Factory & registry
-export { createPlugin, registerFormatPlugin, getFormatPlugin } from '@abapify/adt-plugin';
+export {
+  createPlugin,
+  registerFormatPlugin,
+  getFormatPlugin,
+} from '@abapify/adt-plugin';
 ```
 
 ## Usage
@@ -46,10 +59,15 @@ export { createPlugin, registerFormatPlugin, getFormatPlugin } from '@abapify/ad
 import { createPlugin } from '@abapify/adt-plugin';
 
 export const myPlugin = createPlugin({
-  name: 'myFormat', version: '1.0.0',
+  name: 'myFormat',
+  version: '1.0.0',
   description: 'My format plugin',
-  registry: { /* handlers */ },
-  format:   { /* serialize/deserialize */ },
+  registry: {
+    /* handlers */
+  },
+  format: {
+    /* serialize/deserialize */
+  },
 });
 ```
 

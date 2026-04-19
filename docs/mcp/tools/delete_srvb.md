@@ -1,7 +1,7 @@
 ---
 title: delete_srvb
 sidebar_label: delete_srvb
-description: "Delete a RAP Service Binding (SRVB) object."
+description: 'Delete a RAP Service Binding (SRVB) object.'
 ---
 
 # `delete_srvb`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "delete_srvb",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "srvbName": "<srvbName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "srvbName": "<srvbName>"
   }
 }
 ```

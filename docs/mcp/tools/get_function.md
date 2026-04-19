@@ -1,7 +1,7 @@
 ---
 title: get_function
 sidebar_label: get_function
-description: "Read ABAP function module metadata (parameters, exceptions) and optionally its source code."
+description: 'Read ABAP function module metadata (parameters, exceptions) and optionally its source code.'
 ---
 
 # `get_function`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,12 +42,12 @@ See the source for the exact shape of `result`.
 {
   "name": "get_function",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "groupName": "<groupName>",
-      "functionName": "<functionName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "groupName": "<groupName>",
+    "functionName": "<functionName>"
   }
 }
 ```

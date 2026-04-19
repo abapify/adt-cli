@@ -24,12 +24,15 @@ bun add @abapify/adt-schemas
 
 ```ts
 // All schemas
-export * from '@abapify/adt-schemas';  // adtcore, atom, classes, interfaces, …
+export * from '@abapify/adt-schemas'; // adtcore, atom, classes, interfaces, …
 
 // Re-exported from ts-xsd
 export { typedSchema, parseXml, buildXml } from '@abapify/adt-schemas';
 export type {
-  TypedSchema, InferTypedSchema, SchemaLike, InferSchema,
+  TypedSchema,
+  InferTypedSchema,
+  SchemaLike,
+  InferSchema,
 } from '@abapify/adt-schemas';
 ```
 
@@ -38,8 +41,8 @@ export type {
 ```ts
 import { atom, adtcore } from '@abapify/adt-schemas';
 
-const data = atom.parse(xmlString);   // typed
-const xml  = atom.build(data);
+const data = atom.parse(xmlString); // typed
+const xml = atom.build(data);
 
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 type AtomData = InferTypedSchema<typeof atom>;

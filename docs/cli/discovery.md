@@ -12,10 +12,10 @@ target system.
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
+| Flag                  | Description                                                   |
+| --------------------- | ------------------------------------------------------------- |
 | `-o, --output <file>` | Save discovery data to file (JSON or XML based on extension). |
-| `-f, --filter <text>` | Filter workspaces by title. |
+| `-f, --filter <text>` | Filter workspaces by title.                                   |
 
 ## Examples
 

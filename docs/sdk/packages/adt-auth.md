@@ -40,11 +40,21 @@ export { resolveServiceKeyFromEnv, readServiceKey } from '@abapify/adt-auth';
 
 // Types
 export type {
-  AuthMethod, AuthConfig, AuthSession,
-  BasicCredentials, CookieCredentials, Credentials,
-  AuthPlugin, AuthPluginOptions, AuthPluginResult,
-  CookieAuthResult, BasicAuthResult, ConnectionTestResult,
-  BTPServiceKey, UAACredentials, ServiceKeyPluginOptions,
+  AuthMethod,
+  AuthConfig,
+  AuthSession,
+  BasicCredentials,
+  CookieCredentials,
+  Credentials,
+  AuthPlugin,
+  AuthPluginOptions,
+  AuthPluginResult,
+  CookieAuthResult,
+  BasicAuthResult,
+  ConnectionTestResult,
+  BTPServiceKey,
+  UAACredentials,
+  ServiceKeyPluginOptions,
 } from '@abapify/adt-auth';
 ```
 

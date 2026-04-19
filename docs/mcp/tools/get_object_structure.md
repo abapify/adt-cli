@@ -1,7 +1,7 @@
 ---
 title: get_object_structure
 sidebar_label: get_object_structure
-description: "Get the structural tree of an ABAP object (includes, methods, attributes, sub-components)."
+description: 'Get the structural tree of an ABAP object (includes, methods, attributes, sub-components).'
 ---
 
 # `get_object_structure`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,11 +42,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_object_structure",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectName": "<objectName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectName": "<objectName>"
   }
 }
 ```

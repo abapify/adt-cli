@@ -1,7 +1,7 @@
 ---
 title: unlock_object
 sidebar_label: unlock_object
-description: "Release an ADT edit lock acquired with lock_object. Requires the lockHandle returned by lock_object."
+description: 'Release an ADT edit lock acquired with lock_object. Requires the lockHandle returned by lock_object.'
 ---
 
 # `unlock_object`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,12 +42,12 @@ See the source for the exact shape of `result`.
 {
   "name": "unlock_object",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectName": "<objectName>",
-      "lockHandle": "<lockHandle>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectName": "<objectName>",
+    "lockHandle": "<lockHandle>"
   }
 }
 ```

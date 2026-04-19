@@ -24,9 +24,14 @@ export { createFindingResolver } from '@abapify/adt-plugin-abapgit';
 
 // Handler registry
 export {
-  getHandler, isSupported, getSupportedTypes,
+  getHandler,
+  isSupported,
+  getSupportedTypes,
 } from '@abapify/adt-plugin-abapgit';
-export type { SerializedFile, ObjectHandler } from '@abapify/adt-plugin-abapgit';
+export type {
+  SerializedFile,
+  ObjectHandler,
+} from '@abapify/adt-plugin-abapgit';
 
 // Utilities
 export { parseAbapGitFilename } from '@abapify/adt-plugin-abapgit';
@@ -36,7 +41,7 @@ export { adtUriToAbapGitPath } from '@abapify/adt-plugin-abapgit';
 ## Usage
 
 ```ts
-import '@abapify/adt-plugin-abapgit';  // self-registers
+import '@abapify/adt-plugin-abapgit'; // self-registers
 // Then use through adt-cli: adt export --format abapgit
 ```
 

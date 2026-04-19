@@ -8,11 +8,11 @@ description: RAP behavior definitions, service definitions and service bindings.
 
 CRUD for RAP (ABAP RESTful Application Programming Model) artifacts.
 
-| Type | Command | File extension | ADT URI |
-| --- | --- | --- | --- |
-| Behavior Definition | `adt bdef` | `.abdl` | `/sap/bc/adt/bo/behaviordefinitions` |
-| Service Definition | `adt srvd` | `.asrvd` | `/sap/bc/adt/ddic/srvd/sources` |
-| Service Binding    | `adt srvb` | — | `/sap/bc/adt/businessservices/bindings` |
+| Type                | Command    | File extension | ADT URI                                 |
+| ------------------- | ---------- | -------------- | --------------------------------------- |
+| Behavior Definition | `adt bdef` | `.abdl`        | `/sap/bc/adt/bo/behaviordefinitions`    |
+| Service Definition  | `adt srvd` | `.asrvd`       | `/sap/bc/adt/ddic/srvd/sources`         |
+| Service Binding     | `adt srvb` | —              | `/sap/bc/adt/businessservices/bindings` |
 
 ## Subcommands
 
@@ -30,17 +30,17 @@ adt bdef delete <name> [-y] [--transport]
 
 ### `srvb`
 
-Service bindings are metadata-only + *publish/unpublish* (activation ≠ publish
+Service bindings are metadata-only + _publish/unpublish_ (activation ≠ publish
 for Gateway services):
 
-| Command | Description |
-| --- | --- |
-| `adt srvb create <name> <description> <package>` | Create a new ABAP service binding. |
-| `adt srvb read <name>` | Read an ABAP service binding. |
-| `adt srvb publish <name>` | Publish (activate) an ABAP service binding via Gateway. |
-| `adt srvb unpublish <name>` | Unpublish (deactivate) an ABAP service binding. |
-| `adt srvb activate <names...>` | Activate one or more service bindings. |
-| `adt srvb delete <name>` | Delete an ABAP service binding. |
+| Command                                          | Description                                             |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| `adt srvb create <name> <description> <package>` | Create a new ABAP service binding.                      |
+| `adt srvb read <name>`                           | Read an ABAP service binding.                           |
+| `adt srvb publish <name>`                        | Publish (activate) an ABAP service binding via Gateway. |
+| `adt srvb unpublish <name>`                      | Unpublish (deactivate) an ABAP service binding.         |
+| `adt srvb activate <names...>`                   | Activate one or more service bindings.                  |
+| `adt srvb delete <name>`                         | Delete an ABAP service binding.                         |
 
 ## Options
 
@@ -48,7 +48,7 @@ Same as [`objects`](./objects):
 
 - `create`: `-t, --transport <corrnr>`, `--no-error-existing`, `--json`
 - `read`: `--json`
-- `write` (*bdef* / *srvd* only): `[file]`, `-t, --transport`, `--activate`
+- `write` (_bdef_ / _srvd_ only): `[file]`, `-t, --transport`, `--activate`
 - `activate` / `publish` / `unpublish`: `--json`
 - `delete`: `-t, --transport`, `-y, --yes`, `--json`
 

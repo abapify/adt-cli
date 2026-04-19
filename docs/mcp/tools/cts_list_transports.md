@@ -1,7 +1,7 @@
 ---
 title: cts_list_transports
 sidebar_label: cts_list_transports
-description: "List transport requests from the CTS"
+description: 'List transport requests from the CTS'
 ---
 
 # `cts_list_transports`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,10 +40,10 @@ See the source for the exact shape of `result`.
 {
   "name": "cts_list_transports",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

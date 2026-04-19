@@ -23,11 +23,18 @@ bun add @abapify/acds
 export { parse, type ParseResult } from '@abapify/acds';
 // Re-exported from './ast', './tokens', './errors':
 export type {
-  CdsSourceFile, CdsDefinition,
-  TableDefinition, StructureDefinition, SimpleTypeDefinition,
-  ServiceDefinition, MetadataExtension,
-  FieldDefinition, IncludeDirective,
-  TypeRef, BuiltinTypeRef, NamedTypeRef,
+  CdsSourceFile,
+  CdsDefinition,
+  TableDefinition,
+  StructureDefinition,
+  SimpleTypeDefinition,
+  ServiceDefinition,
+  MetadataExtension,
+  FieldDefinition,
+  IncludeDirective,
+  TypeRef,
+  BuiltinTypeRef,
+  NamedTypeRef,
   CdsParseError,
 } from '@abapify/acds';
 ```

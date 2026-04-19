@@ -15,17 +15,17 @@ Ideal for scripting quick diagnostics (`WRITE sy-uname.`, `SELECT COUNT(*) FROM
 
 ## Arguments
 
-| Argument | Description |
-| --- | --- |
+| Argument | Description                                         |
+| -------- | --------------------------------------------------- |
 | `[file]` | Source file path (use `-` for stdin). Default: `-`. |
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
-| `--prefix <name>` | Temp class name prefix (default: `zcl_adtcli_run`). |
-| `--package <pkg>` | Package for the temp class (default: `$TMP`). |
-| `--transport <corrnr>` | Transport request (not needed for `$TMP`). |
+| Flag                   | Description                                         |
+| ---------------------- | --------------------------------------------------- |
+| `--prefix <name>`      | Temp class name prefix (default: `zcl_adtcli_run`). |
+| `--package <pkg>`      | Package for the temp class (default: `$TMP`).       |
+| `--transport <corrnr>` | Transport request (not needed for `$TMP`).          |
 
 ## Examples
 

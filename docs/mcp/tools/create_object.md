@@ -1,7 +1,7 @@
 ---
 title: create_object
 sidebar_label: create_object
-description: "Create a new ABAP object. Supported types: PROG, CLAS, INTF, FUGR, DEVC, DOMA (domain), DTEL (data element), TABL (table), STRUCT (structure), DDLS (CDS DDL), DCLS (CDS DCL), BDEF (RAP behavior definition), SRVD (RAP service definition)."
+description: 'Create a new ABAP object. Supported types: PROG, CLAS, INTF, FUGR, DEVC, DOMA (domain), DTEL (data element), TABL (table), STRUCT (structure), DDLS (CDS DDL), DCLS (CDS DCL), BDEF (RAP behavior definition), SRVD (RAP service definition).'
 ---
 
 # `create_object`
@@ -32,9 +32,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -46,13 +44,13 @@ See the source for the exact shape of `result`.
 {
   "name": "create_object",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectName": "<objectName>",
-      "objectType": "<objectType>",
-      "description": "<description>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectName": "<objectName>",
+    "objectType": "<objectType>",
+    "description": "<description>"
   }
 }
 ```

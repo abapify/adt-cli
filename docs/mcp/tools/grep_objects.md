@@ -1,7 +1,7 @@
 ---
 title: grep_objects
 sidebar_label: grep_objects
-description: "Regex search for a pattern within ABAP object source code. Provide either a list of object URIs or name+type pairs to resolve them."
+description: 'Regex search for a pattern within ABAP object source code. Provide either a list of object URIs or name+type pairs to resolve them.'
 ---
 
 # `grep_objects`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,11 +43,11 @@ See the source for the exact shape of `result`.
 {
   "name": "grep_objects",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "pattern": "<pattern>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "pattern": "<pattern>"
   }
 }
 ```

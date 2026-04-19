@@ -1,7 +1,7 @@
 ---
 title: get_callees_of
 sidebar_label: get_callees_of
-description: "Find all callees (downward call hierarchy) of an ABAP method, function module, or subroutine"
+description: 'Find all callees (downward call hierarchy) of an ABAP method, function module, or subroutine'
 ---
 
 # `get_callees_of`

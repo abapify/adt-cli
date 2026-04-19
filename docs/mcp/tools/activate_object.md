@@ -1,7 +1,7 @@
 ---
 title: activate_object
 sidebar_label: activate_object
-description: "Activate one or more ABAP objects. Supply either objectName+objectType for a single object, or the objects array for batch activation."
+description: 'Activate one or more ABAP objects. Supply either objectName+objectType for a single object, or the objects array for batch activation.'
 ---
 
 # `activate_object`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,10 +42,10 @@ See the source for the exact shape of `result`.
 {
   "name": "activate_object",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

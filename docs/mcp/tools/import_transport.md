@@ -1,7 +1,7 @@
 ---
 title: import_transport
 sidebar_label: import_transport
-description: "Export all objects referenced by a transport request to a local folder. Mirrors `adt import transport`."
+description: 'Export all objects referenced by a transport request to a local folder. Mirrors `adt import transport`.'
 ---
 
 # `import_transport`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,11 +43,11 @@ See the source for the exact shape of `result`.
 {
   "name": "import_transport",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "transportNumber": "<transportNumber>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "transportNumber": "<transportNumber>"
   }
 }
 ```

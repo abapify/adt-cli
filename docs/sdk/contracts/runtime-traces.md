@@ -12,15 +12,15 @@ measurements) used to wire AUnit coverage to JaCoCo/SonarQube.
 
 ### `client.adt.runtime.traces.coverage.measurements`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
+| Method       | HTTP | Path                                               | Summary                          |
+| ------------ | ---- | -------------------------------------------------- | -------------------------------- |
 | `.post(...)` | POST | `/sap/bc/adt/runtime/traces/coverage/measurements` | Start/fetch coverage measurement |
 
 ### `client.adt.runtime.traces.coverage.statements`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.get(...)` | GET | `/sap/bc/adt/runtime/traces/coverage/statements` | Statement-level coverage |
+| Method      | HTTP | Path                                             | Summary                  |
+| ----------- | ---- | ------------------------------------------------ | ------------------------ |
+| `.get(...)` | GET  | `/sap/bc/adt/runtime/traces/coverage/statements` | Statement-level coverage |
 
 ## Schema
 

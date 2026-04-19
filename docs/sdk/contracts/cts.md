@@ -13,31 +13,31 @@ transport checks.
 
 ### `client.adt.cts.transportrequests`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.list(params?)` | GET | `/sap/bc/adt/cts/transportrequests` | List transports |
-| `.get(trkorr)` | GET | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Get one |
-| `.post()` | POST | `/sap/bc/adt/cts/transportrequests` | Create |
-| `.postAction(trkorr)` | POST | `/sap/bc/adt/cts/transportrequests/{trkorr}` | User action |
-| `.put(trkorr)` | PUT | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Update |
-| `.delete(trkorr)` | DELETE | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Delete |
-| `.reference(...)` | GET | `.../reference` | Resolve transport reference |
-| `.valuehelp.attribute/target/object/ctsproject` | GET | `.../valuehelp/...` | Value help lookups |
-| `.searchconfiguration.configurations.*` | GET/PUT | `.../searchconfiguration/configurations` | Search config CRUD |
-| `.searchconfiguration.metadata()` | GET | `.../searchconfiguration/metadata` | Metadata |
-| `.useraction.*` | POST | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Release / change owner / etc. |
+| Method                                          | HTTP    | Path                                         | Summary                       |
+| ----------------------------------------------- | ------- | -------------------------------------------- | ----------------------------- |
+| `.list(params?)`                                | GET     | `/sap/bc/adt/cts/transportrequests`          | List transports               |
+| `.get(trkorr)`                                  | GET     | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Get one                       |
+| `.post()`                                       | POST    | `/sap/bc/adt/cts/transportrequests`          | Create                        |
+| `.postAction(trkorr)`                           | POST    | `/sap/bc/adt/cts/transportrequests/{trkorr}` | User action                   |
+| `.put(trkorr)`                                  | PUT     | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Update                        |
+| `.delete(trkorr)`                               | DELETE  | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Delete                        |
+| `.reference(...)`                               | GET     | `.../reference`                              | Resolve transport reference   |
+| `.valuehelp.attribute/target/object/ctsproject` | GET     | `.../valuehelp/...`                          | Value help lookups            |
+| `.searchconfiguration.configurations.*`         | GET/PUT | `.../searchconfiguration/configurations`     | Search config CRUD            |
+| `.searchconfiguration.metadata()`               | GET     | `.../searchconfiguration/metadata`           | Metadata                      |
+| `.useraction.*`                                 | POST    | `/sap/bc/adt/cts/transportrequests/{trkorr}` | Release / change owner / etc. |
 
 ### `client.adt.cts.transports`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.list(params?)` | GET | `/sap/bc/adt/cts/transports` | Search transports |
+| Method           | HTTP | Path                         | Summary           |
+| ---------------- | ---- | ---------------------------- | ----------------- |
+| `.list(params?)` | GET  | `/sap/bc/adt/cts/transports` | Search transports |
 
 ### `client.adt.cts.transportchecks`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.list()` | GET | `/sap/bc/adt/cts/transportchecks` | Transport checks |
+| Method    | HTTP | Path                              | Summary          |
+| --------- | ---- | --------------------------------- | ---------------- |
+| `.list()` | GET  | `/sap/bc/adt/cts/transportchecks` | Transport checks |
 
 ## Schema
 

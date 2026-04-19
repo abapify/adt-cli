@@ -1,7 +1,7 @@
 ---
 title: search_objects
 sidebar_label: search_objects
-description: "Search for ABAP objects in the repository (supports wildcards)"
+description: 'Search for ABAP objects in the repository (supports wildcards)'
 ---
 
 # `search_objects`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "search_objects",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "query": "<query>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "query": "<query>"
   }
 }
 ```

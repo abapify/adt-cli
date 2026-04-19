@@ -1,7 +1,7 @@
 ---
 title: get_domain
 sidebar_label: get_domain
-description: "Fetch DDIC domain metadata (type information, fixed values, output info)."
+description: 'Fetch DDIC domain metadata (type information, fixed values, output info).'
 ---
 
 # `get_domain`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_domain",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "domainName": "<domainName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "domainName": "<domainName>"
   }
 }
 ```

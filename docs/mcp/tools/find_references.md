@@ -1,7 +1,7 @@
 ---
 title: find_references
 sidebar_label: find_references
-description: "Find all usages (where-used) of an ABAP object or symbol. Uses the 2-step POST /usageReferences protocol."
+description: 'Find all usages (where-used) of an ABAP object or symbol. Uses the 2-step POST /usageReferences protocol.'
 ---
 
 # `find_references`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,11 +43,11 @@ See the source for the exact shape of `result`.
 {
   "name": "find_references",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectName": "<objectName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectName": "<objectName>"
   }
 }
 ```

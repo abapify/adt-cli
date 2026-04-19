@@ -1,7 +1,7 @@
 ---
 title: delete_srvd
 sidebar_label: delete_srvd
-description: "Delete a RAP Service Definition (SRVD) object."
+description: 'Delete a RAP Service Definition (SRVD) object.'
 ---
 
 # `delete_srvd`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "delete_srvd",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "srvdName": "<srvdName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "srvdName": "<srvdName>"
   }
 }
 ```

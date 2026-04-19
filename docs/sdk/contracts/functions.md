@@ -21,14 +21,14 @@ CRUD for function groups at `/sap/bc/adt/functions/groups/{groupName}`.
 
 CRUD for function modules, including source endpoints:
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.get(fmName)` | GET | `.../fmodules/{fmName}` | Get FM |
-| `.post(...)` | POST | `.../fmodules` | Create |
-| `.put(fmName)` | PUT | `.../fmodules/{fmName}` | Update |
-| `.delete(fmName)` | DELETE | `.../fmodules/{fmName}` | Delete |
-| `.source.main.get(fmName)` | GET | `.../fmodules/{fmName}/source/main` | Source |
-| `.source.main.put(fmName)` | PUT | `.../fmodules/{fmName}/source/main` | Update source |
+| Method                     | HTTP   | Path                                | Summary       |
+| -------------------------- | ------ | ----------------------------------- | ------------- |
+| `.get(fmName)`             | GET    | `.../fmodules/{fmName}`             | Get FM        |
+| `.post(...)`               | POST   | `.../fmodules`                      | Create        |
+| `.put(fmName)`             | PUT    | `.../fmodules/{fmName}`             | Update        |
+| `.delete(fmName)`          | DELETE | `.../fmodules/{fmName}`             | Delete        |
+| `.source.main.get(fmName)` | GET    | `.../fmodules/{fmName}/source/main` | Source        |
+| `.source.main.put(fmName)` | PUT    | `.../fmodules/{fmName}/source/main` | Update source |
 
 ## Schema
 
@@ -37,7 +37,10 @@ Source: [`adt-contracts/src/adt/functions/`](https://github.com/abapify/adt-cli/
 ## Example
 
 ```ts
-const fm = await client.adt.functions.groups.fmodules.get('ZFG_DEMO', 'ZFM_HELLO');
+const fm = await client.adt.functions.groups.fmodules.get(
+  'ZFG_DEMO',
+  'ZFM_HELLO',
+);
 ```
 
 :::caution FM create quirks

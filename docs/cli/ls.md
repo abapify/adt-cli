@@ -13,12 +13,12 @@ live SAP listing.
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
-| `--json` | Output as JSON. |
-| `-t, --type <types>` | Filter by object type (comma-separated, e.g. `CLAS,INTF`). |
-| `-o, --output <file>` | Write output to file. |
-| `-d, --dir <directory>` | Directory to scan (default: current directory). |
+| Flag                    | Description                                                |
+| ----------------------- | ---------------------------------------------------------- |
+| `--json`                | Output as JSON.                                            |
+| `-t, --type <types>`    | Filter by object type (comma-separated, e.g. `CLAS,INTF`). |
+| `-o, --output <file>`   | Write output to file.                                      |
+| `-d, --dir <directory>` | Directory to scan (default: current directory).            |
 
 ## Examples
 

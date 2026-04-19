@@ -9,8 +9,8 @@ description: ABAP SQL freestyle execution.
 
 ### `client.adt.datapreview.freestyle`
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
+| Method       | HTTP | Path                                | Summary                    |
+| ------------ | ---- | ----------------------------------- | -------------------------- |
 | `.post(...)` | POST | `/sap/bc/adt/datapreview/freestyle` | Execute ABAP SQL statement |
 
 ## Schema

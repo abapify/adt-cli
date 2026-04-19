@@ -16,23 +16,23 @@ computes the plan without touching SAP.
 
 ## Arguments
 
-| Argument | Description |
-| --- | --- |
+| Argument      | Description                                   |
+| ------------- | --------------------------------------------- |
 | `<directory>` | Source directory containing serialised files. |
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
-| `--format <format>` | Format plugin id (default: `abapgit`; try `gcts` for AFF layout). |
-| `-p, --package <package>` | Target root SAP package for the checkin. |
-| `-t, --transport <transport>` | Transport request to use for lock/save operations. |
-| `--types <types>` | Filter by object types (comma-separated, e.g. `CLAS,INTF`). |
-| `--dry-run` | Validate & plan only — no writes to SAP (default: `false`). |
-| `--no-activate` | Skip activation after save (objects remain inactive). |
-| `--unlock` | Force-unlock objects already locked by the current user before applying. |
-| `--abap-language-version <version>` | ABAP language version for new objects (e.g. `'5'` for Cloud). |
-| `--json` | Emit the `CheckinResult` as JSON (machine-readable) (default: `false`). |
+| Flag                                | Description                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| `--format <format>`                 | Format plugin id (default: `abapgit`; try `gcts` for AFF layout).        |
+| `-p, --package <package>`           | Target root SAP package for the checkin.                                 |
+| `-t, --transport <transport>`       | Transport request to use for lock/save operations.                       |
+| `--types <types>`                   | Filter by object types (comma-separated, e.g. `CLAS,INTF`).              |
+| `--dry-run`                         | Validate & plan only — no writes to SAP (default: `false`).              |
+| `--no-activate`                     | Skip activation after save (objects remain inactive).                    |
+| `--unlock`                          | Force-unlock objects already locked by the current user before applying. |
+| `--abap-language-version <version>` | ABAP language version for new objects (e.g. `'5'` for Cloud).            |
+| `--json`                            | Emit the `CheckinResult` as JSON (machine-readable) (default: `false`).  |
 
 ## Examples
 

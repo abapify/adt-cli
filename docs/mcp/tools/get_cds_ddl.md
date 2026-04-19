@@ -1,7 +1,7 @@
 ---
 title: get_cds_ddl
 sidebar_label: get_cds_ddl
-description: "Fetch CDS DDL source (DDLS) metadata, optionally including the DDL source code."
+description: 'Fetch CDS DDL source (DDLS) metadata, optionally including the DDL source code.'
 ---
 
 # `get_cds_ddl`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_cds_ddl",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "ddlName": "<ddlName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "ddlName": "<ddlName>"
   }
 }
 ```

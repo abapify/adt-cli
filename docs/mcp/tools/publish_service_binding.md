@@ -1,7 +1,7 @@
 ---
 title: publish_service_binding
 sidebar_label: publish_service_binding
-description: "Publish (or unpublish) a RAP Service Binding (SRVB) in SAP. Pass `unpublish: true` to deactivate. Delegates to the typed SRVB contract."
+description: 'Publish (or unpublish) a RAP Service Binding (SRVB) in SAP. Pass `unpublish: true` to deactivate. Delegates to the typed SRVB contract.'
 ---
 
 # `publish_service_binding`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "publish_service_binding",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "bindingName": "<bindingName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "bindingName": "<bindingName>"
   }
 }
 ```

@@ -21,7 +21,10 @@ export { gctsFormatPlugin } from '@abapify/adt-plugin-gcts';
 export { gctsPlugin, GctsPlugin, default } from '@abapify/adt-plugin-gcts';
 
 export {
-  getHandler, getSupportedTypes, isSupported, createHandler,
+  getHandler,
+  getSupportedTypes,
+  isSupported,
+  createHandler,
 } from '@abapify/adt-plugin-gcts';
 ```
 

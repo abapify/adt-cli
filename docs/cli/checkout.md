@@ -35,23 +35,23 @@ The object-type subcommands map to the SAP 4-letter kinds (`class` → `CLAS`,
 
 ### Object subcommands (`class`, `interface`, `program`, ...)
 
-| Flag | Description |
-| --- | --- |
-| `[targetFolder]` | Target output folder (default: `.`). |
+| Flag                  | Description                                  |
+| --------------------- | -------------------------------------------- |
+| `[targetFolder]`      | Target output folder (default: `.`).         |
 | `-o, --output <path>` | Output directory (overrides `targetFolder`). |
-| `--format <format>` | Output format (default: `abapgit`). |
-| `--debug` | Enable debug output. |
+| `--format <format>`   | Output format (default: `abapgit`).          |
+| `--debug`             | Enable debug output.                         |
 
 ### `package`
 
-| Flag | Description |
-| --- | --- |
-| `[targetFolder]` | Target output folder (default: `.`). |
-| `-o, --output <path>` | Output directory (overrides `targetFolder`). |
+| Flag                         | Description                                           |
+| ---------------------------- | ----------------------------------------------------- |
+| `[targetFolder]`             | Target output folder (default: `.`).                  |
+| `-o, --output <path>`        | Output directory (overrides `targetFolder`).          |
 | `-t, --object-types <types>` | Comma-separated object types (e.g. `CLAS,INTF,DDLS`). |
-| `--no-sub-packages` | Exclude subpackages. |
-| `--format <format>` | Output format (default: `abapgit`). |
-| `--debug` | Enable debug output. |
+| `--no-sub-packages`          | Exclude subpackages.                                  |
+| `--format <format>`          | Output format (default: `abapgit`).                   |
+| `--debug`                    | Enable debug output.                                  |
 
 ## Examples
 

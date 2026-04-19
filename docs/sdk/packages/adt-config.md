@@ -18,9 +18,14 @@ bun add @abapify/adt-config
 
 ```ts
 export type {
-  Destination, DestinationInput, AdtConfig,
-  AuthPlugin, AuthTestResult,
-  ContractsConfig, ContentTypeMapping, EnabledEndpoints,
+  Destination,
+  DestinationInput,
+  AdtConfig,
+  AuthPlugin,
+  AuthTestResult,
+  ContractsConfig,
+  ContentTypeMapping,
+  EnabledEndpoints,
 } from '@abapify/adt-config';
 export type { LoadedConfig, LoadConfigOptions } from '@abapify/adt-config';
 export { loadConfig, defineConfig } from '@abapify/adt-config';
@@ -35,7 +40,10 @@ import { defineConfig } from '@abapify/adt-config';
 
 export default defineConfig({
   destinations: {
-    BHF: { type: 'puppeteer', options: { url: 'https://sap.example.com', client: '100' } },
+    BHF: {
+      type: 'puppeteer',
+      options: { url: 'https://sap.example.com', client: '100' },
+    },
   },
   commands: ['@abapify/adt-atc/commands/atc'],
 });

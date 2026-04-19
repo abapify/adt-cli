@@ -1,7 +1,7 @@
 ---
 title: find_definition
 sidebar_label: find_definition
-description: "Resolve an ABAP symbol (class, interface, function, data element, …) to its ADT object URI."
+description: 'Resolve an ABAP symbol (class, interface, function, data element, …) to its ADT object URI.'
 ---
 
 # `find_definition`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,11 +43,11 @@ See the source for the exact shape of `result`.
 {
   "name": "find_definition",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectName": "<objectName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectName": "<objectName>"
   }
 }
 ```

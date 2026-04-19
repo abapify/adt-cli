@@ -27,14 +27,18 @@ export { ConsoleLogger, type Logger } from '@abapify/adt-codegen';
 // Built-in plugins
 export {
   workspaceSplitterPlugin,
-  extractCollectionsPlugin, extractCollections,
-  bootstrapSchemasPlugin, bootstrapSchemas,
+  extractCollectionsPlugin,
+  extractCollections,
+  bootstrapSchemasPlugin,
+  bootstrapSchemas,
   generateTypesPlugin,
 } from '@abapify/adt-codegen';
 
 export type {
-  ExtractCollectionsOptions, CollectionData,
-  BootstrapSchemasOptions, SchemaInfo,
+  ExtractCollectionsOptions,
+  CollectionData,
+  BootstrapSchemasOptions,
+  SchemaInfo,
 } from '@abapify/adt-codegen';
 ```
 

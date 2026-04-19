@@ -1,7 +1,7 @@
 ---
 title: gcts_list_repos
 sidebar_label: gcts_list_repos
-description: "List gCTS repositories on the SAP system"
+description: 'List gCTS repositories on the SAP system'
 ---
 
 # `gcts_list_repos`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,10 +40,10 @@ See the source for the exact shape of `result`.
 {
   "name": "gcts_list_repos",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

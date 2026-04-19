@@ -1,12 +1,12 @@
 ---
 title: lookup_user
 sidebar_label: lookup_user
-description: "Look up SAP system users. Empty query returns the current user; exact username returns a single user; wildcard query (with * or ?) searches."
+description: 'Look up SAP system users. Empty query returns the current user; exact username returns a single user; wildcard query (with * or ?) searches.'
 ---
 
 # `lookup_user`
 
-Look up SAP system users. Empty query returns the current user; exact username returns a single user; wildcard query (with * or ?) searches.
+Look up SAP system users. Empty query returns the current user; exact username returns a single user; wildcard query (with \* or ?) searches.
 
 Defined in [`packages/adt-mcp/src/lib/tools/lookup-user.ts`](https://github.com/abapify/adt-cli/blob/main/packages/adt-mcp/src/lib/tools/lookup-user.ts).
 
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,10 +41,10 @@ See the source for the exact shape of `result`.
 {
   "name": "lookup_user",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

@@ -10,13 +10,13 @@ case (packages are uppercase; URL-encoded, no lowercase transform).
 
 ## Methods
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.list()` | GET | `/sap/bc/adt/packages` | List packages |
-| `.get(name)` | GET | `/sap/bc/adt/packages/{name}` | Get one |
-| `.post(params?)` | POST | `/sap/bc/adt/packages` | Create (pass `{ corrNr }`) |
-| `.put(name)` | PUT | `/sap/bc/adt/packages/{name}` | Update |
-| `.delete(name)` | DELETE | `/sap/bc/adt/packages/{name}` | Delete |
+| Method           | HTTP   | Path                          | Summary                    |
+| ---------------- | ------ | ----------------------------- | -------------------------- |
+| `.list()`        | GET    | `/sap/bc/adt/packages`        | List packages              |
+| `.get(name)`     | GET    | `/sap/bc/adt/packages/{name}` | Get one                    |
+| `.post(params?)` | POST   | `/sap/bc/adt/packages`        | Create (pass `{ corrNr }`) |
+| `.put(name)`     | PUT    | `/sap/bc/adt/packages/{name}` | Update                     |
+| `.delete(name)`  | DELETE | `/sap/bc/adt/packages/{name}` | Delete                     |
 
 Accept: `application/vnd.sap.adt.packages.v2+xml, …v1+xml`
 Content-Type: `application/vnd.sap.adt.packages.v2+xml`

@@ -19,11 +19,14 @@ bun add @abapify/adt-playwright
 
 ```ts
 export type {
-  PlaywrightCredentials, PlaywrightAuthOptions,
+  PlaywrightCredentials,
+  PlaywrightAuthOptions,
   PlaywrightPluginOptions,
 } from '@abapify/adt-playwright';
 export type {
-  BrowserCredentials, BrowserAuthOptions, CookieData,
+  BrowserCredentials,
+  BrowserAuthOptions,
+  CookieData,
 } from '@abapify/adt-playwright';
 ```
 

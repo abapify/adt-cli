@@ -1,7 +1,7 @@
 ---
 title: list_certs
 sidebar_label: list_certs
-description: "List X.509 certificates installed in a STRUST PSE."
+description: 'List X.509 certificates installed in a STRUST PSE.'
 ---
 
 # `list_certs`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,12 +41,12 @@ See the source for the exact shape of `result`.
 {
   "name": "list_certs",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "context": "<context>",
-      "applic": "<applic>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "context": "<context>",
+    "applic": "<applic>"
   }
 }
 ```

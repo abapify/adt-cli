@@ -1,7 +1,7 @@
 ---
 title: gcts_create_branch
 sidebar_label: gcts_create_branch
-description: "Create a branch in a gCTS repository"
+description: 'Create a branch in a gCTS repository'
 ---
 
 # `gcts_create_branch`
@@ -32,9 +32,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -46,12 +44,12 @@ See the source for the exact shape of `result`.
 {
   "name": "gcts_create_branch",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "rid": "<rid>",
-      "name": "<name>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "rid": "<rid>",
+    "name": "<name>"
   }
 }
 ```

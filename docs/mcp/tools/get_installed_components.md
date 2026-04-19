@@ -1,7 +1,7 @@
 ---
 title: get_installed_components
 sidebar_label: get_installed_components
-description: "List all software components installed on the SAP system with their version and release information."
+description: 'List all software components installed on the SAP system with their version and release information.'
 ---
 
 # `get_installed_components`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,10 +40,10 @@ See the source for the exact shape of `result`.
 {
   "name": "get_installed_components",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

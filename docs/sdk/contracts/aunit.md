@@ -7,8 +7,8 @@ description: ABAP Unit test runs.
 
 ## Methods
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
+| Method             | HTTP | Path                            | Summary                    |
+| ------------------ | ---- | ------------------------------- | -------------------------- |
 | `.testruns.post()` | POST | `/sap/bc/adt/abapunit/testruns` | Execute ABAP Unit test run |
 
 Headers:

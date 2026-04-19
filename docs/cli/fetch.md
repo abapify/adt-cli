@@ -12,19 +12,19 @@ security sessions are attached transparently.
 
 ## Arguments
 
-| Argument | Description |
-| --- | --- |
-| `<url>` | URL path to fetch (e.g. `/sap/bc/adt/core/http/sessions`). |
+| Argument | Description                                                |
+| -------- | ---------------------------------------------------------- |
+| `<url>`  | URL path to fetch (e.g. `/sap/bc/adt/core/http/sessions`). |
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
-| `-X, --method <method>` | HTTP method (default: `GET`). |
-| `-H, --header <header>` | Add header (can be used multiple times). |
-| `-d, --data <data>` | Request body (for `POST`/`PUT`). |
-| `-o, --output <file>` | Save response to file. |
-| `--accept <type>` | Set `Accept` header (shorthand for `-H "Accept: <type>"`). |
+| Flag                    | Description                                                |
+| ----------------------- | ---------------------------------------------------------- |
+| `-X, --method <method>` | HTTP method (default: `GET`).                              |
+| `-H, --header <header>` | Add header (can be used multiple times).                   |
+| `-d, --data <data>`     | Request body (for `POST`/`PUT`).                           |
+| `-o, --output <file>`   | Save response to file.                                     |
+| `--accept <type>`       | Set `Accept` header (shorthand for `-H "Accept: <type>"`). |
 
 ## Examples
 

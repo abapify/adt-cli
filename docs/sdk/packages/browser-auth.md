@@ -20,17 +20,26 @@ bun add @abapify/browser-auth
 
 ```ts
 export {
-  authenticate, testCredentials, toCookieHeader, toHeaders,
+  authenticate,
+  testCredentials,
+  toCookieHeader,
+  toHeaders,
 } from '@abapify/browser-auth';
 export type { AuthenticateOptions } from '@abapify/browser-auth';
 
 export type {
-  CookieData, BrowserCredentials, BrowserAuthOptions,
-  BrowserAdapter, ResponseEvent, TestResult,
+  CookieData,
+  BrowserCredentials,
+  BrowserAuthOptions,
+  BrowserAdapter,
+  ResponseEvent,
+  TestResult,
 } from '@abapify/browser-auth';
 
 export {
-  matchesCookiePattern, cookieMatchesAny, resolveUserDataDir,
+  matchesCookiePattern,
+  cookieMatchesAny,
+  resolveUserDataDir,
 } from '@abapify/browser-auth';
 ```
 

@@ -1,7 +1,7 @@
 ---
 title: gcts_get_repo
 sidebar_label: gcts_get_repo
-description: "Get a single gCTS repository by RID"
+description: 'Get a single gCTS repository by RID'
 ---
 
 # `gcts_get_repo`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "gcts_get_repo",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "rid": "<rid>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "rid": "<rid>"
   }
 }
 ```

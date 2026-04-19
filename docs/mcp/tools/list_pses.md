@@ -1,7 +1,7 @@
 ---
 title: list_pses
 sidebar_label: list_pses
-description: "List SAP STRUST Personal Security Environments (identities)."
+description: 'List SAP STRUST Personal Security Environments (identities).'
 ---
 
 # `list_pses`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,10 +40,10 @@ See the source for the exact shape of `result`.
 {
   "name": "list_pses",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100"
   }
 }
 ```

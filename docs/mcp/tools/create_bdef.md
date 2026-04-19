@@ -1,7 +1,7 @@
 ---
 title: create_bdef
 sidebar_label: create_bdef
-description: "Create a new RAP Behavior Definition (BDEF) object."
+description: 'Create a new RAP Behavior Definition (BDEF) object.'
 ---
 
 # `create_bdef`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,13 +43,13 @@ See the source for the exact shape of `result`.
 {
   "name": "create_bdef",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "bdefName": "<bdefName>",
-      "description": "<description>",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "bdefName": "<bdefName>",
+    "description": "<description>",
+    "packageName": "<packageName>"
   }
 }
 ```

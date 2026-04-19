@@ -1,7 +1,7 @@
 ---
 title: delete_function_module
 sidebar_label: delete_function_module
-description: "Delete an ABAP function module. Requires both group name and module name."
+description: 'Delete an ABAP function module. Requires both group name and module name.'
 ---
 
 # `delete_function_module`
@@ -30,9 +30,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -44,12 +42,12 @@ See the source for the exact shape of `result`.
 {
   "name": "delete_function_module",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "groupName": "<groupName>",
-      "functionName": "<functionName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "groupName": "<groupName>",
+    "functionName": "<functionName>"
   }
 }
 ```

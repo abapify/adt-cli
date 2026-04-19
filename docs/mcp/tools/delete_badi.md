@@ -1,7 +1,7 @@
 ---
 title: delete_badi
 sidebar_label: delete_badi
-description: "Delete an Enhancement Implementation (ENHO/XHH — BAdI container)."
+description: 'Delete an Enhancement Implementation (ENHO/XHH — BAdI container).'
 ---
 
 # `delete_badi`
@@ -29,9 +29,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -43,11 +41,11 @@ See the source for the exact shape of `result`.
 {
   "name": "delete_badi",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "badiName": "<badiName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "badiName": "<badiName>"
   }
 }
 ```

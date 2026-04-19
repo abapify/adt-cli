@@ -1,7 +1,7 @@
 ---
 title: create_srvd
 sidebar_label: create_srvd
-description: "Create a new RAP Service Definition (SRVD) object."
+description: 'Create a new RAP Service Definition (SRVD) object.'
 ---
 
 # `create_srvd`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,13 +43,13 @@ See the source for the exact shape of `result`.
 {
   "name": "create_srvd",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "srvdName": "<srvdName>",
-      "description": "<description>",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "srvdName": "<srvdName>",
+    "description": "<description>",
+    "packageName": "<packageName>"
   }
 }
 ```

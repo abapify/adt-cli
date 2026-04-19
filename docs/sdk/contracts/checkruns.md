@@ -7,8 +7,8 @@ description: ABAP syntax / check-run execution.
 
 ## Methods
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
+| Method                 | HTTP | Path                    | Summary                           |
+| ---------------------- | ---- | ----------------------- | --------------------------------- |
 | `.checkObjects.post()` | POST | `/sap/bc/adt/checkruns` | Run a syntax/check-run on objects |
 
 - `Accept: application/vnd.sap.adt.checkmessages+xml`

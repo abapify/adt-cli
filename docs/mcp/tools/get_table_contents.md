@@ -1,7 +1,7 @@
 ---
 title: get_table_contents
 sidebar_label: get_table_contents
-description: "Read data from a DDIC table with optional WHERE filter, column selection, and row limit. WARNING: the WHERE clause is sent as-is to the SAP data preview endpoint — avoid untrusted input."
+description: 'Read data from a DDIC table with optional WHERE filter, column selection, and row limit. WARNING: the WHERE clause is sent as-is to the SAP data preview endpoint — avoid untrusted input.'
 ---
 
 # `get_table_contents`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,11 +43,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_table_contents",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "tableName": "<tableName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "tableName": "<tableName>"
   }
 }
 ```

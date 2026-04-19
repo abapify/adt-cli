@@ -1,7 +1,7 @@
 ---
 title: get_flp_tile
 sidebar_label: get_flp_tile
-description: "Get a single Fiori Launchpad tile (CHIP) by its full CHIP ID"
+description: 'Get a single Fiori Launchpad tile (CHIP) by its full CHIP ID'
 ---
 
 # `get_flp_tile`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "get_flp_tile",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "tileId": "<tileId>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "tileId": "<tileId>"
   }
 }
 ```

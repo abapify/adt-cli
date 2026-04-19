@@ -1,7 +1,7 @@
 ---
 title: create_function_group
 sidebar_label: create_function_group
-description: "Create a new ABAP function group. Wraps the typed functions/groups contract."
+description: 'Create a new ABAP function group. Wraps the typed functions/groups contract.'
 ---
 
 # `create_function_group`
@@ -31,9 +31,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -45,13 +43,13 @@ See the source for the exact shape of `result`.
 {
   "name": "create_function_group",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "groupName": "<groupName>",
-      "description": "<description>",
-      "packageName": "<packageName>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "groupName": "<groupName>",
+    "description": "<description>",
+    "packageName": "<packageName>"
   }
 }
 ```

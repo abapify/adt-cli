@@ -30,8 +30,11 @@ export { atcCommand } from '@abapify/adt-atc';
 export { atcCustomizingCommand } from '@abapify/adt-atc';
 export { outputSarifReport, outputGitLabCodeQuality } from '@abapify/adt-atc';
 export type {
-  AtcResult, AtcFinding, OutputFormat,
-  FindingResolver, ResolvedLocation,
+  AtcResult,
+  AtcFinding,
+  OutputFormat,
+  FindingResolver,
+  ResolvedLocation,
 } from '@abapify/adt-atc';
 ```
 

@@ -13,14 +13,14 @@ description, links).
 
 ## Arguments
 
-| Argument | Description |
-| --- | --- |
+| Argument       | Description                  |
+| -------------- | ---------------------------- |
 | `<objectName>` | ABAP object name to inspect. |
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
+| Flag     | Description                        |
+| -------- | ---------------------------------- |
 | `--json` | Output as JSON (default: `false`). |
 
 ## Examples

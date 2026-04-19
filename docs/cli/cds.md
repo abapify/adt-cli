@@ -15,14 +15,14 @@ Both use the generic CRUD builder, so options match [`objects`](./objects).
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt ddl create <name> <description> <package>` | Create a new DDL source. |
-| `adt ddl read <name>` | Print the `.asddls` source to stdout. |
-| `adt ddl write <name> [file\|-]` | Write source from file or stdin. |
-| `adt ddl activate <names...>` | Activate one or more DDL sources. |
-| `adt ddl delete <name>` | Delete a DDL source. |
-| `adt dcl ...` | Same surface for DCL sources. |
+| Command                                         | Description                           |
+| ----------------------------------------------- | ------------------------------------- |
+| `adt ddl create <name> <description> <package>` | Create a new DDL source.              |
+| `adt ddl read <name>`                           | Print the `.asddls` source to stdout. |
+| `adt ddl write <name> [file\|-]`                | Write source from file or stdin.      |
+| `adt ddl activate <names...>`                   | Activate one or more DDL sources.     |
+| `adt ddl delete <name>`                         | Delete a DDL source.                  |
+| `adt dcl ...`                                   | Same surface for DCL sources.         |
 
 ## Options
 

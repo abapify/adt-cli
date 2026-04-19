@@ -10,9 +10,9 @@ available workspaces and collections.
 
 ## Methods
 
-| Method | HTTP | Path | Summary |
-|--------|------|------|---------|
-| `.getDiscovery()` | GET | `/sap/bc/adt/discovery` | AtomPub service document |
+| Method            | HTTP | Path                    | Summary                  |
+| ----------------- | ---- | ----------------------- | ------------------------ |
+| `.getDiscovery()` | GET  | `/sap/bc/adt/discovery` | AtomPub service document |
 
 ## Schema
 
@@ -24,6 +24,9 @@ Response schema: [`adt-schemas/discovery`](../packages/adt-schemas)
 ```ts
 const doc = await client.adt.discovery.getDiscovery();
 for (const ws of doc.service?.workspace ?? []) {
-  console.log(ws.title, ws.collection?.map((c) => c.href));
+  console.log(
+    ws.title,
+    ws.collection?.map((c) => c.href),
+  );
 }
 ```

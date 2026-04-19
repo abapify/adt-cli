@@ -1,7 +1,7 @@
 ---
 title: atc_run
 sidebar_label: atc_run
-description: "Run ABAP Test Cockpit (ATC) checks on an object or package"
+description: 'Run ABAP Test Cockpit (ATC) checks on an object or package'
 ---
 
 # `atc_run`
@@ -28,9 +28,7 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 
 ```json
 {
-  "content": [
-    { "type": "text", "text": "<JSON.stringify(result, null, 2)>" }
-  ]
+  "content": [{ "type": "text", "text": "<JSON.stringify(result, null, 2)>" }]
 }
 ```
 
@@ -42,11 +40,11 @@ See the source for the exact shape of `result`.
 {
   "name": "atc_run",
   "arguments": {
-      "baseUrl": "https://sap.example.com:44300",
-      "username": "DEVELOPER",
-      "password": "***",
-      "client": "100",
-      "objectUri": "<objectUri>"
+    "baseUrl": "https://sap.example.com:44300",
+    "username": "DEVELOPER",
+    "password": "***",
+    "client": "100",
+    "objectUri": "<objectUri>"
   }
 }
 ```

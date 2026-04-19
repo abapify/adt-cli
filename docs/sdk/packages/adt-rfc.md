@@ -19,13 +19,13 @@ bun add @abapify/adt-rfc
 
 ```ts
 export { createRfcClient } from '@abapify/adt-rfc';
-export type {
-  RfcClient, RfcClientConfig, RawFetcher,
-} from '@abapify/adt-rfc';
+export type { RfcClient, RfcClientConfig, RawFetcher } from '@abapify/adt-rfc';
 
 export {
-  buildRfcSoapEnvelope, parseRfcSoapResponse,
-  RFC_SOAP_NS, SOAP_ENV_NS,
+  buildRfcSoapEnvelope,
+  parseRfcSoapResponse,
+  RFC_SOAP_NS,
+  SOAP_ENV_NS,
 } from '@abapify/adt-rfc';
 ```
 

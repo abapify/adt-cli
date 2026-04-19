@@ -15,13 +15,13 @@ those of `class` / `program` / ...:
 
 ## Subcommands
 
-| Command | Description |
-| --- | --- |
-| `adt badi create <name> <description> <package>` | Create a BAdI / enhancement implementation. |
-| `adt badi read <name>` | Print the enhancement source. |
-| `adt badi write <name> [file\|-]` | Write new source (with optional activate). |
-| `adt badi activate <names...>` | Activate one or more enhancement implementations. |
-| `adt badi delete <name>` | Delete an enhancement implementation. |
+| Command                                          | Description                                       |
+| ------------------------------------------------ | ------------------------------------------------- |
+| `adt badi create <name> <description> <package>` | Create a BAdI / enhancement implementation.       |
+| `adt badi read <name>`                           | Print the enhancement source.                     |
+| `adt badi write <name> [file\|-]`                | Write new source (with optional activate).        |
+| `adt badi activate <names...>`                   | Activate one or more enhancement implementations. |
+| `adt badi delete <name>`                         | Delete an enhancement implementation.             |
 
 ## Options
 
