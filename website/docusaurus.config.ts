@@ -33,7 +33,6 @@ const config: Config = {
           exclude: [
             'README.md',
             'architecture/adk-overview.md',
-            'architecture/format-plugins.md',
             'architecture/plugin-system.md',
             'changelogs/**',
             'ci-cd-setup.md',
