@@ -16,6 +16,7 @@ METHODS _build_client
 METHODS _send_request
   IMPORTING io_client          TYPE REF TO if_web_http_client
             io_request         TYPE REF TO if_web_http_request
+            iv_method          TYPE string
   RETURNING VALUE(ro_response) TYPE REF TO if_web_http_response
   RAISING   cx_web_http_client_error
             cx_web_message_error.
@@ -35,12 +36,9 @@ ENDMETHOD.
 
 METHOD _send_request.
   " The caller has already populated io_request via io_client->get_http_request( ).
-  " The HTTP method is passed through the conventional '~request_method'
-  " pseudo-header so we do not need per-verb overloads.
-  DATA(lv_method) = io_request->get_header_field( '~request_method' ).
-  IF lv_method IS INITIAL.
-    lv_method = if_web_http_client=>get.
-  ENDIF.
-  ro_response = io_client->execute( i_method = lv_method ).
+  " The HTTP method is passed via iv_method and must be one of the
+  " if_web_http_client=>get / =>post / =>put / =>delete / =>patch /
+  " =>head / =>options static constants.
+  ro_response = io_client->execute( i_method = iv_method ).
 ENDMETHOD.
 `;

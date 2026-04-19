@@ -19,6 +19,7 @@
     "@abapify/abap-ast": "workspace:*",
     "@apidevtools/swagger-parser": "^10.1.0",
     "commander": "^11.1.0",
+    "fast-xml-parser": "^5.5.0",
     "yaml": "^2.5.0"
   },
   "files": [

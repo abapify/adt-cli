@@ -80,6 +80,17 @@ describe('getCloudRuntime: whitelist', () => {
 });
 
 describe('getCloudRuntime: correctness-critical substrings', () => {
+  it('_send_request takes iv_method and dispatches via if_web_http_client execute', () => {
+    // The method is now selected at the call site via a static constant
+    // (if_web_http_client=>get, =>post, …) rather than the old
+    // ~request_method header hack.
+    expect(runtime.declarations).toMatch(/iv_method\s+TYPE\s+string/i);
+    expect(runtime.implementations).toContain(
+      'io_client->execute( i_method = iv_method )',
+    );
+    expect(runtime.implementations).not.toMatch(/~request_method/);
+  });
+
   it('contains the UTF-16 surrogate pair branch in the string escape loop', () => {
     expect(runtime.implementations).toMatch(
       /lv_code\s*>=\s*55296\s*AND\s*lv_code\s*<=\s*56319/,
