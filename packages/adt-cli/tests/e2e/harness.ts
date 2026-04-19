@@ -23,6 +23,7 @@
  */
 
 import type { Command } from 'commander';
+import { randomBytes } from 'node:crypto';
 import { Client as McpClient } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import {
@@ -113,7 +114,7 @@ export async function startAdtHarness(): Promise<AdtHarness> {
   const connection: HarnessConnectionArgs = {
     baseUrl: `http://127.0.0.1:${mockPort}`,
     username: 'DEVELOPER',
-    password: 'mock-password',
+    password: randomBytes(16).toString('hex'),
     client: '100',
   };
 
