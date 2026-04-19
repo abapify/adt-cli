@@ -188,8 +188,12 @@ function normalizeTypeSection(
 /** Convert leading-`*` star comments into `"` line comments so the printer's
  * indentation-prefix machinery doesn't invalidate them (star comments must
  * start at column 1 of the physical line in ABAP; line comments can be
- * indented). */
-function sanitizeStarComments(source: string): string {
+ * indented).
+ *
+ * Exported so callers that inject raw runtime ABAP into printed source can
+ * normalise comments before splicing.
+ */
+export function sanitizeStarComments(source: string): string {
   return source
     .split('\n')
     .map((l) => {
@@ -351,11 +355,11 @@ export function emitClientClass(
       const retName = hoistedReturningParam.name;
       const isBool = ret.kind === 'bool';
       const desBody = isBool
-        ? `" TODO: implement JSON → target deserialization if this endpoint ever
+        ? `" TODO: implement JSON -> target deserialization if this endpoint ever
 " returns a payload. For now this is an empty-body success: ${retName} = abap_true.
 ${retName} = abap_true.
 RETURN.`
-        : `" TODO: implement JSON → target deserialization using private _json_tokenize.
+        : `" TODO: implement JSON -> target deserialization using private _json_tokenize.
 " For now ${retName} is returned with its initial value so the class activates cleanly.
 CLEAR ${retName}.
 RETURN.`;
@@ -414,7 +418,7 @@ RETURN.`;
           name: serName,
           body: [
             raw({
-              source: `" TODO: implement target → JSON serialization using private _json_write_* helpers.
+              source: `" TODO: implement target -> JSON serialization using private _json_write_* helpers.
 " For now rv_json is returned empty so the class activates cleanly.
 CLEAR rv_json.
 RETURN.`,
@@ -425,20 +429,20 @@ RETURN.`,
     }
   }
 
-  // Private section: runtime marker method + types. We also embed the runtime
-  // signatures as an informational comment in the private-section; the real
-  // runtime statements live inside a trailing synthetic method in the
-  // IMPLEMENTATION block.
-  const runtimeMarkerDecl = methodDef({
-    name: '_runtime_stub',
-    visibility: 'private',
-  });
-  const runtimeImpl = methodImpl({
-    name: '_runtime_stub',
-    body: [raw({ source: sanitizeStarComments(runtime.implementations) })],
-  });
+  // NOTE: the runtime's METHODS declarations and METHOD ... ENDMETHOD bodies
+  // are NOT injected into the AST (the AST has no representation for a raw
+  // METHOD block at class-IMPLEMENTATION level, and nesting them inside
+  // another METHOD is syntactically invalid ABAP). Instead the caller
+  // (`generate.ts`) performs a string-level injection of
+  // `runtime.declarations` into the PRIVATE SECTION and
+  // `runtime.implementations` into the IMPLEMENTATION block after printing.
+  // The assembler still imports the runtime so its whitelist of
+  // `allowedClassReferences` participates in profile enforcement below.
+  void runtime;
 
   const publicMembers: SectionMember[] = [
+    ...types,
+    ...extraTypes,
     ...serverConstants,
     constructorDef,
     ...sec.publicMethods,
@@ -450,12 +454,7 @@ RETURN.`,
     ...sec.protectedMethods,
   ];
 
-  const privateMembers: SectionMember[] = [
-    ...types,
-    ...extraTypes,
-    ...stubDecls,
-    runtimeMarkerDecl,
-  ];
+  const privateMembers: SectionMember[] = [...stubDecls];
 
   const sections = [
     section({ visibility: 'public', members: publicMembers }),
@@ -472,7 +471,6 @@ RETURN.`,
       ...sec.protectedImpls,
       ...operationImpls,
       ...stubImpls,
-      runtimeImpl,
     ],
   });
 

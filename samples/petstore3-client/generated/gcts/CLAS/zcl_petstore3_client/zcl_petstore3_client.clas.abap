@@ -1,5 +1,50 @@
 CLASS ZCL_PETSTORE3_CLIENT DEFINITION PUBLIC CREATE PUBLIC.
   PUBLIC SECTION.
+    TYPES: BEGIN OF ty_ps3order,
+      id        TYPE int8,
+      pet_id    TYPE int8,
+      quantity  TYPE i,
+      ship_date TYPE timestampl,
+      status    TYPE string,
+      complete  TYPE abap_bool,
+    END OF ty_ps3order.
+    TYPES: BEGIN OF ty_ps3category,
+      id   TYPE int8,
+      name TYPE string,
+    END OF ty_ps3category.
+    TYPES: BEGIN OF ty_ps3user,
+      id          TYPE int8,
+      username    TYPE string,
+      first_name  TYPE string,
+      last_name   TYPE string,
+      email       TYPE string,
+      password    TYPE string,
+      phone       TYPE string,
+      user_status TYPE i,
+    END OF ty_ps3user.
+    TYPES: BEGIN OF ty_ps3tag,
+      id   TYPE int8,
+      name TYPE string,
+    END OF ty_ps3tag.
+    TYPES ty_ps3pet__photo_urls_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    TYPES ty_ps3pet__tags_tab TYPE STANDARD TABLE OF ty_ps3tag WITH DEFAULT KEY.
+    TYPES: BEGIN OF ty_ps3pet,
+      id         TYPE int8,
+      name       TYPE string,
+      category   TYPE ty_ps3category,
+      photo_urls TYPE ty_ps3pet__photo_urls_tab,
+      tags       TYPE ty_ps3pet__tags_tab,
+      status     TYPE string,
+    END OF ty_ps3pet.
+    TYPES: BEGIN OF ty_ps3api_response,
+      code    TYPE i,
+      type    TYPE string,
+      message TYPE string,
+    END OF ty_ps3api_response.
+    TYPES ty_find_pets_by_status_rv_result_tab TYPE STANDARD TABLE OF ty_ps3pet WITH DEFAULT KEY.
+    TYPES ty_find_pets_by_tags_iv_tags_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    TYPES ty_find_pets_by_tags_rv_result_tab TYPE STANDARD TABLE OF ty_ps3pet WITH DEFAULT KEY.
+    TYPES ty_create_users_with_list_input_body_tab TYPE STANDARD TABLE OF ty_ps3user WITH DEFAULT KEY.
     CONSTANTS co_server_0 TYPE string VALUE '/api/v3'.
     METHODS constructor
       IMPORTING
@@ -99,51 +144,6 @@ CLASS ZCL_PETSTORE3_CLIENT DEFINITION PUBLIC CREATE PUBLIC.
     METHODS on_authorize
       IMPORTING io_request TYPE REF TO if_web_http_request.
   PRIVATE SECTION.
-    TYPES: BEGIN OF ty_ps3order,
-      id        TYPE int8,
-      pet_id    TYPE int8,
-      quantity  TYPE i,
-      ship_date TYPE timestampl,
-      status    TYPE string,
-      complete  TYPE abap_bool,
-    END OF ty_ps3order.
-    TYPES: BEGIN OF ty_ps3category,
-      id   TYPE int8,
-      name TYPE string,
-    END OF ty_ps3category.
-    TYPES: BEGIN OF ty_ps3user,
-      id          TYPE int8,
-      username    TYPE string,
-      first_name  TYPE string,
-      last_name   TYPE string,
-      email       TYPE string,
-      password    TYPE string,
-      phone       TYPE string,
-      user_status TYPE i,
-    END OF ty_ps3user.
-    TYPES: BEGIN OF ty_ps3tag,
-      id   TYPE int8,
-      name TYPE string,
-    END OF ty_ps3tag.
-    TYPES ty_ps3pet__photo_urls_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-    TYPES ty_ps3pet__tags_tab TYPE STANDARD TABLE OF ty_ps3tag WITH DEFAULT KEY.
-    TYPES: BEGIN OF ty_ps3pet,
-      id         TYPE int8,
-      name       TYPE string,
-      category   TYPE ty_ps3category,
-      photo_urls TYPE ty_ps3pet__photo_urls_tab,
-      tags       TYPE ty_ps3pet__tags_tab,
-      status     TYPE string,
-    END OF ty_ps3pet.
-    TYPES: BEGIN OF ty_ps3api_response,
-      code    TYPE i,
-      type    TYPE string,
-      message TYPE string,
-    END OF ty_ps3api_response.
-    TYPES ty_find_pets_by_status_rv_result_tab TYPE STANDARD TABLE OF ty_ps3pet WITH DEFAULT KEY.
-    TYPES ty_find_pets_by_tags_iv_tags_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-    TYPES ty_find_pets_by_tags_rv_result_tab TYPE STANDARD TABLE OF ty_ps3pet WITH DEFAULT KEY.
-    TYPES ty_create_users_with_list_input_body_tab TYPE STANDARD TABLE OF ty_ps3user WITH DEFAULT KEY.
     METHODS _des_add_pet
       IMPORTING iv_payload TYPE string
       RETURNING VALUE(rv_result) TYPE ty_ps3pet.
@@ -222,7 +222,81 @@ CLASS ZCL_PETSTORE3_CLIENT DEFINITION PUBLIC CREATE PUBLIC.
     METHODS _des_delete_user
       IMPORTING iv_payload TYPE string
       RETURNING VALUE(rv_success) TYPE abap_bool.
-    METHODS _runtime_stub.
+    METHODS _build_client
+      IMPORTING iv_destination   TYPE string
+      RETURNING VALUE(ro_client) TYPE REF TO if_web_http_client
+      RAISING   cx_web_http_client_error
+                cx_http_dest_provider_error.
+
+    METHODS _send_request
+      IMPORTING io_client          TYPE REF TO if_web_http_client
+                io_request         TYPE REF TO if_web_http_request
+                iv_method          TYPE string
+      RETURNING VALUE(ro_response) TYPE REF TO if_web_http_response
+      RAISING   cx_web_http_client_error
+                cx_web_message_error.
+
+    METHODS _encode_path
+      IMPORTING iv_value          TYPE string
+      RETURNING VALUE(rv_encoded) TYPE string.
+
+    METHODS _serialize_query_param
+      IMPORTING iv_name      TYPE string
+                iv_value     TYPE string
+                iv_style     TYPE string
+                iv_explode   TYPE abap_bool
+      RETURNING VALUE(rv_qs) TYPE string.
+
+    METHODS _join_url
+      IMPORTING iv_server     TYPE string
+                iv_path       TYPE string
+                it_query      TYPE string_table
+      RETURNING VALUE(rv_url) TYPE string.
+
+    TYPES: BEGIN OF ty_json_token,
+             kind     TYPE string,
+             str_val  TYPE string,
+             num_val  TYPE decfloat34,
+             bool_val TYPE abap_bool,
+           END OF ty_json_token,
+           ty_json_tokens TYPE STANDARD TABLE OF ty_json_token WITH DEFAULT KEY.
+
+    METHODS _json_tokenize
+      IMPORTING iv_json          TYPE string
+      RETURNING VALUE(rt_tokens) TYPE ty_json_tokens
+      RAISING   cx_sy_conversion_no_number.
+
+    METHODS _json_escape
+      IMPORTING iv_value  TYPE string
+      RETURNING VALUE(rv) TYPE string.
+
+    METHODS _json_write_string
+      IMPORTING iv_value  TYPE string
+      CHANGING  ct_parts  TYPE string_table.
+
+    METHODS _json_write_number
+      IMPORTING iv_value  TYPE decfloat34
+      CHANGING  ct_parts  TYPE string_table.
+
+    METHODS _json_write_bool
+      IMPORTING iv_value  TYPE abap_bool
+      CHANGING  ct_parts  TYPE string_table.
+
+    METHODS _json_write_null
+      CHANGING  ct_parts  TYPE string_table.
+
+    METHODS _json_concat
+      IMPORTING it_parts  TYPE string_table
+      RETURNING VALUE(rv) TYPE string.
+
+    METHODS _json_hex_to_int
+      IMPORTING iv_hex    TYPE string
+      RETURNING VALUE(rv) TYPE i.
+
+    METHODS _json_codepoint_to_string
+      IMPORTING iv_code   TYPE i
+      RETURNING VALUE(rv) TYPE string.
+
 ENDCLASS.
 
 CLASS ZCL_PETSTORE3_CLIENT IMPLEMENTATION.
@@ -233,7 +307,6 @@ CLASS ZCL_PETSTORE3_CLIENT IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_authorize.
-    " override me
     RETURN.
   ENDMETHOD.
 
@@ -940,543 +1013,432 @@ CLASS ZCL_PETSTORE3_CLIENT IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD _des_add_pet.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _ser_add_pet.
-    " TODO: implement target → JSON serialization using private _json_write_* helpers.
-    " For now rv_json is returned empty so the class activates cleanly.
     CLEAR rv_json.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_update_pet.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _ser_update_pet.
-    " TODO: implement target → JSON serialization using private _json_write_* helpers.
-    " For now rv_json is returned empty so the class activates cleanly.
     CLEAR rv_json.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_find_pets_by_status.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_find_pets_by_tags.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_get_pet_by_id.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_update_pet_with_form.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_delete_pet.
-    " TODO: implement JSON → target deserialization if this endpoint ever
-    " returns a payload. For now this is an empty-body success: rv_success = abap_true.
     rv_success = abap_true.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_upload_file.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _ser_upload_file.
-    " TODO: implement target → JSON serialization using private _json_write_* helpers.
-    " For now rv_json is returned empty so the class activates cleanly.
     CLEAR rv_json.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_get_inventory.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_place_order.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _ser_place_order.
-    " TODO: implement target → JSON serialization using private _json_write_* helpers.
-    " For now rv_json is returned empty so the class activates cleanly.
     CLEAR rv_json.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_get_order_by_id.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_delete_order.
-    " TODO: implement JSON → target deserialization if this endpoint ever
-    " returns a payload. For now this is an empty-body success: rv_success = abap_true.
     rv_success = abap_true.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_create_user.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _ser_create_user.
-    " TODO: implement target → JSON serialization using private _json_write_* helpers.
-    " For now rv_json is returned empty so the class activates cleanly.
     CLEAR rv_json.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_create_users_with_list_input.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _ser_create_users_with_list_input.
-    " TODO: implement target → JSON serialization using private _json_write_* helpers.
-    " For now rv_json is returned empty so the class activates cleanly.
     CLEAR rv_json.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_login_user.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_logout_user.
-    " TODO: implement JSON → target deserialization if this endpoint ever
-    " returns a payload. For now this is an empty-body success: rv_success = abap_true.
     rv_success = abap_true.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_get_user_by_name.
-    " TODO: implement JSON → target deserialization using private _json_tokenize.
-    " For now rv_result is returned with its initial value so the class activates cleanly.
     CLEAR rv_result.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_update_user.
-    " TODO: implement JSON → target deserialization if this endpoint ever
-    " returns a payload. For now this is an empty-body success: rv_success = abap_true.
     rv_success = abap_true.
     RETURN.
   ENDMETHOD.
 
   METHOD _ser_update_user.
-    " TODO: implement target → JSON serialization using private _json_write_* helpers.
-    " For now rv_json is returned empty so the class activates cleanly.
     CLEAR rv_json.
     RETURN.
   ENDMETHOD.
 
   METHOD _des_delete_user.
-    " TODO: implement JSON → target deserialization if this endpoint ever
-    " returns a payload. For now this is an empty-body success: rv_success = abap_true.
     rv_success = abap_true.
     RETURN.
   ENDMETHOD.
+  METHOD _build_client.
+    DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
+      comm_scenario  = iv_destination
+      comm_system_id = ''
+      service_id     = '' ).
+    ro_client = cl_web_http_client_manager=>create_by_http_destination( lo_destination ).
+  ENDMETHOD.
 
-  METHOD _runtime_stub.
-    " --- HTTP runtime (s4-cloud) ---
-    METHOD _build_client.
-      " Resolve the communication arrangement identified by iv_destination
-      " and build a web-http client on top of it. Both classes are the only
-      " approved entry points on SAP BTP (Steampunk).
-      DATA(lo_destination) = cl_http_destination_provider=>create_by_comm_arrangement(
-        comm_scenario  = iv_destination
-        comm_system_id = ''
-        service_id     = '' ).
-      ro_client = cl_web_http_client_manager=>create_by_http_destination( lo_destination ).
-    ENDMETHOD.
+  METHOD _send_request.
+    ro_response = io_client->execute( i_method = iv_method ).
+  ENDMETHOD.
 
-    METHOD _send_request.
-      " The caller has already populated io_request via io_client->get_http_request( ).
-      " The HTTP method is passed via iv_method and must be one of the
-      " if_web_http_client=>get / =>post / =>put / =>delete / =>patch /
-      " =>head / =>options static constants.
-      ro_response = io_client->execute( i_method = iv_method ).
-    ENDMETHOD.
+  METHOD _encode_path.
+    rv_encoded = cl_http_utility=>escape_url( iv_value ).
+  ENDMETHOD.
 
-    " --- URL runtime (s4-cloud) ---
-    METHOD _encode_path.
-      " Percent-encode a single path segment. OpenAPI style=simple with explode
-      " toggled off is the only path style we emit, so a flat escape is enough.
-      rv_encoded = cl_http_utility=>escape_url( iv_value ).
-    ENDMETHOD.
+  METHOD _serialize_query_param.
+    DATA(lv_name)  = cl_http_utility=>escape_url( iv_name ).
+    DATA(lv_value) = cl_http_utility=>escape_url( iv_value ).
+    rv_qs = |{ lv_name }={ lv_value }|.
+  ENDMETHOD.
 
-    METHOD _serialize_query_param.
-      " style=form with explode=true/false both collapse to name=value for
-      " scalar types; array handling happens in the caller which invokes this
-      " helper once per element. iv_style / iv_explode are kept for signature
-      " stability across future emitter versions.
-      DATA(lv_name)  = cl_http_utility=>escape_url( iv_name ).
-      DATA(lv_value) = cl_http_utility=>escape_url( iv_value ).
-      rv_qs = |{ lv_name }={ lv_value }|.
-    ENDMETHOD.
-
-    METHOD _join_url.
-      " Concatenate server + path and append the query string (if any).
-      " Separators are inserted deterministically so callers do not need to
-      " know whether a query was already present.
-      rv_url = |{ iv_server }{ iv_path }|.
-      IF it_query IS NOT INITIAL.
-        DATA lv_first TYPE abap_bool VALUE abap_true.
-        rv_url = |{ rv_url }?|.
-        LOOP AT it_query INTO DATA(lv_q).
-          IF lv_first = abap_true.
-            rv_url = |{ rv_url }{ lv_q }|.
-            lv_first = abap_false.
-          ELSE.
-            rv_url = |{ rv_url }&{ lv_q }|.
-          ENDIF.
-        ENDLOOP.
-      ENDIF.
-    ENDMETHOD.
-
-    " --- JSON runtime (s4-cloud, inline) ---
-    METHOD _json_escape.
-      " Escape the characters that MUST be escaped inside a JSON string.
-      " Order matters: backslash first, otherwise we'd double-escape the
-      " backslashes inserted for quote and whitespace escapes.
-      DATA(lv) = iv_value.
-      REPLACE ALL OCCURRENCES OF `\\` IN lv WITH `\\\\`.
-      REPLACE ALL OCCURRENCES OF `"` IN lv WITH `\\"`.
-      REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>newline        IN lv WITH `\\n`.
-      REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>horizontal_tab IN lv WITH `\\t`.
-      rv = lv.
-    ENDMETHOD.
-
-    METHOD _json_write_string.
-      APPEND |"{ _json_escape( iv_value ) }"| TO ct_parts.
-    ENDMETHOD.
-
-    METHOD _json_write_number.
-      APPEND |{ iv_value }| TO ct_parts.
-    ENDMETHOD.
-
-    METHOD _json_write_bool.
-      IF iv_value = abap_true.
-        APPEND `true` TO ct_parts.
-      ELSE.
-        APPEND `false` TO ct_parts.
-      ENDIF.
-    ENDMETHOD.
-
-    METHOD _json_write_null.
-      APPEND `null` TO ct_parts.
-    ENDMETHOD.
-
-    METHOD _json_concat.
-      rv = concat_lines_of( table = it_parts sep = `` ).
-    ENDMETHOD.
-
-    METHOD _json_hex_to_int.
-      DATA: lv_i   TYPE i VALUE 0,
-            lv_len TYPE i,
-            lv_c   TYPE c LENGTH 1,
-            lv_v   TYPE i.
-      rv = 0.
-      lv_len = strlen( iv_hex ).
-      WHILE lv_i < lv_len.
-        lv_c = iv_hex+lv_i(1).
-        IF lv_c CA `0123456789`.
-          lv_v = lv_c.
-        ELSEIF lv_c = `a` OR lv_c = `A`.
-          lv_v = 10.
-        ELSEIF lv_c = `b` OR lv_c = `B`.
-          lv_v = 11.
-        ELSEIF lv_c = `c` OR lv_c = `C`.
-          lv_v = 12.
-        ELSEIF lv_c = `d` OR lv_c = `D`.
-          lv_v = 13.
-        ELSEIF lv_c = `e` OR lv_c = `E`.
-          lv_v = 14.
-        ELSEIF lv_c = `f` OR lv_c = `F`.
-          lv_v = 15.
+  METHOD _join_url.
+    rv_url = |{ iv_server }{ iv_path }|.
+    IF it_query IS NOT INITIAL.
+      DATA lv_first TYPE abap_bool VALUE abap_true.
+      rv_url = |{ rv_url }?|.
+      LOOP AT it_query INTO DATA(lv_q).
+        IF lv_first = abap_true.
+          rv_url = |{ rv_url }{ lv_q }|.
+          lv_first = abap_false.
+        ELSE.
+          rv_url = |{ rv_url }&{ lv_q }|.
         ENDIF.
-        rv = rv * 16 + lv_v.
-        lv_i = lv_i + 1.
-      ENDWHILE.
-    ENDMETHOD.
+      ENDLOOP.
+    ENDIF.
+  ENDMETHOD.
 
-    METHOD _json_codepoint_to_string.
-      " Build the UTF-8 byte sequence for iv_code and convert it to a string
-      " via cl_abap_conv_codepage. This is the only approved codepage helper
-      " on BTP Steampunk.
-      DATA: lv_x    TYPE xstring,
-            lv_byte TYPE x LENGTH 1,
-            lv_cp   TYPE i.
-      lv_cp = iv_code.
-      IF lv_cp < 128.
-        lv_byte = lv_cp.
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-      ELSEIF lv_cp < 2048.
-        lv_byte = 192 + ( lv_cp DIV 64 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-        lv_byte = 128 + ( lv_cp MOD 64 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-      ELSEIF lv_cp < 65536.
-        lv_byte = 224 + ( lv_cp DIV 4096 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-        lv_byte = 128 + ( ( lv_cp DIV 64 ) MOD 64 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-        lv_byte = 128 + ( lv_cp MOD 64 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-      ELSE.
-        lv_byte = 240 + ( lv_cp DIV 262144 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-        lv_byte = 128 + ( ( lv_cp DIV 4096 ) MOD 64 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-        lv_byte = 128 + ( ( lv_cp DIV 64 ) MOD 64 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
-        lv_byte = 128 + ( lv_cp MOD 64 ).
-        CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+  METHOD _json_escape.
+    DATA(lv) = iv_value.
+    REPLACE ALL OCCURRENCES OF `\\` IN lv WITH `\\\\`.
+    REPLACE ALL OCCURRENCES OF `"` IN lv WITH `\\"`.
+    REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>newline        IN lv WITH `\\n`.
+    REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>horizontal_tab IN lv WITH `\\t`.
+    rv = lv.
+  ENDMETHOD.
+
+  METHOD _json_write_string.
+    APPEND |"{ _json_escape( iv_value ) }"| TO ct_parts.
+  ENDMETHOD.
+
+  METHOD _json_write_number.
+    APPEND |{ iv_value }| TO ct_parts.
+  ENDMETHOD.
+
+  METHOD _json_write_bool.
+    IF iv_value = abap_true.
+      APPEND `true` TO ct_parts.
+    ELSE.
+      APPEND `false` TO ct_parts.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD _json_write_null.
+    APPEND `null` TO ct_parts.
+  ENDMETHOD.
+
+  METHOD _json_concat.
+    rv = concat_lines_of( table = it_parts sep = `` ).
+  ENDMETHOD.
+
+  METHOD _json_hex_to_int.
+    DATA: lv_i   TYPE i VALUE 0,
+          lv_len TYPE i,
+          lv_c   TYPE c LENGTH 1,
+          lv_v   TYPE i.
+    rv = 0.
+    lv_len = strlen( iv_hex ).
+    WHILE lv_i < lv_len.
+      lv_c = iv_hex+lv_i(1).
+      IF lv_c CA `0123456789`.
+        lv_v = lv_c.
+      ELSEIF lv_c = `a` OR lv_c = `A`.
+        lv_v = 10.
+      ELSEIF lv_c = `b` OR lv_c = `B`.
+        lv_v = 11.
+      ELSEIF lv_c = `c` OR lv_c = `C`.
+        lv_v = 12.
+      ELSEIF lv_c = `d` OR lv_c = `D`.
+        lv_v = 13.
+      ELSEIF lv_c = `e` OR lv_c = `E`.
+        lv_v = 14.
+      ELSEIF lv_c = `f` OR lv_c = `F`.
+        lv_v = 15.
       ENDIF.
-      rv = cl_abap_conv_codepage=>create_in( codepage = `UTF-8` )->convert( source = lv_x ).
-    ENDMETHOD.
+      rv = rv * 16 + lv_v.
+      lv_i = lv_i + 1.
+    ENDWHILE.
+  ENDMETHOD.
 
-    METHOD _json_tokenize.
-      " Single-pass tokenizer. We deliberately avoid regex here: ABAP regex
-      " semantics around backtracking in decoder corner cases are subtle, and
-      " a hand-written scanner keeps memory bounded to O(n).
-      DATA: lv_len       TYPE i,
-            lv_pos       TYPE i VALUE 0,
-            lv_ch        TYPE c LENGTH 1,
-            ls_token     TYPE ty_json_token,
-            lv_buf       TYPE string,
-            lv_esc       TYPE c LENGTH 1,
-            lv_hex       TYPE string,
-            lv_code      TYPE i,
-            lv_code2     TYPE i,
-            lv_char      TYPE string,
-            lv_num_start TYPE i,
-            lv_num_len   TYPE i,
-            lv_num_str   TYPE string,
-            lv_num_val   TYPE decfloat34.
+  METHOD _json_codepoint_to_string.
+    DATA: lv_x    TYPE xstring,
+          lv_byte TYPE x LENGTH 1,
+          lv_cp   TYPE i.
+    lv_cp = iv_code.
+    IF lv_cp < 128.
+      lv_byte = lv_cp.
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+    ELSEIF lv_cp < 2048.
+      lv_byte = 192 + ( lv_cp DIV 64 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+      lv_byte = 128 + ( lv_cp MOD 64 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+    ELSEIF lv_cp < 65536.
+      lv_byte = 224 + ( lv_cp DIV 4096 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+      lv_byte = 128 + ( ( lv_cp DIV 64 ) MOD 64 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+      lv_byte = 128 + ( lv_cp MOD 64 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+    ELSE.
+      lv_byte = 240 + ( lv_cp DIV 262144 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+      lv_byte = 128 + ( ( lv_cp DIV 4096 ) MOD 64 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+      lv_byte = 128 + ( ( lv_cp DIV 64 ) MOD 64 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+      lv_byte = 128 + ( lv_cp MOD 64 ).
+      CONCATENATE lv_x lv_byte INTO lv_x IN BYTE MODE.
+    ENDIF.
+    rv = cl_abap_conv_codepage=>create_in( codepage = `UTF-8` )->convert( source = lv_x ).
+  ENDMETHOD.
 
-      lv_len = strlen( iv_json ).
-      WHILE lv_pos < lv_len.
-        lv_ch = iv_json+lv_pos(1).
+  METHOD _json_tokenize.
+    DATA: lv_len       TYPE i,
+          lv_pos       TYPE i VALUE 0,
+          lv_ch        TYPE c LENGTH 1,
+          ls_token     TYPE ty_json_token,
+          lv_buf       TYPE string,
+          lv_esc       TYPE c LENGTH 1,
+          lv_hex       TYPE string,
+          lv_code      TYPE i,
+          lv_code2     TYPE i,
+          lv_char      TYPE string,
+          lv_num_start TYPE i,
+          lv_num_len   TYPE i,
+          lv_num_str   TYPE string,
+          lv_num_val   TYPE decfloat34.
 
-        " Whitespace: space, tab, LF, CR per RFC-8259 section 2.
-        IF lv_ch = ` `
-           OR lv_ch = cl_abap_char_utilities=>horizontal_tab
-           OR lv_ch = cl_abap_char_utilities=>newline
-           OR lv_ch = cl_abap_char_utilities=>cr_lf(1).
+    lv_len = strlen( iv_json ).
+    WHILE lv_pos < lv_len.
+      lv_ch = iv_json+lv_pos(1).
+
+      IF lv_ch = ` `
+         OR lv_ch = cl_abap_char_utilities=>horizontal_tab
+         OR lv_ch = cl_abap_char_utilities=>newline
+         OR lv_ch = cl_abap_char_utilities=>cr_lf(1).
+        lv_pos = lv_pos + 1.
+        CONTINUE.
+      ENDIF.
+
+      CLEAR ls_token.
+      CASE lv_ch.
+        WHEN `{`.
+          ls_token-kind = `object-start`.
+          APPEND ls_token TO rt_tokens.
           lv_pos = lv_pos + 1.
-          CONTINUE.
-        ENDIF.
+        WHEN `}`.
+          ls_token-kind = `object-end`.
+          APPEND ls_token TO rt_tokens.
+          lv_pos = lv_pos + 1.
+        WHEN `[`.
+          ls_token-kind = `array-start`.
+          APPEND ls_token TO rt_tokens.
+          lv_pos = lv_pos + 1.
+        WHEN `]`.
+          ls_token-kind = `array-end`.
+          APPEND ls_token TO rt_tokens.
+          lv_pos = lv_pos + 1.
+        WHEN `:`.
+          ls_token-kind = `colon`.
+          APPEND ls_token TO rt_tokens.
+          lv_pos = lv_pos + 1.
+        WHEN `,`.
+          ls_token-kind = `comma`.
+          APPEND ls_token TO rt_tokens.
+          lv_pos = lv_pos + 1.
 
-        CLEAR ls_token.
-        CASE lv_ch.
-          WHEN `{`.
-            ls_token-kind = `object-start`.
-            APPEND ls_token TO rt_tokens.
-            lv_pos = lv_pos + 1.
-          WHEN `}`.
-            ls_token-kind = `object-end`.
-            APPEND ls_token TO rt_tokens.
-            lv_pos = lv_pos + 1.
-          WHEN `[`.
-            ls_token-kind = `array-start`.
-            APPEND ls_token TO rt_tokens.
-            lv_pos = lv_pos + 1.
-          WHEN `]`.
-            ls_token-kind = `array-end`.
-            APPEND ls_token TO rt_tokens.
-            lv_pos = lv_pos + 1.
-          WHEN `:`.
-            ls_token-kind = `colon`.
-            APPEND ls_token TO rt_tokens.
-            lv_pos = lv_pos + 1.
-          WHEN `,`.
-            ls_token-kind = `comma`.
-            APPEND ls_token TO rt_tokens.
-            lv_pos = lv_pos + 1.
-
-          WHEN `"`.
-            " String literal: scan until the matching (unescaped) double quote.
-            lv_pos = lv_pos + 1.
-            CLEAR lv_buf.
-            WHILE lv_pos < lv_len.
-              lv_ch = iv_json+lv_pos(1).
-              IF lv_ch = `"`.
-                lv_pos = lv_pos + 1.
-                EXIT.
-              ELSEIF lv_ch = `\\`.
-                " String escape loop: \", \\, \/, \b, \f, \n, \r, \t, \uXXXX.
-                lv_pos = lv_pos + 1.
-                lv_esc = iv_json+lv_pos(1).
-                CASE lv_esc.
-                  WHEN `"`.
-                    lv_buf = lv_buf && `"`.
-                  WHEN `\\`.
-                    lv_buf = lv_buf && `\\`.
-                  WHEN `/`.
-                    lv_buf = lv_buf && `/`.
-                  WHEN `b`.
-                    lv_buf = lv_buf && cl_abap_char_utilities=>backspace.
-                  WHEN `f`.
-                    lv_buf = lv_buf && cl_abap_char_utilities=>form_feed.
-                  WHEN `n`.
-                    lv_buf = lv_buf && cl_abap_char_utilities=>newline.
-                  WHEN `r`.
-                    lv_buf = lv_buf && cl_abap_char_utilities=>cr_lf(1).
-                  WHEN `t`.
-                    lv_buf = lv_buf && cl_abap_char_utilities=>horizontal_tab.
-                  WHEN `u`.
-                    " \uXXXX: parse 4 hex digits, decode UTF-16 surrogate pairs
-                    " so code points above U+FFFF survive the roundtrip.
+        WHEN `"`.
+          lv_pos = lv_pos + 1.
+          CLEAR lv_buf.
+          WHILE lv_pos < lv_len.
+            lv_ch = iv_json+lv_pos(1).
+            IF lv_ch = `"`.
+              lv_pos = lv_pos + 1.
+              EXIT.
+            ELSEIF lv_ch = `\\`.
+              lv_pos = lv_pos + 1.
+              lv_esc = iv_json+lv_pos(1).
+              CASE lv_esc.
+                WHEN `"`.
+                  lv_buf = lv_buf && `"`.
+                WHEN `\\`.
+                  lv_buf = lv_buf && `\\`.
+                WHEN `/`.
+                  lv_buf = lv_buf && `/`.
+                WHEN `b`.
+                  lv_buf = lv_buf && cl_abap_char_utilities=>backspace.
+                WHEN `f`.
+                  lv_buf = lv_buf && cl_abap_char_utilities=>form_feed.
+                WHEN `n`.
+                  lv_buf = lv_buf && cl_abap_char_utilities=>newline.
+                WHEN `r`.
+                  lv_buf = lv_buf && cl_abap_char_utilities=>cr_lf(1).
+                WHEN `t`.
+                  lv_buf = lv_buf && cl_abap_char_utilities=>horizontal_tab.
+                WHEN `u`.
+                  lv_pos = lv_pos + 1.
+                  lv_hex = iv_json+lv_pos(4).
+                  lv_code = _json_hex_to_int( lv_hex ).
+                  lv_pos = lv_pos + 3.
+                  IF lv_code >= 55296 AND lv_code <= 56319.
                     lv_pos = lv_pos + 1.
-                    lv_hex = iv_json+lv_pos(4).
-                    lv_code = _json_hex_to_int( lv_hex ).
-                    lv_pos = lv_pos + 3.
-                    IF lv_code >= 55296 AND lv_code <= 56319.
-                      " UTF-16 surrogate pair handling: high surrogate followed
-                      " by a low surrogate yields the actual code point.
-                      lv_pos = lv_pos + 1.
-                      IF iv_json+lv_pos(2) = `\\u`.
-                        lv_pos = lv_pos + 2.
-                        lv_hex = iv_json+lv_pos(4).
-                        lv_code2 = _json_hex_to_int( lv_hex ).
-                        lv_pos = lv_pos + 3.
-                        lv_code = ( lv_code - 55296 ) * 1024 + ( lv_code2 - 56320 ) + 65536.
-                      ELSE.
-                        lv_pos = lv_pos - 1.
-                      ENDIF.
+                    IF iv_json+lv_pos(2) = `\\u`.
+                      lv_pos = lv_pos + 2.
+                      lv_hex = iv_json+lv_pos(4).
+                      lv_code2 = _json_hex_to_int( lv_hex ).
+                      lv_pos = lv_pos + 3.
+                      lv_code = ( lv_code - 55296 ) * 1024 + ( lv_code2 - 56320 ) + 65536.
+                    ELSE.
+                      lv_pos = lv_pos - 1.
                     ENDIF.
-                    lv_char = _json_codepoint_to_string( lv_code ).
-                    lv_buf = lv_buf && lv_char.
-                  WHEN OTHERS.
-                    lv_buf = lv_buf && lv_esc.
-                ENDCASE.
-                lv_pos = lv_pos + 1.
-              ELSE.
-                lv_buf = lv_buf && lv_ch.
-                lv_pos = lv_pos + 1.
-              ENDIF.
-            ENDWHILE.
-            ls_token-kind = `string`.
-            ls_token-str_val = lv_buf.
+                  ENDIF.
+                  lv_char = _json_codepoint_to_string( lv_code ).
+                  lv_buf = lv_buf && lv_char.
+                WHEN OTHERS.
+                  lv_buf = lv_buf && lv_esc.
+              ENDCASE.
+              lv_pos = lv_pos + 1.
+            ELSE.
+              lv_buf = lv_buf && lv_ch.
+              lv_pos = lv_pos + 1.
+            ENDIF.
+          ENDWHILE.
+          ls_token-kind = `string`.
+          ls_token-str_val = lv_buf.
+          APPEND ls_token TO rt_tokens.
+
+        WHEN `t`.
+          IF lv_pos + 4 <= lv_len AND iv_json+lv_pos(4) = `true`.
+            ls_token-kind = `bool`.
+            ls_token-bool_val = abap_true.
             APPEND ls_token TO rt_tokens.
+            lv_pos = lv_pos + 4.
+          ELSE.
+            lv_pos = lv_pos + 1.
+          ENDIF.
 
-          WHEN `t`.
-            IF lv_pos + 4 <= lv_len AND iv_json+lv_pos(4) = `true`.
-              ls_token-kind = `bool`.
-              ls_token-bool_val = abap_true.
-              APPEND ls_token TO rt_tokens.
-              lv_pos = lv_pos + 4.
-            ELSE.
-              lv_pos = lv_pos + 1.
-            ENDIF.
-
-          WHEN `f`.
-            IF lv_pos + 5 <= lv_len AND iv_json+lv_pos(5) = `false`.
-              ls_token-kind = `bool`.
-              ls_token-bool_val = abap_false.
-              APPEND ls_token TO rt_tokens.
-              lv_pos = lv_pos + 5.
-            ELSE.
-              lv_pos = lv_pos + 1.
-            ENDIF.
-
-          WHEN `n`.
-            IF lv_pos + 4 <= lv_len AND iv_json+lv_pos(4) = `null`.
-              ls_token-kind = `null`.
-              APPEND ls_token TO rt_tokens.
-              lv_pos = lv_pos + 4.
-            ELSE.
-              lv_pos = lv_pos + 1.
-            ENDIF.
-
-          WHEN OTHERS.
-            " Number literal: [-]digits[.digits][eE[+-]digits]. We do exponent
-            " parsing in-place by consuming any character that could legally be
-            " part of a numeric token; the final conversion validates it.
-            lv_num_start = lv_pos.
-            IF lv_ch = `-`.
-              lv_pos = lv_pos + 1.
-            ENDIF.
-            WHILE lv_pos < lv_len.
-              lv_ch = iv_json+lv_pos(1).
-              IF lv_ch CA `0123456789.eE+-`.
-                lv_pos = lv_pos + 1.
-              ELSE.
-                EXIT.
-              ENDIF.
-            ENDWHILE.
-            lv_num_len = lv_pos - lv_num_start.
-            lv_num_str = iv_json+lv_num_start(lv_num_len).
-            lv_num_val = lv_num_str.
-            ls_token-kind = `number`.
-            ls_token-num_val = lv_num_val.
+        WHEN `f`.
+          IF lv_pos + 5 <= lv_len AND iv_json+lv_pos(5) = `false`.
+            ls_token-kind = `bool`.
+            ls_token-bool_val = abap_false.
             APPEND ls_token TO rt_tokens.
-        ENDCASE.
-      ENDWHILE.
-    ENDMETHOD.
+            lv_pos = lv_pos + 5.
+          ELSE.
+            lv_pos = lv_pos + 1.
+          ENDIF.
 
+        WHEN `n`.
+          IF lv_pos + 4 <= lv_len AND iv_json+lv_pos(4) = `null`.
+            ls_token-kind = `null`.
+            APPEND ls_token TO rt_tokens.
+            lv_pos = lv_pos + 4.
+          ELSE.
+            lv_pos = lv_pos + 1.
+          ENDIF.
+
+        WHEN OTHERS.
+          lv_num_start = lv_pos.
+          IF lv_ch = `-`.
+            lv_pos = lv_pos + 1.
+          ENDIF.
+          WHILE lv_pos < lv_len.
+            lv_ch = iv_json+lv_pos(1).
+            IF lv_ch CA `0123456789.eE+-`.
+              lv_pos = lv_pos + 1.
+            ELSE.
+              EXIT.
+            ENDIF.
+          ENDWHILE.
+          lv_num_len = lv_pos - lv_num_start.
+          lv_num_str = iv_json+lv_num_start(lv_num_len).
+          lv_num_val = lv_num_str.
+          ls_token-kind = `number`.
+          ls_token-num_val = lv_num_val.
+          APPEND ls_token TO rt_tokens.
+      ENDCASE.
+    ENDWHILE.
   ENDMETHOD.
-ENDCLASS.
 
-CLASS ZCX_PETSTORE3_CLIENT_ERROR DEFINITION FINAL INHERITING FROM cx_static_check.
-  PUBLIC SECTION.
-    DATA mv_status TYPE i READ-ONLY.
-    DATA mv_payload TYPE string READ-ONLY.
-    METHODS constructor
-      IMPORTING
-        iv_status TYPE i
-        iv_payload TYPE string.
-ENDCLASS.
-
-CLASS ZCX_PETSTORE3_CLIENT_ERROR IMPLEMENTATION.
-  METHOD constructor.
-    super->constructor( ).
-    me->mv_status = iv_status.
-    me->mv_payload = iv_payload.
-  ENDMETHOD.
 ENDCLASS.
