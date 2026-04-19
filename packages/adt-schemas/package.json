@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-schemas",
+  "version": "0.2.0",
+  "description": "ADT XML schemas generated from SAP XSD definitions",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "ADT XML schemas generated from SAP XSD definitions",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {

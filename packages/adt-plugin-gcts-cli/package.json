@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-plugin-gcts-cli",
+  "version": "0.1.0",
+  "description": "CLI command plugin for SAP gCTS (git-enabled CTS) — mirrors sapcli's `sap gcts`",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.0",
-  "description": "CLI command plugin for SAP gCTS (git-enabled CTS) — mirrors sapcli's `sap gcts`",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {

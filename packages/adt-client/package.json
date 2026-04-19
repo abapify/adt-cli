@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-client",
+  "version": "0.2.0",
+  "description": "Minimalistic speci-based ADT client for SAP ABAP Development Tools",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "Minimalistic speci-based ADT client for SAP ABAP Development Tools",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {

@@ -1,11 +1,12 @@
 {
   "name": "@abapify/speci",
+  "version": "0.2.0",
+  "description": "Minimal arrow-function-based contract specification system for TypeScript",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
   "type": "module",
-  "description": "Minimal arrow-function-based contract specification system for TypeScript",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",

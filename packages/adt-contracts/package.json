@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-contracts",
+  "version": "0.2.0",
+  "description": "SAP ADT REST API contracts using speci + ts-xsd",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "SAP ADT REST API contracts using speci + ts-xsd",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {

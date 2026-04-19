@@ -2,6 +2,7 @@
   "name": "@abapify/adt-locks",
   "version": "0.2.0",
   "description": "ADT lock/unlock operations and lock store management",
+  "license": "MIT",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {

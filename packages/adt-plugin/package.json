@@ -1,11 +1,12 @@
 {
   "name": "@abapify/adt-plugin",
+  "version": "0.2.0",
+  "description": "ADT Plugin interface and factory for abapify",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
   "type": "module",
-  "description": "ADT Plugin interface and factory for abapify",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",

@@ -1,11 +1,12 @@
 {
   "name": "@abapify/adt-tui",
+  "version": "0.2.0",
+  "description": "Terminal UI components for ADT - page-based navigation with Ink",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "version": "0.2.0",
-  "description": "Terminal UI components for ADT - page-based navigation with Ink",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",

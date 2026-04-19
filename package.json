@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "private": true,
   "description": "TypeScript libraries and CLI tools for modern SAP ABAP development workflows. Build CLI-first development tools, integrate ABAP with modern CI/CD pipelines, and work with SAP systems programmatically.",
-  "license": "ISC",
+  "license": "MIT",
   "author": "",
   "type": "module",
   "main": "index.js",

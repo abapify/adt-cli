@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-codegen",
+  "version": "0.2.0",
+  "description": "Code generation toolkit for SAP ADT APIs",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "Code generation toolkit for SAP ADT APIs",
   "type": "module",
   "types": "./dist/index.d.mts",
   "bin": {

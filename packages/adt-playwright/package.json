@@ -1,11 +1,12 @@
 {
   "name": "@abapify/adt-playwright",
+  "version": "0.2.0",
+  "description": "Playwright-based SSO authentication plugin for ADT client",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
   "type": "module",
-  "description": "Playwright-based SSO authentication plugin for ADT client",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
