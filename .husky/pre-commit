@@ -1,7 +1,5 @@
 if command -v bunx >/dev/null 2>&1; then
-  bunx nx format:write --uncommitted
+  bunx lint-staged
 else
-  npx nx format:write --uncommitted
+  npx lint-staged
 fi
-git update-index --again
-
