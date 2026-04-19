@@ -6,14 +6,14 @@
     "start": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "docusaurus start",
+        "command": "bun run start",
         "cwd": "website"
       }
     },
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "docusaurus build",
+        "command": "bun run build",
         "cwd": "website"
       },
       "outputs": ["{projectRoot}/build"]
@@ -21,14 +21,14 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "docusaurus serve",
+        "command": "bun run serve",
         "cwd": "website"
       }
     },
     "clear": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "docusaurus clear",
+        "command": "bun run clear",
         "cwd": "website"
       }
     }
