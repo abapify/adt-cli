@@ -110,12 +110,11 @@ interface Token {
   text?: string;
 }
 
-// Two non-overlapping alternatives: CDATA first (has an explicit ]]> terminator),
-// then a plain tag body `<[^>]*>`. The tag body is a single class with `>` as the
-// hard stop → no intra-alternative backtracking. Tag name is extracted post-match
-// via tagNameOf() to avoid CodeQL js/polynomial-redos flagged by splitting the
-// pattern into name + attrs within the same alternative.
-const TAG_RE = /<!\[CDATA\[([\s\S]*?)\]\]>|<([^>]*)>/g;
+// Single linear alternative: a tag body bounded by `>`. `[^>]*` cannot exceed
+// the next `>`, so matching is O(N) with no backtracking. SOAP-RFC responses
+// from SAP do not include CDATA sections; if that ever changes, handle it
+// with a streaming scanner (not a regex) to keep parsing linear.
+const TAG_RE = /<([^>]*)>/g;
 
 const TAG_NAME_RE = /^\/?([A-Za-z_][\w.:-]*)/;
 
@@ -135,23 +134,29 @@ function tokenize(xml: string): Token[] {
       const text = xml.slice(lastIndex, m.index);
       if (text.trim().length > 0) tokens.push({ kind: 'text', text });
     }
-    if (m[1] !== undefined) {
-      // CDATA content
-      tokens.push({ kind: 'text', text: m[1] });
+    const raw = m[0];
+    const inside = m[1] ?? '';
+    // Skip XML prolog (<?xml ...?>), comments, and DOCTYPE — we never
+    // emit tokens for these and they are non-structural for RFC parsing.
+    if (
+      inside.startsWith('?') ||
+      inside.startsWith('!--') ||
+      inside.startsWith('!DOCTYPE') ||
+      inside.startsWith('!')
+    ) {
+      lastIndex = TAG_RE.lastIndex;
+      continue;
+    }
+    const name = tagNameOf(inside);
+    if (!name) {
+      // malformed tag body without a name — treat as literal text
+      tokens.push({ kind: 'text', text: raw });
+    } else if (raw.startsWith('</')) {
+      tokens.push({ kind: 'close', name });
+    } else if (raw.endsWith('/>')) {
+      tokens.push({ kind: 'self', name });
     } else {
-      const raw = m[0];
-      const inside = m[2] ?? '';
-      const name = tagNameOf(inside);
-      if (!name) {
-        // malformed tag body without a name — treat as literal text
-        tokens.push({ kind: 'text', text: raw });
-      } else if (raw.startsWith('</')) {
-        tokens.push({ kind: 'close', name });
-      } else if (raw.endsWith('/>')) {
-        tokens.push({ kind: 'self', name });
-      } else {
-        tokens.push({ kind: 'open', name });
-      }
+      tokens.push({ kind: 'open', name });
     }
     lastIndex = TAG_RE.lastIndex;
   }
