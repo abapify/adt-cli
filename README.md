@@ -18,7 +18,10 @@ Key entry points:
 - [Plugins](https://adt-cli.netlify.app/plugins/overview) — abapGit, gCTS, and writing your own
 - [Architecture](https://adt-cli.netlify.app/architecture/overview) — how the pieces fit together
 
-Sources: documentation lives under [`docs/`](./docs) and the Docusaurus site under [`website/`](./website). Contributions to either are welcome.
+Sources:
+
+- **Public docs** — [`website/docs/`](./website/docs) (rendered to https://adt-cli.netlify.app).
+- **Internal/maintainer docs** — [`docs/`](./docs) (not rendered on the site; historical design notes, epic briefs, changelogs, planning).
 
 ## Packages
 
@@ -149,7 +152,8 @@ adt-cli/
 │   ├── adt-codegen/        # Code generation
 │   ├── asjson-parser/      # asJSON parser
 │   └── logger/             # Shared logger
-├── docs/                   # Architecture docs and specs
+├── docs/                   # Internal maintainer docs (not on website)
+├── website/docs/           # Public Docusaurus docs
 ├── samples/                # Example projects
 └── tmp/                    # Local temp files (gitignored)
 ```

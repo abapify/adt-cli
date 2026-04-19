@@ -26,24 +26,11 @@ const config: Config = {
       'classic',
       {
         docs: {
-          path: '../docs',
+          path: 'docs',
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/abapify/adt-cli/tree/main/',
-          exclude: [
-            'README.md',
-            'architecture/adk-overview.md',
-            'architecture/plugin-system.md',
-            'changelogs/**',
-            'ci-cd-setup.md',
-            'design/**',
-            'examples/**',
-            'history/**',
-            'migration/**',
-            'planning/**',
-            'roadmap/**',
-            'tmp/**',
-          ],
+          editUrl: 'https://github.com/abapify/adt-cli/tree/main/website/',
+          exclude: ['README.md', 'tmp/**'],
         },
         blog: false,
         theme: {
