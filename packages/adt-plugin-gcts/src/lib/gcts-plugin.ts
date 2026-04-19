@@ -36,7 +36,7 @@ export const gctsPlugin: AdtPlugin = createPlugin({
         const isPackage = object.type?.startsWith('DEVC');
         const objPackage = isPackage
           ? object.name
-          : (object as any).package || object.name || 'ROOT';
+          : (object as { package?: string }).package || object.name || 'ROOT';
         const packagePath = await context.resolvePackagePath(objPackage);
 
         // gCTS layout: flat per-package directory under src/<package-path>/.

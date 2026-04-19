@@ -352,19 +352,19 @@ export class CdsVisitor extends BaseCstVisitor {
     if (nums.length === 1) {
       const dotCount = asTokens(ctx.Dot).length;
       if (dotCount === 0) {
-        return { max: parseInt(nums[0].image, 10) };
+        return { max: Number.parseInt(nums[0].image, 10) };
       }
       // `[N..*]`  (Star present as second operand) or `[N..M]` (handled below)
       if (stars.length >= 1) {
-        return { min: parseInt(nums[0].image, 10), max: '*' };
+        return { min: Number.parseInt(nums[0].image, 10), max: '*' };
       }
       // Fallback — shouldn't happen if grammar is consistent.
-      return { min: parseInt(nums[0].image, 10), max: '*' };
+      return { min: Number.parseInt(nums[0].image, 10), max: '*' };
     }
     if (nums.length === 2) {
       return {
-        min: parseInt(nums[0].image, 10),
-        max: parseInt(nums[1].image, 10),
+        min: Number.parseInt(nums[0].image, 10),
+        max: Number.parseInt(nums[1].image, 10),
       };
     }
     return { max: '*' };
@@ -593,10 +593,10 @@ export class CdsVisitor extends BaseCstVisitor {
     const name = this.visit(asNodes(ctx.cdsName)[0]) as string;
     const numberTokens = asTokens(ctx.NumberLiteral);
     const length = numberTokens[0]
-      ? parseInt(numberTokens[0].image, 10)
+      ? Number.parseInt(numberTokens[0].image, 10)
       : undefined;
     const decimals = numberTokens[1]
-      ? parseInt(numberTokens[1].image, 10)
+      ? Number.parseInt(numberTokens[1].image, 10)
       : undefined;
     return { kind: 'builtin', name, length, decimals };
   }

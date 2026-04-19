@@ -79,7 +79,7 @@ export function buildUsageReferenceRequestXml(scopeResultXml: string): string {
       noProlog = noProlog.slice(prologEnd + 2).replace(/^\s+/, '');
     }
   }
-  const scopeElement = noProlog.replace(
+  const scopeElement = noProlog.replaceAll(
     /usagereferences:usageScopeResult/g,
     'usagereferences:scope',
   );

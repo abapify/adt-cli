@@ -36,9 +36,10 @@ function pickSourceContract(
   uri: string,
 ): { op: SourceOp; objectName: string } | undefined {
   // Patterns: /sap/bc/adt/<area>/<name>
-  const match = uri.match(
-    /^\/sap\/bc\/adt\/(oo\/classes|oo\/interfaces|programs\/programs|ddic\/ddl\/sources|ddic\/dcl\/sources)\/([^/?#]+)/i,
-  );
+  const match =
+    /^\/sap\/bc\/adt\/(oo\/classes|oo\/interfaces|programs\/programs|ddic\/ddl\/sources|ddic\/dcl\/sources)\/([^/?#]+)/i.exec(
+      uri,
+    );
   if (!match) return undefined;
   const [, area, encodedName] = match;
   const objectName = decodeURIComponent(encodedName);

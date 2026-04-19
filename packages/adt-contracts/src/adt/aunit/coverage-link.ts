@@ -44,11 +44,14 @@ export function extractCoverageMeasurementId(
 
     const obj = current as Record<string, unknown>;
     const links = obj.link;
-    const linkList = Array.isArray(links)
-      ? links
-      : links && typeof links === 'object'
-        ? [links as CoverageLinkCandidate]
-        : [];
+    let linkList: CoverageLinkCandidate[];
+    if (Array.isArray(links)) {
+      linkList = links as CoverageLinkCandidate[];
+    } else if (links && typeof links === 'object') {
+      linkList = [links as CoverageLinkCandidate];
+    } else {
+      linkList = [];
+    }
 
     for (const link of linkList) {
       const href =

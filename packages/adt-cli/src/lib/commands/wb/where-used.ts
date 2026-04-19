@@ -130,11 +130,15 @@ export const whereUsedCommand = new Command('where-used')
         console.log('\nNo references found.');
         return;
       }
+      const totalSuffix = parsed.numberOfResults
+        ? ` of ${parsed.numberOfResults}`
+        : '';
       console.log(
-        `\nFound ${parsed.usages.length}${parsed.numberOfResults ? ` of ${parsed.numberOfResults}` : ''} reference(s):`,
+        `\nFound ${parsed.usages.length}${totalSuffix} reference(s):`,
       );
       for (const u of parsed.usages) {
-        const head = `  • ${u.name ?? '(unnamed)'}${u.type ? ` (${u.type})` : ''}`;
+        const typeSuffix = u.type ? ` (${u.type})` : '';
+        const head = `  • ${u.name ?? '(unnamed)'}${typeSuffix}`;
         console.log(head);
         if (u.uri) console.log(`      ${u.uri}`);
         if (u.packageName) console.log(`      package: ${u.packageName}`);

@@ -28,8 +28,8 @@ export interface GctsConfigEntry {
 export interface GctsRepository {
   rid: string;
   name?: string;
-  role?: 'SOURCE' | 'TARGET' | string;
-  type?: 'GIT' | 'GITHUB' | string;
+  role?: 'SOURCE' | 'TARGET' | (string & {});
+  type?: 'GIT' | 'GITHUB' | (string & {});
   vsid?: string;
   status?: string;
   branch?: string;
@@ -42,7 +42,7 @@ export interface GctsRepository {
 
 export interface GctsBranch {
   name: string;
-  type?: 'active' | 'local' | 'remote' | string;
+  type?: 'active' | 'local' | 'remote' | (string & {});
   isSymbolic?: boolean;
   isPeeled?: boolean;
   ref?: string;

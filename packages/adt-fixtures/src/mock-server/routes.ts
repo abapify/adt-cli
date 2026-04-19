@@ -1035,7 +1035,7 @@ export function matchRoute(
   // Unlock — POST ?_action=UNLOCK
   if (m === 'POST' && url.includes('_action=UNLOCK')) {
     const objectUri = extractObjectUri(url);
-    const handleMatch = url.match(/[?&]lockHandle=([^&]+)/);
+    const handleMatch = /[?&]lockHandle=([^&]+)/.exec(url);
     const handle = handleMatch ? decodeURIComponent(handleMatch[1]) : undefined;
     const ok = locks.unlock(objectUri, handle);
     if (!ok) {

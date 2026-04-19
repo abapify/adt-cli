@@ -23,7 +23,7 @@ import { ABAPGIT_SUFFIX } from '../handlers/objects/clas';
  * (lower-cased).
  */
 function applyNamespace(raw: string): string {
-  const nsMatch = raw.match(/^\/([^/]+)\/(.*)$/);
+  const nsMatch = /^\/([^/]+)\/(.*)$/.exec(raw);
   if (nsMatch) {
     const [, ns, rest] = nsMatch;
     return `(${ns.toLowerCase()})${rest.toLowerCase()}`;
@@ -179,7 +179,7 @@ export function adtUriToAbapGitPath(uri: string): string | null {
   if (!uri) return null;
   const clean = stripFragment(uri).trim();
   for (const rule of RULES) {
-    const m = clean.match(rule.test);
+    const m = rule.test.exec(clean);
     if (m) return rule.build(m);
   }
   return null;

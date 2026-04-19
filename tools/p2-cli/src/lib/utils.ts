@@ -38,9 +38,9 @@ export function findFiles(dir: string, pattern: string): string[] {
   // Convert glob to regex. Escape ALL regex metacharacters except the glob
   // wildcards '*' and '?' first, so characters like '+', '(', '[' in the
   // pattern can't introduce regex syntax. Then expand the wildcards.
-  const escaped = pattern.replace(/[.+^${}()|[\]\\/]/g, '\\$&');
+  const escaped = pattern.replaceAll(/[.+^${}()|[\]\\/]/g, '\\$&');
   const regex = new RegExp(
-    '^' + escaped.replace(/\*/g, '.*').replace(/\?/g, '.') + '$',
+    '^' + escaped.replaceAll(/\*/g, '.*').replaceAll(/\?/g, '.') + '$',
   );
 
   for (const entry of entries) {

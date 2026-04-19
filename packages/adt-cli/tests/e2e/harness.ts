@@ -182,7 +182,7 @@ export async function startAdtHarness(): Promise<AdtHarness> {
 // runCliCommand
 // ────────────────────────────────────────────────────────────────────────────
 
-function tryParseJson(text: string): unknown | undefined {
+function tryParseJson(text: string): unknown {
   const trimmed = text.trim();
   if (!trimmed) return undefined;
   // Fast-path: only attempt if it starts with JSON-ish

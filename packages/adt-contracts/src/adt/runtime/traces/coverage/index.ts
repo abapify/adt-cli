@@ -9,8 +9,10 @@
 import { measurements, type MeasurementsContract } from './measurements';
 import { statements, type StatementsContract } from './statements';
 
-export { measurements, statements };
-export type { MeasurementsContract, StatementsContract };
+export { measurements } from './measurements';
+export { statements } from './statements';
+export type { MeasurementsContract } from './measurements';
+export type { StatementsContract } from './statements';
 
 export interface CoverageContract {
   measurements: MeasurementsContract;

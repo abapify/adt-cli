@@ -215,17 +215,20 @@ async function performPkceFlow(
         // data derived from the (attacker-controllable) OAuth callback URL
         // (e.g. error_description) and must never be treated as trusted.
         const rawMessage = err instanceof Error ? err.message : String(err);
-        const escaped = rawMessage.replace(/[&<>"']/g, (c) =>
-          c === '&'
-            ? '&amp;'
-            : c === '<'
-              ? '&lt;'
-              : c === '>'
-                ? '&gt;'
-                : c === '"'
-                  ? '&quot;'
-                  : '&#39;',
-        );
+        const escaped = rawMessage.replaceAll(/[&<>"']/g, (c) => {
+          switch (c) {
+            case '&':
+              return '&amp;';
+            case '<':
+              return '&lt;';
+            case '>':
+              return '&gt;';
+            case '"':
+              return '&quot;';
+            default:
+              return '&#39;';
+          }
+        });
         res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(
           '<html><body style="font-family:Arial;text-align:center;padding:50px">' +

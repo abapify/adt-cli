@@ -35,9 +35,9 @@ export const SOAP_ENV_NS = 'http://schemas.xmlsoap.org/soap/envelope/';
 
 function escapeXml(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replaceAll(/&/g, '&amp;')
+    .replaceAll(/</g, '&lt;')
+    .replaceAll(/>/g, '&gt;');
 }
 
 function renderScalar(value: RfcScalar): string {
@@ -176,11 +176,11 @@ function localName(qname: string): string {
 
 function unescapeXml(s: string): string {
   return s
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&amp;/g, '&');
+    .replaceAll(/&lt;/g, '<')
+    .replaceAll(/&gt;/g, '>')
+    .replaceAll(/&quot;/g, '"')
+    .replaceAll(/&apos;/g, "'")
+    .replaceAll(/&amp;/g, '&');
 }
 
 interface ParsedNode {
@@ -204,7 +204,7 @@ function parseXmlFragment(xml: string): ParsedNode {
   const stack: ParsedNode[] = [root];
 
   for (const tok of tokens) {
-    const top = stack[stack.length - 1];
+    const top = stack.at(-1)!;
     if (tok.kind === 'open') {
       const child = newNode();
       top.children.push({ name: localName(tok.name!), node: child });
@@ -245,7 +245,7 @@ function nodeToValue(node: ParsedNode): RfcScalar | RfcStructure | RfcTable {
     if (name in obj) {
       const existing = obj[name];
       if (Array.isArray(existing)) {
-        (existing as RfcTable).push(val as RfcStructure);
+        existing.push(val as RfcStructure);
       } else {
         obj[name] = [existing as unknown as RfcStructure, val as RfcStructure];
       }

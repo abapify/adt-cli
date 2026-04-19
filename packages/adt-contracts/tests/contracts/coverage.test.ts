@@ -10,7 +10,7 @@
  * Fixtures are the real (sanitized) SAP responses from jfilak/sapcli.
  */
 
-import { expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { acoverageResult, acoverageStatements } from '../../src/schemas';
 import {
@@ -99,7 +99,7 @@ class MeasurementsTypedScenario extends TypedContractScenario<
     const topCoverages = topNodes?.[0]?.coverages?.coverage ?? [];
     const types = topCoverages
       .map((c) => c.type)
-      .sort((a, b) => a.localeCompare(b));
+      .sort((a, b) => (a ?? '').localeCompare(b ?? ''));
     expect(types).toEqual(['branch', 'procedure', 'statement']);
   }
 }
@@ -144,7 +144,6 @@ runTypedScenario(new StatementsTypedScenario());
 // ─────────────────────────────────────────────────────────────
 // 4. Coverage link helper
 // ─────────────────────────────────────────────────────────────
-import { describe, it } from 'vitest';
 
 describe('extractCoverageMeasurementId', () => {
   it('returns undefined when no coverage link is present', () => {

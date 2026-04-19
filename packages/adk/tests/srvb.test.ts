@@ -19,7 +19,9 @@ function createMockLockService() {
   };
 }
 
-function createMockBindingsContract(getResult: unknown = { meta: true }) {
+const DEFAULT_GET_RESULT = { meta: true };
+
+function createMockBindingsContract(getResult: unknown = DEFAULT_GET_RESULT) {
   return {
     get: vi.fn().mockResolvedValue(getResult),
     post: vi.fn().mockResolvedValue({}),
@@ -31,7 +33,7 @@ function createMockBindingsContract(getResult: unknown = { meta: true }) {
 }
 
 function createCtx(
-  getResult: unknown = { meta: true },
+  getResult: unknown = DEFAULT_GET_RESULT,
   lockService?: ReturnType<typeof createMockLockService>,
 ) {
   const bindings = createMockBindingsContract(getResult);

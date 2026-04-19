@@ -99,12 +99,15 @@ export function registerFindDefinitionTool(
         );
 
         if (!target?.uri) {
+          const typeSuffix = args.objectType
+            ? ` (type: ${args.objectType})`
+            : '';
           return {
             isError: true,
             content: [
               {
                 type: 'text' as const,
-                text: `Could not resolve '${args.objectName}'${args.objectType ? ` (type: ${args.objectType})` : ''} — no search hit matched.`,
+                text: `Could not resolve '${args.objectName}'${typeSuffix} — no search hit matched.`,
               },
             ],
           };

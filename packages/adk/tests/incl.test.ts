@@ -21,11 +21,21 @@ function createMockLockService() {
   };
 }
 
+const DEFAULT_INCLUDE_GET = { abapInclude: {} };
+const DEFAULT_INCLUDE_META = {
+  abapInclude: {
+    name: 'ZTEST_INCLUDE',
+    type: 'PROG/I',
+    description: 'Test Include',
+    version: 'active',
+  },
+};
+
 /**
  * Mock the client.adt.programs.includes surface — matches the CRUD contract
  * shape produced by `crud({ ... sources: ['main'] })`.
  */
-function createMockIncludesContract(getResult: unknown = { abapInclude: {} }) {
+function createMockIncludesContract(getResult: unknown = DEFAULT_INCLUDE_GET) {
   return {
     get: vi.fn().mockResolvedValue(getResult),
     post: vi.fn().mockResolvedValue({}),
@@ -43,14 +53,7 @@ function createMockIncludesContract(getResult: unknown = { abapInclude: {} }) {
 }
 
 function createCtx(
-  getResult: unknown = {
-    abapInclude: {
-      name: 'ZTEST_INCLUDE',
-      type: 'PROG/I',
-      description: 'Test Include',
-      version: 'active',
-    },
-  },
+  getResult: unknown = DEFAULT_INCLUDE_META,
   lockService?: ReturnType<typeof createMockLockService>,
   options: { getThrows?: boolean } = {},
 ) {

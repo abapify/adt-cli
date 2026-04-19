@@ -112,7 +112,7 @@ export function createRfcClient(config: RfcClientConfig): RfcClient {
         // underlying fetcher. `AdtClient.fetch()` throws errors whose
         // `message` usually contains the status code.
         const msg = err instanceof Error ? err.message : String(err);
-        const statusMatch = msg.match(/\b(401|403|404|501)\b/);
+        const statusMatch = /\b(401|403|404|501)\b/.exec(msg);
         if (statusMatch) {
           throw new RfcTransportUnavailable(Number(statusMatch[1]), url, msg);
         }

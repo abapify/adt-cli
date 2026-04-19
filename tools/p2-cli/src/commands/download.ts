@@ -78,8 +78,8 @@ export async function download(
           // Escape regex metacharacters in user-supplied filter before
           // expanding the glob wildcard. Prevents regex-injection when
           // the filter contains characters like '.', '+', '(' etc.
-          const escaped = p.replace(/[.+?^${}()|[\]\\/]/g, '\\$&');
-          const regex = new RegExp('^' + escaped.replace(/\*/g, '.*') + '$');
+          const escaped = p.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
+          const regex = new RegExp('^' + escaped.replaceAll(/\*/g, '.*') + '$');
           return regex.test(a.id);
         }
         return a.id.startsWith(p);

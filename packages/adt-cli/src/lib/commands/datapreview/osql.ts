@@ -79,12 +79,14 @@ function renderTable(result: OsqlResult, noHeadings: boolean): void {
   }
 
   // Use column order from metadata (or from first row keys if no columns)
-  const colNames =
-    columns.length > 0
-      ? columns.map((c) => c.name)
-      : rows.length > 0
-        ? Object.keys(rows[0])
-        : [];
+  let colNames: string[];
+  if (columns.length > 0) {
+    colNames = columns.map((c) => c.name);
+  } else if (rows.length > 0) {
+    colNames = Object.keys(rows[0]);
+  } else {
+    colNames = [];
+  }
 
   // Calculate column widths
   const widths = colNames.map((col) => {
@@ -143,7 +145,7 @@ export const datapreviewOsqlCommand = new Command('osql')
 
       try {
         const client = await getAdtClientV2();
-        const maxRows = parseInt(options.rows, 10) || 100;
+        const maxRows = Number.parseInt(options.rows, 10) || 100;
 
         const result = await client.adt.datapreview.freestyle.post(
           {

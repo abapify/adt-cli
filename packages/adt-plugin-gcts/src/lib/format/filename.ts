@@ -84,11 +84,9 @@ export function parseGctsFilename(
     return undefined;
   }
 
-  const extension = parts[parts.length - 1];
-  const maybeSuffix = parts.length >= 4 ? parts[parts.length - 2] : undefined;
-  const nameParts = maybeSuffix
-    ? parts.slice(0, parts.length - 3)
-    : parts.slice(0, parts.length - 2);
+  const extension = parts.at(-1)!;
+  const maybeSuffix = parts.length >= 4 ? parts.at(-2) : undefined;
+  const nameParts = maybeSuffix ? parts.slice(0, -3) : parts.slice(0, -2);
 
   if (nameParts.length === 0) {
     return undefined;
@@ -99,11 +97,8 @@ export function parseGctsFilename(
   // source extension to decide: if ext is 'json' there can't be a suffix.
   if (extension === METADATA_EXTENSION) {
     return {
-      name:
-        nameParts.length === 0
-          ? ''
-          : parts.slice(0, parts.length - 2).join('.'),
-      type: parts[parts.length - 2].toUpperCase(),
+      name: nameParts.length === 0 ? '' : parts.slice(0, -2).join('.'),
+      type: parts.at(-2)!.toUpperCase(),
       extension,
     };
   }
@@ -119,16 +114,16 @@ export function parseGctsFilename(
   // suffix present iff parts.length >= 4.
   if (parts.length >= 4) {
     return {
-      name: parts.slice(0, parts.length - 3).join('.'),
-      type: parts[parts.length - 3].toUpperCase(),
-      suffix: parts[parts.length - 2],
+      name: parts.slice(0, -3).join('.'),
+      type: parts.at(-3)!.toUpperCase(),
+      suffix: parts.at(-2),
       extension,
     };
   }
 
   return {
-    name: parts.slice(0, parts.length - 2).join('.'),
-    type: parts[parts.length - 2].toUpperCase(),
+    name: parts.slice(0, -2).join('.'),
+    type: parts.at(-2)!.toUpperCase(),
     extension,
   };
 }
@@ -162,7 +157,7 @@ export function adtUriToGctsPath(uri: string): string | undefined {
   ];
 
   for (const [pattern, type] of TABLE) {
-    const m = tail.match(pattern);
+    const m = pattern.exec(tail);
     if (m) {
       const name = m[1];
       if (type === 'DEVC') return `${name.toLowerCase()}/${PACKAGE_FILENAME}`;

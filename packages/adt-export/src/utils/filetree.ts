@@ -74,9 +74,9 @@ export class MemoryFileTree implements FileTree {
     //         wildcard expansions (e.g. '**' -> '.*' -> '\\.\\*').
     // Step 2: expand '**' then '*' using a placeholder that contains no
     //         regex metacharacters, so later passes leave it alone.
-    const escaped = pattern.replace(/[.+?^${}()|[\]\\/]/g, '\\$&');
+    const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
     const body = escaped
-      .replace(/\*\*/g, '\x00DOUBLESTAR\x00')
+      .replaceAll(/\*\*/g, '\x00DOUBLESTAR\x00')
       .replace(/\*/g, '[^/]*')
       .split('\x00DOUBLESTAR\x00')
       .join('.*');

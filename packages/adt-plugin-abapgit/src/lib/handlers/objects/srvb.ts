@@ -12,14 +12,13 @@
  * zcl_abapgit_object_srvb (abapGit upstream serialiser).
  */
 
-import type { AdkServiceBinding } from '@abapify/adk';
 import { srvb } from '../../../schemas/generated';
 import { createHandler, type SerializedFile } from '../base';
 
 // SRVB is not derived from AdkObject — we cast to the minimal handler shape
 // via the string form of createHandler.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SrvbLike = AdkServiceBinding | any;
+type SrvbLike = any;
 
 export const serviceBindingHandler = createHandler<SrvbLike, typeof srvb>(
   'SRVB',

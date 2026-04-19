@@ -287,7 +287,7 @@ export function registerGctsCreateBranchTool(
         const client = ctx.getClient(args);
         const body = {
           branch: args.name,
-          type: (args.localOnly ? 'local' : 'global') as 'local' | 'global',
+          type: args.localOnly ? ('local' as const) : ('global' as const),
           isSymbolic: Boolean(args.symbolic),
           isPeeled: Boolean(args.peeled),
         };

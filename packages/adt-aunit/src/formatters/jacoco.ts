@@ -78,8 +78,6 @@ interface CoverageNode {
   nodes?: { node?: CoverageNode[] };
 }
 
-type CoverageResultRoot = AcoverageResultSchema['result'];
-
 interface StatementEntry {
   objectReference?: ObjectRef;
   executed?: number;
@@ -95,10 +93,10 @@ interface StatementResponse {
 
 function escapeAttr(s: string): string {
   return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replaceAll(/&/g, '&amp;')
+    .replaceAll(/</g, '&lt;')
+    .replaceAll(/>/g, '&gt;')
+    .replaceAll(/"/g, '&quot;');
 }
 
 function indent(level: number): string {
@@ -111,7 +109,7 @@ function indent(level: number): string {
  */
 function parseStartLine(uri: string | undefined): number | null {
   if (!uri) return null;
-  const m = uri.match(/#start=(\d+)/);
+  const m = /#start=(\d+)/.exec(uri);
   return m ? Number.parseInt(m[1], 10) : null;
 }
 
@@ -147,8 +145,8 @@ function buildMethodLinesMapping(
   for (const response of responses) {
     const parts = (response.name ?? '').split('.');
     if (parts.length < 2) continue;
-    const methodName = parts[parts.length - 1];
-    const className = parts[parts.length - 2];
+    const methodName = parts.at(-1)!;
+    const className = parts.at(-2)!;
     const key = methodKey(className, methodName);
     const bucket = result.get(key) ?? [];
     for (const stmt of response.statement ?? []) {
@@ -274,9 +272,7 @@ export interface JacocoInput {
 }
 
 export function toJacocoXml(input: JacocoInput): string {
-  const root = (input.measurements?.result ?? undefined) as
-    | CoverageResultRoot
-    | undefined;
+  const root = input.measurements?.result;
   const lineMap = buildMethodLinesMapping(input.statements);
   const out: string[] = [];
 
@@ -289,8 +285,7 @@ export function toJacocoXml(input: JacocoInput): string {
   );
 
   if (root) {
-    const packages = ((root.nodes?.node as unknown as CoverageNode[]) ??
-      []) as CoverageNode[];
+    const packages = (root.nodes?.node as unknown as CoverageNode[]) ?? [];
     for (const pkg of packages) {
       emitPackage(pkg, lineMap, 1, out);
     }
@@ -316,7 +311,7 @@ export function outputJacocoReport(input: JacocoInput, filePath: string): void {
 
 export function toSonarGenericCoverageXml(input: JacocoInput): string {
   const lineMap = buildMethodLinesMapping(input.statements);
-  const root = input.measurements?.result as CoverageResultRoot | undefined;
+  const root = input.measurements?.result;
 
   // Build file → lines map by walking measurements tree for class refs,
   // then looking up lines via their method keys.

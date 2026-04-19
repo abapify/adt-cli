@@ -17,14 +17,13 @@
  * instead of the default `.abap`.
  */
 
-import type { AdkBehaviorDefinition } from '@abapify/adk';
 import { bdef } from '../../../schemas/generated';
 import { createHandler, type SerializedFile } from '../base';
 
 // BDEF is not derived from AdkObject — we cast to the minimal handler shape
 // via the string form of createHandler.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type BdefLike = AdkBehaviorDefinition | any;
+type BdefLike = any;
 
 export const behaviorDefinitionHandler = createHandler<BdefLike, typeof bdef>(
   'BDEF',

@@ -21,7 +21,14 @@
  *   adt diff zcl_myclass.clas.xml --no-color
  */
 
-import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
+import {
+  requireFormatPlugin,
+  getFormatPlugin,
+  type CliCommandPlugin,
+  type CliContext,
+  type FormatHandler,
+  type ParsedFormatFilename,
+} from '@abapify/adt-plugin';
 import {
   createAdk,
   AdkObject,
@@ -33,12 +40,6 @@ import { glob as nativeGlob } from 'node:fs/promises';
 import { resolve, basename, dirname, join, relative } from 'node:path';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
-import {
-  requireFormatPlugin,
-  getFormatPlugin,
-  type FormatHandler,
-  type ParsedFormatFilename,
-} from '@abapify/adt-plugin';
 
 // abapGit is the only diff format today. The plugin registers itself on
 // import (see adt-cli/src/lib/cli.ts bootstrap).

@@ -151,19 +151,27 @@ function extractReports(response: unknown): {
     unknown
   >;
 
-  const raw = reportsBlock.checkReport as unknown;
-  const arr = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const raw = reportsBlock.checkReport;
+  let arr: unknown[];
+  if (Array.isArray(raw)) {
+    arr = raw;
+  } else if (raw) {
+    arr = [raw];
+  } else {
+    arr = [];
+  }
 
   const reports: CheckReport[] = arr.map((r) => {
     const rec = r as Record<string, unknown>;
     const msgList = rec.checkMessageList as
       | { checkMessage?: CheckMessage | CheckMessage[] }
       | undefined;
-    const messages = msgList?.checkMessage
-      ? Array.isArray(msgList.checkMessage)
+    let messages: CheckMessage[] | undefined;
+    if (msgList?.checkMessage) {
+      messages = Array.isArray(msgList.checkMessage)
         ? msgList.checkMessage
-        : [msgList.checkMessage]
-      : undefined;
+        : [msgList.checkMessage];
+    }
     return {
       reporter: rec.reporter as string | undefined,
       triggeringUri: rec.triggeringUri as string | undefined,

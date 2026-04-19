@@ -59,9 +59,8 @@ export const calleesCommand = new Command('callees')
       }
       console.log(`\nFound ${list.length} callee(s):`);
       for (const c of list) {
-        console.log(
-          `  • ${c.name ?? '(unnamed)'}${c.type ? ` (${c.type})` : ''}`,
-        );
+        const typeSuffix = c.type ? ` (${c.type})` : '';
+        console.log(`  • ${c.name ?? '(unnamed)'}${typeSuffix}`);
         if (c.uri) console.log(`      ${c.uri}`);
       }
     } catch (error) {

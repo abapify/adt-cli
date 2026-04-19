@@ -25,8 +25,7 @@
  */
 
 import type { FileTree, ExportOptions } from '@abapify/adt-plugin';
-import type { AdkObject } from '@abapify/adk';
-import { createAdk, type AdtClient } from '@abapify/adk';
+import { createAdk, type AdkObject, type AdtClient } from '@abapify/adk';
 import { getHandler, getSupportedTypes } from './handlers/base';
 import { parseGctsFilename, PACKAGE_FILENAME } from './format/filename';
 

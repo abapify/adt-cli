@@ -36,7 +36,7 @@ describe('SRVD abapGit handler', () => {
     const paths = files.map((f) => f.path);
 
     assert.deepStrictEqual(
-      paths.sort((a, b) => a.localeCompare(b)),
+      [...paths].sort((a: string, b: string) => a.localeCompare(b)),
       ['zui_mock_srvd.srvd.asrvd', 'zui_mock_srvd.srvd.xml'],
     );
 

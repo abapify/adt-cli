@@ -36,7 +36,7 @@ describe('BDEF abapGit handler', () => {
     const paths = files.map((f) => f.path);
 
     assert.deepStrictEqual(
-      paths.sort((a, b) => a.localeCompare(b)),
+      [...paths].sort((a: string, b: string) => a.localeCompare(b)),
       ['zbp_mock_bdef.bdef.abdl', 'zbp_mock_bdef.bdef.xml'],
     );
 

@@ -265,11 +265,14 @@ const branchList: CliCommandPlugin = {
     const rid = str(args.rid);
     const res = await client.adt.gcts.branches.list(rid);
     const all = res.branches ?? [];
-    const filtered = args.remote
-      ? all.filter((b) => b.type === 'remote')
-      : args.all
-        ? all
-        : all.filter((b) => b.type === 'local');
+    let filtered: typeof all;
+    if (args.remote) {
+      filtered = all.filter((b) => b.type === 'remote');
+    } else if (args.all) {
+      filtered = all;
+    } else {
+      filtered = all.filter((b) => b.type === 'local');
+    }
 
     if (args.json) {
       console.log(json(filtered));
@@ -300,7 +303,7 @@ const branchCreate: CliCommandPlugin = {
     const name = str(args.name);
     const body = {
       branch: name,
-      type: (args.localOnly ? 'local' : 'global') as 'local' | 'global',
+      type: args.localOnly ? ('local' as const) : ('global' as const),
       isSymbolic: Boolean(args.symbolic),
       isPeeled: Boolean(args.peeled),
     };
@@ -425,9 +428,10 @@ const commitCmd: CliCommandPlugin = {
       console.log(json(res));
       return;
     }
-    ctx.logger.info(
-      `✅ Committed to "${rid}": ${corrnr ? `transport ${corrnr}` : `package ${objects[0].object}`}`,
-    );
+    const detail = corrnr
+      ? `transport ${corrnr}`
+      : `package ${objects[0].object}`;
+    ctx.logger.info(`✅ Committed to "${rid}": ${detail}`);
   },
 };
 

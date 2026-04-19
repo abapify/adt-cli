@@ -159,29 +159,32 @@ export class CdsParser extends CstParser {
   //                                                 or `as projection on ...`
   // ============================================================
 
-  private viewEntityDefinition = this.RULE('viewEntityDefinition', () => {
-    this.CONSUME(View);
-    this.CONSUME(Entity);
-    this.SUBRULE(this.cdsName);
-    this.OPTION(() => {
-      this.SUBRULE(this.parametersClause);
-    });
-    this.CONSUME(As);
-    this.OR([
-      { ALT: () => this.SUBRULE(this.selectFromClause) },
-      { ALT: () => this.SUBRULE(this.projectionOnClause) },
-    ]);
-    this.OPTION2(() => {
-      this.SUBRULE(this.elementList);
-    });
-    // optional where at top-level of view (consume expression if present)
-    this.OPTION3(() => {
-      this.CONSUME(Where);
-      this.SUBRULE(this.expression);
-    });
-  });
+  private readonly viewEntityDefinition = this.RULE(
+    'viewEntityDefinition',
+    () => {
+      this.CONSUME(View);
+      this.CONSUME(Entity);
+      this.SUBRULE(this.cdsName);
+      this.OPTION(() => {
+        this.SUBRULE(this.parametersClause);
+      });
+      this.CONSUME(As);
+      this.OR([
+        { ALT: () => this.SUBRULE(this.selectFromClause) },
+        { ALT: () => this.SUBRULE(this.projectionOnClause) },
+      ]);
+      this.OPTION2(() => {
+        this.SUBRULE(this.elementList);
+      });
+      // optional where at top-level of view (consume expression if present)
+      this.OPTION3(() => {
+        this.CONSUME(Where);
+        this.SUBRULE(this.expression);
+      });
+    },
+  );
 
-  private abstractEntityDefinition = this.RULE(
+  private readonly abstractEntityDefinition = this.RULE(
     'abstractEntityDefinition',
     () => {
       this.CONSUME(Abstract);
@@ -194,17 +197,20 @@ export class CdsParser extends CstParser {
     },
   );
 
-  private customEntityDefinition = this.RULE('customEntityDefinition', () => {
-    this.CONSUME(Custom);
-    this.CONSUME(Entity);
-    this.SUBRULE(this.cdsName);
-    this.OPTION(() => {
-      this.SUBRULE(this.parametersClause);
-    });
-    this.SUBRULE(this.elementList);
-  });
+  private readonly customEntityDefinition = this.RULE(
+    'customEntityDefinition',
+    () => {
+      this.CONSUME(Custom);
+      this.CONSUME(Entity);
+      this.SUBRULE(this.cdsName);
+      this.OPTION(() => {
+        this.SUBRULE(this.parametersClause);
+      });
+      this.SUBRULE(this.elementList);
+    },
+  );
 
-  private selectFromClause = this.RULE('selectFromClause', () => {
+  private readonly selectFromClause = this.RULE('selectFromClause', () => {
     this.CONSUME(Select);
     this.OPTION(() => {
       this.CONSUME(From);
@@ -214,13 +220,13 @@ export class CdsParser extends CstParser {
     this.SUBRULE(this.dataSource);
   });
 
-  private projectionOnClause = this.RULE('projectionOnClause', () => {
+  private readonly projectionOnClause = this.RULE('projectionOnClause', () => {
     this.CONSUME(Projection);
     this.CONSUME(On);
     this.SUBRULE(this.dataSource);
   });
 
-  private dataSource = this.RULE('dataSource', () => {
+  private readonly dataSource = this.RULE('dataSource', () => {
     this.SUBRULE(this.qualifiedName);
     this.OPTION(() => {
       this.OPTION2(() => this.CONSUME(As));
@@ -232,7 +238,7 @@ export class CdsParser extends CstParser {
   // Element list: `{ [key] [virtual] <expr> [as <alias>] ; ... }`
   // ============================================================
 
-  private elementList = this.RULE('elementList', () => {
+  private readonly elementList = this.RULE('elementList', () => {
     this.CONSUME(LBrace);
     this.MANY(() => {
       this.SUBRULE(this.elementMember);
@@ -240,7 +246,7 @@ export class CdsParser extends CstParser {
     this.CONSUME(RBrace);
   });
 
-  private elementMember = this.RULE('elementMember', () => {
+  private readonly elementMember = this.RULE('elementMember', () => {
     // Annotations are shared between projection elements and associations to
     // keep the LL(k) grammar unambiguous. The branch decision is made on the
     // `association` / `composition` keyword (or the absence thereof).
@@ -251,7 +257,7 @@ export class CdsParser extends CstParser {
     ]);
   });
 
-  private viewElementTail = this.RULE('viewElementTail', () => {
+  private readonly viewElementTail = this.RULE('viewElementTail', () => {
     this.OPTION(() => this.CONSUME(Key));
     this.OPTION2(() => this.CONSUME(Virtual));
     this.OPTION3(() => this.CONSUME(Redirected));
@@ -273,7 +279,7 @@ export class CdsParser extends CstParser {
     });
   });
 
-  private typedFieldTail = this.RULE('typedFieldTail', () => {
+  private readonly typedFieldTail = this.RULE('typedFieldTail', () => {
     this.SUBRULE(this.cdsName);
     this.CONSUME(Colon);
     this.SUBRULE(this.typeReference);
@@ -288,13 +294,16 @@ export class CdsParser extends CstParser {
    *    <qualified-name> [as <alias>]
    * Kept intentionally narrow — full SQL expression support is out of scope.
    */
-  private projectionExpression = this.RULE('projectionExpression', () => {
-    this.SUBRULE(this.qualifiedName);
-    this.OPTION(() => {
-      this.CONSUME(As);
-      this.SUBRULE(this.cdsName);
-    });
-  });
+  private readonly projectionExpression = this.RULE(
+    'projectionExpression',
+    () => {
+      this.SUBRULE(this.qualifiedName);
+      this.OPTION(() => {
+        this.CONSUME(As);
+        this.SUBRULE(this.cdsName);
+      });
+    },
+  );
 
   /** Cheap lookahead: `ident :` (optionally following `key`/`virtual`) → typed field. */
   private isTypedField(): boolean {
@@ -313,7 +322,7 @@ export class CdsParser extends CstParser {
   //     [on <expr>]
   // ============================================================
 
-  private associationTail = this.RULE('associationTail', () => {
+  private readonly associationTail = this.RULE('associationTail', () => {
     this.OR([
       { ALT: () => this.CONSUME(Association) },
       { ALT: () => this.CONSUME(Composition) },
@@ -362,7 +371,7 @@ export class CdsParser extends CstParser {
   });
 
   /** `[<lower>..<upper>]`, `[<n>]`, `[*]`, `[<lower>..*]` */
-  private cardinality = this.RULE('cardinality', () => {
+  private readonly cardinality = this.RULE('cardinality', () => {
     this.CONSUME(LBracket);
     this.OR([
       { ALT: () => this.CONSUME(Star) },
@@ -387,7 +396,7 @@ export class CdsParser extends CstParser {
   // Parameters clause: `with parameters p1 : type, p2 : type`
   // ============================================================
 
-  private parametersClause = this.RULE('parametersClause', () => {
+  private readonly parametersClause = this.RULE('parametersClause', () => {
     this.CONSUME(With);
     this.CONSUME(Parameters);
     this.SUBRULE(this.parameterDefinition);
@@ -397,16 +406,19 @@ export class CdsParser extends CstParser {
     });
   });
 
-  private parameterDefinition = this.RULE('parameterDefinition', () => {
-    this.MANY(() => this.SUBRULE(this.annotation));
-    this.SUBRULE(this.cdsName);
-    this.CONSUME(Colon);
-    this.SUBRULE(this.typeReference);
-    this.OPTION(() => {
-      this.CONSUME(Default);
-      this.SUBRULE(this.literal);
-    });
-  });
+  private readonly parameterDefinition = this.RULE(
+    'parameterDefinition',
+    () => {
+      this.MANY(() => this.SUBRULE(this.annotation));
+      this.SUBRULE(this.cdsName);
+      this.CONSUME(Colon);
+      this.SUBRULE(this.typeReference);
+      this.OPTION(() => {
+        this.CONSUME(Default);
+        this.SUBRULE(this.literal);
+      });
+    },
+  );
 
   // ============================================================
   // Simple type definition
@@ -448,7 +460,7 @@ export class CdsParser extends CstParser {
   // DCL — `define role X { grant select on Y where cond; }`
   // ============================================================
 
-  private roleDefinition = this.RULE('roleDefinition', () => {
+  private readonly roleDefinition = this.RULE('roleDefinition', () => {
     this.CONSUME(Role);
     this.SUBRULE(this.cdsName);
     this.CONSUME(LBrace);
@@ -458,7 +470,7 @@ export class CdsParser extends CstParser {
     this.CONSUME(RBrace);
   });
 
-  private grantStatement = this.RULE('grantStatement', () => {
+  private readonly grantStatement = this.RULE('grantStatement', () => {
     this.CONSUME(Grant);
     this.CONSUME(Select);
     this.CONSUME(On);
@@ -602,7 +614,7 @@ export class CdsParser extends CstParser {
   // Literals
   // ============================================================
 
-  private literal = this.RULE('literal', () => {
+  private readonly literal = this.RULE('literal', () => {
     this.OR([
       { ALT: () => this.CONSUME(StringLiteral) },
       { ALT: () => this.CONSUME(NumberLiteral) },
@@ -618,7 +630,7 @@ export class CdsParser extends CstParser {
   // kept opaque — consumers see a flat token list through the visitor.
   // ============================================================
 
-  private expression = this.RULE('expression', () => {
+  private readonly expression = this.RULE('expression', () => {
     this.SUBRULE(this.comparison);
     this.MANY(() => {
       this.OR([
@@ -629,7 +641,7 @@ export class CdsParser extends CstParser {
     });
   });
 
-  private comparison = this.RULE('comparison', () => {
+  private readonly comparison = this.RULE('comparison', () => {
     this.SUBRULE(this.operand);
     this.OPTION(() => {
       this.OR([
@@ -645,7 +657,7 @@ export class CdsParser extends CstParser {
     });
   });
 
-  private operand = this.RULE('operand', () => {
+  private readonly operand = this.RULE('operand', () => {
     this.OR([
       { ALT: () => this.SUBRULE(this.literal) },
       { ALT: () => this.SUBRULE(this.qualifiedName) },

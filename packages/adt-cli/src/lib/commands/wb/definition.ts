@@ -66,9 +66,8 @@ export const definitionCommand = new Command('definition')
       );
 
       if (!hit?.uri) {
-        console.error(
-          `❌ No definition found for '${reference}'${options.type ? ` (type: ${options.type})` : ''}`,
-        );
+        const typeSuffix = options.type ? ` (type: ${options.type})` : '';
+        console.error(`❌ No definition found for '${reference}'${typeSuffix}`);
         process.exit(1);
       }
 

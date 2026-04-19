@@ -26,8 +26,7 @@ const ansi = {
   cyan: (s: string) => `\x1b[36m${s}\x1b[0m`,
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
 };
-import { outputJunitReport } from '../formatters';
-import { outputSonarReport } from '../formatters';
+import { outputJunitReport, outputSonarReport } from '../formatters';
 import { toJacocoXml, toSonarGenericCoverageXml } from '../formatters/jacoco';
 import type {
   AunitResult,

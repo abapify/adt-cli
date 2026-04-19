@@ -17,14 +17,13 @@
  * instead of the default `.abap`.
  */
 
-import type { AdkServiceDefinition } from '@abapify/adk';
 import { srvd } from '../../../schemas/generated';
 import { createHandler, type SerializedFile } from '../base';
 
 // SRVD is not derived from AdkObject — we cast to the minimal handler shape
 // via the string form of createHandler.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SrvdLike = AdkServiceDefinition | any;
+type SrvdLike = any;
 
 export const serviceDefinitionHandler = createHandler<SrvdLike, typeof srvd>(
   'SRVD',

@@ -24,11 +24,14 @@ export function extractAtomEntries(data: unknown): PseEntry[] {
       title?: string;
       link?: Array<{ href?: string }> | { href?: string };
     };
-    const links = Array.isArray(entry.link)
-      ? entry.link
-      : entry.link
-        ? [entry.link]
-        : [];
+    let links: Array<{ href?: string }>;
+    if (Array.isArray(entry.link)) {
+      links = entry.link;
+    } else if (entry.link) {
+      links = [entry.link];
+    } else {
+      links = [];
+    }
     return {
       id: entry.id ?? '',
       title: entry.title ?? '',

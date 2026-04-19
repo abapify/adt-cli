@@ -36,8 +36,8 @@ function createMockFileTree(fixturesDir: string): FileTree {
     // incomplete-sanitization pitfall of only escaping '.'.
     const toRegex = (glob: string): string =>
       glob
-        .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // note: '*' intentionally excluded
-        .replace(/\*/g, '[^/]*');
+        .replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&') // note: '*' intentionally excluded
+        .replaceAll(/\*/g, '[^/]*');
     // Handle **/*.xml pattern - should match both dir/file.xml and file.xml
     if (pattern.startsWith('**/')) {
       const suffix = pattern.slice(3); // Remove **/
