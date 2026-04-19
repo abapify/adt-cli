@@ -34,5 +34,8 @@
     "steampunk"
   ],
   "author": "abapify",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@abaplint/core": "^2.118.12"
+  }
 }
