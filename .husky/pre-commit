@@ -1,3 +1,13 @@
+# Guard: block committing bun.lock entries that contain the corporate JFrog URL.
+# This protects the public repo from accidental leakage of internal mirror URLs.
+if git diff --cached --name-only | grep -qx "bun.lock"; then
+  if git diff --cached bun.lock | grep -qE "jfrog|booking\.com"; then
+    echo "refusing to commit: bun.lock contains corporate mirror URLs (jfrog/booking.com)." >&2
+    echo "unstage with: git restore --staged bun.lock" >&2
+    exit 1
+  fi
+fi
+
 if command -v bunx >/dev/null 2>&1; then
   bunx lint-staged
 else
