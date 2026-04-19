@@ -10,6 +10,7 @@
  */
 
 import { http, contract } from '../../base';
+import { textPlain } from '../../helpers/text-schema';
 import {
   fmodules as fmodulesSchema,
   type InferTypedSchema,
@@ -35,7 +36,7 @@ const basePath = '/sap/bc/adt/functions/groups/${groupName}/fmodules';
 export const functionModulesContract = contract({
   /** GET .../fmodules/{fmName} - Get function module metadata */
   // eslint-disable-next-line no-template-curly-in-string
-  get: (groupName: string, fmName: string) =>
+  get: (_groupName: string, _fmName: string) =>
     http.get(basePath + '/${fmName}', {
       responses: { 200: fmodulesSchema },
       headers: { Accept: accept },
@@ -129,7 +130,7 @@ export const functionModulesContract = contract({
     main: {
       /** GET .../fmodules/{fmName}/source/main - Get source code */
       // eslint-disable-next-line no-template-curly-in-string
-      get: (groupName: string, fmName: string) =>
+      get: (_groupName: string, _fmName: string) =>
         http.get(basePath + '/${fmName}/source/main', {
           responses: { 200: undefined as unknown as string },
           headers: { Accept: 'text/plain' },
@@ -143,7 +144,7 @@ export const functionModulesContract = contract({
         options?: { lockHandle?: string; corrNr?: string },
       ) =>
         http.put(basePath + '/${fmName}/source/main', {
-          body: undefined as unknown as string,
+          body: textPlain,
           responses: { 200: undefined as unknown as string },
           headers: { Accept: 'text/plain', 'Content-Type': 'text/plain' },
           query: {

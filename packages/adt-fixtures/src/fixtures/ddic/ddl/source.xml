@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Source: GET /sap/bc/adt/ddic/ddl/sources/{name} -->
+<ddl:source
+    xmlns:ddl="http://www.sap.com/adt/ddl"
+    xmlns:abapsource="http://www.sap.com/adt/abapsource"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    abapsource:fixPointArithmetic="true"
+    abapsource:activeUnicodeCheck="true"
+    adtcore:responsible="DEVELOPER"
+    adtcore:masterLanguage="EN"
+    adtcore:masterSystem="DEV"
+    adtcore:name="ZDDL_SAMPLE"
+    adtcore:type="DDLS/DF"
+    adtcore:changedAt="2025-01-01T12:00:00Z"
+    adtcore:version="active"
+    adtcore:createdAt="2025-01-01T12:00:00Z"
+    adtcore:changedBy="DEVELOPER"
+    adtcore:createdBy="DEVELOPER"
+    adtcore:description="Sample CDS view"
+    adtcore:language="EN">
+  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
+</ddl:source>

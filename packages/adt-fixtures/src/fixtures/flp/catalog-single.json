@@ -1,0 +1,22 @@
+{
+  "d": {
+    "__metadata": {
+      "id": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_MOCK_DEV_CAT')",
+      "uri": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_MOCK_DEV_CAT')",
+      "type": "PAGE_BUILDER_PERS.Catalog"
+    },
+    "id": "X-SAP-UI2-CATALOGPAGE:SAP_MOCK_DEV_CAT",
+    "type": "CATALOG_PAGE",
+    "domainId": "SAP_MOCK_DEV_CAT",
+    "remoteType": "",
+    "title": "Mock Development Catalog",
+    "systemAlias": "",
+    "remoteId": "",
+    "isReadOnly": "",
+    "originalLanguage": "en",
+    "scope": "CUSTOMIZING",
+    "baseUrl": "",
+    "chipCount": "0002",
+    "outdated": ""
+  }
+}

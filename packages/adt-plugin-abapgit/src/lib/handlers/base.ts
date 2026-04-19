@@ -275,7 +275,7 @@ export interface HandlerDefinition<
 /**
  * Context passed to serialize function with helper utilities
  */
-export interface HandlerContext<T extends AdkObject, TData = unknown> {
+export interface HandlerContext<T extends AdkObject, _TData = unknown> {
   /** ABAP object type */
   readonly type: AbapObjectType;
   /** File extension (lowercase type) */

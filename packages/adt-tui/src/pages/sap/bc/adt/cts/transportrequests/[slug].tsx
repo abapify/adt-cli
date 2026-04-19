@@ -32,12 +32,15 @@ function getStatusColor(status: string): string {
 /**
  * Transport Page - returns PageResult for framework rendering
  */
-export function transportPage({ url, response }: PageProps): PageResult | null {
+export function transportPage({
+  url: _url,
+  response,
+}: PageProps): PageResult | null {
   // Parse transport data
   let transport;
   try {
     transport = load(response.raw);
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 

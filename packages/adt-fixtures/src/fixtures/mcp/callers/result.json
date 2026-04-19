@@ -1,0 +1,11 @@
+{
+  "callers": {
+    "caller": [
+      {
+        "uri": "/sap/bc/adt/programs/programs/zprog_main",
+        "name": "ZPROG_MAIN",
+        "type": "PROG"
+      }
+    ]
+  }
+}

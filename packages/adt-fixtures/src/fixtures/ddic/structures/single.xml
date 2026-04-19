@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Source: GET /sap/bc/adt/ddic/structures/{name} -->
+<blue:blueSource
+    xmlns:blue="http://www.sap.com/wbobj/blue"
+    xmlns:abapsource="http://www.sap.com/adt/abapsource"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    abapsource:fixPointArithmetic="true"
+    abapsource:activeUnicodeCheck="true"
+    adtcore:responsible="DEVELOPER"
+    adtcore:masterLanguage="EN"
+    adtcore:masterSystem="DEV"
+    adtcore:name="ZSTRUCT_SAMPLE"
+    adtcore:type="TABL/DS"
+    adtcore:changedAt="2025-01-01T12:00:00Z"
+    adtcore:version="active"
+    adtcore:createdAt="2025-01-01T12:00:00Z"
+    adtcore:changedBy="DEVELOPER"
+    adtcore:createdBy="DEVELOPER"
+    adtcore:description="Sample structure"
+    adtcore:language="EN">
+  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
+</blue:blueSource>

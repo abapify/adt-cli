@@ -1,0 +1,9 @@
+{
+  "branch": {
+    "name": "feature/new",
+    "type": "local",
+    "isSymbolic": false,
+    "isPeeled": false,
+    "ref": "refs/heads/feature/new"
+  }
+}

@@ -1,0 +1,790 @@
+{
+  "d": {
+    "results": [
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIA_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIA_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_AIA_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_AIA_PC",
+        "remoteType": "",
+        "title": "Development - IDE Action Implementation",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIA_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIA_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIQ_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIQ_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_AIQ_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_AIQ_PC",
+        "remoteType": "",
+        "title": "Development - Joule with ABAP Developer Capabilities",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIQ_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_AIQ_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_ATC_RUN_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_ATC_RUN_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_ATC_RUN_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_ATC_RUN_PC",
+        "remoteType": "",
+        "title": "Development - ABAP Test Cockpit Check Run",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_ATC_RUN_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_ATC_RUN_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_DIS_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_DIS_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_BCT_BCS_DIS_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_BCT_BCS_DIS_PC",
+        "remoteType": "",
+        "title": "Development - Business Configuration Sets Display",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_DIS_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_DIS_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_BCT_BCS_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_BCT_BCS_PC",
+        "remoteType": "",
+        "title": "Development - Business Configuration Sets",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_BCT_BCS_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_CLA_RUN_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_CLA_RUN_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_CLA_RUN_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_CLA_RUN_PC",
+        "remoteType": "",
+        "title": "Development - Class Runner Execution",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_CLA_RUN_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_CLA_RUN_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_DAT_PRV_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_DAT_PRV_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_DAT_PRV_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_DAT_PRV_PC",
+        "remoteType": "",
+        "title": "Development - Data Preview - Released Objects",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0002",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_DAT_PRV_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_DAT_PRV_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_OBJ_DIS_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_OBJ_DIS_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_OBJ_DIS_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_OBJ_DIS_PC",
+        "remoteType": "",
+        "title": "Development - Development Objects Display",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_OBJ_DIS_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_OBJ_DIS_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_PC",
+        "remoteType": "",
+        "title": "Development - ABAP Development Tools",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_DSP_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_DSP_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_RVB_DSP_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_RVB_DSP_PC",
+        "remoteType": "",
+        "title": "Development - Review Booklet App Generation Display",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0002",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_DSP_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_DSP_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_RVB_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_RVB_PC",
+        "remoteType": "",
+        "title": "Development - Review Booklet App Generation",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0003",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_RVB_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_SUP_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_SUP_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_SUP_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_SUP_PC",
+        "remoteType": "",
+        "title": "Development - Analysis and Support",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0013",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_SUP_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_SUP_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_TRA_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_TRA_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_TRA_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_TRA_PC",
+        "remoteType": "",
+        "title": "Translation - Developer Extensibility",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0002",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_TRA_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_TRA_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_UID_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_UID_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_DEV_UID_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_DEV_UID_PC",
+        "remoteType": "",
+        "title": "Development - UI Deployment",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_UID_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_DEV_UID_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_MNG_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_MNG_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_TRN_MNG_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_TRN_MNG_PC",
+        "remoteType": "",
+        "title": "Development - Transport Management",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_MNG_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_MNG_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_REL_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_REL_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_A4C_BC_TRN_REL_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_A4C_BC_TRN_REL_PC",
+        "remoteType": "",
+        "title": "Development - Transport Release Management",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0001",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_REL_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_A4C_BC_TRN_REL_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_BCT_MBC_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_BCT_MBC_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_BCT_MBC_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_BCT_MBC_PC",
+        "remoteType": "",
+        "title": "Business Configuration - Configuration",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0002",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_BCT_MBC_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_BCT_MBC_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_CCM')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_CCM')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_CCM",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_CCM",
+        "remoteType": "",
+        "title": "Custom Code Migration",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0007",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_CCM')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_CCM')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_COMMON')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_COMMON')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_COMMON",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_COMMON",
+        "remoteType": "",
+        "title": "Common - Common Core Authorizations for all Business Users",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CONFIGURATION",
+        "baseUrl": "",
+        "chipCount": "0002",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_COMMON')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_COMMON')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_FLX_CUS_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_FLX_CUS_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_EXT_FLX_CUS_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_EXT_FLX_CUS_PC",
+        "remoteType": "",
+        "title": "Extensibility - Key User Adaptation Customizing",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0005",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_FLX_CUS_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_FLX_CUS_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_TST')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_TST')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_EXT_TST",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_EXT_TST",
+        "remoteType": "",
+        "title": "Extensibility - Custom Apps and Services",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CONFIGURATION",
+        "baseUrl": "",
+        "chipCount": "0000",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_TST')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_EXT_TST')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_IAS')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_IAS')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_IAS",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_IAS",
+        "remoteType": "",
+        "title": "Additional Software",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0002",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_IAS')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_IAS')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_RAP_DRAFT_PC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_RAP_DRAFT_PC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_RAP_DRAFT_PC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_RAP_DRAFT_PC",
+        "remoteType": "",
+        "title": "Self-Services - Draft Forwarding",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0002",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_RAP_DRAFT_PC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_RAP_DRAFT_PC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_TMC')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_TMC')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:SAP_CORE_BC_TMC",
+        "type": "CATALOG_PAGE",
+        "domainId": "SAP_CORE_BC_TMC",
+        "remoteType": "",
+        "title": "Technical Monitoring",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0023",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_TMC')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3ASAP_CORE_BC_TMC')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_DISP')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_DISP')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:ZPRA_MF_BC_DISP",
+        "type": "CATALOG_PAGE",
+        "domainId": "ZPRA_MF_BC_DISP",
+        "remoteType": "",
+        "title": "Business Catalog for Display",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0004",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_DISP')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_DISP')/Chips"
+          }
+        }
+      },
+      {
+        "__metadata": {
+          "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_UPD')",
+          "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_UPD')",
+          "type": "PAGE_BUILDER_PERS.Catalog"
+        },
+        "id": "X-SAP-UI2-CATALOGPAGE:ZPRA_MF_BC_UPD",
+        "type": "CATALOG_PAGE",
+        "domainId": "ZPRA_MF_BC_UPD",
+        "remoteType": "",
+        "title": "Business Catalog for Change",
+        "systemAlias": "",
+        "remoteId": "",
+        "isReadOnly": "",
+        "originalLanguage": "en",
+        "scope": "CUSTOMIZING",
+        "baseUrl": "",
+        "chipCount": "0004",
+        "outdated": "",
+        "CatalogPage": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_UPD')/CatalogPage"
+          }
+        },
+        "Chips": {
+          "__deferred": {
+            "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Catalogs('X-SAP-UI2-CATALOGPAGE%3AZPRA_MF_BC_UPD')/Chips"
+          }
+        }
+      }
+    ]
+  },
+  "_captured": {
+    "sid": "TRL",
+    "date": "2026-04-18"
+  }
+}

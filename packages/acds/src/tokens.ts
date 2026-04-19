@@ -169,6 +169,149 @@ export const Abap = createToken({
   longer_alt: Identifier,
 });
 
+// ---- Phase 2/3 additions ----
+
+export const View = createToken({
+  name: 'View',
+  pattern: /view/,
+  longer_alt: Identifier,
+});
+
+export const Projection = createToken({
+  name: 'Projection',
+  pattern: /projection/,
+  longer_alt: Identifier,
+});
+
+export const Select = createToken({
+  name: 'Select',
+  pattern: /select/,
+  longer_alt: Identifier,
+});
+
+export const From = createToken({
+  name: 'From',
+  pattern: /from/,
+  longer_alt: Identifier,
+});
+
+export const On = createToken({
+  name: 'On',
+  pattern: /on/,
+  longer_alt: Identifier,
+});
+
+export const Association = createToken({
+  name: 'Association',
+  pattern: /association/,
+  longer_alt: Identifier,
+});
+
+export const Composition = createToken({
+  name: 'Composition',
+  pattern: /composition/,
+  longer_alt: Identifier,
+});
+
+export const To = createToken({
+  name: 'To',
+  pattern: /to/,
+  longer_alt: Identifier,
+});
+
+export const Many = createToken({
+  name: 'Many',
+  pattern: /many/,
+  longer_alt: Identifier,
+});
+
+export const One = createToken({
+  name: 'One',
+  pattern: /one/,
+  longer_alt: Identifier,
+});
+
+export const Of = createToken({
+  name: 'Of',
+  pattern: /of/,
+  longer_alt: Identifier,
+});
+
+export const Parameters = createToken({
+  name: 'Parameters',
+  pattern: /parameters/,
+  longer_alt: Identifier,
+});
+
+export const Role = createToken({
+  name: 'Role',
+  pattern: /role/,
+  longer_alt: Identifier,
+});
+
+export const Grant = createToken({
+  name: 'Grant',
+  pattern: /grant/,
+  longer_alt: Identifier,
+});
+
+export const Where = createToken({
+  name: 'Where',
+  pattern: /where/,
+  longer_alt: Identifier,
+});
+
+export const Abstract = createToken({
+  name: 'Abstract',
+  pattern: /abstract/,
+  longer_alt: Identifier,
+});
+
+export const Custom = createToken({
+  name: 'Custom',
+  pattern: /custom/,
+  longer_alt: Identifier,
+});
+
+export const Virtual = createToken({
+  name: 'Virtual',
+  pattern: /virtual/,
+  longer_alt: Identifier,
+});
+
+export const Redirected = createToken({
+  name: 'Redirected',
+  pattern: /redirected/,
+  longer_alt: Identifier,
+});
+
+export const Default = createToken({
+  name: 'Default',
+  pattern: /default/,
+  longer_alt: Identifier,
+});
+
+// Operators for simple expressions inside where-clauses / associations
+export const EqEq = createToken({ name: 'EqEq', pattern: /==/ });
+export const Eq = createToken({ name: 'Eq', pattern: /=/ });
+export const NotEq = createToken({ name: 'NotEq', pattern: /!=|<>/ });
+export const LtEq = createToken({ name: 'LtEq', pattern: /<=/ });
+export const GtEq = createToken({ name: 'GtEq', pattern: />=/ });
+export const Lt = createToken({ name: 'Lt', pattern: /</ });
+export const Gt = createToken({ name: 'Gt', pattern: />/ });
+
+export const And = createToken({
+  name: 'And',
+  pattern: /and/,
+  longer_alt: Identifier,
+});
+
+export const Or = createToken({
+  name: 'Or',
+  pattern: /or/,
+  longer_alt: Identifier,
+});
+
 // ============================================
 // Symbols
 // ============================================
@@ -184,6 +327,10 @@ export const LParen = createToken({ name: 'LParen', pattern: /\(/ });
 export const RParen = createToken({ name: 'RParen', pattern: /\)/ });
 export const LBracket = createToken({ name: 'LBracket', pattern: /\[/ });
 export const RBracket = createToken({ name: 'RBracket', pattern: /\]/ });
+export const Star = createToken({ name: 'Star', pattern: /\*/ });
+export const Plus = createToken({ name: 'Plus', pattern: /\+/ });
+export const Minus = createToken({ name: 'Minus', pattern: /-/ });
+export const Slash = createToken({ name: 'Slash', pattern: /\// });
 
 // ============================================
 // Token list (ORDER MATTERS)
@@ -202,13 +349,20 @@ export const allTokens = [
   EnumLiteral,
 
   // Keywords (before Identifier!)
+  // NOTE: longer keywords that share a prefix with shorter ones (e.g.
+  // `association` starts with `as`, `one` starts with `on`) MUST be listed
+  // before the shorter keyword otherwise Chevrotain's lexer will complain
+  // that they are unreachable.
+  Association,
+  Composition,
+  Abstract,
+  Annotate,
   Define,
   Table,
   Structure,
   Type,
   Service,
   Expose,
-  Annotate,
   Entity,
   With,
   Key,
@@ -220,9 +374,34 @@ export const allTokens = [
   True,
   False,
   Abap,
+  One,
+  View,
+  Projection,
+  Select,
+  From,
+  On,
+  To,
+  Many,
+  Of,
+  Parameters,
+  Role,
+  Grant,
+  Where,
+  Custom,
+  Virtual,
+  Redirected,
+  Default,
+  And,
+  Or,
 
   // Identifier (catch-all for names)
   Identifier,
+
+  // Multi-char symbols (before single-char equivalents)
+  EqEq,
+  NotEq,
+  LtEq,
+  GtEq,
 
   // Symbols
   At,
@@ -236,6 +415,13 @@ export const allTokens = [
   RParen,
   LBracket,
   RBracket,
+  Eq,
+  Lt,
+  Gt,
+  Star,
+  Plus,
+  Minus,
+  Slash,
 ];
 
 export const CdsLexer = new Lexer(allTokens);

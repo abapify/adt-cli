@@ -20,3 +20,18 @@
 export { load, getPath, getFixturesRoot } from './loader';
 export { fixtures } from './fixtures';
 export type { FixtureHandle, Fixtures } from './fixtures';
+
+// Mock ADT HTTP server — shared by MCP and CLI e2e tests
+export {
+  createMockAdtServer,
+  LockRegistry,
+  matchRoute,
+  loadRouteFixtures,
+} from './mock-server/server';
+export type {
+  MockAdtServer,
+  MockAdtServerOptions,
+  LockEntry,
+  RouteResult,
+  LoadedFixtures,
+} from './mock-server/server';

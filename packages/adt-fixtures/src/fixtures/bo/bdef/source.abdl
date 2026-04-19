@@ -1,0 +1,24 @@
+managed implementation in class zbp_mock_bdef unique;
+strict ( 2 );
+
+define behavior for ZI_MOCK_ROOT alias Root
+persistent table zmock_tab
+lock master
+authorization master ( instance )
+etag master LastChangedAt
+{
+  create;
+  update;
+  delete;
+
+  field ( readonly, numbering : managed ) Uuid;
+  field ( mandatory ) Name;
+
+  mapping for zmock_tab
+  {
+    Uuid = uuid;
+    Name = name;
+    CreatedAt = created_at;
+    LastChangedAt = last_changed_at;
+  }
+}

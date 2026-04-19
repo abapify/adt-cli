@@ -26,8 +26,8 @@ describe('XSD Schema Body Inference', () => {
   // Mock schema that mimics transportmanagmentCreate
   const mockXsdSchema: Serializable<TransportCreate> = {
     _infer: undefined as unknown as TransportCreate,
-    parse: (xml: string) => ({}) as TransportCreate,
-    build: (data: TransportCreate) => '<xml/>',
+    parse: (_xml: string) => ({}) as TransportCreate,
+    build: (_data: TransportCreate) => '<xml/>',
   };
 
   const mockAdapter: HttpAdapter<TransportCreate> = {

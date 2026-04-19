@@ -1,0 +1,9 @@
+@EndUserText.label: 'Product pricing custom entity'
+define custom entity X_PriceLookup
+  with parameters
+    p_currency : abap.cuky default 'USD'
+{
+  key ProductId : abap.char(10);
+      Price     : abap.dec(15, 2);
+      Currency  : abap.cuky;
+}

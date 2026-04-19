@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<app:service xmlns:app="http://www.w3.org/2007/app" xmlns:atom="http://www.w3.org/2005/Atom">
+  <app:workspace>
+    <atom:title>ADT Core Services</atom:title>
+    <app:collection href="/sap/bc/adt/core">
+      <atom:title>Core</atom:title>
+    </app:collection>
+    <app:collection href="/sap/bc/adt/repository">
+      <atom:title>Repository</atom:title>
+    </app:collection>
+  </app:workspace>
+  <app:workspace>
+    <atom:title>CTS Services</atom:title>
+    <app:collection href="/sap/bc/adt/cts/transportrequests">
+      <atom:title>Transport Requests</atom:title>
+    </app:collection>
+  </app:workspace>
+</app:service>

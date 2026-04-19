@@ -9,10 +9,10 @@ import { useState, useMemo } from 'react';
 import { Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
 import TextInput from 'ink-text-input';
-import { writeFileSync } from 'fs';
+import { writeFileSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { NavigationProvider, useNavigation } from './lib/context';
 import { parseResponse } from './lib/parser';
 import { PageRenderer } from './lib/PageRenderer';
@@ -45,16 +45,48 @@ function openXmlInIde(xml: string, url: string): void {
 }
 
 /**
+ * Resolve absolute path to a launcher binary from an allow-list of known
+ * install locations. Prevents PATH-hijack (S4036) by avoiding bare-name
+ * lookups when an absolute path is available. Falls back to the bare name
+ * only if none of the known paths exist, so packaged distributions with
+ * non-standard layouts still function.
+ */
+function resolveLauncher(
+  candidates: readonly string[],
+  fallbackName: string,
+): string {
+  for (const p of candidates) {
+    if (existsSync(p)) return p;
+  }
+  return fallbackName;
+}
+
+const XDG_OPEN = resolveLauncher(
+  ['/usr/bin/xdg-open', '/usr/local/bin/xdg-open'],
+  'xdg-open',
+);
+const OPEN_MAC = resolveLauncher(
+  ['/usr/bin/open', '/usr/local/bin/open'],
+  'open',
+);
+
+/**
  * Open in Eclipse ADT
  * Format: adt://[system]/[path]
  * @see https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide/opening-adt-links
  */
 function openInAdt(systemName: string, url: string): void {
   const adtUrl = `adt://${systemName}${url}`;
-  // Use xdg-open on Linux, open on macOS
-  exec(`xdg-open "${adtUrl}" 2>/dev/null || open "${adtUrl}"`, (error) => {
+  // Use execFile (arg array, no shell) to avoid shell-command injection
+  // via systemName/url. Try xdg-open (Linux), fall back to open (macOS).
+  // Paths resolved above via allow-list to prevent PATH-hijack (S4036).
+  execFile(XDG_OPEN, [adtUrl], (error) => {
     if (error) {
-      console.error('Failed to open ADT link:', error.message);
+      execFile(OPEN_MAC, [adtUrl], (err2) => {
+        if (err2) {
+          console.error('Failed to open ADT link:', err2.message);
+        }
+      });
     }
   });
 }

@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "path": "src/zcl_example.clas.abap",
+      "content": "CLASS zcl_example DEFINITION PUBLIC FINAL CREATE PUBLIC.\nENDCLASS."
+    },
+    {
+      "path": "src/zcl_example.clas.xml",
+      "content": "<?xml version=\"1.0\" ?><abapGit version=\"v1.0.0\"><asx:abap></asx:abap></abapGit>"
+    }
+  ]
+}

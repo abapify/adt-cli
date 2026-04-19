@@ -192,7 +192,7 @@ describe('URL Path Parameters', () => {
           }),
       };
 
-      const client = createClient(contract, {
+      const _client = createClient(contract, {
         baseUrl: 'http://test.com',
         adapter: {
           request: async <T>() =>

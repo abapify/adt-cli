@@ -1,0 +1,26 @@
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order composite root'
+@Metadata.allowExtensions: true
+define view entity I_SalesOrderRoot
+  with parameters
+    p_fromDate : abap.dats,
+    p_toDate   : abap.dats default '99991231'
+  as select from zsales_order as so
+{
+      @ObjectModel.text.element: ['CustomerName']
+  key so.order_id                      as OrderId,
+      so.customer_id                   as CustomerId,
+      so.customer_name                 as CustomerName,
+      so.total_amount                  as TotalAmount,
+      @Semantics.amount.currencyCode: 'CurrencyCode'
+      so.currency                      as CurrencyCode,
+
+      /* outgoing associations */
+      association[0..*] to I_SalesOrderItem as _Items
+         on so.order_id = _Items.order_id,
+      composition[0..*] of I_SalesOrderText as _Texts
+         on so.order_id = _Texts.order_id,
+      association[0..1] to I_Customer       as _Customer
+         on so.customer_id = _Customer.customer_id
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Source: GET /sap/bc/adt/programs/includes/{name}
+  Accept: application/vnd.sap.adt.programs.includes.v2+xml
+  Sanitized from a real SAP response (BTP sandbox) — names anonymized.
+-->
+<include:abapInclude
+        xmlns:include="http://www.sap.com/adt/programs/includes"
+        abapsource:sourceUri="source/main"
+        abapsource:fixPointArithmetic="true"
+        abapsource:activeUnicodeCheck="true"
+        adtcore:responsible="DEVELOPER"
+        adtcore:masterLanguage="EN"
+        adtcore:masterSystem="DEV"
+        adtcore:abapLanguageVersion="standard"
+        adtcore:name="ZTEST_INCLUDE"
+        adtcore:type="PROG/I"
+        adtcore:changedAt="2025-01-01T12:00:00Z"
+        adtcore:version="active"
+        adtcore:createdAt="2025-01-01T00:00:00Z"
+        adtcore:changedBy="DEVELOPER"
+        adtcore:createdBy="DEVELOPER"
+        adtcore:description="Test Include"
+        adtcore:descriptionTextLimit="60"
+        adtcore:language="EN"
+        xmlns:abapsource="http://www.sap.com/adt/abapsource"
+        xmlns:adtcore="http://www.sap.com/adt/core">
+    <atom:link
+            xmlns:atom="http://www.w3.org/2005/Atom"
+            href="source/main"
+            rel="http://www.sap.com/adt/relations/source"
+            type="text/plain"
+            etag="202501011200000001" />
+    <atom:link
+            xmlns:atom="http://www.w3.org/2005/Atom"
+            href="objectstructure"
+            rel="http://www.sap.com/adt/relations/objectstructure"
+            type="application/vnd.sap.adt.objectstructure.v2+xml" />
+    <adtcore:packageRef
+            xmlns:adtcore="http://www.sap.com/adt/core"
+            adtcore:uri="/sap/bc/adt/packages/%24tmp"
+            adtcore:type="DEVC/K"
+            adtcore:name="$TMP" />
+    <include:contextRef
+            adtcore:uri="/sap/bc/adt/programs/programs/ztest_program"
+            adtcore:type="PROG/P"
+            adtcore:name="ZTEST_PROGRAM" />
+</include:abapInclude>

@@ -16,6 +16,13 @@ export * from './ddic';
 export * from './system';
 export * from './checkruns';
 export * from './activation';
+export * from './datapreview';
+export * from './runtime';
+export * from './gcts';
+export * from './bo';
+export * from './businessservices';
+export * from './enhancements';
+export * from './uifsa';
 
 /**
  * Complete ADT Contract
@@ -37,6 +44,19 @@ import { ddicContract, type DdicContract } from './ddic';
 import { systemContract, type SystemContract } from './system';
 import { checkrunsContract, type CheckrunsContract } from './checkruns';
 import { activationContract, type ActivationContract } from './activation';
+import { datapreviewContract, type DatapreviewContract } from './datapreview';
+import { runtimeContract, type RuntimeContract } from './runtime';
+import { gctsContract, type GctsContract } from './gcts';
+import { boContract, type BoContract } from './bo';
+import {
+  businessservicesContract,
+  type BusinessservicesContract,
+} from './businessservices';
+import {
+  enhancementsContract,
+  type EnhancementsContract,
+} from './enhancements';
+import { flpContract, type FlpContract } from './uifsa';
 
 /**
  * Explicit type to avoid TS7056 "inferred type exceeds maximum length"
@@ -56,6 +76,13 @@ export interface AdtContract {
   system: SystemContract;
   checkruns: CheckrunsContract;
   activation: ActivationContract;
+  datapreview: DatapreviewContract;
+  runtime: RuntimeContract;
+  gcts: GctsContract;
+  bo: BoContract;
+  businessservices: BusinessservicesContract;
+  enhancements: EnhancementsContract;
+  flp: FlpContract;
 }
 
 export const adtContract: AdtContract = {
@@ -73,6 +100,13 @@ export const adtContract: AdtContract = {
   system: systemContract,
   checkruns: checkrunsContract,
   activation: activationContract,
+  datapreview: datapreviewContract,
+  runtime: runtimeContract,
+  gcts: gctsContract,
+  bo: boContract,
+  businessservices: businessservicesContract,
+  enhancements: enhancementsContract,
+  flp: flpContract,
 };
 
 // Import RestClient from base for client type definition

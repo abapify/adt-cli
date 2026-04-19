@@ -1,0 +1,24 @@
+{
+  "objectStructure": {
+    "objectReference": {
+      "uri": "/sap/bc/adt/oo/classes/zcl_example",
+      "type": "CLAS/OC",
+      "name": "ZCL_EXAMPLE",
+      "description": "Example class"
+    },
+    "includes": {
+      "include": [
+        {
+          "uri": "/sap/bc/adt/oo/classes/zcl_example/includes/definitions",
+          "type": "CLAS/OC/D",
+          "name": "ZCL_EXAMPLE"
+        },
+        {
+          "uri": "/sap/bc/adt/oo/classes/zcl_example/includes/implementations",
+          "type": "CLAS/OC/M",
+          "name": "ZCL_EXAMPLE"
+        }
+      ]
+    }
+  }
+}

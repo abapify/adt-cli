@@ -420,8 +420,8 @@ describe('SchemaTraverser additional coverage', () => {
     tracker.traverse(mainSchema);
 
     // Should have called onLeaveSchema for both schemas
-    assert.ok(leaveOrder.includes('http://example.com'));
-    assert.ok(leaveOrder.includes('http://example.com/base'));
+    assert.ok(leaveOrder.some((ns) => ns === 'http://example.com'));
+    assert.ok(leaveOrder.some((ns) => ns === 'http://example.com/base'));
   });
 
   it('visits top-level attributes', () => {

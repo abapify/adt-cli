@@ -48,6 +48,60 @@ export class AdkDomain extends AdkMainObject<typeof DomainKind, DomainXml> {
     const context = ctx ?? getGlobalContext();
     return new AdkDomain(context, name).load();
   }
+
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkDomain.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP domain on SAP.
+   *
+   * Note: Domains are metadata-only objects (no source code). After creation,
+   * use the `adt get domain <name>` command or abapGit-based deploy to fill in
+   * the domain properties (data type, field length, etc.).
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkDomain> {
+    const context = ctx ?? getGlobalContext();
+    const domain = new AdkDomain(context, name.toUpperCase());
+    domain.setData({
+      name: name.toUpperCase(),
+      type: 'DOMA',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as DomainXml);
+    await domain.save({ transport: options?.transport, mode: 'create' });
+    return domain;
+  }
+
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const domain = new AdkDomain(context, name.toUpperCase());
+    await domain.crudContract.delete(name.toUpperCase(), {
+      ...(options?.transport && { corrNr: options.transport }),
+      ...(options?.lockHandle && { lockHandle: options.lockHandle }),
+    });
+  }
 }
 
 // Self-register with ADK registry

@@ -13,6 +13,7 @@ import { registerCtsGetTransportTool } from './cts-get-transport';
 import { registerCtsCreateTransportTool } from './cts-create-transport';
 import { registerCtsReleaseTransportTool } from './cts-release-transport';
 import { registerCtsDeleteTransportTool } from './cts-delete-transport';
+import { registerCtsSearchTransportsTool } from './cts-search-transports';
 import { registerAtcRunTool } from './atc-run';
 import { registerGetSourceTool } from './get-source';
 import { registerUpdateSourceTool } from './update-source';
@@ -41,6 +42,9 @@ import {
   registerGetFunctionGroupTool,
   registerGetFunctionTool,
 } from './function-tools';
+import { registerCreateFunctionGroupTool } from './create-function-group';
+import { registerCreateFunctionModuleTool } from './create-function-module';
+import { registerDeleteFunctionModuleTool } from './delete-function-module';
 import { registerLockObjectTool } from './lock-object';
 import { registerUnlockObjectTool } from './unlock-object';
 import { registerGetObjectStructureTool } from './get-object-structure';
@@ -54,6 +58,52 @@ import {
 import { registerCloneObjectTool } from './clone-object';
 import { registerPublishServiceBindingTool } from './publish-service-binding';
 import { registerGetGitTypesTool, registerGitExportTool } from './git-tools';
+import { registerRunAbapTool } from './run-abap';
+import { registerGetDomainTool } from './get-domain';
+import { registerGetIncludeTool } from './get-include';
+import { registerGetDataElementTool } from './get-data-element';
+import { registerGetStructureTool } from './get-structure';
+import { registerGetCdsDdlTool } from './get-cds-ddl';
+import { registerGetCdsDclTool } from './get-cds-dcl';
+import { registerGetBdefTool } from './get-bdef';
+import { registerCreateBdefTool } from './create-bdef';
+import { registerDeleteBdefTool } from './delete-bdef';
+import { registerGetBadiTool } from './get-badi';
+import { registerCreateBadiTool } from './create-badi';
+import { registerDeleteBadiTool } from './delete-badi';
+import { registerGetSrvdTool } from './get-srvd';
+import { registerCreateSrvdTool } from './create-srvd';
+import { registerDeleteSrvdTool } from './delete-srvd';
+import { registerGetSrvbTool } from './get-srvb';
+import { registerCreateSrvbTool } from './create-srvb';
+import { registerDeleteSrvbTool } from './delete-srvb';
+import { registerUnpublishSrvbTool } from './unpublish-srvb';
+// CTS + package parity tools
+import { registerCtsUpdateTransportTool } from './cts-update-transport';
+import { registerCtsReassignTransportTool } from './cts-reassign-transport';
+import { registerStatPackageTool } from './stat-package';
+import { registerGetPackageTool } from './get-package';
+import { registerLookupUserTool } from './lookup-user';
+// Import tools – mirror `adt import object|package|transport`
+import { registerImportObjectTool } from './import-object';
+import { registerImportPackageTool } from './import-package';
+import { registerImportTransportTool } from './import-transport';
+// STRUST — SSL PSE cert management
+import { registerListPsesTool } from './list-pses';
+import { registerListCertsTool } from './list-certs';
+import { registerUploadCertTool } from './upload-cert';
+import { registerDeleteCertTool } from './delete-cert';
+// Checkin (E08) — inverse of import_package; pushes local files → SAP.
+import { registerCheckinTool } from './checkin';
+// gCTS (E07) — /sap/bc/cts_abapvcs/* surface (separate from /sap/bc/adt)
+import { registerGctsTools } from './gcts-tools';
+// RFC (E13) — classic RFC function modules via SOAP-over-HTTP
+import { registerCallRfcTool } from './call-rfc';
+// FLP (E14) — Fiori Launchpad inventory (Page Builder OData)
+import { registerListFlpCatalogsTool } from './list-flp-catalogs';
+import { registerListFlpGroupsTool } from './list-flp-groups';
+import { registerListFlpTilesTool } from './list-flp-tiles';
+import { registerGetFlpTileTool } from './get-flp-tile';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Existing tools
@@ -66,6 +116,7 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerCtsCreateTransportTool(server, ctx);
   registerCtsReleaseTransportTool(server, ctx);
   registerCtsDeleteTransportTool(server, ctx);
+  registerCtsSearchTransportsTool(server, ctx);
   registerAtcRunTool(server, ctx);
   registerGetSourceTool(server, ctx);
   registerUpdateSourceTool(server, ctx);
@@ -90,6 +141,9 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Medium-priority tools (#M1–#M10)
   registerGetFunctionGroupTool(server, ctx);
   registerGetFunctionTool(server, ctx);
+  registerCreateFunctionGroupTool(server, ctx);
+  registerCreateFunctionModuleTool(server, ctx);
+  registerDeleteFunctionModuleTool(server, ctx);
   registerLockObjectTool(server, ctx);
   registerUnlockObjectTool(server, ctx);
   registerGetObjectStructureTool(server, ctx);
@@ -102,4 +156,51 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerPublishServiceBindingTool(server, ctx);
   registerGetGitTypesTool(server, ctx);
   registerGitExportTool(server, ctx);
+  // Import tools
+  registerImportObjectTool(server, ctx);
+  registerImportPackageTool(server, ctx);
+  registerImportTransportTool(server, ctx);
+  // CTS + package parity tools
+  registerCtsUpdateTransportTool(server, ctx);
+  registerCtsReassignTransportTool(server, ctx);
+  registerStatPackageTool(server, ctx);
+  registerGetPackageTool(server, ctx);
+  registerLookupUserTool(server, ctx);
+  // DDIC/CDS read tools + ABAP run
+  registerRunAbapTool(server, ctx);
+  registerGetDomainTool(server, ctx);
+  registerGetIncludeTool(server, ctx);
+  registerGetDataElementTool(server, ctx);
+  registerGetStructureTool(server, ctx);
+  registerGetCdsDdlTool(server, ctx);
+  registerGetCdsDclTool(server, ctx);
+  registerGetBdefTool(server, ctx);
+  registerCreateBdefTool(server, ctx);
+  registerDeleteBdefTool(server, ctx);
+  registerGetBadiTool(server, ctx);
+  registerCreateBadiTool(server, ctx);
+  registerDeleteBadiTool(server, ctx);
+  registerGetSrvdTool(server, ctx);
+  registerCreateSrvdTool(server, ctx);
+  registerDeleteSrvdTool(server, ctx);
+  registerGetSrvbTool(server, ctx);
+  registerCreateSrvbTool(server, ctx);
+  registerDeleteSrvbTool(server, ctx);
+  registerUnpublishSrvbTool(server, ctx);
+  // STRUST — PSE cert management (E04)
+  registerListPsesTool(server, ctx);
+  registerListCertsTool(server, ctx);
+  registerUploadCertTool(server, ctx);
+  registerDeleteCertTool(server, ctx);
+  // Checkin (E08)
+  registerCheckinTool(server, ctx);
+  // gCTS (E07) — /sap/bc/cts_abapvcs/*
+  registerGctsTools(server, ctx);
+  // RFC (E13) — SOAP-over-HTTP RFC function module calls
+  registerCallRfcTool(server, ctx);
+  // FLP (E14) — Page Builder OData catalog/group/tile inventory
+  registerListFlpCatalogsTool(server, ctx);
+  registerListFlpGroupsTool(server, ctx);
+  registerListFlpTilesTool(server, ctx);
+  registerGetFlpTileTool(server, ctx);
 }

@@ -95,4 +95,4 @@ export interface AunitResult {
 /**
  * Output format options
  */
-export type OutputFormat = 'console' | 'json' | 'junit';
+export type OutputFormat = 'console' | 'json' | 'junit' | 'sonar';

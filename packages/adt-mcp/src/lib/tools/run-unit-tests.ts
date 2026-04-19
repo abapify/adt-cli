@@ -16,6 +16,11 @@ import { connectionShape } from './shared-schemas';
 import { resolveObjectUri } from './utils';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { aunitResult } from '@abapify/adt-schemas';
+import { extractCoverageMeasurementId } from '@abapify/adt-contracts';
+import {
+  toJacocoXml,
+  toSonarGenericCoverageXml,
+} from '@abapify/adt-aunit/formatters/jacoco';
 
 type AunitResultData = InferTypedSchema<typeof aunitResult>;
 type AunitProgram = NonNullable<
@@ -160,6 +165,17 @@ export function registerRunUnitTestsTool(
         .optional()
         .default(false)
         .describe('Whether to collect code coverage data'),
+      coverage: z
+        .boolean()
+        .optional()
+        .describe(
+          'Alias for withCoverage. If true, returns coverage report XML alongside the results.',
+        ),
+      coverageFormat: z
+        .enum(['jacoco', 'sonar-generic'])
+        .optional()
+        .default('jacoco')
+        .describe('Coverage report format when coverage is enabled'),
     },
     async (args) => {
       try {
@@ -182,10 +198,10 @@ export function registerRunUnitTestsTool(
           };
         }
 
-        const body = buildRunConfiguration(
-          [objectUri],
-          args.withCoverage ?? false,
-        );
+        const wantsCoverage =
+          (args.coverage ?? false) || (args.withCoverage ?? false);
+
+        const body = buildRunConfiguration([objectUri], wantsCoverage);
 
         // Use the typed AUnit contract – adapter calls aunitRun.build(body) for the request
         // and aunitResult.parse(responseXml) for the response automatically.
@@ -195,11 +211,75 @@ export function registerRunUnitTestsTool(
         );
         const result = normalizeResult(response as AunitResultData);
 
+        // Optional: follow the coverage link and serialise a JaCoCo / Sonar report.
+        let coveragePayload:
+          | { format: string; xml: string; warning?: string }
+          | undefined;
+
+        if (wantsCoverage) {
+          const measurementId = extractCoverageMeasurementId(response);
+          const runtime = (
+            client as unknown as {
+              adt: {
+                runtime?: {
+                  traces: {
+                    coverage: {
+                      measurements: { post: (id: string) => Promise<unknown> };
+                      statements: { get: (id: string) => Promise<unknown> };
+                    };
+                  };
+                };
+              };
+            }
+          ).adt.runtime;
+
+          if (!measurementId) {
+            coveragePayload = {
+              format: args.coverageFormat ?? 'jacoco',
+              xml: '',
+              warning:
+                'Coverage requested but SAP returned no measurement link.',
+            };
+          } else if (!runtime) {
+            coveragePayload = {
+              format: args.coverageFormat ?? 'jacoco',
+              xml: '',
+              warning: 'runtime/traces contract not available on this client.',
+            };
+          } else {
+            const cov = runtime.traces.coverage;
+            try {
+              const measurements = (await cov.measurements.post(
+                measurementId,
+              )) as Parameters<typeof toJacocoXml>[0]['measurements'];
+              const statements = (await cov.statements.get(
+                measurementId,
+              )) as Parameters<typeof toJacocoXml>[0]['statements'];
+              const fmt = args.coverageFormat ?? 'jacoco';
+              const xml =
+                fmt === 'sonar-generic'
+                  ? toSonarGenericCoverageXml({ measurements, statements })
+                  : toJacocoXml({ measurements, statements });
+              coveragePayload = { format: fmt, xml };
+            } catch (err) {
+              coveragePayload = {
+                format: args.coverageFormat ?? 'jacoco',
+                xml: '',
+                warning: `Coverage fetch failed: ${err instanceof Error ? err.message : String(err)}`,
+              };
+            }
+          }
+        }
+
+        const payload = coveragePayload
+          ? { testResults: result, coverage: coveragePayload }
+          : result;
+
         return {
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify(payload, null, 2),
             },
           ],
         };

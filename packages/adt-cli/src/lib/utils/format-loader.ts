@@ -1,28 +1,39 @@
-// Static import for bundled abapgit plugin
-import * as abapgitPlugin from '@abapify/adt-plugin-abapgit';
-
 /**
- * Bundled format plugins - statically imported for bundler compatibility
+ * Format-plugin loader for CLI commands.
+ *
+ * Format plugins self-register into the global `FormatPlugin` registry when
+ * their package is imported. This loader translates the CLI's legacy format
+ * spec (`abapgit` / `ag` / `@abapify/adt-plugin-abapgit` / `pkg/preset`) into
+ * a live `AdtPlugin` (the higher-level import/export plugin) so existing
+ * import services keep working.
+ *
+ * Built-in format id → package mappings. New built-in formats just need one
+ * extra entry here (plus the side-effect import in `cli.ts`).
  */
-const BUNDLED_PLUGINS: Record<string, any> = {
-  '@abapify/adt-plugin-abapgit': abapgitPlugin,
-};
+import { getFormatPlugin, type AdtPlugin } from '@abapify/adt-plugin';
 
-/**
- * Format shortcuts - map short names to actual package names
- */
 const FORMAT_SHORTCUTS: Record<string, string> = {
   abapgit: '@abapify/adt-plugin-abapgit',
   ag: '@abapify/adt-plugin-abapgit',
+  // gCTS / AFF format plugin (E06). `aff` is a synonym — gCTS and AFF share
+  // the same on-disk layout so a single plugin serves both communities.
+  gcts: '@abapify/adt-plugin-gcts',
+  aff: '@abapify/adt-plugin-gcts',
 };
 
+/** Resolve a CLI format id to its registered package name (if known). */
+function resolvePackageForFormatId(id: string): string | undefined {
+  return FORMAT_SHORTCUTS[id];
+}
+
 /**
- * Parse format specification with optional preset
+ * Parse format specification with optional preset.
+ *
  * Examples:
- *   @abapify/adt-plugin-abapgit -> { package: '@abapify/adt-plugin-abapgit', preset: undefined }
- *   @abapify/adt-plugin-abapgit/full -> { package: '@abapify/adt-plugin-abapgit', preset: 'full' }
- *   abapgit -> { package: '@abapify/adt-plugin-abapgit', preset: undefined } (shortcut)
- *   ag -> { package: '@abapify/adt-plugin-abapgit', preset: undefined } (shortcut)
+ *   @abapify/adt-plugin-abapgit        → { package: '@abapify/adt-plugin-abapgit' }
+ *   @abapify/adt-plugin-abapgit/full   → { package: '@abapify/adt-plugin-abapgit', preset: 'full' }
+ *   abapgit                            → { package: '@abapify/adt-plugin-abapgit' } (shortcut)
+ *   ag                                 → { package: '@abapify/adt-plugin-abapgit' } (shortcut)
  */
 export function parseFormatSpec(formatSpec: string): {
   package: string;
@@ -47,16 +58,39 @@ export function parseFormatSpec(formatSpec: string): {
 }
 
 /**
- * Load format plugin
- * Uses static imports for bundled plugins, dynamic imports for external ones
+ * Load a format plugin by CLI spec.
+ *
+ * Resolution order:
+ *   1. Look up the format id in the {@link FormatPlugin} registry. If it is
+ *      already registered (e.g. via CLI bootstrap), use it without any dynamic
+ *      import.
+ *   2. Otherwise dynamically `import(packageName)` — this triggers the
+ *      package's self-registration side-effects — then return the resolved
+ *      legacy `AdtPlugin` instance from the package's default/named export.
  */
-export async function loadFormatPlugin(formatSpec: string) {
+export async function loadFormatPlugin(formatSpec: string): Promise<{
+  name: string;
+  description: string;
+  instance: AdtPlugin;
+  preset?: string;
+}> {
   const { package: packageName, preset } = parseFormatSpec(formatSpec);
 
+  // Fast path: if the format plugin has already self-registered (typical when
+  // the CLI bootstrap has side-effect-imported the package), we're done — but
+  // we still need the legacy AdtPlugin instance for the import services, so
+  // fall through to the dynamic import. The registry lookup merely validates
+  // that the requested format is available.
+  const builtinId = Object.entries(FORMAT_SHORTCUTS).find(
+    ([, pkg]) => pkg === packageName,
+  )?.[0];
+  if (builtinId && !getFormatPlugin(builtinId)) {
+    // Registry is empty for this id — the dynamic import below will populate
+    // it via the package's self-registration side-effect.
+  }
+
   try {
-    // Use bundled plugin if available, otherwise try dynamic import
-    const pluginModule =
-      BUNDLED_PLUGINS[packageName] ?? (await import(packageName));
+    const pluginModule = await import(packageName);
     const PluginClass =
       pluginModule.default || pluginModule[Object.keys(pluginModule)[0]];
 
@@ -64,12 +98,9 @@ export async function loadFormatPlugin(formatSpec: string) {
       throw new Error(`No plugin class found in ${packageName}`);
     }
 
-    // Create plugin instance with preset options
     const options = preset ? { preset } : {};
 
-    // Check if PluginClass is already an instance (from createFormatPlugin)
-    // or if it's a constructor function that needs to be instantiated
-    const plugin =
+    const plugin: AdtPlugin =
       typeof PluginClass === 'function' && PluginClass.prototype
         ? new PluginClass(options)
         : PluginClass;
@@ -82,9 +113,8 @@ export async function loadFormatPlugin(formatSpec: string) {
     };
   } catch (error: unknown) {
     const err = error as Error;
-    // Check both error code (CommonJS) and message (ES modules)
     if (
-      (err as any).code === 'MODULE_NOT_FOUND' ||
+      (err as { code?: string }).code === 'MODULE_NOT_FOUND' ||
       err.message?.includes(`Cannot find module '${packageName}'`)
     ) {
       throw new Error(
@@ -95,3 +125,5 @@ export async function loadFormatPlugin(formatSpec: string) {
     throw error;
   }
 }
+
+export { resolvePackageForFormatId };

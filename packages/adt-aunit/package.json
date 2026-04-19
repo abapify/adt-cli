@@ -11,6 +11,7 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./commands/aunit": "./dist/commands/aunit.mjs",
+    "./formatters/jacoco": "./dist/formatters/jacoco.mjs",
     "./package.json": "./package.json"
   },
   "files": [
@@ -27,7 +28,10 @@
     "gitlab-ci"
   ],
   "dependencies": {
-    "@abapify/adt-plugin": "workspace:*"
+    "@abapify/adt-plugin": "workspace:*",
+    "@abapify/adt-schemas": "workspace:*",
+    "@abapify/adt-contracts": "workspace:*",
+    "@abapify/adt-plugin-abapgit": "workspace:*"
   },
   "module": "./dist/index.mjs"
 }

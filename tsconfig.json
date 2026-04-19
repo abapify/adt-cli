@@ -92,6 +92,15 @@
     },
     {
       "path": "./packages/adt-locks"
+    },
+    {
+      "path": "./packages/adt-plugin-gcts"
+    },
+    {
+      "path": "./packages/adt-plugin-gcts-cli"
+    },
+    {
+      "path": "./packages/adt-rfc"
     }
   ]
 }

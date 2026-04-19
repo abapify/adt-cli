@@ -1,17 +1,23 @@
 /**
  * Tool: find_definition – navigate to the definition of an ABAP symbol
  *
- * Uses the ADT navigation endpoint to resolve where a symbol (class, method,
- * data element, etc.) is defined.
+ * The SAP ADT /sap/bc/adt/navigation/target endpoint requires POST (GET
+ * returns 405) and a non-documented request body. On real systems we
+ * tested (TRL BTP trial, 2025-11) every attempted body shape returned
+ * 400 "I::000", so this tool now uses the repository information system
+ * search instead — resolve the object URI by name/type and return it.
  *
- * ADT endpoint: GET /sap/bc/adt/navigation/target
+ * This matches what navigation/target returns when it works (a link +
+ * object identity) and is sufficient for the MCP use case: "give me the
+ * ADT URI for <symbol>". Future work: capture a real Eclipse ADT
+ * navigation/target request and promote this to a proper POST contract.
  */
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
-import { resolveObjectUri } from './utils';
+import { extractObjectReferences, resolveObjectUri } from './utils';
 
 export function registerFindDefinitionTool(
   server: McpServer,
@@ -19,12 +25,12 @@ export function registerFindDefinitionTool(
 ): void {
   server.tool(
     'find_definition',
-    'Navigate to the definition of an ABAP symbol (class, method, type, function module, etc.)',
+    'Resolve an ABAP symbol (class, interface, function, data element, …) to its ADT object URI.',
     {
       ...connectionShape,
       objectName: z
         .string()
-        .describe('Name of the symbol or object to navigate to'),
+        .describe('Name of the symbol or object to resolve'),
       objectType: z
         .string()
         .optional()
@@ -35,7 +41,7 @@ export function registerFindDefinitionTool(
         .string()
         .optional()
         .describe(
-          'Parent object name (e.g. class name when looking for a method)',
+          'Parent object name (e.g. class name when looking for a method) — currently used as a hint for scoping',
         ),
       parentObjectType: z
         .string()
@@ -46,37 +52,27 @@ export function registerFindDefinitionTool(
       try {
         const client = ctx.getClient(args);
 
-        const params = new URLSearchParams({
-          objectName: args.objectName,
-        });
-
-        if (args.objectType) params.set('objectType', args.objectType);
-        if (args.parentObjectName) params.set('context', args.parentObjectName);
-        if (args.parentObjectType)
-          params.set('contextType', args.parentObjectType);
-
-        const result = await client.fetch(
-          `/sap/bc/adt/navigation/target?${params.toString()}`,
-          {
-            method: 'GET',
-            headers: { Accept: 'application/json' },
-          },
-        );
-
-        // If result is empty, try resolving via search
-        if (!result) {
-          const uri = await resolveObjectUri(
+        // Prefer the parent object when the caller asks for a nested symbol;
+        // the ADT URI of the parent is the "closest" definition we can offer
+        // without the proprietary navigation/target POST body.
+        if (args.parentObjectName) {
+          const parentUri = await resolveObjectUri(
             client,
-            args.objectName,
-            args.objectType,
+            args.parentObjectName,
+            args.parentObjectType,
           );
-          if (uri) {
+          if (parentUri) {
             return {
               content: [
                 {
                   type: 'text' as const,
                   text: JSON.stringify(
-                    { objectName: args.objectName, uri },
+                    {
+                      objectName: args.objectName,
+                      parentObjectName: args.parentObjectName,
+                      uri: parentUri,
+                      note: 'Returned parent object URI — nested symbol navigation requires the proprietary POST /sap/bc/adt/navigation/target protocol, not yet supported.',
+                    },
                     null,
                     2,
                   ),
@@ -86,11 +82,51 @@ export function registerFindDefinitionTool(
           }
         }
 
+        // Fallback: resolve by name + optional type via quick-search.
+        const searchResult =
+          await client.adt.repository.informationsystem.search.quickSearch({
+            query: args.objectName,
+            maxResults: 10,
+          });
+        const target = extractObjectReferences(searchResult).find(
+          (o) =>
+            String(o.name ?? '').toUpperCase() ===
+              args.objectName.toUpperCase() &&
+            (!args.objectType ||
+              String(o.type ?? '')
+                .toUpperCase()
+                .startsWith(args.objectType.toUpperCase())),
+        );
+
+        if (!target?.uri) {
+          const typeSuffix = args.objectType
+            ? ` (type: ${args.objectType})`
+            : '';
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text' as const,
+                text: `Could not resolve '${args.objectName}'${typeSuffix} — no search hit matched.`,
+              },
+            ],
+          };
+        }
+
         return {
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify(
+                {
+                  objectName: args.objectName,
+                  objectType: target.type,
+                  uri: target.uri,
+                  packageName: (target as { packageName?: string }).packageName,
+                },
+                null,
+                2,
+              ),
             },
           ],
         };

@@ -112,10 +112,10 @@ export function registerGetFunctionTool(
 
         let source: string | undefined;
         if (args.includeSource) {
-          source = (await client.fetch(
-            `/sap/bc/adt/functions/groups/${groupName}/fmodules/${fmName}/source/main`,
-            { method: 'GET', headers: { Accept: 'text/plain' } },
-          )) as string;
+          source = await client.adt.functions.groups.fmodules.source.main.get(
+            groupName,
+            fmName,
+          );
         }
 
         return {

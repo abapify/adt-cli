@@ -30,7 +30,7 @@ export {
   type SourcePutOptions,
   type SourceOperations,
   type SourcesContract,
-  type IncludesContract,
+  type IncludesContractSkeleton,
 } from './helpers/crud';
 
 // Client creation utilities (for consumers like adt-client)

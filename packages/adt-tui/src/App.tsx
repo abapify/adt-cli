@@ -26,7 +26,7 @@ export interface AppProps {
 export function App({
   startUrl,
   fetch,
-  router,
+  router: _router,
   systemName,
 }: AppProps): React.ReactNode {
   const [, setResizeKey] = useState(0);

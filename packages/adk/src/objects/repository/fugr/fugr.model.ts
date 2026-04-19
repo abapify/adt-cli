@@ -68,12 +68,69 @@ export class AdkFunctionGroup extends AdkMainObject<
   }
 
   // ============================================
-  // Static Factory Method
+  // Static Factory Methods
   // ============================================
 
   static async get(name: string, ctx?: AdkContext): Promise<AdkFunctionGroup> {
     const context = ctx ?? getGlobalContext();
     return new AdkFunctionGroup(context, name).load();
+  }
+
+  /**
+   * Check if a function group exists on SAP
+   */
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkFunctionGroup.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP function group on SAP
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkFunctionGroup> {
+    const context = ctx ?? getGlobalContext();
+    const fugr = new AdkFunctionGroup(context, name.toUpperCase());
+    fugr.setData({
+      name: name.toUpperCase(),
+      type: 'FUGR/F',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as FunctionGroupXml);
+    await fugr.save({ transport: options?.transport, mode: 'create' });
+    return fugr;
+  }
+
+  /**
+   * Delete an ABAP function group from SAP
+   */
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const fugr = new AdkFunctionGroup(context, name.toUpperCase());
+    const contract = fugr.crudContract;
+    await contract.delete(name.toUpperCase(), {
+      corrNr: options?.transport,
+      lockHandle: options?.lockHandle,
+    });
   }
 }
 

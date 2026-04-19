@@ -45,15 +45,6 @@ function asArray<T>(val: T | T[] | undefined): T[] {
   return Array.isArray(val) ? val : [val];
 }
 
-/** Escape XML special characters */
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 // =============================================================================
 // Config Cache (module-level for efficiency)
 // =============================================================================
@@ -325,19 +316,9 @@ export class AdkTransportRequest extends AdkObject<
 
   async release(): Promise<ReleaseResult> {
     try {
-      // SAP ADT requires namespace-prefixed attributes (non-standard XML)
-      const xml = `<?xml version="1.0" encoding="UTF-8"?><tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="release"/>`;
-
-      await this.ctx.client.fetch(
-        `/sap/bc/adt/cts/transportrequests/${this.number}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/vnd.sap.adt.transportorganizer.v1+xml',
-            Accept: 'application/vnd.sap.adt.transportorganizer.v1+xml',
-          },
-          body: xml,
-        },
+      await this.ctx.client.adt.cts.transportrequests.useraction.release(
+        this.number,
+        { root: { useraction: 'release' } },
       );
 
       (this.itemData as { status?: string; status_text?: string }).status = 'R';
@@ -390,6 +371,35 @@ export class AdkTransportRequest extends AdkObject<
     await this.ctx.client.adt.cts.transportrequests.delete(this.number);
   }
 
+  /**
+   * Reassign ownership of this transport (and optionally all tasks) to a new user.
+   *
+   * @param newOwner - SAP username to become the new owner
+   * @param recursive - When true, also reassign all modifiable tasks
+   */
+  async reassign(newOwner: string, recursive = false): Promise<void> {
+    await this.ctx.client.adt.cts.transportrequests.useraction.reassign(
+      this.number,
+      { targetUser: newOwner, recursive },
+      {
+        root: {
+          useraction: 'changeowner',
+          targetuser: newOwner,
+        },
+      },
+    );
+
+    (this.itemData as { owner?: string }).owner = newOwner;
+
+    if (recursive) {
+      for (const task of this.tasks) {
+        if (task.status !== 'R') {
+          await task.reassign(newOwner);
+        }
+      }
+    }
+  }
+
   // ===========================================================================
   // Static Factory
   // ===========================================================================
@@ -412,24 +422,33 @@ export class AdkTransportRequest extends AdkObject<
       owner = await AdkTransportRequest.getCurrentUser(context);
     }
 
-    // SAP ADT requires namespace-prefixed attributes (non-standard XML)
-    const xml = `<?xml version="1.0" encoding="UTF-8"?><tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="newrequest"><tm:request tm:desc="${escapeXml(options.description)}" tm:type="${options.type || 'K'}" tm:target="${options.target || 'LOCAL'}" tm:cts_project="${options.project || ''}"><tm:task tm:owner="${owner}"/></tm:request></tm:root>`;
-
-    const responseXml = await context.client.fetch(
-      '/sap/bc/adt/cts/transportrequests',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/vnd.sap.adt.transportorganizer.v1+xml',
-          Accept: 'application/vnd.sap.adt.transportorganizer.v1+xml',
+    const response =
+      await context.client.adt.cts.transportrequests.useraction.create(
+        {
+          description: options.description,
+          type: options.type,
+          target: options.target,
+          project: options.project,
+          owner,
         },
-        body: xml,
-      },
-    );
+        {
+          root: {
+            useraction: 'newrequest',
+            request: {
+              desc: options.description,
+              type: options.type || 'K',
+              target: options.target || 'LOCAL',
+              cts_project: options.project || '',
+              task: [{ owner }],
+            },
+          },
+        },
+      );
 
-    // Parse response - extract transport number from response XML
-    const numberMatch = String(responseXml).match(/tm:number="([^"]+)"/);
-    const number = numberMatch?.[1];
+    // Parse response - extract transport number.
+    // SAP returns the new transport in root.request.number (preferred) or root.name.
+    const number =
+      response?.root?.request?.number ?? response?.root?.name ?? undefined;
     if (!number)
       throw new Error('Failed to create transport - no number returned');
 
@@ -503,20 +522,14 @@ export class AdkTransportRequest extends AdkObject<
   static async getCurrentUser(ctx?: AdkContext): Promise<string> {
     const context = ctx ?? getGlobalContext();
 
-    const xmlContent = await context.client.fetch(
-      '/sap/bc/adt/cts/transportrequests/searchconfiguration/metadata',
-      {
-        headers: {
-          Accept: 'application/vnd.sap.adt.configuration.metadata.v1+xml',
-        },
-      },
-    );
+    const response =
+      await context.client.adt.cts.transportrequests.searchconfiguration.metadata.get();
 
-    const userMatch = String(xmlContent).match(
-      /<configuration:property key="User"[^>]*>([^<]+)</,
-    );
-    if (userMatch && userMatch[1]) {
-      return userMatch[1].trim();
+    const properties = response?.configuration?.properties?.property ?? [];
+    const userProp = properties.find((p: { key?: string }) => p.key === 'User');
+    const user = userProp?.$value?.trim();
+    if (user) {
+      return user;
     }
 
     throw new Error('Could not detect current user from metadata response');

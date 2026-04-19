@@ -1,0 +1,6 @@
+@EndUserText.label: 'Mock RAP service definition'
+define service ZUI_MOCK_SRVD {
+  expose ZI_MOCK_ROOT      as MockRoot;
+  expose ZI_MOCK_CHILD     as MockChild;
+  expose ZI_MOCK_VALUEHELP as MockValueHelp;
+}

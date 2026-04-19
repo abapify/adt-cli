@@ -10,6 +10,7 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
 import { resolveObjectUri } from './utils';
@@ -25,6 +26,8 @@ type DeleteOperation = (
 const deleteOperations: Record<string, DeleteOperation> = {
   PROG: (client, objectName, queryOptions) =>
     client.adt.programs.programs.delete(objectName.toLowerCase(), queryOptions),
+  INCL: (client, objectName, queryOptions) =>
+    client.adt.programs.includes.delete(objectName.toLowerCase(), queryOptions),
   CLAS: (client, objectName, queryOptions) =>
     client.adt.oo.classes.delete(objectName.toLowerCase(), queryOptions),
   INTF: (client, objectName, queryOptions) =>
@@ -33,6 +36,30 @@ const deleteOperations: Record<string, DeleteOperation> = {
     client.adt.functions.groups.delete(objectName.toLowerCase(), queryOptions),
   DEVC: (client, objectName, queryOptions) =>
     client.adt.packages.delete(objectName, queryOptions),
+  DOMA: (client, objectName, queryOptions) =>
+    client.adt.ddic.domains.delete(objectName.toLowerCase(), queryOptions),
+  DTEL: (client, objectName, queryOptions) =>
+    client.adt.ddic.dataelements.delete(objectName.toLowerCase(), queryOptions),
+  TABL: (client, objectName, queryOptions) =>
+    client.adt.ddic.tables.delete(objectName.toLowerCase(), queryOptions),
+  STRUCT: (client, objectName, queryOptions) =>
+    client.adt.ddic.structures.delete(objectName.toLowerCase(), queryOptions),
+  DDLS: (client, objectName, queryOptions) =>
+    client.adt.ddic.ddl.sources.delete(objectName.toLowerCase(), queryOptions),
+  DCLS: (client, objectName, queryOptions) =>
+    client.adt.ddic.dcl.sources.delete(objectName.toLowerCase(), queryOptions),
+  BDEF: (client, objectName, queryOptions) =>
+    client.adt.bo.behaviordefinitions.delete(
+      objectName.toLowerCase(),
+      queryOptions,
+    ),
+  SRVD: (client, objectName, queryOptions) =>
+    client.adt.ddic.srvd.sources.delete(objectName.toLowerCase(), queryOptions),
+  SRVB: (client, objectName, queryOptions) =>
+    client.adt.businessservices.bindings.delete(
+      objectName.toLowerCase(),
+      queryOptions,
+    ),
 };
 
 function getDeleteOperation(objectType?: string): DeleteOperation | undefined {
@@ -67,7 +94,7 @@ export function registerDeleteObjectTool(
 ): void {
   server.tool(
     'delete_object',
-    'Delete an ABAP object. Supports PROG, CLAS, INTF, FUGR, DEVC and falls back to direct URI deletion for other types.',
+    'Delete an ABAP object. Supports PROG, INCL, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF, SRVD, SRVB and falls back to direct URI deletion for other types.',
     {
       ...connectionShape,
       objectName: z.string().describe('Name of the ABAP object to delete'),
@@ -85,6 +112,11 @@ export function registerDeleteObjectTool(
     async (args) => {
       try {
         const client = ctx.getClient(args);
+        // Initialise ADK so any internal helper using the global context
+        // (e.g. lock service lookups) has a live client. See the parity
+        // note in `object-creation.ts`.
+        initializeAdk(client);
+
         const objectName = args.objectName.toUpperCase();
         const objectType = args.objectType?.toUpperCase();
         const queryOptions = args.transport ? { corrNr: args.transport } : {};

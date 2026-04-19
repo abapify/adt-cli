@@ -319,7 +319,28 @@ export function formatValue(value: unknown, type: string): string {
 export function formatXml(xml: string): string {
   let formatted = '';
   let indent = 0;
-  const parts = xml.split(/(<[^>]+>)/g).filter(Boolean);
+  // Tokenize into tags and text using linear scan (avoids regex backtracking).
+  const parts: string[] = [];
+  let pos = 0;
+  while (pos < xml.length) {
+    if (xml.charCodeAt(pos) === 60 /* '<' */) {
+      const end = xml.indexOf('>', pos + 1);
+      if (end === -1) {
+        parts.push(xml.slice(pos));
+        break;
+      }
+      parts.push(xml.slice(pos, end + 1));
+      pos = end + 1;
+    } else {
+      const next = xml.indexOf('<', pos);
+      if (next === -1) {
+        parts.push(xml.slice(pos));
+        break;
+      }
+      if (next > pos) parts.push(xml.slice(pos, next));
+      pos = next;
+    }
+  }
   let lastWasText = false;
 
   for (let i = 0; i < parts.length; i++) {

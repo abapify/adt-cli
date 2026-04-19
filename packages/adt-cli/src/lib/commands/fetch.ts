@@ -18,7 +18,7 @@ export const fetchCommand = new Command('fetch')
     '--accept <type>',
     'Set Accept header (shorthand for -H "Accept: <type>")',
   )
-  .action(async (url: string, options, command) => {
+  .action(async (url: string, options, _command) => {
     try {
       // Create v2 client (uses global CLI context automatically)
       const adtClient = await getAdtClientV2({

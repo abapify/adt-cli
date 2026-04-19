@@ -1,0 +1,12 @@
+{
+  "name": "adt-plugin-gcts",
+  "targets": {
+    "test": {
+      "command": "node --import tsx --test tests/**/*.test.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": ["{projectRoot}/tests/**/*.ts", "{projectRoot}/src/**/*.ts"]
+    }
+  }
+}

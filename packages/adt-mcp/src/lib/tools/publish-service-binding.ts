@@ -1,14 +1,18 @@
 /**
- * Tool: publish_service_binding – publish an OData service binding in the SAP system
+ * Tool: publish_service_binding – publish/unpublish a RAP Service Binding
  *
- * Activates and publishes an OData V2 or V4 service binding, making it
- * accessible via the SAP Gateway. Requires an existing SRVB object.
+ * Retained for backward compatibility with the pre-E12 MCP surface.
+ * As of E12 this tool now delegates to the typed
+ * `client.adt.businessservices.bindings.publish/unpublish` contract
+ * instead of a raw `client.fetch()` call. Prefer the dedicated
+ * `unpublish_srvb` tool for new integrations.
  *
- * ADT endpoint: POST /sap/bc/adt/businessservices/bindings/{name}/publishedstates
+ * ADT endpoint: POST/DELETE /sap/bc/adt/businessservices/bindings/{name}/publishedstates
  */
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { AdkServiceBinding, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
 import { connectionShape } from './shared-schemas';
 
@@ -18,7 +22,7 @@ export function registerPublishServiceBindingTool(
 ): void {
   server.tool(
     'publish_service_binding',
-    'Publish (activate) an OData service binding (SRVB) in SAP to make it accessible via the Gateway.',
+    'Publish (or unpublish) a RAP Service Binding (SRVB) in SAP. Pass `unpublish: true` to deactivate. Delegates to the typed SRVB contract.',
     {
       ...connectionShape,
       bindingName: z
@@ -34,31 +38,14 @@ export function registerPublishServiceBindingTool(
     async (args) => {
       try {
         const client = ctx.getClient(args);
+        initializeAdk(client);
+
         const bindingName = args.bindingName.toUpperCase();
-        const action = args.unpublish ? 'unpublish' : 'publish';
 
         if (args.unpublish) {
-          // DELETE from publishedstates to unpublish
-          await client.fetch(
-            `/sap/bc/adt/businessservices/bindings/${bindingName}/publishedstates`,
-            {
-              method: 'DELETE',
-              headers: { Accept: 'application/json' },
-            },
-          );
+          await AdkServiceBinding.unpublish(bindingName);
         } else {
-          // POST to publishedstates to publish
-          await client.fetch(
-            `/sap/bc/adt/businessservices/bindings/${bindingName}/publishedstates`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-              },
-              body: JSON.stringify({ bindingName }),
-            },
-          );
+          await AdkServiceBinding.publish(bindingName);
         }
 
         return {
@@ -67,7 +54,7 @@ export function registerPublishServiceBindingTool(
               type: 'text' as const,
               text: JSON.stringify(
                 {
-                  status: action === 'publish' ? 'published' : 'unpublished',
+                  status: args.unpublish ? 'unpublished' : 'published',
                   bindingName,
                 },
                 null,

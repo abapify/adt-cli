@@ -1,12 +1,6 @@
 import { execSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  copyFileSync,
-  rmSync,
-} from 'node:fs';
-import { join, basename } from 'node:path';
+import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Execute shell command
@@ -41,11 +35,12 @@ export function findFiles(dir: string, pattern: string): string[] {
   const files: string[] = [];
   const entries = readdirSync(dir, { withFileTypes: true, recursive: true });
 
-  // Convert glob to regex
+  // Convert glob to regex. Escape ALL regex metacharacters except the glob
+  // wildcards '*' and '?' first, so characters like '+', '(', '[' in the
+  // pattern can't introduce regex syntax. Then expand the wildcards.
+  const escaped = pattern.replaceAll(/[.+^${}()|[\]\\/]/g, '\\$&');
   const regex = new RegExp(
-    '^' +
-      pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') +
-      '$',
+    '^' + escaped.replaceAll(/\*/g, '.*').replaceAll(/\?/g, '.') + '$',
   );
 
   for (const entry of entries) {

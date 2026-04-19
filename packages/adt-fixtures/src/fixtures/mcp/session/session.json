@@ -1,0 +1,11 @@
+{
+  "session": {
+    "properties": {
+      "property": [
+        { "name": "com.sap.adt.user", "_text": "DEVELOPER" },
+        { "name": "com.sap.adt.language", "_text": "EN" },
+        { "name": "com.sap.adt.client", "_text": "100" }
+      ]
+    }
+  }
+}

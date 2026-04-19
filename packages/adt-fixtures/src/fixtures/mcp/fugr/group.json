@@ -1,0 +1,10 @@
+{
+  "abapFunctionGroup": {
+    "name": "ZFUGR_UTIL",
+    "type": "FUGR",
+    "description": "Utility function group",
+    "language": "EN",
+    "masterLanguage": "EN",
+    "packageRef": { "uri": "/sap/bc/adt/packages/zpackage" }
+  }
+}

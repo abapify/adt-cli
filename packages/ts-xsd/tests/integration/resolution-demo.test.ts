@@ -288,7 +288,7 @@ describe('Schema Resolution Demo', () => {
       const commonXsd = readFileSync(join(fixturesDir, 'common.xsd'), 'utf-8');
 
       assert.ok(
-        commonXsd.includes('http://example.com/main'),
+        /targetNamespace="http:\/\/example\.com\/main"/.test(commonXsd),
         'Should have same namespace as main',
       );
       assert.ok(commonXsd.includes('EmailType'), 'Should have EmailType');
@@ -299,7 +299,7 @@ describe('Schema Resolution Demo', () => {
       const typesXsd = readFileSync(join(fixturesDir, 'types.xsd'), 'utf-8');
 
       assert.ok(
-        typesXsd.includes('http://example.com/main'),
+        /targetNamespace="http:\/\/example\.com\/main"/.test(typesXsd),
         'Should have same namespace as main',
       );
       assert.ok(typesXsd.includes('AddressType'), 'Should have AddressType');

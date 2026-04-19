@@ -10,7 +10,7 @@
  * - Handles "not locked" errors gracefully in cleanup
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { createLockService } from '../src/service';
 import type { LockStore } from '../src/store';
 import type { LockEntry } from '../src/types';

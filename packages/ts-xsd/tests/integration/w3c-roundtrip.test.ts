@@ -22,7 +22,7 @@ import { strict as assert } from 'node:assert';
 import { parseXsd, buildXsd, type Schema } from '../../src/xsd';
 import { getW3CSchema } from '../fixtures';
 
-function sortByName<T extends { name?: string }>(arr: T[]): T[] {
+function _sortByName<T extends { name?: string }>(arr: T[]): T[] {
   return [...arr].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 }
 

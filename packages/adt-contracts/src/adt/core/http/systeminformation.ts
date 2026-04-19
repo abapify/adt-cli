@@ -5,12 +5,10 @@
  * Path: /sap/bc/adt/core/http/systeminformation
  */
 
-import { http } from '../../../base';
-import { systeminformationSchema } from '../../../schemas';
+import { http, contract } from '../../../base';
+import { systeminformation } from '../../../schemas';
 
-export const systeminformationContract: {
-  getSystemInfo: () => ReturnType<typeof http.get>;
-} = {
+export const systeminformationContract = contract({
   /**
    * Get system information
    *
@@ -19,12 +17,12 @@ export const systeminformationContract: {
   getSystemInfo: () =>
     http.get('/sap/bc/adt/core/http/systeminformation', {
       responses: {
-        200: systeminformationSchema,
+        200: systeminformation,
       },
       headers: {
         Accept: 'application/vnd.sap.adt.core.http.systeminformation.v1+json',
       },
     }),
-};
+});
 
 export type SystemInformationContract = typeof systeminformationContract;

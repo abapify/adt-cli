@@ -1,0 +1,43 @@
+{
+  "d": {
+    "__metadata": {
+      "id": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FSSB%2FCOMPARISON_MM_TILE')",
+      "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FSSB%2FCOMPARISON_MM_TILE')",
+      "type": "PAGE_BUILDER_PERS.Chip"
+    },
+    "id": "X-SAP-UI2-CHIP:/SSB/COMPARISON_MM_TILE",
+    "title": "HTTP response failed for UI2 CHIP xml with path /sap/public/bc/ui5_ui5/ui2/resources/sap/ushell/components/tiles/indicatorcomparison/ComparisonTileChip.xml. Return code: 0, reason: Status:400 ,BAD REQUEST",
+    "description": "",
+    "configuration": "",
+    "url": "",
+    "baseChipId": "X-SAP-UI2-CHIP:/SSB/COMPARISON_MM_TILE",
+    "catalogId": "/UI2/CATALOG_ALL",
+    "catalogPageChipInstanceId": "",
+    "referenceChipId": "",
+    "isReadOnly": "",
+    "Catalog": {
+      "__deferred": {
+        "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FSSB%2FCOMPARISON_MM_TILE')/Catalog"
+      }
+    },
+    "ReferenceChip": {
+      "__deferred": {
+        "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FSSB%2FCOMPARISON_MM_TILE')/ReferenceChip"
+      }
+    },
+    "ChipBags": {
+      "__deferred": {
+        "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FSSB%2FCOMPARISON_MM_TILE')/ChipBags"
+      }
+    },
+    "CatalogPageChipInstance": {
+      "__deferred": {
+        "uri": "https://87073b08-232b-42f9-ae7c-bc59cf2ae025.abap.us10.hana.ondemand.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Chips('X-SAP-UI2-CHIP%3A%2FSSB%2FCOMPARISON_MM_TILE')/CatalogPageChipInstance"
+      }
+    }
+  },
+  "_captured": {
+    "sid": "TRL",
+    "date": "2026-04-18"
+  }
+}

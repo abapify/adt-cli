@@ -1,0 +1,16 @@
+{
+  "abapgitObjects": {
+    "object": [
+      {
+        "name": "ZCL_EXAMPLE",
+        "type": "CLAS",
+        "uri": "/sap/bc/adt/oo/classes/zcl_example"
+      },
+      {
+        "name": "ZPROG_EXAMPLE",
+        "type": "PROG",
+        "uri": "/sap/bc/adt/programs/programs/zprog_example"
+      }
+    ]
+  }
+}

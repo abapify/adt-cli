@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tm:root xmlns:tm="http://www.sap.com/cts/adt/tm">
+  <tm:workbench>
+    <tm:modifiable status="released" />
+    <tm:relstarted status="released" />
+    <tm:released status="released" />
+  </tm:workbench>
+</tm:root>

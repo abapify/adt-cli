@@ -1,0 +1,14 @@
+{
+  "repository": {
+    "rid": "example-repo",
+    "name": "example-repo",
+    "role": "SOURCE",
+    "type": "GITHUB",
+    "vsid": "6IT",
+    "status": "CREATED",
+    "branch": "",
+    "currentCommit": "",
+    "url": "https://example.com/git/example-repo",
+    "connection": "ssl"
+  }
+}

@@ -19,16 +19,34 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     {
+      "path": "../adt-rfc"
+    },
+    {
+      "path": "../adt-plugin-abapgit"
+    },
+    {
+      "path": "../adt-aunit"
+    },
+    {
+      "path": "../adk"
+    },
+    {
       "path": "../adt-schemas"
     },
     {
       "path": "../adt-locks"
     },
     {
+      "path": "../adt-fixtures"
+    },
+    {
       "path": "../adt-contracts"
     },
     {
       "path": "../adt-client"
+    },
+    {
+      "path": "../adt-cli"
     }
   ]
 }

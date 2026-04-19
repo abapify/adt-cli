@@ -21,7 +21,7 @@ export const configurations = contract({
     ),
 
   /** GET a specific configuration by ID */
-  getById: (configId: string) =>
+  getById: (_configId: string) =>
     http.get(
       '/sap/bc/adt/cts/transportrequests/searchconfiguration/configurations/${configId}',
       {
@@ -33,7 +33,7 @@ export const configurations = contract({
   /** PUT update a specific configuration by ID - body type inferred from schema
    *  Note: If-Match header is automatically added by the adapter from cached ETag
    */
-  put: (configId: string) =>
+  put: (_configId: string) =>
     http.put(
       '/sap/bc/adt/cts/transportrequests/searchconfiguration/configurations/${configId}',
       {

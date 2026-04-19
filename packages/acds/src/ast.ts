@@ -178,22 +178,134 @@ export interface AnnotatedElement extends AstNode {
 }
 
 // ============================================
-// Future Phase 2+ types (placeholders)
+// Parameters
 // ============================================
 
-/** define role <name> { grant ... } */
-export interface RoleDefinition extends AstNode {
-  kind: 'role';
+export interface ParameterDefinition extends AstNode {
+  annotations: Annotation[];
   name: string;
-  // Phase 2: grant clauses, conditions
+  type: TypeRef;
+  /** default literal value, if any (e.g. `default 'X'`) */
+  defaultValue?: AnnotationValue;
 }
 
-/** define view entity <name> as select from ... { ... } */
+// ============================================
+// Expressions (narrow subset)
+// ============================================
+
+/**
+ * A parsed but un-interpreted expression from `on` / `where` clauses.
+ * Consumers typically only need the raw source span; `tokens` gives the
+ * flat token stream for lightweight introspection.
+ */
+export interface Expression extends AstNode {
+  /** Flattened source image of the expression (concatenated token images, space-separated). */
+  source: string;
+  /** Token images in order. */
+  tokens: string[];
+}
+
+// ============================================
+// Associations
+// ============================================
+
+/** Cardinality, e.g. `[0..1]`, `[1..*]`, `[*]`, `[5]` */
+export interface Cardinality extends AstNode {
+  min?: number;
+  /** `undefined` means unbounded (`*`) when present. */
+  max?: number | '*';
+}
+
+export type AssociationKind = 'association' | 'composition';
+
+export interface AssociationDeclaration extends AstNode {
+  kind: 'association';
+  /** `association` or `composition` */
+  associationKind: AssociationKind;
+  annotations: Annotation[];
+  cardinality?: Cardinality;
+  /** `of many` / `of one` modifier (optional). */
+  targetMultiplicity?: 'many' | 'one';
+  /** Fully qualified target entity (e.g. `I_SalesOrder`). */
+  target: string;
+  /** `to redirected to <target>` (projection association). */
+  redirected?: boolean;
+  alias?: string;
+  on?: Expression;
+}
+
+// ============================================
+// View entities / projection views
+// ============================================
+
+export type DataSourceKind = 'select' | 'projection';
+
+export interface DataSource extends AstNode {
+  name: string;
+  alias?: string;
+}
+
+/** Single element in a view's projection list. */
+export interface ViewElement extends AstNode {
+  annotations: Annotation[];
+  isKey: boolean;
+  isVirtual: boolean;
+  isRedirected: boolean;
+  /** Either a typed field (abstract/custom entities) or projection expression. */
+  expression: string;
+  alias?: string;
+  /** Present only when element is a typed field (`name : type`). */
+  type?: TypeRef;
+  notNull?: boolean;
+}
+
+export type ViewMember = ViewElement | AssociationDeclaration;
+
 export interface ViewEntityDefinition extends AstNode {
   kind: 'viewEntity';
   name: string;
   annotations: Annotation[];
-  // Phase 3: datasource, fields, joins, associations
+  sourceKind: DataSourceKind;
+  source: DataSource;
+  parameters: ParameterDefinition[];
+  members: ViewMember[];
+  /** Top-level filter clause (`where ...`). */
+  where?: Expression;
+}
+
+export interface AbstractEntityDefinition extends AstNode {
+  kind: 'abstractEntity';
+  name: string;
+  annotations: Annotation[];
+  parameters: ParameterDefinition[];
+  members: ViewMember[];
+}
+
+export interface CustomEntityDefinition extends AstNode {
+  kind: 'customEntity';
+  name: string;
+  annotations: Annotation[];
+  parameters: ParameterDefinition[];
+  members: ViewMember[];
+}
+
+// ============================================
+// DCL — access control (role)
+// ============================================
+
+export interface GrantStatement extends AstNode {
+  /** The granted privilege, always `select` for now. */
+  privilege: 'select';
+  /** Target entity (qualified). */
+  entity: string;
+  where?: Expression;
+}
+
+export interface RoleDefinition extends AstNode {
+  kind: 'role';
+  name: string;
+  annotations: Annotation[];
+  grants: GrantStatement[];
 }
 
 // ============================================
@@ -207,7 +319,9 @@ export type CdsDefinition =
   | ServiceDefinition
   | MetadataExtension
   | RoleDefinition
-  | ViewEntityDefinition;
+  | ViewEntityDefinition
+  | AbstractEntityDefinition
+  | CustomEntityDefinition;
 
 // ============================================
 // Source file (root AST node)

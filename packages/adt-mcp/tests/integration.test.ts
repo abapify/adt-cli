@@ -211,6 +211,38 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
+  // ── cts_search_transports ──────────────────────────────────────
+
+  describe('cts_search_transports tool', () => {
+    it('returns transports from FIND endpoint', async () => {
+      const { json } = await callTool('cts_search_transports', {
+        ...connArgs(),
+        user: '*',
+        trfunction: '*',
+      });
+      const data = json as {
+        count: number;
+        transports: Array<{ TRKORR: string }>;
+      };
+      assert.ok(typeof data.count === 'number');
+      assert.ok(Array.isArray(data.transports));
+      assert.ok(data.count >= 1, 'mock FIND fixture returns at least 1');
+    });
+
+    it('filters by status client-side', async () => {
+      const { json } = await callTool('cts_search_transports', {
+        ...connArgs(),
+        status: 'R',
+      });
+      const data = json as {
+        transports: Array<{ TRSTATUS: string }>;
+      };
+      for (const t of data.transports) {
+        assert.strictEqual(t.TRSTATUS, 'R');
+      }
+    });
+  });
+
   // ── atc_run ────────────────────────────────────────────────────
 
   describe('atc_run tool', () => {
@@ -334,6 +366,26 @@ describe('adt-mcp integration tests', () => {
       };
       assert.ok(typeof data.totalTests === 'number');
       assert.ok(typeof data.passCount === 'number');
+    });
+
+    it('runs AUnit tests with coverage and emits a JaCoCo report', async () => {
+      const { json } = await callTool('run_unit_tests', {
+        ...connArgs(),
+        objectName: 'ZCL_EXAMPLE',
+        objectType: 'CLAS',
+        coverage: true,
+        coverageFormat: 'jacoco',
+      });
+      const data = json as {
+        testResults: { totalTests: number };
+        coverage: { format: string; xml: string; warning?: string };
+      };
+      assert.ok(typeof data.testResults?.totalTests === 'number');
+      assert.strictEqual(data.coverage.format, 'jacoco');
+      assert.ok(
+        data.coverage.xml.includes('<!DOCTYPE report PUBLIC'),
+        `coverage XML must contain JaCoCo DOCTYPE; payload: ${JSON.stringify(data.coverage).slice(0, 500)}`,
+      );
     });
   });
 
@@ -863,6 +915,366 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
+  // ── import tools ───────────────────────────────────────────────
+
+  describe('import_object tool', () => {
+    it('invokes ImportService without throwing and returns a text response', async () => {
+      const fs = await import('node:fs');
+      const os = await import('node:os');
+      const path = await import('node:path');
+      const outputDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'adt-mcp-import-object-'),
+      );
+      try {
+        const { raw } = await callTool('import_object', {
+          ...connArgs(),
+          objectType: 'CLAS',
+          objectName: 'ZCL_EXAMPLE',
+          outputDir,
+        });
+        const res = raw as { content: Array<{ type: string; text: string }> };
+        assert.ok(Array.isArray(res.content), 'tool must return content array');
+        assert.ok(res.content[0]?.text, 'tool must return text payload');
+      } finally {
+        fs.rmSync(outputDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  describe('import_package tool', () => {
+    it('invokes ImportService without throwing and returns a text response', async () => {
+      const fs = await import('node:fs');
+      const os = await import('node:os');
+      const path = await import('node:path');
+      const outputDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'adt-mcp-import-pkg-'),
+      );
+      try {
+        const { raw } = await callTool('import_package', {
+          ...connArgs(),
+          packageName: 'ZPACKAGE',
+          outputDir,
+          recursive: false,
+        });
+        const res = raw as { content: Array<{ type: string; text: string }> };
+        assert.ok(Array.isArray(res.content));
+        assert.ok(res.content[0]?.text);
+      } finally {
+        fs.rmSync(outputDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  describe('import_transport tool', () => {
+    it('invokes ImportService without throwing and returns a text response', async () => {
+      const fs = await import('node:fs');
+      const os = await import('node:os');
+      const path = await import('node:path');
+      const outputDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'adt-mcp-import-tr-'),
+      );
+      try {
+        const { raw } = await callTool('import_transport', {
+          ...connArgs(),
+          transportNumber: 'DEVK900001',
+          outputDir,
+        });
+        const res = raw as { content: Array<{ type: string; text: string }> };
+        assert.ok(Array.isArray(res.content));
+        assert.ok(res.content[0]?.text);
+      } finally {
+        fs.rmSync(outputDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  // ── cts_update_transport ───────────────────────────────────────
+
+  describe('cts_update_transport tool', () => {
+    it('updates a transport description', async () => {
+      const { json } = await callTool('cts_update_transport', {
+        ...connArgs(),
+        transportNumber: 'DEVK900001',
+        description: 'Updated description',
+      });
+      const data = json as { status: string; transport: string };
+      assert.strictEqual(data.status, 'updated');
+      assert.strictEqual(data.transport, 'DEVK900001');
+    });
+
+    it('rejects calls with no update fields', async () => {
+      const { raw } = await callTool('cts_update_transport', {
+        ...connArgs(),
+        transportNumber: 'DEVK900001',
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(result.isError, 'should error when no fields provided');
+    });
+  });
+
+  // ── cts_reassign_transport ─────────────────────────────────────
+
+  describe('cts_reassign_transport tool', () => {
+    it('reassigns a transport to a new owner', async () => {
+      const { json } = await callTool('cts_reassign_transport', {
+        ...connArgs(),
+        transportNumber: 'DEVK900001',
+        targetUser: 'NEWOWNER',
+        recursive: true,
+      });
+      const data = json as {
+        status: string;
+        transport: string;
+        newOwner: string;
+        recursive: boolean;
+      };
+      assert.strictEqual(data.status, 'reassigned');
+      assert.strictEqual(data.newOwner, 'NEWOWNER');
+      assert.strictEqual(data.recursive, true);
+    });
+  });
+
+  // ── stat_package ───────────────────────────────────────────────
+
+  describe('stat_package tool', () => {
+    it('returns exists=true with metadata for a known package', async () => {
+      const { json } = await callTool('stat_package', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as { exists: boolean; metadata?: unknown };
+      assert.strictEqual(data.exists, true);
+      assert.ok(data.metadata, 'should include metadata');
+    });
+  });
+
+  // ── get_package ────────────────────────────────────────────────
+
+  describe('get_package tool', () => {
+    it('returns package metadata without objects by default', async () => {
+      const { json } = await callTool('get_package', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+      });
+      const data = json as {
+        packageName: string;
+        metadata: unknown;
+        objects?: unknown;
+      };
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+      assert.ok(data.metadata, 'should include metadata');
+      assert.strictEqual(data.objects, undefined);
+    });
+
+    it('returns package metadata with objects when includeObjects=true', async () => {
+      const { json } = await callTool('get_package', {
+        ...connArgs(),
+        packageName: 'ZPACKAGE',
+        includeObjects: true,
+      });
+      const data = json as {
+        packageName: string;
+        metadata: unknown;
+        objects?: unknown[];
+        count?: number;
+      };
+      assert.strictEqual(data.packageName, 'ZPACKAGE');
+      assert.ok(Array.isArray(data.objects), 'should include objects array');
+    });
+  });
+
+  // ── lookup_user ────────────────────────────────────────────────
+
+  describe('lookup_user tool', () => {
+    it('returns the current user when no query given', async () => {
+      const { json } = await callTool('lookup_user', connArgs());
+      const data = json as { mode: string; user: { userName: string } };
+      assert.strictEqual(data.mode, 'current');
+      assert.ok(data.user.userName, 'should have userName');
+    });
+
+    it('returns exact user lookup result', async () => {
+      const { json } = await callTool('lookup_user', {
+        ...connArgs(),
+        query: 'DEVELOPER',
+      });
+      const data = json as { mode: string; count: number; users: unknown[] };
+      assert.strictEqual(data.mode, 'exact');
+      assert.ok(Array.isArray(data.users));
+    });
+
+    it('returns wildcard search results', async () => {
+      const { json } = await callTool('lookup_user', {
+        ...connArgs(),
+        query: 'DEV*',
+      });
+      const data = json as { mode: string; count: number; users: unknown[] };
+      assert.strictEqual(data.mode, 'search');
+      assert.ok(Array.isArray(data.users));
+    });
+  });
+
+  // ── DDIC / CDS read tools + run_abap ──────────────────────────
+
+  describe('get_domain tool', () => {
+    it('returns DDIC domain metadata', async () => {
+      const { json } = await callTool('get_domain', {
+        ...connArgs(),
+        domainName: 'ZDOM_SAMPLE',
+      });
+      assert.ok(json, 'should return domain metadata');
+    });
+  });
+
+  describe('get_data_element tool', () => {
+    it('returns DDIC data element metadata', async () => {
+      const { json } = await callTool('get_data_element', {
+        ...connArgs(),
+        dataElementName: 'ZDTEL_SAMPLE',
+      });
+      assert.ok(json, 'should return data element metadata');
+    });
+  });
+
+  describe('get_structure tool', () => {
+    it('returns DDIC structure metadata', async () => {
+      const { json, raw } = await callTool('get_structure', {
+        ...connArgs(),
+        structureName: 'ZSTRUCT_SAMPLE',
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(!result.isError, 'should not return an error');
+      assert.ok(json !== undefined, 'should return a result');
+    });
+
+    it('returns DDIC structure with source when includeSource=true', async () => {
+      const { json, raw } = await callTool('get_structure', {
+        ...connArgs(),
+        structureName: 'ZSTRUCT_SAMPLE',
+        includeSource: true,
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(!result.isError);
+      const data = json as { source?: string };
+      assert.strictEqual(typeof data.source, 'string');
+    });
+  });
+
+  describe('get_cds_ddl tool', () => {
+    it('returns CDS DDL metadata', async () => {
+      const { raw } = await callTool('get_cds_ddl', {
+        ...connArgs(),
+        ddlName: 'ZDDL_SAMPLE',
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(!result.isError, 'should not return an error');
+    });
+
+    it('returns CDS DDL metadata + source', async () => {
+      const { json, raw } = await callTool('get_cds_ddl', {
+        ...connArgs(),
+        ddlName: 'ZDDL_SAMPLE',
+        includeSource: true,
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(!result.isError);
+      const data = json as { source?: string };
+      assert.strictEqual(typeof data.source, 'string');
+    });
+  });
+
+  describe('get_cds_dcl tool', () => {
+    it('returns CDS DCL metadata', async () => {
+      const { raw } = await callTool('get_cds_dcl', {
+        ...connArgs(),
+        dclName: 'ZDCL_SAMPLE',
+      });
+      const result = raw as { isError?: boolean };
+      assert.ok(!result.isError);
+    });
+  });
+
+  describe('create_object tool (DDIC/CDS types)', () => {
+    it('creates a DOMA object', async () => {
+      const { json } = await callTool('create_object', {
+        ...connArgs(),
+        objectName: 'ZDOM_NEW',
+        objectType: 'DOMA',
+        description: 'New test domain',
+        packageName: 'ZPACKAGE',
+        transport: 'DEVK900001',
+      });
+      const data = json as { status: string; objectType: string };
+      assert.strictEqual(data.status, 'created');
+      assert.strictEqual(data.objectType, 'DOMA');
+    });
+
+    it('creates a DDLS object', async () => {
+      const { json } = await callTool('create_object', {
+        ...connArgs(),
+        objectName: 'ZDDL_NEW',
+        objectType: 'DDLS',
+        description: 'New CDS DDL',
+        packageName: 'ZPACKAGE',
+        transport: 'DEVK900001',
+      });
+      const data = json as { status: string; objectType: string };
+      assert.strictEqual(data.status, 'created');
+      assert.strictEqual(data.objectType, 'DDLS');
+    });
+  });
+
+  describe('delete_object tool (DDIC/CDS types)', () => {
+    it('deletes a DOMA object', async () => {
+      const { json } = await callTool('delete_object', {
+        ...connArgs(),
+        objectName: 'ZDOM_SAMPLE',
+        objectType: 'DOMA',
+        transport: 'DEVK900001',
+      });
+      const data = json as { status: string };
+      assert.strictEqual(data.status, 'deleted');
+    });
+
+    it('deletes a DDLS object', async () => {
+      const { json } = await callTool('delete_object', {
+        ...connArgs(),
+        objectName: 'ZDDL_SAMPLE',
+        objectType: 'DDLS',
+        transport: 'DEVK900001',
+      });
+      const data = json as { status: string };
+      assert.strictEqual(data.status, 'deleted');
+    });
+  });
+
+  describe('run_abap tool', () => {
+    it('runs an ABAP snippet and returns classrun output', async () => {
+      const { json } = await callTool('run_abap', {
+        ...connArgs(),
+        source: "out->write( 'hello' ).",
+      });
+      const data = json as {
+        className: string;
+        output: string;
+        classDeleted: boolean;
+      };
+      assert.ok(data.className, 'should return className');
+      assert.strictEqual(typeof data.output, 'string');
+      assert.strictEqual(typeof data.classDeleted, 'boolean');
+    });
+
+    it('keeps the class when keepClass=true', async () => {
+      const { json } = await callTool('run_abap', {
+        ...connArgs(),
+        source: "out->write( 'keep' ).",
+        keepClass: true,
+      });
+      const data = json as { classDeleted: boolean };
+      assert.strictEqual(data.classDeleted, false);
+    });
+  });
+
   // ── tool listing ───────────────────────────────────────────────
 
   describe('tool listing', () => {
@@ -879,6 +1291,7 @@ describe('adt-mcp integration tests', () => {
         'cts_create_transport',
         'cts_release_transport',
         'cts_delete_transport',
+        'cts_search_transports',
         'atc_run',
         'get_source',
         'update_source',
@@ -915,6 +1328,23 @@ describe('adt-mcp integration tests', () => {
         'publish_service_binding',
         'get_git_types',
         'git_export',
+        // Import tools (mirror `adt import object|package|transport`)
+        'import_object',
+        'import_package',
+        'import_transport',
+        // CTS + package parity tools
+        'cts_update_transport',
+        'cts_reassign_transport',
+        'stat_package',
+        'get_package',
+        'lookup_user',
+        // DDIC/CDS read tools + run_abap
+        'run_abap',
+        'get_domain',
+        'get_data_element',
+        'get_structure',
+        'get_cds_ddl',
+        'get_cds_dcl',
       ];
       for (const name of expected) {
         assert.ok(names.has(name), `tool "${name}" should be listed`);

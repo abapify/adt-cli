@@ -1,0 +1,10 @@
+@EndUserText.label: 'Example table'
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+define table ztable {
+  key mandt  : abap.clnt not null;
+  key docid  : abap.char(10) not null;
+      cust_id: abap.char(10);
+      amount : abap.dec(15, 2);
+      currency : abap.cuky;
+}

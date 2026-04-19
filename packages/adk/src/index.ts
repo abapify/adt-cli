@@ -46,6 +46,7 @@ export type {
   InterfaceResponse,
   PackageResponse,
   ProgramResponse,
+  IncludeResponse,
   FunctionGroupResponse,
   FunctionModuleResponse,
   TransportGetResponse,
@@ -103,6 +104,13 @@ export type {
 } from './objects/repository/prog';
 export { AdkProgram } from './objects/repository/prog';
 
+// Include types and class
+export type {
+  AbapInclude,
+  IncludeXml, // Raw API response type
+} from './objects/repository/incl';
+export { AdkInclude } from './objects/repository/incl';
+
 // Function group types and class
 export type {
   AbapFunctionGroup,
@@ -129,6 +137,15 @@ export {
   type TableXml,
   type TableTypeXml,
 } from './objects/ddic';
+
+// CDS types (DDL, DCL)
+export { AdkDdlSource, AdkDclSource } from './objects/cds';
+
+// RAP types and classes
+export { AdkBehaviorDefinition } from './objects/repository/bdef';
+export { AdkBadi } from './objects/repository/badi';
+export { AdkServiceDefinition } from './objects/repository/srvd';
+export { AdkServiceBinding } from './objects/repository/srvb';
 
 // CTS types (legacy complex transport)
 export type {

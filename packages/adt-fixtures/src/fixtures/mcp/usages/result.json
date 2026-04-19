@@ -1,0 +1,12 @@
+{
+  "usages": {
+    "usage": [
+      {
+        "uri": "/sap/bc/adt/programs/programs/zprog_example",
+        "name": "ZPROG_EXAMPLE",
+        "type": "PROG",
+        "location": "line 42"
+      }
+    ]
+  }
+}

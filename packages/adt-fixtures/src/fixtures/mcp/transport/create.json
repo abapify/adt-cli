@@ -1,0 +1,11 @@
+{
+  "root": {
+    "request": {
+      "trkorr": "DEVK900099",
+      "as4text": "New transport",
+      "as4user": "DEVELOPER",
+      "trstatus": "D",
+      "trfunction": "K"
+    }
+  }
+}

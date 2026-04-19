@@ -28,10 +28,12 @@ function propertiesToMap(config: unknown): Record<string, string> {
   const result: Record<string, string> = {};
   if (!config || typeof config !== 'object') return result;
 
+  // Response has the root `configuration` wrapper, unwrap if present
   const configObj = config as Record<string, unknown>;
-  const properties = configObj.properties as
-    | Record<string, unknown>
-    | undefined;
+  const inner =
+    (configObj.configuration as Record<string, unknown> | undefined) ??
+    configObj;
+  const properties = inner.properties as Record<string, unknown> | undefined;
 
   if (!properties) return result;
 
@@ -44,7 +46,8 @@ function propertiesToMap(config: unknown): Record<string, string> {
     if (prop && typeof prop === 'object') {
       const p = prop as Record<string, unknown>;
       const key = p.key as string | undefined;
-      const value = p['$text'] as string | undefined;
+      // ts-xsd parses simpleContent text as `$value` (see ts-xsd/src/xml/parse.ts)
+      const value = p.$value as string | undefined;
       if (key && value !== undefined) {
         result[key] = String(value);
       }
@@ -54,18 +57,19 @@ function propertiesToMap(config: unknown): Record<string, string> {
 }
 
 /**
- * Build configuration data for PUT request
+ * Build configuration data for PUT request (typed — matches ConfigurationSchema)
  */
 function buildConfigurationData(properties: Record<string, string>) {
   const propertyArray = Object.entries(properties).map(([key, value]) => ({
     key,
-    isMandatory: undefined,
-    $text: value,
+    $value: value,
   }));
 
   return {
-    properties: {
-      property: propertyArray,
+    configuration: {
+      properties: {
+        property: propertyArray,
+      },
     },
   };
 }
@@ -216,12 +220,9 @@ export const treeConfigSetCommand = new Command('set')
       console.log('\n🔄 Saving configuration...');
       const configData = buildConfigurationData(newProps);
 
-      // Cast to unknown to bypass schema mismatch - schema alignment pending
       await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
         configId,
-        configData as unknown as Parameters<
-          typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put
-        >[1],
+        configData,
       );
 
       console.log('✅ Configuration updated successfully');

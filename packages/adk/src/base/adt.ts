@@ -36,6 +36,7 @@ export type {
   PackageResponse as PackageResponseUnion,
   TransportGetResponse,
   ProgramResponse as ProgramResponseUnion,
+  IncludeResponse as IncludeResponseUnion,
   FunctionGroupResponse as FunctionGroupResponseUnion,
   FunctionModuleResponse as FunctionModuleResponseUnion,
   DomainResponse,
@@ -55,7 +56,7 @@ export type {
   ObjectStructureOptions,
   SourceOperations,
   SourcesContract,
-  IncludesContract,
+  IncludesContractSkeleton,
 } from '@abapify/adt-client';
 
 import type {
@@ -63,6 +64,7 @@ import type {
   InterfaceResponse as _InterfaceResponse,
   PackageResponse as _PackageResponse,
   ProgramResponse as _ProgramResponse,
+  IncludeResponse as _IncludeResponse,
   FunctionGroupResponse as _FunctionGroupResponse,
   FunctionModuleResponse as _FunctionModuleResponse,
 } from '@abapify/adt-client';
@@ -93,6 +95,11 @@ export type PackageResponse = Extract<_PackageResponse, { package: unknown }>;
  * Program response type - single root element (no union needed)
  */
 export type ProgramResponse = _ProgramResponse;
+
+/**
+ * Include response type - single root element (no union needed)
+ */
+export type IncludeResponse = _IncludeResponse;
 
 /**
  * Function group response type - single root element (no union needed)
@@ -142,6 +149,8 @@ export interface AdkContract {
   readonly functions: AdtContracts['functions'];
   /** DDIC contracts (domains, data elements, structures, tables, table types) */
   readonly ddic: AdtContracts['ddic'];
+  /** BO contracts (behavior definitions) */
+  readonly bo: AdtContracts['bo'];
 }
 
 /**
@@ -160,5 +169,6 @@ export function createAdkContract(client: AdtClient): AdkContract {
     programs: client.adt.programs,
     functions: client.adt.functions,
     ddic: client.adt.ddic,
+    bo: client.adt.bo,
   };
 }

@@ -64,14 +64,57 @@ function pathToRoute(filePath: string): RouteInfo | null {
     routePath = routePath.slice(0, -6); // Remove '/index'
   }
 
-  // Convert to URL pattern
-  // [slug] → :slug (for pattern display)
-  // [slug] → [^/]+ (for regex)
-  const pattern = '/' + routePath.replace(/\[([^\]]+)\]/g, ':$1');
-  const regexPattern =
-    '^/' +
-    routePath.replace(/\[([^\]]+)\]/g, '([^/]+)').replace(/\//g, '\\/') +
-    '$';
+  // Convert route path into display pattern + regex using a fully linear,
+  // character-by-character scan. No regex is compiled against user-derived
+  // input, so this cannot exhibit super-linear backtracking (S5852).
+  //
+  // Placeholders `[slug]` are detected via indexOf and become:
+  //   - `:slug` in the human-readable pattern
+  //   - `([^/]+)` in the regex
+  // All other literal characters are escaped one-by-one.
+  const REGEX_SPECIALS = new Set([
+    '.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\', '/',
+  ]);
+  const escapeChar = (c: string): string =>
+    REGEX_SPECIALS.has(c) ? '\\' + c : c;
+  const escapeLiteral = (s: string): string => {
+    let out = '';
+    for (const c of s) out += escapeChar(c);
+    return out;
+  };
+
+  let patternBody = '';
+  let regexBody = '';
+  let cursor = 0;
+  while (cursor < routePath.length) {
+    const open = routePath.indexOf('[', cursor);
+    if (open === -1) {
+      const rest = routePath.slice(cursor);
+      patternBody += rest;
+      regexBody += escapeLiteral(rest);
+      break;
+    }
+    const close = routePath.indexOf(']', open + 1);
+    if (close === -1) {
+      // Unterminated placeholder — treat remainder as literal
+      const rest = routePath.slice(cursor);
+      patternBody += rest;
+      regexBody += escapeLiteral(rest);
+      break;
+    }
+    // Literal prefix before '['
+    const prefix = routePath.slice(cursor, open);
+    patternBody += prefix;
+    regexBody += escapeLiteral(prefix);
+    // Placeholder name between [ and ]
+    const name = routePath.slice(open + 1, close);
+    patternBody += ':' + name;
+    regexBody += '([^/]+)';
+    cursor = close + 1;
+  }
+
+  const pattern = '/' + patternBody;
+  const regexPattern = '^/' + regexBody + '$';
 
   const isDynamic = routePath.includes('[');
 
