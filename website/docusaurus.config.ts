@@ -117,12 +117,12 @@ const config: Config = {
 
   themes: [
     [
-      require.resolve('@easyops-cn/docusaurus-search-local'),
+      '@easyops-cn/docusaurus-search-local',
       {
         hashed: true,
         indexDocs: true,
         indexBlog: false,
-        docsDir: '../docs',
+        docsDir: 'docs',
         docsRouteBasePath: '/',
         language: ['en'],
       },

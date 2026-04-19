@@ -19,16 +19,15 @@ description: Install the adt CLI globally and verify the binary is on PATH.
 ## Install
 
 ```bash
-# npm
-npm install -g @abapify/adt-cli
-
-# bun
+# bun (recommended — what the project itself uses)
 bun add -g @abapify/adt-cli
+```
 
-# pnpm
+Other package managers work too:
+
+```bash
+npm install -g @abapify/adt-cli
 pnpm add -g @abapify/adt-cli
-
-# yarn
 yarn global add @abapify/adt-cli
 ```
 

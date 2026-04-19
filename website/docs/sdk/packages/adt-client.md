@@ -66,7 +66,7 @@ const client = createAdtClient({
 });
 
 // Two-layer API:
-const info = await client.adt.core.http.systeminformation.get();
+const info = await client.adt.core.http.systeminformation.getSystemInfo();
 const search = await client.adt.repository.informationsystem.search.quickSearch(
   {
     query: 'ZCL_',

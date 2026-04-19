@@ -25,9 +25,9 @@ Request headers:
 
 ### `client.adt.core.http.systeminformation`
 
-| Method   | HTTP | Path                                      | Summary                           |
-| -------- | ---- | ----------------------------------------- | --------------------------------- |
-| `.get()` | GET  | `/sap/bc/adt/core/http/systeminformation` | SID, client, release, language, … |
+| Method             | HTTP | Path                                      | Summary                           |
+| ------------------ | ---- | ----------------------------------------- | --------------------------------- |
+| `.getSystemInfo()` | GET  | `/sap/bc/adt/core/http/systeminformation` | SID, client, release, language, … |
 
 ## Schemas
 
@@ -39,7 +39,7 @@ systeminformation.
 
 ```ts
 const session = await client.adt.core.http.sessions.getSession();
-const info = await client.adt.core.http.systeminformation.get();
+const info = await client.adt.core.http.systeminformation.getSystemInfo();
 ```
 
 :::info Session lifecycle
