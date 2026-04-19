@@ -20,7 +20,7 @@ function isVerbose(): boolean {
       const envContent = require('fs').readFileSync(envPath, 'utf-8');
       return envContent.includes('NX_VERBOSE_LOGGING=true');
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore errors
   }
 
@@ -35,7 +35,7 @@ function logDebug(message: string) {
 
 export const createNodesV2: CreateNodesV2 = [
   '**/tsdown.config.ts',
-  (configFiles, options, context) => {
+  (configFiles, _options, _context) => {
     const verbose = isVerbose();
 
     if (verbose) {

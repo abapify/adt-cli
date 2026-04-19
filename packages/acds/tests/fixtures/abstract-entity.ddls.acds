@@ -1,0 +1,6 @@
+@EndUserText.label: 'Sales abstract root'
+define abstract entity A_SalesRoot {
+  key SalesOrderId : abap.char(10) not null;
+      CustomerId   : abap.char(10);
+      TotalAmount  : abap.dec(15, 2);
+}

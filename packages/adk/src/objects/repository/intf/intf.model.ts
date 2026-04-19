@@ -65,12 +65,79 @@ export class AdkInterface extends AdkMainObject<
   }
 
   // ============================================
-  // Static Factory Method
+  // Static Factory Methods
   // ============================================
 
   static async get(name: string, ctx?: AdkContext): Promise<AdkInterface> {
     const context = ctx ?? getGlobalContext();
     return new AdkInterface(context, name).load();
+  }
+
+  /**
+   * Check if an interface exists on SAP
+   */
+  static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
+    try {
+      await AdkInterface.get(name, ctx);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a new ABAP interface on SAP
+   *
+   * @param name - Interface name (e.g., 'ZIF_MY_INTERFACE')
+   * @param description - Short description
+   * @param packageName - Package to assign the interface to
+   * @param options - Save options (transport)
+   * @param ctx - Optional ADK context
+   */
+  static async create(
+    name: string,
+    description: string,
+    packageName: string,
+    options?: { transport?: string },
+    ctx?: AdkContext,
+  ): Promise<AdkInterface> {
+    const context = ctx ?? getGlobalContext();
+    const intf = new AdkInterface(context, name.toUpperCase());
+    intf.setData({
+      name: name.toUpperCase(),
+      type: 'INTF/OI',
+      description,
+      language: 'EN',
+      masterLanguage: 'EN',
+      packageRef: {
+        name: packageName.toUpperCase(),
+        uri: `/sap/bc/adt/packages/${encodeURIComponent(packageName.toUpperCase())}`,
+        type: 'DEVC/K',
+      },
+    } as unknown as InterfaceXml);
+    await intf.save({ transport: options?.transport, mode: 'create' });
+    return intf;
+  }
+
+  /**
+   * Delete an ABAP interface from SAP
+   *
+   * @param name - Interface name
+   * @param options - Delete options (transport)
+   * @param ctx - Optional ADK context
+   */
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const intf = new AdkInterface(context, name.toUpperCase());
+    const contract = intf.crudContract;
+    await contract.delete(name.toUpperCase(), {
+      corrNr: options?.transport,
+      lockHandle: options?.lockHandle,
+    });
   }
 }
 

@@ -6,8 +6,9 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ToolContext } from '../types.js';
-import { connectionShape } from './shared-schemas.js';
+import type { ToolContext } from '../types';
+import { connectionShape } from './shared-schemas';
+import { extractDiscoveryWorkspaces } from './utils';
 
 export function registerDiscoveryTool(
   server: McpServer,
@@ -27,18 +28,15 @@ export function registerDiscoveryTool(
       try {
         const client = ctx.getClient(args);
         const discovery = await client.adt.discovery.getDiscovery();
-
-        const result = discovery as Record<string, unknown>;
+        const workspaces = extractDiscoveryWorkspaces(discovery);
 
         // Apply optional filter
-        if (args.filter && result.workspaces) {
-          const workspaces = Array.isArray(result.workspaces)
-            ? result.workspaces
-            : [result.workspaces];
-          const filtered = workspaces.filter((ws: Record<string, unknown>) => {
-            const title = typeof ws['title'] === 'string' ? ws['title'] : '';
-            return title.toLowerCase().includes(args.filter!.toLowerCase());
-          });
+        if (args.filter) {
+          const filtered = workspaces.filter((workspace) =>
+            String(workspace.title ?? '')
+              .toLowerCase()
+              .includes(args.filter.toLowerCase()),
+          );
           return {
             content: [
               {
@@ -51,7 +49,10 @@ export function registerDiscoveryTool(
 
         return {
           content: [
-            { type: 'text' as const, text: JSON.stringify(result, null, 2) },
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ workspaces }, null, 2),
+            },
           ],
         };
       } catch (error) {

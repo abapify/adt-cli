@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<usagereferences:usageScopeResult localUsage="false" xmlns:usagereferences="http://www.sap.com/adt/ris/usageReferences">
+  <usagereferences:objectIdentifier displayName="ZCL_EXAMPLE (Class)" globalType="CLAS/OC"/>
+  <usagereferences:grade definitions="false" elements="false" indirectReferences="true"/>
+  <usagereferences:objectTypes>
+    <usagereferences:type name="CLAS/OC" isSelected="true" isDefault="true"/>
+    <usagereferences:type name="PROG/1P" isSelected="true" isDefault="true"/>
+  </usagereferences:objectTypes>
+  <usagereferences:payload>MOCK_PAYLOAD</usagereferences:payload>
+</usagereferences:usageScopeResult>

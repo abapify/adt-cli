@@ -11,7 +11,7 @@ export const discoveryCommand = new Command('discovery')
     'Save discovery data to file (JSON or XML based on extension)',
   )
   .option('-f, --filter <text>', 'Filter workspaces by title')
-  .action(async (options, command) => {
+  .action(async (options, _command) => {
     try {
       // Create v2 client with capture enabled
       const adtClient = await getAdtClientV2({ capture: true });

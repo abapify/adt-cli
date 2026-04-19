@@ -23,7 +23,7 @@ describe('Type Inference', () => {
     // NOT as 'unknown'
 
     // Type test: If this compiles, type inference works
-    type DiscoveryType = Awaited<
+    type _DiscoveryType = Awaited<
       ReturnType<typeof client.discovery.getDiscovery>
     >;
 
@@ -33,14 +33,14 @@ describe('Type Inference', () => {
       // If we get here, these properties should be typed correctly
       const workspaceCount: number = discovery.workspace.length;
       assert.ok(typeof workspaceCount === 'number');
-    } catch (error) {
+    } catch (_error) {
       // Expected to fail at runtime - we're testing compile-time types
       assert.ok(true, 'Runtime failure expected - this is a type test');
     }
   });
 
   it('should infer request body types from schema', async () => {
-    const client = createAdtClient({
+    const _client = createAdtClient({
       baseUrl: 'https://example.com',
       username: 'test',
       password: 'test',

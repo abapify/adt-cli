@@ -1,0 +1,8 @@
+{
+  "objectReference": {
+    "uri": "/sap/bc/adt/oo/classes/zcl_example",
+    "type": "CLAS/OC",
+    "name": "ZCL_EXAMPLE",
+    "description": "Example class"
+  }
+}

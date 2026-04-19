@@ -47,8 +47,10 @@ function extractConfigId(uri: string): string {
 }
 
 /**
- * Convert properties from parsed configuration to key-value map
- * The schema parses text content as '$text' (speci convention)
+ * Convert properties from parsed configuration to key-value map.
+ *
+ * The typed PUT/GET schema stores property text as `$value` (ts-xsd
+ * simpleContent convention — see `packages/ts-xsd/src/xml/parse.ts`).
  */
 function propertiesToMap(config: unknown): Record<string, string> {
   const result: Record<string, string> = {};
@@ -70,8 +72,7 @@ function propertiesToMap(config: unknown): Record<string, string> {
     if (prop && typeof prop === 'object') {
       const p = prop as Record<string, unknown>;
       const key = p.key as string | undefined;
-      // speci uses '$text' for text content (not '#text')
-      const value = p['$text'] as string | undefined;
+      const value = p.$value as string | undefined;
       if (key && value !== undefined) {
         result[key] = String(value);
       }
@@ -108,49 +109,32 @@ function propertiesToConfigState(
 
 /**
  * Convert TreeConfigState to Configuration schema format for saving
+ * (matches ConfigurationSchema — root element is `configuration`)
  */
 function configStateToConfigurationData(config: TreeConfigState) {
   // Convert date format YYYY-MM-DD to YYYYMMDD
   const fromDate = config.fromDate.replace(/-/g, '');
   const toDate = config.toDate.replace(/-/g, '');
 
-  // Build properties array matching the schema structure
-  // Each property needs: key, isMandatory (optional attribute), $text (text content)
+  // Build properties array matching the schema structure.
+  // simpleContent text is `$value` per ts-xsd convention.
   const properties = [
-    { key: 'User', isMandatory: undefined, $text: config.userName },
-    {
-      key: 'WorkbenchRequests',
-      isMandatory: undefined,
-      $text: String(config.workbenchRequests),
-    },
-    {
-      key: 'CustomizingRequests',
-      isMandatory: undefined,
-      $text: String(config.customizingRequests),
-    },
-    {
-      key: 'TransportOfCopies',
-      isMandatory: undefined,
-      $text: String(config.transportOfCopies),
-    },
-    {
-      key: 'Modifiable',
-      isMandatory: undefined,
-      $text: String(config.modifiable),
-    },
-    { key: 'Released', isMandatory: undefined, $text: String(config.released) },
-    {
-      key: 'DateFilter',
-      isMandatory: undefined,
-      $text: config.releasedDateFilter,
-    },
-    { key: 'FromDate', isMandatory: undefined, $text: fromDate },
-    { key: 'ToDate', isMandatory: undefined, $text: toDate },
+    { key: 'User', $value: config.userName },
+    { key: 'WorkbenchRequests', $value: String(config.workbenchRequests) },
+    { key: 'CustomizingRequests', $value: String(config.customizingRequests) },
+    { key: 'TransportOfCopies', $value: String(config.transportOfCopies) },
+    { key: 'Modifiable', $value: String(config.modifiable) },
+    { key: 'Released', $value: String(config.released) },
+    { key: 'DateFilter', $value: config.releasedDateFilter },
+    { key: 'FromDate', $value: fromDate },
+    { key: 'ToDate', $value: toDate },
   ];
 
   return {
-    properties: {
-      property: properties,
+    configuration: {
+      properties: {
+        property: properties,
+      },
     },
   };
 }
@@ -256,13 +240,13 @@ export const treeConfigCommand = new Command('config')
         );
 
       // Response has nested structure - extract configuration object
-      // Cast to expected shape for property access
+      // Cast to expected shape for property access (matches ConfigurationSchema)
       type ConfigDetails = {
         configuration?: {
           properties?: {
             property?: Array<{
               key?: string;
-              _text?: string;
+              $value?: string;
               isMandatory?: boolean;
             }>;
           };
@@ -293,15 +277,11 @@ export const treeConfigCommand = new Command('config')
           // Convert config to schema-compatible format
           const configData = configStateToConfigurationData(newConfig);
 
-          // PUT the configuration back using the typed contract
-          // Body type is Partial<Configuration> - we only send properties
-          // Note: CSRF token is auto-initialized by the adapter before write operations
-          // Cast to unknown to bypass schema mismatch - schema alignment pending
+          // PUT the configuration back using the typed contract.
+          // Note: CSRF token is auto-initialized by the adapter before writes.
           await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
             configId,
-            configData as unknown as Parameters<
-              typeof client.adt.cts.transportrequests.searchconfiguration.configurations.put
-            >[1],
+            configData,
           );
         };
 

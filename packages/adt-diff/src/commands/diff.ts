@@ -21,7 +21,14 @@
  *   adt diff zcl_myclass.clas.xml --no-color
  */
 
-import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
+import {
+  requireFormatPlugin,
+  getFormatPlugin,
+  type CliCommandPlugin,
+  type CliContext,
+  type FormatHandler,
+  type ParsedFormatFilename,
+} from '@abapify/adt-plugin';
 import {
   createAdk,
   AdkObject,
@@ -33,12 +40,21 @@ import { glob as nativeGlob } from 'node:fs/promises';
 import { resolve, basename, dirname, join, relative } from 'node:path';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
-import {
-  getHandler,
-  getSupportedTypes,
-  parseAbapGitFilename,
-  type ObjectHandler,
-} from '@abapify/adt-plugin-abapgit';
+
+// abapGit is the only diff format today. The plugin registers itself on
+// import (see adt-cli/src/lib/cli.ts bootstrap).
+const abapgit = () => requireFormatPlugin('abapgit');
+const getHandler = (type: string): FormatHandler | undefined =>
+  abapgit().getHandler(type);
+// Used in command `description` at module-load time — must be safe to call
+// before the bootstrap has registered the plugin (returns `[]` in that case;
+// the actual `execute` body always runs post-bootstrap).
+const getSupportedTypes = (): string[] => [
+  ...(getFormatPlugin('abapgit')?.supportedTypes ?? []),
+];
+const parseAbapGitFilename = (filename: string): ParsedFormatFilename | null =>
+  abapgit().parseFilename?.(filename) ?? null;
+type ObjectHandler = FormatHandler;
 import { tablXmlToCdsDdl } from '../lib/abapgit-to-cds';
 import { adtContract } from '@abapify/adt-contracts';
 
@@ -53,9 +69,14 @@ import { adtContract } from '@abapify/adt-contracts';
 const adtSchemaMap: Record<
   string,
   {
-    schema: {
-      build: (data: unknown, options?: { pretty?: boolean }) => string;
-    };
+    // The actual schemas are TypedSchema<T> from adt-schemas. Each has a
+    // narrowly-typed build(data: T, ...) that is contravariantly incompatible
+    // with a unified (data: unknown, ...) signature. We widen to `any` here
+    // so the callers in this file (which know the wrapperKey) can pass the
+    // correct shape. See FormatHandler<T, TSchema> in adt-plugin for the
+    // same pattern.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    schema: { build: (data: any, options?: { pretty?: boolean }) => string };
     wrapperKey: string;
   }
 > = {

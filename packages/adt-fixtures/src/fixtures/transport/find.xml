@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TODO-synthetic: Fabricated minimal ABAP XML envelope mimicking the
+  `GET /sap/bc/adt/cts/transports?_action=FIND` response shape defined in
+  adt-schemas/.xsd/custom/transportfind.xsd. Replace with a real sanitized
+  SAP response when available. Transport numbers, usernames and dates are
+  mocked (MOCK*, TESTUSER).
+-->
+<asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+    <DATA>
+      <CTS_REQ_HEADER>
+        <TRKORR>MOCK900001</TRKORR>
+        <TRFUNCTION>K</TRFUNCTION>
+        <TRSTATUS>D</TRSTATUS>
+        <TARSYSTEM>PRD</TARSYSTEM>
+        <AS4USER>TESTUSER</AS4USER>
+        <AS4DATE>2025-01-01</AS4DATE>
+        <AS4TIME>12:00:00</AS4TIME>
+        <AS4TEXT>Mock workbench request (modifiable)</AS4TEXT>
+        <CLIENT>100</CLIENT>
+        <REPOID></REPOID>
+      </CTS_REQ_HEADER>
+      <CTS_REQ_HEADER>
+        <TRKORR>MOCK900002</TRKORR>
+        <TRFUNCTION>K</TRFUNCTION>
+        <TRSTATUS>R</TRSTATUS>
+        <TARSYSTEM>PRD</TARSYSTEM>
+        <AS4USER>TESTUSER</AS4USER>
+        <AS4DATE>2025-01-02</AS4DATE>
+        <AS4TIME>13:00:00</AS4TIME>
+        <AS4TEXT>Mock workbench request (released)</AS4TEXT>
+        <CLIENT>100</CLIENT>
+        <REPOID></REPOID>
+      </CTS_REQ_HEADER>
+    </DATA>
+  </asx:values>
+</asx:abap>

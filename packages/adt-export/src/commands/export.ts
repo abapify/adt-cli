@@ -621,19 +621,48 @@ export const exportCommand: CliCommandPlugin = {
                     )) as string;
 
                     // Step 3: PUT with modified superPackage
-                    // Replace the superPackage reference in the XML
-                    // The XML uses adtcore:name and adtcore:uri attributes
+                    // Replace the superPackage reference in the XML.
+                    // Use a linear scan to locate the <pak:superPackage ...>
+                    // tag and rewrite its adtcore:name / adtcore:uri attributes
+                    // without relying on regex backtracking (avoids ReDoS).
                     let modifiedXml = inactiveXml;
-                    // Replace superPackage name attribute (adtcore:name="...")
-                    modifiedXml = modifiedXml.replace(
-                      /(<pak:superPackage[^>]*adtcore:name=")([^"]*)(")/,
-                      `$1${expectedSuper}$3`,
-                    );
-                    // Replace superPackage URI attribute (adtcore:uri="...")
-                    modifiedXml = modifiedXml.replace(
-                      /(<pak:superPackage[^>]*adtcore:uri=")([^"]*)(")/,
-                      `$1/sap/bc/adt/packages/${expectedSuper.toLowerCase()}$3`,
-                    );
+                    const tagStart = modifiedXml.indexOf('<pak:superPackage');
+                    if (tagStart !== -1) {
+                      const tagEnd = modifiedXml.indexOf('>', tagStart);
+                      if (tagEnd !== -1) {
+                        const before = modifiedXml.slice(0, tagStart);
+                        const tag = modifiedXml.slice(tagStart, tagEnd + 1);
+                        const after = modifiedXml.slice(tagEnd + 1);
+                        const replaceAttr = (
+                          src: string,
+                          attr: string,
+                          newValue: string,
+                        ): string => {
+                          const needle = `${attr}="`;
+                          const a = src.indexOf(needle);
+                          if (a === -1) return src;
+                          const valStart = a + needle.length;
+                          const valEnd = src.indexOf('"', valStart);
+                          if (valEnd === -1) return src;
+                          return (
+                            src.slice(0, valStart) +
+                            newValue +
+                            src.slice(valEnd)
+                          );
+                        };
+                        let newTag = replaceAttr(
+                          tag,
+                          'adtcore:name',
+                          expectedSuper,
+                        );
+                        newTag = replaceAttr(
+                          newTag,
+                          'adtcore:uri',
+                          `/sap/bc/adt/packages/${expectedSuper.toLowerCase()}`,
+                        );
+                        modifiedXml = before + newTag + after;
+                      }
+                    }
 
                     await client.fetch(
                       `${pkgUri}?lockHandle=${encodeURIComponent(lockHandle)}`,

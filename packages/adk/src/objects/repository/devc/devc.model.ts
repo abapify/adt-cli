@@ -126,10 +126,15 @@ export class AdkPackage
           },
         );
 
-      // Parse object references - filter for DEVC type and exclude self
-      const refs = response.objectReferences?.objectReference ?? [];
+      // Parse object references - filter for DEVC type and exclude self.
+      // adtcore response is a union; narrow to the objectReferences variant.
+      const refs =
+        'objectReferences' in response
+          ? (response.objectReferences?.objectReference ?? [])
+          : [];
       const subpkgRefs = (Array.isArray(refs) ? refs : [refs]).filter(
-        (ref) => ref.type === 'DEVC/K' && ref.name !== this.name,
+        (ref): ref is typeof ref & { name: string } =>
+          !!ref.name && ref.type === 'DEVC/K' && ref.name !== this.name,
       );
 
       // Load all candidate packages and filter to direct children only
@@ -160,10 +165,15 @@ export class AdkPackage
           },
         );
 
-      // Parse object references - filter out packages (DEVC) and objects from other packages
-      const refs = response.objectReferences?.objectReference ?? [];
+      // Parse object references - filter out packages (DEVC) and objects from other packages.
+      // adtcore response is a union; narrow to the objectReferences variant.
+      const refs =
+        'objectReferences' in response
+          ? (response.objectReferences?.objectReference ?? [])
+          : [];
       const objRefs = (Array.isArray(refs) ? refs : [refs]).filter(
-        (ref) =>
+        (ref): ref is typeof ref & { name: string } =>
+          !!ref.name &&
           ref.type !== 'DEVC/K' &&
           ref.packageName?.toUpperCase() === this.name.toUpperCase(),
       );
@@ -340,6 +350,26 @@ export class AdkPackage
     } as PackageXml);
     await pkg.save({ transport: options?.transport, mode: 'create' });
     return pkg;
+  }
+
+  /**
+   * Delete an ABAP package from SAP
+   *
+   * @param name - Package name
+   * @param options - Delete options (transport, lockHandle)
+   * @param ctx - Optional ADK context (uses global context if not provided)
+   */
+  static async delete(
+    name: string,
+    options?: { transport?: string; lockHandle?: string },
+    ctx?: AdkContext,
+  ): Promise<void> {
+    const context = ctx ?? getGlobalContext();
+    const pkg = new AdkPackage(context, name.toUpperCase());
+    await pkg.crudContract.delete(name.toUpperCase(), {
+      ...(options?.transport && { corrNr: options.transport }),
+      ...(options?.lockHandle && { lockHandle: options.lockHandle }),
+    });
   }
 }
 

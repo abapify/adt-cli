@@ -7,7 +7,7 @@
  */
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createMcpServer } from '../lib/server.js';
+import { createMcpServer } from '../lib/server';
 
 const server = createMcpServer();
 const transport = new StdioServerTransport();

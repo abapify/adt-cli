@@ -19,6 +19,9 @@
       "path": "../adt-diff"
     },
     {
+      "path": "../adt-aunit"
+    },
+    {
       "path": "../adt-atc"
     },
     {
@@ -32,6 +35,15 @@
     },
     {
       "path": "../adt-tui/tsconfig.lib.json"
+    },
+    {
+      "path": "../adt-rfc/tsconfig.lib.json"
+    },
+    {
+      "path": "../adt-plugin-gcts-cli/tsconfig.lib.json"
+    },
+    {
+      "path": "../adt-plugin-gcts/tsconfig.lib.json"
     },
     {
       "path": "../adt-plugin-abapgit/tsconfig.lib.json"

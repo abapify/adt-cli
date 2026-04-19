@@ -1,0 +1,13 @@
+{
+  "request": {
+    "trkorr": "DEVK900001",
+    "as4text": "First transport",
+    "as4user": "DEVELOPER",
+    "trstatus": "D",
+    "trfunction": "K",
+    "tarsystem": "QAS",
+    "task": [
+      { "trkorr": "DEVK900001_T1", "as4user": "DEVELOPER", "trstatus": "D" }
+    ]
+  }
+}

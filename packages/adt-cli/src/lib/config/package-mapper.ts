@@ -15,7 +15,7 @@ export class PackageMapper {
   toLocal(remotePkg: string, context?: ImportContext): string {
     // 1. Try static mapping first (reverse lookup)
     const staticMatch = Object.entries(this.mapping).find(
-      ([localName, remoteName]) =>
+      ([_localName, remoteName]) =>
         typeof remoteName === 'string' && remoteName === remotePkg,
     );
 

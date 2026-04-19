@@ -1,0 +1,22 @@
+{
+  "objects": [
+    {
+      "pgmid": "R3TR",
+      "type": "DEVC",
+      "object": "ZMOCK_PKG",
+      "description": "Mock package"
+    },
+    {
+      "pgmid": "R3TR",
+      "type": "CLAS",
+      "object": "ZCL_MOCK",
+      "description": "Mock class"
+    },
+    {
+      "pgmid": "R3TR",
+      "type": "INTF",
+      "object": "ZIF_MOCK",
+      "description": "Mock interface"
+    }
+  ]
+}

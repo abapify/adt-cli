@@ -45,7 +45,7 @@ export const ctsReleaseCommand = new Command('release')
       let tr: AdkTransportRequest;
       try {
         tr = await AdkTransportRequest.get(transport, { client });
-      } catch (err) {
+      } catch (_err) {
         console.error(`❌ Transport ${transport} not found or not accessible`);
         process.exit(1);
       }

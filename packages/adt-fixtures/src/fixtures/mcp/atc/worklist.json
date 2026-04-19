@@ -1,0 +1,18 @@
+{
+  "objects": [
+    {
+      "uri": "/sap/bc/adt/oo/classes/zcl_example",
+      "type": "CLAS",
+      "name": "ZCL_EXAMPLE",
+      "findings": [
+        {
+          "checkId": "CL_CI_TEST_AMDP_HDB_MIGRATION",
+          "checkTitle": "AMDP HDB Migration",
+          "messageTitle": "Consider migrating to AMDP",
+          "priority": 2,
+          "uri": "/sap/bc/adt/oo/classes/zcl_example/source/main#start=10,0"
+        }
+      ]
+    }
+  ]
+}

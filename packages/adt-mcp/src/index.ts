@@ -5,5 +5,5 @@
  * programmatically (e.g. in integration tests).
  */
 
-export { createMcpServer, type McpServerOptions } from './lib/server.js';
-export { registerTools } from './lib/tools/index.js';
+export { createMcpServer, type McpServerOptions } from './lib/server';
+export { registerTools } from './lib/tools/index';

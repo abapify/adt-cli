@@ -15,6 +15,7 @@
  */
 
 export { atcCommand } from './commands/atc';
+export { atcCustomizingCommand } from './commands/atc-customizing';
 export { outputSarifReport, outputGitLabCodeQuality } from './formatters';
 export type {
   AtcResult,

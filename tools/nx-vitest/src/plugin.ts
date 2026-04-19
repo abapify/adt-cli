@@ -21,7 +21,7 @@ function isVerbose(): boolean {
       const envContent = require('fs').readFileSync(envPath, 'utf-8');
       return envContent.includes('NX_VERBOSE_LOGGING=true');
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore errors
   }
 
@@ -134,7 +134,7 @@ function isProjectInVitestConfig(
 
 export const createNodesV2: CreateNodesV2 = [
   '**/vitest.config.{ts,js,mts,mjs,cts,cjs}',
-  (configFiles, options, context) => {
+  (configFiles, _options, _context) => {
     const verbose = isVerbose();
 
     if (verbose) {

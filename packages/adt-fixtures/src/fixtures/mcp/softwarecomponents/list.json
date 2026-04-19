@@ -1,0 +1,18 @@
+{
+  "softwareComponents": {
+    "softwareComponent": [
+      {
+        "name": "SAP_BASIS",
+        "release": "756",
+        "patchLevel": "0012",
+        "description": "SAP Basis Component"
+      },
+      {
+        "name": "SAP_ABA",
+        "release": "756",
+        "patchLevel": "0012",
+        "description": "Cross-Application Component"
+      }
+    ]
+  }
+}

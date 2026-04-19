@@ -1,0 +1,32 @@
+{
+  "branches": [
+    {
+      "name": "main",
+      "type": "active",
+      "isSymbolic": false,
+      "isPeeled": false,
+      "ref": "refs/heads/main"
+    },
+    {
+      "name": "main",
+      "type": "local",
+      "isSymbolic": false,
+      "isPeeled": false,
+      "ref": "refs/heads/main"
+    },
+    {
+      "name": "origin/main",
+      "type": "remote",
+      "isSymbolic": false,
+      "isPeeled": false,
+      "ref": "refs/remotes/origin/main"
+    },
+    {
+      "name": "feature/example",
+      "type": "local",
+      "isSymbolic": false,
+      "isPeeled": false,
+      "ref": "refs/heads/feature/example"
+    }
+  ]
+}

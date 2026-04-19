@@ -91,6 +91,7 @@ export interface TransportCreateOptions {
 export interface TransportUpdateOptions {
   description?: string;
   target?: string;
+  owner?: string;
 }
 
 /**

@@ -119,7 +119,7 @@ describe('Codegen CLI Integration', () => {
 describe('Type Inference with Generated Schemas', () => {
   it('should infer types from person schema structure', () => {
     // This schema structure matches what codegen produces from person.xsd
-    const personSchema = {
+    const _personSchema = {
       targetNamespace: 'http://example.com/person',
       elementFormDefault: 'qualified',
       element: [{ name: 'Person', type: 'tns:PersonType' }],
@@ -166,7 +166,7 @@ describe('Type Inference with Generated Schemas', () => {
 
   it('should infer types from order schema structure', () => {
     // This schema structure matches what codegen produces from order.xsd
-    const orderSchema = {
+    const _orderSchema = {
       targetNamespace: 'http://example.com/order',
       element: [{ name: 'Order', type: 'OrderType' }],
       complexType: [

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  abapGit SRVD (RAP Service Definition) Schema
+
+  Defines SKEY (minimal source descriptor) structure for *.srvd.xml files.
+  The actual service source lives alongside in `<name>.srvd.asrvd`.
+
+  The abapGit zcl_abapgit_object_srvd serializer writes only a lightweight
+  SKEY metadata block because all semantic content is in the .asrvd source.
+  Mirrors the BDEF handler layout.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Import ASX namespace -->
+  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
+
+  <!-- Include base abapGit types -->
+  <xs:include schemaLocation="abapgit.xsd"/>
+
+  <!-- SKEY — RAP service source key (minimal metadata for abapGit) -->
+  <xs:complexType name="SkeyType">
+    <xs:all>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- SRVD-specific values type -->
+  <xs:complexType name="SrvdValuesType">
+    <xs:all>
+      <xs:element name="SKEY" type="SkeyType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- SRVD-specific ABAP envelope -->
+  <xs:complexType name="SrvdAbapType">
+    <xs:sequence>
+      <xs:element name="values" type="SrvdValuesType"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" default="1.0"/>
+  </xs:complexType>
+
+  <!-- THE ONLY ROOT ELEMENT -->
+  <xs:element name="abapGit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="abap" type="SrvdAbapType"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="serializer" type="xs:string" use="required"/>
+      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

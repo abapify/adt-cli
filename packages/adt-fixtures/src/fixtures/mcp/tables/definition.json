@@ -1,0 +1,27 @@
+{
+  "blueSource": {
+    "name": "MARA",
+    "description": "General Material Data",
+    "type": "TABL/DT",
+    "element": [
+      {
+        "name": "MANDT",
+        "type": "CLNT",
+        "length": "3",
+        "description": "Client"
+      },
+      {
+        "name": "MATNR",
+        "type": "CHAR",
+        "length": "18",
+        "description": "Material Number"
+      },
+      {
+        "name": "MBRSH",
+        "type": "CHAR",
+        "length": "1",
+        "description": "Industry Sector"
+      }
+    ]
+  }
+}

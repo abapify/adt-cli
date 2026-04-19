@@ -1,0 +1,23 @@
+{
+  "result": {
+    "rid": "example-repo",
+    "name": "example-repo",
+    "role": "SOURCE",
+    "type": "GITHUB",
+    "vsid": "6IT",
+    "status": "READY",
+    "branch": "main",
+    "currentCommit": "deadbeef00000000000000000000000000000001",
+    "url": "https://example.com/git/example-repo",
+    "connection": "ssl",
+    "config": [
+      { "key": "VCS_CONNECTION", "value": "SSL", "category": "Connection" },
+      {
+        "key": "CLIENT_VCS_URI",
+        "value": "https://example.com/git/example-repo",
+        "category": "Repository"
+      },
+      { "key": "VCS_TARGET_DIR", "value": "src/", "category": "Repository" }
+    ]
+  }
+}

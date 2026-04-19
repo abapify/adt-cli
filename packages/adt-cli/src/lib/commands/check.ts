@@ -15,14 +15,13 @@
  */
 
 import { Command } from 'commander';
-import { XMLParser } from 'fast-xml-parser';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
 import { getObjectUri } from '@abapify/adk';
 import { normalizeSearchResults } from '../utils/lock-helpers';
 
 type CheckMessage = {
   uri?: string;
-  type?: string;
+  type?: unknown;
   shortText?: string;
   category?: string;
   code?: string;
@@ -30,7 +29,7 @@ type CheckMessage = {
 
 type CheckReport = {
   checkMessageList?: {
-    checkMessage?: CheckMessage | CheckMessage[];
+    checkMessage?: CheckMessage[];
   };
   reporter?: string;
   triggeringUri?: string;
@@ -114,74 +113,79 @@ async function resolvePackageObjects(
 }
 
 /**
- * Build checkObjectList XML for the checkruns endpoint
+ * Build a typed checkObjectList body for the checkruns endpoint.
+ * The `checkrun` schema union is discriminated on the root key.
  */
-function buildCheckObjectListXml(
+function buildCheckObjectList(
   objects: Array<{ uri: string }>,
   version = 'active',
-): string {
-  const checkObjects = objects
-    .map(
-      (o) =>
-        `  <chkrun:checkObject adtcore:uri="${o.uri}" chkrun:version="${version}"/>`,
-    )
-    .join('\n');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<chkrun:checkObjectList xmlns:chkrun="http://www.sap.com/adt/checkrun" xmlns:adtcore="http://www.sap.com/adt/core">
-${checkObjects}
-</chkrun:checkObjectList>`;
+) {
+  return {
+    checkObjectList: {
+      checkObject: objects.map((o) => ({
+        uri: o.uri,
+        version: version as
+          | ''
+          | 'active'
+          | 'inactive'
+          | 'workingArea'
+          | 'new'
+          | 'partlyActive'
+          | 'activeWithInactiveVersion',
+      })),
+    },
+  };
 }
 
 /**
- * Parse XML response from checkruns endpoint
+ * Extract reports + aggregated severity from a typed checkRunReports response.
  */
-function parseCheckRunXml(xmlOrParsed: unknown): {
+function extractReports(response: unknown): {
   reports: CheckReport[];
   hasErrors: boolean;
   hasWarnings: boolean;
 } {
-  let data: Record<string, unknown>;
+  const root = (response ?? {}) as Record<string, unknown>;
+  const reportsBlock = (root.checkRunReports ?? root) as Record<
+    string,
+    unknown
+  >;
 
-  if (typeof xmlOrParsed === 'string') {
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: '',
-      removeNSPrefix: true,
-    });
-    data = parser.parse(xmlOrParsed) as Record<string, unknown>;
+  const raw = reportsBlock.checkReport;
+  let arr: unknown[];
+  if (Array.isArray(raw)) {
+    arr = raw;
+  } else if (raw) {
+    arr = [raw];
   } else {
-    data = xmlOrParsed as Record<string, unknown>;
+    arr = [];
   }
 
-  let reports: CheckReport[] = [];
+  const reports: CheckReport[] = arr.map((r) => {
+    const rec = r as Record<string, unknown>;
+    const msgList = rec.checkMessageList as
+      | { checkMessage?: CheckMessage | CheckMessage[] }
+      | undefined;
+    let messages: CheckMessage[] | undefined;
+    if (msgList?.checkMessage) {
+      messages = Array.isArray(msgList.checkMessage)
+        ? msgList.checkMessage
+        : [msgList.checkMessage];
+    }
+    return {
+      reporter: rec.reporter as string | undefined,
+      triggeringUri: rec.triggeringUri as string | undefined,
+      status: rec.status as string | undefined,
+      statusText: rec.statusText as string | undefined,
+      checkMessageList: messages ? { checkMessage: messages } : undefined,
+    };
+  });
+
   let hasErrors = false;
   let hasWarnings = false;
-
-  // Navigate into checkRunReports > checkReport
-  const reportsRoot = (data.checkRunReports ?? data) as Record<string, unknown>;
-  const rawReports = reportsRoot.checkReport;
-  if (rawReports) {
-    const arr = Array.isArray(rawReports) ? rawReports : [rawReports];
-    reports = arr.map((r: Record<string, unknown>) => ({
-      reporter: (r.reporter as string) ?? undefined,
-      triggeringUri: (r.triggeringUri as string) ?? undefined,
-      status: (r.status as string) ?? undefined,
-      statusText: (r.statusText as string) ?? undefined,
-      checkMessageList: r.checkMessageList as CheckReport['checkMessageList'],
-    }));
-  }
-
   for (const report of reports) {
-    const msgList = report.checkMessageList;
-    if (!msgList?.checkMessage) continue;
-
-    const messages = Array.isArray(msgList.checkMessage)
-      ? msgList.checkMessage
-      : [msgList.checkMessage];
-
-    for (const msg of messages) {
-      const sev = msg.type ?? msg.category;
+    for (const msg of report.checkMessageList?.checkMessage ?? []) {
+      const sev = typeof msg.type === 'string' ? msg.type : msg.category;
       if (sev === 'E' || sev === 'A') hasErrors = true;
       if (sev === 'W') hasWarnings = true;
     }
@@ -197,8 +201,8 @@ function displayResults(reports: CheckReport[]): number {
   let totalMessages = 0;
 
   for (const report of reports) {
-    const msgList = report.checkMessageList;
-    if (!msgList?.checkMessage) {
+    const messages = report.checkMessageList?.checkMessage;
+    if (!messages || messages.length === 0) {
       // No messages — clean
       if (report.triggeringUri) {
         const objName =
@@ -208,18 +212,12 @@ function displayResults(reports: CheckReport[]): number {
       continue;
     }
 
-    const messages = Array.isArray(msgList.checkMessage)
-      ? msgList.checkMessage
-      : [msgList.checkMessage];
-
-    if (messages.length === 0) continue;
-
     const objName =
       report.triggeringUri?.split('/').pop() ?? report.reporter ?? 'unknown';
 
     for (const msg of messages) {
       totalMessages++;
-      const sev = msg.type ?? msg.category;
+      const sev = typeof msg.type === 'string' ? msg.type : msg.category;
       const icon =
         sev === 'E' || sev === 'A' ? '❌' : sev === 'W' ? '⚠️' : 'ℹ️';
       console.log(
@@ -284,31 +282,41 @@ export const checkCommand = new Command('check')
           console.log(
             `🔍 Resolving objects in transport ${options.transport}...`,
           );
-          const trResult = await client.fetch(
-            `/sap/bc/adt/cts/transportrequests/${options.transport}`,
-            {
-              method: 'GET',
-              headers: {
-                Accept: 'application/vnd.sap.adt.transportrequests.v1+xml',
-              },
-            },
+          const trResponse = await client.services.transports.get(
+            options.transport,
           );
-          // Parse transport objects from response
-          const trData = trResult as Record<string, unknown>;
-          // Transport response contains objects — extract URIs
-          // For now, search by transport number as a workaround
-          console.log(`⚠️ Transport object extraction: parsing response...`);
-          // Attempt to find object references in the transport data
-          const trJson = JSON.stringify(trData);
-          const uriMatches = trJson.match(/\/sap\/bc\/adt\/[^"]+/g);
-          if (uriMatches && uriMatches.length > 0) {
-            const uniqueUris = [...new Set(uriMatches)].filter(
-              (u) => !u.includes('transportrequests') && !u.includes('cts/'),
-            );
-            for (const uri of uniqueUris) {
-              const name = uri.split('/').pop() ?? '';
-              checkObjects.push({ uri, type: 'UNKNOWN', name });
+          // Walk the typed transport response to collect abap_object URIs.
+          // Schema shape (see transportmanagment.types.ts): deeply nested
+          // workbench/customizing → target → status → request[] → { task[]?,
+          // abap_object[]? } with `abap_object.uri`.
+          const collected = new Map<string, { type: string; name: string }>();
+          const visit = (node: unknown): void => {
+            if (!node || typeof node !== 'object') return;
+            if (Array.isArray(node)) {
+              for (const item of node) visit(item);
+              return;
             }
+            const rec = node as Record<string, unknown>;
+            const uri = rec.uri;
+            const type = rec.type;
+            const name = rec.name;
+            // abap_object entries have pgmid/type/name/uri
+            if (
+              typeof uri === 'string' &&
+              typeof rec.pgmid === 'string' &&
+              typeof name === 'string'
+            ) {
+              collected.set(uri, {
+                type: typeof type === 'string' ? type : 'UNKNOWN',
+                name,
+              });
+            }
+            for (const v of Object.values(rec)) visit(v);
+          };
+          visit(trResponse);
+
+          for (const [uri, meta] of collected) {
+            checkObjects.push({ uri, type: meta.type, name: meta.name });
           }
           if (checkObjects.length === 0) {
             console.log(
@@ -348,23 +356,16 @@ export const checkCommand = new Command('check')
           process.exit(1);
         }
 
-        // Build and POST checkrun request
-        const xml = buildCheckObjectListXml(checkObjects, options.version);
+        // Build and POST checkrun request via typed contract
+        const body = buildCheckObjectList(checkObjects, options.version);
         console.log(
           `\n🔄 Running syntax check on ${checkObjects.length} object(s)...`,
         );
 
-        const response = await client.fetch('/sap/bc/adt/checkruns', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/vnd.sap.adt.checkobjects+xml',
-            Accept: 'application/vnd.sap.adt.checkmessages+xml',
-          },
-          body: xml,
-        });
+        const response = await client.adt.checkruns.checkObjects.post(body);
 
-        // Parse and display results
-        const { reports, hasErrors, hasWarnings } = parseCheckRunXml(response);
+        // Extract reports from typed response
+        const { reports, hasErrors, hasWarnings } = extractReports(response);
 
         if (options.json) {
           console.log(JSON.stringify(reports, null, 2));

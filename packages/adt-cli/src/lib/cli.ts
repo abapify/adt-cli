@@ -1,5 +1,15 @@
 #!/usr/bin/env -S npx tsx
 
+// Bootstrap: side-effect import registers the abapGit FormatPlugin into the
+// global registry (`@abapify/adt-plugin`). This is the ONE sanctioned place
+// where adt-cli depends on `@abapify/adt-plugin-abapgit` directly — every
+// other consumer MUST go through `getFormatPlugin('abapgit')`.
+import '@abapify/adt-plugin-abapgit';
+// Second built-in FormatPlugin — gCTS / AFF. Same self-registration pattern:
+// side-effect import is the one sanctioned coupling between adt-cli and the
+// plugin package; every other consumer uses `getFormatPlugin('gcts')`.
+import '@abapify/adt-plugin-gcts';
+
 import { Command } from 'commander';
 import {
   importObjectCommand,
@@ -25,7 +35,35 @@ import {
   locksCommand,
   checkCommand,
   userCommand,
+  sourceCommand,
+  strustCommand,
+  checkinCommand,
+  rfcCommand,
+  createFlpCommand,
 } from './commands';
+import { createWbCommand } from './commands/wb';
+import { createPackageCommand } from './commands/package';
+import {
+  classCommand,
+  programCommand,
+  interfaceCommand,
+  includeCommand,
+} from './commands/object';
+import { functionCommand } from './commands/function';
+import {
+  domainCommand,
+  dataelementCommand,
+  tableCommand,
+  structureCommand,
+} from './commands/ddic';
+import { createDatapreviewCommand } from './commands/datapreview';
+import { createAbapCommand } from './commands/abap';
+import { ddlCommand, dclCommand } from './commands/cds';
+import { bdefCommand } from './commands/bdef';
+import { badiCommand } from './commands/badi';
+import { srvdCommand } from './commands/srvd';
+import { srvbCommand } from './commands/srvb';
+import { createCheckoutCommand } from './commands/checkout';
 import { refreshCommand } from './commands/auth/refresh';
 // Deploy command moved to @abapify/adt-export plugin
 // Add '@abapify/adt-export/commands/export' to adt.config.ts commands array to enable
@@ -35,6 +73,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadCommandPlugins, loadStaticPlugins } from './plugin-loader';
 import type { CliCommandPlugin } from '@abapify/adt-plugin';
+// gCTS CLI command plugin (E07) — auto-discovered: shipped as a required
+// dep of adt-cli and registered here so `adt gcts …` is always available.
+import { gctsCommand } from '@abapify/adt-plugin-gcts-cli';
 
 // Check for insecure SSL flag in stored session and apply it globally
 function applyInsecureSslFlag(): void {
@@ -51,7 +92,7 @@ function applyInsecureSslFlag(): void {
         // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Commented out for testing proper cert validation
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // Silently ignore errors - session might not exist yet
   }
 }
@@ -174,8 +215,11 @@ export async function createCLI(options?: {
   // Object inspector command
   program.addCommand(getCommand);
 
-  // Get subcommands for specific object types
+  // Get subcommands for specific object types (legacy: adt get package <name>)
   getCommand.addCommand(packageGetCommand);
+
+  // Package commands (adt package create/list/delete/activate/stat/get)
+  program.addCommand(createPackageCommand());
 
   // ATC (ABAP Test Cockpit) command - now loaded as plugin from @abapify/adt-atc
   // Add '@abapify/adt-atc/commands/atc' to adt.config.ts commands array to enable
@@ -218,11 +262,65 @@ export async function createCLI(options?: {
   // Check command (syntax check / checkruns)
   program.addCommand(checkCommand);
 
+  // Source command (read/write ABAP source code)
+  program.addCommand(sourceCommand);
+
   // User lookup command
   program.addCommand(userCommand);
 
+  // STRUST command (SSL PSE cert management)
+  program.addCommand(strustCommand);
+
+  // Object CRUD commands (class, program, interface, include)
+  program.addCommand(classCommand);
+  program.addCommand(programCommand);
+  program.addCommand(interfaceCommand);
+  program.addCommand(includeCommand);
+  program.addCommand(functionCommand);
+
+  // DDIC commands (domain, dataelement, table, structure)
+  program.addCommand(domainCommand);
+  program.addCommand(dataelementCommand);
+  program.addCommand(tableCommand);
+  program.addCommand(structureCommand);
+
+  // Datapreview (OSQL queries)
+  program.addCommand(createDatapreviewCommand());
+
+  // ABAP execution (abap run)
+  program.addCommand(createAbapCommand());
+
+  // CDS/RAP commands (DDL, DCL)
+  program.addCommand(ddlCommand);
+  program.addCommand(dclCommand);
+  program.addCommand(bdefCommand);
+  program.addCommand(badiCommand);
+  program.addCommand(srvdCommand);
+  program.addCommand(srvbCommand);
+
+  // Checkout command (download SAP objects to abapgit-compatible files)
+  program.addCommand(createCheckoutCommand());
+
+  // Checkin command (push local abapGit/gCTS directory into SAP — inverse of checkout)
+  program.addCommand(checkinCommand);
+
+  // RFC command (E13) — invoke classic RFC function modules via SOAP-over-HTTP
+  program.addCommand(rfcCommand);
+
+  // FLP command (E14) — Fiori Launchpad inventory (read-only)
+  program.addCommand(createFlpCommand());
+
+  // Workbench navigation (E15) — where-used, callers, callees, definition, outline
+  program.addCommand(createWbCommand());
+
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());
+
+  // gCTS command-plugin (E07). Auto-registered here (not via adt.config.ts)
+  // because `@abapify/adt-plugin-gcts-cli` is a required dependency of
+  // `adt-cli`, matching the pattern used for the abapGit/gCTS *format*
+  // plugins above.
+  await loadStaticPlugins(program, [gctsCommand], process.cwd());
 
   // Load command plugins from config (adt.config.ts or --config)
   // NOTE: We need to parse --config early since plugins must be loaded before parseAsync()

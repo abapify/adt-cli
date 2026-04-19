@@ -1,3 +1,7 @@
-npx nx format:write --uncommitted
+if command -v bunx >/dev/null 2>&1; then
+  bunx nx format:write --uncommitted
+else
+  npx nx format:write --uncommitted
+fi
 git update-index --again
 

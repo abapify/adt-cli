@@ -1,0 +1,26 @@
+{
+  "abapFunctionModule": {
+    "name": "Z_MY_FUNCTION",
+    "type": "FUGR/FF",
+    "description": "My utility function module",
+    "processingType": "normal",
+    "remoteEnabledMode": "notRemoteEnabled",
+    "parameters": {
+      "importParameters": {
+        "parameter": [
+          {
+            "name": "IV_INPUT",
+            "type": "TYPE",
+            "associatedType": "STRING",
+            "optional": true
+          }
+        ]
+      },
+      "exportParameters": {
+        "parameter": [
+          { "name": "EV_OUTPUT", "type": "TYPE", "associatedType": "STRING" }
+        ]
+      }
+    }
+  }
+}

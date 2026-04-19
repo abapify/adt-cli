@@ -53,6 +53,32 @@ adt-cli
 
 Foundation packages (no `@abapify` deps): `ts-xsd`, `speci`, `logger`, `acds`.
 
+## MCP ↔ CLI Coupling (intentional)
+
+`@abapify/adt-mcp` is a **thin MCP adapter over the CLI service layer**. It
+may (and does) depend on `@abapify/adt-cli` and on the domain plugin packages
+(`@abapify/adt-aunit`, `@abapify/adt-rfc`, `@abapify/adt-plugin-*`, etc.).
+
+This is a deliberate architectural choice, not an accident:
+
+- **Invariant**: every CLI subcommand has a matching MCP tool, and every MCP
+  tool has a matching CLI subcommand. Behaviour, flags, output shape, and
+  error messages are expected to match.
+- **Enforcement**: the parity test suite in
+  `packages/adt-cli/tests/e2e/parity.*.test.ts` is the source of truth. A
+  feature is not "done" until both the CLI path and the MCP path hit the
+  same mock backend through the same service function and return equivalent
+  results.
+- **Code reuse**: MCP tool handlers delegate to CLI service functions
+  (exported from `packages/adt-cli/src/index.ts`) rather than re-implementing
+  transports, locking, XML serialisation, or ADK orchestration.
+- **Consequence**: the `adt-cli` → `adt-mcp` dependency direction is
+  forbidden (would create a cycle). The `adt-mcp` → `adt-cli` direction is
+  required.
+
+When adding a new feature, add the CLI command **and** the MCP tool in the
+same change, and add a parity test that exercises both paths.
+
 ## Type Flow (Core Architecture)
 
 ```
@@ -133,6 +159,7 @@ Each package has its own `AGENTS.md` with detailed conventions:
 - [`packages/adt-client/AGENTS.md`](packages/adt-client/AGENTS.md) — Contract-driven REST client, schema conventions, type inference
 - [`packages/adt-contracts/AGENTS.md`](packages/adt-contracts/AGENTS.md) — Contract testing framework, schema integration
 - [`packages/adt-schemas/AGENTS.md`](packages/adt-schemas/AGENTS.md) — XSD-derived schemas, generation pipeline
+- [`packages/adt-mcp/AGENTS.md`](packages/adt-mcp/AGENTS.md) — MCP server: tool conventions, schema rules, mock server, extension guide
 - [`packages/adt-plugin-abapgit/AGENTS.md`](packages/adt-plugin-abapgit/AGENTS.md) — abapGit serialization, handler template
 - [`packages/ts-xsd/AGENTS.md`](packages/ts-xsd/AGENTS.md) — W3C XSD parser, type inference, codegen
 - [`packages/adt-auth/AGENTS.md`](packages/adt-auth/AGENTS.md) — Auth methods, browser SSO

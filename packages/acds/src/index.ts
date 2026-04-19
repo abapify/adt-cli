@@ -76,10 +76,22 @@ export type {
   ServiceDefinition,
   MetadataExtension,
   ViewEntityDefinition,
+  AbstractEntityDefinition,
+  CustomEntityDefinition,
   RoleDefinition,
+  GrantStatement,
   FieldDefinition,
   IncludeDirective,
   TableMember,
+  ViewElement,
+  ViewMember,
+  DataSource,
+  DataSourceKind,
+  ParameterDefinition,
+  AssociationDeclaration,
+  AssociationKind,
+  Cardinality,
+  Expression,
   ExposeStatement,
   AnnotatedElement,
   Annotation,
@@ -99,3 +111,39 @@ export type {
 } from './ast';
 
 export type { CdsParseError } from './errors';
+
+// AST walker helpers
+export {
+  walkDefinitions,
+  walkAnnotations,
+  walkAssociations,
+  walkFields,
+  walkParameters,
+  walkViewElements,
+  findAnnotation,
+  hasFields,
+  hasMembers,
+  hasParameters,
+  isAssociation,
+} from './lib/ast/walker';
+
+// Semantic validators
+export {
+  validate,
+  validateCardinality,
+  validateViewElements,
+} from './lib/validate';
+export type { SemanticDiagnostic } from './lib/validate';
+
+// Grammar coverage metadata (useful for tooling / test reports)
+export {
+  GRAMMAR_COVERAGE,
+  ddlCoverage,
+  dclCoverage,
+  annotationsCoverage,
+  associationsCoverage,
+  parametersCoverage,
+  projectionsCoverage,
+  actionsCoverage,
+} from './lib/grammar';
+export type { GrammarCoverage } from './lib/grammar';

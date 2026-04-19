@@ -10,6 +10,18 @@
   },
   "tags": [],
   "targets": {
+    "test": {
+      "dependsOn": ["build", "^build", "adt-mcp:build"]
+    },
+    "test:real": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx vitest run --config ./vitest.real.config.ts",
+        "cwd": "{projectRoot}"
+      },
+      "cache": false,
+      "dependsOn": ["build"]
+    },
     "bundle": {
       "executor": "nx:run-commands",
       "options": {

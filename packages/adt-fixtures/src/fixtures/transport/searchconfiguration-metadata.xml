@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TODO-synthetic: Fabricated minimal configuration fixture for
+  GET /sap/bc/adt/cts/transportrequests/searchconfiguration/metadata.
+  Used by AdkTransportRequest.getCurrentUser() to detect the current
+  SAP user in tests. User value is mocked (DEVELOPER).
+-->
+<configuration:configuration
+    xmlns:configuration="http://www.sap.com/adt/configuration"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    client="100"
+    configName="default">
+  <configuration:properties>
+    <configuration:property key="User" isMandatory="true">DEVELOPER</configuration:property>
+    <configuration:property key="Targets" isMandatory="false">*</configuration:property>
+  </configuration:properties>
+</configuration:configuration>

@@ -129,10 +129,15 @@ export class AdtError extends Error {
  * Uses the generated exception schema from @abapify/adt-schemas for type-safe parsing.
  */
 export function parseAdtException(xml: string): AdtExceptionData | undefined {
-  // Quick check if this looks like an ADT exception
+  // Quick check if this looks like an ADT exception. We look for the
+  // communicationframework namespace in an xmlns attribute context rather
+  // than a free substring match (which would fire on user-controlled
+  // content happening to contain the URI anywhere in the XML body).
   if (
     !xml.includes('exception') ||
-    !xml.includes('http://www.sap.com/abapxml/types/communicationframework')
+    !/xmlns(?::[\w-]+)?="http:\/\/www\.sap\.com\/abapxml\/types\/communicationframework"/.test(
+      xml,
+    )
   ) {
     return undefined;
   }

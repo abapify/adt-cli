@@ -27,7 +27,7 @@ class MockAbapGitPlugin implements FormatPlugin {
   async serializeObject(
     object: AdkObject,
     targetPath: string,
-    context: SerializationContext,
+    _context: SerializationContext,
   ): Promise<SerializeObjectResult> {
     const filesCreated: string[] = [];
 

@@ -206,9 +206,14 @@ Source string
 
 ## Roadmap
 
-- **Phase 1** (current): `TABL`, `Structure`, `DRTY`, `SRVD`, `DDLX`
-- **Phase 2**: `DCLS`, `DDLA`, `DRAS`, `DSFD`, `DTDC`, `DTEB`, `DTSC`
-- **Phase 3**: `DDLS` (view entity — SQL-like syntax)
+- ✅ **DDL**: tables, structures, simple types, view entities, projection views, abstract/custom entities, services (SRVD), metadata extensions (DDLX), parameters, associations, compositions
+- ✅ **DCL**: role definitions with grant-select + where clauses
+- ✅ **Annotations**: full value grammar (strings, enums, booleans, numbers, arrays, objects, dotted keys)
+- ✅ **Tooling**: AST walker helpers, semantic validators (`SemanticDiagnostic`), grammar coverage metadata
+- 🔜 **Expression grammar** (structured `on`/`where` trees — currently opaque `{ source, tokens }`)
+- 🔜 **Joins** (`inner join`, `left outer join …`), CASE/CAST, aggregates, GROUP BY, UNION
+- 🔜 **`define aspect` (DRAS), `define hierarchy`, cache definitions (DTDC/DTSC), scalar functions (DSFD)**
+- 🔜 **BDEF / behavior definitions** (owned by epic E10)
 
 ## Dependencies
 

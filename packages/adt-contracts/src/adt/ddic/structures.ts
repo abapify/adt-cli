@@ -35,6 +35,7 @@ export const structuresContract = {
     schema: blueSourceSchema,
     contentType,
     accept,
+    sources: ['main'] as const,
   }),
 
   objectstructure: (name: string, options?: { version?: string }) =>

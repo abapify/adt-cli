@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ABAP Coverage Statements Bulk Response Schema
+
+  Response of:
+    GET /sap/bc/adt/runtime/traces/coverage/results/{id}/statements
+  Content-Type: application/xml+scov
+
+  Sourced from jfilak/sapcli test fixtures (acoverage_statements).
+
+  A <cov:statementsBulkResponse> containing repeating
+  <cov:statementsResponse name="...">, each with atom:links and
+  <procedure>, <statement>, <branch> items wrapping adtcore:objectReference.
+
+  Namespace: http://www.sap.com/adt/cov
+
+  NOTE: branch/@executedTrue and /@executedFalse are xs:string because SAP
+  returns values like ">= 3" in addition to plain integers.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:cov="http://www.sap.com/adt/cov"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    targetNamespace="http://www.sap.com/adt/cov"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.sap.com/adt/core"
+      schemaLocation="../sap/adtcore.xsd"/>
+  <xsd:import namespace="http://www.w3.org/2005/Atom"
+      schemaLocation="../sap/atom.xsd"/>
+
+  <!-- Root element -->
+  <xsd:element name="statementsBulkResponse" type="cov:StatementsBulkResponse"/>
+
+  <!-- Bulk response: list of per-method statementsResponse entries -->
+  <xsd:complexType name="StatementsBulkResponse">
+    <xsd:sequence>
+      <xsd:element name="statementsResponse" type="cov:StatementsResponse"
+          minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Per-method statement response -->
+  <xsd:complexType name="StatementsResponse">
+    <xsd:sequence>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="procedure" type="cov:ProcedureEntry"
+          minOccurs="0" maxOccurs="unbounded" form="unqualified"/>
+      <xsd:element name="statement" type="cov:StatementEntry"
+          minOccurs="0" maxOccurs="unbounded" form="unqualified"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string"/>
+  </xsd:complexType>
+
+  <!-- Procedure entry: executed count + objectReference -->
+  <xsd:complexType name="ProcedureEntry">
+    <xsd:sequence>
+      <xsd:element ref="adtcore:objectReference" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+    <xsd:attribute name="executed" type="xsd:int"/>
+  </xsd:complexType>
+
+  <!-- Statement entry: executed count + objectReference + optional branch -->
+  <xsd:complexType name="StatementEntry">
+    <xsd:sequence>
+      <xsd:element ref="adtcore:objectReference" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="branch" type="cov:BranchEntry"
+          minOccurs="0" maxOccurs="unbounded" form="unqualified"/>
+    </xsd:sequence>
+    <xsd:attribute name="executed" type="xsd:int"/>
+  </xsd:complexType>
+
+  <!-- Branch entry: kind + true/false execution counts (strings, see above) -->
+  <xsd:complexType name="BranchEntry">
+    <xsd:sequence>
+      <xsd:element ref="adtcore:objectReference" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+    <xsd:attribute name="kind" type="xsd:string"/>
+    <xsd:attribute name="executedTrue" type="xsd:string"/>
+    <xsd:attribute name="executedFalse" type="xsd:string"/>
+  </xsd:complexType>
+
+</xsd:schema>

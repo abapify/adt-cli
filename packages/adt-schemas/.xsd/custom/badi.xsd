@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Custom wrapper schema for BAdI / Enhancement Implementation (ENHO) responses.
+
+  SAP's actual HTTP response for `/sap/bc/adt/enhancements/enhoxhh/{name}`
+  uses an `enh:enhancementImplementation` root element that extends
+  `adtcore:AdtMainObject`. A full XSD exists in
+  `../sap/enhancements.xsd` for the deep BAdI / source-plugin tree, but
+  for CLI / MCP purposes we only need the AdtMainObject envelope
+  (name, type, description, responsible, package ref, links) — the same
+  shape consumed by bdef / class / interface.
+
+  This custom schema declares that minimal wrapper so ts-xsd can parse
+  and build enhoxhh responses without pulling in the heavyweight
+  enhancements model.
+-->
+<xsd:schema xmlns:adtcore="http://www.sap.com/adt/core"
+	xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:enh="http://www.sap.com/adt/abapsource/enhancements"
+	ecore:package="com.sap.adt.tools.abapsource.model.enhancements"
+	ecore:nsPrefix="enh"
+	targetNamespace="http://www.sap.com/adt/abapsource/enhancements"
+	elementFormDefault="qualified"
+	attributeFormDefault="qualified">
+
+	<xsd:import namespace="http://www.sap.com/adt/core" schemaLocation="../sap/adtcore.xsd" />
+
+	<!-- Root element: ENHO (enhancement implementation — BAdI container) -->
+	<xsd:element name="enhancementImplementation" type="enh:EnhancementImplementationWrapper" />
+
+	<xsd:complexType name="EnhancementImplementationWrapper">
+		<xsd:complexContent>
+			<xsd:extension base="adtcore:AdtMainObject">
+				<!--
+				  Minimal envelope only. The full BAdI impl tree is served
+				  via the /source/main endpoint (text) or a separate GET
+				  for the enhancements:sourceCodePlugin payload; we do not
+				  model it here to keep the schema lightweight and stable.
+				-->
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+</xsd:schema>

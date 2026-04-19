@@ -33,3 +33,13 @@ export type {
   UnlockOptions,
 } from './service';
 export { createLockService, parseLockResponse } from './service';
+
+// Batch session — acquire/release N locks atomically (best-effort rollback).
+export {
+  createBatchLockSession,
+  type BatchLockSession,
+  type BatchLockTarget,
+  type BatchLockAcquisition,
+  type BatchLockSessionOptions,
+  type BatchReleaseResult,
+} from './batch';

@@ -1,0 +1,44 @@
+{
+  "d": {
+    "results": [
+      {
+        "__metadata": {
+          "id": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FMOCK_PAGE')",
+          "uri": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FMOCK_PAGE')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/MOCK_PAGE",
+        "title": "Mock Page",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "MOCK_LAYOUT",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0002",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1700000000000)/",
+        "outdated": ""
+      },
+      {
+        "__metadata": {
+          "id": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FMOCK_PAGE_2')",
+          "uri": "https://mock-system.example.com/sap/opu/odata/UI2/PAGE_BUILDER_PERS/Pages('%2FUI2%2FMOCK_PAGE_2')",
+          "type": "PAGE_BUILDER_PERS.Page"
+        },
+        "id": "/UI2/MOCK_PAGE_2",
+        "title": "Second Mock Page",
+        "catalogId": "/UI2/FLPD_CATALOG",
+        "layout": "",
+        "originalLanguage": "en",
+        "isCatalogPage": "",
+        "chipInstanceCount": "0001",
+        "isPersLocked": "",
+        "isReadOnly": "",
+        "scope": "CONFIGURATION",
+        "updated": "/Date(1700100000000)/",
+        "outdated": ""
+      }
+    ]
+  }
+}

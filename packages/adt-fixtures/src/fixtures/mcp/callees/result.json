@@ -1,0 +1,11 @@
+{
+  "callees": {
+    "callee": [
+      {
+        "uri": "/sap/bc/adt/functions/groups/zfugr_util",
+        "name": "ZFUGR_UTIL",
+        "type": "FUGR"
+      }
+    ]
+  }
+}

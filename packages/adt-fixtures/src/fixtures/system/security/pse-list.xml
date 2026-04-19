@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TODO-synthetic: fabricated response for GET /sap/bc/adt/system/security/pses.
+
+  sapcli (jfilak/sapcli) drives STRUST via SAP RFC function modules
+  (see sap/rfc/strust.py), not through ADT. No real ADT capture was
+  available at fixture-creation time. Shape is based on the SAP ADT
+  Atom-feed convention used by /sap/bc/adt/system/users — each PSE
+  identity is exposed as an atom:entry whose id is `<PSE_CONTEXT>/<PSE_APPLIC>`.
+-->
+<atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
+  <atom:author>
+    <atom:name>SAP AG</atom:name>
+  </atom:author>
+  <atom:title>STRUST Personal Security Environments</atom:title>
+  <atom:updated>2026-04-02T21:08:03Z</atom:updated>
+  <atom:entry>
+    <atom:id>SSLS/ANONYM</atom:id>
+    <atom:link href="/sap/bc/adt/system/security/pses/SSLS/ANONYM" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:title>SSL client SSL Client (Anonymous)</atom:title>
+  </atom:entry>
+  <atom:entry>
+    <atom:id>SSLC/DFAULT</atom:id>
+    <atom:link href="/sap/bc/adt/system/security/pses/SSLC/DFAULT" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:title>SSL client SSL Client (Standard)</atom:title>
+  </atom:entry>
+  <atom:entry>
+    <atom:id>SSLS/DFAULT</atom:id>
+    <atom:link href="/sap/bc/adt/system/security/pses/SSLS/DFAULT" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:title>SSL server Standard</atom:title>
+  </atom:entry>
+</atom:feed>

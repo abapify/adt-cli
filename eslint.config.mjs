@@ -35,6 +35,11 @@ export default [
       'e2e/**',
       // Generated contracts use package imports intentionally (not relative)
       'packages/adt-contracts/src/generated/**',
+      // Fixture payloads are captured SAP responses, not source code
+      'packages/adt-fixtures/src/fixtures/**',
+      // Generated schemas/types across packages
+      '**/src/schemas/generated/**',
+      '**/src/generated/**',
       // Config files are build-time only, not runtime dependencies
       '**/*.config.ts',
       '**/*.config.mts',
@@ -89,6 +94,22 @@ export default [
           destructuredArrayIgnorePattern: '^_',
         },
       ],
+    },
+  },
+  {
+    // In tests, non-null assertions and `any` are idiomatic: test data shape is
+    // known, mocks deliberately use loose typing, and type-inference tests
+    // intentionally assign client handles just to type-check.
+    files: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/tests/**/*.ts',
+      '**/tests/**/*.tsx',
+    ],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ];
