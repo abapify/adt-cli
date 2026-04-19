@@ -24,5 +24,5 @@ export {
   emitServerCtorParams,
   resolveServerUrl,
 } from './server';
-export { emitClientClass } from './assemble';
+export { emitClientClass, sanitizeStarComments } from './assemble';
 export type { EmitClientOptions, EmittedClient } from './assemble';

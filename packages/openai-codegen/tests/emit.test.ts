@@ -60,10 +60,7 @@ describe('emitClientClass (Petstore v3)', () => {
     expect(ret).toBeDefined();
     // Returning is a NamedTypeRef pointing at a hoisted table-of-pet typedef.
     expect(ret!.typeRef.kind).toBe('NamedTypeRef');
-    const privateSection = result.class.sections.find(
-      (s) => s.visibility === 'private',
-    )!;
-    const hoisted = privateSection.members.find(
+    const hoisted = publicSection!.members.find(
       (m) =>
         m.kind === 'TypeDef' &&
         m.name === (ret!.typeRef as { name: string }).name,

@@ -107,6 +107,12 @@ export async function writeAbapgitLayout(
     written.push(`src/${base}.clas.locals_def.abap`);
   }
 
+  if (artifact.localsImpSource !== undefined) {
+    const p = join(srcDir, `${base}.clas.locals_imp.abap`);
+    await writeFile(p, artifact.localsImpSource, 'utf-8');
+    written.push(`src/${base}.clas.locals_imp.abap`);
+  }
+
   written.sort();
   return { files: written };
 }

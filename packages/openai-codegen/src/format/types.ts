@@ -17,6 +17,8 @@ export interface ClassArtifact {
   testSource?: string;
   /** Optional local include (types) source. */
   localsDefSource?: string;
+  /** Optional local include (implementation) source — for helper classes emitted alongside the main class. */
+  localsImpSource?: string;
   /** Optional description used in the .clas.xml metadata (DESCRIPT). */
   description?: string;
   /** ADT language key, default 'E'. */
