@@ -1,3 +1,22 @@
+## 0.3.2 (2026-04-20)
+
+### 🚀 Features
+
+- **nx-npm-access:** add npm-fix target — auto-remediation, not just checks ([4da7ad10](https://github.com/abapify/adt-cli/commit/4da7ad10))
+- **nx-npm-access:** add npm-prepare target — port /npm-publish prepare-ci ([3d5a3f3c](https://github.com/abapify/adt-cli/commit/3d5a3f3c))
+- **tools:** nx-npm-access plugin — pre-release readiness check per package ([c8ee3940](https://github.com/abapify/adt-cli/commit/c8ee3940))
+
+### 🩹 Fixes
+
+- **nx-npm-trust:** don't fail when --fix successfully patched everything ([5f3b70d1](https://github.com/abapify/adt-cli/commit/5f3b70d1))
+- **nx-npm-trust:** don't treat auto-fixable issues as lingering errors ([c5b1fda5](https://github.com/abapify/adt-cli/commit/c5b1fda5))
+- **nx-npm-trust:** --prepare now speaks the right dialect of npm CLI ([b6e70d3f](https://github.com/abapify/adt-cli/commit/b6e70d3f))
+- **nx-npm-trust:** don't pass scope registry override to `npm trust` ([ec45425c](https://github.com/abapify/adt-cli/commit/ec45425c))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+
 ## 0.3.1 (2026-04-20)
 
 ### 🚀 Features
