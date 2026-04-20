@@ -231,11 +231,12 @@ export async function startHttpServer(
   const hostValidator = makeHostValidator(hostAllow);
 
   // Resolve auth mode. `trustForwardedAuth` is a convenience alias for
-  // `authMode='proxy'` and wins when both are set (explicit opt-in to
-  // reverse-proxy trust).
+  // `authMode='proxy'` and may only promote an *unset* auth mode to
+  // 'proxy'. It must NOT silently downgrade an explicit authMode (e.g.
+  // 'oauth'), or the JWT validation layer would be bypassed.
   let authMode: AuthMode =
     options.authMode ?? (options.authToken ? 'bearer' : 'none');
-  if (options.trustForwardedAuth) authMode = 'proxy';
+  if (options.trustForwardedAuth && authMode === 'none') authMode = 'proxy';
   if (authMode === 'oauth' && !options.oauth) {
     throw new Error(
       'startHttpServer: authMode=oauth requires `oauth` options (issuer at minimum)',

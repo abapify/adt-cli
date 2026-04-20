@@ -180,7 +180,15 @@ async function main(): Promise<void> {
   const authToken = args.authToken ?? process.env.MCP_AUTH_TOKEN;
   let authMode: AuthMode = args.authMode ?? 'none';
   if (authToken && authMode === 'none') authMode = 'bearer';
-  if (args.trustForwardedAuth || envTrustForwarded) authMode = 'proxy';
+  // TRUST_FORWARDED_AUTH (env or flag) may only promote a still-unset
+  // `authMode` to 'proxy'. An explicit --auth-mode (e.g. oauth) must never
+  // be silently downgraded by a stale env var — that would bypass JWT
+  // validation. The explicit --trust-forwarded-auth CLI flag also requires
+  // authMode to currently be 'none' to win, preserving the "most specific
+  // intent wins, never silently weaken" rule.
+  if ((args.trustForwardedAuth || envTrustForwarded) && authMode === 'none') {
+    authMode = 'proxy';
+  }
 
   // OAuth config — CLI wins, env fills the gaps.
   const oauthIssuer = args.oauthIssuer ?? process.env.OAUTH_ISSUER;

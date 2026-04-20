@@ -43,6 +43,11 @@ export function registerChangesetRollbackTool(
         session.changeset = undefined;
         return textOk({ ok: true, changeset: payload });
       } catch (err) {
+        // Best-effort: clear pointer + tracked locks so the session is
+        // not wedged in 'open' if rollback itself throws. The next
+        // changeset_begin can proceed without force=true.
+        for (const entry of cs.entries) session.locks.delete(entry.objectUri);
+        session.changeset = undefined;
         return textError(
           `changeset_rollback failed: ${err instanceof Error ? err.message : String(err)}`,
         );
