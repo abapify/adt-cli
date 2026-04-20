@@ -146,8 +146,8 @@ function parseArgs(argv: string[]): ParsedArgs {
             '                    [--cors-origin ORIGIN ...]\n',
         );
         process.exit(0);
-        // eslint-disable-next-line no-fallthrough
       }
+      // eslint-disable-next-line no-fallthrough
       default:
         // Unknown flag — ignore for forward compatibility.
         break;

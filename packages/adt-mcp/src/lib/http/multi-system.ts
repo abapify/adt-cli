@@ -45,6 +45,7 @@ function parseJsonSafe(raw: string, source: string): RawConfig {
       `Failed to parse multi-system config from ${source}: ${
         err instanceof Error ? err.message : String(err)
       }`,
+      { cause: err },
     );
   }
 }
