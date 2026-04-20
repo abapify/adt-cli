@@ -110,16 +110,13 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
-  publish:
-    name: Publish packages
-    needs: release
-    if: ${{ !inputs.dry_run && inputs.publish }}
-    uses: ./.github/workflows/publish.yml
-    with:
-      version: ${{ needs.release.outputs.tag }}
-    permissions:
-      contents: read
-      id-token: write # needed for npm OIDC trusted publishing
+  # Note: npm publishing is NOT wired up as `workflow_call` here. When
+  # `publish.yml` is invoked via `uses:`, the resulting OIDC token's
+  # claims reflect the CALLER (release.yml), and npm's trusted publisher
+  # matcher rejects that because the 30 trust entries on npmjs are
+  # registered with `--file publish.yml`. Instead, publish.yml runs on
+  # the tag push triggered by the `Push commit and tags` step above —
+  # that path keeps workflow_ref=publish.yml, so OIDC matches.
 
   publish-gpr:
     name: Publish packages to GitHub Packages

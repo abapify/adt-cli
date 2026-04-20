@@ -2,6 +2,17 @@ name: Publish
 
 on:
   workflow_dispatch:
+  # Auto-trigger on version tags pushed by the Release workflow. We
+  # intentionally do NOT use `workflow_call` from release.yml: when
+  # publish.yml runs as a reusable workflow, the OIDC token's claims
+  # reflect the CALLER (release.yml) and npm's trusted publisher
+  # matcher rejects them, even though `job_workflow_ref` is publish.yml.
+  # Running on tag push gives us workflow_ref=publish.yml directly,
+  # which is what every trusted publisher entry on npmjs is registered
+  # for (via `npm trust github … --file publish.yml`).
+  push:
+    tags:
+      - 'v*'
   workflow_call:
     inputs:
       version:
