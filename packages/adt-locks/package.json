@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-locks",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "ADT lock/unlock operations and lock store management",
   "license": "MIT",
   "type": "module",

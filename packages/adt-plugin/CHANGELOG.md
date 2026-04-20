@@ -1,3 +1,14 @@
+## 0.3.0 (2026-04-20)
+
+### 🚀 Features
+
+- **plugin:** FormatPlugin API foundation — E05 ([a4e6eeef](https://github.com/abapify/adt-cli/commit/a4e6eeef))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.2.0 (2026-04-02)
 
 ### 🚀 Features

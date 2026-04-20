@@ -1,3 +1,22 @@
+## 0.3.0 (2026-04-20)
+
+### 🚀 Features
+
+- **incl:** INCL CLI + MCP — E01 ([ffbe4db0](https://github.com/abapify/adt-cli/commit/ffbe4db0))
+
+### 🩹 Fixes
+
+- **security:** resolve all remaining CodeQL alerts with source-level fixes ([734713bc](https://github.com/abapify/adt-cli/commit/734713bc))
+- resolve all pre-existing typecheck + test failures — QC1 ([81152316](https://github.com/abapify/adt-cli/commit/81152316))
+- apply CodeRabbit auto-fixes ([5554994b](https://github.com/abapify/adt-cli/commit/5554994b))
+- **adt-cli:** harden user command JSON mode and input validation ([f1d980de](https://github.com/abapify/adt-cli/commit/f1d980de))
+
+### ❤️ Thank You
+
+- CodeRabbit
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.2.0 (2026-04-02)
 
 ### 🚀 Features

@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-client",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Minimalistic speci-based ADT client for SAP ABAP Development Tools",
   "license": "MIT",
   "publishConfig": {

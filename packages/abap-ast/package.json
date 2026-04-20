@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Zero-dependency typed AST and pretty-printer for ABAP source code (classes, interfaces, types, statements)",
   "type": "module",
   "types": "./dist/index.d.mts",

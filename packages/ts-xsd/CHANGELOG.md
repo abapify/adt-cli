@@ -1,3 +1,14 @@
+## 0.3.0 (2026-04-20)
+
+### 🩹 Fixes
+
+- **security:** resolve all remaining CodeQL alerts with source-level fixes ([734713bc](https://github.com/abapify/adt-cli/commit/734713bc))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.2.0 (2026-04-02)
 
 ### 🚀 Features

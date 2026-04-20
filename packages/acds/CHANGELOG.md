@@ -1,3 +1,18 @@
+## 0.3.0 (2026-04-20)
+
+### 🚀 Features
+
+- **acds:** full CDS DDL/DCL grammar + AST walker + validators — E09 ([51fa799d](https://github.com/abapify/adt-cli/commit/51fa799d))
+
+### 🩹 Fixes
+
+- **pr-103:** address review comments — type safety, parity, harness, policy ([#103](https://github.com/abapify/adt-cli/issues/103))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.2.0 (2026-04-02)
 
 ### 🚀 Features
