@@ -84,12 +84,19 @@ export function resolveClient(
     };
   }
 
-  // 3. systemId via multi-system config.
+  // 3. systemId via multi-system config. Registry holds connection
+  // metadata only (baseUrl, client); merge in any credentials the
+  // caller supplied on this tool call so the request isn't silently
+  // unauthenticated.
   if (args.systemId && ctx.resolveSystem) {
     const params = ctx.resolveSystem(args.systemId);
     if (params) {
       return {
-        client: ctx.getClient(params),
+        client: ctx.getClient({
+          ...params,
+          username: args.username,
+          password: args.password,
+        }),
         mcpSessionId,
         isSessionScoped: false,
         systemId: args.systemId,
