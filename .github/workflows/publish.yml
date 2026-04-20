@@ -119,6 +119,7 @@ jobs:
         env:
           NPM_CONFIG_PROVENANCE: true
           NPM_CONFIG_ACCESS: public
+          NPM_CONFIG_LOGLEVEL: verbose
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # The Nx Cloud org is on the free plan which this workspace
           # has exceeded; nx refuses to run at all when it can't reach
