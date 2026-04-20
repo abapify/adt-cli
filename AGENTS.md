@@ -123,16 +123,17 @@ Symlinked to `.windsurf/rules/` and `.cognition/rules/` for tool compatibility.
 
 ### On Demand (model_decision)
 
-| Rule                                                                                | Description                        |
-| ----------------------------------------------------------------------------------- | ---------------------------------- |
-| [`openspec/spec-first-then-code`](.agents/rules/openspec/spec-first-then-code.md)   | Check specs before coding          |
-| [`development/tmp-folder-testing`](.agents/rules/development/tmp-folder-testing.md) | Use `tmp/` for scratch files       |
-| [`development/package-versions`](.agents/rules/development/package-versions.md)     | Always install latest versions     |
-| [`adt/adk-save-logic`](.agents/rules/adt/adk-save-logic.md)                         | ADK upsert/lock edge cases         |
-| [`adt/adt-ddic-mapping`](.agents/rules/adt/adt-ddic-mapping.md)                     | DDIC object → schema mapping       |
-| [`adt/xsd-best-practices`](.agents/rules/adt/xsd-best-practices.md)                 | XSD validity and builder rules     |
-| [`nx/nx-monorepo-setup`](.agents/rules/nx/nx-monorepo-setup.md)                     | Package creation, config templates |
-| [`nx/nx-circular-dependencies`](.agents/rules/nx/nx-circular-dependencies.md)       | Fix false circular dep issues      |
+| Rule                                                                                | Description                                                                      |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [`openspec/spec-first-then-code`](.agents/rules/openspec/spec-first-then-code.md)   | Check specs before coding                                                        |
+| [`development/tmp-folder-testing`](.agents/rules/development/tmp-folder-testing.md) | Use `tmp/` for scratch files                                                     |
+| [`development/package-versions`](.agents/rules/development/package-versions.md)     | Always install latest versions                                                   |
+| [`adt/adk-save-logic`](.agents/rules/adt/adk-save-logic.md)                         | ADK upsert/lock edge cases                                                       |
+| [`adt/adt-ddic-mapping`](.agents/rules/adt/adt-ddic-mapping.md)                     | DDIC object → schema mapping                                                     |
+| [`adt/steampunk-kernel-whitelist`](.agents/rules/adt/steampunk-kernel-whitelist.md) | ABAP Cloud kernel API gotchas (cl_http_destination_provider, /ui2/cl_json, etc.) |
+| [`adt/xsd-best-practices`](.agents/rules/adt/xsd-best-practices.md)                 | XSD validity and builder rules                                                   |
+| [`nx/nx-monorepo-setup`](.agents/rules/nx/nx-monorepo-setup.md)                     | Package creation, config templates                                               |
+| [`nx/nx-circular-dependencies`](.agents/rules/nx/nx-circular-dependencies.md)       | Fix false circular dep issues                                                    |
 
 ### File-Scoped (glob)
 
