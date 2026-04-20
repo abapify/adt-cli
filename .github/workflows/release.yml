@@ -89,6 +89,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NX_NO_CLOUD: 'true'
 
       - name: Version, changelog & tag
         if: ${{ !inputs.dry_run }}
@@ -96,6 +97,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NX_NO_CLOUD: 'true'
 
       - name: Push commit and tags
         if: ${{ !inputs.dry_run }}
