@@ -119,22 +119,43 @@ const scope = name?.startsWith('@') ? name.split('/')[0] : null;
 const scopeFlag = scope ? [`--${scope}:registry=${registry}`] : [];
 
 /**
- * Run an npm subcommand. We deliberately do NOT inherit the repo `.npmrc` —
- * instead we pass registry overrides explicitly. Auth-free commands are
- * preferred (`view`); anything that requires login is still called but
- * failure is reported as "needs auth" rather than blocking.
+ * Pick the first meaningful error line out of an npm stderr blob. npm
+ * chatters with `npm notice` (release reminders), `npm warn` (config
+ * deprecations), and escape-code banners that bury the real error. We
+ * prefer anything starting with `npm error`; fall back to the first
+ * non-chatter line; otherwise the raw first line.
  */
-function npm(cmdArgs: string[]): NpmResult {
-  const result = spawnSync(
-    'npm',
-    [...cmdArgs, `--registry=${registry}`, ...scopeFlag, '--json'],
-    {
-      encoding: 'utf-8',
-      // Individual npm calls are short-lived; if the network (or corporate
-      // proxy) hangs, fail fast instead of wedging the whole `nx run-many`.
-      timeout: 20_000,
-    },
+function firstErrorLine(stderr: string): string {
+  const lines = (stderr ?? '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  return (
+    lines.find((l) => /^npm\s+(error|err!)/i.test(l)) ??
+    lines.find((l) => !/^npm\s+(notice|warn|http|info|verb|sill)/i.test(l)) ??
+    lines[0] ??
+    'no stderr'
   );
+}
+
+/**
+ * Run an npm subcommand. We deliberately do NOT inherit the repo `.npmrc` —
+ * instead we pass registry overrides explicitly. `--json` is opt-in via
+ * `jsonOutput: true` because some subcommands (notably `npm trust github`)
+ * reject it with `EUSAGE`.
+ */
+function npm(cmdArgs: string[], jsonOutput = true): NpmResult {
+  const extra = [
+    `--registry=${registry}`,
+    ...scopeFlag,
+    ...(jsonOutput ? ['--json'] : []),
+  ];
+  const result = spawnSync('npm', [...cmdArgs, ...extra], {
+    encoding: 'utf-8',
+    // Individual npm calls are short-lived; if the network (or corporate
+    // proxy) hangs, fail fast instead of wedging the whole `nx run-many`.
+    timeout: 20_000,
+  });
   let parsed: unknown = null;
   if (result.stdout) {
     try {
@@ -235,7 +256,7 @@ if (view.code === 0 && isObjJson && !(viewJson as ViewJson).error) {
 } else {
   report.checks.exists = 'unknown';
   report.problems.push(
-    `npm view failed: ${view.stderr.split('\n')[0] ?? view.code}`,
+    `npm view failed: ${firstErrorLine(view.stderr) || view.code}`,
   );
 }
 
@@ -245,7 +266,7 @@ if (report.checks.exists === true && name) {
   if (status.code === 0) {
     report.checks.accessStatus = status.json ?? status.stdout.trim();
   } else {
-    report.checks.accessStatus = `ERR: ${status.stderr.split('\n')[0] ?? status.code}`;
+    report.checks.accessStatus = `ERR: ${firstErrorLine(status.stderr) || status.code}`;
   }
 
   // 4. collaborators
@@ -253,7 +274,7 @@ if (report.checks.exists === true && name) {
   if (collabs.code === 0) {
     report.checks.collaborators = collabs.json ?? collabs.stdout.trim();
   } else {
-    report.checks.collaborators = `ERR: ${collabs.stderr.split('\n')[0] ?? collabs.code}`;
+    report.checks.collaborators = `ERR: ${firstErrorLine(collabs.stderr) || collabs.code}`;
   }
 
   // --fix: flip visibility to public if npm reports it as private.
@@ -272,7 +293,7 @@ if (report.checks.exists === true && name) {
         report.checks.accessStatus = 'public';
       } else {
         report.problems.push(
-          `npm access set status=public failed: ${setPub.stderr.split('\n')[0] ?? 'no stderr'} — needs login (\`npm login\`) or OIDC env`,
+          `npm access set status=public failed: ${firstErrorLine(setPub.stderr)} — needs login (\`npm login\`) or OIDC env`,
         );
       }
     }
@@ -285,7 +306,7 @@ if (report.checks.exists === true && name) {
         report.checks.mfa = mfaTarget;
       } else {
         report.problems.push(
-          `npm access set mfa=${mfaTarget} failed: ${setMfa.stderr.split('\n')[0] ?? 'no stderr'}`,
+          `npm access set mfa=${mfaTarget} failed: ${firstErrorLine(setMfa.stderr)}`,
         );
       }
     }
@@ -301,7 +322,7 @@ if (name) {
     // 404 for packages that don't exist yet, or empty list.
     report.checks.trustedPublishers = [];
   } else {
-    report.checks.trustedPublishers = `ERR: ${trust.stderr.split('\n')[0] ?? trust.code}`;
+    report.checks.trustedPublishers = `ERR: ${firstErrorLine(trust.stderr) || trust.code}`;
   }
   // Keep the UI link as a fallback for humans who want to double-check.
   if (name.startsWith('@')) {
@@ -359,13 +380,14 @@ if (prepare && name) {
         report.checks.latestVersion = '0.0.0';
       } else {
         report.problems.push(
-          `npm publish placeholder failed: ${publishResult.stderr?.split('\n')[0] ?? 'no stderr'} — run \`npm login\` first`,
+          `npm publish placeholder failed: ${firstErrorLine(publishResult.stderr)} — run \`npm login\` first`,
         );
       }
       rmSync(tmpDir, { recursive: true, force: true });
     }
 
     // 6b. register the trusted publisher.
+    // `npm trust` does NOT accept `--json`, so disable it for these calls.
     const trustArgs =
       trustProvider === 'github'
         ? [
@@ -398,21 +420,21 @@ if (prepare && name) {
         `unsupported --trust-provider=${trustProvider} (expected github|gitlab)`,
       );
     } else {
-      const trustResult = npm(trustArgs);
+      const trustResult = npm(trustArgs, false);
       if (trustResult.code === 0) {
         report.fixes.push(
           `npm trust ${trustProvider} ${name} → ${trustRepo || `${trustNamespace}/${trustProject}`} / ${trustWorkflow}`,
         );
       } else {
-        const first = trustResult.stderr.split('\n')[0] ?? '';
+        const line = firstErrorLine(trustResult.stderr);
         // Idempotent: `already exists` is not a failure.
-        if (first.includes('already')) {
+        if (line.toLowerCase().includes('already')) {
           report.fixes.push(
             `npm trust ${trustProvider} ${name}: already configured (skip)`,
           );
         } else {
           report.problems.push(
-            `npm trust ${trustProvider} failed: ${first || trustResult.code}`,
+            `npm trust ${trustProvider} failed: ${line || trustResult.code}`,
           );
         }
       }
