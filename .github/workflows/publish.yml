@@ -93,6 +93,20 @@ jobs:
           "
           grep -A1 '\"cli\"' nx.json
 
+      - name: Diagnose OIDC readiness
+        # Sanity-check: confirm the GitHub Actions OIDC env vars that npm
+        # 11.5+ sniffs (ACTIONS_ID_TOKEN_REQUEST_URL/_TOKEN) are actually
+        # present in this step's env. Without them, `npm publish` falls
+        # through to "not logged in".
+        run: |
+          echo "npm version: $(npm --version)"
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL set? $([ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ] && echo yes || echo NO)"
+          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN set? $([ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ] && echo yes || echo NO)"
+          echo "--- userconfig ($NPM_CONFIG_USERCONFIG) ---"
+          cat "$NPM_CONFIG_USERCONFIG" 2>/dev/null || echo "(no userconfig file)"
+          echo "--- repo .npmrc ---"
+          cat .npmrc
+
       - name: Publish packages
         run: npx nx release publish
         shell: bash
