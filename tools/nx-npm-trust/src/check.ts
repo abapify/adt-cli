@@ -1,9 +1,12 @@
 #!/usr/bin/env bun
-// tools/nx-npm-access/src/check.ts
+// tools/nx-npm-trust/src/check.ts
 //
 // Validates that a single @abapify/* package (located in $cwd) is ready to be
-// published from CI. Run per-package via Nx (`nx run <pkg>:npm-check`) or for
-// all publishable packages at once (`nx run-many -t npm-check`).
+// published from CI. Run per-package via Nx
+// (`nx run <pkg>:npm-trust-check`) or for all publishable packages at once
+// (`nx run-many -t npm-trust-check`). Mutations are opt-in:
+//   --fix      patch publishConfig + `npm access set`
+//   --prepare  publish 0.0.0 placeholder (if new) + `npm trust github`
 //
 // Checks performed (all read-only by default, no network writes):
 //   1. package.json hygiene — name, version, publishConfig.access, exports.
@@ -101,7 +104,7 @@ const trustProject = getFlag('trust-project', '');
 
 const pkgPath = join(process.cwd(), 'package.json');
 if (!existsSync(pkgPath)) {
-  console.error(`[npm-check] no package.json in ${process.cwd()}`);
+  console.error(`[npm-trust-check] no package.json in ${process.cwd()}`);
   process.exit(2);
 }
 const pkg: Pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));

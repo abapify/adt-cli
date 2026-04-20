@@ -3,27 +3,12 @@ import { dirname, join, relative } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
-interface NxNpmAccessOptions {
+interface NxNpmTrustOptions {
   /**
-   * Target name registered on each publishable package for the read-only
-   * readiness probe.
-   * @default "npm-check"
+   * Target name registered on each publishable package.
+   * @default "npm-trust-check"
    */
-  checkTargetName?: string;
-  /**
-   * Target name registered on each publishable package for safe
-   * auto-remediation (patches `publishConfig`, runs `npm access set`).
-   * @default "npm-fix"
-   */
-  fixTargetName?: string;
-  /**
-   * Target name registered on each publishable package for bootstrapping
-   * trusted publishing (nx-native equivalent of `/npm-publish prepare-ci`:
-   * publishes an empty `0.0.0` placeholder on npm for brand-new packages
-   * and registers an `npm trust` entry for GitHub Actions OIDC).
-   * @default "npm-prepare"
-   */
-  prepareTargetName?: string;
+  targetName?: string;
   /**
    * npm registry used for access probes. Defaults to the public registry.
    * The script also overrides scope-level registry pins via
@@ -34,7 +19,8 @@ interface NxNpmAccessOptions {
   registry?: string;
   /**
    * GitHub Actions workflow filename that is allowed to publish via OIDC.
-   * Used by the `prepare` target when calling `npm trust github`.
+   * Used when the caller passes `--prepare` (the script invokes
+   * `npm trust github … --file <workflow>`).
    * @default "publish.yml"
    */
   trustWorkflow?: string;
@@ -60,7 +46,7 @@ function isVerbose(): boolean {
 }
 
 function log(msg: string) {
-  if (isVerbose()) logger.info(`[nx-npm-access] ${msg}`);
+  if (isVerbose()) logger.info(`[nx-npm-trust] ${msg}`);
 }
 
 function shouldSkipPath(projectRoot: string): boolean {
@@ -87,27 +73,25 @@ function detectGithubRepo(): string | null {
   return m ? m[1] : null;
 }
 
-export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
+export const createNodesV2: CreateNodesV2<NxNpmTrustOptions> = [
   '**/package.json',
   (configFiles, options = {}) => {
-    const checkTargetName = options.checkTargetName ?? 'npm-check';
-    const fixTargetName = options.fixTargetName ?? 'npm-fix';
-    const prepareTargetName = options.prepareTargetName ?? 'npm-prepare';
+    const targetName = options.targetName ?? 'npm-trust-check';
     const registry = options.registry ?? 'https://registry.npmjs.org/';
     const trustWorkflow = options.trustWorkflow ?? 'publish.yml';
     const trustRepo = options.trustRepo ?? detectGithubRepo() ?? '';
 
     const scriptPath = join(__dirname, 'check.ts');
     const scriptArg = JSON.stringify(scriptPath);
-    const baseCmd = `bun ${scriptArg} --registry=${registry}`;
-    const prepareExtra = [
-      '--prepare',
-      '--trust-provider=github',
+    // Baseline command: read-only probe. Callers opt into mutations by
+    // passing `--fix` and/or `--prepare` through `nx --args="..."`.
+    const baseParts = [
+      `bun ${scriptArg}`,
+      `--registry=${registry}`,
       `--trust-workflow=${trustWorkflow}`,
       trustRepo ? `--trust-repo=${trustRepo}` : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
+    ].filter(Boolean);
+    const command = baseParts.join(' ');
 
     return configFiles
       .map((configFile) => {
@@ -140,23 +124,7 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
           return null;
         }
 
-        log(
-          `register ${checkTargetName} + ${fixTargetName} + ${prepareTargetName} for ${pkg.name}`,
-        );
-
-        // Shared shape: cwd + no arg forwarding, no cache (network-dependent).
-        const makeTarget = (extraArg: string | null) => ({
-          executor: 'nx:run-commands' as const,
-          options: {
-            command: extraArg ? `${baseCmd} ${extraArg}` : baseCmd,
-            cwd: projectRoot,
-            // Prevents nx from swallowing stderr from npm, and lets the user
-            // pass extra flags (e.g. `--args="--mfa=none"`) through nx.
-            forwardAllArgs: true,
-          },
-          cache: false,
-          inputs: [`{projectRoot}/package.json`],
-        });
+        log(`register ${targetName} for ${pkg.name}`);
 
         return [
           configFile,
@@ -164,17 +132,26 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
             projects: {
               [projectRoot]: {
                 targets: {
-                  [checkTargetName]: makeTarget(null),
-                  [fixTargetName]: makeTarget('--fix'),
-                  [prepareTargetName]: makeTarget(prepareExtra),
+                  [targetName]: {
+                    executor: 'nx:run-commands',
+                    options: {
+                      command,
+                      cwd: projectRoot,
+                      // Allow the caller to add flags via `nx --args="--fix"`
+                      // etc. without re-declaring the target.
+                      forwardAllArgs: true,
+                    },
+                    cache: false,
+                    inputs: ['{projectRoot}/package.json'],
+                  },
                 },
               },
             },
           },
-        ] as const;
+        ] as [string, { projects: Record<string, unknown> }];
       })
-      .filter((x): x is NonNullable<typeof x> => x !== null) as ReturnType<
-      CreateNodesV2<NxNpmAccessOptions>[1]
-    >;
+      .filter(
+        (x): x is NonNullable<typeof x> => x !== null,
+      ) as unknown as ReturnType<CreateNodesV2<NxNpmTrustOptions>[1]>;
   },
 ];

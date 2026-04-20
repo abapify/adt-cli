@@ -109,7 +109,7 @@
       "path": "./packages/abap-ast"
     },
     {
-      "path": "./tools/nx-npm-access"
+      "path": "./tools/nx-npm-trust"
     }
   ]
 }
