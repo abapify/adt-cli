@@ -101,8 +101,26 @@ function extractBearer(req: http.IncomingMessage): string | undefined {
   const h = req.headers['authorization'];
   const value = Array.isArray(h) ? h[0] : h;
   if (!value) return undefined;
-  const m = /^Bearer\s+(.+)$/u.exec(value.trim());
-  return m ? m[1].trim() : undefined;
+  const trimmed = value.trim();
+  // Case-insensitive "Bearer" prefix check without regex to avoid ReDoS.
+  if (trimmed.length < 7) return undefined;
+  const prefix = trimmed.slice(0, 6);
+  if (prefix.toLowerCase() !== 'bearer') return undefined;
+  // Skip a single required whitespace char, then any leading whitespace.
+  const rest = trimmed.slice(6);
+  if (rest.length === 0) return undefined;
+  const first = rest.charCodeAt(0);
+  // ASCII whitespace: space, tab, LF, CR, VT, FF.
+  const isWs =
+    first === 0x20 ||
+    first === 0x09 ||
+    first === 0x0a ||
+    first === 0x0d ||
+    first === 0x0b ||
+    first === 0x0c;
+  if (!isWs) return undefined;
+  const token = rest.trimStart();
+  return token.length > 0 ? token : undefined;
 }
 
 function headerString(
