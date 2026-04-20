@@ -1,6 +1,16 @@
 export * from './lib/cli';
 export * from './lib/plugins';
 
+// Programmatic client factory – consumed by adt-mcp's sap_connect tool
+// (and other workspace packages) so they can resolve credentials from
+// the on-disk auth store (~/.adt/sessions/<sid>.json) without
+// duplicating the CLI's auth bridge.
+export {
+  getAdtClientV2,
+  getAdtClientV2Safe,
+  AdtAuthError,
+} from './lib/utils/adt-client-v2';
+
 // Programmatic services – consumed by adt-mcp and other workspace packages
 // that need to reuse CLI business logic without going through commander.
 export {
@@ -28,3 +38,15 @@ export {
   diffObject,
   applyPlan,
 } from './lib/services/checkin';
+
+// Changeset (Wave 3) — transactional unit-of-work shared by CLI and MCP.
+export {
+  ChangesetService,
+  createChangeset,
+  type Changeset,
+  type ChangesetEntry,
+  type ChangesetStatus,
+  type AddEntryArgs as ChangesetAddArgs,
+  type CommitResult as ChangesetCommitResult,
+  type RollbackResult as ChangesetRollbackResult,
+} from './lib/services/changeset';

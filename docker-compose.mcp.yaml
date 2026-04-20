@@ -1,0 +1,93 @@
+# docker-compose.mcp.yaml
+#
+# Production-ish reference compose file for the adt-mcp HTTP server.
+#
+# Usage:
+#   cp .env.mcp.example .env.mcp     # or create your own
+#   docker compose -f docker-compose.mcp.yaml --env-file .env.mcp up
+#
+# The stack ships one required service (`adt-mcp`) and one optional,
+# commented-out example (`oauth2-proxy`) showing how to front the MCP
+# server with an OIDC reverse proxy (Okta, Entra ID, Cognito, …) and
+# have it forward authenticated user identity via `x-forwarded-user`.
+
+services:
+  adt-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+      args:
+        # Set this in your shell env when building behind a corporate
+        # npm proxy (e.g. JFrog Artifactory). Do not commit the URL.
+        BUN_CONFIG_REGISTRY: ${BUN_CONFIG_REGISTRY:-}
+    image: ghcr.io/abapify/adt-mcp:latest
+    restart: unless-stopped
+    ports:
+      - '${MCP_BIND_ADDR:-127.0.0.1}:${MCP_PORT:-3000}:3000'
+    environment:
+      # Bind inside the container. Leave as 0.0.0.0 so Docker can route
+      # the published port; MCP_BIND_ADDR above restricts the host side.
+      MCP_HOST: '0.0.0.0'
+      MCP_PORT: '3000'
+      # Host-header allow-list (comma-separated). Always set this when
+      # exposing beyond localhost to defeat DNS-rebinding attacks.
+      MCP_ALLOWED_HOSTS: '${MCP_ALLOWED_HOSTS:-localhost,127.0.0.1}'
+      # CORS allow-list for browser clients (comma-separated).
+      MCP_CORS_ORIGIN: '${MCP_CORS_ORIGIN:-}'
+      # ── auth: pick exactly one mode ──────────────────────────────
+      # 1) bearer — shared secret. Simplest for single-user setups.
+      MCP_AUTH_TOKEN: '${MCP_AUTH_TOKEN:-}'
+      # 2) proxy — trust `x-forwarded-user` from a reverse proxy
+      #    (oauth2-proxy, Cloudflare Access, etc.). Set to "1" to enable.
+      TRUST_FORWARDED_AUTH: '${TRUST_FORWARDED_AUTH:-}'
+      # 3) oauth — validate an OIDC JWT directly against the IdP. Only
+      #    OAUTH_ISSUER is mandatory; the rest are optional hardening.
+      OAUTH_ISSUER: '${OAUTH_ISSUER:-}'
+      OAUTH_AUDIENCE: '${OAUTH_AUDIENCE:-}'
+      OAUTH_JWKS_URI: '${OAUTH_JWKS_URI:-}'
+      OAUTH_REQUIRED_SCOPES: '${OAUTH_REQUIRED_SCOPES:-}'
+      OAUTH_USER_CLAIM: '${OAUTH_USER_CLAIM:-}'
+      # ── multi-system routing ─────────────────────────────────────
+      # Either embed the registry inline …
+      SAP_SYSTEMS_JSON: '${SAP_SYSTEMS_JSON:-}'
+      # … or mount a file and point at it:
+      SAP_SYSTEMS_FILE: '${SAP_SYSTEMS_FILE:-}'
+    # Uncomment to mount a systems.json from the host.
+    # volumes:
+    #   - ./systems.json:/app/systems.json:ro
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O-', 'http://127.0.0.1:3000/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── Optional: oauth2-proxy in front of adt-mcp ─────────────────────
+  #
+  # Example shape only — adapt the provider block to your IdP.
+  # The proxy terminates OIDC with Okta / Azure AD / Google / etc.,
+  # then forwards the authenticated user identity to adt-mcp via
+  # `x-forwarded-user`. Set TRUST_FORWARDED_AUTH=1 on adt-mcp.
+  #
+  # oauth2-proxy:
+  #   image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - adt-mcp
+  #   ports:
+  #     - "127.0.0.1:4180:4180"
+  #   environment:
+  #     OAUTH2_PROXY_PROVIDER: "oidc"
+  #     OAUTH2_PROXY_OIDC_ISSUER_URL: "https://<tenant>.okta.com"
+  #     OAUTH2_PROXY_CLIENT_ID: "${OKTA_CLIENT_ID}"
+  #     OAUTH2_PROXY_CLIENT_SECRET: "${OKTA_CLIENT_SECRET}"
+  #     OAUTH2_PROXY_COOKIE_SECRET: "${OAUTH2_PROXY_COOKIE_SECRET}"
+  #     OAUTH2_PROXY_REDIRECT_URL: "https://mcp.example.com/oauth2/callback"
+  #     OAUTH2_PROXY_UPSTREAMS: "http://adt-mcp:3000"
+  #     OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
+  #     OAUTH2_PROXY_REVERSE_PROXY: "true"
+  #     OAUTH2_PROXY_PASS_ACCESS_TOKEN: "true"
+  #     OAUTH2_PROXY_SET_XAUTHREQUEST: "true"
+  #     OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+  #     # Forward authenticated user identity to adt-mcp.
+  #     OAUTH2_PROXY_PASS_USER_HEADERS: "true"

@@ -5,7 +5,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetDataElementTool(
   server: McpServer,
@@ -15,14 +16,14 @@ export function registerGetDataElementTool(
     'get_data_element',
     'Fetch DDIC data element metadata.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       dataElementName: z
         .string()
         .describe('Data element name (e.g. ZDTEL_SAMPLE)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const result = await client.adt.ddic.dataelements.get(
           args.dataElementName.toLowerCase(),
         );

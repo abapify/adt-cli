@@ -16,7 +16,8 @@ import {
   CREATE_OBJECT_TYPES,
   isCreateObjectType,
 } from './object-creation';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCreateObjectTool(
   server: McpServer,
@@ -26,7 +27,7 @@ export function registerCreateObjectTool(
     'create_object',
     'Create a new ABAP object. Supported types: PROG, CLAS, INTF, FUGR, DEVC, DOMA (domain), DTEL (data element), TABL (table), STRUCT (structure), DDLS (CDS DDL), DCLS (CDS DCL), BDEF (RAP behavior definition), SRVD (RAP service definition).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z
         .string()
         .describe(
@@ -51,9 +52,9 @@ export function registerCreateObjectTool(
           'Transport request number (required for transportable objects)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const objectType = args.objectType.toUpperCase();
         const objectName = args.objectName.toUpperCase();
 

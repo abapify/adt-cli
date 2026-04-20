@@ -12,7 +12,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 
 type AdtClient = ReturnType<ToolContext['getClient']>;
@@ -96,7 +97,7 @@ export function registerDeleteObjectTool(
     'delete_object',
     'Delete an ABAP object. Supports PROG, INCL, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF, SRVD, SRVB and falls back to direct URI deletion for other types.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z.string().describe('Name of the ABAP object to delete'),
       objectType: z
         .string()
@@ -109,9 +110,9 @@ export function registerDeleteObjectTool(
           'Transport request number (required for transportable objects)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         // Initialise ADK so any internal helper using the global context
         // (e.g. lock service lookups) has a live client. See the parity
         // note in `object-creation.ts`.

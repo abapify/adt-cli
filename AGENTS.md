@@ -163,7 +163,7 @@ Each package has its own `AGENTS.md` with detailed conventions:
 - [`packages/adt-client/AGENTS.md`](packages/adt-client/AGENTS.md) — Contract-driven REST client, schema conventions, type inference
 - [`packages/adt-contracts/AGENTS.md`](packages/adt-contracts/AGENTS.md) — Contract testing framework, schema integration
 - [`packages/adt-schemas/AGENTS.md`](packages/adt-schemas/AGENTS.md) — XSD-derived schemas, generation pipeline
-- [`packages/adt-mcp/AGENTS.md`](packages/adt-mcp/AGENTS.md) — MCP server: tool conventions, schema rules, mock server, extension guide
+- [`packages/adt-mcp/AGENTS.md`](packages/adt-mcp/AGENTS.md) — MCP server: tool conventions, schema rules, mock server, extension guide. Ships **two transports** (stdio + Streamable HTTP since Wave 1) with session-scoped state + transactional `changeset_*` tools on the HTTP path; see [`docs/deployment/mcp-http.md`](docs/deployment/mcp-http.md) for deployment.
 - [`packages/adt-plugin-abapgit/AGENTS.md`](packages/adt-plugin-abapgit/AGENTS.md) — abapGit serialization, handler template
 - [`packages/openai-codegen/AGENTS.md`](packages/openai-codegen/AGENTS.md) — OpenAPI → ABAP client generator; emits a single zero-runtime-deps ABAP class per spec, BTP Steampunk cloud profile.
 - [`packages/ts-xsd/AGENTS.md`](packages/ts-xsd/AGENTS.md) — W3C XSD parser, type inference, codegen

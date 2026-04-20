@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGrepPackagesTool(
   server: McpServer,
@@ -20,7 +21,7 @@ export function registerGrepPackagesTool(
     'grep_packages',
     'Regex search for a pattern across all ABAP source code within a package (and optionally its subpackages)',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       pattern: z.string().describe('Search pattern (regex or literal string)'),
       packageName: z
         .string()
@@ -34,9 +35,9 @@ export function registerGrepPackagesTool(
         .optional()
         .describe('Maximum number of results (default: 50)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const maxResults = args.maxResults ?? 50;
         const includeSubPackages = args.includeSubPackages ?? true;
 

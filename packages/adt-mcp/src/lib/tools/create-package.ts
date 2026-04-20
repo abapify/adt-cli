@@ -12,7 +12,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCreatePackageTool(
   server: McpServer,
@@ -22,7 +23,7 @@ export function registerCreatePackageTool(
     'create_package',
     'Create a new ABAP development package (DEVC). Omit transport for local ($TMP) packages.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z
         .string()
         .describe('Package name (e.g. ZPACKAGE, $TMP_TEST)'),
@@ -44,9 +45,9 @@ export function registerCreatePackageTool(
           'Transport request number. Omit for local packages (e.g. $-prefixed names).',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const packageName = args.packageName.toUpperCase();
         const packageType = args.packageType ?? 'development';
 

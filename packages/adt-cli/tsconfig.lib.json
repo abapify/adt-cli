@@ -37,6 +37,9 @@
       "path": "../adt-tui/tsconfig.lib.json"
     },
     {
+      "path": "../adt-schemas"
+    },
+    {
       "path": "../adt-rfc/tsconfig.lib.json"
     },
     {

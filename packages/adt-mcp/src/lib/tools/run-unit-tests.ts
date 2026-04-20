@@ -12,7 +12,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { aunitResult } from '@abapify/adt-schemas';
@@ -150,7 +151,7 @@ export function registerRunUnitTestsTool(
     'run_unit_tests',
     'Run ABAP Unit tests on an object or package and return pass/fail counts per method',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z
         .string()
         .describe('ABAP object name (class, program, or package)'),
@@ -177,9 +178,9 @@ export function registerRunUnitTestsTool(
         .default('jacoco')
         .describe('Coverage report format when coverage is enabled'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const objectUri = await resolveObjectUri(
           client,

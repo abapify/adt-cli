@@ -9,7 +9,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCtsReleaseTransportTool(
   server: McpServer,
@@ -19,14 +20,14 @@ export function registerCtsReleaseTransportTool(
     'cts_release_transport',
     'Release a transport request',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       transport: z
         .string()
         .describe('Transport number to release (e.g. S0DK900001)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         // SAP expects a namespace-prefixed action attribute here.
         const body =
           '<?xml version="1.0" encoding="UTF-8"?>' +

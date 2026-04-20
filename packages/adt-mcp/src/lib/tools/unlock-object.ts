@@ -10,7 +10,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 
 export function registerUnlockObjectTool(
@@ -21,7 +22,7 @@ export function registerUnlockObjectTool(
     'unlock_object',
     'Release an ADT edit lock acquired with lock_object. Requires the lockHandle returned by lock_object.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z.string().describe('ABAP object name'),
       objectType: z
         .string()
@@ -29,9 +30,9 @@ export function registerUnlockObjectTool(
         .describe('Object type (e.g. CLAS, PROG, INTF, FUGR)'),
       lockHandle: z.string().describe('Lock handle returned by lock_object'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const objectUri = await resolveObjectUri(
           client,

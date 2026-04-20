@@ -9,11 +9,13 @@
   "type": "module",
   "types": "./dist/index.d.mts",
   "bin": {
-    "adt-mcp": "./dist/bin/adt-mcp.mjs"
+    "adt-mcp": "./dist/bin/adt-mcp.mjs",
+    "adt-mcp-http": "./dist/bin/adt-mcp-http.mjs"
   },
   "exports": {
     ".": "./dist/index.mjs",
     "./bin/adt-mcp": "./dist/bin/adt-mcp.mjs",
+    "./bin/adt-mcp-http": "./dist/bin/adt-mcp-http.mjs",
     "./mock": "./dist/mock.mjs",
     "./package.json": "./package.json"
   },
@@ -41,6 +43,7 @@
     "@abapify/adt-plugin-abapgit": "workspace:*",
     "@abapify/adt-rfc": "workspace:*",
     "@xmldom/xmldom": "^0.9.9",
+    "jose": "^6.2.1",
     "zod": "^3.24.0"
   }
 }

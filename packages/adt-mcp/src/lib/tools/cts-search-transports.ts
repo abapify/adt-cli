@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import {
   normalizeTransportFindResponse,
   type CtsReqHeader,
@@ -24,7 +25,7 @@ export function registerCtsSearchTransportsTool(
     'cts_search_transports',
     'Search transport requests via /sap/bc/adt/cts/transports?_action=FIND. Filters: user (owner), trfunction (K/W/T/*), status (D/R/L/... client-side filter).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       user: z
         .string()
         .optional()
@@ -46,9 +47,9 @@ export function registerCtsSearchTransportsTool(
         .optional()
         .describe('Maximum number of results (default: 50)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const rawResult = await client.adt.cts.transports.find({
           _action: 'FIND',
           user: args.user ?? '*',

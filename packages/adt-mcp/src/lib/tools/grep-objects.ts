@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 
 export function registerGrepObjectsTool(
@@ -21,7 +22,7 @@ export function registerGrepObjectsTool(
     'grep_objects',
     'Regex search for a pattern within ABAP object source code. Provide either a list of object URIs or name+type pairs to resolve them.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       pattern: z.string().describe('Search pattern (regex or literal string)'),
       objectUris: z
         .array(z.string())
@@ -43,9 +44,9 @@ export function registerGrepObjectsTool(
         .optional()
         .describe('Maximum number of results (default: 50)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const maxResults = args.maxResults ?? 50;
 
         // Resolve URIs from name/type pairs if provided (in parallel)

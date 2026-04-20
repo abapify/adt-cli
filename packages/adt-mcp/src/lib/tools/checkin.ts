@@ -10,14 +10,15 @@ import { CheckinService } from '@abapify/adt-cli';
 import { initializeAdk } from '@abapify/adk';
 import { FileLockStore } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCheckinTool(server: McpServer, ctx: ToolContext): void {
   server.tool(
     'checkin',
     'Push a local abapGit/gCTS-formatted directory into SAP (inverse of `import_package`). Mirrors `adt checkin`.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       sourceDir: z
         .string()
         .describe('Local directory containing serialised files'),
@@ -54,9 +55,9 @@ export function registerCheckinTool(server: McpServer, ctx: ToolContext): void {
         .optional()
         .describe("ABAP language version — e.g. '5' for Cloud"),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client, { lockStore: new FileLockStore() });
 
         const service = new CheckinService();

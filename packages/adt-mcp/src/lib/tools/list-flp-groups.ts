@@ -4,7 +4,8 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { normalizeOdataFeed } from '@abapify/adt-contracts';
 
 export function registerListFlpGroupsTool(
@@ -14,10 +15,10 @@ export function registerListFlpGroupsTool(
   server.tool(
     'list_flp_groups',
     'List Fiori Launchpad groups (Page Builder "Pages") via OData',
-    { ...connectionShape },
-    async (args) => {
+    { ...sessionOrConnectionShape },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.flp.groups.list();
         return {
           content: [

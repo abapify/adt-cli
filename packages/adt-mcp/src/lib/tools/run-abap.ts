@@ -21,7 +21,8 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
 import { initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 function buildClassTemplate(className: string, body: string): string {
   const lower = className.toLowerCase();
@@ -51,7 +52,7 @@ export function registerRunAbapTool(server: McpServer, ctx: ToolContext): void {
     'run_abap',
     'Execute an ad-hoc ABAP snippet via a temporary IF_OO_ADT_CLASSRUN class. Creates the class, writes the source, activates, executes, then deletes (unless keepClass is true).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       source: z
         .string()
         .describe(
@@ -74,8 +75,21 @@ export function registerRunAbapTool(server: McpServer, ctx: ToolContext): void {
         .optional()
         .describe('If true, do not delete the temp class after execution'),
     },
-    async (args) => {
-      const client = ctx.getClient(args);
+    async (args, extra) => {
+      let client;
+      try {
+        ({ client } = await resolveClient(ctx, args, extra ?? {}));
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text' as const,
+              text: `run_abap failed: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
       // Wire ADK/lockService for ctx.lockService consumers (parity with other tools)
       initializeAdk(client);
 

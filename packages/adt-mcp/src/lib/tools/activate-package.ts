@@ -8,7 +8,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { extractObjectReferences } from './utils';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { adtcore } from '@abapify/adt-schemas';
@@ -26,12 +27,12 @@ export function registerActivatePackageTool(
     'activate_package',
     'Batch-activate all inactive objects in a package. Returns the count and list of activated objects.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z.string().describe('ABAP package name (e.g. ZPACKAGE)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const packageName = args.packageName.toUpperCase();
 
         // Step 1: Get list of inactive objects in the package

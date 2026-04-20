@@ -121,11 +121,7 @@ describe('CLI + MCP parity (misc)', () => {
   });
 
   it('current user — MCP', async () => {
-    const res = await callMcpTool<{ mode: string }>(
-      harness,
-      'lookup_user',
-      {},
-    );
+    const res = await callMcpTool<{ mode: string }>(harness, 'lookup_user', {});
     expect(res.isError).toBe(false);
     expect(res.json.mode).toBe('current');
   });

@@ -14,14 +14,15 @@ import {
   type RfcParams,
 } from '@abapify/adt-rfc';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCallRfcTool(server: McpServer, ctx: ToolContext): void {
   server.tool(
     'call_rfc',
     'Invoke a classic RFC function module on the SAP system via SOAP-over-HTTP (/sap/bc/soap/rfc). Use this for BAPIs, STFC_CONNECTION, custom RFC FMs, etc.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       functionModule: z
         .string()
         .describe(
@@ -38,9 +39,13 @@ export function registerCallRfcTool(server: McpServer, ctx: ToolContext): void {
         .optional()
         .describe('Override sap-client query parameter'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const adtClient = ctx.getClient(args);
+        const { client: adtClient } = await resolveClient(
+          ctx,
+          args,
+          extra ?? {},
+        );
         const rfc = createRfcClient({
           fetch: (url, opts) => adtClient.fetch(url, opts) as Promise<unknown>,
           client: args.client,

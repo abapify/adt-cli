@@ -11,7 +11,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 
 export function registerUpdateSourceTool(
@@ -22,7 +23,7 @@ export function registerUpdateSourceTool(
     'update_source',
     'Write new ABAP source code to an existing object (acquires lock, PUTs source, releases lock)',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z.string().describe('ABAP object name'),
       objectType: z
         .string()
@@ -36,8 +37,21 @@ export function registerUpdateSourceTool(
           'Transport request number (required for transportable objects)',
         ),
     },
-    async (args) => {
-      const client = ctx.getClient(args);
+    async (args, extra) => {
+      let client;
+      try {
+        ({ client } = await resolveClient(ctx, args, extra ?? {}));
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text' as const,
+              text: `Update source failed: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
       let objectUri: string | undefined;
 
       try {

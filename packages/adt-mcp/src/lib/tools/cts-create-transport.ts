@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { transportmanagmentCreate } from '@abapify/adt-schemas';
 
@@ -38,7 +39,7 @@ export function registerCtsCreateTransportTool(
     'cts_create_transport',
     'Create a new transport request',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       description: z.string().describe('Transport description'),
       type: z
         .enum(['K', 'W'])
@@ -49,9 +50,9 @@ export function registerCtsCreateTransportTool(
       target: z.string().optional().describe('Target system'),
       project: z.string().optional().describe('CTS project name'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const body: CreateBody = {
           root: {

@@ -11,7 +11,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { extractObjectReferences } from './utils';
 
 export function registerGetPackageTool(
@@ -22,16 +23,16 @@ export function registerGetPackageTool(
     'get_package',
     'Get metadata for an ABAP package, optionally including its contained objects.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z.string().describe('Package name (e.g. ZPACKAGE)'),
       includeObjects: z
         .boolean()
         .optional()
         .describe('If true, also list the objects contained in the package.'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const pkgName = args.packageName.toUpperCase();
 
         const metadata = await client.adt.packages.get(pkgName);

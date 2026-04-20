@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetTableContentsTool(
   server: McpServer,
@@ -20,7 +21,7 @@ export function registerGetTableContentsTool(
     'get_table_contents',
     'Read data from a DDIC table with optional WHERE filter, column selection, and row limit. WARNING: the WHERE clause is sent as-is to the SAP data preview endpoint — avoid untrusted input.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       tableName: z.string().describe('DDIC table name (e.g. MARA, VBAK, T001)'),
       where: z
         .string()
@@ -37,9 +38,9 @@ export function registerGetTableContentsTool(
         .optional()
         .describe('Maximum rows to return (default: 100)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const maxRows = args.maxRows ?? 100;
 
         const selectColumns =

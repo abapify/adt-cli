@@ -7,7 +7,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { extractObjectReferences } from './utils';
 
 export function registerSearchObjectsTool(
@@ -18,16 +19,16 @@ export function registerSearchObjectsTool(
     'search_objects',
     'Search for ABAP objects in the repository (supports wildcards)',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       query: z.string().describe('Search query (supports wildcards like *)'),
       maxResults: z
         .number()
         .optional()
         .describe('Maximum number of results (default: 50)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const maxResults = args.maxResults ?? 50;
 
         const results =

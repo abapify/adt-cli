@@ -26,16 +26,10 @@ import type { Command } from 'commander';
 import { randomBytes } from 'node:crypto';
 import { Client as McpClient } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import {
-  createMockAdtServer,
-  type MockAdtServer,
-} from '@abapify/adt-fixtures';
+import { createMockAdtServer, type MockAdtServer } from '@abapify/adt-fixtures';
 /* eslint-disable-next-line @nx/enforce-module-boundaries */
 import { createMcpServer } from '@abapify/adt-mcp';
-import {
-  createAdtClient,
-  type AdtClient,
-} from '@abapify/adt-client';
+import { createAdtClient, type AdtClient } from '@abapify/adt-client';
 import { initializeAdk } from '@abapify/adk';
 
 import { createCLI } from '../../src/lib/cli';
@@ -332,8 +326,8 @@ export async function callMcpTool<T = unknown>(
     arguments: { ...harness.connection, ...args },
   });
 
-  const content = (result.content as Array<{ type: string; text?: string }>) ??
-    [];
+  const content =
+    (result.content as Array<{ type: string; text?: string }>) ?? [];
   const firstText = content[0]?.text ?? '';
 
   let parsed: unknown = firstText;

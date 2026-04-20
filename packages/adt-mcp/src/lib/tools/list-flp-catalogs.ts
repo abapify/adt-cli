@@ -7,7 +7,8 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { normalizeOdataFeed } from '@abapify/adt-contracts';
 
 export function registerListFlpCatalogsTool(
@@ -17,10 +18,10 @@ export function registerListFlpCatalogsTool(
   server.tool(
     'list_flp_catalogs',
     'List Fiori Launchpad catalogs via the Page Builder OData service',
-    { ...connectionShape },
-    async (args) => {
+    { ...sessionOrConnectionShape },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.flp.catalogs.list();
         return {
           content: [

@@ -7,7 +7,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetDomainTool(
   server: McpServer,
@@ -17,12 +18,12 @@ export function registerGetDomainTool(
     'get_domain',
     'Fetch DDIC domain metadata (type information, fixed values, output info).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       domainName: z.string().describe('Domain name (e.g. ZDOM_SAMPLE)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const result = await client.adt.ddic.domains.get(
           args.domainName.toLowerCase(),
         );

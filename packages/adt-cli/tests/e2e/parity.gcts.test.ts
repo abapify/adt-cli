@@ -62,8 +62,12 @@ describe('parity: gcts', () => {
       {},
     );
     expect(mcp.isError).toBe(false);
-    const cliRids = cliRepos!.map((r) => r.rid).sort((a, b) => a.localeCompare(b));
-    const mcpRids = mcp.json.map((r) => r.rid).sort((a, b) => a.localeCompare(b));
+    const cliRids = cliRepos!
+      .map((r) => r.rid)
+      .sort((a, b) => a.localeCompare(b));
+    const mcpRids = mcp.json
+      .map((r) => r.rid)
+      .sort((a, b) => a.localeCompare(b));
     expect(cliRids).toEqual(mcpRids);
   });
 
@@ -202,22 +206,15 @@ describe('parity: gcts', () => {
   });
 
   it('log: CLI `gcts log <rid> --json` and MCP `gcts_log`', async () => {
-    const cli = await runCliCommand(harness, [
-      'gcts',
-      'log',
-      RID,
-      '--json',
-    ]);
+    const cli = await runCliCommand(harness, ['gcts', 'log', RID, '--json']);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
     const cliCommits = extractJson<Array<{ id: string }>>(cli);
     expect(Array.isArray(cliCommits)).toBe(true);
     expect(cliCommits!.length).toBeGreaterThan(0);
 
-    const mcp = await callMcpTool<Array<{ id: string }>>(
-      harness,
-      'gcts_log',
-      { rid: RID },
-    );
+    const mcp = await callMcpTool<Array<{ id: string }>>(harness, 'gcts_log', {
+      rid: RID,
+    });
     expect(mcp.isError).toBe(false);
     expect(mcp.json.map((c) => c.id)).toEqual(cliCommits!.map((c) => c.id));
   });
