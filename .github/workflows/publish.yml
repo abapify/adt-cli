@@ -36,15 +36,17 @@ jobs:
         run: bun install
 
       - name: Override @abapify scope registry for npmjs publishing
-        # The repo-level .npmrc pins @abapify:registry to GitHub Packages so
-        # consumers can install @abapify/* from GHP. During the npm publish job
-        # we instead target registry.npmjs.org (OIDC trusted publisher), so the
-        # scope override must be dropped before `nx release publish` runs —
-        # otherwise npm issues metadata GETs against GHP and fails with 401.
+        # The repo-level .npmrc is shaped for CI CONSUMERS of the package
+        # (GHP auth token for the @abapify scope). For the publish job we
+        # don't need any of that — we're publishing, not installing. Any
+        # leftover scope pin or `_authToken` line (even for a different
+        # registry like npm.pkg.github.com) may short-circuit npm's OIDC
+        # auto-discovery, so nuke the repo-level .npmrc entirely.
         run: |
-          sed -i '/^@abapify:registry=/d' .npmrc
-          echo "--- effective .npmrc ---"
+          : > .npmrc
+          echo "--- effective repo .npmrc ---"
           cat .npmrc
+          echo "(end)"
 
       - name: Upgrade npm to >= 11.10
         # Node 24 ships with npm 11.0.x. OIDC trusted publishing discovery
