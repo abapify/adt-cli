@@ -15,6 +15,7 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_petstore3~add_pet.
+    TRY.
     DATA(response) = client->fetch(
       method  = 'POST'
       path    = '/pet'
@@ -39,9 +40,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~update_pet.
+    TRY.
     DATA(response) = client->fetch(
       method  = 'PUT'
       path    = '/pet'
@@ -71,9 +78,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~find_pets_by_status.
+    TRY.
     DATA(response) = client->fetch(
       method = 'GET'
       path   = '/pet/findByStatus'
@@ -92,13 +105,19 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~find_pets_by_tags.
+    TRY.
     DATA(response) = client->fetch(
       method = 'GET'
       path   = '/pet/findByTags'
-      query  = VALUE #( ( name = 'tags' value = tags ) ) ).
+      query  = VALUE #( FOR _tags IN tags ( name = 'tags' value = _tags ) ) ).
     CASE response->status( ).
       WHEN 200.
         json=>parse( response->body( ) )->to( REF #( pets ) ).
@@ -113,9 +132,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~get_pet_by_id.
+    TRY.
     DATA(response) = client->fetch( method = 'GET' path = |/pet/{ pet_id }| ).
     CASE response->status( ).
       WHEN 200.
@@ -136,9 +161,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~update_pet_with_form.
+    TRY.
     DATA(response) = client->fetch(
       method = 'POST'
       path   = |/pet/{ pet_id }|
@@ -157,9 +188,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~delete_pet.
+    TRY.
     DATA(response) = client->fetch(
       method  = 'DELETE'
       path    = |/pet/{ pet_id }|
@@ -178,9 +215,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~upload_file.
+    TRY.
     DATA(response) = client->fetch(
       method = 'POST'
       path   = |/pet/{ pet_id }/uploadImage|
@@ -205,9 +248,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~get_inventory.
+    TRY.
     DATA(response) = client->fetch( method = 'GET' path = '/store/inventory' ).
     CASE response->status( ).
       WHEN 200.
@@ -218,9 +267,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~place_order.
+    TRY.
     DATA(response) = client->fetch(
       method  = 'POST'
       path    = '/store/order'
@@ -245,9 +300,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~get_order_by_id.
+    TRY.
     DATA(response) = client->fetch( method = 'GET' path = |/store/order/{ order_id }| ).
     CASE response->status( ).
       WHEN 200.
@@ -268,9 +329,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~delete_order.
+    TRY.
     DATA(response) = client->fetch( method = 'DELETE' path = |/store/order/{ order_id }| ).
     CASE response->status( ).
       WHEN 200.
@@ -291,9 +358,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~create_user.
+    TRY.
     DATA(response) = client->fetch(
       method  = 'POST'
       path    = '/user'
@@ -308,9 +381,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~create_users_with_list_input.
+    TRY.
     DATA(response) = client->fetch(
       method  = 'POST'
       path    = '/user/createWithList'
@@ -325,9 +404,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~login_user.
+    TRY.
     DATA(response) = client->fetch(
       method = 'GET'
       path   = '/user/login'
@@ -346,9 +431,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~logout_user.
+    TRY.
     DATA(response) = client->fetch( method = 'GET' path = '/user/logout' ).
     CASE response->status( ).
       WHEN 200.
@@ -359,9 +450,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~get_user_by_name.
+    TRY.
     DATA(response) = client->fetch( method = 'GET' path = |/user/{ username }| ).
     CASE response->status( ).
       WHEN 200.
@@ -382,9 +479,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~update_user.
+    TRY.
     DATA(response) = client->fetch(
       method  = 'PUT'
       path    = |/user/{ username }|
@@ -409,9 +512,15 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD zif_petstore3~delete_user.
+    TRY.
     DATA(response) = client->fetch( method = 'DELETE' path = |/user/{ username }| ).
     CASE response->status( ).
       WHEN 200.
@@ -432,5 +541,10 @@ CLASS ZCL_PETSTORE3 IMPLEMENTATION.
           description = 'Unexpected error'
           body        = response->body( ) ).
     ENDCASE.
+      CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 0
+          description = _http_err->get_text( ) ).
+    ENDTRY.
   ENDMETHOD.
 ENDCLASS.

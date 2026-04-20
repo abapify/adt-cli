@@ -160,10 +160,10 @@ describe('format/writeClientBundle', () => {
       'src/zcl_demo.clas.xml',
       'src/zcx_demo_error.clas.abap',
       'src/zcx_demo_error.clas.xml',
-      'src/zif_demo.intf.abap',
-      'src/zif_demo.intf.xml',
       'src/zif_demo_types.intf.abap',
       'src/zif_demo_types.intf.xml',
+      'src/zif_demo.intf.abap',
+      'src/zif_demo.intf.xml',
     ]);
 
     for (const f of result.files) {

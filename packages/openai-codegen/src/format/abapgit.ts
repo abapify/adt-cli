@@ -114,7 +114,7 @@ export async function writeAbapgitLayout(
     written.push(`src/${base}.clas.locals_imp.abap`);
   }
 
-  written.sort();
+  written.sort((a, b) => a.localeCompare(b));
   return { files: written };
 }
 
@@ -173,6 +173,6 @@ export async function writeAbapgitInterface(
   );
   written.push(`src/${base}.intf.xml`);
 
-  written.sort();
+  written.sort((a, b) => a.localeCompare(b));
   return { files: written };
 }

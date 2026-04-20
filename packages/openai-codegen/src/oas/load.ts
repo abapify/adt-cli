@@ -500,9 +500,36 @@ function normalizeResponses(raw: unknown): NormalizedResponse[] {
 }
 
 function synthesizeOperationId(method: HttpMethod, path: string): string {
-  const sanitized = path
-    .replace(/\{([^}]+)\}/g, '$1')
-    .replace(/[^A-Za-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  return `${method}_${sanitized}`;
+  // Explicit character-by-character sanitization avoids super-linear regex
+  // backtracking risks (Sonar `typescript:S5852`).
+  const out: string[] = [];
+  let underscore = false;
+  let braceDepth = 0;
+  for (const ch of path) {
+    if (ch === '{') {
+      braceDepth += 1;
+      continue;
+    }
+    if (ch === '}') {
+      if (braceDepth > 0) braceDepth -= 1;
+      continue;
+    }
+    const isAlnum =
+      (ch >= 'A' && ch <= 'Z') ||
+      (ch >= 'a' && ch <= 'z') ||
+      (ch >= '0' && ch <= '9');
+    if (isAlnum) {
+      out.push(ch);
+      underscore = false;
+    } else if (!underscore) {
+      out.push('_');
+      underscore = true;
+    }
+  }
+  // Trim leading/trailing underscores.
+  let start = 0;
+  let end = out.length;
+  while (start < end && out[start] === '_') start += 1;
+  while (end > start && out[end - 1] === '_') end -= 1;
+  return `${method}_${out.slice(start, end).join('')}`;
 }

@@ -61,12 +61,12 @@ export function printTypeDef(node: TypeDef, writer: Writer): void {
     return;
   }
   if (t.kind === 'TableType') {
-    const kindKw =
-      t.tableKind === 'standard'
-        ? K('STANDARD')
-        : t.tableKind === 'sorted'
-          ? K('SORTED')
-          : K('HASHED');
+    const tableKindKw: Record<typeof t.tableKind, string> = {
+      standard: K('STANDARD'),
+      sorted: K('SORTED'),
+      hashed: K('HASHED'),
+    };
+    const kindKw = tableKindKw[t.tableKind];
     const row = printInlineType(t.rowType, writer);
     let key: string;
     if (t.keyFields && t.keyFields.length > 0) {

@@ -90,5 +90,5 @@ export async function writeClientBundle(
       all.add(f);
     }
   }
-  return { files: [...all].sort() };
+  return { files: [...all].sort((a, b) => a.localeCompare(b)) };
 }

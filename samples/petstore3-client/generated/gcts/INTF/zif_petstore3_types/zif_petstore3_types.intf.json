@@ -1,7 +1,7 @@
 {
   "header": {
     "formatVersion": "1.0",
-    "description": "Generated Petstore v3 client",
+    "description": "Types for ZCL_PETSTORE3",
     "originalLanguage": "E"
   },
   "interface": {

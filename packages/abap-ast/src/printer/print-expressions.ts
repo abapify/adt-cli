@@ -35,8 +35,15 @@ export function printExpression(expr: Expression, writer: Writer): string {
       return `${recv}->${expr.method}(${args})`;
     }
     case 'BinOp': {
-      const left = printExpression(expr.left, writer);
-      const right = printExpression(expr.right, writer);
+      // Preserve operator grouping — wrap nested BinOp operands in parens
+      // so that `a AND (b OR c)` does not flatten to `a AND b OR c` and
+      // change the ABAP condition semantics.
+      const wrap = (inner: Expression): string => {
+        const src = printExpression(inner, writer);
+        return inner.kind === 'BinOp' ? `( ${src} )` : src;
+      };
+      const left = wrap(expr.left);
+      const right = wrap(expr.right);
       const op =
         expr.op === 'AND' || expr.op === 'OR' ? writer.kw(expr.op) : expr.op;
       return `${left} ${op} ${right}`;

@@ -1,8 +1,9 @@
 {
   "header": {
     "formatVersion": "1.0",
-    "description": "Generated Petstore v3 client",
-    "originalLanguage": "E"
+    "description": "Error exception for ZCL_PETSTORE3",
+    "originalLanguage": "E",
+    "abapLanguageVersion": "5"
   },
   "class": {
     "name": "ZCX_PETSTORE3_ERROR",

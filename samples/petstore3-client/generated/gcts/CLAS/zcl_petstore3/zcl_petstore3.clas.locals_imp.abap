@@ -27,7 +27,7 @@ CLASS lcl_http IMPLEMENTATION.
 
     DATA dest TYPE REF TO if_http_destination.
     dest = cl_http_destination_provider=>create_by_destination(
-      i_destination_name = CONV #( destination ) ).
+      i_destination = CONV #( destination ) ).
 
     DATA client TYPE REF TO if_web_http_client.
     client = cl_web_http_client_manager=>create_by_http_destination(
@@ -74,7 +74,7 @@ CLASS lcl_http IMPLEMENTATION.
         source = body_bytes ).
     ENDIF.
 
-    DATA raw_headers TYPE if_web_http_response=>name_value_pairs.
+    DATA raw_headers TYPE if_web_http_request=>name_value_pairs.
     raw_headers = resp->get_header_fields( ).
 
     DATA header_list TYPE kvs.

@@ -291,7 +291,7 @@ describe('printer — statements', () => {
         left: identifierExpr({ name: 'lv_x' }),
         right: literal({ literalKind: 'int', value: 1 }),
       }),
-      then: [
+      thenBody: [
         assign({
           target: identifierExpr({ name: 'lv_y' }),
           value: literal({ literalKind: 'int', value: 10 }),
@@ -349,11 +349,17 @@ describe('printer — statements', () => {
   });
 
   it('Return with value', () => {
-    expect(print(returnStmt({ value: identifierExpr({ name: 'lv_result' }) })))
-      .toMatchInlineSnapshot(`
-      "rv = lv_result.
-      RETURN."
-    `);
+    expect(
+      print(
+        returnStmt({
+          value: identifierExpr({ name: 'lv_result' }),
+          target: 'rv_result',
+        }),
+      ),
+    ).toMatchInlineSnapshot(`
+        "rv_result = lv_result.
+        RETURN."
+      `);
   });
 
   it('Return without value', () => {
@@ -677,7 +683,7 @@ describe('printer — ClassDef (composite)', () => {
           LOOP AT lt_rows ASSIGNING <fs_row>.
             <fs_row>-count = 0.
           ENDLOOP.
-          rv = rv_msg.
+          rv_msg = rv_msg.
           RETURN.
         ENDMETHOD.
       ENDCLASS."
@@ -812,7 +818,7 @@ function buildCompositeClass() {
           left: identifierExpr({ name: 'iv_name' }),
           right: literal({ literalKind: 'string', value: '' }),
         }),
-        then: [
+        thenBody: [
           raise({
             exceptionType: namedTypeRef({ name: 'zcx_greet_error' }),
             args: [],
@@ -844,7 +850,10 @@ function buildCompositeClass() {
           }),
         ],
       }),
-      returnStmt({ value: identifierExpr({ name: 'rv_msg' }) }),
+      returnStmt({
+        value: identifierExpr({ name: 'rv_msg' }),
+        target: 'rv_msg',
+      }),
     ],
   });
   return classDef({

@@ -51,6 +51,11 @@ function buildClasJson(
           formatVersion: '1.0',
           description,
           originalLanguage: language,
+          // `5` = ABAP for Cloud Development (Steampunk). Required for
+          // deployments that target ABAP Cloud — without it gCTS imports
+          // default to Standard ABAP and the object fails to activate on
+          // BTP with S_ABPLNGVS errors.
+          abapLanguageVersion: '5',
         },
         class: {
           name: className,
@@ -117,7 +122,7 @@ export async function writeGctsLayout(
     written.push(`CLAS/${base}/${base}.clas.locals_imp.abap`);
   }
 
-  written.sort();
+  written.sort((a, b) => a.localeCompare(b));
   return { files: written };
 }
 
@@ -176,6 +181,6 @@ export async function writeGctsInterface(
   await writeFile(mainPath, artifact.source, 'utf-8');
   written.push(`INTF/${base}/${base}.intf.abap`);
 
-  written.sort();
+  written.sort((a, b) => a.localeCompare(b));
   return { files: written };
 }

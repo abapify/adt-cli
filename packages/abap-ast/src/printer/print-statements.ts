@@ -66,7 +66,7 @@ export function printStatement(stmt: Statement, writer: Writer): void {
         `${K('IF')} ${printExpression(stmt.condition, writer)}.`,
       );
       writer.indent();
-      printStatements(stmt.then, writer);
+      printStatements(stmt.thenBody, writer);
       writer.dedent();
       for (const b of stmt.elseIfs) {
         writer.writeLine(
@@ -100,7 +100,9 @@ export function printStatement(stmt: Statement, writer: Writer): void {
     }
     case 'Return': {
       if (stmt.value !== undefined) {
-        writer.writeLine(`rv = ${printExpression(stmt.value, writer)}.`);
+        writer.writeLine(
+          `${stmt.target} = ${printExpression(stmt.value, writer)}.`,
+        );
       }
       writer.writeLine(`${K('RETURN')}.`);
       return;

@@ -135,7 +135,9 @@ function buildComponentIndex(spec: NormalizedSpec): ComponentIndex {
     if (!isRecord(schema)) continue;
     const props = (schema as { properties?: unknown }).properties;
     if (!isRecord(props)) continue;
-    const keys = Object.keys(props).sort().join(',');
+    const keys = Object.keys(props)
+      .sort((a, b) => a.localeCompare(b))
+      .join(',');
     if (keys && !byPropSig.has(keys)) {
       byPropSig.set(keys, name);
     }
@@ -153,7 +155,9 @@ function matchComponent(
   if (!isPlainObjectSchema(schema)) return undefined;
   const props = (schema as { properties?: unknown }).properties;
   if (!isRecord(props)) return undefined;
-  const sig = Object.keys(props).sort().join(',');
+  const sig = Object.keys(props)
+    .sort((a, b) => a.localeCompare(b))
+    .join(',');
   if (!sig) return undefined;
   return index.byPropSig.get(sig);
 }

@@ -248,7 +248,7 @@ describe('statements', () => {
   it('ifStmt builds with elseif/else', () => {
     const s = ifStmt({
       condition: binOp({ op: '=', left: idX, right: n1 }),
-      then: [returnStmt()],
+      thenBody: [returnStmt()],
       elseIfs: [
         { condition: binOp({ op: '=', left: idX, right: n1 }), body: [exit()] },
       ],

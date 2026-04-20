@@ -109,27 +109,27 @@ export interface ElseIfBranch {
 export interface If extends AbapNode {
   readonly kind: 'If';
   readonly condition: Expression;
-  readonly then: readonly Statement[];
+  readonly thenBody: readonly Statement[];
   readonly elseIfs: readonly ElseIfBranch[];
   readonly else?: readonly Statement[];
 }
 
 export function ifStmt(input: {
   condition: Expression;
-  then: readonly Statement[];
+  thenBody: readonly Statement[];
   elseIfs?: readonly ElseIfBranch[];
   else?: readonly Statement[];
 }): If {
   if (!input.condition) {
     throw new AbapAstError('If: required field "condition" is missing');
   }
-  if (!input.then) {
-    throw new AbapAstError('If: required field "then" is missing');
+  if (!input.thenBody) {
+    throw new AbapAstError('If: required field "thenBody" is missing');
   }
   return Object.freeze({
     kind: 'If' as const,
     condition: input.condition,
-    then: Object.freeze([...input.then]),
+    thenBody: Object.freeze([...input.thenBody]),
     elseIfs: Object.freeze(
       (input.elseIfs ?? []).map((b) =>
         Object.freeze({ ...b, body: Object.freeze([...b.body]) }),
@@ -179,16 +179,33 @@ export function loop(input: {
   });
 }
 
-/** `RETURN.` or `rv = ...` followed by `RETURN.`. */
+/**
+ * `RETURN.` statement, optionally preceded by an assignment to the
+ * RETURNING parameter (e.g. `rv_result = <expr>.` + `RETURN.`).
+ *
+ * `target` is the ABAP identifier of the RETURNING parameter. When
+ * `value` is set, `target` is required — ABAP has no implicit `rv`
+ * variable.
+ */
 export interface Return extends AbapNode {
   readonly kind: 'Return';
   readonly value?: Expression;
+  readonly target?: string;
 }
 
-export function returnStmt(input?: { value?: Expression }): Return {
+export function returnStmt(input?: {
+  value?: Expression;
+  target?: string;
+}): Return {
+  if (input?.value !== undefined && !input.target) {
+    throw new AbapAstError(
+      'returnStmt: `target` (the RETURNING parameter name) is required when `value` is set — ABAP has no implicit `rv` variable',
+    );
+  }
   return Object.freeze({
     kind: 'Return' as const,
     value: input?.value,
+    target: input?.target,
   });
 }
 

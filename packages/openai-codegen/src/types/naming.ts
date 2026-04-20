@@ -18,10 +18,12 @@ function splitWords(raw: string): string[] {
   const tokens = cleaned.split(/\s+/);
   const out: string[] = [];
   for (const tok of tokens) {
-    // Insert spaces before uppercase runs: "HTTPServer" -> "HTTP Server", "camelCase" -> "camel Case"
+    // Insert spaces before uppercase runs: "HTTPServer" -> "HTTP Server", "camelCase" -> "camel Case".
+    // Using lookahead-only patterns (no overlapping quantifiers) keeps regex
+    // evaluation linear-time (CodeQL `js/polynomial-redos`).
     const spaced = tok
-      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-      .replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+      .replace(/([A-Z])(?=[A-Z][a-z])/g, '$1 ')
+      .replace(/([a-z0-9])(?=[A-Z])/g, '$1 ');
     for (const part of spaced.split(/\s+/)) {
       if (part) out.push(part);
     }
@@ -30,7 +32,7 @@ function splitWords(raw: string): string[] {
 }
 
 function shortHash(raw: string, len = 4): string {
-  return createHash('sha1').update(raw).digest('hex').slice(0, len);
+  return createHash('sha256').update(raw).digest('hex').slice(0, len);
 }
 
 /** Sanitize a raw identifier into an ABAP-safe name. */
