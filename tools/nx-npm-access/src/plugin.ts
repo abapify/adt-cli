@@ -1,21 +1,29 @@
 import { type CreateNodesV2, logger, workspaceRoot } from '@nx/devkit';
 import { dirname, join, relative } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 
 interface NxNpmAccessOptions {
   /**
    * Target name registered on each publishable package for the read-only
-   * readiness check.
+   * readiness probe.
    * @default "npm-check"
    */
   checkTargetName?: string;
   /**
-   * Target name registered on each publishable package for the
-   * auto-remediating fix (patches `publishConfig.access` locally and runs
-   * `npm access set` remotely).
+   * Target name registered on each publishable package for safe
+   * auto-remediation (patches `publishConfig`, runs `npm access set`).
    * @default "npm-fix"
    */
   fixTargetName?: string;
+  /**
+   * Target name registered on each publishable package for bootstrapping
+   * trusted publishing (nx-native equivalent of `/npm-publish prepare-ci`:
+   * publishes an empty `0.0.0` placeholder on npm for brand-new packages
+   * and registers an `npm trust` entry for GitHub Actions OIDC).
+   * @default "npm-prepare"
+   */
+  prepareTargetName?: string;
   /**
    * npm registry used for access probes. Defaults to the public registry.
    * The script also overrides scope-level registry pins via
@@ -24,6 +32,17 @@ interface NxNpmAccessOptions {
    * @default "https://registry.npmjs.org/"
    */
   registry?: string;
+  /**
+   * GitHub Actions workflow filename that is allowed to publish via OIDC.
+   * Used by the `prepare` target when calling `npm trust github`.
+   * @default "publish.yml"
+   */
+  trustWorkflow?: string;
+  /**
+   * `<owner>/<repo>` — GitHub repository allowed to publish via OIDC.
+   * Auto-detected from `git remote get-url origin` when absent.
+   */
+  trustRepo?: string;
 }
 
 function isVerbose(): boolean {
@@ -52,16 +71,43 @@ function shouldSkipPath(projectRoot: string): boolean {
   return false;
 }
 
+/**
+ * Parse `<owner>/<repo>` from a git remote URL (ssh/https/git protocol).
+ * Returns null for non-GitHub remotes.
+ */
+function detectGithubRepo(): string | null {
+  const res = spawnSync('git', ['remote', 'get-url', 'origin'], {
+    cwd: workspaceRoot,
+    encoding: 'utf-8',
+  });
+  if (res.status !== 0) return null;
+  const url = res.stdout.trim();
+  if (!url.includes('github.com')) return null;
+  const m = url.match(/[:/]([^/]+\/[^/.]+?)(\.git)?$/);
+  return m ? m[1] : null;
+}
+
 export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
   '**/package.json',
   (configFiles, options = {}) => {
     const checkTargetName = options.checkTargetName ?? 'npm-check';
     const fixTargetName = options.fixTargetName ?? 'npm-fix';
+    const prepareTargetName = options.prepareTargetName ?? 'npm-prepare';
     const registry = options.registry ?? 'https://registry.npmjs.org/';
+    const trustWorkflow = options.trustWorkflow ?? 'publish.yml';
+    const trustRepo = options.trustRepo ?? detectGithubRepo() ?? '';
 
     const scriptPath = join(__dirname, 'check.ts');
     const scriptArg = JSON.stringify(scriptPath);
     const baseCmd = `bun ${scriptArg} --registry=${registry}`;
+    const prepareExtra = [
+      '--prepare',
+      '--trust-provider=github',
+      `--trust-workflow=${trustWorkflow}`,
+      trustRepo ? `--trust-repo=${trustRepo}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     return configFiles
       .map((configFile) => {
@@ -94,7 +140,9 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
           return null;
         }
 
-        log(`register ${checkTargetName} + ${fixTargetName} for ${pkg.name}`);
+        log(
+          `register ${checkTargetName} + ${fixTargetName} + ${prepareTargetName} for ${pkg.name}`,
+        );
 
         // Shared shape: cwd + no arg forwarding, no cache (network-dependent).
         const makeTarget = (extraArg: string | null) => ({
@@ -118,6 +166,7 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
                 targets: {
                   [checkTargetName]: makeTarget(null),
                   [fixTargetName]: makeTarget('--fix'),
+                  [prepareTargetName]: makeTarget(prepareExtra),
                 },
               },
             },

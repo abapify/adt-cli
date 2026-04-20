@@ -11,9 +11,7 @@
 //   3. `npm access get status` — current public/private visibility on npm.
 //   4. `npm access list collaborators` — who can publish (incl. bot account
 //      used by GitHub Actions when OIDC is not in play).
-//   5. Trusted publisher hint — prints a ready-to-click settings URL where
-//      the OIDC trusted publisher for this package can be verified. npm has
-//      no stable CLI for listing trusted publishers yet (as of npm 11).
+//   5. Trusted publisher listing via `npm trust list <pkg>` (npm ≥ 11.5.1).
 //
 // With `--fix` the script also applies safe remediations:
 //   - patches `publishConfig.access = "public"` into package.json if missing;
@@ -23,8 +21,14 @@
 //     — required for OIDC trusted publishing without interactive 2FA.
 // Every mutation is logged to the structured report under `fixes`.
 //
-// Trusted publisher registration (OIDC) still has no CLI, so the script only
-// prints the UI link — it does NOT try to automate that step.
+// With `--prepare` the script bootstraps trusted publishing for brand-new
+// packages (nx-native equivalent of the `/npm-publish prepare-ci` skill):
+//   - if the package does not yet exist on npm, publishes an empty `0.0.0`
+//     placeholder (NOT your real code — just a registry stub so `npm trust`
+//     can be configured);
+//   - runs `npm trust github <pkg> --file <workflow> --repo <owner/repo>
+//     --yes` to register the GitHub Actions OIDC trusted publisher.
+// Requires npm ≥ 11.5.1 and 2FA on the npm account.
 //
 // The script exits with code 0 when the package is "ready to publish from
 // CI", 1 otherwise. Errors are printed to stderr; the structured report is
@@ -34,8 +38,15 @@
 // `@abapify:registry=https://npm.pkg.github.com/`, the script passes
 // `--<scope>:registry=<registry>` on every npm invocation.
 
-import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import {
+  readFileSync,
+  existsSync,
+  writeFileSync,
+  mkdirSync,
+  rmSync,
+} from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 interface Pkg {
@@ -60,7 +71,7 @@ interface Report {
   access: string | null;
   registry: string;
   scope: string | null;
-  mode: 'check' | 'fix';
+  mode: 'check' | 'fix' | 'prepare';
   checks: Record<string, unknown>;
   fixes: string[];
   readyForCi: boolean;
@@ -77,9 +88,16 @@ const hasFlag = (name: string): boolean => args.includes(`--${name}`);
 const registry = getFlag('registry', 'https://registry.npmjs.org/');
 const quiet = hasFlag('quiet');
 const fix = hasFlag('fix');
+const prepare = hasFlag('prepare');
 // Optional MFA setting applied only in fix mode. Useful before switching to
 // OIDC trusted publishing (`--mfa=none`). Omit to leave MFA untouched.
 const mfaTarget = getFlag('mfa', '');
+// Trusted-publisher config for `--prepare` mode. Defaults match the repo.
+const trustProvider = getFlag('trust-provider', 'github');
+const trustWorkflow = getFlag('trust-workflow', 'publish.yml');
+const trustRepo = getFlag('trust-repo', '');
+const trustNamespace = getFlag('trust-namespace', '');
+const trustProject = getFlag('trust-project', '');
 
 const pkgPath = join(process.cwd(), 'package.json');
 if (!existsSync(pkgPath)) {
@@ -145,7 +163,7 @@ const report: Report = {
   access: pkg.publishConfig?.access ?? null,
   registry,
   scope,
-  mode: fix ? 'fix' : 'check',
+  mode: prepare ? 'prepare' : fix ? 'fix' : 'check',
   checks: {},
   fixes: [],
   readyForCi: false,
@@ -262,13 +280,132 @@ if (report.checks.exists === true && name) {
   }
 }
 
-// 5. trusted publisher hint (npm has no stable CLI for listing these yet)
-if (name?.startsWith('@')) {
-  const [s, p] = name.slice(1).split('/');
-  report.checks.trustedPublisherSettingsUrl = `https://www.npmjs.com/settings/${s}/packages?q=${p}`;
+// 5. trusted publishers (npm ≥ 11.5.1 exposes `npm trust list <pkg>`).
+if (name) {
+  const trust = npm(['trust', 'list', name]);
+  if (trust.code === 0) {
+    report.checks.trustedPublishers = trust.json ?? trust.stdout.trim();
+  } else if (trust.stderr.includes('E404') || trust.code === 1) {
+    // 404 for packages that don't exist yet, or empty list.
+    report.checks.trustedPublishers = [];
+  } else {
+    report.checks.trustedPublishers = `ERR: ${trust.stderr.split('\n')[0] ?? trust.code}`;
+  }
+  // Keep the UI link as a fallback for humans who want to double-check.
+  if (name.startsWith('@')) {
+    const [s, p] = name.slice(1).split('/');
+    report.checks.trustedPublisherSettingsUrl = `https://www.npmjs.com/settings/${s}/packages?q=${p}`;
+  }
   report.checks.trustedPublisherPackageUrl = `https://www.npmjs.com/package/${name}/access`;
-} else if (name) {
-  report.checks.trustedPublisherPackageUrl = `https://www.npmjs.com/package/${name}/access`;
+}
+
+// 6. --prepare: bootstrap trusted publishing for brand-new packages.
+// Mirrors the logic of the `/npm-publish prepare-ci` skill, but per package
+// and driven by nx (so it plays well with `run-many`).
+if (prepare && name) {
+  if (trustProvider === 'github' && !trustRepo) {
+    report.problems.push(
+      '--prepare --trust-provider=github requires --trust-repo=<owner/repo>',
+    );
+  } else if (trustProvider === 'gitlab' && (!trustNamespace || !trustProject)) {
+    report.problems.push(
+      '--prepare --trust-provider=gitlab requires --trust-namespace and --trust-project',
+    );
+  } else {
+    // 6a. publish 0.0.0 placeholder if not yet on npm.
+    if (report.checks.exists === false) {
+      const tmpDir = join(
+        tmpdir(),
+        `npm-prepare-${Date.now()}-${name.replace(/\//g, '__')}`,
+      );
+      mkdirSync(tmpDir, { recursive: true });
+      writeFileSync(
+        join(tmpDir, 'package.json'),
+        JSON.stringify(
+          {
+            name,
+            version: '0.0.0',
+            description:
+              'Placeholder — real package is published via CI/CD (trusted publishing).',
+          },
+          null,
+          2,
+        ),
+      );
+      writeFileSync(
+        join(tmpDir, 'README.md'),
+        `# ${name}\n\nPlaceholder. The real release is published via CI/CD.\n`,
+      );
+      const publishResult = spawnSync(
+        'npm',
+        ['publish', `--registry=${registry}`, ...scopeFlag, '--access=public'],
+        { cwd: tmpDir, encoding: 'utf-8' },
+      );
+      if (publishResult.status === 0) {
+        report.fixes.push(`published 0.0.0 placeholder for ${name}`);
+        report.checks.exists = true;
+        report.checks.latestVersion = '0.0.0';
+      } else {
+        report.problems.push(
+          `npm publish placeholder failed: ${publishResult.stderr?.split('\n')[0] ?? 'no stderr'} — run \`npm login\` first`,
+        );
+      }
+      rmSync(tmpDir, { recursive: true, force: true });
+    }
+
+    // 6b. register the trusted publisher.
+    const trustArgs =
+      trustProvider === 'github'
+        ? [
+            'trust',
+            'github',
+            name,
+            '--file',
+            trustWorkflow,
+            '--repo',
+            trustRepo,
+            '--yes',
+          ]
+        : trustProvider === 'gitlab'
+          ? [
+              'trust',
+              'gitlab',
+              name,
+              '--file',
+              trustWorkflow,
+              '--namespace',
+              trustNamespace,
+              '--project',
+              trustProject,
+              '--yes',
+            ]
+          : null;
+
+    if (!trustArgs) {
+      report.problems.push(
+        `unsupported --trust-provider=${trustProvider} (expected github|gitlab)`,
+      );
+    } else {
+      const trustResult = npm(trustArgs);
+      if (trustResult.code === 0) {
+        report.fixes.push(
+          `npm trust ${trustProvider} ${name} → ${trustRepo || `${trustNamespace}/${trustProject}`} / ${trustWorkflow}`,
+        );
+      } else {
+        const first = trustResult.stderr.split('\n')[0] ?? '';
+        // Idempotent: `already exists` is not a failure.
+        if (first.includes('already')) {
+          report.fixes.push(
+            `npm trust ${trustProvider} ${name}: already configured (skip)`,
+          );
+        } else {
+          report.problems.push(
+            `npm trust ${trustProvider} failed: ${first || trustResult.code}`,
+          );
+        }
+      }
+    }
+  }
 }
 
 // Decide overall readiness
@@ -296,7 +433,7 @@ const problemsSummary =
     ? `\n  problems:\n    - ${report.problems.join('\n    - ')}`
     : '';
 
-const modeTag = fix ? ' [fix]' : '';
+const modeTag = prepare ? ' [prepare]' : fix ? ' [fix]' : '';
 console.log(
   `${symbol} ${name}@${pkg.version}${modeTag} (${existsTag})${fixesSummary}${problemsSummary}`,
 );
