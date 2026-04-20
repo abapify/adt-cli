@@ -9,13 +9,11 @@
   "type": "module",
   "types": "./dist/index.d.mts",
   "bin": {
-    "adt-mcp": "./dist/bin/adt-mcp.mjs",
-    "adt-mcp-http": "./dist/bin/adt-mcp-http.mjs"
+    "adt-mcp": "./dist/bin/adt-mcp.mjs"
   },
   "exports": {
     ".": "./dist/index.mjs",
     "./bin/adt-mcp": "./dist/bin/adt-mcp.mjs",
-    "./bin/adt-mcp-http": "./dist/bin/adt-mcp-http.mjs",
     "./mock": "./dist/mock.mjs",
     "./package.json": "./package.json"
   },

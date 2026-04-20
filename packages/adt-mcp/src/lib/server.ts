@@ -8,24 +8,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createAdtClient, type AdtClient } from '@abapify/adt-client';
 import { registerTools } from './tools/index';
 import type { ConnectionParams, ToolContext } from './types';
-import type { SessionRegistry } from './session/registry.js';
 
 export interface McpServerOptions {
   /** Override the client factory – useful for injecting a mock client in tests. */
   clientFactory?: (params: ConnectionParams) => AdtClient;
-  /**
-   * Session registry, present only in HTTP mode. When supplied, the
-   * ToolContext exposes `registry` and a `getSession` closure so that
-   * session-scoped tools (added in a later wave) can look up the active
-   * SAP connection for the current MCP session.
-   */
-  registry?: SessionRegistry;
-  /**
-   * Multi-system resolver. Maps a logical system id (e.g. `DEV`) to
-   * concrete `ConnectionParams`. Present only when the HTTP bin has a
-   * multi-system configuration loaded.
-   */
-  resolveSystem?: (systemId: string) => ConnectionParams | undefined;
 }
 
 /**
@@ -46,17 +32,8 @@ export function createMcpServer(options?: McpServerOptions): McpServer {
     { capabilities: { tools: {} } },
   );
 
-  const registry = options?.registry;
-
   const ctx: ToolContext = {
     getClient: options?.clientFactory ?? defaultClientFactory,
-    ...(registry
-      ? {
-          registry,
-          getSession: (mcpSessionId: string) => registry.get(mcpSessionId),
-        }
-      : {}),
-    ...(options?.resolveSystem ? { resolveSystem: options.resolveSystem } : {}),
   };
 
   registerTools(server, ctx);

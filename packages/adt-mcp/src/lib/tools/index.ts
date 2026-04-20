@@ -4,8 +4,6 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { registerSapConnectTool } from './sap-connect';
-import { registerSapDisconnectTool } from './sap-disconnect';
 import { registerDiscoveryTool } from './discovery';
 import { registerSystemInfoTool } from './system-info';
 import { registerSearchObjectsTool } from './search-objects';
@@ -108,9 +106,6 @@ import { registerListFlpTilesTool } from './list-flp-tiles';
 import { registerGetFlpTileTool } from './get-flp-tile';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  // Session lifecycle tools (HTTP transport only)
-  registerSapConnectTool(server, ctx);
-  registerSapDisconnectTool(server, ctx);
   // Existing tools
   registerDiscoveryTool(server, ctx);
   registerSystemInfoTool(server, ctx);
