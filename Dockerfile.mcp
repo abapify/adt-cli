@@ -69,13 +69,12 @@ RUN groupadd --system --gid 10001 appuser \
     && useradd  --system --uid 10001 --gid appuser --home-dir /app appuser
 
 # Copy the built workspace packages and the workspace node_modules so the
-# @abapify/* symlinks resolve at runtime. Read-only at rest — the runtime
-# never mutates these paths. Explicit `chmod a-w` below satisfies
-# CWE-732 / docker:S6504 defence-in-depth beyond the COPY --chmod flag.
-COPY --from=builder --chown=appuser:appuser --chmod=555 /build/packages     ./packages
-COPY --from=builder --chown=appuser:appuser --chmod=555 /build/node_modules ./node_modules
-COPY --from=builder --chown=appuser:appuser --chmod=444 /build/package.json ./package.json
-RUN chmod -R a-w ./packages ./node_modules ./package.json
+# @abapify/* symlinks resolve at runtime. Owned by root, readable+executable
+# by everyone — appuser falls in "others" (r-x) so cannot mutate these paths.
+# Matches the Sonar docker:S6504 / CWE-732 compliant pattern.
+COPY --from=builder --chown=root:root --chmod=755 /build/packages     ./packages
+COPY --from=builder --chown=root:root --chmod=755 /build/node_modules ./node_modules
+COPY --from=builder --chown=root:root --chmod=644 /build/package.json ./package.json
 
 USER appuser
 
