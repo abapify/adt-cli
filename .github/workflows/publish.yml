@@ -56,6 +56,23 @@ jobs:
           npm install -g npm@^11.10.0
           npm --version
 
+      - name: Clean setup-node .npmrc for OIDC
+        # actions/setup-node with `registry-url` writes
+        #   always-auth=true
+        #   //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+        # Since we don't pass a `token` to setup-node, NODE_AUTH_TOKEN is
+        # effectively empty, so npm ends up sending an empty Authorization
+        # header on PUT and npmjs responds `Not Found`. To make OIDC
+        # trusted publishing kick in, the registry entry must be present
+        # without any token line — npm then asks GitHub Actions for an
+        # id-token and exchanges it for a publish token.
+        run: |
+          cat > "$NPM_CONFIG_USERCONFIG" <<'EOF'
+          registry=https://registry.npmjs.org/
+          EOF
+          echo "--- effective userconfig ($NPM_CONFIG_USERCONFIG) ---"
+          cat "$NPM_CONFIG_USERCONFIG"
+
       - name: Force npm as nx release publish driver (for this job only)
         # nx.json keeps `cli.packageManager: bun` globally — bun is the
         # monorepo's workspace package manager, handles `workspace:*`
