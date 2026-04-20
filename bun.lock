@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "abapify",
@@ -81,18 +82,18 @@
     },
     "packages/abap-ast": {
       "name": "@abapify/abap-ast",
-      "version": "0.1.0",
+      "version": "0.3.1",
     },
     "packages/acds": {
       "name": "@abapify/acds",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "chevrotain": "^11.0.0",
       },
     },
     "packages/adk": {
       "name": "@abapify/adk",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-client": "workspace:*",
         "@abapify/adt-locks": "workspace:*",
@@ -101,7 +102,7 @@
     },
     "packages/adt-atc": {
       "name": "@abapify/adt-atc",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-plugin": "workspace:*",
         "chalk": "^5.3.0",
@@ -109,7 +110,7 @@
     },
     "packages/adt-aunit": {
       "name": "@abapify/adt-aunit",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-contracts": "workspace:*",
         "@abapify/adt-plugin": "workspace:*",
@@ -119,7 +120,7 @@
     },
     "packages/adt-auth": {
       "name": "@abapify/adt-auth",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/logger": "workspace:*",
         "proxy-agent": "^6.4.0",
@@ -127,7 +128,7 @@
     },
     "packages/adt-cli": {
       "name": "@abapify/adt-cli",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "bin": {
         "adt": "./dist/bin/adt.mjs",
       },
@@ -169,7 +170,7 @@
     },
     "packages/adt-client": {
       "name": "@abapify/adt-client",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-contracts": "workspace:*",
         "@abapify/adt-schemas": "workspace:*",
@@ -178,7 +179,7 @@
     },
     "packages/adt-codegen": {
       "name": "@abapify/adt-codegen",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "bin": {
         "adt-codegen": "./dist/cli.mjs",
       },
@@ -192,11 +193,11 @@
     },
     "packages/adt-config": {
       "name": "@abapify/adt-config",
-      "version": "0.2.0",
+      "version": "0.3.1",
     },
     "packages/adt-contracts": {
       "name": "@abapify/adt-contracts",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-schemas": "workspace:*",
         "@abapify/speci": "workspace:*",
@@ -207,7 +208,7 @@
     },
     "packages/adt-diff": {
       "name": "@abapify/adt-diff",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adk": "workspace:*",
         "@abapify/adt-contracts": "workspace:*",
@@ -223,7 +224,7 @@
     },
     "packages/adt-export": {
       "name": "@abapify/adt-export",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adk": "workspace:*",
         "@abapify/adt-locks": "workspace:*",
@@ -236,18 +237,18 @@
     },
     "packages/adt-fixtures": {
       "name": "@abapify/adt-fixtures",
-      "version": "0.2.0",
+      "version": "0.3.1",
     },
     "packages/adt-locks": {
       "name": "@abapify/adt-locks",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-client": "workspace:*",
       },
     },
     "packages/adt-mcp": {
       "name": "@abapify/adt-mcp",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "bin": {
         "adt-mcp": "./dist/bin/adt-mcp.mjs",
         "adt-mcp-http": "./dist/bin/adt-mcp-http.mjs",
@@ -271,7 +272,7 @@
     },
     "packages/adt-playwright": {
       "name": "@abapify/adt-playwright",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-auth": "workspace:*",
         "@abapify/adt-config": "workspace:*",
@@ -284,14 +285,14 @@
     },
     "packages/adt-plugin": {
       "name": "@abapify/adt-plugin",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adk": "workspace:*",
       },
     },
     "packages/adt-plugin-abapgit": {
       "name": "@abapify/adt-plugin-abapgit",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/acds": "workspace:*",
         "@abapify/adk": "workspace:*",
@@ -303,7 +304,7 @@
     },
     "packages/adt-plugin-gcts": {
       "name": "@abapify/adt-plugin-gcts",
-      "version": "0.1.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adk": "workspace:*",
         "@abapify/adt-plugin": "workspace:*",
@@ -311,7 +312,7 @@
     },
     "packages/adt-plugin-gcts-cli": {
       "name": "@abapify/adt-plugin-gcts-cli",
-      "version": "0.1.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-contracts": "workspace:*",
         "@abapify/adt-plugin": "workspace:*",
@@ -320,7 +321,7 @@
     },
     "packages/adt-puppeteer": {
       "name": "@abapify/adt-puppeteer",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-auth": "workspace:*",
         "@abapify/adt-config": "workspace:*",
@@ -333,11 +334,11 @@
     },
     "packages/adt-rfc": {
       "name": "@abapify/adt-rfc",
-      "version": "0.1.0",
+      "version": "0.3.1",
     },
     "packages/adt-schemas": {
       "name": "@abapify/adt-schemas",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/ts-xsd": "workspace:*",
         "zod": "^3.24.0 || ^4.0.0",
@@ -348,7 +349,7 @@
     },
     "packages/adt-tui": {
       "name": "@abapify/adt-tui",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-contracts": "workspace:*",
         "fast-xml-parser": "^5.3.1",
@@ -367,14 +368,14 @@
     },
     "packages/asjson-parser": {
       "name": "@abapify/asjson-parser",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "jsonc-eslint-parser": "^2.1.0",
       },
     },
     "packages/browser-auth": {
       "name": "@abapify/browser-auth",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "dependencies": {
         "@abapify/adt-config": "workspace:*",
       },
@@ -384,11 +385,11 @@
     },
     "packages/logger": {
       "name": "@abapify/logger",
-      "version": "0.2.0",
+      "version": "0.3.1",
     },
     "packages/openai-codegen": {
       "name": "@abapify/openai-codegen",
-      "version": "0.1.0",
+      "version": "0.3.1",
       "bin": {
         "openai-codegen": "./dist/cli.mjs",
       },
@@ -405,11 +406,11 @@
     },
     "packages/speci": {
       "name": "@abapify/speci",
-      "version": "0.2.0",
+      "version": "0.3.1",
     },
     "packages/ts-xsd": {
       "name": "@abapify/ts-xsd",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "bin": {
         "ts-xsd": "./dist/codegen/cli.mjs",
       },
@@ -432,6 +433,10 @@
       "dependencies": {
         "tslib": "^2.3.0",
       },
+    },
+    "tools/nx-npm-trust": {
+      "name": "@abapify/nx-npm-trust",
+      "version": "0.0.1",
     },
     "tools/nx-sync": {
       "name": "@abapify/nx-sync",
@@ -534,6 +539,8 @@
     "@abapify/browser-auth": ["@abapify/browser-auth@workspace:packages/browser-auth"],
 
     "@abapify/logger": ["@abapify/logger@workspace:packages/logger"],
+
+    "@abapify/nx-npm-trust": ["@abapify/nx-npm-trust@workspace:tools/nx-npm-trust"],
 
     "@abapify/nx-sync": ["@abapify/nx-sync@workspace:tools/nx-sync"],
 
