@@ -89,9 +89,9 @@ const getFlag = (name: string, def: string): string => {
 const hasFlag = (name: string): boolean => args.includes(`--${name}`);
 
 const registry = getFlag('registry', 'https://registry.npmjs.org/');
-const quiet = hasFlag('quiet');
 const fix = hasFlag('fix');
 const prepare = hasFlag('prepare');
+const json = hasFlag('json');
 // Optional MFA setting applied only in fix mode. Useful before switching to
 // OIDC trusted publishing (`--mfa=none`). Omit to leave MFA untouched.
 const mfaTarget = getFlag('mfa', '');
@@ -110,7 +110,7 @@ if (!existsSync(pkgPath)) {
 const pkg: Pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
 
 if (pkg.private) {
-  if (!quiet) console.log(`[skip] ${pkg.name ?? '<no-name>'} is private`);
+  console.log(`- ${pkg.name ?? '<no-name>'} (private, skipped)`);
   process.exit(0);
 }
 
@@ -174,8 +174,8 @@ const report: Report = {
 };
 
 // 1. package.json hygiene — and patch in --fix mode.
-if (!name) report.problems.push('package.json: missing "name"');
-if (!pkg.version) report.problems.push('package.json: missing "version"');
+if (!name) report.problems.push('missing "name"');
+if (!pkg.version) report.problems.push('missing "version"');
 
 const needsPublishConfigFix =
   !pkg.publishConfig || pkg.publishConfig.access !== 'public';
@@ -188,19 +188,15 @@ if (needsPublishConfigFix) {
     // Preserve trailing newline + 2-space indent to match the rest of the
     // monorepo's package.json style (Prettier will normalise anyway).
     writeFileSync(pkgPath, JSON.stringify(patched, null, 2) + '\n', 'utf-8');
-    report.fixes.push('package.json: set publishConfig.access = "public"');
+    report.fixes.push('set publishConfig.access=public');
     report.access = 'public';
   } else {
-    report.problems.push(
-      'package.json: publishConfig.access should be "public" (scoped packages default to restricted on npm; CI publishes would 402 Payment Required) — re-run with `--fix` to patch',
-    );
+    report.problems.push('publishConfig.access missing (run with --fix)');
   }
 }
 if (pkg.files === undefined) {
   // Not auto-fixable: the correct files list is package-specific.
-  report.problems.push(
-    'package.json: "files" not declared — publish will include everything (incl. node_modules, dist build artefacts, tests). Add a narrow allowlist (e.g. ["dist", "README.md"]).',
-  );
+  report.problems.push('no "files" allowlist');
 }
 
 // 2. Does it exist on npm?
@@ -220,13 +216,11 @@ if (view.code === 0 && isObjJson && !(viewJson as ViewJson).error) {
   report.checks.exists = false;
 } else if (view.timedOut) {
   report.checks.exists = 'unknown';
-  report.problems.push(
-    `npm view timed out after 20s — registry ${registry} unreachable from this host`,
-  );
+  report.problems.push('npm view timed out (registry unreachable)');
 } else {
   report.checks.exists = 'unknown';
   report.problems.push(
-    `npm view failed unexpectedly: ${view.stderr.split('\n')[0] ?? 'no stderr'}`,
+    `npm view failed: ${view.stderr.split('\n')[0] ?? view.code}`,
   );
 }
 
@@ -425,22 +419,24 @@ const existsTag =
   report.checks.exists === true
     ? `on npm @ ${report.checks.latestVersion as string}`
     : report.checks.exists === false
-      ? 'NOT on npm — first publish'
-      : 'npm state unknown';
+      ? 'not on npm'
+      : 'state unknown';
 const fixesSummary =
-  report.fixes.length > 0
-    ? `\n  fixes applied:\n    + ${report.fixes.join('\n    + ')}`
-    : '';
+  report.fixes.length > 0 ? `  + ${report.fixes.join(', ')}` : '';
 const problemsSummary =
-  report.problems.length > 0
-    ? `\n  problems:\n    - ${report.problems.join('\n    - ')}`
-    : '';
+  report.problems.length > 0 ? `  ! ${report.problems.join(', ')}` : '';
 
 const modeTag = prepare ? ' [prepare]' : fix ? ' [fix]' : '';
-console.log(
-  `${symbol} ${name}@${pkg.version}${modeTag} (${existsTag})${fixesSummary}${problemsSummary}`,
-);
-// Structured line for aggregation:
-console.log(`__NPM_CHECK_JSON__ ${JSON.stringify(report)}`);
+const parts = [
+  `${symbol} ${name}@${pkg.version}${modeTag} — ${existsTag}`,
+  fixesSummary,
+  problemsSummary,
+].filter(Boolean);
+console.log(parts.join('\n'));
+
+// Structured JSON report for aggregation — opt-in, keeps human logs clean.
+if (json) {
+  console.log(`__NPM_CHECK_JSON__ ${JSON.stringify(report)}`);
+}
 
 process.exit(report.readyForCi && report.problems.length === 0 ? 0 : 1);
