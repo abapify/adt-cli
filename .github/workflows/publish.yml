@@ -46,6 +46,24 @@ jobs:
           echo "--- effective .npmrc ---"
           cat .npmrc
 
+      - name: Force npm as nx release publish driver
+        # The monorepo uses bun as its workspace package manager
+        # (`cli.packageManager=bun` in nx.json). Nx 22's
+        # `@nx/js:release-publish` honours that and invokes `bun publish`,
+        # which does NOT support OIDC trusted publishing — it just errors
+        # with `missing authentication`. Override the nx-level package
+        # manager to npm in this job only, so `nx release publish` runs
+        # `npm publish` and the GitHub Actions OIDC token is consumed.
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            const p = 'nx.json';
+            const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+            j.cli = { ...(j.cli ?? {}), packageManager: 'npm' };
+            fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+          "
+          grep -A1 '\"cli\"' nx.json
+
       - name: Publish packages
         run: npx nx release publish
         shell: bash
