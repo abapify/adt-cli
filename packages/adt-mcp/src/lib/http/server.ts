@@ -24,6 +24,8 @@ import {
   loadMultiSystemConfig,
   type MultiSystemConfig,
 } from './multi-system.js';
+import { createAuthMiddleware, type AuthMode } from './auth.js';
+import { createCorsHandler } from './cors.js';
 
 export interface HttpServerOptions {
   /** Port to listen on. Default: `MCP_PORT` env or 3000. */
@@ -38,6 +40,25 @@ export interface HttpServerOptions {
    * by default.
    */
   allowedHosts?: string[];
+  /**
+   * Authentication mode for incoming requests. Defaults to `'none'` when
+   * no token / forwarded-auth flag is configured. Misconfiguration (e.g.
+   * `bearer` without a token) throws synchronously from `startHttpServer`.
+   */
+  authMode?: AuthMode;
+  /** Bearer token (required when `authMode === 'bearer'`). */
+  authToken?: string;
+  /**
+   * Convenience flag — when true, forces `authMode='proxy'` and trusts
+   * `x-forwarded-user` from the caller. Intended for deployments behind
+   * an authenticating reverse proxy (oauth2-proxy, Cloudflare Access).
+   */
+  trustForwardedAuth?: boolean;
+  /**
+   * CORS allow-list. Exact-match origins only (plus `'*'` for dev).
+   * Undefined or empty = CORS disabled (no headers added).
+   */
+  allowedOrigins?: string[];
   /** Override the multi-system config loader (mainly for tests). */
   multiSystem?: MultiSystemConfig;
   /** Override the session registry (mainly for tests). */
@@ -103,14 +124,6 @@ function makeHostValidator(allowed: Set<string>): Middleware {
     return false;
   };
 }
-
-/**
- * Identity auth middleware. A later wave will replace this with a real
- * implementation (e.g. static token or OAuth). Keeping it as a named slot
- * makes the pipeline easy to extend.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const noopAuth: Middleware = (_req, _res) => false;
 
 async function readJsonBody(
   req: http.IncomingMessage,
@@ -202,7 +215,19 @@ export async function startHttpServer(
   const servers = new Map<string, McpServer>();
 
   const hostAllow = normaliseHostAllowlist(host, options.allowedHosts);
-  const pipeline: Middleware[] = [makeHostValidator(hostAllow), noopAuth];
+  const hostValidator = makeHostValidator(hostAllow);
+
+  // Resolve auth mode. `trustForwardedAuth` is a convenience alias for
+  // `authMode='proxy'` and wins when both are set (explicit opt-in to
+  // reverse-proxy trust).
+  let authMode: AuthMode =
+    options.authMode ?? (options.authToken ? 'bearer' : 'none');
+  if (options.trustForwardedAuth) authMode = 'proxy';
+  const authMw = createAuthMiddleware({
+    mode: authMode,
+    token: options.authToken,
+  });
+  const cors = createCorsHandler({ allowedOrigins: options.allowedOrigins });
 
   const handleMcp = async (
     req: http.IncomingMessage,
@@ -318,18 +343,18 @@ export async function startHttpServer(
 
   const server = http.createServer(async (req, res) => {
     try {
-      for (const mw of pipeline) {
-        const handled = await mw(req, res);
-        if (handled) return;
-      }
+      // Pipeline order (security-critical):
+      //   1. CORS — handles preflight short-circuit.
+      //   2. Host-header validation — DNS-rebind protection.
+      //   3. /healthz — NOT behind auth so monitoring probes work.
+      //   4. Auth — bearer / proxy / none.
+      //   5. Route to /mcp.
+      if (cors.handle(req, res)) return;
+      if (hostValidator(req, res)) return;
 
       const url = req.url ?? '/';
-      // Accept /mcp and /mcp/ — ignore query string.
       const pathOnly = url.split('?')[0];
-      if (pathOnly === '/mcp' || pathOnly === '/mcp/') {
-        await handleMcp(req, res);
-        return;
-      }
+
       if (pathOnly === '/healthz' && req.method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(
@@ -338,6 +363,18 @@ export async function startHttpServer(
             sessions: registry.list().length,
           }),
         );
+        return;
+      }
+
+      const authResult = authMw(req, res);
+      if (!authResult.allowed) return;
+      // userHint available for future per-request context propagation
+      // (Wave 3/4). Currently unused but intentionally preserved.
+      void authResult.userHint;
+
+      // Accept /mcp and /mcp/ — ignore query string.
+      if (pathOnly === '/mcp' || pathOnly === '/mcp/') {
+        await handleMcp(req, res);
         return;
       }
 
