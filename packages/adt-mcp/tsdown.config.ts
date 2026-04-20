@@ -7,5 +7,6 @@ export default defineConfig({
     index: 'src/index.ts',
     mock: 'src/lib/mock/index.ts',
     'bin/adt-mcp': 'src/bin/adt-mcp.ts',
+    'bin/adt-mcp-http': 'src/bin/adt-mcp-http.ts',
   },
 });

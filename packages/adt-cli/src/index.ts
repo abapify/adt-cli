@@ -1,6 +1,12 @@
 export * from './lib/cli';
 export * from './lib/plugins';
 
+// Programmatic client factory – consumed by adt-mcp's sap_connect tool
+// (and other workspace packages) so they can resolve credentials from
+// the on-disk auth store (~/.adt/sessions/<sid>.json) without
+// duplicating the CLI's auth bridge.
+export { getAdtClientV2 } from './lib/utils/adt-client-v2';
+
 // Programmatic services – consumed by adt-mcp and other workspace packages
 // that need to reuse CLI business logic without going through commander.
 export {
