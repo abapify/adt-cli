@@ -3,17 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "tools/nx-npm-access/src",
   "projectType": "library",
-  "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/tools/nx-npm-access",
-        "main": "tools/nx-npm-access/src/index.ts",
-        "tsConfig": "tools/nx-npm-access/tsconfig.lib.json",
-        "assets": ["tools/nx-npm-access/*.md"]
-      }
-    }
-  },
+  "targets": {},
   "tags": []
 }
