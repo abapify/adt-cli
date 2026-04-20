@@ -11,6 +11,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ChangesetService } from '@abapify/adt-cli';
 import type { ToolContext } from '../types';
 import { optionalConnectionShape } from './shared-schemas';
+import { requireOpenChangeset, textError, textOk } from './changeset-helpers';
 
 export function registerChangesetRollbackTool(
   server: McpServer,
@@ -26,46 +27,12 @@ export function registerChangesetRollbackTool(
       systemId: z.string().optional(),
     },
     async (_args, extra) => {
-      const mcpSessionId = extra?.sessionId;
-      if (!mcpSessionId || !ctx.registry) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'changeset_rollback requires an HTTP MCP session.',
-            },
-          ],
-        };
-      }
-      const session = ctx.registry.get(mcpSessionId);
-      if (!session) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'No SAP session bound. Call sap_connect first.',
-            },
-          ],
-        };
-      }
-      const cs = session.changeset;
-      if (!cs || cs.status !== 'open') {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'No open changeset to rollback.',
-            },
-          ],
-        };
-      }
+      const guard = requireOpenChangeset(ctx, extra, 'changeset_rollback');
+      if (!guard.ok) return guard.error;
+      const { session, cs } = guard.value;
 
       try {
-        const svc = new ChangesetService(session.client);
-        const result = await svc.rollback(cs);
+        const result = await new ChangesetService(session.client).rollback(cs);
         for (const uri of result.released) session.locks.delete(uri);
         const payload = {
           id: cs.id,
@@ -74,24 +41,11 @@ export function registerChangesetRollbackTool(
           failed: result.failed,
         };
         session.changeset = undefined;
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({ ok: true, changeset: payload }, null, 2),
-            },
-          ],
-        };
+        return textOk({ ok: true, changeset: payload });
       } catch (err) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `changeset_rollback failed: ${err instanceof Error ? err.message : String(err)}`,
-            },
-          ],
-        };
+        return textError(
+          `changeset_rollback failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     },
   );

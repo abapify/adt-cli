@@ -69,10 +69,11 @@ RUN groupadd --system --gid 10001 appuser \
     && useradd  --system --uid 10001 --gid appuser --home-dir /app appuser
 
 # Copy the built workspace packages and the workspace node_modules so the
-# @abapify/* symlinks resolve at runtime.
-COPY --from=builder --chown=appuser:appuser /build/packages     ./packages
-COPY --from=builder --chown=appuser:appuser /build/node_modules ./node_modules
-COPY --from=builder --chown=appuser:appuser /build/package.json ./package.json
+# @abapify/* symlinks resolve at runtime. Chmod 0555 (read+execute, no write)
+# as the runtime never mutates these paths — satisfies CWE-732 hardening.
+COPY --from=builder --chown=appuser:appuser --chmod=0555 /build/packages     ./packages
+COPY --from=builder --chown=appuser:appuser --chmod=0555 /build/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appuser --chmod=0444 /build/package.json ./package.json
 
 USER appuser
 

@@ -77,8 +77,10 @@ export function createCorsHandler(options: CorsOptions = {}): CorsHandler {
         return true;
       }
 
-      const mirror = allowed[0] === '*' ? origin : origin;
-      res.setHeader('Access-Control-Allow-Origin', mirror);
+      // Always mirror the request Origin — using the literal `*` would be
+      // incompatible with credentialed requests, and mirroring is spec-compliant
+      // in both wildcard and explicit-allow-list cases.
+      res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Vary', 'Origin');
       res.setHeader('Access-Control-Expose-Headers', EXPOSE_HEADERS);
 

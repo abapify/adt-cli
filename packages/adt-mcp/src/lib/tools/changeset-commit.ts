@@ -12,6 +12,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ChangesetService } from '@abapify/adt-cli';
 import type { ToolContext } from '../types';
 import { optionalConnectionShape } from './shared-schemas';
+import { requireOpenChangeset, textError, textOk } from './changeset-helpers';
 
 export function registerChangesetCommitTool(
   server: McpServer,
@@ -26,47 +27,12 @@ export function registerChangesetCommitTool(
       systemId: z.string().optional(),
     },
     async (_args, extra) => {
-      const mcpSessionId = extra?.sessionId;
-      if (!mcpSessionId || !ctx.registry) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'changeset_commit requires an HTTP MCP session.',
-            },
-          ],
-        };
-      }
-      const session = ctx.registry.get(mcpSessionId);
-      if (!session) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'No SAP session bound. Call sap_connect first.',
-            },
-          ],
-        };
-      }
-      const cs = session.changeset;
-      if (!cs || cs.status !== 'open') {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'No open changeset to commit.',
-            },
-          ],
-        };
-      }
+      const guard = requireOpenChangeset(ctx, extra, 'changeset_commit');
+      if (!guard.ok) return guard.error;
+      const { session, cs } = guard.value;
 
       try {
-        const svc = new ChangesetService(session.client);
-        const result = await svc.commit(cs);
-        // Clear session-level lock tracking for released entries.
+        const result = await new ChangesetService(session.client).commit(cs);
         for (const uri of result.activated) session.locks.delete(uri);
         const committed = {
           id: cs.id,
@@ -75,31 +41,15 @@ export function registerChangesetCommitTool(
           failed: result.failed,
           entryCount: cs.entries.length,
         };
-        // Clear pointer — caller starts fresh with changeset_begin.
         session.changeset = undefined;
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({ ok: true, changeset: committed }, null, 2),
-            },
-          ],
-        };
+        return textOk({ ok: true, changeset: committed });
       } catch (err) {
-        // Clear pointer even on activation failure — locks have been
-        // best-effort released by the service. The changeset object is
-        // intentionally left in `committing` state for debugging.
+        // Best-effort: drop tracked locks and clear pointer even on failure.
         for (const entry of cs.entries) session.locks.delete(entry.objectUri);
         session.changeset = undefined;
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `changeset_commit failed: ${err instanceof Error ? err.message : String(err)}`,
-            },
-          ],
-        };
+        return textError(
+          `changeset_commit failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     },
   );

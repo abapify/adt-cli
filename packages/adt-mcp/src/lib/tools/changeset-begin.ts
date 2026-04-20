@@ -15,6 +15,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ChangesetService } from '@abapify/adt-cli';
 import type { ToolContext } from '../types';
 import { optionalConnectionShape } from './shared-schemas';
+import { requireSession, textError, textOk } from './changeset-helpers';
 
 export function registerChangesetBeginTool(
   server: McpServer,
@@ -37,81 +38,41 @@ export function registerChangesetBeginTool(
         .describe('Auto-rollback any existing open changeset first'),
     },
     async (args, extra) => {
-      const mcpSessionId = extra?.sessionId;
-      if (!mcpSessionId || !ctx.registry) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text:
-                'changeset_begin requires an HTTP MCP session. Call ' +
-                'sap_connect first or switch to the HTTP transport.',
-            },
-          ],
-        };
-      }
-
-      const session = ctx.registry.get(mcpSessionId);
-      if (!session) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'No SAP session bound to this MCP session. Call sap_connect first.',
-            },
-          ],
-        };
-      }
+      const guard = requireSession(ctx, extra, 'changeset_begin');
+      if (!guard.ok) return guard.error;
+      const session = guard.value;
 
       if (session.changeset && session.changeset.status === 'open') {
         if (!args.force) {
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text' as const,
-                text:
-                  `A changeset is already open (id=${session.changeset.id}). ` +
-                  `Call changeset_commit/rollback, or pass force=true to auto-rollback.`,
-              },
-            ],
-          };
+          return textError(
+            `A changeset is already open (id=${session.changeset.id}). ` +
+              `Call changeset_commit/rollback, or pass force=true to auto-rollback.`,
+          );
         }
-        // Force-rollback prior.
+        // Force-rollback prior (best-effort).
         try {
-          const svc = new ChangesetService(session.client);
-          await svc.rollback(session.changeset);
+          await new ChangesetService(session.client).rollback(
+            session.changeset,
+          );
         } catch {
           /* best-effort */
         }
       }
 
-      const svc = new ChangesetService(session.client);
-      const changeset = svc.begin(args.description);
+      const changeset = new ChangesetService(session.client).begin(
+        args.description,
+      );
       session.changeset = changeset;
 
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify(
-              {
-                ok: true,
-                changeset: {
-                  id: changeset.id,
-                  status: changeset.status,
-                  openedAt: changeset.openedAt,
-                  description: changeset.description,
-                },
-              },
-              null,
-              2,
-            ),
-          },
-        ],
-      };
+      return textOk({
+        ok: true,
+        changeset: {
+          id: changeset.id,
+          status: changeset.status,
+          openedAt: changeset.openedAt,
+          description: changeset.description,
+        },
+      });
     },
   );
 }

@@ -13,6 +13,7 @@ import { ChangesetService } from '@abapify/adt-cli';
 import type { ToolContext } from '../types';
 import { optionalConnectionShape } from './shared-schemas';
 import { resolveObjectUri, resolveObjectUriFromType } from './utils';
+import { requireOpenChangeset, textError, textOk } from './changeset-helpers';
 
 export function registerChangesetAddTool(
   server: McpServer,
@@ -36,43 +37,10 @@ export function registerChangesetAddTool(
         .describe('Transport request (required for transportable objects)'),
     },
     async (args, extra) => {
-      const mcpSessionId = extra?.sessionId;
-      if (!mcpSessionId || !ctx.registry) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'changeset_add requires an HTTP MCP session (changesets are session-bound).',
-            },
-          ],
-        };
-      }
-      const session = ctx.registry.get(mcpSessionId);
-      if (!session) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'No SAP session bound. Call sap_connect first.',
-            },
-          ],
-        };
-      }
-      if (!session.changeset || session.changeset.status !== 'open') {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: 'No open changeset. Call changeset_begin first.',
-            },
-          ],
-        };
-      }
+      const guard = requireOpenChangeset(ctx, extra, 'changeset_add');
+      if (!guard.ok) return guard.error;
+      const { session, cs } = guard.value;
 
-      // Resolve URI via typed lookup, then fall back to repository search.
       let objectUri =
         resolveObjectUriFromType(args.objectType, args.objectName) ?? undefined;
       if (!objectUri) {
@@ -83,77 +51,46 @@ export function registerChangesetAddTool(
             args.objectType,
           );
         } catch (err) {
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text' as const,
-                text: `changeset_add: object resolution failed: ${err instanceof Error ? err.message : String(err)}`,
-              },
-            ],
-          };
+          return textError(
+            `changeset_add: object resolution failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
         }
       }
       if (!objectUri) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `changeset_add: object '${args.objectName}' (${args.objectType}) not found`,
-            },
-          ],
-        };
+        return textError(
+          `changeset_add: object '${args.objectName}' (${args.objectType}) not found`,
+        );
       }
 
       try {
-        const svc = new ChangesetService(session.client);
-        const entry = await svc.add(session.changeset, {
+        const entry = await new ChangesetService(session.client).add(cs, {
           objectUri,
           objectType: args.objectType,
           objectName: args.objectName,
           source: args.source,
           transport: args.transport,
         });
-        // Track lock at session-level too so other tools can see it.
         session.locks.add(entry.objectUri);
 
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  ok: true,
-                  changeset: {
-                    id: session.changeset.id,
-                    status: session.changeset.status,
-                    entryCount: session.changeset.entries.length,
-                  },
-                  entry: {
-                    objectUri: entry.objectUri,
-                    objectType: entry.objectType,
-                    objectName: entry.objectName,
-                    lockHandle: entry.lockHandle,
-                    action: entry.action,
-                  },
-                },
-                null,
-                2,
-              ),
-            },
-          ],
-        };
+        return textOk({
+          ok: true,
+          changeset: {
+            id: cs.id,
+            status: cs.status,
+            entryCount: cs.entries.length,
+          },
+          entry: {
+            objectUri: entry.objectUri,
+            objectType: entry.objectType,
+            objectName: entry.objectName,
+            lockHandle: entry.lockHandle,
+            action: entry.action,
+          },
+        });
       } catch (err) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `changeset_add failed: ${err instanceof Error ? err.message : String(err)}`,
-            },
-          ],
-        };
+        return textError(
+          `changeset_add failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     },
   );
