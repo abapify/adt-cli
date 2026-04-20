@@ -3,9 +3,9 @@
   <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
     <asx:values>
       <VSEOCLASS>
-        <CLSNAME>ZCX_PETSTORE3_CLIENT_ERROR</CLSNAME>
+        <CLSNAME>ZCX_PETSTORE3_ERROR</CLSNAME>
         <LANGU>E</LANGU>
-        <DESCRIPT>Generated error type for ZCL_PETSTORE3_CLIENT</DESCRIPT>
+        <DESCRIPT>Generated Petstore v3 client</DESCRIPT>
         <STATE>1</STATE>
         <CLSCCINCL>X</CLSCCINCL>
         <FIXPT>X</FIXPT>

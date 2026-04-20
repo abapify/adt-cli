@@ -1,0 +1,11 @@
+{
+  "header": {
+    "formatVersion": "1.0",
+    "description": "Generated Petstore v3 client",
+    "originalLanguage": "E"
+  },
+  "interface": {
+    "name": "ZIF_PETSTORE3_TYPES",
+    "visibility": "public"
+  }
+}

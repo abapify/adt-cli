@@ -133,6 +133,47 @@ both `FINAL` and `ABSTRACT`, a section's members must match its
 visibility), throws `AbapAstError`, and freezes the resulting node. Arrays
 are frozen too — the AST is effectively immutable.
 
+## ABAPDoc comments
+
+Declaration nodes (`TypeDef`, `MethodDef`, `AttributeDef`, `InterfaceDef`,
+`ClassDef`) accept an optional `abapDoc: readonly string[]` field. The
+printer emits each entry as a `"! <line>` comment at the declaration's
+own indentation, immediately above the declaration. Consumers use this
+to attach structured, round-trip metadata (for example the
+`@openapi-operation`, `@openapi-path`, `@openapi-schema`, and
+`@openapi-ref` markers emitted by
+[`@abapify/openai-codegen`](./openai-codegen)).
+
+```ts
+import { print, methodDef, methodParam, builtinType } from '@abapify/abap-ast';
+
+const m = methodDef({
+  name: 'get_foo',
+  visibility: 'public',
+  abapDoc: ['@openapi-operation getFoo', 'Return a foo.'],
+  params: [
+    methodParam({
+      paramKind: 'importing',
+      name: 'id',
+      typeRef: builtinType({ name: 'string' }),
+    }),
+  ],
+});
+
+console.log(print(m));
+```
+
+emits:
+
+```abap
+"! @openapi-operation getFoo
+"! Return a foo.
+METHODS get_foo
+  IMPORTING id TYPE string.
+```
+
+Lines are written verbatim — no wrapping, no escaping, no tag rewriting.
+
 ## `print()` and options
 
 ```ts

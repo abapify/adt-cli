@@ -7,39 +7,35 @@ ENDCLASS.
 
 CLASS zcl_ps3_client_tests IMPLEMENTATION.
   METHOD test_instantiation.
-    DATA lo_client TYPE REF TO zcl_petstore3_client.
-    lo_client = NEW zcl_petstore3_client( iv_destination = 'PETSTORE' ).
+    DATA client TYPE REF TO zif_petstore3.
+    client = NEW zcl_petstore3( destination = 'PETSTORE' ).
     cl_abap_unit_assert=>assert_bound(
-      act = lo_client
-      msg = 'zcl_petstore3_client constructor should bind an instance' ).
+      act = client
+      msg = 'zcl_petstore3 constructor should bind a zif_petstore3 reference' ).
   ENDMETHOD.
 
   METHOD test_typed_pet.
-    DATA ls_pet TYPE zcl_petstore3_client=>ty_ps3pet.
-    ls_pet-name = |Rex|.
-    ls_pet-status = |available|.
+    DATA pet TYPE zif_petstore3_types=>pet.
+    pet-name   = |Rex|.
+    pet-status = |available|.
     cl_abap_unit_assert=>assert_equals(
-      act = ls_pet-name
-      exp = |Rex|
-      msg = 'Pet.name must be writable and readable' ).
+      act = pet-name exp = |Rex|
+      msg = 'Pet.name must be writable and readable via the typed interface' ).
     cl_abap_unit_assert=>assert_equals(
-      act = ls_pet-status
-      exp = |available|
+      act = pet-status exp = |available|
       msg = 'Pet.status must be writable and readable' ).
   ENDMETHOD.
 
   METHOD test_typed_order.
-    DATA ls_order TYPE zcl_petstore3_client=>ty_ps3order.
-    ls_order-id = 42.
-    ls_order-quantity = 5.
-    ls_order-complete = abap_true.
+    DATA order TYPE zif_petstore3_types=>order.
+    order-id       = 42.
+    order-quantity = 5.
+    order-complete = abap_true.
     cl_abap_unit_assert=>assert_equals(
-      act = ls_order-id
-      exp = CONV int8( 42 )
-      msg = 'Order.id typed as int8' ).
+      act = order-id exp = CONV int8( 42 )
+      msg = 'Order.id is typed as int8' ).
     cl_abap_unit_assert=>assert_equals(
-      act = ls_order-complete
-      exp = abap_true
-      msg = 'Order.complete typed as abap_bool' ).
+      act = order-complete exp = abap_true
+      msg = 'Order.complete is typed as abap_bool' ).
   ENDMETHOD.
 ENDCLASS.

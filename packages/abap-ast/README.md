@@ -119,8 +119,52 @@ AST node.
 
 `raw({ source })` is an escape hatch for ABAP fragments that are not yet
 representable in the AST. Consumers should prefer structured nodes and
-confine `raw` to known-safe cases (the inline runtime in
-`@abapify/openai-codegen` uses it for hand-written HTTP/JSON helpers).
+confine `raw` to known-safe cases.
+
+## ABAPDoc comments
+
+Declaration nodes (`TypeDef`, `MethodDef`, `AttributeDef`, `InterfaceDef`,
+`ClassDef`) accept an optional `abapDoc: readonly string[]` field. The
+printer emits each line verbatim prefixed with `"!` at the declaration's
+own indentation, immediately above it. This is the standard ABAP way to
+attach structured metadata to a declaration (ABAPDoc / Knowledge Transfer
+comments).
+
+```typescript
+import { print, methodDef, methodParam, builtinType } from '@abapify/abap-ast';
+
+const m = methodDef({
+  name: 'get_foo',
+  visibility: 'public',
+  abapDoc: [
+    '@openapi-operation getFoo',
+    '@openapi-path GET /foo/{id}',
+    'Return a foo by id.',
+  ],
+  params: [
+    methodParam({
+      paramKind: 'importing',
+      name: 'id',
+      typeRef: builtinType({ name: 'string' }),
+    }),
+  ],
+});
+
+console.log(print(m));
+```
+
+emits:
+
+```abap
+"! @openapi-operation getFoo
+"! @openapi-path GET /foo/{id}
+"! Return a foo by id.
+METHODS get_foo
+  IMPORTING id TYPE string.
+```
+
+Lines are written verbatim: no automatic wrapping, no escaping, no tag
+rewriting. Consumers own their tag conventions.
 
 ## Printer
 
@@ -165,7 +209,10 @@ point `print(parse(src)) ≈ src` becomes the round-trip contract.
 ## Consumers
 
 - [`@abapify/openai-codegen`](../openai-codegen) — OpenAPI → ABAP client
-  generator. Builds a `ClassDef` per spec and relies on the determinism
+  generator. Builds two `InterfaceDef`s, one `ClassDef` for the
+  implementation, and one `ClassDef` for the exception. Uses the
+  `abapDoc` field to attach round-trip `@openapi-*` markers on every
+  generated type and operation, and relies on the printer's determinism
   guarantee for reproducible artefacts.
 
 ## License

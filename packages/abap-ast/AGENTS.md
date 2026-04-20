@@ -34,23 +34,23 @@ printer/writer.ts    (buffered string writer — indent, keyword case, eol)
 
 ## Key Files
 
-| File                       | Purpose                                                                                              |
-| -------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `src/index.ts`             | Public barrel — re-exports nodes + printer.                                                          |
-| `src/nodes/index.ts`       | Re-exports all node modules in stable order.                                                         |
-| `src/nodes/base.ts`        | Shared types: `NodeKind`, `AbapNode`, `Visibility`, `Comment`.                                       |
-| `src/nodes/types.ts`       | Type nodes: `BuiltinType`, `NamedTypeRef`, `TableType`, `StructureType`, `EnumType`, `TypeDef`.      |
-| `src/nodes/data.ts`        | `DataDecl`, `ConstantDecl`, `FieldSymbolDecl`.                                                       |
-| `src/nodes/expressions.ts` | `Literal`, `IdentifierExpr`, `ConstructorExpr`, `MethodCallExpr`, `BinOp`, `StringTemplate`, `Cast`. |
-| `src/nodes/statements.ts`  | Control flow + imperative forms (If, Loop, Try, Append, Read, …).                                    |
-| `src/nodes/members.ts`     | `MethodParam`, `MethodDef`, `MethodImpl`, `EventDef`, `AttributeDef`.                                |
-| `src/nodes/class.ts`       | `Section`, `ClassDef`, `LocalClassDef`.                                                              |
-| `src/nodes/interface.ts`   | `InterfaceDef`.                                                                                      |
-| `src/nodes/errors.ts`      | `requireField()` — validator used by factories.                                                      |
-| `src/printer/index.ts`     | `print()` entry point + `kind` dispatch.                                                             |
-| `src/printer/writer.ts`    | Buffer + keyword-case + indent controller.                                                           |
-| `src/printer/options.ts`   | `PrintOptions`, `resolveOptions()`.                                                                  |
-| `src/printer/print-*.ts`   | Per-topic printer — pure functions on `(node, writer)`.                                              |
+| File                       | Purpose                                                                                                                |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `src/index.ts`             | Public barrel — re-exports nodes + printer.                                                                            |
+| `src/nodes/index.ts`       | Re-exports all node modules in stable order.                                                                           |
+| `src/nodes/base.ts`        | Shared types: `NodeKind`, `AbapNode`, `Visibility`, `Comment`.                                                         |
+| `src/nodes/types.ts`       | Type nodes: `BuiltinType`, `NamedTypeRef`, `TableType`, `StructureType`, `EnumType`, `TypeDef`.                        |
+| `src/nodes/data.ts`        | `DataDecl`, `ConstantDecl`, `FieldSymbolDecl`.                                                                         |
+| `src/nodes/expressions.ts` | `Literal`, `IdentifierExpr`, `ConstructorExpr`, `MethodCallExpr`, `BinOp`, `StringTemplate`, `Cast`.                   |
+| `src/nodes/statements.ts`  | Control flow + imperative forms (If, Loop, Try, Append, Read, …).                                                      |
+| `src/nodes/members.ts`     | `MethodParam`, `MethodDef`, `MethodImpl`, `EventDef`, `AttributeDef`.                                                  |
+| `src/nodes/class.ts`       | `Section`, `ClassDef`, `LocalClassDef`.                                                                                |
+| `src/nodes/interface.ts`   | `InterfaceDef`.                                                                                                        |
+| `src/nodes/errors.ts`      | `requireField()` — validator used by factories.                                                                        |
+| `src/printer/index.ts`     | `print()` entry point + `kind` dispatch.                                                                               |
+| `src/printer/writer.ts`    | Buffer + keyword-case + indent controller.                                                                             |
+| `src/printer/options.ts`   | `PrintOptions`, `resolveOptions()`.                                                                                    |
+| `src/printer/print-*.ts`   | Per-topic printer — pure functions on `(node, writer)`. Emits ABAPDoc `"! <line>` for `abapDoc`-carrying declarations. |
 
 ## Invariants
 
@@ -73,6 +73,14 @@ printer/writer.ts    (buffered string writer — indent, keyword case, eol)
    throws with a clear message if called on them directly.
 6. **No runtime dependencies.** This is a leaf package by design.
    Introducing any `dependencies` entry is a breaking architectural change.
+7. **ABAPDoc is a readonly string array on declaration nodes.** `TypeDef`,
+   `MethodDef`, `AttributeDef`, `InterfaceDef`, and `ClassDef` optionally
+   carry `abapDoc: readonly string[]`. Each entry is one logical line;
+   the printer emits `"! <line>` verbatim at the declaration's indent,
+   immediately above the declaration. No escaping, no wrapping, no tag
+   rewriting — consumers own their tag conventions. See
+   `src/printer/print-members.ts`, `print-types.ts`, `print-class.ts`,
+   `print-interface.ts`.
 
 ## Adding a New Node Kind
 

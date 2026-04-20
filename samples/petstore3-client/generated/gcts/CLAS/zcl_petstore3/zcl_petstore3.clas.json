@@ -5,7 +5,7 @@
     "originalLanguage": "E"
   },
   "class": {
-    "name": "ZCL_PETSTORE3_CLIENT",
+    "name": "ZCL_PETSTORE3",
     "category": "00",
     "visibility": "public",
     "final": true,

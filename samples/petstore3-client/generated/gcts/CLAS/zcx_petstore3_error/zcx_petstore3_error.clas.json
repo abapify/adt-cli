@@ -1,11 +1,11 @@
 {
   "header": {
     "formatVersion": "1.0",
-    "description": "Generated error type for ZCL_PETSTORE3_CLIENT",
+    "description": "Generated Petstore v3 client",
     "originalLanguage": "E"
   },
   "class": {
-    "name": "ZCX_PETSTORE3_CLIENT_ERROR",
+    "name": "ZCX_PETSTORE3_ERROR",
     "category": "00",
     "visibility": "public",
     "final": true,

@@ -2,246 +2,322 @@
 
 ## Package Overview
 
-**Deterministic OpenAPI → ABAP client generator.** Reads an OpenAPI 3.x
-spec, builds a typed AST via `@abapify/abap-ast`, and writes a single
-zero-runtime-dependency ABAP class per spec, packaged as abapGit or gCTS.
+**Deterministic OpenAPI → ABAP client generator (v2 pipeline).** Reads
+an OpenAPI 3.x spec, builds typed ABAP ASTs via `@abapify/abap-ast`, and
+writes **four global artifacts** plus a bundled set of local helpers:
+
+- `ZIF_<BASE>_TYPES` — global interface holding every schema as ABAP
+  `TYPES`, with round-trip `@openapi-schema` / `@openapi-ref` ABAPDoc
+  markers.
+- `ZIF_<BASE>` — global interface holding every operation as typed
+  `METHODS`, `RAISING` the exception class; types are referenced via
+  `zif_<name>_types=>…`.
+- `ZCX_<BASE>_ERROR` — global exception class inheriting
+  `cx_static_check`, carrying `status`, `description`, `body`,
+  `headers`.
+- `ZCL_<BASE>` — thin implementation class. One private attribute
+  (`client TYPE REF TO lcl_http`). Each method body is one `fetch` call
+  plus a `CASE response->status( )` block.
+- `zcl_<base>.clas.locals_def.abap` / `locals_imp.abap` — bundled helper
+  locals: `lcl_http`, `lcl_response`, `json`, `lcl_json_parser`.
+  Zero Z-dependencies; kernel APIs only.
+
+Writing layouts supported: `abapgit` (11 files) and `gcts`.
 
 | Item          | Value                                                                                      |
 | ------------- | ------------------------------------------------------------------------------------------ |
 | Runtime deps  | `@abapify/abap-ast`, `@apidevtools/swagger-parser`, `commander`, `fast-xml-parser`, `yaml` |
-| Dev deps      | `@abaplint/core` (for parse-check tests)                                                   |
+| Dev deps      | `@abaplint/core` (parse-check)                                                             |
 | Language      | TypeScript 5 strict ESM                                                                    |
-| Build         | `bunx nx build openai-codegen` (tsdown)                                                    |
+| Build         | `bunx nx build openai-codegen`                                                             |
 | Test runner   | `bunx nx test openai-codegen` (vitest)                                                     |
 | CLI binary    | `openai-codegen` → `dist/cli.mjs`                                                          |
-| Library entry | `src/index.ts` → `generate()` + per-module re-exports                                      |
+| Library entry | `src/index.ts` → `generate()` + module re-exports                                          |
 
 ## Architecture
 
-```
-CLI (src/cli.ts) ─┐
-                  ├─► generate() (src/generate.ts)
-Library caller ───┘        │
-                           ▼
-                 oas/ ── load + dereference + normalize ──► NormalizedSpec
-                 profiles/ ── pick target profile ────────► TargetProfile
-                 types/ ── plan TypeDefs (topological) ───► TypePlan
-                 runtime/ ── pick inline ABAP helpers ─────► CloudRuntime
-                 emit/ ── assemble ClassDef + extras ──────► { class, extras }
-                           │
-                           ▼
-                 @abapify/abap-ast print()
-                           │
-                           ▼
-                 generate.ts ── injectRuntime + stripLineComments
-                           │
-                           ▼
-                 format/ ── writeLayout (abapGit | gCTS) ──► files[]
+```text
+loadSpec (oas/) ─► NormalizedSpec
+planTypes (types/) ─► TypePlan (topological, cycle-broken with REF TO data)
+resolveNames (emit/naming.ts) ─► ResolvedNames
+        │
+        ├─► emitTypesInterface       (ZIF_<BASE>_TYPES AST)
+        ├─► emitOperationsInterface  (ZIF_<BASE>    AST)
+        ├─► emitExceptionClass       (ZCX_<BASE>_ERROR AST)
+        ├─► emitImplementationClass  (ZCL_<BASE>   AST — thin)
+        └─► emitLocalClasses         (locals_def + locals_imp — templated)
+                │
+                ▼
+        @abapify/abap-ast print()        (4 × deterministic prints)
+                │
+                ▼
+        writeClientBundle (format/)      (abapgit | gcts layout + envelopes)
 ```
 
 ## Per-subdirectory responsibilities
 
 ### `src/oas/`
 
-Normalise the raw OpenAPI document into the shape the rest of the pipeline
-expects. **Must not leak `swagger-parser` types** past this boundary.
+OpenAPI loader + normalizer. Produces `NormalizedSpec` — the only shape
+the rest of the pipeline consumes. Must not leak `swagger-parser`
+types past this boundary.
 
-| File         | Responsibility                                                                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `types.ts`   | `NormalizedSpec`, `NormalizedOperation`, `NormalizedParameter`, `NormalizedRequestBody`, `NormalizedResponse`, `NormalizedServer`, `JsonSchema`. |
-| `load.ts`    | `loadSpec()` (file/URL/object), `normalizeSpec()` (operations list, servers, security).                                                          |
-| `iterate.ts` | `walkSchemas()`, `operationKey()` — stable keys for the planner.                                                                                 |
-| `index.ts`   | Barrel.                                                                                                                                          |
-
-### `src/profiles/`
-
-Target SAP system definitions. Whitelist enforcement lives here.
-
-| File                | Responsibility                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| `types.ts`          | `TargetProfileId`, `TargetProfile`, `HttpClientStrategy`, `JsonStrategy`.                |
-| `cloud.ts`          | `s4CloudProfile` — the only v1-implemented profile; carries the kernel-class allow-list. |
-| `onprem-modern.ts`  | `s4OnPremModernProfile` — declared but not emitted (TODO).                               |
-| `onprem-classic.ts` | `onPremClassicProfile` — declared but not emitted (TODO).                                |
-| `errors.ts`         | `WhitelistViolationError`.                                                               |
-| `registry.ts`       | `getProfile()`, `assertClassAllowed()`, `ALL_PROFILES`.                                  |
-| `index.ts`          | Barrel.                                                                                  |
+| File         | Responsibility                                                                                      |
+| ------------ | --------------------------------------------------------------------------------------------------- |
+| `types.ts`   | `NormalizedSpec`, `NormalizedOperation`, `NormalizedParameter`, `NormalizedResponse`, `JsonSchema`. |
+| `load.ts`    | `loadSpec()` (file/URL/object) + normalization.                                                     |
+| `iterate.ts` | `walkSchemas()`, stable `operationKey()`.                                                           |
+| `index.ts`   | Barrel.                                                                                             |
 
 ### `src/types/`
 
-JSON Schema → ABAP `TypeDef` planning and mapping.
+JSON Schema → ABAP `TypeDef` planning.
 
-| File        | Responsibility                                                                        |
-| ----------- | ------------------------------------------------------------------------------------- |
-| `naming.ts` | `sanitizeIdent()`, `makeNameAllocator()` — collision-safe lowercase ABAP names.       |
-| `plan.ts`   | `planTypes()` — topological sort of component + inline schemas; returns `TypePlan`.   |
-| `map.ts`    | `mapPrimitive`, `mapSchemaToTypeRef`, `mapSchemaToTypeDef` — the schema → AST mapper. |
-| `emit.ts`   | `emitTypeSection()` — plan → `TypeDef[]` in dependency order.                         |
-| `errors.ts` | `CyclicTypeError`, `CollisionError`, `UnsupportedSchemaError`.                        |
-| `index.ts`  | Barrel.                                                                               |
+| File        | Responsibility                                                         |
+| ----------- | ---------------------------------------------------------------------- |
+| `naming.ts` | `sanitizeIdent()`, `makeNameAllocator()` — collision-safe ABAP names.  |
+| `plan.ts`   | `planTypes()` — topological sort; back-edges broken via `REF TO data`. |
+| `map.ts`    | `mapPrimitive`, `mapSchemaToTypeRef`, `mapSchemaToTypeDef`.            |
+| `errors.ts` | `CyclicTypeError`, `CollisionError`, `UnsupportedSchemaError`.         |
+| `index.ts`  | Barrel.                                                                |
 
-### `src/runtime/s4-cloud/`
+### `src/profiles/`
 
-Hand-written ABAP snippets that get injected into the generated class. These
-are **raw strings**, not AST. They live here because the AST has no
-representation for raw ABAP blocks and we deliberately avoid round-tripping
-them through a parser.
+Target profile registry. Only `s4-cloud` emits in v1; the other ids
+exist as slots for future runtimes.
 
-| File           | Responsibility                                             |
-| -------------- | ---------------------------------------------------------- |
-| `http.abap.ts` | `if_web_http_client` send/receive helper.                  |
-| `url.abap.ts`  | Path/query encoding helpers.                               |
-| `json.abap.ts` | Inline JSON tokenizer + reflective (de)serialisation.      |
-| `index.ts`     | `getCloudRuntime()` → `{ declarations, implementations }`. |
+| File                | Responsibility                              |
+| ------------------- | ------------------------------------------- |
+| `types.ts`          | `TargetProfileId`, `TargetProfile`.         |
+| `cloud.ts`          | `s4CloudProfile` (kernel-class allow-list). |
+| `onprem-modern.ts`  | Stub — declared, not emitted.               |
+| `onprem-classic.ts` | Stub — declared, not emitted.               |
+| `registry.ts`       | `getProfile()`, `assertClassAllowed()`.     |
+| `errors.ts`         | `WhitelistViolationError`.                  |
 
-### `src/emit/`
+### `src/emit/naming.ts`
 
-Turn `NormalizedOperation` + `TypePlan` + `TargetProfile` into AST nodes.
+Single source of truth for all generated global + local names.
+`resolveNames(NamesConfig)` validates ABAP identifier rules (Z/Y prefix,
+length ≤ 30, charset) and returns a `ResolvedNames` record used by every
+emitter downstream. Base-derived defaults:
 
-| File                 | Responsibility                                                                                |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| `identifiers.ts`     | Stable ABAP names (method, param, attribute, exception class) via `NameAllocator`.            |
-| `parameters.ts`      | `buildImportingParams`, `translateParameter`, `translateRequestBody`, `pickRequestMediaType`. |
-| `responses.ts`       | `pickSuccessResponse`, `buildReturning`, `buildRaising`.                                      |
-| `operation-body.ts`  | `buildOperationBody()` — the per-method `METHOD … ENDMETHOD` body.                            |
-| `security.ts`        | `emitSecuritySupport`, `collectUsedSchemes`.                                                  |
-| `server.ts`          | `emitServerConstants`, `emitServerCtorParams`, `resolveServerUrl`.                            |
-| `exception-class.ts` | `buildExceptionClass()` — the `ZCX_*_ERROR` `LocalClassDef` (promoted to global on write).    |
-| `assemble.ts`        | `emitClientClass()` + `sanitizeStarComments()` — the top-level assembler.                     |
-| `index.ts`           | Barrel.                                                                                       |
+- `ZIF_<BASE>_TYPES`, `ZIF_<BASE>`, `ZCL_<BASE>`, `ZCX_<BASE>_ERROR`
+- locals: `lcl_http`, `lcl_response`, `json`, `lcl_json_parser`
+
+### `src/emit/types-interface.ts` (Layer 1)
+
+Builds an `InterfaceDef` whose members are plan-ordered `TypeDef`s with
+ABAPDoc markers. Handles:
+
+- Primitive → ABAP mapping (`string`, `int8`, `timestampl`, …).
+- `object` → `BEGIN OF … END OF`.
+- `array` → `STANDARD TABLE OF <row> WITH EMPTY KEY`.
+- `additionalProperties` → `_map` table rows of `{ key, value }`.
+- `allOf` → flattened structure.
+- `oneOf` / `anyOf` → union merge (all branch fields, optional
+  semantics).
+- Cyclic back-edges → field typed `REF TO data` with `"! @openapi-ref
+<field>:<Target>`.
+- Every type carries `"! @openapi-schema <SourceName>`.
+
+### `src/emit/operations-interface.ts` (Layer 2)
+
+Builds an `InterfaceDef` whose members are `MethodDef`s referencing
+types as `zif_<base>_types=>…`. Each method carries:
+
+- `"! @openapi-operation <operationId>`
+- `"! @openapi-path <VERB> <path>`
+- `"! <summary>` (if present)
+
+Returns the parsed operation list so the implementation emitter can
+generate method bodies without reparsing.
+
+### `src/emit/exception-class.ts`
+
+Emits `ZCX_<BASE>_ERROR` inheriting `cx_static_check`, with `status`,
+`description`, `body`, `headers` attributes and a matching constructor.
+
+### `src/emit/implementation-class.ts` (Layer 3)
+
+Minimal `ClassDef`:
+
+- Public section: `constructor( destination, server = '<path>' )` where
+  the default comes from `spec.servers[0].url` (path component) or `/`.
+- Private section: exactly one `DATA client TYPE REF TO lcl_http`.
+- One method impl per operation — delegates the body to
+  `response-mapper.ts`.
+
+No private helper methods. No state beyond `client`.
+
+### `src/emit/response-mapper.ts`
+
+Builds the per-operation `METHOD … ENDMETHOD` body:
+
+1. `DATA(response) = client->fetch( method = '…' path = |…| [query = …]
+[headers = …] [body = json=>stringify( body )] ).`
+2. `CASE response->status( ). WHEN <success>. json=>parse( response->body(
+) )->to( REF #( <retVar> ) ). WHEN <code1>. RAISE … WHEN OTHERS.
+RAISE … ENDCASE.`
+
+### `src/emit/local-classes.ts` + `src/emit/templates/`
+
+The helper-locals bundle. Templates live as TypeScript string exports
+(`locals-def.abap.ts`, `locals-imp.abap.ts`) and get parameterised with
+the resolved local class names. The bundle exposes:
+
+- `lcl_http` — HTTP transport wrapping `cl_web_http_client_manager` +
+  `cl_http_destination_provider`. Only kernel exceptions propagate
+  (`cx_web_http_client_error`, `cx_http_dest_provider_error`).
+- `lcl_response` — status / body / text / header / headers accessors.
+- `json` — `stringify` / `render` / `parse->to( REF #( … ) )` (mirrors
+  the `abapify/json` surface).
+- `lcl_json_parser` — internal JSON walker used by `json`.
 
 ### `src/format/`
 
-Disk layout writers + envelope emitters.
+On-disk writers.
 
-| File          | Responsibility                                                                  |
-| ------------- | ------------------------------------------------------------------------------- |
-| `types.ts`    | `OutputFormat`, `ClassArtifact`, `WriteResult`.                                 |
-| `abapgit.ts`  | Canonical abapGit layout (`src/*.clas.abap` + `.clas.xml`, `package.devc.xml`). |
-| `gcts.ts`     | AFF-style gCTS layout (`CLAS/<name>/*.clas.abap` + `.clas.json`).               |
-| `validate.ts` | Filename + class-name sanity checks.                                            |
-| `index.ts`    | `writeLayout()` dispatcher.                                                     |
+| File          | Responsibility                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| `types.ts`    | `InterfaceArtifact`, `ClassArtifact`, `ClientBundle`, `WriteResult`.                                   |
+| `abapgit.ts`  | abapGit layout (`src/*.clas.abap` + `.clas.xml`, `src/*.intf.abap` + `.intf.xml`, `package.devc.xml`). |
+| `gcts.ts`     | AFF/gCTS layout (`CLAS/<name>/…`, `INTF/<name>/…`, JSON envelopes).                                    |
+| `envelope.ts` | `VSEOCLASS` / `VSEOINTERF` emit with `ABAP_LANGUAGE_VERSION=5`.                                        |
+| `index.ts`    | `writeClientBundle({ types, operations, exception, implementation }, format, outDir)`.                 |
 
 ### `src/generate.ts`
 
-Orchestrates the pipeline and owns the post-printer steps:
-`injectRuntime()` (splices the inline runtime at section boundaries) and
-`stripLineComments()` (Steampunk rejects standalone `"` line comments in
-structural positions). Also patches the printed `LocalClassDef` header of
-each extra exception class to `PUBLIC CREATE PUBLIC` so it is valid as a
-global class file.
+Pipeline entry point. Orchestrates load → plan → resolveNames → five
+emitters → four prints → write. Tags each step in thrown errors
+(`openai-codegen generate failed at step "<step>": …`).
 
 ### `src/cli.ts`
 
-Thin commander wrapper over `generate()`. Validates `--target` and
-`--format`, supports comma-separated multi-format output, prints a
-one-liner summary per format to stdout, errors to stderr with a non-zero
-exit code.
+Commander wrapper over `generate()`. Flags: `--input`, `--out`,
+`--base`, `--types-interface`, `--operations-interface`, `--class-name`,
+`--exception-class`, `--format`, `--target`, `--description`. Supports
+comma-separated `--format abapgit,gcts`; each lands in its own
+subdirectory.
 
 ### `src/index.ts`
 
-Public barrel. Re-exports `oas`, `profiles`, `types`, `runtime`, `emit`,
-`format`, and `generate`.
+Public barrel — `generate`, `NamesConfig`, `ResolvedNames`,
+`resolveNames`, plus every subdirectory re-export so callers can drive
+individual pipeline steps.
 
 ## Invariants
 
-1. **No new runtime deps in emitted ABAP.** The generated class may only
-   call kernel classes listed in `s4CloudProfile.allowedClasses`. Any new
-   emitter that introduces a class reference must add it to the whitelist
-   AND the whitelist must be checked at emit time, not after the fact.
-2. **AST is the only source of ABAP structure.** The sole exception is the
-   inline runtime, spliced as pre-formatted strings at the `PRIVATE
-SECTION` / `IMPLEMENTATION` closing `ENDCLASS.` boundaries by
-   `injectRuntime()`. Do NOT introduce string splicing anywhere else;
-   extend the AST in `@abapify/abap-ast` instead.
-3. **Schema TypeDefs go to the PUBLIC SECTION.** Callers need to name
-   generated types (`ty_<prefix>_<schema>`) from their own code, so all
-   plan-derived `TypeDef`s are emitted as public members of the main
-   class.
-4. **No standalone `"` line comments in written source.**
-   `stripLineComments()` runs after print and removes them. If a generator
-   path "needs" a line comment for future tooling, attach it as a trailing
-   comment on a code line instead, or fold it into the structured AST via
-   a `Comment` node.
-5. **`ZCX_*` is a separate global class file.** The error exception is
-   built as a `LocalClassDef`, printed, then rewritten to
-   `CLASS … DEFINITION PUBLIC CREATE PUBLIC` and written as its own
-   `.clas.abap` + envelope.
-6. **Generated `.clas.xml` / `.clas.json` carry `ABAP_LANGUAGE_VERSION=5`.**
-   This is the Cloud value; without it, Steampunk import fails with a
-   language-version mismatch.
-7. **Output is deterministic.** `result.files` is sorted + deduped; the
-   printer is deterministic (see `@abapify/abap-ast/AGENTS.md`); the
-   envelope writers use stable key ordering.
+1. **Schema TYPES live on the types interface, never on the class.**
+   ABAP's unified component namespace for types / attributes / methods
+   on a class would force name mangling. Keep
+   `ZIF_<BASE>_TYPES` as the only home for schema types. Operations
+   reference them via `zif_<base>_types=>…`.
+2. **Transport is JSON-blind.** `lcl_http->fetch` knows nothing about
+   JSON, status codes, or operation identities. It accepts `body` as
+   `string` (+ optional `binary` as `xstring`), returns an
+   `lcl_response`, and only propagates kernel exceptions. All mapping
+   (success decode, error dispatch) happens in the per-operation method
+   in `ZCL_<BASE>`.
+3. **JSON API matches `abapify/json`.** `json=>stringify( data )` returns
+   `string`, `json=>render( data )` returns `xstring`, `json=>parse(
+any )->to( REF #( target ) )` fills the target by reference.
+   Internally wraps `/ui2/cl_json` + `cl_abap_conv_codepage`.
+4. **All 4 global + 4 local names are configurable.** `resolveNames()`
+   is the only place that decides final names. It validates against
+   ABAP identifier rules (`^[ZY][A-Z0-9_]*$` for globals, length ≤ 30;
+   `^[a-z][a-z0-9_]*$` for locals).
+5. **Generated source parses under `@abaplint/core`.** Any emitter
+   change MUST be covered by a test that feeds the concatenated output
+   through `@abaplint/core` with zero fatal errors.
+6. **`ABAP_LANGUAGE_VERSION=5` in every envelope.** `VSEOCLASS` and
+   `VSEOINTERF` carry `<ABAP_LANGUAGE_VERSION>5</ABAP_LANGUAGE_VERSION>`;
+   without it, Steampunk import fails with a language-version mismatch.
+7. **No standalone `"` line comments in written source.** ADT rejects
+   them structurally. Strip at emit time; prefer ABAPDoc (`"!`) or
+   trailing comments on code lines instead.
+8. **ZCX is its own global class file.** Do NOT concatenate it into the
+   main class; it must be a separate `.clas.abap` artifact with its
+   own envelope.
+9. **Output is deterministic.** Sorted file list, stable key ordering
+   in envelopes, and `@abapify/abap-ast` determinism give byte-for-byte
+   identical output on re-run.
 
-## Adding a new target profile
+## How to add …
 
-1. Create `src/profiles/<id>.ts` exporting a `TargetProfile` (id, http
-   strategy, json strategy, `allowedClasses`).
-2. Register it in `src/profiles/registry.ts` (`PROFILES`, `ALL_PROFILES`).
-3. Add the id to `TargetProfileId` in `src/profiles/types.ts`.
-4. If the profile needs a new runtime, add
-   `src/runtime/<profile>/{http,url,json}.abap.ts` + an `index.ts`
-   exporting `get<Profile>Runtime(): CloudRuntime`.
-5. Teach `generate.ts` to pick the right runtime (today it short-circuits
-   on `target !== 's4-cloud'` — replace that with a dispatcher).
-6. Update `cli.ts` — `parseTarget()` already accepts all three ids, but
-   verify the error paths.
-7. Add a parse-check test: generate a small spec against the new profile
-   and feed the source through `@abaplint/core`.
+### A new JSON-Schema → ABAP mapping rule
 
-## Adding a new JSON-Schema → ABAP mapping rule
+1. Extend `src/types/map.ts` — keep it pure `JsonSchema → AbapTypeRef /
+AbapTypeDef`.
+2. If the new shape introduces a named type, allocate via the planner's
+   `NameAllocator` in `src/types/plan.ts`.
+3. If it may introduce a cycle, verify the back-edge path: the planner
+   emits `REF TO data` + `"! @openapi-ref` on back-edges. Add a fixture.
+4. Add a test in `tests/types-emit.test.ts` asserting both the AST shape
+   and the printed ABAP.
+5. Update the mapping table in `README.md`.
 
-1. Start in `src/types/map.ts`. `mapPrimitive()` for new primitive
-   `type`/`format` pairs; `mapSchemaToTypeRef()` / `mapSchemaToTypeDef()`
-   for composite shapes.
-2. If the new shape introduces a name (enum values, union branches, inline
-   objects), allocate it via the planner's `NameAllocator` in
-   `src/types/plan.ts`.
-3. Extend the unit tests in `tests/types-emit.test.ts` with:
-   - The happy-path mapping.
-   - An explicit `UnsupportedSchemaError` case if the shape has gaps.
-4. Update the type-mapping table in `README.md`.
+### A new target profile
 
-## Extending the operation emitter
+1. Create `src/profiles/<id>.ts` with a `TargetProfile` (id, HTTP
+   strategy, allowed kernel classes, ABAP language version).
+2. Register in `src/profiles/registry.ts`.
+3. Teach `generate.ts` to dispatch past the current `assertSupportedTarget`
+   short-circuit.
+4. The locals bundle in `src/emit/templates/` is shared; branch only if
+   the new profile needs a different kernel class (e.g. `cl_http_client`
+   for classic on-prem).
+5. Add a parse-check test.
 
-- New OpenAPI operation field → thread through `NormalizedOperation` in
-  `src/oas/types.ts` and `normalizeSpec()` in `load.ts`.
-- New ABAP parameter / statement shape → extend the relevant module in
-  `src/emit/` (`parameters.ts`, `responses.ts`, `operation-body.ts`).
-- If the emitter needs a new ABAP construct, add it to `@abapify/abap-ast`
-  first (new node kind + printer), then consume it from the emitter —
-  never reach for string concatenation.
-- Any new kernel-class reference MUST be added to
-  `s4CloudProfile.allowedClasses` and covered by a test that asserts the
-  generated source still passes parse-check.
+### A new CLI flag
 
-## Testing
+1. Extend `RawCliOptions` + `buildCliRunOptions` in `src/cli.ts`.
+2. Thread through to `GenerateOptions` in `src/generate.ts` if it
+   affects emission.
+3. Add help text and a test in the CLI test suite.
 
-- Unit tests live under `tests/` (`oas`, `types-emit`, `emit`, `format`,
-  `profiles`, `runtime`) and use `vitest` with inline snapshots where the
-  snapshot itself is the spec.
-- **Parse-check expectation.** Any emitter that can affect the final
-  source MUST have at least one test that feeds the concatenated source
-  (`GenerateResult.source`) through `@abaplint/core` and asserts zero
-  fatal errors. This is our gate against generating invalid ABAP that
-  would only fail on a live SAP system.
-- The fixture-diff against `samples/petstore3-client/generated/**` is the
-  end-to-end regression check — regenerate and assert `git diff
---exit-code`.
+### A new ABAPDoc tag
 
-## End-to-end deploy note
+1. Decide which emitter attaches it
+   (`types-interface.ts` / `operations-interface.ts`).
+2. Emit via the `abapDoc` field on the relevant `@abapify/abap-ast`
+   factory — never splice raw `"! …` strings.
+3. Document the tag in `README.md` (Round-trip markers) and in this
+   AGENTS.md.
 
-When manually testing against a live BTP tenant:
+## Testing gates
 
-- Use a **user-writable package** (e.g. `ZMY_PACKAGE` in a tenant you
-  control). Do not target `$TMP` on BTP unless your role grants
-  `S_ABPLNGVS` for that language version — import will otherwise fail
-  with a language-version authorisation error.
-- The authoritative procedure lives at
-  [`samples/petstore3-client/e2e/README.md`](../../samples/petstore3-client/e2e/README.md).
-  Keep that README as the single source of truth; do not duplicate steps
-  here.
+Before a PR lands:
+
+```bash
+bunx nx run-many -t typecheck,test,build,lint -p abap-ast,openai-codegen
+```
+
+Plus the fixture-diff gate:
+
+```bash
+cd samples/petstore3-client && bun run generate
+git diff --exit-code samples/petstore3-client/generated
+```
+
+Any non-empty diff means a non-deterministic change slipped in.
+
+## Deploy recipe (BTP Steampunk)
+
+```bash
+bunx adt auth login
+bunx openai-codegen \
+  --input ./spec/openapi.json \
+  --out ./generated/abapgit \
+  --format abapgit \
+  --base petstore3
+bunx adt deploy --source ./generated/abapgit --package ZMY_PACKAGE --activate --unlock
+```
+
+Use a **user-owned** Z package (for example `ZMY_PACKAGE`, `ZPEPL`).
+`$TMP` on BTP often fails with HTTP 403 because `S_ABPLNGVS` is granted
+per package. The authoritative walk-through lives in
+[`samples/petstore3-client/e2e/README.md`](../../samples/petstore3-client/e2e/README.md).
 
 ## Build commands
 

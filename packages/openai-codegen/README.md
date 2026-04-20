@@ -1,115 +1,271 @@
 # @abapify/openai-codegen
 
 **Deterministic OpenAPI → ABAP client code generator.** Reads an OpenAPI
-3.x spec and emits a single zero-runtime-dependency ABAP class per spec,
-packaged as abapGit or gCTS for deployment to SAP BTP / Steampunk or any
-other ABAP system.
+3.x spec and emits three global ABAP interfaces, one global exception
+class, and one thin implementation class bundled with a small set of
+local helper classes. The result targets SAP BTP / Steampunk
+(`s4-cloud`) out of the box and has **zero Z-dependencies** — the
+bundled locals wrap kernel APIs (`cl_web_http_client_manager`,
+`cl_http_destination_provider`, `/ui2/cl_json`, `cl_abap_conv_codepage`,
+…) only.
 
 Re-running the generator with the same inputs produces byte-identical
-output — generated artefacts are safe to commit and diff.
+output. Generated artifacts are safe to commit and diff.
 
-## Features
-
-- **One class per spec.** All operations become `METHODS`; all schemas
-  become `TYPES` in the same class.
-- **Zero ABAP dependencies.** The emitted class carries an inline HTTP +
-  JSON + URL runtime — no `/ui2/cl_json`, no `xco_cp_json`, nothing
-  outside the `s4-cloud` kernel whitelist.
-- **Typed.** Full JSON Schema 2020-12 subset (primitives, objects, arrays,
-  enums, `$ref`, `allOf`, `oneOf`/`anyOf` with discriminator, `nullable`,
-  `additionalProperties`).
-- **Security.** `apiKey`, `http bearer`, `http basic` emitted inline. `oauth2`
-  / `openIdConnect` exposed via an overridable `ON_AUTHORIZE` hook.
-- **Two packaging layouts.** `abapgit` or `gcts` (or both at once).
-- **CLI + library.** Ship it in a build step or drive it from code.
-
-## Installation
+## Install
 
 ```bash
 bun add -D @abapify/openai-codegen
+bunx openai-codegen --help
 ```
 
-## CLI usage
+## Quick start
 
 ```bash
 bunx openai-codegen \
   --input ./petstore3.json \
-  --out ./out \
-  --target s4-cloud \
+  --out ./out/abapgit \
+  --base petstore3 \
   --format abapgit \
-  --class-name ZCL_PETSTORE3_CLIENT \
-  --type-prefix ps3 \
+  --target s4-cloud \
   --description "Petstore v3 client"
 ```
 
-The `--format` flag accepts a comma-separated list (`abapgit,gcts`) to
-produce both layouts in one invocation; each lands in its own
-`<out>/<format>/…` subdirectory.
+With the default `abapgit` layout this writes **11 files**:
 
-| Flag                | Required | Notes                                                           |
-| ------------------- | -------- | --------------------------------------------------------------- |
-| `-i, --input`       | yes      | Path or URL to the OpenAPI spec (JSON or YAML).                 |
-| `-o, --out`         | yes      | Output directory.                                               |
-| `-t, --target`      | no       | `s4-cloud` (default, only profile implemented in v1).           |
-| `-f, --format`      | no       | `abapgit` (default), `gcts`, or `abapgit,gcts`.                 |
-| `-c, --class-name`  | yes      | Uppercase ABAP class name, e.g. `ZCL_MY_CLIENT`.                |
-| `-p, --type-prefix` | yes      | Lower-case ABAP type prefix (no `ty_`, no trailing underscore). |
-| `-d, --description` | no       | Used in the generated `.clas.xml` `DESCRIPT` field.             |
+```text
+out/abapgit/
+├── package.devc.xml
+└── src/
+    ├── zif_petstore3_types.intf.abap         # Layer 1 — TYPES interface
+    ├── zif_petstore3_types.intf.xml
+    ├── zif_petstore3.intf.abap               # Layer 2 — operations interface
+    ├── zif_petstore3.intf.xml
+    ├── zcx_petstore3_error.clas.abap         # global exception class
+    ├── zcx_petstore3_error.clas.xml
+    ├── zcl_petstore3.clas.abap               # Layer 3 — thin implementation
+    ├── zcl_petstore3.clas.xml
+    ├── zcl_petstore3.clas.locals_def.abap    # bundled helper locals
+    └── zcl_petstore3.clas.locals_imp.abap
+```
+
+## Architecture
+
+```text
+ZIF_<BASE>_TYPES   ── all schemas as ABAP TYPES (+ @openapi-schema markers)
+        ▲
+        │
+ZIF_<BASE>         ── all operations as typed METHODS (+ @openapi-operation markers)
+        │                                             ── RAISING ZCX_<BASE>_ERROR
+        │
+ZCL_<BASE>         ── implements ZIF_<BASE>
+                      one private attribute: client TYPE REF TO lcl_http
+                      each method body = fetch(...) + CASE response->status( )
+                      ─────────────────────────────────────────────
+                      local classes (same .clas file, locals_def/imp):
+                        lcl_http          (HTTP transport)
+                        lcl_response      (status / body / headers)
+                        json              (stringify / render / parse)
+                        lcl_json_parser   (internal JSON parser)
+
+ZCX_<BASE>_ERROR   ── inherits cx_static_check
+                      carries status / description / body / headers
+```
+
+The implementation class is deliberately minimal:
+
+- exactly one private attribute (`client`),
+- no private helper methods besides `constructor`,
+- each operation method is **one `fetch` call** followed by a `CASE`
+  block that decodes the success branch via `json=>parse( ... )->to( … )`
+  and raises `ZCX_<BASE>_ERROR` for every other status.
+
+Schema `TYPES` intentionally live on their own **interface** — not on
+the class. ABAP's unified component namespace for types / attributes /
+methods on a class would otherwise force awkward name mangling; putting
+types on `ZIF_<BASE>_TYPES` keeps the main class and the operations
+interface collision-free.
+
+## Generated API surface
+
+### Layer 1 — types interface (`zif_petstore3_types.intf.abap`)
+
+```abap
+"! Generated types for ZCL_PETSTORE3.
+INTERFACE ZIF_PETSTORE3_TYPES PUBLIC.
+  "! @openapi-schema Category
+  TYPES: BEGIN OF category,
+    id   TYPE int8,
+    name TYPE string,
+  END OF category.
+  "! @openapi-schema Pet
+  TYPES: BEGIN OF pet,
+    id         TYPE int8,
+    name       TYPE string,
+    category   TYPE category,
+    photo_urls TYPE STANDARD TABLE OF string WITH EMPTY KEY,
+    tags       TYPE STANDARD TABLE OF tag WITH EMPTY KEY,
+    status     TYPE string,
+  END OF pet.
+ENDINTERFACE.
+```
+
+### Layer 2 — operations interface (`zif_petstore3.intf.abap`)
+
+```abap
+INTERFACE zif_petstore3 PUBLIC.
+  "! @openapi-operation addPet
+  "! @openapi-path POST /pet
+  "! Add a new pet to the store.
+  METHODS add_pet
+    IMPORTING body TYPE zif_petstore3_types=>pet
+    RETURNING VALUE(pet) TYPE zif_petstore3_types=>pet
+    RAISING zcx_petstore3_error.
+  "! @openapi-operation getPetById
+  "! @openapi-path GET /pet/{petId}
+  "! Find pet by ID.
+  METHODS get_pet_by_id
+    IMPORTING pet_id TYPE int8
+    RETURNING VALUE(pet) TYPE zif_petstore3_types=>pet
+    RAISING zcx_petstore3_error.
+ENDINTERFACE.
+```
+
+### Layer 3 — implementation class (`zcl_petstore3.clas.abap`)
+
+```abap
+CLASS ZCL_PETSTORE3 DEFINITION PUBLIC CREATE PUBLIC.
+  INTERFACES zif_petstore3.
+  PUBLIC SECTION.
+    METHODS constructor
+      IMPORTING
+        destination TYPE string
+        server TYPE string DEFAULT '/api/v3'.
+  PRIVATE SECTION.
+    DATA client TYPE REF TO lcl_http.
+ENDCLASS.
+
+CLASS ZCL_PETSTORE3 IMPLEMENTATION.
+  METHOD constructor.
+    client = NEW lcl_http( destination = destination server = server ).
+  ENDMETHOD.
+
+  METHOD zif_petstore3~add_pet.
+    DATA(response) = client->fetch(
+      method  = 'POST'
+      path    = '/pet'
+      body    = json=>stringify( body )
+      headers = VALUE #( ( name = 'Content-Type' value = 'application/json' ) ) ).
+    CASE response->status( ).
+      WHEN 200.
+        json=>parse( response->body( ) )->to( REF #( pet ) ).
+      WHEN 400.
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = 400
+          description = 'Invalid input'
+          body        = response->body( ) ).
+      WHEN OTHERS.
+        RAISE EXCEPTION NEW zcx_petstore3_error(
+          status      = response->status( )
+          description = 'Unexpected error'
+          body        = response->body( ) ).
+    ENDCASE.
+  ENDMETHOD.
+ENDCLASS.
+```
+
+### Bundled locals (`zcl_petstore3.clas.locals_def.abap` / `locals_imp.abap`)
+
+The local classes expose a small, stable API that is **transport-only**
+for HTTP and **typed-by-reference** for JSON:
+
+```abap
+" Transport (HTTP): lcl_http / lcl_response
+DATA(response) = client->fetch(
+  method  = 'GET'
+  path    = '/pet/123'
+  query   = VALUE #( ( name = 'detail' value = 'full' ) )
+  headers = VALUE #( ( name = 'Accept' value = 'application/json' ) ) ).
+response->status( ).     " -> i
+response->body( ).       " -> xstring
+response->text( ).       " -> string (decoded)
+response->header( 'etag' ).
+response->headers( ).
+
+" JSON: json helper (mirrors abapify/json)
+DATA(payload) = json=>stringify( pet ).       " string
+DATA(raw)     = json=>render( pet ).          " xstring
+json=>parse( response->body( ) )->to( REF #( pet ) ).
+```
+
+`lcl_http->fetch` is deliberately ignorant of JSON, status codes, and
+operation identities. All policy lives in the per-operation method body
+in `ZCL_<BASE>`. The JSON API surface mirrors
+[`abapify/json`](https://github.com/abapify) and wraps `/ui2/cl_json` +
+`cl_abap_conv_codepage`.
+
+## Configuration
+
+All four global names and all four local names are configurable. The
+simplest path is to provide `--base`; every name then derives from it.
+Any individual override wins.
+
+| CLI flag                        | Library field (`NamesConfig`) | Default                                 |
+| ------------------------------- | ----------------------------- | --------------------------------------- |
+| `--base <name>`                 | `base`                        | _required unless all 4 overrides given_ |
+| `--types-interface <name>`      | `typesInterface`              | `ZIF_<BASE>_TYPES`                      |
+| `--operations-interface <name>` | `operationsInterface`         | `ZIF_<BASE>`                            |
+| `--class-name <name>`           | `implementationClass`         | `ZCL_<BASE>`                            |
+| `--exception-class <name>`      | `exceptionClass`              | `ZCX_<BASE>_ERROR`                      |
+| _(library only)_                | `localHttpClass`              | `lcl_http`                              |
+| _(library only)_                | `localResponseClass`          | `lcl_response`                          |
+| _(library only)_                | `localJsonClass`              | `json`                                  |
+| _(library only)_                | `localJsonParserClass`        | `lcl_json_parser`                       |
+
+Other flags:
+
+| Flag                      | Purpose                                                          |
+| ------------------------- | ---------------------------------------------------------------- |
+| `-i, --input <path>`      | Path / URL / file for the OpenAPI spec (JSON or YAML). Required. |
+| `-o, --out <dir>`         | Output directory. Required.                                      |
+| `-f, --format <list>`     | `abapgit` (default), `gcts`, or `abapgit,gcts`.                  |
+| `-t, --target <profile>`  | Target profile (`s4-cloud` only, default).                       |
+| `-d, --description <txt>` | Description stored in the generated `.clas.xml` / `.intf.xml`.   |
 
 ## Library usage
 
-```typescript
+```ts
 import { generate } from '@abapify/openai-codegen';
 
 const result = await generate({
   input: './petstore3.json',
   outDir: './out/abapgit',
-  target: 's4-cloud',
   format: 'abapgit',
-  className: 'ZCL_PETSTORE3_CLIENT',
-  typePrefix: 'ps3',
+  target: 's4-cloud',
+  names: { base: 'petstore3' },
   description: 'Petstore v3 client',
 });
 
-console.log(result.files); // written file paths (sorted, deduped)
+console.log(result.files); // sorted, deduped relative paths
 console.log(result.typeCount, result.operationCount);
+console.log(result.resolvedNames);
 ```
-
-`result.source` is the full concatenated ABAP source (main class +
-generated `ZCX_*_ERROR` exception class), useful for parse-checking with
-`@abaplint/core`.
 
 ## Pipeline
 
+```text
+OpenAPI spec
+  → loadSpec           ($ref-deref via @apidevtools/swagger-parser)
+  → planTypes          (topological sort of schemas + cycle detection)
+  → resolveNames       (NamesConfig → ResolvedNames; validates ABAP idents)
+  → emitTypesInterface      (Layer 1 — ZIF_<BASE>_TYPES AST)
+  → emitOperationsInterface (Layer 2 — ZIF_<BASE> AST)
+  → emitExceptionClass      (ZCX_<BASE>_ERROR AST)
+  → emitImplementationClass (Layer 3 — ZCL_<BASE> AST)
+  → emitLocalClasses        (locals_def + locals_imp templates)
+  → print               (four AST → ABAP source, via @abapify/abap-ast)
+  → writeClientBundle   (abapgit or gcts on-disk tree + envelopes)
 ```
-OpenAPI spec (JSON/YAML, file or URL)
-   │
-   ▼ oas/       load + $ref-dereference via @apidevtools/swagger-parser
-NormalizedSpec
-   │
-   ▼ types/    plan types (topological, deduped, prefixed)
-TypePlan (TypeDef[] in topological order)
-   │
-   ▼ emit/     per-operation METHOD, importing/returning/raising,
-   │          security support, server constants, exception class
-ClassDef + LocalClassDef[]  (pure @abapify/abap-ast AST)
-   │
-   ▼ print()   from @abapify/abap-ast (deterministic, configurable)
-ABAP source (string)
-   │
-   ▼ inject inline HTTP/URL/JSON runtime at section boundaries
-   │       + strip line-only comments
-Final ABAP source
-   │
-   ▼ format/   write abapGit or gCTS layout (xml/json envelopes)
-On-disk artefacts
-```
-
-The AST is the **only** source of ABAP structure, with one controlled
-exception: the inline runtime is injected as pre-formatted strings at the
-`PRIVATE SECTION` and `IMPLEMENTATION` boundaries (see `generate.ts`
-`injectRuntime`). That trade-off is explained in detail in
-[`AGENTS.md`](AGENTS.md).
 
 ## Type mapping
 
@@ -123,88 +279,67 @@ exception: the inline runtime is injected as pre-formatted strings at the
 | `string, format: date-time`               | `timestampl`                                                |
 | `string, format: uuid`                    | `sysuuid_x16`                                               |
 | `string, format: byte` / `binary`         | `xstring`                                                   |
-| `array`                                   | `STANDARD TABLE OF <rowType> WITH DEFAULT KEY`              |
-| `object` (properties)                     | `TYPES: BEGIN OF ty_<name> … END OF ty_<name>.`             |
-| `object` with `additionalProperties` only | key/value table (`ty_<name>_entry` rows with `key`/`value`) |
-| `enum`                                    | `TYPES: BEGIN OF ENUM ty_<name> BASE TYPE … END OF ENUM.`   |
-| `$ref`                                    | `NamedTypeRef` into the existing plan entry.                |
-| `allOf`                                   | Flattened into one structure (INCLUDE-style merge).         |
-| `oneOf` / `anyOf` with `discriminator`    | Tagged union struct carrying the discriminator field.       |
-| `oneOf` / `anyOf` without discriminator   | `string` payload + structured comment (escape hatch).       |
-| `nullable: true`                          | Same ABAP type — nullability handled at (de)serialisation.  |
+| `array of X`                              | `STANDARD TABLE OF <X> WITH EMPTY KEY`                      |
+| `object` (properties)                     | `BEGIN OF <name> … END OF <name>.`                          |
+| `object` with `additionalProperties` only | `_map` table of `BEGIN OF entry, key, value, END OF entry`  |
+| `enum`                                    | Field typed as base scalar; values documented via ABAPDoc.  |
+| `allOf`                                   | Flattened into one structure.                               |
+| `oneOf` / `anyOf`                         | Union merge — fields from every branch, optional semantics. |
+| `$ref` (forward)                          | `NamedTypeRef` into the existing plan entry.                |
+| `$ref` (back-edge — cyclic)               | `REF TO data` with `"! @openapi-ref <field>:<Target>`.      |
+| `nullable: true`                          | Same ABAP type (nullability preserved at (de)serialise).    |
 
-Unknown or unsupported combinations surface as `UnsupportedSchemaError`
-(from `src/types/errors.ts`) so the build fails loudly rather than
-producing silent wrong output.
+Types are emitted in semantic topological order. Back-edges introduced
+by cyclic schemas are broken with a `REF TO data` plus a structured
+`@openapi-ref` marker, so a future reader can reconstruct the original
+reference target.
 
-## Target profiles
+## Round-trip markers
 
-| Profile id         | Status      | Runtime                                                            |
-| ------------------ | ----------- | ------------------------------------------------------------------ |
-| `s4-cloud`         | implemented | `if_web_http_client` + `cl_http_destination_provider`, inline JSON |
-| `s4-onprem-modern` | declared    | `if_web_http_client` + `/ui2/cl_json` (not emitted in v1)          |
-| `on-prem-classic`  | declared    | `if_http_client` + `/ui2/cl_json` (not emitted in v1)              |
+Every generated ABAP declaration carries an ABAPDoc block that a
+downstream tool (for example a future `.aclass` parser) can use to
+rebuild the originating OpenAPI shape:
 
-The `s4-cloud` profile whitelists only kernel classes available on the
-Steampunk allow-list: `cl_web_http_client_manager`,
-`cl_http_destination_provider`, `if_web_http_client`, `if_web_http_request`,
-`if_web_http_response`, `cl_http_utility`, `cl_system_uuid`,
-`cl_abap_char_utilities`, `cl_abap_conv_codepage`, `cl_abap_codepage`,
-`cl_abap_conv_out_ce`, `cl_abap_conv_in_ce`. Any emission that tries to
-reference a class outside this set raises `WhitelistViolationError`.
+| Marker                                | Attached to         | Meaning                                              |
+| ------------------------------------- | ------------------- | ---------------------------------------------------- |
+| `"! @openapi-schema <Name>`           | `TYPES` declaration | Original JSON-Schema component name.                 |
+| `"! @openapi-operation <operationId>` | `METHODS`           | Original OpenAPI `operationId`.                      |
+| `"! @openapi-path <VERB> <path>`      | `METHODS`           | HTTP verb + templated path.                          |
+| `"! @openapi-ref <field>:<Target>`    | `TYPES` field       | Field broken to `REF TO data` references `<Target>`. |
 
-## Output layout
+Markers are plain lines under the printer's ABAPDoc rules; they are
+never rewritten or wrapped.
 
-### abapGit (`--format abapgit`)
+## Deploying to BTP Steampunk
 
-```
-<outDir>/
-  package.devc.xml
-  src/
-    <class>.clas.abap
-    <class>.clas.xml
-    <class>_error.clas.abap      # ZCX_<CLASS>_ERROR global class
-    <class>_error.clas.xml
-```
+Short recipe (see
+[`samples/petstore3-client/e2e/README.md`](../../samples/petstore3-client/e2e/README.md)
+for the authoritative walk-through):
 
-### gCTS (`--format gcts`)
-
-```
-<outDir>/
-  CLAS/
-    <class>/
-      <class>.clas.abap
-      <class>.clas.json
-    <class>_error/
-      <class>_error.clas.abap
-      <class>_error.clas.json
+```bash
+bunx adt auth login
+bunx openai-codegen \
+  --input ./spec/openapi.json \
+  --out ./generated/abapgit \
+  --format abapgit \
+  --base petstore3
+bunx adt deploy --source ./generated/abapgit --package ZMY_PACKAGE --activate --unlock
 ```
 
-Both layouts carry `ABAP_LANGUAGE_VERSION=5` (Cloud) in the metadata
-envelope.
+`S_ABPLNGVS` is granted per package on BTP. Deploy into a user-owned
+`Z*` package (for example `ZMY_PACKAGE` or `ZPEPL`); targeting `$TMP`
+often returns HTTP 403 on BTP.
 
-## Live-deploy note
+## Not yet supported
 
-The authoritative end-to-end write-up lives in
-[`samples/petstore3-client/e2e/README.md`](../../samples/petstore3-client/e2e/README.md).
-It covers spinning up a writable ABAP package on `<your-btp-tenant>`,
-importing the generated abapGit layout via `adt-cli`, running the smoke
-snippet, and executing the generated ABAP Unit test class. Do **not**
-target `$TMP` on BTP unless your role grants `S_ABPLNGVS` for it — use a
-tenant package such as `ZMY_PACKAGE` instead.
-
-## Out of scope (v1)
-
-- Per-type dedicated serialiser / deserialiser method bodies (v1 uses a
-  single reflective JSON runtime).
-- On-prem runtimes (`s4-onprem-modern`, `on-prem-classic` emission).
-- OpenAPI webhooks.
-- OpenAPI callbacks.
-- Full OAuth2 client-credentials / authorization-code flows (only the
-  `ON_AUTHORIZE` hook is emitted).
-- Streaming / Server-Sent Events responses.
-- `.aclass` DSL parser (will live in `@abapify/abap-ast` once the parser
-  layer lands).
+- OpenAPI webhooks and callbacks.
+- Server-Sent Events / streaming responses.
+- Full OAuth2 `authorization_code` / `client_credentials` flows
+  (`apiKey`, `http bearer`, `http basic` are emitted; `oauth2` exposes
+  an overridable hook only).
+- `.aclass` DSL parser — tracked in `@abapify/abap-ast`.
+- Per-target runtime bundles beyond `s4-cloud` (profile slots exist for
+  `s4-onprem-modern` and `on-prem-classic`; only `s4-cloud` emits in v1).
 
 ## License
 

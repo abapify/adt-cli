@@ -1,8 +1,8 @@
-# Tasks — `add-openai-codegen`
+# Tasks — `add-openai-codegen` (v2)
 
 Waves reflect subagent parallelism. Each task lists the package(s) it touches so waves don't collide.
 
-## Wave 0 — scaffold (sequential, done by lead)
+## Wave 0 — scaffold (sequential, lead)
 
 - [x] Create `packages/abap-ast` skeleton (package.json, tsconfig, tsdown, vitest, eslint, `src/index.ts`).
 - [x] Create `packages/openai-codegen` skeleton (same template + CLI entry).
@@ -11,38 +11,34 @@ Waves reflect subagent parallelism. Each task lists the package(s) it touches so
 - [x] Create this OpenSpec change document.
 - [x] Feature branch `feat/openai-codegen-abap` off `main`.
 
-## Wave 1 — foundations (parallel subagents)
+## Wave 1 — foundations + Layer-1/2 emitters (7 parallel subagents)
 
-- [ ] **abap-ast #1** — node types + factories: `ClassDef`, `InterfaceDef`, `TypeDef`, `TypeRef`, `Section`, `MethodDef`, `MethodParam`, `DataDecl`, `Statement` (assignment / call / raise / if / loop / try / return), `Expr` (literal / identifier / call / binop), `Comment`. Package `packages/abap-ast/src/nodes/`.
-- [ ] **openai-codegen #1** — OAS loader & normalizer: wrap `@apidevtools/swagger-parser`, dereference, hoist path-level parameters into operations, collect 2xx / 4xx-5xx response buckets, normalize media types. `packages/openai-codegen/src/oas/`.
-- [ ] **openai-codegen #2** — target profiles & class whitelist for `s4-cloud` only (others are type stubs with `TODO`). `packages/openai-codegen/src/profiles/`.
+- [x] **abap-ast #ABAPDoc** — extend declaration nodes (`TypeDef`, `MethodDef`, `AttributeDef`, `InterfaceDef`, `ClassDef`) with an optional `readonly abapDoc: readonly string[]` field; teach the printer to emit each line verbatim with a `"! ` prefix at the declaration's indentation. Snapshot tests for every shape.
+- [x] **openai-codegen #naming** — `NamesConfig` type, defaults (`ZIF_<base>_TYPES`, `ZIF_<base>`, `ZCX_<base>_ERROR`, `ZCL_<base>`, locals `json`/`lcl_http`/`lcl_response`/`lcl_json_parser`), CLI flag wiring (`--types-interface`, `--operations-interface`, `--exception-class`, `--implementation-class`, `--local-http-class`, `--local-response-class`, `--local-json-parser-class`, `--local-json-class`), validation + collision detection.
+- [x] **openai-codegen #types-intf** — Layer-1 emitter: OpenAPI schemas → `InterfaceDef` with `TYPES:` entries, topological ordering, `"! @openapi-schema <OriginalName>` on every entry, `"! @openapi-ref` on `$ref`-derived fields.
+- [x] **openai-codegen #ops-intf** — Layer-2 emitter: operations → `InterfaceDef` with `METHODS:` per op, typed via Layer 1, `"! @openapi-operation` + `"! @openapi-path VERB /path` on every method.
+- [x] **openai-codegen #exception** — `ZCX_<base>_ERROR` emitter: standard exception class carrying `status`, `body`, `operation_id` attributes + constructor.
+- [x] **openai-codegen #locals** — `zcl_<base>.clas.locals_def.abap` + `zcl_<base>.clas.locals_imp.abap` templates for `json`, `lcl_http`, `lcl_response`, `lcl_json_parser`. Names injected via `NamesConfig`. `lcl_http->fetch` signature mirrors `abapify/fetch`; `json=>` API mirrors `abapify/json`.
+- [x] **openai-codegen #response-mapper** — helper that, given an operation's `responses`, produces the AST fragments for the `CASE response->status( )` block (typed returns + `ZCX_<base>_ERROR RAISE`).
 
-## Wave 2 — emitters (parallel, depend on Wave 1)
+## Wave 2 — Layer-3 + pipeline (3 parallel subagents)
 
-- [ ] **abap-ast #2** — pretty-printer + snapshot tests for every node kind in `tests/printer.test.ts`. Deterministic: 2-space indent, UPPER keywords, stable ordering within sections.
-- [ ] **openai-codegen #3** — type planner + emitter: JSON Schema → `TypeDef` AST (primitives, array, object, enum, `$ref`, `allOf` flatten, `oneOf`/`anyOf` with discriminator, nullable-as-flag). Includes stable-id allocator (≤30 chars + hash suffix). Tests: mapping matrix per schema shape.
-- [ ] **openai-codegen #4** — inline JSON runtime: ABAP fragments (tokenizer + type-specific ser/de) emitted into the class for `s4-cloud`. Stored as plain `.abap` templates under `src/runtime/s4-cloud/` and assembled by the emitter.
+- [x] **openai-codegen #impl** — Layer-3 emitter: `ZCL_<base>` with one private `client TYPE REF TO lcl_http` attribute, a constructor, and one method per operation whose body is `client->fetch( … )` + `CASE response->status( ) … ENDCASE` (delegating to #response-mapper). Zero references to per-operation types inside `lcl_http`.
+- [x] **openai-codegen #format** — `format/index.ts` `InterfaceArtifact`/`ClassArtifact`/`DevcArtifact` model + `writeClientBundle(dir, artifacts)` that writes the 11-file abapGit layout; `<ABAP_LANGUAGE_VERSION>5</ABAP_LANGUAGE_VERSION>` in every VSEOCLASS/VSEOINTERF for Steampunk compatibility.
+- [x] **openai-codegen #generate** — `generate.ts` pipeline wiring (`oas → naming → emit/types-interface → emit/operations-interface → emit/exception-class → emit/implementation-class → emit/local-classes → format/writeClientBundle`) + `cli.ts` flag plumbing + deterministic-output assertion.
 
-## Wave 3 — integration (parallel)
+## Wave 3 — sample, docs, openspec refresh (3 parallel subagents)
 
-- [ ] **openai-codegen #5** — operation emitter: operationId → `MethodDef`; parameter serialization per `style`/`explode`; request body; response routing (typed 2xx return, `RAISING ZCX_…_ERROR` for 4xx/5xx); local exception class.
-- [ ] **openai-codegen #6** — security schemes: `apiKey`, `http bearer`, `http basic` auto-injection; constructor wiring; OAuth2 `ON_AUTHORIZE` hook stub.
-- [ ] **openai-codegen #7** — CLI (`commander`): `openai-codegen --input --out --target --format --class-name --type-prefix`; deterministic stdout; non-zero exit on spec validation errors.
-- [ ] **openai-codegen #8** — format plugins: emit abapGit layout (`.clas.abap` + `.clas.xml` + devc manifest) and gCTS layout. No new runtime deps required — only TS emission of package layouts.
+- [x] **sample** — regenerate `samples/petstore3-client/generated/abapgit/` (11 files); hand-write AUnit test class; update `samples/petstore3-client/e2e/README.md` with the live BTP Steampunk workflow (`adt-cli deploy … --package <user-owned Z pkg>` then `adt aunit`).
+- [ ] **docs** — update `packages/abap-ast/README.md`, `packages/openai-codegen/README.md`, their `AGENTS.md` files, the website page, and the `.agents/rules/` / skill entry for openai-codegen.
+- [ ] **openspec** — this task: rewrite proposal/tasks/spec for v2 + extend `abap-ast` spec with the ABAPDoc requirement.
 
-## Wave 4 — E2E on live TRL (sequential, single agent)
-
-- [ ] Generate `samples/petstore3-client/generated/{abapgit,gcts}`; commit results.
-- [ ] `bunx adt deploy samples/petstore3-client/generated/abapgit --package $TMP --system TRL`.
-- [ ] Smoke: `bunx adt abap run samples/petstore3-client/e2e/smoke.abap` — instantiate the generated client, call `GET /pet/findByStatus`, print first pet name.
-- [ ] Deploy ABAP Unit test class `ZCL_PETSTORE3_CLIENT_TESTS` (hand-written, hits a live path and asserts shape).
-- [ ] `bunx adt aunit zcl_petstore3_client_tests` — must pass with 0 failures.
-- [ ] Regression: `bunx nx test abap-ast openai-codegen` green; `git diff samples/petstore3-client/generated/` empty after re-running `bun run generate`.
-
-## Wave 5 — verification & PR
+## Wave 4 — verification + PR (sequential, lead)
 
 - [ ] `bunx nx run-many -t build,test,typecheck,lint -p abap-ast,openai-codegen`
 - [ ] `bunx nx format:write`
+- [ ] Abaplint parse check against `samples/petstore3-client/generated/abapgit/` (0 fatal errors).
+- [ ] `git diff samples/petstore3-client/generated/` empty after re-running `bun run generate`.
+- [ ] Live deploy to BTP Steampunk via `adt-cli deploy … --package <user-owned Z pkg>` and `adt aunit` green.
 - [ ] Update root `AGENTS.md` dependency graph.
-- [ ] `AGENTS.md` per package (abap-ast, openai-codegen) with conventions.
-- [ ] Commit waves as separate commits; push feature branch; open PR with summary + test plan + generated-artifact diff stats.
+- [ ] Commit waves as separate commits; push feature branch; open/update PR with summary + test plan + generated-artifact diff stats.
