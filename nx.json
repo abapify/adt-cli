@@ -33,6 +33,7 @@
     },
     { "plugin": "./tools/nx-tsdown/src/index.ts" },
     { "plugin": "./tools/nx-vitest/src/index.ts" },
+    { "plugin": "./tools/nx-npm-access/src/index.ts" },
     { "plugin": "@nx/vite/plugin", "exclude": ["**/*"] },
     { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
     {

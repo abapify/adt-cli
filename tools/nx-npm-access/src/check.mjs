@@ -1,0 +1,186 @@
+#!/usr/bin/env node
+// tools/nx-npm-access/src/check.mjs
+//
+// Validates that a single @abapify/* package (located in $cwd) is ready to be
+// published from CI. Run per-package via Nx (`nx run <pkg>:npm-check`) or for
+// all publishable packages at once (`nx run-many -t npm-check`).
+//
+// Checks performed (all read-only, no network writes):
+//   1. package.json hygiene — name, version, publishConfig.access, exports.
+//   2. Does the package exist on npm? (new packages report "first publish").
+//   3. `npm access get status` — current public/private visibility on npm.
+//   4. `npm access list collaborators` — who can publish (incl. bot account
+//      used by GitHub Actions when OIDC is not in play).
+//   5. Trusted publisher hint — prints a ready-to-click settings URL where
+//      the OIDC trusted publisher for this package can be verified. npm has
+//      no stable CLI for listing trusted publishers yet (as of npm 11).
+//
+// The script exits with code 0 when the package is "ready to publish from
+// CI", 1 otherwise. Errors are printed to stderr; the structured report is
+// emitted to stdout as a single JSON line, prefixed with a human summary.
+//
+// Registry handling: to avoid the repo-level `.npmrc` pinning
+// `@abapify:registry=https://npm.pkg.github.com/`, the script passes
+// `--<scope>:registry=<registry>` on every npm invocation.
+
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+
+const args = process.argv.slice(2);
+const getFlag = (name, def) => {
+  const hit = args.find((a) => a.startsWith(`--${name}=`));
+  return hit ? hit.slice(name.length + 3) : def;
+};
+const registry = getFlag('registry', 'https://registry.npmjs.org/');
+const quiet = args.includes('--quiet');
+
+const pkgPath = join(process.cwd(), 'package.json');
+if (!existsSync(pkgPath)) {
+  console.error(`[npm-check] no package.json in ${process.cwd()}`);
+  process.exit(2);
+}
+const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+
+if (pkg.private) {
+  if (!quiet) console.log(`[skip] ${pkg.name ?? '<no-name>'} is private`);
+  process.exit(0);
+}
+
+const name = pkg.name;
+const scope = name?.startsWith('@') ? name.split('/')[0] : null;
+const scopeFlag = scope ? [`--${scope}:registry=${registry}`] : [];
+
+/**
+ * Run an npm subcommand. We deliberately do NOT inherit the repo `.npmrc` —
+ * instead we pass registry overrides explicitly. Auth-free commands are
+ * preferred (`view`); anything that requires login is still called but
+ * failure is reported as "needs auth" rather than blocking.
+ */
+function npm(cmdArgs) {
+  const result = spawnSync(
+    'npm',
+    [...cmdArgs, `--registry=${registry}`, ...scopeFlag, '--json'],
+    {
+      encoding: 'utf-8',
+      // Individual npm calls are short-lived; if the network (or corporate
+      // proxy) hangs, fail fast instead of wedging the whole `nx run-many`.
+      timeout: 20_000,
+    },
+  );
+  let parsed = null;
+  if (result.stdout) {
+    try {
+      parsed = JSON.parse(result.stdout);
+    } catch {
+      parsed = result.stdout.trim();
+    }
+  }
+  return {
+    code: result.status ?? -1,
+    timedOut: result.signal === 'SIGTERM' || result.error?.code === 'ETIMEDOUT',
+    stdout: result.stdout,
+    stderr: result.stderr,
+    json: parsed,
+  };
+}
+
+const report = {
+  name,
+  version: pkg.version,
+  access: pkg.publishConfig?.access ?? null,
+  registry,
+  scope,
+  checks: {},
+  readyForCi: false,
+  problems: [],
+};
+
+// 1. package.json hygiene
+if (!name) report.problems.push('package.json: missing "name"');
+if (!pkg.version) report.problems.push('package.json: missing "version"');
+if (!pkg.publishConfig || pkg.publishConfig.access !== 'public') {
+  report.problems.push(
+    'package.json: publishConfig.access should be "public" (scoped packages default to restricted on npm; CI publishes would 402 Payment Required)',
+  );
+}
+if (pkg.files === undefined) {
+  report.problems.push(
+    'package.json: "files" not declared — publish will include everything (incl. node_modules, dist build artefacts, tests). Add a narrow allowlist (e.g. ["dist", "README.md"]).',
+  );
+}
+
+// 2. Does it exist on npm?
+const view = npm(['view', name]);
+if (view.code === 0 && view.json && typeof view.json === 'object') {
+  report.checks.exists = true;
+  report.checks.latestVersion = view.json.version;
+  report.checks.maintainers = view.json.maintainers ?? [];
+  report.checks.distTags = view.json['dist-tags'] ?? {};
+} else if (view.stderr?.includes('E404') || view.json?.error?.code === 'E404') {
+  report.checks.exists = false;
+} else if (view.timedOut) {
+  report.checks.exists = 'unknown';
+  report.problems.push(
+    `npm view timed out after 20s — registry ${registry} unreachable from this host`,
+  );
+} else {
+  report.checks.exists = 'unknown';
+  report.problems.push(
+    `npm view failed unexpectedly: ${view.stderr?.split('\n')[0] ?? 'no stderr'}`,
+  );
+}
+
+// 3. access status (only meaningful if published)
+if (report.checks.exists === true) {
+  const status = npm(['access', 'get', 'status', name]);
+  if (status.code === 0) {
+    report.checks.accessStatus = status.json ?? status.stdout.trim();
+  } else {
+    report.checks.accessStatus = `ERR: ${status.stderr?.split('\n')[0] ?? status.code}`;
+  }
+
+  // 4. collaborators
+  const collabs = npm(['access', 'list', 'collaborators', name]);
+  if (collabs.code === 0) {
+    report.checks.collaborators = collabs.json ?? collabs.stdout.trim();
+  } else {
+    report.checks.collaborators = `ERR: ${collabs.stderr?.split('\n')[0] ?? collabs.code}`;
+  }
+}
+
+// 5. trusted publisher hint (npm has no stable CLI for listing these yet)
+if (name?.startsWith('@')) {
+  const [s, p] = name.slice(1).split('/');
+  report.checks.trustedPublisherSettingsUrl = `https://www.npmjs.com/settings/${s}/packages?q=${p}`;
+  report.checks.trustedPublisherPackageUrl = `https://www.npmjs.com/package/${name}/access`;
+} else {
+  report.checks.trustedPublisherPackageUrl = `https://www.npmjs.com/package/${name}/access`;
+}
+
+// Decide overall readiness
+const hasPublishConfig = pkg.publishConfig?.access === 'public';
+const existsOrNew =
+  report.checks.exists === true || report.checks.exists === false;
+report.readyForCi = hasPublishConfig && existsOrNew && name && pkg.version;
+
+// Human summary
+const symbol = report.readyForCi ? '✓' : '✗';
+const existsTag =
+  report.checks.exists === true
+    ? `on npm @ ${report.checks.latestVersion}`
+    : report.checks.exists === false
+      ? 'NOT on npm — first publish'
+      : 'npm state unknown';
+const problemsSummary =
+  report.problems.length > 0
+    ? `\n  problems:\n    - ${report.problems.join('\n    - ')}`
+    : '';
+
+console.log(
+  `${symbol} ${name}@${pkg.version} (${existsTag})${problemsSummary}`,
+);
+// Structured line for aggregation:
+console.log(`__NPM_CHECK_JSON__ ${JSON.stringify(report)}`);
+
+process.exit(report.readyForCi && report.problems.length === 0 ? 0 : 1);
