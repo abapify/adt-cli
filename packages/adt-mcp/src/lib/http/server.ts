@@ -121,7 +121,7 @@ function makeHostValidator(allowed: Set<string>): Middleware {
     // Strip port.
     const host = hostHeader.replace(/:\d+$/u, '').toLowerCase();
     if (!host || !allowed.has(host)) {
-      res.writeHead(421, { 'Content-Type': 'application/json' });
+      res.writeHead(403, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify({
           jsonrpc: '2.0',
@@ -277,6 +277,9 @@ export async function startHttpServer(
       }
 
       if (sessionId && transports.has(sessionId)) {
+        // Refresh the session's last-used timestamp so the TTL sweep
+        // doesn't evict an actively-used session between tool calls.
+        registry.touch(sessionId);
         const transport = transports.get(sessionId)!;
         await transport.handleRequest(req, res, body);
         return;

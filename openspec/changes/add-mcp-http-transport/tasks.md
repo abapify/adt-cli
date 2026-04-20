@@ -77,8 +77,8 @@ Parallelisable subagents; all touch `packages/adt-mcp` and
       `packages/adt-cli/AGENTS.md`).
 - [ ] **adt-mcp #changeset-tools** — new
       `src/lib/tools/sap-changeset.ts` exposing
-      `sap_begin_changeset`, `sap_add_to_changeset`,
-      `sap_commit_changeset`, `sap_rollback_changeset`. Tools delegate
+      `changeset_begin`, `changeset_add`,
+      `changeset_commit`, `changeset_rollback`. Tools delegate
       to the CLI service — no business logic in the MCP package.
 - [ ] **adt-mcp #changeset-registry** — session-scoped changeset state
       stored on `McpSession.changeset`; rejects nested begins.

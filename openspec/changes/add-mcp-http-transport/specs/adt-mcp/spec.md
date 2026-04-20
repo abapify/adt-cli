@@ -168,16 +168,16 @@ YAML/JSON registry file.
 
 ### Requirement: Transactional changesets
 
-The server SHALL expose `sap_begin_changeset`,
-`sap_add_to_changeset`, `sap_commit_changeset`,
-`sap_rollback_changeset` tools, all of which SHALL delegate to the
+The server SHALL expose `changeset_begin`,
+`changeset_add`, `changeset_commit`,
+`changeset_rollback` tools, all of which SHALL delegate to the
 `ChangesetService` in `@abapify/adt-cli`. At most one changeset MAY be
 open per MCP session.
 
 #### Scenario: Commit applies all operations
 
 - **GIVEN** an open changeset with two `update` operations queued
-- **WHEN** the client calls `sap_commit_changeset`
+- **WHEN** the client calls `changeset_commit`
 - **THEN** the service applies both updates, activates the affected
   objects, releases every lock, and the session's changeset state
   returns to idle.
@@ -185,14 +185,14 @@ open per MCP session.
 #### Scenario: Rollback discards operations and releases locks
 
 - **GIVEN** an open changeset with one update queued and one lock held
-- **WHEN** the client calls `sap_rollback_changeset`
+- **WHEN** the client calls `changeset_rollback`
 - **THEN** no activation occurs, the lock is released, and the session's
   changeset state returns to idle.
 
 #### Scenario: Nested begin is rejected
 
 - **GIVEN** a session with an already open changeset
-- **WHEN** the client calls `sap_begin_changeset` again
+- **WHEN** the client calls `changeset_begin` again
 - **THEN** the tool returns an error without modifying the existing
   changeset.
 
@@ -209,5 +209,5 @@ results.
 
 - **WHEN** the parity suite runs
 - **THEN** it asserts that `adt changeset commit` and
-  `sap_commit_changeset` produce the same object-state diffs against
+  `changeset_commit` produce the same object-state diffs against
   the mock, and likewise for `rollback`.

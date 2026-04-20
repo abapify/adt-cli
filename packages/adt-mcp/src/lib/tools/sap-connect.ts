@@ -50,12 +50,18 @@ async function resolveAdtClient(
     };
   }
 
-  // Priority B: systemId via multi-system config.
+  // Priority B: systemId via multi-system config. The registry holds only
+  // connection metadata (baseUrl, client); credentials come from the tool
+  // call so secrets are never persisted to disk.
   if (args.systemId && ctx.resolveSystem) {
     const params = ctx.resolveSystem(args.systemId);
     if (params) {
       return {
-        client: ctx.getClient(params),
+        client: ctx.getClient({
+          ...params,
+          username: args.username,
+          password: args.password,
+        }),
         systemId: args.systemId,
         source: 'multi-system',
       };
@@ -89,6 +95,25 @@ export function registerSapConnectTool(
     sessionOrConnectionShape,
     async (args, extra) => {
       const mcpSessionId = extra?.sessionId;
+
+      // Reject ambiguous input up-front. baseUrl and systemId select
+      // different resolution paths; supplying both is most likely a
+      // copy-paste mistake and silently preferring baseUrl could
+      // connect the caller to the wrong target.
+      if (args.baseUrl && args.systemId) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text' as const,
+              text:
+                'sap_connect: `baseUrl` and `systemId` are mutually exclusive. ' +
+                'Supply exactly one — `baseUrl` for an explicit endpoint, ' +
+                '`systemId` to resolve from multi-system config or ~/.adt.',
+            },
+          ],
+        };
+      }
 
       if (!mcpSessionId) {
         return {

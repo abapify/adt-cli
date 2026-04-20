@@ -232,11 +232,11 @@ activations occur.
 ### State machine
 
 ```
-  idle ──sap_begin_changeset──► open ──sap_add_to_changeset──► open
+  idle ──changeset_begin──► open ──changeset_add──► open
                                   │                              │
-                                  ├──sap_rollback_changeset──► closed (discarded)
+                                  ├──changeset_rollback──► closed (discarded)
                                   │
-                                  └──sap_commit_changeset────► closed (committed)
+                                  └──changeset_commit────► closed (committed)
 ```
 
 Only **one** changeset may be open per MCP session. Nested changesets

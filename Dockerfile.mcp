@@ -89,4 +89,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 # Default CMD runs the Streamable HTTP entry-point. Override with
 # `docker run ... adt-mcp` to run the stdio transport instead.
-CMD ["node", "/app/packages/adt-mcp/dist/bin/adt-mcp-http.mjs", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["node", "/app/packages/adt-mcp/dist/bin/adt-mcp-http.mjs", "--host", "0.0.0.0"]

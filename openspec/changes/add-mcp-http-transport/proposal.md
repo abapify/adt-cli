@@ -52,7 +52,7 @@ Each HTTP MCP session owns:
   per user, so a leak is catastrophic).
 - An optional **active changeset** — a batch of pending ADT operations
   (activations, creates, updates) to be committed or rolled back
-  atomically via new `sap_commit_changeset` / `sap_rollback_changeset`
+  atomically via new `changeset_commit` / `changeset_rollback`
   tools.
 
 ### Two-layer authentication
@@ -76,15 +76,15 @@ MCP session.
 
 ### New tools
 
-| Tool                     | Purpose                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `sap_connect`            | Establish SAP session for this MCP session                      |
-| `sap_disconnect`         | Tear down SAP session early (also happens on MCP session close) |
-| `sap_list_systems`       | Enumerate configured systems (names only, no creds)             |
-| `sap_begin_changeset`    | Start a transactional batch in this session                     |
-| `sap_add_to_changeset`   | Add an operation (lock+update+activate) to the active batch     |
-| `sap_commit_changeset`   | Apply all operations, release all locks, close the changeset    |
-| `sap_rollback_changeset` | Discard pending operations, release all locks                   |
+| Tool                 | Purpose                                                         |
+| -------------------- | --------------------------------------------------------------- |
+| `sap_connect`        | Establish SAP session for this MCP session                      |
+| `sap_disconnect`     | Tear down SAP session early (also happens on MCP session close) |
+| `sap_list_systems`   | Enumerate configured systems (names only, no creds)             |
+| `changeset_begin`    | Start a transactional batch in this session                     |
+| `changeset_add`      | Add an operation (lock+update+activate) to the active batch     |
+| `changeset_commit`   | Apply all operations, release all locks, close the changeset    |
+| `changeset_rollback` | Discard pending operations, release all locks                   |
 
 All changeset logic lives in a new **`ChangesetService`** in
 `@abapify/adt-cli` so that the CLI ↔ MCP parity invariant holds

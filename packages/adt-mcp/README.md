@@ -105,12 +105,12 @@ Only available on the HTTP transport:
 
 Bundle multiple ADT writes into a single atomic unit:
 
-| Tool                 | Purpose                                                                          |
-| -------------------- | -------------------------------------------------------------------------------- |
-| `changeset_begin`    | Open a changeset; optionally acquire a transport.                                |
-| `changeset_add`      | Append an operation (`update_source`, `activate_object`, `create_object`, …).    |
-| `changeset_commit`   | Execute the batched operations in order, release locks, return per-step results. |
-| `changeset_rollback` | Discard the batch, release locks, restore the previous state where possible.     |
+| Tool                 | Purpose                                                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `changeset_begin`    | Open a transactional unit-of-work bound to the current MCP session (one at a time).                                          |
+| `changeset_add`      | Stage an object write — acquires a lock and PUTs the supplied source. Defers activate.                                       |
+| `changeset_commit`   | Batch-activate every staged object in a single call, then release all locks.                                                 |
+| `changeset_rollback` | Release every held lock and mark the changeset rolled back. Source PUTs are not reverted (SAP has no transactional discard). |
 
 See [`docs/deployment/mcp-http.md#transactional-changesets`](../../docs/deployment/mcp-http.md#transactional-changesets) for a worked example.
 
