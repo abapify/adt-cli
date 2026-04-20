@@ -261,10 +261,14 @@ describe('emitLocalClasses — snapshot (default names)', () => {
         ENDMETHOD.
 
         METHOD fetch.
+          " Prefix with the configured server base path when set,
+          " so OpenAPI specs with a non-root server still resolve correctly.
           DATA full_path TYPE string.
-          full_path = path.
+          full_path = COND string(
+            WHEN server IS INITIAL THEN path
+            ELSE |{ server }{ path }| ).
           IF query IS NOT INITIAL.
-            full_path = |{ path }?{ build_query_string( query ) }|.
+            full_path = |{ full_path }?{ build_query_string( query ) }|.
           ENDIF.
 
           DATA dest TYPE REF TO if_http_destination.
@@ -275,63 +279,70 @@ describe('emitLocalClasses — snapshot (default names)', () => {
           client = cl_web_http_client_manager=>create_by_http_destination(
             i_destination = dest ).
 
-          DATA request TYPE REF TO if_web_http_request.
-          request = client->get_http_request( ).
-          request->set_uri_path( i_uri_path = full_path ).
+          " All IO against client runs inside TRY ... CLEANUP so the HTTP
+          " connection is closed even when execute() / binary read / codepage
+          " conversion raise a kernel exception.
+          TRY.
+              DATA request TYPE REF TO if_web_http_request.
+              request = client->get_http_request( ).
+              request->set_uri_path( i_uri_path = full_path ).
 
-          DATA verb TYPE if_web_http_client=>method.
-          verb = SWITCH if_web_http_client=>method( method
-            WHEN 'GET'     THEN if_web_http_client=>get
-            WHEN 'POST'    THEN if_web_http_client=>post
-            WHEN 'PUT'     THEN if_web_http_client=>put
-            WHEN 'DELETE'  THEN if_web_http_client=>delete
-            WHEN 'PATCH'   THEN if_web_http_client=>patch
-            WHEN 'HEAD'    THEN if_web_http_client=>head
-            WHEN 'OPTIONS' THEN if_web_http_client=>options
-            ELSE if_web_http_client=>get ).
+              DATA verb TYPE if_web_http_client=>method.
+              verb = SWITCH if_web_http_client=>method( method
+                WHEN 'GET'     THEN if_web_http_client=>get
+                WHEN 'POST'    THEN if_web_http_client=>post
+                WHEN 'PUT'     THEN if_web_http_client=>put
+                WHEN 'DELETE'  THEN if_web_http_client=>delete
+                WHEN 'PATCH'   THEN if_web_http_client=>patch
+                WHEN 'HEAD'    THEN if_web_http_client=>head
+                WHEN 'OPTIONS' THEN if_web_http_client=>options
+                ELSE if_web_http_client=>get ).
 
-          LOOP AT headers ASSIGNING FIELD-SYMBOL(<h>).
-            request->set_header_field( i_name  = <h>-name
-                                       i_value = <h>-value ).
-          ENDLOOP.
+              LOOP AT headers ASSIGNING FIELD-SYMBOL(<h>).
+                request->set_header_field( i_name  = <h>-name
+                                           i_value = <h>-value ).
+              ENDLOOP.
 
-          IF binary IS NOT INITIAL.
-            request->set_binary( i_data = binary ).
-          ELSEIF body IS NOT INITIAL.
-            request->set_text( i_text = body ).
-          ENDIF.
+              IF binary IS NOT INITIAL.
+                request->set_binary( i_data = binary ).
+              ELSEIF body IS NOT INITIAL.
+                request->set_text( i_text = body ).
+              ENDIF.
 
-          DATA resp TYPE REF TO if_web_http_response.
-          resp = client->execute( i_method = verb ).
+              DATA resp TYPE REF TO if_web_http_response.
+              resp = client->execute( i_method = verb ).
 
-          DATA status_code TYPE i.
-          status_code = resp->get_status( )-code.
+              DATA status_code TYPE i.
+              status_code = resp->get_status( )-code.
 
-          DATA body_bytes TYPE xstring.
-          body_bytes = resp->get_binary( ).
+              DATA body_bytes TYPE xstring.
+              body_bytes = resp->get_binary( ).
 
-          DATA body_text TYPE string.
-          IF body_bytes IS NOT INITIAL.
-            body_text = cl_abap_conv_codepage=>create_in( )->convert(
-              source = body_bytes ).
-          ENDIF.
+              DATA body_text TYPE string.
+              IF body_bytes IS NOT INITIAL.
+                body_text = cl_abap_conv_codepage=>create_in( )->convert(
+                  source = body_bytes ).
+              ENDIF.
 
-          DATA raw_headers TYPE if_web_http_request=>name_value_pairs.
-          raw_headers = resp->get_header_fields( ).
+              DATA raw_headers TYPE if_web_http_request=>name_value_pairs.
+              raw_headers = resp->get_header_fields( ).
 
-          DATA header_list TYPE kvs.
-          LOOP AT raw_headers ASSIGNING FIELD-SYMBOL(<rh>).
-            APPEND VALUE #( name  = <rh>-name
-                            value = <rh>-value ) TO header_list.
-          ENDLOOP.
+              DATA header_list TYPE kvs.
+              LOOP AT raw_headers ASSIGNING FIELD-SYMBOL(<rh>).
+                APPEND VALUE #( name  = <rh>-name
+                                value = <rh>-value ) TO header_list.
+              ENDLOOP.
 
-          response = NEW lcl_response(
-            status_code = status_code
-            body_bytes  = body_bytes
-            body_text   = body_text
-            header_list = header_list ).
+              response = NEW lcl_response(
+                status_code = status_code
+                body_bytes  = body_bytes
+                body_text   = body_text
+                header_list = header_list ).
 
-          client->close( ).
+              client->close( ).
+            CLEANUP.
+              client->close( ).
+          ENDTRY.
         ENDMETHOD.
 
       ENDCLASS.

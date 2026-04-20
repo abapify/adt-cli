@@ -167,7 +167,7 @@ function buildOperationBody(
   const bodySchema = pickRequestBodySchema(op);
   const bodyIsBinary = isBinaryRequestBody(op, bodySchema);
 
-  const fetchSource = renderFetchCall(mapping, bodyIsBinary);
+  const fetchSource = renderFetchCall(mapping, bodyIsBinary, ctx.jsonLocal);
 
   const successBody = decideSuccessBody(op, mapping);
   const caseResult = mapResponseHandling(op, {
@@ -206,6 +206,7 @@ function buildOperationBody(
 function renderFetchCall(
   mapping: OperationMapping,
   bodyIsBinary: boolean,
+  jsonLocalClass: string,
 ): string {
   type Arg = { readonly key: string; readonly value: string };
   const args: Arg[] = [];
@@ -237,7 +238,10 @@ function renderFetchCall(
     if (bodyIsBinary) {
       args.push({ key: 'binary', value: 'body' });
     } else {
-      args.push({ key: 'body', value: 'json=>stringify( body )' });
+      args.push({
+        key: 'body',
+        value: `${jsonLocalClass}=>stringify( body )`,
+      });
       headerItems.push(`( name = 'Content-Type' value = 'application/json' )`);
     }
   }

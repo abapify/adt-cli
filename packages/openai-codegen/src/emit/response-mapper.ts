@@ -71,7 +71,11 @@ function pickSuccessStatus(
     return { statusCode: twoXX[0], whenLabel: twoXX[0] };
   }
   const def = responses.find((r) => r.statusCode === 'default');
-  if (def !== undefined) {
+  // Only treat `default` as the success branch when it is NOT marked as an
+  // error response. When it IS an error, fall through so the caller emits
+  // a synthetic generic success WHEN and lets the error-branch loop /
+  // OTHERS branch handle `default`.
+  if (def !== undefined && !def.isError) {
     return { statusCode: 'default', whenLabel: 'OTHERS' };
   }
   return undefined;
@@ -133,7 +137,13 @@ export function mapResponseHandling(
 
   const success = pickSuccessStatus(operation.responses);
 
-  if (success !== undefined) {
+  const successConsumedOthers =
+    success !== undefined && success.whenLabel === 'OTHERS';
+
+  // Emit the explicit success WHEN first unless `default` itself is the
+  // success (WHEN OTHERS), in which case we must defer it so it remains
+  // the *last* branch — ABAP forbids any WHEN after OTHERS.
+  if (success !== undefined && !successConsumedOthers) {
     lines.push(`  WHEN ${success.whenLabel}.`);
     lines.push(`    ${renderSuccessBody(opts)}`);
   }
@@ -148,14 +158,16 @@ export function mapResponseHandling(
     lines.push(...renderErrorBranch(resp.statusCode, resp.description, opts));
   }
 
-  // WHEN OTHERS handling:
-  //   - If the success branch already consumed 'default' (no 2xx), do not
-  //     emit another OTHERS branch — the success already covered it.
-  //   - Else, if 'default' is an error response, use its description.
-  //   - Else, emit a generic fallback with no description.
-  const successConsumedOthers =
-    success !== undefined && success.whenLabel === 'OTHERS';
-  if (!successConsumedOthers) {
+  // Final WHEN OTHERS:
+  //   - If `default` is the success (successConsumedOthers), emit it as
+  //     the terminal OTHERS branch now that all error WHENs are already
+  //     emitted.
+  //   - Else, emit a generic error fallback, using `default`'s description
+  //     when it exists and is an error.
+  if (successConsumedOthers) {
+    lines.push(`  WHEN OTHERS.`);
+    lines.push(`    ${renderSuccessBody(opts)}`);
+  } else {
     const defaultResp = operation.responses.find(
       (r) => r.statusCode === 'default',
     );
