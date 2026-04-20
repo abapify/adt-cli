@@ -13,17 +13,19 @@ publishing bootstrap with `--prepare`.
 bunx nx run-many -t npm-trust-check
 
 # Patch publishConfig, fix npm access status + MFA (requires npm login):
-bunx nx run-many -t npm-trust-check --args="--fix"
+bunx nx run-many -t npm-trust-check --fix
+bunx nx run adt-cli:npm-trust-check --fix --mfa=none
 
 # Bootstrap trusted publishing (0.0.0 placeholder + `npm trust github`):
-bunx nx run-many -t npm-trust-check --args="--prepare"
+bunx nx run-many -t npm-trust-check --prepare
 
 # Full lap on a single package:
-bunx nx run adt-cli:npm-trust-check --args="--fix --prepare"
+bunx nx run adt-cli:npm-trust-check --fix --prepare
 ```
 
-One target, opt-in behaviour via flags. Flags reach the script through
-`forwardAllArgs: true` + `nx --args="..."`.
+One target, opt-in behaviour via flags. `forwardAllArgs: true` on the
+underlying executor means any flag that Nx does not recognise is passed
+straight to the script — no `--args="..."` wrapping required.
 
 | flag                 | effect                                                                                     | needs npm auth? |
 | -------------------- | ------------------------------------------------------------------------------------------ | --------------- |
