@@ -16,7 +16,7 @@ bun run generate:abapgit  # abapGit only
 bun run generate:gcts     # gCTS only
 ```
 
-## Deploy & run (requires authenticated `adt-cli` session)
+## Deploy & run (requires an authenticated `adt-cli` session)
 
 ```bash
 # NOTE: on ABAP Cloud / Steampunk the service user typically cannot write

@@ -13,6 +13,7 @@
  *     CLAS/<name>/<name>.clas.abap
  *     CLAS/<name>/<name>.clas.testclasses.abap   (optional)
  *     CLAS/<name>/<name>.clas.locals_def.abap    (optional)
+ *     CLAS/<name>/<name>.clas.locals_imp.abap    (optional)
  *
  * The `CLAS/` object-type subdirectory mirrors the layout used by gCTS
  * repositories (objects grouped under their type code). See
@@ -138,6 +139,10 @@ function buildIntfJson(
           formatVersion: '1.0',
           description,
           originalLanguage: language,
+          // Mirrors the class-envelope rule: every gCTS metadata file
+          // carries `abapLanguageVersion: '5'` so BTP Steampunk imports
+          // don't default back to Standard ABAP.
+          abapLanguageVersion: '5',
         },
         interface: {
           name,

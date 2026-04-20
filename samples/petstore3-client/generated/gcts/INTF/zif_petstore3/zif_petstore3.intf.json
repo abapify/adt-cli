@@ -2,7 +2,8 @@
   "header": {
     "formatVersion": "1.0",
     "description": "Operations for ZCL_PETSTORE3",
-    "originalLanguage": "E"
+    "originalLanguage": "E",
+    "abapLanguageVersion": "5"
   },
   "interface": {
     "name": "ZIF_PETSTORE3",

@@ -66,6 +66,11 @@ export function call(input: {
   if (!input.method) {
     throw new AbapAstError('Call: required field "method" is missing');
   }
+  if (input.callKind !== 'static' && input.callKind !== 'instance') {
+    throw new AbapAstError(
+      'Call: required field "callKind" must be "static" or "instance"',
+    );
+  }
   if (input.callKind === 'instance' && !input.receiver) {
     throw new AbapAstError('Call: instance calls require a receiver');
   }
