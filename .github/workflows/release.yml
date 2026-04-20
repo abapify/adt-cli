@@ -110,6 +110,18 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
+      - name: Dispatch publish workflow
+        if: ${{ !inputs.dry_run && inputs.publish }}
+        # Can't rely on `push: tags:` auto-trigger in publish.yml — events
+        # caused by GITHUB_TOKEN pushes don't cascade to other workflows
+        # (GitHub Actions by design). Invoke publish.yml via workflow_dispatch
+        # so it runs with its own workflow_ref and our OIDC trusted
+        # publisher entries match.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run publish.yml --ref "${{ steps.get_tag.outputs.tag }}"
+
   # Note: npm publishing is NOT wired up as `workflow_call` here. When
   # `publish.yml` is invoked via `uses:`, the resulting OIDC token's
   # claims reflect the CALLER (release.yml), and npm's trusted publisher
