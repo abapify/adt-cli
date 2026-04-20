@@ -5,7 +5,7 @@
 // published from CI. Run per-package via Nx (`nx run <pkg>:npm-check`) or for
 // all publishable packages at once (`nx run-many -t npm-check`).
 //
-// Checks performed (all read-only, no network writes):
+// Checks performed (all read-only by default, no network writes):
 //   1. package.json hygiene — name, version, publishConfig.access, exports.
 //   2. Does the package exist on npm? (new packages report "first publish").
 //   3. `npm access get status` — current public/private visibility on npm.
@@ -15,6 +15,17 @@
 //      the OIDC trusted publisher for this package can be verified. npm has
 //      no stable CLI for listing trusted publishers yet (as of npm 11).
 //
+// With `--fix` the script also applies safe remediations:
+//   - patches `publishConfig.access = "public"` into package.json if missing;
+//   - runs `npm access set status=public <pkg>` on published packages whose
+//     remote visibility drifted to `private`;
+//   - runs `npm access set mfa=none <pkg>` (only if `--mfa=none` is passed)
+//     — required for OIDC trusted publishing without interactive 2FA.
+// Every mutation is logged to the structured report under `fixes`.
+//
+// Trusted publisher registration (OIDC) still has no CLI, so the script only
+// prints the UI link — it does NOT try to automate that step.
+//
 // The script exits with code 0 when the package is "ready to publish from
 // CI", 1 otherwise. Errors are printed to stderr; the structured report is
 // emitted to stdout as a single JSON line, prefixed with a human summary.
@@ -23,7 +34,7 @@
 // `@abapify:registry=https://npm.pkg.github.com/`, the script passes
 // `--<scope>:registry=<registry>` on every npm invocation.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -49,7 +60,9 @@ interface Report {
   access: string | null;
   registry: string;
   scope: string | null;
+  mode: 'check' | 'fix';
   checks: Record<string, unknown>;
+  fixes: string[];
   readyForCi: boolean;
   problems: string[];
 }
@@ -59,8 +72,14 @@ const getFlag = (name: string, def: string): string => {
   const hit = args.find((a) => a.startsWith(`--${name}=`));
   return hit ? hit.slice(name.length + 3) : def;
 };
+const hasFlag = (name: string): boolean => args.includes(`--${name}`);
+
 const registry = getFlag('registry', 'https://registry.npmjs.org/');
-const quiet = args.includes('--quiet');
+const quiet = hasFlag('quiet');
+const fix = hasFlag('fix');
+// Optional MFA setting applied only in fix mode. Useful before switching to
+// OIDC trusted publishing (`--mfa=none`). Omit to leave MFA untouched.
+const mfaTarget = getFlag('mfa', '');
 
 const pkgPath = join(process.cwd(), 'package.json');
 if (!existsSync(pkgPath)) {
@@ -126,20 +145,38 @@ const report: Report = {
   access: pkg.publishConfig?.access ?? null,
   registry,
   scope,
+  mode: fix ? 'fix' : 'check',
   checks: {},
+  fixes: [],
   readyForCi: false,
   problems: [],
 };
 
-// 1. package.json hygiene
+// 1. package.json hygiene — and patch in --fix mode.
 if (!name) report.problems.push('package.json: missing "name"');
 if (!pkg.version) report.problems.push('package.json: missing "version"');
-if (!pkg.publishConfig || pkg.publishConfig.access !== 'public') {
-  report.problems.push(
-    'package.json: publishConfig.access should be "public" (scoped packages default to restricted on npm; CI publishes would 402 Payment Required)',
-  );
+
+const needsPublishConfigFix =
+  !pkg.publishConfig || pkg.publishConfig.access !== 'public';
+if (needsPublishConfigFix) {
+  if (fix) {
+    const patched: Pkg = {
+      ...pkg,
+      publishConfig: { ...(pkg.publishConfig ?? {}), access: 'public' },
+    };
+    // Preserve trailing newline + 2-space indent to match the rest of the
+    // monorepo's package.json style (Prettier will normalise anyway).
+    writeFileSync(pkgPath, JSON.stringify(patched, null, 2) + '\n', 'utf-8');
+    report.fixes.push('package.json: set publishConfig.access = "public"');
+    report.access = 'public';
+  } else {
+    report.problems.push(
+      'package.json: publishConfig.access should be "public" (scoped packages default to restricted on npm; CI publishes would 402 Payment Required) — re-run with `--fix` to patch',
+    );
+  }
 }
 if (pkg.files === undefined) {
+  // Not auto-fixable: the correct files list is package-specific.
   report.problems.push(
     'package.json: "files" not declared — publish will include everything (incl. node_modules, dist build artefacts, tests). Add a narrow allowlist (e.g. ["dist", "README.md"]).',
   );
@@ -188,6 +225,41 @@ if (report.checks.exists === true && name) {
   } else {
     report.checks.collaborators = `ERR: ${collabs.stderr.split('\n')[0] ?? collabs.code}`;
   }
+
+  // --fix: flip visibility to public if npm reports it as private.
+  if (fix) {
+    const currentStatus =
+      typeof report.checks.accessStatus === 'object' &&
+      report.checks.accessStatus !== null
+        ? (report.checks.accessStatus as Record<string, string>)[name]
+        : typeof report.checks.accessStatus === 'string'
+          ? report.checks.accessStatus
+          : undefined;
+    if (currentStatus && currentStatus !== 'public') {
+      const setPub = npm(['access', 'set', 'status=public', name]);
+      if (setPub.code === 0) {
+        report.fixes.push(`npm access set status=public ${name}`);
+        report.checks.accessStatus = 'public';
+      } else {
+        report.problems.push(
+          `npm access set status=public failed: ${setPub.stderr.split('\n')[0] ?? 'no stderr'} — needs login (\`npm login\`) or OIDC env`,
+        );
+      }
+    }
+
+    // Optional: align MFA policy (e.g. `--mfa=none` for OIDC trusted pub).
+    if (mfaTarget) {
+      const setMfa = npm(['access', 'set', `mfa=${mfaTarget}`, name]);
+      if (setMfa.code === 0) {
+        report.fixes.push(`npm access set mfa=${mfaTarget} ${name}`);
+        report.checks.mfa = mfaTarget;
+      } else {
+        report.problems.push(
+          `npm access set mfa=${mfaTarget} failed: ${setMfa.stderr.split('\n')[0] ?? 'no stderr'}`,
+        );
+      }
+    }
+  }
 }
 
 // 5. trusted publisher hint (npm has no stable CLI for listing these yet)
@@ -215,13 +287,18 @@ const existsTag =
     : report.checks.exists === false
       ? 'NOT on npm — first publish'
       : 'npm state unknown';
+const fixesSummary =
+  report.fixes.length > 0
+    ? `\n  fixes applied:\n    + ${report.fixes.join('\n    + ')}`
+    : '';
 const problemsSummary =
   report.problems.length > 0
     ? `\n  problems:\n    - ${report.problems.join('\n    - ')}`
     : '';
 
+const modeTag = fix ? ' [fix]' : '';
 console.log(
-  `${symbol} ${name}@${pkg.version} (${existsTag})${problemsSummary}`,
+  `${symbol} ${name}@${pkg.version}${modeTag} (${existsTag})${fixesSummary}${problemsSummary}`,
 );
 // Structured line for aggregation:
 console.log(`__NPM_CHECK_JSON__ ${JSON.stringify(report)}`);

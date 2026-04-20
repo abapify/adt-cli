@@ -1,27 +1,48 @@
 # @abapify/nx-npm-access
 
-Internal Nx plugin that adds an `npm-check` target to every publishable
-`packages/*` workspace package. The target verifies that a package is
-ready to be published from CI before a release is attempted.
+Internal Nx plugin that registers two targets on every publishable
+`packages/*` workspace package:
+
+- `npm-check` — read-only readiness probe (`npm view`, `npm access get`).
+- `npm-fix` — safe auto-remediation (patches `package.json`, runs
+  `npm access set status=public`, optionally `npm access set mfa=...`).
 
 ## Usage
 
 ```bash
-# Check every publishable package at once:
+# Read-only — run this as a CI gate before `nx release publish`:
 bunx nx run-many -t npm-check
 
-# Check a single package:
-bunx nx run adt-cli:npm-check
+# Apply safe fixes across the whole workspace (requires `npm login` or an
+# authenticated OIDC context for the `npm access set` calls):
+bunx nx run-many -t npm-fix
 
-# Silence the success lines in CI, keep only problems:
-bunx nx run-many -t npm-check --parallel=8 --output-style=stream | \
-  grep -E '^(✗|  problems|__NPM_CHECK_JSON__)'
+# Target one package:
+bunx nx run adt-cli:npm-check
+bunx nx run adt-cli:npm-fix
+
+# Extra flags are forwarded through nx:
+bunx nx run adt-cli:npm-fix --args="--mfa=none"
 ```
 
-The target exits non-zero when a package has `publishConfig.access` missing,
-when `npm view` fails unexpectedly, or when required metadata (name,
-version) is absent. **First publish** (package not yet on npm) is NOT an
-error — it is reported as `NOT on npm — first publish`.
+`npm-check` exits non-zero when a package has `publishConfig.access`
+missing, when `npm view` fails unexpectedly, or when required metadata
+(name, version) is absent. **First publish** (package not yet on npm) is
+NOT an error — it is reported as `NOT on npm — first publish`.
+
+`npm-fix` does the same checks and additionally applies:
+
+1. **package.json patch** — sets `publishConfig.access = "public"` in
+   place when missing or wrong. Safe, offline, idempotent.
+2. **`npm access set status=public <pkg>`** — only for packages already
+   on npm whose remote visibility drifted to `private`.
+3. **`npm access set mfa=<target> <pkg>`** — only when `--mfa=<target>`
+   is passed (e.g. `--mfa=none` before switching a package to OIDC
+   trusted publishing).
+
+Trusted publisher (OIDC) registration is **not automated** — npm v11
+ships no CLI for it. The script prints a ready-to-click settings URL
+instead.
 
 ## What is actually checked
 
@@ -62,13 +83,14 @@ Registered in the root `nx.json` under `plugins`:
 ```
 
 The plugin's `createNodesV2` matches `packages/*/package.json`, reads each
-manifest, skips packages with `"private": true`, and attaches an
-`npm-check` target that invokes `src/check.ts` via `bun` (same runtime
-used everywhere else in the monorepo — no separate `.mjs` build step).
+manifest, skips packages with `"private": true`, and attaches both the
+`npm-check` and `npm-fix` targets. Both invoke `src/check.ts` via `bun`
+(same runtime used everywhere else in the monorepo — no build step).
 
 Options (all optional, set via `nx.json` plugin options):
 
-| option       | default                         | purpose                                    |
-| ------------ | ------------------------------- | ------------------------------------------ |
-| `targetName` | `"npm-check"`                   | Name of the target registered per package. |
-| `registry`   | `"https://registry.npmjs.org/"` | Registry probed by the script.             |
+| option            | default                         | purpose                                          |
+| ----------------- | ------------------------------- | ------------------------------------------------ |
+| `checkTargetName` | `"npm-check"`                   | Name of the read-only target registered per pkg. |
+| `fixTargetName`   | `"npm-fix"`                     | Name of the auto-remediating target.             |
+| `registry`        | `"https://registry.npmjs.org/"` | Registry probed by the script.                   |

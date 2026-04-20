@@ -4,10 +4,18 @@ import { existsSync, readFileSync } from 'node:fs';
 
 interface NxNpmAccessOptions {
   /**
-   * Target name registered on each publishable package.
+   * Target name registered on each publishable package for the read-only
+   * readiness check.
    * @default "npm-check"
    */
-  targetName?: string;
+  checkTargetName?: string;
+  /**
+   * Target name registered on each publishable package for the
+   * auto-remediating fix (patches `publishConfig.access` locally and runs
+   * `npm access set` remotely).
+   * @default "npm-fix"
+   */
+  fixTargetName?: string;
   /**
    * npm registry used for access probes. Defaults to the public registry.
    * The script also overrides scope-level registry pins via
@@ -47,10 +55,13 @@ function shouldSkipPath(projectRoot: string): boolean {
 export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
   '**/package.json',
   (configFiles, options = {}) => {
-    const targetName = options.targetName ?? 'npm-check';
+    const checkTargetName = options.checkTargetName ?? 'npm-check';
+    const fixTargetName = options.fixTargetName ?? 'npm-fix';
     const registry = options.registry ?? 'https://registry.npmjs.org/';
 
     const scriptPath = join(__dirname, 'check.ts');
+    const scriptArg = JSON.stringify(scriptPath);
+    const baseCmd = `bun ${scriptArg} --registry=${registry}`;
 
     return configFiles
       .map((configFile) => {
@@ -83,19 +94,21 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
           return null;
         }
 
-        log(`register ${targetName} for ${pkg.name}`);
+        log(`register ${checkTargetName} + ${fixTargetName} for ${pkg.name}`);
 
-        const target = {
+        // Shared shape: cwd + no arg forwarding, no cache (network-dependent).
+        const makeTarget = (extraArg: string | null) => ({
           executor: 'nx:run-commands' as const,
           options: {
-            command: `bun ${JSON.stringify(scriptPath)} --registry=${registry}`,
+            command: extraArg ? `${baseCmd} ${extraArg}` : baseCmd,
             cwd: projectRoot,
-            // Prevents nx from swallowing stderr from npm.
-            forwardAllArgs: false,
+            // Prevents nx from swallowing stderr from npm, and lets the user
+            // pass extra flags (e.g. `--args="--mfa=none"`) through nx.
+            forwardAllArgs: true,
           },
           cache: false,
           inputs: [`{projectRoot}/package.json`],
-        };
+        });
 
         return [
           configFile,
@@ -103,7 +116,8 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
             projects: {
               [projectRoot]: {
                 targets: {
-                  [targetName]: target,
+                  [checkTargetName]: makeTarget(null),
+                  [fixTargetName]: makeTarget('--fix'),
                 },
               },
             },
