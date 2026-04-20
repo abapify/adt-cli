@@ -78,10 +78,7 @@ interface Report {
   checks: Record<string, unknown>;
   fixes: string[];
   readyForCi: boolean;
-  /** Blocking issues — cause non-zero exit. */
   problems: string[];
-  /** Non-blocking advisories — shown in the log, do not affect exit code. */
-  warnings: string[];
 }
 
 const args = process.argv.slice(2);
@@ -174,34 +171,47 @@ const report: Report = {
   fixes: [],
   readyForCi: false,
   problems: [],
-  warnings: [],
 };
 
-// 1. package.json hygiene — and patch in --fix mode.
+// 1. package.json hygiene — with --fix, mutate the manifest in-place and
+// flush a single write at the end. Each issue either becomes a fix (if
+// `--fix` is on and it is auto-fixable) or a blocking problem otherwise.
 if (!name) report.problems.push('missing "name"');
 if (!pkg.version) report.problems.push('missing "version"');
 
-const needsPublishConfigFix =
-  !pkg.publishConfig || pkg.publishConfig.access !== 'public';
-if (needsPublishConfigFix) {
+let manifestDirty = false;
+const draft: Pkg = { ...pkg };
+
+// publishConfig.access must be "public" for scoped packages.
+if (!draft.publishConfig || draft.publishConfig.access !== 'public') {
   if (fix) {
-    const patched: Pkg = {
-      ...pkg,
-      publishConfig: { ...(pkg.publishConfig ?? {}), access: 'public' },
-    };
-    // Preserve trailing newline + 2-space indent to match the rest of the
-    // monorepo's package.json style (Prettier will normalise anyway).
-    writeFileSync(pkgPath, JSON.stringify(patched, null, 2) + '\n', 'utf-8');
+    draft.publishConfig = { ...(draft.publishConfig ?? {}), access: 'public' };
     report.fixes.push('set publishConfig.access=public');
     report.access = 'public';
+    manifestDirty = true;
   } else {
     report.problems.push('publishConfig.access missing (run with --fix)');
   }
 }
-if (pkg.files === undefined) {
-  // Advisory only: publish still works, but the tarball will include src/,
-  // tests/, etc. Fixing this requires human judgement per package.
-  report.warnings.push('no "files" allowlist');
+
+// `files` allowlist — default to `["dist", "README.md"]`, which matches
+// every other package in the monorepo (tsdown emits to dist/, README lives
+// at the package root). Without this, the npm tarball leaks src/, tests/,
+// node_modules/, etc.
+if (draft.files === undefined) {
+  if (fix) {
+    draft.files = ['dist', 'README.md'];
+    report.fixes.push('set files=["dist","README.md"]');
+    manifestDirty = true;
+  } else {
+    report.problems.push('no "files" allowlist (run with --fix)');
+  }
+}
+
+if (manifestDirty) {
+  // Preserve trailing newline + 2-space indent to match the rest of the
+  // monorepo's package.json style (Prettier will normalise anyway).
+  writeFileSync(pkgPath, JSON.stringify(draft, null, 2) + '\n', 'utf-8');
 }
 
 // 2. Does it exist on npm?
@@ -420,7 +430,7 @@ report.readyForCi = Boolean(
 
 // Human summary
 const hasProblems = report.problems.length > 0;
-const symbol = hasProblems ? '✗' : report.warnings.length > 0 ? '!' : '✓';
+const symbol = hasProblems ? '✗' : '✓';
 const existsTag =
   report.checks.exists === true
     ? `on npm @ ${report.checks.latestVersion as string}`
@@ -429,8 +439,6 @@ const existsTag =
       : 'state unknown';
 const fixesSummary =
   report.fixes.length > 0 ? `  + ${report.fixes.join(', ')}` : '';
-const warningsSummary =
-  report.warnings.length > 0 ? `  ~ ${report.warnings.join(', ')}` : '';
 const problemsSummary =
   report.problems.length > 0 ? `  ! ${report.problems.join(', ')}` : '';
 
@@ -438,7 +446,6 @@ const modeTag = prepare ? ' [prepare]' : fix ? ' [fix]' : '';
 const parts = [
   `${symbol} ${name}@${pkg.version}${modeTag} — ${existsTag}`,
   fixesSummary,
-  warningsSummary,
   problemsSummary,
 ].filter(Boolean);
 console.log(parts.join('\n'));
@@ -448,6 +455,6 @@ if (verbose) {
   console.log(`__NPM_CHECK_JSON__ ${JSON.stringify(report)}`);
 }
 
-// Exit non-zero only on blocking problems. Warnings (e.g. missing `files`
-// allowlist) are advisory — the package can still be published from CI.
+// Exit code reflects the *final* state after any fixes were applied: a
+// problem that was successfully auto-fixed no longer counts against it.
 process.exit(hasProblems ? 1 : 0);
