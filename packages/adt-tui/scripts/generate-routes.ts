@@ -73,7 +73,21 @@ function pathToRoute(filePath: string): RouteInfo | null {
   //   - `([^/]+)` in the regex
   // All other literal characters are escaped one-by-one.
   const REGEX_SPECIALS = new Set([
-    '.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\', '/',
+    '.',
+    '*',
+    '+',
+    '?',
+    '^',
+    '$',
+    '{',
+    '}',
+    '(',
+    ')',
+    '|',
+    '[',
+    ']',
+    '\\',
+    '/',
   ]);
   const escapeChar = (c: string): string =>
     REGEX_SPECIALS.has(c) ? '\\' + c : c;

@@ -63,8 +63,14 @@ describe('parity: flp', () => {
       {},
     );
     expect(mcp.isError).toBe(false);
-    expect(mcp.json.map((c) => c.id).sort((a, b) => String(a ?? '').localeCompare(String(b ?? '')))).toEqual(
-      cliList!.map((c) => c.id).sort((a, b) => String(a ?? '').localeCompare(String(b ?? ''))),
+    expect(
+      mcp.json
+        .map((c) => c.id)
+        .sort((a, b) => String(a ?? '').localeCompare(String(b ?? ''))),
+    ).toEqual(
+      cliList!
+        .map((c) => c.id)
+        .sort((a, b) => String(a ?? '').localeCompare(String(b ?? ''))),
     );
   });
 
@@ -97,8 +103,14 @@ describe('parity: flp', () => {
       {},
     );
     expect(mcp.isError).toBe(false);
-    expect(mcp.json.map((t) => t.id).sort((a, b) => String(a ?? '').localeCompare(String(b ?? '')))).toEqual(
-      cliList!.map((t) => t.id).sort((a, b) => String(a ?? '').localeCompare(String(b ?? ''))),
+    expect(
+      mcp.json
+        .map((t) => t.id)
+        .sort((a, b) => String(a ?? '').localeCompare(String(b ?? ''))),
+    ).toEqual(
+      cliList!
+        .map((t) => t.id)
+        .sort((a, b) => String(a ?? '').localeCompare(String(b ?? ''))),
     );
   });
 

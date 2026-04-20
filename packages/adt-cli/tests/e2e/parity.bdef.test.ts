@@ -31,11 +31,7 @@ describe('CLI + MCP parity (bdef)', () => {
   });
 
   it('parity: read BDEF source', async () => {
-    const cli = await runCliCommand(harness, [
-      'bdef',
-      'read',
-      'ZBP_MOCK_BDEF',
-    ]);
+    const cli = await runCliCommand(harness, ['bdef', 'read', 'ZBP_MOCK_BDEF']);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
 
     const mcp = await callMcpTool(harness, 'get_bdef', {
@@ -113,7 +109,12 @@ describe('CLI + MCP parity (bdef)', () => {
   });
 
   it('parity: delete BDEF', async () => {
-    const cli = await runCliCommand(harness, ['bdef', 'delete', 'ZBP_NEW', '-y']);
+    const cli = await runCliCommand(harness, [
+      'bdef',
+      'delete',
+      'ZBP_NEW',
+      '-y',
+    ]);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
 
     const mcp = await callMcpTool(harness, 'delete_bdef', {

@@ -28,11 +28,7 @@ describe('CLI + MCP parity (srvb)', () => {
   });
 
   it('parity: read SRVB metadata', async () => {
-    const cli = await runCliCommand(harness, [
-      'srvb',
-      'read',
-      'ZUI_MOCK_SRVB',
-    ]);
+    const cli = await runCliCommand(harness, ['srvb', 'read', 'ZUI_MOCK_SRVB']);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
 
     const mcp = await callMcpTool(harness, 'get_srvb', {
@@ -120,7 +116,12 @@ describe('CLI + MCP parity (srvb)', () => {
   });
 
   it('parity: delete SRVB', async () => {
-    const cli = await runCliCommand(harness, ['srvb', 'delete', 'ZUI_NEW', '-y']);
+    const cli = await runCliCommand(harness, [
+      'srvb',
+      'delete',
+      'ZUI_NEW',
+      '-y',
+    ]);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
 
     const mcp = await callMcpTool(harness, 'delete_srvb', {

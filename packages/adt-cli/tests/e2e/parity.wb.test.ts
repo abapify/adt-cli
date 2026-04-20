@@ -126,7 +126,9 @@ describe('parity: wb (E15)', () => {
       '--json',
     ]);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
-    const cliPayload = extractJson<{ objectUri: string; callees: unknown }>(cli);
+    const cliPayload = extractJson<{ objectUri: string; callees: unknown }>(
+      cli,
+    );
     expect(cliPayload?.objectUri).toBe(EXPECTED_URI);
 
     const mcp = await callMcpTool<{ objectUri: string; callees: unknown }>(
@@ -154,10 +156,14 @@ describe('parity: wb (E15)', () => {
     const cliPayload = extractJson<{ uri?: string }>(cli);
     expect(cliPayload?.uri).toBe(EXPECTED_URI);
 
-    const mcp = await callMcpTool<{ uri?: string }>(harness, 'find_definition', {
-      objectName: OBJECT_NAME,
-      objectType: OBJECT_TYPE,
-    });
+    const mcp = await callMcpTool<{ uri?: string }>(
+      harness,
+      'find_definition',
+      {
+        objectName: OBJECT_NAME,
+        objectType: OBJECT_TYPE,
+      },
+    );
     expect(mcp.isError).toBe(false);
 
     // Both paths resolve the same target URI (via search); the top-level
@@ -179,11 +185,10 @@ describe('parity: wb (E15)', () => {
     const cliPayload = extractJson<unknown>(cli);
     expect(cliPayload).toBeDefined();
 
-    const mcp = await callMcpTool<unknown>(
-      harness,
-      'get_object_structure',
-      { objectName: OBJECT_NAME, objectType: OBJECT_TYPE },
-    );
+    const mcp = await callMcpTool<unknown>(harness, 'get_object_structure', {
+      objectName: OBJECT_NAME,
+      objectType: OBJECT_TYPE,
+    });
     expect(mcp.isError).toBe(false);
     expect(JSON.stringify(cliPayload)).toBe(JSON.stringify(mcp.json));
   });

@@ -66,14 +66,10 @@ describe('CLI + MCP parity (E13 rfc)', () => {
       '--param',
       'REQUTEXT=hello',
     ]);
-    const mcp = await callMcpTool<{ ECHOTEXT: string }>(
-      harness,
-      'call_rfc',
-      {
-        functionModule: 'STFC_CONNECTION',
-        parameters: { REQUTEXT: 'hello' },
-      },
-    );
+    const mcp = await callMcpTool<{ ECHOTEXT: string }>(harness, 'call_rfc', {
+      functionModule: 'STFC_CONNECTION',
+      parameters: { REQUTEXT: 'hello' },
+    });
     expect(cli.exitCode).toBe(0);
     expect(mcp.isError).toBe(false);
     expect(cli.stdout).toContain(`"ECHOTEXT": "${mcp.json.ECHOTEXT}"`);
