@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-aunit",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "ABAP Unit Test CLI plugin for adt-cli with JUnit XML output for GitLab CI",
   "license": "MIT",
   "publishConfig": {

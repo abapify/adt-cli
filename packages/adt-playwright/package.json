@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-playwright",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Playwright-based SSO authentication plugin for ADT client",
   "license": "MIT",
   "publishConfig": {

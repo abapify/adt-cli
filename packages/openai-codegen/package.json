@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Deterministic OpenAPI → ABAP client code generator. Emits a single zero-dependency ABAP class per OpenAPI spec, targeting SAP Cloud / on-prem profiles, packaged as abapGit or gCTS.",
   "type": "module",
   "types": "./dist/index.d.mts",

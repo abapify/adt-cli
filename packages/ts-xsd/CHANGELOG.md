@@ -1,3 +1,7 @@
+## 0.3.3 (2026-04-20)
+
+This was a version bump only for ts-xsd to align it with other projects, there were no code changes.
+
 ## 0.3.2 (2026-04-20)
 
 This was a version bump only for ts-xsd to align it with other projects, there were no code changes.

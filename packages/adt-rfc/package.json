@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "SAP RFC transport for @abapify — SOAP-over-HTTP RFC implementation (/sap/bc/soap/rfc)",
   "type": "module",
   "types": "./dist/index.d.mts",

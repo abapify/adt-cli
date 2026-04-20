@@ -1,3 +1,15 @@
+## 0.3.3 (2026-04-20)
+
+### 🩹 Fixes
+
+- **ci:** force npm as nx release publish driver (bun has no OIDC) ([434d80a5](https://github.com/abapify/adt-cli/commit/434d80a5))
+- **ci:** set cli.packageManager=npm + bump npm for OIDC publishing ([#1](https://github.com/abapify/adt-cli/issues/1))
+- **ci:** revert global nx.json cli.packageManager, keep job-local override ([1c75c732](https://github.com/abapify/adt-cli/commit/1c75c732))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+
 ## 0.3.2 (2026-04-20)
 
 ### 🚀 Features
