@@ -138,6 +138,7 @@ const mcpTools = [
 
 const sdkPackages = [
   'sdk/packages/overview',
+  'sdk/packages/abap-ast',
   'sdk/packages/acds',
   'sdk/packages/adk',
   'sdk/packages/adt-atc',
@@ -165,6 +166,7 @@ const sdkPackages = [
   'sdk/packages/asjson-parser',
   'sdk/packages/browser-auth',
   'sdk/packages/logger',
+  'sdk/packages/openai-codegen',
   'sdk/packages/speci',
   'sdk/packages/ts-xsd',
 ];
