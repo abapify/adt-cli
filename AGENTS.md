@@ -54,7 +54,7 @@ abap-ast    (zero deps, typed AST + printer for ABAP source)
 openai-codegen ──► abap-ast                     (OpenAPI → ABAP client codegen)
 ```
 
-Foundation packages (no `@abapify` deps): `ts-xsd`, `speci`, `logger`, `acds`, `aclass`, `abap-ast`.
+Foundation packages (no `@abapify` deps): `ts-xsd`, `speci`, `logger`, `acds`.
 
 ## MCP ↔ CLI Coupling (intentional)
 
@@ -159,7 +159,6 @@ Each package has its own `AGENTS.md` with detailed conventions:
 - [`packages/abap-ast/AGENTS.md`](packages/abap-ast/AGENTS.md) — zero-dependency AST + deterministic printer for ABAP; foundation for code generation.
 - [`packages/adk/AGENTS.md`](packages/adk/AGENTS.md) — ABAP Development Kit, object CRUD, save/lock flow, ETag management
 - [`packages/acds/AGENTS.md`](packages/acds/AGENTS.md) — ABAP CDS parser, tokenizer, AST types
-- [`packages/aclass/AGENTS.md`](packages/aclass/AGENTS.md) — ABAP OO parser (CLAS/INTF), Chevrotain lexer + typed AST
 - [`packages/adt-cli/AGENTS.md`](packages/adt-cli/AGENTS.md) — CLI commands, service pattern, client initialization
 - [`packages/adt-client/AGENTS.md`](packages/adt-client/AGENTS.md) — Contract-driven REST client, schema conventions, type inference
 - [`packages/adt-contracts/AGENTS.md`](packages/adt-contracts/AGENTS.md) — Contract testing framework, schema integration
