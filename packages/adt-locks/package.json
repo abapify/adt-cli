@@ -11,5 +11,8 @@
   },
   "dependencies": {
     "@abapify/adt-client": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
