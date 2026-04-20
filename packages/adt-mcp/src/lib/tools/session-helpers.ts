@@ -47,11 +47,11 @@ export interface ResolvedClient {
  * Throws when none apply; callers should wrap with the standard
  * `{ isError: true, content: [...] }` response.
  */
-export function resolveClient(
+export async function resolveClient(
   ctx: ToolContext,
   args: LegacyConnectionArgs,
   extra: { sessionId?: string },
-): ResolvedClient {
+): Promise<ResolvedClient> {
   const mcpSessionId = extra.sessionId;
 
   // 1. Session-scoped (HTTP, after sap_connect)

@@ -141,9 +141,33 @@ export function registerSapConnectTool(
         };
       }
 
-      // Idempotent — already connected is a success.
+      // Idempotent when the caller re-requests the SAME system (or makes
+      // a bare re-connect with no target). Reject a mismatching systemId
+      // explicitly — silently binding the caller's PROD request to an
+      // already-open DEV session would risk writing to the wrong SAP.
+      // baseUrl-vs-systemId mismatch is harder to detect here since the
+      // SapSessionContext doesn't record baseUrl; relying on systemId is
+      // enough for the multi-system config case that motivates this rule.
       const existing = ctx.registry.get(mcpSessionId);
       if (existing) {
+        if (
+          args.systemId !== undefined &&
+          existing.systemId !== undefined &&
+          args.systemId !== existing.systemId
+        ) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text' as const,
+                text:
+                  `sap_connect: this MCP session is already bound to ` +
+                  `systemId=${existing.systemId}; refusing to rebind to ` +
+                  `${args.systemId}. Call sap_disconnect first, then reconnect.`,
+              },
+            ],
+          };
+        }
         return {
           content: [
             {
