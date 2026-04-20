@@ -35,6 +35,17 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Override @abapify scope registry for npmjs publishing
+        # The repo-level .npmrc pins @abapify:registry to GitHub Packages so
+        # consumers can install @abapify/* from GHP. During the npm publish job
+        # we instead target registry.npmjs.org (OIDC trusted publisher), so the
+        # scope override must be dropped before `nx release publish` runs —
+        # otherwise npm issues metadata GETs against GHP and fails with 401.
+        run: |
+          sed -i '/^@abapify:registry=/d' .npmrc
+          echo "--- effective .npmrc ---"
+          cat .npmrc
+
       - name: Publish packages
         run: npx nx release publish
         shell: bash
