@@ -1,0 +1,13 @@
+{
+  "name": "petstore3-client-sample",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Generated ABAP client for the Swagger Petstore v3 OpenAPI spec. Used as a fixture for @abapify/openai-codegen and as an end-to-end target deployed to a real SAP BTP (Steampunk) system via adt-cli.",
+  "type": "module",
+  "scripts": {
+    "generate": "openai-codegen --input ./spec/openapi.json --out ./generated --base petstore3 --format abapgit,gcts --description 'Generated Petstore v3 client'"
+  },
+  "dependencies": {
+    "@abapify/openai-codegen": "workspace:*"
+  }
+}

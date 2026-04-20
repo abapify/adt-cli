@@ -1,0 +1,17 @@
+{
+  "header": {
+    "formatVersion": "1.0",
+    "description": "ZCL_PETSTORE3",
+    "originalLanguage": "E",
+    "abapLanguageVersion": "5"
+  },
+  "class": {
+    "name": "ZCL_PETSTORE3",
+    "category": "00",
+    "visibility": "public",
+    "final": true,
+    "abstract": false,
+    "fixedPointArithmetic": true,
+    "unicodeChecksActive": true
+  }
+}

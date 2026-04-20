@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`emitTypesInterface snapshot (synthetic 3 schemas + array + map) > matches snapshot 1`] = `
+"INTERFACE ZIF_DEMO_TYPES PUBLIC.
+  "! @openapi-schema Tag
+  TYPES: BEGIN OF tag,
+    id   TYPE int8,
+    name TYPE string,
+  END OF tag.
+  "! @openapi-schema Pet
+  TYPES: BEGIN OF pet,
+    id   TYPE int8,
+    name TYPE string,
+    tags TYPE STANDARD TABLE OF tag WITH EMPTY KEY,
+  END OF pet.
+  "! @openapi-map-entry Dictionary
+  TYPES: BEGIN OF dictionary_map_entry,
+    key   TYPE string,
+    value TYPE string,
+  END OF dictionary_map_entry.
+  "! @openapi-map Dictionary
+  TYPES dictionary_map TYPE STANDARD TABLE OF dictionary_map_entry WITH DEFAULT KEY.
+  "! @openapi-schema Dictionary
+  TYPES: BEGIN OF dictionary,
+    entries TYPE dictionary_map,
+  END OF dictionary.
+ENDINTERFACE."
+`;
