@@ -5,7 +5,7 @@
       <VSEOCLASS>
         <CLSNAME>ZCX_PETSTORE3_ERROR</CLSNAME>
         <LANGU>E</LANGU>
-        <DESCRIPT>Generated Petstore v3 client</DESCRIPT>
+        <DESCRIPT>Error exception for ZCL_PETSTORE3</DESCRIPT>
         <STATE>1</STATE>
         <CLSCCINCL>X</CLSCCINCL>
         <FIXPT>X</FIXPT>

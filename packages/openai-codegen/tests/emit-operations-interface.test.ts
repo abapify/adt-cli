@@ -116,7 +116,7 @@ describe('emitOperationsInterface (Petstore v3)', () => {
     expect(typeName(ret!.typeRef)).toBe('zif_petstore_types=>pet');
   });
 
-  it('maps findPetsByStatus to a STANDARD TABLE RETURNING', async () => {
+  it('maps findPetsByStatus to a named table alias in the ops interface', async () => {
     const spec = await loadSpec(PETSTORE_PATH);
     const plan = planTypes(spec, { typePrefix: '' });
     const result = emitOperationsInterface(spec, plan, {
@@ -127,12 +127,12 @@ describe('emitOperationsInterface (Petstore v3)', () => {
     const m = methodByName(result, 'find_pets_by_status');
     const ret = m.params.find((p) => p.paramKind === 'returning');
     expect(ret!.name).toBe('pets');
-    // `WITH EMPTY KEY` is intentionally omitted from inline METHODS param
-    // types: abaplint rejects the key clause in that position. See the
-    // emitter for details.
-    expect(typeName(ret!.typeRef)).toBe(
-      'STANDARD TABLE OF zif_petstore_types=>pet',
-    );
+    // Array return types MUST be named aliases declared inside the ops
+    // interface — Steampunk rejects inline `STANDARD TABLE OF ...` in a
+    // METHODS parameter slot with "An error occured during the save
+    // operation". The alias lives at the head of the interface as a
+    // TypeDef: `TYPES pet_list TYPE STANDARD TABLE OF zif_petstore_types=>pet`.
+    expect(typeName(ret!.typeRef)).toBe('zif_petstore=>pet_list');
   });
 
   it('maps deletePet to RETURNING success TYPE abap_bool', async () => {

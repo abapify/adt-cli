@@ -22,8 +22,11 @@ import {
   methodDef,
   methodParam,
   namedTypeRef,
+  tableType,
+  typeDef,
   type InterfaceDef,
   type MethodParam,
+  type TypeDef,
   type TypeRef,
 } from '@abapify/abap-ast';
 import type {
@@ -194,14 +197,22 @@ function renderSchemaTypeSource(
 }
 
 /**
- * Build an ABAP `TypeRef` for a schema usable as an inline type reference
- * (no TableType nodes — tables are encoded as verbatim `NamedTypeRef`s so
- * the printer can emit `STANDARD TABLE OF ... WITH EMPTY KEY` inline).
+ * Build an ABAP `TypeRef` for a schema usable as an inline type reference.
+ *
+ * For array shapes we ALWAYS emit a named alias (`<ops-intf>=><name>_list`)
+ * into the operations interface itself. Cloud ABAP does NOT accept inline
+ * `STANDARD TABLE OF ...` clauses inside a METHODS parameter list (the SAP
+ * ADT save endpoint returns "An error occured during the save operation"),
+ * so every array-typed parameter or return must be a named type reference.
+ * The aliases are collected via {@link registerTableAlias} and emitted as
+ * TYPES declarations at the head of the interface in {@link emitOperationsInterface}.
  */
 function schemaToTypeRef(
   schema: JsonSchema | undefined,
   index: ComponentIndex,
   typesInterfaceName: string,
+  opsInterfaceName: string,
+  aliases: TableAliasRegistry,
 ): TypeRef {
   if (!schema) return builtinType({ name: 'string' });
   if (isRef(schema)) {
@@ -215,8 +226,16 @@ function schemaToTypeRef(
   }
   const t = pluckType(schema);
   if (t === 'array') {
+    const items = (schema as { items?: unknown }).items;
+    const rowSchema: JsonSchema = isRecord(items) ? (items as JsonSchema) : {};
+    const rowType = renderSchemaTypeSource(
+      rowSchema,
+      index,
+      typesInterfaceName,
+    );
+    const aliasName = registerTableAlias(aliases, rowType);
     return namedTypeRef({
-      name: renderSchemaTypeSource(schema, index, typesInterfaceName),
+      name: `${opsInterfaceName.toLowerCase()}=>${aliasName}`,
     });
   }
   if (isPlainObjectSchema(schema)) {
@@ -230,6 +249,73 @@ function schemaToTypeRef(
   }
   // Primitive.
   return builtinType({ name: mapPrimitive(schema) });
+}
+
+/**
+ * Registry of `STANDARD TABLE OF <rowType> WITH EMPTY KEY` aliases emitted
+ * into the operations interface. Keyed by the row-type source string so
+ * identical row types share the same alias (`pet_list`, `string_list`, ...).
+ */
+interface TableAliasRegistry {
+  readonly aliases: Map<string, string>;
+  /** Insertion order, used when flushing TypeDefs to the interface. */
+  readonly order: string[];
+}
+
+function createTableAliasRegistry(): TableAliasRegistry {
+  return { aliases: new Map<string, string>(), order: [] };
+}
+
+/** Return the alias name for a given row type, registering it if new. */
+function registerTableAlias(
+  registry: TableAliasRegistry,
+  rowType: string,
+): string {
+  const existing = registry.aliases.get(rowType);
+  if (existing !== undefined) return existing;
+  const alias = deriveTableAliasName(rowType, registry.aliases);
+  registry.aliases.set(rowType, alias);
+  registry.order.push(alias);
+  return alias;
+}
+
+/**
+ * Derive an alias name from the row-type source.
+ * Strip any interface prefix (`zif_foo_types=>`) and keep only the schema
+ * name, then append `_list`. Collisions get a `_2`, `_3` … suffix.
+ */
+function deriveTableAliasName(
+  rowType: string,
+  existing: ReadonlyMap<string, string>,
+): string {
+  const taken = new Set(existing.values());
+  const bare = rowType.includes('=>')
+    ? (rowType.split('=>').pop() ?? rowType)
+    : rowType;
+  const sanitized = bare.replace(/[^a-z0-9_]/gi, '_').toLowerCase();
+  const base = `${sanitized}_list`;
+  if (!taken.has(base)) return base;
+  let i = 2;
+  while (taken.has(`${base}_${i}`)) i += 1;
+  return `${base}_${i}`;
+}
+
+/** Build TypeDef nodes for every registered table alias. */
+function buildAliasTypeDefs(registry: TableAliasRegistry): readonly TypeDef[] {
+  const inverse = new Map<string, string>();
+  for (const [rowType, alias] of registry.aliases) {
+    inverse.set(alias, rowType);
+  }
+  return registry.order.map((alias) => {
+    const rowType = inverse.get(alias) ?? 'string';
+    return typeDef({
+      name: alias,
+      type: tableType({
+        rowType: namedTypeRef({ name: rowType }),
+        tableKind: 'standard',
+      }),
+    });
+  });
 }
 
 // ----- Response selection ------------------------------------------------
@@ -374,6 +460,8 @@ export function emitOperationsInterface(
 
   const methods: ReturnType<typeof methodDef>[] = [];
   const mappings: OperationMapping[] = [];
+  const tableAliases = createTableAliasRegistry();
+  const opsInterfaceName = opts.name;
 
   for (const op of spec.operations) {
     const methodName = allocMethod(op.operationId, 'method');
@@ -388,7 +476,13 @@ export function emitOperationsInterface(
 
     for (const p of emitted) {
       const abapName = allocParam(p.name, 'param');
-      const ref = schemaToTypeRef(p.schema, compIndex, opts.typesInterfaceName);
+      const ref = schemaToTypeRef(
+        p.schema,
+        compIndex,
+        opts.typesInterfaceName,
+        opsInterfaceName,
+        tableAliases,
+      );
       abapParams.push(
         methodParam({
           paramKind: 'importing',
@@ -414,6 +508,8 @@ export function emitOperationsInterface(
         bodySchema,
         compIndex,
         opts.typesInterfaceName,
+        opsInterfaceName,
+        tableAliases,
       );
       abapParams.push(
         methodParam({
@@ -451,6 +547,8 @@ export function emitOperationsInterface(
         success.schema,
         compIndex,
         opts.typesInterfaceName,
+        opsInterfaceName,
+        tableAliases,
       );
     }
 
@@ -494,9 +592,10 @@ export function emitOperationsInterface(
     });
   }
 
+  const aliasTypeDefs = buildAliasTypeDefs(tableAliases);
   const iface = interfaceDef({
     name: opts.name.toLowerCase(),
-    members: methods,
+    members: [...aliasTypeDefs, ...methods],
     abapDoc: opts.interfaceAbapDoc,
   });
 

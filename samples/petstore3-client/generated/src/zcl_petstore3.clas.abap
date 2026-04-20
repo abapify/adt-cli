@@ -1,6 +1,6 @@
 CLASS ZCL_PETSTORE3 DEFINITION PUBLIC CREATE PUBLIC.
-  INTERFACES zif_petstore3.
   PUBLIC SECTION.
+    INTERFACES zif_petstore3.
     METHODS constructor
       IMPORTING
         destination TYPE string

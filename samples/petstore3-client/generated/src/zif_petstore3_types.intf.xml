@@ -5,7 +5,7 @@
       <VSEOINTERF>
         <CLSNAME>ZIF_PETSTORE3_TYPES</CLSNAME>
         <LANGU>E</LANGU>
-        <DESCRIPT>Generated Petstore v3 client</DESCRIPT>
+        <DESCRIPT>Types for ZCL_PETSTORE3</DESCRIPT>
         <EXPOSURE>2</EXPOSURE>
         <STATE>1</STATE>
         <UNICODE>X</UNICODE>

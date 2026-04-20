@@ -16,9 +16,16 @@ const VIS_KW: Record<Visibility, string> = {
   private: 'PRIVATE SECTION',
 };
 
-function printSection(sec: Section, writer: Writer): void {
+function printSection(
+  sec: Section,
+  writer: Writer,
+  opts?: { readonly leadingInterfaces?: readonly string[] },
+): void {
   writer.writeLine(`${writer.kw(VIS_KW[sec.visibility])}.`);
   writer.indent();
+  for (const i of opts?.leadingInterfaces ?? []) {
+    writer.writeLine(`${writer.kw('INTERFACES')} ${i}.`);
+  }
   for (const m of sec.members) {
     switch (m.kind) {
       case 'TypeDef':
@@ -51,6 +58,14 @@ function printDefinitionHeader(
     readonly isAbstract?: boolean;
     readonly isForTesting?: boolean;
     readonly isCreatePrivate?: boolean;
+    /**
+     * When true, the class has explicit visibility sections and the
+     * `INTERFACES` declarations must be emitted inside the first public
+     * section rather than at class-body level. ABAP cloud rejects
+     * `INTERFACES` placed outside a SECTION with
+     * "There is no PUBLIC / PROTECTED / PRIVATE SECTION statement".
+     */
+    readonly interfacesInsidePublicSection?: boolean;
   },
   writer: Writer,
 ): void {
@@ -69,7 +84,7 @@ function printDefinitionHeader(
     parts.push(opts.isCreatePrivate ? K('CREATE PRIVATE') : K('CREATE PUBLIC'));
   }
   writer.writeLine(parts.join(' ') + '.');
-  if (opts.interfaces.length > 0) {
+  if (!opts.interfacesInsidePublicSection && opts.interfaces.length > 0) {
     writer.indent();
     for (const i of opts.interfaces) {
       writer.writeLine(`${K('INTERFACES')} ${i}.`);
@@ -78,9 +93,31 @@ function printDefinitionHeader(
   }
 }
 
-function printSections(sections: readonly Section[], writer: Writer): void {
+function printSections(
+  sections: readonly Section[],
+  writer: Writer,
+  opts?: { readonly leadingInterfaces?: readonly string[] },
+): void {
+  const leadingInterfaces = opts?.leadingInterfaces ?? [];
+  let publicEmitted = false;
   for (const s of sections) {
-    printSection(s, writer);
+    if (!publicEmitted && s.visibility === 'public') {
+      printSection(s, writer, { leadingInterfaces });
+      publicEmitted = true;
+    } else {
+      printSection(s, writer);
+    }
+  }
+  // If we have leading INTERFACES but no public section was emitted, emit a
+  // minimal public section containing them so the class still compiles.
+  if (!publicEmitted && leadingInterfaces.length > 0) {
+    const K = (s: string): string => writer.kw(s);
+    writer.writeLine(`${K('PUBLIC SECTION')}.`);
+    writer.indent();
+    for (const i of leadingInterfaces) {
+      writer.writeLine(`${K('INTERFACES')} ${i}.`);
+    }
+    writer.dedent();
   }
 }
 
@@ -103,6 +140,7 @@ function printImplementations(
 export function printClassDef(node: ClassDef, writer: Writer): void {
   printAbapDoc(node.abapDoc, writer);
   const K = (s: string): string => writer.kw(s);
+  const hasSections = node.sections.length > 0;
   printDefinitionHeader(
     node.name,
     {
@@ -113,11 +151,14 @@ export function printClassDef(node: ClassDef, writer: Writer): void {
       isAbstract: node.isAbstract,
       isForTesting: node.isForTesting,
       isCreatePrivate: node.isCreatePrivate,
+      interfacesInsidePublicSection: hasSections,
     },
     writer,
   );
   writer.indent();
-  printSections(node.sections, writer);
+  printSections(node.sections, writer, {
+    leadingInterfaces: hasSections ? node.interfaces : [],
+  });
   writer.dedent();
   writer.writeLine(`${K('ENDCLASS')}.`);
   writer.blank();

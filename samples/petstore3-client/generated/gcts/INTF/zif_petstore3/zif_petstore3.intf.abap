@@ -1,4 +1,7 @@
 INTERFACE zif_petstore3 PUBLIC.
+  TYPES pet_list TYPE STANDARD TABLE OF zif_petstore3_types=>pet WITH DEFAULT KEY.
+  TYPES string_list TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  TYPES user_list TYPE STANDARD TABLE OF zif_petstore3_types=>user WITH DEFAULT KEY.
   "! @openapi-operation addPet
   "! @openapi-path POST /pet
   "! Add a new pet to the store.
@@ -18,14 +21,14 @@ INTERFACE zif_petstore3 PUBLIC.
   "! Finds Pets by status.
   METHODS find_pets_by_status
     IMPORTING status TYPE string
-    RETURNING VALUE(pets) TYPE STANDARD TABLE OF zif_petstore3_types=>pet
+    RETURNING VALUE(pets) TYPE zif_petstore3=>pet_list
     RAISING zcx_petstore3_error.
   "! @openapi-operation findPetsByTags
   "! @openapi-path GET /pet/findByTags
   "! Finds Pets by tags.
   METHODS find_pets_by_tags
-    IMPORTING tags TYPE STANDARD TABLE OF string
-    RETURNING VALUE(pets) TYPE STANDARD TABLE OF zif_petstore3_types=>pet
+    IMPORTING tags TYPE zif_petstore3=>string_list
+    RETURNING VALUE(pets) TYPE zif_petstore3=>pet_list
     RAISING zcx_petstore3_error.
   "! @openapi-operation getPetById
   "! @openapi-path GET /pet/{petId}
@@ -101,7 +104,7 @@ INTERFACE zif_petstore3 PUBLIC.
   "! @openapi-path POST /user/createWithList
   "! Creates list of users with given input array.
   METHODS create_users_with_list_input
-    IMPORTING body TYPE STANDARD TABLE OF zif_petstore3_types=>user OPTIONAL
+    IMPORTING body TYPE zif_petstore3=>user_list OPTIONAL
     RETURNING VALUE(user) TYPE zif_petstore3_types=>user
     RAISING zcx_petstore3_error.
   "! @openapi-operation loginUser
