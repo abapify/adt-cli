@@ -1,7 +1,7 @@
 /**
  * Auth middleware for the adt-mcp HTTP transport.
  *
- * Three modes:
+ * Four modes:
  *   - `none`   — no authentication (dev / behind already-authenticated transport).
  *   - `bearer` — require `Authorization: Bearer <token>` where `<token>` matches
  *                the configured secret. Compared with `crypto.timingSafeEqual`.
@@ -9,6 +9,9 @@
  *                Requires a non-empty `x-forwarded-user` header. Additional
  *                identity hints (`x-forwarded-email`, `x-forwarded-groups`) are
  *                collected into the returned `userHint`.
+ *   - `oauth`  — validate an OIDC-issued JWT (Okta, Entra ID, Cognito, …)
+ *                against the configured issuer + audience + scopes. See
+ *                `./oauth.ts` for the validator implementation.
  *
  * The middleware writes a 401 JSON response on failure and returns
  * `{ allowed: false }`. The caller should stop processing. On success it
@@ -18,13 +21,23 @@
 import http from 'node:http';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
+import { createOAuthValidator, type OAuthOptions } from './oauth.js';
 
-export type AuthMode = 'none' | 'bearer' | 'proxy';
+export type AuthMode = 'none' | 'bearer' | 'proxy' | 'oauth';
 
 export interface AuthMiddlewareOptions {
   mode: AuthMode;
   /** Required when mode==='bearer'. The expected bearer token secret. */
   token?: string;
+  /** Required when mode==='oauth'. OIDC issuer / audience / scopes. */
+  oauth?: OAuthOptions;
+  /**
+   * Test-only hook: invoked synchronously whenever an OAuth request
+   * successfully authenticates, with the derived user hint. Production
+   * code uses the normal `userHint` return value instead.
+   * @internal
+   */
+  onUserHint?: (hint: UserHint | undefined) => void;
 }
 
 export interface UserHint {
@@ -41,9 +54,12 @@ export interface AuthResult {
 export type AuthMiddleware = (
   req: http.IncomingMessage,
   res: http.ServerResponse,
-) => AuthResult;
+) => AuthResult | Promise<AuthResult>;
 
-function writeUnauthorized(res: http.ServerResponse): void {
+function writeUnauthorized(
+  res: http.ServerResponse,
+  oauthError?: string,
+): void {
   if (res.headersSent) {
     try {
       res.end();
@@ -52,11 +68,18 @@ function writeUnauthorized(res: http.ServerResponse): void {
     }
     return;
   }
+  // RFC 6750 §3: the WWW-Authenticate challenge for bearer tokens. For
+  // OAuth failures we include the standard `error` / `error_description`
+  // parameters so clients can distinguish "no token", "invalid token",
+  // and "insufficient scope".
+  const challenge = oauthError
+    ? `Bearer realm="adt-mcp", error="${oauthError.split(':')[0].trim()}", error_description="${oauthError.replace(/"/g, "'")}"`
+    : 'Bearer realm="adt-mcp"';
   res.writeHead(401, {
     'Content-Type': 'application/json',
-    'WWW-Authenticate': 'Bearer realm="adt-mcp"',
+    'WWW-Authenticate': challenge,
   });
-  res.end(JSON.stringify({ error: 'unauthorized' }));
+  res.end(JSON.stringify({ error: oauthError ?? 'unauthorized' }));
 }
 
 function constantTimeEqualString(a: string, b: string): boolean {
@@ -133,6 +156,34 @@ export function createAuthMiddleware(
             .filter((s) => s.length > 0)
         : undefined;
       return { allowed: true, userHint: { user, email, groups } };
+    };
+  }
+
+  if (options.mode === 'oauth') {
+    if (!options.oauth) {
+      throw new Error(
+        'createAuthMiddleware: oauth mode requires an `oauth` option',
+      );
+    }
+    const validator = createOAuthValidator(options.oauth);
+    const onUserHint = options.onUserHint;
+    return async (req, res) => {
+      const presented = extractBearer(req);
+      if (!presented) {
+        writeUnauthorized(res, 'invalid_token: missing bearer token');
+        return { allowed: false };
+      }
+      const result = await validator(presented);
+      if (!result.valid) {
+        // Map to RFC 6750 error codes. `insufficient_scope` must remain
+        // a distinct category so the client knows the user needs a
+        // re-consent, not a re-login.
+        const err = result.error ?? 'invalid_token';
+        writeUnauthorized(res, err);
+        return { allowed: false };
+      }
+      if (onUserHint) onUserHint(result.userHint);
+      return { allowed: true, userHint: result.userHint };
     };
   }
 

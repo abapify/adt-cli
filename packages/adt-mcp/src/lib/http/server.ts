@@ -25,6 +25,7 @@ import {
   type MultiSystemConfig,
 } from './multi-system.js';
 import { createAuthMiddleware, type AuthMode } from './auth.js';
+import type { OAuthOptions } from './oauth.js';
 import { createCorsHandler } from './cors.js';
 
 export interface HttpServerOptions {
@@ -54,6 +55,18 @@ export interface HttpServerOptions {
    * an authenticating reverse proxy (oauth2-proxy, Cloudflare Access).
    */
   trustForwardedAuth?: boolean;
+  /**
+   * OAuth / OIDC validation options (required when `authMode === 'oauth'`).
+   * Issuer, audience, JWKS, required scopes, user-claim mapping. See
+   * `./oauth.ts` for the full option list.
+   */
+  oauth?: OAuthOptions;
+  /**
+   * Internal test hook — called with each successful OAuth `userHint`.
+   * Not part of the public API.
+   * @internal
+   */
+  onOAuthUserHint?: (hint: import('./auth.js').UserHint | undefined) => void;
   /**
    * CORS allow-list. Exact-match origins only (plus `'*'` for dev).
    * Undefined or empty = CORS disabled (no headers added).
@@ -223,9 +236,16 @@ export async function startHttpServer(
   let authMode: AuthMode =
     options.authMode ?? (options.authToken ? 'bearer' : 'none');
   if (options.trustForwardedAuth) authMode = 'proxy';
+  if (authMode === 'oauth' && !options.oauth) {
+    throw new Error(
+      'startHttpServer: authMode=oauth requires `oauth` options (issuer at minimum)',
+    );
+  }
   const authMw = createAuthMiddleware({
     mode: authMode,
     token: options.authToken,
+    oauth: options.oauth,
+    onUserHint: options.onOAuthUserHint,
   });
   const cors = createCorsHandler({ allowedOrigins: options.allowedOrigins });
 
@@ -366,7 +386,7 @@ export async function startHttpServer(
         return;
       }
 
-      const authResult = authMw(req, res);
+      const authResult = await authMw(req, res);
       if (!authResult.allowed) return;
       // userHint available for future per-request context propagation
       // (Wave 3/4). Currently unused but intentionally preserved.

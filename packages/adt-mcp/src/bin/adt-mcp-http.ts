@@ -21,8 +21,9 @@
  */
 
 import { startHttpServer } from '../lib/http/server.js';
+import type { OAuthOptions } from '../lib/http/oauth.js';
 
-type AuthMode = 'none' | 'bearer' | 'proxy';
+type AuthMode = 'none' | 'bearer' | 'proxy' | 'oauth';
 
 interface ParsedArgs {
   port?: number;
@@ -33,6 +34,11 @@ interface ParsedArgs {
   authMode?: AuthMode;
   trustForwardedAuth?: boolean;
   allowedOrigins?: string[];
+  oauthIssuer?: string;
+  oauthAudience?: string[];
+  oauthJwksUri?: string;
+  oauthRequiredScopes?: string[];
+  oauthUserClaim?: string;
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -72,7 +78,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       }
       case '--auth-mode': {
         const v = next();
-        if (v === 'none' || v === 'bearer' || v === 'proxy') {
+        if (v === 'none' || v === 'bearer' || v === 'proxy' || v === 'oauth') {
           out.authMode = v;
         }
         break;
@@ -80,6 +86,45 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--trust-forwarded-auth': {
         out.trustForwardedAuth = true;
         out.authMode = 'proxy';
+        break;
+      }
+      case '--oauth-issuer': {
+        const v = next();
+        if (v) out.oauthIssuer = v;
+        break;
+      }
+      case '--oauth-audience': {
+        const v = next();
+        if (v) {
+          (out.oauthAudience ??= []).push(
+            ...v
+              .split(',')
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+          );
+        }
+        break;
+      }
+      case '--oauth-jwks-uri': {
+        const v = next();
+        if (v) out.oauthJwksUri = v;
+        break;
+      }
+      case '--oauth-required-scope': {
+        const v = next();
+        if (v) {
+          (out.oauthRequiredScopes ??= []).push(
+            ...v
+              .split(',')
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0),
+          );
+        }
+        break;
+      }
+      case '--oauth-user-claim': {
+        const v = next();
+        if (v) out.oauthUserClaim = v;
         break;
       }
       case '--cors-origin': {
@@ -94,6 +139,10 @@ function parseArgs(argv: string[]): ParsedArgs {
             '                    [--allowed-host H ...]\n' +
             '                    [--auth-token TOKEN | --auth-mode MODE]\n' +
             '                    [--trust-forwarded-auth]\n' +
+            '                    [--oauth-issuer URL] [--oauth-audience VAL]\n' +
+            '                    [--oauth-jwks-uri URL]\n' +
+            '                    [--oauth-required-scope SCOPE]\n' +
+            '                    [--oauth-user-claim NAME]\n' +
             '                    [--cors-origin ORIGIN ...]\n',
         );
         process.exit(0);
@@ -133,12 +182,54 @@ async function main(): Promise<void> {
   if (authToken && authMode === 'none') authMode = 'bearer';
   if (args.trustForwardedAuth || envTrustForwarded) authMode = 'proxy';
 
+  // OAuth config — CLI wins, env fills the gaps.
+  const oauthIssuer = args.oauthIssuer ?? process.env.OAUTH_ISSUER;
+  const oauthAudience =
+    args.oauthAudience ?? parseCsvEnv(process.env.OAUTH_AUDIENCE);
+  const oauthJwksUri = args.oauthJwksUri ?? process.env.OAUTH_JWKS_URI;
+  const oauthRequiredScopes =
+    args.oauthRequiredScopes ?? parseCsvEnv(process.env.OAUTH_REQUIRED_SCOPES);
+  const oauthUserClaim = args.oauthUserClaim ?? process.env.OAUTH_USER_CLAIM;
+
+  if (authMode === 'none' && oauthIssuer) {
+    // If user supplied OAuth config without explicit --auth-mode, assume
+    // they meant oauth. Explicit --auth-mode always wins.
+    authMode = 'oauth';
+  }
+
   // Startup sanity check: bearer mode without a token cannot work.
   if (authMode === 'bearer' && (!authToken || authToken.length === 0)) {
     process.stderr.write(
       '[adt-mcp-http] fatal: MCP_AUTH_TOKEN (or --auth-token) required when --auth-mode=bearer\n',
     );
     process.exit(1);
+  }
+
+  // Startup sanity check: oauth mode requires at least an issuer.
+  if (authMode === 'oauth' && (!oauthIssuer || oauthIssuer.length === 0)) {
+    process.stderr.write(
+      '[adt-mcp-http] fatal: --oauth-issuer (or OAUTH_ISSUER) required when --auth-mode=oauth\n',
+    );
+    process.exit(1);
+  }
+
+  let oauthOptions: OAuthOptions | undefined;
+  if (authMode === 'oauth' && oauthIssuer) {
+    oauthOptions = {
+      issuer: oauthIssuer,
+      audience:
+        oauthAudience && oauthAudience.length > 0
+          ? oauthAudience.length === 1
+            ? oauthAudience[0]
+            : oauthAudience
+          : undefined,
+      jwksUri: oauthJwksUri,
+      requiredScopes:
+        oauthRequiredScopes && oauthRequiredScopes.length > 0
+          ? oauthRequiredScopes
+          : undefined,
+      userClaim: oauthUserClaim,
+    };
   }
 
   const host = args.host ?? process.env.MCP_HOST ?? '127.0.0.1';
@@ -168,8 +259,21 @@ async function main(): Promise<void> {
     authMode,
     authToken,
     trustForwardedAuth: args.trustForwardedAuth || envTrustForwarded,
+    oauth: oauthOptions,
     allowedOrigins: [...(args.allowedOrigins ?? []), ...envCorsOrigins],
   });
+
+  if (authMode === 'oauth' && oauthOptions) {
+    const audDisplay = Array.isArray(oauthOptions.audience)
+      ? oauthOptions.audience.join(',')
+      : (oauthOptions.audience ?? '<any>');
+    const scopesDisplay = oauthOptions.requiredScopes?.length
+      ? oauthOptions.requiredScopes.join(',')
+      : '<none>';
+    process.stderr.write(
+      `[adt-mcp-http] OAuth validation enabled: issuer=${oauthOptions.issuer} audience=${audDisplay} scopes=${scopesDisplay}\n`,
+    );
+  }
 
   const shutdown = async (signal: string): Promise<void> => {
     process.stderr.write(`[adt-mcp-http] received ${signal}, shutting down\n`);
