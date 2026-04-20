@@ -2,7 +2,16 @@
 
 MCP (Model Context Protocol) server that exposes SAP ADT operations as structured tools for AI assistants, IDE integrations, and automation pipelines.
 
-## Quick Start
+This package ships **two transports**:
+
+| Binary         | Transport                   | State model                                               |
+| -------------- | --------------------------- | --------------------------------------------------------- |
+| `adt-mcp`      | stdio (JSON-RPC over pipes) | Stateless — connection-per-call.                          |
+| `adt-mcp-http` | Streamable HTTP             | Session-scoped cached `AdtClient`, locks, and changesets. |
+
+See [`docs/deployment/mcp-http.md`](../../docs/deployment/mcp-http.md) for the complete HTTP deployment guide (Docker, Okta, multi-system, troubleshooting). The rest of this README focuses on stdio.
+
+## Quick Start (stdio)
 
 ```bash
 # Run via npx (no install required)
@@ -54,6 +63,56 @@ Add to your MCP server list:
   }
 }
 ```
+
+---
+
+## HTTP transport (since Wave 1)
+
+`adt-mcp-http` is the Streamable HTTP entry-point. It targets shared / remote deployments (Docker, Kubernetes, Kiro, teams).
+
+Minimal run:
+
+```bash
+bunx nx build adt-mcp
+node packages/adt-mcp/dist/bin/adt-mcp-http.mjs --port 3000 --auth-token "$(openssl rand -hex 32)"
+```
+
+Minimal smoke test:
+
+```bash
+TOKEN=<your token>
+curl -sf http://127.0.0.1:3000/healthz
+curl -H "Authorization: Bearer $TOKEN" \
+     -H 'Content-Type: application/json' \
+     -X POST http://127.0.0.1:3000/mcp \
+     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"demo","version":"0"}}}'
+```
+
+Capture the `Mcp-Session-Id` response header, then call `sap_connect`, the tools you need, and finally `sap_disconnect` — or close the transport to trigger cleanup automatically.
+
+**Auth modes:** `none` (dev / loopback), `bearer` (shared secret), `proxy` (trust `x-forwarded-user` from an upstream proxy), `oauth` (OIDC JWT validation against Okta / Entra ID / Cognito). Full flag + env matrix in [`docs/deployment/mcp-http.md`](../../docs/deployment/mcp-http.md#cli-reference).
+
+### Session lifecycle tools
+
+Only available on the HTTP transport:
+
+| Tool             | Purpose                                                                                                                                                               |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sap_connect`    | Perform the SAP security-session handshake once per MCP session. Accepts inline credentials or a `systemId` resolved against `SAP_SYSTEMS_JSON` / `SAP_SYSTEMS_FILE`. |
+| `sap_disconnect` | Release locks, DELETE the SAP security session, and drop the cached client.                                                                                           |
+
+### Transactional changesets (since Wave 3)
+
+Bundle multiple ADT writes into a single atomic unit:
+
+| Tool                 | Purpose                                                                          |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `changeset_begin`    | Open a changeset; optionally acquire a transport.                                |
+| `changeset_add`      | Append an operation (`update_source`, `activate_object`, `create_object`, …).    |
+| `changeset_commit`   | Execute the batched operations in order, release locks, return per-step results. |
+| `changeset_rollback` | Discard the batch, release locks, restore the previous state where possible.     |
+
+See [`docs/deployment/mcp-http.md#transactional-changesets`](../../docs/deployment/mcp-http.md#transactional-changesets) for a worked example.
 
 ---
 

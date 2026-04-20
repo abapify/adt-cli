@@ -16,10 +16,15 @@ This document covers the internal architecture, conventions, and extension patte
 packages/adt-mcp/
 ├── src/
 │   ├── bin/
-│   │   └── adt-mcp.ts          # CLI entry-point (stdio transport)
+│   │   ├── adt-mcp.ts          # stdio transport entry-point
+│   │   └── adt-mcp-http.ts     # Streamable HTTP transport entry-point
 │   ├── lib/
 │   │   ├── server.ts           # createMcpServer() factory
 │   │   ├── types.ts            # ConnectionParams, ToolContext
+│   │   ├── http/               # HTTP transport — server, auth, CORS, OIDC,
+│   │   │                       # multi-system registry
+│   │   ├── session/            # registry.ts, changeset.ts, types.ts —
+│   │   │                       # session-scoped state for HTTP transport
 │   │   ├── tools/
 │   │   │   ├── index.ts        # registerTools() – wires all tools
 │   │   │   ├── shared-schemas.ts  # connectionShape (Zod, reused by all tools)
@@ -67,9 +72,14 @@ If a required endpoint has no contract yet, add one to `@abapify/adt-contracts` 
 
 `fast-xml-parser`, `xml2js`, and similar libraries must not be used. The XSD→schema→contract pipeline handles all XML.
 
-### 4. Stateless server – connection-per-call
+### 4. Two transports, two state models
 
-Each tool call creates its own `AdtClient` via `ctx.getClient(args)`. The server holds no session, no cached client, and no credentials between calls.
+The server supports **stdio** and **Streamable HTTP**. They share every tool handler but differ in state:
+
+- **stdio** — stateless, connection-per-call. Each tool call constructs a fresh `AdtClient` from the arguments and no state persists across calls. This preserves the original invariant.
+- **Streamable HTTP** — session-scoped state. Each MCP session (`Mcp-Session-Id`) owns a cached `AdtClient`, a lock registry, and an optional active changeset. State is cleaned up on session close (explicit `DELETE /mcp`, `sap_disconnect`, or idle TTL). Across sessions and processes no state persists; credentials are never written to disk.
+
+Source of truth for the exact scenarios: [`openspec/changes/add-mcp-http-transport/specs/adt-mcp/spec.md`](../../openspec/changes/add-mcp-http-transport/specs/adt-mcp/spec.md). Do not duplicate the spec here.
 
 ### 5. All tools return JSON text
 
@@ -203,7 +213,47 @@ Source writes follow the SAP ADT security-session lock protocol via `@abapify/ad
 3. createLockService(client).unlock(objectUri, { lockHandle })
 ```
 
-Always unlock in a `finally`-equivalent catch block to avoid stuck locks.
+Always unlock in a `finally`-equivalent catch block to avoid stuck locks. On the HTTP transport the session lock registry acts as the safety net — on session close every still-held lock is released before the SAP security session is destroyed.
+
+---
+
+## Transports
+
+| Entry-point           | Transport        | Selected when                                         |
+| --------------------- | ---------------- | ----------------------------------------------------- |
+| `bin/adt-mcp.ts`      | stdio (JSON-RPC) | Default.                                              |
+| `bin/adt-mcp-http.ts` | Streamable HTTP  | Always runs the HTTP server on `--port` / `MCP_PORT`. |
+
+Legacy MCP-over-SSE is deliberately not supported; the HTTP code path answers `POST /mcp`, `GET /mcp`, and `DELETE /mcp` only.
+
+User-facing deployment documentation: [`docs/deployment/mcp-http.md`](../../docs/deployment/mcp-http.md).
+
+---
+
+## Session registry + changesets (HTTP transport only)
+
+Session-scoped state lives in `src/lib/session/` and is owned by the HTTP server:
+
+- `registry.ts` — maps `Mcp-Session-Id` → cached `AdtClient`, lock registry, optional active changeset. Idle TTL eviction is driven by the `--ttl` flag.
+- `changeset.ts` — transactional batch used by the `changeset_*` tools. Pending operations are executed in order on `changeset_commit`; `changeset_rollback` discards them and releases any locks taken while building the batch.
+- `types.ts` — shared interfaces.
+
+On session close (`DELETE /mcp`, `sap_disconnect`, or TTL expiry) the server releases every lock, DELETEs the SAP security session, and drops the cached client. Partial failures are logged but do not abort the remaining cleanup steps.
+
+---
+
+## Auth modes (HTTP transport only)
+
+`src/lib/http/auth.ts` implements four mutually-exclusive modes selected from CLI flags / env:
+
+| Mode     | Selected when                                        | Check                                                                                                  |
+| -------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `none`   | no auth flags                                        | none; logs a warning if the server is not bound to loopback.                                           |
+| `bearer` | `--auth-token` or `MCP_AUTH_TOKEN`                   | `Authorization: Bearer <token>` compared with `crypto.timingSafeEqual`.                                |
+| `proxy`  | `--trust-forwarded-auth` or `TRUST_FORWARDED_AUTH=1` | Require `x-forwarded-user`. Additional hints collected from `x-forwarded-email`, `x-forwarded-groups`. |
+| `oauth`  | `--oauth-issuer` / `OAUTH_ISSUER`                    | OIDC JWT validation via `src/lib/http/oauth.ts` (Okta / Entra ID / Cognito / …).                       |
+
+The spec enumerates the expected behaviour of each mode — keep the implementation and the spec in sync rather than forking documentation here.
 
 ---
 
