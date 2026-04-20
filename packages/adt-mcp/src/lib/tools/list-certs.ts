@@ -7,7 +7,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerListCertsTool(
   server: McpServer,
@@ -17,13 +18,13 @@ export function registerListCertsTool(
     'list_certs',
     'List X.509 certificates installed in a STRUST PSE.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       context: z.string().describe('PSE context (e.g. SSLC, SSLS)'),
       applic: z.string().describe('PSE application (e.g. DFAULT, ANONYM)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const result = await client.adt.system.security.pses.listCertificates(
           args.context,
           args.applic,

@@ -5,7 +5,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetCdsDdlTool(
   server: McpServer,
@@ -15,13 +16,13 @@ export function registerGetCdsDdlTool(
     'get_cds_ddl',
     'Fetch CDS DDL source (DDLS) metadata, optionally including the DDL source code.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       ddlName: z.string().describe('DDL source name (e.g. ZDDL_SAMPLE)'),
       includeSource: z.boolean().optional().describe('Include DDL source code'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const name = args.ddlName.toLowerCase();
         const metadata = await client.adt.ddic.ddl.sources.get(name);
         const result: Record<string, unknown> = { metadata };

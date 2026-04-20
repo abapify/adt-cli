@@ -14,7 +14,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetGitTypesTool(
   server: McpServer,
@@ -24,14 +25,14 @@ export function registerGetGitTypesTool(
     'get_git_types',
     'List ABAP objects in a package that are eligible for abapGit export. Requires abapGit installed on the SAP system.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z
         .string()
         .describe('ABAP package name to inspect (e.g. ZPACKAGE)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const packageName = args.packageName.toUpperCase();
 
         const params = new URLSearchParams({ package: packageName });
@@ -74,14 +75,14 @@ export function registerGitExportTool(
     'git_export',
     'Export an ABAP package in abapGit XML format. Requires abapGit installed on the SAP system. Returns a map of file paths to their content.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z
         .string()
         .describe('ABAP package name to export (e.g. ZPACKAGE)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const packageName = args.packageName.toUpperCase();
 
         const result = await client.fetch(

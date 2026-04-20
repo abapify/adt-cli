@@ -10,7 +10,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AdkBadi, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCreateBadiTool(
   server: McpServer,
@@ -20,7 +21,7 @@ export function registerCreateBadiTool(
     'create_badi',
     'Create a new Enhancement Implementation (ENHO/XHH — BAdI container).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       badiName: z
         .string()
         .describe('Enhancement Implementation name (uppercase)'),
@@ -33,9 +34,9 @@ export function registerCreateBadiTool(
         .optional()
         .describe('Transport request number (required for transportable)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client);
 
         await AdkBadi.create(

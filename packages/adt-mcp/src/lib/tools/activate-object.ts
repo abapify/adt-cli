@@ -11,7 +11,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { adtcore } from '@abapify/adt-schemas';
@@ -36,7 +37,7 @@ export function registerActivateObjectTool(
     'activate_object',
     'Activate one or more ABAP objects. Supply either objectName+objectType for a single object, or the objects array for batch activation.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z
         .string()
         .optional()
@@ -50,9 +51,9 @@ export function registerActivateObjectTool(
         .optional()
         .describe('Array of objects to activate (batch mode)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         type ObjRef = { uri: string; type: string; name: string };
         const toActivate: ObjRef[] = [];

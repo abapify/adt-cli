@@ -11,7 +11,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 function escapeXmlAttr(value: string): string {
   return value
@@ -29,7 +30,7 @@ export function registerCtsUpdateTransportTool(
     'cts_update_transport',
     'Update a transport request (description, target, project). Uses ADT lock/unlock protocol.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       transportNumber: z
         .string()
         .describe('Transport number (e.g. S0DK900123)'),
@@ -37,7 +38,7 @@ export function registerCtsUpdateTransportTool(
       target: z.string().optional().describe('New target system'),
       project: z.string().optional().describe('CTS project name'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
         if (!args.description && !args.target && !args.project) {
           return {
@@ -51,7 +52,7 @@ export function registerCtsUpdateTransportTool(
           };
         }
 
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const objectUri = `/sap/bc/adt/cts/transportrequests/${args.transportNumber}`;
         const lockService = createLockService(client);
         const lockHandle = await lockService.lock(objectUri, {

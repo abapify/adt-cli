@@ -7,7 +7,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCtsListTransportsTool(
   server: McpServer,
@@ -17,15 +18,15 @@ export function registerCtsListTransportsTool(
     'cts_list_transports',
     'List transport requests from the CTS',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       maxResults: z
         .number()
         .optional()
         .describe('Maximum number of results (default: 50)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const transports = await client.services.transports.list();
         const maxResults = args.maxResults ?? 50;
         const display = transports.slice(0, maxResults);

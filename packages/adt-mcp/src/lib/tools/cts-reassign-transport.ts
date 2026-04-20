@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 function escapeXmlAttr(value: string): string {
   return value
@@ -28,7 +29,7 @@ export function registerCtsReassignTransportTool(
     'cts_reassign_transport',
     'Change the owner of a transport request (optionally cascading to modifiable tasks).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       transportNumber: z
         .string()
         .describe('Transport number (e.g. S0DK900123)'),
@@ -38,9 +39,9 @@ export function registerCtsReassignTransportTool(
         .optional()
         .describe('Also reassign all modifiable tasks (default: false)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const body =
           '<?xml version="1.0" encoding="UTF-8"?>' +

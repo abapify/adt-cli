@@ -19,7 +19,7 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AdtClient } from '@abapify/adt-client';
-import { getAdtClientV2 } from '@abapify/adt-cli';
+import { getAdtClientV2Safe, AdtAuthError } from '@abapify/adt-cli';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 
@@ -63,7 +63,7 @@ async function resolveAdtClient(
 
   // Priority C: systemId via adt-cli ~/.adt sessions store.
   if (args.systemId) {
-    const client = await getAdtClientV2({ sid: args.systemId });
+    const client = await getAdtClientV2Safe({ sid: args.systemId });
     return {
       client,
       systemId: args.systemId,
@@ -145,12 +145,16 @@ export function registerSapConnectTool(
       try {
         resolved = await resolveAdtClient(ctx, args);
       } catch (error) {
+        const prefix =
+          error instanceof AdtAuthError
+            ? `sap_connect auth failure (${error.code})`
+            : 'sap_connect failed to resolve a client';
         return {
           isError: true,
           content: [
             {
               type: 'text' as const,
-              text: `sap_connect failed to resolve a client: ${
+              text: `${prefix}: ${
                 error instanceof Error ? error.message : String(error)
               }`,
             },

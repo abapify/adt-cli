@@ -9,7 +9,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AdkBadi, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerDeleteBadiTool(
   server: McpServer,
@@ -19,13 +20,13 @@ export function registerDeleteBadiTool(
     'delete_badi',
     'Delete an Enhancement Implementation (ENHO/XHH — BAdI container).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       badiName: z.string().describe('Enhancement Implementation name'),
       transport: z.string().optional().describe('Transport request number'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client);
 
         await AdkBadi.delete(

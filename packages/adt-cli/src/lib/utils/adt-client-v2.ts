@@ -157,6 +157,51 @@ export interface AdtClientV2Options {
 }
 
 /**
+ * Typed error thrown by `getAdtClientV2Safe` when authentication cannot be
+ * resolved. Intentionally NOT thrown by the legacy `getAdtClientV2`, which
+ * prints a friendly message and calls `process.exit(1)` instead. Use this
+ * error class from long-running processes (HTTP servers, MCP daemons) that
+ * must never exit the process on auth failure.
+ */
+export class AdtAuthError extends Error {
+  public readonly code:
+    | 'NO_SESSION'
+    | 'SESSION_EXPIRED_NO_PLUGIN'
+    | 'REFRESH_FAILED'
+    | 'UNSUPPORTED_AUTH_METHOD'
+    | 'MAX_REFRESH_ATTEMPTS';
+  public readonly systemId?: string;
+
+  constructor(code: AdtAuthError['code'], message: string, systemId?: string) {
+    super(message);
+    this.name = 'AdtAuthError';
+    this.code = code;
+    this.systemId = systemId;
+  }
+}
+
+// =============================================================================
+// Small helpers for the shared-between-variants logic (previously inline
+// process.exit paths). Split out per the Wave 1-C task so that
+// `getAdtClientV2Safe` can throw while `getAdtClientV2` keeps its
+// friendly CLI UX (print + exit).
+// =============================================================================
+
+function reportNoSessionAndExit(sid: string | undefined): never {
+  const sidMsg = sid ? ` for SID ${sid}` : '';
+  console.error(`❌ Not authenticated${sidMsg}`);
+  console.error(
+    `💡 Run "npx adt auth login${sid ? ` --sid=${sid}` : ''}" to authenticate first`,
+  );
+  process.exit(1);
+}
+
+function reportUnsupportedAuthAndExit(method: string): never {
+  console.error(`❌ Unsupported auth method: ${method}`);
+  process.exit(1);
+}
+
+/**
  * Try to auto-refresh expired session credentials
  *
  * @param session - The expired session
@@ -197,6 +242,44 @@ async function tryAutoRefresh(
       `💡 Run "npx adt auth login${sidArg}" to re-authenticate manually`,
     );
     process.exit(1);
+  }
+}
+
+/**
+ * Safe variant of `tryAutoRefresh` that throws `AdtAuthError` instead of
+ * exiting the process. Used by `getAdtClientV2Safe`.
+ */
+async function tryAutoRefreshSafe(
+  session: AuthSession,
+  sid: string | undefined,
+): Promise<AuthSession> {
+  if (!session.auth.plugin) {
+    throw new AdtAuthError(
+      'SESSION_EXPIRED_NO_PLUGIN',
+      `Session expired${sid ? ` for SID ${sid}` : ''} and no auth plugin is configured to refresh it.`,
+      sid,
+    );
+  }
+
+  try {
+    const refreshedSession = await refreshCredentials(session, {
+      // no progress reporter in the safe path — callers own logging
+      log: () => {
+        /* silent */
+      },
+    });
+    if (!refreshedSession) {
+      throw new Error('Refresh returned null');
+    }
+    return refreshedSession;
+  } catch (error) {
+    throw new AdtAuthError(
+      'REFRESH_FAILED',
+      `Auto-refresh failed${sid ? ` for SID ${sid}` : ''}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      sid,
+    );
   }
 }
 
@@ -264,14 +347,7 @@ export async function getAdtClientV2(
   let session = loadAuthSession(effectiveOptions.sid);
 
   if (!session) {
-    const sidMsg = effectiveOptions.sid
-      ? ` for SID ${effectiveOptions.sid}`
-      : '';
-    console.error(`❌ Not authenticated${sidMsg}`);
-    console.error(
-      `💡 Run "npx adt auth login${effectiveOptions.sid ? ` --sid=${effectiveOptions.sid}` : ''}" to authenticate first`,
-    );
-    process.exit(1);
+    reportNoSessionAndExit(effectiveOptions.sid);
   }
 
   // Set system name for ADT hyperlinks (e.g., adt://S0D/sap/bc/adt/...)
@@ -308,8 +384,7 @@ export async function getAdtClientV2(
       cookieHeader = rawCookies;
     }
   } else {
-    console.error(`❌ Unsupported auth method: ${session.auth.method}`);
-    process.exit(1);
+    reportUnsupportedAuthAndExit(session.auth.method);
   }
 
   // Build plugin list: built-in plugins first, then user plugins
@@ -436,6 +511,201 @@ export async function getAdtClientV2(
 
   // Initialize ADK global context if not already done
   // This allows ADK objects to be used without passing context explicitly
+  if (!isAdkInitialized()) {
+    initializeAdk(adtClient, { lockStore: new FileLockStore() });
+  }
+
+  return adtClient;
+}
+
+// =============================================================================
+// getAdtClientV2Safe — safe variant that throws AdtAuthError instead of
+// exiting the process. Required by long-running callers (adt-mcp HTTP
+// transport, any daemon). Keep this behaviourally identical to
+// `getAdtClientV2`, differing only in error handling.
+// =============================================================================
+
+/**
+ * Same contract as {@link getAdtClientV2}, but on any authentication /
+ * credential failure throws a typed {@link AdtAuthError} instead of
+ * writing to stderr and calling `process.exit(1)`.
+ *
+ * Use this from long-running processes (HTTP servers, MCP daemons) where
+ * `process.exit` would tear down unrelated connections.
+ *
+ * @throws {AdtAuthError} when the session is missing, expired without a
+ *   refresh plugin, refresh fails, or the configured auth method is
+ *   unsupported.
+ */
+export async function getAdtClientV2Safe(
+  options?: AdtClientV2Options,
+): Promise<AdtClient> {
+  // Test DI hook — identical to getAdtClientV2
+  const testOverride = __getActiveTestAdtClient();
+  if (testOverride) {
+    return testOverride;
+  }
+
+  const ctx = getCliContext();
+  const effectiveOptions = {
+    sid: options?.sid ?? ctx.sid,
+    logger: options?.logger ?? ctx.logger,
+    logResponseFiles: options?.logResponseFiles ?? ctx.logResponseFiles,
+    logOutput: options?.logOutput ?? ctx.logOutput ?? './tmp/logs',
+    enableLogging: options?.enableLogging,
+    writeMetadata: options?.writeMetadata ?? false,
+    capture: options?.capture ?? false,
+    plugins: options?.plugins ?? [],
+    autoReauth: options?.autoReauth ?? true,
+    verbose: options?.verbose ?? ctx.verbose,
+  };
+
+  const logger =
+    effectiveOptions.logger ??
+    (effectiveOptions.enableLogging ? consoleLogger : silentLogger);
+
+  let session = loadAuthSession(effectiveOptions.sid);
+
+  if (!session) {
+    throw new AdtAuthError(
+      'NO_SESSION',
+      `Not authenticated${effectiveOptions.sid ? ` for SID ${effectiveOptions.sid}` : ''}. Run "adt auth login${effectiveOptions.sid ? ` --sid=${effectiveOptions.sid}` : ''}" first.`,
+      effectiveOptions.sid,
+    );
+  }
+
+  setAdtSystem(session.sid);
+
+  const baseUrl = session.host;
+  const client = session.client;
+  let username: string | undefined;
+  let password: string | undefined;
+  let cookieHeader: string | undefined;
+  let authorizationHeader: string | undefined;
+
+  if (session.auth.method === 'basic') {
+    const creds = session.auth.credentials as BasicCredentials;
+    username = creds.username;
+    password = creds.password;
+  } else if (session.auth.method === 'cookie') {
+    if (isExpired(session)) {
+      session = await tryAutoRefreshSafe(session, effectiveOptions.sid);
+    }
+
+    const creds = session.auth.credentials as CookieCredentials;
+    const rawCookies = decodeURIComponent(creds.cookies);
+
+    const AUTH_PREFIX = 'Authorization: ';
+    if (rawCookies.startsWith(AUTH_PREFIX)) {
+      authorizationHeader = rawCookies.substring(AUTH_PREFIX.length);
+    } else {
+      cookieHeader = rawCookies;
+    }
+  } else {
+    throw new AdtAuthError(
+      'UNSUPPORTED_AUTH_METHOD',
+      `Unsupported auth method: ${session.auth.method}`,
+      effectiveOptions.sid,
+    );
+  }
+
+  // Plugin list — identical to getAdtClientV2
+  const plugins: AdtAdapterConfig['plugins'] = [];
+
+  if (effectiveOptions.capture) {
+    resetCaptured();
+    plugins.push({
+      name: 'capture',
+      process: (context: ResponseContext) => {
+        setCaptured({
+          xml: context.rawText,
+          json: context.parsedData,
+        });
+        return context.parsedData;
+      },
+    });
+  }
+
+  if (effectiveOptions.logResponseFiles) {
+    plugins.push(
+      new FileLoggingPlugin({
+        outputDir: effectiveOptions.logOutput,
+        writeMetadata: effectiveOptions.writeMetadata,
+        logger,
+      }),
+    );
+  }
+
+  if (effectiveOptions.enableLogging) {
+    plugins.push(
+      new LoggingPlugin((msg, data) => {
+        logger.info(`${msg}${data ? ` ${JSON.stringify(data)}` : ''}`);
+      }),
+    );
+  }
+
+  plugins.push(...effectiveOptions.plugins);
+
+  // onSessionExpired callback — throws AdtAuthError, no console.error
+  let onSessionExpired: (() => Promise<string>) | undefined;
+  if (
+    effectiveOptions.autoReauth &&
+    session.auth.method === 'cookie' &&
+    session.auth.plugin
+  ) {
+    let currentSession = session;
+    let refreshAttempts = 0;
+    const MAX_REFRESH_ATTEMPTS = 1;
+
+    onSessionExpired = async (): Promise<string> => {
+      refreshAttempts++;
+
+      if (refreshAttempts > MAX_REFRESH_ATTEMPTS) {
+        throw new AdtAuthError(
+          'MAX_REFRESH_ATTEMPTS',
+          `Maximum refresh attempts (${MAX_REFRESH_ATTEMPTS}) exceeded${effectiveOptions.sid ? ` for SID ${effectiveOptions.sid}` : ''}.`,
+          effectiveOptions.sid,
+        );
+      }
+
+      try {
+        const refreshedSession = await refreshCredentials(currentSession, {
+          log: () => {
+            /* silent — callers own logging */
+          },
+        });
+        if (!refreshedSession) {
+          throw new Error('Refresh returned null');
+        }
+        currentSession = refreshedSession;
+
+        const creds = currentSession.auth.credentials as CookieCredentials;
+        return decodeURIComponent(creds.cookies);
+      } catch (error) {
+        if (error instanceof AdtAuthError) throw error;
+        throw new AdtAuthError(
+          'REFRESH_FAILED',
+          `Auto-refresh failed${effectiveOptions.sid ? ` for SID ${effectiveOptions.sid}` : ''}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+          effectiveOptions.sid,
+        );
+      }
+    };
+  }
+
+  const adtClient = createAdtClient({
+    baseUrl,
+    username,
+    password,
+    cookieHeader,
+    authorizationHeader,
+    client,
+    logger,
+    plugins,
+    onSessionExpired,
+  });
+
   if (!isAdkInitialized()) {
     initializeAdk(adtClient, { lockStore: new FileLockStore() });
   }

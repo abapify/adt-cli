@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerRunQueryTool(
   server: McpServer,
@@ -20,7 +21,7 @@ export function registerRunQueryTool(
     'run_query',
     'Execute a freestyle ABAP SQL SELECT query and return results as JSON. Only SELECT statements are supported.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       query: z
         .string()
         .describe(
@@ -31,9 +32,9 @@ export function registerRunQueryTool(
         .optional()
         .describe('Maximum rows to return (default: 100)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const maxRows = args.maxRows ?? 100;
 
         const trimmedQuery = args.query.trim();

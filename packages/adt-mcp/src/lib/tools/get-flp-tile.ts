@@ -5,7 +5,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { normalizeOdataEntity } from '@abapify/adt-contracts';
 
 export function registerGetFlpTileTool(
@@ -16,14 +17,14 @@ export function registerGetFlpTileTool(
     'get_flp_tile',
     'Get a single Fiori Launchpad tile (CHIP) by its full CHIP ID',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       tileId: z
         .string()
         .describe('CHIP ID, e.g. X-SAP-UI2-CHIP:/UI2/STATIC_APPLAUNCHER'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.flp.tiles.get(args.tileId);
         return {
           content: [

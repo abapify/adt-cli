@@ -14,7 +14,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 type ToolResult =
   | {
@@ -53,10 +54,10 @@ export function registerGctsListReposTool(
   server.tool(
     'gcts_list_repos',
     'List gCTS repositories on the SAP system',
-    { ...connectionShape },
-    async (args) => {
+    { ...sessionOrConnectionShape },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.gcts.repository.list();
         return okJson(res.result ?? []);
       } catch (e) {
@@ -73,10 +74,10 @@ export function registerGctsGetRepoTool(
   server.tool(
     'gcts_get_repo',
     'Get a single gCTS repository by RID',
-    { ...connectionShape, rid: z.string().describe('Repository ID') },
-    async (args) => {
+    { ...sessionOrConnectionShape, rid: z.string().describe('Repository ID') },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.gcts.repository.get(args.rid);
         return okJson(res.result ?? res);
       } catch (e) {
@@ -94,7 +95,7 @@ export function registerGctsCreateRepoTool(
     'gcts_create_repo',
     'Create a new gCTS repository (POST /repository)',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       rid: z.string().describe('Repository ID'),
       url: z.string().describe('Git URL (https://...)'),
       vsid: z.string().optional().describe('Virtual system ID (default: 6IT)'),
@@ -115,9 +116,9 @@ export function registerGctsCreateRepoTool(
         .optional()
         .describe('VCS authentication token (if required)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const config: Array<{ key: string; value: string }> = [];
         if (args.startingFolder)
           config.push({ key: 'VCS_TARGET_DIR', value: args.startingFolder });
@@ -153,10 +154,10 @@ export function registerGctsCloneRepoTool(
   server.tool(
     'gcts_clone_repo',
     'Clone an existing gCTS repository (POST /clone)',
-    { ...connectionShape, rid: z.string().describe('Repository ID') },
-    async (args) => {
+    { ...sessionOrConnectionShape, rid: z.string().describe('Repository ID') },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.gcts.repository.clone(args.rid);
         return okJson(res);
       } catch (e) {
@@ -173,10 +174,10 @@ export function registerGctsDeleteRepoTool(
   server.tool(
     'gcts_delete_repo',
     'Delete a gCTS repository (DELETE /repository/<rid>)',
-    { ...connectionShape, rid: z.string().describe('Repository ID') },
-    async (args) => {
+    { ...sessionOrConnectionShape, rid: z.string().describe('Repository ID') },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.gcts.repository.delete(args.rid);
         return okJson(res);
       } catch (e) {
@@ -193,10 +194,10 @@ export function registerGctsPullTool(
   server.tool(
     'gcts_pull',
     'Pull a gCTS repository (GET /pullByCommit)',
-    { ...connectionShape, rid: z.string().describe('Repository ID') },
-    async (args) => {
+    { ...sessionOrConnectionShape, rid: z.string().describe('Repository ID') },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.gcts.repository.pull(args.rid);
         return okJson(res);
       } catch (e) {
@@ -214,7 +215,7 @@ export function registerGctsCheckoutBranchTool(
     'gcts_checkout_branch',
     'Check out a branch in a gCTS repository',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       rid: z.string().describe('Repository ID'),
       branch: z.string().describe('Target branch'),
       currentBranch: z
@@ -222,9 +223,9 @@ export function registerGctsCheckoutBranchTool(
         .optional()
         .describe('Current branch (auto-detected if omitted)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         let current = args.currentBranch;
         if (!current) {
           try {
@@ -254,10 +255,10 @@ export function registerGctsListBranchesTool(
   server.tool(
     'gcts_list_branches',
     'List branches of a gCTS repository',
-    { ...connectionShape, rid: z.string().describe('Repository ID') },
-    async (args) => {
+    { ...sessionOrConnectionShape, rid: z.string().describe('Repository ID') },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.gcts.branches.list(args.rid);
         return okJson(res.branches ?? []);
       } catch (e) {
@@ -275,16 +276,16 @@ export function registerGctsCreateBranchTool(
     'gcts_create_branch',
     'Create a branch in a gCTS repository',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       rid: z.string().describe('Repository ID'),
       name: z.string().describe('New branch name'),
       localOnly: z.boolean().optional().describe('Create a local branch only'),
       symbolic: z.boolean().optional(),
       peeled: z.boolean().optional(),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const body = {
           branch: args.name,
           type: args.localOnly ? ('local' as const) : ('global' as const),
@@ -308,14 +309,14 @@ export function registerGctsSwitchBranchTool(
     'gcts_switch_branch',
     'Switch branches in a gCTS repository',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       rid: z.string().describe('Repository ID'),
       target: z.string().describe('Target branch'),
       currentBranch: z.string().optional(),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         let current = args.currentBranch;
         if (!current) {
           try {
@@ -346,7 +347,7 @@ export function registerGctsCommitTool(
     'gcts_commit',
     'Commit a package or transport into a gCTS repository',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       rid: z.string().describe('Repository ID'),
       message: z.string().optional().describe('Commit message'),
       description: z.string().optional().describe('Long description'),
@@ -359,9 +360,9 @@ export function registerGctsCommitTool(
         .optional()
         .describe('ABAP package name (defaults to RID when corrnr is absent)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const objects = args.corrnr
           ? [{ object: args.corrnr, type: 'TRANSPORT' }]
           : [
@@ -392,10 +393,10 @@ export function registerGctsLogTool(server: McpServer, ctx: ToolContext): void {
   server.tool(
     'gcts_log',
     'Show the commit history of a gCTS repository',
-    { ...connectionShape, rid: z.string().describe('Repository ID') },
-    async (args) => {
+    { ...sessionOrConnectionShape, rid: z.string().describe('Repository ID') },
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const res = await client.adt.gcts.repository.log(args.rid);
         return okJson(res.commits ?? []);
       } catch (e) {
@@ -413,7 +414,7 @@ export function registerGctsConfigTool(
     'gcts_config',
     'Get, set, unset, or list gCTS repository configuration entries',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       rid: z.string().describe('Repository ID'),
       action: z
         .enum(['get', 'set', 'unset', 'list'])
@@ -421,9 +422,9 @@ export function registerGctsConfigTool(
       key: z.string().optional().describe('Config key (for get/set/unset)'),
       value: z.string().optional().describe('Config value (for set)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         if (args.action === 'list') {
           const repo = await client.adt.gcts.repository.get(args.rid);
           return okJson(repo.result?.config ?? []);

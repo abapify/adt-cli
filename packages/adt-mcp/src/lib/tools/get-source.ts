@@ -9,7 +9,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 
 export function registerGetSourceTool(
@@ -20,7 +21,7 @@ export function registerGetSourceTool(
     'get_source',
     'Fetch ABAP source code for an object (program, class, interface, etc.)',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z.string().describe('ABAP object name'),
       objectType: z
         .string()
@@ -29,9 +30,9 @@ export function registerGetSourceTool(
           'Object type (e.g. PROG, CLAS, INTF). Speeds up URI resolution when known.',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const objectUri = await resolveObjectUri(
           client,

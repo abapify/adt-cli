@@ -9,7 +9,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetTestClassesTool(
   server: McpServer,
@@ -19,12 +20,12 @@ export function registerGetTestClassesTool(
     'get_test_classes',
     'Get the test class definitions (FOR TESTING) embedded in an ABAP class',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       className: z.string().describe('ABAP class name (e.g. ZCL_MY_CLASS)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const name = encodeURIComponent(args.className.toLowerCase());
 
         const source = await client.fetch(

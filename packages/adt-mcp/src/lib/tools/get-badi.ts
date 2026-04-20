@@ -7,14 +7,15 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetBadiTool(server: McpServer, ctx: ToolContext): void {
   server.tool(
     'get_badi',
     'Fetch Enhancement Implementation (ENHO/XHH — BAdI container) metadata, optionally including the source payload with its BAdI implementations.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       badiName: z
         .string()
         .describe('Enhancement Implementation name (e.g. ZE_MY_BADI_IMPL)'),
@@ -23,9 +24,9 @@ export function registerGetBadiTool(server: McpServer, ctx: ToolContext): void {
         .optional()
         .describe('Include source text listing the BAdI implementations'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const name = args.badiName.toLowerCase();
         const metadata = await client.adt.enhancements.enhoxhh.get(name);
         const result: Record<string, unknown> = { metadata };

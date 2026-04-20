@@ -9,7 +9,8 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { extractDiscoveryWorkspaces } from './utils';
 
 export function registerGetInstalledComponentsTool(
@@ -20,11 +21,11 @@ export function registerGetInstalledComponentsTool(
     'get_installed_components',
     'List all software components installed on the SAP system with their version and release information.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const result = await client.fetch(
           '/sap/bc/adt/system/softwarecomponents',
@@ -73,11 +74,11 @@ export function registerGetFeaturesTool(
     'get_features',
     'Probe the SAP system for available ADT features (abapGit, RAP, AMDP, UI5, ATC, CTS, etc.).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const discovery = await client.adt.discovery.getDiscovery();
         const workspaces = extractDiscoveryWorkspaces(discovery);
 

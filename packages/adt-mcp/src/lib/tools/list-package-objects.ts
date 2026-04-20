@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { extractObjectReferences } from './utils';
 
 export function registerListPackageObjectsTool(
@@ -21,7 +22,7 @@ export function registerListPackageObjectsTool(
     'list_package_objects',
     'List ABAP objects contained in a package (uses quickSearch with packageName filter)',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z.string().describe('Package name (e.g. ZPACKAGE)'),
       objectType: z
         .string()
@@ -33,9 +34,9 @@ export function registerListPackageObjectsTool(
         .default(200)
         .describe('Maximum number of results (default: 200)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const searchResult =
           await client.adt.repository.informationsystem.search.quickSearch({

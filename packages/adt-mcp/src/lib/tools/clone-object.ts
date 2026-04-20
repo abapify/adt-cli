@@ -20,7 +20,8 @@ import {
   SOURCE_BACKED_OBJECT_TYPES,
   type SourceBackedObjectType,
 } from './object-creation';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri, resolveObjectUriFromType } from './utils';
 
 async function getSourceCode(
@@ -126,7 +127,7 @@ export function registerCloneObjectTool(
     'clone_object',
     'Copy an ABAP object to a new name. Supported types: PROG, CLAS, INTF. Creates the new object and copies the source code.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       sourceObjectName: z
         .string()
         .describe('Name of the source object to copy'),
@@ -146,9 +147,9 @@ export function registerCloneObjectTool(
         .optional()
         .describe('Transport request number for the clone'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const sourceType = args.sourceObjectType.toUpperCase().split('/')[0];
         const sourceName = args.sourceObjectName.toUpperCase();
         const targetName = args.targetObjectName.toUpperCase();

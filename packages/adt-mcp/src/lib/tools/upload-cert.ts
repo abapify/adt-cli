@@ -7,7 +7,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerUploadCertTool(
   server: McpServer,
@@ -17,7 +18,7 @@ export function registerUploadCertTool(
     'upload_cert',
     'Upload a PEM-encoded X.509 certificate into a STRUST PSE.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       context: z.string().describe('PSE context (e.g. SSLC, SSLS)'),
       applic: z.string().describe('PSE application (e.g. DFAULT, ANONYM)'),
       pem: z
@@ -26,7 +27,7 @@ export function registerUploadCertTool(
           'PEM-encoded certificate text (BEGIN/END CERTIFICATE blocks)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
         if (!args.pem.includes('BEGIN CERTIFICATE')) {
           return {
@@ -39,7 +40,7 @@ export function registerUploadCertTool(
             ],
           };
         }
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const result = await client.adt.system.security.pses.uploadCertificate(
           args.context,
           args.applic,

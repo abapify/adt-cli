@@ -9,7 +9,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AdkFunctionGroup, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCreateFunctionGroupTool(
   server: McpServer,
@@ -19,7 +20,7 @@ export function registerCreateFunctionGroupTool(
     'create_function_group',
     'Create a new ABAP function group. Wraps the typed functions/groups contract.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       groupName: z
         .string()
         .describe('Function group name (uppercase, e.g. ZFG_UTIL)'),
@@ -32,9 +33,9 @@ export function registerCreateFunctionGroupTool(
         .optional()
         .describe('Transport request number (for transportable objects)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client);
 
         const fugr = await AdkFunctionGroup.create(
