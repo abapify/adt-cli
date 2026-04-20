@@ -91,7 +91,7 @@ const hasFlag = (name: string): boolean => args.includes(`--${name}`);
 const registry = getFlag('registry', 'https://registry.npmjs.org/');
 const fix = hasFlag('fix');
 const prepare = hasFlag('prepare');
-const json = hasFlag('json');
+const verbose = hasFlag('verbose');
 // Optional MFA setting applied only in fix mode. Useful before switching to
 // OIDC trusted publishing (`--mfa=none`). Omit to leave MFA untouched.
 const mfaTarget = getFlag('mfa', '');
@@ -435,7 +435,7 @@ const parts = [
 console.log(parts.join('\n'));
 
 // Structured JSON report for aggregation — opt-in, keeps human logs clean.
-if (json) {
+if (verbose) {
   console.log(`__NPM_CHECK_JSON__ ${JSON.stringify(report)}`);
 }
 
