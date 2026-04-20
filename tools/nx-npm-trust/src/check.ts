@@ -78,7 +78,10 @@ interface Report {
   checks: Record<string, unknown>;
   fixes: string[];
   readyForCi: boolean;
+  /** Blocking issues — cause non-zero exit. */
   problems: string[];
+  /** Non-blocking advisories — shown in the log, do not affect exit code. */
+  warnings: string[];
 }
 
 const args = process.argv.slice(2);
@@ -171,6 +174,7 @@ const report: Report = {
   fixes: [],
   readyForCi: false,
   problems: [],
+  warnings: [],
 };
 
 // 1. package.json hygiene — and patch in --fix mode.
@@ -195,8 +199,9 @@ if (needsPublishConfigFix) {
   }
 }
 if (pkg.files === undefined) {
-  // Not auto-fixable: the correct files list is package-specific.
-  report.problems.push('no "files" allowlist');
+  // Advisory only: publish still works, but the tarball will include src/,
+  // tests/, etc. Fixing this requires human judgement per package.
+  report.warnings.push('no "files" allowlist');
 }
 
 // 2. Does it exist on npm?
@@ -414,7 +419,8 @@ report.readyForCi = Boolean(
 );
 
 // Human summary
-const symbol = report.readyForCi ? '✓' : '✗';
+const hasProblems = report.problems.length > 0;
+const symbol = hasProblems ? '✗' : report.warnings.length > 0 ? '!' : '✓';
 const existsTag =
   report.checks.exists === true
     ? `on npm @ ${report.checks.latestVersion as string}`
@@ -423,6 +429,8 @@ const existsTag =
       : 'state unknown';
 const fixesSummary =
   report.fixes.length > 0 ? `  + ${report.fixes.join(', ')}` : '';
+const warningsSummary =
+  report.warnings.length > 0 ? `  ~ ${report.warnings.join(', ')}` : '';
 const problemsSummary =
   report.problems.length > 0 ? `  ! ${report.problems.join(', ')}` : '';
 
@@ -430,6 +438,7 @@ const modeTag = prepare ? ' [prepare]' : fix ? ' [fix]' : '';
 const parts = [
   `${symbol} ${name}@${pkg.version}${modeTag} — ${existsTag}`,
   fixesSummary,
+  warningsSummary,
   problemsSummary,
 ].filter(Boolean);
 console.log(parts.join('\n'));
@@ -439,4 +448,6 @@ if (verbose) {
   console.log(`__NPM_CHECK_JSON__ ${JSON.stringify(report)}`);
 }
 
-process.exit(report.readyForCi && report.problems.length === 0 ? 0 : 1);
+// Exit non-zero only on blocking problems. Warnings (e.g. missing `files`
+// allowlist) are advisory — the package can still be published from CI.
+process.exit(hasProblems ? 1 : 0);
