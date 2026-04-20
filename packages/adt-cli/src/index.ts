@@ -38,3 +38,15 @@ export {
   diffObject,
   applyPlan,
 } from './lib/services/checkin';
+
+// Changeset (Wave 3) — transactional unit-of-work shared by CLI and MCP.
+export {
+  ChangesetService,
+  createChangeset,
+  type Changeset,
+  type ChangesetEntry,
+  type ChangesetStatus,
+  type AddEntryArgs as ChangesetAddArgs,
+  type CommitResult as ChangesetCommitResult,
+  type RollbackResult as ChangesetRollbackResult,
+} from './lib/services/changeset';

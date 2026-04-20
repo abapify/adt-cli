@@ -9,6 +9,7 @@
  */
 
 import type { AdtClient } from '@abapify/adt-client';
+import type { Changeset } from './changeset.js';
 
 export interface SapSessionContext {
   /** MCP session id (the value of the `Mcp-Session-Id` header). */
@@ -23,8 +24,12 @@ export interface SapSessionContext {
   client: AdtClient;
   /** Object URIs currently locked by this session. */
   locks: Set<string>;
-  /** Reserved for Wave 3 changeset support. */
-  changeset?: unknown;
+  /**
+   * Pending transactional unit-of-work for this session (Wave 3). When
+   * set, `changeset.status === 'open'` means locks are held and at least
+   * one source PUT has happened but no activation has run yet.
+   */
+  changeset?: Changeset;
   /**
    * Releases SAP-side resources (locks, security session). Must be
    * idempotent — the registry may call it more than once under races.

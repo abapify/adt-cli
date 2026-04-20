@@ -28,5 +28,6 @@ export { userCommand } from './user';
 export { sourceCommand } from './source';
 export { strustCommand } from './strust';
 export { checkinCommand } from './checkin';
+export { createChangesetCommand } from './changeset';
 export { rfcCommand } from './rfc';
 export { createFlpCommand } from './flp';

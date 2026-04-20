@@ -20,6 +20,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AdtClient } from '@abapify/adt-client';
 import { getAdtClientV2Safe, AdtAuthError } from '@abapify/adt-cli';
+import { ChangesetService } from '@abapify/adt-cli';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 
@@ -181,7 +182,11 @@ export function registerSapConnectTool(
         };
       }
 
-      ctx.registry.create(
+      // Capture the session via a forward-ref so the close handler can
+      // look at the current changeset state *after* registry.delete()
+      // has already removed it from the map.
+      const sessionRef: { value?: ReturnType<typeof ctx.registry.create> } = {};
+      const created = ctx.registry.create(
         mcpSessionId,
         {
           systemId: resolved.systemId,
@@ -189,11 +194,22 @@ export function registerSapConnectTool(
           locks: new Set<string>(),
         },
         async () => {
-          // Best-effort cleanup. The v2 AdtClient has no dispose API
-          // today; security-session cleanup happens lazily on SAP side.
-          // Future wave: release locks tracked in the session context.
+          // Auto-rollback any open changeset so we never leak SAP locks
+          // when a client disconnects mid-unit-of-work. Best-effort: a
+          // failure here must not prevent session teardown.
+          const session = sessionRef.value;
+          const cs = session?.changeset;
+          if (cs && cs.status === 'open' && session) {
+            try {
+              const service = new ChangesetService(session.client);
+              await service.rollback(cs);
+            } catch {
+              /* best-effort — can't surface to client at teardown */
+            }
+          }
         },
       );
+      sessionRef.value = created;
 
       return {
         content: [
