@@ -63,7 +63,8 @@ Registered in the root `nx.json` under `plugins`:
 
 The plugin's `createNodesV2` matches `packages/*/package.json`, reads each
 manifest, skips packages with `"private": true`, and attaches an
-`npm-check` target that invokes `src/check.mjs`.
+`npm-check` target that invokes `src/check.ts` via `bun` (same runtime
+used everywhere else in the monorepo — no separate `.mjs` build step).
 
 Options (all optional, set via `nx.json` plugin options):
 

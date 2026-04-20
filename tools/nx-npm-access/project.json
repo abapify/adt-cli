@@ -11,14 +11,7 @@
         "outputPath": "dist/tools/nx-npm-access",
         "main": "tools/nx-npm-access/src/index.ts",
         "tsConfig": "tools/nx-npm-access/tsconfig.lib.json",
-        "assets": [
-          "tools/nx-npm-access/*.md",
-          {
-            "input": "tools/nx-npm-access/src",
-            "glob": "**/*.mjs",
-            "output": "./"
-          }
-        ]
+        "assets": ["tools/nx-npm-access/*.md"]
       }
     }
   },

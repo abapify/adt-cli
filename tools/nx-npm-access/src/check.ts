@@ -1,5 +1,5 @@
-#!/usr/bin/env node
-// tools/nx-npm-access/src/check.mjs
+#!/usr/bin/env bun
+// tools/nx-npm-access/src/check.ts
 //
 // Validates that a single @abapify/* package (located in $cwd) is ready to be
 // published from CI. Run per-package via Nx (`nx run <pkg>:npm-check`) or for
@@ -27,8 +27,35 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
+interface Pkg {
+  name?: string;
+  version?: string;
+  private?: boolean;
+  publishConfig?: { access?: string };
+  files?: string[];
+}
+
+interface NpmResult {
+  code: number;
+  timedOut: boolean;
+  stdout: string;
+  stderr: string;
+  json: unknown;
+}
+
+interface Report {
+  name: string | undefined;
+  version: string | undefined;
+  access: string | null;
+  registry: string;
+  scope: string | null;
+  checks: Record<string, unknown>;
+  readyForCi: boolean;
+  problems: string[];
+}
+
 const args = process.argv.slice(2);
-const getFlag = (name, def) => {
+const getFlag = (name: string, def: string): string => {
   const hit = args.find((a) => a.startsWith(`--${name}=`));
   return hit ? hit.slice(name.length + 3) : def;
 };
@@ -40,7 +67,7 @@ if (!existsSync(pkgPath)) {
   console.error(`[npm-check] no package.json in ${process.cwd()}`);
   process.exit(2);
 }
-const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+const pkg: Pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
 
 if (pkg.private) {
   if (!quiet) console.log(`[skip] ${pkg.name ?? '<no-name>'} is private`);
@@ -57,7 +84,7 @@ const scopeFlag = scope ? [`--${scope}:registry=${registry}`] : [];
  * preferred (`view`); anything that requires login is still called but
  * failure is reported as "needs auth" rather than blocking.
  */
-function npm(cmdArgs) {
+function npm(cmdArgs: string[]): NpmResult {
   const result = spawnSync(
     'npm',
     [...cmdArgs, `--registry=${registry}`, ...scopeFlag, '--json'],
@@ -68,7 +95,7 @@ function npm(cmdArgs) {
       timeout: 20_000,
     },
   );
-  let parsed = null;
+  let parsed: unknown = null;
   if (result.stdout) {
     try {
       parsed = JSON.parse(result.stdout);
@@ -76,16 +103,24 @@ function npm(cmdArgs) {
       parsed = result.stdout.trim();
     }
   }
+  const err = result.error as NodeJS.ErrnoException | undefined;
   return {
     code: result.status ?? -1,
-    timedOut: result.signal === 'SIGTERM' || result.error?.code === 'ETIMEDOUT',
-    stdout: result.stdout,
-    stderr: result.stderr,
+    timedOut: result.signal === 'SIGTERM' || err?.code === 'ETIMEDOUT',
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
     json: parsed,
   };
 }
 
-const report = {
+type ViewJson = {
+  version?: string;
+  maintainers?: unknown;
+  'dist-tags'?: unknown;
+  error?: { code?: string };
+};
+
+const report: Report = {
   name,
   version: pkg.version,
   access: pkg.publishConfig?.access ?? null,
@@ -111,13 +146,19 @@ if (pkg.files === undefined) {
 }
 
 // 2. Does it exist on npm?
-const view = npm(['view', name]);
-if (view.code === 0 && view.json && typeof view.json === 'object') {
+const view = npm(['view', name ?? '']);
+const viewJson = view.json as ViewJson | string | null;
+const isObjJson = viewJson !== null && typeof viewJson === 'object';
+if (view.code === 0 && isObjJson && !(viewJson as ViewJson).error) {
+  const v = viewJson as ViewJson;
   report.checks.exists = true;
-  report.checks.latestVersion = view.json.version;
-  report.checks.maintainers = view.json.maintainers ?? [];
-  report.checks.distTags = view.json['dist-tags'] ?? {};
-} else if (view.stderr?.includes('E404') || view.json?.error?.code === 'E404') {
+  report.checks.latestVersion = v.version;
+  report.checks.maintainers = v.maintainers ?? [];
+  report.checks.distTags = v['dist-tags'] ?? {};
+} else if (
+  view.stderr.includes('E404') ||
+  (isObjJson && (viewJson as ViewJson).error?.code === 'E404')
+) {
   report.checks.exists = false;
 } else if (view.timedOut) {
   report.checks.exists = 'unknown';
@@ -127,17 +168,17 @@ if (view.code === 0 && view.json && typeof view.json === 'object') {
 } else {
   report.checks.exists = 'unknown';
   report.problems.push(
-    `npm view failed unexpectedly: ${view.stderr?.split('\n')[0] ?? 'no stderr'}`,
+    `npm view failed unexpectedly: ${view.stderr.split('\n')[0] ?? 'no stderr'}`,
   );
 }
 
 // 3. access status (only meaningful if published)
-if (report.checks.exists === true) {
+if (report.checks.exists === true && name) {
   const status = npm(['access', 'get', 'status', name]);
   if (status.code === 0) {
     report.checks.accessStatus = status.json ?? status.stdout.trim();
   } else {
-    report.checks.accessStatus = `ERR: ${status.stderr?.split('\n')[0] ?? status.code}`;
+    report.checks.accessStatus = `ERR: ${status.stderr.split('\n')[0] ?? status.code}`;
   }
 
   // 4. collaborators
@@ -145,7 +186,7 @@ if (report.checks.exists === true) {
   if (collabs.code === 0) {
     report.checks.collaborators = collabs.json ?? collabs.stdout.trim();
   } else {
-    report.checks.collaborators = `ERR: ${collabs.stderr?.split('\n')[0] ?? collabs.code}`;
+    report.checks.collaborators = `ERR: ${collabs.stderr.split('\n')[0] ?? collabs.code}`;
   }
 }
 
@@ -154,7 +195,7 @@ if (name?.startsWith('@')) {
   const [s, p] = name.slice(1).split('/');
   report.checks.trustedPublisherSettingsUrl = `https://www.npmjs.com/settings/${s}/packages?q=${p}`;
   report.checks.trustedPublisherPackageUrl = `https://www.npmjs.com/package/${name}/access`;
-} else {
+} else if (name) {
   report.checks.trustedPublisherPackageUrl = `https://www.npmjs.com/package/${name}/access`;
 }
 
@@ -162,13 +203,15 @@ if (name?.startsWith('@')) {
 const hasPublishConfig = pkg.publishConfig?.access === 'public';
 const existsOrNew =
   report.checks.exists === true || report.checks.exists === false;
-report.readyForCi = hasPublishConfig && existsOrNew && name && pkg.version;
+report.readyForCi = Boolean(
+  hasPublishConfig && existsOrNew && name && pkg.version,
+);
 
 // Human summary
 const symbol = report.readyForCi ? '✓' : '✗';
 const existsTag =
   report.checks.exists === true
-    ? `on npm @ ${report.checks.latestVersion}`
+    ? `on npm @ ${report.checks.latestVersion as string}`
     : report.checks.exists === false
       ? 'NOT on npm — first publish'
       : 'npm state unknown';

@@ -50,7 +50,7 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
     const targetName = options.targetName ?? 'npm-check';
     const registry = options.registry ?? 'https://registry.npmjs.org/';
 
-    const scriptPath = join(__dirname, 'check.mjs');
+    const scriptPath = join(__dirname, 'check.ts');
 
     return configFiles
       .map((configFile) => {
@@ -88,7 +88,7 @@ export const createNodesV2: CreateNodesV2<NxNpmAccessOptions> = [
         const target = {
           executor: 'nx:run-commands' as const,
           options: {
-            command: `node ${JSON.stringify(scriptPath)} --registry=${registry}`,
+            command: `bun ${JSON.stringify(scriptPath)} --registry=${registry}`,
             cwd: projectRoot,
             // Prevents nx from swallowing stderr from npm.
             forwardAllArgs: false,
