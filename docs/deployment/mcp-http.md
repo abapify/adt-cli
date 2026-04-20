@@ -185,9 +185,7 @@ Schema (matches `MultiSystemConfig` in `packages/adt-mcp/src/lib/http/multi-syst
 {
   "DEV": {
     "baseUrl": "https://dev.example.com:44300",
-    "client": "100",
-    "username": "DEVELOPER",
-    "password": "..."
+    "client": "100"
   },
   "QAS": {
     "baseUrl": "https://qas.example.com:44300",
@@ -198,14 +196,14 @@ Schema (matches `MultiSystemConfig` in `packages/adt-mcp/src/lib/http/multi-syst
 
 Fields:
 
-| Field      | Required | Description                                                                                         |
-| ---------- | -------- | --------------------------------------------------------------------------------------------------- |
-| `baseUrl`  | ✅       | Full SAP base URL incl. port.                                                                       |
-| `client`   | —        | SAP client number.                                                                                  |
-| `username` | —        | Default user — the client may override per-session.                                                 |
-| `password` | —        | Default password — prefer secrets injection (`docker secret`, Kubernetes `Secret`) over this field. |
+| Field     | Required | Description                   |
+| --------- | -------- | ----------------------------- |
+| `baseUrl` | ✅       | Full SAP base URL incl. port. |
+| `client`  | —        | SAP client number.            |
 
-Resolution: `sap_connect { systemId: "DEV" }` replaces any missing fields from the registry entry, then performs the SAP handshake. A client-supplied `baseUrl`/`username`/`password` in the same call overrides the registry.
+**Credentials are never read from disk.** Any `username` / `password` keys in the JSON are dropped with a stderr warning on load. Credentials must always be supplied at runtime via the `sap_connect` tool call (directly, or via an external secrets injector that renders into the call). This is enforced by `normalise()` in `multi-system.ts` and is deliberate — on-disk credentials conflict with the "zero persisted secrets" goal of this deployment.
+
+Resolution: `sap_connect { systemId: "DEV", username, password }` merges `baseUrl` + `client` from the registry with the call-supplied credentials, then performs the SAP handshake. An explicit `baseUrl` in the same call is mutually exclusive with `systemId` and will be rejected.
 
 ## Client examples
 

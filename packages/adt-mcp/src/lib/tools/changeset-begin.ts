@@ -49,13 +49,23 @@ export function registerChangesetBeginTool(
               `Call changeset_commit/rollback, or pass force=true to auto-rollback.`,
           );
         }
-        // Force-rollback prior (best-effort).
+        // Force-rollback prior. If rollback fails we MUST NOT proceed —
+        // overwriting session.changeset would orphan its lock handles
+        // and leak SAP locks until the security session times out.
         try {
-          await new ChangesetService(session.client).rollback(
-            session.changeset,
+          const prior = session.changeset;
+          const result = await new ChangesetService(session.client).rollback(
+            prior,
           );
-        } catch {
-          /* best-effort */
+          for (const uri of result.released) session.locks.delete(uri);
+        } catch (err) {
+          return textError(
+            `changeset_begin force=true could not roll back the prior ` +
+              `changeset (id=${session.changeset.id}): ` +
+              `${err instanceof Error ? err.message : String(err)}. ` +
+              `Call changeset_rollback explicitly, or wait for the SAP ` +
+              `security session to expire.`,
+          );
         }
       }
 
