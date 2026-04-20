@@ -1,4 +1,4 @@
-import type { AbapNode, Identifier, Visibility } from './base';
+import type { AbapDoc, AbapNode, Identifier, Visibility } from './base';
 import { AbapAstError } from './errors';
 import type { TypeDef } from './types';
 import type { ConstantDecl } from './data';
@@ -65,6 +65,7 @@ export function classDef(input: {
   isCreatePrivate?: boolean;
   sections?: readonly Section[];
   implementations?: readonly MethodImpl[];
+  abapDoc?: AbapDoc;
 }): ClassDef {
   if (!input.name) {
     throw new AbapAstError('ClassDef: required field "name" is missing');
@@ -83,6 +84,7 @@ export function classDef(input: {
     isCreatePrivate: input.isCreatePrivate,
     sections: Object.freeze([...(input.sections ?? [])]),
     implementations: Object.freeze([...(input.implementations ?? [])]),
+    abapDoc: input.abapDoc ? Object.freeze([...input.abapDoc]) : undefined,
   });
 }
 

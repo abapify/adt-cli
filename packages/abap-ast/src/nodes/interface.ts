@@ -1,4 +1,4 @@
-import type { AbapNode, Identifier } from './base';
+import type { AbapDoc, AbapNode, Identifier } from './base';
 import { AbapAstError } from './errors';
 import type { TypeDef } from './types';
 import type { MethodDef } from './members';
@@ -16,6 +16,7 @@ export interface InterfaceDef extends AbapNode {
 export function interfaceDef(input: {
   name: Identifier;
   members?: readonly InterfaceMember[];
+  abapDoc?: AbapDoc;
 }): InterfaceDef {
   if (!input.name) {
     throw new AbapAstError('InterfaceDef: required field "name" is missing');
@@ -32,5 +33,6 @@ export function interfaceDef(input: {
     kind: 'InterfaceDef' as const,
     name: input.name,
     members: Object.freeze([...members]),
+    abapDoc: input.abapDoc ? Object.freeze([...input.abapDoc]) : undefined,
   });
 }

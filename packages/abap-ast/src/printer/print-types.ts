@@ -1,5 +1,19 @@
 import type { Writer } from './writer';
+import type { AbapDoc } from '../nodes/base';
 import type { TypeRef, EnumType, TypeDef } from '../nodes/types';
+
+/**
+ * Emit each ABAPDoc line as `"! <line>` at the current indent, immediately
+ * above the following declaration. Does nothing when `doc` is undefined or
+ * empty. Content is passed through verbatim — tabs and special characters
+ * are preserved.
+ */
+export function printAbapDoc(doc: AbapDoc | undefined, writer: Writer): void {
+  if (!doc || doc.length === 0) return;
+  for (const line of doc) {
+    writer.writeLine(line.length === 0 ? '"!' : `"! ${line}`);
+  }
+}
 
 /** Print a TypeRef as an inline type expression (e.g. 'string', 'i', 'zcl_foo'). */
 export function printInlineType(type: TypeRef, writer: Writer): string {
@@ -29,6 +43,7 @@ export function printInlineType(type: TypeRef, writer: Writer): string {
 
 /** Print a TYPES top-level declaration. */
 export function printTypeDef(node: TypeDef, writer: Writer): void {
+  printAbapDoc(node.abapDoc, writer);
   const K = (s: string): string => writer.kw(s);
   const t: TypeRef | EnumType = node.type;
   if (t.kind === 'StructureType') {

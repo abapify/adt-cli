@@ -7,11 +7,12 @@ import type {
   MethodParam,
 } from '../nodes/members';
 import type { ConstantDecl } from '../nodes/data';
-import { printInlineType } from './print-types';
+import { printInlineType, printAbapDoc } from './print-types';
 import { printExpression } from './print-expressions';
 import { printStatements } from './print-statements';
 
 export function printAttributeDef(node: AttributeDef, writer: Writer): void {
+  printAbapDoc(node.abapDoc, writer);
   const K = (s: string): string => writer.kw(s);
   const kw = node.classData ? K('CLASS-DATA') : K('DATA');
   const type = printInlineType(node.type, writer);
@@ -86,6 +87,7 @@ function printParamBody(p: MethodParam, writer: Writer): string {
 }
 
 export function printMethodDef(node: MethodDef, writer: Writer): void {
+  printAbapDoc(node.abapDoc, writer);
   const K = (s: string): string => writer.kw(s);
   const flagsPrefix = node.isClassMethod ? K('CLASS-METHODS') : K('METHODS');
   const suffixFlags: string[] = [];

@@ -1,4 +1,4 @@
-import type { AbapNode, Identifier, Visibility } from './base';
+import type { AbapDoc, AbapNode, Identifier, Visibility } from './base';
 import { AbapAstError } from './errors';
 import type { TypeRef } from './types';
 import type { Expression } from './expressions';
@@ -77,6 +77,7 @@ export function methodDef(input: {
   isFinal?: boolean;
   isRedefinition?: boolean;
   isForTesting?: boolean;
+  abapDoc?: AbapDoc;
 }): MethodDef {
   if (!input.name) {
     throw new AbapAstError('MethodDef: required field "name" is missing');
@@ -113,6 +114,7 @@ export function methodDef(input: {
     isFinal: input.isFinal,
     isRedefinition: input.isRedefinition,
     isForTesting: input.isForTesting,
+    abapDoc: input.abapDoc ? Object.freeze([...input.abapDoc]) : undefined,
   });
 }
 
@@ -185,6 +187,7 @@ export function attributeDef(input: {
   classData?: boolean;
   readOnly?: boolean;
   initial?: Expression;
+  abapDoc?: AbapDoc;
 }): AttributeDef {
   if (!input.name) {
     throw new AbapAstError('AttributeDef: required field "name" is missing');
@@ -205,5 +208,6 @@ export function attributeDef(input: {
     classData: input.classData,
     readOnly: input.readOnly,
     initial: input.initial,
+    abapDoc: input.abapDoc ? Object.freeze([...input.abapDoc]) : undefined,
   });
 }

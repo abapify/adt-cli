@@ -1,9 +1,10 @@
 import type { Writer } from './writer';
 import type { InterfaceDef } from '../nodes/interface';
-import { printTypeDef } from './print-types';
+import { printTypeDef, printAbapDoc } from './print-types';
 import { printMethodDef } from './print-members';
 
 export function printInterfaceDef(node: InterfaceDef, writer: Writer): void {
+  printAbapDoc(node.abapDoc, writer);
   const K = (s: string): string => writer.kw(s);
   writer.writeLine(`${K('INTERFACE')} ${node.name} ${K('PUBLIC')}.`);
   writer.indent();

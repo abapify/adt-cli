@@ -1,4 +1,4 @@
-import type { AbapNode, Identifier } from './base';
+import type { AbapDoc, AbapNode, Identifier } from './base';
 import { AbapAstError } from './errors';
 
 /** ABAP builtin type names allowed in the AST. */
@@ -181,6 +181,7 @@ export interface TypeDef extends AbapNode {
 export function typeDef(input: {
   name: Identifier;
   type: TypeRef | EnumType;
+  abapDoc?: AbapDoc;
 }): TypeDef {
   if (!input.name) {
     throw new AbapAstError('TypeDef: required field "name" is missing');
@@ -192,5 +193,6 @@ export function typeDef(input: {
     kind: 'TypeDef' as const,
     name: input.name,
     type: input.type,
+    abapDoc: input.abapDoc ? Object.freeze([...input.abapDoc]) : undefined,
   });
 }

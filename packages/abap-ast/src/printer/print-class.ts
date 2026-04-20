@@ -1,7 +1,7 @@
 import type { Writer } from './writer';
 import type { ClassDef, LocalClassDef, Section } from '../nodes/class';
 import type { Visibility } from '../nodes/base';
-import { printTypeDef } from './print-types';
+import { printTypeDef, printAbapDoc } from './print-types';
 import {
   printAttributeDef,
   printConstantDecl,
@@ -101,6 +101,7 @@ function printImplementations(
 }
 
 export function printClassDef(node: ClassDef, writer: Writer): void {
+  printAbapDoc(node.abapDoc, writer);
   const K = (s: string): string => writer.kw(s);
   printDefinitionHeader(
     node.name,
