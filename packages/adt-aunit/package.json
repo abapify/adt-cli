@@ -34,5 +34,14 @@
     "@abapify/adt-contracts": "workspace:*",
     "@abapify/adt-plugin-abapgit": "workspace:*"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-aunit"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-aunit#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

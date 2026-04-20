@@ -25,5 +25,14 @@
     "@abapify/adt-plugin": "workspace:*",
     "@abapify/adt-schemas": "workspace:*",
     "@abapify/ts-xsd": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-plugin-abapgit"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-plugin-abapgit#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

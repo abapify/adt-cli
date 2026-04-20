@@ -33,5 +33,14 @@
     "oauth"
   ],
   "author": "Booking.com",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-auth"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-auth#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

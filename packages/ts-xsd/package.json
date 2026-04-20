@@ -25,5 +25,14 @@
     "@xmldom/xmldom": "^0.9.9",
     "ts-morph": "*",
     "zod": "^3.24.0 || ^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/ts-xsd"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/ts-xsd#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

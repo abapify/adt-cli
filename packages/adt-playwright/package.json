@@ -24,5 +24,14 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-playwright"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-playwright#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

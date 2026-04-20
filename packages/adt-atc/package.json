@@ -31,5 +31,14 @@
     "@abapify/adt-plugin": "workspace:*",
     "chalk": "^5.3.0"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-atc"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-atc#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

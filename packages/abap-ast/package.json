@@ -23,5 +23,14 @@
     "sap"
   ],
   "author": "abapify",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/abap-ast"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/abap-ast#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

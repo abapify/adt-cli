@@ -38,5 +38,14 @@
   "module": "./dist/index.mjs",
   "devDependencies": {
     "@abapify/adt-fixtures": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-diff"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-diff#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

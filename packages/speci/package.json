@@ -25,5 +25,14 @@
     "client-generation",
     "openapi"
   ],
-  "dependencies": {}
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/speci"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/speci#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

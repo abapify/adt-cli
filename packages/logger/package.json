@@ -22,5 +22,14 @@
     "adt"
   ],
   "author": "abapify",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/logger"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/logger#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

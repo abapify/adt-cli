@@ -37,5 +37,14 @@
     "diff": "^8.0.3",
     "fast-xml-parser": "^5.5.5"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-export"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-export#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

@@ -19,5 +19,14 @@
     "@abapify/adt-client": "workspace:*",
     "@abapify/adt-locks": "workspace:*",
     "@abapify/adt-schemas": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adk"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adk#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

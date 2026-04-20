@@ -54,5 +54,14 @@
   },
   "bin": {
     "adt": "./dist/bin/adt.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-cli"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-cli#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

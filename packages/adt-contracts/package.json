@@ -23,5 +23,14 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-contracts"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-contracts#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

@@ -14,5 +14,18 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-locks"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-locks#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

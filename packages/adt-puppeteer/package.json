@@ -24,5 +24,14 @@
   },
   "peerDependencies": {
     "puppeteer": ">=22.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-puppeteer"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-puppeteer#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

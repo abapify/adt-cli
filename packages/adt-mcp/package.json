@@ -45,5 +45,14 @@
     "@xmldom/xmldom": "^0.9.9",
     "jose": "^6.2.1",
     "zod": "^3.24.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-mcp"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

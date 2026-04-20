@@ -21,5 +21,14 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/browser-auth"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/browser-auth#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }
