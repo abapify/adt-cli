@@ -1,3 +1,18 @@
+## 0.3.1 (2026-04-20)
+
+### 🚀 Features
+
+- **aclass:** Wave 0 — package skeleton + Chevrotain lexer ([78a31f33](https://github.com/abapify/adt-cli/commit/78a31f33))
+
+### 🩹 Fixes
+
+- **ci:** unblock v0.3.x release — npm scope override + Docker website workspace ([02d66b1b](https://github.com/abapify/adt-cli/commit/02d66b1b))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.3.0 (2026-04-20)
 
 ### 🚀 Features
