@@ -176,7 +176,27 @@ function buildOperationBody(
     successBody,
   });
 
-  return [raw({ source: fetchSource }), caseResult.statement];
+  // Wrap the body in TRY/CATCH so that kernel HTTP exceptions
+  // (CX_WEB_HTTP_CLIENT_ERROR, CX_HTTP_DEST_PROVIDER_ERROR) are translated
+  // into the codegen's own exception type. This keeps the public method
+  // signature RAISING only the generated exception class and satisfies the
+  // Steampunk 'exception not caught or declared' activation warning.
+  const excName = ctx.exceptionClassName;
+  return [
+    raw({ source: 'TRY.' }),
+    raw({ source: fetchSource }),
+    caseResult.statement,
+    raw({
+      source: `  CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).`,
+    }),
+    raw({
+      source:
+        `    RAISE EXCEPTION NEW ${excName}(\n` +
+        `      status      = 0\n` +
+        `      description = _http_err->get_text( ) ).`,
+    }),
+    raw({ source: 'ENDTRY.' }),
+  ];
 }
 
 // -----------------------------------------------------------------------
@@ -195,11 +215,17 @@ function renderFetchCall(
 
   const queryParams = mapping.params.filter((p) => p.location === 'query');
   if (queryParams.length > 0) {
+    // Non-table params become direct entries; table params use FOR loop
+    // comprehensions. Both forms mix inside a single VALUE #( ... ) table.
     const items = queryParams
-      .map(
-        (p) =>
-          `( name = '${escapeSingleQuotes(p.openapiName)}' value = ${p.name} )`,
-      )
+      .map((p) => {
+        const key = escapeSingleQuotes(p.openapiName);
+        if (p.isTable) {
+          const loopVar = `_${p.name}`;
+          return `FOR ${loopVar} IN ${p.name} ( name = '${key}' value = ${loopVar} )`;
+        }
+        return `( name = '${key}' value = ${p.name} )`;
+      })
       .join(' ');
     args.push({ key: 'query', value: `VALUE #( ${items} )` });
   }

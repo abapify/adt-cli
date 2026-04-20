@@ -189,6 +189,7 @@ describe('emitImplementationClass (Petstore v3)', () => {
     const body = extractMethod(source, 'zif_petstore~get_pet_by_id');
     expect(body).toMatchInlineSnapshot(`
       "  METHOD zif_petstore~get_pet_by_id.
+          TRY.
           DATA(response) = client->fetch( method = 'GET' path = |/pet/{ pet_id }| ).
           CASE response->status( ).
             WHEN 200.
@@ -209,6 +210,11 @@ describe('emitImplementationClass (Petstore v3)', () => {
                 description = 'Unexpected error'
                 body        = response->body( ) ).
           ENDCASE.
+            CATCH cx_web_http_client_error cx_http_dest_provider_error INTO DATA(_http_err).
+              RAISE EXCEPTION NEW zcx_petstore_error(
+                status      = 0
+                description = _http_err->get_text( ) ).
+          ENDTRY.
         ENDMETHOD."
     `);
   });

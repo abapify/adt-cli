@@ -71,6 +71,8 @@ export interface OperationParamMapping {
   readonly location: 'path' | 'query' | 'header';
   readonly required: boolean;
   readonly typeRefSource: string;
+  /** True when the ABAP type is a STANDARD TABLE (array) alias. */
+  readonly isTable: boolean;
 }
 
 export interface OperationMapping {
@@ -497,6 +499,7 @@ export function emitOperationsInterface(
         location: p.in as 'path' | 'query' | 'header',
         required: p.required,
         typeRefSource: renderTypeRefSource(ref),
+        isTable: pluckType(p.schema) === 'array',
       });
     }
 
