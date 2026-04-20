@@ -81,11 +81,27 @@ describe('emitLocalClasses — localsImp', () => {
 describe('emitLocalClasses — ZERO Z-dependencies', () => {
   it('does not reference any Z-prefixed symbol', () => {
     const { localsDef, localsImp } = emitLocalClasses(defaultNames);
-    const zRef = /\b[zZ][a-zA-Z0-9_]*_[a-zA-Z0-9_]+/;
-    // allow the header comment mention only; the generator keeps the
-    // exception name out of the body entirely, so no Z-token at all.
-    expect(localsDef).not.toMatch(zRef);
-    expect(localsImp).not.toMatch(zRef);
+    // Broad match: any token that starts with Z/z and is 3+ chars, either
+    // underscore-containing (`ZCL_FOO`, `z_bar`) or solid (`ZFOO`, `zbar`).
+    // The rationale the reviewer flagged is that solid names like `ZAPI`
+    // or `ZCLIENT` should also be caught — restricting the match to
+    // underscore-containing forms was too narrow.
+    const zRef = /\b[Zz][A-Za-z0-9_]{2,}\b/;
+    // The comment-stripped payload must contain zero Z-tokens so we are
+    // truly dependency-free. The banner `* ZERO Z-dependencies` is only a
+    // doc line at the top of the emitted source — strip comment-only lines
+    // (`*` / `"` prefixes) before matching so the assertion checks the
+    // actual code, not the banner.
+    const stripComments = (src: string): string =>
+      src
+        .split('\n')
+        .filter((l) => {
+          const t = l.trimStart();
+          return !t.startsWith('*') && !t.startsWith('"');
+        })
+        .join('\n');
+    expect(stripComments(localsDef)).not.toMatch(zRef);
+    expect(stripComments(localsImp)).not.toMatch(zRef);
   });
 
   it('does not reference legacy or banned APIs', () => {
