@@ -56,6 +56,26 @@ jobs:
           npm install -g npm@^11.10.0
           npm --version
 
+      - name: Force npm as nx release publish driver (for this job only)
+        # nx.json keeps `cli.packageManager: bun` globally — bun is the
+        # monorepo's workspace package manager, handles `workspace:*`
+        # dependency protocol etc. But Nx 22's @nx/js:release-publish
+        # honours that setting and invokes `bun publish`, which does NOT
+        # support OIDC trusted publishing and errors with `missing
+        # authentication`. Switching nx.json permanently breaks
+        # `nx release version` (npm can't resolve `workspace:*`), so we
+        # flip it to npm in this job only and leave the committed file
+        # alone.
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            const p = 'nx.json';
+            const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+            j.cli = { ...(j.cli ?? {}), packageManager: 'npm' };
+            fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+          "
+          grep -A1 '\"cli\"' nx.json
+
       - name: Publish packages
         run: npx nx release publish
         shell: bash
