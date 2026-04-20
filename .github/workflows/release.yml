@@ -117,7 +117,7 @@ jobs:
       version: ${{ needs.release.outputs.tag }}
     permissions:
       contents: read
-      id-token: write
+      id-token: write # needed for npm OIDC trusted publishing
 
   publish-gpr:
     name: Publish packages to GitHub Packages
