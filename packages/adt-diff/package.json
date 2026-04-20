@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-diff",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Diff CLI plugin for adt-cli - compare local serialized files against SAP remote source",
   "license": "MIT",
   "publishConfig": {

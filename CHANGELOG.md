@@ -1,3 +1,15 @@
+## 0.3.4 (2026-04-20)
+
+### 🩹 Fixes
+
+- **ci:** clear setup-node .npmrc to enable OIDC trusted publishing ([aa9199fa](https://github.com/abapify/adt-cli/commit/aa9199fa))
+- **ci:** nuke repo .npmrc entirely in publish job to unblock OIDC ([ab0d30d0](https://github.com/abapify/adt-cli/commit/ab0d30d0))
+- **packages:** add repository/homepage/bugs to every published package ([e1853e48](https://github.com/abapify/adt-cli/commit/e1853e48))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+
 ## 0.3.3 (2026-04-20)
 
 ### 🩹 Fixes

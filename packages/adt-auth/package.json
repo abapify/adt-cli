@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Authentication package for SAP ADT systems - supports multiple auth methods",
   "type": "module",
   "types": "./dist/index.d.mts",
