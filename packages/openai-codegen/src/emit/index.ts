@@ -1,28 +1,9 @@
-export {
-  methodNameFor,
-  paramNameFor,
-  exceptionClassNameFor,
-  attributeNameFor,
-} from './identifiers';
-export {
-  buildImportingParams,
-  translateParameter,
-  translateRequestBody,
-  pickRequestMediaType,
-  makeMethodParamAllocator,
-} from './parameters';
-export type { ParamTranslation } from './parameters';
-export { pickSuccessResponse, buildReturning, buildRaising } from './responses';
-export type { ReturnShape } from './responses';
-export { buildOperationBody } from './operation-body';
-export type { BuildBodyContext } from './operation-body';
-export { emitSecuritySupport, collectUsedSchemes } from './security';
-export type { SecuritySupport } from './security';
-export { buildExceptionClass } from './exception-class';
-export {
-  emitServerConstants,
-  emitServerCtorParams,
-  resolveServerUrl,
-} from './server';
-export { emitClientClass, sanitizeStarComments } from './assemble';
-export type { EmitClientOptions, EmittedClient } from './assemble';
+// Wave 1/2 will populate this barrel. Emitters:
+//   - types-interface.ts       (Layer 1 — ZIF_<name>_TYPES)
+//   - operations-interface.ts  (Layer 2 — ZIF_<name>)
+//   - exception-class.ts       (ZCX_<name>_ERROR)
+//   - implementation-class.ts  (Layer 3 — ZCL_<name>)
+//   - local-classes.ts         (locals_def + locals_imp templates)
+//   - response-mapper.ts       (OpenAPI responses object → CASE ABAP)
+//   - naming.ts                (central name derivation from config)
+export {};
