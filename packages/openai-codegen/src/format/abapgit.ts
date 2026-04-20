@@ -48,6 +48,7 @@ function buildClasXml(
         <CLSCCINCL>X</CLSCCINCL>
         <FIXPT>X</FIXPT>
         <UNICODE>X</UNICODE>
+        <ABAP_LANGUAGE_VERSION>5</ABAP_LANGUAGE_VERSION>
       </VSEOCLASS>
     </asx:values>
   </asx:abap>
