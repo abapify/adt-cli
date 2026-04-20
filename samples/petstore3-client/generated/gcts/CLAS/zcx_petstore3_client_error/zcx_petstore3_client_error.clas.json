@@ -1,0 +1,16 @@
+{
+  "header": {
+    "formatVersion": "1.0",
+    "description": "Generated error type for ZCL_PETSTORE3_CLIENT",
+    "originalLanguage": "E"
+  },
+  "class": {
+    "name": "ZCX_PETSTORE3_CLIENT_ERROR",
+    "category": "00",
+    "visibility": "public",
+    "final": true,
+    "abstract": false,
+    "fixedPointArithmetic": true,
+    "unicodeChecksActive": true
+  }
+}
