@@ -138,16 +138,28 @@ function firstErrorLine(stderr: string): string {
   );
 }
 
+interface NpmCallOptions {
+  /** Append `--json`. Disable for subcommands that reject it (e.g. older
+   * versions of `npm trust`). Default: true. */
+  jsonOutput?: boolean;
+  /** Append `--@<scope>:registry=<registry>` to bypass the repo-level
+   * `.npmrc` scope pin. Disable for subcommands that don't accept
+   * unknown flags (e.g. `npm trust github`, which rejects it with
+   * `EUSAGE Unknown flag`). Default: true. */
+  scopeRegistry?: boolean;
+}
+
 /**
  * Run an npm subcommand. We deliberately do NOT inherit the repo `.npmrc` —
- * instead we pass registry overrides explicitly. `--json` is opt-in via
- * `jsonOutput: true` because some subcommands (notably `npm trust github`)
- * reject it with `EUSAGE`.
+ * instead we pass registry overrides explicitly for read-only probes. For
+ * subcommands that don't parse arbitrary flags (`npm trust …`), pass
+ * `{ scopeRegistry: false, jsonOutput: false }`.
  */
-function npm(cmdArgs: string[], jsonOutput = true): NpmResult {
+function npm(cmdArgs: string[], opts: NpmCallOptions = {}): NpmResult {
+  const { jsonOutput = true, scopeRegistry = true } = opts;
   const extra = [
     `--registry=${registry}`,
-    ...scopeFlag,
+    ...(scopeRegistry ? scopeFlag : []),
     ...(jsonOutput ? ['--json'] : []),
   ];
   const result = spawnSync('npm', [...cmdArgs, ...extra], {
@@ -336,7 +348,20 @@ if (name) {
 // Mirrors the logic of the `/npm-publish prepare-ci` skill, but per package
 // and driven by nx (so it plays well with `run-many`).
 if (prepare && name) {
-  if (trustProvider === 'github' && !trustRepo) {
+  // `npm trust` CLI requires npm >= 11.10.0. Older versions silently
+  // ignore unknown flags and emit cryptic warnings, which masks the
+  // real cause. Fail fast with an actionable message instead.
+  const versionResult = spawnSync('npm', ['--version'], {
+    encoding: 'utf-8',
+  });
+  const npmVersion = (versionResult.stdout ?? '').trim();
+  const [maj, min] = npmVersion.split('.').map((n) => parseInt(n, 10));
+  const hasTrust = maj > 11 || (maj === 11 && min >= 10);
+  if (!hasTrust) {
+    report.problems.push(
+      `--prepare needs npm >= 11.10.0 for \`npm trust\` (detected ${npmVersion || 'unknown'}) — run \`npm i -g npm@latest\``,
+    );
+  } else if (trustProvider === 'github' && !trustRepo) {
     report.problems.push(
       '--prepare --trust-provider=github requires --trust-repo=<owner/repo>',
     );
@@ -407,10 +432,12 @@ if (prepare && name) {
               name,
               '--file',
               trustWorkflow,
-              '--namespace',
-              trustNamespace,
+              // `npm trust gitlab` takes a single --project=<namespace>/<project>
+              // identifier; it does NOT accept separate --namespace + --project.
               '--project',
-              trustProject,
+              trustNamespace && trustProject
+                ? `${trustNamespace}/${trustProject}`
+                : trustProject,
               '--yes',
             ]
           : null;
@@ -420,7 +447,15 @@ if (prepare && name) {
         `unsupported --trust-provider=${trustProvider} (expected github|gitlab)`,
       );
     } else {
-      const trustResult = npm(trustArgs, false);
+      const trustResult = npm(trustArgs, {
+        // `npm trust github` is a strict-argv command — it rejects unknown
+        // flags with EUSAGE, so we must not append the scope registry
+        // override here. `--json` is supported by `npm trust` on modern
+        // npm (>= 11.10), but we keep it off to be conservative and let
+        // `firstErrorLine` handle the plain-text output.
+        jsonOutput: false,
+        scopeRegistry: false,
+      });
       if (trustResult.code === 0) {
         report.fixes.push(
           `npm trust ${trustProvider} ${name} → ${trustRepo || `${trustNamespace}/${trustProject}`} / ${trustWorkflow}`,
