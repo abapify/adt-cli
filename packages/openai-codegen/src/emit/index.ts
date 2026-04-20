@@ -1,9 +1,12 @@
-// Wave 1/2 will populate this barrel. Emitters:
-//   - types-interface.ts       (Layer 1 — ZIF_<name>_TYPES)
-//   - operations-interface.ts  (Layer 2 — ZIF_<name>)
-//   - exception-class.ts       (ZCX_<name>_ERROR)
-//   - implementation-class.ts  (Layer 3 — ZCL_<name>)
-//   - local-classes.ts         (locals_def + locals_imp templates)
-//   - response-mapper.ts       (OpenAPI responses object → CASE ABAP)
-//   - naming.ts                (central name derivation from config)
-export {};
+/**
+ * Barrel for the emitter wave. Wave 1 + Wave 2 modules are re-exported
+ * here; the implementation-class emitter is owned by a parallel Wave 2
+ * agent and may not exist yet — when absent, `generate.ts` uses an
+ * inline placeholder.
+ */
+export * from './naming';
+export * from './types-interface';
+export * from './operations-interface';
+export * from './exception-class';
+export * from './local-classes';
+export * from './response-mapper';

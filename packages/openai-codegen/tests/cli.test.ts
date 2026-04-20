@@ -98,9 +98,9 @@ describe('openai-codegen CLI', () => {
       input: 'a',
       out: 'b',
       base: 'shop',
-      target: 's4-onprem',
+      target: 's4-onprem-modern',
     });
-    expect(opts.target).toBe('s4-onprem');
+    expect(opts.target).toBe('s4-onprem-modern');
   });
 
   it('carries description through buildGenerateOptions', () => {

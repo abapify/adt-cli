@@ -25,6 +25,19 @@ export interface ClassArtifact {
   language?: string;
 }
 
+export interface InterfaceArtifact {
+  /** UPPERCASE ABAP interface name, e.g. 'ZIF_PETSTORE_TYPES'. */
+  name: string;
+  /** The printed ABAP interface source. */
+  source: string;
+  /** Optional description used in the .intf.xml DESCRIPT. */
+  description?: string;
+  /** ADT language key, default 'E'. */
+  language?: string;
+}
+
+export type ArtifactKind = 'class' | 'interface';
+
 export interface WriteResult {
   /** Relative paths written, sorted, forward-slash normalised. */
   files: readonly string[];

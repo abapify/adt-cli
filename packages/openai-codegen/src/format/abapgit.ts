@@ -18,7 +18,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { ClassArtifact, WriteResult } from './types';
+import type { ClassArtifact, InterfaceArtifact, WriteResult } from './types';
 import { assertValidClassName } from './validate';
 
 const PACKAGE_DEVC_XML = `<?xml version="1.0" encoding="utf-8"?>
@@ -113,6 +113,65 @@ export async function writeAbapgitLayout(
     await writeFile(p, artifact.localsImpSource, 'utf-8');
     written.push(`src/${base}.clas.locals_imp.abap`);
   }
+
+  written.sort();
+  return { files: written };
+}
+
+function buildIntfXml(
+  name: string,
+  description: string,
+  language: string,
+): string {
+  return `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_INTF" serializer_version="v1.0.0">
+  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+    <asx:values>
+      <VSEOINTERF>
+        <CLSNAME>${name}</CLSNAME>
+        <LANGU>${language}</LANGU>
+        <DESCRIPT>${escapeXml(description)}</DESCRIPT>
+        <EXPOSURE>2</EXPOSURE>
+        <STATE>1</STATE>
+        <UNICODE>X</UNICODE>
+        <ABAP_LANGUAGE_VERSION>5</ABAP_LANGUAGE_VERSION>
+      </VSEOINTERF>
+    </asx:values>
+  </asx:abap>
+</abapGit>
+`;
+}
+
+export async function writeAbapgitInterface(
+  artifact: InterfaceArtifact,
+  outDir: string,
+): Promise<WriteResult> {
+  assertValidClassName(artifact.name);
+
+  const language = artifact.language ?? 'E';
+  const description = artifact.description ?? artifact.name;
+  const base = artifact.name.toLowerCase();
+
+  const srcDir = join(outDir, 'src');
+  await mkdir(srcDir, { recursive: true });
+
+  const written: string[] = [];
+
+  const pkgPath = join(outDir, 'package.devc.xml');
+  await writeFile(pkgPath, PACKAGE_DEVC_XML, 'utf-8');
+  written.push('package.devc.xml');
+
+  const intfAbap = join(srcDir, `${base}.intf.abap`);
+  await writeFile(intfAbap, artifact.source, 'utf-8');
+  written.push(`src/${base}.intf.abap`);
+
+  const intfXml = join(srcDir, `${base}.intf.xml`);
+  await writeFile(
+    intfXml,
+    buildIntfXml(artifact.name, description, language),
+    'utf-8',
+  );
+  written.push(`src/${base}.intf.xml`);
 
   written.sort();
   return { files: written };

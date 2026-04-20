@@ -21,7 +21,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { ClassArtifact, WriteResult } from './types';
+import type { ClassArtifact, InterfaceArtifact, WriteResult } from './types';
 import { assertValidClassName } from './validate';
 
 const PACKAGE_DEVC_JSON =
@@ -110,6 +110,71 @@ export async function writeGctsLayout(
     await writeFile(p, artifact.localsDefSource, 'utf-8');
     written.push(`CLAS/${base}/${base}.clas.locals_def.abap`);
   }
+
+  if (artifact.localsImpSource !== undefined) {
+    const p = join(objectDir, `${base}.clas.locals_imp.abap`);
+    await writeFile(p, artifact.localsImpSource, 'utf-8');
+    written.push(`CLAS/${base}/${base}.clas.locals_imp.abap`);
+  }
+
+  written.sort();
+  return { files: written };
+}
+
+function buildIntfJson(
+  name: string,
+  description: string,
+  language: string,
+): string {
+  return (
+    JSON.stringify(
+      {
+        header: {
+          formatVersion: '1.0',
+          description,
+          originalLanguage: language,
+        },
+        interface: {
+          name,
+          visibility: 'public',
+        },
+      },
+      null,
+      2,
+    ) + '\n'
+  );
+}
+
+export async function writeGctsInterface(
+  artifact: InterfaceArtifact,
+  outDir: string,
+): Promise<WriteResult> {
+  assertValidClassName(artifact.name);
+
+  const language = artifact.language ?? 'E';
+  const description = artifact.description ?? artifact.name;
+  const base = artifact.name.toLowerCase();
+  const objectDir = join(outDir, 'INTF', base);
+
+  await mkdir(objectDir, { recursive: true });
+
+  const written: string[] = [];
+
+  const pkgPath = join(outDir, 'package.devc.json');
+  await writeFile(pkgPath, PACKAGE_DEVC_JSON, 'utf-8');
+  written.push('package.devc.json');
+
+  const metaPath = join(objectDir, `${base}.intf.json`);
+  await writeFile(
+    metaPath,
+    buildIntfJson(artifact.name, description, language),
+    'utf-8',
+  );
+  written.push(`INTF/${base}/${base}.intf.json`);
+
+  const mainPath = join(objectDir, `${base}.intf.abap`);
+  await writeFile(mainPath, artifact.source, 'utf-8');
+  written.push(`INTF/${base}/${base}.intf.abap`);
 
   written.sort();
   return { files: written };
