@@ -1,3 +1,16 @@
+## 0.3.5 (2026-04-20)
+
+### 🩹 Fixes
+
+- **ci:** propagate id-token: write to publish job in release.yml ([2074dfcc](https://github.com/abapify/adt-cli/commit/2074dfcc))
+- **ci:** disable Nx Cloud for publish job (org exceeded free plan) ([6a630228](https://github.com/abapify/adt-cli/commit/6a630228))
+- **ci:** set NX_NO_CLOUD=true in release version step too ([aa7ecf14](https://github.com/abapify/adt-cli/commit/aa7ecf14))
+- **release:** set preserveLocalDependencyProtocols=false so workspace:\* is resolved ([d201251d](https://github.com/abapify/adt-cli/commit/d201251d))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+
 ## 0.3.4 (2026-04-20)
 
 ### 🩹 Fixes

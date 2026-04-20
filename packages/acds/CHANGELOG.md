@@ -1,3 +1,7 @@
+## 0.3.5 (2026-04-20)
+
+This was a version bump only for @abapify/acds to align it with other projects, there were no code changes.
+
 ## 0.3.4 (2026-04-20)
 
 ### 🩹 Fixes
