@@ -49,6 +49,7 @@ jobs:
     permissions:
       contents: write # needed to push commits and tags
       id-token: write # needed for provenance data generation
+      actions: write # needed to dispatch publish.yml via `gh workflow run`
     timeout-minutes: 15
     outputs:
       tag: ${{ steps.get_tag.outputs.tag }}
