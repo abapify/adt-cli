@@ -101,6 +101,12 @@
     },
     {
       "path": "./packages/adt-rfc"
+    },
+    {
+      "path": "./packages/openai-codegen"
+    },
+    {
+      "path": "./packages/abap-ast"
     }
   ]
 }
