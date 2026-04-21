@@ -29,18 +29,12 @@ describe('petstore3 corpus — parser must accept every file the generator emits
     'parses $name with no lex errors and at least one top-level definition',
     ({ source, name }) => {
       const { ast, errors } = parse(source);
-      // Lex errors would indicate an unknown character in real output —
-      // every real token must be in the lexer's vocabulary.
-      const lexErrors = errors.filter((e) =>
-        /Unexpected character/.test(e.message),
-      );
-      expect(lexErrors, `lex errors in ${name}`).toEqual([]);
-
-      // locals_def / locals_imp files contain only local class
-      // declarations (CLASS <name> DEFINITION. … ENDCLASS.) — they ARE
-      // top-level from the parser's perspective, just without a ZCL_*
-      // wrapper. The file with opaque raw content ("method body only")
-      // still needs at least one definition.
+      // Zero tolerance: the fixture contract is "these generated files
+      // parse cleanly". Checking only lex errors would let new
+      // diagnostics (missing ENDCLASS, unknown shape in a class body,
+      // …) slip through unnoticed; gate on the full errors array
+      // instead.
+      expect(errors, `parse errors in ${name}`).toEqual([]);
       expect(
         ast.definitions.length,
         `${name} yielded zero top-level definitions`,

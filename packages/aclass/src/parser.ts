@@ -29,6 +29,7 @@ import type {
   ClassImpl,
   ClassMember,
   ConstantDecl,
+  EventDecl,
   InterfaceDef,
   InterfaceStmt,
   MethodDecl,
@@ -293,6 +294,25 @@ function parseClassDef(
   const name = headerTokens[1].image;
   const mods = headerTokens.slice(3);
 
+  // Forward declaration: `CLASS x DEFINITION DEFERRED.` / `… DEFINITION LOAD.`
+  // has no body and must NOT expect ENDCLASS.
+  const isForwardDecl = mods.some(
+    (t) => t.tokenType.name === 'Deferred' || t.tokenType.name === 'Load',
+  );
+  if (isForwardDecl) {
+    return {
+      kind: 'ClassDef',
+      name,
+      abapDoc,
+      isFinal: false,
+      isAbstract: false,
+      isForTesting: false,
+      createVisibility: 'public',
+      sections: [],
+      span: headerSpan,
+    };
+  }
+
   let isFinal = false;
   let isAbstract = false;
   let isForTesting = false;
@@ -347,9 +367,14 @@ function parseClassDef(
     if (sec) sections.push(sec);
     else break;
   }
-  // consume ENDCLASS.
+  // Consume the closing `ENDCLASS.` or report that it never arrived.
   if (c.matches('EndClass')) {
     c.collectStatement();
+  } else {
+    c.report(
+      `unterminated CLASS ${name} DEFINITION — expected ENDCLASS`,
+      headerTokens[0],
+    );
   }
 
   return {
@@ -387,6 +412,16 @@ function parseClassImpl(
   }
   if (c.matches('EndClass')) {
     c.collectStatement();
+  } else {
+    // No token handy — synthesise a diagnostic anchored at the header span.
+    c['errors'].push({
+      severity: 'error',
+      message: `unterminated CLASS ${name} IMPLEMENTATION — expected ENDCLASS`,
+      line: headerSpan.startLine,
+      column: headerSpan.startColumn,
+      offset: headerSpan.startOffset,
+      length: headerSpan.endOffset - headerSpan.startOffset + 1,
+    });
   }
   return { kind: 'ClassImpl', name, methods, span: headerSpan };
 }
@@ -396,7 +431,7 @@ function parseMethodImpl(c: Cursor): MethodImpl | null {
   const header = c.collectStatement();
   // header.tokens: [Method, Ident, …]
   const nameTok = header.tokens[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (!isNameLike(nameTok)) {
     c.report('expected method name after METHOD', nameTok ?? methodTok);
     return null;
   }
@@ -565,6 +600,9 @@ function parseMember(c: Cursor): ClassMember | null {
       return parseTypeDecl(c, abapDoc);
     case 'Constants':
       return parseConstantDecl(c, abapDoc);
+    case 'Events':
+    case 'ClassEvents':
+      return parseEventDecl(c, abapDoc);
     case 'Interfaces':
       return parseInterfaceStmt(c, abapDoc);
     case 'Aliases':
@@ -600,7 +638,7 @@ function parseMethodDecl(
   const toks = stmt.tokens;
   // toks: [Methods|ClassMethods, Ident, …]
   const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (!isNameLike(nameTok)) {
     c.report('expected method name', nameTok ?? head);
     return null;
   }
@@ -1065,6 +1103,42 @@ function parseConstantDecl(
     abapDoc,
     type: typeRes.type,
     value,
+    span: spanFromStmt(stmt, head),
+  };
+}
+
+// --- EVENTS / CLASS-EVENTS ---
+
+function parseEventDecl(
+  c: Cursor,
+  abapDoc: string[] | undefined,
+): EventDecl | null {
+  const head = c.current();
+  const isClassEvent = head.tokenType.name === 'ClassEvents';
+  const stmt = c.collectStatement();
+  const toks = stmt.tokens;
+  // toks: [Events|ClassEvents, Ident, [Exporting, <paramList…>]]
+  const nameTok = toks[1];
+  if (!isNameLike(nameTok)) {
+    c.report('expected event name', nameTok ?? head);
+    return null;
+  }
+  const exporting: MethodParam[] = [];
+  if (toks[2]?.tokenType.name === 'Exporting') {
+    let i = 3;
+    while (i < toks.length) {
+      const consumed = consumeMethodParam(toks, i, c);
+      if (!consumed) break;
+      exporting.push(consumed.param);
+      i = consumed.nextIndex;
+    }
+  }
+  return {
+    kind: 'EventDecl',
+    name: nameTok.image,
+    abapDoc,
+    isClassEvent,
+    exporting,
     span: spanFromStmt(stmt, head),
   };
 }

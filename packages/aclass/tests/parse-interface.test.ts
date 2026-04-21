@@ -193,11 +193,33 @@ describe('parse — CLASS declarations', () => {
     expect(stmt.name).toBe('zif_petstore3');
   });
 
-  it('preserves unrecognised members as RawMember', () => {
+  it('parses EVENTS into a typed EventDecl node', () => {
     const src = [
       'CLASS zcl_foo DEFINITION PUBLIC FINAL CREATE PUBLIC.',
       '  PUBLIC SECTION.',
-      '    EVENTS changed.', // EVENTS not in MVP grammar
+      '    EVENTS changed EXPORTING VALUE(payload) TYPE string.',
+      'ENDCLASS.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const cls = ast.definitions[0];
+    if (cls.kind !== 'ClassDef') return;
+    const ev = cls.sections[0].members[0];
+    expect(ev.kind).toBe('EventDecl');
+    if (ev.kind !== 'EventDecl') return;
+    expect(ev.name).toBe('changed');
+    expect(ev.isClassEvent).toBe(false);
+    expect(ev.exporting).toHaveLength(1);
+    expect(ev.exporting[0].name).toBe('payload');
+    expect(ev.exporting[0].isValue).toBe(true);
+    expect(ev.exporting[0].type.source).toBe('string');
+  });
+
+  it('preserves genuinely-unknown member statements as RawMember', () => {
+    const src = [
+      'CLASS zcl_foo DEFINITION PUBLIC FINAL CREATE PUBLIC.',
+      '  PUBLIC SECTION.',
+      '    WILDCARD something_unrecognised_by_mvp.', // truly outside MVP grammar
       'ENDCLASS.',
     ].join('\n');
     const { ast, errors } = parse(src);
@@ -207,8 +229,7 @@ describe('parse — CLASS declarations', () => {
     const raw = cls.sections[0].members[0];
     expect(raw.kind).toBe('RawMember');
     if (raw.kind !== 'RawMember') return;
-    expect(raw.source).toContain('EVENTS');
-    expect(raw.source).toContain('changed');
+    expect(raw.source).toContain('WILDCARD');
   });
 });
 
@@ -225,15 +246,17 @@ describe('parse — error handling', () => {
     expect(errors).toEqual([]);
   });
 
-  it('is robust against a missing ENDCLASS', () => {
+  it('is robust against a missing ENDCLASS, producing a best-effort AST + a diagnostic', () => {
     const { ast, errors } = parse(
       'CLASS zcl_x DEFINITION PUBLIC.\n  PUBLIC SECTION.\n',
     );
-    // Should not throw; produces at least the opening ClassDef.
+    // Doesn't throw; produces at least the opening ClassDef.
     expect(ast.definitions.length).toBeGreaterThan(0);
-    // Errors may or may not include diagnostics — the contract is only
-    // "doesn't throw and produces a best-effort AST".
-    void errors;
+    // ENDCLASS never arrives, so the parser MUST emit at least one
+    // diagnostic pointing at the truncated input. An empty errors array
+    // here would mean we silently lost information.
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].severity).toBe('error');
   });
 });
 

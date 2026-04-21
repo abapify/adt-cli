@@ -97,6 +97,7 @@ export type ClassMember =
   | AttributeDecl
   | TypeDecl
   | ConstantDecl
+  | EventDecl
   | InterfaceStmt
   | AliasDecl
   | RawMember;
@@ -154,6 +155,22 @@ export interface ConstantDecl {
   readonly type: TypeRef;
   readonly value: string;
   readonly abapDoc?: readonly string[];
+  readonly span: SourceSpan;
+}
+
+export interface EventDecl {
+  readonly kind: 'EventDecl';
+  readonly name: string;
+  readonly abapDoc?: readonly string[];
+  /** True when the declaration is `CLASS-EVENTS`, false for instance-level `EVENTS`. */
+  readonly isClassEvent: boolean;
+  /**
+   * Parameters declared after `EXPORTING`. Each entry is a `MethodParam`
+   * for shape consistency with `MethodDecl.importing` / .exporting. Events
+   * only support `VALUE(...) TYPE <ref>` in practice; other slots are
+   * always empty for events.
+   */
+  readonly exporting: readonly MethodParam[];
   readonly span: SourceSpan;
 }
 

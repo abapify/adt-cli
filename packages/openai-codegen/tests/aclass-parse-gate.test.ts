@@ -21,8 +21,9 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse } from '@abapify/aclass';
+import { assertCleanParse, parse } from '@abapify/aclass';
 import type { ClassDef, InterfaceDef } from '@abapify/aclass';
+import { Registry, MemoryFile } from '@abaplint/core';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const petstore3Dir = join(
@@ -35,13 +36,28 @@ describe('openai-codegen × aclass — parse-gate for petstore3 corpus', () => {
     .filter((f) => f.endsWith('.abap'))
     .map((f) => ({ f, src: readFileSync(join(petstore3Dir, f), 'utf8') }));
 
-  it.each(files)('$f parses without lex errors', ({ f, src }) => {
-    const { errors } = parse(src);
-    const lexErrors = errors.filter((e) =>
-      /Unexpected character/i.test(e.message),
-    );
-    expect(lexErrors, `unexpected characters in ${f}`).toEqual([]);
+  it.each(files)('$f parses cleanly via aclass', ({ f, src }) => {
+    // `assertCleanParse` throws a labelled AclassParseError on any lex
+    // or parse error, with file:line pointers in the message.
+    expect(() => assertCleanParse(src, f)).not.toThrow();
   });
+
+  it.each(files)(
+    '$f parses cleanly via @abaplint/core (no parser_error)',
+    ({ f, src }) => {
+      // Second opinion: run the same source through abaplint's Registry.
+      // Gate ONLY on `parser_error` keys — abaplint's default rule set
+      // includes stylistic rules (`description_empty`,
+      // `in_statement_indentation`, `global_class` filename check) that
+      // aren't relevant to the "does this even parse?" question.
+      const reg = new Registry().addFile(new MemoryFile(f, src)).parse();
+      const fatals = reg
+        .findIssues()
+        .filter((i) => i.getKey() === 'parser_error')
+        .map((i) => `${i.getKey()}: ${i.getMessage()}`);
+      expect(fatals).toEqual([]);
+    },
+  );
 
   it.each(files.filter((f) => f.f.endsWith('.intf.abap')))(
     '$f: interface body is fully structured (no RawMember fallbacks)',
