@@ -68,8 +68,13 @@ function detectGithubRepo(): string | null {
   });
   if (res.status !== 0) return null;
   const url = res.stdout.trim();
-  if (!url.includes('github.com')) return null;
-  const m = url.match(/[:/]([^/]+\/[^/.]+?)(\.git)?$/);
+  // Match github.com only when it is the actual host of the remote URL, not
+  // an arbitrary substring. Supports https(s)://, git://, git+ssh://, ssh://,
+  // and SCP-style (`git@github.com:owner/repo`). Fixes CodeQL
+  // `js/incomplete-url-substring-sanitization`.
+  const m = url.match(
+    /^(?:https?:\/\/(?:[^@/]+@)?|git(?:\+ssh)?:\/\/(?:[^@/]+@)?|ssh:\/\/(?:[^@/]+@)?|git@)github\.com[:/]([^/]+\/[^/.]+?)(?:\.git)?$/,
+  );
   return m ? m[1] : null;
 }
 
