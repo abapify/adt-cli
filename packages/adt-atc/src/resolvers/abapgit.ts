@@ -8,8 +8,8 @@
  * No external package dependencies required.
  */
 
-import { readFileSync, existsSync, readdirSync, type Dirent } from 'fs';
-import { basename, join } from 'path';
+import { readFileSync, existsSync, readdirSync, type Dirent } from 'node:fs';
+import { basename, join } from 'node:path';
 import type { FindingResolver, ResolvedLocation } from '../types';
 
 // ── Method range parsing ────────────────────────────────────────────────
@@ -134,7 +134,9 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
 
   try {
     if (existsSync(srcRoot)) {
-      const files = collectSourceFiles(srcRoot).sort();
+      const files = collectSourceFiles(srcRoot).sort((a, b) =>
+        a.localeCompare(b),
+      );
 
       for (const f of files) {
         const name = basename(f);
