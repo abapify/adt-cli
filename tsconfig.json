@@ -110,6 +110,9 @@
     },
     {
       "path": "./tools/nx-npm-trust"
+    },
+    {
+      "path": "./packages/aclass"
     }
   ]
 }
