@@ -57,21 +57,34 @@ function shouldSkipPath(projectRoot: string): boolean {
   return false;
 }
 
-/** Strip a trailing `.git` and return `owner/repo`, or null if the path
- *  does not match that exact shape. */
+/**
+ * Strict allow-list for GitHub `<owner>/<repo>` path segments. This is the
+ * final validation gate before the value flows into a shell command (see
+ * `--trust-repo=${trustRepo}` below), so characters outside `[A-Za-z0-9._-]`
+ * must be rejected even if the URL parser accepted them.
+ */
+const OWNER_REPO = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+
+/** Strip leading slashes and a trailing `.git`, then validate against
+ *  {@link OWNER_REPO}. Returns the normalised `owner/repo` or `null`. */
 function parseOwnerRepo(path: string): string | null {
-  const m = path.match(/^([^/]+\/[^/.]+?)(?:\.git)?$/);
-  return m ? m[1] : null;
+  const normalised = path.replace(/^\/+|\.git$/g, '');
+  return OWNER_REPO.test(normalised) ? normalised : null;
 }
 
 /**
- * Parse `<owner>/<repo>` from a git remote URL (https, git, ssh, git+ssh,
- * or SCP-style `git@host:owner/repo`). Returns null for non-GitHub remotes.
+ * Parse `<owner>/<repo>` from a git remote URL (https, http, git, ssh,
+ * git+ssh, or SCP-style `git@host:owner/repo`). Returns null for non-GitHub
+ * remotes.
  *
- * The host check is anchored via `URL.hostname` (for URL-form) or the
- * explicit SCP pattern (for `user@host:path` form), so substrings like
+ * The host check is anchored via `URL.hostname` (URL-form) or the explicit
+ * SCP pattern (for `user@host:path` form), so substrings like
  * `github.com.attacker.com` or `evil/github.com/...` cannot match. Fixes
  * CodeQL `js/incomplete-url-substring-sanitization`.
+ *
+ * The SCP branch is skipped when the input contains `://`: proper URL-form
+ * remotes with a `user@` and a `:port` (e.g. `ssh://git@github.com:22/…`)
+ * would otherwise be mis-parsed as SCP.
  */
 function detectGithubRepo(): string | null {
   const res = spawnSync('git', ['remote', 'get-url', 'origin'], {
@@ -81,18 +94,19 @@ function detectGithubRepo(): string | null {
   if (res.status !== 0) return null;
   const raw = res.stdout.trim();
 
-  // SCP-style: user@host:path. Must be handled manually because `new URL()`
-  // does not accept it.
-  const scp = raw.match(/^[^@\s]+@([^:]+):(.+)$/);
+  // SCP-style: `user@host:path`. Must be handled manually because `new URL()`
+  // does not accept it. Guarded by the `://` check so URL-form remotes with
+  // `user@host:port` fall through to the URL parser below.
+  const scp = !raw.includes('://') && raw.match(/^[^@\s]+@([^:]+):(.+)$/);
   if (scp) {
     return scp[1] === 'github.com' ? parseOwnerRepo(scp[2]) : null;
   }
 
-  // Any proper URL scheme (https, http, git, ssh, git+ssh, …).
+  // Any proper URL scheme (http, https, git, ssh, git+ssh, …).
   try {
     const u = new URL(raw);
     if (u.hostname !== 'github.com') return null;
-    return parseOwnerRepo(u.pathname.replace(/^\//, ''));
+    return parseOwnerRepo(u.pathname);
   } catch {
     return null;
   }
