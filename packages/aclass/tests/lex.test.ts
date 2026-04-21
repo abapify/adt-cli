@@ -107,16 +107,18 @@ describe('AclassLexer — Wave 0 smoke coverage', () => {
   });
 
   it('does NOT treat a mid-line asterisk as a star-comment', () => {
-    // `*` inside an identifier isn't valid ABAP anyway, but a mid-line
-    // `*` (not at column 1) must not swallow the rest of the line.
-    // We emulate the situation by putting a Dot before `*` on the same
-    // line; the tokenizer should flag the `*` as an unexpected char
-    // instead of skipping to end-of-line.
-    const { errors } = tokenize('CLASS zcl . *trailing');
-    // An error is expected because `*` mid-line isn't a valid token —
-    // the important bit is that `trailing` did NOT get swallowed by a
-    // star-comment rule.
-    expect(errors.length).toBeGreaterThan(0);
+    // A mid-line `*` (not at column 1) must tokenise as a Star symbol,
+    // NOT swallow the rest of the line as a comment. The tokens AFTER
+    // the `*` must still be visible to the parser.
+    const { tokens, errors } = tokenize('CLASS zcl. *trailing.');
+    expect(errors).toEqual([]);
+    const names = tokens.map((t) => t.tokenType.name);
+    // Must contain Star followed by `trailing` identifier — proving the
+    // `*` didn't swallow the rest of the line.
+    expect(names).toContain('Star');
+    const starIdx = names.indexOf('Star');
+    expect(names[starIdx + 1]).toBe('Identifier');
+    expect(tokens[starIdx + 1].image).toBe('trailing');
   });
 
   it('tokenises static and instance access operators', () => {

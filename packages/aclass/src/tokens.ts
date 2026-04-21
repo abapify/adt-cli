@@ -264,6 +264,29 @@ export const LBracket = createToken({ name: 'LBracket', pattern: /\[/ });
 export const RBracket = createToken({ name: 'RBracket', pattern: /\]/ });
 export const Eq = createToken({ name: 'Eq', pattern: /=/ });
 
+// `#` — inferred-type placeholder in `VALUE #(…)`, `NEW #(…)`, `COND #(…)`, etc.
+export const Hash = createToken({ name: 'Hash', pattern: /#/ });
+
+// String templates `|…|` with interpolation braces `{` / `}`.
+// We tokenise them at the single-character level — good enough for
+// opaque-body preservation, since the parser never inspects expression
+// interior for MethodImpl.body.
+export const Pipe = createToken({ name: 'Pipe', pattern: /\|/ });
+export const LBrace = createToken({ name: 'LBrace', pattern: /\{/ });
+export const RBrace = createToken({ name: 'RBrace', pattern: /\}/ });
+
+// Arithmetic / comparison operators that appear inside method bodies.
+// Treated as plain symbols — the body parser doesn't need their semantics.
+export const Plus = createToken({ name: 'Plus', pattern: /\+/ });
+export const Minus = createToken({ name: 'Minus', pattern: /-/ });
+export const Star = createToken({ name: 'Star', pattern: /\*/ });
+export const Slash = createToken({ name: 'Slash', pattern: /\// });
+export const Lt = createToken({ name: 'Lt', pattern: /</ });
+export const Gt = createToken({ name: 'Gt', pattern: />/ });
+export const Question = createToken({ name: 'Question', pattern: /\?/ });
+export const At = createToken({ name: 'At', pattern: /@/ });
+export const Ampersand = createToken({ name: 'Ampersand', pattern: /&/ });
+
 // ============================================
 // Full token array — lexer dispatch order
 // ============================================
@@ -376,6 +399,19 @@ export const allTokens = [
   LBracket,
   RBracket,
   Eq,
+  Hash,
+  Pipe,
+  LBrace,
+  RBrace,
+  Plus,
+  Minus,
+  Star,
+  Slash,
+  Lt,
+  Gt,
+  Question,
+  At,
+  Ampersand,
 ];
 
 export const AclassLexer = new Lexer(allTokens, {

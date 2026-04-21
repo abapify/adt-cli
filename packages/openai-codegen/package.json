@@ -37,7 +37,8 @@
   "author": "abapify",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/core": "^2.118.12"
+    "@abaplint/core": "^2.118.12",
+    "@abapify/aclass": "workspace:*"
   },
   "repository": {
     "type": "git",
