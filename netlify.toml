@@ -13,6 +13,13 @@
   base = "website"
   command = "bun install && bun run build"
   publish = "build"
+  # Skip the deploy entirely when nothing under `website/` or this file
+  # changed since the last successful build. Without this, Netlify runs
+  # the full build and only at the end decides "no content change" —
+  # which gets reported as a red `error` state + failing GitHub commit
+  # status. Exit 0 from this command tells Netlify to skip the deploy
+  # (reported as `skipped`, not `error`). Exit 1 means "proceed".
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../netlify.toml"
 
 [build.environment]
   NODE_VERSION = "20"
