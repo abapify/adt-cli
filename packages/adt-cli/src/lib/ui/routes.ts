@@ -13,7 +13,9 @@ import './pages/package';
 import './pages/class';
 import './pages/interface';
 
-// Export initialized router
+// Re-export the initialized router for downstream consumers.
+export { router } from './router';
+
 // ============================================================================
 // Helper: Create generic page from search result
 // ============================================================================
@@ -35,4 +37,3 @@ export function createGenericPage(result: SearchResult): Page {
     packageName: result.packageName,
   });
 }
-export { router } from './router';

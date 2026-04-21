@@ -40,13 +40,11 @@ import { isRef } from '../oas/types';
 import type { TypePlan } from '../types/plan';
 import { mapPrimitive } from '../types/map';
 import { makeNameAllocator, sanitizeIdent } from '../types/naming';
-// Keep the NamesConfig coupling minimal: we only need the three strings
-// passed in via EmitOperationsInterfaceOptions. ResolvedNames is imported
-// as type-only for forward compatibility with the Wave 1 naming module.
 
-// Silence "unused import" complaints while the naming module is still
-// being wired up; ResolvedNames is exported so downstream callers can
-// thread it through if they like.
+// `ResolvedNames` is re-exported for downstream callers that want to thread
+// it through their own NamesConfig; we don't consume the type here.
+export type { ResolvedNames } from './naming';
+
 // -----------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------
@@ -617,4 +615,3 @@ function renderTypeRefSource(ref: TypeRef): string {
       return ref.kind;
   }
 }
-export type { ResolvedNames } from './naming';
