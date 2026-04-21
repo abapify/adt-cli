@@ -76,17 +76,22 @@ export const contractsCommand: CliCommandPlugin = {
 
       try {
         // Use adt CLI to fetch discovery - no internal API dependencies.
-        // execFileSync with an argv array (no shell) ensures the user-
-        // supplied `discoveryPath` is passed verbatim to the child process
-        // and cannot be interpreted as shell metacharacters.
+        // argv is passed as an array so the user-supplied `discoveryPath` is
+        // forwarded verbatim to the child process and cannot be interpreted
+        // as shell metacharacters on POSIX. On Windows, `.bin/adt` is a
+        // `.cmd` shim, which cannot be executed by `execFileSync` without
+        // `shell: true` per Node's child_process docs; the shell flag is
+        // enabled only on Windows for that reason.
         mkdirSync(dirname(discoveryPath), { recursive: true });
+        const isWindows = process.platform === 'win32';
         const adtCliPath = resolve(
           ctx.cwd,
-          `node_modules/.bin/${process.platform === 'win32' ? 'adt.cmd' : 'adt'}`,
+          `node_modules/.bin/${isWindows ? 'adt.cmd' : 'adt'}`,
         );
         execFileSync(adtCliPath, ['discovery', '--output', discoveryPath], {
           stdio: 'inherit',
           cwd: ctx.cwd,
+          shell: isWindows,
         });
         ctx.logger.info(`💾 Discovery cached to: ${discoveryPath}`);
       } catch (error) {
