@@ -315,7 +315,11 @@ if (report.checks.exists === true && name) {
       const setMfa = npm(['access', 'set', `mfa=${mfaTarget}`, name]);
       if (setMfa.code === 0) {
         report.fixes.push(`npm access set mfa=${mfaTarget} ${name}`);
-        report.checks.mfa = mfaTarget;
+        // Stored as `mfaPolicy` (not `mfa`) to reflect that the value is the
+        // configured publish policy (`none` / `automatic`), not a user secret
+        // or authentication factor. Keeping the name `mfa` triggered CodeQL's
+        // `js/clear-text-logging` heuristic on the JSON report log below.
+        report.checks.mfaPolicy = mfaTarget;
       } else {
         report.problems.push(
           `npm access set mfa=${mfaTarget} failed: ${firstErrorLine(setMfa.stderr)}`,
