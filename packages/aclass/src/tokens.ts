@@ -136,7 +136,7 @@ export const Identifier = createToken({
 // We escape every one of them when embedding `word` into a dynamic
 // pattern so CodeQL's `js/incomplete-sanitization` stops complaining
 // and callers cannot inject pattern metacharacters by accident.
-const REGEX_META = /[.*+?^${}()|[\]\\/\-]/g;
+const REGEX_META = /[.*+?^${}()|[\]\\/-]/g;
 function kw(name: string, word: string) {
   // Case-insensitive, whole-word match. `longer_alt: Identifier` makes
   // the keyword lose to `Identifier` when followed by an identifier
