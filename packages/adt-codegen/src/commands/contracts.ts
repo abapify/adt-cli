@@ -16,7 +16,7 @@ import type { CliCommandPlugin } from '@abapify/adt-plugin';
 import type { ContractsConfig } from '@abapify/adt-config';
 import { resolve, dirname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { generateContractsFromDiscovery } from '../plugins/generate-contracts';
 
 /**
@@ -75,9 +75,12 @@ export const contractsCommand: CliCommandPlugin = {
       ctx.logger.info('📡 Fetching discovery from SAP...');
 
       try {
-        // Use adt CLI to fetch discovery - no internal API dependencies
+        // Use adt CLI to fetch discovery - no internal API dependencies.
+        // execFileSync with an argv array (no shell) ensures the user-
+        // supplied `discoveryPath` is passed verbatim to the child process
+        // and cannot be interpreted as shell metacharacters.
         mkdirSync(dirname(discoveryPath), { recursive: true });
-        execSync(`npx adt discovery --output "${discoveryPath}"`, {
+        execFileSync('npx', ['adt', 'discovery', '--output', discoveryPath], {
           stdio: 'inherit',
           cwd: ctx.cwd,
         });

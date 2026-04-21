@@ -123,8 +123,8 @@ export class MockAuthProvider implements AuthProvider {
     // Return a mock client for testing
     // Use config.enabled to potentially customize mock behavior
     const baseUrl = this.config.enabled
-      ? 'http://mock-sap-system.local'
-      : 'http://disabled-mock.local';
+      ? 'https://mock-sap-system.local'
+      : 'https://disabled-mock.local';
 
     return createAdtClient({
       baseUrl,
