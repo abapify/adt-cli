@@ -99,6 +99,6 @@ export function inferredTypes(
 
 function pascalCase(str: string): string {
   return str
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+    .replaceAll(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
     .replace(/^./, (s) => s.toUpperCase());
 }

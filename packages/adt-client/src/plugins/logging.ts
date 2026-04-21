@@ -12,7 +12,7 @@ export type LogFunction = (message: string, data?: any) => void;
 export class LoggingPlugin implements ResponsePlugin {
   name = 'logging';
 
-  constructor(private logger: LogFunction = console.log) {}
+  constructor(private readonly logger: LogFunction = console.log) {}
 
   process(context: ResponseContext): unknown {
     this.logger(`[${context.method}] ${context.url}`, {

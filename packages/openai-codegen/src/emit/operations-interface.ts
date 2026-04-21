@@ -43,13 +43,10 @@ import { makeNameAllocator, sanitizeIdent } from '../types/naming';
 // Keep the NamesConfig coupling minimal: we only need the three strings
 // passed in via EmitOperationsInterfaceOptions. ResolvedNames is imported
 // as type-only for forward compatibility with the Wave 1 naming module.
-import type { ResolvedNames } from './naming';
 
 // Silence "unused import" complaints while the naming module is still
 // being wired up; ResolvedNames is exported so downstream callers can
 // thread it through if they like.
-export type { ResolvedNames };
-
 // -----------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------
@@ -298,7 +295,7 @@ function deriveTableAliasName(
   const bare = rowType.includes('=>')
     ? (rowType.split('=>').pop() ?? rowType)
     : rowType;
-  const sanitized = bare.replace(/[^a-z0-9_]/gi, '_').toLowerCase();
+  const sanitized = bare.replaceAll(/[^a-z0-9_]/gi, '_').toLowerCase();
   const base = `${sanitized}_list`;
   if (!taken.has(base)) return base;
   let i = 2;
@@ -620,3 +617,4 @@ function renderTypeRefSource(ref: TypeRef): string {
       return ref.kind;
   }
 }
+export type { ResolvedNames } from './naming';

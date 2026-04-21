@@ -5,8 +5,6 @@
 import type { Logger } from '@abapify/logger';
 
 // Re-export Logger for convenience
-export type { Logger };
-
 // Connection configuration
 export interface AdtConnectionConfig {
   baseUrl: string;
@@ -38,3 +36,4 @@ export interface OperationResult {
   success: boolean;
   message?: string;
 }
+export type { Logger } from '@abapify/logger';

@@ -12,8 +12,6 @@ import { SessionManager } from './utils/session';
 import { createAdtError } from './errors';
 
 // Re-export HttpAdapter type for consumers
-export type { HttpAdapter };
-
 /**
  * Extended ADT connection config with plugins
  */
@@ -414,3 +412,4 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
     },
   };
 }
+export type { HttpAdapter } from '@abapify/adt-contracts';

@@ -32,7 +32,7 @@ export interface AuthProvider {
 export class BtpAuthProvider implements AuthProvider {
   readonly type = 'btp';
 
-  constructor(private config: BtpAuthConfig) {}
+  constructor(private readonly config: BtpAuthConfig) {}
 
   async createClient(): Promise<AdtClient> {
     try {
@@ -76,7 +76,7 @@ export class BtpAuthProvider implements AuthProvider {
 export class BasicAuthProvider implements AuthProvider {
   readonly type = 'basic';
 
-  constructor(private config: BasicAuthConfig) {}
+  constructor(private readonly config: BasicAuthConfig) {}
 
   async createClient(): Promise<AdtClient> {
     return createAdtClient({
@@ -117,7 +117,7 @@ export class BasicAuthProvider implements AuthProvider {
 export class MockAuthProvider implements AuthProvider {
   readonly type = 'mock';
 
-  constructor(private config: MockAuthConfig) {}
+  constructor(private readonly config: MockAuthConfig) {}
 
   async createClient(): Promise<AdtClient> {
     // Return a mock client for testing
@@ -146,7 +146,10 @@ export class MockAuthProvider implements AuthProvider {
  * Authentication registry
  */
 export class AuthRegistry {
-  private providers = new Map<string, new (config: any) => AuthProvider>();
+  private readonly providers = new Map<
+    string,
+    new (config: any) => AuthProvider
+  >();
 
   constructor() {
     this.register('btp', BtpAuthProvider);

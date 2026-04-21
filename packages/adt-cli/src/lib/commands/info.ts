@@ -64,8 +64,14 @@ export const infoCommand = new Command('info')
 
           // Display key system properties
           const displayProperty = (key: string, label: string) => {
-            if (systemData[key])
-              console.log(`  • ${label}: ${systemData[key]}`);
+            const value = systemData[key];
+            if (value !== undefined && value !== null && value !== '') {
+              const text =
+                typeof value === 'object'
+                  ? JSON.stringify(value)
+                  : String(value);
+              console.log(`  • ${label}: ${text}`);
+            }
           };
 
           displayProperty('systemID', 'System ID');

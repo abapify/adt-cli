@@ -88,6 +88,13 @@ export const packageListCommand = new Command('list')
         return;
       }
 
+      // Stringify an unknown field safely (avoids "[object Object]")
+      const asStr = (v: unknown, fallback = ''): string => {
+        if (v === undefined || v === null) return fallback;
+        if (typeof v === 'object') return JSON.stringify(v);
+        return String(v);
+      };
+
       // Display subpackages
       if (subpackages.length > 0) {
         console.log(chalk.underline(`\n▼ Subpackages (${subpackages.length})`));
@@ -95,10 +102,10 @@ export const packageListCommand = new Command('list')
           const spObj = sp as unknown as Record<string, unknown>;
           if (options.long) {
             console.log(
-              `  ${chalk.cyan(String(spObj.name ?? ''))}  ${chalk.dim(String(spObj.description ?? ''))}`,
+              `  ${chalk.cyan(asStr(spObj.name))}  ${chalk.dim(asStr(spObj.description))}`,
             );
           } else {
-            console.log(`  ${String(spObj.name ?? '')}`);
+            console.log(`  ${asStr(spObj.name)}`);
           }
         }
       }
@@ -112,8 +119,8 @@ export const packageListCommand = new Command('list')
             // Group by type
             const byType = new Map<string, AbapObject[]>();
             for (const obj of objects) {
-              const type = String(
-                (obj as unknown as Record<string, unknown>).type ?? '',
+              const type = asStr(
+                (obj as unknown as Record<string, unknown>).type,
               );
               const list = byType.get(type) ?? [];
               list.push(obj);
@@ -125,19 +132,20 @@ export const packageListCommand = new Command('list')
               console.log(chalk.dim(`  ${type} (${list.length})`));
               for (const obj of list) {
                 const o = obj as unknown as Record<string, unknown>;
+                const objPkg = asStr(o.package);
                 const pkgNote =
-                  options.recursive && String(o.package ?? '') !== pkgName
-                    ? chalk.dim(` [${String(o.package ?? '')}]`)
+                  options.recursive && objPkg !== pkgName
+                    ? chalk.dim(` [${objPkg}]`)
                     : '';
                 console.log(
-                  `    ${chalk.green(String(o.name ?? ''))}${pkgNote}  ${chalk.dim(String(o.description ?? ''))}`,
+                  `    ${chalk.green(asStr(o.name))}${pkgNote}  ${chalk.dim(asStr(o.description))}`,
                 );
               }
             }
           } else {
             for (const obj of objects) {
               console.log(
-                `  ${String((obj as unknown as Record<string, unknown>).name ?? '')}`,
+                `  ${asStr((obj as unknown as Record<string, unknown>).name)}`,
               );
             }
           }

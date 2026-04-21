@@ -45,7 +45,7 @@ async function setup() {
 /** Extract the printed source of a single METHOD block by interface-tilde name. */
 function extractMethod(printed: string, methodName: string): string {
   const re = new RegExp(
-    `^(\\s*)METHOD\\s+${methodName.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\.[\\s\\S]*?^\\1ENDMETHOD\\.`,
+    `^(\\s*)METHOD\\s+${methodName.replaceAll(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\.[\\s\\S]*?^\\1ENDMETHOD\\.`,
     'm',
   );
   const m = re.exec(printed);

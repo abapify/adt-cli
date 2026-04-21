@@ -114,11 +114,16 @@ export const packageGetCommand = new Command('package')
       } else {
         // Fallback: simple output
         const pkgAny = pkgData as Record<string, unknown>;
-        console.log(`📦 Package: ${pkgAny.name || name}`);
-        console.log(`   Type: ${pkgAny.type || 'N/A'}`);
-        console.log(`   Description: ${pkgAny.description || 'N/A'}`);
+        const toDisplay = (v: unknown, fallback: string): string => {
+          if (v === undefined || v === null || v === '') return fallback;
+          if (typeof v === 'object') return JSON.stringify(v);
+          return String(v);
+        };
+        console.log(`📦 Package: ${toDisplay(pkgAny.name, name)}`);
+        console.log(`   Type: ${toDisplay(pkgAny.type, 'N/A')}`);
+        console.log(`   Description: ${toDisplay(pkgAny.description, 'N/A')}`);
         const attrs = pkgAny.attributes as Record<string, unknown> | undefined;
-        console.log(`   Package Type: ${attrs?.packageType || 'N/A'}`);
+        console.log(`   Package Type: ${toDisplay(attrs?.packageType, 'N/A')}`);
       }
 
       // Render objects section (extension, not replacement)

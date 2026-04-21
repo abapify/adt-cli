@@ -5,7 +5,7 @@ import type { Logger } from '../types';
  * Simple logger for basic use cases
  */
 export class ConsoleLogger implements Logger {
-  constructor(private prefix?: string) {}
+  constructor(private readonly prefix?: string) {}
 
   trace(msg: string, obj?: any): void {
     console.debug(this.format(msg, obj));

@@ -91,7 +91,7 @@ export abstract class SchemaTraverser {
   };
 
   /** Visited schemas (prevents infinite loops) */
-  private visited = new Set<Schema>();
+  private readonly visited = new Set<Schema>();
 
   // -------------------------------------------------------------------------
   // Public API

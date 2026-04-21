@@ -522,10 +522,13 @@ export class ImportService {
         )
         .slice(0, 5);
 
+      const similarList = similar
+        .map(
+          (o: SearchObject) => `   • ${o.name} (${o.type}) – ${o.packageName}`,
+        )
+        .join('\n');
       const hint =
-        similar.length > 0
-          ? `\n💡 Similar objects:\n${similar.map((o: SearchObject) => `   • ${o.name} (${o.type}) – ${o.packageName}`).join('\n')}`
-          : '';
+        similar.length > 0 ? `\n💡 Similar objects:\n${similarList}` : '';
 
       throw new Error(
         `Object '${options.objectName}' not found in the system.${hint}`,

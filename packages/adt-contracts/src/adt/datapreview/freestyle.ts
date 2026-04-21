@@ -15,15 +15,7 @@ import { http } from '../../base';
 import {
   dataPreviewFreestyleRequestSchema,
   dataPreviewFreestyleResponseSchema,
-  type DataPreviewFreestyleResponse,
 } from './schema';
-
-export {
-  dataPreviewFreestyleResponseSchema,
-  dataPreviewFreestyleRequestSchema,
-};
-export type { DataPreviewFreestyleResponse };
-
 /** Query parameters for `POST /datapreview/freestyle` */
 export interface FreestyleQuery {
   /** Maximum number of rows to return (ADT default: 100) */
@@ -53,3 +45,8 @@ export const freestyle = {
 };
 
 export type FreestyleContract = typeof freestyle;
+export {
+  dataPreviewFreestyleResponseSchema,
+  dataPreviewFreestyleRequestSchema,
+} from './schema';
+export type { DataPreviewFreestyleResponse } from './schema';

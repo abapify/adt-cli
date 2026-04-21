@@ -247,7 +247,7 @@ function stripNamespacePrefix(qname: string): string {
  */
 function toPascalCase(str: string): string {
   return str
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+    .replaceAll(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
     .replace(/^./, (s) => s.toUpperCase());
 }
 
@@ -302,7 +302,7 @@ const RESERVED_WORDS = new Set([
 
 function toValidIdentifier(name: string): string {
   // Convert hyphens to camelCase
-  let result = name.replace(/-([a-zA-Z])/g, (_, c) => c.toUpperCase());
+  let result = name.replaceAll(/-([a-zA-Z])/g, (_, c) => c.toUpperCase());
   // Escape reserved words
   if (RESERVED_WORDS.has(result)) {
     result = `${result}_`;

@@ -24,13 +24,6 @@ import { config, type ConfigContract as GctsConfigContract } from './config';
 // `gctsContract` tree below to avoid collisions with the top-level
 // `repository` / `packages` namespaces in `adt/index.ts`.
 export * from './schema';
-export type {
-  GctsRepositoryContract,
-  GctsBranchesContract,
-  GctsCommitsContract,
-  GctsConfigContract,
-};
-
 export interface GctsContract {
   repository: GctsRepositoryContract;
   branches: GctsBranchesContract;
@@ -44,3 +37,7 @@ export const gctsContract: GctsContract = {
   commits,
   config,
 };
+export type { RepositoryContract as GctsRepositoryContract } from './repository';
+export type { BranchesContract as GctsBranchesContract } from './branches';
+export type { CommitsContract as GctsCommitsContract } from './commits';
+export type { ConfigContract as GctsConfigContract } from './config';

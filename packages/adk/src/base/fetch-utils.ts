@@ -22,5 +22,7 @@ export async function toText(result: unknown): Promise<string> {
   ) {
     return (result as Response).text();
   }
-  return String(result ?? '');
+  if (result === null || result === undefined) return '';
+  if (typeof result === 'object') return JSON.stringify(result);
+  return String(result);
 }

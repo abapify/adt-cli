@@ -5,12 +5,7 @@
  * Provides Playwright-specific browser adapter.
  */
 
-import {
-  authenticate,
-  testCredentials,
-  toCookieHeader,
-  toHeaders,
-} from '@abapify/browser-auth';
+import { authenticate, testCredentials } from '@abapify/browser-auth';
 import type {
   BrowserCredentials,
   BrowserAuthOptions,
@@ -57,7 +52,6 @@ export const playwrightAuth = {
 };
 
 // Re-export utilities
-export { toCookieHeader, toHeaders };
-
 // Legacy export
 export const playwright = playwrightAuth;
+export { toCookieHeader, toHeaders } from '@abapify/browser-auth';

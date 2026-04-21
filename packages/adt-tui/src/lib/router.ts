@@ -10,7 +10,7 @@ import type { Route, PageComponent } from './types';
  * Router class for URL pattern matching
  */
 export class Router {
-  private routes: Route[] = [];
+  private readonly routes: Route[] = [];
   private fallback: PageComponent | null = null;
 
   /**

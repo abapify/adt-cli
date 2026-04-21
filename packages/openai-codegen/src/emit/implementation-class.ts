@@ -397,5 +397,5 @@ function isBinaryRequestBody(
 // -----------------------------------------------------------------------
 
 function escapeSingleQuotes(s: string): string {
-  return s.replace(/'/g, "''");
+  return s.replaceAll("'", "''");
 }

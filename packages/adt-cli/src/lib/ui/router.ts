@@ -8,8 +8,6 @@
 import type { AdtClient } from '@abapify/adt-client';
 import type { Page } from './types';
 
-export type { AdtClient };
-
 /**
  * Navigation parameters - each page defines its own params
  */
@@ -81,7 +79,7 @@ export function definePage<T>(
  * Router for object types
  */
 class ObjectTypeRouter {
-  private routes = new Map<string, Route>();
+  private readonly routes = new Map<string, Route>();
 
   /**
    * Register a route for an object type
@@ -142,3 +140,4 @@ export const router = new ObjectTypeRouter();
 
 // Export for type inference
 export type { ObjectTypeRouter };
+export type { AdtClient } from '@abapify/adt-client';

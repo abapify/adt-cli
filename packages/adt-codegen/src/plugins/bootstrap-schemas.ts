@@ -50,7 +50,7 @@ function contentTypeToPath(
   const base = contentType.replace(/\+(json|xml)$/, '');
 
   // Replace dots with slashes
-  const path = base.replace(/\./g, '/');
+  const path = base.replaceAll(/\./g, '/');
 
   // Add appropriate extension
   const ext = format === 'json' ? 'json' : 'xsd';
@@ -159,9 +159,9 @@ export function bootstrapSchemas(
             if (filePath === false) continue; // Skip this schema
           } else {
             filePath = output
-              .replace(/{contentType}/g, info.contentType)
-              .replace(/{format}/g, info.format)
-              .replace(/{schemaPath}/g, info.schemaPath);
+              .replaceAll(/{contentType}/g, info.contentType)
+              .replaceAll(/{format}/g, info.format)
+              .replaceAll(/{schemaPath}/g, info.schemaPath);
           }
 
           // Check uniqueness if enabled

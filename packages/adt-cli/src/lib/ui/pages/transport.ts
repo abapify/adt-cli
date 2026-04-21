@@ -205,8 +205,8 @@ function renderTransportPage(
     const totalObjects = objects.length;
     objectComponents.push(
       Text(`${tasks.length} task(s), ${totalObjects} object(s)`),
+      Text(`Use --objects flag to show details`),
     );
-    objectComponents.push(Text(`Use --objects flag to show details`));
   } else {
     objectComponents.push(Text('(no objects)'));
   }

@@ -436,8 +436,8 @@ export const roundtripCommand: CliCommandPlugin = {
       ).trim();
 
       // Normalize line endings (SAP returns CRLF, git uses LF)
-      origContent = origContent.replace(/\r\n/g, '\n');
-      reimContent = reimContent.replace(/\r\n/g, '\n');
+      origContent = origContent.replaceAll(/\r\n/g, '\n');
+      reimContent = reimContent.replaceAll(/\r\n/g, '\n');
 
       // Normalize XML files before comparison
       const isXml = origName.endsWith('.xml');

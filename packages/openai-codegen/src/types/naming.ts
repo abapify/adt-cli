@@ -12,7 +12,7 @@ const DEFAULT_MAX_LEN = 30;
 /** Split an identifier on camelCase boundaries, non-alnum runs, and digits-prev-letter. */
 function splitWords(raw: string): string[] {
   if (!raw) return [];
-  const cleaned = raw.replace(/[^A-Za-z0-9]+/g, ' ').trim();
+  const cleaned = raw.replaceAll(/[^A-Za-z0-9]+/g, ' ').trim();
   if (!cleaned) return [];
   // Split on spaces, then further split on camelCase within each token.
   const tokens = cleaned.split(/\s+/);
@@ -22,8 +22,8 @@ function splitWords(raw: string): string[] {
     // Using lookahead-only patterns (no overlapping quantifiers) keeps regex
     // evaluation linear-time (CodeQL `js/polynomial-redos`).
     const spaced = tok
-      .replace(/([A-Z])(?=[A-Z][a-z])/g, '$1 ')
-      .replace(/([a-z0-9])(?=[A-Z])/g, '$1 ');
+      .replaceAll(/([A-Z])(?=[A-Z][a-z])/g, '$1 ')
+      .replaceAll(/([a-z0-9])(?=[A-Z])/g, '$1 ');
     for (const part of spaced.split(/\s+/)) {
       if (part) out.push(part);
     }

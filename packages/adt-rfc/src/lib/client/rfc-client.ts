@@ -120,7 +120,13 @@ export function createRfcClient(config: RfcClientConfig): RfcClient {
       }
 
       const xml =
-        typeof response === 'string' ? response : String(response ?? '');
+        typeof response === 'string'
+          ? response
+          : response === null || response === undefined
+            ? ''
+            : typeof response === 'object'
+              ? JSON.stringify(response)
+              : String(response);
       return parseRfcSoapResponse(xml);
     },
   };

@@ -189,9 +189,10 @@ export class AdtAuthError extends Error {
 
 function reportNoSessionAndExit(sid: string | undefined): never {
   const sidMsg = sid ? ` for SID ${sid}` : '';
+  const loginFlag = sid ? ` --sid=${sid}` : '';
   console.error(`❌ Not authenticated${sidMsg}`);
   console.error(
-    `💡 Run "npx adt auth login${sid ? ` --sid=${sid}` : ''}" to authenticate first`,
+    `💡 Run "npx adt auth login${loginFlag}" to authenticate first`,
   );
   process.exit(1);
 }
@@ -254,9 +255,10 @@ async function tryAutoRefreshSafe(
   sid: string | undefined,
 ): Promise<AuthSession> {
   if (!session.auth.plugin) {
+    const sidSuffix = sid ? ` for SID ${sid}` : '';
     throw new AdtAuthError(
       'SESSION_EXPIRED_NO_PLUGIN',
-      `Session expired${sid ? ` for SID ${sid}` : ''} and no auth plugin is configured to refresh it.`,
+      `Session expired${sidSuffix} and no auth plugin is configured to refresh it.`,
       sid,
     );
   }
@@ -273,11 +275,11 @@ async function tryAutoRefreshSafe(
     }
     return refreshedSession;
   } catch (error) {
+    const sidSuffix = sid ? ` for SID ${sid}` : '';
+    const errMsg = error instanceof Error ? error.message : String(error);
     throw new AdtAuthError(
       'REFRESH_FAILED',
-      `Auto-refresh failed${sid ? ` for SID ${sid}` : ''}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      `Auto-refresh failed${sidSuffix}: ${errMsg}`,
       sid,
     );
   }
@@ -420,7 +422,8 @@ export async function getAdtClientV2(
   if (effectiveOptions.enableLogging) {
     plugins.push(
       new LoggingPlugin((msg, data) => {
-        logger.info(`${msg}${data ? ` ${JSON.stringify(data)}` : ''}`);
+        const dataSuffix = data ? ` ${JSON.stringify(data)}` : '';
+        logger.info(`${msg}${dataSuffix}`);
       }),
     );
   }
@@ -567,9 +570,15 @@ export async function getAdtClientV2Safe(
   let session = loadAuthSession(effectiveOptions.sid);
 
   if (!session) {
+    const sidSuffix = effectiveOptions.sid
+      ? ` for SID ${effectiveOptions.sid}`
+      : '';
+    const sidFlag = effectiveOptions.sid
+      ? ` --sid=${effectiveOptions.sid}`
+      : '';
     throw new AdtAuthError(
       'NO_SESSION',
-      `Not authenticated${effectiveOptions.sid ? ` for SID ${effectiveOptions.sid}` : ''}. Run "adt auth login${effectiveOptions.sid ? ` --sid=${effectiveOptions.sid}` : ''}" first.`,
+      `Not authenticated${sidSuffix}. Run "adt auth login${sidFlag}" first.`,
       effectiveOptions.sid,
     );
   }
@@ -639,7 +648,8 @@ export async function getAdtClientV2Safe(
   if (effectiveOptions.enableLogging) {
     plugins.push(
       new LoggingPlugin((msg, data) => {
-        logger.info(`${msg}${data ? ` ${JSON.stringify(data)}` : ''}`);
+        const dataSuffix = data ? ` ${JSON.stringify(data)}` : '';
+        logger.info(`${msg}${dataSuffix}`);
       }),
     );
   }
@@ -661,9 +671,12 @@ export async function getAdtClientV2Safe(
       refreshAttempts++;
 
       if (refreshAttempts > MAX_REFRESH_ATTEMPTS) {
+        const sidSuffix = effectiveOptions.sid
+          ? ` for SID ${effectiveOptions.sid}`
+          : '';
         throw new AdtAuthError(
           'MAX_REFRESH_ATTEMPTS',
-          `Maximum refresh attempts (${MAX_REFRESH_ATTEMPTS}) exceeded${effectiveOptions.sid ? ` for SID ${effectiveOptions.sid}` : ''}.`,
+          `Maximum refresh attempts (${MAX_REFRESH_ATTEMPTS}) exceeded${sidSuffix}.`,
           effectiveOptions.sid,
         );
       }
@@ -683,11 +696,13 @@ export async function getAdtClientV2Safe(
         return decodeURIComponent(creds.cookies);
       } catch (error) {
         if (error instanceof AdtAuthError) throw error;
+        const sidSuffix = effectiveOptions.sid
+          ? ` for SID ${effectiveOptions.sid}`
+          : '';
+        const errMsg = error instanceof Error ? error.message : String(error);
         throw new AdtAuthError(
           'REFRESH_FAILED',
-          `Auto-refresh failed${effectiveOptions.sid ? ` for SID ${effectiveOptions.sid}` : ''}: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
+          `Auto-refresh failed${sidSuffix}: ${errMsg}`,
           effectiveOptions.sid,
         );
       }

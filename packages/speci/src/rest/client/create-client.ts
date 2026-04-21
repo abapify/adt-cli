@@ -21,7 +21,7 @@ function extractPathParams(path: string): string[] {
  * Example: "/users/${id}" with {id: "123"} -> "/users/123"
  */
 function replacePath(path: string, params: Record<string, any>): string {
-  return path.replace(/\$\{(\w+)\}/g, (_, key) => {
+  return path.replaceAll(/\$\{(\w+)\}/g, (_, key) => {
     const value = params[key];
     if (value === undefined) {
       throw new Error(`Missing path parameter: ${key}`);

@@ -14,8 +14,8 @@ import {
  * Plugin registry implementation
  */
 export class PluginRegistry implements IPluginRegistry {
-  private plugins = new Map<string, FormatPlugin>();
-  private pluginConfigs = new Map<string, any>();
+  private readonly plugins = new Map<string, FormatPlugin>();
+  private readonly pluginConfigs = new Map<string, any>();
 
   /**
    * Load plugins from configuration

@@ -71,4 +71,4 @@ export function clearConfigCache(): void {
 }
 
 // Re-export types
-export type { LoadedConfig, Destination };
+export type { LoadedConfig, Destination } from '@abapify/adt-config';

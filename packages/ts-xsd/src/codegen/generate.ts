@@ -314,10 +314,11 @@ function schemaToLiteral(
  * and escaping any single quotes.
  */
 function toSingleQuoteLiteral(jsonStr: string): string {
-  return `'${jsonStr
+  const inner = jsonStr
     .slice(1, -1)
     .replaceAll('\\"', '"')
-    .replaceAll("'", String.raw`\'`)}'`;
+    .replaceAll("'", "\\'");
+  return `'${inner}'`;
 }
 
 /**
@@ -473,6 +474,6 @@ function isValidIdentifier(str: string): boolean {
  */
 function pascalCase(str: string): string {
   return str
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+    .replaceAll(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
     .replace(/^./, (s) => s.toUpperCase());
 }

@@ -113,8 +113,8 @@ function propertiesToConfigState(
  */
 function configStateToConfigurationData(config: TreeConfigState) {
   // Convert date format YYYY-MM-DD to YYYYMMDD
-  const fromDate = config.fromDate.replace(/-/g, '');
-  const toDate = config.toDate.replace(/-/g, '');
+  const fromDate = config.fromDate.replaceAll('-', '');
+  const toDate = config.toDate.replaceAll('-', '');
 
   // Build properties array matching the schema structure.
   // simpleContent text is `$value` per ts-xsd convention.

@@ -38,8 +38,8 @@ export interface ${typeName}Response {
 
       // Generate safe filename
       const filename = (coll.category.term || 'collection')
-        .replace(/[^a-z0-9]+/gi, '-')
-        .replace(/^-+|-+$/g, '')
+        .replaceAll(/[^a-z0-9]+/gi, '-')
+        .replaceAll(/^-+|-+$/g, '')
         .toLowerCase();
 
       // Add to workspace artifacts
