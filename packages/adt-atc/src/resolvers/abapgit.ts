@@ -134,7 +134,7 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
 
   try {
     if (existsSync(srcRoot)) {
-      const files = collectSourceFiles(srcRoot);
+      const files = collectSourceFiles(srcRoot).sort();
 
       for (const f of files) {
         const name = basename(f);

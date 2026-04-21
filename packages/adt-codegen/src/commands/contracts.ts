@@ -80,15 +80,14 @@ export const contractsCommand: CliCommandPlugin = {
         // supplied `discoveryPath` is passed verbatim to the child process
         // and cannot be interpreted as shell metacharacters.
         mkdirSync(dirname(discoveryPath), { recursive: true });
-        const adtCliPath = resolve(ctx.cwd, 'node_modules/.bin/adt');
-        execFileSync(
-          process.execPath,
-          [adtCliPath, 'discovery', '--output', discoveryPath],
-          {
-            stdio: 'inherit',
-            cwd: ctx.cwd,
-          },
+        const adtCliPath = resolve(
+          ctx.cwd,
+          `node_modules/.bin/${process.platform === 'win32' ? 'adt.cmd' : 'adt'}`,
         );
+        execFileSync(adtCliPath, ['discovery', '--output', discoveryPath], {
+          stdio: 'inherit',
+          cwd: ctx.cwd,
+        });
         ctx.logger.info(`💾 Discovery cached to: ${discoveryPath}`);
       } catch (error) {
         ctx.logger.error('❌ Failed to fetch discovery from SAP');

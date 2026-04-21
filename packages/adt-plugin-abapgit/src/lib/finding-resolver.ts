@@ -10,7 +10,7 @@
  * it defines how SAP objects map to files on disk.
  */
 
-import { readFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, type Dirent } from 'fs';
 import { basename, join } from 'path';
 import type { FindingResolver, ResolvedLocation } from '@abapify/adt-atc';
 
@@ -97,22 +97,32 @@ function convertLine(
 // ── Resolver factory ────────────────────────────────────────────────────
 
 function collectSourceFiles(root: string): string[] {
-  const results: string[] = [];
-  const entries = readdirSync(root, { withFileTypes: true });
+  const result: string[] = [];
+  const stack: string[] = [root];
 
-  for (const entry of entries) {
-    const fullPath = join(root, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...collectSourceFiles(fullPath));
-    } else if (
-      entry.isFile() &&
-      (fullPath.endsWith('.abap') || fullPath.endsWith('.xml'))
-    ) {
-      results.push(fullPath);
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    let entries: Dirent[];
+    try {
+      entries = readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      const fullPath = join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (
+        entry.isFile() &&
+        (fullPath.endsWith('.abap') || fullPath.endsWith('.xml'))
+      ) {
+        result.push(fullPath);
+      }
     }
   }
 
-  return results;
+  return result;
 }
 
 /**
@@ -139,7 +149,7 @@ export function createFindingResolver(srcRoot = 'src/'): FindingResolver {
 
   try {
     if (existsSync(srcRoot)) {
-      const files = collectSourceFiles(srcRoot);
+      const files = collectSourceFiles(srcRoot).sort();
 
       for (const f of files) {
         const name = basename(f);
