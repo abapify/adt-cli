@@ -25,5 +25,6 @@
   "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/asjson-parser#readme",
   "bugs": {
     "url": "https://github.com/abapify/adt-cli/issues"
-  }
+  },
+  "description": "Parser for SAP ABAP asJSON canonical format — maps ABAP asJSON payloads to/from plain JavaScript objects"
 }

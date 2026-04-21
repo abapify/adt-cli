@@ -63,5 +63,6 @@
   "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-cli#readme",
   "bugs": {
     "url": "https://github.com/abapify/adt-cli/issues"
-  }
+  },
+  "description": "Command-line interface for SAP ABAP Development Tools — the adt binary, plus plugin loader and top-level service layer"
 }

@@ -29,5 +29,6 @@
   "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-plugin-gcts#readme",
   "bugs": {
     "url": "https://github.com/abapify/adt-cli/issues"
-  }
+  },
+  "description": "gCTS (git-enabled CTS) plugin for adt-cli — repository, commit, pull/push operations on SAP gCTS"
 }

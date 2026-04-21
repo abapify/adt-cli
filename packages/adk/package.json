@@ -28,5 +28,6 @@
   "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adk#readme",
   "bugs": {
     "url": "https://github.com/abapify/adt-cli/issues"
-  }
+  },
+  "description": "ABAP Development Kit — typed object model for ABAP Repository objects (classes, interfaces, programs, tables, …) with ADT XML serialization"
 }

@@ -34,5 +34,6 @@
   "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-plugin-abapgit#readme",
   "bugs": {
     "url": "https://github.com/abapify/adt-cli/issues"
-  }
+  },
+  "description": "abapGit serialization plugin for adt-cli — round-trips ADT objects to/from the abapGit on-disk format"
 }
