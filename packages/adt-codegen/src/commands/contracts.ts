@@ -76,22 +76,18 @@ export const contractsCommand: CliCommandPlugin = {
 
       try {
         // Use adt CLI to fetch discovery - no internal API dependencies.
-        // argv is passed as an array so the user-supplied `discoveryPath` is
-        // forwarded verbatim to the child process and cannot be interpreted
-        // as shell metacharacters on POSIX. On Windows, `.bin/adt` is a
-        // `.cmd` shim, which cannot be executed by `execFileSync` without
-        // `shell: true` per Node's child_process docs; the shell flag is
-        // enabled only on Windows for that reason.
+        // Invoke via `bunx` (per AGENTS.md convention), which walks up the
+        // directory tree to find the hoisted binary in a bun-workspaces
+        // monorepo — a fixed `node_modules/.bin/adt` under `ctx.cwd` would
+        // fail when the command is run from a sub-package. On Windows,
+        // `bunx` is a `.cmd` shim, which cannot be executed by
+        // `execFileSync` without `shell: true` per Node's child_process
+        // docs; the shell flag is enabled only on Windows for that reason.
         mkdirSync(dirname(discoveryPath), { recursive: true });
-        const isWindows = process.platform === 'win32';
-        const adtCliPath = resolve(
-          ctx.cwd,
-          `node_modules/.bin/${isWindows ? 'adt.cmd' : 'adt'}`,
-        );
-        execFileSync(adtCliPath, ['discovery', '--output', discoveryPath], {
+        execFileSync('bunx', ['adt', 'discovery', '--output', discoveryPath], {
           stdio: 'inherit',
           cwd: ctx.cwd,
-          shell: isWindows,
+          shell: process.platform === 'win32',
         });
         ctx.logger.info(`💾 Discovery cached to: ${discoveryPath}`);
       } catch (error) {
