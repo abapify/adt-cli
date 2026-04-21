@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "nxCloudId": "69e4c8fd4679d3b4b2845b26",
+  "nxCloudId": "69e6f81c01adefdeabf2c971",
   "cli": { "packageManager": "bun" },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
