@@ -24,6 +24,11 @@ jobs:
   publish:
     name: Publish packages
     runs-on: ubuntu-latest
+    # Publish always runs against a version tag on `main` — use the
+    # protected-branch environment so nx can hit Nx Cloud (read-write).
+    environment: protected-branch-pipeline
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
     permissions:
       contents: read
       id-token: write # needed for provenance data generation
@@ -122,8 +127,3 @@ jobs:
           NPM_CONFIG_ACCESS: public
           NPM_CONFIG_LOGLEVEL: verbose
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # The Nx Cloud org is on the free plan which this workspace
-          # has exceeded; nx refuses to run at all when it can't reach
-          # cloud. Opt out for this job — we only need local task
-          # execution to publish packages.
-          NX_NO_CLOUD: 'true'
