@@ -29,3 +29,5 @@ export { fromLexError, fromParseError } from './errors';
 
 export { tokenize } from './lex';
 export type { LexResult } from './lex';
+
+export { assertCleanParse, AclassParseError } from './assert';

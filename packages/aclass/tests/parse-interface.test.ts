@@ -236,3 +236,113 @@ describe('parse — error handling', () => {
     void errors;
   });
 });
+
+describe('parse — ABAP keywords used as names', () => {
+  it('accepts a parameter named `data` (keyword-as-name)', () => {
+    const src = [
+      'INTERFACE zif_x PUBLIC.',
+      '  METHODS foo IMPORTING data TYPE i.',
+      'ENDINTERFACE.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const iface = ast.definitions[0];
+    if (iface.kind !== 'InterfaceDef') throw new Error('expected InterfaceDef');
+    const m = iface.members[0];
+    if (m.kind !== 'MethodDecl') throw new Error('expected MethodDecl');
+    expect(m.importing[0].name).toBe('data');
+    expect(m.importing[0].type.source).toBe('i');
+  });
+
+  it('accepts REF TO <keyword-named-type>', () => {
+    const src = [
+      'INTERFACE zif_x PUBLIC.',
+      '  TYPES generic_ref TYPE REF TO data.',
+      'ENDINTERFACE.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const iface = ast.definitions[0];
+    if (iface.kind !== 'InterfaceDef') throw new Error('expected InterfaceDef');
+    const td = iface.members[0];
+    if (td.kind !== 'TypeDecl') throw new Error('expected TypeDecl');
+    if (td.shape.kind !== 'alias') throw new Error('expected alias');
+    expect(td.shape.type.kind).toBe('RefToTypeRef');
+    if (td.shape.type.kind !== 'RefToTypeRef') return;
+    expect(td.shape.type.target.source).toBe('data');
+  });
+
+  it('accepts a structure field named after an ABAP keyword', () => {
+    const src = [
+      'INTERFACE zif_x PUBLIC.',
+      '  TYPES: BEGIN OF row,',
+      '    type  TYPE string,',
+      '    data  TYPE i,',
+      '    value TYPE string,',
+      '  END OF row.',
+      'ENDINTERFACE.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const iface = ast.definitions[0];
+    if (iface.kind !== 'InterfaceDef') throw new Error('expected InterfaceDef');
+    const td = iface.members[0];
+    if (td.kind !== 'TypeDecl') throw new Error('expected TypeDecl');
+    if (td.shape.kind !== 'structure') throw new Error('expected structure');
+    const fields = td.shape.fields.map((f) => f.name);
+    expect(fields).toEqual(['type', 'data', 'value']);
+  });
+
+  it('accepts qualified type references where either side is a keyword', () => {
+    const src = [
+      'INTERFACE zif_x PUBLIC.',
+      '  TYPES foo TYPE zif_y=>data.',
+      'ENDINTERFACE.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const iface = ast.definitions[0];
+    if (iface.kind !== 'InterfaceDef') throw new Error('expected InterfaceDef');
+    const td = iface.members[0];
+    if (td.kind !== 'TypeDecl' || td.shape.kind !== 'alias') return;
+    expect(td.shape.type.source).toBe('zif_y=>data');
+  });
+});
+
+describe('parse — MethodImpl.bodySpan', () => {
+  it('bodySpan.startLine points at the first line of the method body, not at METHOD', () => {
+    const src = [
+      'CLASS zcl_x IMPLEMENTATION.',
+      '  METHOD foo.', // line 2
+      '    RETURN.', // line 3 — this is where bodySpan should start
+      '  ENDMETHOD.',
+      'ENDCLASS.',
+    ].join('\n');
+    const { ast } = parse(src);
+    const impl = ast.definitions.find((d) => d.kind === 'ClassImpl');
+    if (impl?.kind !== 'ClassImpl') throw new Error('expected ClassImpl');
+    const m = impl.methods[0];
+    expect(m.span.startLine).toBe(2); // METHOD keyword line
+    expect(m.bodySpan.startLine).toBe(3); // body content line
+  });
+
+  it('empty method body still produces a valid bodySpan', () => {
+    const src = [
+      'CLASS zcl_x IMPLEMENTATION.',
+      '  METHOD noop.',
+      '  ENDMETHOD.',
+      'ENDCLASS.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const impl = ast.definitions.find((d) => d.kind === 'ClassImpl');
+    if (impl?.kind !== 'ClassImpl') throw new Error('expected ClassImpl');
+    const m = impl.methods[0];
+    // Empty body span must still be well-ordered (end >= start - 1 is the
+    // degenerate empty-range case; start should never land past end of file).
+    expect(m.bodySpan.startOffset).toBeLessThanOrEqual(
+      m.bodySpan.endOffset + 1,
+    );
+    expect(m.body.trim()).toBe('');
+  });
+});

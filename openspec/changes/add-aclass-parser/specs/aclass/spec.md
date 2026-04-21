@@ -72,7 +72,11 @@ AbapSourceFile {
   kind: 'AbapSourceFile',
   source: string,                      // original input, for offset math
   definitions: AbapDefinition[],
-  errors: ParseError[],
+}
+
+ParseResult {
+  ast: AbapSourceFile,
+  errors: ParseError[],                // lex + parse diagnostics
 }
 
 AbapDefinition =

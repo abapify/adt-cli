@@ -20,7 +20,6 @@
 import type { IToken } from 'chevrotain';
 import { tokenize } from './lex';
 import type { ParseError } from './errors';
-import * as T from './tokens';
 import type {
   AbapDefinition,
   AbapSourceFile,
@@ -62,9 +61,26 @@ export function parse(source: string): ParseResult {
   const definitions: AbapDefinition[] = [];
   const cursor = new Cursor(tokens, source, errors);
 
-  while (!cursor.eof()) {
-    const def = parseTopLevel(cursor);
-    if (def) definitions.push(def);
+  try {
+    while (!cursor.eof()) {
+      const def = parseTopLevel(cursor);
+      if (def) definitions.push(def);
+    }
+  } catch (err) {
+    // The parser is documented to never throw — any unexpected exception
+    // (e.g. a missing `eof()` guard in a future helper) is normalised
+    // into a `ParseError` and attached to the result so callers still
+    // get a best-effort AST.
+    errors.push({
+      severity: 'error',
+      message: `internal parser error: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+      line: 1,
+      column: 1,
+      offset: 0,
+      length: 0,
+    });
   }
 
   const ast: AbapSourceFile = {
@@ -170,6 +186,19 @@ class Cursor {
 
   sliceSource(startOffset: number, endOffset: number): string {
     return this.source.slice(startOffset, endOffset + 1);
+  }
+
+  /**
+   * Return the first token whose start offset is greater than or equal
+   * to the given offset. Useful for recovering line/column metadata for
+   * a source-slice boundary that doesn't land on a token (e.g. the
+   * start of a method body, which is usually whitespace).
+   */
+  firstTokenAtOrAfter(offset: number): IToken | undefined {
+    for (const t of this.tokens) {
+      if (t.startOffset >= offset) return t;
+    }
+    return undefined;
   }
 }
 
@@ -383,6 +412,12 @@ function parseMethodImpl(c: Cursor): MethodImpl | null {
       const bodyEnd = endMethodStart - 1;
       const totalEnd = stmt.endOffset;
       const body = c['sliceSource'](bodyStart, bodyEnd);
+      // Locate the first non-whitespace line/column inside the body so
+      // bodySpan points at the actual content, not at the `METHOD`
+      // keyword that terminated with the `.` before bodyStart.
+      const firstBodyTok = c.firstTokenAtOrAfter(bodyStart);
+      const bodyLine = firstBodyTok?.startLine ?? methodTok.startLine ?? 1;
+      const bodyCol = firstBodyTok?.startColumn ?? 1;
       return {
         kind: 'MethodImpl',
         name: nameTok.image,
@@ -390,8 +425,8 @@ function parseMethodImpl(c: Cursor): MethodImpl | null {
         bodySpan: {
           startOffset: bodyStart,
           endOffset: bodyEnd,
-          startLine: methodTok.startLine ?? 1,
-          startColumn: methodTok.startColumn ?? 1,
+          startLine: bodyLine,
+          startColumn: bodyCol,
         },
         span: {
           startOffset: methodTok.startOffset,
@@ -697,7 +732,7 @@ function consumeMethodParam(
   ) {
     isValue = true;
     const nameTok = toks[i + 2];
-    if (!nameTok || nameTok.tokenType.name !== 'Identifier') return null;
+    if (!isNameLike(nameTok)) return null;
     if (toks[i + 3]?.tokenType.name !== 'RParen') return null;
     i += 4;
     // Followed by TYPE <typeref> etc. Fall through to common path but
@@ -705,9 +740,9 @@ function consumeMethodParam(
     const paramName = nameTok.image;
     return parseParamTail(toks, i, c, paramName, isValue);
   }
-  // Plain identifier
+  // Plain name — may be a keyword-as-name (`data`, `type`, `ref`, ...).
   const nameTok = toks[i];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') return null;
+  if (!isNameLike(nameTok)) return null;
   i += 1;
   return parseParamTail(toks, i, c, nameTok.image, isValue);
 }
@@ -939,7 +974,7 @@ function parseFieldRun(toks: IToken[], out: StructureField[], c: Cursor): void {
       continue;
     }
     const nameTok = toks[i];
-    if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+    if (!isNameLike(nameTok)) {
       // Unexpected — skip to next comma to recover
       while (i < toks.length && toks[i].tokenType.name !== 'Comma') i += 1;
       continue;
@@ -1115,15 +1150,18 @@ function consumeTypeRef(
     return consumeTableTypeRef(toks, i, c, limit, tableKind);
   }
 
-  // Simple name / qualified form: ident (=>|~) ident [(=>|~) ident …]
-  const startTok = toks[i];
-  if (
-    startTok.tokenType.name !== 'Identifier' &&
-    startTok.tokenType.name !== 'Value'
-  ) {
-    // `Value` shouldn't appear here, but harmless.
-    // Keep collecting identifiers — but at least the head must be an identifier.
-    c.report(`expected type name, got "${startTok.image}"`, startTok);
+  // Simple name / qualified form: <name> (=>|~) <name> [(=>|~) <name> …]
+  // `<name>` accepts any identifier-shaped token, including keywords
+  // that the grammar re-purposes as names in declaration positions
+  // (`DATA data TYPE i.`, `REF TO data`, `TYPE type`, etc.).
+  const startTok: IToken | undefined = toks[i];
+  if (!isNameLike(startTok)) {
+    // `startTok` is narrowed to `undefined` here (isNameLike rejected a
+    // present token would also land here; in that case the image is
+    // already captured in `toks[i]` so read from there).
+    const at = toks[i] ?? toks[i - 1] ?? toks[0];
+    const label = at ? at.image : '<eof>';
+    c.report(`expected type name, got "${label}"`, at);
     return null;
   }
   let lastIdx = i;
@@ -1133,7 +1171,7 @@ function consumeTypeRef(
     const t = toks[j]?.tokenType.name;
     if (t === 'FatArrow' || t === 'Tilde') {
       const next = toks[j + 1];
-      if (next?.tokenType.name !== 'Identifier') break;
+      if (!isNameLike(next)) break;
       nameParts.push(t === 'FatArrow' ? '=>' : '~', next.image);
       lastIdx = j + 1;
       j += 2;
@@ -1252,6 +1290,28 @@ function spanFromStmt(
   };
 }
 
+/**
+ * True when the token can legally appear in a position that expects an
+ * ABAP identifier (type name, field name, parameter name, qualified part).
+ *
+ * The ABAP grammar allows many reserved words to be reused as names in
+ * declaration positions — e.g. `DATA data TYPE i.`, `METHODS foo IMPORTING
+ * type TYPE string.`, `TYPES: BEGIN OF x, data TYPE i, END OF x.`.
+ * At the lexer level those tokens are classified as keywords; the parser
+ * has to reinterpret them contextually.
+ *
+ * We accept: `Identifier`, plus any token whose `image` is a plain ABAP
+ * identifier (starts with letter/underscore, only contains the chars a
+ * real identifier would). This keeps the rule cheap (no huge keyword
+ * allowlist) and catches every keyword that can legally be a name.
+ */
+function isNameLike(t: IToken | undefined): t is IToken {
+  if (!t) return false;
+  if (t.tokenType.name === 'Identifier') return true;
+  // Symbols (`Dot`, `Comma`, `FatArrow`, ...) have non-alphabetic images.
+  return /^[A-Za-z_][A-Za-z0-9_/]*$/.test(t.image);
+}
+
 const BUILTIN_ABAP_TYPES = new Set([
   'string',
   'xstring',
@@ -1280,6 +1340,3 @@ const BUILTIN_ABAP_TYPES = new Set([
 function isBuiltinName(name: string): boolean {
   return BUILTIN_ABAP_TYPES.has(name.toLowerCase());
 }
-
-// Silence the unused-name warning on the legacy import.
-void T;

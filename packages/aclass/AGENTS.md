@@ -22,38 +22,54 @@ into a full ABAP OO round-trip:
 
 ## Current status
 
-Wave 0 (this commit): lexer (`tokens.ts`), error shape, `tokenize()`
-entry point and 12 smoke tests covering compound keywords, ABAPDoc vs
-regular line comments, star-comments at column 1, access operators,
-and qualified references.
+Waves 0–3 are all shipped:
 
-Wave 1 onwards: CstParser, visitor, typed AST, per-topic grammar
-tests. Wave 2 adds the petstore3 fixture suite and the roundtrip
-release gate. See
+- **Wave 0** — Chevrotain lexer (`tokens.ts`) with compound-keyword and
+  ABAPDoc handling.
+- **Wave 1** — statement-based parser (`parser.ts`) + typed AST
+  (`ast.ts`). No Chevrotain CstParser / visitor — ABAP's `keyword … dot`
+  statement shape makes a statement splitter both simpler and more
+  robust than a full CST pipeline for this scope.
+- **Wave 2** — fixture suite against the live petstore3 corpus and
+  structural roundtrip / idempotence tests.
+- **Wave 3** — consumer wiring via `assertCleanParse()` (`assert.ts`),
+  used by `@abapify/openai-codegen` as a CI gate.
+
+See
 [`openspec/changes/add-aclass-parser/tasks.md`](../../openspec/changes/add-aclass-parser/tasks.md)
-for the full wave plan.
+for the detailed task record.
 
 ## Architecture
 
 ```
 Source string (.clas.abap / .intf.abap)
-  → AclassLexer   (src/tokens.ts)    Tokenise
-  → AclassParser  (src/parser.ts)    Tokens → CST     [Wave 1]
-  → AclassVisitor (src/visitor.ts)   CST → typed AST  [Wave 1]
-  → AbapSourceFile (src/ast.ts)                       [Wave 1]
+  → AclassLexer    (src/tokens.ts)    Tokenise
+  → statement split (on `Dot`)         Declarative-statement stream
+  → parse()         (src/parser.ts)    Typed AST
+  → AbapSourceFile  (src/ast.ts)       { definitions, source }
+  → assertCleanParse (src/assert.ts)   Consumer CI gate
 ```
+
+Why a statement splitter, not a Chevrotain CstParser: ABAP is
+`keyword … dot` at the surface level. Declaring every production in
+Chevrotain would require also declaring the expression grammar just
+to parse type references — and method bodies are explicitly opaque in
+this package, so the expression grammar would be wasted. The
+statement splitter classifies each statement by its head keyword and
+builds typed AST nodes directly from the token slice; unknown shapes
+fall through to `RawMember` for lossless roundtrip.
 
 ### Key files
 
-| File             | Purpose                                                                 |
-| ---------------- | ----------------------------------------------------------------------- |
-| `src/index.ts`   | Public exports. Re-exports `tokenize`, lexer, token types, error shape. |
-| `src/tokens.ts`  | Chevrotain token definitions (keywords, symbols, literals, comments).   |
-| `src/lex.ts`     | `tokenize(source)` — thin wrapper that normalises lex errors.           |
-| `src/errors.ts`  | Chevrotain lex + parse errors → stable `ParseError` shape.              |
-| `src/parser.ts`  | [Wave 1] CstParser rules.                                               |
-| `src/visitor.ts` | [Wave 1] CST → typed AST.                                               |
-| `src/ast.ts`     | [Wave 1] AST node interfaces.                                           |
+| File            | Purpose                                                                        |
+| --------------- | ------------------------------------------------------------------------------ |
+| `src/index.ts`  | Public exports: `parse`, `assertCleanParse`, AST types, lexer, token types.    |
+| `src/tokens.ts` | Chevrotain token definitions (keywords, symbols, literals, comments).          |
+| `src/lex.ts`    | `tokenize(source)` — thin wrapper that normalises lex errors.                  |
+| `src/errors.ts` | Chevrotain lex + parse errors → stable `ParseError` shape.                     |
+| `src/parser.ts` | Statement splitter + per-statement typed AST builders.                         |
+| `src/ast.ts`    | AST node interfaces.                                                           |
+| `src/assert.ts` | `assertCleanParse(source, fileLabel)` + `AclassParseError` — reusable CI gate. |
 
 ## Conventions
 
@@ -104,10 +120,9 @@ bunx nx lint aclass        # ESLint
 
 ## Anti-patterns to avoid
 
-| Don't                                    | Do instead                                                  |
-| ---------------------------------------- | ----------------------------------------------------------- |
-| Hand-rolled string scanning              | Extend `allTokens`                                          |
-| `new RegExp(...)` for each keyword match | `createToken({ pattern: /word/i, longer_alt: Identifier })` |
-| Add `then` property on AST nodes         | Use `thenBody` (JS thenable clash — see `abap-ast`)         |
-| Depend on `@abapify/abap-ast` at runtime | Devdep only; aclass owns its AST                            |
-| `throw` on malformed input               | Return `{ ast, errors }`                                    |
+| Don't                                    | Do instead                                          |
+| ---------------------------------------- | --------------------------------------------------- |
+| Hand-rolled string scanning              | Extend `allTokens`                                  |
+| Add `then` property on AST nodes         | Use `thenBody` (JS thenable clash — see `abap-ast`) |
+| Depend on `@abapify/abap-ast` at runtime | Devdep only; aclass owns its AST                    |
+| `throw` on malformed input               | Return `{ ast, errors }`                            |

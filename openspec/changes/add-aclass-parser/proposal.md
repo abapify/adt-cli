@@ -71,16 +71,23 @@ New AST usages unlocked by parsing:
    literals, `ABAPDocLine` (`"!`), line comments (`"`), star comments
    (`*`), end-of-statement dot, comma, colon, paren open/close,
    backtick literal, hyphen, whitespace.
-3. **Parser** — a Chevrotain `CstParser` with production rules limited
-   to: `cdsClassDef`, `cdsClassImplementation`, `cdsInterfaceDef`, each
-   broken down into sections, member declarations, inheritance /
-   `IMPLEMENTS` lists. Method implementations (`METHOD foo. … ENDMETHOD.`)
-   are captured as a single _opaque_ node whose body is the raw text
-   between `METHOD <name>.` and `ENDMETHOD.`. `maxLookahead: 4`,
-   `recoveryEnabled: true`, following `acds`.
-4. **Visitor** — CST → typed AST. Emits `AbapSourceFile` with a single
-   top-level `definitions: AbapDefinition[]` array, each element a
-   `ClassDef`, `ClassImpl`, or `InterfaceDef`.
+3. **Parser** — a statement splitter (`parser.ts`) that tokenises with
+   the Wave 0 lexer, splits the stream on `Dot`, classifies each
+   statement by its leading keyword (`classDef`, `classImpl`,
+   `interfaceDef`, and the member-declaration heads), and builds typed
+   AST nodes directly from the token slice. Method implementations
+   (`METHOD foo. … ENDMETHOD.`) are captured as a single _opaque_ node
+   whose body is the raw text between `METHOD <name>.` and
+   `ENDMETHOD.`. Never throws for malformed input — unknown shapes fall
+   through to `RawMember` so round-trip printing stays lossless.
+   Trade-off vs a Chevrotain `CstParser`: we lose automatic recovery
+   machinery but gain drastically simpler code, direct offset access
+   for source spans, and an easy fallback for any shape outside MVP
+   grammar.
+4. **Typed AST** — emitted directly by the parser. No separate visitor
+   stage; `parse()` returns `AbapSourceFile` with a single top-level
+   `definitions: AbapDefinition[]` array, each element a `ClassDef`,
+   `ClassImpl`, or `InterfaceDef`.
 5. **Error normalization** — Chevrotain lex + parse errors mapped to a
    stable `{ line, column, message, severity: 'error' }` shape.
 6. **Public API** — one entry point:
