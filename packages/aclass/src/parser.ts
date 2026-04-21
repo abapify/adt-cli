@@ -834,6 +834,40 @@ function parseParamTail(
   return { param, nextIndex: i };
 }
 
+/**
+ * Shared body for member declarations shaped like `<head> <name> TYPE
+ * <typeref> [rest…]`. Returns `{ nameTok, typeRes, toks, stmt, tailIdx }`
+ * where `tailIdx` is the index of the first token AFTER the type-ref so
+ * callers can inspect modifiers such as `READ-ONLY` / `VALUE <lit>`.
+ */
+function parseNameTypeStatement(
+  c: Cursor,
+  expectation: { name: string; type: string },
+): {
+  nameTok: IToken;
+  typeRes: { type: TypeRef; nextIndex: number };
+  toks: IToken[];
+  stmt: ReturnType<Cursor['collectStatement']>;
+  tailIdx: number;
+} | null {
+  const head = c.current();
+  const stmt = c.collectStatement();
+  const toks = stmt.tokens;
+  // toks[0] = head keyword (already validated by the caller dispatching on it)
+  const nameTok = toks[1];
+  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+    c.report(`expected ${expectation.name}`, nameTok ?? head);
+    return null;
+  }
+  if (toks[2]?.tokenType.name !== 'Type') {
+    c.report(`expected TYPE in ${expectation.type}`, toks[2] ?? head);
+    return null;
+  }
+  const typeRes = consumeTypeRef(toks, 3, c);
+  if (!typeRes) return null;
+  return { nameTok, typeRes, toks, stmt, tailIdx: typeRes.nextIndex };
+}
+
 // --- DATA / CLASS-DATA ---
 
 function parseAttributeDecl(
@@ -842,24 +876,13 @@ function parseAttributeDecl(
 ): AttributeDecl | null {
   const head = c.current();
   const isClassData = head.tokenType.name === 'ClassData';
-  const stmt = c.collectStatement();
-  const toks = stmt.tokens;
-  // [Data|ClassData, Ident, Type, <typeref tokens>, [ReadOnly]]
-  const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
-    c.report('expected attribute name', nameTok ?? head);
-    return null;
-  }
-  if (toks[2]?.tokenType.name !== 'Type') {
-    c.report('expected TYPE in attribute declaration', toks[2] ?? head);
-    return null;
-  }
-  const typeRes = consumeTypeRef(toks, 3, c);
-  if (!typeRes) return null;
-  let isReadOnly = false;
-  if (toks[typeRes.nextIndex]?.tokenType.name === 'ReadOnly') {
-    isReadOnly = true;
-  }
+  const parsed = parseNameTypeStatement(c, {
+    name: 'attribute name',
+    type: 'attribute declaration',
+  });
+  if (!parsed) return null;
+  const { nameTok, typeRes, toks, stmt, tailIdx } = parsed;
+  const isReadOnly = toks[tailIdx]?.tokenType.name === 'ReadOnly';
   return {
     kind: 'AttributeDecl',
     name: nameTok.image,
@@ -895,20 +918,12 @@ function parseTypeDecl(
   }
 
   // Simple form — single statement ending with Dot.
-  const stmt = c.collectStatement();
-  const toks = stmt.tokens;
-  // [Types, Ident, Type, <typeref tokens>]
-  const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
-    c.report('expected type name after TYPES', nameTok ?? head);
-    return null;
-  }
-  if (toks[2]?.tokenType.name !== 'Type') {
-    c.report('expected TYPE in TYPES declaration', toks[2] ?? head);
-    return null;
-  }
-  const typeRes = consumeTypeRef(toks, 3, c);
-  if (!typeRes) return null;
+  const parsed = parseNameTypeStatement(c, {
+    name: 'type name after TYPES',
+    type: 'TYPES declaration',
+  });
+  if (!parsed) return null;
+  const { nameTok, typeRes, stmt } = parsed;
   return {
     kind: 'TypeDecl',
     name: nameTok.image,
