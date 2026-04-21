@@ -88,10 +88,18 @@ export const packageListCommand = new Command('list')
         return;
       }
 
-      // Stringify an unknown field safely (avoids "[object Object]")
+      // Stringify an unknown field safely (avoids "[object Object]").
+      // JSON.stringify can throw on circular refs / BigInt — fall back to
+      // plain String coercion so `package list` never crashes on output.
       const asStr = (v: unknown, fallback = ''): string => {
         if (v === undefined || v === null) return fallback;
-        if (typeof v === 'object') return JSON.stringify(v);
+        if (typeof v === 'object') {
+          try {
+            return JSON.stringify(v);
+          } catch {
+            return String(v);
+          }
+        }
         return String(v);
       };
 

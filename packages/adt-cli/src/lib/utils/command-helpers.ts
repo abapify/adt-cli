@@ -52,7 +52,15 @@ export function handleCommandError(error: unknown, operation: string): never {
 export function handleImportError(error: unknown, debug = false): never {
   const toStr = (v: unknown): string => {
     if (v === undefined || v === null) return '';
-    if (typeof v === 'object') return JSON.stringify(v);
+    if (typeof v === 'object') {
+      try {
+        return JSON.stringify(v);
+      } catch {
+        // Error objects occasionally have circular refs; don't let
+        // the import error handler itself crash while formatting.
+        return String(v);
+      }
+    }
     return String(v);
   };
 
