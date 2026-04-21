@@ -1,3 +1,19 @@
+## 0.3.6 (2026-04-21)
+
+### 🚀 Features
+
+- **nx-cloud:** setup nx cloud workspace ([23de1e92](https://github.com/abapify/adt-cli/commit/23de1e92))
+
+### 🩹 Fixes
+
+- **ci:** trigger publish.yml on tag push, not via workflow_call ([dc91f860](https://github.com/abapify/adt-cli/commit/dc91f860))
+- **ci:** chain release -> publish via workflow_dispatch (GITHUB_TOKEN push won't trigger) ([872e8a7c](https://github.com/abapify/adt-cli/commit/872e8a7c))
+- **ci:** grant actions: write to release job so it can dispatch publish.yml ([fb842c3e](https://github.com/abapify/adt-cli/commit/fb842c3e))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+
 ## 0.3.5 (2026-04-20)
 
 ### 🩹 Fixes

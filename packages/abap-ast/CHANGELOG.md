@@ -1,3 +1,7 @@
+## 0.3.6 (2026-04-21)
+
+This was a version bump only for @abapify/abap-ast to align it with other projects, there were no code changes.
+
 ## 0.3.5 (2026-04-20)
 
 This was a version bump only for @abapify/abap-ast to align it with other projects, there were no code changes.

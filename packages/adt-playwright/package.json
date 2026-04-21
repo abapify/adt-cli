@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-playwright",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Playwright-based SSO authentication plugin for ADT client",
   "license": "MIT",
   "publishConfig": {
@@ -17,9 +17,9 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-auth": "0.3.5",
-    "@abapify/adt-config": "0.3.5",
-    "@abapify/browser-auth": "0.3.5",
+    "@abapify/adt-auth": "0.3.6",
+    "@abapify/adt-config": "0.3.6",
+    "@abapify/browser-auth": "0.3.6",
     "playwright": "^1.57.0"
   },
   "devDependencies": {

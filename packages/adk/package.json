@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adk",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -16,9 +16,9 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-client": "0.3.5",
-    "@abapify/adt-locks": "0.3.5",
-    "@abapify/adt-schemas": "0.3.5"
+    "@abapify/adt-client": "0.3.6",
+    "@abapify/adt-locks": "0.3.6",
+    "@abapify/adt-schemas": "0.3.6"
   },
   "repository": {
     "type": "git",

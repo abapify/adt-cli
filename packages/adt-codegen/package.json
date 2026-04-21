@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-codegen",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Code generation toolkit for SAP ADT APIs",
   "license": "MIT",
   "publishConfig": {
@@ -31,8 +31,8 @@
     "typescript"
   ],
   "dependencies": {
-    "@abapify/adt-config": "0.3.5",
-    "@abapify/adt-plugin": "0.3.5",
+    "@abapify/adt-config": "0.3.6",
+    "@abapify/adt-plugin": "0.3.6",
     "fast-xml-parser": "^5.5.0",
     "commander": "^11.1.0",
     "chalk": "^5.3.0"

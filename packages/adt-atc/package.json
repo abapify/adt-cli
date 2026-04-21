@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-atc",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "ABAP Test Cockpit (ATC) CLI plugin for adt-cli",
   "license": "MIT",
   "publishConfig": {
@@ -28,7 +28,7 @@
     "gitlab"
   ],
   "dependencies": {
-    "@abapify/adt-plugin": "0.3.5",
+    "@abapify/adt-plugin": "0.3.6",
     "chalk": "^5.3.0"
   },
   "module": "./dist/index.mjs",
