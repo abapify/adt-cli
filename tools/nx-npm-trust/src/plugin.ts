@@ -135,7 +135,7 @@ export const createNodesV2: CreateNodesV2<NxNpmTrustOptions> = [
       (p) => (p.endsWith('/') ? p : `${p}/`),
     );
 
-    const scriptPath = join(__dirname, 'check.js');
+    const scriptPath = join(__dirname, 'check.ts');
     const scriptArg = JSON.stringify(scriptPath);
     // Baseline command: read-only probe. Callers opt into mutations by
     // passing `--fix` and/or `--prepare` through `nx --args="..."`.
