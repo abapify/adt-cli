@@ -9,8 +9,17 @@
  */
 
 import { readFileSync, existsSync, readdirSync, type Dirent } from 'node:fs';
-import { basename, join } from 'node:path';
+import { basename, join, sep } from 'node:path';
 import type { FindingResolver, ResolvedLocation } from '../types';
+
+/**
+ * Normalise platform-native path separators (\\ on Windows) to POSIX (/).
+ * `ResolvedLocation.path` is documented as a git-relative path, and
+ * downstream formatters (GitLab JSON, SARIF) require `/` separators.
+ */
+function toPosix(p: string): string {
+  return sep === '/' ? p : p.split(sep).join('/');
+}
 
 // ── Method range parsing ────────────────────────────────────────────────
 
@@ -141,7 +150,9 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
       for (const f of files) {
         const name = basename(f);
         if (!lookup.has(name)) {
-          lookup.set(name, f);
+          // Store POSIX-normalised paths: consumers treat
+          // ResolvedLocation.path as a git-relative path (uses `/`).
+          lookup.set(name, toPosix(f));
         }
       }
     }
