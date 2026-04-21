@@ -41,7 +41,7 @@ function collectSourceFiles(root: string): string[] {
         stack.push(fullPath);
       } else if (
         entry.isFile() &&
-        (entry.name.endsWith('.abap') || entry.name.endsWith('.xml'))
+        (fullPath.endsWith('.abap') || fullPath.endsWith('.xml'))
       ) {
         result.push(fullPath);
       }

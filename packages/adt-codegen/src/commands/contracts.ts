@@ -80,9 +80,10 @@ export const contractsCommand: CliCommandPlugin = {
         // supplied `discoveryPath` is passed verbatim to the child process
         // and cannot be interpreted as shell metacharacters.
         mkdirSync(dirname(discoveryPath), { recursive: true });
+        const adtCliPath = resolve(ctx.cwd, 'node_modules/.bin/adt');
         execFileSync(
           process.execPath,
-          ['./node_modules/.bin/adt', 'discovery', '--output', discoveryPath],
+          [adtCliPath, 'discovery', '--output', discoveryPath],
           {
             stdio: 'inherit',
             cwd: ctx.cwd,
