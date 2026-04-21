@@ -215,8 +215,7 @@ export function buildCdsDdl(
 
   // --- Definition header ---
   const keyword = isStructure ? 'define structure' : 'define table';
-  lines.push(`${keyword} ${tableName.toLowerCase()} {`);
-  lines.push(''); // Blank line after opening brace (SAP format)
+  lines.push(`${keyword} ${tableName.toLowerCase()} {`, ''); // Blank line after opening brace (SAP format)
 
   // --- Sort fields by POSITION ---
   const sorted = [...dd03pEntries].sort((a, b) => {
@@ -254,8 +253,7 @@ export function buildCdsDdl(
     }
   }
 
-  lines.push(''); // Blank line before closing brace (SAP format)
-  lines.push('}');
+  lines.push('', '}'); // Blank line before closing brace (SAP format)
 
   return lines.join('\n') + '\n'; // Trailing newline (SAP format)
 }
@@ -459,7 +457,7 @@ function buildCdsTypeString(entry: DD03PData): string | null {
  * Escape single quotes in annotation string values
  */
 function escapeAnnotationString(value: string): string {
-  return value.replace(/'/g, "''");
+  return value.replaceAll("'", "''");
 }
 
 // ============================================

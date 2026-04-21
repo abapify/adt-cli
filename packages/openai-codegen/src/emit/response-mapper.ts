@@ -43,7 +43,7 @@ export interface ResponseMapperResult {
  * quoted literal. Single quotes are doubled; newlines collapse to spaces.
  */
 function escapeAbapLiteral(input: string): string {
-  return input.replace(/[\r\n]+/g, ' ').replace(/'/g, "''");
+  return input.replaceAll(/[\r\n]+/g, ' ').replaceAll("'", "''");
 }
 
 interface PickedSuccess {

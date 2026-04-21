@@ -5,7 +5,7 @@ import { AuthRegistry } from './auth';
  * Configuration validation utilities
  */
 export class ConfigValidator {
-  private authRegistry = new AuthRegistry();
+  private readonly authRegistry = new AuthRegistry();
 
   /**
    * Validate complete CLI configuration

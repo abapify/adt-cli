@@ -101,7 +101,9 @@ export function formatXmlAttributes(xml: string): string {
     if (attrs.length === 0) {
       result += xml.slice(openBracket, closeBracket + 1);
     } else {
-      result += `<${tag}${attrs.map((a) => `\n  ${a}`).join('')}\n${isSelfClosing ? '/' : ''}>`;
+      const attrsJoined = attrs.map((a) => `\n  ${a}`).join('');
+      const selfCloseMarker = isSelfClosing ? '/' : '';
+      result += `<${tag}${attrsJoined}\n${selfCloseMarker}>`;
     }
     pos = closeBracket + 1;
   }

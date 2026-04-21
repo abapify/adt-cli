@@ -61,7 +61,7 @@ export class FsFileTree implements FileTree {
 export class MemoryFileTree implements FileTree {
   constructor(
     public readonly root: string,
-    private files: Map<string, string | Buffer>,
+    private readonly files: Map<string, string | Buffer>,
   ) {}
 
   async glob(pattern: string): Promise<string[]> {
@@ -77,7 +77,7 @@ export class MemoryFileTree implements FileTree {
     const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
     const body = escaped
       .replaceAll(/\*\*/g, '\x00DOUBLESTAR\x00')
-      .replace(/\*/g, '[^/]*')
+      .replaceAll(/\*/g, '[^/]*')
       .split('\x00DOUBLESTAR\x00')
       .join('.*');
     const regex = new RegExp('^' + body + '$');

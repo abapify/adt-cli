@@ -146,7 +146,7 @@ export default defineConfig({
       '',
       ...sapSchemas.map(
         (s: string) =>
-          `export { default as ${s.replace(/-/g, '')} } from './${s}';`,
+          `export { default as ${s.replaceAll('-', '')} } from './${s}';`,
       ),
       '',
     ].join('\n');
@@ -160,7 +160,7 @@ export default defineConfig({
       '',
       ...customSchemas.map(
         (s: string) =>
-          `export { default as ${s.replace(/-/g, '')} } from './${s}';`,
+          `export { default as ${s.replaceAll('-', '')} } from './${s}';`,
       ),
       '',
     ].join('\n');
@@ -228,7 +228,7 @@ export default defineConfig({
     ]);
 
     const toExportName = (name: string) => {
-      const cleaned = name.replace(/-/g, '');
+      const cleaned = name.replaceAll('-', '');
       return reservedWords.has(cleaned) ? `${cleaned}Schema` : cleaned;
     };
 
@@ -268,7 +268,7 @@ export default defineConfig({
     typedLines.push('// SAP schemas');
     for (const schemaName of targetSapSchemas) {
       const exportName = toExportName(schemaName);
-      const importName = `_${schemaName.replace(/-/g, '')}`;
+      const importName = `_${schemaName.replaceAll('-', '')}`;
       const rootTypeName = toRootTypeName(schemaName);
 
       sapTypeImportLines.push(
@@ -288,7 +288,7 @@ export default defineConfig({
     // Generate typed exports for TARGET custom schemas only
     for (const schemaName of targetCustomSchemas) {
       const exportName = toExportName(schemaName);
-      const importName = `_${schemaName.replace(/-/g, '')}`;
+      const importName = `_${schemaName.replaceAll('-', '')}`;
       const rootTypeName = toRootTypeName(schemaName);
 
       customTypeImportLines.push(

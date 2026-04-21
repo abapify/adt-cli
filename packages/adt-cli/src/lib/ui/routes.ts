@@ -5,7 +5,6 @@
  * Each page uses definePage() which auto-registers with the router.
  */
 
-import { router } from './router';
 import { GenericPage } from './pages';
 import type { Page } from './types';
 
@@ -14,8 +13,8 @@ import './pages/package';
 import './pages/class';
 import './pages/interface';
 
-// Export initialized router
-export { router };
+// Re-export the initialized router for downstream consumers.
+export { router } from './router';
 
 // ============================================================================
 // Helper: Create generic page from search result

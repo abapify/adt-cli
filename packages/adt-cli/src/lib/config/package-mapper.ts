@@ -7,7 +7,7 @@ import {
 } from './types';
 
 export class PackageMapper {
-  constructor(private mapping: PackageMapping) {}
+  constructor(private readonly mapping: PackageMapping) {}
 
   /**
    * Convert remote (SAP) package name to local project package name

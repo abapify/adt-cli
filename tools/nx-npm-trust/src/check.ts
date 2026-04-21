@@ -374,7 +374,7 @@ if (prepare && name) {
     if (report.checks.exists === false) {
       const tmpDir = join(
         tmpdir(),
-        `npm-prepare-${Date.now()}-${name.replace(/\//g, '__')}`,
+        `npm-prepare-${Date.now()}-${name.replaceAll(/\//g, '__')}`,
       );
       mkdirSync(tmpDir, { recursive: true });
       writeFileSync(
@@ -457,8 +457,9 @@ if (prepare && name) {
         scopeRegistry: false,
       });
       if (trustResult.code === 0) {
+        const trustTarget = trustRepo || `${trustNamespace}/${trustProject}`;
         report.fixes.push(
-          `npm trust ${trustProvider} ${name} → ${trustRepo || `${trustNamespace}/${trustProject}`} / ${trustWorkflow}`,
+          `npm trust ${trustProvider} ${name} → ${trustTarget} / ${trustWorkflow}`,
         );
       } else {
         const line = firstErrorLine(trustResult.stderr);

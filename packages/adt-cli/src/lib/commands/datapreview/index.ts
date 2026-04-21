@@ -8,8 +8,6 @@
 import { Command } from 'commander';
 import { datapreviewOsqlCommand } from './osql';
 
-export { datapreviewOsqlCommand };
-
 export function createDatapreviewCommand(): Command {
   const cmd = new Command('datapreview').description(
     'ABAP data preview (SQL console) operations',
@@ -19,3 +17,4 @@ export function createDatapreviewCommand(): Command {
 
   return cmd;
 }
+export { datapreviewOsqlCommand } from './osql';

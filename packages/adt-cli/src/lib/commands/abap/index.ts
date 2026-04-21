@@ -8,8 +8,6 @@
 import { Command } from 'commander';
 import { abapRunCommand } from './run';
 
-export { abapRunCommand };
-
 export function createAbapCommand(): Command {
   const cmd = new Command('abap').description('ABAP code execution commands');
 
@@ -17,3 +15,4 @@ export function createAbapCommand(): Command {
 
   return cmd;
 }
+export { abapRunCommand } from './run';

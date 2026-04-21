@@ -1,10 +1,8 @@
 import type { AdkObject as AdkObjectType, AdkKind } from '@abapify/adk';
 import {
-  ADT_TYPE_MAPPINGS,
   getKindForType as adkGetKindForType,
   getTypeForKind as adkGetTypeForKind,
 } from '@abapify/adk';
-
 // Re-export ADK types for plugin use
 export type AdkObject = AdkObjectType;
 
@@ -19,8 +17,6 @@ export type AdkObject = AdkObjectType;
 export type AbapObjectType = string;
 
 // Re-export ADK mappings for convenience
-export { ADT_TYPE_MAPPINGS };
-
 /**
  * Get object type from ADK object
  */
@@ -541,3 +537,4 @@ export interface IPluginRegistry {
    */
   unregister(formatName: string): void;
 }
+export { ADT_TYPE_MAPPINGS } from '@abapify/adk';

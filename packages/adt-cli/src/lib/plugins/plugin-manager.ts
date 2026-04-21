@@ -27,8 +27,8 @@ export interface PluginSpec {
 
 export class PluginManager {
   private static instance: PluginManager;
-  private loadedPlugins = new Map<string, PluginInfo>();
-  private configLoader = new ConfigLoader();
+  private readonly loadedPlugins = new Map<string, PluginInfo>();
+  private readonly configLoader = new ConfigLoader();
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}

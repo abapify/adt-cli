@@ -50,6 +50,20 @@ export function handleCommandError(error: unknown, operation: string): never {
  * Stack traces are only shown when --debug is enabled.
  */
 export function handleImportError(error: unknown, debug = false): never {
+  const toStr = (v: unknown): string => {
+    if (v === undefined || v === null) return '';
+    if (typeof v === 'object') {
+      try {
+        return JSON.stringify(v);
+      } catch {
+        // Error objects occasionally have circular refs; don't let
+        // the import error handler itself crash while formatting.
+        return String(v);
+      }
+    }
+    return String(v);
+  };
+
   const errorMsg = error instanceof Error ? error.message : String(error);
   const errorCode =
     error instanceof Error && 'code' in error
@@ -66,18 +80,19 @@ export function handleImportError(error: unknown, debug = false): never {
 
   console.error(`❌ Import failed: ${errorMsg}`);
   if (errorCode && errorCode !== 'UNKNOWN') {
-    console.error(`   Error code: ${errorCode}`);
+    console.error(`   Error code: ${toStr(errorCode)}`);
   }
   if (errorStatus) {
-    console.error(`   HTTP status: ${errorStatus}`);
+    console.error(`   HTTP status: ${toStr(errorStatus)}`);
   }
   if (cause) {
-    const causeMsg = cause instanceof Error ? cause.message : String(cause);
+    const causeMsg = cause instanceof Error ? cause.message : toStr(cause);
     const causeCode =
       cause instanceof Error && 'code' in cause
         ? (cause as { code: unknown }).code
         : '';
-    console.error(`   Cause: ${causeMsg}${causeCode ? ` (${causeCode})` : ''}`);
+    const causeSuffix = causeCode ? ` (${toStr(causeCode)})` : '';
+    console.error(`   Cause: ${causeMsg}${causeSuffix}`);
   }
   if (debug && error instanceof Error && error.stack) {
     console.error(`   Stack: ${error.stack}`);

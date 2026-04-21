@@ -824,7 +824,10 @@ export const diffCommand: CliCommandPlugin = {
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
     const filePatterns = (args.files as string[]) ?? [];
-    const contextLines = parseInt(String(args.context ?? '3'), 10);
+    const contextLines = parseInt(
+      String((args.context as string | number | undefined) ?? '3'),
+      10,
+    );
     const useColor = args.color !== false;
     const source = args.source === true;
     const raw = args.raw === true;
@@ -865,8 +868,9 @@ export const diffCommand: CliCommandPlugin = {
       // Convert to paths relative to cwd
       files = scannedFiles.map((f) => relative(ctx.cwd, join(repoRoot!, f)));
 
+      const pkgSuffix = packageName ? ` (package: ${packageName})` : '';
       ctx.logger.info(
-        `📦 Scanning ${scannedFiles.length} object(s) in ${repoRoot}${packageName ? ` (package: ${packageName})` : ''}...`,
+        `📦 Scanning ${scannedFiles.length} object(s) in ${repoRoot}${pkgSuffix}...`,
       );
     }
 
@@ -967,13 +971,15 @@ export const diffCommand: CliCommandPlugin = {
         process.exit(1);
       }
       if (r.hasDifferences) {
+        const identicalSuffix =
+          r.identicalCount > 0
+            ? ` (${r.identicalCount} file(s) identical)`
+            : '';
         console.log(
           useColor
             ? chalk.red('Differences found.') +
-                (r.identicalCount > 0
-                  ? chalk.dim(` (${r.identicalCount} file(s) identical)`)
-                  : '')
-            : `Differences found.${r.identicalCount > 0 ? ` (${r.identicalCount} file(s) identical)` : ''}`,
+                (r.identicalCount > 0 ? chalk.dim(identicalSuffix) : '')
+            : `Differences found.${identicalSuffix}`,
         );
         process.exit(1);
       }
