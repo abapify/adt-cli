@@ -10,6 +10,11 @@ interface NxNpmTrustOptions {
    */
   targetName?: string;
   /**
+   * Runtime used to execute the checker script.
+   * @default "bun"
+   */
+  runtime?: string;
+  /**
    * npm registry used for access probes. Defaults to the public registry.
    * The script also overrides scope-level registry pins via
    * `--@<scope>:registry=<url>`, so a repo-level `.npmrc` that pins the scope
@@ -29,6 +34,12 @@ interface NxNpmTrustOptions {
    * Auto-detected from `git remote get-url origin` when absent.
    */
   trustRepo?: string;
+  /**
+   * Directory prefixes that contain publishable packages.
+   * Each entry is treated as a project-root prefix (for example "packages/").
+   * @default ["packages/"]
+   */
+  publishablePaths?: string[];
 }
 
 function isVerbose(): boolean {
@@ -116,16 +127,20 @@ export const createNodesV2: CreateNodesV2<NxNpmTrustOptions> = [
   '**/package.json',
   (configFiles, options = {}) => {
     const targetName = options.targetName ?? 'npm-trust-check';
+    const runtime = options.runtime ?? 'bun';
     const registry = options.registry ?? 'https://registry.npmjs.org/';
     const trustWorkflow = options.trustWorkflow ?? 'publish.yml';
     const trustRepo = options.trustRepo ?? detectGithubRepo() ?? '';
+    const publishablePaths = (options.publishablePaths ?? ['packages/']).map(
+      (p) => (p.endsWith('/') ? p : `${p}/`),
+    );
 
     const scriptPath = join(__dirname, 'check.ts');
     const scriptArg = JSON.stringify(scriptPath);
     // Baseline command: read-only probe. Callers opt into mutations by
     // passing `--fix` and/or `--prepare` through `nx --args="..."`.
     const baseParts = [
-      `bun ${scriptArg}`,
+      `${runtime} ${scriptArg}`,
       `--registry=${registry}`,
       `--trust-workflow=${trustWorkflow}`,
       trustRepo ? `--trust-repo=${trustRepo}` : '',
@@ -137,8 +152,9 @@ export const createNodesV2: CreateNodesV2<NxNpmTrustOptions> = [
         const projectRoot = dirname(configFile);
         if (shouldSkipPath(projectRoot)) return null;
 
-        // Only packages/** are considered publishable in this repo.
-        if (!projectRoot.startsWith('packages/')) return null;
+        // Only configured publishable paths are considered.
+        if (!publishablePaths.some((prefix) => projectRoot.startsWith(prefix)))
+          return null;
 
         const pkgJsonPath = join(workspaceRoot, configFile);
         let pkg: {
