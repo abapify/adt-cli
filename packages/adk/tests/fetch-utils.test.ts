@@ -22,27 +22,35 @@ describe('toText', () => {
   });
 
   it('should convert null to empty string', async () => {
-    const result = await toText(null);
-    expect(result).toBe('');
+    expect(await toText(null)).toBe('');
   });
 
   it('should convert undefined to empty string', async () => {
-    const result = await toText(undefined);
-    expect(result).toBe('');
+    expect(await toText(undefined)).toBe('');
   });
 
   it('should convert number to string', async () => {
-    const result = await toText(123);
-    expect(result).toBe('123');
+    expect(await toText(123)).toBe('123');
   });
 
-  it('should convert object to string', async () => {
+  it('should JSON-stringify plain objects', async () => {
     const result = await toText({ key: 'value' });
-    expect(result).toBe('[object Object]');
+    expect(result).toBe('{"key":"value"}');
   });
 
-  it('should handle object with text property but not a function', async () => {
+  it('should JSON-stringify objects with non-function text property', async () => {
+    // `text` is not a function, so the Response-like branch is skipped and
+    // the value falls through to the JSON.stringify path.
     const result = await toText({ text: 'not a function' });
+    expect(result).toBe('{"text":"not a function"}');
+  });
+
+  it('should fall back to String() when JSON.stringify throws', async () => {
+    // JSON.stringify throws on circular references — the catch branch in
+    // toText() must return the default string coercion instead of propagating.
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+    const result = await toText(circular);
     expect(result).toBe('[object Object]');
   });
 });

@@ -3,6 +3,11 @@
  *
  * Tests for registry.ts functions that handle ADT type to ADK kind mapping
  * and object type registration/resolution.
+ *
+ * NOTE: The registry is module-level singleton state (`registry`, `adtToKind`,
+ * `kindToAdt` Maps in `src/base/registry.ts`). Each test resets it via
+ * `__resetRegistryForTests()` so ordering and import side effects from other
+ * modules cannot leak in. Do not remove the `beforeEach` call below.
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -18,22 +23,33 @@ import {
   getRegisteredTypes,
   getRegisteredKinds,
   getEndpointForType,
+  __resetRegistryForTests,
+  type AdkObjectConstructor,
 } from '../src/base/registry';
 import * as kinds from '../src/base/kinds';
 import type { AdkKind } from '../src/base/kinds';
 
-// Mock AdkObject class for testing
+// Minimal stand-in for an AdkObject constructor; tests only care about
+// identity round-tripping through the registry, not the object shape.
 class MockAdkObject {
   constructor(
     public ctx: unknown,
-    public nameOrData: string | unknown,
+    public nameOrData: unknown,
   ) {}
 }
 
+// Single typed cast — the mock intentionally does not implement the full
+// AdkObject contract, so we bridge through `unknown` once here rather than
+// sprinkling `as any` at every call site.
+const mockCtor = MockAdkObject as unknown as AdkObjectConstructor;
+
+beforeEach(() => {
+  __resetRegistryForTests();
+});
+
 describe('parseAdtType', () => {
   it('should parse full type with sub type', () => {
-    const result = parseAdtType('DEVC/K');
-    expect(result).toEqual({
+    expect(parseAdtType('DEVC/K')).toEqual({
       full: 'DEVC/K',
       main: 'DEVC',
       sub: 'K',
@@ -41,8 +57,7 @@ describe('parseAdtType', () => {
   });
 
   it('should parse main type without sub type', () => {
-    const result = parseAdtType('CLAS');
-    expect(result).toEqual({
+    expect(parseAdtType('CLAS')).toEqual({
       full: 'CLAS',
       main: 'CLAS',
       sub: undefined,
@@ -50,8 +65,7 @@ describe('parseAdtType', () => {
   });
 
   it('should handle lowercase input', () => {
-    const result = parseAdtType('tabl/ds');
-    expect(result).toEqual({
+    expect(parseAdtType('tabl/ds')).toEqual({
       full: 'tabl/ds',
       main: 'TABL',
       sub: 'DS',
@@ -59,8 +73,7 @@ describe('parseAdtType', () => {
   });
 
   it('should handle empty sub type', () => {
-    const result = parseAdtType('TABL/');
-    expect(result).toEqual({
+    expect(parseAdtType('TABL/')).toEqual({
       full: 'TABL/',
       main: 'TABL',
       sub: '',
@@ -83,30 +96,21 @@ describe('getMainType', () => {
 });
 
 describe('registerObjectType', () => {
-  beforeEach(() => {
-    // Reset would be needed here but since we're using internal registry,
-    // we'll test in isolation by importing fresh functions
-  });
-
   it('should register a type with endpoint and nameTransform', () => {
-    const mockConstructor = MockAdkObject as any;
-
-    registerObjectType('PROG', kinds.Program, mockConstructor, {
-      endpoint: 'abap/ programs',
+    registerObjectType('PROG', kinds.Program, mockCtor, {
+      endpoint: 'abap/programs',
       nameTransform: 'preserve',
     });
 
     const entry = resolveType('PROG');
     expect(entry).toBeDefined();
     expect(entry?.kind).toBe(kinds.Program);
-    expect(entry?.endpoint).toBe('abap/ programs');
+    expect(entry?.endpoint).toBe('abap/programs');
     expect(entry?.nameTransform).toBe('preserve');
   });
 
   it('should register without optional parameters', () => {
-    const mockConstructor = MockAdkObject as any;
-
-    registerObjectType('TEST', 'TestType' as AdkKind, mockConstructor);
+    registerObjectType('TEST', 'TestType' as AdkKind, mockCtor);
 
     const entry = resolveType('TEST');
     expect(entry).toBeDefined();
@@ -114,9 +118,7 @@ describe('registerObjectType', () => {
   });
 
   it('should handle case-insensitive registration', () => {
-    const mockConstructor = MockAdkObject as any;
-
-    registerObjectType('prog', kinds.Program, mockConstructor);
+    registerObjectType('prog', kinds.Program, mockCtor);
 
     expect(resolveType('PROG')).toBeDefined();
     expect(resolveType('prog')).toBeDefined();
@@ -125,82 +127,59 @@ describe('registerObjectType', () => {
 
 describe('resolveType', () => {
   it('should resolve exact type match first', () => {
-    const mockConstructor = MockAdkObject as any;
-
-    registerObjectType('MYTAB', kinds.Table, mockConstructor, {
+    registerObjectType('MYTAB', kinds.Table, mockCtor, {
       endpoint: 'ddic/tables',
     });
-    registerObjectType(
-      'MYTAB/DS',
-      kinds.Structure as AdkKind,
-      mockConstructor,
-      { endpoint: 'ddic/structs' },
-    );
+    registerObjectType('MYTAB/DS', kinds.Structure as AdkKind, mockCtor, {
+      endpoint: 'ddic/structs',
+    });
 
-    const entry = resolveType('MYTAB/DS');
-    expect(entry?.endpoint).toBe('ddic/structs');
+    expect(resolveType('MYTAB/DS')?.endpoint).toBe('ddic/structs');
   });
 
   it('should fall back to main type if full type not found', () => {
-    const mockConstructor = MockAdkObject as any;
-
-    registerObjectType('ANOTAB', kinds.Table, mockConstructor, {
+    registerObjectType('ANOTAB', kinds.Table, mockCtor, {
       endpoint: 'ddic/tables',
     });
 
-    const entry = resolveType('ANOTAB/DS');
-    expect(entry?.endpoint).toBe('ddic/tables');
+    expect(resolveType('ANOTAB/DS')?.endpoint).toBe('ddic/tables');
   });
 
   it('should return undefined for unregistered type', () => {
-    const entry = resolveType('UNREGISTERED');
-    expect(entry).toBeUndefined();
+    expect(resolveType('UNREGISTERED')).toBeUndefined();
   });
 });
 
 describe('getKindForType', () => {
   it('should return kind for registered type', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('CLAS', kinds.Class, mockConstructor);
-
-    const kind = getKindForType('CLAS');
-    expect(kind).toBe(kinds.Class);
+    registerObjectType('CLAS', kinds.Class, mockCtor);
+    expect(getKindForType('CLAS')).toBe(kinds.Class);
   });
 
   it('should return kind for full type', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('TABL', kinds.Table, mockConstructor);
-
-    const kind = getKindForType('TABL/DS');
-    expect(kind).toBe(kinds.Table);
+    registerObjectType('TABL', kinds.Table, mockCtor);
+    expect(getKindForType('TABL/DS')).toBe(kinds.Table);
   });
 
   it('should return undefined for unregistered type', () => {
-    const kind = getKindForType('UNREG');
-    expect(kind).toBeUndefined();
+    expect(getKindForType('UNREG')).toBeUndefined();
   });
 });
 
 describe('getTypeForKind', () => {
   it('should return ADT type for registered kind', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('CLAS', kinds.Class, mockConstructor);
-
-    const type = getTypeForKind(kinds.Class);
-    expect(type).toBe('CLAS');
+    registerObjectType('CLAS', kinds.Class, mockCtor);
+    expect(getTypeForKind(kinds.Class)).toBe('CLAS');
   });
 
   it('should return undefined for unregistered kind', () => {
-    const type = getTypeForKind('UnknownKind' as AdkKind);
-    expect(type).toBeUndefined();
+    expect(getTypeForKind('UnknownKind' as AdkKind)).toBeUndefined();
   });
 });
 
 describe('isTypeRegistered', () => {
-  it('should return true for registered type', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('CLAS', kinds.Class, mockConstructor);
-
+  it('should return true for registered main type', () => {
+    registerObjectType('CLAS', kinds.Class, mockCtor);
     expect(isTypeRegistered('CLAS')).toBe(true);
   });
 
@@ -208,19 +187,16 @@ describe('isTypeRegistered', () => {
     expect(isTypeRegistered('UNREG')).toBe(false);
   });
 
-  it('should check main type only', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('TABL', kinds.Table, mockConstructor);
-
+  it('should treat full types as registered when main type is registered', () => {
+    registerObjectType('TABL', kinds.Table, mockCtor);
     expect(isTypeRegistered('TABL/DS')).toBe(true);
   });
 });
 
 describe('getRegisteredTypes', () => {
   it('should return array of registered types', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('TYPE1', 'Type1' as AdkKind, mockConstructor);
-    registerObjectType('TYPE2', 'Type2' as AdkKind, mockConstructor);
+    registerObjectType('TYPE1', 'Type1' as AdkKind, mockCtor);
+    registerObjectType('TYPE2', 'Type2' as AdkKind, mockCtor);
 
     const types = getRegisteredTypes();
     expect(types).toContain('TYPE1');
@@ -228,26 +204,24 @@ describe('getRegisteredTypes', () => {
   });
 
   it('should return empty array when nothing registered', () => {
-    // Note: This assumes fresh state - may need adjustment
-    const types = getRegisteredTypes();
-    expect(Array.isArray(types)).toBe(true);
+    // Registry was cleared in beforeEach; no registrations have occurred in
+    // this test yet, so the list must be empty (not just array-shaped).
+    expect(getRegisteredTypes()).toEqual([]);
   });
 });
 
 describe('getRegisteredKinds', () => {
   it('should return array of registered kinds', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('TYPE1', 'Kind1' as AdkKind, mockConstructor);
+    registerObjectType('TYPE1', 'Kind1' as AdkKind, mockCtor);
 
-    const kinds_list = getRegisteredKinds();
-    expect(kinds_list).toContain('Kind1');
+    const kindsList = getRegisteredKinds();
+    expect(kindsList).toContain('Kind1');
   });
 });
 
 describe('resolveKind', () => {
   it('should resolve registered kind to entry', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('CLAS', kinds.Class, mockConstructor, {
+    registerObjectType('CLAS', kinds.Class, mockCtor, {
       endpoint: 'oo/classes',
     });
 
@@ -257,24 +231,20 @@ describe('resolveKind', () => {
   });
 
   it('should return undefined for unregistered kind', () => {
-    const entry = resolveKind('UnknownKind' as AdkKind);
-    expect(entry).toBeUndefined();
+    expect(resolveKind('UnknownKind' as AdkKind)).toBeUndefined();
   });
 });
 
 describe('getEndpointForType', () => {
   it('should return endpoint for registered type', () => {
-    const mockConstructor = MockAdkObject as any;
-    registerObjectType('PROG', kinds.Program, mockConstructor, {
+    registerObjectType('PROG', kinds.Program, mockCtor, {
       endpoint: 'abap/programs',
     });
 
-    const endpoint = getEndpointForType('PROG');
-    expect(endpoint).toBe('abap/programs');
+    expect(getEndpointForType('PROG')).toBe('abap/programs');
   });
 
   it('should return undefined for unregistered type', () => {
-    const endpoint = getEndpointForType('UNREG');
-    expect(endpoint).toBeUndefined();
+    expect(getEndpointForType('UNREG')).toBeUndefined();
   });
 });

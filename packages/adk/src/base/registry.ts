@@ -88,6 +88,23 @@ const adtToKind = new Map<string, AdkKind>();
 /** ADK kind to ADT main type mapping (reverse) */
 const kindToAdt = new Map<AdkKind, string>();
 
+/**
+ * Test-only: clear all registry state.
+ *
+ * The registry is module-level singleton state populated by side-effectful
+ * `registerObjectType()` calls in `src/objects/repository/**`. Tests that
+ * exercise registration need a clean slate, but production code must never
+ * call this — it would break every ADK object type resolution.
+ *
+ * Name intentionally uses the `__` prefix to signal "not part of the public
+ * API". Do not import this from runtime code.
+ */
+export function __resetRegistryForTests(): void {
+  registry.clear();
+  adtToKind.clear();
+  kindToAdt.clear();
+}
+
 /** Options for registerObjectType */
 export interface RegisterObjectTypeOptions {
   /** ADT REST endpoint path segment (e.g., 'oo/classes', 'ddic/tabletypes') */
