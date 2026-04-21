@@ -19,9 +19,7 @@ export function createChangesetCommand(): Command {
   return cmd;
 }
 
-export {
-  changesetBeginCommand,
-  changesetAddCommand,
-  changesetCommitCommand,
-  changesetRollbackCommand,
-};
+export { changesetBeginCommand } from './begin';
+export { changesetAddCommand } from './add';
+export { changesetCommitCommand } from './commit';
+export { changesetRollbackCommand } from './rollback';

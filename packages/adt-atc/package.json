@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-atc",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "ABAP Test Cockpit (ATC) CLI plugin for adt-cli",
   "license": "MIT",
   "publishConfig": {
@@ -28,8 +28,17 @@
     "gitlab"
   ],
   "dependencies": {
-    "@abapify/adt-plugin": "workspace:*",
+    "@abapify/adt-plugin": "0.3.6",
     "chalk": "^5.3.0"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-atc"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-atc#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

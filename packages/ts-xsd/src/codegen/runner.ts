@@ -404,7 +404,7 @@ function createImportResolver(
     // e.g., if current is "custom/discovery" and schemaLocation is "../sap/atom.xsd" -> "sap/atom"
     const resolvedPath =
       currentSchemaDir !== '.'
-        ? join(currentSchemaDir, schemaPath).replace(/\\/g, '/')
+        ? join(currentSchemaDir, schemaPath).replaceAll(/\\/g, '/')
         : schemaPath;
 
     // Normalize the path (handle ../ etc.)
@@ -425,7 +425,7 @@ function createImportResolver(
       const relImport =
         fromDir === dirname(toPath)
           ? `./${basename(toPath)}${ext}`
-          : relative(fromDir || '.', toPath).replace(/\\/g, '/') ||
+          : relative(fromDir || '.', toPath).replaceAll(/\\/g, '/') ||
             `./${basename(toPath)}`;
       return relImport.startsWith('.')
         ? `${relImport}${ext}`
@@ -446,15 +446,15 @@ function createImportResolver(
 
       if (source.schemas.includes(normalizedPath)) {
         const relPath = relative(currentSource.outputDir, source.outputDir);
-        return `${relPath}/${normalizedPath}${ext}`.replace(/\\/g, '/');
+        return `${relPath}/${normalizedPath}${ext}`.replaceAll(/\\/g, '/');
       }
       if (source.schemas.includes(schemaPath)) {
         const relPath = relative(currentSource.outputDir, source.outputDir);
-        return `${relPath}/${schemaPath}${ext}`.replace(/\\/g, '/');
+        return `${relPath}/${schemaPath}${ext}`.replaceAll(/\\/g, '/');
       }
       if (source.schemas.includes(schemaBaseName)) {
         const relPath = relative(currentSource.outputDir, source.outputDir);
-        return `${relPath}/${schemaBaseName}${ext}`.replace(/\\/g, '/');
+        return `${relPath}/${schemaBaseName}${ext}`.replaceAll(/\\/g, '/');
       }
     }
 

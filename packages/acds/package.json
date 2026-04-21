@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "ABAP CDS source parser — tokenizer, parser, and AST for all DDL-based ABAP source types",
   "type": "module",
   "types": "./dist/index.d.mts",
@@ -27,5 +27,14 @@
     "adt"
   ],
   "author": "abapify",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/acds"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/acds#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

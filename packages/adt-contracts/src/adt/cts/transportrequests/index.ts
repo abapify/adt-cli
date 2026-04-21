@@ -33,8 +33,6 @@ export type TransportResponse = InferTypedSchema<
 >;
 
 /** Re-export schema for consumers that need direct parsing */
-export { transportmanagmentSingle };
-
 export const transportrequests = {
   /** GET / - List transports */
   list: (params?: { targets?: string; configUri?: string }) =>
@@ -95,3 +93,4 @@ export const transportrequests = {
   searchconfiguration,
   useraction,
 };
+export { transportmanagmentSingle } from '../../../schemas';

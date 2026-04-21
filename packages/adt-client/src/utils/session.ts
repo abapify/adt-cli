@@ -11,7 +11,7 @@ import type { Logger } from '@abapify/logger';
  * Cookie Store - Manages HTTP cookies for stateful sessions
  */
 export class CookieStore {
-  private cookies = new Map<string, string>();
+  private readonly cookies = new Map<string, string>();
 
   /**
    * Parse Set-Cookie header and store cookies
@@ -224,7 +224,7 @@ export class CsrfTokenManager {
  * ETag Manager - Tracks ETags for optimistic locking
  */
 export class ETagManager {
-  private etags = new Map<string, string>();
+  private readonly etags = new Map<string, string>();
 
   /**
    * Extract and cache ETag from response header
@@ -280,12 +280,12 @@ export class ETagManager {
  * Session Manager - Orchestrates cookies and CSRF tokens
  */
 export class SessionManager {
-  private cookieStore = new CookieStore();
-  private csrfManager = new CsrfTokenManager();
-  private etagManager = new ETagManager();
+  private readonly cookieStore = new CookieStore();
+  private readonly csrfManager = new CsrfTokenManager();
+  private readonly etagManager = new ETagManager();
   private securitySessionActive = false;
 
-  constructor(private logger?: Logger) {}
+  constructor(private readonly logger?: Logger) {}
 
   /**
    * Process response to update session state

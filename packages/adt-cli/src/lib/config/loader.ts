@@ -10,8 +10,8 @@ import path from 'path';
 import yaml from 'js-yaml';
 
 export class ConfigLoader implements IConfigLoader {
-  private static cache = new Map<string, CliConfig>();
-  private authRegistry = new AuthRegistry();
+  private static readonly cache = new Map<string, CliConfig>();
+  private readonly authRegistry = new AuthRegistry();
 
   /**
    * Load configuration from file

@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-contracts",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "SAP ADT REST API contracts using speci + ts-xsd",
   "license": "MIT",
   "publishConfig": {
@@ -15,13 +15,22 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/speci": "workspace:*",
-    "@abapify/adt-schemas": "workspace:*"
+    "@abapify/speci": "0.3.6",
+    "@abapify/adt-schemas": "0.3.6"
   },
   "devDependencies": {
-    "@abapify/adt-fixtures": "workspace:*"
+    "@abapify/adt-fixtures": "0.3.6"
   },
   "files": [
     "dist"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-contracts"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-contracts#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

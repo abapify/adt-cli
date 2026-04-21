@@ -105,14 +105,14 @@ export class CdsParser extends CstParser {
   // Top-level definition dispatch
   // ============================================================
 
-  private definition = this.RULE('definition', () => {
+  private readonly definition = this.RULE('definition', () => {
     this.OR([
       { ALT: () => this.SUBRULE(this.defineStatement) },
       { ALT: () => this.SUBRULE(this.annotateStatement) },
     ]);
   });
 
-  private defineStatement = this.RULE('defineStatement', () => {
+  private readonly defineStatement = this.RULE('defineStatement', () => {
     this.CONSUME(Define);
     this.OR([
       { ALT: () => this.SUBRULE(this.tableDefinition) },
@@ -130,7 +130,7 @@ export class CdsParser extends CstParser {
   // Table definition
   // ============================================================
 
-  private tableDefinition = this.RULE('tableDefinition', () => {
+  private readonly tableDefinition = this.RULE('tableDefinition', () => {
     this.CONSUME(Table);
     this.SUBRULE(this.cdsName);
     this.CONSUME(LBrace);
@@ -144,15 +144,18 @@ export class CdsParser extends CstParser {
   // Structure definition
   // ============================================================
 
-  private structureDefinition = this.RULE('structureDefinition', () => {
-    this.CONSUME(Structure);
-    this.SUBRULE(this.cdsName);
-    this.CONSUME(LBrace);
-    this.MANY(() => {
-      this.SUBRULE(this.tableMember);
-    });
-    this.CONSUME(RBrace);
-  });
+  private readonly structureDefinition = this.RULE(
+    'structureDefinition',
+    () => {
+      this.CONSUME(Structure);
+      this.SUBRULE(this.cdsName);
+      this.CONSUME(LBrace);
+      this.MANY(() => {
+        this.SUBRULE(this.tableMember);
+      });
+      this.CONSUME(RBrace);
+    },
+  );
 
   // ============================================================
   // View entity: `view entity <name> [with parameters ...] as select from ...`
@@ -424,19 +427,22 @@ export class CdsParser extends CstParser {
   // Simple type definition
   // ============================================================
 
-  private simpleTypeDefinition = this.RULE('simpleTypeDefinition', () => {
-    this.CONSUME(Type);
-    this.SUBRULE(this.cdsName);
-    this.CONSUME(Colon);
-    this.SUBRULE(this.typeReference);
-    this.CONSUME(Semicolon);
-  });
+  private readonly simpleTypeDefinition = this.RULE(
+    'simpleTypeDefinition',
+    () => {
+      this.CONSUME(Type);
+      this.SUBRULE(this.cdsName);
+      this.CONSUME(Colon);
+      this.SUBRULE(this.typeReference);
+      this.CONSUME(Semicolon);
+    },
+  );
 
   // ============================================================
   // Service definition
   // ============================================================
 
-  private serviceDefinition = this.RULE('serviceDefinition', () => {
+  private readonly serviceDefinition = this.RULE('serviceDefinition', () => {
     this.CONSUME(Service);
     this.SUBRULE(this.cdsName);
     this.CONSUME(LBrace);
@@ -446,7 +452,7 @@ export class CdsParser extends CstParser {
     this.CONSUME(RBrace);
   });
 
-  private exposeStatement = this.RULE('exposeStatement', () => {
+  private readonly exposeStatement = this.RULE('exposeStatement', () => {
     this.CONSUME(Expose);
     this.SUBRULE(this.cdsName);
     this.OPTION(() => {
@@ -486,14 +492,14 @@ export class CdsParser extends CstParser {
   // Table/structure members
   // ============================================================
 
-  private tableMember = this.RULE('tableMember', () => {
+  private readonly tableMember = this.RULE('tableMember', () => {
     this.OR([
       { ALT: () => this.SUBRULE(this.includeDirective) },
       { ALT: () => this.SUBRULE(this.fieldDefinition) },
     ]);
   });
 
-  private includeDirective = this.RULE('includeDirective', () => {
+  private readonly includeDirective = this.RULE('includeDirective', () => {
     this.CONSUME(Include);
     this.SUBRULE(this.cdsName);
     this.OPTION(() => {
@@ -504,7 +510,7 @@ export class CdsParser extends CstParser {
     this.CONSUME(Semicolon);
   });
 
-  private fieldDefinition = this.RULE('fieldDefinition', () => {
+  private readonly fieldDefinition = this.RULE('fieldDefinition', () => {
     this.MANY(() => {
       this.SUBRULE(this.annotation);
     });
@@ -525,7 +531,7 @@ export class CdsParser extends CstParser {
   // Metadata extension (annotate entity ... with { ... })
   // ============================================================
 
-  private annotateStatement = this.RULE('annotateStatement', () => {
+  private readonly annotateStatement = this.RULE('annotateStatement', () => {
     this.CONSUME(Annotate);
     this.CONSUME(Entity);
     this.SUBRULE(this.cdsName);
@@ -537,7 +543,7 @@ export class CdsParser extends CstParser {
     this.CONSUME(RBrace);
   });
 
-  private annotatedElement = this.RULE('annotatedElement', () => {
+  private readonly annotatedElement = this.RULE('annotatedElement', () => {
     this.MANY(() => {
       this.SUBRULE(this.annotation);
     });
@@ -549,11 +555,11 @@ export class CdsParser extends CstParser {
   // Annotations
   // ============================================================
 
-  private topLevelAnnotation = this.RULE('topLevelAnnotation', () => {
+  private readonly topLevelAnnotation = this.RULE('topLevelAnnotation', () => {
     this.SUBRULE(this.annotation);
   });
 
-  private annotation = this.RULE('annotation', () => {
+  private readonly annotation = this.RULE('annotation', () => {
     this.CONSUME(At);
     this.SUBRULE(this.dottedName);
     this.OPTION(() => {
@@ -562,7 +568,7 @@ export class CdsParser extends CstParser {
     });
   });
 
-  private dottedName = this.RULE('dottedName', () => {
+  private readonly dottedName = this.RULE('dottedName', () => {
     this.SUBRULE(this.cdsName);
     this.MANY(() => {
       this.CONSUME(Dot);
@@ -570,7 +576,7 @@ export class CdsParser extends CstParser {
     });
   });
 
-  private annotationValue = this.RULE('annotationValue', () => {
+  private readonly annotationValue = this.RULE('annotationValue', () => {
     this.OR([
       { ALT: () => this.CONSUME(StringLiteral) },
       { ALT: () => this.CONSUME(EnumLiteral) },
@@ -582,7 +588,7 @@ export class CdsParser extends CstParser {
     ]);
   });
 
-  private annotationArray = this.RULE('annotationArray', () => {
+  private readonly annotationArray = this.RULE('annotationArray', () => {
     this.CONSUME(LBracket);
     this.MANY_SEP({
       SEP: Comma,
@@ -593,7 +599,7 @@ export class CdsParser extends CstParser {
     this.CONSUME(RBracket);
   });
 
-  private annotationObject = this.RULE('annotationObject', () => {
+  private readonly annotationObject = this.RULE('annotationObject', () => {
     this.CONSUME(LBrace);
     this.MANY_SEP({
       SEP: Comma,
@@ -604,7 +610,7 @@ export class CdsParser extends CstParser {
     this.CONSUME(RBrace);
   });
 
-  private annotationProperty = this.RULE('annotationProperty', () => {
+  private readonly annotationProperty = this.RULE('annotationProperty', () => {
     this.SUBRULE(this.dottedName);
     this.CONSUME(Colon);
     this.SUBRULE(this.annotationValue);
@@ -668,7 +674,7 @@ export class CdsParser extends CstParser {
   // Type references
   // ============================================================
 
-  private typeReference = this.RULE('typeReference', () => {
+  private readonly typeReference = this.RULE('typeReference', () => {
     this.OR([
       { ALT: () => this.SUBRULE(this.builtinType) },
       { ALT: () => this.SUBRULE(this.namedType) },
@@ -676,7 +682,7 @@ export class CdsParser extends CstParser {
   });
 
   /** `abap.char(10)` or `abap.dec(11,2)` */
-  private builtinType = this.RULE('builtinType', () => {
+  private readonly builtinType = this.RULE('builtinType', () => {
     this.CONSUME(Abap);
     this.CONSUME(Dot);
     this.SUBRULE(this.cdsName);
@@ -692,7 +698,7 @@ export class CdsParser extends CstParser {
   });
 
   /** Data element or other named type reference */
-  private namedType = this.RULE('namedType', () => {
+  private readonly namedType = this.RULE('namedType', () => {
     this.SUBRULE(this.qualifiedName);
   });
 
@@ -701,7 +707,7 @@ export class CdsParser extends CstParser {
   // ============================================================
 
   /** An identifier that may also be a keyword used as a name. */
-  private cdsName = this.RULE('cdsName', () => {
+  private readonly cdsName = this.RULE('cdsName', () => {
     this.OR([
       { ALT: () => this.CONSUME(Identifier) },
       // Keywords permitted as names (common CDS identifier collisions).
@@ -735,7 +741,7 @@ export class CdsParser extends CstParser {
   });
 
   /** Dot-separated qualified name: foo.bar.baz */
-  private qualifiedName = this.RULE('qualifiedName', () => {
+  private readonly qualifiedName = this.RULE('qualifiedName', () => {
     this.SUBRULE(this.cdsName);
     this.MANY(() => {
       this.CONSUME(Dot);

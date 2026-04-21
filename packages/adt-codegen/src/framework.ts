@@ -20,10 +20,10 @@ import { ConsoleLogger } from './logger';
 import { matchesFilter } from './filters';
 
 export class CodegenFramework {
-  private logger = new ConsoleLogger();
+  private readonly logger = new ConsoleLogger();
   private plugins: CodegenPlugin[] = [];
 
-  constructor(private config: CodegenConfig) {
+  constructor(private readonly config: CodegenConfig) {
     this.plugins = config.plugins;
   }
 
@@ -299,7 +299,7 @@ export class CodegenFramework {
   private sanitizeTitle(title: string): string {
     return title
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replaceAll(/[^a-z0-9]+/g, '-')
+      .replaceAll(/^-+|-+$/g, '');
   }
 }

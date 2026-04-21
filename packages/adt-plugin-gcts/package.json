@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-plugin-gcts",
-  "version": "0.1.0",
+  "version": "0.3.6",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -18,7 +18,17 @@
     "dist"
   ],
   "dependencies": {
-    "@abapify/adk": "workspace:*",
-    "@abapify/adt-plugin": "workspace:*"
-  }
+    "@abapify/adk": "0.3.6",
+    "@abapify/adt-plugin": "0.3.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-plugin-gcts"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-plugin-gcts#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  },
+  "description": "gCTS (git-enabled CTS) plugin for adt-cli — repository, commit, pull/push operations on SAP gCTS"
 }

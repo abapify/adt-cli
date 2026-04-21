@@ -112,13 +112,27 @@ export const packageGetCommand = new Command('package')
         const page = route.page(pkgData, { name });
         render(page);
       } else {
-        // Fallback: simple output
+        // Fallback: simple output.
+        // JSON.stringify can throw on circular refs / BigInt — fall back
+        // to plain String coercion so `package get` never crashes during
+        // the fallback render path.
         const pkgAny = pkgData as Record<string, unknown>;
-        console.log(`📦 Package: ${pkgAny.name || name}`);
-        console.log(`   Type: ${pkgAny.type || 'N/A'}`);
-        console.log(`   Description: ${pkgAny.description || 'N/A'}`);
+        const toDisplay = (v: unknown, fallback: string): string => {
+          if (v === undefined || v === null || v === '') return fallback;
+          if (typeof v === 'object') {
+            try {
+              return JSON.stringify(v);
+            } catch {
+              return String(v);
+            }
+          }
+          return String(v);
+        };
+        console.log(`📦 Package: ${toDisplay(pkgAny.name, name)}`);
+        console.log(`   Type: ${toDisplay(pkgAny.type, 'N/A')}`);
+        console.log(`   Description: ${toDisplay(pkgAny.description, 'N/A')}`);
         const attrs = pkgAny.attributes as Record<string, unknown> | undefined;
-        console.log(`   Package Type: ${attrs?.packageType || 'N/A'}`);
+        console.log(`   Package Type: ${toDisplay(attrs?.packageType, 'N/A')}`);
       }
 
       // Render objects section (extension, not replacement)

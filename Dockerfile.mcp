@@ -35,6 +35,9 @@ COPY package.json bun.lock nx.json tsconfig.base.json tsconfig.json tsdown.confi
 COPY packages/ ./packages/
 COPY tools/    ./tools/
 COPY samples/  ./samples/
+# website/ is declared in root workspaces but is a docs-only project; copy just
+# its package.json so `bun install --frozen-lockfile` can resolve the workspace.
+COPY website/package.json ./website/package.json
 
 # Install every workspace dependency (dev deps are required for the build).
 RUN bun install --frozen-lockfile

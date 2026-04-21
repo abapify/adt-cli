@@ -207,12 +207,12 @@ export const treeConfigSetCommand = new Command('set')
       }
       if (options.fromDate !== undefined) {
         // Normalize date format to YYYYMMDD
-        newProps.FromDate = options.fromDate.replace(/-/g, '');
+        newProps.FromDate = options.fromDate.replaceAll('-', '');
         console.log(`  📝 FromDate: ${newProps.FromDate}`);
       }
       if (options.toDate !== undefined) {
         // Normalize date format to YYYYMMDD
-        newProps.ToDate = options.toDate.replace(/-/g, '');
+        newProps.ToDate = options.toDate.replaceAll('-', '');
         console.log(`  📝 ToDate: ${newProps.ToDate}`);
       }
 

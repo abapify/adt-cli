@@ -203,7 +203,6 @@ export function runTypedScenario<
 }
 
 // Re-export expect for use in scenarios
-export { expect };
-
 // Export type helpers for use in scenarios
 export type { ExtractRequest, ExtractResponse, ExtractBody };
+export { expect } from 'vitest';

@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-locks",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "ADT lock/unlock operations and lock store management",
   "license": "MIT",
   "type": "module",
@@ -10,6 +10,22 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/adt-client": "workspace:*"
+    "@abapify/adt-client": "0.3.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-locks"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-locks#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

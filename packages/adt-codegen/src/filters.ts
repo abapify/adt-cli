@@ -25,7 +25,7 @@ function matchesValue(
 
   // Glob pattern (simple * support)
   if (typeof filter === 'string' && filter.includes('*')) {
-    const pattern = filter.replace(/\*/g, '.*');
+    const pattern = filter.replaceAll(/\*/g, '.*');
     return new RegExp(`^${pattern}$`).test(value);
   }
 

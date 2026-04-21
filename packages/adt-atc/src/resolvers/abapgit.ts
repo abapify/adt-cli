@@ -9,7 +9,7 @@
  */
 
 import { readFileSync, existsSync } from 'fs';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { basename } from 'path';
 import type { FindingResolver, ResolvedLocation } from '../types';
 
@@ -106,8 +106,22 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
 
   try {
     if (existsSync(srcRoot)) {
-      const files = execSync(
-        `find ${srcRoot} -type f \\( -name "*.abap" -o -name "*.xml" \\)`,
+      // Use execFileSync with an argv array (no shell) so `srcRoot` is
+      // passed verbatim and cannot be interpreted as shell metacharacters.
+      const files = execFileSync(
+        'find',
+        [
+          srcRoot,
+          '-type',
+          'f',
+          '(',
+          '-name',
+          '*.abap',
+          '-o',
+          '-name',
+          '*.xml',
+          ')',
+        ],
         { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 },
       )
         .trim()

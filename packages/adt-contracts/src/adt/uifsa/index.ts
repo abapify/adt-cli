@@ -13,8 +13,6 @@ import { groups, type GroupsContract } from './groups';
 import { tiles, type TilesContract } from './tiles';
 
 export * from './schema';
-export type { CatalogsContract, GroupsContract, TilesContract };
-
 export interface FlpContract {
   catalogs: CatalogsContract;
   groups: GroupsContract;
@@ -26,3 +24,6 @@ export const flpContract: FlpContract = {
   groups,
   tiles,
 };
+export type { GroupsContract } from './groups';
+export type { TilesContract } from './tiles';
+export type { CatalogsContract } from './catalogs';

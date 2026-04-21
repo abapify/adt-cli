@@ -160,7 +160,7 @@ function v2Name(
   raw: string,
   allocator: ReturnType<typeof makeNameAllocator>,
 ): string {
-  const pre = raw.replace(/\$/g, '_');
+  const pre = raw.replaceAll(/\$/g, '_');
   return allocator(pre, 'type');
 }
 
@@ -392,7 +392,7 @@ function buildStructureFields(
 
   const addField = (rawName: string, rawType: TypeRef, src: JsonSchema) => {
     const type = asFieldTypeRef(rawType);
-    const fieldName = sanitizeIdent(rawName.replace(/\$/g, '_'), 'param');
+    const fieldName = sanitizeIdent(rawName.replaceAll(/\$/g, '_'), 'param');
     const prev = seen.get(fieldName);
     if (prev !== undefined) {
       if (!typeRefEqual(prev, type)) {

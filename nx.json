@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "nxCloudId": "69e4c8fd4679d3b4b2845b26",
+  "nxCloudId": "69e6f81c01adefdeabf2c971",
   "cli": { "packageManager": "bun" },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
@@ -33,6 +33,7 @@
     },
     { "plugin": "./tools/nx-tsdown/src/index.ts" },
     { "plugin": "./tools/nx-vitest/src/index.ts" },
+    { "plugin": "./tools/nx-npm-trust/src/index.ts" },
     { "plugin": "@nx/vite/plugin", "exclude": ["**/*"] },
     { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
     {
@@ -47,7 +48,8 @@
     "version": {
       "preVersionCommand": "npx nx run-many -t build",
       "conventionalCommits": true,
-      "fallbackCurrentVersionResolver": "disk"
+      "fallbackCurrentVersionResolver": "disk",
+      "preserveLocalDependencyProtocols": false
     },
     "changelog": {
       "automaticFromRef": true,

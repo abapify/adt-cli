@@ -140,11 +140,10 @@ export function runScenario(scenario: ContractScenario): void {
 }
 
 /** Re-export FixtureHandle for convenience */
-export type { FixtureHandle };
-
 // Re-export speci createClient for use in specific contract tests
 export { createClient } from '@abapify/speci/rest';
 
 // Re-export mock adapter for client tests
 export { createMockAdapter, createSimpleMockAdapter } from './mock-adapter';
 export type { MockMatcher, MockResponse } from './mock-adapter';
+export type { FixtureHandle } from '@abapify/adt-fixtures';

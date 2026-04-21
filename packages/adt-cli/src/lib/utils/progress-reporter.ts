@@ -29,7 +29,7 @@ export interface ProgressOptions {
 }
 
 function sanitize(message: string): string {
-  return message.replace(/\s+/g, ' ').trim();
+  return message.replaceAll(/\s+/g, ' ').trim();
 }
 
 export function createProgressReporter(

@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-export",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "Export CLI plugin for adt-cli - deploy local files to SAP",
   "license": "MIT",
   "publishConfig": {
@@ -29,13 +29,22 @@
     "abapgit"
   ],
   "dependencies": {
-    "@abapify/adk": "workspace:*",
-    "@abapify/adt-locks": "workspace:*",
-    "@abapify/adt-plugin": "workspace:*",
-    "@abapify/adt-plugin-abapgit": "workspace:*",
+    "@abapify/adk": "0.3.6",
+    "@abapify/adt-locks": "0.3.6",
+    "@abapify/adt-plugin": "0.3.6",
+    "@abapify/adt-plugin-abapgit": "0.3.6",
     "chalk": "^5.6.2",
     "diff": "^8.0.3",
     "fast-xml-parser": "^5.5.5"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-export"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-export#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

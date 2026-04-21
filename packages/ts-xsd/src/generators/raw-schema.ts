@@ -405,10 +405,11 @@ class SchemaRef {
  * and escaping any single quotes.
  */
 function toSingleQuoteLiteral(jsonStr: string): string {
-  return `'${jsonStr
+  const inner = jsonStr
     .slice(1, -1)
     .replaceAll('\\"', '"')
-    .replaceAll("'", String.raw`\'`)}'`;
+    .replaceAll("'", "\\'");
+  return `'${inner}'`;
 }
 
 function filterDeep(value: unknown, exclude: Set<string>): unknown {

@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-plugin-abapgit",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -19,11 +19,21 @@
     "xsd"
   ],
   "dependencies": {
-    "@abapify/acds": "workspace:*",
-    "@abapify/adk": "workspace:*",
-    "@abapify/adt-atc": "workspace:*",
-    "@abapify/adt-plugin": "workspace:*",
-    "@abapify/adt-schemas": "workspace:*",
-    "@abapify/ts-xsd": "workspace:*"
-  }
+    "@abapify/acds": "0.3.6",
+    "@abapify/adk": "0.3.6",
+    "@abapify/adt-atc": "0.3.6",
+    "@abapify/adt-plugin": "0.3.6",
+    "@abapify/adt-schemas": "0.3.6",
+    "@abapify/ts-xsd": "0.3.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-plugin-abapgit"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-plugin-abapgit#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  },
+  "description": "abapGit serialization plugin for adt-cli — round-trips ADT objects to/from the abapGit on-disk format"
 }

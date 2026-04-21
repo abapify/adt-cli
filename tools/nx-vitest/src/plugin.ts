@@ -79,7 +79,7 @@ function getRootVitestProjects(): string[] {
     const projectPatterns = stringMatches
       ? stringMatches.map((match) => {
           // Remove the quotes from each match
-          const cleaned = match.replace(/^['"`]|['"`]$/g, '');
+          const cleaned = match.replaceAll(/^['"`]|['"`]$/g, '');
           return cleaned;
         })
       : [];

@@ -65,7 +65,7 @@ function parseArgs(args: string[]): CliOptions {
     const output = positional[1] || defaultOutput;
     const defaultName =
       basename(input, '.xsd')
-        .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+        .replaceAll(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
         .replace(/^./, (s) => s.toLowerCase()) + 'Schema';
 
     return {

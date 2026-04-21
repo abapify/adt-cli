@@ -73,7 +73,7 @@ function writeUnauthorized(
   // parameters so clients can distinguish "no token", "invalid token",
   // and "insufficient scope".
   const challenge = oauthError
-    ? `Bearer realm="adt-mcp", error="${oauthError.split(':')[0].trim()}", error_description="${oauthError.replace(/"/g, "'")}"`
+    ? `Bearer realm="adt-mcp", error="${oauthError.split(':')[0].trim()}", error_description="${oauthError.replaceAll('"', "'")}"`
     : 'Bearer realm="adt-mcp"';
   res.writeHead(401, {
     'Content-Type': 'application/json',

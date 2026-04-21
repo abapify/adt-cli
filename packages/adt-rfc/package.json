@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.0",
+  "version": "0.3.6",
   "description": "SAP RFC transport for @abapify — SOAP-over-HTTP RFC implementation (/sap/bc/soap/rfc)",
   "type": "module",
   "types": "./dist/index.d.mts",
@@ -24,5 +24,14 @@
     "startrfc"
   ],
   "author": "Booking.com",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-rfc"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-rfc#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

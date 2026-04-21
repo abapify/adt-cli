@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-tui",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "Terminal UI components for ADT - page-based navigation with Ink",
   "license": "MIT",
   "publishConfig": {
@@ -17,7 +17,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-contracts": "workspace:*",
+    "@abapify/adt-contracts": "0.3.6",
     "fast-xml-parser": "^5.3.1",
     "ink": "5.1.0",
     "ink-select-input": "^6.0.0",
@@ -29,6 +29,15 @@
     "@types/react": "18.3.0"
   },
   "peerDependencies": {
-    "@abapify/adt-client": "workspace:*"
+    "@abapify/adt-client": "0.3.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-tui"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-tui#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

@@ -288,8 +288,13 @@ export function parseRfcSoapResponse(xml: string): RfcResponse {
   );
   if (fault) {
     const faultObj = nodeToValue(fault.node) as RfcStructure;
-    const faultcode = String(faultObj.faultcode ?? 'Server');
-    const faultstring = String(faultObj.faultstring ?? 'Unknown SOAP fault');
+    const faultcode = String(
+      (faultObj.faultcode as string | number | undefined) ?? 'Server',
+    );
+    const faultstring = String(
+      (faultObj.faultstring as string | number | undefined) ??
+        'Unknown SOAP fault',
+    );
     throw new RfcSoapFault(faultcode, faultstring, xml);
   }
 

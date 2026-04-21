@@ -2,6 +2,17 @@ name: Publish
 
 on:
   workflow_dispatch:
+  # Auto-trigger on version tags pushed by the Release workflow. We
+  # intentionally do NOT use `workflow_call` from release.yml: when
+  # publish.yml runs as a reusable workflow, the OIDC token's claims
+  # reflect the CALLER (release.yml) and npm's trusted publisher
+  # matcher rejects them, even though `job_workflow_ref` is publish.yml.
+  # Running on tag push gives us workflow_ref=publish.yml directly,
+  # which is what every trusted publisher entry on npmjs is registered
+  # for (via `npm trust github … --file publish.yml`).
+  push:
+    tags:
+      - 'v*'
   workflow_call:
     inputs:
       version:
@@ -13,6 +24,11 @@ jobs:
   publish:
     name: Publish packages
     runs-on: ubuntu-latest
+    # Publish always runs against a version tag on `main` — use the
+    # protected-branch environment so nx can hit Nx Cloud (read-write).
+    environment: protected-branch-pipeline
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
     permissions:
       contents: read
       id-token: write # needed for provenance data generation
@@ -35,10 +51,79 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Override @abapify scope registry for npmjs publishing
+        # The repo-level .npmrc is shaped for CI CONSUMERS of the package
+        # (GHP auth token for the @abapify scope). For the publish job we
+        # don't need any of that — we're publishing, not installing. Any
+        # leftover scope pin or `_authToken` line (even for a different
+        # registry like npm.pkg.github.com) may short-circuit npm's OIDC
+        # auto-discovery, so nuke the repo-level .npmrc entirely.
+        run: |
+          : > .npmrc
+          echo "--- effective repo .npmrc ---"
+          cat .npmrc
+          echo "(end)"
+
+      - name: Clean setup-node .npmrc for OIDC
+        # actions/setup-node with `registry-url` writes
+        #   always-auth=true
+        #   //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+        # Since we don't pass a `token` to setup-node, NODE_AUTH_TOKEN is
+        # effectively empty, so npm ends up sending an empty Authorization
+        # header on PUT and npmjs responds `Not Found`. To make OIDC
+        # trusted publishing kick in, the registry entry must be present
+        # without any token line — npm then asks GitHub Actions for an
+        # id-token and exchanges it for a publish token.
+        run: |
+          cat > "$NPM_CONFIG_USERCONFIG" <<'EOF'
+          registry=https://registry.npmjs.org/
+          EOF
+          echo "--- effective userconfig ($NPM_CONFIG_USERCONFIG) ---"
+          cat "$NPM_CONFIG_USERCONFIG"
+
+      - name: Force npm as nx release publish driver (for this job only)
+        # nx.json keeps `cli.packageManager: bun` globally — bun is the
+        # monorepo's workspace package manager, handles `workspace:*`
+        # dependency protocol etc. But Nx 22's @nx/js:release-publish
+        # honours that setting and invokes `bun publish`, which does NOT
+        # support OIDC trusted publishing and errors with `missing
+        # authentication`. Switching nx.json permanently breaks
+        # `nx release version` (npm can't resolve `workspace:*`), so we
+        # flip it to npm in this job only and leave the committed file
+        # alone.
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            const p = 'nx.json';
+            const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+            j.cli = { ...(j.cli ?? {}), packageManager: 'npm' };
+            fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+          "
+          grep -A1 '\"cli\"' nx.json
+
+      - name: Diagnose OIDC readiness
+        # Sanity-check: confirm the GitHub Actions OIDC env vars that npm
+        # 11.5+ sniffs (ACTIONS_ID_TOKEN_REQUEST_URL/_TOKEN) are actually
+        # present in this step's env. Without them, `npm publish` falls
+        # through to "not logged in".
+        run: |
+          echo "npm version: $(npm --version)"
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL set? $([ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ] && echo yes || echo NO)"
+          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN set? $([ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ] && echo yes || echo NO)"
+          echo "--- userconfig ($NPM_CONFIG_USERCONFIG) ---"
+          cat "$NPM_CONFIG_USERCONFIG" 2>/dev/null || echo "(no userconfig file)"
+          echo "--- repo .npmrc ---"
+          cat .npmrc
+          echo "--- OIDC token preview ---"
+          token=$(curl -sSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
+          echo "$token" | cut -d. -f2 | base64 -d 2>/dev/null | jq '{iss, sub, workflow, workflow_ref, job_workflow_ref, repository, ref}'
+
       - name: Publish packages
         run: npx nx release publish
         shell: bash
         env:
           NPM_CONFIG_PROVENANCE: true
           NPM_CONFIG_ACCESS: public
+          NPM_CONFIG_LOGLEVEL: verbose
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

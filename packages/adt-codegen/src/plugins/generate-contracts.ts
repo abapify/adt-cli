@@ -228,7 +228,7 @@ function sanitizeParamName(name: string): string {
   // Remove leading special characters like & or *
   let sanitized = name.replace(/^[&*]+/, '');
   // Replace any remaining invalid characters with underscore
-  sanitized = sanitized.replace(/[^a-zA-Z0-9_]/g, '_');
+  sanitized = sanitized.replaceAll(/[^a-zA-Z0-9_]/g, '_');
   // Ensure it starts with a letter or underscore
   if (/^[0-9]/.test(sanitized)) {
     sanitized = '_' + sanitized;
@@ -255,7 +255,7 @@ function methodNameFromRel(
 
   name = name
     .replace(/^relations?$/, '')
-    .replace(/[^a-zA-Z0-9]/g, '')
+    .replaceAll(/[^a-zA-Z0-9]/g, '')
     .toLowerCase();
 
   if (
@@ -363,7 +363,7 @@ function generateMethodCode(method: EndpointMethod, indent: string): string {
     // Sanitize parameter names in the path expression
     pathExpr =
       '`' +
-      path.replace(
+      path.replaceAll(
         /\{([^}]+)\}/g,
         (_, p) => '${' + sanitizeParamName(p) + '}',
       ) +
@@ -586,7 +586,9 @@ function generateIndexFile(
       const prefix = parts
         .slice(i, -1)
         .map((p) =>
-          p.replace(/[^a-zA-Z0-9]/g, '').replace(/^./, (c) => c.toUpperCase()),
+          p
+            .replaceAll(/[^a-zA-Z0-9]/g, '')
+            .replace(/^./, (c) => c.toUpperCase()),
         )
         .join('');
       exportName =

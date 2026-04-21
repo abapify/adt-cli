@@ -159,7 +159,11 @@ export class TransportService {
     const data = req as Record<string, unknown>;
 
     return {
-      number: String(data.trkorr ?? data.number ?? ''),
+      number: String(
+        (data.trkorr as string | undefined) ??
+          (data.number as string | undefined) ??
+          '',
+      ),
       desc:
         (data.as4text as string | undefined) ??
         (data.desc as string | undefined),
@@ -192,7 +196,11 @@ export class TransportService {
     return taskArray.map((task) => {
       const t = task as Record<string, unknown>;
       return {
-        number: String(t.trkorr ?? t.number ?? ''),
+        number: String(
+          (t.trkorr as string | undefined) ??
+            (t.number as string | undefined) ??
+            '',
+        ),
         owner:
           (t.as4user as string | undefined) ?? (t.owner as string | undefined),
         status:

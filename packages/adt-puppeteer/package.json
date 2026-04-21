@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-puppeteer",
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "Puppeteer-based authentication for SAP ADT (SSO/IDP)",
   "license": "MIT",
   "publishConfig": {
@@ -17,12 +17,21 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-auth": "workspace:*",
-    "@abapify/adt-config": "workspace:*",
-    "@abapify/browser-auth": "workspace:*",
+    "@abapify/adt-auth": "0.3.6",
+    "@abapify/adt-config": "0.3.6",
+    "@abapify/browser-auth": "0.3.6",
     "puppeteer": "^24.0.0"
   },
   "peerDependencies": {
     "puppeteer": ">=22.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-puppeteer"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-puppeteer#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }
