@@ -10,9 +10,8 @@
  * it defines how SAP objects map to files on disk.
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { execFileSync } from 'child_process';
-import { basename } from 'path';
+import { readFileSync, existsSync, readdirSync } from 'fs';
+import { basename, join } from 'path';
 import type { FindingResolver, ResolvedLocation } from '@abapify/adt-atc';
 
 // ── Method range parsing ────────────────────────────────────────────────
@@ -97,6 +96,25 @@ function convertLine(
 
 // ── Resolver factory ────────────────────────────────────────────────────
 
+function collectSourceFiles(root: string): string[] {
+  const results: string[] = [];
+  const entries = readdirSync(root, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = join(root, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...collectSourceFiles(fullPath));
+    } else if (
+      entry.isFile() &&
+      (fullPath.endsWith('.abap') || fullPath.endsWith('.xml'))
+    ) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
 /**
  * Create a FindingResolver for an abapGit repository.
  *
@@ -121,27 +139,7 @@ export function createFindingResolver(srcRoot = 'src/'): FindingResolver {
 
   try {
     if (existsSync(srcRoot)) {
-      // Use execFileSync with an argv array (no shell) so `srcRoot` is
-      // passed verbatim and cannot be interpreted as shell metacharacters.
-      const files = execFileSync(
-        'find',
-        [
-          srcRoot,
-          '-type',
-          'f',
-          '(',
-          '-name',
-          '*.abap',
-          '-o',
-          '-name',
-          '*.xml',
-          ')',
-        ],
-        { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 },
-      )
-        .trim()
-        .split('\n')
-        .filter(Boolean);
+      const files = collectSourceFiles(srcRoot);
 
       for (const f of files) {
         const name = basename(f);

@@ -4,13 +4,12 @@
  * Resolves ATC finding locations to actual git file paths and file-relative
  * line numbers for abapGit repositories (FULL or PREFIX folder logic).
  *
- * This is a built-in resolver that uses only Node.js builtins (fs, child_process, path).
+ * This is a built-in resolver that uses only Node.js builtins (fs, path).
  * No external package dependencies required.
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { execFileSync } from 'child_process';
-import { basename } from 'path';
+import { readFileSync, existsSync, readdirSync, type Dirent } from 'fs';
+import { basename, join } from 'path';
 import type { FindingResolver, ResolvedLocation } from '../types';
 
 // ── Method range parsing ────────────────────────────────────────────────
@@ -22,6 +21,35 @@ interface MethodRange {
 }
 
 const fileCache = new Map<string, string[]>();
+
+function collectSourceFiles(root: string): string[] {
+  const result: string[] = [];
+  const stack: string[] = [root];
+
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    let entries: Dirent[];
+    try {
+      entries = readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      const fullPath = join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (
+        entry.isFile() &&
+        (entry.name.endsWith('.abap') || entry.name.endsWith('.xml'))
+      ) {
+        result.push(fullPath);
+      }
+    }
+  }
+
+  return result;
+}
 
 function getFileLines(filePath: string): string[] | null {
   if (fileCache.has(filePath)) return fileCache.get(filePath)!;
@@ -106,27 +134,7 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
 
   try {
     if (existsSync(srcRoot)) {
-      // Use execFileSync with an argv array (no shell) so `srcRoot` is
-      // passed verbatim and cannot be interpreted as shell metacharacters.
-      const files = execFileSync(
-        'find',
-        [
-          srcRoot,
-          '-type',
-          'f',
-          '(',
-          '-name',
-          '*.abap',
-          '-o',
-          '-name',
-          '*.xml',
-          ')',
-        ],
-        { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 },
-      )
-        .trim()
-        .split('\n')
-        .filter(Boolean);
+      const files = collectSourceFiles(srcRoot);
 
       for (const f of files) {
         const name = basename(f);

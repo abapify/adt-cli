@@ -1,7 +1,7 @@
 # @abapify/nx-npm-trust
 
 Internal Nx plugin that registers a single `npm-trust-check` target on
-every publishable `packages/*` workspace package. The target drives the
+every publishable workspace package. The target drives the
 full **npm publishing lifecycle** from a single entry point — read-only
 checks by default, safe remediations with `--fix`, and OIDC trusted
 publishing bootstrap with `--prepare`.
@@ -39,7 +39,7 @@ straight to the script — no `--args="..."` wrapping required.
 
 ## What is actually checked
 
-For each non-private `packages/*` workspace:
+For each non-private publishable workspace:
 
 1. `package.json` hygiene — `name`, `version`, `publishConfig.access=public`,
    `files` allowlist.
@@ -68,7 +68,7 @@ On top of the checks:
 
 ## What `--prepare` does
 
-For each non-private `packages/*` workspace:
+For each non-private publishable workspace:
 
 1. If the package does not exist on npm yet, publishes a **`0.0.0`
    placeholder** from a temp directory. **This is not your real code** —
@@ -113,19 +113,21 @@ Registered in the root `nx.json` under `plugins`:
 }
 ```
 
-The plugin's `createNodesV2` matches `packages/*/package.json`, reads
+The plugin's `createNodesV2` matches `**/package.json`, reads
 each manifest, skips packages with `"private": true`, and attaches a
-single `npm-trust-check` target that invokes `src/check.ts` via `bun`.
-No build step — `bun` runs the `.ts` source directly.
+single `npm-trust-check` target that invokes the compiled `check.js`
+script via the configured runtime.
 
 Options (all optional, set via `nx.json` plugin options):
 
-| option          | default                         | purpose                                              |
-| --------------- | ------------------------------- | ---------------------------------------------------- |
-| `targetName`    | `"npm-trust-check"`             | Name of the target.                                  |
-| `registry`      | `"https://registry.npmjs.org/"` | Registry probed and published to.                    |
-| `trustWorkflow` | `"publish.yml"`                 | GitHub Actions workflow allowed to publish via OIDC. |
-| `trustRepo`     | auto (git remote)               | `<owner>/<repo>` allowed to publish.                 |
+| option             | default                         | purpose                                              |
+| ------------------ | ------------------------------- | ---------------------------------------------------- |
+| `targetName`       | `"npm-trust-check"`             | Name of the target.                                  |
+| `runtime`          | `"bun"`                         | Runtime used to execute the checker script.          |
+| `registry`         | `"https://registry.npmjs.org/"` | Registry probed and published to.                    |
+| `trustWorkflow`    | `"publish.yml"`                 | GitHub Actions workflow allowed to publish via OIDC. |
+| `trustRepo`        | auto (git remote)               | `<owner>/<repo>` allowed to publish.                 |
+| `publishablePaths` | `["packages/"]`                 | Project-root prefixes treated as publishable.        |
 
 ## Credits
 

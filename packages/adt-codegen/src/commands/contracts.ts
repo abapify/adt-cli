@@ -80,10 +80,14 @@ export const contractsCommand: CliCommandPlugin = {
         // supplied `discoveryPath` is passed verbatim to the child process
         // and cannot be interpreted as shell metacharacters.
         mkdirSync(dirname(discoveryPath), { recursive: true });
-        execFileSync('npx', ['adt', 'discovery', '--output', discoveryPath], {
-          stdio: 'inherit',
-          cwd: ctx.cwd,
-        });
+        execFileSync(
+          process.execPath,
+          ['./node_modules/.bin/adt', 'discovery', '--output', discoveryPath],
+          {
+            stdio: 'inherit',
+            cwd: ctx.cwd,
+          },
+        );
         ctx.logger.info(`💾 Discovery cached to: ${discoveryPath}`);
       } catch (error) {
         ctx.logger.error('❌ Failed to fetch discovery from SAP');

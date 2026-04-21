@@ -18,7 +18,7 @@ function isVerbose(): boolean {
   try {
     const envPath = join(workspaceRoot, '.env');
     if (existsSync(envPath)) {
-      const envContent = require('fs').readFileSync(envPath, 'utf-8');
+      const envContent = readFileSync(envPath, 'utf-8');
       return envContent.includes('NX_VERBOSE_LOGGING=true');
     }
   } catch (_e) {
@@ -79,7 +79,7 @@ function getRootVitestProjects(): string[] {
     const projectPatterns = stringMatches
       ? stringMatches.map((match) => {
           // Remove the quotes from each match
-          const cleaned = match.replaceAll(/^['"`]|['"`]$/g, '');
+          const cleaned = match.replace(/^['"`]|['"`]$/, '');
           return cleaned;
         })
       : [];
