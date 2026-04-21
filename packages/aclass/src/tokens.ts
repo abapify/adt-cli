@@ -132,12 +132,17 @@ export const Identifier = createToken({
 // Keyword factory
 // ============================================
 
+// All characters that have a special meaning inside a RegExp literal.
+// We escape every one of them when embedding `word` into a dynamic
+// pattern so CodeQL's `js/incomplete-sanitization` stops complaining
+// and callers cannot inject pattern metacharacters by accident.
+const REGEX_META = /[.*+?^${}()|[\]\\/\-]/g;
 function kw(name: string, word: string) {
   // Case-insensitive, whole-word match. `longer_alt: Identifier` makes
   // the keyword lose to `Identifier` when followed by an identifier
   // character, avoiding false positives like `CLASSIFIER` being split
   // into `CLASS IFIER`.
-  const pattern = new RegExp(word.replace(/-/g, '\\-'), 'i');
+  const pattern = new RegExp(word.replace(REGEX_META, '\\$&'), 'i');
   return createToken({ name, pattern, longer_alt: Identifier });
 }
 
