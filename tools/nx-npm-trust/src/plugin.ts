@@ -57,9 +57,21 @@ function shouldSkipPath(projectRoot: string): boolean {
   return false;
 }
 
+/** Strip a trailing `.git` and return `owner/repo`, or null if the path
+ *  does not match that exact shape. */
+function parseOwnerRepo(path: string): string | null {
+  const m = path.match(/^([^/]+\/[^/.]+?)(?:\.git)?$/);
+  return m ? m[1] : null;
+}
+
 /**
- * Parse `<owner>/<repo>` from a git remote URL (ssh/https/git protocol).
- * Returns null for non-GitHub remotes.
+ * Parse `<owner>/<repo>` from a git remote URL (https, git, ssh, git+ssh,
+ * or SCP-style `git@host:owner/repo`). Returns null for non-GitHub remotes.
+ *
+ * The host check is anchored via `URL.hostname` (for URL-form) or the
+ * explicit SCP pattern (for `user@host:path` form), so substrings like
+ * `github.com.attacker.com` or `evil/github.com/...` cannot match. Fixes
+ * CodeQL `js/incomplete-url-substring-sanitization`.
  */
 function detectGithubRepo(): string | null {
   const res = spawnSync('git', ['remote', 'get-url', 'origin'], {
@@ -67,15 +79,23 @@ function detectGithubRepo(): string | null {
     encoding: 'utf-8',
   });
   if (res.status !== 0) return null;
-  const url = res.stdout.trim();
-  // Match github.com only when it is the actual host of the remote URL, not
-  // an arbitrary substring. Supports https(s)://, git://, git+ssh://, ssh://,
-  // and SCP-style (`git@github.com:owner/repo`). Fixes CodeQL
-  // `js/incomplete-url-substring-sanitization`.
-  const m = url.match(
-    /^(?:https?:\/\/(?:[^@/]+@)?|git(?:\+ssh)?:\/\/(?:[^@/]+@)?|ssh:\/\/(?:[^@/]+@)?|git@)github\.com[:/]([^/]+\/[^/.]+?)(?:\.git)?$/,
-  );
-  return m ? m[1] : null;
+  const raw = res.stdout.trim();
+
+  // SCP-style: user@host:path. Must be handled manually because `new URL()`
+  // does not accept it.
+  const scp = raw.match(/^[^@\s]+@([^:]+):(.+)$/);
+  if (scp) {
+    return scp[1] === 'github.com' ? parseOwnerRepo(scp[2]) : null;
+  }
+
+  // Any proper URL scheme (https, http, git, ssh, git+ssh, …).
+  try {
+    const u = new URL(raw);
+    if (u.hostname !== 'github.com') return null;
+    return parseOwnerRepo(u.pathname.replace(/^\//, ''));
+  } catch {
+    return null;
+  }
 }
 
 export const createNodesV2: CreateNodesV2<NxNpmTrustOptions> = [
