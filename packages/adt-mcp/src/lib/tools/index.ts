@@ -4,6 +4,12 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
+import { registerSapConnectTool } from './sap-connect';
+import { registerSapDisconnectTool } from './sap-disconnect';
+import { registerChangesetBeginTool } from './changeset-begin';
+import { registerChangesetAddTool } from './changeset-add';
+import { registerChangesetCommitTool } from './changeset-commit';
+import { registerChangesetRollbackTool } from './changeset-rollback';
 import { registerDiscoveryTool } from './discovery';
 import { registerSystemInfoTool } from './system-info';
 import { registerSearchObjectsTool } from './search-objects';
@@ -106,6 +112,14 @@ import { registerListFlpTilesTool } from './list-flp-tiles';
 import { registerGetFlpTileTool } from './get-flp-tile';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
+  // Session lifecycle tools (HTTP transport only)
+  registerSapConnectTool(server, ctx);
+  registerSapDisconnectTool(server, ctx);
+  // Wave 3 — transactional changesets (HTTP transport only)
+  registerChangesetBeginTool(server, ctx);
+  registerChangesetAddTool(server, ctx);
+  registerChangesetCommitTool(server, ctx);
+  registerChangesetRollbackTool(server, ctx);
   // Existing tools
   registerDiscoveryTool(server, ctx);
   registerSystemInfoTool(server, ctx);

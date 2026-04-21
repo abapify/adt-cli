@@ -276,11 +276,9 @@ export function toJacocoXml(input: JacocoInput): string {
   const lineMap = buildMethodLinesMapping(input.statements);
   const out: string[] = [];
 
-  out.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
   out.push(
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">',
-  );
-  out.push(
     `<report name="${escapeAttr(input.reportName ?? 'ABAP Coverage')}">`,
   );
 
@@ -338,8 +336,7 @@ export function toSonarGenericCoverageXml(input: JacocoInput): string {
   if (root) walk(root as unknown as CoverageNode);
 
   const out: string[] = [];
-  out.push('<?xml version="1.0" encoding="UTF-8"?>');
-  out.push('<coverage version="1">');
+  out.push('<?xml version="1.0" encoding="UTF-8"?>', '<coverage version="1">');
   for (const [file, lines] of fileLines) {
     if (lines.length === 0) continue;
     out.push(`  <file path="${escapeAttr(file)}">`);

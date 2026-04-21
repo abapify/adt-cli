@@ -11,7 +11,8 @@ import { ImportService } from '@abapify/adt-cli';
 import { initializeAdk } from '@abapify/adk';
 import { FileLockStore } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerImportPackageTool(
   server: McpServer,
@@ -21,7 +22,7 @@ export function registerImportPackageTool(
     'import_package',
     'Recursively import all objects in an ABAP package to a local folder in abapGit format. Mirrors `adt import package`.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z.string().describe('ABAP package name (e.g. Z_MY_PACKAGE)'),
       outputDir: z
         .string()
@@ -42,9 +43,9 @@ export function registerImportPackageTool(
           'Optional list of object types to filter (e.g. ["CLAS","INTF"])',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client, { lockStore: new FileLockStore() });
 
         const service = new ImportService();

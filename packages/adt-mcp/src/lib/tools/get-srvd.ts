@@ -5,23 +5,24 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetSrvdTool(server: McpServer, ctx: ToolContext): void {
   server.tool(
     'get_srvd',
     'Fetch RAP Service Definition (SRVD) metadata, optionally including the .asrvd source code.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       srvdName: z.string().describe('SRVD name (e.g. ZUI_MY_SERVICE)'),
       includeSource: z
         .boolean()
         .optional()
         .describe('Include the .asrvd source text'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const name = args.srvdName.toLowerCase();
         const metadata = await client.adt.ddic.srvd.sources.get(name);
         const result: Record<string, unknown> = { metadata };

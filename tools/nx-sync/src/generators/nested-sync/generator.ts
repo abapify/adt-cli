@@ -152,7 +152,7 @@ function findNestedWorkspaces(): WorkspaceInfo[] {
 }
 
 function normalizeRelativePath(path: string): string {
-  return path.replace(/\\/g, '/');
+  return path.replaceAll(/\\/g, '/');
 }
 
 function checkWorkspace(workspace: WorkspaceInfo): WorkspaceCheckResult {

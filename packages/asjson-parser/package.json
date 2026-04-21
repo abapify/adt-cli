@@ -1,9 +1,10 @@
 {
   "name": "@abapify/asjson-parser",
+  "version": "0.3.6",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
@@ -18,7 +19,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abapify/js.git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
     "directory": "packages/asjson-parser"
-  }
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/asjson-parser#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  },
+  "description": "Parser for SAP ABAP asJSON canonical format — maps ABAP asJSON payloads to/from plain JavaScript objects"
 }

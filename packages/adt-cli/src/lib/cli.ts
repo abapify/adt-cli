@@ -38,6 +38,7 @@ import {
   sourceCommand,
   strustCommand,
   checkinCommand,
+  createChangesetCommand,
   rfcCommand,
   createFlpCommand,
 } from './commands';
@@ -303,6 +304,9 @@ export async function createCLI(options?: {
 
   // Checkin command (push local abapGit/gCTS directory into SAP — inverse of checkout)
   program.addCommand(checkinCommand);
+
+  // Changeset command (Wave 3) — transactional unit-of-work: begin/add/commit/rollback
+  program.addCommand(createChangesetCommand());
 
   // RFC command (E13) — invoke classic RFC function modules via SOAP-over-HTTP
   program.addCommand(rfcCommand);

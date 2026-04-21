@@ -32,9 +32,9 @@ function normalizeContent(content: string): string {
   return (
     content
       // platform:/plugin/.../model/foo.xsd → foo.xsd
-      .replace(platformPattern, 'schemaLocation="$1"')
+      .replaceAll(platformPattern, 'schemaLocation="$1"')
       // platform:/resource/.../model/foo.xsd → foo.xsd
-      .replace(resourcePattern, 'schemaLocation="$1"')
+      .replaceAll(resourcePattern, 'schemaLocation="$1"')
   );
 }
 

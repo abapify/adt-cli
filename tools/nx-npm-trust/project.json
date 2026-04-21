@@ -1,0 +1,8 @@
+{
+  "name": "nx-npm-trust",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/nx-npm-trust/src",
+  "projectType": "library",
+  "targets": {},
+  "tags": []
+}

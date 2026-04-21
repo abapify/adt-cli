@@ -7,7 +7,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { extractDiscoveryWorkspaces } from './utils';
 
 export function registerDiscoveryTool(
@@ -18,15 +19,15 @@ export function registerDiscoveryTool(
     'discovery',
     'Discover available ADT services on a SAP system',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       filter: z
         .string()
         .optional()
         .describe('Filter workspaces by title substring'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const discovery = await client.adt.discovery.getDiscovery();
         const workspaces = extractDiscoveryWorkspaces(discovery);
 

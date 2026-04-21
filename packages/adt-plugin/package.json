@@ -1,11 +1,12 @@
 {
   "name": "@abapify/adt-plugin",
+  "version": "0.3.6",
+  "description": "ADT Plugin interface and factory for abapify",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
   "type": "module",
-  "description": "ADT Plugin interface and factory for abapify",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
@@ -18,6 +19,15 @@
     "dist"
   ],
   "dependencies": {
-    "@abapify/adk": "workspace:*"
+    "@abapify/adk": "0.3.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-plugin"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

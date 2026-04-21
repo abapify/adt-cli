@@ -134,10 +134,7 @@ export const functionGroupHandler = createHandler(AdkFunctionGroup, {
         `${objectName}.fugr.sapl${objectName}.abap`,
         buildMainProgramSource(nameUpper),
       ),
-    );
-
-    // 5. Main program PROGDIR metadata
-    files.push(
+      // 5. Main program PROGDIR metadata
       ctx.createFile(
         `${objectName}.fugr.sapl${objectName}.xml`,
         buildProgdirXml(`SAPL${nameUpper}`, 'F', fixpt),
@@ -345,8 +342,10 @@ export function extractFunctionDescriptors(
         : [];
 
   return (items as Array<Record<string, unknown>>).map((fm) => ({
-    funcName: String(fm.FUNCNAME ?? ''),
-    shortText: fm.SHORT_TEXT ? String(fm.SHORT_TEXT) : undefined,
+    funcName: String((fm.FUNCNAME as string | undefined) ?? ''),
+    shortText: fm.SHORT_TEXT
+      ? String(fm.SHORT_TEXT as string | number | boolean)
+      : undefined,
     processingType: remoteCallToProcessingType(
       fm.REMOTE_CALL as string | undefined,
       fm.UPDATE_TASK as string | undefined,

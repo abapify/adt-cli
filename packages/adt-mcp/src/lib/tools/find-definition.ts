@@ -16,7 +16,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { extractObjectReferences, resolveObjectUri } from './utils';
 
 export function registerFindDefinitionTool(
@@ -27,7 +28,7 @@ export function registerFindDefinitionTool(
     'find_definition',
     'Resolve an ABAP symbol (class, interface, function, data element, …) to its ADT object URI.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z
         .string()
         .describe('Name of the symbol or object to resolve'),
@@ -48,9 +49,9 @@ export function registerFindDefinitionTool(
         .optional()
         .describe('Parent object type (e.g. CLAS)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         // Prefer the parent object when the caller asks for a nested symbol;
         // the ADT URI of the parent is the "closest" definition we can offer

@@ -1,18 +1,21 @@
 {
   "name": "@abapify/adt-mcp",
+  "version": "0.3.6",
+  "description": "MCP server for SAP ADT operations – exposes adt-cli features as MCP tools",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "MCP server for SAP ADT operations – exposes adt-cli features as MCP tools",
   "type": "module",
   "types": "./dist/index.d.mts",
   "bin": {
-    "adt-mcp": "./dist/bin/adt-mcp.mjs"
+    "adt-mcp": "./dist/bin/adt-mcp.mjs",
+    "adt-mcp-http": "./dist/bin/adt-mcp-http.mjs"
   },
   "exports": {
     ".": "./dist/index.mjs",
     "./bin/adt-mcp": "./dist/bin/adt-mcp.mjs",
+    "./bin/adt-mcp-http": "./dist/bin/adt-mcp-http.mjs",
     "./mock": "./dist/mock.mjs",
     "./package.json": "./package.json"
   },
@@ -29,17 +32,27 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.0",
-    "@abapify/adt-cli": "workspace:*",
-    "@abapify/adt-client": "workspace:*",
-    "@abapify/adt-contracts": "workspace:*",
-    "@abapify/adt-fixtures": "workspace:*",
-    "@abapify/adt-locks": "workspace:*",
-    "@abapify/adt-schemas": "workspace:*",
-    "@abapify/adk": "workspace:*",
-    "@abapify/adt-aunit": "workspace:*",
-    "@abapify/adt-plugin-abapgit": "workspace:*",
-    "@abapify/adt-rfc": "workspace:*",
+    "@abapify/adt-cli": "0.3.6",
+    "@abapify/adt-client": "0.3.6",
+    "@abapify/adt-contracts": "0.3.6",
+    "@abapify/adt-fixtures": "0.3.6",
+    "@abapify/adt-locks": "0.3.6",
+    "@abapify/adt-schemas": "0.3.6",
+    "@abapify/adk": "0.3.6",
+    "@abapify/adt-aunit": "0.3.6",
+    "@abapify/adt-plugin-abapgit": "0.3.6",
+    "@abapify/adt-rfc": "0.3.6",
     "@xmldom/xmldom": "^0.9.9",
+    "jose": "^6.2.1",
     "zod": "^3.24.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-mcp"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

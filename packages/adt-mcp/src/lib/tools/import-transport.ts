@@ -11,7 +11,8 @@ import { ImportService } from '@abapify/adt-cli';
 import { initializeAdk } from '@abapify/adk';
 import { FileLockStore } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerImportTransportTool(
   server: McpServer,
@@ -21,7 +22,7 @@ export function registerImportTransportTool(
     'import_transport',
     'Export all objects referenced by a transport request to a local folder. Mirrors `adt import transport`.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       transportNumber: z
         .string()
         .describe('Transport request number (e.g. DEVK900123)'),
@@ -40,9 +41,9 @@ export function registerImportTransportTool(
           'Optional list of object types to filter (e.g. ["CLAS","INTF"])',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client, { lockStore: new FileLockStore() });
 
         const service = new ImportService();

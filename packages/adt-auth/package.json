@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
+  "version": "0.3.6",
   "description": "Authentication package for SAP ADT systems - supports multiple auth methods",
   "type": "module",
   "types": "./dist/index.d.mts",
@@ -21,7 +21,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/logger": "workspace:*",
+    "@abapify/logger": "0.3.6",
     "proxy-agent": "^6.4.0"
   },
   "keywords": [
@@ -33,5 +33,14 @@
     "oauth"
   ],
   "author": "Booking.com",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-auth"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-auth#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

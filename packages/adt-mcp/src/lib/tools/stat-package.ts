@@ -11,7 +11,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 function isNotFoundError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err);
@@ -30,12 +31,12 @@ export function registerStatPackageTool(
     'stat_package',
     'Check whether an ABAP package exists. Returns { exists, metadata? }.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       packageName: z.string().describe('Package name (e.g. ZPACKAGE)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         try {
           const metadata = await client.adt.packages.get(
             args.packageName.toUpperCase(),

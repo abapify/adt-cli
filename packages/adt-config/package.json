@@ -1,11 +1,12 @@
 {
   "name": "@abapify/adt-config",
+  "version": "0.3.6",
+  "description": "Configuration loader for ADT CLI",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "version": "0.2.0",
-  "description": "Configuration loader for ADT CLI",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
@@ -14,5 +15,14 @@
   "files": [
     "dist",
     "README.md"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-config"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-config#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

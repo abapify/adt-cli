@@ -17,6 +17,7 @@
 export { atcCommand } from './commands/atc';
 export { atcCustomizingCommand } from './commands/atc-customizing';
 export { outputSarifReport, outputGitLabCodeQuality } from './formatters';
+export { createAbapGitResolver } from './resolvers/abapgit';
 export type {
   AtcResult,
   AtcFinding,

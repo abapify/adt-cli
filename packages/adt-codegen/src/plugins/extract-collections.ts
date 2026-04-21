@@ -26,8 +26,8 @@ function sanitizePath(path: string): string {
   return cleanPath
     .replace(/^\/+/, '') // Remove leading slashes
     .replace(/\/+$/, '') // Remove trailing slashes
-    .replace(/[<>:"|?*]/g, '-') // Replace invalid chars
-    .replace(/\s+/g, '-'); // Replace spaces with dashes
+    .replaceAll(/[<>:"|?*]/g, '-') // Replace invalid chars
+    .replaceAll(/\s+/g, '-'); // Replace spaces with dashes
 }
 
 export interface CollectionData {
@@ -125,9 +125,12 @@ export function extractCollections(
                 } else {
                   // Replace placeholders
                   filePath = output
-                    .replace(/{href}/g, sanitizePath(coll.href || 'unknown'))
-                    .replace(/{title}/g, sanitizePath(coll.title || 'unknown'))
-                    .replace(
+                    .replaceAll(/{href}/g, sanitizePath(coll.href || 'unknown'))
+                    .replaceAll(
+                      /{title}/g,
+                      sanitizePath(coll.title || 'unknown'),
+                    )
+                    .replaceAll(
                       /{category}/g,
                       sanitizePath(coll.category?.term || 'unknown'),
                     );

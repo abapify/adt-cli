@@ -22,5 +22,15 @@ export async function toText(result: unknown): Promise<string> {
   ) {
     return (result as Response).text();
   }
-  return String(result ?? '');
+  if (result === null || result === undefined) return '';
+  if (typeof result === 'object') {
+    try {
+      return JSON.stringify(result);
+    } catch {
+      // JSON.stringify throws on circular refs / BigInt — fall back to the
+      // default string coercion rather than propagating an unrelated error.
+      return String(result);
+    }
+  }
+  return String(result);
 }

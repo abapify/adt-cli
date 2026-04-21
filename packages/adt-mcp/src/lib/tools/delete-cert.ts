@@ -7,7 +7,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerDeleteCertTool(
   server: McpServer,
@@ -17,7 +18,7 @@ export function registerDeleteCertTool(
     'delete_cert',
     'Delete a certificate from a STRUST PSE.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       context: z.string().describe('PSE context (e.g. SSLC, SSLS)'),
       applic: z.string().describe('PSE application (e.g. DFAULT, ANONYM)'),
       certId: z
@@ -26,9 +27,9 @@ export function registerDeleteCertTool(
           'Certificate id (from list_certs, typically a 1-based index)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         await client.adt.system.security.pses.deleteCertificate(
           args.context,
           args.applic,

@@ -46,9 +46,14 @@ jobs:
   release:
     name: Version, Changelog & Tag
     runs-on: ubuntu-latest
+    # Release always runs against `main`, so use the read-write Nx Cloud
+    # token directly from repository secrets.
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN_RW }}
     permissions:
       contents: write # needed to push commits and tags
       id-token: write # needed for provenance data generation
+      actions: write # needed to dispatch publish.yml via `gh workflow run`
     timeout-minutes: 15
     outputs:
       tag: ${{ steps.get_tag.outputs.tag }}
@@ -108,16 +113,25 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
-  publish:
-    name: Publish packages
-    needs: release
-    if: ${{ !inputs.dry_run && inputs.publish }}
-    uses: ./.github/workflows/publish.yml
-    with:
-      version: ${{ needs.release.outputs.tag }}
-    permissions:
-      contents: read
-      id-token: write
+      - name: Dispatch publish workflow
+        if: ${{ !inputs.dry_run && inputs.publish }}
+        # Can't rely on `push: tags:` auto-trigger in publish.yml — events
+        # caused by GITHUB_TOKEN pushes don't cascade to other workflows
+        # (GitHub Actions by design). Invoke publish.yml via workflow_dispatch
+        # so it runs with its own workflow_ref and our OIDC trusted
+        # publisher entries match.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run publish.yml --ref "${{ steps.get_tag.outputs.tag }}"
+
+  # Note: npm publishing is NOT wired up as `workflow_call` here. When
+  # `publish.yml` is invoked via `uses:`, the resulting OIDC token's
+  # claims reflect the CALLER (release.yml), and npm's trusted publisher
+  # matcher rejects that because the 30 trust entries on npmjs are
+  # registered with `--file publish.yml`. Instead, publish.yml runs on
+  # the tag push triggered by the `Push commit and tags` step above —
+  # that path keeps workflow_ref=publish.yml, so OIDC matches.
 
   publish-gpr:
     name: Publish packages to GitHub Packages

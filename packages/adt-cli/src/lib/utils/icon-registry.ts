@@ -1,5 +1,5 @@
 export class IconRegistry {
-  private static icons = new Map<string, string>();
+  private static readonly icons = new Map<string, string>();
 
   static {
     // Register SAP object type icons

@@ -1,0 +1,12 @@
+---
+title: Contributing
+sidebar_position: 1
+---
+
+# Contributing
+
+This section will be populated by documentation wave D2d.
+
+:::note
+Content is planned and tracked in `docs-roadmap/README.md`. Check back after the referenced wave lands.
+:::

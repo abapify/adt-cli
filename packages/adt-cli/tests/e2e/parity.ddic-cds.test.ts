@@ -101,11 +101,7 @@ describe('CLI + MCP parity: DDIC & CDS', () => {
   // 4. Read data element
   // ─────────────────────────────────────────────────────────────────────
   it('4. reads a data element (CLI + MCP)', async () => {
-    const cli = await runCliCommand(harness, [
-      'dataelement',
-      'read',
-      'ZDTEL',
-    ]);
+    const cli = await runCliCommand(harness, ['dataelement', 'read', 'ZDTEL']);
     expect(cli.exitCode).toBe(0);
 
     const mcp = await callMcpTool(harness, 'get_data_element', {
@@ -179,11 +175,7 @@ describe('CLI + MCP parity: DDIC & CDS', () => {
   // 8. Read structure
   // ─────────────────────────────────────────────────────────────────────
   it('8. reads a structure (CLI + MCP)', async () => {
-    const cli = await runCliCommand(harness, [
-      'structure',
-      'read',
-      'ZSTRUCT',
-    ]);
+    const cli = await runCliCommand(harness, ['structure', 'read', 'ZSTRUCT']);
     expect(cli.exitCode).toBe(0);
 
     const mcp = await callMcpTool(harness, 'get_structure', {

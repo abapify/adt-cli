@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetTypeHierarchyTool(
   server: McpServer,
@@ -20,7 +21,7 @@ export function registerGetTypeHierarchyTool(
     'get_type_hierarchy',
     'Get the type hierarchy (super/sub-types, implemented interfaces) of an ABAP class or interface.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z
         .string()
         .describe('Class or interface name (e.g. ZCL_MY_CLASS, ZIF_MY_INTF)'),
@@ -37,9 +38,9 @@ export function registerGetTypeHierarchyTool(
           'Whether to include sub-types (subclasses/implementors) in the result (default: false)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const objectName = args.objectName.toUpperCase();
 
         // Detect type from name if not provided (interfaces often start with ZIF_/IF_)

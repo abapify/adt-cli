@@ -11,7 +11,8 @@ import { ImportService } from '@abapify/adt-cli';
 import { initializeAdk } from '@abapify/adk';
 import { FileLockStore } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerImportObjectTool(
   server: McpServer,
@@ -21,7 +22,7 @@ export function registerImportObjectTool(
     'import_object',
     'Import a single ABAP object (by name) into a local folder in abapGit format. Mirrors `adt import object`.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectType: z
         .string()
         .describe(
@@ -39,9 +40,9 @@ export function registerImportObjectTool(
         .optional()
         .describe("Format plugin name, default 'abapgit'"),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         // ImportService uses the ADK global context to load objects. Each
         // MCP call (re-)initialises it with the per-call client so the
         // server remains stateless.

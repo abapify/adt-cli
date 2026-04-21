@@ -13,7 +13,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AdkServiceBinding, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerUnpublishSrvbTool(
   server: McpServer,
@@ -23,12 +24,12 @@ export function registerUnpublishSrvbTool(
     'unpublish_srvb',
     'Unpublish (deactivate) a RAP Service Binding (SRVB) so it is no longer exposed via the SAP Gateway.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       srvbName: z.string().describe('SRVB name'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client);
         await AdkServiceBinding.unpublish(args.srvbName);
         return {

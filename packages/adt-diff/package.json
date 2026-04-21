@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-diff",
+  "version": "0.3.6",
+  "description": "Diff CLI plugin for adt-cli - compare local serialized files against SAP remote source",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "Diff CLI plugin for adt-cli - compare local serialized files against SAP remote source",
   "type": "module",
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
@@ -26,16 +27,25 @@
     "abapgit"
   ],
   "dependencies": {
-    "@abapify/adk": "workspace:*",
-    "@abapify/adt-contracts": "workspace:*",
-    "@abapify/adt-plugin": "workspace:*",
-    "@abapify/adt-plugin-abapgit": "workspace:*",
+    "@abapify/adk": "0.3.6",
+    "@abapify/adt-contracts": "0.3.6",
+    "@abapify/adt-plugin": "0.3.6",
+    "@abapify/adt-plugin-abapgit": "0.3.6",
     "chalk": "^5.6.2",
     "diff": "^8.0.3",
     "fast-xml-parser": "^5.5.5"
   },
   "module": "./dist/index.mjs",
   "devDependencies": {
-    "@abapify/adt-fixtures": "workspace:*"
+    "@abapify/adt-fixtures": "0.3.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-diff"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-diff#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

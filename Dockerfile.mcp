@@ -1,0 +1,95 @@
+# syntax=docker/dockerfile:1.7
+#
+# Dockerfile.mcp — production image for the @abapify/adt-mcp HTTP server.
+#
+# Build:
+#   docker build -f Dockerfile.mcp -t ghcr.io/abapify/adt-mcp:latest .
+#
+# Behind a corporate npm proxy (e.g. JFrog Artifactory) pass the registry
+# URL as a build arg instead of committing it:
+#   docker build -f Dockerfile.mcp \
+#     --build-arg BUN_CONFIG_REGISTRY="$BUN_CONFIG_REGISTRY" \
+#     -t adt-mcp:local .
+#
+# Run:
+#   docker run --rm -p 3000:3000 \
+#     -e MCP_AUTH_TOKEN=change-me \
+#     -e MCP_ALLOWED_HOSTS=localhost,127.0.0.1 \
+#     ghcr.io/abapify/adt-mcp:latest
+#
+# ── Stage 1: builder ────────────────────────────────────────────────────────
+FROM node:24-bookworm AS builder
+
+ARG BUN_CONFIG_REGISTRY
+ENV BUN_CONFIG_REGISTRY=${BUN_CONFIG_REGISTRY}
+
+# Install bun (matches the version used by CI).
+RUN npm install -g bun@1.2.9
+
+WORKDIR /build
+
+# Copy workspace manifests first for better layer caching.
+COPY package.json bun.lock nx.json tsconfig.base.json tsconfig.json tsdown.config.ts ./
+
+# Copy all workspace members required for the build.
+COPY packages/ ./packages/
+COPY tools/    ./tools/
+COPY samples/  ./samples/
+# website/ is declared in root workspaces but is a docs-only project; copy just
+# its package.json so `bun install --frozen-lockfile` can resolve the workspace.
+COPY website/package.json ./website/package.json
+
+# Install every workspace dependency (dev deps are required for the build).
+RUN bun install --frozen-lockfile
+
+# Nx tweaks for containerised builds.
+ENV NX_DAEMON=false
+ENV NX_TUI=false
+
+# Build adt-mcp (Nx respects the dependency graph, so all transitive
+# workspace packages are built in the correct order).
+RUN npx nx build adt-mcp
+
+# ── Stage 2: runtime ────────────────────────────────────────────────────────
+FROM node:24-bookworm-slim AS runtime
+
+LABEL org.opencontainers.image.title="adt-mcp" \
+      org.opencontainers.image.description="MCP (Model Context Protocol) HTTP server for SAP ABAP Development Tools" \
+      org.opencontainers.image.source="https://github.com/abapify/adt-cli" \
+      org.opencontainers.image.licenses="MIT"
+
+WORKDIR /app
+
+# Install a minimal set of tools required for the healthcheck. wget is
+# already available in bookworm-slim via coreutils? No — install it.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create an unprivileged user. uid/gid 10001 is outside the usual ranges
+# and is a common convention for container app users.
+RUN groupadd --system --gid 10001 appuser \
+    && useradd  --system --uid 10001 --gid appuser --home-dir /app appuser
+
+# Copy the built workspace packages and the workspace node_modules so the
+# @abapify/* symlinks resolve at runtime. Owned by root, readable+executable
+# by everyone — appuser falls in "others" (r-x) so cannot mutate these paths.
+# Matches the Sonar docker:S6504 / CWE-732 compliant pattern.
+COPY --from=builder --chown=root:root --chmod=755 /build/packages     ./packages
+COPY --from=builder --chown=root:root --chmod=755 /build/node_modules ./node_modules
+COPY --from=builder --chown=root:root --chmod=644 /build/package.json ./package.json
+
+USER appuser
+
+ENV NODE_ENV=production \
+    MCP_HOST=0.0.0.0 \
+    MCP_PORT=3000
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -q -O- "http://127.0.0.1:${MCP_PORT}/healthz" || exit 1
+
+# Default CMD runs the Streamable HTTP entry-point. Override with
+# `docker run ... adt-mcp` to run the stdio transport instead.
+CMD ["node", "/app/packages/adt-mcp/dist/bin/adt-mcp-http.mjs", "--host", "0.0.0.0"]

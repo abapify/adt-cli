@@ -10,7 +10,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerPrettyPrintTool(
   server: McpServer,
@@ -20,12 +21,12 @@ export function registerPrettyPrintTool(
     'pretty_print',
     'Format ABAP source code via the SAP pretty-printer. Returns the formatted code without modifying the object.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       sourceCode: z.string().describe('ABAP source code to format'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const result = await client.fetch(
           '/sap/bc/adt/prettyprinter/prettifySource',

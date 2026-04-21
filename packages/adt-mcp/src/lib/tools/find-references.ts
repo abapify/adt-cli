@@ -21,7 +21,8 @@ import { z } from 'zod';
 import { DOMParser } from '@xmldom/xmldom';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 import {
   buildUsageReferenceRequestXml,
@@ -106,7 +107,7 @@ export function registerFindReferencesTool(
     'find_references',
     'Find all usages (where-used) of an ABAP object or symbol. Uses the 2-step POST /usageReferences protocol.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z
         .string()
         .describe('Name of the ABAP object to find references for'),
@@ -125,9 +126,9 @@ export function registerFindReferencesTool(
         .optional()
         .describe('Maximum number of results (default: 100)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const maxResults = args.maxResults ?? 100;
 
         let objectUri = args.objectUri;

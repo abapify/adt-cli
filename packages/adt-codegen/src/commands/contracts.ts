@@ -14,10 +14,31 @@
 
 import type { CliCommandPlugin } from '@abapify/adt-plugin';
 import type { ContractsConfig } from '@abapify/adt-config';
-import { resolve, dirname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
-import { execSync } from 'child_process';
+import { resolve, dirname, join, parse } from 'node:path';
+import { existsSync, mkdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+
 import { generateContractsFromDiscovery } from '../plugins/generate-contracts';
+
+/**
+ * Walk up from `startDir` looking for `node_modules/.bin/<name>` (or its
+ * `.cmd` shim on Windows). Returns an absolute, verified path, so the
+ * caller can invoke the binary directly without relying on the PATH
+ * environment variable (SonarCloud S4036) and still works in
+ * bun-workspace monorepos where binaries are hoisted to the workspace
+ * root.
+ */
+function findHoistedBin(name: string, startDir: string): string | null {
+  const binName = process.platform === 'win32' ? `${name}.cmd` : name;
+  const root = parse(startDir).root;
+  let dir = resolve(startDir);
+  while (true) {
+    const candidate = join(dir, 'node_modules', '.bin', binName);
+    if (existsSync(candidate)) return candidate;
+    if (dir === root) return null;
+    dir = dirname(dir);
+  }
+}
 
 /**
  * Contracts command - generates type-safe speci contracts from ADT discovery data
@@ -75,11 +96,27 @@ export const contractsCommand: CliCommandPlugin = {
       ctx.logger.info('📡 Fetching discovery from SAP...');
 
       try {
-        // Use adt CLI to fetch discovery - no internal API dependencies
+        // Use adt CLI to fetch discovery - no internal API dependencies.
+        // Resolve an absolute path to the hoisted `node_modules/.bin/adt`
+        // (or `adt.cmd` on Windows) by walking up from `ctx.cwd`. This
+        // handles bun-workspaces hoisting (binaries live at the workspace
+        // root, not necessarily under `ctx.cwd`) and avoids invoking a
+        // PATH-resolved executable (SonarCloud S4036). On Windows the
+        // resolved file is a `.cmd` shim, which cannot be launched by
+        // `execFileSync` without `shell: true` per Node's child_process
+        // docs; the shell flag is enabled only on Windows for that reason.
         mkdirSync(dirname(discoveryPath), { recursive: true });
-        execSync(`npx adt discovery --output "${discoveryPath}"`, {
+        const adtCliPath = findHoistedBin('adt', ctx.cwd);
+        if (!adtCliPath) {
+          throw new Error(
+            `Could not locate 'node_modules/.bin/adt' walking up from ${ctx.cwd}. ` +
+              `Make sure @abapify/adt-cli is installed as a (dev) dependency.`,
+          );
+        }
+        execFileSync(adtCliPath, ['discovery', '--output', discoveryPath], {
           stdio: 'inherit',
           cwd: ctx.cwd,
+          shell: process.platform === 'win32',
         });
         ctx.logger.info(`💾 Discovery cached to: ${discoveryPath}`);
       } catch (error) {

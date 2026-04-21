@@ -1,0 +1,36 @@
+{
+  "name": "@abapify/abap-ast",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.3.6",
+  "description": "Zero-dependency typed AST and pretty-printer for ABAP source code (classes, interfaces, types, statements)",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {},
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "abap",
+    "ast",
+    "codegen",
+    "sap"
+  ],
+  "author": "abapify",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/abap-ast"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/abap-ast#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
+}

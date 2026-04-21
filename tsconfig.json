@@ -101,6 +101,18 @@
     },
     {
       "path": "./packages/adt-rfc"
+    },
+    {
+      "path": "./packages/openai-codegen"
+    },
+    {
+      "path": "./packages/abap-ast"
+    },
+    {
+      "path": "./tools/nx-npm-trust"
+    },
+    {
+      "path": "./packages/aclass"
     }
   ]
 }

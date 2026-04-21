@@ -381,14 +381,22 @@ function displaySummary(result: AunitResult): void {
   console.log(
     `   📋 Total: ${result.totalTests} tests in ${result.totalTime.toFixed(3)}s`,
   );
-  if (result.passCount > 0)
-    console.log(`   ${ansi.green(`✓ ${result.passCount} passed`)}`);
-  if (result.failCount > 0)
-    console.log(`   ${ansi.red(`✗ ${result.failCount} failed`)}`);
-  if (result.errorCount > 0)
-    console.log(`   ${ansi.red(`⚠ ${result.errorCount} errors`)}`);
-  if (result.skipCount > 0)
-    console.log(`   ${ansi.yellow(`○ ${result.skipCount} skipped`)}`);
+  if (result.passCount > 0) {
+    const passLine = `✓ ${result.passCount} passed`;
+    console.log(`   ${ansi.green(passLine)}`);
+  }
+  if (result.failCount > 0) {
+    const failLine = `✗ ${result.failCount} failed`;
+    console.log(`   ${ansi.red(failLine)}`);
+  }
+  if (result.errorCount > 0) {
+    const errorLine = `⚠ ${result.errorCount} errors`;
+    console.log(`   ${ansi.red(errorLine)}`);
+  }
+  if (result.skipCount > 0) {
+    const skipLine = `○ ${result.skipCount} skipped`;
+    console.log(`   ${ansi.yellow(skipLine)}`);
+  }
 }
 
 /**

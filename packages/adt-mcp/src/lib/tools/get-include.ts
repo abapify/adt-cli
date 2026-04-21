@@ -8,7 +8,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerGetIncludeTool(
   server: McpServer,
@@ -18,14 +19,14 @@ export function registerGetIncludeTool(
     'get_include',
     'Fetch metadata for an ABAP program include (PROG/I).',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       includeName: z
         .string()
         .describe('Include name (e.g. ZTEST_INCLUDE). Case-insensitive.'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         const result = await client.adt.programs.includes.get(
           args.includeName.toLowerCase(),
         );

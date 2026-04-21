@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-schemas",
+  "version": "0.3.6",
+  "description": "ADT XML schemas generated from SAP XSD definitions",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "ADT XML schemas generated from SAP XSD definitions",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
@@ -12,13 +13,22 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/ts-xsd": "workspace:*",
+    "@abapify/ts-xsd": "0.3.6",
     "zod": "^3.24.0 || ^4.0.0"
   },
   "devDependencies": {
-    "@abapify/adt-fixtures": "workspace:*"
+    "@abapify/adt-fixtures": "0.3.6"
   },
   "files": [
     "dist"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-schemas"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-schemas#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

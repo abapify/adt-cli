@@ -2,6 +2,7 @@
   "name": "@abapify/p2-cli",
   "version": "0.1.0",
   "description": "CLI for Eclipse P2 repositories - download, extract, and decompile plugins",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "p2": "./dist/cli.mjs"

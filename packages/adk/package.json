@@ -1,9 +1,10 @@
 {
   "name": "@abapify/adk",
+  "version": "0.3.6",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
@@ -15,8 +16,18 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-client": "workspace:*",
-    "@abapify/adt-locks": "workspace:*",
-    "@abapify/adt-schemas": "workspace:*"
-  }
+    "@abapify/adt-client": "0.3.6",
+    "@abapify/adt-locks": "0.3.6",
+    "@abapify/adt-schemas": "0.3.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adk"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adk#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  },
+  "description": "ABAP Development Kit — typed object model for ABAP Repository objects (classes, interfaces, programs, tables, …) with ADT XML serialization"
 }

@@ -10,7 +10,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AdkServiceDefinition, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCreateSrvdTool(
   server: McpServer,
@@ -20,7 +21,7 @@ export function registerCreateSrvdTool(
     'create_srvd',
     'Create a new RAP Service Definition (SRVD) object.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       srvdName: z
         .string()
         .describe('SRVD name (uppercase, e.g. ZUI_MY_SERVICE)'),
@@ -33,9 +34,9 @@ export function registerCreateSrvdTool(
         .optional()
         .describe('Transport request number (required for transportable)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client);
 
         await AdkServiceDefinition.create(

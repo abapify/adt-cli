@@ -9,23 +9,24 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerAtcRunTool(server: McpServer, ctx: ToolContext): void {
   server.tool(
     'atc_run',
     'Run ABAP Test Cockpit (ATC) checks on an object or package',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectUri: z
         .string()
         .describe(
           'ADT URI of the object or package to check (e.g. /sap/bc/adt/packages/ZPACKAGE)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         // ATC run: POST to /sap/bc/adt/atc/runs with the target object,
         // then fetch the resulting worklist.

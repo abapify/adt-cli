@@ -1,10 +1,11 @@
 {
   "name": "@abapify/adt-aunit",
+  "version": "0.3.6",
+  "description": "ABAP Unit Test CLI plugin for adt-cli with JUnit XML output for GitLab CI",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "ABAP Unit Test CLI plugin for adt-cli with JUnit XML output for GitLab CI",
   "type": "module",
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
@@ -28,10 +29,19 @@
     "gitlab-ci"
   ],
   "dependencies": {
-    "@abapify/adt-plugin": "workspace:*",
-    "@abapify/adt-schemas": "workspace:*",
-    "@abapify/adt-contracts": "workspace:*",
-    "@abapify/adt-plugin-abapgit": "workspace:*"
+    "@abapify/adt-plugin": "0.3.6",
+    "@abapify/adt-schemas": "0.3.6",
+    "@abapify/adt-contracts": "0.3.6",
+    "@abapify/adt-plugin-abapgit": "0.3.6"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-aunit"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-aunit#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
 }

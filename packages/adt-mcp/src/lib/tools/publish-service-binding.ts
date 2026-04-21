@@ -14,7 +14,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AdkServiceBinding, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerPublishServiceBindingTool(
   server: McpServer,
@@ -24,7 +25,7 @@ export function registerPublishServiceBindingTool(
     'publish_service_binding',
     'Publish (or unpublish) a RAP Service Binding (SRVB) in SAP. Pass `unpublish: true` to deactivate. Delegates to the typed SRVB contract.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       bindingName: z
         .string()
         .describe('Service binding name (e.g. ZUI_MYAPP_O4)'),
@@ -35,9 +36,9 @@ export function registerPublishServiceBindingTool(
           'If true, unpublishes (deactivates) the service binding instead (default: false)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client);
 
         const bindingName = args.bindingName.toUpperCase();

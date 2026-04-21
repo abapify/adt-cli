@@ -62,10 +62,26 @@ export const infoCommand = new Command('info')
         if (!options.output) {
           console.log('🖥️  System Information:');
 
-          // Display key system properties
+          // Display key system properties.
+          // - Preserve the original truthy semantics (`!value` was the
+          //   pre-PR condition): hide null / undefined / '' / 0 / false,
+          //   since SAP system-info fields are string-shaped in practice
+          //   and surfacing numeric 0 / false would be a regression.
+          // - Guard JSON.stringify against circular refs / BigInt so a
+          //   malformed value can never crash the `info` command.
+          const safeStringify = (v: unknown): string => {
+            try {
+              return JSON.stringify(v);
+            } catch {
+              return String(v);
+            }
+          };
           const displayProperty = (key: string, label: string) => {
-            if (systemData[key])
-              console.log(`  • ${label}: ${systemData[key]}`);
+            const value = systemData[key];
+            if (!value) return;
+            const text =
+              typeof value === 'object' ? safeStringify(value) : String(value);
+            console.log(`  • ${label}: ${text}`);
           };
 
           displayProperty('systemID', 'System ID');
@@ -91,7 +107,7 @@ export const infoCommand = new Command('info')
           if (otherKeys.length > 0) {
             console.log('\n  Additional properties:');
             otherKeys.forEach((key) => {
-              console.log(`    • ${key}: ${JSON.stringify(systemData[key])}`);
+              console.log(`    • ${key}: ${safeStringify(systemData[key])}`);
             });
           }
         }

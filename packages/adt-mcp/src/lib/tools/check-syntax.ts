@@ -12,7 +12,8 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { checkrun } from '@abapify/adt-schemas';
@@ -38,7 +39,7 @@ export function registerCheckSyntaxTool(
     'check_syntax',
     'Run ABAP syntax check (checkruns) on an object and return structured messages',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z.string().describe('ABAP object name to check'),
       objectType: z
         .string()
@@ -54,9 +55,9 @@ export function registerCheckSyntaxTool(
           'Version to check: active, inactive, or new (default: active)',
         ),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const objectUri = await resolveObjectUri(
           client,

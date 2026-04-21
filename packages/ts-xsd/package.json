@@ -1,10 +1,11 @@
 {
   "name": "@abapify/ts-xsd",
+  "version": "0.3.6",
+  "description": "Core XSD parser and builder - W3C XMLSchema 1:1 TypeScript representation",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.0",
-  "description": "Core XSD parser and builder - W3C XMLSchema 1:1 TypeScript representation",
   "type": "module",
   "types": "./dist/index.d.mts",
   "bin": {
@@ -24,5 +25,14 @@
     "@xmldom/xmldom": "^0.9.9",
     "ts-morph": "*",
     "zod": "^3.24.0 || ^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/ts-xsd"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/ts-xsd#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
   }
 }

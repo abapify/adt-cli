@@ -14,7 +14,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 import { resolveObjectUri } from './utils';
 
 export function registerLockObjectTool(
@@ -25,7 +26,7 @@ export function registerLockObjectTool(
     'lock_object',
     'Acquire an ADT edit lock on an ABAP object and return the lock handle needed for subsequent write operations.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       objectName: z.string().describe('ABAP object name'),
       objectType: z
         .string()
@@ -33,9 +34,9 @@ export function registerLockObjectTool(
         .describe('Object type (e.g. CLAS, PROG, INTF, FUGR)'),
       transport: z.string().optional().describe('Transport request number'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const objectUri = await resolveObjectUri(
           client,

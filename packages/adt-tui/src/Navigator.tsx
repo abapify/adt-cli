@@ -33,7 +33,7 @@ interface NavigatorProps {
  * Open raw XML in IDE (VS Code)
  */
 function openXmlInIde(xml: string, url: string): void {
-  const safeName = url.replace(/[^a-zA-Z0-9]/g, '_').slice(-50);
+  const safeName = url.replaceAll(/[^a-zA-Z0-9]/g, '_').slice(-50);
   const filename = `adt_${safeName}.xml`;
   const filepath = join(tmpdir(), filename);
   writeFileSync(filepath, xml, 'utf-8');

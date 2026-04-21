@@ -119,8 +119,23 @@ export function createRfcClient(config: RfcClientConfig): RfcClient {
         throw err;
       }
 
-      const xml =
-        typeof response === 'string' ? response : String(response ?? '');
+      // Fallback coercion of the fetch result to XML text. JSON.stringify
+      // can throw on circular refs or BigInt; guard against that so an
+      // unrelated serialization error doesn't mask the real SOAP failure
+      // downstream in parseRfcSoapResponse.
+      const coerceToXml = (value: unknown): string => {
+        if (typeof value === 'string') return value;
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'object') {
+          try {
+            return JSON.stringify(value);
+          } catch {
+            return String(value);
+          }
+        }
+        return String(value);
+      };
+      const xml = coerceToXml(response);
       return parseRfcSoapResponse(xml);
     },
   };

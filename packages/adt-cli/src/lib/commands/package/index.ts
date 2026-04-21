@@ -18,15 +18,6 @@ import { packageDeleteCommand } from './delete';
 import { packageActivateCommand } from './activate';
 import { packageStatCommand } from './stat';
 
-export {
-  packageGetCommand,
-  packageCreateCommand,
-  packageListCommand,
-  packageDeleteCommand,
-  packageActivateCommand,
-  packageStatCommand,
-};
-
 export function createPackageCommand(): Command {
   const pkgCmd = new Command('package').description('ABAP package operations');
 
@@ -39,3 +30,9 @@ export function createPackageCommand(): Command {
 
   return pkgCmd;
 }
+export { packageGetCommand } from './get';
+export { packageCreateCommand } from './create';
+export { packageListCommand } from './list';
+export { packageDeleteCommand } from './delete';
+export { packageActivateCommand } from './activate';
+export { packageStatCommand } from './stat';

@@ -1,6 +1,7 @@
 {
   "name": "@abapify/nx-typecheck",
   "version": "0.0.1",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",

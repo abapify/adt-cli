@@ -10,7 +10,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AdkBehaviorDefinition, initializeAdk } from '@abapify/adk';
 import type { ToolContext } from '../types';
-import { connectionShape } from './shared-schemas';
+import { sessionOrConnectionShape } from './shared-schemas';
+import { resolveClient } from './session-helpers';
 
 export function registerCreateBdefTool(
   server: McpServer,
@@ -20,7 +21,7 @@ export function registerCreateBdefTool(
     'create_bdef',
     'Create a new RAP Behavior Definition (BDEF) object.',
     {
-      ...connectionShape,
+      ...sessionOrConnectionShape,
       bdefName: z
         .string()
         .describe('BDEF name (uppercase, e.g. ZBP_MY_ENTITY)'),
@@ -33,9 +34,9 @@ export function registerCreateBdefTool(
         .optional()
         .describe('Transport request number (required for transportable)'),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const client = ctx.getClient(args);
+        const { client } = await resolveClient(ctx, args, extra ?? {});
         initializeAdk(client);
 
         await AdkBehaviorDefinition.create(

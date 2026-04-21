@@ -20,7 +20,7 @@ export interface FileLoggingConfig {
 export class FileLoggingPlugin implements ResponsePlugin {
   name = 'file-logging';
 
-  constructor(private config: FileLoggingConfig) {}
+  constructor(private readonly config: FileLoggingConfig) {}
 
   process(context: ResponseContext): unknown {
     try {
@@ -103,7 +103,7 @@ export class FileLoggingPlugin implements ResponsePlugin {
     if (urlObj.search) {
       const sanitizedQuery = urlObj.search
         .slice(1)
-        .replace(/[^a-zA-Z0-9_-]/g, '_');
+        .replaceAll(/[^a-zA-Z0-9_-]/g, '_');
       dirPath += `/${sanitizedQuery}`;
     }
 

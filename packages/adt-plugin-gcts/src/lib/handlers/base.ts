@@ -15,7 +15,7 @@
 import type { AdkObject, AdkKind } from '@abapify/adk';
 import { getTypeForKind, getMainType } from '@abapify/adk';
 import type { FormatHandler, SerializedFile } from '@abapify/adt-plugin';
-import { gctsFilename, PACKAGE_FILENAME } from '../format/filename';
+import { gctsFilename } from '../format/filename';
 import type { GctsMetadata } from '../format/types';
 
 export type AbapObjectType = string;
@@ -227,4 +227,4 @@ export function createHandler<
 }
 
 /** Convenience re-export — matches abapGit's `package.devc.xml` pattern. */
-export { PACKAGE_FILENAME };
+export { PACKAGE_FILENAME } from '../format/filename';

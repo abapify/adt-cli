@@ -31,11 +31,7 @@ describe('CLI + MCP parity (srvd)', () => {
   });
 
   it('parity: read SRVD source', async () => {
-    const cli = await runCliCommand(harness, [
-      'srvd',
-      'read',
-      'ZUI_MOCK_SRVD',
-    ]);
+    const cli = await runCliCommand(harness, ['srvd', 'read', 'ZUI_MOCK_SRVD']);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
 
     const mcp = await callMcpTool(harness, 'get_srvd', {
