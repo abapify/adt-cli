@@ -25,10 +25,9 @@ jobs:
     name: Publish packages
     runs-on: ubuntu-latest
     # Publish always runs against a version tag on `main` — use the
-    # protected-branch environment so nx can hit Nx Cloud (read-write).
-    environment: protected-branch-pipeline
+    # read-write Nx Cloud token from repository secrets.
     env:
-      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN_RW }}
     permissions:
       contents: read
       id-token: write # needed for provenance data generation

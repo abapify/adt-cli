@@ -46,11 +46,10 @@ jobs:
   release:
     name: Version, Changelog & Tag
     runs-on: ubuntu-latest
-    # Release always runs against `main` — use the protected-branch
-    # environment so nx gets the read-write Nx Cloud access token.
-    environment: protected-branch-pipeline
+    # Release always runs against `main`, so use the read-write Nx Cloud
+    # token directly from repository secrets.
     env:
-      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN_RW }}
     permissions:
       contents: write # needed to push commits and tags
       id-token: write # needed for provenance data generation
