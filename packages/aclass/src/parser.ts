@@ -429,10 +429,13 @@ function parseClassImpl(
 function parseMethodImpl(c: Cursor): MethodImpl | null {
   const methodTok = c.current();
   const header = c.collectStatement();
-  // header.tokens: [Method, Ident, …]
-  const nameTok = header.tokens[1];
-  if (!isNameLike(nameTok)) {
-    c.report('expected method name after METHOD', nameTok ?? methodTok);
+  // header.tokens: [Method, <qualifiedName>, …]
+  const qual = readQualifiedName(header.tokens, 1);
+  if (!qual) {
+    c.report(
+      'expected method name after METHOD',
+      header.tokens[1] ?? methodTok,
+    );
     return null;
   }
   // Body: everything up to the next ENDMETHOD. We operate on source
@@ -455,7 +458,7 @@ function parseMethodImpl(c: Cursor): MethodImpl | null {
       const bodyCol = firstBodyTok?.startColumn ?? 1;
       return {
         kind: 'MethodImpl',
-        name: nameTok.image,
+        name: qual.name,
         body,
         bodySpan: {
           startOffset: bodyStart,
@@ -636,10 +639,10 @@ function parseMethodDecl(
   const isClassMethod = head.tokenType.name === 'ClassMethods';
   const stmt = c.collectStatement();
   const toks = stmt.tokens;
-  // toks: [Methods|ClassMethods, Ident, …]
-  const nameTok = toks[1];
-  if (!isNameLike(nameTok)) {
-    c.report('expected method name', nameTok ?? head);
+  // toks: [Methods|ClassMethods, <qualifiedName>, …]
+  const qual = readQualifiedName(toks, 1);
+  if (!qual) {
+    c.report('expected method name', toks[1] ?? head);
     return null;
   }
 
@@ -662,7 +665,7 @@ function parseMethodDecl(
     | 'returning'
     | 'raising' = 'none';
 
-  let i = 2;
+  let i = qual.lastIdx + 1;
   while (i < toks.length) {
     const t = toks[i];
     const tn = t.tokenType.name;
@@ -740,7 +743,7 @@ function parseMethodDecl(
 
   return {
     kind: 'MethodDecl',
-    name: nameTok.image,
+    name: qual.name,
     abapDoc,
     isClassMethod,
     isAbstract,
@@ -1394,6 +1397,37 @@ function spanFromStmt(
  * real identifier would). This keeps the rule cheap (no huge keyword
  * allowlist) and catches every keyword that can legally be a name.
  */
+/**
+ * Read a possibly-qualified ABAP name starting at `start`: a chain of
+ * identifier-shaped tokens separated by `~` (interface member) or `=>`
+ * (static scope). Returns the joined `image` plus the last-consumed
+ * index, or `null` if the head token is not name-like.
+ *
+ *   `zif_foo~bar`   → `{ name: 'zif_foo~bar', lastIdx: start + 2 }`
+ *   `zcl_x=>method` → `{ name: 'zcl_x=>method', lastIdx: start + 2 }`
+ *   `plain_name`    → `{ name: 'plain_name',  lastIdx: start }`
+ */
+function readQualifiedName(
+  toks: IToken[],
+  start: number,
+): { name: string; lastIdx: number } | null {
+  const head = toks[start];
+  if (!isNameLike(head)) return null;
+  const parts: string[] = [head.image];
+  let lastIdx = start;
+  let j = start + 1;
+  while (j < toks.length) {
+    const sep = toks[j]?.tokenType.name;
+    if (sep !== 'Tilde' && sep !== 'FatArrow') break;
+    const next = toks[j + 1];
+    if (!isNameLike(next)) break;
+    parts.push(sep === 'Tilde' ? '~' : '=>', next.image);
+    lastIdx = j + 1;
+    j += 2;
+  }
+  return { name: parts.join(''), lastIdx };
+}
+
 function isNameLike(t: IToken | undefined): t is IToken {
   if (!t) return false;
   if (t.tokenType.name === 'Identifier') return true;

@@ -369,3 +369,37 @@ describe('parse — MethodImpl.bodySpan', () => {
     expect(m.body.trim()).toBe('');
   });
 });
+
+describe('parse — qualified method names', () => {
+  it('preserves `zif_foo~bar` on METHOD IMPLEMENTATIONS', () => {
+    const src = [
+      'CLASS zcl_x IMPLEMENTATION.',
+      '  METHOD zif_petstore3~add_pet.',
+      '    RETURN.',
+      '  ENDMETHOD.',
+      'ENDCLASS.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const impl = ast.definitions.find((d) => d.kind === 'ClassImpl');
+    if (impl?.kind !== 'ClassImpl') throw new Error('expected ClassImpl');
+    expect(impl.methods[0].name).toBe('zif_petstore3~add_pet');
+  });
+
+  it('preserves `zif_foo~bar REDEFINITION` on METHODS declarations', () => {
+    const src = [
+      'CLASS zcl_x DEFINITION PUBLIC FINAL CREATE PUBLIC.',
+      '  PUBLIC SECTION.',
+      '    METHODS zif_foo~bar REDEFINITION.',
+      'ENDCLASS.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const cls = ast.definitions[0];
+    if (cls.kind !== 'ClassDef') throw new Error('expected ClassDef');
+    const m = cls.sections[0].members[0];
+    if (m.kind !== 'MethodDecl') throw new Error('expected MethodDecl');
+    expect(m.name).toBe('zif_foo~bar');
+    expect(m.isRedefinition).toBe(true);
+  });
+});
