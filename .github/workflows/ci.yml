@@ -14,13 +14,13 @@ permissions:
 jobs:
   main:
     runs-on: ubuntu-latest
-    # Protected `main` branch pushes get read-write Nx Cloud access;
-    # PRs from feature branches only get read-only — the environment
-    # is protected with `protected_branches=true` so GitHub will only
-    # inject the `protected-branch-pipeline` secret on main pushes.
-    environment: ${{ github.event_name == 'push' && 'protected-branch-pipeline' || 'unprotected-branch-pipeline' }}
+    # Pushes to `main` get the read-write Nx Cloud token so the remote
+    # cache is populated; everything else (PRs, other branches) gets the
+    # read-only token, which is safe to expose. Both tokens live as
+    # repository secrets — we intentionally avoid GitHub Environments
+    # here because they register every run as a "deployment" in the UI.
     env:
-      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && secrets.NX_CLOUD_ACCESS_TOKEN_RW || secrets.NX_CLOUD_ACCESS_TOKEN_RO }}
     steps:
       - uses: actions/checkout@v6
         with:

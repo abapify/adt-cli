@@ -13,9 +13,8 @@ jobs:
   publish-gpr:
     name: Publish packages to GitHub Packages
     runs-on: ubuntu-latest
-    environment: protected-branch-pipeline
     env:
-      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN_RW }}
     permissions:
       contents: read
       packages: write
