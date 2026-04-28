@@ -1,0 +1,13 @@
+{
+  "name": "adt-pilot",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/adt-pilot/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}"]
+    }
+  },
+  "tags": ["scope:adt", "type:agent"],
+  "targets": {}
+}
