@@ -45,7 +45,7 @@ export {
   codeReviewInputSchema,
   codeReviewOutputSchema,
 } from './workflow.js';
-export type { CodeReviewInput } from './workflow.js';
+export type { CodeReviewInput, CodeReviewWorkflowHandle } from './workflow.js';
 
 // MCP client factory
 export { createMcpToolCaller, connectMcpClient } from './mcp-client.js';

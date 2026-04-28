@@ -43,7 +43,7 @@ Always present findings grouped by severity and provide clear remediation guidan
  *
  * @param config - Agent configuration (model + optional pre-loaded tools)
  */
-export function createReviewAgent(config: ReviewAgentConfig): Agent {
+export function createReviewAgent(config: ReviewAgentConfig): Agent<string> {
   return new Agent({
     id: 'review',
     name: 'abapify Pilot – Review',

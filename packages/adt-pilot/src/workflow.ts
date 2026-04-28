@@ -377,12 +377,31 @@ function extractFindings(
 // ---------------------------------------------------------------------------
 
 /**
+ * Minimal public type for the workflow handle returned by
+ * `createCodeReviewWorkflow`.
+ *
+ * Wraps the real Mastra `Workflow<...>` in a simple interface so the OXC
+ * declaration generator does not need to expand the deeply generic Mastra
+ * type parameters (which would cause OOM in the DTS build step).
+ */
+export interface CodeReviewWorkflowHandle {
+  createRun(): {
+    start(opts: { inputData: CodeReviewInput }): Promise<{
+      status: string;
+      result: unknown;
+    }>;
+  };
+}
+
+/**
  * Create the Code Review workflow, bound to the given MCP tool caller.
  *
  * @param callTool Function that calls a named MCP tool and returns the parsed
  *                 JSON response.
  */
-export function createCodeReviewWorkflow(callTool: McpToolCaller) {
+export function createCodeReviewWorkflow(
+  callTool: McpToolCaller,
+): CodeReviewWorkflowHandle {
   const resolveObjectsStep = createResolveObjectsStep(callTool);
   const runAtcChecksStep = createRunAtcChecksStep(callTool);
   const buildReportStep = createBuildReportStep();
@@ -397,5 +416,5 @@ export function createCodeReviewWorkflow(callTool: McpToolCaller) {
     .then(resolveObjectsStep)
     .then(runAtcChecksStep)
     .then(buildReportStep)
-    .commit();
+    .commit() as unknown as CodeReviewWorkflowHandle;
 }
