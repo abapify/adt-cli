@@ -9,5 +9,22 @@
     }
   },
   "tags": ["scope:adt", "type:agent"],
-  "targets": {}
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "dependsOn": [],
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": ["{workspaceRoot}/dist/out-tsc/packages/adt-pilot/**"],
+      "cache": true,
+      "options": {
+        "cwd": "packages/adt-pilot",
+        "command": "tsc -p tsconfig.lib.json --noEmit"
+      }
+    }
+  }
 }

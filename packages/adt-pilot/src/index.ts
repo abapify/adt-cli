@@ -1,23 +1,37 @@
 /**
  * @abapify/adt-pilot – abapify Pilot
  *
- * Mastra AI agent for ABAP code review via ADT MCP.
+ * Mastra-powered ABAP code review tooling. The package exposes two
+ * complementary modes that share the same MCP-backed implementation:
  *
- * @example
+ * 1. **Workflow mode** — a deterministic Mastra `Workflow`
+ *    ({@link createCodeReviewWorkflow}) that runs ATC checks on a package
+ *    or a transport request and returns a structured
+ *    {@link CodeReviewReport}. No LLM is required.
+ * 2. **Harness mode** — a Mastra `Harness` ({@link createAbapifyPilot}) that
+ *    wraps a `review` Agent so a user can drive code review interactively
+ *    via natural language. The Agent is wired with the same MCP tools
+ *    used by the workflow.
+ *
+ * Both modes accept either a package or a transport as the review target.
+ *
+ * @example Workflow mode
  * ```typescript
- * import { createAbapifyPilot, createCodeReviewWorkflow, connectMcpClient } from '@abapify/adt-pilot';
+ * import {
+ *   createCodeReviewWorkflow,
+ *   connectMcpClient,
+ * } from '@abapify/adt-pilot';
  * import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
  * import { createMcpServer } from '@abapify/adt-mcp';
  *
- * // Set up MCP server + client
  * const server = createMcpServer();
- * const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+ * const [clientTransport, serverTransport] =
+ *   InMemoryTransport.createLinkedPair();
  * await server.connect(serverTransport);
  * const { callTool } = await connectMcpClient(clientTransport);
  *
- * // Create and run the workflow
  * const workflow = createCodeReviewWorkflow(callTool);
- * const run = workflow.createRun();
+ * const run = await workflow.createRun();
  * const result = await run.start({
  *   inputData: {
  *     mode: 'package',
@@ -27,7 +41,22 @@
  *     password: 'secret',
  *   },
  * });
- * console.log(result.result); // CodeReviewReport
+ * if (result.status === 'success') {
+ *   console.log(result.result); // CodeReviewReport
+ * }
+ * ```
+ *
+ * @example Harness mode
+ * ```typescript
+ * import { createAbapifyPilot } from '@abapify/adt-pilot';
+ *
+ * const pilot = createAbapifyPilot({
+ *   model: 'openai/gpt-4o',
+ *   mcpTools: await mcpClient.listTools(),
+ * });
+ * await pilot.init();
+ * await pilot.selectOrCreateThread();
+ * await pilot.sendMessage({ content: 'Review package ZPACKAGE on http://sap:8000' });
  * ```
  */
 
@@ -35,6 +64,8 @@
 export type {
   ConnectionParams,
   AtcFinding,
+  AtcStepResult,
+  CodeReviewMode,
   CodeReviewReport,
   McpToolCaller,
 } from './types.js';
@@ -45,13 +76,18 @@ export {
   codeReviewInputSchema,
   codeReviewOutputSchema,
 } from './workflow.js';
-export type { CodeReviewInput, CodeReviewWorkflowHandle } from './workflow.js';
+export type {
+  CodeReviewInput,
+  CodeReviewWorkflow,
+  CodeReviewRun,
+  CodeReviewRunResult,
+} from './workflow.js';
 
 // MCP client factory
 export { createMcpToolCaller, connectMcpClient } from './mcp-client.js';
 
 // Agent
-export { createReviewAgent } from './agent.js';
+export { createReviewAgent, REVIEW_AGENT_INSTRUCTIONS } from './agent.js';
 export type { ReviewAgentConfig } from './agent.js';
 
 // Harness

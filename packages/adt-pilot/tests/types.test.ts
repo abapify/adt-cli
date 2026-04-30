@@ -2,9 +2,13 @@
  * Type validation tests for CodeReviewReport schema
  */
 
+import { randomBytes } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
 import { codeReviewOutputSchema, codeReviewInputSchema } from '../src/index.js';
+
+// Generated per-process; never a real credential.
+const TEST_SECRET = randomBytes(8).toString('hex');
 
 describe('codeReviewOutputSchema', () => {
   it('accepts a valid package-mode report', () => {
@@ -87,7 +91,7 @@ describe('codeReviewInputSchema', () => {
       packageName: 'ZPACKAGE',
       baseUrl: 'http://sap:8000',
       username: 'DEVELOPER',
-      password: 'secret',
+      password: TEST_SECRET,
     };
     expect(() => codeReviewInputSchema.parse(input)).not.toThrow();
   });
@@ -98,7 +102,7 @@ describe('codeReviewInputSchema', () => {
       transportNumber: 'DEVK900001',
       baseUrl: 'http://sap:8000',
       username: 'DEVELOPER',
-      password: 'secret',
+      password: TEST_SECRET,
       client: '100',
     };
     expect(() => codeReviewInputSchema.parse(input)).not.toThrow();
@@ -109,7 +113,7 @@ describe('codeReviewInputSchema', () => {
       mode: 'package',
       packageName: 'ZPACKAGE',
       username: 'DEVELOPER',
-      password: 'secret',
+      password: TEST_SECRET,
     };
     expect(() => codeReviewInputSchema.parse(input)).toThrow(z.ZodError);
   });
@@ -120,7 +124,7 @@ describe('codeReviewInputSchema', () => {
       packageName: 'ZPACKAGE',
       baseUrl: 'http://sap:8000',
       username: 'DEVELOPER',
-      password: 'secret',
+      password: TEST_SECRET,
     };
     expect(() => codeReviewInputSchema.parse(input)).toThrow(z.ZodError);
   });

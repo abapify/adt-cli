@@ -113,6 +113,9 @@
     },
     {
       "path": "./packages/aclass"
+    },
+    {
+      "path": "./packages/adt-pilot"
     }
   ]
 }
