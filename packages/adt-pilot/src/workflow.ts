@@ -21,7 +21,7 @@
  *   inputData: {
  *     mode: 'package',
  *     packageName: 'ZPACKAGE',
- *     baseUrl: 'http://sap:8000',
+ *     baseUrl: 'https://sap.example.com',
  *     username: 'DEVELOPER',
  *     password: 'secret',
  *   },

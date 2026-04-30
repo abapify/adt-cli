@@ -11,7 +11,7 @@
  * these credentials — they must be passed as part of every workflow input.
  */
 export interface ConnectionParams {
-  /** Base URL of the SAP system (e.g. `http://sap:8000`) */
+  /** Base URL of the SAP system (e.g. `https://sap.example.com`) */
   baseUrl: string;
   /** SAP user name */
   username: string;

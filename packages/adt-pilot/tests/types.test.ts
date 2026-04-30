@@ -89,7 +89,7 @@ describe('codeReviewInputSchema', () => {
     const input = {
       mode: 'package',
       packageName: 'ZPACKAGE',
-      baseUrl: 'http://sap:8000',
+      baseUrl: 'https://sap.example.com',
       username: 'DEVELOPER',
       password: TEST_SECRET,
     };
@@ -100,7 +100,7 @@ describe('codeReviewInputSchema', () => {
     const input = {
       mode: 'transport',
       transportNumber: 'DEVK900001',
-      baseUrl: 'http://sap:8000',
+      baseUrl: 'https://sap.example.com',
       username: 'DEVELOPER',
       password: TEST_SECRET,
       client: '100',
@@ -122,7 +122,7 @@ describe('codeReviewInputSchema', () => {
     const input = {
       mode: 'invalid',
       packageName: 'ZPACKAGE',
-      baseUrl: 'http://sap:8000',
+      baseUrl: 'https://sap.example.com',
       username: 'DEVELOPER',
       password: TEST_SECRET,
     };

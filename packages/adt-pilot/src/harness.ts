@@ -12,7 +12,7 @@
  * });
  * await pilot.init();
  * await pilot.selectOrCreateThread();
- * await pilot.sendMessage({ content: 'Review package ZPACKAGE on http://my-sap:8000' });
+ * await pilot.sendMessage({ content: 'Review package ZPACKAGE on https://my-sap.example.com' });
  * ```
  */
 

@@ -36,7 +36,7 @@
  *   inputData: {
  *     mode: 'package',
  *     packageName: 'ZPACKAGE',
- *     baseUrl: 'http://sap:8000',
+ *     baseUrl: 'https://sap.example.com',
  *     username: 'DEVELOPER',
  *     password: 'secret',
  *   },
@@ -56,7 +56,7 @@
  * });
  * await pilot.init();
  * await pilot.selectOrCreateThread();
- * await pilot.sendMessage({ content: 'Review package ZPACKAGE on http://sap:8000' });
+ * await pilot.sendMessage({ content: 'Review package ZPACKAGE on https://sap.example.com' });
  * ```
  */
 
