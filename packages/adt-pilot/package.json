@@ -27,11 +27,11 @@
   ],
   "dependencies": {
     "@mastra/core": "^1.28.0",
-    "@mastra/mcp": "^1.5.2",
     "@modelcontextprotocol/sdk": "^1.27.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@abapify/adt-client": "0.3.6",
     "@abapify/adt-fixtures": "0.3.6",
     "@abapify/adt-mcp": "0.3.6"
   },
