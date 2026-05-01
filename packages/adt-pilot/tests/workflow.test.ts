@@ -20,8 +20,8 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createMockAdtServer, type MockAdtServer } from '@abapify/adt-fixtures';
 import { createAdtClient } from '@abapify/adt-client';
 import { createMcpServer } from '@abapify/adt-mcp';
-import { createCodeReviewWorkflow, createMcpToolCaller } from '../src/index.js';
-import type { CodeReviewReport, McpToolCaller } from '../src/index.js';
+import { createCodeReviewWorkflow, createMcpToolCaller } from '../src/index';
+import type { CodeReviewReport, McpToolCaller } from '../src/index';
 
 // ---------------------------------------------------------------------------
 // Test-level setup

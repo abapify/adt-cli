@@ -42,7 +42,7 @@ import type {
   AtcStepResult,
   CodeReviewReport,
   McpToolCaller,
-} from './types.js';
+} from './types';
 
 // Type-erase the Mastra workflow/step factories at the import boundary.
 // See "Internal type-erasure aliases" below for the rationale.

@@ -18,7 +18,7 @@
 
 import { Harness } from '@mastra/core/harness';
 import type { ToolsInput } from '@mastra/core/agent';
-import { createReviewAgent } from './agent.js';
+import { createReviewAgent } from './agent';
 
 /** Configuration for the abapify Pilot Harness */
 export interface AbapifyPilotConfig {

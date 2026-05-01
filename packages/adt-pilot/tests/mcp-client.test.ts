@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { createMcpToolCaller } from '../src/index.js';
+import { createMcpToolCaller } from '../src/index';
 
 // ---------------------------------------------------------------------------
 // createMcpToolCaller tests

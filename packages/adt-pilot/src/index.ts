@@ -68,28 +68,28 @@ export type {
   CodeReviewMode,
   CodeReviewReport,
   McpToolCaller,
-} from './types.js';
+} from './types';
 
 // Workflow
 export {
   createCodeReviewWorkflow,
   codeReviewInputSchema,
   codeReviewOutputSchema,
-} from './workflow.js';
+} from './workflow';
 export type {
   CodeReviewInput,
   CodeReviewWorkflow,
   CodeReviewRun,
   CodeReviewRunResult,
-} from './workflow.js';
+} from './workflow';
 
 // MCP client factory
-export { createMcpToolCaller, connectMcpClient } from './mcp-client.js';
+export { createMcpToolCaller, connectMcpClient } from './mcp-client';
 
 // Agent
-export { createReviewAgent, REVIEW_AGENT_INSTRUCTIONS } from './agent.js';
-export type { ReviewAgentConfig } from './agent.js';
+export { createReviewAgent, REVIEW_AGENT_INSTRUCTIONS } from './agent';
+export type { ReviewAgentConfig } from './agent';
 
 // Harness
-export { createAbapifyPilot } from './harness.js';
-export type { AbapifyPilotConfig } from './harness.js';
+export { createAbapifyPilot } from './harness';
+export type { AbapifyPilotConfig } from './harness';

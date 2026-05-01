@@ -18,7 +18,7 @@ import {
   createAbapifyPilot,
   createReviewAgent,
   REVIEW_AGENT_INSTRUCTIONS,
-} from '../src/index.js';
+} from '../src/index';
 
 describe('createAbapifyPilot', () => {
   it('returns a Harness instance', () => {

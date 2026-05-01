@@ -5,7 +5,7 @@
 import { randomBytes } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
-import { codeReviewOutputSchema, codeReviewInputSchema } from '../src/index.js';
+import { codeReviewOutputSchema, codeReviewInputSchema } from '../src/index';
 
 // Generated per-process; never a real credential.
 const TEST_SECRET = randomBytes(8).toString('hex');

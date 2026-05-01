@@ -13,7 +13,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import type { McpToolCaller } from './types.js';
+import type { McpToolCaller } from './types';
 
 interface TextContentBlock {
   type: 'text';
