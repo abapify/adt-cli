@@ -5,3 +5,4 @@
 /.nx/workspace-data
 /git_modules
 **/schemas/generated
+.nx/self-healing

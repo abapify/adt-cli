@@ -2,7 +2,9 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
   "nxCloudId": "69e6f81c01adefdeabf2c971",
-  "cli": { "packageManager": "bun" },
+  "cli": {
+    "packageManager": "bun"
+  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -20,26 +22,52 @@
     "sharedGlobals": []
   },
   "pluginsConfig": {
-    "@nx/js": { "analyzeSourceFiles": true, "analyzePackageJson": true }
+    "@nx/js": {
+      "analyzeSourceFiles": true,
+      "analyzePackageJson": true
+    }
   },
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": { "targetName": "typecheck" },
-        "build": { "targetName": "build", "configName": "tsconfig.lib.json" }
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build",
+          "configName": "tsconfig.lib.json"
+        }
       },
       "exclude": ["packages/xmld/*"]
     },
-    { "plugin": "./tools/nx-tsdown/src/index.ts" },
-    { "plugin": "./tools/nx-vitest/src/index.ts" },
-    { "plugin": "./tools/nx-npm-trust/src/index.ts" },
-    { "plugin": "@nx/vite/plugin", "exclude": ["**/*"] },
-    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
+    {
+      "plugin": "./tools/nx-tsdown/src/index.ts"
+    },
+    {
+      "plugin": "./tools/nx-vitest/src/index.ts"
+    },
+    {
+      "plugin": "./tools/nx-npm-trust/src/index.ts"
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "exclude": ["**/*"]
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
     {
       "plugin": "@nx/js/typescript",
       "include": ["packages/xmld/*"],
-      "options": { "typecheck": { "targetName": "typecheck" } }
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        }
+      }
     }
   ],
   "release": {
@@ -53,7 +81,9 @@
     },
     "changelog": {
       "automaticFromRef": true,
-      "workspaceChangelog": { "createRelease": "github" },
+      "workspaceChangelog": {
+        "createRelease": "github"
+      },
       "projectChangelogs": true
     },
     "git": {
@@ -62,8 +92,12 @@
     }
   },
   "targetDefaults": {
-    "build": { "dependsOn": ["^build"] },
-    "_nx-release-publish": { "dependsOn": ["build"] },
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "_nx-release-publish": {
+      "dependsOn": ["build"]
+    },
     "@nx/js:swc": {
       "cache": true,
       "dependsOn": ["^build"],
@@ -72,8 +106,15 @@
     "@nx/jest:jest": {
       "cache": true,
       "inputs": ["default", "^default", "{workspaceRoot}/jest.preset.js"],
-      "options": { "passWithNoTests": true },
-      "configurations": { "ci": { "ci": true, "codeCoverage": true } }
+      "options": {
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
     },
     "@nx/js:tsc": {
       "cache": true,
@@ -93,7 +134,12 @@
         "{workspaceRoot}/tools/eslint-rules/**/*"
       ]
     },
-    "test": { "dependsOn": ["^build"] }
+    "test": {
+      "dependsOn": ["^build"]
+    }
   },
-  "tui": { "enabled": false }
+  "tui": {
+    "enabled": false
+  },
+  "analytics": true
 }
