@@ -31,6 +31,25 @@
         "command": "bun run clear",
         "cwd": "website"
       }
+    },
+    "docs-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun .devin/skills/docs-sync/scripts/check-structure.ts"
+      },
+      "inputs": [
+        "{workspaceRoot}/.devin/skills/docs-sync/scripts/check-structure.ts",
+        "{workspaceRoot}/website/sidebars.ts",
+        "{workspaceRoot}/website/docs/**/*.{md,mdx}",
+        "{workspaceRoot}/packages/*/package.json",
+        "{workspaceRoot}/packages/adt-mcp/src/lib/tools/**/*.ts"
+      ]
+    },
+    "docs-stubs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun .devin/skills/docs-sync/scripts/generate-stubs.ts --write"
+      }
     }
   }
 }
