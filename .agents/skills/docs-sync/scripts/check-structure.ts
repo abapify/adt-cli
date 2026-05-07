@@ -9,20 +9,21 @@
  *   1. packages/*               ↔ website/docs/sdk/packages/*.md    ↔ sidebars.ts
  *   2. MCP tools (server.tool)  ↔ website/docs/mcp/tools/*.md       ↔ sidebars.ts
  *   3. Every doc file under website/docs is listed somewhere in sidebars.ts
- *      (except generated-index categories and the root `index.md`)
+ *      (except the root `index.md`, which is the generated-index landing page)
  *   4. Every sidebar entry resolves to an existing doc file
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('../../../../', import.meta.url).pathname.replace(
-  /\/$/,
+const rootDir = fileURLToPath(new URL('../../../../', import.meta.url)).replace(
+  /[/\\]$/,
   '',
 );
-const WEBSITE = join(ROOT, 'website');
-const DOCS = join(WEBSITE, 'docs');
-const SIDEBAR = join(WEBSITE, 'sidebars.ts');
-const PACKAGES = join(ROOT, 'packages');
+const websiteDir = join(rootDir, 'website');
+const docsDir = join(websiteDir, 'docs');
+const sidebarFile = join(websiteDir, 'sidebars.ts');
+const packagesDir = join(rootDir, 'packages');
 
 type Report = { section: string; missing: string[]; orphan: string[] };
 const reports: Report[] = [];
@@ -48,7 +49,7 @@ function walk(p: string, acc: string[] = []): string[] {
 }
 
 // --- Parse sidebars.ts: collect every quoted doc id ---
-const sidebarText = readFileSync(SIDEBAR, 'utf8');
+const sidebarText = readFileSync(sidebarFile, 'utf8');
 const sidebarIds = new Set<string>();
 for (const m of sidebarText.matchAll(/['"`]([a-z0-9][a-z0-9/_-]*?)['"`]/gi)) {
   const id = m[1];
@@ -58,8 +59,8 @@ for (const m of sidebarText.matchAll(/['"`]([a-z0-9][a-z0-9/_-]*?)['"`]/gi)) {
 
 // --- 1. Packages ---
 {
-  const codePkgs = new Set(listDirs(PACKAGES));
-  const docPkgsDir = join(DOCS, 'sdk/packages');
+  const codePkgs = new Set(listDirs(packagesDir));
+  const docPkgsDir = join(docsDir, 'sdk/packages');
   const docPkgs = new Set(
     readdirSync(docPkgsDir)
       .filter((f) => f.endsWith('.md') && f !== 'overview.md')
@@ -88,7 +89,7 @@ for (const m of sidebarText.matchAll(/['"`]([a-z0-9][a-z0-9/_-]*?)['"`]/gi)) {
 
 // --- 2. MCP tools ---
 {
-  const toolDir = join(PACKAGES, 'adt-mcp/src/lib/tools');
+  const toolDir = join(packagesDir, 'adt-mcp/src/lib/tools');
   const toolFiles = walk(toolDir).filter(
     (f) => f.endsWith('.ts') && !f.endsWith('.test.ts'),
   );
@@ -109,7 +110,7 @@ for (const m of sidebarText.matchAll(/['"`]([a-z0-9][a-z0-9/_-]*?)['"`]/gi)) {
     }
   }
 
-  const docToolsDir = join(DOCS, 'mcp/tools');
+  const docToolsDir = join(docsDir, 'mcp/tools');
   const docTools = new Set(
     readdirSync(docToolsDir)
       .filter((f) => f.endsWith('.md'))
@@ -135,17 +136,26 @@ for (const m of sidebarText.matchAll(/['"`]([a-z0-9][a-z0-9/_-]*?)['"`]/gi)) {
 
 // --- 3 + 4. Cross-check sidebar ↔ files for every doc under website/docs ---
 {
-  const allDocFiles = walk(DOCS)
+  // The root `index.md` is the docs landing page and is always reachable
+  // through Docusaurus's category/generated-index machinery, so don't
+  // treat it as a sidebar drift candidate.
+  const allDocFiles = walk(docsDir)
     .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
-    .map((f) => relative(DOCS, f).replace(/\.(md|mdx)$/, ''));
+    .map((f) => relative(docsDir, f).replace(/\.(md|mdx)$/, ''))
+    .filter((id) => id !== 'index');
   const docSet = new Set(allDocFiles);
+  const sidebarIdsForCrossCheck = [...sidebarIds].filter(
+    (id) => id !== 'index',
+  );
 
   reports.push({
     section: 'sidebar ↔ doc files',
     // missing: sidebar references a doc that does not exist on disk
-    missing: [...sidebarIds].filter((id) => !docSet.has(id)).sort(),
+    missing: sidebarIdsForCrossCheck.filter((id) => !docSet.has(id)).sort(),
     // orphan: doc file on disk but not referenced anywhere in sidebars.ts
-    orphan: allDocFiles.filter((id) => !sidebarIds.has(id)).sort(),
+    orphan: allDocFiles
+      .filter((id) => !sidebarIdsForCrossCheck.includes(id))
+      .sort(),
   });
 }
 

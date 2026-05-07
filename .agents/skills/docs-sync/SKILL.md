@@ -44,7 +44,7 @@ prose that requires human judgement — level 3 handles that, but only as an
 ## Level 1 — check-structure (implemented)
 
 ```bash
-bun .devin/skills/docs-sync/scripts/check-structure.ts
+bun .agents/skills/docs-sync/scripts/check-structure.ts
 ```
 
 Exit code `0` if clean, `1` if drift. Emits a machine-readable-ish report with:
@@ -79,8 +79,8 @@ mapping is unambiguous. Fuzzy mappings belong in level 3.
 ## Level 2 — generate-stubs (implemented)
 
 ```bash
-bun .devin/skills/docs-sync/scripts/generate-stubs.ts           # dry-run
-bun .devin/skills/docs-sync/scripts/generate-stubs.ts --write   # apply
+bun .agents/skills/docs-sync/scripts/generate-stubs.ts           # dry-run
+bun .agents/skills/docs-sync/scripts/generate-stubs.ts --write   # apply
 # or: bunx nx docs-stubs adt-cli-docs
 ```
 
@@ -135,7 +135,7 @@ latter without creating new lies.
 
 When the user asks to "sync docs" or "check docs drift":
 
-1. Run `bun .devin/skills/docs-sync/scripts/check-structure.ts`.
+1. Run `bun .agents/skills/docs-sync/scripts/check-structure.ts`.
 2. Report the result verbatim — do not summarise away items.
 3. For each `missing` item, confirm with the user before creating any files.
    Level 2 stubs are safe, but even stubs land in a published site.

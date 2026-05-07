@@ -8,8 +8,8 @@
  * guessing.
  *
  * Usage:
- *   bun .devin/skills/docs-sync/scripts/generate-stubs.ts           # dry-run
- *   bun .devin/skills/docs-sync/scripts/generate-stubs.ts --write   # apply
+ *   bun .agents/skills/docs-sync/scripts/generate-stubs.ts           # dry-run
+ *   bun .agents/skills/docs-sync/scripts/generate-stubs.ts --write   # apply
  */
 import {
   readdirSync,
@@ -19,18 +19,19 @@ import {
   existsSync,
 } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('../../../../', import.meta.url).pathname.replace(
-  /\/$/,
+const rootDir = fileURLToPath(new URL('../../../../', import.meta.url)).replace(
+  /[/\\]$/,
   '',
 );
-const WEBSITE = join(ROOT, 'website');
-const DOCS = join(WEBSITE, 'docs');
-const SIDEBAR = join(WEBSITE, 'sidebars.ts');
-const PACKAGES = join(ROOT, 'packages');
-const GITHUB_BLOB = 'https://github.com/abapify/adt-cli/blob/main/';
+const websiteDir = join(rootDir, 'website');
+const docsDir = join(websiteDir, 'docs');
+const sidebarFile = join(websiteDir, 'sidebars.ts');
+const packagesDir = join(rootDir, 'packages');
+const githubBlobBase = 'https://github.com/abapify/adt-cli/blob/main/';
 
-const WRITE = process.argv.includes('--write');
+const writeMode = process.argv.includes('--write');
 
 // ────────────────────────────────────────────────────────────────────────────
 // Utilities
@@ -223,7 +224,7 @@ function parseSchemaObject(
 }
 
 function loadSharedShapes(): Map<string, SchemaField[]> {
-  const file = join(PACKAGES, 'adt-mcp/src/lib/tools/shared-schemas.ts');
+  const file = join(packagesDir, 'adt-mcp/src/lib/tools/shared-schemas.ts');
   const src = readFileSync(file, 'utf8');
   const shapes = new Map<string, SchemaField[]>();
   // Find `export const <name> = { ... };` — two-pass: resolve dependencies.
@@ -260,7 +261,7 @@ function extractToolsFromFile(
 ): ToolInfo[] {
   const src = readFileSync(file, 'utf8');
   const results: ToolInfo[] = [];
-  const sourceRelPath = relative(ROOT, file);
+  const sourceRelPath = relative(rootDir, file);
 
   // Find every `server.tool(` and also detect indirect registration
   // via `config.toolName` by pairing `toolName: 'X'` + `toolDescription: '...'`
@@ -323,7 +324,7 @@ function extractToolsFromFile(
 
 function collectAllTools(): Map<string, ToolInfo> {
   const shapes = loadSharedShapes();
-  const toolDir = join(PACKAGES, 'adt-mcp/src/lib/tools');
+  const toolDir = join(packagesDir, 'adt-mcp/src/lib/tools');
   const files = walk(toolDir).filter(
     (f) => f.endsWith('.ts') && !f.endsWith('.test.ts'),
   );
@@ -350,7 +351,7 @@ type PackageInfo = {
 };
 
 function extractPackageInfo(dirName: string): PackageInfo | null {
-  const dir = join(PACKAGES, dirName);
+  const dir = join(packagesDir, dirName);
   const pkgJsonPath = join(dir, 'package.json');
   if (!existsSync(pkgJsonPath)) return null;
   const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
@@ -360,7 +361,7 @@ function extractPackageInfo(dirName: string): PackageInfo | null {
     description: pkg.description ?? '',
     hasAgentsMd: existsSync(join(dir, 'AGENTS.md')),
     hasReadme: existsSync(join(dir, 'README.md')),
-    sourceRelPath: relative(ROOT, dir),
+    sourceRelPath: relative(rootDir, dir),
   };
 }
 
@@ -374,7 +375,7 @@ function escapeFrontmatter(s: string): string {
 
 function renderMcpTool(info: ToolInfo): string {
   const desc = info.description?.trim() ?? '';
-  const sourceLink = `${GITHUB_BLOB}${info.sourceRelPath}`;
+  const sourceLink = `${githubBlobBase}${info.sourceRelPath}`;
   const lines: string[] = [];
   lines.push('---');
   lines.push(`title: ${info.name}`);
@@ -428,14 +429,14 @@ function renderMcpTool(info: ToolInfo): string {
 }
 
 function renderPackage(info: PackageInfo): string {
-  const sourceLink = `${GITHUB_BLOB}${info.sourceRelPath}`;
+  const sourceLink = `${githubBlobBase}${info.sourceRelPath}`;
   const agentsLink = info.hasAgentsMd ? `${sourceLink}/AGENTS.md` : null;
   const readmeLink = info.hasReadme ? `${sourceLink}/README.md` : null;
   const lines: string[] = [];
   lines.push('---');
   lines.push(`title: '${info.pkgName}'`);
   if (info.description)
-    lines.push(`description: ${escapeFrontmatter(info.description)}`);
+    lines.push(`description: '${escapeFrontmatter(info.description)}'`);
   lines.push('---');
   lines.push('');
   lines.push(`# \`${info.pkgName}\``);
@@ -520,20 +521,20 @@ function main() {
 
   // Discover missing items by comparing to current docs.
   const missingPackages: PackageInfo[] = [];
-  const docPackagesDir = join(DOCS, 'sdk/packages');
+  const docPackagesDir = join(docsDir, 'sdk/packages');
   const existingPackageDocs = new Set(
     readdirSync(docPackagesDir)
       .filter((f) => f.endsWith('.md'))
       .map((f) => f.replace(/\.md$/, '')),
   );
-  for (const dir of listDirs(PACKAGES)) {
+  for (const dir of listDirs(packagesDir)) {
     if (existingPackageDocs.has(dir)) continue;
     const info = extractPackageInfo(dir);
     if (info) missingPackages.push(info);
   }
 
   const missingTools: ToolInfo[] = [];
-  const docToolsDir = join(DOCS, 'mcp/tools');
+  const docToolsDir = join(docsDir, 'mcp/tools');
   const existingToolDocs = new Set(
     readdirSync(docToolsDir)
       .filter((f) => f.endsWith('.md'))
@@ -552,7 +553,7 @@ function main() {
       `  - ${t.name}  (schema: ${t.schema ? `${t.schema.length} fields` : 'unresolved'})`,
     );
 
-  if (!WRITE) {
+  if (!writeMode) {
     console.log(
       '\n(dry run — pass --write to create files and patch sidebars.ts)',
     );
@@ -561,18 +562,18 @@ function main() {
 
   // Write pages.
   for (const p of missingPackages) {
-    const target = join(DOCS, 'sdk/packages', `${p.dirName}.md`);
+    const target = join(docsDir, 'sdk/packages', `${p.dirName}.md`);
     writeFileSync(target, renderPackage(p));
-    console.log(`wrote ${relative(ROOT, target)}`);
+    console.log(`wrote ${relative(rootDir, target)}`);
   }
   for (const t of missingTools) {
-    const target = join(DOCS, 'mcp/tools', `${t.name}.md`);
+    const target = join(docsDir, 'mcp/tools', `${t.name}.md`);
     writeFileSync(target, renderMcpTool(t));
-    console.log(`wrote ${relative(ROOT, target)}`);
+    console.log(`wrote ${relative(rootDir, target)}`);
   }
 
   // Patch sidebars.ts.
-  let sidebar = readFileSync(SIDEBAR, 'utf8');
+  let sidebar = readFileSync(sidebarFile, 'utf8');
   if (missingPackages.length) {
     const ids = missingPackages.map((p) => `sdk/packages/${p.dirName}`);
     const res = patchSidebarArray(sidebar, 'sdkPackages', ids);
@@ -585,8 +586,8 @@ function main() {
     sidebar = res.src;
     for (const id of res.added) console.log(`sidebar += ${id}`);
   }
-  writeFileSync(SIDEBAR, sidebar);
-  console.log(`patched ${relative(ROOT, SIDEBAR)}`);
+  writeFileSync(sidebarFile, sidebar);
+  console.log(`patched ${relative(rootDir, sidebarFile)}`);
 }
 
 main();

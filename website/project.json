@@ -35,10 +35,10 @@
     "docs-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun .devin/skills/docs-sync/scripts/check-structure.ts"
+        "command": "bun .agents/skills/docs-sync/scripts/check-structure.ts"
       },
       "inputs": [
-        "{workspaceRoot}/.devin/skills/docs-sync/scripts/check-structure.ts",
+        "{workspaceRoot}/.agents/skills/docs-sync/scripts/check-structure.ts",
         "{workspaceRoot}/website/sidebars.ts",
         "{workspaceRoot}/website/docs/**/*.{md,mdx}",
         "{workspaceRoot}/packages/*/package.json",
@@ -48,7 +48,7 @@
     "docs-stubs": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun .devin/skills/docs-sync/scripts/generate-stubs.ts --write"
+        "command": "bun .agents/skills/docs-sync/scripts/generate-stubs.ts --write"
       }
     }
   }
