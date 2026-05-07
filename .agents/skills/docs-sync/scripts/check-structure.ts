@@ -14,9 +14,10 @@
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('../../../../', import.meta.url).pathname.replace(
-  /\/$/,
+const ROOT = fileURLToPath(new URL('../../../../', import.meta.url)).replace(
+  /[/\\]$/,
   '',
 );
 const WEBSITE = join(ROOT, 'website');
@@ -145,7 +146,10 @@ for (const m of sidebarText.matchAll(/['"`]([a-z0-9][a-z0-9/_-]*?)['"`]/gi)) {
     // missing: sidebar references a doc that does not exist on disk
     missing: [...sidebarIds].filter((id) => !docSet.has(id)).sort(),
     // orphan: doc file on disk but not referenced anywhere in sidebars.ts
-    orphan: allDocFiles.filter((id) => !sidebarIds.has(id)).sort(),
+    // (root index.md is intentionally excluded from this check)
+    orphan: allDocFiles
+      .filter((id) => id !== 'index' && !sidebarIds.has(id))
+      .sort(),
   });
 }
 

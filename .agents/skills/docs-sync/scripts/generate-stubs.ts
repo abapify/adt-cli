@@ -8,8 +8,8 @@
  * guessing.
  *
  * Usage:
- *   bun .devin/skills/docs-sync/scripts/generate-stubs.ts           # dry-run
- *   bun .devin/skills/docs-sync/scripts/generate-stubs.ts --write   # apply
+ *   bun .agents/skills/docs-sync/scripts/generate-stubs.ts           # dry-run
+ *   bun .agents/skills/docs-sync/scripts/generate-stubs.ts --write   # apply
  */
 import {
   readdirSync,
@@ -19,9 +19,10 @@ import {
   existsSync,
 } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('../../../../', import.meta.url).pathname.replace(
-  /\/$/,
+const ROOT = fileURLToPath(new URL('../../../../', import.meta.url)).replace(
+  /[/\\]$/,
   '',
 );
 const WEBSITE = join(ROOT, 'website');
@@ -435,7 +436,7 @@ function renderPackage(info: PackageInfo): string {
   lines.push('---');
   lines.push(`title: '${info.pkgName}'`);
   if (info.description)
-    lines.push(`description: ${escapeFrontmatter(info.description)}`);
+    lines.push(`description: '${escapeFrontmatter(info.description)}'`);
   lines.push('---');
   lines.push('');
   lines.push(`# \`${info.pkgName}\``);
