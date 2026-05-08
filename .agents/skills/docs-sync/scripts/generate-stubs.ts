@@ -486,30 +486,25 @@ function patchSidebarArray(
   const openBracket = m.index + m[0].length - 1;
   const slice = sliceBalanced(src, openBracket, '[', ']');
   const inner = slice.slice(1, -1);
-  // Extract existing string-literal entries in order
+  // Extract existing string-literal entries to determine what's already present
   const entryRe = /['"`]([^'"`]+)['"`]/g;
   const existing: string[] = [];
   let em;
   while ((em = entryRe.exec(inner)) !== null) existing.push(em[1]);
   const existingSet = new Set(existing);
   const added: string[] = [];
-  const merged = [...existing];
   for (const id of newIds) {
-    if (existingSet.has(id)) continue;
-    merged.push(id);
-    added.push(id);
+    if (!existingSet.has(id)) added.push(id);
   }
-  // Preserve any "fixed" first entries that end in /overview, otherwise sort alphabetically.
-  const overviewIdx = merged.findIndex((id) => id.endsWith('/overview'));
-  const overview = overviewIdx >= 0 ? merged.splice(overviewIdx, 1) : [];
-  merged.sort();
-  const finalList = [...overview, ...merged];
+  // If nothing to add, return original source unchanged
+  if (added.length === 0) return { src, added: [] };
+  // Inject added entries before the closing ']'
   const indent = '  ';
-  const rebuilt =
-    '[\n' + finalList.map((id) => `${indent}'${id}',`).join('\n') + '\n]';
+  const addedLines = added.map((id) => `${indent}'${id}',`).join('\n') + '\n';
+  const modifiedSlice = slice.slice(0, -1) + addedLines + ']';
   const before = src.slice(0, openBracket);
   const after = src.slice(openBracket + slice.length);
-  return { src: before + rebuilt + after, added };
+  return { src: before + modifiedSlice + after, added };
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -522,11 +517,13 @@ function main() {
   // Discover missing items by comparing to current docs.
   const missingPackages: PackageInfo[] = [];
   const docPackagesDir = join(docsDir, 'sdk/packages');
-  const existingPackageDocs = new Set(
-    readdirSync(docPackagesDir)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => f.replace(/\.md$/, '')),
-  );
+  const existingPackageDocs = existsSync(docPackagesDir)
+    ? new Set(
+        readdirSync(docPackagesDir)
+          .filter((f) => f.endsWith('.md'))
+          .map((f) => f.replace(/\.md$/, '')),
+      )
+    : new Set<string>();
   for (const dir of listDirs(packagesDir)) {
     if (existingPackageDocs.has(dir)) continue;
     const info = extractPackageInfo(dir);
@@ -535,11 +532,13 @@ function main() {
 
   const missingTools: ToolInfo[] = [];
   const docToolsDir = join(docsDir, 'mcp/tools');
-  const existingToolDocs = new Set(
-    readdirSync(docToolsDir)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => f.replace(/\.md$/, '')),
-  );
+  const existingToolDocs = existsSync(docToolsDir)
+    ? new Set(
+        readdirSync(docToolsDir)
+          .filter((f) => f.endsWith('.md'))
+          .map((f) => f.replace(/\.md$/, '')),
+      )
+    : new Set<string>();
   for (const [name, info] of mcpTools) {
     if (!existingToolDocs.has(name)) missingTools.push(info);
   }
