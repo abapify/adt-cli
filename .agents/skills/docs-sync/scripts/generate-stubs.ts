@@ -131,7 +131,7 @@ function parseStringExpr(expr: string): string | null {
   let lastEnd = 0;
   while ((m = re.exec(expr)) !== null) {
     const between = expr.slice(lastEnd, m.index).trim();
-    if (between && between !== '+' && parts.length) return null; // non-literal content
+    if (between && between !== '+') return null; // non-literal content
     parts.push(
       m[1].replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\"/g, '"'),
     );
