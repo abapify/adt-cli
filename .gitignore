@@ -156,3 +156,6 @@ package-lock.json
 website/.docusaurus/
 website/build/
 website/node_modules/
+
+.claude/worktrees
+.nx/self-healing
