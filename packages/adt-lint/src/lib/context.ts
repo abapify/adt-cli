@@ -120,7 +120,7 @@ export function extractDependencies(source: string): string[] {
       return commentIndex >= 0 ? line.slice(0, commentIndex) : line;
     })
     .join('\n');
-  const tokens = sanitized.match(/=>|[A-Z_][A-Z0-9_]*|'.*?'|[.,]/gi) ?? [];
+  const tokens = sanitized.match(/=>|[A-Z_][A-Z0-9_]*|'[^']*'|[.,]/gi) ?? [];
 
   for (let i = 0; i < tokens.length; i += 1) {
     const t0 = normalizeToken(tokens[i]);
