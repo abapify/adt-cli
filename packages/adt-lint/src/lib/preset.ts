@@ -11,9 +11,9 @@ function cloneDefaultConfig(): Record<string, unknown> {
 export function buildPreset(
   systemType: LintSystemType,
 ): Record<string, unknown> {
-  const config = cloneDefaultConfig() as {
+  const config: {
     rules?: Record<string, Record<string, unknown>>;
-  };
+  } = cloneDefaultConfig();
 
   config.rules ??= {};
 

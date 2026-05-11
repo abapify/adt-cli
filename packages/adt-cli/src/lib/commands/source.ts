@@ -14,6 +14,11 @@ import { getAdtClientV2 } from '../utils/adt-client-v2';
 import { normalizeSearchResults } from '../utils/lock-helpers';
 import { createLockService } from '@abapify/adt-locks';
 import { getObjectUri } from '@abapify/adk';
+import {
+  detectMethodBoundary,
+  lintSource,
+  normalizeMethodBody,
+} from '@abapify/adt-lint';
 
 type AdtClient = Awaited<ReturnType<typeof getAdtClientV2>>;
 
@@ -145,17 +150,76 @@ const putSourceCommand = new Command('put')
     '--transport <transport>',
     'Transport request number for transportable objects',
   )
+  .option(
+    '--method <method>',
+    'Replace the body of a single method instead of uploading full source',
+  )
+  .option(
+    '--lint-before-write',
+    'Run local lint checks and block write on parser/cloud violations',
+    false,
+  )
   .option('--json', 'Output result as JSON')
   .action(
     async (
       objectName: string,
       file: string,
-      options: { type?: string; transport?: string; json?: boolean },
+      options: {
+        type?: string;
+        transport?: string;
+        json?: boolean;
+        method?: string;
+        lintBeforeWrite?: boolean;
+      },
     ) => {
       try {
         const client = await getAdtClientV2();
         const uri = await resolveUri(client, objectName, options.type);
         const sourceCode = await readFile(file, 'utf8');
+        let sourceToWrite = sourceCode;
+
+        if (options.method) {
+          const currentSource = String(
+            await client.fetch(`${uri}/source/main`, {
+              method: 'GET',
+              headers: { Accept: 'text/plain' },
+            }),
+          );
+          const boundary = detectMethodBoundary(currentSource, options.method);
+          if (!boundary) {
+            throw new Error(
+              `Method ${options.method} not found in ${objectName}`,
+            );
+          }
+
+          const lines = currentSource.split(/\r?\n/);
+          const methodBody = normalizeMethodBody(sourceCode, options.method);
+          const methodBlock = [
+            `METHOD ${options.method.toUpperCase()}.`,
+            methodBody,
+            'ENDMETHOD.',
+          ].join('\n');
+          lines.splice(
+            boundary.startLine - 1,
+            boundary.endLine - boundary.startLine + 1,
+            methodBlock,
+          );
+          sourceToWrite = lines.join('\n');
+        }
+
+        if (options.lintBeforeWrite) {
+          const diagnostics = lintSource(sourceToWrite, {
+            filename: `${objectName.toLowerCase()}.abap`,
+          });
+          const blocking = diagnostics.filter((d) =>
+            ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),
+          );
+          if (blocking.length > 0) {
+            throw new Error(
+              `Lint blocked write:\n${blocking.map((d) => `${d.key}: ${d.message}`).join('\n')}`,
+            );
+          }
+        }
 
         const lockService = createLockService(client);
         let lockHandle: string | undefined;
@@ -178,7 +242,7 @@ const putSourceCommand = new Command('put')
                 lockHandle,
                 ...(options.transport ? { corrNr: options.transport } : {}),
               },
-              sourceCode,
+              sourceToWrite,
             );
           } else {
             // TODO: generic fallback — remove once all object types have
@@ -188,7 +252,7 @@ const putSourceCommand = new Command('put')
             await client.fetch(`${uri}/source/main?${params.toString()}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'text/plain' },
-              body: sourceCode,
+              body: sourceToWrite,
             });
           }
 

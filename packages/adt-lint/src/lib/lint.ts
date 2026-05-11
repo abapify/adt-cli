@@ -14,7 +14,7 @@ import type {
   RuleInfo,
 } from './types';
 
-const DEFAULT_FILENAME = 'zlint.prog.abap';
+const FALLBACK_FILENAME = 'anonymous.prog.abap';
 
 function toSeverity(severity: Severity): LintSeverity {
   switch (severity) {
@@ -65,7 +65,7 @@ function createRegistry(
   filename: string;
   config: Config;
 } {
-  const filename = options?.filename ?? DEFAULT_FILENAME;
+  const filename = options?.filename ?? FALLBACK_FILENAME;
   const config = buildConfig(options);
   const registry = new Registry(undefined, config);
   registry.addFile(new MemoryFile(filename, source));

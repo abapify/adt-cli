@@ -3,25 +3,55 @@ import type { MethodBoundary, StripResult } from './types';
 type SourceObjectType = 'CLAS' | 'INTF' | 'FUNC' | 'DDLS' | 'PROG' | string;
 
 function stripClassSource(source: string): StripResult {
-  const defMatch = source.match(
-    /CLASS\s+[A-Z0-9_]+\s+DEFINITION[\s\S]*?ENDCLASS\./i,
-  );
-  if (!defMatch) {
+  const lines = source.split(/\r?\n/);
+  const output: string[] = [];
+
+  let inDefinition = false;
+  let inHiddenSection = false;
+  let foundDefinition = false;
+
+  for (const line of lines) {
+    const upper = line.trim().toUpperCase();
+
+    if (!inDefinition) {
+      if (
+        upper.startsWith('CLASS ') &&
+        upper.includes(' DEFINITION') &&
+        upper.endsWith('.')
+      ) {
+        inDefinition = true;
+        foundDefinition = true;
+        output.push(line);
+      }
+      continue;
+    }
+
+    if (upper === 'PROTECTED SECTION.' || upper === 'PRIVATE SECTION.') {
+      inHiddenSection = true;
+      continue;
+    }
+
+    if (upper === 'PUBLIC SECTION.') {
+      inHiddenSection = false;
+      output.push(line);
+      continue;
+    }
+
+    if (upper === 'ENDCLASS.') {
+      output.push(line);
+      break;
+    }
+
+    if (!inHiddenSection) {
+      output.push(line);
+    }
+  }
+
+  if (!foundDefinition || output.length === 0) {
     return { source, fallback: true };
   }
 
-  let definition = defMatch[0];
-
-  definition = definition.replace(
-    /^\s*PROTECTED SECTION\.[\s\S]*?(?=^\s*(PRIVATE SECTION\.|ENDCLASS\.))/gim,
-    '',
-  );
-  definition = definition.replace(
-    /^\s*PRIVATE SECTION\.[\s\S]*?(?=^\s*ENDCLASS\.)/gim,
-    '',
-  );
-
-  return { source: `${definition.trim()}\n`, fallback: false };
+  return { source: `${output.join('\n').trim()}\n`, fallback: false };
 }
 
 function stripFunctionSource(source: string): StripResult {
@@ -73,38 +103,111 @@ export function stripToPublicApi(
   return { source, fallback: true };
 }
 
-const DEPENDENCY_PATTERNS: RegExp[] = [
-  /\b(?:TYPE\s+REF\s+TO|NEW|CAST\s+)\s*([ZY][A-Z0-9_]+)/gi,
-  /\bINHERITING\s+FROM\s+([ZY][A-Z0-9_]+)/gi,
-  /\bCALL\s+FUNCTION\s+'?([ZY][A-Z0-9_]+)'?/gi,
-  /\b(?:RAISING|CATCH)\s+([ZY][A-Z0-9_]+)/gi,
-  /\b([ZY][A-Z0-9_]+)\s*=>/gi,
-];
+function normalizeToken(token: string): string {
+  return token.replace(/^'+|'+$/, '').toUpperCase();
+}
+
+function isCustomName(token: string | undefined): token is string {
+  return Boolean(token && /^[ZY][A-Z0-9_]*$/i.test(token));
+}
 
 export function extractDependencies(source: string): string[] {
   const dependencies = new Set<string>();
+  const sanitized = source
+    .split(/\r?\n/)
+    .map((line) => {
+      const commentIndex = line.indexOf('"');
+      return commentIndex >= 0 ? line.slice(0, commentIndex) : line;
+    })
+    .join('\n');
+  const tokens = sanitized.match(/=>|[A-Z_][A-Z0-9_]*|'.*?'|[.,]/gi) ?? [];
 
-  for (const pattern of DEPENDENCY_PATTERNS) {
-    for (const match of source.matchAll(pattern)) {
-      const dep = match[1]?.toUpperCase();
-      if (dep && /^[ZY]/.test(dep)) {
-        dependencies.add(dep);
+  for (let i = 0; i < tokens.length; i += 1) {
+    const t0 = normalizeToken(tokens[i]);
+    const t1 = normalizeToken(tokens[i + 1] ?? '');
+    const t2 = normalizeToken(tokens[i + 2] ?? '');
+    const t3 = normalizeToken(tokens[i + 3] ?? '');
+
+    if (t0 === 'TYPE' && t1 === 'REF' && t2 === 'TO' && isCustomName(t3)) {
+      dependencies.add(t3);
+      continue;
+    }
+
+    if ((t0 === 'NEW' || t0 === 'CAST') && isCustomName(t1)) {
+      dependencies.add(t1);
+      continue;
+    }
+
+    if (t0 === 'INHERITING' && t1 === 'FROM' && isCustomName(t2)) {
+      dependencies.add(t2);
+      continue;
+    }
+
+    if (t0 === 'CALL' && t1 === 'FUNCTION') {
+      const fn = normalizeToken(tokens[i + 2] ?? '');
+      if (isCustomName(fn)) {
+        dependencies.add(fn);
+      }
+      continue;
+    }
+
+    if ((t0 === 'RAISING' || t0 === 'CATCH') && isCustomName(t1)) {
+      dependencies.add(t1);
+      continue;
+    }
+
+    if (tokens[i + 1] === '=>' && isCustomName(t0)) {
+      dependencies.add(t0);
+      continue;
+    }
+
+    if (t0 === 'INTERFACES') {
+      for (let j = i + 1; j < tokens.length; j += 1) {
+        const next = normalizeToken(tokens[j]);
+        if (next === '.') {
+          break;
+        }
+        if (next !== ',' && isCustomName(next)) {
+          dependencies.add(next);
+        }
       }
     }
   }
 
-  for (const match of source.matchAll(/\bINTERFACES\s*:?\s*([^.]+)\./gi)) {
-    const interfaces = match[1]
-      ?.split(/[\s,]+/)
-      .map((item) => item.trim().toUpperCase())
-      .filter((item) => item.length > 0 && /^[ZY]/.test(item));
+  return Array.from(dependencies).sort();
+}
 
-    for (const intf of interfaces ?? []) {
-      dependencies.add(intf);
-    }
+function extractMethodNameFromHeader(line: string): string | undefined {
+  const trimmed = line.trim();
+  const upper = trimmed.toUpperCase();
+  if (!upper.startsWith('METHOD ') || !upper.endsWith('.')) {
+    return undefined;
   }
 
-  return Array.from(dependencies).sort();
+  const withoutKeyword = trimmed.slice('METHOD '.length, -1).trim();
+  if (!withoutKeyword) {
+    return undefined;
+  }
+
+  return withoutKeyword.split(/\s+/)[0]?.toUpperCase();
+}
+
+export function normalizeMethodBody(
+  source: string,
+  methodName: string,
+): string {
+  const lines = source.split(/\r?\n/);
+  if (lines.length === 0) return source;
+
+  const target = methodName.trim().toUpperCase();
+  const firstName = extractMethodNameFromHeader(lines[0] ?? '');
+  const last = (lines[lines.length - 1] ?? '').trim().toUpperCase();
+
+  if (firstName === target && last === 'ENDMETHOD.') {
+    return lines.slice(1, -1).join('\n').trimEnd();
+  }
+
+  return source.trimEnd();
 }
 
 export function detectMethodBoundary(
@@ -112,13 +215,11 @@ export function detectMethodBoundary(
   methodName: string,
 ): MethodBoundary | null {
   const lines = source.split(/\r?\n/);
-  const escapedMethod = methodName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const startRe = new RegExp(`^\\s*METHOD\\s+${escapedMethod}\\s*\\.`, 'i');
-  const endRe = /^\s*ENDMETHOD\./i;
+  const target = methodName.trim().toUpperCase();
 
   const starts: number[] = [];
   for (let i = 0; i < lines.length; i += 1) {
-    if (startRe.test(lines[i])) {
+    if (extractMethodNameFromHeader(lines[i] ?? '') === target) {
       starts.push(i);
     }
   }
@@ -129,7 +230,7 @@ export function detectMethodBoundary(
 
   const startIndex = starts[0];
   for (let i = startIndex + 1; i < lines.length; i += 1) {
-    if (endRe.test(lines[i])) {
+    if ((lines[i] ?? '').trim().toUpperCase() === 'ENDMETHOD.') {
       return {
         startLine: startIndex + 1,
         endLine: i + 1,

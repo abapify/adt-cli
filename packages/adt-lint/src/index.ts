@@ -4,6 +4,7 @@ export {
   stripToPublicApi,
   extractDependencies,
   detectMethodBoundary,
+  normalizeMethodBody,
 } from './lib/context';
 export type {
   LintDiagnostic,

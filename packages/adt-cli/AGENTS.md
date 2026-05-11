@@ -90,6 +90,9 @@ commands/
 ├── fetch.ts        # Generic HTTP requests
 ├── search.ts       # Object search
 ├── info.ts         # System/session information
+├── lint.ts         # Local ABAP lint checks via @abapify/adt-lint
+├── context.ts      # Compressed dependency context extraction
+├── diagnose/       # Runtime diagnostics (dumps, traces)
 └── ...             # Other commands
 ```
 
