@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "declarationMap": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts"],
+  "references": [
+    {
+      "path": "../adt-client"
+    },
+    {
+      "path": "../adt-mcp"
+    },
+    {
+      "path": "../adt-fixtures"
+    }
+  ]
+}
