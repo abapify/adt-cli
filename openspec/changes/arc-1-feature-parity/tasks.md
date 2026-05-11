@@ -1,16 +1,16 @@
 ## 1. Foundation — `packages/adt-lint` shared library
 
-- [ ] 1.1 Scaffold `packages/adt-lint` package (tsdown build, Vitest, package.json with `@abapify/adt-lint` name)
-- [ ] 1.2 Add `@abaplint/core` as a dependency to `packages/adt-lint`; verify advisory database for known CVEs
-- [ ] 1.3 Implement `lintSource(source, options)` — run `@abaplint/core` rules and return typed `LintDiagnostic[]`
-- [ ] 1.4 Implement `lintAndFix(source, options)` — run lint with auto-fix and return `{ source: string; remaining: LintDiagnostic[] }`
-- [ ] 1.5 Implement `listRules(options)` — return all rule names with enabled status and current config
-- [ ] 1.6 Implement `stripToPublicApi(source, objectType)` — use `@abaplint/core` AST to strip class implementation / private/protected sections, function body, etc.; fall back to full source on parse failure
-- [ ] 1.7 Implement `extractDependencies(source)` — AST scan for `TYPE REF TO`, `NEW`, `CAST`, `INHERITING FROM`, `INTERFACES`, `CALL FUNCTION`, `RAISING`, `CATCH`, `=>` references; return Z/Y names only
-- [ ] 1.8 Implement `detectMethodBoundary(source, methodName)` — line scan + AST fallback; return `{ startLine, endLine }` or `null`
-- [ ] 1.9 Export `buildPreset(systemType: "btp" | "onpremise")` returning abaplint config object for the appropriate rule set
-- [ ] 1.10 Write unit tests for `lintSource`, `lintAndFix`, `stripToPublicApi`, `extractDependencies`, `detectMethodBoundary` using fixture ABAP source strings
-- [ ] 1.11 Run `bunx nx build adt-lint && bunx nx test adt-lint && bunx nx lint adt-lint`
+- [x] 1.1 Scaffold `packages/adt-lint` package (tsdown build, Vitest, package.json with `@abapify/adt-lint` name)
+- [x] 1.2 Add `@abaplint/core` as a dependency to `packages/adt-lint`; verify advisory database for known CVEs
+- [x] 1.3 Implement `lintSource(source, options)` — run `@abaplint/core` rules and return typed `LintDiagnostic[]`
+- [x] 1.4 Implement `lintAndFix(source, options)` — run lint with auto-fix and return `{ source: string; remaining: LintDiagnostic[] }`
+- [x] 1.5 Implement `listRules(options)` — return all rule names with enabled status and current config
+- [x] 1.6 Implement `stripToPublicApi(source, objectType)` — use `@abaplint/core` AST to strip class implementation / private/protected sections, function body, etc.; fall back to full source on parse failure
+- [x] 1.7 Implement `extractDependencies(source)` — AST scan for `TYPE REF TO`, `NEW`, `CAST`, `INHERITING FROM`, `INTERFACES`, `CALL FUNCTION`, `RAISING`, `CATCH`, `=>` references; return Z/Y names only
+- [x] 1.8 Implement `detectMethodBoundary(source, methodName)` — line scan + AST fallback; return `{ startLine, endLine }` or `null`
+- [x] 1.9 Export `buildPreset(systemType: "btp" | "onpremise")` returning abaplint config object for the appropriate rule set
+- [x] 1.10 Write unit tests for `lintSource`, `lintAndFix`, `stripToPublicApi`, `extractDependencies`, `detectMethodBoundary` using fixture ABAP source strings
+- [x] 1.11 Run `bunx nx build adt-lint && bunx nx test adt-lint && bunx nx lint adt-lint`
 
 ## 2. ADT Contracts — dumps, traces, completions
 

@@ -246,6 +246,13 @@
       "name": "@abapify/adt-fixtures",
       "version": "0.3.6",
     },
+    "packages/adt-lint": {
+      "name": "@abapify/adt-lint",
+      "version": "0.0.1",
+      "dependencies": {
+        "@abaplint/core": "^2.119.15",
+      },
+    },
     "packages/adt-locks": {
       "name": "@abapify/adt-locks",
       "version": "0.3.6",
@@ -538,6 +545,8 @@
 
     "@abapify/adt-fixtures": ["@abapify/adt-fixtures@workspace:packages/adt-fixtures"],
 
+    "@abapify/adt-lint": ["@abapify/adt-lint@workspace:packages/adt-lint"],
+
     "@abapify/adt-locks": ["@abapify/adt-locks@workspace:packages/adt-locks"],
 
     "@abapify/adt-mcp": ["@abapify/adt-mcp@workspace:packages/adt-mcp"],
@@ -588,7 +597,7 @@
 
     "@abapify/ts-xsd": ["@abapify/ts-xsd@workspace:packages/ts-xsd"],
 
-    "@abaplint/core": ["@abaplint/core@2.119.1", "", { "dependencies": { "fast-xml-parser": "^5.7.1", "json5": "^2.2.3", "vscode-languageserver-types": "^3.17.5" } }, "sha512-dsAFecT5I5m+PiSPuNgB0hHFzilqFa+/S+YRHIhd12u3+tzmktwNtI2c1I9wm+2HXF+9bTeLxk6JekVuNfqs4w=="],
+    "@abaplint/core": ["@abaplint/core@2.119.15", "", { "dependencies": { "fast-xml-parser": "^5.7.1", "json5": "^2.2.3", "vscode-languageserver-types": "^3.17.5" } }, "sha512-3FPQyiNjdWK+UvK1rUb0Ejva41cXeaWQSnNBzJMOAoMT1WDyMp5s9G/4IL/JVVuKk4jw/0zYUbS5gpGPDEzGZg=="],
 
     "@ai-sdk/provider": ["@ai-sdk/provider@2.0.1", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-KCUwswvsC5VsW2PWFqF8eJgSCu5Ysj7m1TxiHTVA6g7k360bk0RNQENT8KTMAYEs+8fWPD3Uu4dEmzGHc+jGng=="],
 
@@ -4563,6 +4572,8 @@
     "@abapify/asjson-parser/jsonc-eslint-parser": ["jsonc-eslint-parser@2.4.2", "", { "dependencies": { "acorn": "^8.5.0", "eslint-visitor-keys": "^3.0.0", "espree": "^9.0.0", "semver": "^7.3.5" } }, "sha512-1e4qoRgnn448pRuMvKGsFFymUCquZV0mpGgOyIKNgD3JVDTsVJyRBGH/Fm0tBb8WsWGgmB1mDe6/yJMQM37DUA=="],
 
     "@abapify/browser-auth/@types/node": ["@types/node@22.19.15", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg=="],
+
+    "@abapify/openai-codegen/@abaplint/core": ["@abaplint/core@2.119.1", "", { "dependencies": { "fast-xml-parser": "^5.7.1", "json5": "^2.2.3", "vscode-languageserver-types": "^3.17.5" } }, "sha512-dsAFecT5I5m+PiSPuNgB0hHFzilqFa+/S+YRHIhd12u3+tzmktwNtI2c1I9wm+2HXF+9bTeLxk6JekVuNfqs4w=="],
 
     "@abapify/openai-codegen/commander": ["commander@11.1.0", "", {}, "sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ=="],
 
