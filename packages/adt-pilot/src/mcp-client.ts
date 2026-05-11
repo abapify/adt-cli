@@ -15,6 +15,8 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import type { McpToolCaller } from './types';
 
+type McpClient = Pick<Client, 'callTool'>;
+
 interface TextContentBlock {
   type: 'text';
   text: string;
@@ -34,7 +36,7 @@ interface TextContentBlock {
  *
  * @param client A connected `@modelcontextprotocol/sdk` `Client`.
  */
-export function createMcpToolCaller(client: Client): McpToolCaller {
+export function createMcpToolCaller(client: McpClient): McpToolCaller {
   return async (toolName: string, args: Record<string, unknown>) => {
     const result = await client.callTool({
       name: toolName,

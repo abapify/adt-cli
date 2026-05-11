@@ -65,7 +65,7 @@ const createStep = createStepRaw as unknown as (config: {
   inputSchema: unknown;
   outputSchema: unknown;
   execute: AnyStepExecute;
-}) => AnyStep;
+}) => unknown;
 
 // ---------------------------------------------------------------------------
 // Internal type-erasure aliases
@@ -78,9 +78,8 @@ const createStep = createStepRaw as unknown as (config: {
 // of the chain is enforced by the Zod schemas, and the public surface
 // is exposed via the narrower {@link CodeReviewWorkflow} interface.
 
-type AnyStep = unknown;
 interface AnyWorkflowBuilder {
-  then(step: AnyStep): AnyWorkflowBuilder;
+  then(step: unknown): AnyWorkflowBuilder;
   commit(): unknown;
 }
 
@@ -259,11 +258,14 @@ function createRunAtcChecksStep(callTool: McpToolCaller) {
         try {
           const result = await callTool('atc_run', { ...conn, objectUri });
           const worklist = pickWorklist(result);
-          atcResults.push({
+          const atcResult: AtcStepResult = {
             objectUri,
             status: 'success',
-            ...(worklist !== undefined ? { worklist } : {}),
-          });
+          };
+          if (worklist !== undefined) {
+            atcResult.worklist = worklist;
+          }
+          atcResults.push(atcResult);
         } catch (error) {
           atcResults.push({
             objectUri,
@@ -351,14 +353,17 @@ function stripConnection(input: {
   baseUrl: string;
   username: string;
   password: string;
-  client?: string | undefined;
+  client?: string;
 }): { baseUrl: string; username: string; password: string; client?: string } {
-  return {
+  const connection = {
     baseUrl: input.baseUrl,
     username: input.username,
     password: input.password,
-    ...(input.client !== undefined ? { client: input.client } : {}),
   };
+  if (input.client !== undefined) {
+    return { ...connection, client: input.client };
+  }
+  return connection;
 }
 
 /**
@@ -404,6 +409,85 @@ function pickWorklist(response: unknown): unknown {
   return rec.worklist;
 }
 
+function getRecordProperty(
+  value: Record<string, unknown>,
+  key: string,
+): unknown {
+  return value[key];
+}
+
+function getStringProperty(
+  value: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const property = getRecordProperty(value, key);
+  return typeof property === 'string' ? property : undefined;
+}
+
+function firstStringProperty(
+  value: Record<string, unknown>,
+  keys: string[],
+): string {
+  for (const key of keys) {
+    const property = getStringProperty(value, key);
+    if (property !== undefined) {
+      return property;
+    }
+  }
+  return '';
+}
+
+function extractFinding(
+  objectUri: string,
+  finding: Record<string, unknown>,
+): AtcFinding {
+  const atcFinding: AtcFinding = {
+    objectUri,
+    priority: getStringProperty(finding, 'priority') ?? 'unknown',
+    description: firstStringProperty(finding, [
+      'messageTitle',
+      'checkTitle',
+      'description',
+    ]),
+  };
+
+  const category = getStringProperty(finding, 'checkTitle');
+  if (category !== undefined) {
+    atcFinding.category = category;
+  }
+
+  const checkName = getStringProperty(finding, 'checkId');
+  if (checkName !== undefined) {
+    atcFinding.checkName = checkName;
+  }
+
+  const location = getStringProperty(finding, 'location');
+  if (location !== undefined) {
+    atcFinding.location = location;
+  }
+
+  return atcFinding;
+}
+
+function extractObjectFindings(
+  fallbackObjectUri: string,
+  obj: Record<string, unknown>,
+): AtcFinding[] {
+  const objectUri = getStringProperty(obj, 'uri') ?? fallbackObjectUri;
+  const findingsContainer = getRecordProperty(obj, 'findings');
+  if (!findingsContainer || typeof findingsContainer !== 'object') return [];
+
+  const rawFindings = (findingsContainer as Record<string, unknown>).finding;
+  const findings: AtcFinding[] = [];
+  for (const rawFinding of toArray(rawFindings)) {
+    if (!rawFinding || typeof rawFinding !== 'object') continue;
+    findings.push(
+      extractFinding(objectUri, rawFinding as Record<string, unknown>),
+    );
+  }
+  return findings;
+}
+
 /**
  * Best-effort extraction of {@link AtcFinding} entries from an ATC worklist.
  *
@@ -427,51 +511,30 @@ function extractFindings(
   if (!worklist || typeof worklist !== 'object') return [];
 
   const wl = worklist as Record<string, unknown>;
+  const rawInner = getRecordProperty(wl, 'worklist');
   const inner =
-    wl.worklist && typeof wl.worklist === 'object'
-      ? (wl.worklist as Record<string, unknown>)
+    rawInner && typeof rawInner === 'object'
+      ? (rawInner as Record<string, unknown>)
       : wl;
 
-  const objectsContainer = inner.objects;
+  const objectsContainer = getRecordProperty(inner, 'objects');
   if (!objectsContainer || typeof objectsContainer !== 'object') return [];
 
-  const rawObjects = (objectsContainer as Record<string, unknown>).object;
+  const rawObjects = getRecordProperty(
+    objectsContainer as Record<string, unknown>,
+    'object',
+  );
   const objectArray = toArray(rawObjects);
 
   const findings: AtcFinding[] = [];
   for (const obj of objectArray) {
     if (!obj || typeof obj !== 'object') continue;
-    const o = obj as Record<string, unknown>;
-    const objectUri =
-      typeof o.uri === 'string' && o.uri.length > 0 ? o.uri : fallbackObjectUri;
-
-    const findingsContainer = o.findings;
-    if (!findingsContainer || typeof findingsContainer !== 'object') continue;
-
-    const rawFindings = (findingsContainer as Record<string, unknown>).finding;
-    for (const f of toArray(rawFindings)) {
-      if (!f || typeof f !== 'object') continue;
-      const finding = f as Record<string, unknown>;
-      findings.push({
-        objectUri,
-        priority: String(finding.priority ?? 'unknown'),
-        description: String(
-          finding.messageTitle ??
-            finding.checkTitle ??
-            finding.description ??
-            '',
-        ),
-        ...(typeof finding.checkTitle === 'string'
-          ? { category: finding.checkTitle }
-          : {}),
-        ...(typeof finding.checkId === 'string'
-          ? { checkName: finding.checkId }
-          : {}),
-        ...(typeof finding.location === 'string'
-          ? { location: finding.location }
-          : {}),
-      });
-    }
+    findings.push(
+      ...extractObjectFindings(
+        fallbackObjectUri,
+        obj as Record<string, unknown>,
+      ),
+    );
   }
   return findings;
 }

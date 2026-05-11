@@ -29,12 +29,12 @@ The `codeReviewWorkflow` SHALL accept `{ mode: 'transport', transportNumber: str
 
 - **WHEN** the workflow is executed with `mode: 'transport'` and a valid `transportNumber`
 - **THEN** the `resolveObjects` step calls the `cts_get_transport` MCP tool with that transport number
-- **THEN** the step result contains the list of ABAP object URIs from that transport
+- **THEN** the step result contains the transport request URI as the ATC target so ATC can enumerate transport objects server-side
 
-#### Scenario: Transport mode runs ATC on resolved objects
+#### Scenario: Transport mode runs ATC on transport target
 
-- **WHEN** `resolveObjects` returns a non-empty object list
-- **THEN** the `runAtcChecks` step calls `atc_run` for each resolved object URI
+- **WHEN** `resolveObjects` returns a transport request URI
+- **THEN** the `runAtcChecks` step calls `atc_run` for the transport request URI
 - **THEN** the `buildReport` step aggregates all findings into a `CodeReviewReport`
 
 ### Requirement: CodeReviewReport output schema
@@ -45,7 +45,7 @@ The workflow output SHALL conform to `CodeReviewReport`:
 {
   mode: 'package' | 'transport';
   target: string;          // packageName or transportNumber
-  objects: string[];       // resolved object URIs
+  objects: string[];       // resolved object URIs, or transport URI for transport mode
   findings: AtcFinding[];  // all ATC findings across objects
   summary: {
     totalObjects: number;
