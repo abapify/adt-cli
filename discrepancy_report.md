@@ -1,6 +1,6 @@
 # Triangular Consistency Review: Discrepancy Report
 
-**Date**: 2025-05-22
+**Date**: Omitted to avoid stale report metadata.
 **Auditor**: Jules, Senior Solutions Architect
 **Project**: abapify / adt-cli
 **Scope**: `adt-mcp` (HTTP transport), `adt-client`, and core service dependencies.
