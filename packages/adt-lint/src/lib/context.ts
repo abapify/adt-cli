@@ -104,7 +104,10 @@ export function stripToPublicApi(
 }
 
 function normalizeToken(token: string): string {
-  return token.replace(/^'+|'+$/, '').toUpperCase();
+  let t = token;
+  while (t.startsWith("'")) t = t.slice(1);
+  while (t.endsWith("'")) t = t.slice(0, -1);
+  return t.toUpperCase();
 }
 
 function isCustomName(token: string | undefined): token is string {
@@ -177,8 +180,13 @@ export function extractDependencies(source: string): string[] {
   return Array.from(dependencies).sort();
 }
 
+function stripInlineComment(line: string): string {
+  const idx = line.indexOf('"');
+  return idx >= 0 ? line.slice(0, idx) : line;
+}
+
 function extractMethodNameFromHeader(line: string): string | undefined {
-  const trimmed = line.trim();
+  const trimmed = stripInlineComment(line).trim();
   const upper = trimmed.toUpperCase();
   if (!upper.startsWith('METHOD ') || !upper.endsWith('.')) {
     return undefined;
@@ -228,9 +236,17 @@ export function detectMethodBoundary(
     return null;
   }
 
+  if (starts.length > 1) {
+    return null;
+  }
+
   const startIndex = starts[0];
   for (let i = startIndex + 1; i < lines.length; i += 1) {
-    if ((lines[i] ?? '').trim().toUpperCase() === 'ENDMETHOD.') {
+    if (
+      stripInlineComment(lines[i] ?? '')
+        .trim()
+        .toUpperCase() === 'ENDMETHOD.'
+    ) {
       return {
         startLine: startIndex + 1,
         endLine: i + 1,

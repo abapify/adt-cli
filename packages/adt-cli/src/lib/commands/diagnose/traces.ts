@@ -42,10 +42,20 @@ export const diagnoseTracesCommand = new Command('traces')
         }
       }
     } catch (error) {
-      console.error(
-        '❌ Diagnose traces failed:',
-        error instanceof Error ? error.message : String(error),
-      );
+      const status =
+        error instanceof Error && 'status' in error
+          ? (error as { status?: number }).status
+          : undefined;
+      if (status === 404) {
+        console.error(
+          '❌ Traces endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/traces)',
+        );
+      } else {
+        console.error(
+          '❌ Diagnose traces failed:',
+          error instanceof Error ? error.message : String(error),
+        );
+      }
       process.exit(1);
     }
   });

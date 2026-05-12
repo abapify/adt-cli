@@ -7,13 +7,29 @@ import {
   type LintOptions,
 } from '@abapify/adt-lint';
 
+function stripJsonComments(text: string): string {
+  return text.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+}
+
+function stripTrailingCommas(text: string): string {
+  return text.replace(/,\s*([\]}])/g, '$1');
+}
+
 async function loadRuleOverrides(
   configPath?: string,
 ): Promise<Record<string, unknown> | undefined> {
   if (!configPath) return undefined;
   const raw = await readFile(configPath, 'utf8');
-  const parsed = JSON.parse(raw) as { rules?: Record<string, unknown> };
-  return parsed.rules;
+  try {
+    const cleaned = stripTrailingCommas(stripJsonComments(raw));
+    const parsed = JSON.parse(cleaned) as { rules?: Record<string, unknown> };
+    return parsed.rules;
+  } catch (e) {
+    throw new Error(
+      `Invalid JSON/JSONC in ${configPath}: ${e instanceof Error ? e.message : String(e)}`,
+      { cause: e },
+    );
+  }
 }
 
 export const lintCommand = new Command('lint')

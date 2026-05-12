@@ -159,6 +159,11 @@ const putSourceCommand = new Command('put')
     'Run local lint checks and block write on parser/cloud violations',
     false,
   )
+  .option(
+    '--lint-preset <preset>',
+    'Lint preset for --lint-before-write gate: btp|onpremise',
+    'onpremise',
+  )
   .option('--json', 'Output result as JSON')
   .action(
     async (
@@ -170,6 +175,7 @@ const putSourceCommand = new Command('put')
         json?: boolean;
         method?: string;
         lintBeforeWrite?: boolean;
+        lintPreset?: 'btp' | 'onpremise';
       },
     ) => {
       try {
@@ -179,6 +185,15 @@ const putSourceCommand = new Command('put')
         let sourceToWrite = sourceCode;
 
         if (options.method) {
+          if (
+            !uri.includes('/oo/classes/') &&
+            !uri.includes('/oo/interfaces/')
+          ) {
+            throw new Error(
+              `--method is only supported for classes and interfaces, but '${objectName}' resolved to ${uri}`,
+            );
+          }
+
           const currentSource = String(
             await client.fetch(`${uri}/source/main`, {
               method: 'GET',
@@ -210,6 +225,7 @@ const putSourceCommand = new Command('put')
         if (options.lintBeforeWrite) {
           const diagnostics = lintSource(sourceToWrite, {
             filename: `${objectName.toLowerCase()}.abap`,
+            systemType: options.lintPreset,
           });
           const blocking = diagnostics.filter((d) =>
             ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),

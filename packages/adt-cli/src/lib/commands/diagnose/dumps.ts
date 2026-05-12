@@ -45,10 +45,20 @@ export const diagnoseDumpsCommand = new Command('dumps')
           }
         }
       } catch (error) {
-        console.error(
-          '❌ Diagnose dumps failed:',
-          error instanceof Error ? error.message : String(error),
-        );
+        const status =
+          error instanceof Error && 'status' in error
+            ? (error as { status?: number }).status
+            : undefined;
+        if (status === 404) {
+          console.error(
+            '❌ Short dumps endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/dumps)',
+          );
+        } else {
+          console.error(
+            '❌ Diagnose dumps failed:',
+            error instanceof Error ? error.message : String(error),
+          );
+        }
         process.exit(1);
       }
     },

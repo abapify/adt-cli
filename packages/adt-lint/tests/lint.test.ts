@@ -88,4 +88,33 @@ ENDCLASS.
     const boundary = detectMethodBoundary(source, 'run');
     expect(boundary).toEqual({ startLine: 3, endLine: 5 });
   });
+
+  it('detectMethodBoundary handles inline comments', () => {
+    const source = `
+CLASS zcl_demo IMPLEMENTATION.
+  METHOD run. " entry point
+    WRITE 'X'.
+  ENDMETHOD. " run
+ENDCLASS.
+`;
+    const boundary = detectMethodBoundary(source, 'run');
+    expect(boundary).toEqual({ startLine: 3, endLine: 5 });
+  });
+
+  it('detectMethodBoundary returns null for ambiguous matches', () => {
+    const source = `
+CLASS zcl_demo IMPLEMENTATION.
+  METHOD run.
+    WRITE 'X'.
+  ENDMETHOD.
+ENDCLASS.
+CLASS lcl_test IMPLEMENTATION.
+  METHOD run.
+    WRITE 'Y'.
+  ENDMETHOD.
+ENDCLASS.
+`;
+    const boundary = detectMethodBoundary(source, 'run');
+    expect(boundary).toBeNull();
+  });
 });

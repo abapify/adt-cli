@@ -26,14 +26,14 @@ The system SHALL extend `update_source` with an `action: "editMethod"` variant a
 
 ### Requirement: Method boundary detection via line scan
 
-The system SHALL locate the method boundary using a case-insensitive line scan for `METHOD <name>.` and `ENDMETHOD.` tokens, falling back to `@abaplint/core` AST if the simple scan is ambiguous. The implementation MUST handle both inline and separated method implementations.
+The system SHALL locate the method boundary using a case-insensitive line scan for `METHOD <name>.` and `ENDMETHOD.` tokens, stripping inline ABAP comments before matching. The implementation MUST handle inline comments after the period on both `METHOD` and `ENDMETHOD` lines.
 
 #### Scenario: Simple scan finds method boundaries
 
 - **WHEN** the class source contains `  METHOD process.` followed later by `  ENDMETHOD.`
 - **THEN** the system correctly identifies the start and end lines for splicing
 
-#### Scenario: Ambiguous scan delegates to AST
+#### Scenario: Ambiguous scan returns null
 
-- **WHEN** the simple line scan finds multiple potential `METHOD <name>` occurrences
-- **THEN** `@abaplint/core` AST position data is used to resolve the correct boundary
+- **WHEN** the simple line scan finds multiple potential `METHOD <name>` occurrences (e.g. local test classes)
+- **THEN** the system returns `null` to avoid corrupting the wrong method body

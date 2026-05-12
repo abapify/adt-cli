@@ -80,12 +80,20 @@ export function registerGetCompletionsTool(
           ],
         };
       } catch (error) {
+        const status =
+          error instanceof Error && 'status' in error
+            ? (error as { status?: number }).status
+            : undefined;
+        const message =
+          status === 404
+            ? 'Code completion endpoint is not available on this system (BTP systems may not support /sap/bc/adt/codeassistance/completion)'
+            : `Get completions failed: ${error instanceof Error ? error.message : String(error)}`;
         return {
           isError: true,
           content: [
             {
               type: 'text' as const,
-              text: `Get completions failed: ${error instanceof Error ? error.message : String(error)}`,
+              text: message,
             },
           ],
         };

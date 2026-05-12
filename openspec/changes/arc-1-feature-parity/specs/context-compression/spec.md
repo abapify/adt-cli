@@ -26,14 +26,14 @@ Public API surface definition:
 - **WHEN** a class uses `CL_ABAP_*`, `IF_ABAP_*`, or `CX_SY_*` dependencies
 - **THEN** those standard objects are NOT included in the context (only Z/Y custom objects are returned)
 
-#### Scenario: AST parse failure falls back to full source
+#### Scenario: Stripping failure falls back to full source
 
-- **WHEN** `@abaplint/core` cannot parse a dependency (e.g. unusual macros)
+- **WHEN** the line-based scanner cannot identify the expected structure of a dependency (e.g. unusual macros or non-standard formatting)
 - **THEN** the full unstripped source for that dependency is returned with a `fallback: true` flag
 
-### Requirement: Dependency detection via AST
+### Requirement: Dependency detection via token scan
 
-The system SHALL detect dependencies by parsing the source with `@abaplint/core` and identifying references from patterns including: `TYPE REF TO`, `NEW`, `CAST`, `INHERITING FROM`, `INTERFACES`, `CALL FUNCTION`, `RAISING`, `CATCH`, and static calls (`=>`).
+The system SHALL detect dependencies by tokenizing the source (after stripping ABAP comments) and identifying references from patterns including: `TYPE REF TO`, `NEW`, `CAST`, `INHERITING FROM`, `INTERFACES`, `CALL FUNCTION`, `RAISING`, `CATCH`, and static calls (`=>`).
 
 #### Scenario: Class reference in method is detected
 

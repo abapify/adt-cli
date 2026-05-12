@@ -53,6 +53,12 @@ export function registerUpdateSourceTool(
         .describe(
           'When true, run local abaplint pre-check and block write on parser/cloud violations',
         ),
+      lintPreset: z
+        .enum(['btp', 'onpremise'])
+        .optional()
+        .describe(
+          'Lint preset for lintBeforeWrite gate (btp enables cloud_types checking)',
+        ),
       transport: z
         .string()
         .optional()
@@ -126,6 +132,22 @@ export function registerUpdateSourceTool(
             };
           }
 
+          if (
+            objectUri &&
+            !objectUri.includes('/oo/classes/') &&
+            !objectUri.includes('/oo/interfaces/')
+          ) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `editMethod is only supported for classes and interfaces, but '${args.objectName}' resolved to ${objectUri}`,
+                },
+              ],
+            };
+          }
+
           const currentSource = String(
             await client.fetch(`${objectUri}/source/main`, {
               method: 'GET',
@@ -168,6 +190,7 @@ export function registerUpdateSourceTool(
         if (args.lintBeforeWrite) {
           const diagnostics = lintSource(sourceToWrite, {
             filename: `${args.objectName.toLowerCase()}.abap`,
+            systemType: args.lintPreset,
           });
           const blocking = diagnostics.filter((d) =>
             ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),

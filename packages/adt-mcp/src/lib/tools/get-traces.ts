@@ -68,12 +68,20 @@ export function registerGetTracesTool(
           ],
         };
       } catch (error) {
+        const status =
+          error instanceof Error && 'status' in error
+            ? (error as { status?: number }).status
+            : undefined;
+        const message =
+          status === 404
+            ? 'Traces endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/traces)'
+            : `Get traces failed: ${error instanceof Error ? error.message : String(error)}`;
         return {
           isError: true,
           content: [
             {
               type: 'text' as const,
-              text: `Get traces failed: ${error instanceof Error ? error.message : String(error)}`,
+              text: message,
             },
           ],
         };

@@ -54,12 +54,20 @@ export function registerGetShortDumpsTool(
           ],
         };
       } catch (error) {
+        const status =
+          error instanceof Error && 'status' in error
+            ? (error as { status?: number }).status
+            : undefined;
+        const message =
+          status === 404
+            ? 'Short dumps endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/dumps)'
+            : `Get short dumps failed: ${error instanceof Error ? error.message : String(error)}`;
         return {
           isError: true,
           content: [
             {
               type: 'text' as const,
-              text: `Get short dumps failed: ${error instanceof Error ? error.message : String(error)}`,
+              text: message,
             },
           ],
         };
