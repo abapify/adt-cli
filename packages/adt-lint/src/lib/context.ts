@@ -177,7 +177,7 @@ export function extractDependencies(source: string): string[] {
     }
   }
 
-  return Array.from(dependencies).sort();
+  return Array.from(dependencies).sort((a, b) => a.localeCompare(b));
 }
 
 function stripInlineComment(line: string): string {
