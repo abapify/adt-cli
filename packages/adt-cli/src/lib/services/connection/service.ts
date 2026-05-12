@@ -1,3 +1,4 @@
+/** Concrete connection metadata used to instantiate an ADT client. */
 interface ConnectionParams {
   baseUrl: string;
   client?: string;
@@ -5,6 +6,13 @@ interface ConnectionParams {
   password?: string;
 }
 
+/**
+ * Inputs accepted by the shared connection resolver.
+ *
+ * `baseUrl` and `systemId` are mutually exclusive selectors:
+ * - `baseUrl` selects explicit connection args
+ * - `systemId` selects configured/fallback lookup paths
+ */
 export interface ConnectionResolveArgs {
   baseUrl?: string;
   client?: string;
@@ -13,12 +21,26 @@ export interface ConnectionResolveArgs {
   systemId?: string;
 }
 
+/**
+ * Hook points used by the resolver to stay transport/framework agnostic.
+ *
+ * Resolution chain:
+ * 1. `createClient` with explicit args (`baseUrl`)
+ * 2. `resolveSystem` + `createClient` (`systemId` from registry)
+ * 3. `resolveFromAuthStore` (`systemId` from local auth-store fallback)
+ */
 export interface ResolveConnectionClientHooks<TClient> {
   createClient: (params: ConnectionParams) => TClient;
   resolveSystem?: (systemId: string) => ConnectionParams | undefined;
   resolveFromAuthStore?: (systemId: string) => Promise<TClient>;
 }
 
+/**
+ * Final resolved client plus metadata about how it was obtained.
+ *
+ * `systemId` is present when a logical system was used and may be absent
+ * for plain explicit `baseUrl` calls.
+ */
 export interface ResolvedConnectionClient<TClient> {
   client: TClient;
   systemId?: string;
