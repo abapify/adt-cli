@@ -18,9 +18,9 @@
 
 ### 2. Local-Auth Bridge for MCP
 - **Location**: `packages/adt-mcp/src/lib/tools/sap-connect.ts` vs. `openspec/changes/add-mcp-http-transport/specs/adt-mcp/spec.md`
-- **The Conflict**: The implementation of `sap_connect` supports resolving system credentials from the `~/.adt` session store (Priority C). The spec only defines `baseUrl` and `systemId` (via server-side config).
+- **The Conflict**: The implementation of `sap_connect` supports resolving system credentials from the `~/.adt` session store (Priority C). The spec already allows inline connection credentials and `{ systemId }`, but it does not appear to formalize this additional local auth-store resolution path.
 - **Root Cause Suggestion**: "Superior" shortcut. Developers added support for local session reuse to make the MCP server easier to use in local dev environments (e.g., Cursor/VS Code) without re-entering passwords.
-- **Recommended Fix**: **UPDATE SPEC**. Formalize the `~/.adt` session store as a valid resolution path for the `sap_connect` tool.
+- **Recommended Fix**: **UPDATE SPEC**. Formalize the `~/.adt` session store as an additional valid resolution path for the `sap_connect` tool.
 
 ---
 
