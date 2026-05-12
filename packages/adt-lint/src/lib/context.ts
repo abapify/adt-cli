@@ -240,7 +240,7 @@ export function detectMethodBoundary(
     return null;
   }
 
-  const startIndex = starts[0];
+  const startIndex = starts[0] ?? 0;
   for (let i = startIndex + 1; i < lines.length; i += 1) {
     if (
       stripInlineComment(lines[i] ?? '')
