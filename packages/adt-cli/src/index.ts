@@ -50,3 +50,10 @@ export {
   type CommitResult as ChangesetCommitResult,
   type RollbackResult as ChangesetRollbackResult,
 } from './lib/services/changeset';
+
+export {
+  resolveConnectionClient,
+  type ConnectionResolveArgs,
+  type ResolveConnectionClientHooks,
+  type ResolvedConnectionClient,
+} from './lib/services/connection';

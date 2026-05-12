@@ -137,6 +137,15 @@ branch. On success the server SHALL cache the `AdtClient` on the session.
   handshake, caches the client on the session, and returns
   `{ connected: true, systemId: "DEV" }`.
 
+#### Scenario: Connect by local adt auth store
+
+- **GIVEN** `~/.adt/sessions/DEV.json` exists on the server host
+- **WHEN** the client calls `sap_connect` with `{ systemId: "DEV" }` and
+  the multi-system registry has no `DEV` entry
+- **THEN** the server resolves credentials/session via the local adt auth
+  store bridge, performs the verification call, caches the client, and
+  returns `{ connected: true, systemId: "DEV", source: "adt-cli-auth-store" }`.
+
 #### Scenario: Connect with inline credentials
 
 - **WHEN** the client calls `sap_connect` with `baseUrl`, `username`,
@@ -156,9 +165,10 @@ branch. On success the server SHALL cache the `AdtClient` on the session.
 The server SHALL resolve the target SAP system using the first match
 from: (1) `sap_connect` argument `systemId`, (2) HTTP header
 `x-sap-system-id`, (3) env `SAP_DEFAULT_SYSTEM_ID`, (4) first entry in
-the systems registry. Credentials SHALL always be read from
-`SAP_<ID>_USERNAME` / `SAP_<ID>_PASSWORD` env vars, never from the
-YAML/JSON registry file.
+the systems registry. Credentials SHALL be sourced at runtime (tool
+arguments or env-backed system resolution) and SHALL NOT be read from the
+YAML/JSON systems registry file. A local `~/.adt/sessions/<id>.json`
+bridge MAY be used as a fallback resolution path for developer workflows.
 
 #### Scenario: Tool argument wins over header
 
@@ -211,3 +221,16 @@ results.
 - **THEN** it asserts that `adt changeset commit` and
   `changeset_commit` produce the same object-state diffs against
   the mock, and likewise for `rollback`.
+
+### Requirement: CLI ↔ MCP parity scope for transport lifecycle tools
+
+Global CLI/MCP parity SHALL apply to domain/business operations. Transport
+lifecycle tools that are HTTP-session specific (`sap_connect`,
+`sap_disconnect`) MAY exist only on MCP when no meaningful CLI equivalent
+exists.
+
+#### Scenario: sap lifecycle tools are MCP-only
+
+- **WHEN** parity checks evaluate the command/tool matrix
+- **THEN** `sap_connect` and `sap_disconnect` are treated as transport
+  lifecycle exceptions and do not require `adt` CLI subcommands.

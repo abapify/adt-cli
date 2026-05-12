@@ -33,3 +33,13 @@ The tool returns a single text content item whose body is a JSON-serialised obje
 ```
 
 See the source for the exact shape of `result`.
+
+## Resolution order
+
+`sap_connect` resolves the target client in this order:
+
+1. explicit `baseUrl` (+ optional `client`, `username`, `password`)
+2. `systemId` via server multi-system config
+3. `systemId` via local `~/.adt/sessions/<systemId>.json` auth-store bridge
+
+`baseUrl` and `systemId` are mutually exclusive.

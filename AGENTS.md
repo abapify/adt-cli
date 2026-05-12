@@ -65,8 +65,9 @@ may (and does) depend on `@abapify/adt-cli` and on the domain plugin packages
 This is a deliberate architectural choice, not an accident:
 
 - **Invariant**: every CLI subcommand has a matching MCP tool, and every MCP
-  tool has a matching CLI subcommand. Behaviour, flags, output shape, and
-  error messages are expected to match.
+  tool has a matching CLI subcommand, except HTTP transport lifecycle tools
+  that are MCP-session specific (currently `sap_connect` / `sap_disconnect`).
+  Behaviour, flags, output shape, and error messages are expected to match.
 - **Enforcement**: the parity test suite in
   `packages/adt-cli/tests/e2e/parity.*.test.ts` is the source of truth. A
   feature is not "done" until both the CLI path and the MCP path hit the

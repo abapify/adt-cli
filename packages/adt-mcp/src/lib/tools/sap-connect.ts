@@ -19,7 +19,11 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AdtClient } from '@abapify/adt-client';
-import { getAdtClientV2Safe, AdtAuthError } from '@abapify/adt-cli';
+import {
+  getAdtClientV2Safe,
+  AdtAuthError,
+  resolveConnectionClient,
+} from '@abapify/adt-cli';
 import { ChangesetService } from '@abapify/adt-cli';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
@@ -36,52 +40,12 @@ async function resolveAdtClient(
   ctx: ToolContext,
   args: SapConnectArgs,
 ): Promise<{ client: AdtClient; systemId?: string; source: string }> {
-  // Priority A: explicit baseUrl.
-  if (args.baseUrl) {
-    return {
-      client: ctx.getClient({
-        baseUrl: args.baseUrl,
-        client: args.client,
-        username: args.username,
-        password: args.password,
-      }),
-      systemId: args.systemId,
-      source: 'explicit',
-    };
-  }
-
-  // Priority B: systemId via multi-system config. The registry holds only
-  // connection metadata (baseUrl, client); credentials come from the tool
-  // call so secrets are never persisted to disk.
-  if (args.systemId && ctx.resolveSystem) {
-    const params = ctx.resolveSystem(args.systemId);
-    if (params) {
-      return {
-        client: ctx.getClient({
-          ...params,
-          username: args.username,
-          password: args.password,
-        }),
-        systemId: args.systemId,
-        source: 'multi-system',
-      };
-    }
-  }
-
-  // Priority C: systemId via adt-cli ~/.adt sessions store.
-  if (args.systemId) {
-    const client = await getAdtClientV2Safe({ sid: args.systemId });
-    return {
-      client,
-      systemId: args.systemId,
-      source: 'adt-cli-auth-store',
-    };
-  }
-
-  throw new Error(
-    'sap_connect requires either an explicit baseUrl (+ credentials) or ' +
-      'a systemId resolvable via multi-system config or the ~/.adt session store.',
-  );
+  return resolveConnectionClient(args, {
+    createClient: (params) => ctx.getClient(params),
+    resolveSystem: ctx.resolveSystem,
+    resolveFromAuthStore: async (systemId) =>
+      getAdtClientV2Safe({ sid: systemId }),
+  });
 }
 
 export function registerSapConnectTool(

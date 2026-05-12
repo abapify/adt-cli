@@ -6,7 +6,10 @@ description: Wire the adt-mcp server into Claude Code, Cursor, VS Code, and gene
 
 # MCP Setup
 
-`@abapify/adt-mcp` is a [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the same typed contracts as the CLI to any MCP-aware AI client. It speaks MCP over **stdio** and is stateless — every tool call carries its own SAP connection parameters.
+`@abapify/adt-mcp` is a [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the same typed contracts as the CLI to any MCP-aware AI client.
+
+- **stdio mode (`adt-mcp`)** is stateless and carries SAP connection parameters per tool call.
+- **Streamable HTTP mode (`adt-mcp-http`)** is session-scoped and uses `sap_connect` / `sap_disconnect` with `Mcp-Session-Id`.
 
 See the [MCP overview](../mcp/overview.md) for architecture, or jump straight to the [tool reference](../mcp/tools/discovery.md).
 
@@ -31,7 +34,9 @@ You should see a JSON-RPC response listing 100+ tools (`discovery`, `get_object`
 
 ## Credentials model
 
-`adt-mcp` does **not** read `~/.adt/auth.json`. It holds no session between calls. Each tool invocation accepts connection parameters:
+### stdio (`adt-mcp`)
+
+`adt-mcp` stdio mode does **not** persist session state between calls. Each tool invocation accepts connection parameters:
 
 | Field      | Required | Example                         |
 | ---------- | -------- | ------------------------------- |
@@ -41,7 +46,18 @@ You should see a JSON-RPC response listing 100+ tools (`discovery`, `get_object`
 | `client`   | optional | `100`                           |
 | `language` | optional | `EN`                            |
 
-Most MCP clients let you pin default values via `env` so the AI doesn't have to repeat them. The examples below do exactly that.
+Most MCP clients let you pin default values via `env` so the AI doesn't have to repeat them.
+
+### Streamable HTTP (`adt-mcp-http`)
+
+In HTTP mode, clients should:
+
+1. initialize and retain `Mcp-Session-Id`
+2. call `sap_connect` once (explicit credentials, multi-system config, or local `~/.adt/sessions/<systemId>.json` fallback)
+3. run regular tools without re-sending credentials
+4. call `sap_disconnect` or close the session
+
+See the full deployment guide: [Deploying the adt-mcp HTTP server](https://github.com/abapify/adt-cli/blob/main/docs/deployment/mcp-http.md).
 
 :::warning
 Credentials live in plain text inside the MCP client's config file. Use a service account with the minimum authorizations needed, not your personal user.
