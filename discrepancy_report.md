@@ -64,6 +64,6 @@
 
 ### 3. Dependency Leak (`adt-cli` in `adt-mcp` tools)
 - **Location**: `packages/adt-mcp/src/lib/tools/sap-connect.ts`
-- **The Conflict**: The tool imports `getAdtClientV2Safe` directly from `@abapify/adt-cli`. While `adt-mcp` is allowed to depend on `adt-cli`, tools are ideally supposed to depend on the *service layer*, not internal utility functions.
+- **The Conflict**: The tool imports `getAdtClientV2Safe` from `@abapify/adt-cli` via its public entrypoint, so this is not a deep-import problem. The actual concern is architectural coupling: `adt-mcp` tools are relying on CLI-owned auth-store / connection-resolution behavior instead of a transport-agnostic shared service layer.
 - **Root Cause Suggestion**: Shortcut in coding.
-- **Recommended Fix**: **REFACTOR CODE**. Ensure all tools use the service exports from `adt-cli/src/index.ts` rather than reaching into deep library paths.
+- **Recommended Fix**: **REFACTOR CODE**. Extract or expose the connection/auth resolution logic through a shared service contract that `adt-mcp` can consume directly, rather than depending on CLI-specific bridge helpers.
