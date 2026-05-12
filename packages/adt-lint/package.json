@@ -1,0 +1,31 @@
+{
+  "name": "@abapify/adt-lint",
+  "version": "0.3.6",
+  "description": "Shared ABAP lint and source-shaping utilities built on @abaplint/core",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "@abaplint/core": "^2.119.15"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-lint"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-lint#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
+}

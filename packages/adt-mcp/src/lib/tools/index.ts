@@ -23,6 +23,7 @@ import { registerCtsSearchTransportsTool } from './cts-search-transports';
 import { registerAtcRunTool } from './atc-run';
 import { registerGetSourceTool } from './get-source';
 import { registerUpdateSourceTool } from './update-source';
+import { registerLintAbapTool } from './lint-abap';
 import { registerActivateObjectTool } from './activate-object';
 import { registerCheckSyntaxTool } from './check-syntax';
 import { registerRunUnitTestsTool } from './run-unit-tests';
@@ -56,6 +57,10 @@ import { registerUnlockObjectTool } from './unlock-object';
 import { registerGetObjectStructureTool } from './get-object-structure';
 import { registerGetTypeHierarchyTool } from './get-type-hierarchy';
 import { registerPrettyPrintTool } from './pretty-print';
+import { registerGetContextTool } from './get-context';
+import { registerGetShortDumpsTool } from './get-short-dumps';
+import { registerGetTracesTool } from './get-traces';
+import { registerGetCompletionsTool } from './get-completions';
 import { registerCreatePackageTool } from './create-package';
 import {
   registerGetInstalledComponentsTool,
@@ -134,6 +139,8 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerAtcRunTool(server, ctx);
   registerGetSourceTool(server, ctx);
   registerUpdateSourceTool(server, ctx);
+  registerLintAbapTool(server, ctx);
+  registerGetContextTool(server, ctx);
   registerActivateObjectTool(server, ctx);
   registerCheckSyntaxTool(server, ctx);
   registerRunUnitTestsTool(server, ctx);
@@ -163,6 +170,9 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerGetObjectStructureTool(server, ctx);
   registerGetTypeHierarchyTool(server, ctx);
   registerPrettyPrintTool(server, ctx);
+  registerGetShortDumpsTool(server, ctx);
+  registerGetTracesTool(server, ctx);
+  registerGetCompletionsTool(server, ctx);
   registerCreatePackageTool(server, ctx);
   registerGetInstalledComponentsTool(server, ctx);
   registerGetFeaturesTool(server, ctx);

@@ -10,6 +10,11 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService } from '@abapify/adt-locks';
+import {
+  detectMethodBoundary,
+  lintSource,
+  normalizeMethodBody,
+} from '@abapify/adt-lint';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
@@ -29,7 +34,31 @@ export function registerUpdateSourceTool(
         .string()
         .optional()
         .describe('Object type (e.g. PROG, CLAS, INTF)'),
+      action: z
+        .enum(['update', 'editMethod'])
+        .optional()
+        .default('update')
+        .describe(
+          'Write mode: update writes full source; editMethod replaces one method body inside a class',
+        ),
+      methodName: z
+        .string()
+        .optional()
+        .describe('Method name to replace when action=editMethod'),
       sourceCode: z.string().describe('New ABAP source code'),
+      lintBeforeWrite: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          'When true, run local abaplint pre-check and block write on parser/cloud violations',
+        ),
+      lintPreset: z
+        .enum(['btp', 'onpremise'])
+        .optional()
+        .describe(
+          'Lint preset for lintBeforeWrite gate (btp enables cloud_types checking)',
+        ),
       transport: z
         .string()
         .optional()
@@ -88,6 +117,103 @@ export function registerUpdateSourceTool(
       let lockHandle: string | undefined;
 
       try {
+        let sourceToWrite = args.sourceCode;
+
+        if (args.action === 'editMethod') {
+          if (!args.methodName) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text: 'methodName is required when action=editMethod',
+                },
+              ],
+            };
+          }
+
+          if (
+            !objectUri.includes('/oo/classes/') &&
+            !objectUri.includes('/oo/interfaces/')
+          ) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `editMethod is only supported for classes and interfaces, but '${args.objectName}' resolved to ${objectUri}`,
+                },
+              ],
+            };
+          }
+
+          const currentSource = String(
+            await client.fetch(`${objectUri}/source/main`, {
+              method: 'GET',
+              headers: { Accept: 'text/plain' },
+            }),
+          );
+          const boundary = detectMethodBoundary(currentSource, args.methodName);
+
+          if (!boundary) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Method ${args.methodName} not found in ${args.objectName}`,
+                },
+              ],
+            };
+          }
+
+          const lines = currentSource.split(/\r?\n/);
+          const methodBody = normalizeMethodBody(
+            args.sourceCode,
+            args.methodName,
+          );
+          const methodBlock = [
+            `METHOD ${args.methodName.toUpperCase()}.`,
+            methodBody,
+            'ENDMETHOD.',
+          ].join('\n');
+
+          lines.splice(
+            boundary.startLine - 1,
+            boundary.endLine - boundary.startLine + 1,
+            methodBlock,
+          );
+          sourceToWrite = lines.join('\n');
+        }
+
+        if (args.lintBeforeWrite) {
+          const diagnostics = lintSource(sourceToWrite, {
+            filename: `${args.objectName.toLowerCase()}.abap`,
+            systemType: args.lintPreset,
+          });
+          const blocking = diagnostics.filter((d) =>
+            ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),
+          );
+          if (blocking.length > 0) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text: JSON.stringify(
+                    {
+                      status: 'blocked_by_lint',
+                      diagnostics: blocking,
+                    },
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          }
+        }
+
         // 1. Acquire lock
         const lock = await lockService.lock(objectUri, {
           transport: args.transport,
@@ -103,7 +229,7 @@ export function registerUpdateSourceTool(
         await client.fetch(`${objectUri}/source/main?${params.toString()}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'text/plain' },
-          body: args.sourceCode,
+          body: sourceToWrite,
         });
 
         // 3. Release lock
@@ -115,7 +241,11 @@ export function registerUpdateSourceTool(
             {
               type: 'text' as const,
               text: JSON.stringify(
-                { status: 'updated', object: args.objectName },
+                {
+                  status: 'updated',
+                  object: args.objectName,
+                  action: args.action ?? 'update',
+                },
                 null,
                 2,
               ),

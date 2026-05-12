@@ -23,6 +23,7 @@ export * from './bo';
 export * from './businessservices';
 export * from './enhancements';
 export * from './uifsa';
+export * from './codeassistance';
 
 /**
  * Complete ADT Contract
@@ -57,6 +58,10 @@ import {
   type EnhancementsContract,
 } from './enhancements';
 import { flpContract, type FlpContract } from './uifsa';
+import {
+  codeassistanceContract,
+  type CodeassistanceContract,
+} from './codeassistance';
 
 /**
  * Explicit type to avoid TS7056 "inferred type exceeds maximum length"
@@ -83,6 +88,7 @@ export interface AdtContract {
   businessservices: BusinessservicesContract;
   enhancements: EnhancementsContract;
   flp: FlpContract;
+  codeassistance: CodeassistanceContract;
 }
 
 export const adtContract: AdtContract = {
@@ -107,6 +113,7 @@ export const adtContract: AdtContract = {
   businessservices: businessservicesContract,
   enhancements: enhancementsContract,
   flp: flpContract,
+  codeassistance: codeassistanceContract,
 };
 
 // Import RestClient from base for client type definition

@@ -36,6 +36,7 @@
     "@abapify/adt-client": "0.3.6",
     "@abapify/adt-contracts": "0.3.6",
     "@abapify/adt-fixtures": "0.3.6",
+    "@abapify/adt-lint": "0.3.6",
     "@abapify/adt-locks": "0.3.6",
     "@abapify/adt-schemas": "0.3.6",
     "@abapify/adk": "0.3.6",

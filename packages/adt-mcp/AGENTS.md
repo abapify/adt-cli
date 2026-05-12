@@ -295,6 +295,7 @@ bunx nx format:write       # Prettier (run before every commit)
 | `@abapify/adt-client`       | Typed ADT client (contracts + HTTP adapter) |
 | `@abapify/adt-contracts`    | ADT endpoint contracts                      |
 | `@abapify/adt-schemas`      | Schema types for typed body/response        |
+| `@abapify/adt-lint`         | Local ABAP linting + context helper logic   |
 | `@abapify/adt-locks`        | Lock/unlock protocol implementation         |
 | `@abapify/adt-aunit`        | AUnit domain plugin                         |
 | `@abapify/adt-rfc`          | RFC domain plugin                           |

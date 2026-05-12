@@ -180,3 +180,31 @@ export async function resolveObjectUri(
 
   return match?.uri;
 }
+
+/**
+ * Extract HTTP status from an error (works with AdtError and similar shapes).
+ */
+export function getErrorStatus(error: unknown): number | undefined {
+  return error instanceof Error && 'status' in error
+    ? (error as { status?: number }).status
+    : undefined;
+}
+
+/**
+ * Build a standard MCP error result with BTP 404 awareness.
+ */
+export function mcpErrorResult(
+  error: unknown,
+  toolLabel: string,
+  notFoundHint?: string,
+) {
+  const status = getErrorStatus(error);
+  const message =
+    status === 404 && notFoundHint
+      ? notFoundHint
+      : `${toolLabel} failed: ${error instanceof Error ? error.message : String(error)}`;
+  return {
+    isError: true as const,
+    content: [{ type: 'text' as const, text: message }],
+  };
+}

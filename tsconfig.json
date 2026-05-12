@@ -116,6 +116,9 @@
     },
     {
       "path": "./packages/adt-pilot"
+    },
+    {
+      "path": "./packages/adt-lint"
     }
   ]
 }
