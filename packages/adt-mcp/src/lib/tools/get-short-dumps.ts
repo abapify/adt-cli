@@ -3,6 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
+import { mcpErrorResult } from './utils';
 
 export function registerGetShortDumpsTool(
   server: McpServer,
@@ -54,23 +55,11 @@ export function registerGetShortDumpsTool(
           ],
         };
       } catch (error) {
-        const status =
-          error instanceof Error && 'status' in error
-            ? (error as { status?: number }).status
-            : undefined;
-        const message =
-          status === 404
-            ? 'Short dumps endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/dumps)'
-            : `Get short dumps failed: ${error instanceof Error ? error.message : String(error)}`;
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: message,
-            },
-          ],
-        };
+        return mcpErrorResult(
+          error,
+          'Get short dumps',
+          'Short dumps endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/dumps)',
+        );
       }
     },
   );

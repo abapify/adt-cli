@@ -8,7 +8,22 @@ import {
 } from '@abapify/adt-lint';
 
 function stripJsonComments(text: string): string {
-  return text.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  let result = '';
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === '/' && text[i + 1] === '/') {
+      while (i < text.length && text[i] !== '\n') i++;
+    } else if (text[i] === '/' && text[i + 1] === '*') {
+      i += 2;
+      while (i < text.length - 1 && !(text[i] === '*' && text[i + 1] === '/'))
+        i++;
+      i += 2;
+    } else {
+      result += text[i];
+      i++;
+    }
+  }
+  return result;
 }
 
 function stripTrailingCommas(text: string): string {

@@ -133,7 +133,6 @@ export function registerUpdateSourceTool(
           }
 
           if (
-            objectUri &&
             !objectUri.includes('/oo/classes/') &&
             !objectUri.includes('/oo/interfaces/')
           ) {

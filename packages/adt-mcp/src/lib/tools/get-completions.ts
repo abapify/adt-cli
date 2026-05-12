@@ -3,7 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
-import { resolveObjectUri } from './utils';
+import { mcpErrorResult, resolveObjectUri } from './utils';
 
 export function registerGetCompletionsTool(
   server: McpServer,
@@ -80,23 +80,11 @@ export function registerGetCompletionsTool(
           ],
         };
       } catch (error) {
-        const status =
-          error instanceof Error && 'status' in error
-            ? (error as { status?: number }).status
-            : undefined;
-        const message =
-          status === 404
-            ? 'Code completion endpoint is not available on this system (BTP systems may not support /sap/bc/adt/codeassistance/completion)'
-            : `Get completions failed: ${error instanceof Error ? error.message : String(error)}`;
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: message,
-            },
-          ],
-        };
+        return mcpErrorResult(
+          error,
+          'Get completions',
+          'Code completion endpoint is not available on this system (BTP systems may not support /sap/bc/adt/codeassistance/completion)',
+        );
       }
     },
   );
