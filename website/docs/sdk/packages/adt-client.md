@@ -75,6 +75,22 @@ const search = await client.adt.repository.informationsystem.search.quickSearch(
 );
 ```
 
+### ETag lifecycle and `clearETag()`
+
+`@abapify/adt-client` keeps an internal ETag cache to support optimistic
+concurrency on write endpoints. Most flows are automatic, but consumers
+should clear stale cache entries after out-of-band writes (for example:
+another process/user changed the same object, or a direct non-client HTTP
+call updated the resource).
+
+```ts
+// Clear a specific resource ETag
+client.clearETag('/sap/bc/adt/oo/classes/zcl_demo/source/main');
+
+// Or clear all cached ETags
+client.clearETag();
+```
+
 ## Dependencies
 
 - `@abapify/adt-contracts`, `@abapify/adt-schemas`, `@abapify/logger`

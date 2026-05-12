@@ -6,7 +6,7 @@ description: Model Context Protocol server exposing SAP ADT tooling to AI assist
 
 # MCP Overview
 
-`@abapify/adt-mcp` is a stateless [Model Context Protocol](https://modelcontextprotocol.io/) server that bridges MCP-aware clients — Claude Code, Cursor, VS Code Copilot, and others — to SAP ABAP Development Tools (ADT). It uses the same typed contracts as the [`adt` CLI](../cli/overview.md), so every tool call goes through `@abapify/adt-client` and the XSD-driven schema pipeline. No manual XML, no ad-hoc HTTP.
+`@abapify/adt-mcp` is a [Model Context Protocol](https://modelcontextprotocol.io/) server that bridges MCP-aware clients — Claude Code, Cursor, VS Code Copilot, and others — to SAP ABAP Development Tools (ADT). It uses the same typed contracts as the [`adt` CLI](../cli/overview.md), so every tool call goes through `@abapify/adt-client` and the XSD-driven schema pipeline. No manual XML, no ad-hoc HTTP.
 
 The server is a **thin MCP adapter**. All business logic lives in `@abapify/adt-client`, `@abapify/adt-contracts`, and the domain packages.
 
@@ -18,7 +18,12 @@ The server is a **thin MCP adapter**. All business logic lives in `@abapify/adt-
 
 ## Installing and running
 
-`adt-mcp` is published as a binary inside the monorepo. The server speaks MCP over **stdio**.
+`adt-mcp` ships with two transports:
+
+- **stdio (`adt-mcp`)** — stateless connection-per-call
+- **Streamable HTTP (`adt-mcp-http`)** — session-scoped (`Mcp-Session-Id`) client reuse
+
+For HTTP deployment details, see the dedicated guide: [Deploying the adt-mcp HTTP server](https://github.com/abapify/adt-cli/blob/main/docs/deployment/mcp-http.md).
 
 ```bash
 # From the monorepo
@@ -58,11 +63,14 @@ In **Settings → MCP Servers**:
 
 ### VS Code (Copilot / other MCP clients)
 
-Point the client at the same binary using its MCP server configuration UI. The transport is always stdio — no HTTP port, no daemon.
+Point the client at the same binary using its MCP server configuration UI for stdio mode, or configure `http://<host>:<port>/mcp` for Streamable HTTP mode.
 
 ## Calling a tool
 
-Tools are invoked through the standard MCP `tools/call` request. Every tool accepts the **connection parameters** (baseUrl, username, password, client) as arguments — the server is stateless and creates a fresh `AdtClient` per call.
+Tools are invoked through the standard MCP `tools/call` request.
+
+- In **stdio mode**, tools carry connection parameters (`baseUrl`, `username`, `password`, `client`) per call.
+- In **HTTP mode**, call `sap_connect` once per MCP session, then reuse that cached client across subsequent tool calls on the same `Mcp-Session-Id`.
 
 Example raw JSON-RPC request:
 
@@ -234,15 +242,16 @@ All 96 registered tools grouped by category. Each page documents the input schem
 
 ## Architecture notes
 
-- **Stateless.** No session, no cached client, no credentials in memory between calls. Every request receives its own `AdtClient`.
+- **Dual state model.** stdio is stateless; Streamable HTTP is session-scoped and caches `AdtClient` per MCP session.
+- **Session lifecycle (HTTP).** `sap_connect` binds a SAP client to an MCP session; `sap_disconnect` (or transport close / TTL) releases locks and tears down the SAP session.
 - **Schema-driven.** All request bodies and response parsing go through schemas in `@abapify/adt-schemas` — never a manual XML parser.
 - **Contract-backed.** Each tool calls exactly one typed contract from `@abapify/adt-contracts`. If an endpoint has no contract yet, a contract is added before the tool.
 - **Mock server for testing.** `createMockAdtServer()` starts an in-process HTTP server backed by fixtures; see `packages/adt-mcp/tests/integration.test.ts` for examples.
 
 ## Known limitations
 
-- **Credentials in arguments.** MCP tool calls include connection parameters in every invocation. The server never persists them — but clients do need to forward them.
-- **Per-call sessions.** SAP allows one security session per user. Concurrent tool calls from the same user compete for the same slot.
+- **stdio credentials in arguments.** Stateless stdio calls include connection parameters in each invocation.
+- **HTTP session affinity required.** Streamable HTTP clients must preserve and resend `Mcp-Session-Id`.
 - **No streaming.** Tools return a single JSON blob; long-running operations (package import, ATC runs) do not stream progress.
 
 ## See also
