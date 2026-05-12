@@ -35,9 +35,9 @@
 
 ### 2. 3-Step CSRF Handshake Invisibility
 - **Location**: `packages/adt-client/src/adapter.ts` vs. `website/docs/architecture/overview.md`
-- **The Conflict**: The architectural docs mention CSRF tokens but don't detail the mandatory 3-step security session handshake (Create Session -> Fetch Token -> Delete Session) required by SAP for lock binding. This is correctly implemented in the `SessionManager` but undocumented.
-- **Root Cause Suggestion**: Design oversight. The complexity of the SAP handshake was "solved" in code, and the documentation was left at a high level.
-- **Recommended Fix**: **UPDATE DOCUMENTATION**. Add a "Security Session Protocol" section to the architecture docs to aid future transport implementers (e.g., if adding Python/Go clients).
+- **The Conflict**: `website/docs/architecture/overview.md` mentions CSRF tokens but does not explain the mandatory 3-step security session handshake (Create Session -> Fetch Token -> Delete Session) required by SAP for lock binding. The flow is implemented correctly in `SessionManager` and described elsewhere in the repo, but the architecture overview omits it.
+- **Root Cause Suggestion**: Documentation structure gap. The SAP handshake was documented in more specialized pages, but the high-level architecture overview was not updated to summarize it or link readers to the deeper explanations.
+- **Recommended Fix**: **UPDATE DOCUMENTATION**. Add a brief "Security Session Protocol" section to `website/docs/architecture/overview.md` and cross-link to the existing detailed docs (for example `website/docs/sdk/contracts/core-http.md` and `website/docs/architecture/mock-server.md`) to aid future transport implementers (e.g., if adding Python/Go clients).
 
 ### 3. Change-Tracking (ETag) Management
 - **Location**: `packages/adt-client/src/adapter.ts` vs. `website/docs/sdk/packages/adt-client.md`
