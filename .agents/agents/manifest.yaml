@@ -1,0 +1,29 @@
+# Multi-agent registry for adt-cli (documentation contract; not loaded by tooling yet).
+version: 1
+canonical_roots:
+  rules: .agents/rules/
+  skills: .agents/skills/
+  workflows: .agents/workflows/
+  adt_commands: .agents/commands/
+
+agents:
+  - id: cursor-ide
+    description: Cursor IDE composer/agent
+    native_config_root: .cursor/
+    thin_layer_readme: .cursor/README.md
+    entrypoints:
+      slash_commands: .cursor/commands/
+      optional_rules: .cursor/rules/
+      skill_stubs: .cursor/skills/
+
+  - id: claude-code
+    description: Claude Code / CLI agents using local .claude/
+    native_config_root: .claude/
+    thin_layer_readme: .claude/README.md
+    notes: Slash commands and openspec skill stubs delegate to .agents/; hooks/settings stay in .claude/.
+
+  - id: windsurf-cascade
+    description: Windsurf Cascade (legacy)
+    native_config_root: .windsurf/
+    deprecated: true
+    migration: Prefer .agents/; .windsurf retains redirect stubs only.

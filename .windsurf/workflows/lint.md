@@ -1,11 +1,8 @@
 ---
-description: lint
-auto_execution_mode: 3
+description: Redirect — lint workflow moved to .agents
+deprecated: true
 ---
 
-1. run lint --fix ( nx lint for nx package )
-2. analyse findings and fix errors and also warnings
-3. run again ( and again ) until you make sure lint doesn't have unused variables
+**Canonical:** `.agents/workflows/lint.md`
 
-- avoid unneccesary @ts-ignore
-- avoid unneccesary to underscore
+Execute that file verbatim.
