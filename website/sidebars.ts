@@ -161,6 +161,7 @@ const sdkPackages = [
   'sdk/packages/adt-fixtures',
   'sdk/packages/adt-locks',
   'sdk/packages/adt-mcp',
+  'sdk/packages/adt-pilot',
   'sdk/packages/adt-playwright',
   'sdk/packages/adt-plugin',
   'sdk/packages/adt-plugin-abapgit',

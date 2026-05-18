@@ -5,6 +5,15 @@
   "projectType": "library",
   "tags": ["scope:adt", "type:mcp"],
   "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "cwd": "packages/adt-mcp",
+        "command": "bun dist/bin/adt-mcp-http.mjs",
+        "envFile": "{workspaceRoot}/.env"
+      }
+    },
     "typecheck": {
       "command": "echo 'typecheck disabled: MCP SDK + Zod type inference causes OOM (see adt-mcp/AGENTS.md)'"
     }

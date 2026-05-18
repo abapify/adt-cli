@@ -18,10 +18,15 @@
  *   MCP_CORS_ORIGIN       Comma-separated CORS allow-list.
  *   SAP_SYSTEMS_JSON      Inline multi-system config as JSON.
  *   SAP_SYSTEMS_FILE      Path to a multi-system config JSON file.
+ *   ADT_CONFIG_FILE       Path to adt.config.ts/json. When set, system
+ *                         definitions are loaded from adt-config instead
+ *                         of SAP_SYSTEMS_JSON / SAP_SYSTEMS_FILE.
  */
 
 import { startHttpServer } from '../lib/http/server.js';
 import type { OAuthOptions } from '../lib/http/oauth.js';
+import type { MultiSystemConfig } from '../lib/http/multi-system.js';
+import { loadAdtConfigMultiSystem } from '../lib/http/adt-config-loader.js';
 
 type AuthMode = 'none' | 'bearer' | 'proxy' | 'oauth';
 
@@ -39,6 +44,7 @@ interface ParsedArgs {
   oauthJwksUri?: string;
   oauthRequiredScopes?: string[];
   oauthUserClaim?: string;
+  adtConfigFile?: string;
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -132,6 +138,11 @@ function parseArgs(argv: string[]): ParsedArgs {
         if (v) (out.allowedOrigins ??= []).push(v);
         break;
       }
+      case '--adt-config': {
+        const v = next();
+        if (v) out.adtConfigFile = v;
+        break;
+      }
       case '--help':
       case '-h': {
         process.stdout.write(
@@ -143,7 +154,8 @@ function parseArgs(argv: string[]): ParsedArgs {
             '                    [--oauth-jwks-uri URL]\n' +
             '                    [--oauth-required-scope SCOPE]\n' +
             '                    [--oauth-user-claim NAME]\n' +
-            '                    [--cors-origin ORIGIN ...]\n',
+            '                    [--cors-origin ORIGIN ...]\n' +
+            '                    [--adt-config PATH]\n',
         );
         process.exit(0);
       }
@@ -259,7 +271,17 @@ async function main(): Promise<void> {
     );
   }
 
+  const adtConfigFile = args.adtConfigFile ?? process.env.ADT_CONFIG_FILE;
+  let multiSystem: MultiSystemConfig | undefined;
+  if (adtConfigFile) {
+    process.stderr.write(
+      `[adt-mcp-http] loading system registry from adt-config: ${adtConfigFile}\n`,
+    );
+    multiSystem = await loadAdtConfigMultiSystem(adtConfigFile);
+  }
+
   const running = await startHttpServer({
+    ...(multiSystem ? { multiSystem } : {}),
     port: args.port,
     host: args.host,
     ttlMs: args.ttlMs,
