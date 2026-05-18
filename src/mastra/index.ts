@@ -17,7 +17,10 @@
  *   bun run dev:pilot      (from monorepo root)
  *
  * Then open:
- *   http://localhost:4111  — Mastra Playground / Studio
+ *   http://localhost:4112  — Mastra Playground / Studio
+ *
+ * If you need to set MCP CORS for local development, use:
+ *   MCP_CORS_ORIGIN=http://localhost:4112
  */
 
 import { Mastra } from '@mastra/core/mastra';
@@ -44,7 +47,10 @@ const MCP_SERVER_URL =
   process.env.MCP_SERVER_URL ?? 'http://127.0.0.1:3001/mcp';
 const LITELLM_BASE_URL =
   process.env.LITELLM_BASE_URL ?? 'http://127.0.0.1:4000';
-const LITELLM_API_KEY = process.env.LITELLM_API_KEY ?? 'sk-placeholder';
+const LITELLM_API_KEY = process.env.LITELLM_API_KEY;
+if (!LITELLM_API_KEY) {
+  throw new Error('LITELLM_API_KEY environment variable is required');
+}
 const MODEL = process.env.MODEL ?? 'openai/gpt-4o';
 
 const litellm = createOpenAI({

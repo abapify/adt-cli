@@ -27,11 +27,9 @@
     "atc"
   ],
   "dependencies": {
-    "@ai-sdk/openai": "^1.3.22",
     "@mastra/core": "^1.28.0",
     "@mastra/mcp": "^0.5.0",
     "@modelcontextprotocol/sdk": "^1.27.0",
-    "ai": "^4.3.16",
     "zod": "^3.24.0"
   },
   "devDependencies": {
