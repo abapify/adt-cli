@@ -17,6 +17,21 @@ import type { MultiSystemConfig } from './multi-system.js';
 import type { ConnectionParams } from '../types.js';
 
 /**
+ * Sanitize a URL for safe logging by stripping any embedded credentials
+ * (userinfo component) that a user might accidentally include.
+ */
+function sanitizeUrl(raw: string): string {
+  try {
+    const u = new URL(raw);
+    u.username = '';
+    u.password = '';
+    return u.toString();
+  } catch {
+    return '<invalid-url>';
+  }
+}
+
+/**
  * Attempt to extract a `baseUrl` from a destination's options object.
  * Handles both `{ url: '...' }` and `{ baseUrl: '...' }` shapes, as
  * different auth plugins use different field names.
@@ -48,6 +63,21 @@ export async function loadAdtConfigMultiSystem(
   configPath?: string,
   cwd?: string,
 ): Promise<MultiSystemConfig> {
+  // Warn when a TypeScript config file is requested but the current runtime
+  // is plain Node.js (not Bun). Node cannot `import()` a `.ts` file directly
+  // without a loader, so the config would be silently ignored. Bun natively
+  // supports TypeScript, so this is only a concern for production Node deployments.
+  if (
+    configPath?.endsWith('.ts') &&
+    typeof (globalThis as Record<string, unknown>).Bun === 'undefined'
+  ) {
+    process.stderr.write(
+      `[adt-config-loader] warning: '${configPath}' is a TypeScript file. ` +
+        `Plain Node.js cannot import .ts directly — compile it to .js/.mjs first, ` +
+        `or run the server with Bun ('bunx node packages/adt-mcp/dist/bin/adt-mcp-http.mjs').\n`,
+    );
+  }
+
   const loaded = await loadConfig({ configPath, cwd });
   const systems: Record<string, { baseUrl: string; client?: string }> = {};
 
@@ -74,7 +104,7 @@ export async function loadAdtConfigMultiSystem(
 
     systems[sid] = { baseUrl, ...(client ? { client } : {}) };
     process.stderr.write(
-      `[adt-config-loader] loaded system '${sid}' → ${baseUrl}\n`,
+      `[adt-config-loader] loaded system '${sid}' → ${sanitizeUrl(baseUrl)}\n`,
     );
   }
 

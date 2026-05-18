@@ -62,7 +62,7 @@ MODEL=openai/gpt-4o
 # MCP server settings (env vars picked up by adt-mcp-http)
 MCP_PORT=3001
 MCP_HOST=127.0.0.1
-MCP_CORS_ORIGIN=http://localhost:4111
+MCP_CORS_ORIGIN=http://localhost:4112
 
 # Optional: path to adt.config.ts (relative to packages/adt-mcp/)
 ADT_CONFIG_FILE=../../adt.config.ts
@@ -131,8 +131,8 @@ curl http://localhost:3001/healthz
 
 | Symptom                      | Fix                                                              |
 | ---------------------------- | ---------------------------------------------------------------- |
-| `LITELLM_API_KEY` not set    | Add it to `packages/adt-pilot/.env`                              |
+| `LITELLM_API_KEY` not set    | Add it to the repo root `.env`                                   |
 | MCP server not found         | Check that `MCP_SERVER_URL` points to the running `adt-mcp-http` |
 | `ADT_CONFIG_FILE` path error | Use an absolute path or a path relative to `packages/adt-mcp/`   |
 | Destination has no URL       | Ensure `options.url` is set in `adt.config.ts`                   |
-| CORS error from Playground   | Set `MCP_CORS_ORIGIN=http://localhost:4111` (or `*` for dev)     |
+| CORS error from Playground   | Set `MCP_CORS_ORIGIN=http://localhost:4112` (or `*` for dev)     |
