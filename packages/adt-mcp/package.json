@@ -33,6 +33,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.0",
     "@abapify/adt-cli": "0.3.6",
+    "@abapify/adt-config": "workspace:*",
     "@abapify/adt-client": "0.3.6",
     "@abapify/adt-contracts": "0.3.6",
     "@abapify/adt-fixtures": "0.3.6",

@@ -34,7 +34,8 @@
   "devDependencies": {
     "@abapify/adt-client": "0.3.6",
     "@abapify/adt-fixtures": "0.3.6",
-    "@abapify/adt-mcp": "0.3.6"
+    "@abapify/adt-mcp": "workspace:*",
+    "mastra": "^0.10.0"
   },
   "repository": {
     "type": "git",
