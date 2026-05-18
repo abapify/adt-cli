@@ -24,7 +24,8 @@
     "precommit": "nx format:check --uncommitted",
     "devcontainer": "devcontainer up --workspace-folder=$(pwd)",
     "preversion": "npx nx release version ${npm_new_version}",
-    "knip": "knip"
+    "knip": "knip",
+    "dev:pilot": "bunx nx run adt-mcp:serve & bunx mastra dev --dir src/mastra --env .env"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs,cjs,md,mdx,json,jsonc,yml,yaml,css,scss,html}": "prettier --write --ignore-unknown"
