@@ -2,8 +2,8 @@
 
 Canonical procedures:
 
-| Topic    | File                                                             |
-| -------- | ---------------------------------------------------------------- |
+| Topic    | File                                                               |
+| -------- | ------------------------------------------------------------------ |
 | Schema   | [`../../commands/adt/schema.md`](../../commands/adt/schema.md)     |
 | Page     | [`../../commands/adt/page.md`](../../commands/adt/page.md)         |
 | Contract | [`../../commands/adt/contract.md`](../../commands/adt/contract.md) |
