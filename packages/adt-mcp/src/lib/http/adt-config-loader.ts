@@ -71,10 +71,10 @@ export async function loadAdtConfigMultiSystem(
     configPath?.endsWith('.ts') &&
     typeof (globalThis as Record<string, unknown>).Bun === 'undefined'
   ) {
-    process.stderr.write(
-      `[adt-config-loader] warning: '${configPath}' is a TypeScript file. ` +
-        `Plain Node.js cannot import .ts directly — compile it to .js/.mjs first, ` +
-        `or run the server with Bun ('bunx node packages/adt-mcp/dist/bin/adt-mcp-http.mjs').\n`,
+    throw new Error(
+      `ADT_CONFIG_FILE '${configPath}' is TypeScript; plain Node.js cannot load .ts configs. ` +
+        `Use adt.config.json, a compiled .mjs config, or run adt-mcp-http with Bun ` +
+        `(e.g. bunx nx run adt-mcp:serve).`,
     );
   }
 

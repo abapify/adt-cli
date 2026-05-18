@@ -28,7 +28,7 @@ import { Agent } from '@mastra/core/agent';
 import { MCPClient } from '@mastra/mcp';
 import { createOpenAI } from '@ai-sdk/openai';
 
-const REVIEW_AGENT_INSTRUCTIONS = `You are an expert ABAP code reviewer using SAP ADT (ABAP Development Tools) and ATC (ABAP Test Cockpit).
+const reviewAgentInstructions = `You are an expert ABAP code reviewer using SAP ADT (ABAP Development Tools) and ATC (ABAP Test Cockpit).
 
 Your task is to review ABAP code by:
 1. Listing all objects in the specified package or transport
@@ -43,26 +43,24 @@ Available tools:
 Always authenticate first using sap_connect before calling other tools.
 Provide clear, actionable feedback on code quality, security, and performance issues.`;
 
-const MCP_SERVER_URL =
-  process.env.MCP_SERVER_URL ?? 'http://127.0.0.1:3001/mcp';
-const LITELLM_BASE_URL =
-  process.env.LITELLM_BASE_URL ?? 'http://127.0.0.1:4000';
-const LITELLM_API_KEY = process.env.LITELLM_API_KEY;
-if (!LITELLM_API_KEY) {
+const mcpServerUrl = process.env.MCP_SERVER_URL ?? 'http://127.0.0.1:3001/mcp';
+const litellmBaseUrl = process.env.LITELLM_BASE_URL ?? 'http://127.0.0.1:4000';
+const litellmApiKey = process.env.LITELLM_API_KEY;
+if (!litellmApiKey) {
   throw new Error('LITELLM_API_KEY environment variable is required');
 }
-const MODEL = process.env.MODEL ?? 'openai/gpt-4o';
+const modelName = process.env.MODEL ?? 'openai/gpt-4o';
 
 const litellm = createOpenAI({
-  baseURL: LITELLM_BASE_URL,
-  apiKey: LITELLM_API_KEY,
+  baseURL: litellmBaseUrl,
+  apiKey: litellmApiKey,
   compatibility: 'compatible',
 });
 
 const mcp = new MCPClient({
   servers: {
     'adt-mcp': {
-      url: new URL(MCP_SERVER_URL),
+      url: new URL(mcpServerUrl),
     },
   },
 });
@@ -72,8 +70,8 @@ const tools = await mcp.getTools();
 const reviewAgent = new Agent({
   id: 'review',
   name: 'abapify Pilot – Review',
-  instructions: REVIEW_AGENT_INSTRUCTIONS,
-  model: litellm(MODEL),
+  instructions: reviewAgentInstructions,
+  model: litellm(modelName),
   tools,
 });
 

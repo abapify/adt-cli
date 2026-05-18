@@ -25,6 +25,7 @@
 
 import { startHttpServer } from '../lib/http/server.js';
 import type { OAuthOptions } from '../lib/http/oauth.js';
+import type { MultiSystemConfig } from '../lib/http/multi-system.js';
 import { loadAdtConfigMultiSystem } from '../lib/http/adt-config-loader.js';
 
 type AuthMode = 'none' | 'bearer' | 'proxy' | 'oauth';
@@ -271,7 +272,7 @@ async function main(): Promise<void> {
   }
 
   const adtConfigFile = args.adtConfigFile ?? process.env.ADT_CONFIG_FILE;
-  let multiSystem;
+  let multiSystem: MultiSystemConfig | undefined;
   if (adtConfigFile) {
     process.stderr.write(
       `[adt-mcp-http] loading system registry from adt-config: ${adtConfigFile}\n`,

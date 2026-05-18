@@ -10,7 +10,8 @@
       "dependsOn": ["build"],
       "options": {
         "cwd": "packages/adt-mcp",
-        "command": "node dist/bin/adt-mcp-http.mjs"
+        "command": "bun dist/bin/adt-mcp-http.mjs",
+        "envFile": "{workspaceRoot}/.env"
       }
     },
     "typecheck": {

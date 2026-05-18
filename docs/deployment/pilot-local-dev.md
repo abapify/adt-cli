@@ -4,12 +4,12 @@ Run the MCP server and Mastra Playground agent locally in a few steps.
 
 ## Architecture
 
-```
+```text
 adt.config.ts  (SAP destinations: DEV, QAS, …)
       │  ADT_CONFIG_FILE
       ▼
-adt-mcp-http  :3001   ──── POST /mcp ────►  adt-pilot (mastra dev)  :4111
-  Streamable HTTP MCP                         Mastra Studio / Playground  :4112 (UI)
+adt-mcp-http  :3001   ──── POST /mcp ────►  mastra dev API  :4111
+  Streamable HTTP MCP                         Mastra Playground UI  :4112
 ```
 
 ## Prerequisites
@@ -91,13 +91,12 @@ Navigate to **http://localhost:4112** in your browser.
 
 Select the **abapify Pilot – Review** agent and start a conversation:
 
-```
-Review package ZPACKAGE on https://your-sap-dev-system.example.com
-  with username DEVELOPER and password <your-password>
+```text
+Connect to SAP system DEV, then review package ZPACKAGE and summarize ATC findings.
 ```
 
-The agent will call `list_package_objects` and `atc_run` via the MCP server
-and return a structured ATC findings report.
+Use the `sap_connect` tool for credentials (never paste passwords into the chat).
+The agent calls `list_package_objects` and `atc_run` via the MCP server.
 
 ## Alternatively — run servers separately
 
