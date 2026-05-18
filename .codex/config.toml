@@ -1,5 +1,5 @@
 [mcp_servers.nx-mcp]
-command = "npx"
+command = "bunx"
 args = [ "nx", "mcp" ]
 
 [features]
