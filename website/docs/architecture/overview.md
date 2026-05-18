@@ -94,6 +94,24 @@ for the full list.
    real system only when a session file + env var are present. See
    [real-e2e](./real-e2e).
 
+## Security session protocol (CSRF handshake)
+
+SAP locks are bound to the SAP security session. The client therefore uses
+the mandatory 3-step bootstrap flow before normal write traffic:
+
+1. `GET /sessions` with `x-sap-security-session: create`
+2. `GET /sessions` with `x-sap-security-session: use` + `x-csrf-token: Fetch`
+3. `DELETE /sessions/<id>` with `x-sap-security-session: use`
+
+After this bootstrap, requests continue with `x-sap-security-session: use`.
+This keeps lock/unlock operations valid while avoiding leaked server-side
+sessions.
+
+Deep dives:
+
+- [SDK contracts: core-http](../sdk/contracts/core-http.md)
+- [Mock server behavior](./mock-server.md)
+
 ## Where to go next
 
 - [Contracts pipeline](./contracts-pipeline) — trace a request from XSD to call site.

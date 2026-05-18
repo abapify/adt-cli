@@ -2,7 +2,7 @@
 
 ### Requirement: Package exports Harness and agent
 
-The `@abapify/adt-pilot` package SHALL export a `createAbapifyPilot(config)` factory that returns a configured Mastra `Harness` instance with the **review** mode wired to the `codeReviewWorkflow`.
+The `@abapify/adt-pilot` package SHALL export a `createAbapifyPilot(config)` factory that returns a configured Mastra `Harness` instance with the **review** mode wired to a review `Agent` that can call the ADT MCP tools used by the code review workflow.
 
 #### Scenario: Factory returns Harness
 
@@ -16,12 +16,12 @@ The `@abapify/adt-pilot` package SHALL export a `createAbapifyPilot(config)` fac
 
 ### Requirement: Package exports workflow
 
-The `@abapify/adt-pilot` package SHALL export `codeReviewWorkflow` so it can be used outside the Harness context.
+The `@abapify/adt-pilot` package SHALL export `createCodeReviewWorkflow(callTool)` so it can be used outside the Harness context.
 
 #### Scenario: Direct workflow import
 
-- **WHEN** `import { codeReviewWorkflow } from '@abapify/adt-pilot'` is used
-- **THEN** `codeReviewWorkflow` is a Mastra `Workflow` instance with `inputSchema` and `outputSchema`
+- **WHEN** `import { createCodeReviewWorkflow } from '@abapify/adt-pilot'` is used
+- **THEN** `createCodeReviewWorkflow(callTool)` creates a Mastra `Workflow` instance with `inputSchema` and `outputSchema`
 
 ### Requirement: Connection config passed as workflow input
 

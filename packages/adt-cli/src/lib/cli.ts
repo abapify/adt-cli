@@ -36,6 +36,9 @@ import {
   checkCommand,
   userCommand,
   sourceCommand,
+  lintCommand,
+  contextCommand,
+  createDiagnoseCommand,
   strustCommand,
   checkinCommand,
   createChangesetCommand,
@@ -265,6 +268,9 @@ export async function createCLI(options?: {
 
   // Source command (read/write ABAP source code)
   program.addCommand(sourceCommand);
+  program.addCommand(lintCommand);
+  program.addCommand(contextCommand);
+  program.addCommand(createDiagnoseCommand());
 
   // User lookup command
   program.addCommand(userCommand);
