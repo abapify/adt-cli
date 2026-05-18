@@ -53,7 +53,7 @@ const prevFailureClassification = getArg('--prev-failure-classification');
 let ci;
 try {
   ci = JSON.parse(ciInfoJson);
-} catch {
+} catch (err) {
   console.log(
     JSON.stringify({
       action: 'done',
@@ -198,7 +198,7 @@ function classify() {
   if (
     cipeStatus === 'FAILED' &&
     failedTaskIds.length === 0 &&
-    selfHealingStatus == null
+    selfHealingStatus === null
   )
     return { action: 'done', code: 'cipe_no_tasks' };
 
