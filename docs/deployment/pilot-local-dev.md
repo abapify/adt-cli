@@ -117,7 +117,7 @@ MCP_PORT=3001 MCP_CORS_ORIGIN='*' \
 
 ```bash
 cd packages/adt-pilot
-bunx mastra dev --dir src/mastra --env .env
+bunx mastra dev --dir ../../src/mastra --env .env
 ```
 
 ## Healthcheck
