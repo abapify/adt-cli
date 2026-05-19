@@ -11,28 +11,12 @@
 
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../../utils/adt-client-v2';
+import { parseFilterOption } from '../../../utils/command-helpers';
 import { AdkTransport } from '@abapify/adk';
 import type {
   TransportObjectSelector,
   AdkTransportObjectRef,
 } from '@abapify/adk';
-
-/**
- * Parse a comma-separated option string into a single string or array.
- * Returns undefined for empty/missing input.
- */
-function parseFilter(
-  value: string | undefined,
-  upperCase = false,
-): string | string[] | undefined {
-  if (!value) return undefined;
-  const parts = value
-    .split(',')
-    .map((s) => (upperCase ? s.trim().toUpperCase() : s.trim()))
-    .filter(Boolean);
-  if (parts.length === 0) return undefined;
-  return parts.length === 1 ? parts[0] : parts;
-}
 
 export const ctsObjectsCommand = new Command('objects')
   .description('List objects in a transport request with optional filters')
@@ -58,7 +42,7 @@ export const ctsObjectsCommand = new Command('objects')
     try {
       await getAdtClientV2();
 
-      const alsoTrParsed = parseFilter(options.alsoTransport, true);
+      const alsoTrParsed = parseFilterOption(options.alsoTransport, true);
       const alsoTrArray: string[] = Array.isArray(alsoTrParsed)
         ? alsoTrParsed
         : alsoTrParsed
@@ -69,13 +53,13 @@ export const ctsObjectsCommand = new Command('objects')
       // Build selector from CLI flags using the parseFilter helper
       const selector: TransportObjectSelector = {};
 
-      const objFunc = parseFilter(options.objFunc);
+      const objFunc = parseFilterOption(options.objFunc);
       if (objFunc !== undefined) selector.objFunc = objFunc;
 
-      const pgmid = parseFilter(options.pgmid);
+      const pgmid = parseFilterOption(options.pgmid);
       if (pgmid !== undefined) selector.pgmid = pgmid;
 
-      const type = parseFilter(options.type, true);
+      const type = parseFilterOption(options.type, true);
       if (type !== undefined) selector.type = type;
 
       // Load and optionally merge transports

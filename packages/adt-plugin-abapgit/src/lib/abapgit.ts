@@ -54,6 +54,12 @@ function walkDir(dir: string, results: string[] = []): string[] {
  *
  * abapGit naming convention: `{name}.{type}[.suffix].{ext}`
  * e.g. `zcl_foo.clas.xml`, `zcl_foo.clas.locals_def.abap`
+ *
+ * Matching is done on the filename base: `{name}.{type}.`.  SAP ABAP object
+ * names and types **never contain a dot**, so the prefix is unambiguous —
+ * `ztabl_del.tabl.` cannot accidentally match `ztabl_del_ext.tabl.xml`
+ * because the separator after `ztabl_del` in the prefix is `.` while the
+ * other file has `_ext.`.
  */
 function findObjectFiles(srcDir: string, name: string, type: string): string[] {
   const prefix = `${name.toLowerCase()}.${type.toLowerCase()}.`;

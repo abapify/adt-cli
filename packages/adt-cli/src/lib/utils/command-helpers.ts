@@ -151,3 +151,34 @@ export function displayImportResults(
 
   console.log(`\n✨ Files written to: ${result.outputPath}`);
 }
+
+/**
+ * Parse a comma-separated CLI option string into a single string or an array.
+ *
+ * - Returns `undefined` when the input is falsy or contains no non-empty tokens.
+ * - Returns a `string` when exactly one token is present (preserves the scalar
+ *   form expected by selector types such as {@link TransportObjectSelector}).
+ * - Returns `string[]` when two or more tokens are present.
+ * - When `upperCase` is true every token is uppercased before returning.
+ *
+ * SAP object names and types do **not** contain commas, so this is safe to
+ * use for all CTS filter options.
+ *
+ * @example
+ * parseFilterOption('D')           // → 'D'
+ * parseFilterOption('D,K')         // → ['D', 'K']
+ * parseFilterOption('CLAS, TABL')  // → ['CLAS', 'TABL']
+ * parseFilterOption(undefined)     // → undefined
+ */
+export function parseFilterOption(
+  value: string | undefined,
+  upperCase = false,
+): string | string[] | undefined {
+  if (!value) return undefined;
+  const parts = value
+    .split(',')
+    .map((s) => (upperCase ? s.trim().toUpperCase() : s.trim()))
+    .filter(Boolean);
+  if (parts.length === 0) return undefined;
+  return parts.length === 1 ? parts[0] : parts;
+}
