@@ -16,7 +16,7 @@ import {
   unlinkSync,
   readdirSync,
 } from 'fs';
-import { join, relative } from 'path';
+import { join, relative, basename } from 'path';
 
 import {
   type FolderLogic,
@@ -58,10 +58,7 @@ function walkDir(dir: string, results: string[] = []): string[] {
 function findObjectFiles(srcDir: string, name: string, type: string): string[] {
   const prefix = `${name.toLowerCase()}.${type.toLowerCase()}.`;
   const allFiles = walkDir(srcDir);
-  return allFiles.filter((f) => {
-    const base = f.split('/').at(-1) ?? f.split('\\').at(-1) ?? f;
-    return base.startsWith(prefix);
-  });
+  return allFiles.filter((f) => basename(f).startsWith(prefix));
 }
 
 function readFolderLogicFromExistingRepo(

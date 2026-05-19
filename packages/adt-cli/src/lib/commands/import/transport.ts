@@ -32,6 +32,24 @@ function parseFormatOptionEntries(entries: string[]): Record<string, string> {
   return parsed;
 }
 
+/**
+ * Parse a comma-separated option string into an array of trimmed strings.
+ * Returns a single string when only one value is present (for API compatibility).
+ * Returns undefined when the input is falsy.
+ */
+function parseCommaSeparated(
+  value: string | undefined,
+  upperCase = false,
+): string | string[] | undefined {
+  if (!value) return undefined;
+  const parts = value
+    .split(',')
+    .map((s) => (upperCase ? s.trim().toUpperCase() : s.trim()))
+    .filter(Boolean);
+  if (parts.length === 0) return undefined;
+  return parts.length === 1 ? parts[0] : parts;
+}
+
 export const importTransportCommand = new Command('transport')
   .argument('<transportNumber>', 'Transport request number to import')
   .argument('[targetFolder]', 'Target folder for output')
@@ -120,23 +138,13 @@ export const importTransportCommand = new Command('transport')
       }
 
       // Parse comma-separated deletion filters
-      const deletionObjFunc = options.deletionObjFunc
-        ? options.deletionObjFunc
-            .split(',')
-            .map((s: string) => s.trim())
-            .filter(Boolean)
-        : undefined;
-      const deletionPgmid = options.deletionPgmid
-        ? options.deletionPgmid
-            .split(',')
-            .map((s: string) => s.trim())
-            .filter(Boolean)
-        : undefined;
+      const deletionObjFunc = parseCommaSeparated(options.deletionObjFunc);
+      const deletionPgmid = parseCommaSeparated(options.deletionPgmid);
       const alsoTransports = options.alsoTransport
-        ? options.alsoTransport
-            .split(',')
-            .map((s: string) => s.trim().toUpperCase())
-            .filter(Boolean)
+        ? (parseCommaSeparated(options.alsoTransport, true) as
+            | string
+            | string[]
+            | undefined)
         : undefined;
 
       const result = await importService.importTransport({
@@ -147,15 +155,13 @@ export const importTransportCommand = new Command('transport')
         formatOptions,
         debug: options.debug,
         applyDeletions: options.applyDeletions,
-        deletionObjFunc:
-          deletionObjFunc && deletionObjFunc.length === 1
-            ? deletionObjFunc[0]
-            : deletionObjFunc,
-        deletionPgmid:
-          deletionPgmid && deletionPgmid.length === 1
-            ? deletionPgmid[0]
-            : deletionPgmid,
-        alsoTransports,
+        deletionObjFunc,
+        deletionPgmid,
+        alsoTransports: Array.isArray(alsoTransports)
+          ? alsoTransports
+          : alsoTransports
+            ? [alsoTransports]
+            : undefined,
       });
 
       displayImportResults(

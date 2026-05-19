@@ -99,8 +99,11 @@ function matchesDimension(
 
 /**
  * Check if an object ref matches all dimensions of a {@link TransportObjectSelector}.
+ *
+ * Exported so that consumers (e.g. import service) can reuse the same logic
+ * without duplicating it.
  */
-function matchesSelector(
+export function matchesSelector(
   obj: AdkTransportObjectRef,
   selector: TransportObjectSelector,
 ): boolean {

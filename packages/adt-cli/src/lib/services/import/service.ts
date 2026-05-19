@@ -5,6 +5,7 @@ import {
   AdkPackage,
   AdkTransport,
   MergedTransportView,
+  matchesSelector,
   getGlobalContext,
   createAdkFactory,
 } from '@abapify/adk';
@@ -13,33 +14,6 @@ import type {
   AdkTransportObjectRef,
 } from '@abapify/adk';
 import { Readable } from 'node:stream';
-
-/** Default number of concurrent SAP requests during import */
-const IMPORT_CONCURRENCY = 5;
-
-/**
- * Local helper: check if an object ref matches a selector's objFunc + pgmid
- * dimensions (mirrors the ADK matchesSelector logic without importing it).
- */
-function matchesSelectorLocal(
-  obj: AdkTransportObjectRef,
-  selector: TransportObjectSelector,
-): boolean {
-  const matchDim = (value: string, expected: string | string[] | undefined) => {
-    if (expected === undefined) return true;
-    if (Array.isArray(expected))
-      return expected.some((e) =>
-        e === '*' ? !!value : e.toUpperCase() === value.toUpperCase(),
-      );
-    if (expected === '*') return !!value;
-    return expected.toUpperCase() === value.toUpperCase();
-  };
-  return (
-    matchDim(obj.objFunc, selector.objFunc) &&
-    matchDim(obj.pgmid, selector.pgmid) &&
-    matchDim(obj.type, selector.type)
-  );
-}
 
 /**
  * Resolve full package path from root to the given package.
@@ -280,7 +254,7 @@ export class ImportService {
 
     // Split: active objects (no obj_func=D match) vs deletion objects
     const deletionObjects = applyDeletions
-      ? allObjects.filter((o) => matchesSelectorLocal(o, deletionSelector))
+      ? allObjects.filter((o) => matchesSelector(o, deletionSelector))
       : [];
     const activeObjects = allObjects.filter(
       (o) => !deletionObjects.includes(o),

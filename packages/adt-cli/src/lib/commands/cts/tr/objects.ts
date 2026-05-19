@@ -11,11 +11,28 @@
 
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../../utils/adt-client-v2';
-import { AdkTransport, MergedTransportView } from '@abapify/adk';
+import { AdkTransport } from '@abapify/adk';
 import type {
   TransportObjectSelector,
   AdkTransportObjectRef,
 } from '@abapify/adk';
+
+/**
+ * Parse a comma-separated option string into a single string or array.
+ * Returns undefined for empty/missing input.
+ */
+function parseFilter(
+  value: string | undefined,
+  upperCase = false,
+): string | string[] | undefined {
+  if (!value) return undefined;
+  const parts = value
+    .split(',')
+    .map((s) => (upperCase ? s.trim().toUpperCase() : s.trim()))
+    .filter(Boolean);
+  if (parts.length === 0) return undefined;
+  return parts.length === 1 ? parts[0] : parts;
+}
 
 export const ctsObjectsCommand = new Command('objects')
   .description('List objects in a transport request with optional filters')
@@ -41,42 +58,25 @@ export const ctsObjectsCommand = new Command('objects')
     try {
       await getAdtClientV2();
 
-      const allTransportNumbers = [
-        transport,
-        ...(options.alsoTransport
-          ? options.alsoTransport
-              .split(',')
-              .map((s: string) => s.trim().toUpperCase())
-              .filter(Boolean)
-          : []),
-      ];
+      const alsoTrParsed = parseFilter(options.alsoTransport, true);
+      const alsoTrArray: string[] = Array.isArray(alsoTrParsed)
+        ? alsoTrParsed
+        : alsoTrParsed
+          ? [alsoTrParsed]
+          : [];
+      const allTransportNumbers = [transport, ...alsoTrArray];
 
-      // Build selector from CLI flags
+      // Build selector from CLI flags using the parseFilter helper
       const selector: TransportObjectSelector = {};
 
-      if (options.objFunc) {
-        const parts: string[] = options.objFunc
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter(Boolean);
-        selector.objFunc = parts.length === 1 ? parts[0] : parts;
-      }
+      const objFunc = parseFilter(options.objFunc);
+      if (objFunc !== undefined) selector.objFunc = objFunc;
 
-      if (options.pgmid) {
-        const parts: string[] = options.pgmid
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter(Boolean);
-        selector.pgmid = parts.length === 1 ? parts[0] : parts;
-      }
+      const pgmid = parseFilter(options.pgmid);
+      if (pgmid !== undefined) selector.pgmid = pgmid;
 
-      if (options.type) {
-        const parts: string[] = options.type
-          .split(',')
-          .map((s: string) => s.trim().toUpperCase())
-          .filter(Boolean);
-        selector.type = parts.length === 1 ? parts[0] : parts;
-      }
+      const type = parseFilter(options.type, true);
+      if (type !== undefined) selector.type = type;
 
       // Load and optionally merge transports
       let objects: AdkTransportObjectRef[];
