@@ -78,6 +78,11 @@ export const importTransportCommand = new Command('transport')
     'Write a JSON sidecar for each transport to <outputDir>/.adt/tr/<TRKORR>.json',
     false,
   )
+  .option(
+    '--remove-missing-objects',
+    'Remove local files for objects that are in the TR but cannot be fetched from SAP (orphan sync)',
+    false,
+  )
   .option('--debug', 'Enable debug output', false)
   .action(async (transports, targetFolder, options) => {
     try {
@@ -127,6 +132,7 @@ export const importTransportCommand = new Command('transport')
         debug: options.debug,
         applyDeletions: options.applyDeletions,
         saveTrMetadata: options.saveTrMetadata,
+        removeMissingObjects: options.removeMissingObjects,
       });
 
       displayImportResults(

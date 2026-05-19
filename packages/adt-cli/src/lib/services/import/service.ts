@@ -92,6 +92,17 @@ export interface TransportImportOptions {
    * Default: false
    */
   saveTrMetadata?: boolean;
+  /**
+   * When true, objects that are in the TR list but cannot be fetched from SAP
+   * (i.e., `objRef.load()` returns null — the object no longer exists in the system)
+   * are treated as deletions: `format.delete()` is called to remove their local files.
+   *
+   * This catches the "orphan sync" case where an object was removed in SAP without
+   * an explicit `obj_func=D` entry in the transport.
+   *
+   * Default: false (backward-compatible; previously counted as skipped)
+   */
+  removeMissingObjects?: boolean;
 }
 
 /**
@@ -310,9 +321,44 @@ export class ImportService {
           const adkObject = await objRef.load();
 
           if (!adkObject) {
-            results.skipped++;
-            if (options.debug) {
-              console.log(`  ⏭️ ${objRef.type} ${objRef.name}: failed to load`);
+            // Object is in TR but doesn't exist in SAP (possible orphan — deleted without obj_func=D)
+            const deleteFn = plugin.instance.format.delete;
+            if (options.removeMissingObjects && typeof deleteFn === 'function') {
+              console.log(
+                `  🗑️  [${progress}/${total}] ${objRef.type} ${objRef.name}: not found in SAP → removing local files`,
+              );
+              try {
+                const context: ImportContext = {
+                  resolvePackagePath,
+                  formatOptions: options.formatOptions,
+                  configFormatOptions,
+                };
+                const delResult = await deleteFn(
+                  { pgmid: objRef.pgmid, type: objRef.type, name: objRef.name },
+                  options.outputPath,
+                  context,
+                );
+                if (delResult.success) {
+                  results.deleted++;
+                  filesRemoved.push(...delResult.filesRemoved);
+                } else {
+                  results.skipped++;
+                }
+              } catch (error) {
+                results.skipped++;
+                if (options.debug) {
+                  console.log(
+                    `  ⚠️  ${objRef.type} ${objRef.name}: delete failed — ${error instanceof Error ? error.message : String(error)}`,
+                  );
+                }
+              }
+            } else {
+              results.skipped++;
+              if (options.debug) {
+                console.log(
+                  `  ⏭️ ${objRef.type} ${objRef.name}: not found in SAP (skipped)`,
+                );
+              }
             }
             return;
           }

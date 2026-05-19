@@ -54,6 +54,12 @@ export function registerImportTransportTool(
         .describe(
           'Write a JSON sidecar for each transport to <outputDir>/.adt/tr/<TRKORR>.json (default: false)',
         ),
+      removeMissingObjects: z
+        .boolean()
+        .optional()
+        .describe(
+          'Remove local files for objects in the TR that cannot be fetched from SAP (orphan sync, default: false)',
+        ),
     },
     async (args, extra) => {
       try {
@@ -71,6 +77,7 @@ export function registerImportTransportTool(
           format,
           applyDeletions: args.applyDeletions,
           saveTrMetadata: args.saveTrMetadata,
+          removeMissingObjects: args.removeMissingObjects,
         });
 
         return {

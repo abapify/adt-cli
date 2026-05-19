@@ -20,6 +20,7 @@ import {
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { AdkTransport } from '@abapify/adk';
 
 // ──────────────────────────────────────────────────────────────────────
 // Mock @abapify/adk
@@ -322,5 +323,126 @@ describe('ImportService.importTransport()', () => {
     });
 
     expect(result.metadataFiles).toBeUndefined();
+  });
+
+  it('calls format.delete() for objects that cannot be fetched from SAP when removeMissingObjects is true', async () => {
+    // Object is in TR but load() returns null → simulate "not found in SAP"
+    const missingObj = {
+      pgmid: 'R3TR',
+      type: 'PROG',
+      name: 'ZPROG_MISSING',
+      objFunc: '',
+      uri: undefined,
+      description: 'Missing program',
+      key: 'R3TR/PROG/ZPROG_MISSING',
+      isDeleted: false,
+      raw: { pgmid: 'R3TR', type: 'PROG', name: 'ZPROG_MISSING', obj_func: '' },
+      load: vi.fn(async () => null),
+    };
+
+    const mockTRmissing = {
+      number: 'DEVK900003',
+      description: 'Transport with missing object',
+      owner: 'DEV',
+      status: 'D',
+      statusText: 'Modifiable',
+      target: 'PRD',
+      tasks: [
+        {
+          number: 'DEVK900003T',
+          owner: 'DEV',
+          description: 'Task',
+          status: 'D',
+          objects: [missingObj],
+        },
+      ],
+      objects: [missingObj],
+    };
+
+    vi.mocked(AdkTransport.get).mockResolvedValueOnce(mockTRmissing as any);
+    // PROG is "supported" for this test so the service proceeds past the isSupported check
+    mockPlugin.instance.registry.isSupported.mockReturnValueOnce(true);
+    // Delete reports one removed file
+    mockPlugin.instance.format.delete.mockResolvedValueOnce({
+      success: true,
+      filesRemoved: [`${tmpDir}/src/zprog_missing.prog.abap`],
+    });
+
+    const { ImportService } =
+      await import('../../../src/lib/services/import/service');
+    const svc = new ImportService();
+    const result = await svc.importTransport({
+      transportNumber: 'DEVK900003',
+      outputPath: tmpDir,
+      format: 'mock',
+      removeMissingObjects: true,
+    });
+
+    expect(result.results.deleted).toBe(1);
+    expect(result.filesRemoved).toEqual([
+      `${tmpDir}/src/zprog_missing.prog.abap`,
+    ]);
+    expect(mockPlugin.instance.format.delete).toHaveBeenCalledWith(
+      { pgmid: 'R3TR', type: 'PROG', name: 'ZPROG_MISSING' },
+      tmpDir,
+      expect.any(Object),
+    );
+  });
+
+  it('counts missing objects as skipped (not deleted) when removeMissingObjects is false (default)', async () => {
+    const missingObj = {
+      pgmid: 'R3TR',
+      type: 'PROG',
+      name: 'ZPROG_MISSING2',
+      objFunc: '',
+      uri: undefined,
+      description: 'Missing program 2',
+      key: 'R3TR/PROG/ZPROG_MISSING2',
+      isDeleted: false,
+      raw: {
+        pgmid: 'R3TR',
+        type: 'PROG',
+        name: 'ZPROG_MISSING2',
+        obj_func: '',
+      },
+      load: vi.fn(async () => null),
+    };
+
+    const mockTRmissing2 = {
+      number: 'DEVK900004',
+      description: 'Transport with missing object 2',
+      owner: 'DEV',
+      status: 'D',
+      statusText: 'Modifiable',
+      target: 'PRD',
+      tasks: [
+        {
+          number: 'DEVK900004T',
+          owner: 'DEV',
+          description: 'Task',
+          status: 'D',
+          objects: [missingObj],
+        },
+      ],
+      objects: [missingObj],
+    };
+
+    vi.mocked(AdkTransport.get).mockResolvedValueOnce(mockTRmissing2 as any);
+    mockPlugin.instance.registry.isSupported.mockReturnValueOnce(true);
+
+    const { ImportService } =
+      await import('../../../src/lib/services/import/service');
+    const svc = new ImportService();
+    const result = await svc.importTransport({
+      transportNumber: 'DEVK900004',
+      outputPath: tmpDir,
+      format: 'mock',
+      // removeMissingObjects not set → default false
+    });
+
+    // Missing object → skipped, not deleted
+    expect(result.results.deleted).toBe(0);
+    expect(result.results.skipped).toBeGreaterThan(0);
+    expect(result.filesRemoved).toBeUndefined();
   });
 });
