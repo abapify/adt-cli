@@ -23,9 +23,11 @@ export function registerImportTransportTool(
     'Export all objects referenced by a transport request to a local folder. Mirrors `adt import transport`.',
     {
       ...sessionOrConnectionShape,
-      transportNumber: z
+      transports: z
         .string()
-        .describe('Transport request number (e.g. DEVK900123)'),
+        .describe(
+          'Transport request number(s), comma-separated for multiple (e.g. "DEVK900001" or "DEVK900001,DEVK900002")',
+        ),
       outputDir: z
         .string()
         .optional()
@@ -44,20 +46,14 @@ export function registerImportTransportTool(
         .boolean()
         .optional()
         .describe(
-          'Whether to remove local files for objects marked with obj_func=D (default: true)',
+          'Whether to remove local files for objects marked with obj_func=D and pgmid=R3TR (default: true)',
         ),
-      deletionObjFunc: z
-        .string()
+      saveTrMetadata: z
+        .boolean()
         .optional()
-        .describe('Object function code(s) that trigger deletion (default: D)'),
-      deletionPgmid: z
-        .string()
-        .optional()
-        .describe('Program ID filter for deletion objects (default: R3TR)'),
-      alsoTransports: z
-        .array(z.string())
-        .optional()
-        .describe('Additional transport numbers to merge into the import'),
+        .describe(
+          'Write a JSON sidecar for each transport to <outputDir>/.adt/tr/<TRKORR>.json (default: false)',
+        ),
     },
     async (args, extra) => {
       try {
@@ -69,14 +65,12 @@ export function registerImportTransportTool(
         const format = args.format ?? 'abapgit';
 
         const result = await service.importTransport({
-          transportNumber: args.transportNumber,
+          transportNumber: args.transports,
           outputPath,
           objectTypes: args.objectTypes,
           format,
           applyDeletions: args.applyDeletions,
-          deletionObjFunc: args.deletionObjFunc,
-          deletionPgmid: args.deletionPgmid,
-          alsoTransports: args.alsoTransports,
+          saveTrMetadata: args.saveTrMetadata,
         });
 
         return {
@@ -95,6 +89,7 @@ export function registerImportTransportTool(
                   outputPath: result.outputPath,
                   description: result.description,
                   filesRemoved: result.filesRemoved,
+                  metadataFiles: result.metadataFiles,
                 },
                 null,
                 2,

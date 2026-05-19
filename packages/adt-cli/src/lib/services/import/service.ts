@@ -1,5 +1,6 @@
 import { loadFormatPlugin, parseFormatSpec } from '../../utils/format-loader';
 import { getConfig } from '../../utils/destinations';
+import { parseTransportNumbers } from '../../utils/command-helpers';
 import type { ImportContext, FormatOptionValue } from '@abapify/adt-plugin';
 import {
   AdkPackage,
@@ -9,11 +10,13 @@ import {
   getGlobalContext,
   createAdkFactory,
 } from '@abapify/adk';
-import type {
-  TransportObjectSelector,
-  AdkTransportObjectRef,
-} from '@abapify/adk';
+import type { AdkTransportObjectRef } from '@abapify/adk';
 import { Readable } from 'node:stream';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+/** Default number of concurrent SAP requests during import */
+const IMPORT_CONCURRENCY = 5;
 
 /**
  * Resolve full package path from root to the given package.
@@ -60,7 +63,13 @@ export interface ObjectImportOptions {
  * Options for importing a transport request
  */
 export interface TransportImportOptions {
-  /** Transport request number (e.g., 'DEVK900123') */
+  /**
+   * Transport request number(s).
+   *
+   * Accepts a single number or a comma-separated list:
+   *   - `'DEVK900001'` — single TR
+   *   - `'DEVK900001,DEVK900002,DEVK900003'` — multiple TRs (merged, deduplicated)
+   */
   transportNumber: string;
   /** Output directory for serialized files */
   outputPath: string;
@@ -73,25 +82,16 @@ export interface TransportImportOptions {
   /** Enable debug output */
   debug?: boolean;
   /**
-   * Whether to apply deletions for objects marked with obj_func=D.
+   * Whether to apply deletions for objects marked with obj_func=D and pgmid=R3TR.
    * Default: true
    */
   applyDeletions?: boolean;
   /**
-   * Object function code(s) that identify deletion entries.
-   * Default: 'D'
+   * When true, write a JSON sidecar for each transport to
+   * `<outputPath>/.adt/tr/<TRKORR>.json` with normalized transport metadata.
+   * Default: false
    */
-  deletionObjFunc?: string | string[];
-  /**
-   * Program ID filter for deletion objects.
-   * Default: 'R3TR' (skip CORR / release notes)
-   */
-  deletionPgmid?: string | string[];
-  /**
-   * Additional transport numbers to merge into the same import.
-   * Objects from all transports are unioned (deduplicated by pgmid/type/name).
-   */
-  alsoTransports?: string[];
+  saveTrMetadata?: boolean;
 }
 
 /**
@@ -142,6 +142,8 @@ export interface ImportResult {
   outputPath: string;
   /** Files removed during deletion pass */
   filesRemoved?: string[];
+  /** Metadata sidecar files written (when saveTrMetadata is true) */
+  metadataFiles?: string[];
 }
 
 /**
@@ -219,11 +221,8 @@ export class ImportService {
       console.log(`✅ Loaded plugin: ${plugin.name}`);
     }
 
-    // Fetch transport(s)
-    const allTransportNumbers = [
-      options.transportNumber,
-      ...(options.alsoTransports ?? []),
-    ];
+    // Parse comma-separated transport numbers from positional argument (dedup + uppercase)
+    const allTransportNumbers = parseTransportNumbers(options.transportNumber);
 
     if (options.debug) {
       console.log(
@@ -234,27 +233,31 @@ export class ImportService {
     // Resolve transport objects (single or merged)
     let allObjects: AdkTransportObjectRef[];
     let transportDescription: string;
+    // Keep individual transport instances for metadata writing
+    const loadedTransports: AdkTransport[] = [];
 
     if (allTransportNumbers.length === 1) {
-      const transport = await AdkTransport.get(options.transportNumber);
+      const transport = await AdkTransport.get(allTransportNumbers[0]);
+      loadedTransports.push(transport);
       allObjects = transport.objects;
       transportDescription = transport.description;
     } else {
-      const merged = await MergedTransportView.create(allTransportNumbers);
+      const transports = await Promise.all(
+        allTransportNumbers.map((n) => AdkTransport.get(n)),
+      );
+      loadedTransports.push(...transports);
+      const merged = new MergedTransportView(transports);
       allObjects = merged.objects;
-      transportDescription = `${options.transportNumber} (+${allTransportNumbers.length - 1} more)`;
+      transportDescription = `${allTransportNumbers[0]} (+${allTransportNumbers.length - 1} more)`;
     }
 
-    // Deletion selector
+    // Fixed deletion selector: obj_func === 'D' and pgmid === 'R3TR'
+    // These are not configurable in v1 (CORR/release-note entries are skipped via pgmid filter)
     const applyDeletions = options.applyDeletions !== false; // default: true
-    const deletionSelector: TransportObjectSelector = {
-      objFunc: options.deletionObjFunc ?? 'D',
-      pgmid: options.deletionPgmid ?? 'R3TR',
-    };
-
-    // Split: active objects (no obj_func=D match) vs deletion objects
     const deletionObjects = applyDeletions
-      ? allObjects.filter((o) => matchesSelector(o, deletionSelector))
+      ? allObjects.filter((o) =>
+          matchesSelector(o, { objFunc: 'D', pgmid: 'R3TR' }),
+        )
       : [];
     const activeObjects = allObjects.filter(
       (o) => !deletionObjects.includes(o),
@@ -410,14 +413,65 @@ export class ImportService {
       await plugin.instance.hooks.afterImport(options.outputPath);
     }
 
+    // Write transport metadata sidecars if requested
+    const metadataFiles: string[] = [];
+    if (options.saveTrMetadata) {
+      const metadataDir = join(options.outputPath, '.adt', 'tr');
+      await mkdir(metadataDir, { recursive: true });
+
+      for (const tr of loadedTransports) {
+        const metadata = {
+          number: tr.number,
+          owner: tr.owner,
+          desc: tr.description,
+          status: tr.status,
+          statusText: tr.statusText,
+          target: tr.target,
+          tasks: tr.tasks.map((task) => ({
+            number: task.number,
+            owner: task.owner,
+            desc: task.description,
+            status: task.status,
+            objects: task.objects.map((obj) => ({
+              pgmid: obj.pgmid,
+              type: obj.type,
+              name: obj.name,
+              obj_func: obj.objFunc,
+              uri: obj.uri,
+            })),
+          })),
+          fetchedAt: new Date().toISOString(),
+          import: {
+            format: options.format,
+            success: results.success,
+            skipped: results.skipped,
+            failed: results.failed,
+            deleted: results.deleted,
+          },
+        };
+
+        const metadataPath = join(metadataDir, `${tr.number}.json`);
+        await writeFile(
+          metadataPath,
+          JSON.stringify(metadata, null, 2),
+          'utf-8',
+        );
+        metadataFiles.push(metadataPath);
+        if (options.debug) {
+          console.log(`📄 Wrote transport metadata: ${metadataPath}`);
+        }
+      }
+    }
+
     return {
-      transportNumber: options.transportNumber,
+      transportNumber: allTransportNumbers[0],
       description: transportDescription,
       totalObjects: allObjects.length,
       results,
       objectsByType,
       outputPath: options.outputPath,
       filesRemoved: filesRemoved.length > 0 ? filesRemoved : undefined,
+      metadataFiles: metadataFiles.length > 0 ? metadataFiles : undefined,
     };
   }
 
