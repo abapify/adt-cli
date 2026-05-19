@@ -323,7 +323,10 @@ export class ImportService {
           if (!adkObject) {
             // Object is in TR but doesn't exist in SAP (possible orphan — deleted without obj_func=D)
             const deleteFn = plugin.instance.format.delete;
-            if (options.removeMissingObjects && typeof deleteFn === 'function') {
+            if (
+              options.removeMissingObjects &&
+              typeof deleteFn === 'function'
+            ) {
               console.log(
                 `  🗑️  [${progress}/${total}] ${objRef.type} ${objRef.name}: not found in SAP → removing local files`,
               );
