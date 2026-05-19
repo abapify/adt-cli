@@ -174,6 +174,8 @@ export {
   AdkTransport,
   AdkTransportObjectRef,
   AdkTransportTaskRef,
+  MergedTransportView,
+  type TransportObjectSelector,
   type TransportResponse,
 } from './objects/cts';
 

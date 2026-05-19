@@ -2,13 +2,21 @@ import {
   createPlugin,
   type AdtPlugin,
   type ImportContext,
+  type DeleteResult,
 } from '@abapify/adt-plugin';
 import type { AdtClient } from '@abapify/adk';
 import { AbapGitSerializer } from './serializer';
 import { getSupportedTypes, isSupported } from './handlers';
 import { deserialize } from './deserializer';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  readdirSync,
+} from 'fs';
+import { join, relative } from 'path';
 
 import {
   type FolderLogic,
@@ -24,6 +32,37 @@ const serializer = new AbapGitSerializer();
 
 // Store folder logic for afterImport hook (set during import, read in afterImport)
 let currentFolderLogic: FolderLogic = 'prefix';
+
+/**
+ * Recursively collect all file paths under a directory.
+ */
+function walkDir(dir: string, results: string[] = []): string[] {
+  if (!existsSync(dir)) return results;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walkDir(full, results);
+    } else {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+/**
+ * Find all abapGit files for a given object name and type.
+ *
+ * abapGit naming convention: `{name}.{type}[.suffix].{ext}`
+ * e.g. `zcl_foo.clas.xml`, `zcl_foo.clas.locals_def.abap`
+ */
+function findObjectFiles(srcDir: string, name: string, type: string): string[] {
+  const prefix = `${name.toLowerCase()}.${type.toLowerCase()}.`;
+  const allFiles = walkDir(srcDir);
+  return allFiles.filter((f) => {
+    const base = f.split('/').at(-1) ?? f.split('\\').at(-1) ?? f;
+    return base.startsWith(prefix);
+  });
+}
 
 function readFolderLogicFromExistingRepo(
   targetPath: string,
@@ -140,6 +179,53 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
      */
     export: (fileTree, client, options?) =>
       deserialize(fileTree, client as AdtClient, options),
+
+    /**
+     * Delete local abapGit files for an object marked for deletion in SAP.
+     *
+     * Searches the `<targetPath>/src/` directory tree for files matching
+     * the abapGit naming pattern `{name}.{type}[.suffix].{ext}` and removes
+     * each one.
+     *
+     * Known limitation: if the object never made it into the repository (e.g.
+     * PROG deletions without obj_func=D), no files are present and nothing
+     * happens. This is expected behavior.
+     */
+    async delete(
+      objectRef: { pgmid: string; type: string; name: string },
+      targetPath: string,
+      _context: ImportContext,
+    ): Promise<DeleteResult> {
+      try {
+        const srcDir = join(targetPath, 'src');
+        const matchedFiles = findObjectFiles(
+          srcDir,
+          objectRef.name,
+          objectRef.type,
+        );
+
+        const filesRemoved: string[] = [];
+        for (const filePath of matchedFiles) {
+          try {
+            unlinkSync(filePath);
+            filesRemoved.push(relative(targetPath, filePath));
+          } catch {
+            // If file is already gone, treat as success
+          }
+        }
+
+        return {
+          success: true,
+          filesRemoved,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          filesRemoved: [],
+          errors: [error instanceof Error ? error.message : String(error)],
+        };
+      }
+    },
   },
 
   // Lifecycle hooks

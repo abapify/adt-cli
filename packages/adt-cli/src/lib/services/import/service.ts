@@ -4,13 +4,42 @@ import type { ImportContext, FormatOptionValue } from '@abapify/adt-plugin';
 import {
   AdkPackage,
   AdkTransport,
+  MergedTransportView,
   getGlobalContext,
   createAdkFactory,
+} from '@abapify/adk';
+import type {
+  TransportObjectSelector,
+  AdkTransportObjectRef,
 } from '@abapify/adk';
 import { Readable } from 'node:stream';
 
 /** Default number of concurrent SAP requests during import */
 const IMPORT_CONCURRENCY = 5;
+
+/**
+ * Local helper: check if an object ref matches a selector's objFunc + pgmid
+ * dimensions (mirrors the ADK matchesSelector logic without importing it).
+ */
+function matchesSelectorLocal(
+  obj: AdkTransportObjectRef,
+  selector: TransportObjectSelector,
+): boolean {
+  const matchDim = (value: string, expected: string | string[] | undefined) => {
+    if (expected === undefined) return true;
+    if (Array.isArray(expected))
+      return expected.some((e) =>
+        e === '*' ? !!value : e.toUpperCase() === value.toUpperCase(),
+      );
+    if (expected === '*') return !!value;
+    return expected.toUpperCase() === value.toUpperCase();
+  };
+  return (
+    matchDim(obj.objFunc, selector.objFunc) &&
+    matchDim(obj.pgmid, selector.pgmid) &&
+    matchDim(obj.type, selector.type)
+  );
+}
 
 /**
  * Resolve full package path from root to the given package.
@@ -69,6 +98,26 @@ export interface TransportImportOptions {
   formatOptions?: Record<string, FormatOptionValue>;
   /** Enable debug output */
   debug?: boolean;
+  /**
+   * Whether to apply deletions for objects marked with obj_func=D.
+   * Default: true
+   */
+  applyDeletions?: boolean;
+  /**
+   * Object function code(s) that identify deletion entries.
+   * Default: 'D'
+   */
+  deletionObjFunc?: string | string[];
+  /**
+   * Program ID filter for deletion objects.
+   * Default: 'R3TR' (skip CORR / release notes)
+   */
+  deletionPgmid?: string | string[];
+  /**
+   * Additional transport numbers to merge into the same import.
+   * Objects from all transports are unioned (deduplicated by pgmid/type/name).
+   */
+  alsoTransports?: string[];
 }
 
 /**
@@ -110,11 +159,15 @@ export interface ImportResult {
     success: number;
     skipped: number;
     failed: number;
+    /** Objects deleted from the file system (obj_func=D) */
+    deleted: number;
   };
   /** Objects by type */
   objectsByType: Record<string, number>;
   /** Output path */
   outputPath: string;
+  /** Files removed during deletion pass */
+  filesRemoved?: string[];
 }
 
 /**
@@ -192,33 +245,71 @@ export class ImportService {
       console.log(`✅ Loaded plugin: ${plugin.name}`);
     }
 
-    // Fetch transport
-    if (options.debug) {
-      console.log(`🚛 Fetching transport: ${options.transportNumber}`);
-    }
-    const transport = await AdkTransport.get(options.transportNumber);
+    // Fetch transport(s)
+    const allTransportNumbers = [
+      options.transportNumber,
+      ...(options.alsoTransports ?? []),
+    ];
 
-    // Filter by object types if specified
-    let objectsToImport = transport.objects;
+    if (options.debug) {
+      console.log(
+        `🚛 Fetching transport(s): ${allTransportNumbers.join(', ')}`,
+      );
+    }
+
+    // Resolve transport objects (single or merged)
+    let allObjects: AdkTransportObjectRef[];
+    let transportDescription: string;
+
+    if (allTransportNumbers.length === 1) {
+      const transport = await AdkTransport.get(options.transportNumber);
+      allObjects = transport.objects;
+      transportDescription = transport.description;
+    } else {
+      const merged = await MergedTransportView.create(allTransportNumbers);
+      allObjects = merged.objects;
+      transportDescription = `${options.transportNumber} (+${allTransportNumbers.length - 1} more)`;
+    }
+
+    // Deletion selector
+    const applyDeletions = options.applyDeletions !== false; // default: true
+    const deletionSelector: TransportObjectSelector = {
+      objFunc: options.deletionObjFunc ?? 'D',
+      pgmid: options.deletionPgmid ?? 'R3TR',
+    };
+
+    // Split: active objects (no obj_func=D match) vs deletion objects
+    const deletionObjects = applyDeletions
+      ? allObjects.filter((o) => matchesSelectorLocal(o, deletionSelector))
+      : [];
+    const activeObjects = allObjects.filter(
+      (o) => !deletionObjects.includes(o),
+    );
+
+    // Apply object type filter to active objects
+    let objectsToImport = activeObjects;
     if (options.objectTypes && options.objectTypes.length > 0) {
       const types = options.objectTypes.map((t) => t.toUpperCase());
-      objectsToImport = transport.getObjectsByType(...types);
+      objectsToImport = activeObjects.filter((o) =>
+        types.includes(o.type.toUpperCase()),
+      );
       if (options.debug) {
         console.log(
-          `🔍 Filtered to ${objectsToImport.length} objects by type: ${types.join(', ')}`,
+          `🔍 Filtered to ${objectsToImport.length} active objects by type: ${types.join(', ')}`,
         );
       }
     }
 
     // Track results
-    const results = { success: 0, skipped: 0, failed: 0 };
+    const results = { success: 0, skipped: 0, failed: 0, deleted: 0 };
     const objectsByType: Record<string, number> = {};
+    const filesRemoved: string[] = [];
     const total = objectsToImport.length;
     let processed = 0;
 
-    console.log(`📦 Processing ${total} objects...`);
+    console.log(`📦 Processing ${total} active objects...`);
 
-    // Process objects in parallel using Node.js stream concurrency
+    // Process active objects in parallel
     await Readable.from(objectsToImport).forEach(
       async (objRef) => {
         const progress = ++processed;
@@ -283,6 +374,63 @@ export class ImportService {
       { concurrency: IMPORT_CONCURRENCY },
     );
 
+    // Deletion pass - remove local files for deleted objects
+    if (applyDeletions && deletionObjects.length > 0) {
+      console.log(`🗑️  Processing ${deletionObjects.length} deletion(s)...`);
+
+      const deleteSupported =
+        typeof plugin.instance.format.delete === 'function';
+      if (!deleteSupported && options.debug) {
+        console.log(
+          `  ⚠️  Plugin '${plugin.name}' does not implement format.delete() — skipping deletion pass`,
+        );
+      }
+
+      if (deleteSupported) {
+        let delProcessed = 0;
+        const delTotal = deletionObjects.length;
+
+        await Readable.from(deletionObjects).forEach(
+          async (objRef) => {
+            const progress = ++delProcessed;
+            try {
+              console.log(
+                `  🗑️  [${progress}/${delTotal}] ${objRef.type} ${objRef.name}`,
+              );
+
+              const context: ImportContext = {
+                resolvePackagePath,
+                formatOptions: options.formatOptions,
+                configFormatOptions,
+              };
+
+              const delResult = await plugin.instance.format.delete!(
+                { pgmid: objRef.pgmid, type: objRef.type, name: objRef.name },
+                options.outputPath,
+                context,
+              );
+
+              if (delResult.success) {
+                results.deleted++;
+                filesRemoved.push(...delResult.filesRemoved);
+              } else {
+                results.failed++;
+                console.log(
+                  `  ❌ Delete ${objRef.type} ${objRef.name}: ${delResult.errors?.join(', ') || 'unknown error'}`,
+                );
+              }
+            } catch (error) {
+              results.failed++;
+              console.log(
+                `  ❌ Delete ${objRef.type} ${objRef.name}: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            }
+          },
+          { concurrency: IMPORT_CONCURRENCY },
+        );
+      }
+    }
+
     // Call afterImport hook if available
     if (plugin.instance.hooks?.afterImport) {
       await plugin.instance.hooks.afterImport(options.outputPath);
@@ -290,11 +438,12 @@ export class ImportService {
 
     return {
       transportNumber: options.transportNumber,
-      description: transport.description,
-      totalObjects: objectsToImport.length,
+      description: transportDescription,
+      totalObjects: allObjects.length,
       results,
       objectsByType,
       outputPath: options.outputPath,
+      filesRemoved: filesRemoved.length > 0 ? filesRemoved : undefined,
     };
   }
 

@@ -60,6 +60,29 @@ export const importTransportCommand = new Command('transport')
     '--folder-logic <logic>',
     '[DEPRECATED] Use --format-option folderLogic=<logic>',
   )
+  .option(
+    '--apply-deletions',
+    'Remove local files for objects marked with obj_func=D (default: on)',
+    true,
+  )
+  .option(
+    '--no-apply-deletions',
+    'Disable the deletion pass (backward-compatible mode)',
+  )
+  .option(
+    '--deletion-obj-func <func>',
+    'Object function code(s) that trigger the deletion pass (comma-separated). Default: D',
+    'D',
+  )
+  .option(
+    '--deletion-pgmid <pgmid>',
+    'Program ID filter for deletion objects (comma-separated). Default: R3TR',
+    'R3TR',
+  )
+  .option(
+    '--also-transport <numbers>',
+    'Additional transport number(s) to merge (comma-separated)',
+  )
   .option('--debug', 'Enable debug output', false)
   .action(async (transportNumber, targetFolder, options) => {
     try {
@@ -96,6 +119,26 @@ export const importTransportCommand = new Command('transport')
         );
       }
 
+      // Parse comma-separated deletion filters
+      const deletionObjFunc = options.deletionObjFunc
+        ? options.deletionObjFunc
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        : undefined;
+      const deletionPgmid = options.deletionPgmid
+        ? options.deletionPgmid
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        : undefined;
+      const alsoTransports = options.alsoTransport
+        ? options.alsoTransport
+            .split(',')
+            .map((s: string) => s.trim().toUpperCase())
+            .filter(Boolean)
+        : undefined;
+
       const result = await importService.importTransport({
         transportNumber,
         outputPath,
@@ -103,6 +146,16 @@ export const importTransportCommand = new Command('transport')
         format: options.format,
         formatOptions,
         debug: options.debug,
+        applyDeletions: options.applyDeletions,
+        deletionObjFunc:
+          deletionObjFunc && deletionObjFunc.length === 1
+            ? deletionObjFunc[0]
+            : deletionObjFunc,
+        deletionPgmid:
+          deletionPgmid && deletionPgmid.length === 1
+            ? deletionPgmid[0]
+            : deletionPgmid,
+        alsoTransports,
       });
 
       displayImportResults(

@@ -23,6 +23,7 @@ export type {
   FormatOptionValue,
   ImportContext,
   ImportResult,
+  DeleteResult,
   ExportContext,
   ExportOptions,
   ExportResult,

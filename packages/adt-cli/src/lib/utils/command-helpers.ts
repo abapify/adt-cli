@@ -109,9 +109,15 @@ export function handleImportError(error: unknown, debug = false): never {
 export function displayImportResults(
   result: {
     description: string;
-    results: { success: number; skipped: number; failed: number };
+    results: {
+      success: number;
+      skipped: number;
+      failed: number;
+      deleted?: number;
+    };
     objectsByType: Record<string, number>;
     outputPath: string;
+    filesRemoved?: string[];
   },
   label: string,
   identifier: string,
@@ -119,8 +125,13 @@ export function displayImportResults(
   console.log(`\n✅ ${label} import complete!`);
   console.log(`📦 ${label}: ${identifier}`);
   console.log(`📝 Description: ${result.description}`);
+
+  const deletedPart =
+    result.results.deleted != null && result.results.deleted > 0
+      ? `, ${result.results.deleted} deleted`
+      : '';
   console.log(
-    `📊 Results: ${result.results.success} success, ${result.results.skipped} skipped, ${result.results.failed} failed`,
+    `📊 Results: ${result.results.success} success, ${result.results.skipped} skipped, ${result.results.failed} failed${deletedPart}`,
   );
 
   if (Object.keys(result.objectsByType).length > 0) {
@@ -128,6 +139,13 @@ export function displayImportResults(
     for (const [type, count] of Object.entries(result.objectsByType)) {
       const icon = IconRegistry.getIcon(type);
       console.log(`   ${icon} ${type}: ${count}`);
+    }
+  }
+
+  if (result.filesRemoved && result.filesRemoved.length > 0) {
+    console.log(`\n🗑️  Files removed (${result.filesRemoved.length}):`);
+    for (const f of result.filesRemoved) {
+      console.log(`   - ${f}`);
     }
   }
 

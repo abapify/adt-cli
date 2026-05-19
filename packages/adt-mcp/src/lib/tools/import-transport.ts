@@ -40,6 +40,24 @@ export function registerImportTransportTool(
         .describe(
           'Optional list of object types to filter (e.g. ["CLAS","INTF"])',
         ),
+      applyDeletions: z
+        .boolean()
+        .optional()
+        .describe(
+          'Whether to remove local files for objects marked with obj_func=D (default: true)',
+        ),
+      deletionObjFunc: z
+        .string()
+        .optional()
+        .describe('Object function code(s) that trigger deletion (default: D)'),
+      deletionPgmid: z
+        .string()
+        .optional()
+        .describe('Program ID filter for deletion objects (default: R3TR)'),
+      alsoTransports: z
+        .array(z.string())
+        .optional()
+        .describe('Additional transport numbers to merge into the import'),
     },
     async (args, extra) => {
       try {
@@ -55,6 +73,10 @@ export function registerImportTransportTool(
           outputPath,
           objectTypes: args.objectTypes,
           format,
+          applyDeletions: args.applyDeletions,
+          deletionObjFunc: args.deletionObjFunc,
+          deletionPgmid: args.deletionPgmid,
+          alsoTransports: args.alsoTransports,
         });
 
         return {
@@ -68,9 +90,11 @@ export function registerImportTransportTool(
                   success: result.results.success,
                   skipped: result.results.skipped,
                   failed: result.results.failed,
+                  deleted: result.results.deleted,
                   objectsByType: result.objectsByType,
                   outputPath: result.outputPath,
                   description: result.description,
+                  filesRemoved: result.filesRemoved,
                 },
                 null,
                 2,

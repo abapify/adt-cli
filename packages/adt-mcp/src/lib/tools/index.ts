@@ -92,6 +92,7 @@ import { registerUnpublishSrvbTool } from './unpublish-srvb';
 // CTS + package parity tools
 import { registerCtsUpdateTransportTool } from './cts-update-transport';
 import { registerCtsReassignTransportTool } from './cts-reassign-transport';
+import { registerCtsTransportObjectsTool } from './cts-transport-objects';
 import { registerStatPackageTool } from './stat-package';
 import { registerGetPackageTool } from './get-package';
 import { registerLookupUserTool } from './lookup-user';
@@ -187,6 +188,7 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   // CTS + package parity tools
   registerCtsUpdateTransportTool(server, ctx);
   registerCtsReassignTransportTool(server, ctx);
+  registerCtsTransportObjectsTool(server, ctx);
   registerStatPackageTool(server, ctx);
   registerGetPackageTool(server, ctx);
   registerLookupUserTool(server, ctx);
