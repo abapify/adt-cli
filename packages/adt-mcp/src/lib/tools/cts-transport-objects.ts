@@ -15,7 +15,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
-import { initializeAdk, AdkTransport, MergedTransportView } from '@abapify/adk';
+import { initializeAdk, AdkTransport } from '@abapify/adk';
 import type {
   TransportObjectSelector,
   AdkTransportObjectRef,

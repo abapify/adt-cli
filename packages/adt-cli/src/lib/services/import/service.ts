@@ -259,20 +259,29 @@ export class ImportService {
       loadedTransports.push(...transports);
       const merged = new MergedTransportView(transports);
       allObjects = merged.objects;
-      transportDescription = `${allTransportNumbers[0]} (+${allTransportNumbers.length - 1} more)`;
+      transportDescription =
+        transports.find((tr) => tr.description?.trim())?.description ??
+        `${allTransportNumbers[0]} (+${allTransportNumbers.length - 1} more)`;
     }
 
     // Fixed deletion selector: obj_func === 'D' and pgmid === 'R3TR'
     // These are not configurable in v1 (CORR/release-note entries are skipped via pgmid filter)
     const applyDeletions = options.applyDeletions !== false; // default: true
-    const deletionObjects = applyDeletions
-      ? allObjects.filter((o) =>
-          matchesSelector(o, { objFunc: 'D', pgmid: 'R3TR' }),
-        )
-      : [];
-    const activeObjects = allObjects.filter(
-      (o) => !deletionObjects.includes(o),
-    );
+    let deletionObjects: typeof allObjects = [];
+    let activeObjects: typeof allObjects = allObjects;
+
+    if (applyDeletions) {
+      deletionObjects = [];
+      activeObjects = [];
+
+      for (const object of allObjects) {
+        if (matchesSelector(object, { objFunc: 'D', pgmid: 'R3TR' })) {
+          deletionObjects.push(object);
+        } else {
+          activeObjects.push(object);
+        }
+      }
+    }
 
     // Apply object type filter to active objects
     let objectsToImport = activeObjects;
