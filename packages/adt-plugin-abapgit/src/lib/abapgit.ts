@@ -208,18 +208,31 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
         );
 
         const filesRemoved: string[] = [];
+        const errors: string[] = [];
         for (const filePath of matchedFiles) {
           try {
             unlinkSync(filePath);
             filesRemoved.push(relative(targetPath, filePath));
-          } catch {
-            // If file is already gone, treat as success
+          } catch (error) {
+            const unlinkError = error as NodeJS.ErrnoException;
+            if (unlinkError.code === 'ENOENT') {
+              // File is already gone, treat as success because the desired end state is reached.
+              filesRemoved.push(relative(targetPath, filePath));
+              continue;
+            }
+
+            errors.push(
+              error instanceof Error
+                ? `Failed to delete ${relative(targetPath, filePath)}: ${error.message}`
+                : `Failed to delete ${relative(targetPath, filePath)}: ${String(error)}`,
+            );
           }
         }
 
         return {
-          success: true,
+          success: errors.length === 0,
           filesRemoved,
+          ...(errors.length > 0 ? { errors } : {}),
         };
       } catch (error) {
         return {
