@@ -64,7 +64,7 @@ export const ctsObjectsCommand = new Command('objects')
 
       // Load and optionally merge transports
       let objects: AdkTransportObjectRef[];
-      let sourceTransportMap: Map<string, string> = new Map(); // key → TR number
+      const sourceTransportMap: Map<string, string> = new Map(); // key → TR number
 
       if (allTransportNumbers.length === 1) {
         const tr = await AdkTransport.get(transport);
