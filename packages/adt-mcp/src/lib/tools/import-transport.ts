@@ -23,7 +23,7 @@ export function registerImportTransportTool(
     'Export all objects referenced by a transport request to a local folder. Mirrors `adt import transport`.',
     {
       ...sessionOrConnectionShape,
-      transports: z
+      transportNumber: z
         .string()
         .describe(
           'Transport request number(s), comma-separated for multiple (e.g. "DEVK900001" or "DEVK900001,DEVK900002")',
@@ -71,7 +71,7 @@ export function registerImportTransportTool(
         const format = args.format ?? 'abapgit';
 
         const result = await service.importTransport({
-          transportNumber: args.transports,
+          transportNumber: args.transportNumber,
           outputPath,
           objectTypes: args.objectTypes,
           format,

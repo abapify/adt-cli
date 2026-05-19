@@ -50,6 +50,41 @@ function walkDir(dir: string, results: string[] = []): string[] {
 }
 
 /**
+ * Lazy per-srcDir file index.
+ *
+ * Maps srcDir → (prefix → [absolute file paths]), where prefix is
+ * `${name}.${type}.` in lower-case.  Built at most once per srcDir per
+ * process, so the O(repo-size) directory walk is amortised across all
+ * `format.delete()` calls in a single import run instead of repeated for
+ * every deleted object.
+ */
+const srcDirIndexCache = new Map<string, Map<string, string[]>>();
+
+function getOrBuildSrcIndex(srcDir: string): Map<string, string[]> {
+  const cached = srcDirIndexCache.get(srcDir);
+  if (cached) return cached;
+
+  const index = new Map<string, string[]>();
+  for (const filePath of walkDir(srcDir)) {
+    const fname = basename(filePath).toLowerCase();
+    // Extract the "<name>.<type>." prefix (first two dot-segments + trailing dot)
+    const first = fname.indexOf('.');
+    if (first === -1) continue;
+    const second = fname.indexOf('.', first + 1);
+    if (second === -1) continue;
+    const key = fname.substring(0, second + 1); // e.g. "zcl_foo.clas."
+    const bucket = index.get(key);
+    if (bucket) {
+      bucket.push(filePath);
+    } else {
+      index.set(key, [filePath]);
+    }
+  }
+  srcDirIndexCache.set(srcDir, index);
+  return index;
+}
+
+/**
  * Find all abapGit files for a given object name and type.
  *
  * abapGit naming convention: `{name}.{type}[.suffix].{ext}`
@@ -60,11 +95,13 @@ function walkDir(dir: string, results: string[] = []): string[] {
  * `ztabl_del.tabl.` cannot accidentally match `ztabl_del_ext.tabl.xml`
  * because the separator after `ztabl_del` in the prefix is `.` while the
  * other file has `_ext.`.
+ *
+ * Uses a lazy per-srcDir index so the directory tree is walked at most once
+ * per deletion batch rather than once per object.
  */
 function findObjectFiles(srcDir: string, name: string, type: string): string[] {
   const prefix = `${name.toLowerCase()}.${type.toLowerCase()}.`;
-  const allFiles = walkDir(srcDir);
-  return allFiles.filter((f) => basename(f).startsWith(prefix));
+  return getOrBuildSrcIndex(srcDir).get(prefix) ?? [];
 }
 
 function readFolderLogicFromExistingRepo(

@@ -304,6 +304,15 @@ export class ImportService {
     const total = objectsToImport.length;
     let processed = 0;
 
+    // Build the import context once — shared by the active-object pass
+    // (line ~380 below), the orphan-sync missing-object deletion path
+    // (line ~350 below), and the CTS deletion pass (line ~430 below).
+    const importContext: ImportContext = {
+      resolvePackagePath,
+      formatOptions: options.formatOptions,
+      configFormatOptions,
+    };
+
     console.log(`📦 Processing ${total} active objects...`);
 
     // Process active objects in parallel
@@ -340,15 +349,10 @@ export class ImportService {
                 `  🗑️  [${progress}/${total}] ${objRef.type} ${objRef.name}: not found in SAP → removing local files`,
               );
               try {
-                const context: ImportContext = {
-                  resolvePackagePath,
-                  formatOptions: options.formatOptions,
-                  configFormatOptions,
-                };
                 const delResult = await deleteFn(
                   { pgmid: objRef.pgmid, type: objRef.type, name: objRef.name },
                   options.outputPath,
-                  context,
+                  importContext,
                 );
                 if (delResult.success) {
                   results.deleted++;
@@ -375,19 +379,11 @@ export class ImportService {
             return;
           }
 
-          // Build import context - plugin handles path logic based on its format rules
-          // CLI provides a resolver function to get full package hierarchy from SAP
-          const context: ImportContext = {
-            resolvePackagePath,
-            formatOptions: options.formatOptions,
-            configFormatOptions,
-          };
-
           // Delegate to plugin - import object from SAP to local files
           const result = await plugin.instance.format.import(
             adkObject as any, // ADK object type
             options.outputPath,
-            context,
+            importContext,
           );
 
           if (result.success) {
@@ -433,16 +429,10 @@ export class ImportService {
                 `  🗑️  [${progress}/${delTotal}] ${objRef.type} ${objRef.name}`,
               );
 
-              const context: ImportContext = {
-                resolvePackagePath,
-                formatOptions: options.formatOptions,
-                configFormatOptions,
-              };
-
               const delResult = await plugin.instance.format.delete!(
                 { pgmid: objRef.pgmid, type: objRef.type, name: objRef.name },
                 options.outputPath,
-                context,
+                importContext,
               );
 
               if (delResult.success) {
