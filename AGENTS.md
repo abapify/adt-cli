@@ -24,9 +24,9 @@
 
 ## Workspace agents (shared across Cursor / Windsurf / CLI agents)
 
-- Canonical rules, skills, workflows, and ADT command docs: **`.agents/`** — start at [`.agents/README.md`](.agents/README.md).
+- Canonical rules, skills, workflows, and ADT command docs: **`.agents/`** — start at [`.agents/repo-guide.md`](.agents/repo-guide.md).
 - Repository layout, MCP↔CLI coupling, rules index, and package guides: [`.agents/repo-guide.md`](.agents/repo-guide.md).
 - Cursor-specific discovery only: **`.cursor/`** (slash commands → `.agents/workflows/`, thin skill stubs → `.agents/skills/`).
-- Claude Code native layer: **`.claude/`** — same delegation pattern; keep hooks/settings here ([`.claude/README.md`](.claude/README.md)).
-- Multi-runtime registry: **`.agents/agents/`** (`README.md`, `manifest.yaml`).
+- Claude Code native layer: **`.claude/`** — same delegation pattern; keep hooks/settings here (see [`.agents/README.md`](.agents/README.md)).
+- Multi-runtime registry: **`.agents/agents/`** (`cursor-ide.md`, `claude-code.md`).
 - Legacy Windsurf paths under **`.windsurf/`** are redirect stubs; extend `.agents/` instead.

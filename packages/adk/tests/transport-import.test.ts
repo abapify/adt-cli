@@ -13,7 +13,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock the ADT client
-// Response must have 'root' wrapper to match TransportmanagmentSingleSchema
+// Response must have 'root' wrapper to match TransportmanagementSingleSchema
 const mockTransportResponse = {
   root: {
     object_type: 'K',

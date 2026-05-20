@@ -315,7 +315,7 @@ describe('ImportService.importTransport()', () => {
     expect(result.metadataFiles).toBeUndefined();
   });
 
-  it('calls format.delete() for objects that cannot be fetched from SAP when removeMissingObjects is true', async () => {
+  it('should delete objects that cannot be fetched when removeMissingObjects is true', async () => {
     // Object is in TR but load() returns null → simulate "not found in SAP"
     const missingObj = {
       pgmid: 'R3TR',
