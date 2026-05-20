@@ -14,7 +14,6 @@ import type { AdkObject } from '@abapify/adk';
  * ABAP object type code (e.g., 'CLAS', 'INTF', 'DOMA')
  */
 export type AbapObjectType = string;
-
 /**
  * Primitive value accepted for format/plugin options.
  */
@@ -59,6 +58,16 @@ export interface ImportContext {
 export interface ImportResult {
   success: boolean;
   filesCreated: string[];
+  errors?: string[];
+}
+
+/**
+ * Result of a deletion operation (removing local files for a deleted object)
+ */
+export interface DeleteResult {
+  success: boolean;
+  /** Local file paths that were removed */
+  filesRemoved: string[];
   errors?: string[];
 }
 
@@ -193,6 +202,23 @@ export interface AdtPlugin {
       targetPath: string,
       context: ImportContext,
     ): Promise<ImportResult>;
+
+    /**
+     * Delete local files for an object that was marked for deletion in SAP.
+     *
+     * The plugin uses the same path-resolution rules as `import()` to locate
+     * the files, then removes them from the file system.
+     *
+     * @param objectRef   - Lightweight object reference (type, name, pgmid)
+     * @param targetPath  - Base output directory (same as used for import)
+     * @param context     - Import context (package path resolver, format options)
+     * @returns List of file paths removed, or empty if nothing was found
+     */
+    delete?(
+      objectRef: { pgmid: string; type: string; name: string },
+      targetPath: string,
+      context: ImportContext,
+    ): Promise<DeleteResult>;
 
     /**
      * Export from file system to ADK objects (Git → SAP)

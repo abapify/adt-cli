@@ -276,4 +276,56 @@ describe('parity: cts', () => {
     expect(Array.isArray(mcp.json.transports)).toBe(true);
     expect(mcp.json.count).toBeGreaterThan(0);
   });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 9. Objects query (CLI `cts tr objects` + MCP `cts_transport_objects`)
+  // ──────────────────────────────────────────────────────────────────────────
+  it('objects query: CLI `cts tr objects` and MCP `cts_transport_objects`', async () => {
+    const cli = await runCliCommand(harness, [
+      'cts',
+      'tr',
+      'objects',
+      'DEVK900001',
+      '--json',
+    ]);
+    expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
+
+    const cliJson = extractJson<{
+      transports: string[];
+      objects: Array<{
+        pgmid: string;
+        type: string;
+        name: string;
+        obj_func: string;
+      }>;
+    }>(cli);
+    expect(cliJson).toBeDefined();
+    expect(Array.isArray(cliJson!.transports)).toBe(true);
+    expect(Array.isArray(cliJson!.objects)).toBe(true);
+
+    const mcp = await callMcpTool<{
+      transports: string[];
+      objects: Array<{
+        pgmid: string;
+        type: string;
+        name: string;
+        obj_func: string;
+      }>;
+    }>(harness, 'cts_transport_objects', {
+      transport: 'DEVK900001',
+    });
+    expect(mcp.isError).toBe(false);
+    expect(Array.isArray(mcp.json.transports)).toBe(true);
+    expect(Array.isArray(mcp.json.objects)).toBe(true);
+
+    // Parity: same object count and same object names (order-independent)
+    expect(mcp.json.objects.length).toBe(cliJson!.objects.length);
+    const cliNames = cliJson!.objects
+      .map((o) => o.name)
+      .sort((a, b) => a.localeCompare(b));
+    const mcpNames = mcp.json.objects
+      .map((o) => o.name)
+      .sort((a, b) => a.localeCompare(b));
+    expect(cliNames).toEqual(mcpNames);
+  });
 });

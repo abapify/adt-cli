@@ -28,6 +28,31 @@ interface TransportObjectData {
   obj_desc?: string;
   obj_info?: string;
   lock_status?: string;
+  /** Object function code (e.g. 'D' = deletion, 'K' = key, '' = modification) */
+  obj_func?: string;
+}
+
+/**
+ * Selector for filtering transport objects.
+ *
+ * All specified dimensions are ANDed together.
+ * Use '*' for a wildcard that matches any non-empty value.
+ */
+export interface TransportObjectSelector {
+  /**
+   * Filter by object function code.
+   * 'D' = deletion only, 'K' = key only, '*' = any non-empty value, '' = empty (normal)
+   */
+  objFunc?: string | string[];
+  /**
+   * Filter by program ID.
+   * 'R3TR' = repository objects, 'LIMU' = sub-objects, '*' = any
+   */
+  pgmid?: string | string[];
+  /**
+   * Filter by object type (e.g. 'CLAS', 'TABL', '*' = any)
+   */
+  type?: string | string[];
 }
 
 interface TransportTaskData {
@@ -48,6 +73,45 @@ export type { TransportGetResponse as TransportResponse };
 function asArray<T>(val: T | T[] | undefined): T[] {
   if (!val) return [];
   return Array.isArray(val) ? val : [val];
+}
+
+/**
+ * Check if a value matches a selector dimension.
+ *
+ * - If `expected` is undefined → no filter (always matches).
+ * - If `expected` is '*' → matches any truthy value.
+ * - If `expected` is an array → value must be in the array.
+ * - Otherwise exact match (case-insensitive).
+ */
+function matchesDimension(
+  value: string,
+  expected: string | string[] | undefined,
+): boolean {
+  if (expected === undefined) return true;
+  if (Array.isArray(expected)) {
+    return expected.some((e) =>
+      e === '*' ? !!value : e.toUpperCase() === value.toUpperCase(),
+    );
+  }
+  if (expected === '*') return !!value;
+  return expected.toUpperCase() === value.toUpperCase();
+}
+
+/**
+ * Check if an object ref matches all dimensions of a {@link TransportObjectSelector}.
+ *
+ * Exported so that consumers (e.g. import service) can reuse the same logic
+ * without duplicating it.
+ */
+export function matchesSelector(
+  obj: AdkTransportObjectRef,
+  selector: TransportObjectSelector,
+): boolean {
+  return (
+    matchesDimension(obj.objFunc, selector.objFunc) &&
+    matchesDimension(obj.pgmid, selector.pgmid) &&
+    matchesDimension(obj.type, selector.type)
+  );
 }
 
 /**
@@ -90,6 +154,19 @@ export class AdkTransportObjectRef {
   /** Object description */
   get description(): string | undefined {
     return this.data.obj_desc;
+  }
+
+  /**
+   * Object function code (SAP OBJFUNC).
+   * 'D' = marked for deletion, 'K' = key entry, '' = regular modification.
+   */
+  get objFunc(): string {
+    return this.data.obj_func ?? '';
+  }
+
+  /** Whether this object is marked for deletion (obj_func === 'D') */
+  get isDeleted(): boolean {
+    return this.data.obj_func === 'D';
   }
 
   /** Full object key (PGMID/TYPE/NAME) */
@@ -312,6 +389,32 @@ export class AdkTransport {
   }
 
   /**
+   * Get objects filtered by a {@link TransportObjectSelector}.
+   *
+   * All dimensions specified in the selector are ANDed together.
+   *
+   * @example
+   * ```typescript
+   * // Get only deletion objects with pgmid=R3TR
+   * const deleted = transport.getObjectsBySelector({ objFunc: 'D', pgmid: 'R3TR' });
+   * ```
+   */
+  getObjectsBySelector(
+    selector: TransportObjectSelector,
+  ): AdkTransportObjectRef[] {
+    return this.objects.filter((obj) => matchesSelector(obj, selector));
+  }
+
+  /**
+   * Convenience accessor for objects marked for deletion (obj_func === 'D').
+   *
+   * Equivalent to `getObjectsBySelector({ objFunc: 'D' })`.
+   */
+  get deletionObjects(): AdkTransportObjectRef[] {
+    return this.getObjectsBySelector({ objFunc: 'D' });
+  }
+
+  /**
    * Get unique object types in this transport
    */
   getObjectTypes(): string[] {
@@ -360,5 +463,152 @@ export class AdkTransport {
     const response = await context.client.adt.cts.transportrequests.get(number);
     // Unwrap the root element from the response
     return new AdkTransport(context, response.root);
+  }
+
+  /**
+   * Load multiple transports and merge their objects into a single view.
+   *
+   * De-duplication key is `pgmid/type/name`. When the same key appears in
+   * multiple transports the **first** occurrence wins (first transport in the
+   * `numbers` array).  The source transport number is available via
+   * `AdkTransportObjectRef.sourceTransport`.
+   *
+   * @param numbers - Transport numbers to load and merge
+   * @param ctx     - Optional ADK context
+   *
+   * @example
+   * ```typescript
+   * const merged = await AdkTransport.merge(['DEVK900001', 'DEVK900002']);
+   * const deletions = merged.getObjectsBySelector({ objFunc: 'D' });
+   * ```
+   */
+  static async merge(
+    numbers: string[],
+    ctx?: AdkContext,
+  ): Promise<MergedTransportView> {
+    const transports = await Promise.all(
+      numbers.map((n) => AdkTransport.get(n, ctx)),
+    );
+    return new MergedTransportView(transports);
+  }
+}
+
+/**
+ * Result of resolving transport objects (single or multi-TR).
+ *
+ * Returned by {@link resolveTransportObjects}.
+ */
+export interface ResolvedTransportObjects {
+  /** Deduplicated list of transport objects (first-win across TRs). */
+  objects: AdkTransportObjectRef[];
+  /** Maps each object key to the TR number it was sourced from. */
+  sourceTransportMap: Map<string, string>;
+}
+
+/**
+ * Load and resolve objects from one or more transport numbers, with optional
+ * selector-based filtering and deduplication across TRs.
+ *
+ * This is the shared logic used by both the CLI `cts tr objects` command and
+ * the MCP `cts_transport_objects` tool — extracted here to avoid duplication.
+ *
+ * @param transportNumbers - Ordered list of TR numbers (first-win deduplication).
+ * @param selector         - Optional dimension filter (objFunc, pgmid, type).
+ * @param ctx              - Optional ADK context (uses global context if omitted).
+ */
+export async function resolveTransportObjects(
+  transportNumbers: string[],
+  selector: TransportObjectSelector,
+  ctx?: AdkContext,
+): Promise<ResolvedTransportObjects> {
+  const hasFilter = Object.keys(selector).length > 0;
+  const objects: AdkTransportObjectRef[] = [];
+  const sourceTransportMap = new Map<string, string>();
+
+  if (transportNumbers.length === 1) {
+    const primaryNumber = transportNumbers[0] ?? '';
+    const tr = await AdkTransport.get(primaryNumber, ctx);
+    const filtered = hasFilter ? tr.getObjectsBySelector(selector) : tr.objects;
+    for (const obj of filtered) {
+      objects.push(obj);
+      sourceTransportMap.set(obj.key, primaryNumber);
+    }
+  } else {
+    const transports = await Promise.all(
+      transportNumbers.map((n) => AdkTransport.get(n, ctx)),
+    );
+    const seen = new Set<string>();
+    for (const tr of transports) {
+      const filtered = hasFilter
+        ? tr.getObjectsBySelector(selector)
+        : tr.objects;
+      for (const obj of filtered) {
+        if (!seen.has(obj.key)) {
+          seen.add(obj.key);
+          objects.push(obj);
+          sourceTransportMap.set(obj.key, tr.number);
+        }
+      }
+    }
+  }
+
+  return { objects, sourceTransportMap };
+}
+
+/**
+ * Merged view of objects from multiple transports.
+ *
+ * De-duplicates by `pgmid/type/name`; first occurrence wins.
+ */
+export class MergedTransportView {
+  private readonly _objects: AdkTransportObjectRef[];
+  readonly transports: AdkTransport[];
+
+  constructor(transports: AdkTransport[]) {
+    this.transports = transports;
+    const seen = new Set<string>();
+    const all: AdkTransportObjectRef[] = [];
+    for (const tr of transports) {
+      for (const obj of tr.objects) {
+        if (!seen.has(obj.key)) {
+          seen.add(obj.key);
+          all.push(obj);
+        }
+      }
+    }
+    this._objects = all;
+  }
+
+  /** All objects across transports (deduplicated) */
+  get objects(): AdkTransportObjectRef[] {
+    return this._objects;
+  }
+
+  /** Objects matching a selector across all transports */
+  getObjectsBySelector(
+    selector: TransportObjectSelector,
+  ): AdkTransportObjectRef[] {
+    return this._objects.filter((obj) => matchesSelector(obj, selector));
+  }
+
+  /** Convenience: objects marked for deletion (obj_func === 'D') */
+  get deletionObjects(): AdkTransportObjectRef[] {
+    return this.getObjectsBySelector({ objFunc: 'D' });
+  }
+
+  /**
+   * Load multiple transports and return a merged view.
+   *
+   * @param numbers - Transport numbers to load and merge
+   * @param ctx     - Optional ADK context
+   */
+  static async create(
+    numbers: string[],
+    ctx?: AdkContext,
+  ): Promise<MergedTransportView> {
+    const transports = await Promise.all(
+      numbers.map((n) => AdkTransport.get(n, ctx)),
+    );
+    return new MergedTransportView(transports);
   }
 }

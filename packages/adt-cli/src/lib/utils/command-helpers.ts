@@ -109,9 +109,15 @@ export function handleImportError(error: unknown, debug = false): never {
 export function displayImportResults(
   result: {
     description: string;
-    results: { success: number; skipped: number; failed: number };
+    results: {
+      success: number;
+      skipped: number;
+      failed: number;
+      deleted?: number;
+    };
     objectsByType: Record<string, number>;
     outputPath: string;
+    filesRemoved?: string[];
   },
   label: string,
   identifier: string,
@@ -119,8 +125,13 @@ export function displayImportResults(
   console.log(`\n✅ ${label} import complete!`);
   console.log(`📦 ${label}: ${identifier}`);
   console.log(`📝 Description: ${result.description}`);
+
+  const deletedPart =
+    result.results.deleted != null && result.results.deleted > 0
+      ? `, ${result.results.deleted} deleted`
+      : '';
   console.log(
-    `📊 Results: ${result.results.success} success, ${result.results.skipped} skipped, ${result.results.failed} failed`,
+    `📊 Results: ${result.results.success} success, ${result.results.skipped} skipped, ${result.results.failed} failed${deletedPart}`,
   );
 
   if (Object.keys(result.objectsByType).length > 0) {
@@ -131,5 +142,76 @@ export function displayImportResults(
     }
   }
 
+  if (result.filesRemoved && result.filesRemoved.length > 0) {
+    console.log(`\n🗑️  Files removed (${result.filesRemoved.length}):`);
+    for (const f of result.filesRemoved) {
+      console.log(`   - ${f}`);
+    }
+  }
+
   console.log(`\n✨ Files written to: ${result.outputPath}`);
+}
+
+/**
+ * Parse a comma-separated CLI option string into a single string or an array.
+ *
+ * - Returns `undefined` when the input is falsy or contains no non-empty tokens.
+ * - Returns a `string` when exactly one token is present (preserves the scalar
+ *   form expected by selector types such as {@link TransportObjectSelector}).
+ * - Returns `string[]` when two or more tokens are present.
+ * - When `upperCase` is true every token is uppercased before returning.
+ *
+ * SAP object names and types do **not** contain commas, so this is safe to
+ * use for all CTS filter options.
+ *
+ * @example
+ * parseFilterOption('D')           // → 'D'
+ * parseFilterOption('D,K')         // → ['D', 'K']
+ * parseFilterOption('CLAS, TABL')  // → ['CLAS', 'TABL']
+ * parseFilterOption(undefined)     // → undefined
+ */
+export function parseFilterOption(
+  value: string | undefined,
+  upperCase = false,
+): string | string[] | undefined {
+  if (!value) return undefined;
+  const parts = value
+    .split(',')
+    .map((s) => (upperCase ? s.trim().toUpperCase() : s.trim()))
+    .filter(Boolean);
+  if (parts.length === 0) return undefined;
+  return parts.length === 1 ? parts[0] : parts;
+}
+
+/**
+ * Parse a comma-separated string of SAP transport numbers into a deduplicated
+ * uppercase array.
+ *
+ * Trims whitespace, uppercases, filters empty tokens, and removes duplicates
+ * while preserving insertion order (O(n) via Set).
+ *
+ * Throws when no valid transport numbers are found.
+ *
+ * @example
+ * parseTransportNumbers('DEVK900001')                    // → ['DEVK900001']
+ * parseTransportNumbers('DEVK900001, DEVK900002')        // → ['DEVK900001', 'DEVK900002']
+ * parseTransportNumbers('DEVK900001,DEVK900001')         // → ['DEVK900001']  (deduped)
+ */
+export function parseTransportNumbers(value: string): string[] {
+  const seen = new Set<string>();
+  const numbers = value
+    .split(',')
+    .map((n) => n.trim().toUpperCase())
+    .filter(Boolean)
+    .filter((n) => {
+      if (seen.has(n)) return false;
+      seen.add(n);
+      return true;
+    });
+
+  if (numbers.length === 0) {
+    throw new Error(`No transport number(s) provided in '${value}'`);
+  }
+
+  return numbers;
 }

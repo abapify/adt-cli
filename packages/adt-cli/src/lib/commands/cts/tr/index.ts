@@ -4,6 +4,7 @@
  * Subcommands for transport request operations:
  * - adt cts tr list                    - List transports
  * - adt cts tr get <TR>               - Get transport details
+ * - adt cts tr objects <TR>           - List/filter transport objects
  * - adt cts tr create                  - Create new transport
  * - adt cts tr set <TR>               - Update transport (non-interactive)
  * - adt cts tr delete <TR>            - Delete transport (with confirmation)
@@ -15,6 +16,7 @@
 import { Command } from 'commander';
 import { ctsListCommand } from './list';
 import { ctsGetCommand } from './get';
+import { ctsObjectsCommand } from './objects';
 import { ctsCreateCommand } from './create';
 import { ctsSetCommand } from './set';
 import { ctsDeleteCommand } from './delete';
@@ -26,6 +28,7 @@ export function createTrCommand(): Command {
 
   trCmd.addCommand(ctsListCommand);
   trCmd.addCommand(ctsGetCommand);
+  trCmd.addCommand(ctsObjectsCommand);
   trCmd.addCommand(ctsCreateCommand);
   trCmd.addCommand(ctsSetCommand);
   trCmd.addCommand(ctsDeleteCommand);

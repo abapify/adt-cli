@@ -25,7 +25,9 @@ export function registerImportTransportTool(
       ...sessionOrConnectionShape,
       transportNumber: z
         .string()
-        .describe('Transport request number (e.g. DEVK900123)'),
+        .describe(
+          'Transport request number(s), comma-separated for multiple (e.g. "DEVK900001" or "DEVK900001,DEVK900002")',
+        ),
       outputDir: z
         .string()
         .optional()
@@ -39,6 +41,24 @@ export function registerImportTransportTool(
         .optional()
         .describe(
           'Optional list of object types to filter (e.g. ["CLAS","INTF"])',
+        ),
+      applyDeletions: z
+        .boolean()
+        .optional()
+        .describe(
+          'Whether to remove local files for objects marked with obj_func=D and pgmid=R3TR (default: true)',
+        ),
+      saveTrMetadata: z
+        .boolean()
+        .optional()
+        .describe(
+          'Write a JSON sidecar for each transport to <outputDir>/.adt/tr/<TRKORR>.json (default: false)',
+        ),
+      removeMissingObjects: z
+        .boolean()
+        .optional()
+        .describe(
+          'Remove local files for objects in the TR that cannot be fetched from SAP (orphan sync, default: false)',
         ),
     },
     async (args, extra) => {
@@ -55,6 +75,9 @@ export function registerImportTransportTool(
           outputPath,
           objectTypes: args.objectTypes,
           format,
+          applyDeletions: args.applyDeletions,
+          saveTrMetadata: args.saveTrMetadata,
+          removeMissingObjects: args.removeMissingObjects,
         });
 
         return {
@@ -68,9 +91,12 @@ export function registerImportTransportTool(
                   success: result.results.success,
                   skipped: result.results.skipped,
                   failed: result.results.failed,
+                  deleted: result.results.deleted,
                   objectsByType: result.objectsByType,
                   outputPath: result.outputPath,
                   description: result.description,
+                  filesRemoved: result.filesRemoved,
+                  metadataFiles: result.metadataFiles,
                 },
                 null,
                 2,

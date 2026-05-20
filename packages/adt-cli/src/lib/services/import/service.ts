@@ -1,13 +1,19 @@
 import { loadFormatPlugin, parseFormatSpec } from '../../utils/format-loader';
 import { getConfig } from '../../utils/destinations';
+import { parseTransportNumbers } from '../../utils/command-helpers';
 import type { ImportContext, FormatOptionValue } from '@abapify/adt-plugin';
 import {
   AdkPackage,
   AdkTransport,
+  MergedTransportView,
+  matchesSelector,
   getGlobalContext,
   createAdkFactory,
 } from '@abapify/adk';
+import type { AdkTransportObjectRef } from '@abapify/adk';
 import { Readable } from 'node:stream';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 /** Default number of concurrent SAP requests during import */
 const IMPORT_CONCURRENCY = 5;
@@ -57,7 +63,13 @@ export interface ObjectImportOptions {
  * Options for importing a transport request
  */
 export interface TransportImportOptions {
-  /** Transport request number (e.g., 'DEVK900123') */
+  /**
+   * Transport request number(s).
+   *
+   * Accepts a single number or a comma-separated list:
+   *   - `'DEVK900001'` — single TR
+   *   - `'DEVK900001,DEVK900002,DEVK900003'` — multiple TRs (merged, deduplicated)
+   */
   transportNumber: string;
   /** Output directory for serialized files */
   outputPath: string;
@@ -69,6 +81,28 @@ export interface TransportImportOptions {
   formatOptions?: Record<string, FormatOptionValue>;
   /** Enable debug output */
   debug?: boolean;
+  /**
+   * Whether to apply deletions for objects marked with obj_func=D and pgmid=R3TR.
+   * Default: true
+   */
+  applyDeletions?: boolean;
+  /**
+   * When true, write a JSON sidecar for each transport to
+   * `<outputPath>/.adt/tr/<TRKORR>.json` with normalized transport metadata.
+   * Default: false
+   */
+  saveTrMetadata?: boolean;
+  /**
+   * When true, objects that are in the TR list but cannot be fetched from SAP
+   * (i.e., `objRef.load()` returns null — the object no longer exists in the system)
+   * are treated as deletions: `format.delete()` is called to remove their local files.
+   *
+   * This catches the "orphan sync" case where an object was removed in SAP without
+   * an explicit `obj_func=D` entry in the transport.
+   *
+   * Default: false (backward-compatible; previously counted as skipped)
+   */
+  removeMissingObjects?: boolean;
 }
 
 /**
@@ -110,11 +144,17 @@ export interface ImportResult {
     success: number;
     skipped: number;
     failed: number;
+    /** Objects deleted from the file system (obj_func=D) */
+    deleted: number;
   };
   /** Objects by type */
   objectsByType: Record<string, number>;
   /** Output path */
   outputPath: string;
+  /** Files removed during deletion pass */
+  filesRemoved?: string[];
+  /** Metadata sidecar files written (when saveTrMetadata is true) */
+  metadataFiles?: string[];
 }
 
 /**
@@ -192,33 +232,90 @@ export class ImportService {
       console.log(`✅ Loaded plugin: ${plugin.name}`);
     }
 
-    // Fetch transport
-    if (options.debug) {
-      console.log(`🚛 Fetching transport: ${options.transportNumber}`);
-    }
-    const transport = await AdkTransport.get(options.transportNumber);
+    // Parse comma-separated transport numbers from positional argument (dedup + uppercase)
+    const allTransportNumbers = parseTransportNumbers(options.transportNumber);
 
-    // Filter by object types if specified
-    let objectsToImport = transport.objects;
+    if (options.debug) {
+      console.log(
+        `🚛 Fetching transport(s): ${allTransportNumbers.join(', ')}`,
+      );
+    }
+
+    // Resolve transport objects (single or merged)
+    let allObjects: AdkTransportObjectRef[];
+    let transportDescription: string;
+    // Keep individual transport instances for metadata writing
+    const loadedTransports: AdkTransport[] = [];
+
+    if (allTransportNumbers.length === 1) {
+      const transport = await AdkTransport.get(allTransportNumbers[0]);
+      loadedTransports.push(transport);
+      allObjects = transport.objects;
+      transportDescription = transport.description;
+    } else {
+      const transports = await Promise.all(
+        allTransportNumbers.map((n) => AdkTransport.get(n)),
+      );
+      loadedTransports.push(...transports);
+      const merged = new MergedTransportView(transports);
+      allObjects = merged.objects;
+      transportDescription =
+        transports.find((tr) => tr.description?.trim())?.description ??
+        `${allTransportNumbers[0]} (+${allTransportNumbers.length - 1} more)`;
+    }
+
+    // Fixed deletion selector: obj_func === 'D' and pgmid === 'R3TR'
+    // These are not configurable in v1 (CORR/release-note entries are skipped via pgmid filter)
+    const applyDeletions = options.applyDeletions !== false; // default: true
+    let deletionObjects: typeof allObjects = [];
+    let activeObjects: typeof allObjects = allObjects;
+
+    if (applyDeletions) {
+      deletionObjects = [];
+      activeObjects = [];
+
+      for (const object of allObjects) {
+        if (matchesSelector(object, { objFunc: 'D', pgmid: 'R3TR' })) {
+          deletionObjects.push(object);
+        } else {
+          activeObjects.push(object);
+        }
+      }
+    }
+
+    // Apply object type filter to active objects
+    let objectsToImport = activeObjects;
     if (options.objectTypes && options.objectTypes.length > 0) {
       const types = options.objectTypes.map((t) => t.toUpperCase());
-      objectsToImport = transport.getObjectsByType(...types);
+      objectsToImport = activeObjects.filter((o) =>
+        types.includes(o.type.toUpperCase()),
+      );
       if (options.debug) {
         console.log(
-          `🔍 Filtered to ${objectsToImport.length} objects by type: ${types.join(', ')}`,
+          `🔍 Filtered to ${objectsToImport.length} active objects by type: ${types.join(', ')}`,
         );
       }
     }
 
     // Track results
-    const results = { success: 0, skipped: 0, failed: 0 };
+    const results = { success: 0, skipped: 0, failed: 0, deleted: 0 };
     const objectsByType: Record<string, number> = {};
+    const filesRemoved: string[] = [];
     const total = objectsToImport.length;
     let processed = 0;
 
-    console.log(`📦 Processing ${total} objects...`);
+    // Build the import context once — shared by the active-object pass
+    // (line ~380 below), the orphan-sync missing-object deletion path
+    // (line ~350 below), and the CTS deletion pass (line ~430 below).
+    const importContext: ImportContext = {
+      resolvePackagePath,
+      formatOptions: options.formatOptions,
+      configFormatOptions,
+    };
 
-    // Process objects in parallel using Node.js stream concurrency
+    console.log(`📦 Processing ${total} active objects...`);
+
+    // Process active objects in parallel
     await Readable.from(objectsToImport).forEach(
       async (objRef) => {
         const progress = ++processed;
@@ -242,26 +339,51 @@ export class ImportService {
           const adkObject = await objRef.load();
 
           if (!adkObject) {
-            results.skipped++;
-            if (options.debug) {
-              console.log(`  ⏭️ ${objRef.type} ${objRef.name}: failed to load`);
+            // Object is in TR but doesn't exist in SAP (possible orphan — deleted without obj_func=D)
+            const deleteFn = plugin.instance.format.delete;
+            if (
+              options.removeMissingObjects &&
+              typeof deleteFn === 'function'
+            ) {
+              console.log(
+                `  🗑️  [${progress}/${total}] ${objRef.type} ${objRef.name}: not found in SAP → removing local files`,
+              );
+              try {
+                const delResult = await deleteFn(
+                  { pgmid: objRef.pgmid, type: objRef.type, name: objRef.name },
+                  options.outputPath,
+                  importContext,
+                );
+                if (delResult.success) {
+                  results.deleted++;
+                  filesRemoved.push(...delResult.filesRemoved);
+                } else {
+                  results.skipped++;
+                }
+              } catch (error) {
+                results.skipped++;
+                if (options.debug) {
+                  console.log(
+                    `  ⚠️  ${objRef.type} ${objRef.name}: delete failed — ${error instanceof Error ? error.message : String(error)}`,
+                  );
+                }
+              }
+            } else {
+              results.skipped++;
+              if (options.debug) {
+                console.log(
+                  `  ⏭️ ${objRef.type} ${objRef.name}: not found in SAP (skipped)`,
+                );
+              }
             }
             return;
           }
-
-          // Build import context - plugin handles path logic based on its format rules
-          // CLI provides a resolver function to get full package hierarchy from SAP
-          const context: ImportContext = {
-            resolvePackagePath,
-            formatOptions: options.formatOptions,
-            configFormatOptions,
-          };
 
           // Delegate to plugin - import object from SAP to local files
           const result = await plugin.instance.format.import(
             adkObject as any, // ADK object type
             options.outputPath,
-            context,
+            importContext,
           );
 
           if (result.success) {
@@ -283,18 +405,121 @@ export class ImportService {
       { concurrency: IMPORT_CONCURRENCY },
     );
 
+    // Deletion pass - remove local files for deleted objects
+    if (applyDeletions && deletionObjects.length > 0) {
+      console.log(`🗑️  Processing ${deletionObjects.length} deletion(s)...`);
+
+      const deleteSupported =
+        typeof plugin.instance.format.delete === 'function';
+      if (!deleteSupported && options.debug) {
+        console.log(
+          `  ⚠️  Plugin '${plugin.name}' does not implement format.delete() — skipping deletion pass`,
+        );
+      }
+
+      if (deleteSupported) {
+        let delProcessed = 0;
+        const delTotal = deletionObjects.length;
+
+        await Readable.from(deletionObjects).forEach(
+          async (objRef) => {
+            const progress = ++delProcessed;
+            try {
+              console.log(
+                `  🗑️  [${progress}/${delTotal}] ${objRef.type} ${objRef.name}`,
+              );
+
+              const delResult = await plugin.instance.format.delete!(
+                { pgmid: objRef.pgmid, type: objRef.type, name: objRef.name },
+                options.outputPath,
+                importContext,
+              );
+
+              if (delResult.success) {
+                results.deleted++;
+                filesRemoved.push(...delResult.filesRemoved);
+              } else {
+                results.failed++;
+                console.log(
+                  `  ❌ Delete ${objRef.type} ${objRef.name}: ${delResult.errors?.join(', ') || 'unknown error'}`,
+                );
+              }
+            } catch (error) {
+              results.failed++;
+              console.log(
+                `  ❌ Delete ${objRef.type} ${objRef.name}: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            }
+          },
+          { concurrency: IMPORT_CONCURRENCY },
+        );
+      }
+    }
+
     // Call afterImport hook if available
     if (plugin.instance.hooks?.afterImport) {
       await plugin.instance.hooks.afterImport(options.outputPath);
     }
 
+    // Write transport metadata sidecars if requested
+    const metadataFiles: string[] = [];
+    if (options.saveTrMetadata) {
+      const metadataDir = join(options.outputPath, '.adt', 'tr');
+      await mkdir(metadataDir, { recursive: true });
+
+      for (const tr of loadedTransports) {
+        const metadata = {
+          number: tr.number,
+          owner: tr.owner,
+          desc: tr.description,
+          status: tr.status,
+          statusText: tr.statusText,
+          target: tr.target,
+          tasks: tr.tasks.map((task) => ({
+            number: task.number,
+            owner: task.owner,
+            desc: task.description,
+            status: task.status,
+            objects: task.objects.map((obj) => ({
+              pgmid: obj.pgmid,
+              type: obj.type,
+              name: obj.name,
+              obj_func: obj.objFunc,
+              uri: obj.uri,
+            })),
+          })),
+          fetchedAt: new Date().toISOString(),
+          import: {
+            format: options.format,
+            success: results.success,
+            skipped: results.skipped,
+            failed: results.failed,
+            deleted: results.deleted,
+          },
+        };
+
+        const metadataPath = join(metadataDir, `${tr.number}.json`);
+        await writeFile(
+          metadataPath,
+          JSON.stringify(metadata, null, 2),
+          'utf-8',
+        );
+        metadataFiles.push(metadataPath);
+        if (options.debug) {
+          console.log(`📄 Wrote transport metadata: ${metadataPath}`);
+        }
+      }
+    }
+
     return {
-      transportNumber: options.transportNumber,
-      description: transport.description,
-      totalObjects: objectsToImport.length,
+      transportNumber: allTransportNumbers[0],
+      description: transportDescription,
+      totalObjects: allObjects.length,
       results,
       objectsByType,
       outputPath: options.outputPath,
+      filesRemoved: filesRemoved.length > 0 ? filesRemoved : undefined,
+      metadataFiles: metadataFiles.length > 0 ? metadataFiles : undefined,
     };
   }
 

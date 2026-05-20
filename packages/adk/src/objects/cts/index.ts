@@ -9,5 +9,10 @@ export {
   AdkTransport,
   AdkTransportObjectRef,
   AdkTransportTaskRef,
+  MergedTransportView,
+  matchesSelector,
+  resolveTransportObjects,
+  type TransportObjectSelector,
   type TransportResponse,
+  type ResolvedTransportObjects,
 } from './transport-import';
