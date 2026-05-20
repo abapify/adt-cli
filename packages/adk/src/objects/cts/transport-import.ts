@@ -526,11 +526,12 @@ export async function resolveTransportObjects(
   const sourceTransportMap = new Map<string, string>();
 
   if (transportNumbers.length === 1) {
-    const tr = await AdkTransport.get(transportNumbers[0]!, ctx);
+    const primaryNumber = transportNumbers[0] ?? '';
+    const tr = await AdkTransport.get(primaryNumber, ctx);
     const filtered = hasFilter ? tr.getObjectsBySelector(selector) : tr.objects;
     for (const obj of filtered) {
       objects.push(obj);
-      sourceTransportMap.set(obj.key, transportNumbers[0]!);
+      sourceTransportMap.set(obj.key, primaryNumber);
     }
   } else {
     const transports = await Promise.all(
