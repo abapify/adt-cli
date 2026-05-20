@@ -470,7 +470,7 @@ export class AdkTransport {
    *
    * De-duplication key is `pgmid/type/name`. When the same key appears in
    * multiple transports the **first** occurrence wins (first transport in the
-   * `numbers` array).  The source transport number is available via
+   * `numbers` array). The source transport number is available via
    * `AdkTransportObjectRef.sourceTransport`.
    *
    * @param numbers - Transport numbers to load and merge
