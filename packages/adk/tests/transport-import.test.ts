@@ -133,6 +133,22 @@ const mockTransportWithObjFunc = {
   },
 };
 
+function createTwoTrMockClient(tr1Response: unknown, tr2Response: unknown) {
+  let callCount = 0;
+  return {
+    adt: {
+      cts: {
+        transportrequests: {
+          get: vi.fn().mockImplementation(() => {
+            callCount++;
+            return Promise.resolve(callCount === 1 ? tr1Response : tr2Response);
+          }),
+        },
+      },
+    },
+  };
+}
+
 // Create mock client
 function createMockClient() {
   return {
@@ -487,29 +503,6 @@ describe('MergedTransportView', () => {
   beforeEach(() => {
     vi.resetModules();
   });
-
-  /**
-   * Creates a mock ADK client that returns tr1Response on the first call and
-   * tr2Response on the second call. Shared across multi-TR tests to avoid
-   * duplicating the mockClient construction pattern.
-   */
-  function createTwoTrMockClient(tr1Response: unknown, tr2Response: unknown) {
-    let callCount = 0;
-    return {
-      adt: {
-        cts: {
-          transportrequests: {
-            get: vi.fn().mockImplementation(() => {
-              callCount++;
-              return Promise.resolve(
-                callCount === 1 ? tr1Response : tr2Response,
-              );
-            }),
-          },
-        },
-      },
-    };
-  }
 
   it('should merge objects from two transports and deduplicate', async () => {
     const tr1Response = {
