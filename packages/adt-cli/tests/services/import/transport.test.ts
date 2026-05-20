@@ -176,6 +176,14 @@ vi.mock('../../../src/lib/utils/destinations', () => ({
   getConfig: vi.fn(async () => ({ raw: {} })),
 }));
 
+async function runImport(
+  opts: import('../../../src/lib/services/import/service').TransportImportOptions,
+) {
+  const { ImportService } =
+    await import('../../../src/lib/services/import/service');
+  return new ImportService().importTransport(opts);
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // Tests
 // ──────────────────────────────────────────────────────────────────────
@@ -190,15 +198,6 @@ describe('ImportService.importTransport()', () => {
   afterEach(async () => {
     await rm(tmpDir, { recursive: true, force: true });
   });
-
-  /** Shared helper: creates a fresh ImportService and runs importTransport(). */
-  async function runImport(
-    opts: import('../../../src/lib/services/import/service').TransportImportOptions,
-  ) {
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    return new ImportService().importTransport(opts);
-  }
 
   it('accepts a single transport number', async () => {
     const result = await runImport({

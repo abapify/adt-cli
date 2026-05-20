@@ -505,6 +505,28 @@ export interface ResolvedTransportObjects {
   sourceTransportMap: Map<string, string>;
 }
 
+function getFilteredObjects(
+  transport: AdkTransport,
+  selector: TransportObjectSelector,
+): AdkTransportObjectRef[] {
+  return Object.keys(selector).length > 0
+    ? transport.getObjectsBySelector(selector)
+    : transport.objects;
+}
+
+function addResolvedObject(
+  object: AdkTransportObjectRef,
+  sourceTransport: string,
+  objects: AdkTransportObjectRef[],
+  sourceTransportMap: Map<string, string>,
+  seenKeys?: Set<string>,
+): void {
+  if (seenKeys && seenKeys.has(object.key)) return;
+  if (seenKeys) seenKeys.add(object.key);
+  objects.push(object);
+  sourceTransportMap.set(object.key, sourceTransport);
+}
+
 /**
  * Load and resolve objects from one or more transport numbers, with optional
  * selector-based filtering and deduplication across TRs.
@@ -521,17 +543,14 @@ export async function resolveTransportObjects(
   selector: TransportObjectSelector,
   ctx?: AdkContext,
 ): Promise<ResolvedTransportObjects> {
-  const hasFilter = Object.keys(selector).length > 0;
   const objects: AdkTransportObjectRef[] = [];
   const sourceTransportMap = new Map<string, string>();
 
   if (transportNumbers.length === 1) {
     const primaryNumber = transportNumbers[0] ?? '';
     const tr = await AdkTransport.get(primaryNumber, ctx);
-    const filtered = hasFilter ? tr.getObjectsBySelector(selector) : tr.objects;
-    for (const obj of filtered) {
-      objects.push(obj);
-      sourceTransportMap.set(obj.key, primaryNumber);
+    for (const object of getFilteredObjects(tr, selector)) {
+      addResolvedObject(object, primaryNumber, objects, sourceTransportMap);
     }
   } else {
     const transports = await Promise.all(
@@ -539,15 +558,8 @@ export async function resolveTransportObjects(
     );
     const seen = new Set<string>();
     for (const tr of transports) {
-      const filtered = hasFilter
-        ? tr.getObjectsBySelector(selector)
-        : tr.objects;
-      for (const obj of filtered) {
-        if (!seen.has(obj.key)) {
-          seen.add(obj.key);
-          objects.push(obj);
-          sourceTransportMap.set(obj.key, tr.number);
-        }
+      for (const object of getFilteredObjects(tr, selector)) {
+        addResolvedObject(object, tr.number, objects, sourceTransportMap, seen);
       }
     }
   }
