@@ -191,11 +191,17 @@ describe('ImportService.importTransport()', () => {
     await rm(tmpDir, { recursive: true, force: true });
   });
 
-  it('accepts a single transport number', async () => {
+  /** Shared helper: creates a fresh ImportService and runs importTransport(). */
+  async function runImport(
+    opts: import('../../../src/lib/services/import/service').TransportImportOptions,
+  ) {
     const { ImportService } =
       await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
-    const result = await svc.importTransport({
+    return new ImportService().importTransport(opts);
+  }
+
+  it('accepts a single transport number', async () => {
+    const result = await runImport({
       transportNumber: 'DEVK900001',
       outputPath: tmpDir,
       format: 'mock',
@@ -205,10 +211,7 @@ describe('ImportService.importTransport()', () => {
   });
 
   it('accepts comma-separated transport numbers (multi-TR)', async () => {
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
-    const result = await svc.importTransport({
+    const result = await runImport({
       transportNumber: 'DEVK900001,DEVK900002',
       outputPath: tmpDir,
       format: 'mock',
@@ -225,11 +228,8 @@ describe('ImportService.importTransport()', () => {
   });
 
   it('deduplicates transport numbers when repeated', async () => {
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
     // 'DEVK900001,DEVK900001' should be deduped to a single load
-    const result = await svc.importTransport({
+    const result = await runImport({
       transportNumber: 'DEVK900001, DEVK900001 ', // duplicate with whitespace
       outputPath: tmpDir,
       format: 'mock',
@@ -241,10 +241,7 @@ describe('ImportService.importTransport()', () => {
   });
 
   it('writes .adt/tr/<TRKORR>.json when saveTrMetadata is true', async () => {
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
-    const result = await svc.importTransport({
+    const result = await runImport({
       transportNumber: 'DEVK900001',
       outputPath: tmpDir,
       format: 'mock',
@@ -284,10 +281,7 @@ describe('ImportService.importTransport()', () => {
   });
 
   it('writes one metadata file per TR when multiple transports are used', async () => {
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
-    const result = await svc.importTransport({
+    const result = await runImport({
       transportNumber: 'DEVK900001,DEVK900002',
       outputPath: tmpDir,
       format: 'mock',
@@ -312,10 +306,7 @@ describe('ImportService.importTransport()', () => {
   });
 
   it('does NOT write metadata files when saveTrMetadata is false (default)', async () => {
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
-    const result = await svc.importTransport({
+    const result = await runImport({
       transportNumber: 'DEVK900001',
       outputPath: tmpDir,
       format: 'mock',
@@ -368,10 +359,7 @@ describe('ImportService.importTransport()', () => {
       filesRemoved: [`${tmpDir}/src/zprog_missing.prog.abap`],
     });
 
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
-    const result = await svc.importTransport({
+    const result = await runImport({
       transportNumber: 'DEVK900003',
       outputPath: tmpDir,
       format: 'mock',
@@ -430,10 +418,7 @@ describe('ImportService.importTransport()', () => {
     vi.mocked(AdkTransport.get).mockResolvedValueOnce(mockTRmissing2 as any);
     mockPlugin.instance.registry.isSupported.mockReturnValueOnce(true);
 
-    const { ImportService } =
-      await import('../../../src/lib/services/import/service');
-    const svc = new ImportService();
-    const result = await svc.importTransport({
+    const result = await runImport({
       transportNumber: 'DEVK900004',
       outputPath: tmpDir,
       format: 'mock',

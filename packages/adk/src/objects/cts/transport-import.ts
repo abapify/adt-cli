@@ -494,6 +494,67 @@ export class AdkTransport {
 }
 
 /**
+ * Result of resolving transport objects (single or multi-TR).
+ *
+ * Returned by {@link resolveTransportObjects}.
+ */
+export interface ResolvedTransportObjects {
+  /** Deduplicated list of transport objects (first-win across TRs). */
+  objects: AdkTransportObjectRef[];
+  /** Maps each object key to the TR number it was sourced from. */
+  sourceTransportMap: Map<string, string>;
+}
+
+/**
+ * Load and resolve objects from one or more transport numbers, with optional
+ * selector-based filtering and deduplication across TRs.
+ *
+ * This is the shared logic used by both the CLI `cts tr objects` command and
+ * the MCP `cts_transport_objects` tool — extracted here to avoid duplication.
+ *
+ * @param transportNumbers - Ordered list of TR numbers (first-win deduplication).
+ * @param selector         - Optional dimension filter (objFunc, pgmid, type).
+ * @param ctx              - Optional ADK context (uses global context if omitted).
+ */
+export async function resolveTransportObjects(
+  transportNumbers: string[],
+  selector: TransportObjectSelector,
+  ctx?: AdkContext,
+): Promise<ResolvedTransportObjects> {
+  const hasFilter = Object.keys(selector).length > 0;
+  const objects: AdkTransportObjectRef[] = [];
+  const sourceTransportMap = new Map<string, string>();
+
+  if (transportNumbers.length === 1) {
+    const tr = await AdkTransport.get(transportNumbers[0]!, ctx);
+    const filtered = hasFilter ? tr.getObjectsBySelector(selector) : tr.objects;
+    for (const obj of filtered) {
+      objects.push(obj);
+      sourceTransportMap.set(obj.key, transportNumbers[0]!);
+    }
+  } else {
+    const transports = await Promise.all(
+      transportNumbers.map((n) => AdkTransport.get(n, ctx)),
+    );
+    const seen = new Set<string>();
+    for (const tr of transports) {
+      const filtered = hasFilter
+        ? tr.getObjectsBySelector(selector)
+        : tr.objects;
+      for (const obj of filtered) {
+        if (!seen.has(obj.key)) {
+          seen.add(obj.key);
+          objects.push(obj);
+          sourceTransportMap.set(obj.key, tr.number);
+        }
+      }
+    }
+  }
+
+  return { objects, sourceTransportMap };
+}
+
+/**
  * Merged view of objects from multiple transports.
  *
  * De-duplicates by `pgmid/type/name`; first occurrence wins.

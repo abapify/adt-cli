@@ -35,6 +35,21 @@ function createImportContext(): ImportContext {
   };
 }
 
+function makeTestDir(): { targetPath: string; srcDir: string } {
+  const targetPath = createTempDir();
+  const srcDir = join(targetPath, 'src');
+  mkdirSync(srcDir, { recursive: true });
+  return { targetPath, srcDir };
+}
+
+async function runDelete(
+  obj: { pgmid: string; type: string; name: string },
+  targetPath: string,
+) {
+  const ctx = createImportContext();
+  return abapGitPlugin.format.delete!(obj, targetPath, ctx);
+}
+
 afterEach(() => {
   for (const dir of tempDirs.splice(0, tempDirs.length)) {
     rmSync(dir, { recursive: true, force: true });
@@ -50,20 +65,16 @@ describe('abapgit format.delete()', () => {
   });
 
   it('should remove matching abapgit files for a TABL object', async () => {
-    const targetPath = createTempDir();
-    const srcDir = join(targetPath, 'src');
-    mkdirSync(srcDir, { recursive: true });
+    const { targetPath, srcDir } = makeTestDir();
 
     // Create mock abapgit files for ZTABL_DEL
     writeFileSync(join(srcDir, 'ztabl_del.tabl.xml'), '<tabl/>');
 
     assert.ok(existsSync(join(srcDir, 'ztabl_del.tabl.xml')));
 
-    const ctx = createImportContext();
-    const result = await abapGitPlugin.format.delete!(
+    const result = await runDelete(
       { pgmid: 'R3TR', type: 'TABL', name: 'ZTABL_DEL' },
       targetPath,
-      ctx,
     );
 
     assert.ok(result.success, 'delete should succeed');
@@ -76,20 +87,16 @@ describe('abapgit format.delete()', () => {
   });
 
   it('should remove multiple files for a CLAS object (xml + abap)', async () => {
-    const targetPath = createTempDir();
-    const srcDir = join(targetPath, 'src');
-    mkdirSync(srcDir, { recursive: true });
+    const { targetPath, srcDir } = makeTestDir();
 
     // Create mock abapgit files for ZCL_EXAMPLE
     writeFileSync(join(srcDir, 'zcl_example.clas.xml'), '<clas/>');
     writeFileSync(join(srcDir, 'zcl_example.clas.abap'), 'CLASS zcl_example.');
     writeFileSync(join(srcDir, 'zcl_example.clas.testclasses.abap'), '');
 
-    const ctx = createImportContext();
-    const result = await abapGitPlugin.format.delete!(
+    const result = await runDelete(
       { pgmid: 'R3TR', type: 'CLAS', name: 'ZCL_EXAMPLE' },
       targetPath,
-      ctx,
     );
 
     assert.ok(result.success, 'delete should succeed');
@@ -100,14 +107,11 @@ describe('abapgit format.delete()', () => {
   });
 
   it('should succeed with empty filesRemoved when object not on disk', async () => {
-    const targetPath = createTempDir();
-    mkdirSync(join(targetPath, 'src'), { recursive: true });
+    const { targetPath } = makeTestDir();
 
-    const ctx = createImportContext();
-    const result = await abapGitPlugin.format.delete!(
+    const result = await runDelete(
       { pgmid: 'R3TR', type: 'TABL', name: 'ZNEVER_EXISTED' },
       targetPath,
-      ctx,
     );
 
     assert.ok(result.success, 'delete should succeed even when no files found');
@@ -115,20 +119,16 @@ describe('abapgit format.delete()', () => {
   });
 
   it('should not delete files of other objects with similar names', async () => {
-    const targetPath = createTempDir();
-    const srcDir = join(targetPath, 'src');
-    mkdirSync(srcDir, { recursive: true });
+    const { targetPath, srcDir } = makeTestDir();
 
     // The target object
     writeFileSync(join(srcDir, 'ztabl_del.tabl.xml'), '<tabl/>');
     // A different object that starts similarly
     writeFileSync(join(srcDir, 'ztabl_del_ext.tabl.xml'), '<tabl2/>');
 
-    const ctx = createImportContext();
-    const result = await abapGitPlugin.format.delete!(
+    const result = await runDelete(
       { pgmid: 'R3TR', type: 'TABL', name: 'ZTABL_DEL' },
       targetPath,
-      ctx,
     );
 
     assert.ok(result.success);
@@ -141,19 +141,16 @@ describe('abapgit format.delete()', () => {
   });
 
   it('should find files in subdirectories (package sub-folders)', async () => {
-    const targetPath = createTempDir();
-    const srcDir = join(targetPath, 'src');
+    const { targetPath, srcDir } = makeTestDir();
     const subDir = join(srcDir, 'zpackage', 'sub');
     mkdirSync(subDir, { recursive: true });
 
     writeFileSync(join(subDir, 'zprog_deep.prog.xml'), '<prog/>');
     writeFileSync(join(subDir, 'zprog_deep.prog.abap'), 'REPORT zprog_deep.');
 
-    const ctx = createImportContext();
-    const result = await abapGitPlugin.format.delete!(
+    const result = await runDelete(
       { pgmid: 'R3TR', type: 'PROG', name: 'ZPROG_DEEP' },
       targetPath,
-      ctx,
     );
 
     assert.ok(result.success);

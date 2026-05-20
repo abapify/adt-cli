@@ -176,8 +176,10 @@ export {
   AdkTransportTaskRef,
   MergedTransportView,
   matchesSelector,
+  resolveTransportObjects,
   type TransportObjectSelector,
   type TransportResponse,
+  type ResolvedTransportObjects,
 } from './objects/cts';
 
 // Factory and registry

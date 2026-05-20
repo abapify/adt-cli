@@ -488,6 +488,29 @@ describe('MergedTransportView', () => {
     vi.resetModules();
   });
 
+  /**
+   * Creates a mock ADK client that returns tr1Response on the first call and
+   * tr2Response on the second call. Shared across multi-TR tests to avoid
+   * duplicating the mockClient construction pattern.
+   */
+  function createTwoTrMockClient(tr1Response: unknown, tr2Response: unknown) {
+    let callCount = 0;
+    return {
+      adt: {
+        cts: {
+          transportrequests: {
+            get: vi.fn().mockImplementation(() => {
+              callCount++;
+              return Promise.resolve(
+                callCount === 1 ? tr1Response : tr2Response,
+              );
+            }),
+          },
+        },
+      },
+    };
+  }
+
   it('should merge objects from two transports and deduplicate', async () => {
     const tr1Response = {
       root: {
@@ -551,25 +574,9 @@ describe('MergedTransportView', () => {
       },
     };
 
-    let callCount = 0;
-    const mockClient = {
-      adt: {
-        cts: {
-          transportrequests: {
-            get: vi.fn().mockImplementation(() => {
-              callCount++;
-              return Promise.resolve(
-                callCount === 1 ? tr1Response : tr2Response,
-              );
-            }),
-          },
-        },
-      },
-    };
-
     const { initializeAdk, MergedTransportView } = await import('../src/index');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    initializeAdk(mockClient as any);
+    initializeAdk(createTwoTrMockClient(tr1Response, tr2Response) as any);
 
     const merged = await MergedTransportView.create([
       'DEVK900020',
@@ -627,25 +634,9 @@ describe('MergedTransportView', () => {
       },
     };
 
-    let callCount = 0;
-    const mockClient = {
-      adt: {
-        cts: {
-          transportrequests: {
-            get: vi.fn().mockImplementation(() => {
-              callCount++;
-              return Promise.resolve(
-                callCount === 1 ? tr1Response : tr2Response,
-              );
-            }),
-          },
-        },
-      },
-    };
-
     const { initializeAdk, MergedTransportView } = await import('../src/index');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    initializeAdk(mockClient as any);
+    initializeAdk(createTwoTrMockClient(tr1Response, tr2Response) as any);
 
     const merged = await MergedTransportView.create([
       'DEVK900030',

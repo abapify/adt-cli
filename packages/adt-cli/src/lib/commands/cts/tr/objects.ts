@@ -12,11 +12,8 @@
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../../utils/adt-client-v2';
 import { parseFilterOption } from '../../../utils/command-helpers';
-import { AdkTransport } from '@abapify/adk';
-import type {
-  TransportObjectSelector,
-  AdkTransportObjectRef,
-} from '@abapify/adk';
+import { resolveTransportObjects } from '@abapify/adk';
+import type { TransportObjectSelector } from '@abapify/adk';
 
 export const ctsObjectsCommand = new Command('objects')
   .description('List objects in a transport request with optional filters')
@@ -63,40 +60,10 @@ export const ctsObjectsCommand = new Command('objects')
       if (type !== undefined) selector.type = type;
 
       // Load and optionally merge transports
-      let objects: AdkTransportObjectRef[];
-      const sourceTransportMap: Map<string, string> = new Map(); // key → TR number
-
-      if (allTransportNumbers.length === 1) {
-        const tr = await AdkTransport.get(transport);
-        const filtered =
-          Object.keys(selector).length > 0
-            ? tr.getObjectsBySelector(selector)
-            : tr.objects;
-        objects = filtered;
-        for (const obj of objects) {
-          sourceTransportMap.set(obj.key, transport);
-        }
-      } else {
-        // Build source map before merging so we know the first-win TR
-        const transports = await Promise.all(
-          allTransportNumbers.map((n) => AdkTransport.get(n)),
-        );
-        const seen = new Set<string>();
-        objects = [];
-        for (const tr of transports) {
-          const filtered =
-            Object.keys(selector).length > 0
-              ? tr.getObjectsBySelector(selector)
-              : tr.objects;
-          for (const obj of filtered) {
-            if (!seen.has(obj.key)) {
-              seen.add(obj.key);
-              objects.push(obj);
-              sourceTransportMap.set(obj.key, tr.number);
-            }
-          }
-        }
-      }
+      const { objects, sourceTransportMap } = await resolveTransportObjects(
+        allTransportNumbers,
+        selector,
+      );
 
       if (options.json) {
         const output = {

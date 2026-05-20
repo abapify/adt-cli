@@ -15,11 +15,8 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
-import { initializeAdk, AdkTransport } from '@abapify/adk';
-import type {
-  TransportObjectSelector,
-  AdkTransportObjectRef,
-} from '@abapify/adk';
+import { initializeAdk, resolveTransportObjects } from '@abapify/adk';
+import type { TransportObjectSelector } from '@abapify/adk';
 import { FileLockStore } from '@abapify/adt-locks';
 
 export function registerCtsTransportObjectsTool(
@@ -94,38 +91,10 @@ export function registerCtsTransportObjectsTool(
           selector.type = parts.length === 1 ? parts[0] : parts;
         }
 
-        let objects: AdkTransportObjectRef[];
-        const sourceTransportMap = new Map<string, string>();
-
-        if (allTransportNumbers.length === 1) {
-          const tr = await AdkTransport.get(args.transport);
-          objects =
-            Object.keys(selector).length > 0
-              ? tr.getObjectsBySelector(selector)
-              : tr.objects;
-          for (const obj of objects) {
-            sourceTransportMap.set(obj.key, args.transport);
-          }
-        } else {
-          const transports = await Promise.all(
-            allTransportNumbers.map((n) => AdkTransport.get(n)),
-          );
-          const seen = new Set<string>();
-          objects = [];
-          for (const tr of transports) {
-            const filtered =
-              Object.keys(selector).length > 0
-                ? tr.getObjectsBySelector(selector)
-                : tr.objects;
-            for (const obj of filtered) {
-              if (!seen.has(obj.key)) {
-                seen.add(obj.key);
-                objects.push(obj);
-                sourceTransportMap.set(obj.key, tr.number);
-              }
-            }
-          }
-        }
+        const { objects, sourceTransportMap } = await resolveTransportObjects(
+          allTransportNumbers,
+          selector,
+        );
 
         const output = {
           transports: allTransportNumbers,

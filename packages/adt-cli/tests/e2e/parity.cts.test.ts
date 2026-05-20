@@ -320,8 +320,12 @@ describe('parity: cts', () => {
 
     // Parity: same object count and same object names (order-independent)
     expect(mcp.json.objects.length).toBe(cliJson!.objects.length);
-    const cliNames = cliJson!.objects.map((o) => o.name).sort();
-    const mcpNames = mcp.json.objects.map((o) => o.name).sort();
+    const cliNames = cliJson!.objects
+      .map((o) => o.name)
+      .sort((a, b) => a.localeCompare(b));
+    const mcpNames = mcp.json.objects
+      .map((o) => o.name)
+      .sort((a, b) => a.localeCompare(b));
     expect(cliNames).toEqual(mcpNames);
   });
 });
