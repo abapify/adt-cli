@@ -5,6 +5,16 @@ CLI for Eclipse P2 repositories - download, extract, and decompile plugins.
 ## Installation
 
 ```bash
+# npm
+npm install -g @abapify/p2-cli
+
+# or run without installing globally
+npx @abapify/p2-cli --help
+```
+
+## Development
+
+```bash
 # From monorepo root
 bun install
 npx nx build p2-cli
@@ -12,6 +22,20 @@ npx nx build p2-cli
 # Or run directly with tsx
 npx tsx tools/p2-cli/src/cli.ts
 ```
+
+## Publishing Bootstrap (maintainers)
+
+`p2-cli` is wired into workspace release publishing via `nx release`.
+
+```bash
+# Validate npm publish/trusted-publisher readiness
+bunx nx run p2-cli:npm-trust-check
+
+# One-time bootstrap for new npm package/trusted publishing
+bunx nx run p2-cli:npm-trust-check --prepare
+```
+
+Then publish from CI using the repository release workflow (which triggers `.github/workflows/publish.yml`).
 
 ## Commands
 

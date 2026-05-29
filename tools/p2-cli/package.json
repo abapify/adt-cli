@@ -1,16 +1,39 @@
 {
   "name": "@abapify/p2-cli",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "tools/p2-cli"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/tools/p2-cli#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "CLI for Eclipse P2 repositories - download, extract, and decompile plugins",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "bin": {
     "p2": "./dist/cli.mjs"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "sap",
+    "eclipse",
+    "p2",
+    "cli",
+    "decompiler"
+  ],
   "dependencies": {
     "commander": "*"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

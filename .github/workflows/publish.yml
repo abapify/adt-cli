@@ -118,6 +118,10 @@ jobs:
             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
           echo "$token" | cut -d. -f2 | base64 -d 2>/dev/null | jq '{iss, sub, workflow, workflow_ref, job_workflow_ref, repository, ref}'
 
+      - name: Preflight npm trusted publishing checks
+        run: npx nx run-many -t npm-trust-check
+        shell: bash
+
       - name: Publish packages
         run: npx nx release publish
         shell: bash

@@ -48,7 +48,10 @@
       "plugin": "./tools/nx-vitest/src/index.ts"
     },
     {
-      "plugin": "./tools/nx-npm-trust/src/index.ts"
+      "plugin": "./tools/nx-npm-trust/src/index.ts",
+      "options": {
+        "publishablePaths": ["packages/", "tools/"]
+      }
     },
     {
       "plugin": "@nx/vite/plugin",
@@ -71,7 +74,7 @@
     }
   ],
   "release": {
-    "projects": ["packages/*"],
+    "projects": ["packages/*", "tools/p2-cli"],
     "releaseTagPattern": "v{version}",
     "version": {
       "preVersionCommand": "npx nx run-many -t build",
