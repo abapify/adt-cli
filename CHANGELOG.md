@@ -1,3 +1,9 @@
+## 0.4.1 (2026-05-29)
+
+### 🩹 Fixes
+
+- ensure p2-cli dist/ is built before npm publish ([47931723](https://github.com/abapify/adt-cli/commit/47931723))
+
 ## 0.4.0 (2026-05-29)
 
 ### 🚀 Features

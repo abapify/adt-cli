@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Authentication package for SAP ADT systems - supports multiple auth methods",
   "type": "module",
   "types": "./dist/index.d.mts",
@@ -21,7 +21,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/logger": "0.4.0",
+    "@abapify/logger": "0.4.1",
     "proxy-agent": "^6.4.0"
   },
   "keywords": [
