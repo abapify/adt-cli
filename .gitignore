@@ -160,3 +160,4 @@ website/node_modules/
 .claude/worktrees
 .nx/self-healing
 .claude/settings.local.json
+e2e/adt-sdk
