@@ -98,7 +98,7 @@
     "build": {
       "dependsOn": ["^build"]
     },
-    "_nx-release-publish": {
+    "nx-release-publish": {
       "dependsOn": ["build"]
     },
     "@nx/js:swc": {
