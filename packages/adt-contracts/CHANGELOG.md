@@ -1,3 +1,9 @@
+## 0.4.0 (2026-05-29)
+
+### 🚀 Features
+
+- implement arc-1 parity across adt-lint, adt-contracts, adt-mcp, and adt-cli ([aeb5e8b2](https://github.com/abapify/adt-cli/commit/aeb5e8b2))
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for adt-contracts to align it with other projects, there were no code changes.

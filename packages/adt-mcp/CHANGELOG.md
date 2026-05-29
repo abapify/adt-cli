@@ -1,3 +1,28 @@
+## 0.4.0 (2026-05-29)
+
+### 🚀 Features
+
+- simplify import transport - comma-sep multi-TR, --save-tr-metadata, fixed deletion pass ([877d8eae](https://github.com/abapify/adt-cli/commit/877d8eae))
+- transport deletion-aware import with obj_func filter and multi-TR merge ([452f03f4](https://github.com/abapify/adt-cli/commit/452f03f4))
+- **adt-pilot:** add local dev stack for HTTP MCP and Mastra playground ([#120](https://github.com/abapify/adt-cli/issues/120))
+- implement arc-1 parity across adt-lint, adt-contracts, adt-mcp, and adt-cli ([aeb5e8b2](https://github.com/abapify/adt-cli/commit/aeb5e8b2))
+
+### 🩹 Fixes
+
+- resolve SonarCloud reliability and duplication findings ([ac951739](https://github.com/abapify/adt-cli/commit/ac951739))
+- optimize findObjectFiles index, restore transportNumber compat, dedup ImportContext ([4f08ee94](https://github.com/abapify/adt-cli/commit/4f08ee94))
+- **adt-pilot:** address PR #121 review — docs, types, workspace deps ([#121](https://github.com/abapify/adt-cli/issues/121))
+- **adt-pilot:** remove unused @mastra/mcp dep; fix URL log sanitization and docs port/env issues ([20092cee](https://github.com/abapify/adt-cli/commit/20092cee))
+- reduce duplication, remove useless conditional, harden JSONC parser ([7181ab33](https://github.com/abapify/adt-cli/commit/7181ab33))
+- address PR review — regex security, method detection, BTP 404, lint gate, specs ([bf634260](https://github.com/abapify/adt-cli/commit/bf634260))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for adt-mcp to align it with other projects, there were no code changes.

@@ -1,3 +1,17 @@
+## 0.4.0 (2026-05-29)
+
+### 🩹 Fixes
+
+- harden cross-platform resolver traversal and adt command execution ([8d057393](https://github.com/abapify/adt-cli/commit/8d057393))
+- address validation feedback for quote stripping and adt binary path ([9674624e](https://github.com/abapify/adt-cli/commit/9674624e))
+- apply cross-platform scanning and runtime configurability updates ([3726c837](https://github.com/abapify/adt-cli/commit/3726c837))
+- **security:** unblock SonarCloud Quality Gate on new_security_hotspots_reviewed ([#113](https://github.com/abapify/adt-cli/issues/113))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for @abapify/adt-codegen to align it with other projects, there were no code changes.

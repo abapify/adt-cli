@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-pilot",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "abapify Pilot — Mastra AI agent for ABAP code review via ADT MCP",
   "license": "MIT",
   "publishConfig": {
@@ -32,9 +32,9 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@abapify/adt-client": "0.3.6",
-    "@abapify/adt-fixtures": "0.3.6",
-    "@abapify/adt-mcp": "workspace:*",
+    "@abapify/adt-client": "0.4.0",
+    "@abapify/adt-fixtures": "0.4.0",
+    "@abapify/adt-mcp": "0.4.0",
     "mastra": "^0.10.0"
   },
   "repository": {

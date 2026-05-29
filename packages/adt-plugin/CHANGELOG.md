@@ -1,3 +1,13 @@
+## 0.4.0 (2026-05-29)
+
+### 🚀 Features
+
+- transport deletion-aware import with obj_func filter and multi-TR merge ([452f03f4](https://github.com/abapify/adt-cli/commit/452f03f4))
+
+### ❤️ Thank You
+
+- ThePlenkov @ThePlenkov
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for adt-plugin to align it with other projects, there were no code changes.

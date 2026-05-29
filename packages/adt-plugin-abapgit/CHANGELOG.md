@@ -1,3 +1,22 @@
+## 0.4.0 (2026-05-29)
+
+### 🚀 Features
+
+- transport deletion-aware import with obj_func filter and multi-TR merge ([452f03f4](https://github.com/abapify/adt-cli/commit/452f03f4))
+
+### 🩹 Fixes
+
+- resolve SonarCloud reliability and duplication findings ([ac951739](https://github.com/abapify/adt-cli/commit/ac951739))
+- optimize findObjectFiles index, restore transportNumber compat, dedup ImportContext ([4f08ee94](https://github.com/abapify/adt-cli/commit/4f08ee94))
+- harden cross-platform resolver traversal and adt command execution ([8d057393](https://github.com/abapify/adt-cli/commit/8d057393))
+- apply cross-platform scanning and runtime configurability updates ([3726c837](https://github.com/abapify/adt-cli/commit/3726c837))
+- **security:** unblock SonarCloud Quality Gate on new_security_hotspots_reviewed ([#113](https://github.com/abapify/adt-cli/issues/113))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for adt-plugin-abapgit to align it with other projects, there were no code changes.

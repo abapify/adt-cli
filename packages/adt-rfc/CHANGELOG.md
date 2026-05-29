@@ -1,3 +1,13 @@
+## 0.4.0 (2026-05-29)
+
+### 🩹 Fixes
+
+- **sonarcloud-review:** safe-guard JSON.stringify in S6551 helpers ([#113](https://github.com/abapify/adt-cli/issues/113))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for adt-rfc to align it with other projects, there were no code changes.

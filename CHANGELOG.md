@@ -1,3 +1,64 @@
+## 0.4.0 (2026-05-29)
+
+### 🚀 Features
+
+- implement arc-1 parity across adt-lint, adt-contracts, adt-mcp, and adt-cli ([aeb5e8b2](https://github.com/abapify/adt-cli/commit/aeb5e8b2))
+- transport deletion-aware import with obj_func filter and multi-TR merge ([452f03f4](https://github.com/abapify/adt-cli/commit/452f03f4))
+- simplify import transport - comma-sep multi-TR, --save-tr-metadata, fixed deletion pass ([877d8eae](https://github.com/abapify/adt-cli/commit/877d8eae))
+- add e2e/adt-sdk to .gitignore ([8c4ffc3e](https://github.com/abapify/adt-cli/commit/8c4ffc3e))
+- **aclass:** Wave 0 — package skeleton + Chevrotain lexer ([fc76f504](https://github.com/abapify/adt-cli/commit/fc76f504))
+- **aclass:** Wave 1+2 — parser, typed AST, fixtures, roundtrip ([b242e15f](https://github.com/abapify/adt-cli/commit/b242e15f))
+- **aclass:** typed EventDecl + forward-class decl + abaplint gate ([#111](https://github.com/abapify/adt-cli/issues/111))
+- **adt-lint:** scaffold shared abaplint utilities package ([20827906](https://github.com/abapify/adt-cli/commit/20827906))
+- **adt-pilot:** scaffold package — source, tests, config ([7713a2de](https://github.com/abapify/adt-cli/commit/7713a2de))
+- **adt-pilot:** fix build — disable dts (OOM), explicit return types ([f51bebd1](https://github.com/abapify/adt-cli/commit/f51bebd1))
+- **adt-pilot:** add local dev stack for HTTP MCP and Mastra playground ([#120](https://github.com/abapify/adt-cli/issues/120))
+- **openai-codegen:** Wave 3 — aclass parse-gate + lexer extensions ([46bc7187](https://github.com/abapify/adt-cli/commit/46bc7187))
+- **openspec:** add-abapify-pilot spec — proposal, design, specs, tasks ([194339f7](https://github.com/abapify/adt-cli/commit/194339f7))
+- **openspec:** add arc-1-feature-parity change proposal with SDD artifacts ([5c7c17a5](https://github.com/abapify/adt-cli/commit/5c7c17a5))
+- **p2:** include p2-cli in CI publish pipeline ([b34403f5](https://github.com/abapify/adt-cli/commit/b34403f5))
+- **p2:** bootstrap npm publish metadata and trusted publishing ([c04afaca](https://github.com/abapify/adt-cli/commit/c04afaca))
+
+### 🩹 Fixes
+
+- apply cross-platform scanning and runtime configurability updates ([3726c837](https://github.com/abapify/adt-cli/commit/3726c837))
+- address validation feedback for quote stripping and adt binary path ([9674624e](https://github.com/abapify/adt-cli/commit/9674624e))
+- harden cross-platform resolver traversal and adt command execution ([8d057393](https://github.com/abapify/adt-cli/commit/8d057393))
+- apply CodeRabbit auto-fixes ([97a6b90f](https://github.com/abapify/adt-cli/commit/97a6b90f))
+- apply CodeRabbit auto-fixes ([68e47903](https://github.com/abapify/adt-cli/commit/68e47903))
+- address PR review — regex security, method detection, BTP 404, lint gate, specs ([bf634260](https://github.com/abapify/adt-cli/commit/bf634260))
+- reduce duplication, remove useless conditional, harden JSONC parser ([7181ab33](https://github.com/abapify/adt-cli/commit/7181ab33))
+- guard starts[0] with nullish coalescing for SonarCloud reliability ([77334cf7](https://github.com/abapify/adt-cli/commit/77334cf7))
+- use localeCompare in sort for SonarCloud S2871 reliability ([a40e9dec](https://github.com/abapify/adt-cli/commit/a40e9dec))
+- prefer-const lint error in cts tr objects command ([11da0c54](https://github.com/abapify/adt-cli/commit/11da0c54))
+- apply prettier formatting to service.ts ([52dfffae](https://github.com/abapify/adt-cli/commit/52dfffae))
+- optimize findObjectFiles index, restore transportNumber compat, dedup ImportContext ([4f08ee94](https://github.com/abapify/adt-cli/commit/4f08ee94))
+- resolve SonarCloud reliability and duplication findings ([ac951739](https://github.com/abapify/adt-cli/commit/ac951739))
+- use const variable for transportNumbers[0] to avoid non-null assertions ([12dbce6c](https://github.com/abapify/adt-cli/commit/12dbce6c))
+- **aclass:** proper regex metacharacter escaping in `kw()` helper ([77908b41](https://github.com/abapify/adt-cli/commit/77908b41))
+- **aclass:** qualified method names + keyword method names ([cfe5839d](https://github.com/abapify/adt-cli/commit/cfe5839d))
+- **aclass+openai-codegen:** address PR #111 review findings ([#111](https://github.com/abapify/adt-cli/issues/111))
+- **adt-lint:** replace lazy '._?' with '[^']_' in token regex to fix S5852/polynomial-redos ([6238f973](https://github.com/abapify/adt-cli/commit/6238f973))
+- **adt-pilot:** use https in test/example URLs to clear SonarCloud hotspots ([f7246654](https://github.com/abapify/adt-cli/commit/f7246654))
+- **adt-pilot:** use extensionless internal imports per bundler-imports rule ([d819a8de](https://github.com/abapify/adt-cli/commit/d819a8de))
+- **adt-pilot:** align declared deps with actual usage ([ffa6346f](https://github.com/abapify/adt-cli/commit/ffa6346f))
+- **adt-pilot:** address review and lint findings ([0d03daea](https://github.com/abapify/adt-cli/commit/0d03daea))
+- **adt-pilot:** remove unused @mastra/mcp dep; fix URL log sanitization and docs port/env issues ([20092cee](https://github.com/abapify/adt-cli/commit/20092cee))
+- **adt-pilot:** lint failure, URL credential leak, doc port inconsistencies ([6b018f8c](https://github.com/abapify/adt-cli/commit/6b018f8c))
+- **adt-pilot:** address PR #121 review — docs, types, workspace deps ([#121](https://github.com/abapify/adt-cli/issues/121))
+- **agents:** run Codex nx MCP via bunx to match monorepo convention ([a19a926f](https://github.com/abapify/adt-cli/commit/a19a926f))
+- **security:** unblock SonarCloud Quality Gate on new_security_hotspots_reviewed ([#113](https://github.com/abapify/adt-cli/issues/113))
+- **sonarcloud-review:** safe-guard JSON.stringify in S6551 helpers ([#113](https://github.com/abapify/adt-cli/issues/113))
+
+### ❤️ Thank You
+
+- CodeRabbit
+- Cursor @cursoragent
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.3.6 (2026-04-21)
 
 ### 🚀 Features

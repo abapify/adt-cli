@@ -1,3 +1,20 @@
+## 0.4.0 (2026-05-29)
+
+### 🚀 Features
+
+- transport deletion-aware import with obj_func filter and multi-TR merge ([452f03f4](https://github.com/abapify/adt-cli/commit/452f03f4))
+
+### 🩹 Fixes
+
+- use const variable for transportNumbers[0] to avoid non-null assertions ([12dbce6c](https://github.com/abapify/adt-cli/commit/12dbce6c))
+- resolve SonarCloud reliability and duplication findings ([ac951739](https://github.com/abapify/adt-cli/commit/ac951739))
+- **sonarcloud-review:** safe-guard JSON.stringify in S6551 helpers ([#113](https://github.com/abapify/adt-cli/issues/113))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for adk to align it with other projects, there were no code changes.

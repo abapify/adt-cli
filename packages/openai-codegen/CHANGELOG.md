@@ -1,3 +1,19 @@
+## 0.4.0 (2026-05-29)
+
+### 🚀 Features
+
+- **aclass:** typed EventDecl + forward-class decl + abaplint gate ([#111](https://github.com/abapify/adt-cli/issues/111))
+- **openai-codegen:** Wave 3 — aclass parse-gate + lexer extensions ([46bc7187](https://github.com/abapify/adt-cli/commit/46bc7187))
+
+### 🩹 Fixes
+
+- **aclass+openai-codegen:** address PR #111 review findings ([#111](https://github.com/abapify/adt-cli/issues/111))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.3.6 (2026-04-21)
 
 This was a version bump only for @abapify/openai-codegen to align it with other projects, there were no code changes.

@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-plugin",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "ADT Plugin interface and factory for abapify",
   "license": "MIT",
   "publishConfig": {
@@ -19,7 +19,7 @@
     "dist"
   ],
   "dependencies": {
-    "@abapify/adk": "0.3.6"
+    "@abapify/adk": "0.4.0"
   },
   "repository": {
     "type": "git",
