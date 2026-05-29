@@ -9,18 +9,21 @@
  */
 
 import { Command } from 'commander';
+import { createRequire } from 'node:module';
 import { download } from './commands/download';
 import { extractJars } from './commands/extract';
 import { decompile } from './commands/decompile';
 
 const program = new Command();
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json') as { version?: string };
 
 program
   .name('p2')
   .description(
     'CLI for Eclipse P2 repositories - download, extract, and decompile plugins',
   )
-  .version('0.1.0');
+  .version(pkg.version ?? '0.0.0');
 
 // Download command
 program
