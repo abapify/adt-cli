@@ -54,3 +54,6 @@ export { http, createHttp, type RestEndpointOptions } from './helpers';
 
 // Export client
 export * from './client';
+
+// Export server
+export * from './server';

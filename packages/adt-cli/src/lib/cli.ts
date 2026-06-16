@@ -44,6 +44,7 @@ import {
   createChangesetCommand,
   rfcCommand,
   createFlpCommand,
+  proxyCommand,
 } from './commands';
 import { createWbCommand } from './commands/wb';
 import { createPackageCommand } from './commands/package';
@@ -325,6 +326,9 @@ export async function createCLI(options?: {
 
   // REPL - Interactive hypermedia navigator
   program.addCommand(createReplCommand());
+
+  // Proxy command - ADT proxy server with JSON↔XML conversion
+  program.addCommand(proxyCommand);
 
   // gCTS command-plugin (E07). Auto-registered here (not via adt.config.ts)
   // because `@abapify/adt-plugin-gcts-cli` is a required dependency of

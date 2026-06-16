@@ -28,6 +28,7 @@
     "@abapify/adt-plugin-abapgit": "0.4.1",
     "@abapify/adt-plugin-gcts": "0.4.1",
     "@abapify/adt-plugin-gcts-cli": "0.4.1",
+    "@abapify/adt-proxy": "0.4.1",
     "@abapify/adt-rfc": "0.4.1",
     "@abapify/adt-schemas": "0.4.1",
     "@abapify/adt-tui": "0.4.1",

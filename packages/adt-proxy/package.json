@@ -1,0 +1,30 @@
+{
+  "name": "@abapify/adt-proxy",
+  "version": "0.4.1",
+  "description": "ADT proxy server with JSON↔XML conversion",
+  "license": "MIT",
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "@abapify/adt-contracts": "0.4.1",
+    "@abapify/speci": "0.4.1",
+    "fast-xml-parser": "^5.5.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abapify/adt-cli.git",
+    "directory": "packages/adt-proxy"
+  },
+  "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-proxy#readme",
+  "bugs": {
+    "url": "https://github.com/abapify/adt-cli/issues"
+  }
+}
