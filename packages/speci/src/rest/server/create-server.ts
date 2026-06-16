@@ -129,10 +129,7 @@ function buildPathInfo(
 
   // Build regex by replacing sentinels with capture groups
   const escaped = resolvedPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regexStr = escaped.replaceAll(
-    new RegExp(PARAM_MARKER.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-    '([^/]+)',
-  );
+  const regexStr = escaped.split(PARAM_MARKER).join('([^/]+)');
 
   // Build template by replacing sentinels with ${paramName} syntax
   let template = resolvedPath;

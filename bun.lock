@@ -82,84 +82,85 @@
     },
     "packages/abap-ast": {
       "name": "@abapify/abap-ast",
-      "version": "0.3.6",
+      "version": "0.4.1",
     },
     "packages/acds": {
       "name": "@abapify/acds",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
         "chevrotain": "^11.0.0",
       },
     },
     "packages/aclass": {
       "name": "@abapify/aclass",
-      "version": "0.1.0",
+      "version": "0.4.1",
       "dependencies": {
         "chevrotain": "^11.0.0",
       },
     },
     "packages/adk": {
       "name": "@abapify/adk",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-client": "0.3.6",
-        "@abapify/adt-locks": "0.3.6",
-        "@abapify/adt-schemas": "0.3.6",
+        "@abapify/adt-client": "0.4.1",
+        "@abapify/adt-locks": "0.4.1",
+        "@abapify/adt-schemas": "0.4.1",
       },
     },
     "packages/adt-atc": {
       "name": "@abapify/adt-atc",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-plugin": "0.3.6",
+        "@abapify/adt-plugin": "0.4.1",
         "chalk": "^5.3.0",
       },
     },
     "packages/adt-aunit": {
       "name": "@abapify/adt-aunit",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-contracts": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
-        "@abapify/adt-plugin-abapgit": "0.3.6",
-        "@abapify/adt-schemas": "0.3.6",
+        "@abapify/adt-contracts": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
+        "@abapify/adt-plugin-abapgit": "0.4.1",
+        "@abapify/adt-schemas": "0.4.1",
       },
     },
     "packages/adt-auth": {
       "name": "@abapify/adt-auth",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/logger": "0.3.6",
+        "@abapify/logger": "0.4.1",
         "proxy-agent": "^6.4.0",
       },
     },
     "packages/adt-cli": {
       "name": "@abapify/adt-cli",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "bin": {
         "adt": "./dist/bin/adt.mjs",
       },
       "dependencies": {
-        "@abapify/adk": "0.3.6",
-        "@abapify/adt-atc": "0.3.6",
-        "@abapify/adt-aunit": "0.3.6",
-        "@abapify/adt-auth": "0.3.6",
-        "@abapify/adt-client": "0.3.6",
-        "@abapify/adt-codegen": "0.3.6",
-        "@abapify/adt-config": "0.3.6",
-        "@abapify/adt-contracts": "0.3.6",
-        "@abapify/adt-diff": "0.3.6",
-        "@abapify/adt-export": "0.3.6",
-        "@abapify/adt-lint": "0.3.6",
-        "@abapify/adt-locks": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
-        "@abapify/adt-plugin-abapgit": "0.3.6",
-        "@abapify/adt-plugin-gcts": "0.3.6",
-        "@abapify/adt-plugin-gcts-cli": "0.3.6",
-        "@abapify/adt-rfc": "0.3.6",
-        "@abapify/adt-schemas": "0.3.6",
-        "@abapify/adt-tui": "0.3.6",
-        "@abapify/logger": "0.3.6",
+        "@abapify/adk": "0.4.1",
+        "@abapify/adt-atc": "0.4.1",
+        "@abapify/adt-aunit": "0.4.1",
+        "@abapify/adt-auth": "0.4.1",
+        "@abapify/adt-client": "0.4.1",
+        "@abapify/adt-codegen": "0.4.1",
+        "@abapify/adt-config": "0.4.1",
+        "@abapify/adt-contracts": "0.4.1",
+        "@abapify/adt-diff": "0.4.1",
+        "@abapify/adt-export": "0.4.1",
+        "@abapify/adt-lint": "0.4.1",
+        "@abapify/adt-locks": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
+        "@abapify/adt-plugin-abapgit": "0.4.1",
+        "@abapify/adt-plugin-gcts": "0.4.1",
+        "@abapify/adt-plugin-gcts-cli": "0.4.1",
+        "@abapify/adt-proxy": "0.4.1",
+        "@abapify/adt-rfc": "0.4.1",
+        "@abapify/adt-schemas": "0.4.1",
+        "@abapify/adt-tui": "0.4.1",
+        "@abapify/logger": "0.4.1",
         "@inquirer/prompts": "^7.9.0",
         "@xmldom/xmldom": "^0.9.9",
         "chalk": "^5.6.2",
@@ -178,22 +179,22 @@
     },
     "packages/adt-client": {
       "name": "@abapify/adt-client",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-contracts": "0.3.6",
-        "@abapify/adt-schemas": "0.3.6",
-        "@abapify/logger": "0.3.6",
+        "@abapify/adt-contracts": "0.4.1",
+        "@abapify/adt-schemas": "0.4.1",
+        "@abapify/logger": "0.4.1",
       },
     },
     "packages/adt-codegen": {
       "name": "@abapify/adt-codegen",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "bin": {
         "adt-codegen": "./dist/cli.mjs",
       },
       "dependencies": {
-        "@abapify/adt-config": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
+        "@abapify/adt-config": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
         "chalk": "^5.3.0",
         "commander": "^11.1.0",
         "fast-xml-parser": "^5.5.0",
@@ -201,43 +202,43 @@
     },
     "packages/adt-config": {
       "name": "@abapify/adt-config",
-      "version": "0.3.6",
+      "version": "0.4.1",
     },
     "packages/adt-contracts": {
       "name": "@abapify/adt-contracts",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-schemas": "0.3.6",
-        "@abapify/speci": "0.3.6",
+        "@abapify/adt-schemas": "0.4.1",
+        "@abapify/speci": "0.4.1",
       },
       "devDependencies": {
-        "@abapify/adt-fixtures": "0.3.6",
+        "@abapify/adt-fixtures": "0.4.1",
       },
     },
     "packages/adt-diff": {
       "name": "@abapify/adt-diff",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adk": "0.3.6",
-        "@abapify/adt-contracts": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
-        "@abapify/adt-plugin-abapgit": "0.3.6",
+        "@abapify/adk": "0.4.1",
+        "@abapify/adt-contracts": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
+        "@abapify/adt-plugin-abapgit": "0.4.1",
         "chalk": "^5.6.2",
         "diff": "^8.0.3",
         "fast-xml-parser": "^5.5.5",
       },
       "devDependencies": {
-        "@abapify/adt-fixtures": "0.3.6",
+        "@abapify/adt-fixtures": "0.4.1",
       },
     },
     "packages/adt-export": {
       "name": "@abapify/adt-export",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adk": "0.3.6",
-        "@abapify/adt-locks": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
-        "@abapify/adt-plugin-abapgit": "0.3.6",
+        "@abapify/adk": "0.4.1",
+        "@abapify/adt-locks": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
+        "@abapify/adt-plugin-abapgit": "0.4.1",
         "chalk": "^5.6.2",
         "diff": "^8.0.3",
         "fast-xml-parser": "^5.5.5",
@@ -245,25 +246,25 @@
     },
     "packages/adt-fixtures": {
       "name": "@abapify/adt-fixtures",
-      "version": "0.3.6",
+      "version": "0.4.1",
     },
     "packages/adt-lint": {
       "name": "@abapify/adt-lint",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
         "@abaplint/core": "^2.119.15",
       },
     },
     "packages/adt-locks": {
       "name": "@abapify/adt-locks",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-client": "0.3.6",
+        "@abapify/adt-client": "0.4.1",
       },
     },
     "packages/adt-mcp": {
       "name": "@abapify/adt-mcp",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "bin": {
         "adt-mcp": "./dist/bin/adt-mcp.mjs",
         "adt-mcp-http": "./dist/bin/adt-mcp-http.mjs",
@@ -289,7 +290,7 @@
     },
     "packages/adt-pilot": {
       "name": "@abapify/adt-pilot",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
         "@mastra/core": "^1.28.0",
         "@modelcontextprotocol/sdk": "^1.27.0",
@@ -304,7 +305,7 @@
     },
     "packages/adt-playwright": {
       "name": "@abapify/adt-playwright",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
         "@abapify/adt-auth": "workspace:*",
         "@abapify/adt-config": "workspace:*",
@@ -317,43 +318,52 @@
     },
     "packages/adt-plugin": {
       "name": "@abapify/adt-plugin",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adk": "0.3.6",
+        "@abapify/adk": "0.4.1",
       },
     },
     "packages/adt-plugin-abapgit": {
       "name": "@abapify/adt-plugin-abapgit",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/acds": "0.3.6",
-        "@abapify/adk": "0.3.6",
-        "@abapify/adt-atc": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
-        "@abapify/adt-schemas": "0.3.6",
-        "@abapify/ts-xsd": "0.3.6",
+        "@abapify/acds": "0.4.1",
+        "@abapify/adk": "0.4.1",
+        "@abapify/adt-atc": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
+        "@abapify/adt-schemas": "0.4.1",
+        "@abapify/ts-xsd": "0.4.1",
       },
     },
     "packages/adt-plugin-gcts": {
       "name": "@abapify/adt-plugin-gcts",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adk": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
+        "@abapify/adk": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
       },
     },
     "packages/adt-plugin-gcts-cli": {
       "name": "@abapify/adt-plugin-gcts-cli",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-contracts": "0.3.6",
-        "@abapify/adt-plugin": "0.3.6",
+        "@abapify/adt-contracts": "0.4.1",
+        "@abapify/adt-plugin": "0.4.1",
         "zod": "^3.23.8",
+      },
+    },
+    "packages/adt-proxy": {
+      "name": "@abapify/adt-proxy",
+      "version": "0.4.1",
+      "dependencies": {
+        "@abapify/adt-contracts": "0.4.1",
+        "@abapify/speci": "0.4.1",
+        "fast-xml-parser": "^5.5.3",
       },
     },
     "packages/adt-puppeteer": {
       "name": "@abapify/adt-puppeteer",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
         "@abapify/adt-auth": "workspace:*",
         "@abapify/adt-config": "workspace:*",
@@ -366,24 +376,24 @@
     },
     "packages/adt-rfc": {
       "name": "@abapify/adt-rfc",
-      "version": "0.3.6",
+      "version": "0.4.1",
     },
     "packages/adt-schemas": {
       "name": "@abapify/adt-schemas",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/ts-xsd": "0.3.6",
+        "@abapify/ts-xsd": "0.4.1",
         "zod": "^3.24.0 || ^4.0.0",
       },
       "devDependencies": {
-        "@abapify/adt-fixtures": "0.3.6",
+        "@abapify/adt-fixtures": "0.4.1",
       },
     },
     "packages/adt-tui": {
       "name": "@abapify/adt-tui",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
-        "@abapify/adt-contracts": "0.3.6",
+        "@abapify/adt-contracts": "0.4.1",
         "fast-xml-parser": "^5.3.1",
         "ink": "5.1.0",
         "ink-select-input": "^6.0.0",
@@ -395,19 +405,19 @@
         "@types/react": "18.3.0",
       },
       "peerDependencies": {
-        "@abapify/adt-client": "0.3.6",
+        "@abapify/adt-client": "0.4.1",
       },
     },
     "packages/asjson-parser": {
       "name": "@abapify/asjson-parser",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
         "jsonc-eslint-parser": "^2.1.0",
       },
     },
     "packages/browser-auth": {
       "name": "@abapify/browser-auth",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "dependencies": {
         "@abapify/adt-config": "workspace:*",
       },
@@ -417,11 +427,11 @@
     },
     "packages/logger": {
       "name": "@abapify/logger",
-      "version": "0.3.6",
+      "version": "0.4.1",
     },
     "packages/openai-codegen": {
       "name": "@abapify/openai-codegen",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "bin": {
         "openai-codegen": "./dist/cli.mjs",
       },
@@ -439,11 +449,11 @@
     },
     "packages/speci": {
       "name": "@abapify/speci",
-      "version": "0.3.6",
+      "version": "0.4.1",
     },
     "packages/ts-xsd": {
       "name": "@abapify/ts-xsd",
-      "version": "0.3.6",
+      "version": "0.4.1",
       "bin": {
         "ts-xsd": "./dist/codegen/cli.mjs",
       },
@@ -492,7 +502,7 @@
     },
     "tools/p2-cli": {
       "name": "@abapify/p2-cli",
-      "version": "0.1.0",
+      "version": "0.4.1",
       "bin": {
         "p2": "./dist/cli.mjs",
       },
@@ -566,6 +576,8 @@
     "@abapify/adt-plugin-gcts": ["@abapify/adt-plugin-gcts@workspace:packages/adt-plugin-gcts"],
 
     "@abapify/adt-plugin-gcts-cli": ["@abapify/adt-plugin-gcts-cli@workspace:packages/adt-plugin-gcts-cli"],
+
+    "@abapify/adt-proxy": ["@abapify/adt-proxy@workspace:packages/adt-proxy"],
 
     "@abapify/adt-puppeteer": ["@abapify/adt-puppeteer@workspace:packages/adt-puppeteer"],
 
@@ -4921,6 +4933,8 @@
 
     "@abapify/adt-plugin-gcts-cli/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 
+    "@abapify/adt-proxy/fast-xml-parser": ["fast-xml-parser@5.7.3", "", { "dependencies": { "@nodable/entities": "^2.1.0", "fast-xml-builder": "^1.1.7", "path-expression-matcher": "^1.5.0", "strnum": "^2.2.3" }, "bin": { "fxparser": "src/cli/cli.js" } }, "sha512-C0AaNuC+mscy6vrAQKAc/rMq+zAPHodfHGZu4sGVehvAQt/JLG1O5zEcYcXSY5zSqr4YVgxsB+pHXTq0i7eDlg=="],
+
     "@abapify/adt-tui/fast-xml-parser": ["fast-xml-parser@5.7.3", "", { "dependencies": { "@nodable/entities": "^2.1.0", "fast-xml-builder": "^1.1.7", "path-expression-matcher": "^1.5.0", "strnum": "^2.2.3" }, "bin": { "fxparser": "src/cli/cli.js" } }, "sha512-C0AaNuC+mscy6vrAQKAc/rMq+zAPHodfHGZu4sGVehvAQt/JLG1O5zEcYcXSY5zSqr4YVgxsB+pHXTq0i7eDlg=="],
 
     "@abapify/asjson-parser/jsonc-eslint-parser": ["jsonc-eslint-parser@2.4.2", "", { "dependencies": { "acorn": "^8.5.0", "eslint-visitor-keys": "^3.0.0", "espree": "^9.0.0", "semver": "^7.3.5" } }, "sha512-1e4qoRgnn448pRuMvKGsFFymUCquZV0mpGgOyIKNgD3JVDTsVJyRBGH/Fm0tBb8WsWGgmB1mDe6/yJMQM37DUA=="],
@@ -6106,6 +6120,10 @@
     "@abapify/adt-export/fast-xml-parser/strnum": ["strnum@2.2.3", "", {}, "sha512-oKx6RUCuHfT3oyVjtnrmn19H1SiCqgJSg+54XqURKp5aCMbrXrhLjRN9TjuwMjiYstZ0MzDrHqkGZ5dFTKd+zg=="],
 
     "@abapify/adt-playwright/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "@abapify/adt-proxy/fast-xml-parser/path-expression-matcher": ["path-expression-matcher@1.5.0", "", {}, "sha512-cbrerZV+6rvdQrrD+iGMcZFEiiSrbv9Tfdkvnusy6y0x0GKBXREFg/Y65GhIfm0tnLntThhzCnfKwp1WRjeCyQ=="],
+
+    "@abapify/adt-proxy/fast-xml-parser/strnum": ["strnum@2.2.3", "", {}, "sha512-oKx6RUCuHfT3oyVjtnrmn19H1SiCqgJSg+54XqURKp5aCMbrXrhLjRN9TjuwMjiYstZ0MzDrHqkGZ5dFTKd+zg=="],
 
     "@abapify/adt-tui/fast-xml-parser/path-expression-matcher": ["path-expression-matcher@1.5.0", "", {}, "sha512-cbrerZV+6rvdQrrD+iGMcZFEiiSrbv9Tfdkvnusy6y0x0GKBXREFg/Y65GhIfm0tnLntThhzCnfKwp1WRjeCyQ=="],
 

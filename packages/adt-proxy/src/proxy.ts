@@ -114,7 +114,9 @@ function convertResponseBody(
   if (!body || !isXmlContentType(contentType) || !responseSchemas[status]) {
     return { body, converted: false };
   }
-  return { body: xmlToJson(body, responseSchemas[status]), converted: true };
+  const converted = xmlToJson(body, responseSchemas[status]);
+  const wasConverted = converted !== body;
+  return { body: converted, converted: wasConverted };
 }
 
 async function forwardRequest(
@@ -122,35 +124,44 @@ async function forwardRequest(
   url: string,
   headers: Record<string, string>,
   body?: string,
+  timeoutMs = 30_000,
 ): Promise<{
   status: number;
   headers: Record<string, string | string[]>;
   body: string;
 }> {
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: body || undefined,
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  const responseBody = await response.text();
-  const responseHeaders: Record<string, string | string[]> = {};
-  response.headers.forEach((value, key) => {
-    responseHeaders[key] = value;
-  });
+  try {
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: body || undefined,
+      signal: controller.signal,
+    });
 
-  if (typeof response.headers.getSetCookie === 'function') {
-    const setCookies = response.headers.getSetCookie();
-    if (setCookies.length > 0) {
-      responseHeaders['set-cookie'] = setCookies;
+    const responseBody = await response.text();
+    const responseHeaders: Record<string, string | string[]> = {};
+    response.headers.forEach((value, key) => {
+      responseHeaders[key] = value;
+    });
+
+    if (typeof response.headers.getSetCookie === 'function') {
+      const setCookies = response.headers.getSetCookie();
+      if (setCookies.length > 0) {
+        responseHeaders['set-cookie'] = setCookies;
+      }
     }
-  }
 
-  return {
-    status: response.status,
-    headers: responseHeaders,
-    body: responseBody,
-  };
+    return {
+      status: response.status,
+      headers: responseHeaders,
+      body: responseBody,
+    };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export function createAdtProxy(config: AdtProxyConfig) {
@@ -323,14 +334,15 @@ export function createAdtProxy(config: AdtProxyConfig) {
   }
 
   async function readBody(req: {
-    on: (event: string, cb: (chunk: any) => void) => void;
+    on: (event: string, cb: (...args: any[]) => void) => void;
   }): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       let body = '';
       req.on('data', (chunk: Buffer) => {
         body += chunk.toString();
       });
       req.on('end', () => resolve(body));
+      req.on('error', (err: Error) => reject(err));
     });
   }
 
@@ -403,6 +415,8 @@ export function createAdtProxy(config: AdtProxyConfig) {
           });
         });
 
+        server.on('error', reject);
+
         server.listen(config.port || 0, config.host || '127.0.0.1', () => {
           const addr = server?.address();
           if (!addr || typeof addr !== 'object') {
@@ -415,8 +429,6 @@ export function createAdtProxy(config: AdtProxyConfig) {
           logger.info(`Proxying to ${targetUrl}`);
           resolve({ port: addr.port });
         });
-
-        server.on('error', reject);
       });
     },
 
