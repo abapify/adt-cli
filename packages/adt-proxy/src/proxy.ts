@@ -22,10 +22,6 @@
  *
  * const { port } = await proxy.start();
  * console.log(`Proxy running on http://localhost:${port}`);
- *
- * // Now send JSON requests to the proxy:
- * // curl -X GET http://localhost:${port}/sap/bc/adt/cts/transportrequests/DEVK900001
- * // The proxy converts the response XML → JSON automatically
  * ```
  */
 
@@ -48,12 +44,104 @@ const DEFAULT_LOGGER: Logger = {
   error: console.error,
 };
 
-/**
- * Create an ADT proxy server.
- *
- * @param config - Proxy configuration
- * @returns Proxy server instance with start/stop methods
- */
+const FORWARDABLE_REQUEST_HEADERS = [
+  'accept',
+  'content-type',
+  'x-csrf-token',
+  'x-sap-security-session',
+  'x-sap-adt-sessiontype',
+  'cookie',
+  'authorization',
+];
+
+const FORWARDABLE_RESPONSE_HEADERS = [
+  'content-type',
+  'x-csrf-token',
+  'x-sap-security-session',
+  'set-cookie',
+  'etag',
+  'location',
+];
+
+function forwardHeaders(
+  source: Record<string, string | string[] | undefined>,
+  target: Record<string, string>,
+  keys: string[],
+): void {
+  for (const h of keys) {
+    const value = source[h];
+    if (value && !target[h]) {
+      target[h] = Array.isArray(value) ? value[0] : value;
+    }
+  }
+}
+
+function addAuthHeaders(
+  headers: Record<string, string>,
+  auth?: AdtProxyConfig['auth'],
+): void {
+  if (!auth) return;
+  if (!headers.authorization) {
+    const creds = Buffer.from(`${auth.username}:${auth.password}`).toString(
+      'base64',
+    );
+    headers.authorization = `Basic ${creds}`;
+  }
+  if (auth.client && !headers['sap-client']) {
+    headers['sap-client'] = auth.client;
+  }
+}
+
+function convertRequestBody(
+  body: string,
+  contentType: string | undefined,
+  bodySchema?: RouteDefinition['bodySchema'],
+): { body: string; converted: boolean } {
+  if (!body || !bodySchema || !contentType) {
+    return { body, converted: false };
+  }
+  if (!isJsonContentType(contentType)) {
+    return { body, converted: false };
+  }
+  return { body: jsonToXml(body, bodySchema), converted: true };
+}
+
+function convertResponseBody(
+  body: string,
+  contentType: string,
+  responseSchemas: RouteDefinition['responseSchemas'],
+): { body: string; converted: boolean } {
+  if (!body || !isXmlContentType(contentType) || !responseSchemas[200]) {
+    return { body, converted: false };
+  }
+  return { body: xmlToJson(body, responseSchemas[200]), converted: true };
+}
+
+async function forwardRequest(
+  method: string,
+  url: string,
+  headers: Record<string, string>,
+  body?: string,
+): Promise<{ status: number; headers: Record<string, string>; body: string }> {
+  const response = await fetch(url, {
+    method,
+    headers,
+    body: body || undefined,
+  });
+
+  const responseBody = await response.text();
+  const responseHeaders: Record<string, string> = {};
+  response.headers.forEach((value, key) => {
+    responseHeaders[key] = value;
+  });
+
+  return {
+    status: response.status,
+    headers: responseHeaders,
+    body: responseBody,
+  };
+}
+
 export function createAdtProxy(config: AdtProxyConfig) {
   const {
     targetUrl,
@@ -65,23 +153,25 @@ export function createAdtProxy(config: AdtProxyConfig) {
     logger = DEFAULT_LOGGER,
   } = config;
 
-  // Extract routes from ADT contracts
   const contractRoutes = createServer(adtContract as AdtContract);
   let server: Server | undefined;
 
-  /**
-   * Match an incoming request to a contract route.
-   */
-  function matchRoute(
-    method: string,
-    url: string,
-  ): { route: RouteDefinition; params: Record<string, string> } | null {
-    return contractRoutes.match(method, url, basePath);
+  function buildDownstreamHeaders(
+    incomingHeaders: Record<string, string | string[] | undefined>,
+    contractHeaders?: Record<string, string>,
+  ): Record<string, string> {
+    const headers: Record<string, string> = {
+      ...defaultHeaders,
+      ...contractHeaders,
+    };
+    forwardHeaders(incomingHeaders, headers, FORWARDABLE_REQUEST_HEADERS);
+    addAuthHeaders(headers, auth);
+    if (convertContent && !headers.accept) {
+      headers.accept = 'application/json';
+    }
+    return headers;
   }
 
-  /**
-   * Build the downstream URL from the incoming request URL.
-   */
   function buildDownstreamUrl(url: string): string {
     const relativePath = basePath
       ? url.replace(new RegExp(`^${basePath}`), '') || '/'
@@ -89,102 +179,136 @@ export function createAdtProxy(config: AdtProxyConfig) {
     return `${targetUrl}${relativePath}`;
   }
 
-  /**
-   * Build Basic Auth header from config.
-   */
-  function getAuthHeader(): string | undefined {
-    if (!auth) return undefined;
-    const credentials = Buffer.from(
-      `${auth.username}:${auth.password}`,
-    ).toString('base64');
-    return `Basic ${credentials}`;
+  function getContentType(
+    headers: Record<string, string | string[] | undefined>,
+  ): string | undefined {
+    const ct = headers['content-type'];
+    return Array.isArray(ct) ? ct[0] : ct;
   }
 
-  /**
-   * Build downstream request headers.
-   */
-  function buildDownstreamHeaders(
-    incomingHeaders: Record<string, string | string[] | undefined>,
-    contractHeaders?: Record<string, string>,
-    isXmlBody = false,
-  ): Record<string, string> {
-    const headers: Record<string, string> = {
-      ...defaultHeaders,
-      ...contractHeaders,
-    };
-
-    // Forward relevant headers from the incoming request
-    const forwardableHeaders = [
-      'accept',
-      'content-type',
-      'x-csrf-token',
-      'x-sap-security-session',
-      'x-sap-adt-sessiontype',
-      'cookie',
-      'authorization',
-    ];
-
-    for (const h of forwardableHeaders) {
-      const value = incomingHeaders[h];
-      if (value && !headers[h]) {
-        headers[h] = Array.isArray(value) ? value[0] : value;
-      }
-    }
-
-    // Add auth if configured and not already present
-    if (auth && !headers.authorization) {
-      const authHeader = getAuthHeader();
-      if (authHeader) headers.authorization = authHeader;
-    }
-
-    // Add SAP client if configured
-    if (auth?.client && !headers['sap-client']) {
-      headers['sap-client'] = auth.client;
-    }
-
-    // Set Accept to JSON for the proxy (we want JSON responses)
-    if (convertContent && !headers.accept) {
-      headers.accept = 'application/json';
-    }
-
-    return headers;
-  }
-
-  /**
-   * Forward a request to the downstream SAP system.
-   */
-  async function forwardRequest(
+  async function handleMatchedRoute(
     method: string,
     url: string,
-    headers: Record<string, string>,
-    body?: string,
-  ): Promise<{
-    status: number;
-    headers: Record<string, string>;
-    body: string;
-  }> {
-    const response = await fetch(url, {
-      method,
-      headers,
-      body: body || undefined,
-    });
+    requestBody: string,
+    incomingHeaders: Record<string, string | string[] | undefined>,
+    route: RouteDefinition,
+  ): Promise<ProxyResult> {
+    logger.info(`Matched route: ${route.method} ${route.pathTemplate}`);
 
-    const responseBody = await response.text();
-    const responseHeaders: Record<string, string> = {};
-    response.headers.forEach((value, key) => {
-      responseHeaders[key] = value;
-    });
+    const reqContentType = getContentType(incomingHeaders);
+    const { body: downstreamBody, converted: reqConverted } =
+      convertRequestBody(requestBody, reqContentType, route.bodySchema);
+
+    const downstreamHeaders = buildDownstreamHeaders(
+      incomingHeaders,
+      route.requestHeaders,
+    );
+    if (reqConverted) {
+      downstreamHeaders['content-type'] = 'application/xml';
+    }
+
+    const response = await forwardRequest(
+      method,
+      buildDownstreamUrl(url),
+      downstreamHeaders,
+      downstreamBody,
+    );
+
+    const respContentType = response.headers['content-type'] || '';
+    const { body: responseBody, converted: respConverted } =
+      convertResponseBody(
+        response.body,
+        respContentType,
+        route.responseSchemas,
+      );
 
     return {
       status: response.status,
-      headers: responseHeaders,
+      headers: response.headers,
       body: responseBody,
+      converted: respConverted,
     };
   }
 
-  /**
-   * Handle a single incoming HTTP request.
-   */
+  async function handleForwardedRequest(
+    method: string,
+    url: string,
+    requestBody: string,
+    incomingHeaders: Record<string, string | string[] | undefined>,
+  ): Promise<ProxyResult> {
+    logger.debug(`No route match for ${method} ${url} - forwarding as-is`);
+
+    const downstreamHeaders = buildDownstreamHeaders(incomingHeaders);
+    const response = await forwardRequest(
+      method,
+      buildDownstreamUrl(url),
+      downstreamHeaders,
+      requestBody,
+    );
+
+    return {
+      status: response.status,
+      headers: response.headers,
+      body: response.body,
+      converted: false,
+    };
+  }
+
+  function sendNotFound(
+    res: {
+      writeHead: (status: number, headers: Record<string, string>) => void;
+      end: (body?: string) => void;
+    },
+    method: string,
+    url: string,
+  ): void {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(
+      JSON.stringify({
+        error: 'Not Found',
+        message: `No contract route matched for ${method} ${url}`,
+        availableRoutes: contractRoutes.routes.map((r) => ({
+          method: r.method,
+          path: r.pathTemplate,
+        })),
+      }),
+    );
+  }
+
+  function sendResponse(
+    res: {
+      writeHead: (status: number, headers: Record<string, string>) => void;
+      end: (body?: string) => void;
+    },
+    result: ProxyResult,
+  ): void {
+    const responseHeaders: Record<string, string> = { 'x-proxy': 'adt-proxy' };
+    forwardHeaders(
+      result.headers,
+      responseHeaders,
+      FORWARDABLE_RESPONSE_HEADERS,
+    );
+
+    if (result.converted) {
+      responseHeaders['content-type'] = 'application/json';
+    }
+
+    res.writeHead(result.status, responseHeaders);
+    res.end(result.body);
+  }
+
+  async function readBody(req: {
+    on: (event: string, cb: (chunk: any) => void) => void;
+  }): Promise<string> {
+    return new Promise((resolve) => {
+      let body = '';
+      req.on('data', (chunk: Buffer) => {
+        body += chunk.toString();
+      });
+      req.on('end', () => resolve(body));
+    });
+  }
+
   async function handleRequest(
     req: {
       method?: string;
@@ -199,168 +323,43 @@ export function createAdtProxy(config: AdtProxyConfig) {
   ): Promise<void> {
     const method = req.method || 'GET';
     const url = req.url || '/';
-
     logger.info(`${method} ${url}`);
 
-    // Read request body
-    let requestBody = '';
-    await new Promise<void>((resolve) => {
-      req.on('data', (chunk: Buffer) => {
-        requestBody += chunk.toString();
-      });
-      req.on('end', () => resolve());
-    });
-
-    // Match to a contract route
-    const match = matchRoute(method, url);
-
-    let result: ProxyResult;
+    const requestBody = await readBody(req);
+    const match = contractRoutes.match(method, url, basePath);
 
     if (match && convertContent) {
-      // Route matched - use schema-aware conversion
-      const { route, params } = match;
-      logger.info(`Matched route: ${route.method} ${route.pathTemplate}`, {
-        params,
-      });
-
-      // Convert JSON body → XML if needed
-      let downstreamBody = requestBody;
-      if (requestBody && route.bodySchema) {
-        const contentType = Array.isArray(req.headers['content-type'])
-          ? req.headers['content-type'][0]
-          : req.headers['content-type'];
-
-        if (contentType && isJsonContentType(contentType)) {
-          downstreamBody = jsonToXml(requestBody, route.bodySchema);
-          logger.debug('Converted request body: JSON → XML');
-        }
-      }
-
-      // Build downstream headers
-      const downstreamHeaders = buildDownstreamHeaders(
-        req.headers,
-        route.requestHeaders,
-        downstreamBody !== requestBody,
-      );
-
-      // Set Content-Type for XML body
-      if (downstreamBody !== requestBody) {
-        downstreamHeaders['content-type'] = 'application/xml';
-      }
-
-      // Forward to downstream SAP
-      const downstreamUrl = buildDownstreamUrl(url);
-      const response = await forwardRequest(
+      const result = await handleMatchedRoute(
         method,
-        downstreamUrl,
-        downstreamHeaders,
-        downstreamBody,
-      );
-
-      // Convert XML response → JSON if needed
-      let responseBody = response.body;
-      let converted = false;
-      if (response.body && route.responseSchemas[200]) {
-        const respContentType = response.headers['content-type'] || '';
-        if (isXmlContentType(respContentType)) {
-          responseBody = xmlToJson(response.body, route.responseSchemas[200]);
-          converted = true;
-          logger.debug('Converted response body: XML → JSON');
-        }
-      }
-
-      result = {
-        status: response.status,
-        headers: response.headers,
-        body: responseBody,
-        converted,
-      };
-    } else if (forwardUnknown) {
-      // No route match - forward as-is
-      if (match === null) {
-        logger.debug(`No route match for ${method} ${url} - forwarding as-is`);
-      }
-
-      const downstreamHeaders = buildDownstreamHeaders(req.headers);
-      const downstreamUrl = buildDownstreamUrl(url);
-
-      const response = await forwardRequest(
-        method,
-        downstreamUrl,
-        downstreamHeaders,
+        url,
         requestBody,
+        req.headers,
+        match.route,
       );
-
-      result = {
-        status: response.status,
-        headers: response.headers,
-        body: response.body,
-        converted: false,
-      };
-    } else {
-      // No route match and forwarding disabled
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          error: 'Not Found',
-          message: `No contract route matched for ${method} ${url}`,
-          availableRoutes: contractRoutes.routes.map((r) => ({
-            method: r.method,
-            path: r.pathTemplate,
-          })),
-        }),
-      );
+      sendResponse(res, result);
       return;
     }
 
-    // Send response
-    const responseHeaders: Record<string, string> = {
-      'x-proxy': 'adt-proxy',
-    };
-
-    // Forward relevant response headers
-    const forwardableResponseHeaders = [
-      'content-type',
-      'x-csrf-token',
-      'x-sap-security-session',
-      'set-cookie',
-      'etag',
-      'location',
-    ];
-
-    for (const h of forwardableResponseHeaders) {
-      if (result.headers[h]) {
-        responseHeaders[h] = result.headers[h];
-      }
+    if (forwardUnknown) {
+      const result = await handleForwardedRequest(
+        method,
+        url,
+        requestBody,
+        req.headers,
+      );
+      sendResponse(res, result);
+      return;
     }
 
-    // Set content type to JSON if we converted
-    if (result.converted) {
-      responseHeaders['content-type'] = 'application/json';
-    }
-
-    res.writeHead(result.status, responseHeaders);
-    res.end(result.body);
+    sendNotFound(res, method, url);
   }
 
   return {
-    /**
-     * Get the extracted route definitions (for inspection/testing).
-     */
     get routes() {
       return contractRoutes.routes;
     },
-
-    /**
-     * Match a request against the contract routes.
-     */
     match: contractRoutes.match,
 
-    /**
-     * Start the proxy server.
-     *
-     * @returns The port the server is listening on
-     */
     async start(): Promise<{ port: number }> {
       return new Promise((resolve, reject) => {
         server = httpCreateServer((req, res) => {
@@ -393,9 +392,6 @@ export function createAdtProxy(config: AdtProxyConfig) {
       });
     },
 
-    /**
-     * Stop the proxy server.
-     */
     async stop(): Promise<void> {
       return new Promise((resolve, reject) => {
         if (!server) return resolve();
@@ -405,7 +401,6 @@ export function createAdtProxy(config: AdtProxyConfig) {
   };
 }
 
-// Re-export types and utilities
 export { createServer } from '@abapify/speci/rest';
 export type { AdtProxyConfig, ProxyResult, Logger } from './types';
 export {

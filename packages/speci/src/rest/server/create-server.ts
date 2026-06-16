@@ -64,42 +64,43 @@ function isSerializable(schema: unknown): schema is Serializable {
  * Calls each operation function with a sentinel value to get the resolved
  * path, then replaces the sentinel with regex capture groups for matching.
  */
+function tryExtractEndpoint(
+  obj: OperationFunction,
+): { operation: OperationFunction; descriptor: RestEndpointDescriptor } | null {
+  try {
+    const paramCount = obj.length || 1;
+    const sentinelArgs = Array.from({ length: paramCount }, () => PARAM_MARKER);
+    const descriptor = obj(...sentinelArgs);
+    if (isEndpointDescriptor(descriptor)) {
+      return { operation: obj, descriptor };
+    }
+  } catch {
+    // Some functions may need different args - skip
+  }
+  return null;
+}
+
 function walkContract(
   obj: any,
   parentPath: string[],
 ): Array<{ operation: OperationFunction; descriptor: RestEndpointDescriptor }> {
-  const endpoints: Array<{
-    operation: OperationFunction;
-    descriptor: RestEndpointDescriptor;
-  }> = [];
-
   if (typeof obj === 'function') {
-    try {
-      // Call with sentinel values for all parameters to get the resolved path.
-      // The function's .length gives us the declared parameter count.
-      const paramCount = (obj as OperationFunction).length || 1;
-      const sentinelArgs = Array.from(
-        { length: paramCount },
-        () => PARAM_MARKER,
-      );
-      const descriptor = (obj as OperationFunction)(...sentinelArgs);
+    const result = tryExtractEndpoint(obj as OperationFunction);
+    return result ? [result] : [];
+  }
 
-      if (isEndpointDescriptor(descriptor)) {
-        endpoints.push({
-          operation: obj as OperationFunction,
-          descriptor,
-        });
-      }
-    } catch {
-      // Some functions may need different args - skip
-    }
-  } else if (typeof obj === 'object' && obj !== null) {
+  if (typeof obj === 'object' && obj !== null) {
+    const endpoints: Array<{
+      operation: OperationFunction;
+      descriptor: RestEndpointDescriptor;
+    }> = [];
     for (const [key, value] of Object.entries(obj)) {
       endpoints.push(...walkContract(value, [...parentPath, key]));
     }
+    return endpoints;
   }
 
-  return endpoints;
+  return [];
 }
 
 /**
