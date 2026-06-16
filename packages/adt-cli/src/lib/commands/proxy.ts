@@ -39,6 +39,7 @@ export const proxyCommand = new Command('proxy')
       let auth:
         | { username: string; password: string; client?: string }
         | undefined;
+      let defaultHeaders: Record<string, string> = {};
 
       if (!targetUrl) {
         // Use current auth session
@@ -64,12 +65,16 @@ export const proxyCommand = new Command('proxy')
             client: session.client,
           };
         } else if (session.auth.method === 'cookie') {
-          // Cookie auth - pass cookies as header
           const creds = session.auth.credentials as { cookies: string };
-          auth = undefined; // Will use cookie header instead
-          console.warn(
-            '⚠️  Cookie-based auth detected. Cookie will be forwarded to downstream.',
-          );
+          const rawCookies = decodeURIComponent(creds.cookies);
+          const AUTH_PREFIX = 'Authorization: ';
+          if (rawCookies.startsWith(AUTH_PREFIX)) {
+            defaultHeaders.authorization = rawCookies.substring(
+              AUTH_PREFIX.length,
+            );
+          } else {
+            defaultHeaders.cookie = rawCookies;
+          }
         }
       }
 
@@ -93,6 +98,7 @@ export const proxyCommand = new Command('proxy')
       const proxy = createAdtProxy({
         targetUrl,
         auth,
+        defaultHeaders,
         port: options.port,
         host: options.host,
         basePath: options.basePath,

@@ -174,7 +174,10 @@ export function createAdtProxy(config: AdtProxyConfig) {
 
   function buildDownstreamUrl(url: string): string {
     const relativePath = basePath
-      ? url.replace(new RegExp(`^${basePath}`), '') || '/'
+      ? url.replace(
+          new RegExp(`^${basePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`),
+          '',
+        ) || '/'
       : url;
     return `${targetUrl}${relativePath}`;
   }
