@@ -9,10 +9,6 @@ import type { Serializable } from '@abapify/speci/rest';
 
 /**
  * Convert a JSON string to XML using a schema's build method.
- *
- * @param json - The JSON string to convert
- * @param schema - The schema with a build() method
- * @returns The XML string, or the original JSON if conversion fails
  */
 export function jsonToXml(json: string, schema: Serializable): string {
   try {
@@ -20,27 +16,20 @@ export function jsonToXml(json: string, schema: Serializable): string {
     if (typeof schema.build === 'function') {
       return schema.build(data);
     }
-    // No build method - return as-is
     return json;
   } catch {
-    // If parsing fails, return the original string
     return json;
   }
 }
 
 /**
  * Convert an XML string to JSON using a schema's parse method.
- *
- * @param xml - The XML string to convert
- * @param schema - The schema with a parse() method
- * @returns The JSON string, or the original XML if conversion fails
  */
 export function xmlToJson(xml: string, schema: Serializable): string {
   try {
     const data = schema.parse(xml);
     return JSON.stringify(data);
   } catch {
-    // If parsing fails, return the original string
     return xml;
   }
 }
@@ -52,15 +41,14 @@ export function detectContentType(
   content: string,
   contentType?: string,
 ): 'json' | 'xml' | 'text' | 'binary' {
-  // Check explicit content-type header first
   if (contentType) {
-    if (contentType.includes('json')) return 'json';
-    if (contentType.includes('xml')) return 'xml';
-    if (contentType.includes('text')) return 'text';
+    const ct = contentType.toLowerCase();
+    if (ct.includes('json')) return 'json';
+    if (ct.includes('xml')) return 'xml';
+    if (ct.includes('text')) return 'text';
     return 'binary';
   }
 
-  // Heuristic detection
   const trimmed = content.trimStart();
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
   if (trimmed.startsWith('<?xml') || trimmed.startsWith('<')) return 'xml';
@@ -68,15 +56,17 @@ export function detectContentType(
 }
 
 /**
- * Check if a content type indicates JSON.
+ * Check if a content type indicates JSON (case-insensitive).
  */
 export function isJsonContentType(contentType: string): boolean {
-  return contentType.includes('json') || contentType.endsWith('+json');
+  const ct = contentType.toLowerCase();
+  return ct.includes('json') || ct.endsWith('+json');
 }
 
 /**
- * Check if a content type indicates XML.
+ * Check if a content type indicates XML (case-insensitive).
  */
 export function isXmlContentType(contentType: string): boolean {
-  return contentType.includes('xml') || contentType.endsWith('+xml');
+  const ct = contentType.toLowerCase();
+  return ct.includes('xml') || ct.endsWith('+xml');
 }

@@ -51,7 +51,6 @@ const FORWARDABLE_REQUEST_HEADERS = [
   'x-sap-security-session',
   'x-sap-adt-sessiontype',
   'cookie',
-  'authorization',
 ];
 
 const FORWARDABLE_RESPONSE_HEADERS = [
@@ -65,13 +64,13 @@ const FORWARDABLE_RESPONSE_HEADERS = [
 
 function forwardHeaders(
   source: Record<string, string | string[] | undefined>,
-  target: Record<string, string>,
+  target: Record<string, string | string[]>,
   keys: string[],
 ): void {
   for (const h of keys) {
     const value = source[h];
     if (value && !target[h]) {
-      target[h] = Array.isArray(value) ? value[0] : value;
+      target[h] = value;
     }
   }
 }
@@ -109,12 +108,13 @@ function convertRequestBody(
 function convertResponseBody(
   body: string,
   contentType: string,
+  status: number,
   responseSchemas: RouteDefinition['responseSchemas'],
 ): { body: string; converted: boolean } {
-  if (!body || !isXmlContentType(contentType) || !responseSchemas[200]) {
+  if (!body || !isXmlContentType(contentType) || !responseSchemas[status]) {
     return { body, converted: false };
   }
-  return { body: xmlToJson(body, responseSchemas[200]), converted: true };
+  return { body: xmlToJson(body, responseSchemas[status]), converted: true };
 }
 
 async function forwardRequest(
@@ -122,7 +122,11 @@ async function forwardRequest(
   url: string,
   headers: Record<string, string>,
   body?: string,
-): Promise<{ status: number; headers: Record<string, string>; body: string }> {
+): Promise<{
+  status: number;
+  headers: Record<string, string | string[]>;
+  body: string;
+}> {
   const response = await fetch(url, {
     method,
     headers,
@@ -130,10 +134,17 @@ async function forwardRequest(
   });
 
   const responseBody = await response.text();
-  const responseHeaders: Record<string, string> = {};
+  const responseHeaders: Record<string, string | string[]> = {};
   response.headers.forEach((value, key) => {
     responseHeaders[key] = value;
   });
+
+  if (typeof response.headers.getSetCookie === 'function') {
+    const setCookies = response.headers.getSetCookie();
+    if (setCookies.length > 0) {
+      responseHeaders['set-cookie'] = setCookies;
+    }
+  }
 
   return {
     status: response.status,
@@ -217,11 +228,14 @@ export function createAdtProxy(config: AdtProxyConfig) {
       downstreamBody,
     );
 
-    const respContentType = response.headers['content-type'] || '';
+    const respContentType = Array.isArray(response.headers['content-type'])
+      ? response.headers['content-type'][0]
+      : response.headers['content-type'] || '';
     const { body: responseBody, converted: respConverted } =
       convertResponseBody(
         response.body,
         respContentType,
+        response.status,
         route.responseSchemas,
       );
 
@@ -259,7 +273,10 @@ export function createAdtProxy(config: AdtProxyConfig) {
 
   function sendNotFound(
     res: {
-      writeHead: (status: number, headers: Record<string, string>) => void;
+      writeHead: (
+        status: number,
+        headers: Record<string, string | string[]>,
+      ) => void;
       end: (body?: string) => void;
     },
     method: string,
@@ -280,12 +297,17 @@ export function createAdtProxy(config: AdtProxyConfig) {
 
   function sendResponse(
     res: {
-      writeHead: (status: number, headers: Record<string, string>) => void;
+      writeHead: (
+        status: number,
+        headers: Record<string, string | string[]>,
+      ) => void;
       end: (body?: string) => void;
     },
     result: ProxyResult,
   ): void {
-    const responseHeaders: Record<string, string> = { 'x-proxy': 'adt-proxy' };
+    const responseHeaders: Record<string, string | string[]> = {
+      'x-proxy': 'adt-proxy',
+    };
     forwardHeaders(
       result.headers,
       responseHeaders,
@@ -320,7 +342,10 @@ export function createAdtProxy(config: AdtProxyConfig) {
       on: (event: string, cb: (chunk: any) => void) => void;
     },
     res: {
-      writeHead: (status: number, headers: Record<string, string>) => void;
+      writeHead: (
+        status: number,
+        headers: Record<string, string | string[]>,
+      ) => void;
       end: (body?: string) => void;
     },
   ): Promise<void> {

@@ -7,7 +7,13 @@ export const proxyCommand = new Command('proxy')
   .option(
     '-p, --port <port>',
     'Port to listen on (default: random available port)',
-    parseInt,
+    (val: string) => {
+      const parsed = parseInt(val, 10);
+      if (Number.isNaN(parsed) || parsed < 0 || parsed > 65535) {
+        throw new Error(`Invalid port: ${val}`);
+      }
+      return parsed;
+    },
   )
   .option(
     '-H, --host <host>',
@@ -44,7 +50,7 @@ export const proxyCommand = new Command('proxy')
       if (!targetUrl) {
         // Use current auth session
         const session = loadAuthSession(options.sid);
-        if (!session) {
+        if (!session || !session.auth) {
           console.error('❌ Not authenticated and no --target specified');
           console.error(
             '💡 Run "npx adt auth login" or provide --target <url>',

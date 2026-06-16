@@ -4,11 +4,7 @@
  * Framework-agnostic types for generating servers from REST contracts.
  */
 
-import type {
-  Serializable,
-  RestEndpointDescriptor,
-  ResponseMap,
-} from '../types';
+import type { Serializable, RestEndpointDescriptor } from '../types';
 
 /**
  * HTTP server request (abstraction over node:http IncomingMessage, Web Request, etc.)

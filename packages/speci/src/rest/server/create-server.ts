@@ -226,12 +226,10 @@ export function createServer<T extends Record<string, any>>(
     ): { route: RouteDefinition; params: Record<string, string> } | null {
       // Strip query string and base path
       const pathname = url.split('?')[0];
-      const relativePath = basePath
-        ? pathname.replace(
-            new RegExp(`^${basePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`),
-            '',
-          ) || '/'
-        : pathname;
+      const relativePath =
+        basePath && pathname.startsWith(basePath)
+          ? pathname.slice(basePath.length) || '/'
+          : pathname;
 
       for (const route of routes) {
         const routeWithRegex = route as RouteDefinition & { _regex: RegExp };

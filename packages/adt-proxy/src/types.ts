@@ -79,7 +79,7 @@ export interface ProxyResult {
   status: number;
 
   /** Response headers from downstream */
-  headers: Record<string, string>;
+  headers: Record<string, string | string[]>;
 
   /** Response body (JSON string if converted, raw string otherwise) */
   body: string;
