@@ -53,7 +53,7 @@ export const proxyCommand = new Command('proxy')
         if (!session || !session.auth) {
           console.error('❌ Not authenticated and no --target specified');
           console.error(
-            '💡 Run "npx adt auth login" or provide --target <url>',
+            '💡 Run "bunx adt auth login" or provide --target <url>',
           );
           process.exit(1);
         }
