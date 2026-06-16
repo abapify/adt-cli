@@ -114,7 +114,6 @@ function walkContract(
  */
 function buildPathInfo(
   resolvedPath: string,
-  paramCount: number,
 ): { regex: RegExp; template: string; paramNames: string[] } {
   // Count sentinel occurrences to determine parameter count
   const sentinelCount = (
@@ -175,11 +174,9 @@ export function createServer<T extends Record<string, any>>(
   const routes: RouteDefinition[] = endpoints.map(
     ({ operation, descriptor }) => {
       const resolvedPath = descriptor.path || '';
-      const paramCount = (operation as OperationFunction).length || 0;
 
       const { regex, template, paramNames } = buildPathInfo(
         resolvedPath,
-        paramCount,
       );
 
       // Extract body schema

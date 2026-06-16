@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { createAdtProxy } from '@abapify/adt-proxy';
-import { loadAuthSession, type AuthSession } from '../utils/auth';
+import { loadAuthSession } from '../utils/auth';
 
 export const proxyCommand = new Command('proxy')
   .description('Start an ADT proxy server with JSON↔XML conversion')
@@ -37,7 +37,19 @@ export const proxyCommand = new Command('proxy')
     '--no-forward-unknown',
     'Return 404 for unmatched routes instead of forwarding',
   )
+  .option(
+    '--max-body-size <bytes>',
+    'Maximum request body size in bytes (default: 10485760)',
+    (val: string) => {
+      const parsed = parseInt(val, 10);
+      if (Number.isNaN(parsed) || parsed <= 0) {
+        throw new Error(`Invalid max-body-size: ${val}`);
+      }
+      return parsed;
+    },
+  )
   .option('--sid <sid>', 'SAP System ID to use for authentication')
+  .option('--verbose', 'Enable debug logging')
   .action(async (options, _command) => {
     try {
       // Determine target URL and auth
@@ -110,6 +122,7 @@ export const proxyCommand = new Command('proxy')
         basePath: options.basePath,
         convertContent: options.convert !== false,
         forwardUnknown: options.forwardUnknown !== false,
+        maxBodySize: options.maxBodySize,
         logger: {
           debug: (msg, obj) => {
             if (options.verbose) {

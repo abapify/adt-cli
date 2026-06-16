@@ -37,6 +37,9 @@ export interface AdtProxyConfig {
   /** Custom headers to add to all downstream requests */
   defaultHeaders?: Record<string, string>;
 
+  /** Maximum allowed request body size in bytes (default: 10MB) */
+  maxBodySize?: number;
+
   /** Logger instance (must implement debug, info, warn, error methods) */
   logger?: Logger;
 }

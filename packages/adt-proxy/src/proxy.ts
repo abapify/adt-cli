@@ -37,6 +37,8 @@ import {
 } from './converter';
 import type { AdtProxyConfig, ProxyResult, Logger } from './types';
 
+const DEFAULT_MAX_BODY_SIZE = 10 * 1024 * 1024;
+
 const DEFAULT_LOGGER: Logger = {
   debug: () => {},
   info: () => {},
@@ -172,6 +174,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
     forwardUnknown = true,
     convertContent = true,
     defaultHeaders = {},
+    maxBodySize = DEFAULT_MAX_BODY_SIZE,
     logger = DEFAULT_LOGGER,
   } = config;
 
@@ -217,12 +220,14 @@ export function createAdtProxy(config: AdtProxyConfig) {
     requestBody: string,
     incomingHeaders: Record<string, string | string[] | undefined>,
     route: RouteDefinition,
+    doConvert: boolean,
   ): Promise<ProxyResult> {
     logger.info(`Matched route: ${route.method} ${route.pathTemplate}`);
 
     const reqContentType = getContentType(incomingHeaders);
-    const { body: downstreamBody, converted: reqConverted } =
-      convertRequestBody(requestBody, reqContentType, route.bodySchema);
+    const { body: downstreamBody, converted: reqConverted } = doConvert
+      ? convertRequestBody(requestBody, reqContentType, route.bodySchema)
+      : { body: requestBody, converted: false };
 
     const downstreamHeaders = buildDownstreamHeaders(
       incomingHeaders,
@@ -242,13 +247,14 @@ export function createAdtProxy(config: AdtProxyConfig) {
     const respContentType = Array.isArray(response.headers['content-type'])
       ? response.headers['content-type'][0]
       : response.headers['content-type'] || '';
-    const { body: responseBody, converted: respConverted } =
-      convertResponseBody(
-        response.body,
-        respContentType,
-        response.status,
-        route.responseSchemas,
-      );
+    const { body: responseBody, converted: respConverted } = doConvert
+      ? convertResponseBody(
+          response.body,
+          respContentType,
+          response.status,
+          route.responseSchemas,
+        )
+      : { body: response.body, converted: false };
 
     return {
       status: response.status,
@@ -338,7 +344,13 @@ export function createAdtProxy(config: AdtProxyConfig) {
   }): Promise<string> {
     return new Promise((resolve, reject) => {
       let body = '';
+      let totalSize = 0;
       req.on('data', (chunk: Buffer) => {
+        totalSize += chunk.length;
+        if (totalSize > maxBodySize) {
+          reject(new Error(`Request body exceeds maximum size of ${maxBodySize} bytes`));
+          return;
+        }
         body += chunk.toString();
       });
       req.on('end', () => resolve(body));
@@ -368,13 +380,14 @@ export function createAdtProxy(config: AdtProxyConfig) {
     const requestBody = await readBody(req);
     const match = contractRoutes.match(method, url, basePath);
 
-    if (match && convertContent) {
+    if (match) {
       const result = await handleMatchedRoute(
         method,
         url,
         requestBody,
         req.headers,
         match.route,
+        convertContent,
       );
       sendResponse(res, result);
       return;

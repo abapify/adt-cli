@@ -15,8 +15,7 @@
   ],
   "dependencies": {
     "@abapify/adt-contracts": "0.4.1",
-    "@abapify/speci": "0.4.1",
-    "fast-xml-parser": "^5.5.3"
+    "@abapify/speci": "0.4.1"
   },
   "repository": {
     "type": "git",
