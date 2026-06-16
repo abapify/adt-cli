@@ -37,8 +37,6 @@ import {
 } from './converter';
 import type { AdtProxyConfig, ProxyResult, Logger } from './types';
 
-const DEFAULT_MAX_BODY_SIZE = 10 * 1024 * 1024;
-
 const DEFAULT_LOGGER: Logger = {
   debug: () => {},
   info: () => {},
@@ -174,7 +172,6 @@ export function createAdtProxy(config: AdtProxyConfig) {
     forwardUnknown = true,
     convertContent = true,
     defaultHeaders = {},
-    maxBodySize = DEFAULT_MAX_BODY_SIZE,
     logger = DEFAULT_LOGGER,
   } = config;
 
@@ -220,14 +217,12 @@ export function createAdtProxy(config: AdtProxyConfig) {
     requestBody: string,
     incomingHeaders: Record<string, string | string[] | undefined>,
     route: RouteDefinition,
-    doConvert: boolean,
   ): Promise<ProxyResult> {
     logger.info(`Matched route: ${route.method} ${route.pathTemplate}`);
 
     const reqContentType = getContentType(incomingHeaders);
-    const { body: downstreamBody, converted: reqConverted } = doConvert
-      ? convertRequestBody(requestBody, reqContentType, route.bodySchema)
-      : { body: requestBody, converted: false };
+    const { body: downstreamBody, converted: reqConverted } =
+      convertRequestBody(requestBody, reqContentType, route.bodySchema);
 
     const downstreamHeaders = buildDownstreamHeaders(
       incomingHeaders,
@@ -247,14 +242,13 @@ export function createAdtProxy(config: AdtProxyConfig) {
     const respContentType = Array.isArray(response.headers['content-type'])
       ? response.headers['content-type'][0]
       : response.headers['content-type'] || '';
-    const { body: responseBody, converted: respConverted } = doConvert
-      ? convertResponseBody(
-          response.body,
-          respContentType,
-          response.status,
-          route.responseSchemas,
-        )
-      : { body: response.body, converted: false };
+    const { body: responseBody, converted: respConverted } =
+      convertResponseBody(
+        response.body,
+        respContentType,
+        response.status,
+        route.responseSchemas,
+      );
 
     return {
       status: response.status,
@@ -339,21 +333,24 @@ export function createAdtProxy(config: AdtProxyConfig) {
     res.end(result.body);
   }
 
-  async function readBody(req: {
-    on: (event: string, cb: (...args: any[]) => void) => void;
-  }): Promise<string> {
+  async function readBody(
+    req: {
+      on: (event: string, cb: (...args: any[]) => void) => void;
+    },
+    maxSize = 10 * 1024 * 1024,
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
-      let body = '';
-      let totalSize = 0;
+      let size = 0;
+      const chunks: Buffer[] = [];
       req.on('data', (chunk: Buffer) => {
-        totalSize += chunk.length;
-        if (totalSize > maxBodySize) {
-          reject(new Error(`Request body exceeds maximum size of ${maxBodySize} bytes`));
+        size += chunk.length;
+        if (size > maxSize) {
+          reject(new Error(`Request body exceeds ${maxSize} byte limit`));
           return;
         }
-        body += chunk.toString();
+        chunks.push(chunk);
       });
-      req.on('end', () => resolve(body));
+      req.on('end', () => resolve(Buffer.concat(chunks).toString()));
       req.on('error', (err: Error) => reject(err));
     });
   }
@@ -380,16 +377,35 @@ export function createAdtProxy(config: AdtProxyConfig) {
     const requestBody = await readBody(req);
     const match = contractRoutes.match(method, url, basePath);
 
-    if (match) {
+    if (match && convertContent) {
       const result = await handleMatchedRoute(
         method,
         url,
         requestBody,
         req.headers,
         match.route,
-        convertContent,
       );
       sendResponse(res, result);
+      return;
+    }
+
+    if (match) {
+      const downstreamHeaders = buildDownstreamHeaders(
+        req.headers,
+        match.route.requestHeaders,
+      );
+      const response = await forwardRequest(
+        method,
+        buildDownstreamUrl(url),
+        downstreamHeaders,
+        requestBody,
+      );
+      sendResponse(res, {
+        status: response.status,
+        headers: response.headers,
+        body: response.body,
+        converted: false,
+      });
       return;
     }
 

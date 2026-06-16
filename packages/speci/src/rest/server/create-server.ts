@@ -112,10 +112,11 @@ function walkContract(
  * // For path '/users/\x00/posts/\x00' with param names ['userId', 'postId']
  * // Returns: /\/users\/([^/]+)\/posts\/([^/]+)/
  */
-function buildPathInfo(
-  resolvedPath: string,
-): { regex: RegExp; template: string; paramNames: string[] } {
-  // Count sentinel occurrences to determine parameter count
+function buildPathInfo(resolvedPath: string): {
+  regex: RegExp;
+  template: string;
+  paramNames: string[];
+} {
   const sentinelCount = (
     resolvedPath.match(new RegExp(PARAM_MARKER, 'g')) || []
   ).length;
@@ -175,9 +176,7 @@ export function createServer<T extends Record<string, any>>(
     ({ operation, descriptor }) => {
       const resolvedPath = descriptor.path || '';
 
-      const { regex, template, paramNames } = buildPathInfo(
-        resolvedPath,
-      );
+      const { regex, template, paramNames } = buildPathInfo(resolvedPath);
 
       // Extract body schema
       const bodySchema =
@@ -218,23 +217,19 @@ export function createServer<T extends Record<string, any>>(
       url: string,
       basePath = '',
     ): { route: RouteDefinition; params: Record<string, string> } | null {
-      // Strip query string and base path
       const pathname = url.split('?')[0];
-      const relativePath =
-        basePath && pathname.startsWith(basePath)
-          ? pathname.slice(basePath.length) || '/'
-          : pathname;
+      let relativePath = pathname;
+      if (basePath && pathname.startsWith(basePath)) {
+        relativePath = pathname.slice(basePath.length) || '/';
+      }
 
+      const targetMethod = method.toUpperCase();
       for (const route of routes) {
+        if (route.method !== targetMethod) continue;
+
         const routeWithRegex = route as RouteDefinition & { _regex: RegExp };
-
-        // Skip if method doesn't match
-        if (route.method !== method.toUpperCase()) continue;
-
-        // Try to match the path
         const match = relativePath.match(routeWithRegex._regex);
         if (match) {
-          // Build params object from capture groups
           const params: Record<string, string> = {};
           for (let i = 0; i < route.pathParamNames.length; i++) {
             params[route.pathParamNames[i]] = match[i + 1] || '';
