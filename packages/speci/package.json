@@ -11,6 +11,7 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./rest": "./dist/rest/index.mjs",
+    "./rest/server": "./dist/rest/server/index.mjs",
     "./package.json": "./package.json"
   },
   "files": [

@@ -1,0 +1,13 @@
+{
+  "name": "adt-proxy",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/adt-proxy/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}"]
+    }
+  },
+  "tags": ["type:library", "scope:adt-proxy"],
+  "targets": {}
+}

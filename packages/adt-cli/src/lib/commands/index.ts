@@ -34,3 +34,4 @@ export { checkinCommand } from './checkin';
 export { createChangesetCommand } from './changeset';
 export { rfcCommand } from './rfc';
 export { createFlpCommand } from './flp';
+export { proxyCommand } from './proxy';

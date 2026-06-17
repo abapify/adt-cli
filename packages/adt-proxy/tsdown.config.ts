@@ -3,6 +3,6 @@ import baseConfig from '../../tsdown.config.ts';
 
 export default defineConfig({
   ...baseConfig,
-  entry: ['src/index.ts', 'src/rest/index.ts', 'src/rest/server/index.ts'],
+  entry: ['src/index.ts'],
   tsconfig: 'tsconfig.json',
 });
