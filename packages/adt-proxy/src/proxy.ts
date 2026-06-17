@@ -148,6 +148,7 @@ async function forwardRequest(
     const responseBody = await response.text();
     const responseHeaders: Record<string, string | string[]> = {};
     response.headers.forEach((value, key) => {
+      if (key.toLowerCase() === 'set-cookie') return;
       responseHeaders[key] = value;
     });
 
