@@ -57,7 +57,7 @@ export const proxyCommand = new Command('proxy')
       let auth:
         | { username: string; password: string; client?: string }
         | undefined;
-      let defaultHeaders: Record<string, string> = {};
+      const defaultHeaders: Record<string, string> = {};
 
       if (!targetUrl) {
         // Use current auth session
