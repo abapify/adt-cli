@@ -117,9 +117,7 @@ function buildPathInfo(resolvedPath: string): {
   template: string;
   paramNames: string[];
 } {
-  const sentinelCount = (
-    resolvedPath.match(new RegExp(PARAM_MARKER, 'g')) || []
-  ).length;
+  const sentinelCount = resolvedPath.split(PARAM_MARKER).length - 1;
 
   // Generate parameter names (p1, p2, ... if we don't know the real names)
   const paramNames = Array.from(

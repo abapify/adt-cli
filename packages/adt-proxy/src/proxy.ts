@@ -38,8 +38,12 @@ import {
 import type { AdtProxyConfig, ProxyResult, Logger } from './types';
 
 const DEFAULT_LOGGER: Logger = {
-  debug: () => {},
-  info: () => {},
+  debug: (_msg: string) => {
+    /* noop */
+  },
+  info: (_msg: string) => {
+    /* noop */
+  },
   warn: console.warn,
   error: console.error,
 };
@@ -195,12 +199,10 @@ export function createAdtProxy(config: AdtProxyConfig) {
   }
 
   function buildDownstreamUrl(url: string): string {
-    const relativePath = basePath
-      ? url.replace(
-          new RegExp(`^${basePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`),
-          '',
-        ) || '/'
-      : url;
+    const relativePath =
+      basePath && url.startsWith(basePath)
+        ? url.slice(basePath.length) || '/'
+        : url;
     return `${targetUrl}${relativePath}`;
   }
 

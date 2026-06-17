@@ -51,5 +51,8 @@ jobs:
         shell: bash
       - run: npx nx format:check
       - run: npx nx affected -t lint test build e2e-ci --verbose=false --parallel=3
+        if: ${{ env.NX_CLOUD_ACCESS_TOKEN != '' }}
+      - run: npx nx affected -t lint test build e2e-ci --verbose=false --parallel=3 --no-cloud
+        if: ${{ env.NX_CLOUD_ACCESS_TOKEN == '' }}
       - run: npx nx-cloud fix-ci
-        if: always()
+        if: always() && env.NX_CLOUD_ACCESS_TOKEN != ''
