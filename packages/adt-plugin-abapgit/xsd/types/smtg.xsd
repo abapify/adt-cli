@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SMTG - Email Template types -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Email template header -->
+  <xs:complexType name="SmtgHeaderType">
+    <xs:all>
+      <xs:element name="TMPL_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TMPL_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TMPL_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TMPL_CATEGORY" type="xs:string" minOccurs="0"/>
+      <xs:element name="TMPL_LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="TMPL_APPL" type="xs:string" minOccurs="0"/>
+      <xs:element name="CREA_DATE_TIME" type="xs:string" minOccurs="0"/>
+      <xs:element name="CREA_USER_ACCT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LST_CH_DATE_TIME" type="xs:string" minOccurs="0"/>
+      <xs:element name="LST_CH_USER_ACCT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Email template content -->
+  <xs:complexType name="SmtgContentType">
+    <xs:all>
+      <xs:element name="TMPL_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="SUBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="BODY" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Email template contents table -->
+  <xs:complexType name="SmtgContentsType">
+    <xs:sequence>
+      <xs:element name="item" type="SmtgContentType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Main SMTG values type -->
+  <xs:complexType name="SmtgType">
+    <xs:all>
+      <xs:element name="HEADER" type="SmtgHeaderType" minOccurs="0"/>
+      <xs:element name="CONTENTS" type="SmtgContentsType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

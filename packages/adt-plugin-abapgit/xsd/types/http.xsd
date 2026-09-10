@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- HTTP - HTTP Service types (SAP UCON framework) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- HTTP text (description) -->
+  <xs:complexType name="HttpTextType">
+    <xs:all>
+      <xs:element name="ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="VERSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANG" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- HTTP handler -->
+  <xs:complexType name="HttpHandlerType">
+    <xs:all>
+      <xs:element name="ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="VERSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="SERVICEORDER" type="xs:string" minOccurs="0"/>
+      <xs:element name="SERVICEHANDLER" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- HTTP handler container -->
+  <xs:complexType name="HttpHdlType">
+    <xs:sequence>
+      <xs:element name="UCONSERVHANDLER" type="HttpHandlerType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Main HTTP values type -->
+  <xs:complexType name="HttpType">
+    <xs:all>
+      <xs:element name="HTTPID" type="xs:string" minOccurs="0"/>
+      <xs:element name="HTTPTEXT" type="HttpTextType" minOccurs="0"/>
+      <xs:element name="HTTPHDL" type="HttpHdlType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>
