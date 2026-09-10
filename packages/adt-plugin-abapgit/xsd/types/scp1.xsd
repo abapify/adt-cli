@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SCP1 - Business Configuration Set types -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- BC Set attributes -->
+  <xs:complexType name="Scp1AttrType">
+    <xs:all>
+      <xs:element name="ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLI_DEP" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLI_CAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="REFTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="REFNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMPONENT" type="xs:string" minOccurs="0"/>
+      <xs:element name="MINRELEASE" type="xs:string" minOccurs="0"/>
+      <xs:element name="MAXRELEASE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORGID" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACT_INFO" type="xs:string" minOccurs="0"/>
+      <xs:element name="CATEGORY" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- BC Set text -->
+  <xs:complexType name="Scp1TextType">
+    <xs:all>
+      <xs:element name="PROFID" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- BC Set texts table -->
+  <xs:complexType name="Scp1TextTabType">
+    <xs:sequence>
+      <xs:element name="item" type="Scp1TextType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- BC Set value -->
+  <xs:complexType name="Scp1ValsType">
+    <xs:all>
+      <xs:element name="PROFID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABLENAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="VALUE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- BC Set values table -->
+  <xs:complexType name="Scp1ValsTabType">
+    <xs:sequence>
+      <xs:element name="item" type="Scp1ValsType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Main SCP1 values type -->
+  <xs:complexType name="Scp1Type">
+    <xs:all>
+      <xs:element name="SCPRATTR" type="Scp1AttrType" minOccurs="0"/>
+      <xs:element name="SCPRTEXT" type="Scp1TextTabType" minOccurs="0"/>
+      <xs:element name="SCPRVALS" type="Scp1ValsTabType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

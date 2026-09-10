@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CHDO - Change Document types -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Generated report (TCDRPS) -->
+  <xs:complexType name="ChdoTcdrpsType">
+    <xs:all>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="REPORTNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ARBGEB" type="xs:string" minOccurs="0"/>
+      <xs:element name="FEHLERNR" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Generated reports table -->
+  <xs:complexType name="ChdoReportsType">
+    <xs:sequence>
+      <xs:element name="TCDRPS" type="ChdoTcdrpsType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Change document object (TCDOBS) -->
+  <xs:complexType name="ChdoTcdobsType">
+    <xs:all>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DOCUDEL" type="xs:string" minOccurs="0"/>
+      <xs:element name="DOCUINS" type="xs:string" minOccurs="0"/>
+      <xs:element name="DOCUD_NOIF" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Change document objects table -->
+  <xs:complexType name="ChdoObjectsType">
+    <xs:sequence>
+      <xs:element name="TCDOBS" type="ChdoTcdobsType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Object text entry -->
+  <xs:complexType name="ChdoObjectTextType">
+    <xs:all>
+      <xs:element name="SPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Object texts table -->
+  <xs:complexType name="ChdoObjectsTextType">
+    <xs:sequence>
+      <xs:element name="item" type="ChdoObjectTextType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Main CHDO values type -->
+  <xs:complexType name="ChdoType">
+    <xs:all>
+      <xs:element name="REPORTS_GENERATED" type="ChdoReportsType" minOccurs="0"/>
+      <xs:element name="OBJECTS" type="ChdoObjectsType" minOccurs="0"/>
+      <xs:element name="OBJECTS_TEXT" type="ChdoObjectsTextType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>
