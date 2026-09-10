@@ -9,17 +9,17 @@ export type SrvbSchema = {
     abapGit: {
         abap: {
             values: {
-                SKEY?: {
-                    TYPE?: string;
-                    NAME?: string;
+                SKEY?: undefined | {
+                    TYPE?: string | undefined;
+                    NAME?: string | undefined;
                 };
-                BINDING?: {
-                    TYPE?: string;
-                    VERSION?: string;
-                    CATEGORY?: string;
+                BINDING?: undefined | {
+                    TYPE?: string | undefined;
+                    VERSION?: string | undefined;
+                    CATEGORY?: string | undefined;
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;

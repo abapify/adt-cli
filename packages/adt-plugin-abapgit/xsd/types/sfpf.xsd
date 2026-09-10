@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SFPF - Form Object types (SAP Interactive Forms) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Form header -->
+  <xs:complexType name="SfpfHeaderType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="STATE" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Form layout (XDP raw content) -->
+  <xs:complexType name="SfpfLayoutType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="XDP" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Main SFPF values type -->
+  <xs:complexType name="SfpfType">
+    <xs:all>
+      <xs:element name="HEADER" type="SfpfHeaderType" minOccurs="0"/>
+      <xs:element name="LAYOUT" type="SfpfLayoutType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

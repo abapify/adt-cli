@@ -9,12 +9,12 @@ export type SrvdSchema = {
     abapGit: {
         abap: {
             values: {
-                SKEY?: {
-                    TYPE?: string;
-                    NAME?: string;
+                SKEY?: undefined | {
+                    TYPE?: string | undefined;
+                    NAME?: string | undefined;
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;

@@ -5,6 +5,7 @@
  */
 
 export { default as bdef } from './bdef';
+export { default as chdo } from './chdo';
 export { default as clas } from './clas';
 export { default as dcls } from './dcls';
 export { default as ddls } from './ddls';
@@ -12,10 +13,24 @@ export { default as ddlx } from './ddlx';
 export { default as devc } from './devc';
 export { default as doma } from './doma';
 export { default as dtel } from './dtel';
+export { default as enho } from './enho';
+export { default as enhs } from './enhs';
+export { default as enqu } from './enqu';
 export { default as fugr } from './fugr';
+export { default as http } from './http';
 export { default as intf } from './intf';
+export { default as msag } from './msag';
+export { default as nrob } from './nrob';
 export { default as prog } from './prog';
+export { default as scp1 } from './scp1';
+export { default as sfpf } from './sfpf';
+export { default as shlp } from './shlp';
+export { default as smtg } from './smtg';
 export { default as srvb } from './srvb';
 export { default as srvd } from './srvd';
 export { default as tabl } from './tabl';
+export { default as tran } from './tran';
 export { default as ttyp } from './ttyp';
+export { default as type } from './type';
+export { default as view } from './view';
+export { default as xslt } from './xslt';

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- abapGit SCP1 (Business Configuration Set) Schema -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
+  <xs:include schemaLocation="abapgit.xsd"/>
+  <xs:include schemaLocation="types/scp1.xsd"/>
+
+  <xs:complexType name="Scp1ValuesType">
+    <xs:all>
+      <xs:element name="SCP1" type="Scp1Type" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Scp1AbapType">
+    <xs:sequence>
+      <xs:element name="values" type="Scp1ValuesType"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" default="1.0"/>
+  </xs:complexType>
+
+  <xs:element name="abapGit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="abap" type="Scp1AbapType"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="serializer" type="xs:string" use="required"/>
+      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
