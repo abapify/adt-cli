@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="IcfServiceType">
+    <xs:all>
+      <xs:element name="ICF_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFALTNME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORIG_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_PARENT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_NODE_LOGON" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_AUTH" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_MANDT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFNODGUID" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFPARGUID" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IcfDocuType">
+    <xs:all>
+      <xs:element name="ICF_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="DESCRIPT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IcfHandlerType">
+    <xs:all>
+      <xs:element name="ICF_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFHANDLER" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFHANDLERORDER" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SotsType">
+    <xs:sequence>
+      <xs:element name="item" type="SotsItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SotsItemType">
+    <xs:all>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>
