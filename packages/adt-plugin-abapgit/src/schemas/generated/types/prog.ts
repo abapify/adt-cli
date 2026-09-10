@@ -9,26 +9,26 @@ export type ProgSchema = {
     abapGit: {
         abap: {
             values: {
-                PROGDIR?: {
+                PROGDIR?: undefined | {
                     NAME: string;
-                    STATE?: string;
-                    SUBC?: string;
-                    FIXPT?: string;
-                    UNICODE?: string;
-                    DTEFUNC?: string;
-                    RLOAD?: string;
-                    UCCHECK?: string;
-                    ABAP_LANGUAGE_VERSION?: string;
+                    STATE?: string | undefined;
+                    SUBC?: string | undefined;
+                    FIXPT?: string | undefined;
+                    UNICODE?: string | undefined;
+                    DTEFUNC?: string | undefined;
+                    RLOAD?: string | undefined;
+                    UCCHECK?: string | undefined;
+                    ABAP_LANGUAGE_VERSION?: string | undefined;
                 };
-                TPOOL?: {
-                    item?: {
+                TPOOL?: undefined | {
+                    item?: undefined | {
                         ID: string;
-                        ENTRY?: string;
-                        LENGTH?: string;
+                        ENTRY?: string | undefined;
+                        LENGTH?: string | undefined;
                     }[];
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;

@@ -5,45 +5,87 @@
  * Mode: Flattened
  */
 
-type TranValues = {
-    TSTC?: {
-        TCODE: string;
-        PGMNA?: string;
-        DYPNO?: string;
-        TYPE?: string;
-        CINFO?: string;
-    };
-    TSTCC?: {
-        TCODE?: string;
-        S_WEBGUI?: string;
-        S_PLATIN?: string;
-        S_WIN32?: string;
-        S_MAC?: string;
-    };
-    TSTCT?: {
-        item?: {
-            SPRSL?: string;
-            TCODE?: string;
-            TTEXT?: string;
-        }[];
-    };
-};
-
 export type TranSchema = {
     abapGit: {
         abap: {
-            values: TranValues;
-            version?: string;
+            values: {
+                TSTC?: undefined | {
+                    TCODE: string;
+                    PGMNA?: string | undefined;
+                    DYPNO?: string | undefined;
+                    TYPE?: string | undefined;
+                    CINFO?: string | undefined;
+                };
+                TSTCC?: undefined | {
+                    TCODE?: string | undefined;
+                    S_WEBGUI?: string | undefined;
+                    S_PLATIN?: string | undefined;
+                    S_WIN32?: string | undefined;
+                    S_MAC?: string | undefined;
+                };
+                TSTCT?: undefined | {
+                    item?: undefined | {
+                        SPRSL?: string | undefined;
+                        TCODE?: string | undefined;
+                        TTEXT?: string | undefined;
+                    }[];
+                };
+            };
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
     };
 } | {
-    values: TranValues;
+    values: {
+        TSTC?: undefined | {
+            TCODE: string;
+            PGMNA?: string | undefined;
+            DYPNO?: string | undefined;
+            TYPE?: string | undefined;
+            CINFO?: string | undefined;
+        };
+        TSTCC?: undefined | {
+            TCODE?: string | undefined;
+            S_WEBGUI?: string | undefined;
+            S_PLATIN?: string | undefined;
+            S_WIN32?: string | undefined;
+            S_MAC?: string | undefined;
+        };
+        TSTCT?: undefined | {
+            item?: undefined | {
+                SPRSL?: string | undefined;
+                TCODE?: string | undefined;
+                TTEXT?: string | undefined;
+            }[];
+        };
+    };
 } | {
     abap: {
-        values: TranValues;
-        version?: string;
+        values: {
+            TSTC?: undefined | {
+                TCODE: string;
+                PGMNA?: string | undefined;
+                DYPNO?: string | undefined;
+                TYPE?: string | undefined;
+                CINFO?: string | undefined;
+            };
+            TSTCC?: undefined | {
+                TCODE?: string | undefined;
+                S_WEBGUI?: string | undefined;
+                S_PLATIN?: string | undefined;
+                S_WIN32?: string | undefined;
+                S_MAC?: string | undefined;
+            };
+            TSTCT?: undefined | {
+                item?: undefined | {
+                    SPRSL?: string | undefined;
+                    TCODE?: string | undefined;
+                    TTEXT?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };
