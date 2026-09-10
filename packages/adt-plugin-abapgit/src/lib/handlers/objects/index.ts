@@ -26,6 +26,8 @@ export { searchHelpHandler } from './shlp';
 export { transactionHandler } from './tran';
 export { typeGroupHandler } from './type';
 export { transformationHandler } from './xslt';
+export { enhancementImplementationHandler } from './enho';
+export { enhancementSpotHandler } from './enhs';
 export { cdsAspectHandler } from './dras';
 export { cdsTypeHandler } from './drty';
 export { scalarFunctionDefinitionHandler } from './dsfd';
