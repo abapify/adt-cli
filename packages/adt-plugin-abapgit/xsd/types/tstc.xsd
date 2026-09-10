@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TSTC - Transaction code type (SAP DDIC table TSTC) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="TstcType">
+    <xs:all>
+      <xs:element name="TCODE" type="xs:string"/>
+      <xs:element name="PGMNA" type="xs:string" minOccurs="0"/>
+      <xs:element name="DYPNO" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="CINFO" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

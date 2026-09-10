@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TSTCC - Transaction GUI attributes type (SAP DDIC table TSTCC) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="TstccType">
+    <xs:all>
+      <xs:element name="TCODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="S_WEBGUI" type="xs:string" minOccurs="0"/>
+      <xs:element name="S_PLATIN" type="xs:string" minOccurs="0"/>
+      <xs:element name="S_WIN32" type="xs:string" minOccurs="0"/>
+      <xs:element name="S_MAC" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

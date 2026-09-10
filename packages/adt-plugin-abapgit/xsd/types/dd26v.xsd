@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DD26V - View-table assignment type (SAP DDIC table DD26V) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="Dd26vType">
+    <xs:sequence>
+      <xs:element name="VIEWNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABPOS" type="xs:string" minOccurs="0"/>
+      <xs:element name="FVIEWNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FFIELDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="READONLY" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Dd26vTabType">
+    <xs:sequence>
+      <xs:element name="item" type="Dd26vType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

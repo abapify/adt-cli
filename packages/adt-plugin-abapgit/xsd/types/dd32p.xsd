@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DD32P - Search help parameter type (SAP DDIC table DD32P) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="Dd32pType">
+    <xs:sequence>
+      <xs:element name="SHLPNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHLPINPUT" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHLPOUTPUT" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHLPSELPOS" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHLPLISPOS" type="xs:string" minOccurs="0"/>
+      <xs:element name="DEFAULTVAL" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROLLNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATATYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="LENG" type="xs:string" minOccurs="0"/>
+      <xs:element name="DECIMALS" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Dd32pTabType">
+    <xs:sequence>
+      <xs:element name="item" type="Dd32pType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

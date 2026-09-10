@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DD28V - View selection condition type (SAP DDIC table DD28V) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="Dd28vType">
+    <xs:sequence>
+      <xs:element name="VIEWNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ANDOR" type="xs:string" minOccurs="0"/>
+      <xs:element name="LEFTBRACKET" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OPERATOR" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONST_VALUE" type="xs:string" minOccurs="0"/>
+      <xs:element name="RIGHTBRACKET" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Dd28vTabType">
+    <xs:sequence>
+      <xs:element name="item" type="Dd28vType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DD30V - Search help header type (SAP DDIC structure DD30V) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="Dd30vType">
+    <xs:all>
+      <xs:element name="SHLPNAME" type="xs:string"/>
+      <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHLPTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHLPINPUT" type="xs:string" minOccurs="0"/>
+      <xs:element name="DEFLOOKUP" type="xs:string" minOccurs="0"/>
+      <xs:element name="DIALOGTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="SELEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACTMETHOD" type="xs:string" minOccurs="0"/>
+      <xs:element name="HOTKEY" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

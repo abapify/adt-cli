@@ -28,3 +28,12 @@ export { dynamicCacheHandler } from './dtdc';
 export { tuningIndexHandler } from './dtix';
 export { staticCacheHandler } from './dtsc';
 export { externalSchemaHandler } from './desd';
+
+// Phase 2: Legacy XML types
+export { messageClassHandler } from './msag';
+export { viewHandler } from './view';
+export { lockObjectHandler } from './enqu';
+export { searchHelpHandler } from './shlp';
+export { transactionHandler } from './tran';
+export { typeGroupHandler } from './type';
+export { transformationHandler } from './xslt';
