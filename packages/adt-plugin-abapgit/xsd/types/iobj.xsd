@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="IobjDetailsType">
+    <xs:all>
+      <xs:element name="INFOOBJECT" type="xs:string"/>
+      <xs:element name="VERSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJSTAT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACTIVFL" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNM" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONTREL" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATATP" type="xs:string" minOccurs="0"/>
+      <xs:element name="INTLEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="OUTPUTLEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="LOWCASE" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONVEXIT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TXTLONG" type="xs:string" minOccurs="0"/>
+      <xs:element name="TXTSHRT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IobjCompoundsItemType">
+    <xs:all>
+      <xs:element name="IOBJNM_Z" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMPOUND" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IobjAttributesItemType">
+    <xs:all>
+      <xs:element name="ATRNM" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJSTAT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ATTRIB" type="xs:string" minOccurs="0"/>
+      <xs:element name="KYFNM" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IobjType">
+    <xs:sequence>
+      <xs:element name="IOBJ" type="IobjDetailsType"/>
+      <xs:element name="COMPOUNDS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="BAPI6108CM" type="IobjCompoundsItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ATTRIBUTES" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="BAPI6108AT" type="IobjAttributesItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

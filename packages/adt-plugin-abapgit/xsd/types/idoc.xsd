@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="IdocAttributesType">
+    <xs:all>
+      <xs:element name="IDOCTYP" type="xs:string"/>
+      <xs:element name="DESCRP" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLOSED" type="xs:string" minOccurs="0"/>
+      <xs:element name="RELEASED" type="xs:string" minOccurs="0"/>
+      <xs:element name="APPLREL" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIRSTTYP" type="xs:string" minOccurs="0"/>
+      <xs:element name="PRETYP" type="xs:string" minOccurs="0"/>
+      <xs:element name="SUCCTYP" type="xs:string" minOccurs="0"/>
+      <xs:element name="LASTTYP" type="xs:string" minOccurs="0"/>
+      <xs:element name="GENERATED" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IdocSyntaxItemType">
+    <xs:all>
+      <xs:element name="NR" type="xs:string" minOccurs="0"/>
+      <xs:element name="SEGTYP" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARSEG" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARPNO" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARFLG" type="xs:string" minOccurs="0"/>
+      <xs:element name="MUSTFL" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IdocType">
+    <xs:sequence>
+      <xs:element name="ATTRIBUTES" type="IdocAttributesType"/>
+      <xs:element name="T_SYNTAX" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="EDI_IAPI02" type="IdocSyntaxItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

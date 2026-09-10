@@ -44,6 +44,12 @@ import _chdo from './schemas/chdo';
 import _smtg from './schemas/smtg';
 import _sfpf from './schemas/sfpf';
 import _scp1 from './schemas/scp1';
+import _sicf from './schemas/sicf';
+import _srfc from './schemas/srfc';
+import _idoc from './schemas/idoc';
+import _iobj from './schemas/iobj';
+import _odso from './schemas/odso';
+import _shma from './schemas/shma';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -77,6 +83,12 @@ import type { ChdoSchema as _ChdoSchema } from './types/chdo';
 import type { SmtgSchema as _SmtgSchema } from './types/smtg';
 import type { SfpfSchema as _SfpfSchema } from './types/sfpf';
 import type { Scp1Schema as _Scp1Schema } from './types/scp1';
+import type { SicfSchema as _SicfSchema } from './types/sicf';
+import type { SrfcSchema as _SrfcSchema } from './types/srfc';
+import type { IdocSchema as _IdocSchema } from './types/idoc';
+import type { IobjSchema as _IobjSchema } from './types/iobj';
+import type { OdsoSchema as _OdsoSchema } from './types/odso';
+import type { ShmaSchema as _ShmaSchema } from './types/shma';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -109,6 +121,12 @@ type ChdoAbapGitType = Extract<_ChdoSchema, { abapGit: unknown }>;
 type SmtgAbapGitType = Extract<_SmtgSchema, { abapGit: unknown }>;
 type SfpfAbapGitType = Extract<_SfpfSchema, { abapGit: unknown }>;
 type Scp1AbapGitType = Extract<_Scp1Schema, { abapGit: unknown }>;
+type SicfAbapGitType = Extract<_SicfSchema, { abapGit: unknown }>;
+type SrfcAbapGitType = Extract<_SrfcSchema, { abapGit: unknown }>;
+type IdocAbapGitType = Extract<_IdocSchema, { abapGit: unknown }>;
+type IobjAbapGitType = Extract<_IobjSchema, { abapGit: unknown }>;
+type OdsoAbapGitType = Extract<_OdsoSchema, { abapGit: unknown }>;
+type ShmaAbapGitType = Extract<_ShmaSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -141,6 +159,12 @@ export const chdo = abapGitSchema<ChdoAbapGitType, ChdoAbapGitType['abapGit']['a
 export const smtg = abapGitSchema<SmtgAbapGitType, SmtgAbapGitType['abapGit']['abap']['values']>(_smtg);
 export const sfpf = abapGitSchema<SfpfAbapGitType, SfpfAbapGitType['abapGit']['abap']['values']>(_sfpf);
 export const scp1 = abapGitSchema<Scp1AbapGitType, Scp1AbapGitType['abapGit']['abap']['values']>(_scp1);
+export const sicf = abapGitSchema<SicfAbapGitType, SicfAbapGitType['abapGit']['abap']['values']>(_sicf);
+export const srfc = abapGitSchema<SrfcAbapGitType, SrfcAbapGitType['abapGit']['abap']['values']>(_srfc);
+export const idoc = abapGitSchema<IdocAbapGitType, IdocAbapGitType['abapGit']['abap']['values']>(_idoc);
+export const iobj = abapGitSchema<IobjAbapGitType, IobjAbapGitType['abapGit']['abap']['values']>(_iobj);
+export const odso = abapGitSchema<OdsoAbapGitType, OdsoAbapGitType['abapGit']['abap']['values']>(_odso);
+export const shma = abapGitSchema<ShmaAbapGitType, ShmaAbapGitType['abapGit']['abap']['values']>(_shma);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
