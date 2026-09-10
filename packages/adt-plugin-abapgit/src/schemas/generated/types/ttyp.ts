@@ -9,25 +9,25 @@ export type TtypSchema = {
     abapGit: {
         abap: {
             values: {
-                DD40V?: {
+                DD40V?: undefined | {
                     TYPENAME: string;
-                    DDLANGUAGE?: string;
-                    ROWTYPE?: string;
-                    ROWKIND?: string;
-                    DATATYPE?: string;
-                    ACCESSMODE?: string;
-                    KEYDEF?: string;
-                    KEYKIND?: string;
-                    GENERIC?: string;
-                    LENG?: string;
-                    DECIMALS?: string;
-                    DDTEXT?: string;
-                    TYPELEN?: string;
-                    DEFFDNAME?: string;
-                    ABAP_LANGUAGE_VERSION?: string;
+                    DDLANGUAGE?: string | undefined;
+                    ROWTYPE?: string | undefined;
+                    ROWKIND?: string | undefined;
+                    DATATYPE?: string | undefined;
+                    ACCESSMODE?: string | undefined;
+                    KEYDEF?: string | undefined;
+                    KEYKIND?: string | undefined;
+                    GENERIC?: string | undefined;
+                    LENG?: string | undefined;
+                    DECIMALS?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    TYPELEN?: string | undefined;
+                    DEFFDNAME?: string | undefined;
+                    ABAP_LANGUAGE_VERSION?: string | undefined;
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
@@ -35,45 +35,45 @@ export type TtypSchema = {
     };
 } | {
     values: {
-        DD40V?: {
+        DD40V?: undefined | {
             TYPENAME: string;
-            DDLANGUAGE?: string;
-            ROWTYPE?: string;
-            ROWKIND?: string;
-            DATATYPE?: string;
-            ACCESSMODE?: string;
-            KEYDEF?: string;
-            KEYKIND?: string;
-            GENERIC?: string;
-            LENG?: string;
-            DECIMALS?: string;
-            DDTEXT?: string;
-            TYPELEN?: string;
-            DEFFDNAME?: string;
-            ABAP_LANGUAGE_VERSION?: string;
+            DDLANGUAGE?: string | undefined;
+            ROWTYPE?: string | undefined;
+            ROWKIND?: string | undefined;
+            DATATYPE?: string | undefined;
+            ACCESSMODE?: string | undefined;
+            KEYDEF?: string | undefined;
+            KEYKIND?: string | undefined;
+            GENERIC?: string | undefined;
+            LENG?: string | undefined;
+            DECIMALS?: string | undefined;
+            DDTEXT?: string | undefined;
+            TYPELEN?: string | undefined;
+            DEFFDNAME?: string | undefined;
+            ABAP_LANGUAGE_VERSION?: string | undefined;
         };
     };
 } | {
     abap: {
         values: {
-            DD40V?: {
+            DD40V?: undefined | {
                 TYPENAME: string;
-                DDLANGUAGE?: string;
-                ROWTYPE?: string;
-                ROWKIND?: string;
-                DATATYPE?: string;
-                ACCESSMODE?: string;
-                KEYDEF?: string;
-                KEYKIND?: string;
-                GENERIC?: string;
-                LENG?: string;
-                DECIMALS?: string;
-                DDTEXT?: string;
-                TYPELEN?: string;
-                DEFFDNAME?: string;
-                ABAP_LANGUAGE_VERSION?: string;
+                DDLANGUAGE?: string | undefined;
+                ROWTYPE?: string | undefined;
+                ROWKIND?: string | undefined;
+                DATATYPE?: string | undefined;
+                ACCESSMODE?: string | undefined;
+                KEYDEF?: string | undefined;
+                KEYKIND?: string | undefined;
+                GENERIC?: string | undefined;
+                LENG?: string | undefined;
+                DECIMALS?: string | undefined;
+                DDTEXT?: string | undefined;
+                TYPELEN?: string | undefined;
+                DEFFDNAME?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
             };
         };
-        version?: string;
+        version?: string | undefined;
     };
 };

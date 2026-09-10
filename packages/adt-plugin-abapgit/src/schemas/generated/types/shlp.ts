@@ -5,69 +5,159 @@
  * Mode: Flattened
  */
 
-type ShlpValues = {
-    DD30V?: {
-        SHLPNAME: string;
-        DDLANGUAGE?: string;
-        DDTEXT?: string;
-        SHLPTYPE?: string;
-        SHLPINPUT?: string;
-        DEFLOOKUP?: string;
-        DIALOGTYPE?: string;
-        SELEXT?: string;
-        ACTMETHOD?: string;
-        HOTKEY?: string;
-    };
-    DD31V?: {
-        SHLPNAME?: string;
-        TABNAME?: string;
-        FIELDNAME?: string;
-        FLDLOCATION?: string;
-        ROLLNAME?: string;
-    };
-    DD32P_TABLE?: {
-        item?: {
-            SHLPNAME?: string;
-            FIELDNAME?: string;
-            SHLPINPUT?: string;
-            SHLPOUTPUT?: string;
-            SHLPSELPOS?: string;
-            SHLPLISPOS?: string;
-            DEFAULTVAL?: string;
-            ROLLNAME?: string;
-            DATATYPE?: string;
-            LENG?: string;
-            DECIMALS?: string;
-            DDTEXT?: string;
-        }[];
-    };
-    DD33V_TABLE?: {
-        item?: {
-            SHLPNAME?: string;
-            SHLPFIELD?: string;
-            TABNAME?: string;
-            FIELDNAME?: string;
-            SHLPINPUT?: string;
-            SHLPOUTPUT?: string;
-        }[];
-    };
-};
-
 export type ShlpSchema = {
     abapGit: {
         abap: {
-            values: ShlpValues;
-            version?: string;
+            values: {
+                DD30V?: undefined | {
+                    SHLPNAME: string;
+                    DDLANGUAGE?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    SHLPTYPE?: string | undefined;
+                    SHLPINPUT?: string | undefined;
+                    DEFLOOKUP?: string | undefined;
+                    DIALOGTYPE?: string | undefined;
+                    SELEXT?: string | undefined;
+                    ACTMETHOD?: string | undefined;
+                    HOTKEY?: string | undefined;
+                };
+                DD31V?: undefined | {
+                    SHLPNAME?: string | undefined;
+                    TABNAME?: string | undefined;
+                    FIELDNAME?: string | undefined;
+                    FLDLOCATION?: string | undefined;
+                    ROLLNAME?: string | undefined;
+                };
+                DD32P_TABLE?: undefined | {
+                    item?: undefined | {
+                        SHLPNAME?: string | undefined;
+                        FIELDNAME?: string | undefined;
+                        SHLPINPUT?: string | undefined;
+                        SHLPOUTPUT?: string | undefined;
+                        SHLPSELPOS?: string | undefined;
+                        SHLPLISPOS?: string | undefined;
+                        DEFAULTVAL?: string | undefined;
+                        ROLLNAME?: string | undefined;
+                        DATATYPE?: string | undefined;
+                        LENG?: string | undefined;
+                        DECIMALS?: string | undefined;
+                        DDTEXT?: string | undefined;
+                    }[];
+                };
+                DD33V_TABLE?: undefined | {
+                    item?: undefined | {
+                        SHLPNAME?: string | undefined;
+                        SHLPFIELD?: string | undefined;
+                        TABNAME?: string | undefined;
+                        FIELDNAME?: string | undefined;
+                        SHLPINPUT?: string | undefined;
+                        SHLPOUTPUT?: string | undefined;
+                    }[];
+                };
+            };
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
     };
 } | {
-    values: ShlpValues;
+    values: {
+        DD30V?: undefined | {
+            SHLPNAME: string;
+            DDLANGUAGE?: string | undefined;
+            DDTEXT?: string | undefined;
+            SHLPTYPE?: string | undefined;
+            SHLPINPUT?: string | undefined;
+            DEFLOOKUP?: string | undefined;
+            DIALOGTYPE?: string | undefined;
+            SELEXT?: string | undefined;
+            ACTMETHOD?: string | undefined;
+            HOTKEY?: string | undefined;
+        };
+        DD31V?: undefined | {
+            SHLPNAME?: string | undefined;
+            TABNAME?: string | undefined;
+            FIELDNAME?: string | undefined;
+            FLDLOCATION?: string | undefined;
+            ROLLNAME?: string | undefined;
+        };
+        DD32P_TABLE?: undefined | {
+            item?: undefined | {
+                SHLPNAME?: string | undefined;
+                FIELDNAME?: string | undefined;
+                SHLPINPUT?: string | undefined;
+                SHLPOUTPUT?: string | undefined;
+                SHLPSELPOS?: string | undefined;
+                SHLPLISPOS?: string | undefined;
+                DEFAULTVAL?: string | undefined;
+                ROLLNAME?: string | undefined;
+                DATATYPE?: string | undefined;
+                LENG?: string | undefined;
+                DECIMALS?: string | undefined;
+                DDTEXT?: string | undefined;
+            }[];
+        };
+        DD33V_TABLE?: undefined | {
+            item?: undefined | {
+                SHLPNAME?: string | undefined;
+                SHLPFIELD?: string | undefined;
+                TABNAME?: string | undefined;
+                FIELDNAME?: string | undefined;
+                SHLPINPUT?: string | undefined;
+                SHLPOUTPUT?: string | undefined;
+            }[];
+        };
+    };
 } | {
     abap: {
-        values: ShlpValues;
-        version?: string;
+        values: {
+            DD30V?: undefined | {
+                SHLPNAME: string;
+                DDLANGUAGE?: string | undefined;
+                DDTEXT?: string | undefined;
+                SHLPTYPE?: string | undefined;
+                SHLPINPUT?: string | undefined;
+                DEFLOOKUP?: string | undefined;
+                DIALOGTYPE?: string | undefined;
+                SELEXT?: string | undefined;
+                ACTMETHOD?: string | undefined;
+                HOTKEY?: string | undefined;
+            };
+            DD31V?: undefined | {
+                SHLPNAME?: string | undefined;
+                TABNAME?: string | undefined;
+                FIELDNAME?: string | undefined;
+                FLDLOCATION?: string | undefined;
+                ROLLNAME?: string | undefined;
+            };
+            DD32P_TABLE?: undefined | {
+                item?: undefined | {
+                    SHLPNAME?: string | undefined;
+                    FIELDNAME?: string | undefined;
+                    SHLPINPUT?: string | undefined;
+                    SHLPOUTPUT?: string | undefined;
+                    SHLPSELPOS?: string | undefined;
+                    SHLPLISPOS?: string | undefined;
+                    DEFAULTVAL?: string | undefined;
+                    ROLLNAME?: string | undefined;
+                    DATATYPE?: string | undefined;
+                    LENG?: string | undefined;
+                    DECIMALS?: string | undefined;
+                    DDTEXT?: string | undefined;
+                }[];
+            };
+            DD33V_TABLE?: undefined | {
+                item?: undefined | {
+                    SHLPNAME?: string | undefined;
+                    SHLPFIELD?: string | undefined;
+                    TABNAME?: string | undefined;
+                    FIELDNAME?: string | undefined;
+                    SHLPINPUT?: string | undefined;
+                    SHLPOUTPUT?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

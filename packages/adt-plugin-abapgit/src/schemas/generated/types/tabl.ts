@@ -9,73 +9,73 @@ export type TablSchema = {
     abapGit: {
         abap: {
             values: {
-                DD02V?: {
+                DD02V?: undefined | {
                     TABNAME: string;
-                    DDLANGUAGE?: string;
-                    TABCLASS?: string;
-                    LANGDEP?: string;
-                    CLIDEP?: string;
-                    SQLTAB?: string;
-                    DATCLASS?: string;
-                    DDTEXT?: string;
-                    MASTERLANG?: string;
-                    BUFFERED?: string;
-                    MATEFLAG?: string;
-                    CONTFLAG?: string;
-                    SHLPEXI?: string;
-                    EXCLASS?: string;
-                    AUTHCLASS?: string;
+                    DDLANGUAGE?: string | undefined;
+                    TABCLASS?: string | undefined;
+                    LANGDEP?: string | undefined;
+                    CLIDEP?: string | undefined;
+                    SQLTAB?: string | undefined;
+                    DATCLASS?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    MASTERLANG?: string | undefined;
+                    BUFFERED?: string | undefined;
+                    MATEFLAG?: string | undefined;
+                    CONTFLAG?: string | undefined;
+                    SHLPEXI?: string | undefined;
+                    EXCLASS?: string | undefined;
+                    AUTHCLASS?: string | undefined;
                 };
-                DD09L?: {
-                    TABNAME?: string;
-                    AS4LOCAL?: string;
-                    TABKAT?: string;
-                    TABART?: string;
-                    BUFALLOW?: string;
-                    PUFFERUNG?: string;
-                    SCHFELDANZ?: string;
-                    PROTOKOLL?: string;
-                    SPEESSION?: string;
-                    UESSION?: string;
-                    ROESSION?: string;
+                DD09L?: undefined | {
+                    TABNAME?: string | undefined;
+                    AS4LOCAL?: string | undefined;
+                    TABKAT?: string | undefined;
+                    TABART?: string | undefined;
+                    BUFALLOW?: string | undefined;
+                    PUFFERUNG?: string | undefined;
+                    SCHFELDANZ?: string | undefined;
+                    PROTOKOLL?: string | undefined;
+                    SPEESSION?: string | undefined;
+                    UESSION?: string | undefined;
+                    ROESSION?: string | undefined;
                 };
-                DD03P_TABLE?: {
-                    DD03P?: {
-                        FIELDNAME?: string;
-                        POSITION?: string;
-                        KEYFLAG?: string;
-                        ROLLNAME?: string;
-                        ADMINFIELD?: string;
-                        INTTYPE?: string;
-                        INTLEN?: string;
-                        REFTABLE?: string;
-                        REFFIELD?: string;
-                        PRECFIELD?: string;
-                        NOTNULL?: string;
-                        DATATYPE?: string;
-                        LENG?: string;
-                        DECIMALS?: string;
-                        DOMNAME?: string;
-                        MASK?: string;
-                        SHLPORIGIN?: string;
-                        DDTEXT?: string;
-                        COMPTYPE?: string;
-                        TABNAME?: string;
-                        DDLANGUAGE?: string;
-                        CONRFLAG?: string;
+                DD03P_TABLE?: undefined | {
+                    DD03P?: undefined | {
+                        FIELDNAME?: string | undefined;
+                        POSITION?: string | undefined;
+                        KEYFLAG?: string | undefined;
+                        ROLLNAME?: string | undefined;
+                        ADMINFIELD?: string | undefined;
+                        INTTYPE?: string | undefined;
+                        INTLEN?: string | undefined;
+                        REFTABLE?: string | undefined;
+                        REFFIELD?: string | undefined;
+                        PRECFIELD?: string | undefined;
+                        NOTNULL?: string | undefined;
+                        DATATYPE?: string | undefined;
+                        LENG?: string | undefined;
+                        DECIMALS?: string | undefined;
+                        DOMNAME?: string | undefined;
+                        MASK?: string | undefined;
+                        SHLPORIGIN?: string | undefined;
+                        DDTEXT?: string | undefined;
+                        COMPTYPE?: string | undefined;
+                        TABNAME?: string | undefined;
+                        DDLANGUAGE?: string | undefined;
+                        CONRFLAG?: string | undefined;
                     }[];
                 };
-                TABL_EXTRAS?: {
-                    TDDAT?: {
-                        TABNAME?: string;
-                        CCLASS?: string;
-                        VIEWGRANT?: string;
-                        TVDIR?: string;
-                        GENERICRANGE?: string;
+                TABL_EXTRAS?: undefined | {
+                    TDDAT?: undefined | {
+                        TABNAME?: string | undefined;
+                        CCLASS?: string | undefined;
+                        VIEWGRANT?: string | undefined;
+                        TVDIR?: string | undefined;
+                        GENERICRANGE?: string | undefined;
                     };
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
@@ -83,141 +83,141 @@ export type TablSchema = {
     };
 } | {
     values: {
-        DD02V?: {
+        DD02V?: undefined | {
             TABNAME: string;
-            DDLANGUAGE?: string;
-            TABCLASS?: string;
-            LANGDEP?: string;
-            CLIDEP?: string;
-            SQLTAB?: string;
-            DATCLASS?: string;
-            DDTEXT?: string;
-            MASTERLANG?: string;
-            BUFFERED?: string;
-            MATEFLAG?: string;
-            CONTFLAG?: string;
-            SHLPEXI?: string;
-            EXCLASS?: string;
-            AUTHCLASS?: string;
+            DDLANGUAGE?: string | undefined;
+            TABCLASS?: string | undefined;
+            LANGDEP?: string | undefined;
+            CLIDEP?: string | undefined;
+            SQLTAB?: string | undefined;
+            DATCLASS?: string | undefined;
+            DDTEXT?: string | undefined;
+            MASTERLANG?: string | undefined;
+            BUFFERED?: string | undefined;
+            MATEFLAG?: string | undefined;
+            CONTFLAG?: string | undefined;
+            SHLPEXI?: string | undefined;
+            EXCLASS?: string | undefined;
+            AUTHCLASS?: string | undefined;
         };
-        DD09L?: {
-            TABNAME?: string;
-            AS4LOCAL?: string;
-            TABKAT?: string;
-            TABART?: string;
-            BUFALLOW?: string;
-            PUFFERUNG?: string;
-            SCHFELDANZ?: string;
-            PROTOKOLL?: string;
-            SPEESSION?: string;
-            UESSION?: string;
-            ROESSION?: string;
+        DD09L?: undefined | {
+            TABNAME?: string | undefined;
+            AS4LOCAL?: string | undefined;
+            TABKAT?: string | undefined;
+            TABART?: string | undefined;
+            BUFALLOW?: string | undefined;
+            PUFFERUNG?: string | undefined;
+            SCHFELDANZ?: string | undefined;
+            PROTOKOLL?: string | undefined;
+            SPEESSION?: string | undefined;
+            UESSION?: string | undefined;
+            ROESSION?: string | undefined;
         };
-        DD03P_TABLE?: {
-            DD03P?: {
-                FIELDNAME?: string;
-                POSITION?: string;
-                KEYFLAG?: string;
-                ROLLNAME?: string;
-                ADMINFIELD?: string;
-                INTTYPE?: string;
-                INTLEN?: string;
-                REFTABLE?: string;
-                REFFIELD?: string;
-                PRECFIELD?: string;
-                NOTNULL?: string;
-                DATATYPE?: string;
-                LENG?: string;
-                DECIMALS?: string;
-                DOMNAME?: string;
-                MASK?: string;
-                SHLPORIGIN?: string;
-                DDTEXT?: string;
-                COMPTYPE?: string;
-                TABNAME?: string;
-                DDLANGUAGE?: string;
-                CONRFLAG?: string;
+        DD03P_TABLE?: undefined | {
+            DD03P?: undefined | {
+                FIELDNAME?: string | undefined;
+                POSITION?: string | undefined;
+                KEYFLAG?: string | undefined;
+                ROLLNAME?: string | undefined;
+                ADMINFIELD?: string | undefined;
+                INTTYPE?: string | undefined;
+                INTLEN?: string | undefined;
+                REFTABLE?: string | undefined;
+                REFFIELD?: string | undefined;
+                PRECFIELD?: string | undefined;
+                NOTNULL?: string | undefined;
+                DATATYPE?: string | undefined;
+                LENG?: string | undefined;
+                DECIMALS?: string | undefined;
+                DOMNAME?: string | undefined;
+                MASK?: string | undefined;
+                SHLPORIGIN?: string | undefined;
+                DDTEXT?: string | undefined;
+                COMPTYPE?: string | undefined;
+                TABNAME?: string | undefined;
+                DDLANGUAGE?: string | undefined;
+                CONRFLAG?: string | undefined;
             }[];
         };
-        TABL_EXTRAS?: {
-            TDDAT?: {
-                TABNAME?: string;
-                CCLASS?: string;
-                VIEWGRANT?: string;
-                TVDIR?: string;
-                GENERICRANGE?: string;
+        TABL_EXTRAS?: undefined | {
+            TDDAT?: undefined | {
+                TABNAME?: string | undefined;
+                CCLASS?: string | undefined;
+                VIEWGRANT?: string | undefined;
+                TVDIR?: string | undefined;
+                GENERICRANGE?: string | undefined;
             };
         };
     };
 } | {
     abap: {
         values: {
-            DD02V?: {
+            DD02V?: undefined | {
                 TABNAME: string;
-                DDLANGUAGE?: string;
-                TABCLASS?: string;
-                LANGDEP?: string;
-                CLIDEP?: string;
-                SQLTAB?: string;
-                DATCLASS?: string;
-                DDTEXT?: string;
-                MASTERLANG?: string;
-                BUFFERED?: string;
-                MATEFLAG?: string;
-                CONTFLAG?: string;
-                SHLPEXI?: string;
-                EXCLASS?: string;
-                AUTHCLASS?: string;
+                DDLANGUAGE?: string | undefined;
+                TABCLASS?: string | undefined;
+                LANGDEP?: string | undefined;
+                CLIDEP?: string | undefined;
+                SQLTAB?: string | undefined;
+                DATCLASS?: string | undefined;
+                DDTEXT?: string | undefined;
+                MASTERLANG?: string | undefined;
+                BUFFERED?: string | undefined;
+                MATEFLAG?: string | undefined;
+                CONTFLAG?: string | undefined;
+                SHLPEXI?: string | undefined;
+                EXCLASS?: string | undefined;
+                AUTHCLASS?: string | undefined;
             };
-            DD09L?: {
-                TABNAME?: string;
-                AS4LOCAL?: string;
-                TABKAT?: string;
-                TABART?: string;
-                BUFALLOW?: string;
-                PUFFERUNG?: string;
-                SCHFELDANZ?: string;
-                PROTOKOLL?: string;
-                SPEESSION?: string;
-                UESSION?: string;
-                ROESSION?: string;
+            DD09L?: undefined | {
+                TABNAME?: string | undefined;
+                AS4LOCAL?: string | undefined;
+                TABKAT?: string | undefined;
+                TABART?: string | undefined;
+                BUFALLOW?: string | undefined;
+                PUFFERUNG?: string | undefined;
+                SCHFELDANZ?: string | undefined;
+                PROTOKOLL?: string | undefined;
+                SPEESSION?: string | undefined;
+                UESSION?: string | undefined;
+                ROESSION?: string | undefined;
             };
-            DD03P_TABLE?: {
-                DD03P?: {
-                    FIELDNAME?: string;
-                    POSITION?: string;
-                    KEYFLAG?: string;
-                    ROLLNAME?: string;
-                    ADMINFIELD?: string;
-                    INTTYPE?: string;
-                    INTLEN?: string;
-                    REFTABLE?: string;
-                    REFFIELD?: string;
-                    PRECFIELD?: string;
-                    NOTNULL?: string;
-                    DATATYPE?: string;
-                    LENG?: string;
-                    DECIMALS?: string;
-                    DOMNAME?: string;
-                    MASK?: string;
-                    SHLPORIGIN?: string;
-                    DDTEXT?: string;
-                    COMPTYPE?: string;
-                    TABNAME?: string;
-                    DDLANGUAGE?: string;
-                    CONRFLAG?: string;
+            DD03P_TABLE?: undefined | {
+                DD03P?: undefined | {
+                    FIELDNAME?: string | undefined;
+                    POSITION?: string | undefined;
+                    KEYFLAG?: string | undefined;
+                    ROLLNAME?: string | undefined;
+                    ADMINFIELD?: string | undefined;
+                    INTTYPE?: string | undefined;
+                    INTLEN?: string | undefined;
+                    REFTABLE?: string | undefined;
+                    REFFIELD?: string | undefined;
+                    PRECFIELD?: string | undefined;
+                    NOTNULL?: string | undefined;
+                    DATATYPE?: string | undefined;
+                    LENG?: string | undefined;
+                    DECIMALS?: string | undefined;
+                    DOMNAME?: string | undefined;
+                    MASK?: string | undefined;
+                    SHLPORIGIN?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    COMPTYPE?: string | undefined;
+                    TABNAME?: string | undefined;
+                    DDLANGUAGE?: string | undefined;
+                    CONRFLAG?: string | undefined;
                 }[];
             };
-            TABL_EXTRAS?: {
-                TDDAT?: {
-                    TABNAME?: string;
-                    CCLASS?: string;
-                    VIEWGRANT?: string;
-                    TVDIR?: string;
-                    GENERICRANGE?: string;
+            TABL_EXTRAS?: undefined | {
+                TDDAT?: undefined | {
+                    TABNAME?: string | undefined;
+                    CCLASS?: string | undefined;
+                    VIEWGRANT?: string | undefined;
+                    TVDIR?: string | undefined;
+                    GENERICRANGE?: string | undefined;
                 };
             };
         };
-        version?: string;
+        version?: string | undefined;
     };
 };

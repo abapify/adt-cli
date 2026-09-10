@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ENHS - Enhancement Spot types (SAP enhancement framework) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- BAdI definition entry (for BADI_DEF tool type) -->
+  <xs:complexType name="EnhBadiDefType">
+    <xs:all>
+      <xs:element name="BADI_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="BADI_SHORTTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="INTERFACE" type="xs:string" minOccurs="0"/>
+      <xs:element name="INSTANTIATION" type="xs:string" minOccurs="0"/>
+      <xs:element name="MULTIPLE_USE" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTERS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="EnhBadiFilterDefType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- BAdI filter definition -->
+  <xs:complexType name="EnhBadiFilterDefType">
+    <xs:all>
+      <xs:element name="FILTER_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="VALUE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- BAdI definitions table (for BADI_DEF tool type) -->
+  <xs:complexType name="EnhBadiDefTabType">
+    <xs:sequence>
+      <xs:element name="item" type="EnhBadiDefType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Hook definition entry (for HOOK_DEF tool type) -->
+  <xs:complexType name="EnhHookDefType">
+    <xs:all>
+      <xs:element name="PGMID" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="MAIN_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="MAIN_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROGRAM" type="xs:string" minOccurs="0"/>
+      <xs:element name="DEF_HOOKS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="EnhHookDefEntryType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Hook definition entry -->
+  <xs:complexType name="EnhHookDefEntryType">
+    <xs:all>
+      <xs:element name="HOOK_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROGRAM" type="xs:string" minOccurs="0"/>
+      <xs:element name="INCLUDE_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="HOOK_METHOD" type="xs:string" minOccurs="0"/>
+      <xs:element name="ENHMODE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Main ENHS values type -->
+  <!-- BADI_DATA is used for both BAdI definitions (table) and hook definitions (structure) -->
+  <xs:complexType name="EnhsType">
+    <xs:all>
+      <xs:element name="TOOL" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARENT_COMP" type="xs:string" minOccurs="0"/>
+      <xs:element name="BADI_DATA" type="xs:anyType" minOccurs="0"/>
+      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>
