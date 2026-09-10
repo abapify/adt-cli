@@ -4,6 +4,7 @@ export type {
   FormatHandlerSchema,
   SerializedFile,
   FormatSerializeOptions,
+  AbapGitOutputFormat,
   MaterializedFormatFile,
   FormatMaterializationInput,
   FormatMaterializationResult,

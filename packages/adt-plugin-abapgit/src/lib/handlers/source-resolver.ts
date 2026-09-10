@@ -162,3 +162,96 @@ export function affSetSources(obj: unknown, sources: { main?: string }): void {
       sources.main;
   }
 }
+
+/**
+ * Shared `fromAffJson` handler function for source-driven AFF objects.
+ * Extracts the object name from the JSON header or falls back to the
+ * filename-derived name passed in. The AFF JSON format stores the
+ * description in `header.description` and the original language in
+ * `header.originalLanguage`. Both are preserved for round-trip fidelity.
+ */
+export function affFromAffJson(
+  json: Record<string, unknown>,
+  fallbackName: string,
+): {
+  name: string;
+  description?: string;
+  originalLanguage?: string;
+  abapLanguageVersion?: string;
+} {
+  const header = json.header as
+    | {
+        description?: string;
+        originalLanguage?: string;
+        abapLanguageVersion?: string;
+      }
+    | undefined;
+  return {
+    name: fallbackName,
+    description: header?.description,
+    originalLanguage: header?.originalLanguage,
+    abapLanguageVersion: header?.abapLanguageVersion,
+  };
+}
+
+/**
+ * Dual-format serialize for objects that support both AFF JSON and legacy XML.
+ *
+ * When `options.format === 'legacy'`, produces a legacy abapGit XML metadata
+ * file (via `ctx.toAbapGitXml`) plus the source file. Otherwise (default or
+ * `format === 'aff'`), delegates to `serializeAffSource` to produce the AFF
+ * JSON sidecar plus source.
+ */
+export async function serializeDualFormat(
+  object: SourceObject & {
+    name: string;
+    description?: string;
+    originalLanguage?: string;
+    abapLanguageVersion?: string;
+  },
+  ctx: {
+    getObjectName: (obj: unknown) => string;
+    fileExtension: string;
+    createFile: (path: string, content: string) => SerializedFile;
+    toAbapGitXml: (obj: unknown) => string;
+  },
+  options: import('@abapify/adt-plugin').FormatSerializeOptions | undefined,
+  config: {
+    typeLabel: string;
+    sourceExt: string;
+    jsonExt: string;
+    extra?: Record<string, unknown>;
+  },
+): Promise<SerializedFile[]> {
+  // Legacy XML format: produce .xml metadata + source file
+  if (options?.format === 'legacy') {
+    const source = await resolveMainSource(
+      object,
+      options?.sources,
+      config.typeLabel,
+    );
+    const name = ctx.getObjectName(object);
+    const files: SerializedFile[] = [];
+    // Source file — preserve explicitly supplied empty source (authoritative
+    // sources contract). Only skip when source is genuinely absent.
+    if (source !== undefined) {
+      files.push(
+        ctx.createFile(
+          `${name}.${ctx.fileExtension}.${config.sourceExt}`,
+          source,
+        ),
+      );
+    }
+    // Legacy XML metadata
+    files.push(
+      ctx.createFile(
+        `${name}.${ctx.fileExtension}.xml`,
+        ctx.toAbapGitXml(object),
+      ),
+    );
+    return files;
+  }
+
+  // Default: AFF JSON format
+  return serializeAffSource(object, ctx, options?.sources, config);
+}

@@ -96,6 +96,15 @@ export interface ObjectHandler<
   ): Partial<InferAdkData<T>> & { name: string };
 
   /**
+   * Map AFF JSON metadata to ADK data (Git → SAP)
+   * Used when the metadata file is `.json` (ABAP File Format) instead of legacy `.xml`.
+   * Receives the parsed JSON object and returns the full payload including name.
+   */
+  fromAffJson?(json: Record<string, unknown>): Partial<InferAdkData<T>> & {
+    name: string;
+  };
+
+  /**
    * Set source files on ADK object during deserialization (Git → SAP)
    * Symmetric counterpart to getSources
    */
@@ -208,6 +217,15 @@ export interface HandlerDefinition<
   fromAbapGit?(
     values: InferValuesType<TSchema>,
   ): Partial<InferAdkData<T>> & { name: string };
+
+  /**
+   * Map AFF JSON metadata to ADK data (Git → SAP)
+   * Used when the metadata file is `.json` (ABAP File Format) instead of legacy `.xml`.
+   * Receives the parsed JSON object and returns the full payload including name.
+   */
+  fromAffJson?(json: Record<string, unknown>): Partial<InferAdkData<T>> & {
+    name: string;
+  };
 
   /**
    * Map abapGit file suffix to source key (for objects with multiple sources)
@@ -610,6 +628,7 @@ export function createHandler<
         }
       : defaultSerialize,
     fromAbapGit: defaultFromAbapGit,
+    fromAffJson: definition.fromAffJson,
     setSources: definition.setSources,
   };
 

@@ -35,6 +35,9 @@ export interface SerializedFile {
   encoding?: BufferEncoding;
 }
 
+/** Output format for object types that support both legacy abapGit XML and AFF JSON. */
+export type AbapGitOutputFormat = 'aff' | 'legacy';
+
 /** Source contents selected independently from mutable object getters. */
 export interface FormatSerializeOptions {
   /**
@@ -44,6 +47,12 @@ export interface FormatSerializeOptions {
    * through the object model and MUST emit only the supplied components.
    */
   sources?: Readonly<Record<string, string>>;
+  /**
+   * Output format for object types that support both legacy abapGit XML and
+   * ABAP File Format (AFF) JSON. When omitted, the handler's default format
+   * is used (AFF for CDS/RAP types, legacy XML for DDIC/code types).
+   */
+  format?: AbapGitOutputFormat;
 }
 
 interface MaterializedFormatSourceFile extends SerializedFile {
