@@ -1,21 +1,28 @@
 /**
  * BDEF (RAP Behavior Definition) object handler for abapGit format
  *
- * BDEF is source-driven: the semantic content lives in an `.abdl` file and
- * the official ABAP File Format stores its metadata in a `.json` sidecar.
+ * BDEF is source-driven: the semantic content lives in an `.abdl` file.
+ * Supports BOTH formats:
+ *   - AFF (default): `.bdef.abdl` source + `.bdef.json` metadata sidecar
+ *   - Legacy XML:    `.bdef.abdl` source + `.bdef.xml` metadata
  *
- * File layout:
+ * File layout (AFF):
  *   src/zbp_foo.bdef.abdl — behavior source text
  *   src/zbp_foo.bdef.json — ABAP File Formats metadata
+ *
+ * File layout (legacy):
+ *   src/zbp_foo.bdef.abdl — behavior source text
+ *   src/zbp_foo.bdef.xml  — legacy abapGit XML metadata
  */
 
 import { bdef } from '../../../schemas/generated';
 import { createHandler } from '../base';
 import {
-  serializeAffSource,
+  serializeDualFormat,
   affGetSource,
   affFromAbapGit,
   affSetSources,
+  affFromAffJson,
 } from '../source-resolver';
 import type { FormatSerializeOptions } from '@abapify/adt-plugin';
 
@@ -44,9 +51,10 @@ export const behaviorDefinitionHandler = createHandler<BdefLike, typeof bdef>(
 
     getSource: affGetSource,
     fromAbapGit: ({ SKEY }) => affFromAbapGit(SKEY),
+    fromAffJson: (json) => affFromAffJson(json, ''),
 
     serialize: (object, ctx, options?: FormatSerializeOptions) =>
-      serializeAffSource(object, ctx, options?.sources, {
+      serializeDualFormat(object, ctx, options, {
         typeLabel: 'BDEF',
         sourceExt: 'abdl',
         jsonExt: `${ctx.fileExtension}.json`,

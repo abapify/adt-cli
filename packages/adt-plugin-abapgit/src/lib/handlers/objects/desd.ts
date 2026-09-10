@@ -1,5 +1,6 @@
 import { bdef } from '../../../schemas/generated';
 import { createHandler, type SerializedFile } from '../base';
+import { affFromAffJson } from '../source-resolver';
 
 type DesdLike = {
   name: string;
@@ -17,6 +18,7 @@ export const externalSchemaHandler = createHandler<DesdLike, typeof bdef>(
     toAbapGit: (obj) => ({
       SKEY: { TYPE: 'DESD', NAME: String(obj?.name ?? '').toUpperCase() },
     }),
+    fromAffJson: (json) => affFromAffJson(json, ''),
     async serialize(object, ctx): Promise<SerializedFile[]> {
       const header = {
         description: object.description || String(object.name ?? ''),
