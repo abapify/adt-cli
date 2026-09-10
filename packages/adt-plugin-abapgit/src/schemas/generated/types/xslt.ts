@@ -5,28 +5,36 @@
  * Mode: Flattened
  */
 
-type XsltValues = {
-    XSLT?: {
-        PROGNAME: string;
-        DESCRIPT?: string;
-    };
-};
-
 export type XsltSchema = {
     abapGit: {
         abap: {
-            values: XsltValues;
-            version?: string;
+            values: {
+                XSLT?: undefined | {
+                    PROGNAME: string;
+                    DESCRIPT?: string | undefined;
+                };
+            };
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
     };
 } | {
-    values: XsltValues;
+    values: {
+        XSLT?: undefined | {
+            PROGNAME: string;
+            DESCRIPT?: string | undefined;
+        };
+    };
 } | {
     abap: {
-        values: XsltValues;
-        version?: string;
+        values: {
+            XSLT?: undefined | {
+                PROGNAME: string;
+                DESCRIPT?: string | undefined;
+            };
+        };
+        version?: string | undefined;
     };
 };

@@ -27,3 +27,5 @@ export type { ShlpSchema as ShlpAbapGitType } from './shlp';
 export type { TranSchema as TranAbapGitType } from './tran';
 export type { TypeSchema as TypeAbapGitType } from './type';
 export type { XsltSchema as XsltAbapGitType } from './xslt';
+export type { EnhoSchema as EnhoAbapGitType } from './enho';
+export type { EnhsSchema as EnhsAbapGitType } from './enhs';

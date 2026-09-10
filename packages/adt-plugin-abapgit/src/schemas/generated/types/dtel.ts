@@ -9,30 +9,30 @@ export type DtelSchema = {
     abapGit: {
         abap: {
             values: {
-                DD04V?: {
+                DD04V?: undefined | {
                     ROLLNAME: string;
-                    DDLANGUAGE?: string;
-                    DOMNAME?: string;
-                    HEADLEN?: string;
-                    SCRLEN1?: string;
-                    SCRLEN2?: string;
-                    SCRLEN3?: string;
-                    DDTEXT?: string;
-                    REPTEXT?: string;
-                    SCRTEXT_S?: string;
-                    SCRTEXT_M?: string;
-                    SCRTEXT_L?: string;
-                    DTELMASTER?: string;
-                    DATATYPE?: string;
-                    LENG?: string;
-                    DECIMALS?: string;
-                    OUTPUTLEN?: string;
-                    REFKIND?: string;
-                    REFTYPE?: string;
-                    ABAP_LANGUAGE_VERSION?: string;
+                    DDLANGUAGE?: string | undefined;
+                    DOMNAME?: string | undefined;
+                    HEADLEN?: string | undefined;
+                    SCRLEN1?: string | undefined;
+                    SCRLEN2?: string | undefined;
+                    SCRLEN3?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    REPTEXT?: string | undefined;
+                    SCRTEXT_S?: string | undefined;
+                    SCRTEXT_M?: string | undefined;
+                    SCRTEXT_L?: string | undefined;
+                    DTELMASTER?: string | undefined;
+                    DATATYPE?: string | undefined;
+                    LENG?: string | undefined;
+                    DECIMALS?: string | undefined;
+                    OUTPUTLEN?: string | undefined;
+                    REFKIND?: string | undefined;
+                    REFTYPE?: string | undefined;
+                    ABAP_LANGUAGE_VERSION?: string | undefined;
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
@@ -40,55 +40,55 @@ export type DtelSchema = {
     };
 } | {
     values: {
-        DD04V?: {
+        DD04V?: undefined | {
             ROLLNAME: string;
-            DDLANGUAGE?: string;
-            DOMNAME?: string;
-            HEADLEN?: string;
-            SCRLEN1?: string;
-            SCRLEN2?: string;
-            SCRLEN3?: string;
-            DDTEXT?: string;
-            REPTEXT?: string;
-            SCRTEXT_S?: string;
-            SCRTEXT_M?: string;
-            SCRTEXT_L?: string;
-            DTELMASTER?: string;
-            DATATYPE?: string;
-            LENG?: string;
-            DECIMALS?: string;
-            OUTPUTLEN?: string;
-            REFKIND?: string;
-            REFTYPE?: string;
-            ABAP_LANGUAGE_VERSION?: string;
+            DDLANGUAGE?: string | undefined;
+            DOMNAME?: string | undefined;
+            HEADLEN?: string | undefined;
+            SCRLEN1?: string | undefined;
+            SCRLEN2?: string | undefined;
+            SCRLEN3?: string | undefined;
+            DDTEXT?: string | undefined;
+            REPTEXT?: string | undefined;
+            SCRTEXT_S?: string | undefined;
+            SCRTEXT_M?: string | undefined;
+            SCRTEXT_L?: string | undefined;
+            DTELMASTER?: string | undefined;
+            DATATYPE?: string | undefined;
+            LENG?: string | undefined;
+            DECIMALS?: string | undefined;
+            OUTPUTLEN?: string | undefined;
+            REFKIND?: string | undefined;
+            REFTYPE?: string | undefined;
+            ABAP_LANGUAGE_VERSION?: string | undefined;
         };
     };
 } | {
     abap: {
         values: {
-            DD04V?: {
+            DD04V?: undefined | {
                 ROLLNAME: string;
-                DDLANGUAGE?: string;
-                DOMNAME?: string;
-                HEADLEN?: string;
-                SCRLEN1?: string;
-                SCRLEN2?: string;
-                SCRLEN3?: string;
-                DDTEXT?: string;
-                REPTEXT?: string;
-                SCRTEXT_S?: string;
-                SCRTEXT_M?: string;
-                SCRTEXT_L?: string;
-                DTELMASTER?: string;
-                DATATYPE?: string;
-                LENG?: string;
-                DECIMALS?: string;
-                OUTPUTLEN?: string;
-                REFKIND?: string;
-                REFTYPE?: string;
-                ABAP_LANGUAGE_VERSION?: string;
+                DDLANGUAGE?: string | undefined;
+                DOMNAME?: string | undefined;
+                HEADLEN?: string | undefined;
+                SCRLEN1?: string | undefined;
+                SCRLEN2?: string | undefined;
+                SCRLEN3?: string | undefined;
+                DDTEXT?: string | undefined;
+                REPTEXT?: string | undefined;
+                SCRTEXT_S?: string | undefined;
+                SCRTEXT_M?: string | undefined;
+                SCRTEXT_L?: string | undefined;
+                DTELMASTER?: string | undefined;
+                DATATYPE?: string | undefined;
+                LENG?: string | undefined;
+                DECIMALS?: string | undefined;
+                OUTPUTLEN?: string | undefined;
+                REFKIND?: string | undefined;
+                REFTYPE?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
             };
         };
-        version?: string;
+        version?: string | undefined;
     };
 };

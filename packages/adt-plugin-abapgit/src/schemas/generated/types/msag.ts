@@ -5,37 +5,63 @@
  * Mode: Flattened
  */
 
-type MsagValues = {
-    T100A?: {
-        ARBGB: string;
-        MASTERLANG?: string;
-        STEXT?: string;
-    };
-    T100?: {
-        item?: {
-            SPRSL?: string;
-            ARBGB?: string;
-            MSGNR?: string;
-            TEXT?: string;
-        }[];
-    };
-};
-
 export type MsagSchema = {
     abapGit: {
         abap: {
-            values: MsagValues;
-            version?: string;
+            values: {
+                T100A?: undefined | {
+                    ARBGB: string;
+                    MASTERLANG?: string | undefined;
+                    STEXT?: string | undefined;
+                };
+                T100?: undefined | {
+                    item?: undefined | {
+                        SPRSL?: string | undefined;
+                        ARBGB?: string | undefined;
+                        MSGNR?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            };
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
     };
 } | {
-    values: MsagValues;
+    values: {
+        T100A?: undefined | {
+            ARBGB: string;
+            MASTERLANG?: string | undefined;
+            STEXT?: string | undefined;
+        };
+        T100?: undefined | {
+            item?: undefined | {
+                SPRSL?: string | undefined;
+                ARBGB?: string | undefined;
+                MSGNR?: string | undefined;
+                TEXT?: string | undefined;
+            }[];
+        };
+    };
 } | {
     abap: {
-        values: MsagValues;
-        version?: string;
+        values: {
+            T100A?: undefined | {
+                ARBGB: string;
+                MASTERLANG?: string | undefined;
+                STEXT?: string | undefined;
+            };
+            T100?: undefined | {
+                item?: undefined | {
+                    SPRSL?: string | undefined;
+                    ARBGB?: string | undefined;
+                    MSGNR?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

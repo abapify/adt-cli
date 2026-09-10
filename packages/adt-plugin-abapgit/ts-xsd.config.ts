@@ -51,6 +51,8 @@ export default defineConfig({
         'tran',
         'type',
         'xslt',
+        'enho',
+        'enhs',
       ],
     },
   },

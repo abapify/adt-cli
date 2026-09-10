@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  abapGit ENHO (Enhancement Implementation) Schema
+
+  Defines enhancement implementation structures used in *.enho.xml files.
+  Supports BADI_IMPL and HOOK_IMPL tool types.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Import ASX namespace -->
+  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
+
+  <!-- Include base abapGit types -->
+  <xs:include schemaLocation="abapgit.xsd"/>
+
+  <!-- Include ENHO types -->
+  <xs:include schemaLocation="types/enho.xsd"/>
+
+  <!-- ENHO-specific values type -->
+  <xs:complexType name="EnhoValuesType">
+    <xs:all>
+      <xs:element name="TOOL" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="SPOT_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORIGINAL_OBJECT" type="EnhOriginalObjectType" minOccurs="0"/>
+      <xs:element name="ENHANCEMENTS" type="EnhHookImplsType" minOccurs="0"/>
+      <xs:element name="FILES" type="EnhFilesType" minOccurs="0"/>
+      <xs:element name="IMPL" type="EnhImplType" minOccurs="0"/>
+      <xs:element name="SOTR" type="SotrType" minOccurs="0"/>
+      <xs:element name="SOTR_USE" type="SotrUseTabType" minOccurs="0"/>
+      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- ENHO-specific ABAP envelope -->
+  <xs:complexType name="EnhoAbapType">
+    <xs:sequence>
+      <xs:element name="values" type="EnhoValuesType"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" default="1.0"/>
+  </xs:complexType>
+
+  <!-- THE ONLY ROOT ELEMENT -->
+  <xs:element name="abapGit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="abap" type="EnhoAbapType"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="serializer" type="xs:string" use="required"/>
+      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
