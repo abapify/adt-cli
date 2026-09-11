@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="XinxDd12vType">
+    <xs:all>
+      <xs:element name="SQLTAB" type="xs:string" minOccurs="0"/>
+      <xs:element name="INDEXNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="AS4LOCAL" type="xs:string" minOccurs="0"/>
+      <xs:element name="AS4VERS" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DBINDEX" type="xs:string" minOccurs="0"/>
+      <xs:element name="UNIQUEFLAG" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ISEXTIND" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="XinxDd17vItemType">
+    <xs:all>
+      <xs:element name="DDLANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="SQLTAB" type="xs:string" minOccurs="0"/>
+      <xs:element name="INDEXNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="POSITION" type="xs:string" minOccurs="0"/>
+      <xs:element name="AS4LOCAL" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="XinxType">
+    <xs:sequence>
+      <xs:element name="DD12V" type="XinxDd12vType" minOccurs="0"/>
+      <xs:element name="T_DD17V" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="DD17V" type="XinxDd17vItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

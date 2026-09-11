@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="PersRegType">
+    <xs:all>
+      <xs:element name="PERS_KEY" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACCESS_CL" type="xs:string" minOccurs="0"/>
+      <xs:element name="DISTRIB_CL" type="xs:string" minOccurs="0"/>
+      <xs:element name="DIALOG_FB" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMPONENT" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATATYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPENAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="PersRegTextType">
+    <xs:all>
+      <xs:element name="LANG" type="xs:string" minOccurs="0"/>
+      <xs:element name="PERS_KEY" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="PersType">
+    <xs:sequence>
+      <xs:element name="PERS_REG" type="PersRegType" minOccurs="0"/>
+      <xs:element name="PERS_REG_TEXT" type="PersRegTextType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

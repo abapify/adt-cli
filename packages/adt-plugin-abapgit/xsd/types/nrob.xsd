@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NROB - Number Range Object types -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Number range attributes -->
+  <xs:complexType name="NrobAttributesType">
+    <xs:all>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="DOMLEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="PERCENTAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="BUFFER" type="xs:string" minOccurs="0"/>
+      <xs:element name="NOIVBUFFER" type="xs:string" minOccurs="0"/>
+      <xs:element name="CODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="GAP" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROLLNR" type="xs:string" minOccurs="0"/>
+      <xs:element name="YEARLY" type="xs:string" minOccurs="0"/>
+      <xs:element name="PERCENTAGE2" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Number range text -->
+  <xs:complexType name="NrobTextType">
+    <xs:all>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TXTSHORT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Number range interval -->
+  <xs:complexType name="NrobIntervalType">
+    <xs:all>
+      <xs:element name="NRNR" type="xs:string" minOccurs="0"/>
+      <xs:element name="FROM" type="xs:string" minOccurs="0"/>
+      <xs:element name="TO" type="xs:string" minOccurs="0"/>
+      <xs:element name="NRLVL" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROCIND" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Number range intervals table -->
+  <xs:complexType name="NrobIntervalsType">
+    <xs:sequence>
+      <xs:element name="item" type="NrobIntervalType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Main NROB values type -->
+  <xs:complexType name="NrobType">
+    <xs:all>
+      <xs:element name="ATTRIBUTES" type="NrobAttributesType" minOccurs="0"/>
+      <xs:element name="TEXT" type="NrobTextType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

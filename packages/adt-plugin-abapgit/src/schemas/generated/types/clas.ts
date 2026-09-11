@@ -9,28 +9,28 @@ export type ClasSchema = {
     abapGit: {
         abap: {
             values: {
-                VSEOCLASS?: {
+                VSEOCLASS?: undefined | {
                     CLSNAME: string;
-                    LANGU?: string;
-                    DESCRIPT?: string;
-                    STATE?: string;
-                    CATEGORY?: string;
-                    EXPOSURE?: string;
-                    CLSFINAL?: string;
-                    CLSABSTRCT?: string;
-                    CLSCCINCL?: string;
-                    FIXPT?: string;
-                    UNICODE?: string;
-                    WITH_UNIT_TESTS?: string;
-                    DURATION?: string;
-                    RISK?: string;
-                    MSG_ID?: string;
-                    REFCLSNAME?: string;
-                    SHRM_ENABLED?: string;
-                    ABAP_LANGUAGE_VERSION?: string;
+                    LANGU?: string | undefined;
+                    DESCRIPT?: string | undefined;
+                    STATE?: string | undefined;
+                    CATEGORY?: string | undefined;
+                    EXPOSURE?: string | undefined;
+                    CLSFINAL?: string | undefined;
+                    CLSABSTRCT?: string | undefined;
+                    CLSCCINCL?: string | undefined;
+                    FIXPT?: string | undefined;
+                    UNICODE?: string | undefined;
+                    WITH_UNIT_TESTS?: string | undefined;
+                    DURATION?: string | undefined;
+                    RISK?: string | undefined;
+                    MSG_ID?: string | undefined;
+                    REFCLSNAME?: string | undefined;
+                    SHRM_ENABLED?: string | undefined;
+                    ABAP_LANGUAGE_VERSION?: string | undefined;
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
@@ -38,51 +38,51 @@ export type ClasSchema = {
     };
 } | {
     values: {
-        VSEOCLASS?: {
+        VSEOCLASS?: undefined | {
             CLSNAME: string;
-            LANGU?: string;
-            DESCRIPT?: string;
-            STATE?: string;
-            CATEGORY?: string;
-            EXPOSURE?: string;
-            CLSFINAL?: string;
-            CLSABSTRCT?: string;
-            CLSCCINCL?: string;
-            FIXPT?: string;
-            UNICODE?: string;
-            WITH_UNIT_TESTS?: string;
-            DURATION?: string;
-            RISK?: string;
-            MSG_ID?: string;
-            REFCLSNAME?: string;
-            SHRM_ENABLED?: string;
-            ABAP_LANGUAGE_VERSION?: string;
+            LANGU?: string | undefined;
+            DESCRIPT?: string | undefined;
+            STATE?: string | undefined;
+            CATEGORY?: string | undefined;
+            EXPOSURE?: string | undefined;
+            CLSFINAL?: string | undefined;
+            CLSABSTRCT?: string | undefined;
+            CLSCCINCL?: string | undefined;
+            FIXPT?: string | undefined;
+            UNICODE?: string | undefined;
+            WITH_UNIT_TESTS?: string | undefined;
+            DURATION?: string | undefined;
+            RISK?: string | undefined;
+            MSG_ID?: string | undefined;
+            REFCLSNAME?: string | undefined;
+            SHRM_ENABLED?: string | undefined;
+            ABAP_LANGUAGE_VERSION?: string | undefined;
         };
     };
 } | {
     abap: {
         values: {
-            VSEOCLASS?: {
+            VSEOCLASS?: undefined | {
                 CLSNAME: string;
-                LANGU?: string;
-                DESCRIPT?: string;
-                STATE?: string;
-                CATEGORY?: string;
-                EXPOSURE?: string;
-                CLSFINAL?: string;
-                CLSABSTRCT?: string;
-                CLSCCINCL?: string;
-                FIXPT?: string;
-                UNICODE?: string;
-                WITH_UNIT_TESTS?: string;
-                DURATION?: string;
-                RISK?: string;
-                MSG_ID?: string;
-                REFCLSNAME?: string;
-                SHRM_ENABLED?: string;
-                ABAP_LANGUAGE_VERSION?: string;
+                LANGU?: string | undefined;
+                DESCRIPT?: string | undefined;
+                STATE?: string | undefined;
+                CATEGORY?: string | undefined;
+                EXPOSURE?: string | undefined;
+                CLSFINAL?: string | undefined;
+                CLSABSTRCT?: string | undefined;
+                CLSCCINCL?: string | undefined;
+                FIXPT?: string | undefined;
+                UNICODE?: string | undefined;
+                WITH_UNIT_TESTS?: string | undefined;
+                DURATION?: string | undefined;
+                RISK?: string | undefined;
+                MSG_ID?: string | undefined;
+                REFCLSNAME?: string | undefined;
+                SHRM_ENABLED?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
             };
         };
-        version?: string;
+        version?: string | undefined;
     };
 };

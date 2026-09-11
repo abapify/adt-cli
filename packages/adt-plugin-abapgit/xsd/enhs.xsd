@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  abapGit ENHS (Enhancement Spot) Schema
+
+  Defines enhancement spot structures used in *.enhs.xml files.
+  Supports BADI_DEF and HOOK_DEF tool types.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Import ASX namespace -->
+  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
+
+  <!-- Include base abapGit types -->
+  <xs:include schemaLocation="abapgit.xsd"/>
+
+  <!-- Include ENHS types -->
+  <xs:include schemaLocation="types/enhs.xsd"/>
+
+  <!-- ENHS-specific values type -->
+  <xs:complexType name="EnhsValuesType">
+    <xs:all>
+      <xs:element name="TOOL" type="xs:string" minOccurs="0"/>
+      <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARENT_COMP" type="xs:string" minOccurs="0"/>
+      <xs:element name="BADI_DATA" type="xs:anyType" minOccurs="0"/>
+      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- ENHS-specific ABAP envelope -->
+  <xs:complexType name="EnhsAbapType">
+    <xs:sequence>
+      <xs:element name="values" type="EnhsValuesType"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" default="1.0"/>
+  </xs:complexType>
+
+  <!-- THE ONLY ROOT ELEMENT -->
+  <xs:element name="abapGit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="abap" type="EnhsAbapType"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="serializer" type="xs:string" use="required"/>
+      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

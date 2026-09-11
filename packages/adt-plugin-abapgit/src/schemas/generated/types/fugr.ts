@@ -9,73 +9,73 @@ export type FugrSchema = {
     abapGit: {
         abap: {
             values: {
-                AREAT?: string;
-                INCLUDES?: {
-                    SOBJ_NAME?: string[];
+                AREAT?: string | undefined;
+                INCLUDES?: undefined | {
+                    SOBJ_NAME?: undefined | string[];
                 };
-                FUNCTIONS?: {
-                    item?: {
+                FUNCTIONS?: undefined | {
+                    item?: undefined | {
                         FUNCNAME: string;
-                        GLOBAL_FLAG?: string;
-                        REMOTE_CALL?: string;
-                        UPDATE_TASK?: string;
-                        SHORT_TEXT?: string;
-                        REMOTE_BASXML?: string;
-                        EXCEPTION_CLASSES?: string;
-                        IMPORT?: {
-                            RSIMP?: {
-                                PARAMETER?: string;
-                                TYP?: string;
-                                DBFIELD?: string;
-                                DEFAULT?: string;
-                                OPTIONAL?: string;
-                                REFERENCE?: string;
+                        GLOBAL_FLAG?: string | undefined;
+                        REMOTE_CALL?: string | undefined;
+                        UPDATE_TASK?: string | undefined;
+                        SHORT_TEXT?: string | undefined;
+                        REMOTE_BASXML?: string | undefined;
+                        EXCEPTION_CLASSES?: string | undefined;
+                        IMPORT?: undefined | {
+                            RSIMP?: undefined | {
+                                PARAMETER?: string | undefined;
+                                TYP?: string | undefined;
+                                DBFIELD?: string | undefined;
+                                DEFAULT?: string | undefined;
+                                OPTIONAL?: string | undefined;
+                                REFERENCE?: string | undefined;
                             }[];
                         };
-                        CHANGING?: {
-                            RSCHA?: {
-                                PARAMETER?: string;
-                                TYP?: string;
-                                DBFIELD?: string;
-                                DEFAULT?: string;
-                                OPTIONAL?: string;
-                                REFERENCE?: string;
+                        CHANGING?: undefined | {
+                            RSCHA?: undefined | {
+                                PARAMETER?: string | undefined;
+                                TYP?: string | undefined;
+                                DBFIELD?: string | undefined;
+                                DEFAULT?: string | undefined;
+                                OPTIONAL?: string | undefined;
+                                REFERENCE?: string | undefined;
                             }[];
                         };
-                        EXPORT?: {
-                            RSEXP?: {
-                                PARAMETER?: string;
-                                TYP?: string;
-                                DBFIELD?: string;
-                                DEFAULT?: string;
-                                OPTIONAL?: string;
-                                REFERENCE?: string;
+                        EXPORT?: undefined | {
+                            RSEXP?: undefined | {
+                                PARAMETER?: string | undefined;
+                                TYP?: string | undefined;
+                                DBFIELD?: string | undefined;
+                                DEFAULT?: string | undefined;
+                                OPTIONAL?: string | undefined;
+                                REFERENCE?: string | undefined;
                             }[];
                         };
-                        TABLES?: {
-                            RSTBL?: {
-                                PARAMETER?: string;
-                                DBSTRUCT?: string;
-                                TYP?: string;
-                                OPTIONAL?: string;
+                        TABLES?: undefined | {
+                            RSTBL?: undefined | {
+                                PARAMETER?: string | undefined;
+                                DBSTRUCT?: string | undefined;
+                                TYP?: string | undefined;
+                                OPTIONAL?: string | undefined;
                             }[];
                         };
-                        EXCEPTION?: {
-                            RSEXC?: {
-                                EXCEPTION?: string;
+                        EXCEPTION?: undefined | {
+                            RSEXC?: undefined | {
+                                EXCEPTION?: string | undefined;
                             }[];
                         };
-                        DOCUMENTATION?: {
-                            RSFDO?: {
-                                PARAMETER?: string;
-                                KIND?: string;
-                                STEXT?: string;
+                        DOCUMENTATION?: undefined | {
+                            RSFDO?: undefined | {
+                                PARAMETER?: string | undefined;
+                                KIND?: string | undefined;
+                                STEXT?: string | undefined;
                             }[];
                         };
                     }[];
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;

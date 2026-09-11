@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="TobjObjhType">
+    <xs:all>
+      <xs:element name="OBJECTNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECTTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLIDEP" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGDEP" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJCATEG" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJTRANSP" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="TobjObjtType">
+    <xs:all>
+      <xs:element name="LANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECTNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECTTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="TobjTddatType">
+    <xs:all>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="MCLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="CCLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="FLAG" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="TobjType">
+    <xs:sequence>
+      <xs:element name="OBJH" type="TobjObjhType" minOccurs="0"/>
+      <xs:element name="OBJT" type="TobjObjtType" minOccurs="0"/>
+      <xs:element name="TOBJ" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="TDDAT" type="TobjTddatType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

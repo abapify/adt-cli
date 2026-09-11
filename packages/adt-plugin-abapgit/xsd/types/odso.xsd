@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="OdsoDetailsType">
+    <xs:all>
+      <xs:element name="ODSOBJECT" type="xs:string"/>
+      <xs:element name="ODSOTYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJVERS" type="xs:string" minOccurs="0"/>
+      <xs:element name="ODSASIZCAT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ODSADATCLS" type="xs:string" minOccurs="0"/>
+      <xs:element name="NOEDSFL" type="xs:string" minOccurs="0"/>
+      <xs:element name="KEY_NOT_UNIQUE" type="xs:string" minOccurs="0"/>
+      <xs:element name="IMOFL" type="xs:string" minOccurs="0"/>
+      <xs:element name="PLANNING_MODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACTVIEWGEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="TXTLG" type="xs:string" minOccurs="0"/>
+      <xs:element name="TXTSH" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="OdsoInfoObjectsItemType">
+    <xs:all>
+      <xs:element name="INFOBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJVERS" type="xs:string" minOccurs="0"/>
+      <xs:element name="KEYFLAG" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="OdsoType">
+    <xs:sequence>
+      <xs:element name="ODSO" type="OdsoDetailsType"/>
+      <xs:element name="INFOOBJECTS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="BAPI6116IO" type="OdsoInfoObjectsItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

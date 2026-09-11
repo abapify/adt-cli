@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="JobdType">
+    <xs:all>
+      <xs:element name="JOBNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="REPID" type="xs:string" minOccurs="0"/>
+      <xs:element name="JDPACKAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="JOBCOUNT" type="xs:string" minOccurs="0"/>
+      <xs:element name="JOBCLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="BTCSYS" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>

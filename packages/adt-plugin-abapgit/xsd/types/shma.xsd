@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="ShmaType">
+    <xs:all>
+      <xs:element name="AREA_NAME" type="xs:string"/>
+      <xs:element name="DESCRIPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROOT" type="xs:string" minOccurs="0"/>
+      <xs:element name="AUTO_BUILD" type="xs:string" minOccurs="0"/>
+      <xs:element name="HAS_VERSIONS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TRANSACTIONAL" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLIENT_DEPENDENT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LIFE_CONTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROPAGATION_KIND" type="xs:string" minOccurs="0"/>
+      <xs:element name="DISPLACE_KIND" type="xs:string" minOccurs="0"/>
+      <xs:element name="MAX_VERSIONS" type="xs:string" minOccurs="0"/>
+      <xs:element name="MAX_AREA_SIZE" type="xs:string" minOccurs="0"/>
+      <xs:element name="MAX_VERSION_SIZE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>

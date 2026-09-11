@@ -9,33 +9,33 @@ export type DomaSchema = {
     abapGit: {
         abap: {
             values: {
-                DD01V?: {
+                DD01V?: undefined | {
                     DOMNAME: string;
-                    DDLANGUAGE?: string;
-                    DATATYPE?: string;
-                    LENG?: string;
-                    OUTPUTLEN?: string;
-                    DECIMALS?: string;
-                    LOWERCASE?: string;
-                    SIGNFLAG?: string;
-                    VALEXI?: string;
-                    ENTITYTAB?: string;
-                    CONVEXIT?: string;
-                    DDTEXT?: string;
-                    DOMMASTER?: string;
+                    DDLANGUAGE?: string | undefined;
+                    DATATYPE?: string | undefined;
+                    LENG?: string | undefined;
+                    OUTPUTLEN?: string | undefined;
+                    DECIMALS?: string | undefined;
+                    LOWERCASE?: string | undefined;
+                    SIGNFLAG?: string | undefined;
+                    VALEXI?: string | undefined;
+                    ENTITYTAB?: string | undefined;
+                    CONVEXIT?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    DOMMASTER?: string | undefined;
                 };
-                DD07V_TAB?: {
-                    DD07V?: {
-                        DOMNAME?: string;
-                        VALPOS?: string;
-                        DDLANGUAGE?: string;
-                        DOMVALUE_L?: string;
-                        DOMVALUE_H?: string;
-                        DDTEXT?: string;
+                DD07V_TAB?: undefined | {
+                    DD07V?: undefined | {
+                        DOMNAME?: string | undefined;
+                        VALPOS?: string | undefined;
+                        DDLANGUAGE?: string | undefined;
+                        DOMVALUE_L?: string | undefined;
+                        DOMVALUE_H?: string | undefined;
+                        DDTEXT?: string | undefined;
                     }[];
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
@@ -43,61 +43,61 @@ export type DomaSchema = {
     };
 } | {
     values: {
-        DD01V?: {
+        DD01V?: undefined | {
             DOMNAME: string;
-            DDLANGUAGE?: string;
-            DATATYPE?: string;
-            LENG?: string;
-            OUTPUTLEN?: string;
-            DECIMALS?: string;
-            LOWERCASE?: string;
-            SIGNFLAG?: string;
-            VALEXI?: string;
-            ENTITYTAB?: string;
-            CONVEXIT?: string;
-            DDTEXT?: string;
-            DOMMASTER?: string;
+            DDLANGUAGE?: string | undefined;
+            DATATYPE?: string | undefined;
+            LENG?: string | undefined;
+            OUTPUTLEN?: string | undefined;
+            DECIMALS?: string | undefined;
+            LOWERCASE?: string | undefined;
+            SIGNFLAG?: string | undefined;
+            VALEXI?: string | undefined;
+            ENTITYTAB?: string | undefined;
+            CONVEXIT?: string | undefined;
+            DDTEXT?: string | undefined;
+            DOMMASTER?: string | undefined;
         };
-        DD07V_TAB?: {
-            DD07V?: {
-                DOMNAME?: string;
-                VALPOS?: string;
-                DDLANGUAGE?: string;
-                DOMVALUE_L?: string;
-                DOMVALUE_H?: string;
-                DDTEXT?: string;
+        DD07V_TAB?: undefined | {
+            DD07V?: undefined | {
+                DOMNAME?: string | undefined;
+                VALPOS?: string | undefined;
+                DDLANGUAGE?: string | undefined;
+                DOMVALUE_L?: string | undefined;
+                DOMVALUE_H?: string | undefined;
+                DDTEXT?: string | undefined;
             }[];
         };
     };
 } | {
     abap: {
         values: {
-            DD01V?: {
+            DD01V?: undefined | {
                 DOMNAME: string;
-                DDLANGUAGE?: string;
-                DATATYPE?: string;
-                LENG?: string;
-                OUTPUTLEN?: string;
-                DECIMALS?: string;
-                LOWERCASE?: string;
-                SIGNFLAG?: string;
-                VALEXI?: string;
-                ENTITYTAB?: string;
-                CONVEXIT?: string;
-                DDTEXT?: string;
-                DOMMASTER?: string;
+                DDLANGUAGE?: string | undefined;
+                DATATYPE?: string | undefined;
+                LENG?: string | undefined;
+                OUTPUTLEN?: string | undefined;
+                DECIMALS?: string | undefined;
+                LOWERCASE?: string | undefined;
+                SIGNFLAG?: string | undefined;
+                VALEXI?: string | undefined;
+                ENTITYTAB?: string | undefined;
+                CONVEXIT?: string | undefined;
+                DDTEXT?: string | undefined;
+                DOMMASTER?: string | undefined;
             };
-            DD07V_TAB?: {
-                DD07V?: {
-                    DOMNAME?: string;
-                    VALPOS?: string;
-                    DDLANGUAGE?: string;
-                    DOMVALUE_L?: string;
-                    DOMVALUE_H?: string;
-                    DDTEXT?: string;
+            DD07V_TAB?: undefined | {
+                DD07V?: undefined | {
+                    DOMNAME?: string | undefined;
+                    VALPOS?: string | undefined;
+                    DDLANGUAGE?: string | undefined;
+                    DOMVALUE_L?: string | undefined;
+                    DOMVALUE_H?: string | undefined;
+                    DDTEXT?: string | undefined;
                 }[];
             };
         };
-        version?: string;
+        version?: string | undefined;
     };
 };

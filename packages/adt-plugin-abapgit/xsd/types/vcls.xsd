@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="VclsVcldirType">
+    <xs:all>
+      <xs:element name="VCLNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="AUTHOR" type="xs:string" minOccurs="0"/>
+      <xs:element name="CHANGEDATE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="VclsVclstrucItemType">
+    <xs:all>
+      <xs:element name="VCLNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="VclsVclmfItemType">
+    <xs:all>
+      <xs:element name="VCLNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="FORM" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="VclsType">
+    <xs:sequence>
+      <xs:element name="VCLDIR" type="VclsVcldirType" minOccurs="0"/>
+      <xs:element name="VLCSTRUC_TAB" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="VclsVclstrucItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="VCLMF_TAB" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="VclsVclmfItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

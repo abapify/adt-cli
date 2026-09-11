@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="IaspAttrType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DEVCLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="VERSION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IaspParamItemType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="VALUE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IaspType">
+    <xs:sequence>
+      <xs:element name="ATTR" type="IaspAttrType" minOccurs="0"/>
+      <xs:element name="PARAMETERS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="IaspParamItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
