@@ -13,11 +13,18 @@ type IdocTypeLike = {
   description?: string;
   released?: string;
   closed?: string;
+  applrel?: string;
+  firsttyp?: string;
+  pretyp?: string;
+  succtyp?: string;
+  lasttyp?: string;
+  generated?: string;
   syntax?: Array<{
     nr?: string;
     segtyp?: string;
     parseg?: string;
     parpno?: string;
+    parflg?: string;
     mustfl?: string;
   }>;
 };
@@ -42,6 +49,12 @@ export const idocTypeHandler = createHandler<IdocTypeLike, typeof idoc>(
           DESCRP: obj.description,
           CLOSED: obj.closed,
           RELEASED: obj.released,
+          APPLREL: obj.applrel,
+          FIRSTTYP: obj.firsttyp,
+          PRETYP: obj.pretyp,
+          SUCCTYP: obj.succtyp,
+          LASTTYP: obj.lasttyp,
+          GENERATED: obj.generated,
         },
         T_SYNTAX: obj.syntax?.length
           ? {
@@ -50,6 +63,7 @@ export const idocTypeHandler = createHandler<IdocTypeLike, typeof idoc>(
                 SEGTYP: s.segtyp,
                 PARSEG: s.parseg,
                 PARPNO: s.parpno,
+                PARFLG: s.parflg,
                 MUSTFL: s.mustfl,
               })),
             }
@@ -64,11 +78,18 @@ export const idocTypeHandler = createHandler<IdocTypeLike, typeof idoc>(
         description: IDOC?.ATTRIBUTES?.DESCRP,
         released: IDOC?.ATTRIBUTES?.RELEASED,
         closed: IDOC?.ATTRIBUTES?.CLOSED,
+        applrel: IDOC?.ATTRIBUTES?.APPLREL,
+        firsttyp: IDOC?.ATTRIBUTES?.FIRSTTYP,
+        pretyp: IDOC?.ATTRIBUTES?.PRETYP,
+        succtyp: IDOC?.ATTRIBUTES?.SUCCTYP,
+        lasttyp: IDOC?.ATTRIBUTES?.LASTTYP,
+        generated: IDOC?.ATTRIBUTES?.GENERATED,
         syntax: syntax.map((s) => ({
           nr: s.NR,
           segtyp: s.SEGTYP,
           parseg: s.PARSEG,
           parpno: s.PARPNO,
+          parflg: s.PARFLG,
           mustfl: s.MUSTFL,
         })),
       };

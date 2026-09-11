@@ -45,19 +45,13 @@ export const businessConfigSetHandler = createHandler<
 
   toAbapGit: (obj) => {
     const name = String(obj.name ?? '').toUpperCase();
-    // Ensure description is included in texts (and first, since
-    // fromAbapGit reads texts[0] as the description)
+    // Ensure description is included in texts
     const allTexts = [...(obj.texts ?? [])];
-    if (obj.description) {
-      const idx = allTexts.findIndex((t) => t.text === obj.description);
-      if (idx === -1) {
-        allTexts.unshift({
-          language: obj.texts?.[0]?.language ?? 'en',
-          text: obj.description,
-        });
-      } else if (idx > 0) {
-        allTexts.unshift(allTexts.splice(idx, 1)[0]);
-      }
+    if (obj.description && !allTexts.some((t) => t.text === obj.description)) {
+      allTexts.unshift({
+        language: obj.texts?.[0]?.language ?? 'en',
+        text: obj.description,
+      });
     }
     return {
       SCP1: {
