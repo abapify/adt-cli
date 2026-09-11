@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="EnscEnhSpotItemType">
+    <xs:all>
+      <xs:element name="ENHSPOTNAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnscType">
+    <xs:sequence>
+      <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ENH_SPOTS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="EnscEnhSpotItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="COMP_ENH_SPOTS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="EnscEnhSpotItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
