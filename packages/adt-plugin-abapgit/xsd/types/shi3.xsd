@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="Shi3TreeHeadType">
+    <xs:all>
+      <xs:element name="TREE_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Shi3TreeTitleItemType">
+    <xs:all>
+      <xs:element name="SPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TREE_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Shi3TreeNodeItemType">
+    <xs:all>
+      <xs:element name="NODE_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TREE_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARENT_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Shi3Type">
+    <xs:sequence>
+      <xs:element name="TREE_HEAD" type="Shi3TreeHeadType" minOccurs="0"/>
+      <xs:element name="TREE_TITLES" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="Shi3TreeTitleItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="TREE_NODES" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="Shi3TreeNodeItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

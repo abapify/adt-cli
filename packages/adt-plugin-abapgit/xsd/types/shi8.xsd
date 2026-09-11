@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="Shi8Type">
+    <xs:all>
+      <xs:element name="SFW_ASS_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="SWITCH_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="REACTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="TREE_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="NODE_ID" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>
