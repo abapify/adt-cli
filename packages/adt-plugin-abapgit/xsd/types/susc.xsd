@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SuscTobcType">
+    <xs:all>
+      <xs:element name="OCLSS" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SuscTobctType">
+    <xs:all>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="OCLSS" type="xs:string" minOccurs="0"/>
+      <xs:element name="CTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SuscType">
+    <xs:sequence>
+      <xs:element name="TOBC" type="SuscTobcType" minOccurs="0"/>
+      <xs:element name="TOBCT" type="SuscTobctType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
