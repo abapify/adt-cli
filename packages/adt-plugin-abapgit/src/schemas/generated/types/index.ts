@@ -45,3 +45,8 @@ export type { StylSchema as StylAbapGitType } from './styl';
 export type { SuscSchema as SuscAbapGitType } from './susc';
 export type { SucuSchema as SucuAbapGitType } from './sucu';
 export type { SxciSchema as SxciAbapGitType } from './sxci';
+export type { SmimSchema as SmimAbapGitType } from './smim';
+export type { SqscSchema as SqscAbapGitType } from './sqsc';
+export type { SusoSchema as SusoAbapGitType } from './suso';
+export type { SushSchema as SushAbapGitType } from './sush';
+export type { SktdSchema as SktdAbapGitType } from './sktd';

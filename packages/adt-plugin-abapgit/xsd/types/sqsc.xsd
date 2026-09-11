@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SqscHeaderType">
+    <xs:all>
+      <xs:element name="DB_REPOSITORY_PACKAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_REPOSITORY_PROC_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_CATALOG_SCHEMA" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_CATALOG_PROC_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="READ_ONLY" type="xs:string" minOccurs="0"/>
+      <xs:element name="INTERFACE_POOL" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SqscType">
+    <xs:sequence>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="HEADER" type="SqscHeaderType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

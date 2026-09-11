@@ -74,3 +74,8 @@ export { styleHandler } from './styl';
 export { authObjectClassHandler } from './susc';
 export { authGroupHandler } from './sucu';
 export { badiImplementationHandler } from './sxci';
+export { mimeObjectHandler } from './smim';
+export { dbProcProxyHandler } from './sqsc';
+export { authObjectHandler } from './suso';
+export { authHierarchyHandler } from './sush';
+export { ktdDocumentHandler } from './sktd';
