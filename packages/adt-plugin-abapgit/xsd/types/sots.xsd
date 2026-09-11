@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SotsHeaderType">
+    <xs:all>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="PAKET" type="xs:string" minOccurs="0"/>
+      <xs:element name="CREA_LAN" type="xs:string" minOccurs="0"/>
+      <xs:element name="ALIAS_NAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SotsEntryItemType">
+    <xs:all>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LFD_NUM" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SotsItemType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="SotsHeaderType" minOccurs="0"/>
+      <xs:element name="ENTRIES" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SotsEntryItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SotsType">
+    <xs:sequence>
+      <xs:element name="item" type="SotsItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

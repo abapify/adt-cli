@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="AvarIdItemType">
+    <xs:all>
+      <xs:element name="OBJ_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACTIVE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="AvarType">
+    <xs:sequence>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="IDS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="AvarIdItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
