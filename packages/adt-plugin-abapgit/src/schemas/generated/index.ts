@@ -59,6 +59,7 @@ import _sqsc from './schemas/sqsc';
 import _suso from './schemas/suso';
 import _sush from './schemas/sush';
 import _sktd from './schemas/sktd';
+import _form from './schemas/form';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -107,6 +108,7 @@ import type { SqscSchema as _SqscSchema } from './types/sqsc';
 import type { SusoSchema as _SusoSchema } from './types/suso';
 import type { SushSchema as _SushSchema } from './types/sush';
 import type { SktdSchema as _SktdSchema } from './types/sktd';
+import type { FormSchema as _FormSchema } from './types/form';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -154,6 +156,7 @@ type SqscAbapGitType = Extract<_SqscSchema, { abapGit: unknown }>;
 type SusoAbapGitType = Extract<_SusoSchema, { abapGit: unknown }>;
 type SushAbapGitType = Extract<_SushSchema, { abapGit: unknown }>;
 type SktdAbapGitType = Extract<_SktdSchema, { abapGit: unknown }>;
+type FormAbapGitType = Extract<_FormSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -201,6 +204,7 @@ export const sqsc = abapGitSchema<SqscAbapGitType, SqscAbapGitType['abapGit']['a
 export const suso = abapGitSchema<SusoAbapGitType, SusoAbapGitType['abapGit']['abap']['values']>(_suso);
 export const sush = abapGitSchema<SushAbapGitType, SushAbapGitType['abapGit']['abap']['values']>(_sush);
 export const sktd = abapGitSchema<SktdAbapGitType, SktdAbapGitType['abapGit']['abap']['values']>(_sktd);
+export const form = abapGitSchema<FormAbapGitType, FormAbapGitType['abapGit']['abap']['values']>(_form);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
