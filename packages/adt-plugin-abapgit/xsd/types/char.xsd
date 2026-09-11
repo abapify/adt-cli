@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="CharClsAttributeType">
+    <xs:all>
+      <xs:element name="CLSNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ATNAM" type="xs:string" minOccurs="0"/>
+      <xs:element name="ATFOR" type="xs:string" minOccurs="0"/>
+      <xs:element name="ATVOR" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="CharClsAttributetItemType">
+    <xs:all>
+      <xs:element name="SPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLSNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ATBEZ" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="CharType">
+    <xs:sequence>
+      <xs:element name="CLS_ATTRIBUTE" type="CharClsAttributeType" minOccurs="0"/>
+      <xs:element name="CLS_ATTRIBUTET" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="CharClsAttributetItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
