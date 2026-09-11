@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SktdMetadataType">
+    <xs:all>
+      <xs:element name="MASTER_LANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="RESPONSIBLE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SktdRefObjectType">
+    <xs:all>
+      <xs:element name="URI" type="xs:string" minOccurs="0"/>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SktdType">
+    <xs:sequence>
+      <xs:element name="METADATA" type="SktdMetadataType" minOccurs="0"/>
+      <xs:element name="REF_OBJECT" type="SktdRefObjectType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
