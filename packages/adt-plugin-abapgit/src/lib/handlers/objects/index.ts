@@ -79,3 +79,4 @@ export { dbProcProxyHandler } from './sqsc';
 export { authObjectHandler } from './suso';
 export { authHierarchyHandler } from './sush';
 export { ktdDocumentHandler } from './sktd';
+export { formHandler } from './form';
