@@ -21,12 +21,6 @@ type NumberRangeObjectLike = {
   percentage2?: string;
   buffer?: boolean;
   noivbuffer?: string;
-  code?: string;
-  gap?: string;
-  rollNr?: string;
-  yearly?: string;
-  nrLvl?: string;
-  procInd?: string;
 };
 
 export const numberRangeObjectHandler = createHandler<
@@ -72,14 +66,7 @@ export const numberRangeObjectHandler = createHandler<
     masterLanguage: sapLangToIso(TEXT?.LANGU),
     domainLength: ATTRIBUTES?.DOMLEN,
     percentage: ATTRIBUTES?.PERCENTAGE,
-    percentage2: ATTRIBUTES?.PERCENTAGE2,
     buffer: ATTRIBUTES?.BUFFER === 'X',
     noivbuffer: ATTRIBUTES?.NOIVBUFFER,
-    code: ATTRIBUTES?.CODE,
-    gap: ATTRIBUTES?.GAP,
-    rollNr: ATTRIBUTES?.ROLLNR,
-    yearly: ATTRIBUTES?.YEARLY,
-    nrLvl: ATTRIBUTES?.NRLVL,
-    procInd: ATTRIBUTES?.PROCIND,
   }),
 });

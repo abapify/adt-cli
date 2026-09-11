@@ -212,7 +212,14 @@ export default {
       sequence: {
         element: [
           {
-            ref: "asx:values",
+            name: "ATTRIBUTES",
+            type: "NrobAttributesType",
+            minOccurs: "0",
+          },
+          {
+            name: "TEXT",
+            type: "NrobTextType",
+            minOccurs: "0",
           },
         ],
       },
