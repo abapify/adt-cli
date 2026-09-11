@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SploTspltType">
+    <xs:all>
+      <xs:element name="SPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="PAPART" type="xs:string" minOccurs="0"/>
+      <xs:element name="TXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SploTspldType">
+    <xs:all>
+      <xs:element name="PAPART" type="xs:string" minOccurs="0"/>
+      <xs:element name="PFORMAT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORIENT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OUTCOLUMNS" type="xs:string" minOccurs="0"/>
+      <xs:element name="OUTROWS" type="xs:string" minOccurs="0"/>
+      <xs:element name="LISTAREA" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SploTsp0pType">
+    <xs:all>
+      <xs:element name="PDPAPER" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>
