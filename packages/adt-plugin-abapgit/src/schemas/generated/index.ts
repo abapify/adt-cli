@@ -54,6 +54,11 @@ import _styl from './schemas/styl';
 import _susc from './schemas/susc';
 import _sucu from './schemas/sucu';
 import _sxci from './schemas/sxci';
+import _smim from './schemas/smim';
+import _sqsc from './schemas/sqsc';
+import _suso from './schemas/suso';
+import _sush from './schemas/sush';
+import _sktd from './schemas/sktd';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -97,6 +102,11 @@ import type { StylSchema as _StylSchema } from './types/styl';
 import type { SuscSchema as _SuscSchema } from './types/susc';
 import type { SucuSchema as _SucuSchema } from './types/sucu';
 import type { SxciSchema as _SxciSchema } from './types/sxci';
+import type { SmimSchema as _SmimSchema } from './types/smim';
+import type { SqscSchema as _SqscSchema } from './types/sqsc';
+import type { SusoSchema as _SusoSchema } from './types/suso';
+import type { SushSchema as _SushSchema } from './types/sush';
+import type { SktdSchema as _SktdSchema } from './types/sktd';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -139,6 +149,11 @@ type StylAbapGitType = Extract<_StylSchema, { abapGit: unknown }>;
 type SuscAbapGitType = Extract<_SuscSchema, { abapGit: unknown }>;
 type SucuAbapGitType = Extract<_SucuSchema, { abapGit: unknown }>;
 type SxciAbapGitType = Extract<_SxciSchema, { abapGit: unknown }>;
+type SmimAbapGitType = Extract<_SmimSchema, { abapGit: unknown }>;
+type SqscAbapGitType = Extract<_SqscSchema, { abapGit: unknown }>;
+type SusoAbapGitType = Extract<_SusoSchema, { abapGit: unknown }>;
+type SushAbapGitType = Extract<_SushSchema, { abapGit: unknown }>;
+type SktdAbapGitType = Extract<_SktdSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -181,6 +196,11 @@ export const styl = abapGitSchema<StylAbapGitType, StylAbapGitType['abapGit']['a
 export const susc = abapGitSchema<SuscAbapGitType, SuscAbapGitType['abapGit']['abap']['values']>(_susc);
 export const sucu = abapGitSchema<SucuAbapGitType, SucuAbapGitType['abapGit']['abap']['values']>(_sucu);
 export const sxci = abapGitSchema<SxciAbapGitType, SxciAbapGitType['abapGit']['abap']['values']>(_sxci);
+export const smim = abapGitSchema<SmimAbapGitType, SmimAbapGitType['abapGit']['abap']['values']>(_smim);
+export const sqsc = abapGitSchema<SqscAbapGitType, SqscAbapGitType['abapGit']['abap']['values']>(_sqsc);
+export const suso = abapGitSchema<SusoAbapGitType, SusoAbapGitType['abapGit']['abap']['values']>(_suso);
+export const sush = abapGitSchema<SushAbapGitType, SushAbapGitType['abapGit']['abap']['values']>(_sush);
+export const sktd = abapGitSchema<SktdAbapGitType, SktdAbapGitType['abapGit']['abap']['values']>(_sktd);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';

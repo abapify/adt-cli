@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SmimExtraType">
+    <xs:all>
+      <xs:element name="FILE_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="MIMETYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARENT_FOLDER_ID" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SmimType">
+    <xs:sequence>
+      <xs:element name="URL" type="xs:string" minOccurs="0"/>
+      <xs:element name="FOLDER" type="xs:string" minOccurs="0"/>
+      <xs:element name="CLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="EXTRA" type="SmimExtraType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

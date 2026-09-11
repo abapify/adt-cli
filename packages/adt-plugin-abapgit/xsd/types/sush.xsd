@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SushHeadType">
+    <xs:all>
+      <xs:element name="DISPLAY_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SushUsobxItemType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OKFLAG" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SushUsobtItemType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELD" type="xs:string" minOccurs="0"/>
+      <xs:element name="LOW" type="xs:string" minOccurs="0"/>
+      <xs:element name="HIGH" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SushType">
+    <xs:sequence>
+      <xs:element name="HEAD" type="SushHeadType" minOccurs="0"/>
+      <xs:element name="USOBX" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SushUsobxItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="USOBT" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SushUsobtItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
