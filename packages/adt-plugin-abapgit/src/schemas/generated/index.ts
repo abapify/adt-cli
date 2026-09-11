@@ -67,6 +67,15 @@ import _oa2p from './schemas/oa2p';
 import _splo from './schemas/splo';
 import _tobj from './schemas/tobj';
 import _sprx from './schemas/sprx';
+import _sots from './schemas/sots';
+import _iarp from './schemas/iarp';
+import _iasp from './schemas/iasp';
+import _char from './schemas/char';
+import _auth from './schemas/auth';
+import _area from './schemas/area';
+import _avar from './schemas/avar';
+import _jobd from './schemas/jobd';
+import _nspc from './schemas/nspc';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -123,6 +132,15 @@ import type { Oa2pSchema as _Oa2pSchema } from './types/oa2p';
 import type { SploSchema as _SploSchema } from './types/splo';
 import type { TobjSchema as _TobjSchema } from './types/tobj';
 import type { SprxSchema as _SprxSchema } from './types/sprx';
+import type { SotsSchema as _SotsSchema } from './types/sots';
+import type { IarpSchema as _IarpSchema } from './types/iarp';
+import type { IaspSchema as _IaspSchema } from './types/iasp';
+import type { CharSchema as _CharSchema } from './types/char';
+import type { AuthSchema as _AuthSchema } from './types/auth';
+import type { AreaSchema as _AreaSchema } from './types/area';
+import type { AvarSchema as _AvarSchema } from './types/avar';
+import type { JobdSchema as _JobdSchema } from './types/jobd';
+import type { NspcSchema as _NspcSchema } from './types/nspc';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -178,6 +196,15 @@ type Oa2pAbapGitType = Extract<_Oa2pSchema, { abapGit: unknown }>;
 type SploAbapGitType = Extract<_SploSchema, { abapGit: unknown }>;
 type TobjAbapGitType = Extract<_TobjSchema, { abapGit: unknown }>;
 type SprxAbapGitType = Extract<_SprxSchema, { abapGit: unknown }>;
+type SotsAbapGitType = Extract<_SotsSchema, { abapGit: unknown }>;
+type IarpAbapGitType = Extract<_IarpSchema, { abapGit: unknown }>;
+type IaspAbapGitType = Extract<_IaspSchema, { abapGit: unknown }>;
+type CharAbapGitType = Extract<_CharSchema, { abapGit: unknown }>;
+type AuthAbapGitType = Extract<_AuthSchema, { abapGit: unknown }>;
+type AreaAbapGitType = Extract<_AreaSchema, { abapGit: unknown }>;
+type AvarAbapGitType = Extract<_AvarSchema, { abapGit: unknown }>;
+type JobdAbapGitType = Extract<_JobdSchema, { abapGit: unknown }>;
+type NspcAbapGitType = Extract<_NspcSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -233,6 +260,15 @@ export const oa2p = abapGitSchema<Oa2pAbapGitType, Oa2pAbapGitType['abapGit']['a
 export const splo = abapGitSchema<SploAbapGitType, SploAbapGitType['abapGit']['abap']['values']>(_splo);
 export const tobj = abapGitSchema<TobjAbapGitType, TobjAbapGitType['abapGit']['abap']['values']>(_tobj);
 export const sprx = abapGitSchema<SprxAbapGitType, SprxAbapGitType['abapGit']['abap']['values']>(_sprx);
+export const sots = abapGitSchema<SotsAbapGitType, SotsAbapGitType['abapGit']['abap']['values']>(_sots);
+export const iarp = abapGitSchema<IarpAbapGitType, IarpAbapGitType['abapGit']['abap']['values']>(_iarp);
+export const iasp = abapGitSchema<IaspAbapGitType, IaspAbapGitType['abapGit']['abap']['values']>(_iasp);
+export const char = abapGitSchema<CharAbapGitType, CharAbapGitType['abapGit']['abap']['values']>(_char);
+export const auth = abapGitSchema<AuthAbapGitType, AuthAbapGitType['abapGit']['abap']['values']>(_auth);
+export const area = abapGitSchema<AreaAbapGitType, AreaAbapGitType['abapGit']['abap']['values']>(_area);
+export const avar = abapGitSchema<AvarAbapGitType, AvarAbapGitType['abapGit']['abap']['values']>(_avar);
+export const jobd = abapGitSchema<JobdAbapGitType, JobdAbapGitType['abapGit']['abap']['values']>(_jobd);
+export const nspc = abapGitSchema<NspcAbapGitType, NspcAbapGitType['abapGit']['abap']['values']>(_nspc);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';

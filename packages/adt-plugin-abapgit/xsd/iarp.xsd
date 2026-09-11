@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
+  <xs:include schemaLocation="abapgit.xsd"/>
+  <xs:include schemaLocation="types/iarp.xsd"/>
+
+  <xs:complexType name="IarpValuesType">
+    <xs:sequence>
+      <xs:element name="ATTR" type="IarpAttrType" minOccurs="0"/>
+      <xs:element name="PARAMETERS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="IarpParamItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="IarpAbapType">
+    <xs:sequence>
+      <xs:element name="values" type="IarpValuesType"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" default="1.0"/>
+  </xs:complexType>
+
+  <xs:element name="abapGit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="abap" type="IarpAbapType"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="serializer" type="xs:string" use="required"/>
+      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
