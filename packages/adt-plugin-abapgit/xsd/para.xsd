@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
+  <xs:include schemaLocation="abapgit.xsd"/>
+  <xs:include schemaLocation="types/para.xsd"/>
+
+  <xs:complexType name="ParaValuesType">
+    <xs:sequence>
+      <xs:element name="TPARA" type="ParaTparaType" minOccurs="0"/>
+      <xs:element name="TPARAT" type="ParaTparatType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ParaAbapType">
+    <xs:sequence>
+      <xs:element name="values" type="ParaValuesType"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" default="1.0"/>
+  </xs:complexType>
+
+  <xs:element name="abapGit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="abap" type="ParaAbapType"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="serializer" type="xs:string" use="required"/>
+      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

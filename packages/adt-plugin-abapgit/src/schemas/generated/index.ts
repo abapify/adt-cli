@@ -60,6 +60,13 @@ import _suso from './schemas/suso';
 import _sush from './schemas/sush';
 import _sktd from './schemas/sktd';
 import _form from './schemas/form';
+import _xinx from './schemas/xinx';
+import _para from './schemas/para';
+import _pers from './schemas/pers';
+import _oa2p from './schemas/oa2p';
+import _splo from './schemas/splo';
+import _tobj from './schemas/tobj';
+import _sprx from './schemas/sprx';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -109,6 +116,13 @@ import type { SusoSchema as _SusoSchema } from './types/suso';
 import type { SushSchema as _SushSchema } from './types/sush';
 import type { SktdSchema as _SktdSchema } from './types/sktd';
 import type { FormSchema as _FormSchema } from './types/form';
+import type { XinxSchema as _XinxSchema } from './types/xinx';
+import type { ParaSchema as _ParaSchema } from './types/para';
+import type { PersSchema as _PersSchema } from './types/pers';
+import type { Oa2pSchema as _Oa2pSchema } from './types/oa2p';
+import type { SploSchema as _SploSchema } from './types/splo';
+import type { TobjSchema as _TobjSchema } from './types/tobj';
+import type { SprxSchema as _SprxSchema } from './types/sprx';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -157,6 +171,13 @@ type SusoAbapGitType = Extract<_SusoSchema, { abapGit: unknown }>;
 type SushAbapGitType = Extract<_SushSchema, { abapGit: unknown }>;
 type SktdAbapGitType = Extract<_SktdSchema, { abapGit: unknown }>;
 type FormAbapGitType = Extract<_FormSchema, { abapGit: unknown }>;
+type XinxAbapGitType = Extract<_XinxSchema, { abapGit: unknown }>;
+type ParaAbapGitType = Extract<_ParaSchema, { abapGit: unknown }>;
+type PersAbapGitType = Extract<_PersSchema, { abapGit: unknown }>;
+type Oa2pAbapGitType = Extract<_Oa2pSchema, { abapGit: unknown }>;
+type SploAbapGitType = Extract<_SploSchema, { abapGit: unknown }>;
+type TobjAbapGitType = Extract<_TobjSchema, { abapGit: unknown }>;
+type SprxAbapGitType = Extract<_SprxSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -205,6 +226,13 @@ export const suso = abapGitSchema<SusoAbapGitType, SusoAbapGitType['abapGit']['a
 export const sush = abapGitSchema<SushAbapGitType, SushAbapGitType['abapGit']['abap']['values']>(_sush);
 export const sktd = abapGitSchema<SktdAbapGitType, SktdAbapGitType['abapGit']['abap']['values']>(_sktd);
 export const form = abapGitSchema<FormAbapGitType, FormAbapGitType['abapGit']['abap']['values']>(_form);
+export const xinx = abapGitSchema<XinxAbapGitType, XinxAbapGitType['abapGit']['abap']['values']>(_xinx);
+export const para = abapGitSchema<ParaAbapGitType, ParaAbapGitType['abapGit']['abap']['values']>(_para);
+export const pers = abapGitSchema<PersAbapGitType, PersAbapGitType['abapGit']['abap']['values']>(_pers);
+export const oa2p = abapGitSchema<Oa2pAbapGitType, Oa2pAbapGitType['abapGit']['abap']['values']>(_oa2p);
+export const splo = abapGitSchema<SploAbapGitType, SploAbapGitType['abapGit']['abap']['values']>(_splo);
+export const tobj = abapGitSchema<TobjAbapGitType, TobjAbapGitType['abapGit']['abap']['values']>(_tobj);
+export const sprx = abapGitSchema<SprxAbapGitType, SprxAbapGitType['abapGit']['abap']['values']>(_sprx);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
