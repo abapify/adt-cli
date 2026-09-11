@@ -85,6 +85,17 @@ import _shi3 from './schemas/shi3';
 import _shi5 from './schemas/shi5';
 import _shi8 from './schemas/shi8';
 import _scvi from './schemas/scvi';
+import _acid from './schemas/acid';
+import _avas from './schemas/avas';
+import _cmod from './schemas/cmod';
+import _dial from './schemas/dial';
+import _enhc from './schemas/enhc';
+import _ensc from './schemas/ensc';
+import _otgr from './schemas/otgr';
+import _sfsw from './schemas/sfsw';
+import _ssst from './schemas/ssst';
+import _sfbf from './schemas/sfbf';
+import _sfbs from './schemas/sfbs';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -159,6 +170,17 @@ import type { Shi3Schema as _Shi3Schema } from './types/shi3';
 import type { Shi5Schema as _Shi5Schema } from './types/shi5';
 import type { Shi8Schema as _Shi8Schema } from './types/shi8';
 import type { ScviSchema as _ScviSchema } from './types/scvi';
+import type { AcidSchema as _AcidSchema } from './types/acid';
+import type { AvasSchema as _AvasSchema } from './types/avas';
+import type { CmodSchema as _CmodSchema } from './types/cmod';
+import type { DialSchema as _DialSchema } from './types/dial';
+import type { EnhcSchema as _EnhcSchema } from './types/enhc';
+import type { EnscSchema as _EnscSchema } from './types/ensc';
+import type { OtgrSchema as _OtgrSchema } from './types/otgr';
+import type { SfswSchema as _SfswSchema } from './types/sfsw';
+import type { SsstSchema as _SsstSchema } from './types/ssst';
+import type { SfbfSchema as _SfbfSchema } from './types/sfbf';
+import type { SfbsSchema as _SfbsSchema } from './types/sfbs';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -232,6 +254,17 @@ type Shi3AbapGitType = Extract<_Shi3Schema, { abapGit: unknown }>;
 type Shi5AbapGitType = Extract<_Shi5Schema, { abapGit: unknown }>;
 type Shi8AbapGitType = Extract<_Shi8Schema, { abapGit: unknown }>;
 type ScviAbapGitType = Extract<_ScviSchema, { abapGit: unknown }>;
+type AcidAbapGitType = Extract<_AcidSchema, { abapGit: unknown }>;
+type AvasAbapGitType = Extract<_AvasSchema, { abapGit: unknown }>;
+type CmodAbapGitType = Extract<_CmodSchema, { abapGit: unknown }>;
+type DialAbapGitType = Extract<_DialSchema, { abapGit: unknown }>;
+type EnhcAbapGitType = Extract<_EnhcSchema, { abapGit: unknown }>;
+type EnscAbapGitType = Extract<_EnscSchema, { abapGit: unknown }>;
+type OtgrAbapGitType = Extract<_OtgrSchema, { abapGit: unknown }>;
+type SfswAbapGitType = Extract<_SfswSchema, { abapGit: unknown }>;
+type SsstAbapGitType = Extract<_SsstSchema, { abapGit: unknown }>;
+type SfbfAbapGitType = Extract<_SfbfSchema, { abapGit: unknown }>;
+type SfbsAbapGitType = Extract<_SfbsSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -305,6 +338,17 @@ export const shi3 = abapGitSchema<Shi3AbapGitType, Shi3AbapGitType['abapGit']['a
 export const shi5 = abapGitSchema<Shi5AbapGitType, Shi5AbapGitType['abapGit']['abap']['values']>(_shi5);
 export const shi8 = abapGitSchema<Shi8AbapGitType, Shi8AbapGitType['abapGit']['abap']['values']>(_shi8);
 export const scvi = abapGitSchema<ScviAbapGitType, ScviAbapGitType['abapGit']['abap']['values']>(_scvi);
+export const acid = abapGitSchema<AcidAbapGitType, AcidAbapGitType['abapGit']['abap']['values']>(_acid);
+export const avas = abapGitSchema<AvasAbapGitType, AvasAbapGitType['abapGit']['abap']['values']>(_avas);
+export const cmod = abapGitSchema<CmodAbapGitType, CmodAbapGitType['abapGit']['abap']['values']>(_cmod);
+export const dial = abapGitSchema<DialAbapGitType, DialAbapGitType['abapGit']['abap']['values']>(_dial);
+export const enhc = abapGitSchema<EnhcAbapGitType, EnhcAbapGitType['abapGit']['abap']['values']>(_enhc);
+export const ensc = abapGitSchema<EnscAbapGitType, EnscAbapGitType['abapGit']['abap']['values']>(_ensc);
+export const otgr = abapGitSchema<OtgrAbapGitType, OtgrAbapGitType['abapGit']['abap']['values']>(_otgr);
+export const sfsw = abapGitSchema<SfswAbapGitType, SfswAbapGitType['abapGit']['abap']['values']>(_sfsw);
+export const ssst = abapGitSchema<SsstAbapGitType, SsstAbapGitType['abapGit']['abap']['values']>(_ssst);
+export const sfbf = abapGitSchema<SfbfAbapGitType, SfbfAbapGitType['abapGit']['abap']['values']>(_sfbf);
+export const sfbs = abapGitSchema<SfbsAbapGitType, SfbsAbapGitType['abapGit']['abap']['values']>(_sfbs);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';

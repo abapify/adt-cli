@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="AvasHeaderType">
+    <xs:all>
+      <xs:element name="GUID" type="xs:string" minOccurs="0"/>
+      <xs:element name="ATTRIBUTE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="AvasType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="AvasHeaderType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
