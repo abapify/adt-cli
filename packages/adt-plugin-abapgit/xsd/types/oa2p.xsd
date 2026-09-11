@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="Oa2pProfileType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROFILE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="T_SCOPES" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:all>
+                  <xs:element name="SCOPE" type="xs:string" minOccurs="0"/>
+                  <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+                </xs:all>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

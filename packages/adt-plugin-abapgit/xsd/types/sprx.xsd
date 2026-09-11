@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SprxHeaderItemType">
+    <xs:all>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="INACTIVE" type="xs:string" minOccurs="0"/>
+      <xs:element name="IFR_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="IFR_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="IFR_NSPCE" type="xs:string" minOccurs="0"/>
+      <xs:element name="IFR_GNSPCE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SprxDataItemType">
+    <xs:all>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT1" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_NAME1" type="xs:string" minOccurs="0"/>
+      <xs:element name="INACTIVE" type="xs:string" minOccurs="0"/>
+      <xs:element name="IFR_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="IFR_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="IFR_TEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="R3_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="R3_NAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SprxType">
+    <xs:sequence>
+      <xs:element name="PROXY_HEADER" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SprxHeaderItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PROXY_DATA" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SprxDataItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
