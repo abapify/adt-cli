@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SfbsHeaderType">
+    <xs:all>
+      <xs:element name="BS_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfbsAssignedBfItemType">
+    <xs:all>
+      <xs:element name="BF" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfbsNestedBfsItemType">
+    <xs:all>
+      <xs:element name="BFS" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfbsParentBfsItemType">
+    <xs:all>
+      <xs:element name="BFS" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfbsType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="SfbsHeaderType" minOccurs="0"/>
+      <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
+      <xs:element name="ASSIGNED_BF" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfbsAssignedBfItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="NESTED_BFS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfbsNestedBfsItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PARENT_BFS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfbsParentBfsItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

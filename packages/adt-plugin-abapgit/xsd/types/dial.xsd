@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="DialTdctType">
+    <xs:all>
+      <xs:element name="DIALOGNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="SPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="DialType">
+    <xs:sequence>
+      <xs:element name="TDCT" type="DialTdctType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

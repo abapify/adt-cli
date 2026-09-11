@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SfbfHeaderType">
+    <xs:all>
+      <xs:element name="BF_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfbfAssignedSwitchItemType">
+    <xs:all>
+      <xs:element name="SWITCH" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfbfParentBfItemType">
+    <xs:all>
+      <xs:element name="BF" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfbfType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="SfbfHeaderType" minOccurs="0"/>
+      <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
+      <xs:element name="ASSIGNED_SWITCHES" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfbfAssignedSwitchItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PARENT_BFS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfbfParentBfItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

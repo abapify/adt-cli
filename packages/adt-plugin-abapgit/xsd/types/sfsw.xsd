@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SfswHeaderType">
+    <xs:all>
+      <xs:element name="SWITCH_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfswParentBfItemType">
+    <xs:all>
+      <xs:element name="BF" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfswConflictItemType">
+    <xs:all>
+      <xs:element name="CONFLICT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfswPackageItemType">
+    <xs:all>
+      <xs:element name="PACKAGE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SfswType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="SfswHeaderType" minOccurs="0"/>
+      <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARENT_BF" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfswParentBfItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CONFLICTS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfswConflictItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PACKAGES" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="SfswPackageItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
