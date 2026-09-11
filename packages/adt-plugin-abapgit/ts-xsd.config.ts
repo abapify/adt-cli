@@ -74,6 +74,7 @@ export default defineConfig({
         'suso',
         'sush',
         'sktd',
+        'form',
       ],
     },
   },

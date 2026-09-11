@@ -50,3 +50,4 @@ export type { SqscSchema as SqscAbapGitType } from './sqsc';
 export type { SusoSchema as SusoAbapGitType } from './suso';
 export type { SushSchema as SushAbapGitType } from './sush';
 export type { SktdSchema as SktdAbapGitType } from './sktd';
+export type { FormSchema as FormAbapGitType } from './form';

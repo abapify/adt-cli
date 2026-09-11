@@ -16,6 +16,7 @@ export { default as dtel } from './dtel';
 export { default as enho } from './enho';
 export { default as enhs } from './enhs';
 export { default as enqu } from './enqu';
+export { default as form } from './form';
 export { default as fugr } from './fugr';
 export { default as http } from './http';
 export { default as idoc } from './idoc';
