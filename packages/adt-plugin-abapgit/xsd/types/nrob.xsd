@@ -51,7 +51,6 @@
     <xs:all>
       <xs:element name="ATTRIBUTES" type="NrobAttributesType" minOccurs="0"/>
       <xs:element name="TEXT" type="NrobTextType" minOccurs="0"/>
-      <xs:element name="INTERVALS" type="NrobIntervalsType" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
 

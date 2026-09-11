@@ -7,6 +7,7 @@
 
 import { sfpf } from '../../../schemas/generated';
 import { createHandler } from '../base';
+import { isoToSapLang, sapLangToIso } from '../lang';
 
 type FormObjectLike = {
   name: string;
@@ -30,7 +31,7 @@ export const formObjectHandler = createHandler<FormObjectLike, typeof sfpf>(
         HEADER: {
           NAME: String(obj.name ?? '').toUpperCase(),
           STATE: obj.state,
-          LANGUAGE: obj.language,
+          LANGUAGE: isoToSapLang(obj.language),
           TYPE: obj.type,
           DESCRIPTION: obj.description,
         },
@@ -47,7 +48,7 @@ export const formObjectHandler = createHandler<FormObjectLike, typeof sfpf>(
       name: (SFPF?.HEADER?.NAME ?? '').toUpperCase(),
       description: SFPF?.HEADER?.DESCRIPTION,
       state: SFPF?.HEADER?.STATE,
-      language: SFPF?.HEADER?.LANGUAGE,
+      language: sapLangToIso(SFPF?.HEADER?.LANGUAGE),
       type: SFPF?.HEADER?.TYPE,
       layout: SFPF?.LAYOUT?.XDP,
     }),

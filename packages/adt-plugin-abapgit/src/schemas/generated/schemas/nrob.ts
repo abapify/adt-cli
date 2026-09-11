@@ -260,11 +260,6 @@ export default {
             type: "NrobTextType",
             minOccurs: "0",
           },
-          {
-            name: "INTERVALS",
-            type: "NrobIntervalsType",
-            minOccurs: "0",
-          },
         ],
       },
     },

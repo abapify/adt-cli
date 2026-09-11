@@ -46,6 +46,14 @@ export const businessConfigSetHandler = createHandler<
 
   toAbapGit: (obj) => {
     const name = String(obj.name ?? '').toUpperCase();
+    // Ensure description is included in texts
+    const allTexts = [...(obj.texts ?? [])];
+    if (obj.description && !allTexts.some((t) => t.text === obj.description)) {
+      allTexts.unshift({
+        language: obj.texts?.[0]?.language ?? 'en',
+        text: obj.description,
+      });
+    }
     return {
       SCP1: {
         SCPRATTR: {
@@ -58,9 +66,9 @@ export const businessConfigSetHandler = createHandler<
           MAXRELEASE: obj.maxRelease,
           CATEGORY: obj.category,
         },
-        SCPRTEXT: obj.texts?.length
+        SCPRTEXT: allTexts.length
           ? {
-              item: obj.texts.map((t) => ({
+              item: allTexts.map((t) => ({
                 PROFID: name,
                 LANGU: isoToSapLang(t.language),
                 TEXT: t.text,
