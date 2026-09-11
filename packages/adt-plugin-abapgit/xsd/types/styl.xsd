@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="StylHeaderType">
+    <xs:all>
+      <xs:element name="TDPRINTER" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSTYLE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDCPI" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDLPI" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDOSPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTRANSTAT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSTATUS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDFIRSTPAR" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPAGEFORM" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPAGHEIGH" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPAGWIDTH" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDFAMILY" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDVERSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="PVERS" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="StylParagraphItemType">
+    <xs:all>
+      <xs:element name="TDPARGRAPH" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPJUSTIFY" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPLDIST" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPTOP" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPBOT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPLEFT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPRIGHT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="StylStringItemType">
+    <xs:all>
+      <xs:element name="TDSTRING" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDMARK" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSUPER" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSUB" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDHIDDEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPROTLINE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="StylTabItemType">
+    <xs:all>
+      <xs:element name="TDPARGRAPH" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPOSITION" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTABPOS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTJUSTIFY" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="StylType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="StylHeaderType" minOccurs="0"/>
+      <xs:element name="PARAGRAPHS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="StylParagraphItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="STRINGS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="StylStringItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="TABS" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="StylTabItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

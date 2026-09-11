@@ -70,3 +70,7 @@ export { idocTypeHandler } from './idoc';
 export { infoObjectHandler } from './iobj';
 export { dataStoreObjectHandler } from './odso';
 export { sharedMemoryAreaHandler } from './shma';
+export { styleHandler } from './styl';
+export { authObjectClassHandler } from './susc';
+export { authGroupHandler } from './sucu';
+export { badiImplementationHandler } from './sxci';

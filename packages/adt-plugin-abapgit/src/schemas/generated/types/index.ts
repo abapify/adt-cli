@@ -41,3 +41,7 @@ export type { IdocSchema as IdocAbapGitType } from './idoc';
 export type { IobjSchema as IobjAbapGitType } from './iobj';
 export type { OdsoSchema as OdsoAbapGitType } from './odso';
 export type { ShmaSchema as ShmaAbapGitType } from './shma';
+export type { StylSchema as StylAbapGitType } from './styl';
+export type { SuscSchema as SuscAbapGitType } from './susc';
+export type { SucuSchema as SucuAbapGitType } from './sucu';
+export type { SxciSchema as SxciAbapGitType } from './sxci';
