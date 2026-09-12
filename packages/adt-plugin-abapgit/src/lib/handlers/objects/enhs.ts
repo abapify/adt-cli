@@ -74,7 +74,11 @@ function parseEnhancementSpotFromAbapGit({
     const items = (BADI_DATA as { item?: BadiDefinition | BadiDefinition[] })
       .item;
     result.badiDefinitions = normalizeItems(items);
-  } else if (tool === 'HOOK_DEF' && BADI_DATA && typeof BADI_DATA === 'object') {
+  } else if (
+    tool === 'HOOK_DEF' &&
+    BADI_DATA &&
+    typeof BADI_DATA === 'object'
+  ) {
     // BADI_DATA is a single hook definition structure
     const hookData = BADI_DATA as HookDefinition;
     result.hookDefinition = {
