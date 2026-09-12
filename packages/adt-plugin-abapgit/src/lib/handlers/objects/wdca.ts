@@ -19,41 +19,40 @@ function normalizeItems<T>(raw: T | T[] | undefined): T[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const wdcaHandler = createHandler<WdcaLike, typeof wdca>(
-  'WDCA',
-  {
-    schema: wdca,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_WDCA',
-    serializer_version: 'v1.0.0',
+export const wdcaHandler = createHandler<WdcaLike, typeof wdca>('WDCA', {
+  schema: wdca,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_WDCA',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      OUTLINE: {
-        CONFIG_ID: String(obj.name ?? '').toUpperCase(),
-        CONFIG_TYPE: obj.configType,
-        CONFIG_VAR: obj.configVar,
-      },
-      DATA: obj.data?.length
-        ? { item: obj.data.map((d) => ({
+  toAbapGit: (obj) => ({
+    OUTLINE: {
+      CONFIG_ID: String(obj.name ?? '').toUpperCase(),
+      CONFIG_TYPE: obj.configType,
+      CONFIG_VAR: obj.configVar,
+    },
+    DATA: obj.data?.length
+      ? {
+          item: obj.data.map((d) => ({
             CONFIG_ID: String(obj.name ?? '').toUpperCase(),
             CONFIG_TYPE: obj.configType,
             CONFIG_VAR: obj.configVar,
             COMPNAME: d.compName,
             CONTENT: d.content,
-          })) }
-        : undefined,
-      DESCR_LANG: isoToSapLang(obj.descrLang),
-    }),
+          })),
+        }
+      : undefined,
+    DESCR_LANG: isoToSapLang(obj.descrLang),
+  }),
 
-    fromAbapGit: ({ OUTLINE, DATA, DESCR_LANG }) => {
-      const data = normalizeItems(DATA?.item);
-      return {
-        name: (OUTLINE?.CONFIG_ID ?? '').toUpperCase(),
-        configType: OUTLINE?.CONFIG_TYPE,
-        configVar: OUTLINE?.CONFIG_VAR,
-        data: data.map((d) => ({ compName: d.COMPNAME, content: d.CONTENT })),
-        descrLang: sapLangToIso(DESCR_LANG),
-      };
-    },
+  fromAbapGit: ({ OUTLINE, DATA, DESCR_LANG }) => {
+    const data = normalizeItems(DATA?.item);
+    return {
+      name: (OUTLINE?.CONFIG_ID ?? '').toUpperCase(),
+      configType: OUTLINE?.CONFIG_TYPE,
+      configVar: OUTLINE?.CONFIG_VAR,
+      data: data.map((d) => ({ compName: d.COMPNAME, content: d.CONTENT })),
+      descrLang: sapLangToIso(DESCR_LANG),
+    };
   },
-);
+});

@@ -10,26 +10,26 @@ type CompositeTemplateLike = {
   description?: string;
 };
 
-export const compositeTemplateHandler = createHandler<CompositeTemplateLike, typeof cmpt>(
-  'CMPT',
-  {
-    schema: cmpt,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_CMPT',
-    serializer_version: 'v1.0.0',
+export const compositeTemplateHandler = createHandler<
+  CompositeTemplateLike,
+  typeof cmpt
+>('CMPT', {
+  schema: cmpt,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_CMPT',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      CMPT: {
-        HEADER: {
-          NAME: String(obj.name ?? '').toUpperCase(),
-          DESCRIPTION: obj.description,
-        },
+  toAbapGit: (obj) => ({
+    CMPT: {
+      HEADER: {
+        NAME: String(obj.name ?? '').toUpperCase(),
+        DESCRIPTION: obj.description,
       },
-    }),
+    },
+  }),
 
-    fromAbapGit: ({ CMPT }) => ({
-      name: (CMPT?.HEADER?.NAME ?? '').toUpperCase(),
-      description: CMPT?.HEADER?.DESCRIPTION,
-    }),
-  },
-);
+  fromAbapGit: ({ CMPT }) => ({
+    name: (CMPT?.HEADER?.NAME ?? '').toUpperCase(),
+    description: CMPT?.HEADER?.DESCRIPTION,
+  }),
+});

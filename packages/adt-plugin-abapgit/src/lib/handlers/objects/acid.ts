@@ -10,21 +10,18 @@ type AcidObjectLike = {
   description?: string;
 };
 
-export const acidHandler = createHandler<AcidObjectLike, typeof acid>(
-  'ACID',
-  {
-    schema: acid,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_ACID',
-    serializer_version: 'v1.0.0',
+export const acidHandler = createHandler<AcidObjectLike, typeof acid>('ACID', {
+  schema: acid,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_ACID',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      DESCRIPTION: obj.description,
-    }),
+  toAbapGit: (obj) => ({
+    DESCRIPTION: obj.description,
+  }),
 
-    fromAbapGit: ({ DESCRIPTION }) => ({
-      name: '',
-      description: DESCRIPTION,
-    }),
-  },
-);
+  fromAbapGit: ({ DESCRIPTION }) => ({
+    name: '',
+    description: DESCRIPTION,
+  }),
+});

@@ -53,8 +53,16 @@ export const authObjectHandler = createHandler<AuthObjectLike, typeof suso>(
 
     fromAbapGit: ({ TOBJ, TOBJT }) => {
       const fields = [
-        TOBJ?.FIEL1, TOBJ?.FIEL2, TOBJ?.FIEL3, TOBJ?.FIEL4, TOBJ?.FIEL5,
-        TOBJ?.FIEL6, TOBJ?.FIEL7, TOBJ?.FIEL8, TOBJ?.FIEL9, TOBJ?.FIEL0,
+        TOBJ?.FIEL1,
+        TOBJ?.FIEL2,
+        TOBJ?.FIEL3,
+        TOBJ?.FIEL4,
+        TOBJ?.FIEL5,
+        TOBJ?.FIEL6,
+        TOBJ?.FIEL7,
+        TOBJ?.FIEL8,
+        TOBJ?.FIEL9,
+        TOBJ?.FIEL0,
       ].filter(Boolean) as string[];
       return {
         name: (TOBJ?.OBJCT ?? '').toUpperCase(),

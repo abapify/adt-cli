@@ -20,33 +20,32 @@ function normalizeItems<T>(raw: T | T[] | undefined): T[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const w3htHandler = createHandler<W3TemplateLike, typeof w3ht>(
-  'W3HT',
-  {
-    schema: w3ht,
-    version: 'v2.0.0',
-    serializer: 'LCL_OBJECT_W3HT',
-    serializer_version: 'v2.0.0',
+export const w3htHandler = createHandler<W3TemplateLike, typeof w3ht>('W3HT', {
+  schema: w3ht,
+  version: 'v2.0.0',
+  serializer: 'LCL_OBJECT_W3HT',
+  serializer_version: 'v2.0.0',
 
-    toAbapGit: (obj) => ({
-      NAME: String(obj.name ?? '').toUpperCase(),
-      TEXT: obj.text,
-      PARAMS: obj.params?.length
-        ? { item: obj.params.map((p) => ({
+  toAbapGit: (obj) => ({
+    NAME: String(obj.name ?? '').toUpperCase(),
+    TEXT: obj.text,
+    PARAMS: obj.params?.length
+      ? {
+          item: obj.params.map((p) => ({
             OBJID: String(obj.name ?? '').toUpperCase(),
             NAME: p.name,
             VALUE: p.value,
-          })) }
-        : undefined,
-    }),
+          })),
+        }
+      : undefined,
+  }),
 
-    fromAbapGit: ({ NAME, TEXT, PARAMS }) => {
-      const params = normalizeItems(PARAMS?.item);
-      return {
-        name: (NAME ?? '').toUpperCase(),
-        text: TEXT,
-        params: params.map((p) => ({ name: p.NAME, value: p.VALUE })),
-      };
-    },
+  fromAbapGit: ({ NAME, TEXT, PARAMS }) => {
+    const params = normalizeItems(PARAMS?.item);
+    return {
+      name: (NAME ?? '').toUpperCase(),
+      text: TEXT,
+      params: params.map((p) => ({ name: p.NAME, value: p.VALUE })),
+    };
   },
-);
+});

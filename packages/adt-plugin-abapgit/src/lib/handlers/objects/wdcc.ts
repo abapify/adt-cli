@@ -23,41 +23,38 @@ function normalizeItems<T>(raw: T | T[] | undefined): T[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const wdccHandler = createHandler<WdccLike, typeof wdcc>(
-  'WDCC',
-  {
-    schema: wdcc,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_WDCC',
-    serializer_version: 'v1.0.0',
+export const wdccHandler = createHandler<WdccLike, typeof wdcc>('WDCC', {
+  schema: wdcc,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_WDCC',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      OBJECT_NAME: String(obj.name ?? '').toUpperCase(),
-      CONFIG_ID: obj.configId,
-      CONFIG_TYPE: obj.configType,
-      CONFIG_VAR: obj.configVar,
-      WDA_COMPONENT: obj.wdaComponent,
-      PARENT: obj.parent,
-      RELID: obj.relId,
-      OTR_TEXT: obj.otrTexts?.length
-        ? { item: obj.otrTexts.map((t) => ({ NAME: t.name, TEXT: t.text })) }
-        : undefined,
-      DESCR_LANG: isoToSapLang(obj.descrLang),
-    }),
+  toAbapGit: (obj) => ({
+    OBJECT_NAME: String(obj.name ?? '').toUpperCase(),
+    CONFIG_ID: obj.configId,
+    CONFIG_TYPE: obj.configType,
+    CONFIG_VAR: obj.configVar,
+    WDA_COMPONENT: obj.wdaComponent,
+    PARENT: obj.parent,
+    RELID: obj.relId,
+    OTR_TEXT: obj.otrTexts?.length
+      ? { item: obj.otrTexts.map((t) => ({ NAME: t.name, TEXT: t.text })) }
+      : undefined,
+    DESCR_LANG: isoToSapLang(obj.descrLang),
+  }),
 
-    fromAbapGit: (values) => {
-      const otrTexts = normalizeItems(values.OTR_TEXT?.item);
-      return {
-        name: (values.OBJECT_NAME ?? '').toUpperCase(),
-        configId: values.CONFIG_ID,
-        configType: values.CONFIG_TYPE,
-        configVar: values.CONFIG_VAR,
-        wdaComponent: values.WDA_COMPONENT,
-        parent: values.PARENT,
-        relId: values.RELID,
-        otrTexts: otrTexts.map((t) => ({ name: t.NAME, text: t.TEXT })),
-        descrLang: sapLangToIso(values.DESCR_LANG),
-      };
-    },
+  fromAbapGit: (values) => {
+    const otrTexts = normalizeItems(values.OTR_TEXT?.item);
+    return {
+      name: (values.OBJECT_NAME ?? '').toUpperCase(),
+      configId: values.CONFIG_ID,
+      configType: values.CONFIG_TYPE,
+      configVar: values.CONFIG_VAR,
+      wdaComponent: values.WDA_COMPONENT,
+      parent: values.PARENT,
+      relId: values.RELID,
+      otrTexts: otrTexts.map((t) => ({ name: t.NAME, text: t.TEXT })),
+      descrLang: sapLangToIso(values.DESCR_LANG),
+    };
   },
-);
+});

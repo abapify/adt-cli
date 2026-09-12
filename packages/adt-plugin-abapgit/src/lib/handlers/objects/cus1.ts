@@ -17,40 +17,42 @@ function normalizeItems<T>(raw: T | T[] | undefined): T[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const customizingActivityHandler = createHandler<CustomizingActivityLike, typeof cus1>(
-  'CUS1',
-  {
-    schema: cus1,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_CUS1',
-    serializer_version: 'v1.0.0',
+export const customizingActivityHandler = createHandler<
+  CustomizingActivityLike,
+  typeof cus1
+>('CUS1', {
+  schema: cus1,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_CUS1',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      CUS1: {
-        ACTIVITY_HEADER: {
-          ACT_ID: String(obj.name ?? '').toUpperCase(),
-          ACT_TYPE: obj.actType,
-        },
-        ACTIVITY_TITLE: obj.titles?.length
-          ? { item: obj.titles.map((t) => ({
+  toAbapGit: (obj) => ({
+    CUS1: {
+      ACTIVITY_HEADER: {
+        ACT_ID: String(obj.name ?? '').toUpperCase(),
+        ACT_TYPE: obj.actType,
+      },
+      ACTIVITY_TITLE: obj.titles?.length
+        ? {
+            item: obj.titles.map((t) => ({
               ACT_ID: String(obj.name ?? '').toUpperCase(),
               SPRAS: isoToSapLang(t.language),
               TEXT: t.text,
-            })) }
-          : undefined,
-      },
-    }),
-
-    fromAbapGit: ({ CUS1 }) => {
-      const titles = normalizeItems(CUS1?.ACTIVITY_TITLE?.item);
-      return {
-        name: (CUS1?.ACTIVITY_HEADER?.ACT_ID ?? '').toUpperCase(),
-        actType: CUS1?.ACTIVITY_HEADER?.ACT_TYPE,
-        titles: titles.map((t) => ({
-          language: sapLangToIso(t.SPRAS),
-          text: t.TEXT,
-        })),
-      };
+            })),
+          }
+        : undefined,
     },
+  }),
+
+  fromAbapGit: ({ CUS1 }) => {
+    const titles = normalizeItems(CUS1?.ACTIVITY_TITLE?.item);
+    return {
+      name: (CUS1?.ACTIVITY_HEADER?.ACT_ID ?? '').toUpperCase(),
+      actType: CUS1?.ACTIVITY_HEADER?.ACT_TYPE,
+      titles: titles.map((t) => ({
+        language: sapLangToIso(t.SPRAS),
+        text: t.TEXT,
+      })),
+    };
   },
-);
+});

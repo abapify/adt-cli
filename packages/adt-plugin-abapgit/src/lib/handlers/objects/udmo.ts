@@ -34,19 +34,23 @@ export const dataModelHandler = createHandler<DataModelLike, typeof udmo>(
         DMOTYPE: obj.dmoType,
       },
       UDMO_ENTITIES: obj.entities?.length
-        ? { item: obj.entities.map((e) => ({
-            DMOID: String(obj.name ?? '').toUpperCase(),
-            ENTID: e.entId,
-            AS4LOCAL: e.as4local,
-          })) }
+        ? {
+            item: obj.entities.map((e) => ({
+              DMOID: String(obj.name ?? '').toUpperCase(),
+              ENTID: e.entId,
+              AS4LOCAL: e.as4local,
+            })),
+          }
         : undefined,
       UDMO_TEXTS: obj.texts?.length
-        ? { item: obj.texts.map((t) => ({
-            SPRACHE: isoToSapLang(t.language),
-            DMOID: String(obj.name ?? '').toUpperCase(),
-            LANGBEZ: t.longText,
-            AS4LOCAL: t.as4local,
-          })) }
+        ? {
+            item: obj.texts.map((t) => ({
+              SPRACHE: isoToSapLang(t.language),
+              DMOID: String(obj.name ?? '').toUpperCase(),
+              LANGBEZ: t.longText,
+              AS4LOCAL: t.as4local,
+            })),
+          }
         : undefined,
     }),
 
@@ -57,7 +61,10 @@ export const dataModelHandler = createHandler<DataModelLike, typeof udmo>(
         name: (DM40L?.DMOID ?? '').toUpperCase(),
         as4local: DM40L?.AS4LOCAL,
         dmoType: DM40L?.DMOTYPE,
-        entities: entities.map((e) => ({ entId: e.ENTID, as4local: e.AS4LOCAL })),
+        entities: entities.map((e) => ({
+          entId: e.ENTID,
+          as4local: e.AS4LOCAL,
+        })),
         texts: texts.map((t) => ({
           language: sapLangToIso(t.SPRACHE),
           longText: t.LANGBEZ,

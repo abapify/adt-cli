@@ -29,24 +29,28 @@ export const generalTextHandler = createHandler<GeneralTextLike, typeof doct>(
 
     toAbapGit: (obj) => ({
       LONGTEXTS: {
-        item: [{
-          DOKIL: {
-            ID: 'TX',
-            OBJECT: String(obj.name ?? '').toUpperCase(),
-            LANGU: isoToSapLang(obj.language),
+        item: [
+          {
+            DOKIL: {
+              ID: 'TX',
+              OBJECT: String(obj.name ?? '').toUpperCase(),
+              LANGU: isoToSapLang(obj.language),
+            },
+            HEAD: {
+              TDNAME: String(obj.name ?? '').toUpperCase(),
+              TDID: 'TX',
+              TDSPRAS: isoToSapLang(obj.language),
+            },
+            LINES: obj.lines?.length
+              ? {
+                  item: obj.lines.map((l) => ({
+                    TDFORMAT: l.format,
+                    TDLINE: l.line,
+                  })),
+                }
+              : undefined,
           },
-          HEAD: {
-            TDNAME: String(obj.name ?? '').toUpperCase(),
-            TDID: 'TX',
-            TDSPRAS: isoToSapLang(obj.language),
-          },
-          LINES: obj.lines?.length
-            ? { item: obj.lines.map((l) => ({
-                TDFORMAT: l.format,
-                TDLINE: l.line,
-              })) }
-            : undefined,
-        }],
+        ],
       },
     }),
 

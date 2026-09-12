@@ -13,31 +13,31 @@ type ScreenVariantLike = {
   text?: string;
 };
 
-export const screenVariantHandler = createHandler<ScreenVariantLike, typeof scvi>(
-  'SCVI',
-  {
-    schema: scvi,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_SCVI',
-    serializer_version: 'v1.0.0',
+export const screenVariantHandler = createHandler<
+  ScreenVariantLike,
+  typeof scvi
+>('SCVI', {
+  schema: scvi,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_SCVI',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SCVI: {
-        SHDSVCI: {
-          TCODE: obj.tcode,
-          SCREEN: obj.screen,
-          VARIANT: obj.variant ?? String(obj.name ?? '').toUpperCase(),
-          TEXT: obj.text,
-        },
+  toAbapGit: (obj) => ({
+    SCVI: {
+      SHDSVCI: {
+        TCODE: obj.tcode,
+        SCREEN: obj.screen,
+        VARIANT: obj.variant ?? String(obj.name ?? '').toUpperCase(),
+        TEXT: obj.text,
       },
-    }),
+    },
+  }),
 
-    fromAbapGit: ({ SCVI }) => ({
-      name: (SCVI?.SHDSVCI?.VARIANT ?? '').toUpperCase(),
-      tcode: SCVI?.SHDSVCI?.TCODE,
-      screen: SCVI?.SHDSVCI?.SCREEN,
-      variant: SCVI?.SHDSVCI?.VARIANT,
-      text: SCVI?.SHDSVCI?.TEXT,
-    }),
-  },
-);
+  fromAbapGit: ({ SCVI }) => ({
+    name: (SCVI?.SHDSVCI?.VARIANT ?? '').toUpperCase(),
+    tcode: SCVI?.SHDSVCI?.TCODE,
+    screen: SCVI?.SHDSVCI?.SCREEN,
+    variant: SCVI?.SHDSVCI?.VARIANT,
+    text: SCVI?.SHDSVCI?.TEXT,
+  }),
+});

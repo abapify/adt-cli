@@ -16,32 +16,29 @@ type IamuLike = {
   extension?: string;
 };
 
-export const iamuHandler = createHandler<IamuLike, typeof iamu>(
-  'IAMU',
-  {
-    schema: iamu,
-    version: 'v2.0.0',
-    serializer: 'LCL_OBJECT_IAMU',
-    serializer_version: 'v2.0.0',
+export const iamuHandler = createHandler<IamuLike, typeof iamu>('IAMU', {
+  schema: iamu,
+  version: 'v2.0.0',
+  serializer: 'LCL_OBJECT_IAMU',
+  serializer_version: 'v2.0.0',
 
-    toAbapGit: (obj) => ({
-      IAMU: {
-        ATTRIBUTES: {
-          OBJID: String(obj.name ?? '').toUpperCase(),
-          TEXT: obj.text,
-          MIMETYPE: obj.mimeType,
-          DEVCLASS: obj.packageName,
-        },
-        EXTENSION: obj.extension,
+  toAbapGit: (obj) => ({
+    IAMU: {
+      ATTRIBUTES: {
+        OBJID: String(obj.name ?? '').toUpperCase(),
+        TEXT: obj.text,
+        MIMETYPE: obj.mimeType,
+        DEVCLASS: obj.packageName,
       },
-    }),
+      EXTENSION: obj.extension,
+    },
+  }),
 
-    fromAbapGit: ({ IAMU }) => ({
-      name: (IAMU?.ATTRIBUTES?.OBJID ?? '').toUpperCase(),
-      text: IAMU?.ATTRIBUTES?.TEXT,
-      mimeType: IAMU?.ATTRIBUTES?.MIMETYPE,
-      packageName: IAMU?.ATTRIBUTES?.DEVCLASS,
-      extension: IAMU?.EXTENSION,
-    }),
-  },
-);
+  fromAbapGit: ({ IAMU }) => ({
+    name: (IAMU?.ATTRIBUTES?.OBJID ?? '').toUpperCase(),
+    text: IAMU?.ATTRIBUTES?.TEXT,
+    mimeType: IAMU?.ATTRIBUTES?.MIMETYPE,
+    packageName: IAMU?.ATTRIBUTES?.DEVCLASS,
+    extension: IAMU?.EXTENSION,
+  }),
+});

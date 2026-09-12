@@ -15,28 +15,25 @@ type IatuLike = {
   packageName?: string;
 };
 
-export const iatuHandler = createHandler<IatuLike, typeof iatu>(
-  'IATU',
-  {
-    schema: iatu,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_IATU',
-    serializer_version: 'v1.0.0',
+export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
+  schema: iatu,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_IATU',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      ATTR: {
-        NAME: String(obj.name ?? '').toUpperCase(),
-        TEXT: obj.text,
-        MIMETYPE: obj.mimeType,
-        DEVCLASS: obj.packageName,
-      },
-    }),
+  toAbapGit: (obj) => ({
+    ATTR: {
+      NAME: String(obj.name ?? '').toUpperCase(),
+      TEXT: obj.text,
+      MIMETYPE: obj.mimeType,
+      DEVCLASS: obj.packageName,
+    },
+  }),
 
-    fromAbapGit: ({ ATTR }) => ({
-      name: (ATTR?.NAME ?? '').toUpperCase(),
-      text: ATTR?.TEXT,
-      mimeType: ATTR?.MIMETYPE,
-      packageName: ATTR?.DEVCLASS,
-    }),
-  },
-);
+  fromAbapGit: ({ ATTR }) => ({
+    name: (ATTR?.NAME ?? '').toUpperCase(),
+    text: ATTR?.TEXT,
+    mimeType: ATTR?.MIMETYPE,
+    packageName: ATTR?.DEVCLASS,
+  }),
+});
