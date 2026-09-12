@@ -105,3 +105,8 @@ export type { DoctSchema as DoctAbapGitType } from './doct';
 export type { CmptSchema as CmptAbapGitType } from './cmpt';
 export type { AmsdSchema as AmsdAbapGitType } from './amsd';
 export type { ApisSchema as ApisAbapGitType } from './apis';
+export type { WdyaSchema as WdyaAbapGitType } from './wdya';
+export type { WebiSchema as WebiAbapGitType } from './webi';
+export type { WdcaSchema as WdcaAbapGitType } from './wdca';
+export type { WdccSchema as WdccAbapGitType } from './wdcc';
+export type { PdtsSchema as PdtsAbapGitType } from './pdts';

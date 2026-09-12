@@ -114,6 +114,11 @@ import _doct from './schemas/doct';
 import _cmpt from './schemas/cmpt';
 import _amsd from './schemas/amsd';
 import _apis from './schemas/apis';
+import _wdya from './schemas/wdya';
+import _webi from './schemas/webi';
+import _wdca from './schemas/wdca';
+import _wdcc from './schemas/wdcc';
+import _pdts from './schemas/pdts';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -217,6 +222,11 @@ import type { DoctSchema as _DoctSchema } from './types/doct';
 import type { CmptSchema as _CmptSchema } from './types/cmpt';
 import type { AmsdSchema as _AmsdSchema } from './types/amsd';
 import type { ApisSchema as _ApisSchema } from './types/apis';
+import type { WdyaSchema as _WdyaSchema } from './types/wdya';
+import type { WebiSchema as _WebiSchema } from './types/webi';
+import type { WdcaSchema as _WdcaSchema } from './types/wdca';
+import type { WdccSchema as _WdccSchema } from './types/wdcc';
+import type { PdtsSchema as _PdtsSchema } from './types/pdts';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -319,6 +329,11 @@ type DoctAbapGitType = Extract<_DoctSchema, { abapGit: unknown }>;
 type CmptAbapGitType = Extract<_CmptSchema, { abapGit: unknown }>;
 type AmsdAbapGitType = Extract<_AmsdSchema, { abapGit: unknown }>;
 type ApisAbapGitType = Extract<_ApisSchema, { abapGit: unknown }>;
+type WdyaAbapGitType = Extract<_WdyaSchema, { abapGit: unknown }>;
+type WebiAbapGitType = Extract<_WebiSchema, { abapGit: unknown }>;
+type WdcaAbapGitType = Extract<_WdcaSchema, { abapGit: unknown }>;
+type WdccAbapGitType = Extract<_WdccSchema, { abapGit: unknown }>;
+type PdtsAbapGitType = Extract<_PdtsSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -421,6 +436,11 @@ export const doct = abapGitSchema<DoctAbapGitType, DoctAbapGitType['abapGit']['a
 export const cmpt = abapGitSchema<CmptAbapGitType, CmptAbapGitType['abapGit']['abap']['values']>(_cmpt);
 export const amsd = abapGitSchema<AmsdAbapGitType, AmsdAbapGitType['abapGit']['abap']['values']>(_amsd);
 export const apis = abapGitSchema<ApisAbapGitType, ApisAbapGitType['abapGit']['abap']['values']>(_apis);
+export const wdya = abapGitSchema<WdyaAbapGitType, WdyaAbapGitType['abapGit']['abap']['values']>(_wdya);
+export const webi = abapGitSchema<WebiAbapGitType, WebiAbapGitType['abapGit']['abap']['values']>(_webi);
+export const wdca = abapGitSchema<WdcaAbapGitType, WdcaAbapGitType['abapGit']['abap']['values']>(_wdca);
+export const wdcc = abapGitSchema<WdccAbapGitType, WdccAbapGitType['abapGit']['abap']['values']>(_wdcc);
+export const pdts = abapGitSchema<PdtsAbapGitType, PdtsAbapGitType['abapGit']['abap']['values']>(_pdts);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
