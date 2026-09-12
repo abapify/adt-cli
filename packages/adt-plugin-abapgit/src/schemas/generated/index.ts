@@ -96,6 +96,15 @@ import _sfsw from './schemas/sfsw';
 import _ssst from './schemas/ssst';
 import _sfbf from './schemas/sfbf';
 import _sfbs from './schemas/sfbs';
+import _sxsd from './schemas/sxsd';
+import _ucsa from './schemas/ucsa';
+import _udmo from './schemas/udmo';
+import _iaxu from './schemas/iaxu';
+import _iext from './schemas/iext';
+import _samc from './schemas/samc';
+import _sapc from './schemas/sapc';
+import _dsys from './schemas/dsys';
+import _ftgl from './schemas/ftgl';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -181,6 +190,15 @@ import type { SfswSchema as _SfswSchema } from './types/sfsw';
 import type { SsstSchema as _SsstSchema } from './types/ssst';
 import type { SfbfSchema as _SfbfSchema } from './types/sfbf';
 import type { SfbsSchema as _SfbsSchema } from './types/sfbs';
+import type { SxsdSchema as _SxsdSchema } from './types/sxsd';
+import type { UcsaSchema as _UcsaSchema } from './types/ucsa';
+import type { UdmoSchema as _UdmoSchema } from './types/udmo';
+import type { IaxuSchema as _IaxuSchema } from './types/iaxu';
+import type { IextSchema as _IextSchema } from './types/iext';
+import type { SamcSchema as _SamcSchema } from './types/samc';
+import type { SapcSchema as _SapcSchema } from './types/sapc';
+import type { DsysSchema as _DsysSchema } from './types/dsys';
+import type { FtglSchema as _FtglSchema } from './types/ftgl';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -265,6 +283,15 @@ type SfswAbapGitType = Extract<_SfswSchema, { abapGit: unknown }>;
 type SsstAbapGitType = Extract<_SsstSchema, { abapGit: unknown }>;
 type SfbfAbapGitType = Extract<_SfbfSchema, { abapGit: unknown }>;
 type SfbsAbapGitType = Extract<_SfbsSchema, { abapGit: unknown }>;
+type SxsdAbapGitType = Extract<_SxsdSchema, { abapGit: unknown }>;
+type UcsaAbapGitType = Extract<_UcsaSchema, { abapGit: unknown }>;
+type UdmoAbapGitType = Extract<_UdmoSchema, { abapGit: unknown }>;
+type IaxuAbapGitType = Extract<_IaxuSchema, { abapGit: unknown }>;
+type IextAbapGitType = Extract<_IextSchema, { abapGit: unknown }>;
+type SamcAbapGitType = Extract<_SamcSchema, { abapGit: unknown }>;
+type SapcAbapGitType = Extract<_SapcSchema, { abapGit: unknown }>;
+type DsysAbapGitType = Extract<_DsysSchema, { abapGit: unknown }>;
+type FtglAbapGitType = Extract<_FtglSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -349,6 +376,15 @@ export const sfsw = abapGitSchema<SfswAbapGitType, SfswAbapGitType['abapGit']['a
 export const ssst = abapGitSchema<SsstAbapGitType, SsstAbapGitType['abapGit']['abap']['values']>(_ssst);
 export const sfbf = abapGitSchema<SfbfAbapGitType, SfbfAbapGitType['abapGit']['abap']['values']>(_sfbf);
 export const sfbs = abapGitSchema<SfbsAbapGitType, SfbsAbapGitType['abapGit']['abap']['values']>(_sfbs);
+export const sxsd = abapGitSchema<SxsdAbapGitType, SxsdAbapGitType['abapGit']['abap']['values']>(_sxsd);
+export const ucsa = abapGitSchema<UcsaAbapGitType, UcsaAbapGitType['abapGit']['abap']['values']>(_ucsa);
+export const udmo = abapGitSchema<UdmoAbapGitType, UdmoAbapGitType['abapGit']['abap']['values']>(_udmo);
+export const iaxu = abapGitSchema<IaxuAbapGitType, IaxuAbapGitType['abapGit']['abap']['values']>(_iaxu);
+export const iext = abapGitSchema<IextAbapGitType, IextAbapGitType['abapGit']['abap']['values']>(_iext);
+export const samc = abapGitSchema<SamcAbapGitType, SamcAbapGitType['abapGit']['abap']['values']>(_samc);
+export const sapc = abapGitSchema<SapcAbapGitType, SapcAbapGitType['abapGit']['abap']['values']>(_sapc);
+export const dsys = abapGitSchema<DsysAbapGitType, DsysAbapGitType['abapGit']['abap']['values']>(_dsys);
+export const ftgl = abapGitSchema<FtglAbapGitType, FtglAbapGitType['abapGit']['abap']['values']>(_ftgl);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
