@@ -43,18 +43,19 @@ function buildMainXmlFile(
   if (functions.length > 0) {
     values.FUNCTIONS = { item: functions };
   }
+  const serializer = `LCL_OBJECT_${ctx.type}`;
   const fullPayload = {
     abapGit: {
       abap: { version: '1.0', values },
       version: 'v1.0.0',
-      serializer: 'LCL_OBJECT_FUGR',
+      serializer,
       serializer_version: 'v1.0.0',
     },
   };
   const xmlContent = formatAbapGitXml(
     fugr.build(fullPayload, { pretty: true }),
   );
-  return ctx.createFile(`${objectName}.fugr.xml`, xmlContent);
+  return ctx.createFile(`${objectName}.${ctx.fileExtension}.xml`, xmlContent);
 }
 
 type FmList = {
@@ -97,7 +98,7 @@ async function buildTopSourceFile(
         : undefined;
     if (shouldIncludeSource(topSource, suppliedTopSource)) {
       return ctx.createFile(
-        `${objectName}.fugr.l${objectName}top.abap`,
+        `${objectName}.${ctx.fileExtension}.l${objectName}top.abap`,
         topSource,
       );
     }
@@ -113,17 +114,18 @@ function buildProgramFiles(
   fixpt: string,
   ctx: FugrContext,
 ): SerializedFile[] {
+  const ext = ctx.fileExtension;
   return [
     ctx.createFile(
-      `${objectName}.fugr.l${objectName}top.xml`,
+      `${objectName}.${ext}.l${objectName}top.xml`,
       buildProgdirXml(`L${nameUpper}TOP`, 'I', fixpt),
     ),
     ctx.createFile(
-      `${objectName}.fugr.sapl${objectName}.abap`,
+      `${objectName}.${ext}.sapl${objectName}.abap`,
       buildMainProgramSource(nameUpper),
     ),
     ctx.createFile(
-      `${objectName}.fugr.sapl${objectName}.xml`,
+      `${objectName}.${ext}.sapl${objectName}.xml`,
       buildProgdirXml(`SAPL${nameUpper}`, 'F', fixpt),
     ),
   ];
@@ -155,7 +157,10 @@ async function buildFunctionModuleFiles(
             );
       if (shouldIncludeSource(source, suppliedFmSource)) {
         files.push(
-          ctx.createFile(`${objectName}.fugr.${funcName}.abap`, source),
+          ctx.createFile(
+            `${objectName}.${ctx.fileExtension}.${funcName}.abap`,
+            source,
+          ),
         );
       }
     } catch {
@@ -193,10 +198,11 @@ function remoteCallToProcessingType(
   return 'normal';
 }
 
-export const functionGroupHandler = createHandler(AdkFunctionGroup, {
+function createFunctionGroupHandler(type: 'FUGR' | 'FUGS') {
+  return createHandler<FugrObject, typeof fugr>(type, {
   schema: fugr,
   version: 'v1.0.0',
-  serializer: 'LCL_OBJECT_FUGR',
+  serializer: `LCL_OBJECT_${type}`,
   serializer_version: 'v1.0.0',
 
   // SAP → Git: Map ADK object to abapGit values
@@ -288,7 +294,14 @@ export const functionGroupHandler = createHandler(AdkFunctionGroup, {
     }
     // Note: sapl{name} (main program) is system-generated and not deployed via ADT
   },
-});
+  });
+}
+
+export const functionGroupHandler = createFunctionGroupHandler('FUGR');
+
+// FUGS (function group with screens) inherits the full FUGR serializer
+// upstream — same payload, same multi-file layout, .fugs extension.
+export const functionGroupScreensHandler = createFunctionGroupHandler('FUGS');
 
 // ============================================
 // Serialization helpers

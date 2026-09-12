@@ -162,4 +162,18 @@ export {
   sobjHandler,
   sppfHandler,
   uenoHandler,
+  wapaHandler,
+  wdynHandler,
 } from './objsl';
+export {
+  ecatHandler,
+  ecsdHandler,
+  ecspHandler,
+  ectcHandler,
+  ectdHandler,
+  ecvoHandler,
+  fdt0Handler,
+  sfpiHandler,
+  ssfoHandler,
+} from './rawxml';
+export { functionGroupScreensHandler } from './fugr';

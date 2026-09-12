@@ -29,6 +29,8 @@ import {
   sobj,
   sppf,
   ueno,
+  wapa,
+  wdyn,
 } from '../../../schemas/generated';
 
 type GenericObjslObject = {
@@ -72,3 +74,9 @@ export const slddHandler = createGenericObjslHandler('SLDD', sldd);
 export const sobjHandler = createGenericObjslHandler('SOBJ', sobj);
 export const sppfHandler = createGenericObjslHandler('SPPF', sppf);
 export const uenoHandler = createGenericObjslHandler('UENO', ueno);
+
+// WAPA (BSP application) and WDYN (Web Dynpro component) serialize
+// arbitrary SAP structures (O2*/WDY_* DDIC types not available at
+// compile time), so they use the same wildcard payload.
+export const wapaHandler = createGenericObjslHandler('WAPA', wapa);
+export const wdynHandler = createGenericObjslHandler('WDYN', wdyn);

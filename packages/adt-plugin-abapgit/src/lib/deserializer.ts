@@ -152,10 +152,18 @@ async function parseMetadata(
   if (objFiles.xmlFile) {
     const xmlContent = await fileTree.read(objFiles.xmlFile);
     const parsed = handler!.schema.parse(xmlContent);
-    return {
-      values: (parsed as any)?.abapGit?.abap?.values ?? {},
-      isAffJson: false,
-    };
+    const abapGit = (parsed as any)?.abapGit ?? {};
+    // Raw XML formats (SSFO, eCATT family, FDT0...) store the SAP XML
+    // root directly under abapGit instead of abap/values.
+    const values =
+      abapGit.abap?.values ??
+      Object.fromEntries(
+        Object.entries(abapGit).filter(
+          ([key]) =>
+            !['version', 'serializer', 'serializer_version'].includes(key),
+        ),
+      );
+    return { values, isAffJson: false };
   }
   return null;
 }
