@@ -139,3 +139,8 @@ export { webiHandler } from './webi';
 export { wdcaHandler } from './wdca';
 export { wdccHandler } from './wdcc';
 export { pdtsHandler } from './pdts';
+export { w3htHandler } from './w3ht';
+export { w3miHandler } from './w3mi';
+export { iatuHandler } from './iatu';
+export { iamuHandler } from './iamu';
+export { derivationRuleHandler } from './drul';

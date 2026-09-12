@@ -110,3 +110,8 @@ export type { WebiSchema as WebiAbapGitType } from './webi';
 export type { WdcaSchema as WdcaAbapGitType } from './wdca';
 export type { WdccSchema as WdccAbapGitType } from './wdcc';
 export type { PdtsSchema as PdtsAbapGitType } from './pdts';
+export type { W3htSchema as W3htAbapGitType } from './w3ht';
+export type { W3miSchema as W3miAbapGitType } from './w3mi';
+export type { IatuSchema as IatuAbapGitType } from './iatu';
+export type { IamuSchema as IamuAbapGitType } from './iamu';
+export type { DrulSchema as DrulAbapGitType } from './drul';

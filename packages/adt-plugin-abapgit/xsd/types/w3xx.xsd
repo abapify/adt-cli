@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="W3xxParamItemType">
+    <xs:all>
+      <xs:element name="RELID" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJID" type="xs:string" minOccurs="0"/>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="VALUE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>
