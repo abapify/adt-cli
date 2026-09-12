@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SxsdBadiType">
+    <xs:all>
+      <xs:element name="BADI_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="INTERFACE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SxsdType">
+    <xs:sequence>
+      <xs:element name="BADI" type="SxsdBadiType" minOccurs="0"/>
+      <xs:element name="MAST_LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="EXT_CLNAME" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
