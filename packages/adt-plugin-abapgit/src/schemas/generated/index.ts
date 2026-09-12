@@ -105,6 +105,15 @@ import _samc from './schemas/samc';
 import _sapc from './schemas/sapc';
 import _dsys from './schemas/dsys';
 import _ftgl from './schemas/ftgl';
+import _prag from './schemas/prag';
+import _cus0 from './schemas/cus0';
+import _cus1 from './schemas/cus1';
+import _cus2 from './schemas/cus2';
+import _docv from './schemas/docv';
+import _doct from './schemas/doct';
+import _cmpt from './schemas/cmpt';
+import _amsd from './schemas/amsd';
+import _apis from './schemas/apis';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -199,6 +208,15 @@ import type { SamcSchema as _SamcSchema } from './types/samc';
 import type { SapcSchema as _SapcSchema } from './types/sapc';
 import type { DsysSchema as _DsysSchema } from './types/dsys';
 import type { FtglSchema as _FtglSchema } from './types/ftgl';
+import type { PragSchema as _PragSchema } from './types/prag';
+import type { Cus0Schema as _Cus0Schema } from './types/cus0';
+import type { Cus1Schema as _Cus1Schema } from './types/cus1';
+import type { Cus2Schema as _Cus2Schema } from './types/cus2';
+import type { DocvSchema as _DocvSchema } from './types/docv';
+import type { DoctSchema as _DoctSchema } from './types/doct';
+import type { CmptSchema as _CmptSchema } from './types/cmpt';
+import type { AmsdSchema as _AmsdSchema } from './types/amsd';
+import type { ApisSchema as _ApisSchema } from './types/apis';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -292,6 +310,15 @@ type SamcAbapGitType = Extract<_SamcSchema, { abapGit: unknown }>;
 type SapcAbapGitType = Extract<_SapcSchema, { abapGit: unknown }>;
 type DsysAbapGitType = Extract<_DsysSchema, { abapGit: unknown }>;
 type FtglAbapGitType = Extract<_FtglSchema, { abapGit: unknown }>;
+type PragAbapGitType = Extract<_PragSchema, { abapGit: unknown }>;
+type Cus0AbapGitType = Extract<_Cus0Schema, { abapGit: unknown }>;
+type Cus1AbapGitType = Extract<_Cus1Schema, { abapGit: unknown }>;
+type Cus2AbapGitType = Extract<_Cus2Schema, { abapGit: unknown }>;
+type DocvAbapGitType = Extract<_DocvSchema, { abapGit: unknown }>;
+type DoctAbapGitType = Extract<_DoctSchema, { abapGit: unknown }>;
+type CmptAbapGitType = Extract<_CmptSchema, { abapGit: unknown }>;
+type AmsdAbapGitType = Extract<_AmsdSchema, { abapGit: unknown }>;
+type ApisAbapGitType = Extract<_ApisSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -385,6 +412,15 @@ export const samc = abapGitSchema<SamcAbapGitType, SamcAbapGitType['abapGit']['a
 export const sapc = abapGitSchema<SapcAbapGitType, SapcAbapGitType['abapGit']['abap']['values']>(_sapc);
 export const dsys = abapGitSchema<DsysAbapGitType, DsysAbapGitType['abapGit']['abap']['values']>(_dsys);
 export const ftgl = abapGitSchema<FtglAbapGitType, FtglAbapGitType['abapGit']['abap']['values']>(_ftgl);
+export const prag = abapGitSchema<PragAbapGitType, PragAbapGitType['abapGit']['abap']['values']>(_prag);
+export const cus0 = abapGitSchema<Cus0AbapGitType, Cus0AbapGitType['abapGit']['abap']['values']>(_cus0);
+export const cus1 = abapGitSchema<Cus1AbapGitType, Cus1AbapGitType['abapGit']['abap']['values']>(_cus1);
+export const cus2 = abapGitSchema<Cus2AbapGitType, Cus2AbapGitType['abapGit']['abap']['values']>(_cus2);
+export const docv = abapGitSchema<DocvAbapGitType, DocvAbapGitType['abapGit']['abap']['values']>(_docv);
+export const doct = abapGitSchema<DoctAbapGitType, DoctAbapGitType['abapGit']['abap']['values']>(_doct);
+export const cmpt = abapGitSchema<CmptAbapGitType, CmptAbapGitType['abapGit']['abap']['values']>(_cmpt);
+export const amsd = abapGitSchema<AmsdAbapGitType, AmsdAbapGitType['abapGit']['abap']['values']>(_amsd);
+export const apis = abapGitSchema<ApisAbapGitType, ApisAbapGitType['abapGit']['abap']['values']>(_apis);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
