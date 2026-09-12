@@ -134,3 +134,8 @@ export { generalTextHandler } from './doct';
 export { compositeTemplateHandler } from './cmpt';
 export { amdpSchemaHandler } from './amsd';
 export { apiStateHandler } from './apis';
+export { webDynproAppHandler } from './wdya';
+export { webiHandler } from './webi';
+export { wdcaHandler } from './wdca';
+export { wdccHandler } from './wdcc';
+export { pdtsHandler } from './pdts';
