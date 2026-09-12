@@ -72,9 +72,7 @@ export const changeDocumentObjectHandler = createHandler<
           ? {
               item: [
                 {
-                  SPRAS: isoToSapLang(
-                    obj.masterLanguage || obj.language,
-                  ),
+                  SPRAS: isoToSapLang(obj.masterLanguage || obj.language),
                   OBJECT: name,
                   OBTEXT: obj.description,
                 },
