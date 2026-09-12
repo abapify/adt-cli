@@ -119,6 +119,11 @@ import _webi from './schemas/webi';
 import _wdca from './schemas/wdca';
 import _wdcc from './schemas/wdcc';
 import _pdts from './schemas/pdts';
+import _w3ht from './schemas/w3ht';
+import _w3mi from './schemas/w3mi';
+import _iatu from './schemas/iatu';
+import _iamu from './schemas/iamu';
+import _drul from './schemas/drul';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -227,6 +232,11 @@ import type { WebiSchema as _WebiSchema } from './types/webi';
 import type { WdcaSchema as _WdcaSchema } from './types/wdca';
 import type { WdccSchema as _WdccSchema } from './types/wdcc';
 import type { PdtsSchema as _PdtsSchema } from './types/pdts';
+import type { W3htSchema as _W3htSchema } from './types/w3ht';
+import type { W3miSchema as _W3miSchema } from './types/w3mi';
+import type { IatuSchema as _IatuSchema } from './types/iatu';
+import type { IamuSchema as _IamuSchema } from './types/iamu';
+import type { DrulSchema as _DrulSchema } from './types/drul';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -334,6 +344,11 @@ type WebiAbapGitType = Extract<_WebiSchema, { abapGit: unknown }>;
 type WdcaAbapGitType = Extract<_WdcaSchema, { abapGit: unknown }>;
 type WdccAbapGitType = Extract<_WdccSchema, { abapGit: unknown }>;
 type PdtsAbapGitType = Extract<_PdtsSchema, { abapGit: unknown }>;
+type W3htAbapGitType = Extract<_W3htSchema, { abapGit: unknown }>;
+type W3miAbapGitType = Extract<_W3miSchema, { abapGit: unknown }>;
+type IatuAbapGitType = Extract<_IatuSchema, { abapGit: unknown }>;
+type IamuAbapGitType = Extract<_IamuSchema, { abapGit: unknown }>;
+type DrulAbapGitType = Extract<_DrulSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -441,6 +456,11 @@ export const webi = abapGitSchema<WebiAbapGitType, WebiAbapGitType['abapGit']['a
 export const wdca = abapGitSchema<WdcaAbapGitType, WdcaAbapGitType['abapGit']['abap']['values']>(_wdca);
 export const wdcc = abapGitSchema<WdccAbapGitType, WdccAbapGitType['abapGit']['abap']['values']>(_wdcc);
 export const pdts = abapGitSchema<PdtsAbapGitType, PdtsAbapGitType['abapGit']['abap']['values']>(_pdts);
+export const w3ht = abapGitSchema<W3htAbapGitType, W3htAbapGitType['abapGit']['abap']['values']>(_w3ht);
+export const w3mi = abapGitSchema<W3miAbapGitType, W3miAbapGitType['abapGit']['abap']['values']>(_w3mi);
+export const iatu = abapGitSchema<IatuAbapGitType, IatuAbapGitType['abapGit']['abap']['values']>(_iatu);
+export const iamu = abapGitSchema<IamuAbapGitType, IamuAbapGitType['abapGit']['abap']['values']>(_iamu);
+export const drul = abapGitSchema<DrulAbapGitType, DrulAbapGitType['abapGit']['abap']['values']>(_drul);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
