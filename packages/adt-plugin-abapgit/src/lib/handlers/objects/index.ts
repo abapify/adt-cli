@@ -144,3 +144,22 @@ export { w3miHandler } from './w3mi';
 export { iatuHandler } from './iatu';
 export { iamuHandler } from './iamu';
 export { derivationRuleHandler } from './drul';
+export {
+  aifcHandler,
+  aqbgHandler,
+  aqquHandler,
+  aqsgHandler,
+  asfcHandler,
+  g4baHandler,
+  g4bsHandler,
+  iwmoHandler,
+  iwomHandler,
+  iwprHandler,
+  iwsgHandler,
+  iwsvHandler,
+  iwvbHandler,
+  slddHandler,
+  sobjHandler,
+  sppfHandler,
+  uenoHandler,
+} from './objsl';

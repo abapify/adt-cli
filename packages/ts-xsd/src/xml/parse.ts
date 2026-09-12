@@ -15,6 +15,7 @@ import type {
 import {
   findComplexType,
   findElement,
+  hasWildcard,
   walkElements,
   walkAttributes,
   stripNsPrefix,
@@ -272,6 +273,45 @@ function parseElement(
     }
   }
 
+  // Capture wildcard (xs:any) children not covered by declared elements
+  if (hasWildcard(typeDef, schema)) {
+    const seen = new Set<string>();
+    for (const child of getAllChildElements(node)) {
+      const name = getLocalName(child);
+      if (result[name] !== undefined || seen.has(name)) continue;
+      seen.add(name);
+      const same = getChildElements(node, name);
+      result[name] =
+        same.length > 1 ? same.map(parseAnyValue) : parseAnyValue(child);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parse a wildcard (xs:any) element generically:
+ * leaf elements become strings, element children become nested records,
+ * repeated names become arrays.
+ */
+function parseAnyValue(node: XmlElement): unknown {
+  const children = getAllChildElements(node);
+  if (children.length === 0) {
+    return getTextContent(node);
+  }
+  const result: Record<string, unknown> = {};
+  for (const child of children) {
+    const name = getLocalName(child);
+    const value = parseAnyValue(child);
+    const existing = result[name];
+    if (existing === undefined) {
+      result[name] = value;
+    } else if (Array.isArray(existing)) {
+      existing.push(value);
+    } else {
+      result[name] = [existing, value];
+    }
+  }
   return result;
 }
 

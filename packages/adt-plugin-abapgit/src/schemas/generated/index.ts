@@ -124,6 +124,23 @@ import _w3mi from './schemas/w3mi';
 import _iatu from './schemas/iatu';
 import _iamu from './schemas/iamu';
 import _drul from './schemas/drul';
+import _aifc from './schemas/aifc';
+import _aqbg from './schemas/aqbg';
+import _aqqu from './schemas/aqqu';
+import _aqsg from './schemas/aqsg';
+import _asfc from './schemas/asfc';
+import _g4ba from './schemas/g4ba';
+import _g4bs from './schemas/g4bs';
+import _iwmo from './schemas/iwmo';
+import _iwom from './schemas/iwom';
+import _iwpr from './schemas/iwpr';
+import _iwsg from './schemas/iwsg';
+import _iwsv from './schemas/iwsv';
+import _iwvb from './schemas/iwvb';
+import _sldd from './schemas/sldd';
+import _sobj from './schemas/sobj';
+import _sppf from './schemas/sppf';
+import _ueno from './schemas/ueno';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -237,6 +254,23 @@ import type { W3miSchema as _W3miSchema } from './types/w3mi';
 import type { IatuSchema as _IatuSchema } from './types/iatu';
 import type { IamuSchema as _IamuSchema } from './types/iamu';
 import type { DrulSchema as _DrulSchema } from './types/drul';
+import type { AifcSchema as _AifcSchema } from './types/aifc';
+import type { AqbgSchema as _AqbgSchema } from './types/aqbg';
+import type { AqquSchema as _AqquSchema } from './types/aqqu';
+import type { AqsgSchema as _AqsgSchema } from './types/aqsg';
+import type { AsfcSchema as _AsfcSchema } from './types/asfc';
+import type { G4baSchema as _G4baSchema } from './types/g4ba';
+import type { G4bsSchema as _G4bsSchema } from './types/g4bs';
+import type { IwmoSchema as _IwmoSchema } from './types/iwmo';
+import type { IwomSchema as _IwomSchema } from './types/iwom';
+import type { IwprSchema as _IwprSchema } from './types/iwpr';
+import type { IwsgSchema as _IwsgSchema } from './types/iwsg';
+import type { IwsvSchema as _IwsvSchema } from './types/iwsv';
+import type { IwvbSchema as _IwvbSchema } from './types/iwvb';
+import type { SlddSchema as _SlddSchema } from './types/sldd';
+import type { SobjSchema as _SobjSchema } from './types/sobj';
+import type { SppfSchema as _SppfSchema } from './types/sppf';
+import type { UenoSchema as _UenoSchema } from './types/ueno';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -349,6 +383,23 @@ type W3miAbapGitType = Extract<_W3miSchema, { abapGit: unknown }>;
 type IatuAbapGitType = Extract<_IatuSchema, { abapGit: unknown }>;
 type IamuAbapGitType = Extract<_IamuSchema, { abapGit: unknown }>;
 type DrulAbapGitType = Extract<_DrulSchema, { abapGit: unknown }>;
+type AifcAbapGitType = Extract<_AifcSchema, { abapGit: unknown }>;
+type AqbgAbapGitType = Extract<_AqbgSchema, { abapGit: unknown }>;
+type AqquAbapGitType = Extract<_AqquSchema, { abapGit: unknown }>;
+type AqsgAbapGitType = Extract<_AqsgSchema, { abapGit: unknown }>;
+type AsfcAbapGitType = Extract<_AsfcSchema, { abapGit: unknown }>;
+type G4baAbapGitType = Extract<_G4baSchema, { abapGit: unknown }>;
+type G4bsAbapGitType = Extract<_G4bsSchema, { abapGit: unknown }>;
+type IwmoAbapGitType = Extract<_IwmoSchema, { abapGit: unknown }>;
+type IwomAbapGitType = Extract<_IwomSchema, { abapGit: unknown }>;
+type IwprAbapGitType = Extract<_IwprSchema, { abapGit: unknown }>;
+type IwsgAbapGitType = Extract<_IwsgSchema, { abapGit: unknown }>;
+type IwsvAbapGitType = Extract<_IwsvSchema, { abapGit: unknown }>;
+type IwvbAbapGitType = Extract<_IwvbSchema, { abapGit: unknown }>;
+type SlddAbapGitType = Extract<_SlddSchema, { abapGit: unknown }>;
+type SobjAbapGitType = Extract<_SobjSchema, { abapGit: unknown }>;
+type SppfAbapGitType = Extract<_SppfSchema, { abapGit: unknown }>;
+type UenoAbapGitType = Extract<_UenoSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -461,6 +512,23 @@ export const w3mi = abapGitSchema<W3miAbapGitType, W3miAbapGitType['abapGit']['a
 export const iatu = abapGitSchema<IatuAbapGitType, IatuAbapGitType['abapGit']['abap']['values']>(_iatu);
 export const iamu = abapGitSchema<IamuAbapGitType, IamuAbapGitType['abapGit']['abap']['values']>(_iamu);
 export const drul = abapGitSchema<DrulAbapGitType, DrulAbapGitType['abapGit']['abap']['values']>(_drul);
+export const aifc = abapGitSchema<AifcAbapGitType, AifcAbapGitType['abapGit']['abap']['values']>(_aifc);
+export const aqbg = abapGitSchema<AqbgAbapGitType, AqbgAbapGitType['abapGit']['abap']['values']>(_aqbg);
+export const aqqu = abapGitSchema<AqquAbapGitType, AqquAbapGitType['abapGit']['abap']['values']>(_aqqu);
+export const aqsg = abapGitSchema<AqsgAbapGitType, AqsgAbapGitType['abapGit']['abap']['values']>(_aqsg);
+export const asfc = abapGitSchema<AsfcAbapGitType, AsfcAbapGitType['abapGit']['abap']['values']>(_asfc);
+export const g4ba = abapGitSchema<G4baAbapGitType, G4baAbapGitType['abapGit']['abap']['values']>(_g4ba);
+export const g4bs = abapGitSchema<G4bsAbapGitType, G4bsAbapGitType['abapGit']['abap']['values']>(_g4bs);
+export const iwmo = abapGitSchema<IwmoAbapGitType, IwmoAbapGitType['abapGit']['abap']['values']>(_iwmo);
+export const iwom = abapGitSchema<IwomAbapGitType, IwomAbapGitType['abapGit']['abap']['values']>(_iwom);
+export const iwpr = abapGitSchema<IwprAbapGitType, IwprAbapGitType['abapGit']['abap']['values']>(_iwpr);
+export const iwsg = abapGitSchema<IwsgAbapGitType, IwsgAbapGitType['abapGit']['abap']['values']>(_iwsg);
+export const iwsv = abapGitSchema<IwsvAbapGitType, IwsvAbapGitType['abapGit']['abap']['values']>(_iwsv);
+export const iwvb = abapGitSchema<IwvbAbapGitType, IwvbAbapGitType['abapGit']['abap']['values']>(_iwvb);
+export const sldd = abapGitSchema<SlddAbapGitType, SlddAbapGitType['abapGit']['abap']['values']>(_sldd);
+export const sobj = abapGitSchema<SobjAbapGitType, SobjAbapGitType['abapGit']['abap']['values']>(_sobj);
+export const sppf = abapGitSchema<SppfAbapGitType, SppfAbapGitType['abapGit']['abap']['values']>(_sppf);
+export const ueno = abapGitSchema<UenoAbapGitType, UenoAbapGitType['abapGit']['abap']['values']>(_ueno);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';
