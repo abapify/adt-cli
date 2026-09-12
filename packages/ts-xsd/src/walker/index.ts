@@ -760,6 +760,104 @@ function isArray(item: { maxOccurs?: number | string | 'unbounded' }): boolean {
 }
 
 // =============================================================================
+// Wildcard (xs:any) Support
+// =============================================================================
+
+/**
+ * Check whether a complexType permits wildcard child elements (xs:any).
+ * Handles sequence/choice/all, nested groups, group references,
+ * and complexContent extension/restriction (including base types).
+ */
+export function hasWildcard(ct: ComplexTypeLike, schema: SchemaLike): boolean {
+  const seenTypes = new Set<ComplexTypeLike>();
+  const seenGroupRefs = new Set<string>();
+
+  const groupHasAny = (group: GroupLike | undefined): boolean => {
+    if (!group) return false;
+    if (group.any && group.any.length > 0) return true;
+    for (const nested of group.sequence ?? []) {
+      if (groupHasAny(nested)) return true;
+    }
+    for (const nested of group.choice ?? []) {
+      if (groupHasAny(nested)) return true;
+    }
+    for (const ref of group.group ?? []) {
+      if (ref.ref && !seenGroupRefs.has(ref.ref)) {
+        seenGroupRefs.add(ref.ref);
+        const named = findGroup(stripNsPrefix(ref.ref), schema);
+        if (
+          named &&
+          (groupHasAny(named.sequence) ||
+            groupHasAny(named.choice) ||
+            groupHasAny(named.all))
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const visit = (current: ComplexTypeLike): boolean => {
+    if (seenTypes.has(current)) return false;
+    seenTypes.add(current);
+
+    if (
+      groupHasAny(current.sequence) ||
+      groupHasAny(current.choice) ||
+      groupHasAny(current.all)
+    ) {
+      return true;
+    }
+
+    const ext =
+      current.complexContent?.extension ?? current.complexContent?.restriction;
+    if (ext) {
+      if (
+        groupHasAny(ext.sequence) ||
+        groupHasAny(ext.choice) ||
+        groupHasAny(ext.all)
+      ) {
+        return true;
+      }
+      if (ext.group?.ref && !seenGroupRefs.has(ext.group.ref)) {
+        seenGroupRefs.add(ext.group.ref);
+        const named = findGroup(stripNsPrefix(ext.group.ref), schema);
+        if (
+          named &&
+          (groupHasAny(named.sequence) ||
+            groupHasAny(named.choice) ||
+            groupHasAny(named.all))
+        ) {
+          return true;
+        }
+      }
+      if (ext.base) {
+        const baseEntry = findComplexType(stripNsPrefix(ext.base), schema);
+        if (baseEntry && visit(baseEntry.ct)) return true;
+      }
+    }
+
+    if (current.group?.ref && !seenGroupRefs.has(current.group.ref)) {
+      seenGroupRefs.add(current.group.ref);
+      const named = findGroup(stripNsPrefix(current.group.ref), schema);
+      if (
+        named &&
+        (groupHasAny(named.sequence) ||
+          groupHasAny(named.choice) ||
+          groupHasAny(named.all))
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  return visit(ct);
+}
+
+// =============================================================================
 // Substitution Group Support
 // =============================================================================
 

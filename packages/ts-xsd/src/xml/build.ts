@@ -10,6 +10,7 @@ import type { SchemaLike, ComplexTypeLike, ElementLike } from '../infer';
 import {
   findComplexType,
   findElement,
+  hasWildcard,
   walkElements,
   walkAttributes,
   stripNsPrefix,
@@ -296,11 +297,14 @@ function buildElement(
   // Build attributes using walker (handles inheritance)
   // The walker now returns the schema where each attribute is defined,
   // which is critical for correct namespace prefix resolution in inherited types
+  const wildcard = hasWildcard(typeDef, schema);
+  const consumed = new Set<string>();
   for (const { attribute, schema: attrSchema } of walkAttributes(
     typeDef,
     schema,
   )) {
     if (!attribute.name) continue;
+    consumed.add(attribute.name);
     const value = data[attribute.name];
     if (value !== undefined && value !== null) {
       // Check attributeFormDefault - attributes get prefix when "qualified"
@@ -347,6 +351,7 @@ function buildElement(
         for (const substitute of substitutes) {
           const subName = substitute.element.name;
           if (!subName) continue;
+          consumed.add(subName);
 
           const value = data[subName];
           if (value != null) {
@@ -371,6 +376,7 @@ function buildElement(
 
     const resolved = resolveElementInfo(element, elementDefSchema);
     if (!resolved) continue;
+    consumed.add(resolved.dataKey);
 
     const value = data[resolved.dataKey];
     if (value != null) {
@@ -388,6 +394,45 @@ function buildElement(
       );
     }
   }
+
+  // Emit wildcard (xs:any) children for data keys not covered by declared elements
+  if (wildcard) {
+    for (const key of Object.keys(data)) {
+      if (consumed.has(key)) continue;
+      buildAnyField(doc, node, key, data[key]);
+    }
+  }
+}
+
+/**
+ * Build a wildcard (xs:any) element generically:
+ * primitives become text elements, objects become nested elements,
+ * arrays become repeated sibling elements.
+ */
+function buildAnyField(
+  doc: XmlDocument,
+  parent: XmlElement,
+  tagName: string,
+  value: unknown,
+): void {
+  if (value === undefined || value === null) return;
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      buildAnyField(doc, parent, tagName, item);
+    }
+    return;
+  }
+
+  const el = doc.createElement(tagName);
+  if (typeof value === 'object') {
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      buildAnyField(doc, el, key, nested);
+    }
+  } else {
+    el.textContent = String(value);
+  }
+  parent.appendChild(el);
 }
 
 /**

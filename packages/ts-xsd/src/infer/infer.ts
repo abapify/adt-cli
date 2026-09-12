@@ -419,7 +419,15 @@ export type InferSimpleContentExtension<
 export type InferGroup<G, T extends SchemaLike> = G extends GroupLike
   ? InferElements<G['element'], T> &
       InferNestedSequences<G['sequence'], T> &
-      InferNestedChoices<G['choice'], T>
+      InferNestedChoices<G['choice'], T> &
+      InferWildcard<G['any']>
+  : EmptyObject;
+
+/** Infer index signature from xs:any wildcard */
+export type InferWildcard<A> = A extends readonly unknown[]
+  ? A['length'] extends 0
+    ? EmptyObject
+    : { [key: string]: unknown }
   : EmptyObject;
 
 /** Infer from choice (union of possibilities) */
