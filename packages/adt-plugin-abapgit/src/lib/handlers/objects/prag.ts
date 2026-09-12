@@ -12,28 +12,25 @@ type PragmaLike = {
   description?: string;
 };
 
-export const pragmaHandler = createHandler<PragmaLike, typeof prag>(
-  'PRAG',
-  {
-    schema: prag,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_PRAG',
-    serializer_version: 'v1.0.0',
+export const pragmaHandler = createHandler<PragmaLike, typeof prag>('PRAG', {
+  schema: prag,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_PRAG',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      PRAG: {
-        PRAGMA: String(obj.name ?? '').toUpperCase(),
-        EXTENSION: obj.extension,
-        SIGNATURE: obj.signature,
-        DESCRIPTION: obj.description,
-      },
-    }),
+  toAbapGit: (obj) => ({
+    PRAG: {
+      PRAGMA: String(obj.name ?? '').toUpperCase(),
+      EXTENSION: obj.extension,
+      SIGNATURE: obj.signature,
+      DESCRIPTION: obj.description,
+    },
+  }),
 
-    fromAbapGit: ({ PRAG }) => ({
-      name: (PRAG?.PRAGMA ?? '').toUpperCase(),
-      extension: PRAG?.EXTENSION,
-      signature: PRAG?.SIGNATURE,
-      description: PRAG?.DESCRIPTION,
-    }),
-  },
-);
+  fromAbapGit: ({ PRAG }) => ({
+    name: (PRAG?.PRAGMA ?? '').toUpperCase(),
+    extension: PRAG?.EXTENSION,
+    signature: PRAG?.SIGNATURE,
+    description: PRAG?.DESCRIPTION,
+  }),
+});

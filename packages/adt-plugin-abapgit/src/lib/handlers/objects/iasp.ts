@@ -32,7 +32,9 @@ export const archivePathHandler = createHandler<ArchivePathLike, typeof iasp>(
         VERSION: obj.version,
       },
       PARAMETERS: obj.parameters?.length
-        ? { item: obj.parameters.map((p) => ({ NAME: p.name, VALUE: p.value })) }
+        ? {
+            item: obj.parameters.map((p) => ({ NAME: p.name, VALUE: p.value })),
+          }
         : undefined,
     }),
 

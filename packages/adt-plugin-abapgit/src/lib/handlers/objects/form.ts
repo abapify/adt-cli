@@ -25,20 +25,19 @@ function normalizeItems<T>(raw: T | T[] | undefined): T[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const formHandler = createHandler<FormLike, typeof form>(
-  'FORM',
-  {
-    schema: form,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_FORM',
-    serializer_version: 'v1.0.0',
+export const formHandler = createHandler<FormLike, typeof form>('FORM', {
+  schema: form,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_FORM',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
-      const name = String(obj.name ?? '').toUpperCase();
-      const lang = isoToSapLang(obj.language);
-      return {
-        FORM: {
-          item: [{
+  toAbapGit: (obj) => {
+    const name = String(obj.name ?? '').toUpperCase();
+    const lang = isoToSapLang(obj.language);
+    return {
+      FORM: {
+        item: [
+          {
             FORM_HEADER: {
               TDFORM: name,
               TDSPRAS: lang,
@@ -54,34 +53,52 @@ export const formHandler = createHandler<FormLike, typeof form>(
             },
             ORIG_LANGUAGE: lang,
             PAGES: obj.pages?.length
-              ? { item: obj.pages.map((p) => ({ PAGENAME: p.pageName, NEXTPAGE: p.nextPage })) }
+              ? {
+                  item: obj.pages.map((p) => ({
+                    PAGENAME: p.pageName,
+                    NEXTPAGE: p.nextPage,
+                  })),
+                }
               : undefined,
             WINDOWS: obj.windows?.length
-              ? { item: obj.windows.map((w) => ({ WINDOW: w.window, PAGENAME: w.pageName })) }
+              ? {
+                  item: obj.windows.map((w) => ({
+                    WINDOW: w.window,
+                    PAGENAME: w.pageName,
+                  })),
+                }
               : undefined,
             PARAGRAPHS: obj.paragraphs?.length
-              ? { item: obj.paragraphs.map((p) => ({ TDPARGRAPH: p.paragraph, TDTEXT: p.text })) }
+              ? {
+                  item: obj.paragraphs.map((p) => ({
+                    TDPARGRAPH: p.paragraph,
+                    TDTEXT: p.text,
+                  })),
+                }
               : undefined,
-          }],
-        },
-      };
-    },
-
-    fromAbapGit: ({ FORM }) => {
-      const items = normalizeItems(FORM?.item);
-      const data = items[0];
-      const pages = normalizeItems(data?.PAGES?.item);
-      const windows = normalizeItems(data?.WINDOWS?.item);
-      const paragraphs = normalizeItems(data?.PARAGRAPHS?.item);
-      return {
-        name: (data?.FORM_HEADER?.TDFORM ?? '').toUpperCase(),
-        description: data?.FORM_HEADER?.TDTEXT,
-        language: sapLangToIso(data?.FORM_HEADER?.TDSPRAS ?? data?.ORIG_LANGUAGE),
-        firstPage: data?.FORM_HEADER?.TDFIRSTPAG,
-        pages: pages.map((p) => ({ pageName: p.PAGENAME, nextPage: p.NEXTPAGE })),
-        windows: windows.map((w) => ({ window: w.WINDOW, pageName: w.PAGENAME })),
-        paragraphs: paragraphs.map((p) => ({ paragraph: p.TDPARGRAPH, text: p.TDTEXT })),
-      };
-    },
+          },
+        ],
+      },
+    };
   },
-);
+
+  fromAbapGit: ({ FORM }) => {
+    const items = normalizeItems(FORM?.item);
+    const data = items[0];
+    const pages = normalizeItems(data?.PAGES?.item);
+    const windows = normalizeItems(data?.WINDOWS?.item);
+    const paragraphs = normalizeItems(data?.PARAGRAPHS?.item);
+    return {
+      name: (data?.FORM_HEADER?.TDFORM ?? '').toUpperCase(),
+      description: data?.FORM_HEADER?.TDTEXT,
+      language: sapLangToIso(data?.FORM_HEADER?.TDSPRAS ?? data?.ORIG_LANGUAGE),
+      firstPage: data?.FORM_HEADER?.TDFIRSTPAG,
+      pages: pages.map((p) => ({ pageName: p.PAGENAME, nextPage: p.NEXTPAGE })),
+      windows: windows.map((w) => ({ window: w.WINDOW, pageName: w.PAGENAME })),
+      paragraphs: paragraphs.map((p) => ({
+        paragraph: p.TDPARGRAPH,
+        text: p.TDTEXT,
+      })),
+    };
+  },
+});

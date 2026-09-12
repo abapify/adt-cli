@@ -19,17 +19,19 @@ function normalizeItems<T>(raw: T | T[] | undefined): T[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const documentationObjectHandler = createHandler<DocumentationObjectLike, typeof dsys>(
-  'DSYS',
-  {
-    schema: dsys,
-    version: 'v2.0.0',
-    serializer: 'LCL_OBJECT_DSYS',
-    serializer_version: 'v2.0.0',
+export const documentationObjectHandler = createHandler<
+  DocumentationObjectLike,
+  typeof dsys
+>('DSYS', {
+  schema: dsys,
+  version: 'v2.0.0',
+  serializer: 'LCL_OBJECT_DSYS',
+  serializer_version: 'v2.0.0',
 
-    toAbapGit: (obj) => ({
-      LONGTEXTS: {
-        item: [{
+  toAbapGit: (obj) => ({
+    LONGTEXTS: {
+      item: [
+        {
           DOKIL: {
             ID: 'HY',
             OBJECT: String(obj.name ?? '').toUpperCase(),
@@ -43,24 +45,26 @@ export const documentationObjectHandler = createHandler<DocumentationObjectLike,
             TDSPRAS: isoToSapLang(obj.language),
           },
           LINES: obj.lines?.length
-            ? { item: obj.lines.map((l) => ({
-                TDFORMAT: l.format,
-                TDLINE: l.line,
-              })) }
+            ? {
+                item: obj.lines.map((l) => ({
+                  TDFORMAT: l.format,
+                  TDLINE: l.line,
+                })),
+              }
             : undefined,
-        }],
-      },
-    }),
-
-    fromAbapGit: ({ LONGTEXTS }) => {
-      const items = normalizeItems(LONGTEXTS?.item);
-      const first = items[0];
-      const lines = normalizeItems(first?.LINES?.item);
-      return {
-        name: (first?.DOKIL?.OBJECT ?? '').toUpperCase(),
-        language: sapLangToIso(first?.DOKIL?.LANGU),
-        lines: lines.map((l) => ({ format: l.TDFORMAT, line: l.TDLINE })),
-      };
+        },
+      ],
     },
+  }),
+
+  fromAbapGit: ({ LONGTEXTS }) => {
+    const items = normalizeItems(LONGTEXTS?.item);
+    const first = items[0];
+    const lines = normalizeItems(first?.LINES?.item);
+    return {
+      name: (first?.DOKIL?.OBJECT ?? '').toUpperCase(),
+      language: sapLangToIso(first?.DOKIL?.LANGU),
+      lines: lines.map((l) => ({ format: l.TDFORMAT, line: l.TDLINE })),
+    };
   },
-);
+});

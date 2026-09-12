@@ -40,24 +40,28 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
 
     toAbapGit: (obj) => ({
       PROXY_HEADER: obj.headers?.length
-        ? { item: obj.headers.map((h) => ({
-            OBJECT: h.object,
-            OBJ_NAME: h.objName,
-            IFR_TYPE: h.ifrType,
-            IFR_NAME: h.ifrName,
-            IFR_NSPCE: h.ifrNspce,
-          })) }
+        ? {
+            item: obj.headers.map((h) => ({
+              OBJECT: h.object,
+              OBJ_NAME: h.objName,
+              IFR_TYPE: h.ifrType,
+              IFR_NAME: h.ifrName,
+              IFR_NSPCE: h.ifrNspce,
+            })),
+          }
         : undefined,
       PROXY_DATA: obj.data?.length
-        ? { item: obj.data.map((d) => ({
-            OBJECT: d.object,
-            OBJ_NAME: d.objName,
-            IFR_TYPE: d.ifrType,
-            IFR_NAME: d.ifrName,
-            IFR_TEXT: d.ifrText,
-            R3_TYPE: d.r3Type,
-            R3_NAME: d.r3Name,
-          })) }
+        ? {
+            item: obj.data.map((d) => ({
+              OBJECT: d.object,
+              OBJ_NAME: d.objName,
+              IFR_TYPE: d.ifrType,
+              IFR_NAME: d.ifrName,
+              IFR_TEXT: d.ifrText,
+              R3_TYPE: d.r3Type,
+              R3_NAME: d.r3Name,
+            })),
+          }
         : undefined,
     }),
 

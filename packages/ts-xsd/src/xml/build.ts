@@ -426,7 +426,9 @@ function buildAnyField(
 
   const el = doc.createElement(tagName);
   if (typeof value === 'object') {
-    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+    for (const [key, nested] of Object.entries(
+      value as Record<string, unknown>,
+    )) {
       buildAnyField(doc, el, key, nested);
     }
   } else {

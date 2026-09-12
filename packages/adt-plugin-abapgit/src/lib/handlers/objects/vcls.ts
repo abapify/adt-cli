@@ -33,18 +33,22 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
         CHANGEDATE: obj.changedDate,
       },
       VLCSTRUC_TAB: obj.structures?.length
-        ? { item: obj.structures.map((s) => ({
-            VCLNAME: String(obj.name ?? '').toUpperCase(),
-            OBJECT: s.object,
-            OBJTEXT: s.objText,
-          })) }
+        ? {
+            item: obj.structures.map((s) => ({
+              VCLNAME: String(obj.name ?? '').toUpperCase(),
+              OBJECT: s.object,
+              OBJTEXT: s.objText,
+            })),
+          }
         : undefined,
       VCLMF_TAB: obj.maintenanceForms?.length
-        ? { item: obj.maintenanceForms.map((m) => ({
-            VCLNAME: String(obj.name ?? '').toUpperCase(),
-            OBJECT: m.object,
-            FORM: m.form,
-          })) }
+        ? {
+            item: obj.maintenanceForms.map((m) => ({
+              VCLNAME: String(obj.name ?? '').toUpperCase(),
+              OBJECT: m.object,
+              FORM: m.form,
+            })),
+          }
         : undefined,
     }),
 
@@ -55,8 +59,14 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
         name: (VCLDIR?.VCLNAME ?? '').toUpperCase(),
         author: VCLDIR?.AUTHOR,
         changedDate: VCLDIR?.CHANGEDATE,
-        structures: structures.map((s) => ({ object: s.OBJECT, objText: s.OBJTEXT })),
-        maintenanceForms: forms.map((m) => ({ object: m.OBJECT, form: m.FORM })),
+        structures: structures.map((s) => ({
+          object: s.OBJECT,
+          objText: s.OBJTEXT,
+        })),
+        maintenanceForms: forms.map((m) => ({
+          object: m.OBJECT,
+          form: m.FORM,
+        })),
       };
     },
   },

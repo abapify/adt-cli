@@ -18,42 +18,41 @@ function normalizeItems<T>(raw: T | T[] | undefined): T[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const webiHandler = createHandler<WebiLike, typeof webi>(
-  'WEBI',
-  {
-    schema: webi,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_WEBI',
-    serializer_version: 'v1.0.0',
+export const webiHandler = createHandler<WebiLike, typeof webi>('WEBI', {
+  schema: webi,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_WEBI',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      WEBI: {
-        VEPTEXT: {
-          VEPNAME: String(obj.name ?? '').toUpperCase(),
-          DESCRIPT: obj.description,
-          LANGU: isoToSapLang(obj.language),
-        },
-        PVEPHEADER: obj.headers?.length
-          ? { item: obj.headers.map((h) => ({
+  toAbapGit: (obj) => ({
+    WEBI: {
+      VEPTEXT: {
+        VEPNAME: String(obj.name ?? '').toUpperCase(),
+        DESCRIPT: obj.description,
+        LANGU: isoToSapLang(obj.language),
+      },
+      PVEPHEADER: obj.headers?.length
+        ? {
+            item: obj.headers.map((h) => ({
               VEPNAME: String(obj.name ?? '').toUpperCase(),
               GENERATOR: h.generator,
               FEATURES: h.features,
-            })) }
-          : undefined,
-      },
-    }),
-
-    fromAbapGit: ({ WEBI }) => {
-      const headers = normalizeItems(WEBI?.PVEPHEADER?.item);
-      return {
-        name: (WEBI?.VEPTEXT?.VEPNAME ?? '').toUpperCase(),
-        description: WEBI?.VEPTEXT?.DESCRIPT,
-        language: sapLangToIso(WEBI?.VEPTEXT?.LANGU),
-        headers: headers.map((h) => ({
-          generator: h.GENERATOR,
-          features: h.FEATURES,
-        })),
-      };
+            })),
+          }
+        : undefined,
     },
+  }),
+
+  fromAbapGit: ({ WEBI }) => {
+    const headers = normalizeItems(WEBI?.PVEPHEADER?.item);
+    return {
+      name: (WEBI?.VEPTEXT?.VEPNAME ?? '').toUpperCase(),
+      description: WEBI?.VEPTEXT?.DESCRIPT,
+      language: sapLangToIso(WEBI?.VEPTEXT?.LANGU),
+      headers: headers.map((h) => ({
+        generator: h.GENERATOR,
+        features: h.FEATURES,
+      })),
+    };
   },
-);
+});

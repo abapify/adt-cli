@@ -15,30 +15,27 @@ type PdtsLike = {
   stext?: string;
 };
 
-export const pdtsHandler = createHandler<PdtsLike, typeof pdts>(
-  'PDTS',
-  {
-    schema: pdts,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_PDTS',
-    serializer_version: 'v1.0.0',
+export const pdtsHandler = createHandler<PdtsLike, typeof pdts>('PDTS', {
+  schema: pdts,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_PDTS',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      PDTS: {
-        HEADER: {
-          OTYPE: obj.otype ?? 'TS',
-          OBJID: String(obj.name ?? '').toUpperCase(),
-          SHORT: obj.short,
-          STEXT: obj.stext,
-        },
+  toAbapGit: (obj) => ({
+    PDTS: {
+      HEADER: {
+        OTYPE: obj.otype ?? 'TS',
+        OBJID: String(obj.name ?? '').toUpperCase(),
+        SHORT: obj.short,
+        STEXT: obj.stext,
       },
-    }),
+    },
+  }),
 
-    fromAbapGit: ({ PDTS }) => ({
-      name: (PDTS?.HEADER?.OBJID ?? '').toUpperCase(),
-      otype: PDTS?.HEADER?.OTYPE,
-      short: PDTS?.HEADER?.SHORT,
-      stext: PDTS?.HEADER?.STEXT,
-    }),
-  },
-);
+  fromAbapGit: ({ PDTS }) => ({
+    name: (PDTS?.HEADER?.OBJID ?? '').toUpperCase(),
+    otype: PDTS?.HEADER?.OTYPE,
+    short: PDTS?.HEADER?.SHORT,
+    stext: PDTS?.HEADER?.STEXT,
+  }),
+});

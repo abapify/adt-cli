@@ -12,28 +12,25 @@ type IaxuLike = {
   packageName?: string;
 };
 
-export const iaxuHandler = createHandler<IaxuLike, typeof iaxu>(
-  'IAXU',
-  {
-    schema: iaxu,
-    version: 'v1.0.0',
-    serializer: 'LCL_OBJECT_IAXU',
-    serializer_version: 'v1.0.0',
+export const iaxuHandler = createHandler<IaxuLike, typeof iaxu>('IAXU', {
+  schema: iaxu,
+  version: 'v1.0.0',
+  serializer: 'LCL_OBJECT_IAXU',
+  serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      ATTR: {
-        NAME: String(obj.name ?? '').toUpperCase(),
-        TEXT: obj.text,
-        MIMETYPE: obj.mimeType,
-        DEVCLASS: obj.packageName,
-      },
-    }),
+  toAbapGit: (obj) => ({
+    ATTR: {
+      NAME: String(obj.name ?? '').toUpperCase(),
+      TEXT: obj.text,
+      MIMETYPE: obj.mimeType,
+      DEVCLASS: obj.packageName,
+    },
+  }),
 
-    fromAbapGit: ({ ATTR }) => ({
-      name: (ATTR?.NAME ?? '').toUpperCase(),
-      text: ATTR?.TEXT,
-      mimeType: ATTR?.MIMETYPE,
-      packageName: ATTR?.DEVCLASS,
-    }),
-  },
-);
+  fromAbapGit: ({ ATTR }) => ({
+    name: (ATTR?.NAME ?? '').toUpperCase(),
+    text: ATTR?.TEXT,
+    mimeType: ATTR?.MIMETYPE,
+    packageName: ATTR?.DEVCLASS,
+  }),
+});
