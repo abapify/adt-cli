@@ -104,9 +104,7 @@ function parseEnhancementImplementationFromAbapGit({
   };
 }
 
-function buildBadiImplData(
-  obj: EnhancementImplementationLike,
-): BadiImplData {
+function buildBadiImplData(obj: EnhancementImplementationLike): BadiImplData {
   return {
     SPOT_NAME: obj.spotName,
     BADI_NAME: obj.badiName,
