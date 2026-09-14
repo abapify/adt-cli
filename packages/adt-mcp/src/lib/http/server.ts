@@ -15,7 +15,7 @@
 
 import https from 'node:https';
 import http from 'node:http';
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -966,15 +966,37 @@ export async function startHttpServer(
   const keyPath = options.tlsKey ?? process.env.MCP_TLS_KEY;
   const cert =
     options.tlsCertContent ??
-    (certPath ? readFileSync(certPath, 'utf8') : undefined);
+    (certPath ? await readFile(certPath, 'utf8') : undefined);
   const key =
     options.tlsKeyContent ??
-    (keyPath ? readFileSync(keyPath, 'utf8') : undefined);
+    (keyPath ? await readFile(keyPath, 'utf8') : undefined);
 
   if (!cert || !key) {
     throw new Error(
       'startHttpServer: TLS certificate and key are required. Provide tlsCert/tlsKey, ' +
         'tlsCertContent/tlsKeyContent, or MCP_TLS_CERT/MCP_TLS_KEY.',
+    );
+  }
+  if (
+    !/-----BEGIN CERTIFICATE-----[\s\S]*-----END CERTIFICATE-----/u.test(cert)
+  ) {
+    throw new Error(
+      'startHttpServer: TLS certificate is not valid PEM — expected a ' +
+        '"-----BEGIN CERTIFICATE-----" block' +
+        (certPath ? ` in ${certPath}` : ' in tlsCertContent') +
+        '.',
+    );
+  }
+  if (
+    !/-----BEGIN (?:[A-Z ]+)?PRIVATE KEY-----[\s\S]*-----END (?:[A-Z ]+)?PRIVATE KEY-----/u.test(
+      key,
+    )
+  ) {
+    throw new Error(
+      'startHttpServer: TLS private key is not valid PEM — expected a ' +
+        '"-----BEGIN ... PRIVATE KEY-----" block' +
+        (keyPath ? ` in ${keyPath}` : ' in tlsKeyContent') +
+        '.',
     );
   }
 
