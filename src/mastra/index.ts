@@ -8,7 +8,7 @@
  *  4. Exports a Mastra instance — picked up by `mastra dev` automatically.
  *
  * Required environment variables:
- *   MCP_SERVER_URL      URL of the adt-mcp HTTP server  (default: http://127.0.0.1:3001/mcp)
+ *   MCP_SERVER_URL      URL of the adt-mcp HTTPS server (default: https://127.0.0.1:3001/mcp)
  *   LITELLM_BASE_URL    LiteLLM proxy base URL           (default: http://127.0.0.1:4000)
  *   LITELLM_API_KEY     API key for LiteLLM proxy        (required)
  *   MODEL               Model name recognised by LiteLLM (default: openai/gpt-4o)
@@ -43,7 +43,7 @@ Available tools:
 Always authenticate first using sap_connect before calling other tools.
 Provide clear, actionable feedback on code quality, security, and performance issues.`;
 
-const mcpServerUrl = process.env.MCP_SERVER_URL ?? 'http://127.0.0.1:3001/mcp';
+const mcpServerUrl = process.env.MCP_SERVER_URL ?? 'https://127.0.0.1:3001/mcp';
 const litellmBaseUrl = process.env.LITELLM_BASE_URL ?? 'http://127.0.0.1:4000';
 const litellmApiKey = process.env.LITELLM_API_KEY;
 if (!litellmApiKey) {

@@ -34,6 +34,11 @@ services:
       MCP_ALLOWED_HOSTS: '${MCP_ALLOWED_HOSTS:-localhost,127.0.0.1}'
       # CORS allow-list for browser clients (comma-separated).
       MCP_CORS_ORIGIN: '${MCP_CORS_ORIGIN:-}'
+      # ── TLS (mandatory) ─────────────────────────────────────────
+      # PEM certificate/key served by the HTTPS listener. Mount the
+      # files into the container (see the volumes example below).
+      MCP_TLS_CERT: '${MCP_TLS_CERT:-/app/certs/cert.pem}'
+      MCP_TLS_KEY: '${MCP_TLS_KEY:-/app/certs/key.pem}'
       # ── auth: pick exactly one mode ──────────────────────────────
       # 1) bearer — shared secret. Simplest for single-user setups.
       MCP_AUTH_TOKEN: '${MCP_AUTH_TOKEN:-}'
@@ -52,11 +57,20 @@ services:
       SAP_SYSTEMS_JSON: '${SAP_SYSTEMS_JSON:-}'
       # … or mount a file and point at it:
       SAP_SYSTEMS_FILE: '${SAP_SYSTEMS_FILE:-}'
-    # Uncomment to mount a systems.json from the host.
-    # volumes:
+    # Mount the TLS material (mandatory) and optionally systems.json.
+    volumes:
+      - '${TLS_CERT_DIR:-./certs}:/app/certs:ro'
     #   - ./systems.json:/app/systems.json:ro
     healthcheck:
-      test: ['CMD', 'wget', '-q', '-O-', 'http://127.0.0.1:3000/healthz']
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-check-certificate',
+          '-q',
+          '-O-',
+          'https://127.0.0.1:3000/healthz',
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -83,7 +97,7 @@ services:
   #     OAUTH2_PROXY_CLIENT_SECRET: "${OKTA_CLIENT_SECRET}"
   #     OAUTH2_PROXY_COOKIE_SECRET: "${OAUTH2_PROXY_COOKIE_SECRET}"
   #     OAUTH2_PROXY_REDIRECT_URL: "https://mcp.example.com/oauth2/callback"
-  #     OAUTH2_PROXY_UPSTREAMS: "http://adt-mcp:3000"
+  #     OAUTH2_PROXY_UPSTREAMS: "https://adt-mcp:3000"
   #     OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
   #     OAUTH2_PROXY_REVERSE_PROXY: "true"
   #     OAUTH2_PROXY_PASS_ACCESS_TOKEN: "true"

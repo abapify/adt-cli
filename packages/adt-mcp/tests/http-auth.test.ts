@@ -35,17 +35,28 @@ const noopLog = () => {
 
 describe('adt-mcp HTTPS startup', () => {
   it('rejects startup without TLS material', async () => {
-    await assert.rejects(
-      () =>
-        startHttpServer({
-          port: 0,
-          host: '127.0.0.1',
-          log: noopLog,
-          tlsCert: undefined,
-          tlsKey: undefined,
-        }),
-      /TLS certificate and key are required/u,
-    );
+    // MCP_TLS_CERT/MCP_TLS_KEY fall back to the process environment —
+    // clear them so the fail-closed path is exercised deterministically.
+    const savedCert = process.env.MCP_TLS_CERT;
+    const savedKey = process.env.MCP_TLS_KEY;
+    delete process.env.MCP_TLS_CERT;
+    delete process.env.MCP_TLS_KEY;
+    try {
+      await assert.rejects(
+        () =>
+          startHttpServer({
+            port: 0,
+            host: '127.0.0.1',
+            log: noopLog,
+            tlsCert: undefined,
+            tlsKey: undefined,
+          }),
+        /TLS certificate and key are required/u,
+      );
+    } finally {
+      if (savedCert !== undefined) process.env.MCP_TLS_CERT = savedCert;
+      if (savedKey !== undefined) process.env.MCP_TLS_KEY = savedKey;
+    }
   });
 });
 

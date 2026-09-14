@@ -64,6 +64,13 @@ MCP_PORT=3001
 MCP_HOST=127.0.0.1
 MCP_CORS_ORIGIN=http://localhost:4112
 
+# TLS is mandatory — generate a dev pair once (see .env.example) and
+# point both vars at it. Paths are relative to packages/adt-mcp/.
+MCP_TLS_CERT=../../cert.pem
+MCP_TLS_KEY=../../key.pem
+# Mastra's MCPClient must trust the dev cert as well:
+NODE_EXTRA_CA_CERTS=./cert.pem
+
 # Optional: path to adt.config.ts (relative to packages/adt-mcp/)
 ADT_CONFIG_FILE=../../adt.config.ts
 ```
@@ -103,12 +110,14 @@ The agent calls `list_package_objects` and `atc_run` via the MCP server.
 **MCP server only:**
 
 ```bash
-# With adt-config
+# With adt-config (cert.pem/key.pem generated per .env.example)
 ADT_CONFIG_FILE=./adt.config.ts MCP_PORT=3001 MCP_CORS_ORIGIN='*' \
+  MCP_TLS_CERT=./cert.pem MCP_TLS_KEY=./key.pem \
   node packages/adt-mcp/dist/bin/adt-mcp-http.mjs
 
 # Without adt-config (pass SAP URL per-call via sap_connect)
 MCP_PORT=3001 MCP_CORS_ORIGIN='*' \
+  MCP_TLS_CERT=./cert.pem MCP_TLS_KEY=./key.pem \
   node packages/adt-mcp/dist/bin/adt-mcp-http.mjs
 ```
 
@@ -122,7 +131,7 @@ bunx mastra dev --dir ../../src/mastra --env .env
 ## Healthcheck
 
 ```bash
-curl http://localhost:3001/healthz
+curl --cacert cert.pem https://localhost:3001/healthz
 # → {"status":"ok","sessions":0}
 ```
 

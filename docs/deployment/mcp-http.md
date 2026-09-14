@@ -25,8 +25,19 @@ Key properties:
 
 ### Docker (one-liner)
 
+TLS material is mandatory — mount a certificate and key into the container:
+
 ```bash
+openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
+  -keyout key.pem -out cert.pem -days 1 -nodes \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=IP:127.0.0.1,DNS:localhost"
+
 docker run --rm -p 127.0.0.1:3000:3000 \
+  -v "$PWD/cert.pem:/app/cert.pem:ro" \
+  -v "$PWD/key.pem:/app/key.pem:ro" \
+  -e MCP_TLS_CERT=/app/cert.pem \
+  -e MCP_TLS_KEY=/app/key.pem \
   -e MCP_AUTH_TOKEN=change-me \
   -e MCP_ALLOWED_HOSTS=localhost,127.0.0.1 \
   ghcr.io/abapify/adt-mcp:latest
@@ -40,8 +51,10 @@ The container listens on `0.0.0.0:3000` inside, but only the loopback of the hos
 # Clone the repo just for the compose file (or copy it locally).
 git clone https://github.com/abapify/adt-cli.git && cd adt-cli
 
-# Minimal env file
+# Minimal env file (cert.pem/key.pem generated as shown above)
 cat > .env.mcp <<'EOF'
+MCP_TLS_CERT=/app/certs/cert.pem
+MCP_TLS_KEY=/app/certs/key.pem
 MCP_AUTH_TOKEN=change-me
 MCP_ALLOWED_HOSTS=localhost,127.0.0.1
 EOF
@@ -137,9 +150,10 @@ MCP_AUTH_TOKEN="$(openssl rand -hex 32)" adt-mcp-http --port 3000
 Every request must include `Authorization: Bearer <token>`. The comparison uses `crypto.timingSafeEqual`.
 
 ```bash
-curl -H "Authorization: Bearer $MCP_AUTH_TOKEN" \
+curl --cacert cert.pem \
+     -H "Authorization: Bearer $MCP_AUTH_TOKEN" \
      -H 'Content-Type: application/json' \
-     -X POST http://127.0.0.1:3000/mcp \
+     -X POST https://127.0.0.1:3000/mcp \
      -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{...}}'
 ```
 
@@ -222,7 +236,10 @@ Resolution: `sap_connect { systemId: "DEV", username, password }` merges `baseUr
 
 ## Client examples
 
-Once the server is running, wire it into your MCP client.
+Once the server is running, wire it into your MCP client. All clients must use
+`https://` URLs. With a self-signed certificate, point the client runtime at
+your CA/cert (e.g. `NODE_EXTRA_CA_CERTS=./cert.pem` for Node-based clients) or
+use a certificate issued by a CA the client already trusts.
 
 ### Claude Desktop
 
@@ -231,7 +248,7 @@ Once the server is running, wire it into your MCP client.
   "mcpServers": {
     "adt": {
       "type": "http",
-      "url": "http://127.0.0.1:3000/mcp",
+      "url": "https://127.0.0.1:3000/mcp",
       "headers": {
         "Authorization": "Bearer change-me"
       }
@@ -247,7 +264,7 @@ Once the server is running, wire it into your MCP client.
   "servers": {
     "adt": {
       "type": "http",
-      "url": "http://127.0.0.1:3000/mcp",
+      "url": "https://127.0.0.1:3000/mcp",
       "headers": {
         "Authorization": "Bearer change-me"
       }
@@ -258,7 +275,7 @@ Once the server is running, wire it into your MCP client.
 
 ### Cursor
 
-Settings → MCP → **Add server** → type `HTTP`, URL `http://127.0.0.1:3000/mcp`, add an `Authorization` header.
+Settings → MCP → **Add server** → type `HTTP`, URL `https://127.0.0.1:3000/mcp`, add an `Authorization` header.
 
 ### Kiro
 

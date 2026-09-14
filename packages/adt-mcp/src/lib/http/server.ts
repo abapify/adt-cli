@@ -961,7 +961,8 @@ export async function startHttpServer(
     (process.env.MCP_PORT ? Number(process.env.MCP_PORT) : 3000);
   const host = options.host ?? process.env.MCP_HOST ?? '127.0.0.1';
   const log = options.log ?? defaultLog;
-  const handler = createHttpMcpHandler(options);
+  // Resolve and validate TLS material before allocating the handler — a
+  // missing or malformed certificate must not leak the session registry.
   const certPath = options.tlsCert ?? process.env.MCP_TLS_CERT;
   const keyPath = options.tlsKey ?? process.env.MCP_TLS_KEY;
   const cert =
@@ -997,18 +998,24 @@ export async function startHttpServer(
     );
   }
 
-  const server = https.createServer({ cert, key }, (req, res) => {
-    void handler.handle(req, res);
-  });
-
-  await new Promise<void>((resolve, reject) => {
-    const onError = (err: Error) => reject(err);
-    server.once('error', onError);
-    server.listen(port, host, () => {
-      server.removeListener('error', onError);
-      resolve();
+  const handler = createHttpMcpHandler(options);
+  let server: https.Server;
+  try {
+    server = https.createServer({ cert, key }, (req, res) => {
+      void handler.handle(req, res);
     });
-  });
+    await new Promise<void>((resolve, reject) => {
+      const onError = (err: Error) => reject(err);
+      server.once('error', onError);
+      server.listen(port, host, () => {
+        server.removeListener('error', onError);
+        resolve();
+      });
+    });
+  } catch (err) {
+    await handler.close().catch(() => undefined);
+    throw err;
+  }
 
   const boundPort = (server.address() as { port: number } | null)?.port ?? port;
   log('info', `listening on https://${host}:${boundPort}/mcp`);
