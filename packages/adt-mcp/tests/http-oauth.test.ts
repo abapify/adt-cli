@@ -14,7 +14,7 @@
  * logic end-to-end.
  */
 import { describe, it, before, after } from 'node:test';
-import { getTestTlsMaterial } from './_tls-fixtures.js';
+import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
 
 const tlsFixture = getTestTlsMaterial();
 import assert from 'node:assert';
@@ -143,7 +143,7 @@ async function probeMcp(
   server: RunningHttpServer,
   headers: Record<string, string> = {},
 ): Promise<Response> {
-  return await fetch(`https://127.0.0.1:${server.port}/mcp`, {
+  return await tlsFetch(`https://127.0.0.1:${server.port}/mcp`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ describe('adt-mcp HTTP auth — mode=oauth (JWKS explicit)', () => {
   });
 
   it('/healthz still works without auth', async () => {
-    const res = await fetch(`https://127.0.0.1:${server.port}/healthz`);
+    const res = await tlsFetch(`https://127.0.0.1:${server.port}/healthz`);
     assert.strictEqual(res.status, 200);
   });
 });

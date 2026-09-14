@@ -5,7 +5,7 @@
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getTestTlsMaterial } from './_tls-fixtures.js';
+import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
 
 const tlsFixture = getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -117,6 +117,7 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
   });
   const credential = await signInvocation(privateKey);
   const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({ name: 'invocation-auth-test', version: '0.0.1' });
@@ -144,7 +145,7 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
     const replacementCredential = await signInvocation(privateKey, {
       tokenId: 'invocation-jti-2',
     });
-    const replacementResponse = await fetch(server.url, {
+    const replacementResponse = await tlsFetch(server.url, {
       method: 'POST',
       headers: {
         Accept: 'application/json, text/event-stream',
@@ -224,6 +225,7 @@ test('ADT invocation auth fails closed for an AI Review policy the sidecar canno
   });
   const credential = await signInvocation(privateKey, { agentId: 'ai-review' });
   const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({
@@ -305,6 +307,7 @@ test('AI Review exposes only its signed frozen-source tool', async () => {
     limits: { maxSourceBytes: 65_536 },
   });
   const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({
@@ -412,6 +415,7 @@ test('AI Review redeems only the signed source component before acquiring its de
     limits: { maxSourceBytes: 65_536 },
   });
   const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({
@@ -515,7 +519,7 @@ test('ADT invocation auth rejects credentials that request write authority', asy
     const credential = await signInvocation(privateKey, {
       classes: ['read', 'write'],
     });
-    const response = await fetch(server.url, {
+    const response = await tlsFetch(server.url, {
       method: 'POST',
       headers: {
         Accept: 'application/json, text/event-stream',

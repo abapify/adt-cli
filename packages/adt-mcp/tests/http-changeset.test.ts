@@ -12,7 +12,7 @@
  */
 
 import { describe, it, before, after } from 'node:test';
-import { getTestTlsMaterial } from './_tls-fixtures.js';
+import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
 
 const tlsFixture = getTestTlsMaterial();
 import assert from 'node:assert';
@@ -85,7 +85,9 @@ describe('adt-mcp HTTP — Wave 3 changesets', () => {
     client: Client;
     transport: StreamableHTTPClientTransport;
   }> {
-    const transport = new StreamableHTTPClientTransport(new URL(http.url));
+    const transport = new StreamableHTTPClientTransport(new URL(http.url), {
+      fetch: tlsFetch,
+    });
     const client = new Client({ name: 'http-changeset-it', version: '0.0.1' });
     await client.connect(transport);
     // sap_connect with explicit credentials so the session has a client.

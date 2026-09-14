@@ -17,7 +17,7 @@
  * That's enough to distinguish "auth passed" from "auth blocked".
  */
 import { describe, it, before, after } from 'node:test';
-import { getTestTlsMaterial } from './_tls-fixtures.js';
+import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
 
 const tlsFixture = getTestTlsMaterial();
 import assert from 'node:assert';
@@ -59,7 +59,7 @@ async function probeMcp(
   server: RunningHttpServer,
   headers: Record<string, string> = {},
 ): Promise<Response> {
-  return await fetch(`https://127.0.0.1:${server.port}/mcp`, {
+  return await tlsFetch(`https://127.0.0.1:${server.port}/mcp`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ describe('adt-mcp HTTP auth — mode=none (default)', () => {
   });
 
   it('allows unauthenticated /healthz', async () => {
-    const res = await fetch(`https://127.0.0.1:${server.port}/healthz`);
+    const res = await tlsFetch(`https://127.0.0.1:${server.port}/healthz`);
     assert.strictEqual(res.status, 200);
   });
 });
@@ -154,7 +154,7 @@ describe('adt-mcp HTTP auth — mode=bearer', () => {
   });
 
   it('still allows /healthz without auth (monitoring probes)', async () => {
-    const res = await fetch(`https://127.0.0.1:${server.port}/healthz`);
+    const res = await tlsFetch(`https://127.0.0.1:${server.port}/healthz`);
     assert.strictEqual(res.status, 200);
   });
 
@@ -228,7 +228,7 @@ describe('adt-mcp HTTP — CORS', () => {
   });
 
   it('preflight OPTIONS for allowed origin returns 204 with CORS headers', async () => {
-    const res = await fetch(`https://127.0.0.1:${server.port}/mcp`, {
+    const res = await tlsFetch(`https://127.0.0.1:${server.port}/mcp`, {
       method: 'OPTIONS',
       headers: {
         Origin: 'https://app.example.com',
@@ -264,7 +264,7 @@ describe('adt-mcp HTTP — CORS', () => {
   });
 
   it('preflight from disallowed origin returns 403', async () => {
-    const res = await fetch(`https://127.0.0.1:${server.port}/mcp`, {
+    const res = await tlsFetch(`https://127.0.0.1:${server.port}/mcp`, {
       method: 'OPTIONS',
       headers: {
         Origin: 'https://evil.example.com',
@@ -275,7 +275,7 @@ describe('adt-mcp HTTP — CORS', () => {
   });
 
   it('regular request from allowed origin has CORS response headers', async () => {
-    const res = await fetch(`https://127.0.0.1:${server.port}/healthz`, {
+    const res = await tlsFetch(`https://127.0.0.1:${server.port}/healthz`, {
       headers: { Origin: 'https://app.example.com' },
     });
     assert.strictEqual(res.status, 200);

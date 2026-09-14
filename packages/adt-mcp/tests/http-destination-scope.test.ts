@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getTestTlsMaterial } from './_tls-fixtures.js';
+import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
 
 const tlsFixture = getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -45,7 +45,9 @@ test('HTTP destination mode projects only read-scoped tools without weakening hi
     },
     log: () => undefined,
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url));
+  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
+  });
   const client = new Client({ name: 'http-list-scope-test', version: '0.0.1' });
   await client.connect(transport);
 
@@ -159,7 +161,9 @@ test('HTTP destination mode snapshots trusted access against provider mutation',
     },
     log: () => undefined,
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url));
+  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
+  });
   const client = new Client({
     name: 'http-access-snapshot-test',
     version: '0.0.1',
@@ -252,7 +256,9 @@ test('HTTP destination mode treats malformed trusted access as no access', async
     },
     log: () => undefined,
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url));
+  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
+  });
   const client = new Client({
     name: 'http-malformed-access-test',
     version: '0.0.1',
@@ -318,7 +324,9 @@ test('HTTP destination mode lists no operational tools without an authorised des
     },
     log: () => undefined,
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url));
+  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
+  });
   const client = new Client({
     name: 'http-empty-destination-test',
     version: '0.0.1',
@@ -387,7 +395,9 @@ test('HTTP destination mode fails closed when trusted access is absent', async (
     },
     log: () => undefined,
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url));
+  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
+  });
   const client = new Client({ name: 'http-scope-test', version: '0.0.1' });
   await client.connect(transport);
   // The value resolved at initialization is intentionally retained. A later
@@ -457,7 +467,9 @@ test('HTTP destination mode rejects a session when trusted identity derivation l
     },
     log: () => undefined,
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url));
+  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
+  });
   const client = new Client({ name: 'http-identity-test', version: '0.0.1' });
   await client.connect(transport);
   identityAvailable = false;
@@ -521,6 +533,7 @@ test('HTTP destination mode rejects a session used by another authenticated prin
     log: () => undefined,
   });
   const transport = new StreamableHTTPClientTransport(new URL(server.url), {
+    fetch: tlsFetch,
     requestInit: { headers: { 'X-Forwarded-User': 'alice' } },
   });
   const client = new Client({ name: 'http-session-test', version: '0.0.1' });
@@ -528,7 +541,7 @@ test('HTTP destination mode rejects a session used by another authenticated prin
   assert.ok(transport.sessionId);
 
   try {
-    const response = await fetch(server.url, {
+    const response = await tlsFetch(server.url, {
       method: 'POST',
       headers: {
         Accept: 'application/json, text/event-stream',

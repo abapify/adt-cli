@@ -24,8 +24,16 @@ import { Client as McpClient } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 /* eslint-disable-next-line @nx/enforce-module-boundaries */
 import { startHttpServer, type RunningHttpServer } from '@abapify/adt-mcp';
+/* eslint-disable-next-line @nx/enforce-module-boundaries */
+import { getTestTlsMaterial } from '@abapify/adt-fixtures';
+import tls from 'node:tls';
 
 import { startAdtHarness, runCliCommand, type AdtHarness } from './index';
+
+// Trust the generated test certificate by appending it to the default CA
+// store — TLS verification stays fully enabled (no NODE_TLS_REJECT_UNAUTHORIZED).
+const tlsMaterial = getTestTlsMaterial();
+tls.setDefaultCACertificates([...tls.rootCertificates, tlsMaterial.cert]);
 
 interface ToolText {
   content: Array<{ type: string; text?: string }>;
@@ -68,6 +76,8 @@ describe('CLI + MCP parity (changeset)', () => {
       port: 0,
       host: '127.0.0.1',
       log: () => undefined,
+      tlsCertContent: tlsMaterial.cert,
+      tlsKeyContent: tlsMaterial.key,
     });
   }, 30_000);
 

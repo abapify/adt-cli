@@ -8,7 +8,7 @@
  */
 
 import { describe, it, before, after } from 'node:test';
-import { getTestTlsMaterial } from './_tls-fixtures.js';
+import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
 
 const tlsFixture = getTestTlsMaterial();
 import assert from 'node:assert';
@@ -80,7 +80,9 @@ describe('adt-mcp HTTP integration', () => {
     client: Client;
     transport: StreamableHTTPClientTransport;
   }> {
-    const transport = new StreamableHTTPClientTransport(new URL(http.url));
+    const transport = new StreamableHTTPClientTransport(new URL(http.url), {
+      fetch: tlsFetch,
+    });
     const client = new Client({ name: 'http-it', version: '0.0.1' });
     await client.connect(transport);
     return { client, transport };

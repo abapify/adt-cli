@@ -35,3 +35,7 @@ export type {
   RouteResult,
   LoadedFixtures,
 } from './mock-server/server';
+
+// Test-only TLS material — self-signed cert/key for HTTPS test listeners
+export { getTestTlsMaterial } from './tls';
+export type { TestTlsMaterial } from './tls';
