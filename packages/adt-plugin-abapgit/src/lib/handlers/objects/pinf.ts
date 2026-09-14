@@ -3,7 +3,7 @@
  */
 
 import { pinf } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type PackageInterfaceLike = {
   name: string;
@@ -11,11 +11,6 @@ type PackageInterfaceLike = {
   description?: string;
   elements?: Array<{ elementName?: string; elementType?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const packageInterfaceHandler = createHandler<
   PackageInterfaceLike,

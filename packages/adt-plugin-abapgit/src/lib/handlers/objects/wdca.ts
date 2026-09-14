@@ -3,7 +3,7 @@
  */
 
 import { wdca } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type WdcaLike = {
@@ -13,11 +13,6 @@ type WdcaLike = {
   data?: Array<{ compName?: string; content?: string }>;
   descrLang?: string;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const wdcaHandler = createHandler<WdcaLike, typeof wdca>('WDCA', {
   schema: wdca,

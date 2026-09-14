@@ -7,7 +7,7 @@
  */
 
 import { form } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type FormLike = {
@@ -19,11 +19,6 @@ type FormLike = {
   windows?: Array<{ window?: string; pageName?: string }>;
   paragraphs?: Array<{ paragraph?: string; text?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const formHandler = createHandler<FormLike, typeof form>('FORM', {
   schema: form,

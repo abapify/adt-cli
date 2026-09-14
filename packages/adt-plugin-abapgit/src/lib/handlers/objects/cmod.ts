@@ -3,7 +3,7 @@
  */
 
 import { cmod } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type EnhancementProjectLike = {
@@ -12,11 +12,6 @@ type EnhancementProjectLike = {
   texts?: Array<{ name?: string; language?: string; text?: string }>;
   attributes?: Array<{ name?: string; status?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const enhancementProjectHandler = createHandler<
   EnhancementProjectLike,

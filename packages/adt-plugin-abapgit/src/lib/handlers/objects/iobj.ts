@@ -6,7 +6,7 @@
  */
 
 import { iobj } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type InfoObjectLike = {
   name: string;
@@ -17,11 +17,6 @@ type InfoObjectLike = {
   compounds?: Array<{ iobjnm?: string; compound?: string }>;
   attributes?: Array<{ atrnm?: string; attrib?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const infoObjectHandler = createHandler<InfoObjectLike, typeof iobj>(
   'IOBJ',

@@ -3,7 +3,7 @@
  */
 
 import { oa2p } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type Oauth2ProfileLike = {
   name: string;
@@ -11,11 +11,6 @@ type Oauth2ProfileLike = {
   type?: string;
   scopes?: Array<{ scope?: string; description?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const oauth2ProfileHandler = createHandler<
   Oauth2ProfileLike,

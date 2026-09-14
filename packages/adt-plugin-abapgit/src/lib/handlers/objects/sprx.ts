@@ -3,7 +3,7 @@
  */
 
 import { sprx } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type ProxyObjectLike = {
   name: string;
@@ -24,11 +24,6 @@ type ProxyObjectLike = {
     r3Name?: string;
   }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
   'SPRX',

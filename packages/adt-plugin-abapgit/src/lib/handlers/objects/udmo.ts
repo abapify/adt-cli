@@ -3,7 +3,7 @@
  */
 
 import { udmo } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type DataModelLike = {
@@ -13,11 +13,6 @@ type DataModelLike = {
   entities?: Array<{ entId?: string; as4local?: string }>;
   texts?: Array<{ language?: string; longText?: string; as4local?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const dataModelHandler = createHandler<DataModelLike, typeof udmo>(
   'UDMO',

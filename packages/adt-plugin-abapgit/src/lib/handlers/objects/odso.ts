@@ -6,7 +6,7 @@
  */
 
 import { odso } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type DataStoreObjectLike = {
   name: string;
@@ -15,11 +15,6 @@ type DataStoreObjectLike = {
   version?: string;
   infoObjects?: Array<{ infoobject?: string; keyflag?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const dataStoreObjectHandler = createHandler<
   DataStoreObjectLike,

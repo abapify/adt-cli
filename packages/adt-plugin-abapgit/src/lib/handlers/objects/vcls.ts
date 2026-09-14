@@ -3,7 +3,7 @@
  */
 
 import { vcls } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type ViewClusterLike = {
   name: string;
@@ -12,11 +12,6 @@ type ViewClusterLike = {
   structures?: Array<{ object?: string; objText?: string }>;
   maintenanceForms?: Array<{ object?: string; form?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
   'VCLS',

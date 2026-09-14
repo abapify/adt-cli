@@ -3,7 +3,7 @@
  */
 
 import { sfbf } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type BusinessFunctionLike = {
   name: string;
@@ -12,11 +12,6 @@ type BusinessFunctionLike = {
   assignedSwitches?: string[];
   parentBfs?: string[];
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const businessFunctionHandler = createHandler<
   BusinessFunctionLike,

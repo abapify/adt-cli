@@ -6,7 +6,7 @@
  */
 
 import { sucu } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type AuthGroupLike = {
@@ -15,11 +15,6 @@ type AuthGroupLike = {
   description?: string;
   language?: string;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const authGroupHandler = createHandler<AuthGroupLike, typeof sucu>(
   'SUCU',
