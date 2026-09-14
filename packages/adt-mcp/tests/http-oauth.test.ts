@@ -14,9 +14,13 @@
  * logic end-to-end.
  */
 import { describe, it, before, after } from 'node:test';
-import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
+import {
+  getTestTlsMaterial,
+  tlsFetch,
+  testTlsOptions,
+} from './_tls-fixtures.js';
 
-const tlsFixture = getTestTlsMaterial();
+getTestTlsMaterial();
 import assert from 'node:assert';
 import http from 'node:http';
 import { AddressInfo } from 'node:net';
@@ -164,8 +168,7 @@ describe('adt-mcp HTTP auth — mode=oauth (JWKS explicit)', () => {
     __resetOAuthDiscoveryCacheForTests();
     idp = await startMockIdp();
     server = await startHttpServer({
-      tlsCertContent: tlsFixture.cert,
-      tlsKeyContent: tlsFixture.key,
+      ...testTlsOptions(),
       port: 0,
       host: '127.0.0.1',
       authMode: 'oauth',
@@ -291,8 +294,7 @@ describe('adt-mcp HTTP auth — mode=oauth (OIDC discovery fallback)', () => {
     idp = await startMockIdp();
     // No jwksUri → force discovery.
     server = await startHttpServer({
-      tlsCertContent: tlsFixture.cert,
-      tlsKeyContent: tlsFixture.key,
+      ...testTlsOptions(),
       port: 0,
       host: '127.0.0.1',
       authMode: 'oauth',
@@ -326,8 +328,7 @@ describe('adt-mcp HTTP auth — mode=oauth config errors', () => {
     await assert.rejects(
       async () =>
         await startHttpServer({
-          tlsCertContent: tlsFixture.cert,
-          tlsKeyContent: tlsFixture.key,
+          ...testTlsOptions(),
           port: 0,
           host: '127.0.0.1',
           authMode: 'oauth',

@@ -17,9 +17,13 @@
  * That's enough to distinguish "auth passed" from "auth blocked".
  */
 import { describe, it, before, after } from 'node:test';
-import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
+import {
+  getTestTlsMaterial,
+  tlsFetch,
+  testTlsOptions,
+} from './_tls-fixtures.js';
 
-const tlsFixture = getTestTlsMaterial();
+getTestTlsMaterial();
 import assert from 'node:assert';
 import { startHttpServer } from '../src/lib/http/server.js';
 import { createSessionRegistry } from '../src/lib/session/registry.js';
@@ -75,8 +79,7 @@ describe('adt-mcp HTTP auth — mode=none (default)', () => {
   let server: RunningHttpServer;
   before(async () => {
     server = await startHttpServer({
-      tlsCertContent: tlsFixture.cert,
-      tlsKeyContent: tlsFixture.key,
+      ...testTlsOptions(),
       port: 0,
       host: '127.0.0.1',
       registry: emptyRegistry(),
@@ -108,8 +111,7 @@ describe('adt-mcp HTTP auth — mode=bearer', () => {
   const token = 'super-secret-test-token-abc123';
   before(async () => {
     server = await startHttpServer({
-      tlsCertContent: tlsFixture.cert,
-      tlsKeyContent: tlsFixture.key,
+      ...testTlsOptions(),
       port: 0,
       host: '127.0.0.1',
       authMode: 'bearer',
@@ -162,8 +164,7 @@ describe('adt-mcp HTTP auth — mode=bearer', () => {
     await assert.rejects(
       async () =>
         await startHttpServer({
-          tlsCertContent: tlsFixture.cert,
-          tlsKeyContent: tlsFixture.key,
+          ...testTlsOptions(),
           port: 0,
           host: '127.0.0.1',
           authMode: 'bearer',
@@ -180,8 +181,7 @@ describe('adt-mcp HTTP auth — mode=proxy (trustForwardedAuth)', () => {
   let server: RunningHttpServer;
   before(async () => {
     server = await startHttpServer({
-      tlsCertContent: tlsFixture.cert,
-      tlsKeyContent: tlsFixture.key,
+      ...testTlsOptions(),
       port: 0,
       host: '127.0.0.1',
       trustForwardedAuth: true,
@@ -213,8 +213,7 @@ describe('adt-mcp HTTP — CORS', () => {
   let server: RunningHttpServer;
   before(async () => {
     server = await startHttpServer({
-      tlsCertContent: tlsFixture.cert,
-      tlsKeyContent: tlsFixture.key,
+      ...testTlsOptions(),
       port: 0,
       host: '127.0.0.1',
       allowedOrigins: ['https://app.example.com'],

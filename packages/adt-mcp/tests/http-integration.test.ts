@@ -8,9 +8,13 @@
  */
 
 import { describe, it, before, after } from 'node:test';
-import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
+import {
+  getTestTlsMaterial,
+  createTlsTransport,
+  testTlsOptions,
+} from './_tls-fixtures.js';
 
-const tlsFixture = getTestTlsMaterial();
+getTestTlsMaterial();
 import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -56,8 +60,7 @@ describe('adt-mcp HTTP integration', () => {
     const registry = createSessionRegistry({ ttlMs: 0 });
 
     http = await startHttpServer({
-      tlsCertContent: tlsFixture.cert,
-      tlsKeyContent: tlsFixture.key,
+      ...testTlsOptions(),
       port: 0,
       host: '127.0.0.1',
       registry,
@@ -80,9 +83,7 @@ describe('adt-mcp HTTP integration', () => {
     client: Client;
     transport: StreamableHTTPClientTransport;
   }> {
-    const transport = new StreamableHTTPClientTransport(new URL(http.url), {
-      fetch: tlsFetch,
-    });
+    const transport = createTlsTransport(http.url);
     const client = new Client({ name: 'http-it', version: '0.0.1' });
     await client.connect(transport);
     return { client, transport };

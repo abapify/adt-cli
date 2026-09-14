@@ -1,5 +1,9 @@
 import tls from 'node:tls';
 import {
+  StreamableHTTPClientTransport,
+  type StreamableHTTPClientTransportOptions,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import {
   getTestTlsMaterial as loadTestTlsMaterial,
   type TestTlsMaterial,
 } from '@abapify/adt-fixtures';
@@ -8,6 +12,15 @@ export type { TestTlsMaterial };
 
 const isBun = typeof (globalThis as { Bun?: unknown }).Bun !== 'undefined';
 let caInstalled = false;
+
+/** `tlsCertContent`/`tlsKeyContent` pair for `startHttpServer` options. */
+export function testTlsOptions(): {
+  tlsCertContent: string;
+  tlsKeyContent: string;
+} {
+  const material = getTestTlsMaterial();
+  return { tlsCertContent: material.cert, tlsKeyContent: material.key };
+}
 
 /**
  * Returns the shared self-signed test cert/key pair.
@@ -37,8 +50,32 @@ export function tlsFetch(
   init: RequestInit = {},
 ): Promise<Response> {
   const material = getTestTlsMaterial();
+  const { hostname } = new URL(url);
+  // This helper exists for loopback test servers only — never forward it
+  // arbitrary URLs (Codacy SSRF pattern).
+  if (
+    hostname !== '127.0.0.1' &&
+    hostname !== 'localhost' &&
+    hostname !== '::1' &&
+    hostname !== '[::1]'
+  ) {
+    throw new Error(
+      `tlsFetch is restricted to loopback hosts, got ${hostname}`,
+    );
+  }
   return fetch(url, {
     ...init,
     tls: { ca: material.cert },
   } as RequestInit);
+}
+
+/** StreamableHTTP client transport wired to `tlsFetch`. */
+export function createTlsTransport(
+  url: string,
+  options: StreamableHTTPClientTransportOptions = {},
+): StreamableHTTPClientTransport {
+  return new StreamableHTTPClientTransport(new URL(url), {
+    fetch: tlsFetch,
+    ...options,
+  });
 }

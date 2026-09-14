@@ -5,11 +5,15 @@
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getTestTlsMaterial, tlsFetch } from './_tls-fixtures.js';
+import {
+  getTestTlsMaterial,
+  tlsFetch,
+  createTlsTransport,
+  testTlsOptions,
+} from './_tls-fixtures.js';
 
-const tlsFixture = getTestTlsMaterial();
+getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { generateKeyPair, SignJWT, type CryptoKey } from 'jose';
 import { createMcpInvocationVerifier } from '../src/lib/http/invocation.js';
 import {
@@ -95,8 +99,7 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
     audience,
   });
   const server = await startHttpServer({
-    tlsCertContent: tlsFixture.cert,
-    tlsKeyContent: tlsFixture.key,
+    ...testTlsOptions(),
     port: 0,
     host: '127.0.0.1',
     authMode: 'invocation',
@@ -116,8 +119,7 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
     log: () => undefined,
   });
   const credential = await signInvocation(privateKey);
-  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
-    fetch: tlsFetch,
+  const transport = createTlsTransport(server.url, {
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({ name: 'invocation-auth-test', version: '0.0.1' });
@@ -204,8 +206,7 @@ test('ADT invocation auth fails closed for an AI Review policy the sidecar canno
     ttlMs: 0,
   });
   const server = await startHttpServer({
-    tlsCertContent: tlsFixture.cert,
-    tlsKeyContent: tlsFixture.key,
+    ...testTlsOptions(),
     port: 0,
     host: '127.0.0.1',
     authMode: 'invocation',
@@ -224,8 +225,7 @@ test('ADT invocation auth fails closed for an AI Review policy the sidecar canno
     log: () => undefined,
   });
   const credential = await signInvocation(privateKey, { agentId: 'ai-review' });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
-    fetch: tlsFetch,
+  const transport = createTlsTransport(server.url, {
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({
@@ -270,8 +270,7 @@ test('AI Review exposes only its signed frozen-source tool', async () => {
     },
   });
   const server = await startHttpServer({
-    tlsCertContent: tlsFixture.cert,
-    tlsKeyContent: tlsFixture.key,
+    ...testTlsOptions(),
     port: 0,
     host: '127.0.0.1',
     authMode: 'invocation',
@@ -306,8 +305,7 @@ test('AI Review exposes only its signed frozen-source tool', async () => {
     },
     limits: { maxSourceBytes: 65_536 },
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
-    fetch: tlsFetch,
+  const transport = createTlsTransport(server.url, {
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({
@@ -372,8 +370,7 @@ test('AI Review redeems only the signed source component before acquiring its de
     },
   });
   const server = await startHttpServer({
-    tlsCertContent: tlsFixture.cert,
-    tlsKeyContent: tlsFixture.key,
+    ...testTlsOptions(),
     port: 0,
     host: '127.0.0.1',
     authMode: 'invocation',
@@ -414,8 +411,7 @@ test('AI Review redeems only the signed source component before acquiring its de
     },
     limits: { maxSourceBytes: 65_536 },
   });
-  const transport = new StreamableHTTPClientTransport(new URL(server.url), {
-    fetch: tlsFetch,
+  const transport = createTlsTransport(server.url, {
     requestInit: { headers: { Authorization: `Bearer ${credential}` } },
   });
   const client = new Client({
@@ -495,8 +491,7 @@ test('ADT invocation auth rejects credentials that request write authority', asy
     },
   });
   const server = await startHttpServer({
-    tlsCertContent: tlsFixture.cert,
-    tlsKeyContent: tlsFixture.key,
+    ...testTlsOptions(),
     port: 0,
     host: '127.0.0.1',
     authMode: 'invocation',

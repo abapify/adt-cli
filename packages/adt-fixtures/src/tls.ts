@@ -45,23 +45,21 @@ function isExecutable(path: string): boolean {
   }
 }
 
-function resolveOpenssl(): string {
+function* opensslCandidates(): Generator<string> {
   const override = process.env.ADT_OPENSSL_BIN;
-  const candidates = override
-    ? [override, ...OPENSSL_CANDIDATES]
-    : OPENSSL_CANDIDATES;
-  for (const candidate of candidates) {
-    if (isExecutable(candidate)) return candidate;
-  }
-  // Fall back to a PATH scan (e.g. Nix profiles). The resolved absolute
-  // path — never a bare command name — is passed to execFileSync.
-  const pathExt = process.platform === 'win32' ? ['.exe'] : [''];
+  if (override) yield override;
+  yield* OPENSSL_CANDIDATES;
+  // PATH scan covers non-standard installs (e.g. Nix profiles). The resolved
+  // absolute path — never a bare command name — is passed to execFileSync.
+  const ext = process.platform === 'win32' ? '.exe' : '';
   for (const dir of (process.env.PATH ?? '').split(delimiter)) {
-    if (!dir) continue;
-    for (const ext of pathExt) {
-      const candidate = join(dir, `openssl${ext}`);
-      if (isExecutable(candidate)) return candidate;
-    }
+    if (dir) yield join(dir, `openssl${ext}`);
+  }
+}
+
+function resolveOpenssl(): string {
+  for (const candidate of opensslCandidates()) {
+    if (isExecutable(candidate)) return candidate;
   }
   throw new Error(
     'getTestTlsMaterial: openssl executable not found. Install openssl ' +

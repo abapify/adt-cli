@@ -978,7 +978,8 @@ export async function startHttpServer(
     );
   }
   if (
-    !/-----BEGIN CERTIFICATE-----[\s\S]*-----END CERTIFICATE-----/u.test(cert)
+    !cert.includes('-----BEGIN CERTIFICATE-----') ||
+    !cert.includes('-----END CERTIFICATE-----')
   ) {
     throw new Error(
       'startHttpServer: TLS certificate is not valid PEM — expected a ' +
@@ -987,11 +988,7 @@ export async function startHttpServer(
         '.',
     );
   }
-  if (
-    !/-----BEGIN (?:[A-Z ]+)?PRIVATE KEY-----[\s\S]*-----END (?:[A-Z ]+)?PRIVATE KEY-----/u.test(
-      key,
-    )
-  ) {
+  if (!key.includes('PRIVATE KEY-----')) {
     throw new Error(
       'startHttpServer: TLS private key is not valid PEM — expected a ' +
         '"-----BEGIN ... PRIVATE KEY-----" block' +
