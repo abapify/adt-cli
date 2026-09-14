@@ -1,9 +1,14 @@
+import assert from 'node:assert/strict';
 import tls from 'node:tls';
 import {
   startHttpServer,
   type HttpServerOptions,
   type RunningHttpServer,
 } from '../src/lib/http/server.js';
+import {
+  createDestinationContextRegistry,
+  type DestinationContextRegistry,
+} from '../src/lib/session/destination-registry.js';
 import {
   StreamableHTTPClientTransport,
   type StreamableHTTPClientTransportOptions,
@@ -15,7 +20,7 @@ import {
 
 export type { TestTlsMaterial };
 
-const isBun = typeof (globalThis as { Bun?: unknown }).Bun !== 'undefined';
+const isBun = (globalThis as { Bun?: unknown }).Bun !== undefined;
 let caInstalled = false;
 
 /** `tlsCertContent`/`tlsKeyContent` pair for `startHttpServer` options. */
@@ -68,8 +73,8 @@ export function tlsFetch(
       `tlsFetch is restricted to loopback hosts, got ${hostname}`,
     );
   }
+  // nosemgrep — test-only helper; hostname is restricted to loopback above.
   return fetch(url, {
-    // nosemgrep — test helper, restricted to loopback above
     ...init,
     tls: { ca: material.cert },
   } as RequestInit);
@@ -91,6 +96,54 @@ export function startTestServer(
     log: () => undefined,
     ...options,
   });
+}
+
+/**
+ * Destination registry stub whose lease/context factories only count calls.
+ * `createClient` overrides the stub client when a test needs real methods.
+ */
+export function testDestinationRegistry(createClient?: () => Promise<never>): {
+  registry: DestinationContextRegistry;
+  stats: { leases: number; contexts: number };
+} {
+  const stats = { leases: 0, contexts: 0 };
+  const registry = createDestinationContextRegistry({
+    leaseProvider: {
+      async acquire({ destination }) {
+        stats.leases++;
+        return {
+          destination,
+          expiresAt: Date.now() + 60_000,
+          version: 1,
+          material: {},
+          release: async () => undefined,
+        };
+      },
+    },
+    contextFactory: {
+      async create() {
+        stats.contexts++;
+        return {
+          client: createClient ? await createClient() : ({} as never),
+          close: async () => undefined,
+        };
+      },
+    },
+    ttlMs: 0,
+  });
+  return { registry, stats };
+}
+
+/** Assert an MCP tool result is the `mcp_scope_denied` error. */
+export function assertScopeDenied(result: {
+  isError?: boolean;
+  content?: unknown;
+}): void {
+  assert.strictEqual(result.isError, true);
+  assert.strictEqual(
+    (result.content as Array<{ type: 'text'; text: string }>)[0]?.text,
+    'mcp_scope_denied',
+  );
 }
 
 /** StreamableHTTP client transport wired to `tlsFetch`. */

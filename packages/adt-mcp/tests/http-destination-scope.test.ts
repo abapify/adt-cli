@@ -5,36 +5,15 @@ import {
   tlsFetch,
   createTlsTransport,
   startTestServer,
+  testDestinationRegistry,
+  assertScopeDenied,
 } from './_tls-fixtures.js';
 
 getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { createDestinationContextRegistry } from '../src/lib/session/destination-registry.js';
 
 test('HTTP destination mode projects only read-scoped tools without weakening hidden write dispatch', async () => {
-  let leases = 0;
-  let contexts = 0;
-  const destinations = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
+  const { registry: destinations, stats } = testDestinationRegistry();
   const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
@@ -65,13 +44,9 @@ test('HTTP destination mode projects only read-scoped tools without weakening hi
       name: 'lock_object',
       arguments: { destination: 'dev', objectName: 'ZCL_SCOPE_TEST' },
     });
-    assert.strictEqual(denied.isError, true);
-    assert.strictEqual(
-      (denied.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-      'mcp_scope_denied',
-    );
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assertScopeDenied(denied);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
 
     const deniedGctsWrite = await client.callTool({
       name: 'gcts_config',
@@ -89,8 +64,8 @@ test('HTTP destination mode projects only read-scoped tools without weakening hi
         ?.text,
       'mcp_scope_denied',
     );
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
 
     const allowedGctsRead = await client.callTool({
       name: 'gcts_config',
@@ -113,8 +88,6 @@ test('HTTP destination mode projects only read-scoped tools without weakening hi
 });
 
 test('HTTP destination mode snapshots trusted access against provider mutation', async () => {
-  let leases = 0;
-  let contexts = 0;
   const access: {
     classes: Array<'read' | 'write'>;
     destinationKeys: string[];
@@ -122,27 +95,7 @@ test('HTTP destination mode snapshots trusted access against provider mutation',
     classes: ['read'],
     destinationKeys: ['dev'],
   };
-  const destinations = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
+  const { registry: destinations, stats } = testDestinationRegistry();
   const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
@@ -177,14 +130,10 @@ test('HTTP destination mode snapshots trusted access against provider mutation',
       },
     ]) {
       const denied = await client.callTool(call);
-      assert.strictEqual(denied.isError, true);
-      assert.strictEqual(
-        (denied.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-        'mcp_scope_denied',
-      );
+      assertScopeDenied(denied);
     }
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
 
     const allowed = await client.callTool({
       name: 'gcts_config',
@@ -206,30 +155,8 @@ test('HTTP destination mode snapshots trusted access against provider mutation',
 });
 
 test('HTTP destination mode treats malformed trusted access as no access', async () => {
-  let leases = 0;
-  let contexts = 0;
   const access = JSON.parse('{"classes":"read","destinationKeys":["dev"]}');
-  const destinations = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
+  const { registry: destinations, stats } = testDestinationRegistry();
   const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
@@ -252,13 +179,9 @@ test('HTTP destination mode treats malformed trusted access as no access', async
       name: 'system_info',
       arguments: { destination: 'dev' },
     });
-    assert.strictEqual(denied.isError, true);
-    assert.strictEqual(
-      (denied.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-      'mcp_scope_denied',
-    );
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assertScopeDenied(denied);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
   } finally {
     await transport.close();
     await server.close();
@@ -267,29 +190,7 @@ test('HTTP destination mode treats malformed trusted access as no access', async
 });
 
 test('HTTP destination mode lists no operational tools without an authorised destination', async () => {
-  let leases = 0;
-  let contexts = 0;
-  const destinations = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
+  const { registry: destinations, stats } = testDestinationRegistry();
   const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
@@ -312,13 +213,9 @@ test('HTTP destination mode lists no operational tools without an authorised des
       name: 'system_info',
       arguments: { destination: 'dev' },
     });
-    assert.strictEqual(denied.isError, true);
-    assert.strictEqual(
-      (denied.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-      'mcp_scope_denied',
-    );
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assertScopeDenied(denied);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
   } finally {
     await transport.close();
     await server.close();
@@ -327,32 +224,10 @@ test('HTTP destination mode lists no operational tools without an authorised des
 });
 
 test('HTTP destination mode fails closed when trusted access is absent', async () => {
-  let leases = 0;
-  let contexts = 0;
   // eslint-disable-next-line prefer-const
   let access:
     { classes: Array<'read'>; destinationKeys: Array<string> } | undefined;
-  const destinations = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
+  const { registry: destinations, stats } = testDestinationRegistry();
   const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
@@ -376,14 +251,10 @@ test('HTTP destination mode fails closed when trusted access is absent', async (
       },
     ]) {
       const result = await client.callTool(call);
-      assert.strictEqual(result.isError, true);
-      assert.strictEqual(
-        (result.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-        'mcp_scope_denied',
-      );
+      assertScopeDenied(result);
     }
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
   } finally {
     await transport.close();
     await server.close();
@@ -392,28 +263,8 @@ test('HTTP destination mode fails closed when trusted access is absent', async (
 });
 
 test('HTTP destination mode rejects a session when trusted identity derivation later fails', async () => {
-  let leases = 0;
   let identityAvailable = true;
-  const destinations = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
+  const { registry: destinations, stats } = testDestinationRegistry();
   const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
@@ -438,7 +289,7 @@ test('HTTP destination mode rejects a session when trusted identity derivation l
         }),
       /mcp_session_identity_mismatch/u,
     );
-    assert.strictEqual(leases, 0);
+    assert.strictEqual(stats.leases, 0);
   } finally {
     await transport.close();
     await server.close();
@@ -447,29 +298,7 @@ test('HTTP destination mode rejects a session when trusted identity derivation l
 });
 
 test('HTTP destination mode rejects a session used by another authenticated principal', async () => {
-  let leases = 0;
-  let contexts = 0;
-  const destinations = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
+  const { registry: destinations, stats } = testDestinationRegistry();
   const server = await startTestServer({
     trustForwardedAuth: true,
     destinationServer: {
@@ -513,8 +342,8 @@ test('HTTP destination mode rejects a session used by another authenticated prin
       error?: { message?: string };
     };
     assert.strictEqual(body.error?.message, 'mcp_session_identity_mismatch');
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
   } finally {
     await transport.close();
     await server.close();

@@ -10,13 +10,19 @@ import {
   tlsFetch,
   createTlsTransport,
   startTestServer,
+  testDestinationRegistry,
+  assertScopeDenied,
 } from './_tls-fixtures.js';
 
 getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { generateKeyPair, SignJWT, type CryptoKey } from 'jose';
 import { createMcpInvocationVerifier } from '../src/lib/http/invocation.js';
-import { createHttpMcpHandler } from '../src/lib/http/server.js';
+import {
+  createHttpMcpHandler,
+  type HttpServerOptions,
+  type RunningHttpServer,
+} from '../src/lib/http/server.js';
 import { createDestinationContextRegistry } from '../src/lib/session/destination-registry.js';
 
 const issuer = 'adt-api';
@@ -64,51 +70,35 @@ async function signInvocation(
     .sign(privateKey);
 }
 
+async function startInvocationServer(
+  publicKey: CryptoKey,
+  destinationServer: HttpServerOptions['destinationServer'],
+): Promise<RunningHttpServer> {
+  return startTestServer({
+    authMode: 'invocation',
+    invocationVerifier: createMcpInvocationVerifier({
+      publicKey,
+      keyId,
+      issuer,
+      audience,
+    }),
+    destinationServer,
+  });
+}
+
 test('ADT invocation auth snapshots verified read scope and binds continuation to its JTI', async () => {
   const { privateKey, publicKey } = await generateKeyPair('ES256');
-  let leases = 0;
-  let contexts = 0;
-  const destinationRegistry = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
-  const verifier = createMcpInvocationVerifier({
-    publicKey,
-    keyId,
-    issuer,
-    audience,
-  });
-  const server = await startTestServer({
-    authMode: 'invocation',
-    invocationVerifier: verifier,
-    destinationServer: {
-      destinationRegistry,
-      requestIdentity: () => ({
-        principal: 'untrusted-callback-principal',
-        agentId: 'untrusted-callback-agent',
-      }),
-      requestAccess: () => ({
-        classes: ['write'],
-        destinationKeys: ['prod'],
-      }),
-    },
+  const { registry: destinationRegistry, stats } = testDestinationRegistry();
+  const server = await startInvocationServer(publicKey, {
+    destinationRegistry,
+    requestIdentity: () => ({
+      principal: 'untrusted-callback-principal',
+      agentId: 'untrusted-callback-agent',
+    }),
+    requestAccess: () => ({
+      classes: ['write'],
+      destinationKeys: ['prod'],
+    }),
   });
   const credential = await signInvocation(privateKey);
   const transport = createTlsTransport(server.url, {
@@ -128,13 +118,9 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
       name: 'lock_object',
       arguments: { destination: 'dev', objectName: 'ZCL_SCOPE_TEST' },
     });
-    assert.strictEqual(denied.isError, true);
-    assert.strictEqual(
-      (denied.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-      'mcp_scope_denied',
-    );
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assertScopeDenied(denied);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
 
     const replacementCredential = await signInvocation(privateKey, {
       tokenId: 'invocation-jti-2',
@@ -163,8 +149,8 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
       error: { code: -32000, message: 'mcp_session_identity_mismatch' },
       id: null,
     });
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
   } finally {
     await transport.close();
     await server.close();
@@ -174,42 +160,11 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
 
 test('ADT invocation auth fails closed for an AI Review policy the sidecar cannot yet enforce', async () => {
   const { privateKey, publicKey } = await generateKeyPair('ES256');
-  let leases = 0;
-  let contexts = 0;
-  const destinationRegistry = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return { client: {} as never, close: async () => undefined };
-      },
-    },
-    ttlMs: 0,
-  });
-  const server = await startTestServer({
-    authMode: 'invocation',
-    invocationVerifier: createMcpInvocationVerifier({
-      publicKey,
-      keyId,
-      issuer,
-      audience,
-    }),
-    destinationServer: {
-      destinationRegistry,
-      requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
-      requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
-    },
+  const { registry: destinationRegistry, stats } = testDestinationRegistry();
+  const server = await startInvocationServer(publicKey, {
+    destinationRegistry,
+    requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
+    requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
   });
   const credential = await signInvocation(privateKey, { agentId: 'ai-review' });
   const transport = createTlsTransport(server.url, {
@@ -228,13 +183,9 @@ test('ADT invocation auth fails closed for an AI Review policy the sidecar canno
       name: 'system_info',
       arguments: { destination: 'dev' },
     });
-    assert.strictEqual(denied.isError, true);
-    assert.strictEqual(
-      (denied.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-      'mcp_scope_denied',
-    );
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assertScopeDenied(denied);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
   } finally {
     await transport.close();
     await server.close();
@@ -256,19 +207,10 @@ test('AI Review exposes only its signed frozen-source tool', async () => {
       },
     },
   });
-  const server = await startTestServer({
-    authMode: 'invocation',
-    invocationVerifier: createMcpInvocationVerifier({
-      publicKey,
-      keyId,
-      issuer,
-      audience,
-    }),
-    destinationServer: {
-      destinationRegistry,
-      requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
-      requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
-    },
+  const server = await startInvocationServer(publicKey, {
+    destinationRegistry,
+    requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
+    requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
   });
   const credential = await signInvocation(privateKey, {
     agentId: 'ai-review',
@@ -310,65 +252,35 @@ test('AI Review exposes only its signed frozen-source tool', async () => {
 
 test('AI Review redeems only the signed source component before acquiring its destination', async () => {
   const { privateKey, publicKey } = await generateKeyPair('ES256');
-  let leases = 0;
-  let contexts = 0;
   let boundedSourceReads = 0;
   const resolverCalls: Array<{
     destination: string;
     systemSid: string;
     sourceRef: string;
   }> = [];
-  const destinationRegistry = createDestinationContextRegistry({
-    leaseProvider: {
-      async acquire({ destination }) {
-        leases++;
-        return {
-          destination,
-          expiresAt: Date.now() + 60_000,
-          version: 1,
-          material: {},
-          release: async () => undefined,
-        };
-      },
-    },
-    contextFactory: {
-      async create() {
-        contexts++;
-        return {
-          client: {
-            async readTextBounded(uri: string, maxBytes: number) {
-              boundedSourceReads++;
-              assert.strictEqual(
-                uri,
-                '/sap/bc/adt/oo/classes/zcl_scope_test/source/main',
-              );
-              assert.strictEqual(maxBytes, 65_536);
-              return 'CLASS zcl_scope_test DEFINITION PUBLIC.';
-            },
-          } as never,
-          close: async () => undefined,
-        };
-      },
-    },
-  });
-  const server = await startTestServer({
-    authMode: 'invocation',
-    invocationVerifier: createMcpInvocationVerifier({
-      publicKey,
-      keyId,
-      issuer,
-      audience,
-    }),
-    destinationServer: {
-      destinationRegistry,
-      requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
-      requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
-      async resolveFrozenSource(input) {
-        resolverCalls.push(input);
-        return {
-          sourceUri: '/sap/bc/adt/oo/classes/zcl_scope_test/source/main',
-        };
-      },
+  const { registry: destinationRegistry, stats } = testDestinationRegistry(
+    async () =>
+      ({
+        async readTextBounded(uri: string, maxBytes: number) {
+          boundedSourceReads++;
+          assert.strictEqual(
+            uri,
+            '/sap/bc/adt/oo/classes/zcl_scope_test/source/main',
+          );
+          assert.strictEqual(maxBytes, 65_536);
+          return 'CLASS zcl_scope_test DEFINITION PUBLIC.';
+        },
+      }) as never,
+  );
+  const server = await startInvocationServer(publicKey, {
+    destinationRegistry,
+    requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
+    requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
+    async resolveFrozenSource(input) {
+      resolverCalls.push(input);
+      return {
+        sourceUri: '/sap/bc/adt/oo/classes/zcl_scope_test/source/main',
+      };
     },
   });
   const credential = await signInvocation(privateKey, {
@@ -406,13 +318,9 @@ test('AI Review redeems only the signed source component before acquiring its de
         componentId: 'inactive',
       },
     });
-    assert.strictEqual(denied.isError, true);
-    assert.strictEqual(
-      (denied.content as Array<{ type: 'text'; text: string }>)[0]?.text,
-      'mcp_scope_denied',
-    );
-    assert.strictEqual(leases, 0);
-    assert.strictEqual(contexts, 0);
+    assertScopeDenied(denied);
+    assert.strictEqual(stats.leases, 0);
+    assert.strictEqual(stats.contexts, 0);
     assert.deepStrictEqual(resolverCalls, []);
 
     const accepted = await client.callTool({
@@ -431,8 +339,8 @@ test('AI Review redeems only the signed source component before acquiring its de
         sourceRef: 'v1.opaque-reference',
       },
     ]);
-    assert.strictEqual(leases, 1);
-    assert.strictEqual(contexts, 1);
+    assert.strictEqual(stats.leases, 1);
+    assert.strictEqual(stats.contexts, 1);
     assert.strictEqual(boundedSourceReads, 1);
     assert.deepStrictEqual(
       JSON.parse(
@@ -467,19 +375,10 @@ test('ADT invocation auth rejects credentials that request write authority', asy
       },
     },
   });
-  const server = await startTestServer({
-    authMode: 'invocation',
-    invocationVerifier: createMcpInvocationVerifier({
-      publicKey,
-      keyId,
-      issuer,
-      audience,
-    }),
-    destinationServer: {
-      destinationRegistry,
-      requestIdentity: () => ({ principal: 'must-not-run' }),
-      requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
-    },
+  const server = await startInvocationServer(publicKey, {
+    destinationRegistry,
+    requestIdentity: () => ({ principal: 'must-not-run' }),
+    requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
   });
 
   try {

@@ -32,8 +32,8 @@ const OPENSSL_CANDIDATES = [
   '/usr/local/bin/openssl',
   '/opt/homebrew/bin/openssl',
   '/bin/openssl',
-  'C:\\Program Files\\OpenSSL-Win64\\bin\\openssl.exe',
-  'C:\\Program Files\\Git\\usr\\bin\\openssl.exe',
+  'C:/Program Files/OpenSSL-Win64/bin/openssl.exe',
+  'C:/Program Files/Git/usr/bin/openssl.exe',
 ];
 
 function isExecutable(path: string): boolean {
