@@ -45,6 +45,8 @@ interface ParsedArgs {
   oauthRequiredScopes?: string[];
   oauthUserClaim?: string;
   adtConfigFile?: string;
+  tlsCert?: string;
+  tlsKey?: string;
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -143,6 +145,16 @@ function parseArgs(argv: string[]): ParsedArgs {
         if (v) out.adtConfigFile = v;
         break;
       }
+      case '--tls-cert': {
+        const v = next();
+        if (v) out.tlsCert = v;
+        break;
+      }
+      case '--tls-key': {
+        const v = next();
+        if (v) out.tlsKey = v;
+        break;
+      }
       case '--help':
       case '-h': {
         process.stdout.write(
@@ -155,7 +167,8 @@ function parseArgs(argv: string[]): ParsedArgs {
             '                    [--oauth-required-scope SCOPE]\n' +
             '                    [--oauth-user-claim NAME]\n' +
             '                    [--cors-origin ORIGIN ...]\n' +
-            '                    [--adt-config PATH]\n',
+            '                    [--adt-config PATH]\n' +
+            '                    [--tls-cert PATH] [--tls-key PATH]\n',
         );
         process.exit(0);
       }
@@ -291,6 +304,8 @@ async function main(): Promise<void> {
     trustForwardedAuth: args.trustForwardedAuth || envTrustForwarded,
     oauth: oauthOptions,
     allowedOrigins: [...(args.allowedOrigins ?? []), ...envCorsOrigins],
+    tlsCert: args.tlsCert,
+    tlsKey: args.tlsKey,
   });
 
   if (authMode === 'oauth' && oauthOptions) {

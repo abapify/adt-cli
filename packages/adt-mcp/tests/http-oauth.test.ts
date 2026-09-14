@@ -14,6 +14,9 @@
  * logic end-to-end.
  */
 import { describe, it, before, after } from 'node:test';
+import { getTestTlsMaterial } from './_tls-fixtures.js';
+
+const tlsFixture = getTestTlsMaterial();
 import assert from 'node:assert';
 import http from 'node:http';
 import { AddressInfo } from 'node:net';
@@ -140,7 +143,7 @@ async function probeMcp(
   server: RunningHttpServer,
   headers: Record<string, string> = {},
 ): Promise<Response> {
-  return await fetch(`http://127.0.0.1:${server.port}/mcp`, {
+  return await fetch(`https://127.0.0.1:${server.port}/mcp`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -161,6 +164,8 @@ describe('adt-mcp HTTP auth — mode=oauth (JWKS explicit)', () => {
     __resetOAuthDiscoveryCacheForTests();
     idp = await startMockIdp();
     server = await startHttpServer({
+      tlsCertContent: tlsFixture.cert,
+      tlsKeyContent: tlsFixture.key,
       port: 0,
       host: '127.0.0.1',
       authMode: 'oauth',
@@ -272,7 +277,7 @@ describe('adt-mcp HTTP auth — mode=oauth (JWKS explicit)', () => {
   });
 
   it('/healthz still works without auth', async () => {
-    const res = await fetch(`http://127.0.0.1:${server.port}/healthz`);
+    const res = await fetch(`https://127.0.0.1:${server.port}/healthz`);
     assert.strictEqual(res.status, 200);
   });
 });
@@ -286,6 +291,8 @@ describe('adt-mcp HTTP auth — mode=oauth (OIDC discovery fallback)', () => {
     idp = await startMockIdp();
     // No jwksUri → force discovery.
     server = await startHttpServer({
+      tlsCertContent: tlsFixture.cert,
+      tlsKeyContent: tlsFixture.key,
       port: 0,
       host: '127.0.0.1',
       authMode: 'oauth',
@@ -319,6 +326,8 @@ describe('adt-mcp HTTP auth — mode=oauth config errors', () => {
     await assert.rejects(
       async () =>
         await startHttpServer({
+          tlsCertContent: tlsFixture.cert,
+          tlsKeyContent: tlsFixture.key,
           port: 0,
           host: '127.0.0.1',
           authMode: 'oauth',

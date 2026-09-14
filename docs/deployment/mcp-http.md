@@ -67,13 +67,14 @@ Never commit the registry URL — pass it as a build arg.
 
 ```bash
 bunx nx build adt-mcp
-node packages/adt-mcp/dist/bin/adt-mcp-http.mjs --port 3000
+MCP_TLS_CERT=./cert.pem MCP_TLS_KEY=./key.pem \
+  node packages/adt-mcp/dist/bin/adt-mcp-http.mjs --port 3000
 ```
 
 Smoke test:
 
 ```bash
-curl -sf http://127.0.0.1:3000/healthz
+curl -k -sf https://127.0.0.1:3000/healthz
 # → {"status":"ok"}
 ```
 
@@ -96,10 +97,24 @@ curl -sf http://127.0.0.1:3000/healthz
 | `--oauth-required-scope <s>` (repeatable) | `OAUTH_REQUIRED_SCOPES` (CSV) | —                     | Each scope must be present in the `scope` claim.                                                      |
 | `--oauth-user-claim <name>`               | `OAUTH_USER_CLAIM`            | `sub`                 | JWT claim used as the user identity forwarded to tool handlers.                                       |
 | `--cors-origin <origin>` (repeatable)     | `MCP_CORS_ORIGIN` (CSV)       | —                     | CORS allow-list. Omit to block cross-origin browser clients.                                          |
+| `--tls-cert <path>`                       | `MCP_TLS_CERT`                | —                     | PEM-encoded server certificate. Required for the HTTPS listener.                                      |
+| `--tls-key <path>`                        | `MCP_TLS_KEY`                 | —                     | PEM-encoded server private key. Required for the HTTPS listener.                                      |
 | —                                         | `SAP_SYSTEMS_JSON`            | —                     | Inline multi-system registry as JSON (see [Multi-system configuration](#multi-system-configuration)). |
 | —                                         | `SAP_SYSTEMS_FILE`            | `~/.adt/systems.json` | Path to a JSON systems registry.                                                                      |
 
 Run `adt-mcp-http --help` for the authoritative list.
+
+TLS is mandatory. The server refuses to start without a certificate and private
+key; configure both paths with the flags or environment variables above. MCP
+clients and health checks must use `https://` URLs. For local development,
+generate a short-lived self-signed certificate, for example:
+
+```bash
+openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
+  -keyout key.pem -out cert.pem -days 1 -nodes \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=IP:127.0.0.1,DNS:localhost"
+```
 
 ## Authentication modes
 

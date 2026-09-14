@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { getTestTlsMaterial } from './_tls-fixtures.js';
+
+const tlsFixture = getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { startHttpServer } from '../src/lib/http/server.js';
@@ -30,6 +33,8 @@ test('HTTP destination mode projects only read-scoped tools without weakening hi
     ttlMs: 0,
   });
   const server = await startHttpServer({
+    tlsCertContent: tlsFixture.cert,
+    tlsKeyContent: tlsFixture.key,
     port: 0,
     host: '127.0.0.1',
     multiSystem: { systems: {}, resolve: () => undefined },
@@ -142,6 +147,8 @@ test('HTTP destination mode snapshots trusted access against provider mutation',
     ttlMs: 0,
   });
   const server = await startHttpServer({
+    tlsCertContent: tlsFixture.cert,
+    tlsKeyContent: tlsFixture.key,
     port: 0,
     host: '127.0.0.1',
     multiSystem: { systems: {}, resolve: () => undefined },
@@ -233,6 +240,8 @@ test('HTTP destination mode treats malformed trusted access as no access', async
     ttlMs: 0,
   });
   const server = await startHttpServer({
+    tlsCertContent: tlsFixture.cert,
+    tlsKeyContent: tlsFixture.key,
     port: 0,
     host: '127.0.0.1',
     multiSystem: { systems: {}, resolve: () => undefined },
@@ -297,6 +306,8 @@ test('HTTP destination mode lists no operational tools without an authorised des
     ttlMs: 0,
   });
   const server = await startHttpServer({
+    tlsCertContent: tlsFixture.cert,
+    tlsKeyContent: tlsFixture.key,
     port: 0,
     host: '127.0.0.1',
     multiSystem: { systems: {}, resolve: () => undefined },
@@ -364,6 +375,8 @@ test('HTTP destination mode fails closed when trusted access is absent', async (
     ttlMs: 0,
   });
   const server = await startHttpServer({
+    tlsCertContent: tlsFixture.cert,
+    tlsKeyContent: tlsFixture.key,
     port: 0,
     host: '127.0.0.1',
     multiSystem: { systems: {}, resolve: () => undefined },
@@ -429,6 +442,8 @@ test('HTTP destination mode rejects a session when trusted identity derivation l
     ttlMs: 0,
   });
   const server = await startHttpServer({
+    tlsCertContent: tlsFixture.cert,
+    tlsKeyContent: tlsFixture.key,
     port: 0,
     host: '127.0.0.1',
     multiSystem: { systems: {}, resolve: () => undefined },
@@ -489,6 +504,8 @@ test('HTTP destination mode rejects a session used by another authenticated prin
     ttlMs: 0,
   });
   const server = await startHttpServer({
+    tlsCertContent: tlsFixture.cert,
+    tlsKeyContent: tlsFixture.key,
     port: 0,
     host: '127.0.0.1',
     trustForwardedAuth: true,

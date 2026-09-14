@@ -8,6 +8,9 @@
  */
 
 import { describe, it, before, after } from 'node:test';
+import { getTestTlsMaterial } from './_tls-fixtures.js';
+
+const tlsFixture = getTestTlsMaterial();
 import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -53,6 +56,8 @@ describe('adt-mcp HTTP integration', () => {
     const registry = createSessionRegistry({ ttlMs: 0 });
 
     http = await startHttpServer({
+      tlsCertContent: tlsFixture.cert,
+      tlsKeyContent: tlsFixture.key,
       port: 0,
       host: '127.0.0.1',
       registry,
