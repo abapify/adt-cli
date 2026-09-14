@@ -3,7 +3,7 @@
  */
 
 import { char } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type CharacteristicLike = {
@@ -17,11 +17,6 @@ type CharacteristicLike = {
     description?: string;
   }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const characteristicHandler = createHandler<
   CharacteristicLike,

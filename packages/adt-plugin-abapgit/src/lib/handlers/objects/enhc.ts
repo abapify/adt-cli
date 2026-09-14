@@ -3,7 +3,7 @@
  */
 
 import { enhc } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type EnhancementCompositeLike = {
   name: string;
@@ -12,11 +12,6 @@ type EnhancementCompositeLike = {
   enhChilds?: string[];
   longtextId?: string;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const enhancementCompositeHandler = createHandler<
   EnhancementCompositeLike,

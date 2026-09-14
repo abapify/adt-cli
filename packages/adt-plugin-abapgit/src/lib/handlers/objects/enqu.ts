@@ -7,7 +7,7 @@
  */
 
 import { enqu } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type LockObjectLike = {
@@ -88,11 +88,6 @@ export const lockObjectHandler = createHandler<LockObjectLike, typeof enqu>(
     fromAbapGit: parseLockObjectFromAbapGit,
   },
 );
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 function parseEnquTable(t: {
   TABNAME?: string;

@@ -7,7 +7,7 @@
  */
 
 import { shlp } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type SearchHelpLike = {
@@ -105,11 +105,6 @@ export const searchHelpHandler = createHandler<SearchHelpLike, typeof shlp>(
     fromAbapGit: parseSearchHelpFromAbapGit,
   },
 );
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 function parseShlpParam(p: {
   FIELDNAME?: string;

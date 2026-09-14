@@ -7,18 +7,13 @@
  */
 
 import { w3mi } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type W3MimeLike = {
   name: string;
   text?: string;
   params?: Array<{ name?: string; value?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const w3miHandler = createHandler<W3MimeLike, typeof w3mi>('W3MI', {
   schema: w3mi,

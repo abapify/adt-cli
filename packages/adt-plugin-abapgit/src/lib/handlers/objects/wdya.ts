@@ -3,7 +3,7 @@
  */
 
 import { wdya } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type WdyaLike = {
   name: string;
@@ -12,11 +12,6 @@ type WdyaLike = {
   description?: string;
   properties?: Array<{ name?: string; value?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const webDynproAppHandler = createHandler<WdyaLike, typeof wdya>(
   'WDYA',

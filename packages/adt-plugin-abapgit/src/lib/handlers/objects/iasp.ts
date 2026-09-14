@@ -3,7 +3,7 @@
  */
 
 import { iasp } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type ArchivePathLike = {
   name: string;
@@ -11,11 +11,6 @@ type ArchivePathLike = {
   version?: string;
   parameters?: Array<{ name?: string; value?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const archivePathHandler = createHandler<ArchivePathLike, typeof iasp>(
   'IASP',

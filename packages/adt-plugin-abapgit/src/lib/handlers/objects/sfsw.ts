@@ -3,7 +3,7 @@
  */
 
 import { sfsw } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type SwitchLike = {
   name: string;
@@ -13,11 +13,6 @@ type SwitchLike = {
   conflicts?: string[];
   packages?: string[];
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const switchHandler = createHandler<SwitchLike, typeof sfsw>('SFSW', {
   schema: sfsw,

@@ -7,18 +7,13 @@
  */
 
 import { w3ht } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type W3TemplateLike = {
   name: string;
   text?: string;
   params?: Array<{ name?: string; value?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const w3htHandler = createHandler<W3TemplateLike, typeof w3ht>('W3HT', {
   schema: w3ht,

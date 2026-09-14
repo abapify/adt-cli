@@ -3,7 +3,7 @@
  */
 
 import { xinx } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 
 type ExtensionIndexLike = {
   name: string;
@@ -13,11 +13,6 @@ type ExtensionIndexLike = {
   unique?: boolean;
   fields?: Array<{ position?: string; fieldName?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const extensionIndexHandler = createHandler<
   ExtensionIndexLike,

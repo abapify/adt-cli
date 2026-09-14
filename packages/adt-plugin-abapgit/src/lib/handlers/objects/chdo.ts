@@ -6,7 +6,7 @@
  */
 
 import { chdo } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type ChangeDocumentObjectLike = {

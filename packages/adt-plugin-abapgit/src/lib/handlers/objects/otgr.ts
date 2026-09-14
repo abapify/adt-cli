@@ -3,7 +3,7 @@
  */
 
 import { otgr } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type ObjectTypeGroupLike = {
@@ -12,11 +12,6 @@ type ObjectTypeGroupLike = {
   texts?: Array<{ language?: string; text?: string }>;
   elements?: Array<{ objType?: string }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const objectTypeGroupHandler = createHandler<
   ObjectTypeGroupLike,
