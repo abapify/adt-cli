@@ -20,7 +20,7 @@ import { describe, it, before, after } from 'node:test';
 import {
   getTestTlsMaterial,
   tlsFetch,
-  testTlsOptions,
+  startTestServer,
 } from './_tls-fixtures.js';
 
 getTestTlsMaterial();
@@ -40,7 +40,6 @@ describe('adt-mcp HTTPS startup', () => {
         startHttpServer({
           port: 0,
           host: '127.0.0.1',
-          multiSystem: { systems: {}, resolve: () => undefined },
           log: noopLog,
           tlsCert: undefined,
           tlsKey: undefined,
@@ -78,13 +77,8 @@ async function probeMcp(
 describe('adt-mcp HTTP auth — mode=none (default)', () => {
   let server: RunningHttpServer;
   before(async () => {
-    server = await startHttpServer({
-      ...testTlsOptions(),
-      port: 0,
-      host: '127.0.0.1',
+    server = await startTestServer({
       registry: emptyRegistry(),
-      multiSystem: { systems: {}, resolve: () => undefined },
-      log: noopLog,
     });
   });
   after(async () => {
@@ -110,15 +104,10 @@ describe('adt-mcp HTTP auth — mode=bearer', () => {
   let server: RunningHttpServer;
   const token = 'super-secret-test-token-abc123';
   before(async () => {
-    server = await startHttpServer({
-      ...testTlsOptions(),
-      port: 0,
-      host: '127.0.0.1',
+    server = await startTestServer({
       authMode: 'bearer',
       authToken: token,
       registry: emptyRegistry(),
-      multiSystem: { systems: {}, resolve: () => undefined },
-      log: noopLog,
     });
   });
   after(async () => {
@@ -163,14 +152,9 @@ describe('adt-mcp HTTP auth — mode=bearer', () => {
   it('throws at startup when bearer mode has no token', async () => {
     await assert.rejects(
       async () =>
-        await startHttpServer({
-          ...testTlsOptions(),
-          port: 0,
-          host: '127.0.0.1',
+        await startTestServer({
           authMode: 'bearer',
           registry: emptyRegistry(),
-          multiSystem: { systems: {}, resolve: () => undefined },
-          log: noopLog,
         }),
       /bearer mode requires a non-empty token/u,
     );
@@ -180,14 +164,9 @@ describe('adt-mcp HTTP auth — mode=bearer', () => {
 describe('adt-mcp HTTP auth — mode=proxy (trustForwardedAuth)', () => {
   let server: RunningHttpServer;
   before(async () => {
-    server = await startHttpServer({
-      ...testTlsOptions(),
-      port: 0,
-      host: '127.0.0.1',
+    server = await startTestServer({
       trustForwardedAuth: true,
       registry: emptyRegistry(),
-      multiSystem: { systems: {}, resolve: () => undefined },
-      log: noopLog,
     });
   });
   after(async () => {
@@ -212,14 +191,9 @@ describe('adt-mcp HTTP auth — mode=proxy (trustForwardedAuth)', () => {
 describe('adt-mcp HTTP — CORS', () => {
   let server: RunningHttpServer;
   before(async () => {
-    server = await startHttpServer({
-      ...testTlsOptions(),
-      port: 0,
-      host: '127.0.0.1',
+    server = await startTestServer({
       allowedOrigins: ['https://app.example.com'],
       registry: emptyRegistry(),
-      multiSystem: { systems: {}, resolve: () => undefined },
-      log: noopLog,
     });
   });
   after(async () => {

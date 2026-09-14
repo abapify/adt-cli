@@ -11,7 +11,7 @@ import { describe, it, before, after } from 'node:test';
 import {
   getTestTlsMaterial,
   createTlsTransport,
-  testTlsOptions,
+  startTestServer,
 } from './_tls-fixtures.js';
 
 getTestTlsMaterial();
@@ -19,7 +19,6 @@ import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { startHttpServer } from '../src/lib/http/server.js';
 import { createSessionRegistry } from '../src/lib/session/registry.js';
 import {
   createMockAdtServer,
@@ -59,10 +58,7 @@ describe('adt-mcp HTTP integration', () => {
     // multi-system resolver keyed on "MOCK" → mock backend.
     const registry = createSessionRegistry({ ttlMs: 0 });
 
-    http = await startHttpServer({
-      ...testTlsOptions(),
-      port: 0,
-      host: '127.0.0.1',
+    http = await startTestServer({
       registry,
       multiSystem: {
         systems: { MOCK: { baseUrl: `http://localhost:${mockPort}` } },
@@ -70,7 +66,6 @@ describe('adt-mcp HTTP integration', () => {
           id === 'MOCK' ? buildMockParams() : undefined,
       },
       // Silent logger — the default writes to stderr.
-      log: () => undefined,
     });
   });
 

@@ -1,5 +1,10 @@
 import tls from 'node:tls';
 import {
+  startHttpServer,
+  type HttpServerOptions,
+  type RunningHttpServer,
+} from '../src/lib/http/server.js';
+import {
   StreamableHTTPClientTransport,
   type StreamableHTTPClientTransportOptions,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
@@ -64,9 +69,28 @@ export function tlsFetch(
     );
   }
   return fetch(url, {
+    // nosemgrep — test helper, restricted to loopback above
     ...init,
     tls: { ca: material.cert },
   } as RequestInit);
+}
+
+/**
+ * `startHttpServer` pre-wired for tests: loopback HTTPS on an ephemeral port
+ * with the generated self-signed material, empty multi-system registry, and a
+ * silent logger. Pass overrides via `options`.
+ */
+export function startTestServer(
+  options: HttpServerOptions = {},
+): Promise<RunningHttpServer> {
+  return startHttpServer({
+    ...testTlsOptions(),
+    port: 0,
+    host: '127.0.0.1',
+    multiSystem: { systems: {}, resolve: () => undefined },
+    log: () => undefined,
+    ...options,
+  });
 }
 
 /** StreamableHTTP client transport wired to `tlsFetch`. */

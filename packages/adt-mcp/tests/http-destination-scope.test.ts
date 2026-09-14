@@ -4,12 +4,11 @@ import {
   getTestTlsMaterial,
   tlsFetch,
   createTlsTransport,
-  testTlsOptions,
+  startTestServer,
 } from './_tls-fixtures.js';
 
 getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { startHttpServer } from '../src/lib/http/server.js';
 import { createDestinationContextRegistry } from '../src/lib/session/destination-registry.js';
 
 test('HTTP destination mode projects only read-scoped tools without weakening hidden write dispatch', async () => {
@@ -36,17 +35,12 @@ test('HTTP destination mode projects only read-scoped tools without weakening hi
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
-    multiSystem: { systems: {}, resolve: () => undefined },
+  const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
       requestIdentity: () => ({ principal: 'http-list-scope-test' }),
       requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
     },
-    log: () => undefined,
   });
   const transport = createTlsTransport(server.url);
   const client = new Client({ name: 'http-list-scope-test', version: '0.0.1' });
@@ -149,17 +143,12 @@ test('HTTP destination mode snapshots trusted access against provider mutation',
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
-    multiSystem: { systems: {}, resolve: () => undefined },
+  const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
       requestIdentity: () => ({ principal: 'http-access-snapshot-test' }),
       requestAccess: () => access,
     },
-    log: () => undefined,
   });
   const transport = createTlsTransport(server.url);
   const client = new Client({
@@ -241,17 +230,12 @@ test('HTTP destination mode treats malformed trusted access as no access', async
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
-    multiSystem: { systems: {}, resolve: () => undefined },
+  const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
       requestIdentity: () => ({ principal: 'http-malformed-access-test' }),
       requestAccess: () => access,
     },
-    log: () => undefined,
   });
   const transport = createTlsTransport(server.url);
   const client = new Client({
@@ -306,17 +290,12 @@ test('HTTP destination mode lists no operational tools without an authorised des
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
-    multiSystem: { systems: {}, resolve: () => undefined },
+  const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
       requestIdentity: () => ({ principal: 'http-empty-destination-test' }),
       requestAccess: () => ({ classes: ['read'], destinationKeys: [] }),
     },
-    log: () => undefined,
   });
   const transport = createTlsTransport(server.url);
   const client = new Client({
@@ -374,17 +353,12 @@ test('HTTP destination mode fails closed when trusted access is absent', async (
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
-    multiSystem: { systems: {}, resolve: () => undefined },
+  const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
       requestIdentity: () => ({ principal: 'http-scope-test' }),
       requestAccess: () => access,
     },
-    log: () => undefined,
   });
   const transport = createTlsTransport(server.url);
   const client = new Client({ name: 'http-scope-test', version: '0.0.1' });
@@ -440,11 +414,7 @@ test('HTTP destination mode rejects a session when trusted identity derivation l
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
-    multiSystem: { systems: {}, resolve: () => undefined },
+  const server = await startTestServer({
     destinationServer: {
       destinationRegistry: destinations,
       requestIdentity: () => {
@@ -453,7 +423,6 @@ test('HTTP destination mode rejects a session when trusted identity derivation l
       },
       requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
     },
-    log: () => undefined,
   });
   const transport = createTlsTransport(server.url);
   const client = new Client({ name: 'http-identity-test', version: '0.0.1' });
@@ -501,12 +470,8 @@ test('HTTP destination mode rejects a session used by another authenticated prin
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
+  const server = await startTestServer({
     trustForwardedAuth: true,
-    multiSystem: { systems: {}, resolve: () => undefined },
     destinationServer: {
       destinationRegistry: destinations,
       requestIdentity: ({ userHint }) => {
@@ -515,7 +480,6 @@ test('HTTP destination mode rejects a session used by another authenticated prin
       },
       requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
     },
-    log: () => undefined,
   });
   const transport = createTlsTransport(server.url, {
     requestInit: { headers: { 'X-Forwarded-User': 'alice' } },

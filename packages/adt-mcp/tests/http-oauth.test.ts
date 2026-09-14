@@ -17,7 +17,7 @@ import { describe, it, before, after } from 'node:test';
 import {
   getTestTlsMaterial,
   tlsFetch,
-  testTlsOptions,
+  startTestServer,
 } from './_tls-fixtures.js';
 
 getTestTlsMaterial();
@@ -31,15 +31,10 @@ import {
   type JWK,
   type KeyLike,
 } from 'jose';
-import { startHttpServer } from '../src/lib/http/server.js';
 import type { RunningHttpServer } from '../src/lib/http/server.js';
 import { createSessionRegistry } from '../src/lib/session/registry.js';
 import type { UserHint } from '../src/lib/http/auth.js';
 import { __resetOAuthDiscoveryCacheForTests } from '../src/lib/http/oauth.js';
-
-const noopLog = () => {
-  /* keep test output clean */
-};
 
 function emptyRegistry() {
   return createSessionRegistry({ ttlMs: 0 });
@@ -167,10 +162,7 @@ describe('adt-mcp HTTP auth — mode=oauth (JWKS explicit)', () => {
   before(async () => {
     __resetOAuthDiscoveryCacheForTests();
     idp = await startMockIdp();
-    server = await startHttpServer({
-      ...testTlsOptions(),
-      port: 0,
-      host: '127.0.0.1',
+    server = await startTestServer({
       authMode: 'oauth',
       oauth: {
         issuer: idp.issuer,
@@ -181,8 +173,6 @@ describe('adt-mcp HTTP auth — mode=oauth (JWKS explicit)', () => {
       },
       onOAuthUserHint: (h) => capturedHints.push(h),
       registry: emptyRegistry(),
-      multiSystem: { systems: {}, resolve: () => undefined },
-      log: noopLog,
     });
   });
   after(async () => {
@@ -293,18 +283,13 @@ describe('adt-mcp HTTP auth — mode=oauth (OIDC discovery fallback)', () => {
     __resetOAuthDiscoveryCacheForTests();
     idp = await startMockIdp();
     // No jwksUri → force discovery.
-    server = await startHttpServer({
-      ...testTlsOptions(),
-      port: 0,
-      host: '127.0.0.1',
+    server = await startTestServer({
       authMode: 'oauth',
       oauth: {
         issuer: idp.issuer,
         audience: 'adt-mcp-api',
       },
       registry: emptyRegistry(),
-      multiSystem: { systems: {}, resolve: () => undefined },
-      log: noopLog,
     });
   });
   after(async () => {
@@ -327,14 +312,9 @@ describe('adt-mcp HTTP auth — mode=oauth config errors', () => {
   it('startHttpServer throws when authMode=oauth without oauth options', async () => {
     await assert.rejects(
       async () =>
-        await startHttpServer({
-          ...testTlsOptions(),
-          port: 0,
-          host: '127.0.0.1',
+        await startTestServer({
           authMode: 'oauth',
           registry: emptyRegistry(),
-          multiSystem: { systems: {}, resolve: () => undefined },
-          log: noopLog,
         }),
       /authMode=oauth requires `oauth` options/u,
     );

@@ -9,17 +9,14 @@ import {
   getTestTlsMaterial,
   tlsFetch,
   createTlsTransport,
-  testTlsOptions,
+  startTestServer,
 } from './_tls-fixtures.js';
 
 getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { generateKeyPair, SignJWT, type CryptoKey } from 'jose';
 import { createMcpInvocationVerifier } from '../src/lib/http/invocation.js';
-import {
-  createHttpMcpHandler,
-  startHttpServer,
-} from '../src/lib/http/server.js';
+import { createHttpMcpHandler } from '../src/lib/http/server.js';
 import { createDestinationContextRegistry } from '../src/lib/session/destination-registry.js';
 
 const issuer = 'adt-api';
@@ -98,13 +95,9 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
     issuer,
     audience,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
+  const server = await startTestServer({
     authMode: 'invocation',
     invocationVerifier: verifier,
-    multiSystem: { systems: {}, resolve: () => undefined },
     destinationServer: {
       destinationRegistry,
       requestIdentity: () => ({
@@ -116,7 +109,6 @@ test('ADT invocation auth snapshots verified read scope and binds continuation t
         destinationKeys: ['prod'],
       }),
     },
-    log: () => undefined,
   });
   const credential = await signInvocation(privateKey);
   const transport = createTlsTransport(server.url, {
@@ -205,10 +197,7 @@ test('ADT invocation auth fails closed for an AI Review policy the sidecar canno
     },
     ttlMs: 0,
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
+  const server = await startTestServer({
     authMode: 'invocation',
     invocationVerifier: createMcpInvocationVerifier({
       publicKey,
@@ -216,13 +205,11 @@ test('ADT invocation auth fails closed for an AI Review policy the sidecar canno
       issuer,
       audience,
     }),
-    multiSystem: { systems: {}, resolve: () => undefined },
     destinationServer: {
       destinationRegistry,
       requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
       requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
     },
-    log: () => undefined,
   });
   const credential = await signInvocation(privateKey, { agentId: 'ai-review' });
   const transport = createTlsTransport(server.url, {
@@ -269,10 +256,7 @@ test('AI Review exposes only its signed frozen-source tool', async () => {
       },
     },
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
+  const server = await startTestServer({
     authMode: 'invocation',
     invocationVerifier: createMcpInvocationVerifier({
       publicKey,
@@ -280,13 +264,11 @@ test('AI Review exposes only its signed frozen-source tool', async () => {
       issuer,
       audience,
     }),
-    multiSystem: { systems: {}, resolve: () => undefined },
     destinationServer: {
       destinationRegistry,
       requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
       requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
     },
-    log: () => undefined,
   });
   const credential = await signInvocation(privateKey, {
     agentId: 'ai-review',
@@ -369,10 +351,7 @@ test('AI Review redeems only the signed source component before acquiring its de
       },
     },
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
+  const server = await startTestServer({
     authMode: 'invocation',
     invocationVerifier: createMcpInvocationVerifier({
       publicKey,
@@ -380,7 +359,6 @@ test('AI Review redeems only the signed source component before acquiring its de
       issuer,
       audience,
     }),
-    multiSystem: { systems: {}, resolve: () => undefined },
     destinationServer: {
       destinationRegistry,
       requestIdentity: () => ({ principal: 'untrusted-callback-principal' }),
@@ -392,7 +370,6 @@ test('AI Review redeems only the signed source component before acquiring its de
         };
       },
     },
-    log: () => undefined,
   });
   const credential = await signInvocation(privateKey, {
     agentId: 'ai-review',
@@ -490,10 +467,7 @@ test('ADT invocation auth rejects credentials that request write authority', asy
       },
     },
   });
-  const server = await startHttpServer({
-    ...testTlsOptions(),
-    port: 0,
-    host: '127.0.0.1',
+  const server = await startTestServer({
     authMode: 'invocation',
     invocationVerifier: createMcpInvocationVerifier({
       publicKey,
@@ -506,8 +480,6 @@ test('ADT invocation auth rejects credentials that request write authority', asy
       requestIdentity: () => ({ principal: 'must-not-run' }),
       requestAccess: () => ({ classes: ['read'], destinationKeys: ['dev'] }),
     },
-    multiSystem: { systems: {}, resolve: () => undefined },
-    log: () => undefined,
   });
 
   try {
