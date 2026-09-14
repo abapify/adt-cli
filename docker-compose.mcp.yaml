@@ -65,11 +65,9 @@ services:
       test:
         [
           'CMD',
-          'wget',
-          '--no-check-certificate',
-          '-q',
-          '-O-',
-          'https://127.0.0.1:3000/healthz',
+          'node',
+          '-e',
+          "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');const p=process.env.MCP_TLS_CERT;let ca=t.rootCertificates;if(p&&f.existsSync(p))ca=[...ca,f.readFileSync(p,'utf8')];h.get({host:'127.0.0.1',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
         ]
       interval: 30s
       timeout: 5s
