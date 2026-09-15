@@ -81,7 +81,9 @@ export const emailTemplateHandler = createHandler<
               item: obj.headerTexts.map((t) => ({
                 NAME: t.name,
                 DESCRIPTION: t.description,
-                LANGU: isoToSapLang(t.language || obj.masterLanguage || obj.language),
+                LANGU: isoToSapLang(
+                  t.language || obj.masterLanguage || obj.language,
+                ),
               })),
             }
           : undefined,
@@ -89,7 +91,9 @@ export const emailTemplateHandler = createHandler<
           ? {
               item: obj.contents.map((c) => ({
                 TMPL_ID: name,
-                LANGU: isoToSapLang(c.language || obj.masterLanguage || obj.language),
+                LANGU: isoToSapLang(
+                  c.language || obj.masterLanguage || obj.language,
+                ),
                 SUBJECT: c.subject,
                 BODY: c.body,
               })),
