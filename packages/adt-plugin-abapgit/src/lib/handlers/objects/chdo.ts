@@ -27,6 +27,11 @@ type ChangeDocumentObjectLike = {
     docInsert?: boolean;
     docUpdateNoIf?: boolean;
   }>;
+  objectTexts?: Array<{
+    language?: string;
+    object?: string;
+    text?: string;
+  }>;
 };
 
 export const changeDocumentObjectHandler = createHandler<
@@ -44,7 +49,7 @@ export const changeDocumentObjectHandler = createHandler<
       CHDO: {
         REPORTS_GENERATED: obj.generatedReports?.length
           ? {
-              item: obj.generatedReports.map((r) => ({
+              TCDRPS: obj.generatedReports.map((r) => ({
                 OBJECT: r.object ?? name,
                 REPORTNAME: r.reportName,
                 ARBGEB: r.area,
@@ -54,7 +59,7 @@ export const changeDocumentObjectHandler = createHandler<
           : undefined,
         OBJECTS: obj.objects?.length
           ? {
-              item: obj.objects.map((o) => ({
+              TCDOBS: obj.objects.map((o) => ({
                 OBJECT: o.object ?? name,
                 TABNAME: o.tableName,
                 DOCUDEL: o.docDelete ? 'X' : undefined,
@@ -63,25 +68,35 @@ export const changeDocumentObjectHandler = createHandler<
               })),
             }
           : undefined,
-        OBJECTS_TEXT: obj.description
+        OBJECTS_TEXT: obj.objectTexts?.length
           ? {
-              item: [
-                {
-                  SPRAS: isoToSapLang(obj.masterLanguage || obj.language),
-                  OBJECT: name,
-                  OBTEXT: obj.description,
-                },
-              ],
+              TCDOBTS: mapItems(obj.objectTexts, (t) => ({
+                SPRAS: isoToSapLang(
+                  t.language || obj.masterLanguage || obj.language,
+                ),
+                OBJECT: t.object ?? name,
+                OBTEXT: t.text,
+              })),
             }
-          : undefined,
+          : obj.description
+            ? {
+                TCDOBTS: [
+                  {
+                    SPRAS: isoToSapLang(obj.masterLanguage || obj.language),
+                    OBJECT: name,
+                    OBTEXT: obj.description,
+                  },
+                ],
+              }
+            : undefined,
       },
     };
   },
 
   fromAbapGit: ({ CHDO }) => {
-    const reports = normalizeItems(CHDO?.REPORTS_GENERATED?.item);
-    const objects = normalizeItems(CHDO?.OBJECTS?.item);
-    const texts = normalizeItems(CHDO?.OBJECTS_TEXT?.item);
+    const reports = normalizeItems(CHDO?.REPORTS_GENERATED?.TCDRPS);
+    const objects = normalizeItems(CHDO?.OBJECTS?.TCDOBS);
+    const texts = normalizeItems(CHDO?.OBJECTS_TEXT?.TCDOBTS);
     const firstText = texts[0];
     return {
       name: (
@@ -93,6 +108,11 @@ export const changeDocumentObjectHandler = createHandler<
       description: firstText?.OBTEXT,
       language: sapLangToIso(firstText?.SPRAS),
       masterLanguage: sapLangToIso(firstText?.SPRAS),
+      objectTexts: mapItems(texts, (t) => ({
+        language: sapLangToIso(t.SPRAS),
+        object: t.OBJECT,
+        text: t.OBTEXT,
+      })),
       generatedReports: mapItems(reports, (r) => ({
         object: r.OBJECT,
         reportName: r.REPORTNAME,
