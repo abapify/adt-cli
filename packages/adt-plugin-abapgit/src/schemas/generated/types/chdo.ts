@@ -11,7 +11,7 @@ export type ChdoSchema = {
             values: {
                 CHDO?: undefined | {
                     REPORTS_GENERATED?: undefined | {
-                        TCDRPS?: undefined | {
+                        item?: undefined | {
                             OBJECT?: string | undefined;
                             REPORTNAME?: string | undefined;
                             ARBGEB?: string | undefined;
@@ -19,7 +19,7 @@ export type ChdoSchema = {
                         }[];
                     };
                     OBJECTS?: undefined | {
-                        TCDOBS?: undefined | {
+                        item?: undefined | {
                             OBJECT?: string | undefined;
                             TABNAME?: string | undefined;
                             DOCUDEL?: string | undefined;
@@ -41,5 +41,66 @@ export type ChdoSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        CHDO?: undefined | {
+            REPORTS_GENERATED?: undefined | {
+                item?: undefined | {
+                    OBJECT?: string | undefined;
+                    REPORTNAME?: string | undefined;
+                    ARBGEB?: string | undefined;
+                    FEHLERNR?: string | undefined;
+                }[];
+            };
+            OBJECTS?: undefined | {
+                item?: undefined | {
+                    OBJECT?: string | undefined;
+                    TABNAME?: string | undefined;
+                    DOCUDEL?: string | undefined;
+                    DOCUINS?: string | undefined;
+                    DOCUD_NOIF?: string | undefined;
+                }[];
+            };
+            OBJECTS_TEXT?: undefined | {
+                item?: undefined | {
+                    SPRAS?: string | undefined;
+                    OBJECT?: string | undefined;
+                    OBTEXT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            CHDO?: undefined | {
+                REPORTS_GENERATED?: undefined | {
+                    item?: undefined | {
+                        OBJECT?: string | undefined;
+                        REPORTNAME?: string | undefined;
+                        ARBGEB?: string | undefined;
+                        FEHLERNR?: string | undefined;
+                    }[];
+                };
+                OBJECTS?: undefined | {
+                    item?: undefined | {
+                        OBJECT?: string | undefined;
+                        TABNAME?: string | undefined;
+                        DOCUDEL?: string | undefined;
+                        DOCUINS?: string | undefined;
+                        DOCUD_NOIF?: string | undefined;
+                    }[];
+                };
+                OBJECTS_TEXT?: undefined | {
+                    item?: undefined | {
+                        SPRAS?: string | undefined;
+                        OBJECT?: string | undefined;
+                        OBTEXT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

@@ -31,4 +31,43 @@ export type HttpSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        HTTPID?: string | undefined;
+        HTTPTEXT?: undefined | {
+            ID?: string | undefined;
+            VERSION?: string | undefined;
+            LANG?: string | undefined;
+            SHORTTEXT?: string | undefined;
+        };
+        HTTPHDL?: undefined | {
+            UCONSERVHANDLER?: undefined | {
+                ID?: string | undefined;
+                VERSION?: string | undefined;
+                SERVICEORDER?: string | undefined;
+                SERVICEHANDLER?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            HTTPID?: string | undefined;
+            HTTPTEXT?: undefined | {
+                ID?: string | undefined;
+                VERSION?: string | undefined;
+                LANG?: string | undefined;
+                SHORTTEXT?: string | undefined;
+            };
+            HTTPHDL?: undefined | {
+                UCONSERVHANDLER?: undefined | {
+                    ID?: string | undefined;
+                    VERSION?: string | undefined;
+                    SERVICEORDER?: string | undefined;
+                    SERVICEHANDLER?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
+    };
 };

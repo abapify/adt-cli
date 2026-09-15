@@ -6,7 +6,7 @@
  */
 
 import { chdo } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type ChangeDocumentObjectLike = {
@@ -29,11 +29,6 @@ type ChangeDocumentObjectLike = {
   }>;
 };
 
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
-
 export const changeDocumentObjectHandler = createHandler<
   ChangeDocumentObjectLike,
   typeof chdo
@@ -49,7 +44,7 @@ export const changeDocumentObjectHandler = createHandler<
       CHDO: {
         REPORTS_GENERATED: obj.generatedReports?.length
           ? {
-              TCDRPS: obj.generatedReports.map((r) => ({
+              item: obj.generatedReports.map((r) => ({
                 OBJECT: r.object ?? name,
                 REPORTNAME: r.reportName,
                 ARBGEB: r.area,
@@ -59,7 +54,7 @@ export const changeDocumentObjectHandler = createHandler<
           : undefined,
         OBJECTS: obj.objects?.length
           ? {
-              TCDOBS: obj.objects.map((o) => ({
+              item: obj.objects.map((o) => ({
                 OBJECT: o.object ?? name,
                 TABNAME: o.tableName,
                 DOCUDEL: o.docDelete ? 'X' : undefined,
@@ -84,22 +79,27 @@ export const changeDocumentObjectHandler = createHandler<
   },
 
   fromAbapGit: ({ CHDO }) => {
-    const reports = normalizeItems(CHDO?.REPORTS_GENERATED?.TCDRPS);
-    const objects = normalizeItems(CHDO?.OBJECTS?.TCDOBS);
+    const reports = normalizeItems(CHDO?.REPORTS_GENERATED?.item);
+    const objects = normalizeItems(CHDO?.OBJECTS?.item);
     const texts = normalizeItems(CHDO?.OBJECTS_TEXT?.item);
     const firstText = texts[0];
     return {
-      name: (firstText?.OBJECT ?? reports[0]?.OBJECT ?? '').toUpperCase(),
+      name: (
+        firstText?.OBJECT ??
+        reports[0]?.OBJECT ??
+        objects[0]?.OBJECT ??
+        ''
+      ).toUpperCase(),
       description: firstText?.OBTEXT,
       language: sapLangToIso(firstText?.SPRAS),
       masterLanguage: sapLangToIso(firstText?.SPRAS),
-      generatedReports: reports.map((r) => ({
+      generatedReports: mapItems(reports, (r) => ({
         object: r.OBJECT,
         reportName: r.REPORTNAME,
         area: r.ARBGEB,
         errorNumber: r.FEHLERNR,
       })),
-      objects: objects.map((o) => ({
+      objects: mapItems(objects, (o) => ({
         object: o.OBJECT,
         tableName: o.TABNAME,
         docDelete: o.DOCUDEL === 'X',

@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SmtgAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,66 +46,27 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SmtgValuesType",
+      name: "AbapValuesType",
       all: {
         element: [
           {
             name: "SMTG",
-            type: "SmtgType",
+            type: "asx:SmtgType",
             minOccurs: "0",
           },
         ],
       },
-    },
-    {
-      name: "SmtgAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SmtgValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "SmtgHeaderType",
@@ -165,6 +126,41 @@ export default {
       },
     },
     {
+      name: "SmtgHeaderTextType",
+      all: {
+        element: [
+          {
+            name: "NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DESCRIPTION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "LANGU",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "SmtgHeaderTabType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "SmtgHeaderTextType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
       name: "SmtgContentType",
       all: {
         element: [
@@ -214,12 +210,34 @@ export default {
             minOccurs: "0",
           },
           {
-            name: "CONTENTS",
+            name: "HEADER_T",
+            type: "SmtgHeaderTabType",
+            minOccurs: "0",
+          },
+          {
+            name: "CONTENT",
             type: "SmtgContentsType",
             minOccurs: "0",
           },
         ],
       },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- NROB - Number Range Object types -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<?xml version='1.0' encoding='UTF-8'?><!-- NROB - Number Range Object types --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <!-- Number range attributes -->
   <xs:complexType name="NrobAttributesType">
@@ -47,12 +45,5 @@
   </xs:complexType>
 
   <!-- Main NROB values type -->
-  <xs:complexType name="NrobType">
-    <xs:all>
-      <xs:element name="ATTRIBUTES" type="NrobAttributesType" minOccurs="0"/>
-      <xs:element name="TEXT" type="NrobTextType" minOccurs="0"/>
-      <xs:element name="INTERVALS" type="NrobIntervalsType" minOccurs="0"/>
-    </xs:all>
-  </xs:complexType>
 
 </xs:schema>

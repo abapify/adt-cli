@@ -6,7 +6,7 @@
  */
 
 import { scp1 } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type BusinessConfigSetLike = {
@@ -19,6 +19,10 @@ type BusinessConfigSetLike = {
   minRelease?: string;
   maxRelease?: string;
   category?: string;
+  refType?: string;
+  refName?: string;
+  orgId?: string;
+  actInfo?: string;
   texts?: Array<{
     language?: string;
     text?: string;
@@ -29,11 +33,6 @@ type BusinessConfigSetLike = {
     value?: string;
   }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const businessConfigSetHandler = createHandler<
   BusinessConfigSetLike,
@@ -46,6 +45,20 @@ export const businessConfigSetHandler = createHandler<
 
   toAbapGit: (obj) => {
     const name = String(obj.name ?? '').toUpperCase();
+    // Ensure description is included in texts (and first, since
+    // fromAbapGit reads texts[0] as the description)
+    const allTexts = [...(obj.texts ?? [])];
+    if (obj.description) {
+      const idx = allTexts.findIndex((t) => t.text === obj.description);
+      if (idx === -1) {
+        allTexts.unshift({
+          language: obj.texts?.[0]?.language ?? 'en',
+          text: obj.description,
+        });
+      } else if (idx > 0) {
+        allTexts.unshift(allTexts.splice(idx, 1)[0]);
+      }
+    }
     return {
       SCP1: {
         SCPRATTR: {
@@ -57,10 +70,14 @@ export const businessConfigSetHandler = createHandler<
           MINRELEASE: obj.minRelease,
           MAXRELEASE: obj.maxRelease,
           CATEGORY: obj.category,
+          REFTYPE: obj.refType,
+          REFNAME: obj.refName,
+          ORGID: obj.orgId,
+          ACT_INFO: obj.actInfo,
         },
-        SCPRTEXT: obj.texts?.length
+        SCPRTEXT: allTexts.length
           ? {
-              item: obj.texts.map((t) => ({
+              item: allTexts.map((t) => ({
                 PROFID: name,
                 LANGU: isoToSapLang(t.language),
                 TEXT: t.text,
@@ -95,11 +112,15 @@ export const businessConfigSetHandler = createHandler<
       minRelease: SCP1?.SCPRATTR?.MINRELEASE,
       maxRelease: SCP1?.SCPRATTR?.MAXRELEASE,
       category: SCP1?.SCPRATTR?.CATEGORY,
-      texts: texts.map((t) => ({
+      refType: SCP1?.SCPRATTR?.REFTYPE,
+      refName: SCP1?.SCPRATTR?.REFNAME,
+      orgId: SCP1?.SCPRATTR?.ORGID,
+      actInfo: SCP1?.SCPRATTR?.ACT_INFO,
+      texts: mapItems(texts, (t) => ({
         language: sapLangToIso(t.LANGU),
         text: t.TEXT,
       })),
-      values: values.map((v) => ({
+      values: mapItems(values, (v) => ({
         tableName: v.TABLENAME,
         fieldName: v.FIELDNAME,
         value: v.VALUE,

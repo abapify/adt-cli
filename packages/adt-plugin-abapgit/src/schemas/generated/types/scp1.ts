@@ -47,4 +47,75 @@ export type Scp1Schema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SCP1?: undefined | {
+            SCPRATTR?: undefined | {
+                ID?: string | undefined;
+                TYPE?: string | undefined;
+                CLI_DEP?: string | undefined;
+                CLI_CAS?: string | undefined;
+                REFTYPE?: string | undefined;
+                REFNAME?: string | undefined;
+                COMPONENT?: string | undefined;
+                MINRELEASE?: string | undefined;
+                MAXRELEASE?: string | undefined;
+                ORGID?: string | undefined;
+                ACT_INFO?: string | undefined;
+                CATEGORY?: string | undefined;
+            };
+            SCPRTEXT?: undefined | {
+                item?: undefined | {
+                    PROFID?: string | undefined;
+                    LANGU?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+            SCPRVALS?: undefined | {
+                item?: undefined | {
+                    PROFID?: string | undefined;
+                    TABLENAME?: string | undefined;
+                    FIELDNAME?: string | undefined;
+                    VALUE?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SCP1?: undefined | {
+                SCPRATTR?: undefined | {
+                    ID?: string | undefined;
+                    TYPE?: string | undefined;
+                    CLI_DEP?: string | undefined;
+                    CLI_CAS?: string | undefined;
+                    REFTYPE?: string | undefined;
+                    REFNAME?: string | undefined;
+                    COMPONENT?: string | undefined;
+                    MINRELEASE?: string | undefined;
+                    MAXRELEASE?: string | undefined;
+                    ORGID?: string | undefined;
+                    ACT_INFO?: string | undefined;
+                    CATEGORY?: string | undefined;
+                };
+                SCPRTEXT?: undefined | {
+                    item?: undefined | {
+                        PROFID?: string | undefined;
+                        LANGU?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+                SCPRVALS?: undefined | {
+                    item?: undefined | {
+                        PROFID?: string | undefined;
+                        TABLENAME?: string | undefined;
+                        FIELDNAME?: string | undefined;
+                        VALUE?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

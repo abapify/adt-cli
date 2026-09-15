@@ -43,4 +43,67 @@ export type NrobSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        ATTRIBUTES?: undefined | {
+            OBJECT?: string | undefined;
+            DOMLEN?: string | undefined;
+            PERCENTAGE?: string | undefined;
+            BUFFER?: string | undefined;
+            NOIVBUFFER?: string | undefined;
+            CODE?: string | undefined;
+            GAP?: string | undefined;
+            ROLLNR?: string | undefined;
+            YEARLY?: string | undefined;
+            PERCENTAGE2?: string | undefined;
+        };
+        TEXT?: undefined | {
+            LANGU?: string | undefined;
+            OBJECT?: string | undefined;
+            TXT?: string | undefined;
+            TXTSHORT?: string | undefined;
+        };
+        INTERVALS?: undefined | {
+            item?: undefined | {
+                NRNR?: string | undefined;
+                FROM?: string | undefined;
+                TO?: string | undefined;
+                NRLVL?: string | undefined;
+                PROCIND?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            ATTRIBUTES?: undefined | {
+                OBJECT?: string | undefined;
+                DOMLEN?: string | undefined;
+                PERCENTAGE?: string | undefined;
+                BUFFER?: string | undefined;
+                NOIVBUFFER?: string | undefined;
+                CODE?: string | undefined;
+                GAP?: string | undefined;
+                ROLLNR?: string | undefined;
+                YEARLY?: string | undefined;
+                PERCENTAGE2?: string | undefined;
+            };
+            TEXT?: undefined | {
+                LANGU?: string | undefined;
+                OBJECT?: string | undefined;
+                TXT?: string | undefined;
+                TXTSHORT?: string | undefined;
+            };
+            INTERVALS?: undefined | {
+                item?: undefined | {
+                    NRNR?: string | undefined;
+                    FROM?: string | undefined;
+                    TO?: string | undefined;
+                    NRLVL?: string | undefined;
+                    PROCIND?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
+    };
 };

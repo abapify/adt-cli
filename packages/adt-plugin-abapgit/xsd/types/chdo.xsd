@@ -12,10 +12,10 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- Generated reports table -->
+  <!-- Generated reports table (rows serialize as <item>) -->
   <xs:complexType name="ChdoReportsType">
     <xs:sequence>
-      <xs:element name="TCDRPS" type="ChdoTcdrpsType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="item" type="ChdoTcdrpsType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -30,10 +30,10 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- Change document objects table -->
+  <!-- Change document objects table (rows serialize as <item>) -->
   <xs:complexType name="ChdoObjectsType">
     <xs:sequence>
-      <xs:element name="TCDOBS" type="ChdoTcdobsType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="item" type="ChdoTcdobsType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
