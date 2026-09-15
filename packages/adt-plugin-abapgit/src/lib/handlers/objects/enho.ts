@@ -42,6 +42,7 @@ type EnhancementImplementationLike = {
   implClass?: string;
   active?: boolean;
   implShorttext?: string;
+  implShorttextId?: string;
   lockedInCustomizing?: boolean;
   filterRoot?: unknown;
   filterValues?: unknown;
@@ -87,6 +88,7 @@ export const enhancementImplementationHandler = createHandler<
           IMPL_CLASS: obj.implClass,
           ACTIVE: obj.active ? 'X' : undefined,
           IMPL_SHORTTEXT: obj.implShorttext,
+          IMPL_SHORTTEXT_ID: obj.implShorttextId,
           LOCKED_IN_CUSTOMIZING: obj.lockedInCustomizing ? 'X' : undefined,
           FILTER_ROOT: obj.filterRoot,
           FILTER_VALUES: obj.filterValues,
@@ -140,6 +142,7 @@ export const enhancementImplementationHandler = createHandler<
       implClass: implData?.IMPL_CLASS,
       active: implData?.ACTIVE === 'X',
       implShorttext: implData?.IMPL_SHORTTEXT,
+      implShorttextId: implData?.IMPL_SHORTTEXT_ID,
       lockedInCustomizing: implData?.LOCKED_IN_CUSTOMIZING === 'X',
       filterRoot: implData?.FILTER_ROOT,
       filterValues: implData?.FILTER_VALUES,
