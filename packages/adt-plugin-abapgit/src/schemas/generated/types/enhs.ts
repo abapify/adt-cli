@@ -12,7 +12,38 @@ export type EnhsSchema = {
                 TOOL?: string | undefined;
                 SHORTTEXT?: string | undefined;
                 PARENT_COMP?: string | undefined;
-                BADI_DATA?: unknown;
+                BADI_DATA?: undefined | {
+                    item?: undefined | {
+                        BADI_NAME?: string | undefined;
+                        BADI_SHORTTEXT?: string | undefined;
+                        INTERFACE?: string | undefined;
+                        INSTANTIATION?: string | undefined;
+                        MULTIPLE_USE?: string | undefined;
+                        FILTERS?: undefined | {
+                            item?: undefined | {
+                                FILTER_NAME?: string | undefined;
+                                DESCRIPTION?: string | undefined;
+                                TYPE?: string | undefined;
+                                VALUE?: string | undefined;
+                            }[];
+                        };
+                    }[];
+                    PGMID?: string | undefined;
+                    OBJ_NAME?: string | undefined;
+                    OBJ_TYPE?: string | undefined;
+                    MAIN_TYPE?: string | undefined;
+                    MAIN_NAME?: string | undefined;
+                    PROGRAM?: string | undefined;
+                    DEF_HOOKS?: undefined | {
+                        item?: undefined | {
+                            HOOK_NAME?: string | undefined;
+                            PROGRAM?: string | undefined;
+                            INCLUDE_NAME?: string | undefined;
+                            HOOK_METHOD?: string | undefined;
+                            ENHMODE?: string | undefined;
+                        }[];
+                    };
+                };
                 ABAP_LANGUAGE_VERSION?: string | undefined;
             };
             version?: string | undefined;
@@ -20,5 +51,86 @@ export type EnhsSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        TOOL?: string | undefined;
+        SHORTTEXT?: string | undefined;
+        PARENT_COMP?: string | undefined;
+        BADI_DATA?: undefined | {
+            item?: undefined | {
+                BADI_NAME?: string | undefined;
+                BADI_SHORTTEXT?: string | undefined;
+                INTERFACE?: string | undefined;
+                INSTANTIATION?: string | undefined;
+                MULTIPLE_USE?: string | undefined;
+                FILTERS?: undefined | {
+                    item?: undefined | {
+                        FILTER_NAME?: string | undefined;
+                        DESCRIPTION?: string | undefined;
+                        TYPE?: string | undefined;
+                        VALUE?: string | undefined;
+                    }[];
+                };
+            }[];
+            PGMID?: string | undefined;
+            OBJ_NAME?: string | undefined;
+            OBJ_TYPE?: string | undefined;
+            MAIN_TYPE?: string | undefined;
+            MAIN_NAME?: string | undefined;
+            PROGRAM?: string | undefined;
+            DEF_HOOKS?: undefined | {
+                item?: undefined | {
+                    HOOK_NAME?: string | undefined;
+                    PROGRAM?: string | undefined;
+                    INCLUDE_NAME?: string | undefined;
+                    HOOK_METHOD?: string | undefined;
+                    ENHMODE?: string | undefined;
+                }[];
+            };
+        };
+        ABAP_LANGUAGE_VERSION?: string | undefined;
+    };
+} | {
+    abap: {
+        values: {
+            TOOL?: string | undefined;
+            SHORTTEXT?: string | undefined;
+            PARENT_COMP?: string | undefined;
+            BADI_DATA?: undefined | {
+                item?: undefined | {
+                    BADI_NAME?: string | undefined;
+                    BADI_SHORTTEXT?: string | undefined;
+                    INTERFACE?: string | undefined;
+                    INSTANTIATION?: string | undefined;
+                    MULTIPLE_USE?: string | undefined;
+                    FILTERS?: undefined | {
+                        item?: undefined | {
+                            FILTER_NAME?: string | undefined;
+                            DESCRIPTION?: string | undefined;
+                            TYPE?: string | undefined;
+                            VALUE?: string | undefined;
+                        }[];
+                    };
+                }[];
+                PGMID?: string | undefined;
+                OBJ_NAME?: string | undefined;
+                OBJ_TYPE?: string | undefined;
+                MAIN_TYPE?: string | undefined;
+                MAIN_NAME?: string | undefined;
+                PROGRAM?: string | undefined;
+                DEF_HOOKS?: undefined | {
+                    item?: undefined | {
+                        HOOK_NAME?: string | undefined;
+                        PROGRAM?: string | undefined;
+                        INCLUDE_NAME?: string | undefined;
+                        HOOK_METHOD?: string | undefined;
+                        ENHMODE?: string | undefined;
+                    }[];
+                };
+            };
+            ABAP_LANGUAGE_VERSION?: string | undefined;
+        };
+        version?: string | undefined;
     };
 };

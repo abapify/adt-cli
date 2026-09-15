@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "EnhsAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,10 +46,18 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "EnhsValuesType",
+      name: "AbapValuesType",
       all: {
         element: [
           {
@@ -69,7 +77,7 @@ export default {
           },
           {
             name: "BADI_DATA",
-            type: "xs:anyType",
+            type: "asx:EnhBadiDataType",
             minOccurs: "0",
           },
           {
@@ -79,53 +87,6 @@ export default {
           },
         ],
       },
-    },
-    {
-      name: "EnhsAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "EnhsValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "EnhBadiDefType",
@@ -158,19 +119,8 @@ export default {
           },
           {
             name: "FILTERS",
+            type: "FiltersType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "EnhBadiFilterDefType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
@@ -198,72 +148,6 @@ export default {
             name: "VALUE",
             type: "xs:string",
             minOccurs: "0",
-          },
-        ],
-      },
-    },
-    {
-      name: "EnhBadiDefTabType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "EnhBadiDefType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "EnhHookDefType",
-      all: {
-        element: [
-          {
-            name: "PGMID",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "OBJ_NAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "OBJ_TYPE",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "MAIN_TYPE",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "MAIN_NAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "PROGRAM",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "DEF_HOOKS",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "EnhHookDefEntryType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
@@ -301,36 +185,108 @@ export default {
       },
     },
     {
-      name: "EnhsType",
-      all: {
+      name: "EnhDefHooksType",
+      sequence: {
         element: [
           {
-            name: "TOOL",
+            name: "item",
+            type: "EnhHookDefEntryType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "EnhBadiDataType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "EnhBadiDefType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+          {
+            name: "PGMID",
             type: "xs:string",
             minOccurs: "0",
           },
           {
-            name: "SHORTTEXT",
+            name: "OBJ_NAME",
             type: "xs:string",
             minOccurs: "0",
           },
           {
-            name: "PARENT_COMP",
+            name: "OBJ_TYPE",
             type: "xs:string",
             minOccurs: "0",
           },
           {
-            name: "BADI_DATA",
-            type: "xs:anyType",
+            name: "MAIN_TYPE",
+            type: "xs:string",
             minOccurs: "0",
           },
           {
-            name: "ABAP_LANGUAGE_VERSION",
+            name: "MAIN_NAME",
             type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "PROGRAM",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DEF_HOOKS",
+            type: "EnhDefHooksType",
             minOccurs: "0",
           },
         ],
       },
+    },
+    {
+      name: "FiltersType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "EnhBadiFilterDefType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "DefHooksType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "EnhHookDefEntryType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "EnhoAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,10 +46,18 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "EnhoValuesType",
+      name: "AbapValuesType",
       all: {
         element: [
           {
@@ -69,32 +77,32 @@ export default {
           },
           {
             name: "ORIGINAL_OBJECT",
-            type: "EnhOriginalObjectType",
+            type: "asx:EnhOriginalObjectType",
             minOccurs: "0",
           },
           {
             name: "ENHANCEMENTS",
-            type: "EnhHookImplsType",
+            type: "asx:EnhHookImplsType",
             minOccurs: "0",
           },
           {
             name: "FILES",
-            type: "EnhFilesType",
+            type: "asx:EnhFilesType",
             minOccurs: "0",
           },
           {
             name: "IMPL",
-            type: "EnhImplType",
+            type: "asx:EnhImplType",
             minOccurs: "0",
           },
           {
             name: "SOTR",
-            type: "SotrType",
+            type: "asx:SotrType",
             minOccurs: "0",
           },
           {
             name: "SOTR_USE",
-            type: "SotrUseTabType",
+            type: "asx:SotrUseTabType",
             minOccurs: "0",
           },
           {
@@ -104,53 +112,6 @@ export default {
           },
         ],
       },
-    },
-    {
-      name: "EnhoAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "EnhoValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "EnhOriginalObjectType",
@@ -282,19 +243,8 @@ export default {
           },
           {
             name: "FILTERS",
+            type: "FiltersType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "ENH_BADIIMPL_FILTER_ID",
-                    type: "EnhBadiFilterIdType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
@@ -435,18 +385,8 @@ export default {
           },
           {
             name: "FILTER_ROOT",
+            type: "FilterRootType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "ENH_BADIIMPL_FILTER_ROOT",
-                    type: "EnhBadiFilterRootType",
-                    minOccurs: "0",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "FILTER_VALUES",
@@ -569,19 +509,8 @@ export default {
           },
           {
             name: "ENTRIES",
+            type: "EntriesType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "SOTR_TEXT",
-                    type: "SotrTextType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
@@ -645,61 +574,59 @@ export default {
       },
     },
     {
-      name: "EnhoType",
-      all: {
+      name: "FiltersType",
+      sequence: {
         element: [
           {
-            name: "TOOL",
-            type: "xs:string",
+            name: "ENH_BADIIMPL_FILTER_ID",
+            type: "EnhBadiFilterIdType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "FilterRootType",
+      sequence: {
+        element: [
           {
-            name: "SHORTTEXT",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "SPOT_NAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "ORIGINAL_OBJECT",
-            type: "EnhOriginalObjectType",
-            minOccurs: "0",
-          },
-          {
-            name: "ENHANCEMENTS",
-            type: "EnhHookImplsType",
-            minOccurs: "0",
-          },
-          {
-            name: "FILES",
-            type: "EnhFilesType",
-            minOccurs: "0",
-          },
-          {
-            name: "IMPL",
-            type: "EnhImplType",
-            minOccurs: "0",
-          },
-          {
-            name: "SOTR",
-            type: "SotrType",
-            minOccurs: "0",
-          },
-          {
-            name: "SOTR_USE",
-            type: "SotrUseTabType",
-            minOccurs: "0",
-          },
-          {
-            name: "ABAP_LANGUAGE_VERSION",
-            type: "xs:string",
+            name: "ENH_BADIIMPL_FILTER_ROOT",
+            type: "EnhBadiFilterRootType",
             minOccurs: "0",
           },
         ],
       },
+    },
+    {
+      name: "EntriesType",
+      sequence: {
+        element: [
+          {
+            name: "SOTR_TEXT",
+            type: "SotrTextType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- ENHO - Enhancement Implementation types (SAP enhancement framework) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <!-- Original object reference (for hook/class/intf enhancements) -->
   <xs:complexType name="EnhOriginalObjectType">
     <xs:all>
       <xs:element name="PGMID" type="xs:string" minOccurs="0"/>
@@ -14,7 +11,6 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- Hook implementation entry -->
   <xs:complexType name="EnhHookImplType">
     <xs:all>
       <xs:element name="PROGRAMNAME" type="xs:string" minOccurs="0"/>
@@ -23,14 +19,12 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- Enhancements container (hook implementations) -->
   <xs:complexType name="EnhHookImplsType">
     <xs:sequence>
       <xs:element name="ENH_HOOK_IMPL" type="EnhHookImplType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- File reference entry -->
   <xs:complexType name="EnhFileType">
     <xs:all>
       <xs:element name="NAME" type="xs:string" minOccurs="0"/>
@@ -38,14 +32,12 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- File references table -->
   <xs:complexType name="EnhFilesType">
     <xs:sequence>
       <xs:element name="item" type="EnhFileType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- BAdI filter ID -->
   <xs:complexType name="EnhBadiFilterIdType">
     <xs:all>
       <xs:element name="FILTER_NAME" type="xs:string" minOccurs="0"/>
@@ -53,21 +45,14 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- BAdI filter root -->
   <xs:complexType name="EnhBadiFilterRootType">
     <xs:all>
       <xs:element name="ROOT" type="xs:string" minOccurs="0"/>
-      <xs:element name="FILTERS" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="ENH_BADIIMPL_FILTER_ID" type="EnhBadiFilterIdType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="FILTERS" minOccurs="0" type="FiltersType">
+        </xs:element>
     </xs:all>
   </xs:complexType>
 
-  <!-- BAdI filter value -->
   <xs:complexType name="EnhBadiFilterValueType">
     <xs:all>
       <xs:element name="ID" type="xs:string" minOccurs="0"/>
@@ -79,14 +64,12 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- BAdI filter values table -->
   <xs:complexType name="EnhBadiFilterValuesType">
     <xs:sequence>
       <xs:element name="ENH_BADIIMPL_FILTER_VALUE" type="EnhBadiFilterValueType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- BAdI filter impl entry -->
   <xs:complexType name="EnhBadiFilterImplType">
     <xs:all>
       <xs:element name="DISJ_IDX" type="xs:string" minOccurs="0"/>
@@ -99,14 +82,12 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- BAdI filters table -->
   <xs:complexType name="EnhBadiFiltersType">
     <xs:sequence>
       <xs:element name="ENH_BADI_FILTER_IMPL" type="EnhBadiFilterImplType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- BAdI implementation data (the core of BADI_IMPL ENHO) -->
   <xs:complexType name="EnhBadiImplDataType">
     <xs:all>
       <xs:element name="SPOT_NAME" type="xs:string" minOccurs="0"/>
@@ -114,13 +95,8 @@
       <xs:element name="IMPL_NAME" type="xs:string" minOccurs="0"/>
       <xs:element name="IMPL_CLASS" type="xs:string" minOccurs="0"/>
       <xs:element name="ACTIVE" type="xs:string" minOccurs="0"/>
-      <xs:element name="FILTER_ROOT" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="ENH_BADIIMPL_FILTER_ROOT" type="EnhBadiFilterRootType" minOccurs="0"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="FILTER_ROOT" minOccurs="0" type="FilterRootType">
+        </xs:element>
       <xs:element name="FILTER_VALUES" type="EnhBadiFilterValuesType" minOccurs="0"/>
       <xs:element name="FILTERS" type="EnhBadiFiltersType" minOccurs="0"/>
       <xs:element name="IMPL_SHORTTEXT" type="xs:string" minOccurs="0"/>
@@ -129,14 +105,12 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- IMPL wrapper -->
   <xs:complexType name="EnhImplType">
     <xs:sequence>
       <xs:element name="ENH_BADI_IMPL_DATA" type="EnhBadiImplDataType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- SOTR text entry -->
   <xs:complexType name="SotrTextType">
     <xs:all>
       <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
@@ -149,7 +123,6 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- SOTR header -->
   <xs:complexType name="SotrHeaderType">
     <xs:all>
       <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
@@ -159,28 +132,20 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- SOTR item -->
   <xs:complexType name="SotrItemType">
     <xs:all>
       <xs:element name="HEADER" type="SotrHeaderType" minOccurs="0"/>
-      <xs:element name="ENTRIES" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="SOTR_TEXT" type="SotrTextType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="ENTRIES" minOccurs="0" type="EntriesType">
+        </xs:element>
     </xs:all>
   </xs:complexType>
 
-  <!-- SOTR table -->
   <xs:complexType name="SotrType">
     <xs:sequence>
       <xs:element name="item" type="SotrItemType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- SOTR use entry -->
   <xs:complexType name="SotrUseType">
     <xs:all>
       <xs:element name="PGMID" type="xs:string" minOccurs="0"/>
@@ -191,27 +156,25 @@
     </xs:all>
   </xs:complexType>
 
-  <!-- SOTR use table -->
   <xs:complexType name="SotrUseTabType">
     <xs:sequence>
       <xs:element name="SOTR_USE" type="SotrUseType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Main ENHO values type -->
-  <xs:complexType name="EnhoType">
-    <xs:all>
-      <xs:element name="TOOL" type="xs:string" minOccurs="0"/>
-      <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0"/>
-      <xs:element name="SPOT_NAME" type="xs:string" minOccurs="0"/>
-      <xs:element name="ORIGINAL_OBJECT" type="EnhOriginalObjectType" minOccurs="0"/>
-      <xs:element name="ENHANCEMENTS" type="EnhHookImplsType" minOccurs="0"/>
-      <xs:element name="FILES" type="EnhFilesType" minOccurs="0"/>
-      <xs:element name="IMPL" type="EnhImplType" minOccurs="0"/>
-      <xs:element name="SOTR" type="SotrType" minOccurs="0"/>
-      <xs:element name="SOTR_USE" type="SotrUseTabType" minOccurs="0"/>
-      <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
-    </xs:all>
-  </xs:complexType>
-
-</xs:schema>
+<xs:complexType name="FiltersType">
+          <xs:sequence>
+            <xs:element name="ENH_BADIIMPL_FILTER_ID" type="EnhBadiFilterIdType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      <xs:complexType name="FilterRootType">
+          <xs:sequence>
+            <xs:element name="ENH_BADIIMPL_FILTER_ROOT" type="EnhBadiFilterRootType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      <xs:complexType name="EntriesType">
+          <xs:sequence>
+            <xs:element name="SOTR_TEXT" type="SotrTextType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>
