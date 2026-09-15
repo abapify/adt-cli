@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "WdyaAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,60 +46,23 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "WdyaValuesType",
+      name: "PropertiesType",
       sequence: {
         element: [
           {
-            name: "APP",
-            type: "WdyaAppType",
-            minOccurs: "0",
-          },
-          {
-            name: "PROPERTIES",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "WdyaPropertyItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      name: "WdyaAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "WdyaValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "item",
+            type: "asx:WdyaPropertyItemType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -107,21 +70,21 @@ export default {
       },
     },
     {
-      name: "AbapType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
-            ref: "asx:values",
+            name: "APP",
+            type: "asx:WdyaAppType",
+            minOccurs: "0",
+          },
+          {
+            name: "PROPERTIES",
+            type: "PropertiesType",
+            minOccurs: "0",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "WdyaAppType",
@@ -166,6 +129,23 @@ export default {
           },
         ],
       },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

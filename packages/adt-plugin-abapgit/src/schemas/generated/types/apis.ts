@@ -22,4 +22,25 @@ export type ApisSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        APIS?: undefined | {
+            HEADER?: undefined | {
+                API_NAME?: string | undefined;
+                DESCRIPTION?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            APIS?: undefined | {
+                HEADER?: undefined | {
+                    API_NAME?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

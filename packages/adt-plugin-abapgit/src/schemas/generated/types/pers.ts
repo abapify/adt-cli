@@ -11,18 +11,22 @@ export type PersSchema = {
             values: {
                 PERS?: undefined | {
                     PERS_REG?: undefined | {
-                        PERS_KEY?: string | undefined;
-                        ACCESS_CL?: string | undefined;
-                        DISTRIB_CL?: string | undefined;
-                        DIALOG_FB?: string | undefined;
-                        COMPONENT?: string | undefined;
-                        DATATYPE?: string | undefined;
-                        TYPENAME?: string | undefined;
+                        item?: undefined | {
+                            PERS_KEY?: string | undefined;
+                            ACCESS_CL?: string | undefined;
+                            DISTRIB_CL?: string | undefined;
+                            DIALOG_FB?: string | undefined;
+                            COMPONENT?: string | undefined;
+                            DATATYPE?: string | undefined;
+                            TYPENAME?: string | undefined;
+                        }[];
                     };
                     PERS_REG_TEXT?: undefined | {
-                        LANG?: string | undefined;
-                        PERS_KEY?: string | undefined;
-                        TEXT?: string | undefined;
+                        item?: undefined | {
+                            LANG?: string | undefined;
+                            PERS_KEY?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
                     };
                 };
             };
@@ -31,5 +35,54 @@ export type PersSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        PERS?: undefined | {
+            PERS_REG?: undefined | {
+                item?: undefined | {
+                    PERS_KEY?: string | undefined;
+                    ACCESS_CL?: string | undefined;
+                    DISTRIB_CL?: string | undefined;
+                    DIALOG_FB?: string | undefined;
+                    COMPONENT?: string | undefined;
+                    DATATYPE?: string | undefined;
+                    TYPENAME?: string | undefined;
+                }[];
+            };
+            PERS_REG_TEXT?: undefined | {
+                item?: undefined | {
+                    LANG?: string | undefined;
+                    PERS_KEY?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            PERS?: undefined | {
+                PERS_REG?: undefined | {
+                    item?: undefined | {
+                        PERS_KEY?: string | undefined;
+                        ACCESS_CL?: string | undefined;
+                        DISTRIB_CL?: string | undefined;
+                        DIALOG_FB?: string | undefined;
+                        COMPONENT?: string | undefined;
+                        DATATYPE?: string | undefined;
+                        TYPENAME?: string | undefined;
+                    }[];
+                };
+                PERS_REG_TEXT?: undefined | {
+                    item?: undefined | {
+                        LANG?: string | undefined;
+                        PERS_KEY?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

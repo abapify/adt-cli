@@ -14,7 +14,15 @@ export type WdcaSchema = {
                     CONFIG_TYPE?: string | undefined;
                     CONFIG_VAR?: string | undefined;
                 };
-                DATA?: unknown;
+                DATA?: undefined | {
+                    item?: undefined | {
+                        CONFIG_ID?: string | undefined;
+                        CONFIG_TYPE?: string | undefined;
+                        CONFIG_VAR?: string | undefined;
+                        COMPNAME?: string | undefined;
+                        CONTENT?: string | undefined;
+                    }[];
+                };
                 DESCR_LANG?: string | undefined;
             };
             version?: string | undefined;
@@ -22,5 +30,44 @@ export type WdcaSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        OUTLINE?: undefined | {
+            CONFIG_ID?: string | undefined;
+            CONFIG_TYPE?: string | undefined;
+            CONFIG_VAR?: string | undefined;
+        };
+        DATA?: undefined | {
+            item?: undefined | {
+                CONFIG_ID?: string | undefined;
+                CONFIG_TYPE?: string | undefined;
+                CONFIG_VAR?: string | undefined;
+                COMPNAME?: string | undefined;
+                CONTENT?: string | undefined;
+            }[];
+        };
+        DESCR_LANG?: string | undefined;
+    };
+} | {
+    abap: {
+        values: {
+            OUTLINE?: undefined | {
+                CONFIG_ID?: string | undefined;
+                CONFIG_TYPE?: string | undefined;
+                CONFIG_VAR?: string | undefined;
+            };
+            DATA?: undefined | {
+                item?: undefined | {
+                    CONFIG_ID?: string | undefined;
+                    CONFIG_TYPE?: string | undefined;
+                    CONFIG_VAR?: string | undefined;
+                    COMPNAME?: string | undefined;
+                    CONTENT?: string | undefined;
+                }[];
+            };
+            DESCR_LANG?: string | undefined;
+        };
+        version?: string | undefined;
     };
 };

@@ -26,4 +26,33 @@ export type SxciSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SXCI: {
+            IMPLEMENTATION_DATA?: undefined | {
+                IMP_NAME?: string | undefined;
+                TEXT?: string | undefined;
+                IMP_CLASS?: string | undefined;
+                EXIT_NAME?: string | undefined;
+                INTER_NAME?: string | undefined;
+                ACTIVE?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SXCI: {
+                IMPLEMENTATION_DATA?: undefined | {
+                    IMP_NAME?: string | undefined;
+                    TEXT?: string | undefined;
+                    IMP_CLASS?: string | undefined;
+                    EXIT_NAME?: string | undefined;
+                    INTER_NAME?: string | undefined;
+                    ACTIVE?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

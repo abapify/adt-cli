@@ -28,9 +28,37 @@ export type StylSchema = {
                         TDVERSION?: string | undefined;
                         PVERS?: string | undefined;
                     };
-                    PARAGRAPHS?: unknown;
-                    STRINGS?: unknown;
-                    TABS?: unknown;
+                    PARAGRAPHS?: undefined | {
+                        item?: undefined | {
+                            TDPARGRAPH?: string | undefined;
+                            TDTEXT?: string | undefined;
+                            TDPJUSTIFY?: string | undefined;
+                            TDPLDIST?: string | undefined;
+                            TDPTOP?: string | undefined;
+                            TDPBOT?: string | undefined;
+                            TDPLEFT?: string | undefined;
+                            TDPRIGHT?: string | undefined;
+                        }[];
+                    };
+                    STRINGS?: undefined | {
+                        item?: undefined | {
+                            TDSTRING?: string | undefined;
+                            TDTEXT?: string | undefined;
+                            TDMARK?: string | undefined;
+                            TDSUPER?: string | undefined;
+                            TDSUB?: string | undefined;
+                            TDHIDDEN?: string | undefined;
+                            TDPROTLINE?: string | undefined;
+                        }[];
+                    };
+                    TABS?: undefined | {
+                        item?: undefined | {
+                            TDPARGRAPH?: string | undefined;
+                            TDPOSITION?: string | undefined;
+                            TDTABPOS?: string | undefined;
+                            TDTJUSTIFY?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -38,5 +66,116 @@ export type StylSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        STYLE: {
+            HEADER?: undefined | {
+                TDPRINTER?: string | undefined;
+                TDSTYLE?: string | undefined;
+                TDCPI?: string | undefined;
+                TDLPI?: string | undefined;
+                TDSPRAS?: string | undefined;
+                TDOSPRAS?: string | undefined;
+                TDTRANSTAT?: string | undefined;
+                TDSTATUS?: string | undefined;
+                TDTEXT?: string | undefined;
+                TDFIRSTPAR?: string | undefined;
+                TDPAGEFORM?: string | undefined;
+                TDPAGHEIGH?: string | undefined;
+                TDPAGWIDTH?: string | undefined;
+                TDFAMILY?: string | undefined;
+                TDVERSION?: string | undefined;
+                PVERS?: string | undefined;
+            };
+            PARAGRAPHS?: undefined | {
+                item?: undefined | {
+                    TDPARGRAPH?: string | undefined;
+                    TDTEXT?: string | undefined;
+                    TDPJUSTIFY?: string | undefined;
+                    TDPLDIST?: string | undefined;
+                    TDPTOP?: string | undefined;
+                    TDPBOT?: string | undefined;
+                    TDPLEFT?: string | undefined;
+                    TDPRIGHT?: string | undefined;
+                }[];
+            };
+            STRINGS?: undefined | {
+                item?: undefined | {
+                    TDSTRING?: string | undefined;
+                    TDTEXT?: string | undefined;
+                    TDMARK?: string | undefined;
+                    TDSUPER?: string | undefined;
+                    TDSUB?: string | undefined;
+                    TDHIDDEN?: string | undefined;
+                    TDPROTLINE?: string | undefined;
+                }[];
+            };
+            TABS?: undefined | {
+                item?: undefined | {
+                    TDPARGRAPH?: string | undefined;
+                    TDPOSITION?: string | undefined;
+                    TDTABPOS?: string | undefined;
+                    TDTJUSTIFY?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            STYLE: {
+                HEADER?: undefined | {
+                    TDPRINTER?: string | undefined;
+                    TDSTYLE?: string | undefined;
+                    TDCPI?: string | undefined;
+                    TDLPI?: string | undefined;
+                    TDSPRAS?: string | undefined;
+                    TDOSPRAS?: string | undefined;
+                    TDTRANSTAT?: string | undefined;
+                    TDSTATUS?: string | undefined;
+                    TDTEXT?: string | undefined;
+                    TDFIRSTPAR?: string | undefined;
+                    TDPAGEFORM?: string | undefined;
+                    TDPAGHEIGH?: string | undefined;
+                    TDPAGWIDTH?: string | undefined;
+                    TDFAMILY?: string | undefined;
+                    TDVERSION?: string | undefined;
+                    PVERS?: string | undefined;
+                };
+                PARAGRAPHS?: undefined | {
+                    item?: undefined | {
+                        TDPARGRAPH?: string | undefined;
+                        TDTEXT?: string | undefined;
+                        TDPJUSTIFY?: string | undefined;
+                        TDPLDIST?: string | undefined;
+                        TDPTOP?: string | undefined;
+                        TDPBOT?: string | undefined;
+                        TDPLEFT?: string | undefined;
+                        TDPRIGHT?: string | undefined;
+                    }[];
+                };
+                STRINGS?: undefined | {
+                    item?: undefined | {
+                        TDSTRING?: string | undefined;
+                        TDTEXT?: string | undefined;
+                        TDMARK?: string | undefined;
+                        TDSUPER?: string | undefined;
+                        TDSUB?: string | undefined;
+                        TDHIDDEN?: string | undefined;
+                        TDPROTLINE?: string | undefined;
+                    }[];
+                };
+                TABS?: undefined | {
+                    item?: undefined | {
+                        TDPARGRAPH?: string | undefined;
+                        TDPOSITION?: string | undefined;
+                        TDTABPOS?: string | undefined;
+                        TDTJUSTIFY?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

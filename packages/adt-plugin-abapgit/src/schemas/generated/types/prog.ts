@@ -34,4 +34,49 @@ export type ProgSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        PROGDIR?: undefined | {
+            NAME: string;
+            STATE?: string | undefined;
+            SUBC?: string | undefined;
+            FIXPT?: string | undefined;
+            UNICODE?: string | undefined;
+            DTEFUNC?: string | undefined;
+            RLOAD?: string | undefined;
+            UCCHECK?: string | undefined;
+            ABAP_LANGUAGE_VERSION?: string | undefined;
+        };
+        TPOOL?: undefined | {
+            item?: undefined | {
+                ID: string;
+                ENTRY?: string | undefined;
+                LENGTH?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            PROGDIR?: undefined | {
+                NAME: string;
+                STATE?: string | undefined;
+                SUBC?: string | undefined;
+                FIXPT?: string | undefined;
+                UNICODE?: string | undefined;
+                DTEFUNC?: string | undefined;
+                RLOAD?: string | undefined;
+                UCCHECK?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
+            };
+            TPOOL?: undefined | {
+                item?: undefined | {
+                    ID: string;
+                    ENTRY?: string | undefined;
+                    LENGTH?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
+    };
 };

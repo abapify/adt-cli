@@ -599,6 +599,31 @@ export default {
       },
     },
     {
+      name: "FiltersType",
+      sequence: {
+        element: [
+          {
+            name: "ENH_BADIIMPL_FILTER_ID",
+            type: "EnhBadiFilterIdType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FilterRootType",
+      sequence: {
+        element: [
+          {
+            name: "ENH_BADIIMPL_FILTER_ROOT",
+            type: "EnhBadiFilterRootType",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
       name: "EntriesType",
       sequence: {
         element: [

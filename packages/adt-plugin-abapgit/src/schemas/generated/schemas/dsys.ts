@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "DsysAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,55 +46,23 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "DsysValuesType",
+      name: "LongtextsType",
       sequence: {
         element: [
           {
-            name: "LONGTEXTS",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "DsysLongtextItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      name: "DsysAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "DsysValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "item",
+            type: "asx:DsysLongtextItemType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -102,21 +70,16 @@ export default {
       },
     },
     {
-      name: "AbapType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
-            ref: "asx:values",
+            name: "LONGTEXTS",
+            type: "LongtextsType",
+            minOccurs: "0",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "DsysHeadType",
@@ -168,33 +131,8 @@ export default {
         element: [
           {
             name: "DOKIL",
+            type: "DokilType",
             minOccurs: "0",
-            complexType: {
-              all: {
-                element: [
-                  {
-                    name: "ID",
-                    type: "xs:string",
-                    minOccurs: "0",
-                  },
-                  {
-                    name: "OBJECT",
-                    type: "xs:string",
-                    minOccurs: "0",
-                  },
-                  {
-                    name: "LANGU",
-                    type: "xs:string",
-                    minOccurs: "0",
-                  },
-                  {
-                    name: "TYP",
-                    type: "xs:string",
-                    minOccurs: "0",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "HEAD",
@@ -203,22 +141,68 @@ export default {
           },
           {
             name: "LINES",
+            type: "LinesType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "DsysLineItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
+    },
+    {
+      name: "DokilType",
+      all: {
+        element: [
+          {
+            name: "ID",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "OBJECT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "LANGU",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TYP",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "LinesType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "DsysLineItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

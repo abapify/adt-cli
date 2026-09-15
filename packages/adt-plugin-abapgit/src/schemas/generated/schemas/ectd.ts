@@ -8,64 +8,22 @@
 export default {
   $xmlns: {
     xs: "http://www.w3.org/2001/XMLSchema",
-    asx: "http://www.sap.com/abapxml",
   },
   elementFormDefault: "unqualified",
   element: [
     {
       name: "abapGit",
-      complexType: {
-        sequence: {
-          any: [
-            {
-              minOccurs: "0",
-              processContents: "lax",
-            },
-          ],
-        },
-        attribute: [
-          {
-            name: "version",
-            type: "xs:string",
-            use: "required",
-          },
-          {
-            name: "serializer",
-            type: "xs:string",
-            use: "required",
-          },
-          {
-            name: "serializer_version",
-            type: "xs:string",
-            use: "required",
-          },
-        ],
-      },
-    },
-    {
-      name: "Schema",
-      abstract: true,
+      type: "AbapgitType",
     },
   ],
   complexType: [
     {
-      name: "AbapValuesType",
+      name: "AbapgitType",
       sequence: {
-        element: [
+        any: [
           {
-            ref: "asx:Schema",
             minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
+            processContents: "lax",
           },
         ],
       },
@@ -73,7 +31,17 @@ export default {
         {
           name: "version",
           type: "xs:string",
-          "default": "1.0",
+          use: "required",
+        },
+        {
+          name: "serializer",
+          type: "xs:string",
+          use: "required",
+        },
+        {
+          name: "serializer_version",
+          type: "xs:string",
+          use: "required",
         },
       ],
     },

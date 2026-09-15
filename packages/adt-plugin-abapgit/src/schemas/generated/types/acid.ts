@@ -17,4 +17,15 @@ export type AcidSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        DESCRIPTION?: string | undefined;
+    };
+} | {
+    abap: {
+        values: {
+            DESCRIPTION?: string | undefined;
+        };
+        version?: string | undefined;
+    };
 };

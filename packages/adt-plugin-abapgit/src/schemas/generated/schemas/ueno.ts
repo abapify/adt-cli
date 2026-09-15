@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "ObjslAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,36 +46,18 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
       name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "ObjslValuesType",
@@ -96,6 +78,23 @@ export default {
           {
             name: "values",
             type: "ObjslValuesType",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
           },
         ],
       },

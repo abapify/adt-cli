@@ -14,13 +14,75 @@ export type UdmoSchema = {
                     AS4LOCAL?: string | undefined;
                     DMOTYPE?: string | undefined;
                 };
-                UDMO_ENTITIES?: unknown;
-                UDMO_TEXTS?: unknown;
+                UDMO_ENTITIES?: undefined | {
+                    item?: undefined | {
+                        DMOID?: string | undefined;
+                        ENTID?: string | undefined;
+                        AS4LOCAL?: string | undefined;
+                    }[];
+                };
+                UDMO_TEXTS?: undefined | {
+                    item?: undefined | {
+                        SPRACHE?: string | undefined;
+                        DMOID?: string | undefined;
+                        LANGBEZ?: string | undefined;
+                        AS4LOCAL?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        DM40L?: undefined | {
+            DMOID?: string | undefined;
+            AS4LOCAL?: string | undefined;
+            DMOTYPE?: string | undefined;
+        };
+        UDMO_ENTITIES?: undefined | {
+            item?: undefined | {
+                DMOID?: string | undefined;
+                ENTID?: string | undefined;
+                AS4LOCAL?: string | undefined;
+            }[];
+        };
+        UDMO_TEXTS?: undefined | {
+            item?: undefined | {
+                SPRACHE?: string | undefined;
+                DMOID?: string | undefined;
+                LANGBEZ?: string | undefined;
+                AS4LOCAL?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DM40L?: undefined | {
+                DMOID?: string | undefined;
+                AS4LOCAL?: string | undefined;
+                DMOTYPE?: string | undefined;
+            };
+            UDMO_ENTITIES?: undefined | {
+                item?: undefined | {
+                    DMOID?: string | undefined;
+                    ENTID?: string | undefined;
+                    AS4LOCAL?: string | undefined;
+                }[];
+            };
+            UDMO_TEXTS?: undefined | {
+                item?: undefined | {
+                    SPRACHE?: string | undefined;
+                    DMOID?: string | undefined;
+                    LANGBEZ?: string | undefined;
+                    AS4LOCAL?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

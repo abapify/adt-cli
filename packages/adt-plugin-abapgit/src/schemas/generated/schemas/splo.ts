@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SploAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,76 +46,37 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SploValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "TSPLT",
-            type: "SploTspltType",
+            type: "asx:SploTspltType",
             minOccurs: "0",
           },
           {
             name: "TSPLD",
-            type: "SploTspldType",
+            type: "asx:SploTspldType",
             minOccurs: "0",
           },
           {
             name: "TSP0P",
-            type: "SploTsp0pType",
+            type: "asx:SploTsp0pType",
             minOccurs: "0",
           },
         ],
       },
-    },
-    {
-      name: "SploAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SploValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "SploTspltType",
@@ -192,6 +153,23 @@ export default {
           },
         ],
       },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

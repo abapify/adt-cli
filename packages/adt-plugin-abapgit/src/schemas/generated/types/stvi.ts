@@ -23,4 +23,27 @@ export type StviSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        STVI?: undefined | {
+            SHDTVCIU?: undefined | {
+                TCODE?: string | undefined;
+                VARIANT?: string | undefined;
+                TEXT?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            STVI?: undefined | {
+                SHDTVCIU?: undefined | {
+                    TCODE?: string | undefined;
+                    VARIANT?: string | undefined;
+                    TEXT?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

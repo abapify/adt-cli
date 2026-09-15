@@ -21,25 +21,29 @@ export const packageInterfaceHandler = createHandler<
   serializer: 'LCL_OBJECT_PINF',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    PINF: {
-      ATTRIBUTES: {
-        PACK_NAME: obj.packageName,
-        INTF_NAME: String(obj.name ?? '').toUpperCase(),
-        DESCR: obj.description,
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: PackageInterfaceLike }).data ?? raw;
+    const name = String(obj.name ?? '').toUpperCase();
+    return {
+      PINF: {
+        ATTRIBUTES: {
+          PACK_NAME: obj.packageName,
+          INTF_NAME: name,
+          DESCR: obj.description,
+        },
+        ELEMENTS: obj.elements?.length
+          ? {
+              item: obj.elements.map((e) => ({
+                PACK_NAME: obj.packageName,
+                INTF_NAME: name,
+                ELEMENT_NAME: e.elementName,
+                ELEMENT_TYPE: e.elementType,
+              })),
+            }
+          : undefined,
       },
-      ELEMENTS: obj.elements?.length
-        ? {
-            item: obj.elements.map((e) => ({
-              PACK_NAME: obj.packageName,
-              INTF_NAME: String(obj.name ?? '').toUpperCase(),
-              ELEMENT_NAME: e.elementName,
-              ELEMENT_TYPE: e.elementType,
-            })),
-          }
-        : undefined,
-    },
-  }),
+    };
+  },
 
   fromAbapGit: ({ PINF }) => {
     const elements = normalizeItems(PINF?.ELEMENTS?.item);

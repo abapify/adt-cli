@@ -75,6 +75,7 @@ export default defineConfig({
         'sush',
         'sktd',
         'form',
+        'tdlines',
         'xinx',
         'para',
         'pers',

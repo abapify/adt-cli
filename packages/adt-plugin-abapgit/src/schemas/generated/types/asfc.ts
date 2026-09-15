@@ -15,4 +15,11 @@ export type AsfcSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: unknown;
+} | {
+    abap: {
+        values: unknown;
+        version?: string | undefined;
+    };
 };

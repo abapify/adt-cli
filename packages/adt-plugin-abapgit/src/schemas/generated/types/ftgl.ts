@@ -23,4 +23,27 @@ export type FtglSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        FTGL?: undefined | {
+            HEADER?: undefined | {
+                FEATURE_ID?: string | undefined;
+                DESCRIPTION?: string | undefined;
+                STATUS?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            FTGL?: undefined | {
+                HEADER?: undefined | {
+                    FEATURE_ID?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                    STATUS?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

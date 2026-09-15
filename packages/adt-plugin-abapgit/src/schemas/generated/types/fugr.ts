@@ -81,4 +81,143 @@ export type FugrSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        AREAT?: string | undefined;
+        INCLUDES?: undefined | {
+            SOBJ_NAME?: undefined | string[];
+        };
+        FUNCTIONS?: undefined | {
+            item?: undefined | {
+                FUNCNAME: string;
+                GLOBAL_FLAG?: string | undefined;
+                REMOTE_CALL?: string | undefined;
+                UPDATE_TASK?: string | undefined;
+                SHORT_TEXT?: string | undefined;
+                REMOTE_BASXML?: string | undefined;
+                EXCEPTION_CLASSES?: string | undefined;
+                IMPORT?: undefined | {
+                    RSIMP?: undefined | {
+                        PARAMETER?: string | undefined;
+                        TYP?: string | undefined;
+                        DBFIELD?: string | undefined;
+                        DEFAULT?: string | undefined;
+                        OPTIONAL?: string | undefined;
+                        REFERENCE?: string | undefined;
+                    }[];
+                };
+                CHANGING?: undefined | {
+                    RSCHA?: undefined | {
+                        PARAMETER?: string | undefined;
+                        TYP?: string | undefined;
+                        DBFIELD?: string | undefined;
+                        DEFAULT?: string | undefined;
+                        OPTIONAL?: string | undefined;
+                        REFERENCE?: string | undefined;
+                    }[];
+                };
+                EXPORT?: undefined | {
+                    RSEXP?: undefined | {
+                        PARAMETER?: string | undefined;
+                        TYP?: string | undefined;
+                        DBFIELD?: string | undefined;
+                        DEFAULT?: string | undefined;
+                        OPTIONAL?: string | undefined;
+                        REFERENCE?: string | undefined;
+                    }[];
+                };
+                TABLES?: undefined | {
+                    RSTBL?: undefined | {
+                        PARAMETER?: string | undefined;
+                        DBSTRUCT?: string | undefined;
+                        TYP?: string | undefined;
+                        OPTIONAL?: string | undefined;
+                    }[];
+                };
+                EXCEPTION?: undefined | {
+                    RSEXC?: undefined | {
+                        EXCEPTION?: string | undefined;
+                    }[];
+                };
+                DOCUMENTATION?: undefined | {
+                    RSFDO?: undefined | {
+                        PARAMETER?: string | undefined;
+                        KIND?: string | undefined;
+                        STEXT?: string | undefined;
+                    }[];
+                };
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            AREAT?: string | undefined;
+            INCLUDES?: undefined | {
+                SOBJ_NAME?: undefined | string[];
+            };
+            FUNCTIONS?: undefined | {
+                item?: undefined | {
+                    FUNCNAME: string;
+                    GLOBAL_FLAG?: string | undefined;
+                    REMOTE_CALL?: string | undefined;
+                    UPDATE_TASK?: string | undefined;
+                    SHORT_TEXT?: string | undefined;
+                    REMOTE_BASXML?: string | undefined;
+                    EXCEPTION_CLASSES?: string | undefined;
+                    IMPORT?: undefined | {
+                        RSIMP?: undefined | {
+                            PARAMETER?: string | undefined;
+                            TYP?: string | undefined;
+                            DBFIELD?: string | undefined;
+                            DEFAULT?: string | undefined;
+                            OPTIONAL?: string | undefined;
+                            REFERENCE?: string | undefined;
+                        }[];
+                    };
+                    CHANGING?: undefined | {
+                        RSCHA?: undefined | {
+                            PARAMETER?: string | undefined;
+                            TYP?: string | undefined;
+                            DBFIELD?: string | undefined;
+                            DEFAULT?: string | undefined;
+                            OPTIONAL?: string | undefined;
+                            REFERENCE?: string | undefined;
+                        }[];
+                    };
+                    EXPORT?: undefined | {
+                        RSEXP?: undefined | {
+                            PARAMETER?: string | undefined;
+                            TYP?: string | undefined;
+                            DBFIELD?: string | undefined;
+                            DEFAULT?: string | undefined;
+                            OPTIONAL?: string | undefined;
+                            REFERENCE?: string | undefined;
+                        }[];
+                    };
+                    TABLES?: undefined | {
+                        RSTBL?: undefined | {
+                            PARAMETER?: string | undefined;
+                            DBSTRUCT?: string | undefined;
+                            TYP?: string | undefined;
+                            OPTIONAL?: string | undefined;
+                        }[];
+                    };
+                    EXCEPTION?: undefined | {
+                        RSEXC?: undefined | {
+                            EXCEPTION?: string | undefined;
+                        }[];
+                    };
+                    DOCUMENTATION?: undefined | {
+                        RSFDO?: undefined | {
+                            PARAMETER?: string | undefined;
+                            KIND?: string | undefined;
+                            STEXT?: string | undefined;
+                        }[];
+                    };
+                }[];
+            };
+        };
+        version?: string | undefined;
+    };
 };

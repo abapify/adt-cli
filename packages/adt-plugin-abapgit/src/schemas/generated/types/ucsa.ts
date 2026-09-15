@@ -22,4 +22,25 @@ export type UcsaSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        UCSA?: undefined | {
+            HEADER?: undefined | {
+                ID?: string | undefined;
+                DESCRIPTION?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            UCSA?: undefined | {
+                HEADER?: undefined | {
+                    ID?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

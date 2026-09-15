@@ -15,7 +15,14 @@ export type PinfSchema = {
                         INTF_NAME?: string | undefined;
                         DESCR?: string | undefined;
                     };
-                    ELEMENTS?: unknown;
+                    ELEMENTS?: undefined | {
+                        item?: undefined | {
+                            PACK_NAME?: string | undefined;
+                            INTF_NAME?: string | undefined;
+                            ELEMENT_NAME?: string | undefined;
+                            ELEMENT_TYPE?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -23,5 +30,44 @@ export type PinfSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        PINF?: undefined | {
+            ATTRIBUTES?: undefined | {
+                PACK_NAME?: string | undefined;
+                INTF_NAME?: string | undefined;
+                DESCR?: string | undefined;
+            };
+            ELEMENTS?: undefined | {
+                item?: undefined | {
+                    PACK_NAME?: string | undefined;
+                    INTF_NAME?: string | undefined;
+                    ELEMENT_NAME?: string | undefined;
+                    ELEMENT_TYPE?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            PINF?: undefined | {
+                ATTRIBUTES?: undefined | {
+                    PACK_NAME?: string | undefined;
+                    INTF_NAME?: string | undefined;
+                    DESCR?: string | undefined;
+                };
+                ELEMENTS?: undefined | {
+                    item?: undefined | {
+                        PACK_NAME?: string | undefined;
+                        INTF_NAME?: string | undefined;
+                        ELEMENT_NAME?: string | undefined;
+                        ELEMENT_TYPE?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

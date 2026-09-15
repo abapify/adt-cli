@@ -21,7 +21,16 @@ export type XinxSchema = {
                         DDTEXT?: string | undefined;
                         ISEXTIND?: string | undefined;
                     };
-                    T_DD17V?: unknown;
+                    T_DD17V?: undefined | {
+                        DD17V?: undefined | {
+                            DDLANGUAGE?: string | undefined;
+                            SQLTAB?: string | undefined;
+                            INDEXNAME?: string | undefined;
+                            POSITION?: string | undefined;
+                            AS4LOCAL?: string | undefined;
+                            FIELDNAME?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -29,5 +38,60 @@ export type XinxSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        XINX?: undefined | {
+            DD12V?: undefined | {
+                SQLTAB?: string | undefined;
+                INDEXNAME?: string | undefined;
+                AS4LOCAL?: string | undefined;
+                AS4VERS?: string | undefined;
+                DDLANGUAGE?: string | undefined;
+                DBINDEX?: string | undefined;
+                UNIQUEFLAG?: string | undefined;
+                DDTEXT?: string | undefined;
+                ISEXTIND?: string | undefined;
+            };
+            T_DD17V?: undefined | {
+                DD17V?: undefined | {
+                    DDLANGUAGE?: string | undefined;
+                    SQLTAB?: string | undefined;
+                    INDEXNAME?: string | undefined;
+                    POSITION?: string | undefined;
+                    AS4LOCAL?: string | undefined;
+                    FIELDNAME?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            XINX?: undefined | {
+                DD12V?: undefined | {
+                    SQLTAB?: string | undefined;
+                    INDEXNAME?: string | undefined;
+                    AS4LOCAL?: string | undefined;
+                    AS4VERS?: string | undefined;
+                    DDLANGUAGE?: string | undefined;
+                    DBINDEX?: string | undefined;
+                    UNIQUEFLAG?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    ISEXTIND?: string | undefined;
+                };
+                T_DD17V?: undefined | {
+                    DD17V?: undefined | {
+                        DDLANGUAGE?: string | undefined;
+                        SQLTAB?: string | undefined;
+                        INDEXNAME?: string | undefined;
+                        POSITION?: string | undefined;
+                        AS4LOCAL?: string | undefined;
+                        FIELDNAME?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

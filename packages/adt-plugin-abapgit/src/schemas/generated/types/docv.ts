@@ -18,7 +18,12 @@ export type DocvSchema = {
                         TDSPRAS?: string | undefined;
                         TDTITLE?: string | undefined;
                     };
-                    LINES?: unknown;
+                    LINES?: undefined | {
+                        item?: undefined | {
+                            TDFORMAT?: string | undefined;
+                            TDLINE?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -26,5 +31,46 @@ export type DocvSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        DOC?: undefined | {
+            DOCTITLE?: string | undefined;
+            HEAD?: undefined | {
+                TDOBJECT?: string | undefined;
+                TDNAME?: string | undefined;
+                TDID?: string | undefined;
+                TDSPRAS?: string | undefined;
+                TDTITLE?: string | undefined;
+            };
+            LINES?: undefined | {
+                item?: undefined | {
+                    TDFORMAT?: string | undefined;
+                    TDLINE?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DOC?: undefined | {
+                DOCTITLE?: string | undefined;
+                HEAD?: undefined | {
+                    TDOBJECT?: string | undefined;
+                    TDNAME?: string | undefined;
+                    TDID?: string | undefined;
+                    TDSPRAS?: string | undefined;
+                    TDTITLE?: string | undefined;
+                };
+                LINES?: undefined | {
+                    item?: undefined | {
+                        TDFORMAT?: string | undefined;
+                        TDLINE?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

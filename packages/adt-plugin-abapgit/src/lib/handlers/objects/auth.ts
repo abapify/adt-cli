@@ -13,6 +13,7 @@ type AuthFieldLike = {
   length?: string;
   outputLength?: string;
   lowercase?: boolean;
+  lng?: string;
 };
 
 export const authFieldHandler = createHandler<AuthFieldLike, typeof auth>(
@@ -32,6 +33,7 @@ export const authFieldHandler = createHandler<AuthFieldLike, typeof auth>(
         LENG: obj.length,
         OUTPUTLEN: obj.outputLength,
         LOWERCASE: obj.lowercase ? 'X' : undefined,
+        LNG: obj.lng,
       },
     }),
 
@@ -43,6 +45,7 @@ export const authFieldHandler = createHandler<AuthFieldLike, typeof auth>(
       length: AUTHX?.LENG,
       outputLength: AUTHX?.OUTPUTLEN,
       lowercase: AUTHX?.LOWERCASE === 'X',
+      lng: AUTHX?.LNG,
     }),
   },
 );

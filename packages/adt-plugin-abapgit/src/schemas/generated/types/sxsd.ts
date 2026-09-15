@@ -25,4 +25,31 @@ export type SxsdSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SXSD?: undefined | {
+            BADI?: undefined | {
+                BADI_NAME?: string | undefined;
+                TEXT?: string | undefined;
+                INTERFACE?: string | undefined;
+            };
+            MAST_LANGU?: string | undefined;
+            EXT_CLNAME?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SXSD?: undefined | {
+                BADI?: undefined | {
+                    BADI_NAME?: string | undefined;
+                    TEXT?: string | undefined;
+                    INTERFACE?: string | undefined;
+                };
+                MAST_LANGU?: string | undefined;
+                EXT_CLNAME?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

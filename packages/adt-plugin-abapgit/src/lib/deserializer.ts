@@ -44,7 +44,7 @@ interface ObjectFiles {
   xmlFile?: string;
   /** AFF JSON metadata file path (if present) */
   jsonFile?: string;
-  sourceFiles: Array<{ path: string; suffix?: string }>;
+  sourceFiles: Array<{ path: string; suffix?: string; binary?: boolean }>;
 }
 
 /**
@@ -104,12 +104,15 @@ async function collectSourceFiles(
   fileTree: FileTree,
   objectMap: Map<string, ObjectFiles>,
 ): Promise<void> {
-  const [abapFiles, abdlFiles, acdsFiles, asrvdFiles] = await Promise.all([
-    fileTree.glob('**/*.abap'),
-    fileTree.glob('**/*.abdl'),
-    fileTree.glob('**/*.acds'),
-    fileTree.glob('**/*.asrvd'),
-  ]);
+  const [abapFiles, abdlFiles, acdsFiles, asrvdFiles, xmlFiles, allFiles] =
+    await Promise.all([
+      fileTree.glob('**/*.abap'),
+      fileTree.glob('**/*.abdl'),
+      fileTree.glob('**/*.acds'),
+      fileTree.glob('**/*.asrvd'),
+      fileTree.glob('**/*.xml'),
+      fileTree.glob('**/*'),
+    ]);
   for (const sourcePath of [
     ...abapFiles,
     ...abdlFiles,
@@ -121,6 +124,30 @@ async function collectSourceFiles(
     if (!parsed) continue;
     const obj = objectMap.get(`${parsed.name}:${parsed.type}`);
     if (obj) obj.sourceFiles.push({ path: sourcePath, suffix: parsed.suffix });
+  }
+
+  // Suffixed XML companions (e.g. {name}.form.tdlines_E.xml) are sources,
+  // not metadata — non-suffixed .xml files are already the xmlFile.
+  for (const sourcePath of xmlFiles) {
+    const filename = sourcePath.slice(sourcePath.lastIndexOf('/') + 1);
+    const parsed = parseAbapGitFilename(filename);
+    if (!parsed?.suffix) continue;
+    const obj = objectMap.get(`${parsed.name}:${parsed.type}`);
+    if (obj) obj.sourceFiles.push({ path: sourcePath, suffix: parsed.suffix });
+  }
+
+  // Binary/other companions ({name}.{type}.{filename}, e.g. SMIM MIME
+  // objects) don't match the source/metadata extensions at all.
+  for (const sourcePath of allFiles) {
+    const filename = sourcePath.slice(sourcePath.lastIndexOf('/') + 1);
+    const match = filename.match(/^([^.]+)\.([^.]+)\..+$/);
+    if (!match) continue;
+    const key = `${match[1].toUpperCase()}:${match[2].toUpperCase()}`;
+    const obj = objectMap.get(key);
+    if (!obj) continue;
+    if (parseAbapGitFilename(filename)) continue; // already handled above
+    const suffix = filename.slice(match[1].length + match[2].length + 2);
+    obj.sourceFiles.push({ path: sourcePath, suffix, binary: true });
   }
 }
 
@@ -305,8 +332,10 @@ export async function* deserialize(
 
       // Read source files
       const sources: Record<string, string> = {};
-      for (const { path, suffix } of objFiles.sourceFiles) {
-        const content = await fileTree.read(path);
+      for (const { path, suffix, binary } of objFiles.sourceFiles) {
+        const content = binary
+          ? (await fileTree.readBuffer(path)).toString('base64')
+          : await fileTree.read(path);
         const sourceKey = suffix
           ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
           : 'main';

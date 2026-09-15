@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "IobjAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,65 +46,67 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "IobjValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "IOBJ",
-            type: "IobjType",
-          },
-        ],
-      },
-    },
-    {
-      name: "IobjAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "IobjValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            type: "asx:IobjDetailsType",
             minOccurs: "0",
-            maxOccurs: "unbounded",
           },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
           {
-            ref: "asx:values",
+            name: "COMPOUNDS",
+            type: "asx:IobjCompoundsType",
+            minOccurs: "0",
+          },
+          {
+            name: "ATTRIBUTES",
+            type: "asx:IobjAttributesType",
+            minOccurs: "0",
+          },
+          {
+            name: "NAVIGATION_ATTRIBUTES",
+            type: "asx:IobjAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "ATTR_NAVIGATION",
+            type: "asx:IobjAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "HIERARCHY",
+            type: "asx:IobjAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "ELIMINATION",
+            type: "asx:IobjAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "HANA_FIELDS_MAPPING",
+            type: "asx:IobjAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "XXL_ATTRIBUTES",
+            type: "asx:IobjAnyTableType",
+            minOccurs: "0",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "IobjDetailsType",
@@ -170,6 +172,11 @@ export default {
             minOccurs: "0",
           },
           {
+            name: "KYFNM",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
             name: "TXTLONG",
             type: "xs:string",
             minOccurs: "0",
@@ -195,6 +202,19 @@ export default {
             name: "COMPOUND",
             type: "xs:string",
             minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "IobjCompoundsType",
+      sequence: {
+        element: [
+          {
+            name: "BAPI6108CM",
+            type: "IobjCompoundsItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },
@@ -227,47 +247,46 @@ export default {
       },
     },
     {
-      name: "IobjType",
+      name: "IobjAttributesType",
       sequence: {
         element: [
           {
-            name: "IOBJ",
-            type: "IobjDetailsType",
-          },
-          {
-            name: "COMPOUNDS",
+            name: "BAPI6108AT",
+            type: "IobjAttributesItemType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "BAPI6108CM",
-                    type: "IobjCompoundsItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "ATTRIBUTES",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "BAPI6108AT",
-                    type: "IobjAttributesItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
+            maxOccurs: "unbounded",
           },
         ],
       },
+    },
+    {
+      name: "IobjAnyTableType",
+      sequence: {
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

@@ -25,4 +25,31 @@ export type ParaSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        TPARA?: undefined | {
+            PARAMID?: string | undefined;
+            PARTEXT?: string | undefined;
+        };
+        TPARAT?: undefined | {
+            PARAMID?: string | undefined;
+            SPRACHE?: string | undefined;
+            PARTEXT?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            TPARA?: undefined | {
+                PARAMID?: string | undefined;
+                PARTEXT?: string | undefined;
+            };
+            TPARAT?: undefined | {
+                PARAMID?: string | undefined;
+                SPRACHE?: string | undefined;
+                PARTEXT?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

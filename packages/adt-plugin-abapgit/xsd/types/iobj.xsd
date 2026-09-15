@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- IOBJ details (BAPI6108) -->
   <xs:complexType name="IobjDetailsType">
     <xs:all>
       <xs:element name="INFOOBJECT" type="xs:string"/>
@@ -14,6 +15,7 @@
       <xs:element name="OUTPUTLEN" type="xs:string" minOccurs="0"/>
       <xs:element name="LOWCASE" type="xs:string" minOccurs="0"/>
       <xs:element name="CONVEXIT" type="xs:string" minOccurs="0"/>
+      <xs:element name="KYFNM" type="xs:string" minOccurs="0"/>
       <xs:element name="TXTLONG" type="xs:string" minOccurs="0"/>
       <xs:element name="TXTSHRT" type="xs:string" minOccurs="0"/>
     </xs:all>
@@ -26,6 +28,12 @@
     </xs:all>
   </xs:complexType>
 
+  <xs:complexType name="IobjCompoundsType">
+    <xs:sequence>
+      <xs:element name="BAPI6108CM" type="IobjCompoundsItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="IobjAttributesItemType">
     <xs:all>
       <xs:element name="ATRNM" type="xs:string" minOccurs="0"/>
@@ -35,23 +43,16 @@
     </xs:all>
   </xs:complexType>
 
-  <xs:complexType name="IobjType">
+  <xs:complexType name="IobjAttributesType">
     <xs:sequence>
-      <xs:element name="IOBJ" type="IobjDetailsType"/>
-      <xs:element name="COMPOUNDS" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="BAPI6108CM" type="IobjCompoundsItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="ATTRIBUTES" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="BAPI6108AT" type="IobjAttributesItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="BAPI6108AT" type="IobjAttributesItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Less common IOBJ tables: rows of arbitrary structure (lax) -->
+  <xs:complexType name="IobjAnyTableType">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

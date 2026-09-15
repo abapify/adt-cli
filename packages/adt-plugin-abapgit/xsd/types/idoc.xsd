@@ -26,16 +26,16 @@
     </xs:all>
   </xs:complexType>
 
+  <xs:complexType name="IdocSyntaxType">
+    <xs:sequence>
+      <xs:element name="EDI_IAPI02" type="IdocSyntaxItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="IdocType">
     <xs:sequence>
       <xs:element name="ATTRIBUTES" type="IdocAttributesType"/>
-      <xs:element name="T_SYNTAX" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="EDI_IAPI02" type="IdocSyntaxItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="T_SYNTAX" type="IdocSyntaxType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

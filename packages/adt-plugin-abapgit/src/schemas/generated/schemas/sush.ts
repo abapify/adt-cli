@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SushAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,76 +46,23 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SushValuesType",
+      name: "UsobxType",
       sequence: {
         element: [
           {
-            name: "HEAD",
-            type: "SushHeadType",
-            minOccurs: "0",
-          },
-          {
-            name: "USOBX",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SushUsobxItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "USOBT",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SushUsobtItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      name: "SushAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SushValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "item",
+            type: "asx:SushUsobxItemType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -123,21 +70,39 @@ export default {
       },
     },
     {
-      name: "AbapType",
+      name: "UsobtType",
       sequence: {
         element: [
           {
-            ref: "asx:values",
+            name: "item",
+            type: "asx:SushUsobtItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
+    },
+    {
+      name: "AbapValuesType",
+      all: {
+        element: [
+          {
+            name: "HEAD",
+            type: "asx:SushHeadType",
+            minOccurs: "0",
+          },
+          {
+            name: "USOBX",
+            type: "UsobxType",
+            minOccurs: "0",
+          },
+          {
+            name: "USOBT",
+            type: "UsobtType",
+            minOccurs: "0",
+          },
+        ],
+      },
     },
     {
       name: "SushHeadType",
@@ -231,38 +196,33 @@ export default {
           },
           {
             name: "USOBX",
+            type: "UsobxType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SushUsobxItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "USOBT",
+            type: "UsobtType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SushUsobtItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

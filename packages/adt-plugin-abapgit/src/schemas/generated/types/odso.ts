@@ -9,28 +9,92 @@ export type OdsoSchema = {
     abapGit: {
         abap: {
             values: {
-                ODSO: {
-                    ODSO: {
-                        ODSOBJECT: string;
-                        ODSOTYPE?: string | undefined;
-                        OBJVERS?: string | undefined;
-                        ODSASIZCAT?: string | undefined;
-                        ODSADATCLS?: string | undefined;
-                        NOEDSFL?: string | undefined;
-                        KEY_NOT_UNIQUE?: string | undefined;
-                        IMOFL?: string | undefined;
-                        PLANNING_MODE?: string | undefined;
-                        ACTVIEWGEN?: string | undefined;
-                        TXTLG?: string | undefined;
-                        TXTSH?: string | undefined;
-                    };
-                    INFOOBJECTS?: unknown;
+                ODSO?: undefined | {
+                    ODSOBJECT: string;
+                    ODSOTYPE?: string | undefined;
+                    OBJVERS?: string | undefined;
+                    ODSASIZCAT?: string | undefined;
+                    ODSADATCLS?: string | undefined;
+                    NOEDSFL?: string | undefined;
+                    KEY_NOT_UNIQUE?: string | undefined;
+                    IMOFL?: string | undefined;
+                    PLANNING_MODE?: string | undefined;
+                    ACTVIEWGEN?: string | undefined;
+                    TXTLG?: string | undefined;
+                    TXTSH?: string | undefined;
                 };
+                INFOOBJECTS?: undefined | {
+                    BAPI6116IO?: undefined | {
+                        INFOBJECT?: string | undefined;
+                        OBJVERS?: string | undefined;
+                        KEYFLAG?: string | undefined;
+                    }[];
+                };
+                NAVIGATION?: undefined | unknown;
+                INDEXES?: undefined | unknown;
+                INDEX_IOBJ?: undefined | unknown;
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        ODSO?: undefined | {
+            ODSOBJECT: string;
+            ODSOTYPE?: string | undefined;
+            OBJVERS?: string | undefined;
+            ODSASIZCAT?: string | undefined;
+            ODSADATCLS?: string | undefined;
+            NOEDSFL?: string | undefined;
+            KEY_NOT_UNIQUE?: string | undefined;
+            IMOFL?: string | undefined;
+            PLANNING_MODE?: string | undefined;
+            ACTVIEWGEN?: string | undefined;
+            TXTLG?: string | undefined;
+            TXTSH?: string | undefined;
+        };
+        INFOOBJECTS?: undefined | {
+            BAPI6116IO?: undefined | {
+                INFOBJECT?: string | undefined;
+                OBJVERS?: string | undefined;
+                KEYFLAG?: string | undefined;
+            }[];
+        };
+        NAVIGATION?: undefined | unknown;
+        INDEXES?: undefined | unknown;
+        INDEX_IOBJ?: undefined | unknown;
+    };
+} | {
+    abap: {
+        values: {
+            ODSO?: undefined | {
+                ODSOBJECT: string;
+                ODSOTYPE?: string | undefined;
+                OBJVERS?: string | undefined;
+                ODSASIZCAT?: string | undefined;
+                ODSADATCLS?: string | undefined;
+                NOEDSFL?: string | undefined;
+                KEY_NOT_UNIQUE?: string | undefined;
+                IMOFL?: string | undefined;
+                PLANNING_MODE?: string | undefined;
+                ACTVIEWGEN?: string | undefined;
+                TXTLG?: string | undefined;
+                TXTSH?: string | undefined;
+            };
+            INFOOBJECTS?: undefined | {
+                BAPI6116IO?: undefined | {
+                    INFOBJECT?: string | undefined;
+                    OBJVERS?: string | undefined;
+                    KEYFLAG?: string | undefined;
+                }[];
+            };
+            NAVIGATION?: undefined | unknown;
+            INDEXES?: undefined | unknown;
+            INDEX_IOBJ?: undefined | unknown;
+        };
+        version?: string | undefined;
     };
 };

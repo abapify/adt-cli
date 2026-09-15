@@ -23,4 +23,27 @@ export type AmsdSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        AMSD?: undefined | {
+            METADATA?: undefined | {
+                NAME?: string | undefined;
+                MASTER_LANGUAGE?: string | undefined;
+                PACKAGE_REF?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            AMSD?: undefined | {
+                METADATA?: undefined | {
+                    NAME?: string | undefined;
+                    MASTER_LANGUAGE?: string | undefined;
+                    PACKAGE_REF?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

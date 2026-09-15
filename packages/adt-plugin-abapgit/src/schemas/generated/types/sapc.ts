@@ -22,4 +22,25 @@ export type SapcSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SAPC?: undefined | {
+            HEADER?: undefined | {
+                APC_NAME?: string | undefined;
+                DESCRIPT?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SAPC?: undefined | {
+                HEADER?: undefined | {
+                    APC_NAME?: string | undefined;
+                    DESCRIPT?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

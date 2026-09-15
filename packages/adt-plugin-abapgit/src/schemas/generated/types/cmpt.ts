@@ -22,4 +22,25 @@ export type CmptSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        CMPT?: undefined | {
+            HEADER?: undefined | {
+                NAME?: string | undefined;
+                DESCRIPTION?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            CMPT?: undefined | {
+                HEADER?: undefined | {
+                    NAME?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

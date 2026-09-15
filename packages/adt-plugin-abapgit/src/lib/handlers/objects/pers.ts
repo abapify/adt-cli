@@ -3,7 +3,7 @@
  */
 
 import { pers } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type PersonalizationObjLike = {
@@ -30,31 +30,43 @@ export const personalizationHandler = createHandler<
   toAbapGit: (obj) => ({
     PERS: {
       PERS_REG: {
-        PERS_KEY: String(obj.name ?? '').toUpperCase(),
-        ACCESS_CL: obj.accessClass,
-        DISTRIB_CL: obj.distribClass,
-        DIALOG_FB: obj.dialogFb,
-        COMPONENT: obj.component,
-        DATATYPE: obj.datatype,
-        TYPENAME: obj.typename,
+        item: [
+          {
+            PERS_KEY: String(obj.name ?? '').toUpperCase(),
+            ACCESS_CL: obj.accessClass,
+            DISTRIB_CL: obj.distribClass,
+            DIALOG_FB: obj.dialogFb,
+            COMPONENT: obj.component,
+            DATATYPE: obj.datatype,
+            TYPENAME: obj.typename,
+          },
+        ],
       },
       PERS_REG_TEXT: {
-        LANG: isoToSapLang(obj.language),
-        PERS_KEY: String(obj.name ?? '').toUpperCase(),
-        TEXT: obj.description,
+        item: [
+          {
+            LANG: isoToSapLang(obj.language),
+            PERS_KEY: String(obj.name ?? '').toUpperCase(),
+            TEXT: obj.description,
+          },
+        ],
       },
     },
   }),
 
-  fromAbapGit: ({ PERS }) => ({
-    name: (PERS?.PERS_REG?.PERS_KEY ?? '').toUpperCase(),
-    description: PERS?.PERS_REG_TEXT?.TEXT,
-    language: sapLangToIso(PERS?.PERS_REG_TEXT?.LANG),
-    accessClass: PERS?.PERS_REG?.ACCESS_CL,
-    distribClass: PERS?.PERS_REG?.DISTRIB_CL,
-    dialogFb: PERS?.PERS_REG?.DIALOG_FB,
-    component: PERS?.PERS_REG?.COMPONENT,
-    datatype: PERS?.PERS_REG?.DATATYPE,
-    typename: PERS?.PERS_REG?.TYPENAME,
-  }),
+  fromAbapGit: ({ PERS }) => {
+    const reg = normalizeItems(PERS?.PERS_REG?.item)[0];
+    const text = normalizeItems(PERS?.PERS_REG_TEXT?.item)[0];
+    return {
+      name: (reg?.PERS_KEY ?? '').toUpperCase(),
+      description: text?.TEXT,
+      language: sapLangToIso(text?.LANG),
+      accessClass: reg?.ACCESS_CL,
+      distribClass: reg?.DISTRIB_CL,
+      dialogFb: reg?.DIALOG_FB,
+      component: reg?.COMPONENT,
+      datatype: reg?.DATATYPE,
+      typename: reg?.TYPENAME,
+    };
+  },
 });

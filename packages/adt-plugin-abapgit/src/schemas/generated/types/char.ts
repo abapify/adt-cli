@@ -16,7 +16,13 @@ export type CharSchema = {
                         ATFOR?: string | undefined;
                         ATVOR?: string | undefined;
                     };
-                    CLS_ATTRIBUTET?: unknown;
+                    CLS_ATTRIBUTET?: undefined | {
+                        item?: undefined | {
+                            SPRAS?: string | undefined;
+                            CLSNAME?: string | undefined;
+                            ATBEZ?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -24,5 +30,44 @@ export type CharSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        CHAR?: undefined | {
+            CLS_ATTRIBUTE?: undefined | {
+                CLSNAME?: string | undefined;
+                ATNAM?: string | undefined;
+                ATFOR?: string | undefined;
+                ATVOR?: string | undefined;
+            };
+            CLS_ATTRIBUTET?: undefined | {
+                item?: undefined | {
+                    SPRAS?: string | undefined;
+                    CLSNAME?: string | undefined;
+                    ATBEZ?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            CHAR?: undefined | {
+                CLS_ATTRIBUTE?: undefined | {
+                    CLSNAME?: string | undefined;
+                    ATNAM?: string | undefined;
+                    ATFOR?: string | undefined;
+                    ATVOR?: string | undefined;
+                };
+                CLS_ATTRIBUTET?: undefined | {
+                    item?: undefined | {
+                        SPRAS?: string | undefined;
+                        CLSNAME?: string | undefined;
+                        ATBEZ?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

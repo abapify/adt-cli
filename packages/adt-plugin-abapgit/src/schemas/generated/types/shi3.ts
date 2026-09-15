@@ -13,13 +13,91 @@ export type Shi3Schema = {
                     TREE_ID?: string | undefined;
                     TYPE?: string | undefined;
                 };
-                TREE_TITLES?: unknown;
-                TREE_NODES?: unknown;
+                TREE_TITLES?: undefined | {
+                    item?: undefined | {
+                        SPRAS?: string | undefined;
+                        TREE_ID?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+                TREE_NODES?: undefined | {
+                    item?: undefined | {
+                        NODE_ID?: string | undefined;
+                        TREE_ID?: string | undefined;
+                        PARENT_ID?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+                TREE_REFS?: undefined | {
+                    item?: undefined | unknown[];
+                };
+                TREE_TEXTS?: undefined | {
+                    item?: undefined | unknown[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        TREE_HEAD?: undefined | {
+            TREE_ID?: string | undefined;
+            TYPE?: string | undefined;
+        };
+        TREE_TITLES?: undefined | {
+            item?: undefined | {
+                SPRAS?: string | undefined;
+                TREE_ID?: string | undefined;
+                TEXT?: string | undefined;
+            }[];
+        };
+        TREE_NODES?: undefined | {
+            item?: undefined | {
+                NODE_ID?: string | undefined;
+                TREE_ID?: string | undefined;
+                PARENT_ID?: string | undefined;
+                TEXT?: string | undefined;
+            }[];
+        };
+        TREE_REFS?: undefined | {
+            item?: undefined | unknown[];
+        };
+        TREE_TEXTS?: undefined | {
+            item?: undefined | unknown[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            TREE_HEAD?: undefined | {
+                TREE_ID?: string | undefined;
+                TYPE?: string | undefined;
+            };
+            TREE_TITLES?: undefined | {
+                item?: undefined | {
+                    SPRAS?: string | undefined;
+                    TREE_ID?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+            TREE_NODES?: undefined | {
+                item?: undefined | {
+                    NODE_ID?: string | undefined;
+                    TREE_ID?: string | undefined;
+                    PARENT_ID?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+            TREE_REFS?: undefined | {
+                item?: undefined | unknown[];
+            };
+            TREE_TEXTS?: undefined | {
+                item?: undefined | unknown[];
+            };
+        };
+        version?: string | undefined;
     };
 };

@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SprxAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,71 +46,23 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SprxValuesType",
+      name: "ProxyHeaderType",
       sequence: {
         element: [
           {
-            name: "PROXY_HEADER",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SprxHeaderItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "PROXY_DATA",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SprxDataItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      name: "SprxAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SprxValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "item",
+            type: "asx:SprxHeaderItemType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -118,21 +70,34 @@ export default {
       },
     },
     {
-      name: "AbapType",
+      name: "ProxyDataType",
       sequence: {
         element: [
           {
-            ref: "asx:values",
+            name: "item",
+            type: "asx:SprxDataItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
+    },
+    {
+      name: "AbapValuesType",
+      all: {
+        element: [
+          {
+            name: "PROXY_HEADER",
+            type: "ProxyHeaderType",
+            minOccurs: "0",
+          },
+          {
+            name: "PROXY_DATA",
+            type: "ProxyDataType",
+            minOccurs: "0",
+          },
+        ],
+      },
     },
     {
       name: "SprxHeaderItemType",
@@ -234,43 +199,21 @@ export default {
       },
     },
     {
-      name: "SprxType",
+      name: "AbapType",
       sequence: {
         element: [
           {
-            name: "PROXY_HEADER",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SprxHeaderItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "PROXY_DATA",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SprxDataItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
+            ref: "asx:values",
           },
         ],
       },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

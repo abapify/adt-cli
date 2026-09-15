@@ -15,12 +15,50 @@ export type WdyaSchema = {
                     INTERFACE?: string | undefined;
                     DESCRIPTION?: string | undefined;
                 };
-                PROPERTIES?: unknown;
+                PROPERTIES?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        VALUE?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        APP?: undefined | {
+            APPLICATION_NAME?: string | undefined;
+            COMPONENT?: string | undefined;
+            INTERFACE?: string | undefined;
+            DESCRIPTION?: string | undefined;
+        };
+        PROPERTIES?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                VALUE?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            APP?: undefined | {
+                APPLICATION_NAME?: string | undefined;
+                COMPONENT?: string | undefined;
+                INTERFACE?: string | undefined;
+                DESCRIPTION?: string | undefined;
+            };
+            PROPERTIES?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    VALUE?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

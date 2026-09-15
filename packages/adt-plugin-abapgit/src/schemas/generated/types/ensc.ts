@@ -10,13 +10,52 @@ export type EnscSchema = {
         abap: {
             values: {
                 SHORTTEXT?: string | undefined;
-                ENH_SPOTS?: unknown;
-                COMP_ENH_SPOTS?: unknown;
+                ENH_SPOTS?: undefined | {
+                    item?: undefined | {
+                        ENHSPOTNAME?: string | undefined;
+                    }[];
+                };
+                COMP_ENH_SPOTS?: undefined | {
+                    item?: undefined | {
+                        ENHSPOTNAME?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        SHORTTEXT?: string | undefined;
+        ENH_SPOTS?: undefined | {
+            item?: undefined | {
+                ENHSPOTNAME?: string | undefined;
+            }[];
+        };
+        COMP_ENH_SPOTS?: undefined | {
+            item?: undefined | {
+                ENHSPOTNAME?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SHORTTEXT?: string | undefined;
+            ENH_SPOTS?: undefined | {
+                item?: undefined | {
+                    ENHSPOTNAME?: string | undefined;
+                }[];
+            };
+            COMP_ENH_SPOTS?: undefined | {
+                item?: undefined | {
+                    ENHSPOTNAME?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

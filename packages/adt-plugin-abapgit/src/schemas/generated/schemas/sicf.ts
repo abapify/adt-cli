@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SicfAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,11 +46,32 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SicfValuesType",
+      name: "IcfhandlerTableType",
       sequence: {
+        element: [
+          {
+            name: "ICFHANDLER",
+            type: "asx:IcfHandlerType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "URL",
@@ -59,89 +80,31 @@ export default {
           },
           {
             name: "ICFSERVICE",
-            type: "IcfServiceType",
+            type: "asx:IcfServiceType",
             minOccurs: "0",
           },
           {
             name: "ICFDOCU",
-            type: "IcfDocuType",
+            type: "asx:IcfDocuType",
             minOccurs: "0",
           },
           {
             name: "ICFHANDLER_TABLE",
+            type: "IcfhandlerTableType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "ICFHANDLER",
-                    type: "IcfHandlerType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "SOTS",
-            type: "SotsType",
+            type: "asx:SicfSotsType",
             minOccurs: "0",
           },
           {
             name: "SOTS_USE",
-            type: "SotsType",
+            type: "asx:SicfSotsUseType",
             minOccurs: "0",
           },
         ],
       },
-    },
-    {
-      name: "SicfAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SicfValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "IcfServiceType",
@@ -240,12 +203,12 @@ export default {
       },
     },
     {
-      name: "SotsType",
+      name: "IcfHandlerTableType",
       sequence: {
         element: [
           {
-            name: "item",
-            type: "SotsItemType",
+            name: "ICFHANDLER",
+            type: "IcfHandlerType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -253,7 +216,34 @@ export default {
       },
     },
     {
-      name: "SotsItemType",
+      name: "SicfSotsHeaderType",
+      all: {
+        element: [
+          {
+            name: "CONCEPT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "PAKET",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "CREA_LAN",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "ALIAS_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "SicfSotsEntryType",
       all: {
         element: [
           {
@@ -267,12 +257,127 @@ export default {
             minOccurs: "0",
           },
           {
+            name: "OBJECT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "LFD_NUM",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
             name: "TEXT",
             type: "xs:string",
             minOccurs: "0",
           },
         ],
       },
+    },
+    {
+      name: "SicfSotsEntriesType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "SicfSotsEntryType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "SicfSotsItemType",
+      all: {
+        element: [
+          {
+            name: "HEADER",
+            type: "SicfSotsHeaderType",
+            minOccurs: "0",
+          },
+          {
+            name: "ENTRIES",
+            type: "SicfSotsEntriesType",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "SicfSotsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "SicfSotsItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "SicfSotsUseItemType",
+      all: {
+        element: [
+          {
+            name: "PGMID",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "OBJECT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "OBJ_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "CONCEPT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "LFD_NUM",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "SicfSotsUseType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "SicfSotsUseItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

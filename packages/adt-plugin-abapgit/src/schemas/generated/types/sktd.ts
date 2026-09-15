@@ -27,4 +27,35 @@ export type SktdSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SKTD: {
+            METADATA?: undefined | {
+                MASTER_LANGUAGE?: string | undefined;
+                RESPONSIBLE?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
+            };
+            REF_OBJECT?: undefined | {
+                URI?: string | undefined;
+                DESCRIPTION?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SKTD: {
+                METADATA?: undefined | {
+                    MASTER_LANGUAGE?: string | undefined;
+                    RESPONSIBLE?: string | undefined;
+                    ABAP_LANGUAGE_VERSION?: string | undefined;
+                };
+                REF_OBJECT?: undefined | {
+                    URI?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

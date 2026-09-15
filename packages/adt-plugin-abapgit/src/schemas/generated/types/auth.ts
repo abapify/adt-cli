@@ -26,4 +26,33 @@ export type AuthSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        AUTHX?: undefined | {
+            FIELDNAME?: string | undefined;
+            ROLLNAME?: string | undefined;
+            AUTHCLASS?: string | undefined;
+            DATATYPE?: string | undefined;
+            LNG?: string | undefined;
+            LENG?: string | undefined;
+            OUTPUTLEN?: string | undefined;
+            LOWERCASE?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            AUTHX?: undefined | {
+                FIELDNAME?: string | undefined;
+                ROLLNAME?: string | undefined;
+                AUTHCLASS?: string | undefined;
+                DATATYPE?: string | undefined;
+                LNG?: string | undefined;
+                LENG?: string | undefined;
+                OUTPUTLEN?: string | undefined;
+                LOWERCASE?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

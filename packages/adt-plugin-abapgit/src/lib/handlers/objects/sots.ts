@@ -39,6 +39,7 @@ export const otrTextHandler = createHandler<OtrTextLike, typeof sots>('SOTS', {
                   LANGU: isoToSapLang(t.langu ?? obj.language),
                   OBJECT: t.object,
                   LFD_NUM: t.lfdNum,
+                  TEXT: t.text,
                 })),
               }
             : undefined,
@@ -59,6 +60,7 @@ export const otrTextHandler = createHandler<OtrTextLike, typeof sots>('SOTS', {
         langu: sapLangToIso(e.LANGU),
         object: e.OBJECT,
         lfdNum: e.LFD_NUM,
+        text: e.TEXT,
       })),
     };
   },

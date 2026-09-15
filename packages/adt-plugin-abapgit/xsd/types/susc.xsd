@@ -13,11 +13,4 @@
       <xs:element name="CTEXT" type="xs:string" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
-
-  <xs:complexType name="SuscType">
-    <xs:sequence>
-      <xs:element name="TOBC" type="SuscTobcType" minOccurs="0"/>
-      <xs:element name="TOBCT" type="SuscTobctType" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
 </xs:schema>

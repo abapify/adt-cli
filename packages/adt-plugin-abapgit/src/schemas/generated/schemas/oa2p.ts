@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "Oa2pAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,66 +46,27 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "Oa2pValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "PROFILE",
-            type: "Oa2pProfileType",
+            type: "asx:Oa2pProfileType",
             minOccurs: "0",
           },
         ],
       },
-    },
-    {
-      name: "Oa2pAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "Oa2pValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "Oa2pProfileType",
@@ -128,37 +89,58 @@ export default {
           },
           {
             name: "T_SCOPES",
+            type: "TScopesType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                    complexType: {
-                      all: {
-                        element: [
-                          {
-                            name: "SCOPE",
-                            type: "xs:string",
-                            minOccurs: "0",
-                          },
-                          {
-                            name: "DESCRIPTION",
-                            type: "xs:string",
-                            minOccurs: "0",
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
           },
         ],
       },
+    },
+    {
+      name: "TScopesItemType",
+      all: {
+        element: [
+          {
+            name: "SCOPE",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DESCRIPTION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "TScopesType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "TScopesItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

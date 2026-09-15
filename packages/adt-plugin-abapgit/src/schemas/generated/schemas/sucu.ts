@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SucuAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,71 +46,23 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SucuValuesType",
+      name: "TbrgAuthType",
       sequence: {
         element: [
           {
-            name: "TBRG_AUTH",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SucuAuthType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "TBRG_AUTHT",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SucuAuthTextType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      name: "SucuAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SucuValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "item",
+            type: "asx:SucuAuthType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -118,21 +70,34 @@ export default {
       },
     },
     {
-      name: "AbapType",
+      name: "TbrgAuthtType",
       sequence: {
         element: [
           {
-            ref: "asx:values",
+            name: "item",
+            type: "asx:SucuAuthTextType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
+    },
+    {
+      name: "AbapValuesType",
+      all: {
+        element: [
+          {
+            name: "TBRG_AUTH",
+            type: "TbrgAuthType",
+            minOccurs: "0",
+          },
+          {
+            name: "TBRG_AUTHT",
+            type: "TbrgAuthtType",
+            minOccurs: "0",
+          },
+        ],
+      },
     },
     {
       name: "SucuAuthType",
@@ -179,43 +144,21 @@ export default {
       },
     },
     {
-      name: "SucuType",
+      name: "AbapType",
       sequence: {
         element: [
           {
-            name: "TBRG_AUTH",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SucuAuthType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "TBRG_AUTHT",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "SucuAuthTextType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
+            ref: "asx:values",
           },
         ],
       },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

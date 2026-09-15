@@ -1,35 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
            xmlns:asx="http://www.sap.com/abapxml"
            elementFormDefault="unqualified">
-  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
-  <xs:include schemaLocation="abapgit.xsd"/>
+
+  <!-- Include types (brought into asx namespace) -->
   <xs:include schemaLocation="types/area.xsd"/>
 
-  <xs:complexType name="AreaValuesType">
-    <xs:sequence>
-      <xs:element name="NODENAME" type="xs:string" minOccurs="0"/>
-      <xs:element name="PARENTNAME" type="xs:string" minOccurs="0"/>
-      <xs:element name="TXTSH" type="xs:string" minOccurs="0"/>
-      <xs:element name="TXTLG" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="AreaAbapType">
-    <xs:sequence>
-      <xs:element name="values" type="AreaValuesType"/>
-    </xs:sequence>
-    <xs:attribute name="version" type="xs:string" default="1.0"/>
-  </xs:complexType>
-
-  <xs:element name="abapGit">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="abap" type="AreaAbapType"/>
-      </xs:sequence>
-      <xs:attribute name="version" type="xs:string" use="required"/>
-      <xs:attribute name="serializer" type="xs:string" use="required"/>
-      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+  <!-- Redefine AbapValuesType to include AREA-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+          <xs:element name="NODENAME" type="xs:string" minOccurs="0"/>
+                <xs:element name="PARENTNAME" type="xs:string" minOccurs="0"/>
+                <xs:element name="TXTSH" type="xs:string" minOccurs="0"/>
+                <xs:element name="TXTLG" type="xs:string" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
     </xs:complexType>
-  </xs:element>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
 </xs:schema>

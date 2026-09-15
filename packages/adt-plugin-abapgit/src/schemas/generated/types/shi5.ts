@@ -14,7 +14,13 @@ export type Shi5Schema = {
                         EXT_ID?: string | undefined;
                         TREE_ID?: string | undefined;
                     };
-                    TEXTS?: unknown;
+                    TEXTS?: undefined | {
+                        item?: undefined | {
+                            SPRAS?: string | undefined;
+                            EXT_ID?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -22,5 +28,40 @@ export type Shi5Schema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        SHI5?: undefined | {
+            HEADER?: undefined | {
+                EXT_ID?: string | undefined;
+                TREE_ID?: string | undefined;
+            };
+            TEXTS?: undefined | {
+                item?: undefined | {
+                    SPRAS?: string | undefined;
+                    EXT_ID?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SHI5?: undefined | {
+                HEADER?: undefined | {
+                    EXT_ID?: string | undefined;
+                    TREE_ID?: string | undefined;
+                };
+                TEXTS?: undefined | {
+                    item?: undefined | {
+                        SPRAS?: string | undefined;
+                        EXT_ID?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

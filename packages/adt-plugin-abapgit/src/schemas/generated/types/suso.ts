@@ -37,4 +37,55 @@ export type SusoSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        TOBJ?: undefined | {
+            OBJCT?: string | undefined;
+            FIEL1?: string | undefined;
+            FIEL2?: string | undefined;
+            FIEL3?: string | undefined;
+            FIEL4?: string | undefined;
+            FIEL5?: string | undefined;
+            FIEL6?: string | undefined;
+            FIEL7?: string | undefined;
+            FIEL8?: string | undefined;
+            FIEL9?: string | undefined;
+            FIEL0?: string | undefined;
+            OCLSS?: string | undefined;
+            FBLOCK?: string | undefined;
+            CONVERSION?: string | undefined;
+        };
+        TOBJT?: undefined | {
+            LANGU?: string | undefined;
+            OBJECT?: string | undefined;
+            TTEXT?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            TOBJ?: undefined | {
+                OBJCT?: string | undefined;
+                FIEL1?: string | undefined;
+                FIEL2?: string | undefined;
+                FIEL3?: string | undefined;
+                FIEL4?: string | undefined;
+                FIEL5?: string | undefined;
+                FIEL6?: string | undefined;
+                FIEL7?: string | undefined;
+                FIEL8?: string | undefined;
+                FIEL9?: string | undefined;
+                FIEL0?: string | undefined;
+                OCLSS?: string | undefined;
+                FBLOCK?: string | undefined;
+                CONVERSION?: string | undefined;
+            };
+            TOBJT?: undefined | {
+                LANGU?: string | undefined;
+                OBJECT?: string | undefined;
+                TTEXT?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

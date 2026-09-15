@@ -7,13 +7,19 @@
 
 import { sktd } from '../../../schemas/generated';
 import { createHandler } from '../base';
-import { sapLangToIso, isoToSapLang } from '../lang';
+import {
+  abapLangVerFromAdt,
+  abapLangVerToAdt,
+  isoToSapLang,
+  sapLangToIso,
+} from '../lang';
 
 type KtdDocumentLike = {
   name: string;
   description?: string;
   masterLanguage?: string;
   responsible?: string;
+  abapLanguageVersion?: string;
   refObjectUri?: string;
   refObjectDescription?: string;
 };
@@ -31,10 +37,11 @@ export const ktdDocumentHandler = createHandler<KtdDocumentLike, typeof sktd>(
         METADATA: {
           MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
           RESPONSIBLE: obj.responsible,
+          ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(obj.abapLanguageVersion),
         },
         REF_OBJECT: {
           URI: obj.refObjectUri,
-          DESCRIPTION: obj.refObjectDescription,
+          DESCRIPTION: obj.refObjectDescription ?? obj.description,
         },
       },
     }),
@@ -44,6 +51,9 @@ export const ktdDocumentHandler = createHandler<KtdDocumentLike, typeof sktd>(
       description: SKTD?.REF_OBJECT?.DESCRIPTION,
       masterLanguage: sapLangToIso(SKTD?.METADATA?.MASTER_LANGUAGE),
       responsible: SKTD?.METADATA?.RESPONSIBLE,
+      abapLanguageVersion: abapLangVerToAdt(
+        SKTD?.METADATA?.ABAP_LANGUAGE_VERSION,
+      ),
       refObjectUri: SKTD?.REF_OBJECT?.URI,
       refObjectDescription: SKTD?.REF_OBJECT?.DESCRIPTION,
     }),

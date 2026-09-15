@@ -20,4 +20,21 @@ export type AreaSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        NODENAME?: string | undefined;
+        PARENTNAME?: string | undefined;
+        TXTSH?: string | undefined;
+        TXTLG?: string | undefined;
+    };
+} | {
+    abap: {
+        values: {
+            NODENAME?: string | undefined;
+            PARENTNAME?: string | undefined;
+            TXTSH?: string | undefined;
+            TXTLG?: string | undefined;
+        };
+        version?: string | undefined;
+    };
 };

@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
            xmlns:asx="http://www.sap.com/abapxml"
            elementFormDefault="unqualified">
 
-  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
-  <xs:include schemaLocation="abapgit.xsd"/>
+  <!-- Include types (brought into asx namespace) -->
   <xs:include schemaLocation="types/sxci.xsd"/>
 
-  <xs:complexType name="SxciValuesType">
-    <xs:sequence>
-      <xs:element name="SXCI" type="SxciType"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="SxciAbapType">
-    <xs:sequence>
-      <xs:element name="values" type="SxciValuesType"/>
-    </xs:sequence>
-    <xs:attribute name="version" type="xs:string" default="1.0"/>
-  </xs:complexType>
-
-  <xs:element name="abapGit">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="abap" type="SxciAbapType"/>
-      </xs:sequence>
-      <xs:attribute name="version" type="xs:string" use="required"/>
-      <xs:attribute name="serializer" type="xs:string" use="required"/>
-      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+  <!-- Redefine AbapValuesType to include SXCI-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+          <xs:element name="SXCI" type="asx:SxciType"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
     </xs:complexType>
-  </xs:element>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
 
 </xs:schema>

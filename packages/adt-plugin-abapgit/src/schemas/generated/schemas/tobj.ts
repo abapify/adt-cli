@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "TobjAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,86 +46,52 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "TobjValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "OBJH",
-            type: "TobjObjhType",
+            type: "asx:TobjObjhType",
             minOccurs: "0",
           },
           {
             name: "OBJT",
-            type: "TobjObjtType",
+            type: "asx:TobjObjtType",
+            minOccurs: "0",
+          },
+          {
+            name: "OBJS",
+            type: "asx:TobjTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "OBJSL",
+            type: "asx:TobjTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "OBJM",
+            type: "asx:TobjTableType",
             minOccurs: "0",
           },
           {
             name: "TOBJ",
+            type: "asx:TobjExtraType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "TDDAT",
-                    type: "TobjTddatType",
-                    minOccurs: "0",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
-    },
-    {
-      name: "TobjAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "TobjValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "TobjObjhType",
@@ -219,36 +185,69 @@ export default {
       },
     },
     {
-      name: "TobjType",
+      name: "TobjExtraType",
       sequence: {
         element: [
           {
-            name: "OBJH",
-            type: "TobjObjhType",
+            name: "TDDAT",
+            type: "TobjTddatType",
             minOccurs: "0",
           },
           {
-            name: "OBJT",
-            type: "TobjObjtType",
+            name: "TVDIR",
+            type: "TvdirType",
             minOccurs: "0",
           },
           {
-            name: "TOBJ",
+            name: "TVIMF",
+            type: "TvdirType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "TDDAT",
-                    type: "TobjTddatType",
-                    minOccurs: "0",
-                  },
-                ],
-              },
-            },
+            maxOccurs: "unbounded",
           },
         ],
       },
+    },
+    {
+      name: "TobjTableType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "TvdirType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "TvdirType",
+      sequence: {
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

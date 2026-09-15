@@ -27,7 +27,7 @@ export const extensionIndexHandler = createHandler<
     XINX: {
       DD12V: {
         SQLTAB: obj.tableName,
-        INDEXNAME: obj.indexName,
+        INDEXNAME: obj.indexName ?? String(obj.name ?? '').toUpperCase(),
         DDTEXT: obj.description,
         UNIQUEFLAG: obj.unique ? 'X' : undefined,
       },

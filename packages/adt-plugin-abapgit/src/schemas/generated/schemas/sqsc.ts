@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SqscAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,65 +46,26 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SqscValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "SQSC",
-            type: "SqscType",
+            type: "asx:SqscType",
           },
         ],
       },
-    },
-    {
-      name: "SqscAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SqscValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "SqscHeaderType",
@@ -144,6 +105,161 @@ export default {
       },
     },
     {
+      name: "SqscParamType",
+      all: {
+        element: [
+          {
+            name: "POSITION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DB_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DIRECTION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "KIND",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DB_TABLE_TYPE_SCHEMA",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DB_TABLE_TYPE_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DB_TABLE_TYPE_IS_DDIC",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TRANSFER_TABLE_SCHEMA",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TRANSFER_TABLE_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "ABAP_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "ABAP_NAME_IS_RO",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DDIC_TABLE",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DDIC_TABLE_IS_RO",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "SqscParamsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "SqscParamType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "SqscParamTypeType",
+      all: {
+        element: [
+          {
+            name: "PARAM_POSITION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "COMP_INDEX",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DB_COMP_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "ABAP_COMP_NAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "ABAP_COMP_NAME_IS_RO",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DB_TYPE",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DB_TYPE_TEXT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "ABAP_TYPE_IS_RO",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DDIC_TYPE",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DDIC_TYPE_IS_RO",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "SqscParamTypesType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "SqscParamTypeType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
       name: "SqscType",
       sequence: {
         element: [
@@ -157,8 +273,35 @@ export default {
             type: "SqscHeaderType",
             minOccurs: "0",
           },
+          {
+            name: "PARAMETERS",
+            type: "SqscParamsType",
+            minOccurs: "0",
+          },
+          {
+            name: "PARAMETER_TYPES",
+            type: "SqscParamTypesType",
+            minOccurs: "0",
+          },
         ],
       },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

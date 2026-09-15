@@ -22,7 +22,16 @@ export type IdocSchema = {
                         LASTTYP?: string | undefined;
                         GENERATED?: string | undefined;
                     };
-                    T_SYNTAX?: unknown;
+                    T_SYNTAX?: undefined | {
+                        EDI_IAPI02?: undefined | {
+                            NR?: string | undefined;
+                            SEGTYP?: string | undefined;
+                            PARSEG?: string | undefined;
+                            PARPNO?: string | undefined;
+                            PARFLG?: string | undefined;
+                            MUSTFL?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -30,5 +39,62 @@ export type IdocSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        IDOC: {
+            ATTRIBUTES: {
+                IDOCTYP: string;
+                DESCRP?: string | undefined;
+                CLOSED?: string | undefined;
+                RELEASED?: string | undefined;
+                APPLREL?: string | undefined;
+                FIRSTTYP?: string | undefined;
+                PRETYP?: string | undefined;
+                SUCCTYP?: string | undefined;
+                LASTTYP?: string | undefined;
+                GENERATED?: string | undefined;
+            };
+            T_SYNTAX?: undefined | {
+                EDI_IAPI02?: undefined | {
+                    NR?: string | undefined;
+                    SEGTYP?: string | undefined;
+                    PARSEG?: string | undefined;
+                    PARPNO?: string | undefined;
+                    PARFLG?: string | undefined;
+                    MUSTFL?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            IDOC: {
+                ATTRIBUTES: {
+                    IDOCTYP: string;
+                    DESCRP?: string | undefined;
+                    CLOSED?: string | undefined;
+                    RELEASED?: string | undefined;
+                    APPLREL?: string | undefined;
+                    FIRSTTYP?: string | undefined;
+                    PRETYP?: string | undefined;
+                    SUCCTYP?: string | undefined;
+                    LASTTYP?: string | undefined;
+                    GENERATED?: string | undefined;
+                };
+                T_SYNTAX?: undefined | {
+                    EDI_IAPI02?: undefined | {
+                        NR?: string | undefined;
+                        SEGTYP?: string | undefined;
+                        PARSEG?: string | undefined;
+                        PARPNO?: string | undefined;
+                        PARFLG?: string | undefined;
+                        MUSTFL?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

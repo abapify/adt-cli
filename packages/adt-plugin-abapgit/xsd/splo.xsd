@@ -1,34 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
            xmlns:asx="http://www.sap.com/abapxml"
            elementFormDefault="unqualified">
-  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
-  <xs:include schemaLocation="abapgit.xsd"/>
+
+  <!-- Include types (brought into asx namespace) -->
   <xs:include schemaLocation="types/splo.xsd"/>
 
-  <xs:complexType name="SploValuesType">
-    <xs:sequence>
-      <xs:element name="TSPLT" type="SploTspltType" minOccurs="0"/>
-      <xs:element name="TSPLD" type="SploTspldType" minOccurs="0"/>
-      <xs:element name="TSP0P" type="SploTsp0pType" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="SploAbapType">
-    <xs:sequence>
-      <xs:element name="values" type="SploValuesType"/>
-    </xs:sequence>
-    <xs:attribute name="version" type="xs:string" default="1.0"/>
-  </xs:complexType>
-
-  <xs:element name="abapGit">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="abap" type="SploAbapType"/>
-      </xs:sequence>
-      <xs:attribute name="version" type="xs:string" use="required"/>
-      <xs:attribute name="serializer" type="xs:string" use="required"/>
-      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+  <!-- Redefine AbapValuesType to include SPLO-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+          <xs:element name="TSPLT" type="asx:SploTspltType" minOccurs="0"/>
+                <xs:element name="TSPLD" type="asx:SploTspldType" minOccurs="0"/>
+                <xs:element name="TSP0P" type="asx:SploTsp0pType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
     </xs:complexType>
-  </xs:element>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
 </xs:schema>

@@ -15,6 +15,8 @@ type AuthObjectLike = {
   language?: string;
   fields?: string[];
   authClass?: string;
+  fblock?: string;
+  conversion?: string;
 };
 
 export const authObjectHandler = createHandler<AuthObjectLike, typeof suso>(
@@ -42,6 +44,8 @@ export const authObjectHandler = createHandler<AuthObjectLike, typeof suso>(
           FIEL9: fields[8],
           FIEL0: fields[9],
           OCLSS: obj.authClass,
+          FBLOCK: obj.fblock,
+          CONVERSION: obj.conversion,
         },
         TOBJT: {
           LANGU: isoToSapLang(obj.language),
@@ -70,6 +74,8 @@ export const authObjectHandler = createHandler<AuthObjectLike, typeof suso>(
         language: sapLangToIso(TOBJT?.LANGU),
         fields,
         authClass: TOBJ?.OCLSS,
+        fblock: TOBJ?.FBLOCK,
+        conversion: TOBJ?.CONVERSION,
       };
     },
   },

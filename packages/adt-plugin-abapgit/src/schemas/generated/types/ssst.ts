@@ -14,11 +14,57 @@ export type SsstSchema = {
                     MASTERLANG?: string | undefined;
                     TDFAMILY?: string | undefined;
                 };
+                SSFPARAS?: undefined | {
+                    item?: undefined | unknown[];
+                };
+                SSFSTRINGS?: undefined | {
+                    item?: undefined | unknown[];
+                };
+                STXSTAB?: undefined | {
+                    item?: undefined | unknown[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        HEADER?: undefined | {
+            SSFNAME?: string | undefined;
+            MASTERLANG?: string | undefined;
+            TDFAMILY?: string | undefined;
+        };
+        SSFPARAS?: undefined | {
+            item?: undefined | unknown[];
+        };
+        SSFSTRINGS?: undefined | {
+            item?: undefined | unknown[];
+        };
+        STXSTAB?: undefined | {
+            item?: undefined | unknown[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            HEADER?: undefined | {
+                SSFNAME?: string | undefined;
+                MASTERLANG?: string | undefined;
+                TDFAMILY?: string | undefined;
+            };
+            SSFPARAS?: undefined | {
+                item?: undefined | unknown[];
+            };
+            SSFSTRINGS?: undefined | {
+                item?: undefined | unknown[];
+            };
+            STXSTAB?: undefined | {
+                item?: undefined | unknown[];
+            };
+        };
+        version?: string | undefined;
     };
 };

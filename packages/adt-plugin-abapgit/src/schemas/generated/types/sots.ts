@@ -17,7 +17,15 @@ export type SotsSchema = {
                             CREA_LAN?: string | undefined;
                             ALIAS_NAME?: string | undefined;
                         };
-                        ENTRIES?: unknown;
+                        ENTRIES?: undefined | {
+                            item?: undefined | {
+                                CONCEPT?: string | undefined;
+                                LANGU?: string | undefined;
+                                OBJECT?: string | undefined;
+                                LFD_NUM?: string | undefined;
+                                TEXT?: string | undefined;
+                            }[];
+                        };
                     }[];
                 };
             };
@@ -26,5 +34,52 @@ export type SotsSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        SOTS?: undefined | {
+            item?: undefined | {
+                HEADER?: undefined | {
+                    CONCEPT?: string | undefined;
+                    PAKET?: string | undefined;
+                    CREA_LAN?: string | undefined;
+                    ALIAS_NAME?: string | undefined;
+                };
+                ENTRIES?: undefined | {
+                    item?: undefined | {
+                        CONCEPT?: string | undefined;
+                        LANGU?: string | undefined;
+                        OBJECT?: string | undefined;
+                        LFD_NUM?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SOTS?: undefined | {
+                item?: undefined | {
+                    HEADER?: undefined | {
+                        CONCEPT?: string | undefined;
+                        PAKET?: string | undefined;
+                        CREA_LAN?: string | undefined;
+                        ALIAS_NAME?: string | undefined;
+                    };
+                    ENTRIES?: undefined | {
+                        item?: undefined | {
+                            CONCEPT?: string | undefined;
+                            LANGU?: string | undefined;
+                            OBJECT?: string | undefined;
+                            LFD_NUM?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
+                    };
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

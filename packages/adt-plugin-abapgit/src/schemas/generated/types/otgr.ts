@@ -14,8 +14,19 @@ export type OtgrSchema = {
                         NAME?: string | undefined;
                         TYPE?: string | undefined;
                     };
-                    TEXTS?: unknown;
-                    ELEMENTS?: unknown;
+                    TEXTS?: undefined | {
+                        item?: undefined | {
+                            SPRAS?: string | undefined;
+                            NAME?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
+                    };
+                    ELEMENTS?: undefined | {
+                        item?: undefined | {
+                            OBJ_TYPE_GROUP?: string | undefined;
+                            OBJ_TYPE?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -23,5 +34,52 @@ export type OtgrSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        OTGR?: undefined | {
+            CLS_TYPE_GROUP?: undefined | {
+                NAME?: string | undefined;
+                TYPE?: string | undefined;
+            };
+            TEXTS?: undefined | {
+                item?: undefined | {
+                    SPRAS?: string | undefined;
+                    NAME?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+            ELEMENTS?: undefined | {
+                item?: undefined | {
+                    OBJ_TYPE_GROUP?: string | undefined;
+                    OBJ_TYPE?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            OTGR?: undefined | {
+                CLS_TYPE_GROUP?: undefined | {
+                    NAME?: string | undefined;
+                    TYPE?: string | undefined;
+                };
+                TEXTS?: undefined | {
+                    item?: undefined | {
+                        SPRAS?: string | undefined;
+                        NAME?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+                ELEMENTS?: undefined | {
+                    item?: undefined | {
+                        OBJ_TYPE_GROUP?: string | undefined;
+                        OBJ_TYPE?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

@@ -14,6 +14,10 @@ type AuthGroupLike = {
   object?: string;
   description?: string;
   language?: string;
+  texts?: Array<{
+    language?: string;
+    text?: string;
+  }>;
 };
 
 export const authGroupHandler = createHandler<AuthGroupLike, typeof sucu>(
@@ -31,14 +35,15 @@ export const authGroupHandler = createHandler<AuthGroupLike, typeof sucu>(
           item: [{ BRGRU: name, OBJECT: obj.object }],
         },
         TBRG_AUTHT: {
-          item: [
-            {
-              SPRAS: isoToSapLang(obj.language),
-              BRGRU: name,
-              OBJECT: obj.object,
-              BEZEI: obj.description,
-            },
-          ],
+          item: (obj.texts?.length
+            ? obj.texts
+            : [{ language: obj.language, text: obj.description }]
+          ).map((t) => ({
+            SPRAS: isoToSapLang(t.language ?? obj.language),
+            BRGRU: name,
+            OBJECT: obj.object,
+            BEZEI: t.text ?? obj.description,
+          })),
         },
       };
     },
@@ -53,6 +58,10 @@ export const authGroupHandler = createHandler<AuthGroupLike, typeof sucu>(
         object: firstAuth?.OBJECT,
         description: firstText?.BEZEI,
         language: sapLangToIso(firstText?.SPRAS),
+        texts: texts.map((t) => ({
+          language: sapLangToIso(t.SPRAS),
+          text: t.BEZEI,
+        })),
       };
     },
   },

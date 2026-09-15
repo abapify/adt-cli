@@ -24,4 +24,29 @@ export type JobdSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        JOBD?: undefined | {
+            JOBNAME?: string | undefined;
+            REPID?: string | undefined;
+            JDPACKAGE?: string | undefined;
+            JOBCOUNT?: string | undefined;
+            JOBCLASS?: string | undefined;
+            BTCSYS?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            JOBD?: undefined | {
+                JOBNAME?: string | undefined;
+                REPID?: string | undefined;
+                JDPACKAGE?: string | undefined;
+                JOBCOUNT?: string | undefined;
+                JOBCLASS?: string | undefined;
+                BTCSYS?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

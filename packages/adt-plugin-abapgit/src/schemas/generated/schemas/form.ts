@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "FormAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,77 +46,27 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "FormValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "FORM",
+            type: "asx:FormTableType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "FormDataType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
-    },
-    {
-      name: "FormAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "FormValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "FormHeaderType",
@@ -239,6 +189,140 @@ export default {
       },
     },
     {
+      name: "FormStringItemType",
+      all: {
+        element: [
+          {
+            name: "TDSTRING",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TDTEXT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TDMARK",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormTabItemType",
+      all: {
+        element: [
+          {
+            name: "TDPARGRAPH",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "TDPOSITION",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormPageWindowItemType",
+      all: {
+        element: [
+          {
+            name: "TDWINDOW",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "PAGENAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormPagesType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "FormPageItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormWindowsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "FormWindowItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormPageWindowsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "FormPageWindowItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormParagraphsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "FormParagraphItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormStringsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "FormStringItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "FormTabsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "FormTabItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
       name: "FormDataType",
       sequence: {
         element: [
@@ -259,54 +343,66 @@ export default {
           },
           {
             name: "PAGES",
+            type: "FormPagesType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "FormPageItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "WINDOWS",
+            type: "FormWindowsType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "FormWindowItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
+          },
+          {
+            name: "PAGE_WINDOWS",
+            type: "FormPageWindowsType",
+            minOccurs: "0",
           },
           {
             name: "PARAGRAPHS",
+            type: "FormParagraphsType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "FormParagraphItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
+          },
+          {
+            name: "STRINGS",
+            type: "FormStringsType",
+            minOccurs: "0",
+          },
+          {
+            name: "TABS",
+            type: "FormTabsType",
+            minOccurs: "0",
           },
         ],
       },
+    },
+    {
+      name: "FormTableType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "FormDataType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

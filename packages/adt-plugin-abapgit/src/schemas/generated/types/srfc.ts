@@ -32,4 +32,45 @@ export type SrfcSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SRFC: {
+            HEADER?: undefined | {
+                CREATEDBY?: string | undefined;
+                CREATEDON?: string | undefined;
+                CREATEDAT?: string | undefined;
+                CHANGEDBY?: string | undefined;
+                CHANGEDON?: string | undefined;
+                CHANGEDAT?: string | undefined;
+            };
+            ID: string;
+            VERSION?: string | undefined;
+            SCOPE?: string | undefined;
+            FUNCNAME?: string | undefined;
+            DEFAULT_PROFILE?: string | undefined;
+            TEXT?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SRFC: {
+                HEADER?: undefined | {
+                    CREATEDBY?: string | undefined;
+                    CREATEDON?: string | undefined;
+                    CREATEDAT?: string | undefined;
+                    CHANGEDBY?: string | undefined;
+                    CHANGEDON?: string | undefined;
+                    CHANGEDAT?: string | undefined;
+                };
+                ID: string;
+                VERSION?: string | undefined;
+                SCOPE?: string | undefined;
+                FUNCNAME?: string | undefined;
+                DEFAULT_PROFILE?: string | undefined;
+                TEXT?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

@@ -14,12 +14,48 @@ export type IaspSchema = {
                     DEVCLASS?: string | undefined;
                     VERSION?: string | undefined;
                 };
-                PARAMETERS?: unknown;
+                PARAMETERS?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        VALUE?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        ATTR?: undefined | {
+            NAME?: string | undefined;
+            DEVCLASS?: string | undefined;
+            VERSION?: string | undefined;
+        };
+        PARAMETERS?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                VALUE?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            ATTR?: undefined | {
+                NAME?: string | undefined;
+                DEVCLASS?: string | undefined;
+                VERSION?: string | undefined;
+            };
+            PARAMETERS?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    VALUE?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

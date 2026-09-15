@@ -31,4 +31,43 @@ export type ShmaSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SHMA: {
+            AREA_NAME: string;
+            DESCRIPT?: string | undefined;
+            ROOT?: string | undefined;
+            AUTO_BUILD?: string | undefined;
+            HAS_VERSIONS?: string | undefined;
+            TRANSACTIONAL?: string | undefined;
+            CLIENT_DEPENDENT?: string | undefined;
+            LIFE_CONTEXT?: string | undefined;
+            PROPAGATION_KIND?: string | undefined;
+            DISPLACE_KIND?: string | undefined;
+            MAX_VERSIONS?: string | undefined;
+            MAX_AREA_SIZE?: string | undefined;
+            MAX_VERSION_SIZE?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SHMA: {
+                AREA_NAME: string;
+                DESCRIPT?: string | undefined;
+                ROOT?: string | undefined;
+                AUTO_BUILD?: string | undefined;
+                HAS_VERSIONS?: string | undefined;
+                TRANSACTIONAL?: string | undefined;
+                CLIENT_DEPENDENT?: string | undefined;
+                LIFE_CONTEXT?: string | undefined;
+                PROPAGATION_KIND?: string | undefined;
+                DISPLACE_KIND?: string | undefined;
+                MAX_VERSIONS?: string | undefined;
+                MAX_AREA_SIZE?: string | undefined;
+                MAX_VERSION_SIZE?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };
