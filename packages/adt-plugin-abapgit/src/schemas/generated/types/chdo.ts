@@ -11,7 +11,7 @@ export type ChdoSchema = {
             values: {
                 CHDO?: undefined | {
                     REPORTS_GENERATED?: undefined | {
-                        item?: undefined | {
+                        TCDRPS?: undefined | {
                             OBJECT?: string | undefined;
                             REPORTNAME?: string | undefined;
                             ARBGEB?: string | undefined;
@@ -19,7 +19,7 @@ export type ChdoSchema = {
                         }[];
                     };
                     OBJECTS?: undefined | {
-                        item?: undefined | {
+                        TCDOBS?: undefined | {
                             OBJECT?: string | undefined;
                             TABNAME?: string | undefined;
                             DOCUDEL?: string | undefined;
@@ -28,7 +28,7 @@ export type ChdoSchema = {
                         }[];
                     };
                     OBJECTS_TEXT?: undefined | {
-                        item?: undefined | {
+                        TCDOBTS?: undefined | {
                             SPRAS?: string | undefined;
                             OBJECT?: string | undefined;
                             OBTEXT?: string | undefined;
@@ -46,7 +46,7 @@ export type ChdoSchema = {
     values: {
         CHDO?: undefined | {
             REPORTS_GENERATED?: undefined | {
-                item?: undefined | {
+                TCDRPS?: undefined | {
                     OBJECT?: string | undefined;
                     REPORTNAME?: string | undefined;
                     ARBGEB?: string | undefined;
@@ -54,7 +54,7 @@ export type ChdoSchema = {
                 }[];
             };
             OBJECTS?: undefined | {
-                item?: undefined | {
+                TCDOBS?: undefined | {
                     OBJECT?: string | undefined;
                     TABNAME?: string | undefined;
                     DOCUDEL?: string | undefined;
@@ -63,7 +63,7 @@ export type ChdoSchema = {
                 }[];
             };
             OBJECTS_TEXT?: undefined | {
-                item?: undefined | {
+                TCDOBTS?: undefined | {
                     SPRAS?: string | undefined;
                     OBJECT?: string | undefined;
                     OBTEXT?: string | undefined;
@@ -76,7 +76,7 @@ export type ChdoSchema = {
         values: {
             CHDO?: undefined | {
                 REPORTS_GENERATED?: undefined | {
-                    item?: undefined | {
+                    TCDRPS?: undefined | {
                         OBJECT?: string | undefined;
                         REPORTNAME?: string | undefined;
                         ARBGEB?: string | undefined;
@@ -84,7 +84,7 @@ export type ChdoSchema = {
                     }[];
                 };
                 OBJECTS?: undefined | {
-                    item?: undefined | {
+                    TCDOBS?: undefined | {
                         OBJECT?: string | undefined;
                         TABNAME?: string | undefined;
                         DOCUDEL?: string | undefined;
@@ -93,7 +93,7 @@ export type ChdoSchema = {
                     }[];
                 };
                 OBJECTS_TEXT?: undefined | {
-                    item?: undefined | {
+                    TCDOBTS?: undefined | {
                         SPRAS?: string | undefined;
                         OBJECT?: string | undefined;
                         OBTEXT?: string | undefined;

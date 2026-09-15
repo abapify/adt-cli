@@ -100,7 +100,7 @@ export default {
       sequence: {
         element: [
           {
-            name: "item",
+            name: "TCDRPS",
             type: "ChdoTcdrpsType",
             minOccurs: "0",
             maxOccurs: "unbounded",
@@ -145,7 +145,7 @@ export default {
       sequence: {
         element: [
           {
-            name: "item",
+            name: "TCDOBS",
             type: "ChdoTcdobsType",
             minOccurs: "0",
             maxOccurs: "unbounded",
@@ -180,7 +180,7 @@ export default {
       sequence: {
         element: [
           {
-            name: "item",
+            name: "TCDOBTS",
             type: "ChdoObjectTextType",
             minOccurs: "0",
             maxOccurs: "unbounded",
