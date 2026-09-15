@@ -68,8 +68,6 @@ MCP_CORS_ORIGIN=http://localhost:4112
 # point both vars at it. Paths are relative to packages/adt-mcp/.
 MCP_TLS_CERT=../../cert.pem
 MCP_TLS_KEY=../../key.pem
-# Mastra's MCPClient must trust the dev cert as well:
-NODE_EXTRA_CA_CERTS=./cert.pem
 
 # Optional: path to adt.config.ts (relative to packages/adt-mcp/)
 ADT_CONFIG_FILE=../../adt.config.ts
@@ -84,6 +82,11 @@ bunx nx build adt-mcp
 ## Step 4 — Start both servers
 
 ```bash
+# Mastra's MCPClient must trust the dev cert — Node only reads
+# NODE_EXTRA_CA_CERTS at process start, so export it in the shell
+# (dotenv/.env is applied too late). Run from the repo root:
+export NODE_EXTRA_CA_CERTS="$PWD/cert.pem"
+
 bun run dev:pilot
 ```
 

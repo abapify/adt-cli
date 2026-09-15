@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  getTestTlsMaterial,
   tlsFetch,
   createTlsTransport,
   startTestServer,
@@ -9,7 +8,6 @@ import {
   assertScopeDenied,
 } from './_tls-fixtures.js';
 
-getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 test('HTTP destination mode projects only read-scoped tools without weakening hidden write dispatch', async () => {

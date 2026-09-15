@@ -14,13 +14,8 @@
  * logic end-to-end.
  */
 import { describe, it, before, after } from 'node:test';
-import {
-  getTestTlsMaterial,
-  tlsFetch,
-  startTestServer,
-} from './_tls-fixtures.js';
+import { tlsFetch, startTestServer } from './_tls-fixtures.js';
 
-getTestTlsMaterial();
 import assert from 'node:assert';
 import http from 'node:http';
 import { AddressInfo } from 'node:net';

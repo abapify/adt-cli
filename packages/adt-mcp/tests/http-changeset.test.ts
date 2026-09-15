@@ -12,13 +12,8 @@
  */
 
 import { describe, it, before, after } from 'node:test';
-import {
-  getTestTlsMaterial,
-  createTlsTransport,
-  startTestServer,
-} from './_tls-fixtures.js';
+import { createTlsTransport, startTestServer } from './_tls-fixtures.js';
 
-getTestTlsMaterial();
 import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';

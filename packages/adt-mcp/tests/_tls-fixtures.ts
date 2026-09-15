@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import tls from 'node:tls';
 import {
   startHttpServer,
   type HttpServerOptions,
@@ -15,13 +14,11 @@ import {
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import {
   getTestTlsMaterial as loadTestTlsMaterial,
+  trustTestCa,
   type TestTlsMaterial,
 } from '@abapify/adt-fixtures';
 
 export type { TestTlsMaterial };
-
-const isBun = (globalThis as { Bun?: unknown }).Bun !== undefined;
-let caInstalled = false;
 
 /** `tlsCertContent`/`tlsKeyContent` pair for `startHttpServer` options. */
 export function testTlsOptions(): {
@@ -35,18 +32,15 @@ export function testTlsOptions(): {
 /**
  * Returns the shared self-signed test cert/key pair.
  *
- * On Node the certificate is appended to the default CA store so `fetch`
- * keeps full TLS verification — no `NODE_TLS_REJECT_UNAUTHORIZED`, no
- * `rejectUnauthorized: false`. Under Bun the default-CA store is not
+ * On Node the certificate is appended to the active default CA list so
+ * `fetch` keeps full TLS verification — no `NODE_TLS_REJECT_UNAUTHORIZED`,
+ * no `rejectUnauthorized: false`. Under Bun the default-CA store is not
  * consulted by `fetch`; use `tlsFetch` (or the transport `fetch` option)
  * which passes `tls.ca` per request instead.
  */
 export function getTestTlsMaterial(): TestTlsMaterial {
   const material = loadTestTlsMaterial();
-  if (!isBun && !caInstalled) {
-    tls.setDefaultCACertificates([...tls.rootCertificates, material.cert]);
-    caInstalled = true;
-  }
+  trustTestCa(material.cert);
   return material;
 }
 

@@ -17,13 +17,8 @@
  * That's enough to distinguish "auth passed" from "auth blocked".
  */
 import { describe, it, before, after } from 'node:test';
-import {
-  getTestTlsMaterial,
-  tlsFetch,
-  startTestServer,
-} from './_tls-fixtures.js';
+import { tlsFetch, startTestServer } from './_tls-fixtures.js';
 
-getTestTlsMaterial();
 import assert from 'node:assert';
 import { startHttpServer } from '../src/lib/http/server.js';
 import { createSessionRegistry } from '../src/lib/session/registry.js';

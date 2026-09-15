@@ -10,6 +10,7 @@
  * entry could otherwise shadow the binary (SonarCloud S4036).
  */
 import { execFileSync } from 'node:child_process';
+import tls from 'node:tls';
 import {
   accessSync,
   constants,
@@ -110,5 +111,29 @@ export function getTestTlsMaterial(): TestTlsMaterial {
     return cached;
   } finally {
     rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+const isBun = (globalThis as { Bun?: unknown }).Bun !== undefined;
+
+/**
+ * Appends the test certificate to Node's *active* default CA list so
+ * `fetch`/`https` verify the test listener — verification stays enabled and
+ * system / `NODE_EXTRA_CA_CERTS` roots are preserved. Idempotent.
+ *
+ * No-op under Bun: its `fetch` does not consult the Node CA store — pass the
+ * cert via the per-request `tls.ca` option instead.
+ */
+export function trustTestCa(cert: string): void {
+  if (isBun) return;
+  if (typeof tls.setDefaultCACertificates !== 'function') {
+    throw new Error(
+      'trustTestCa requires Node >= 22.19 / >= 24.5 ' +
+        '(tls.setDefaultCACertificates) or Bun',
+    );
+  }
+  const current = tls.getCACertificates('default');
+  if (!current.includes(cert)) {
+    tls.setDefaultCACertificates([...current, cert]);
   }
 }

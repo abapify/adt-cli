@@ -6,7 +6,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  getTestTlsMaterial,
   tlsFetch,
   createTlsTransport,
   startTestServer,
@@ -14,7 +13,6 @@ import {
   assertScopeDenied,
 } from './_tls-fixtures.js';
 
-getTestTlsMaterial();
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { generateKeyPair, SignJWT, type CryptoKey } from 'jose';
 import { createMcpInvocationVerifier } from '../src/lib/http/invocation.js';

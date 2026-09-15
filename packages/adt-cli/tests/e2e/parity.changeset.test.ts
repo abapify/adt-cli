@@ -25,15 +25,14 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 /* eslint-disable-next-line @nx/enforce-module-boundaries */
 import { startHttpServer, type RunningHttpServer } from '@abapify/adt-mcp';
 /* eslint-disable-next-line @nx/enforce-module-boundaries */
-import { getTestTlsMaterial } from '@abapify/adt-fixtures';
-import tls from 'node:tls';
+import { getTestTlsMaterial, trustTestCa } from '@abapify/adt-fixtures';
 
 import { startAdtHarness, runCliCommand, type AdtHarness } from './index';
 
-// Trust the generated test certificate by appending it to the default CA
-// store — TLS verification stays fully enabled (no NODE_TLS_REJECT_UNAUTHORIZED).
+// Trust the generated test certificate by appending it to the active default
+// CA list — TLS verification stays fully enabled (no NODE_TLS_REJECT_UNAUTHORIZED).
 const tlsMaterial = getTestTlsMaterial();
-tls.setDefaultCACertificates([...tls.rootCertificates, tlsMaterial.cert]);
+trustTestCa(tlsMaterial.cert);
 
 interface ToolText {
   content: Array<{ type: string; text?: string }>;

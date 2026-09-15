@@ -38,6 +38,8 @@ services:
       # PEM certificate/key served by the HTTPS listener. Mount the
       # files into the container (see the volumes example below).
       MCP_TLS_CERT: '${MCP_TLS_CERT:-/app/certs/cert.pem}'
+      # TLS name the healthcheck verifies (match the cert's DNS SAN).
+      MCP_HEALTH_HOST: '${MCP_HEALTH_HOST:-localhost}'
       MCP_TLS_KEY: '${MCP_TLS_KEY:-/app/certs/key.pem}'
       # ── auth: pick exactly one mode ──────────────────────────────
       # 1) bearer — shared secret. Simplest for single-user setups.
@@ -67,7 +69,7 @@ services:
           'CMD',
           'node',
           '-e',
-          "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');const p=process.env.MCP_TLS_CERT;let ca=t.rootCertificates;if(p&&f.existsSync(p))ca=[...ca,f.readFileSync(p,'utf8')];h.get({host:'127.0.0.1',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
+          "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');const p=process.env.MCP_TLS_CERT;let ca=t.rootCertificates;if(p&&f.existsSync(p))ca=[...ca,f.readFileSync(p,'utf8')];h.get({host:'127.0.0.1',servername:process.env.MCP_HEALTH_HOST||'localhost',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
         ]
       interval: 30s
       timeout: 5s
@@ -95,6 +97,11 @@ services:
   #     OAUTH2_PROXY_CLIENT_SECRET: "${OKTA_CLIENT_SECRET}"
   #     OAUTH2_PROXY_COOKIE_SECRET: "${OAUTH2_PROXY_COOKIE_SECRET}"
   #     OAUTH2_PROXY_REDIRECT_URL: "https://mcp.example.com/oauth2/callback"
+  #     # The upstream is HTTPS: the adt-mcp certificate must carry a
+  #     # `DNS:adt-mcp` SAN and be issued by a CA the proxy trusts (the proxy
+  #     # verifies upstream certificates against its system CA pool — mount a
+  #     # CA bundle if you use a private CA). For local dev only you may set:
+  #     # OAUTH2_PROXY_SSL_UPSTREAM_INSECURE_SKIP_VERIFY: "true"
   #     OAUTH2_PROXY_UPSTREAMS: "https://adt-mcp:3000"
   #     OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
   #     OAUTH2_PROXY_REVERSE_PROXY: "true"

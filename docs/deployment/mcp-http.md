@@ -51,7 +51,14 @@ The container listens on `0.0.0.0:3000` inside, but only the loopback of the hos
 # Clone the repo just for the compose file (or copy it locally).
 git clone https://github.com/abapify/adt-cli.git && cd adt-cli
 
-# Minimal env file (cert.pem/key.pem generated as shown above)
+# Generate the TLS pair into ./certs — compose mounts it at /app/certs.
+mkdir -p certs
+openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
+  -keyout certs/key.pem -out certs/cert.pem -days 1 -nodes \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:adt-mcp"
+
+# Minimal env file
 cat > .env.mcp <<'EOF'
 MCP_TLS_CERT=/app/certs/cert.pem
 MCP_TLS_KEY=/app/certs/key.pem

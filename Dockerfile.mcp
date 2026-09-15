@@ -92,7 +92,7 @@ ENV NODE_ENV=production \
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');const p=process.env.MCP_TLS_CERT;let ca=t.rootCertificates;if(p&&f.existsSync(p))ca=[...ca,f.readFileSync(p,'utf8')];h.get({host:'127.0.0.1',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))" || exit 1
+  CMD node -e "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');const p=process.env.MCP_TLS_CERT;let ca=t.rootCertificates;if(p&&f.existsSync(p))ca=[...ca,f.readFileSync(p,'utf8')];h.get({host:'127.0.0.1',servername:process.env.MCP_HEALTH_HOST||'localhost',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))" || exit 1
 
 # Default CMD runs the Streamable HTTP entry-point. Override with
 # `docker run ... adt-mcp` to run the stdio transport instead.
