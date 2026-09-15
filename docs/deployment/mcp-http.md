@@ -33,9 +33,10 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
   -subj "/CN=localhost" \
   -addext "subjectAltName=IP:127.0.0.1,DNS:localhost"
 
-# The container runs as uid 10001 — the mounted key must be readable by it
-# (openssl writes key.pem mode 0600). For a throwaway dev key:
-chmod 644 key.pem
+# The container runs as uid 10001 — give it read access without making the
+# key world-readable on the host (keeps mode 600):
+sudo chown 10001:10001 key.pem
+# … or run with your own uid instead:  --user "$(id -u):$(id -g)"
 
 docker run --rm -p 127.0.0.1:3000:3000 \
   -v "$PWD/cert.pem:/app/cert.pem:ro" \
@@ -61,8 +62,9 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
   -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes \
   -subj "/CN=localhost" \
   -addext "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:adt-mcp"
-# The container runs as uid 10001 — make the mounted key readable:
-chmod 644 certs/key.pem
+# The container runs as uid 10001 — keep the key at mode 600 but assign it
+# to the container uid so it can be read:
+sudo chown 10001:10001 certs/key.pem
 
 # Env file — the shipped .env.mcp.example carries the container paths
 # (/app/certs/...); a repo-root .env must NOT be used here since its

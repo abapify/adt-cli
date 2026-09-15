@@ -12,9 +12,10 @@
 #     -t adt-mcp:local .
 #
 # Run (TLS material is mandatory — mount a cert and key). The container
-# runs as uid 10001, so the mounted key must be readable by it — e.g.
-# `chmod 644 key.pem` for a throwaway dev key, or group/owner permissions
-# for real key material:
+# runs as uid 10001, so the mounted key must be readable by it — keep the
+# key at mode 600 and assign it to the container uid
+# (`sudo chown 10001:10001 key.pem`), or run with your own uid via
+# `--user "$(id -u):$(id -g)"`:
 #   docker run --rm -p 3000:3000 \
 #     -v "$PWD/cert.pem:/app/cert.pem:ro" \
 #     -v "$PWD/key.pem:/app/key.pem:ro" \

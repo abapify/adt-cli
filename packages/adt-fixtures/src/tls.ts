@@ -47,10 +47,16 @@ function isExecutable(path: string): boolean {
   }
 }
 
-/** Directory is not writable by group/other — only the owner can plant binaries. */
+/**
+ * Directory is not writable by group/other and is owned by the effective
+ * user or root — nobody else can plant a shadowing openssl there.
+ */
 function isTrustedDir(dir: string): boolean {
   try {
-    return (statSync(dir).mode & 0o022) === 0;
+    const st = statSync(dir);
+    if ((st.mode & 0o022) !== 0) return false;
+    const uid = process.getuid?.();
+    return uid === undefined || st.uid === uid || st.uid === 0;
   } catch {
     return false;
   }
