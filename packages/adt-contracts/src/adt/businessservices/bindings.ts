@@ -2,7 +2,7 @@
  * ADT RAP Service Binding (SRVB) Contract
  *
  * Endpoint: /sap/bc/adt/businessservices/bindings
- * Content-Type: application/vnd.sap.adt.businessservices.servicebinding.v1+xml
+ * Content-Type: application/vnd.sap.adt.businessservices.servicebinding.v2+xml
  * Object type: SRVB/SVB
  *
  * RAP Service Binding — binds a Service Definition (SRVD) to a runtime
@@ -30,13 +30,14 @@ export type ServiceBindingResponse = InferTypedSchema<
 >;
 
 const basePath = '/sap/bc/adt/businessservices/bindings';
-const nameTransform = (n: string) => n.toLowerCase();
+const nameTransform = (n: string) => encodeURIComponent(n.toLowerCase());
 
 const baseContract = crud({
   basePath,
   schema: servicebindingSchema,
-  contentType: 'application/vnd.sap.adt.businessservices.servicebinding.v1+xml',
-  accept: 'application/vnd.sap.adt.businessservices.servicebinding.v1+xml',
+  contentType: 'application/vnd.sap.adt.businessservices.servicebinding.v2+xml',
+  accept: 'application/vnd.sap.adt.businessservices.servicebinding.v2+xml',
+  nameTransform,
 });
 
 /**

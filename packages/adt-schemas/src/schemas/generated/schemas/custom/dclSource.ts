@@ -21,7 +21,7 @@ export default {
   elementFormDefault: 'qualified',
   element: [
     {
-      name: 'source',
+      name: 'dclSource',
       type: 'dcl:DclSource',
     },
   ],

@@ -60,8 +60,10 @@ deterministic descriptors under `.adt`, rejects unowned collisions or modified
 indexed files before mutation, and rolls back a failed multi-file apply.
 Branches, commits, routing, and merge requests remain the caller's concern.
 
-`.adt/tr/<transport>.json` is emitted for head checkout, and object
-descriptors under `.adt/objects/` are written for both base and head. Object
+`.adt/tr/<transport>.json` is emitted for every request/task discovered during
+head checkout. Each transport descriptor retains the complete CTS object
+inventory, including unsupported or currently filtered types. Object descriptors
+under `.adt/objects/` are written for both base and head. Object
 descriptors use `.adt/objects/<TYPE>/<unique-name>.<type>.adt.json`. The index
 stores hashes and immutable version identities, never source bodies or
 credentials. Removing `.adt` only removes the optimization; source selection

@@ -3,7 +3,7 @@
  *
  * Validates that:
  *  - handler is registered for 'SRVD'
- *  - serialize produces `<name>.srvd.asrvd` + `<name>.srvd.xml`
+ *  - serialize produces `<name>.srvd.acds` + `<name>.srvd.json`
  *  - fromAbapGit round-trips SKEY/NAME → ADK data
  *  - schema is valid and builds the expected XML shape
  */
@@ -22,7 +22,7 @@ describe('SRVD abapGit handler', () => {
     assert.strictEqual(handler!.fileExtension, 'srvd');
   });
 
-  it('serialize produces .srvd.asrvd and .srvd.xml files', async () => {
+  it('serializes the official AFF .srvd.acds and .srvd.json layout', async () => {
     const handler = getHandler('SRVD');
     assert.ok(handler);
 
@@ -37,19 +37,27 @@ describe('SRVD abapGit handler', () => {
 
     assert.deepStrictEqual(
       [...paths].sort((a: string, b: string) => a.localeCompare(b)),
-      ['zui_mock_srvd.srvd.asrvd', 'zui_mock_srvd.srvd.xml'],
+      ['zui_mock_srvd.srvd.acds', 'zui_mock_srvd.srvd.json'],
     );
 
-    const source = files.find((f) => f.path.endsWith('.asrvd'));
+    const source = files.find((f) => f.path.endsWith('.acds'));
     assert.ok(source?.content.includes('define service'));
 
-    const xml = files.find((f) => f.path.endsWith('.xml'));
-    assert.ok(xml?.content.includes('<abapGit'));
-    assert.ok(xml?.content.includes('SKEY'));
-    assert.ok(xml?.content.includes('ZUI_MOCK_SRVD'));
+    const metadata = files.find((f) => f.path.endsWith('.json'));
+    assert.deepStrictEqual(JSON.parse(metadata!.content), {
+      formatVersion: '1',
+      header: {
+        description: 'ZUI_MOCK_SRVD',
+        originalLanguage: 'en',
+      },
+      generalInformation: {
+        sourceOrigin: 'abapDevelopmentTools',
+        sourceType: 'definition',
+      },
+    });
   });
 
-  it('serialize skips .asrvd file when source is empty', async () => {
+  it('serializes JSON when the .acds source is empty', async () => {
     const handler = getHandler('SRVD');
     assert.ok(handler);
 
@@ -61,7 +69,7 @@ describe('SRVD abapGit handler', () => {
     const files = await handler!.serialize(mockSrvd as any);
     const paths = files.map((f) => f.path);
 
-    assert.deepStrictEqual(paths, ['zui_empty.srvd.xml']);
+    assert.deepStrictEqual(paths, ['zui_empty.srvd.json']);
   });
 
   it('fromAbapGit maps SKEY.NAME to ADK data', () => {

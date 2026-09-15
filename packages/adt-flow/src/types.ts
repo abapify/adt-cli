@@ -60,7 +60,19 @@ export interface FlowCheckoutInput {
   root: string;
   transports: string[];
   mode?: FlowCheckoutMode;
+  /**
+   * Materialize only manifest entries with exact source boundaries. This is an
+   * explicit caller opt-in; ordinary checkout remains fail-closed.
+   */
+  partial?: boolean;
   config: FlowConfig;
+}
+
+export interface FlowSkippedObject {
+  object: string;
+  component: string;
+  diagnostic: string;
+  sourceTransport?: string;
 }
 
 export interface FlowCheckoutResult {
@@ -72,11 +84,7 @@ export interface FlowCheckoutResult {
   removed: string[];
   unchanged: string[];
   descriptors: string[];
-  skipped: Array<{
-    object: string;
-    component: string;
-    diagnostic: string;
-  }>;
+  skipped: FlowSkippedObject[];
   sapCalls: { manifest: number; metadata: number; source: number };
   fastPath: 'exact-head' | 'indexed-components' | 'none';
 }

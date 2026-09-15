@@ -35,6 +35,7 @@ import {
   type ProgressReporter,
 } from './progress-reporter';
 import { setAdtSystem } from '../ui/components/link';
+import { resolveAdtHeadersTimeoutMs } from './adt-http-options';
 
 // Re-export shared state from shared/adt-client.ts for backward compatibility
 export {
@@ -323,6 +324,10 @@ export async function getAdtClientV2(
     return testOverride;
   }
 
+  // Resolve the headers timeout before any auth/refresh work so an invalid
+  // value fails fast instead of after a potentially network-bound refresh.
+  const headersTimeoutMs = resolveAdtHeadersTimeoutMs();
+
   // Merge with global CLI context (explicit options take precedence)
   const ctx = getCliContext();
   const effectiveOptions = {
@@ -510,6 +515,7 @@ export async function getAdtClientV2(
     logger,
     plugins,
     onSessionExpired,
+    headersTimeoutMs,
   });
 
   // Initialize ADK global context if not already done
@@ -548,6 +554,10 @@ export async function getAdtClientV2Safe(
   if (testOverride) {
     return testOverride;
   }
+
+  // Validate the headers timeout up front so an invalid value fails before
+  // any expired-session refresh or authentication work can send a request.
+  const adtHeadersTimeout = resolveAdtHeadersTimeoutMs();
 
   const ctx = getCliContext();
   const effectiveOptions = {
@@ -719,6 +729,7 @@ export async function getAdtClientV2Safe(
     logger,
     plugins,
     onSessionExpired,
+    headersTimeoutMs: adtHeadersTimeout,
   });
 
   if (!isAdkInitialized()) {

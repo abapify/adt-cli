@@ -81,10 +81,23 @@ export const transportSourceManifestResponse = z
   .object({
     requestedTransports: z.array(z.string().trim().min(1).max(64)).min(1),
     scopeTransports: z.array(z.string().trim().min(1).max(64)).min(1),
+    inventory: z.array(
+      z
+        .object({
+          pgmid: z.string().trim().min(1).max(16),
+          type: z.string().trim().min(1).max(64),
+          name: z.string().trim().min(1).max(128),
+          wbtype: z.string().trim().min(1).max(64).optional(),
+          objFunc: z.string().max(16),
+          sourceTransport: z.string().trim().min(1).max(64),
+        })
+        .strict(),
+    ),
     entries: z.array(
       z
         .object({
           object: transportSourceManifestObject,
+          repositoryObject: transportSourceManifestObject.optional(),
           component: transportSourceManifestComponent,
           sourceTransport: z.string().trim().min(1).max(64),
           changeKind: z.enum([

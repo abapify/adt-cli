@@ -13,7 +13,6 @@ import json
 import os
 import re
 import select
-import shlex
 import signal
 import subprocess
 import sys
@@ -29,29 +28,52 @@ KEY_PATH = os.environ.get("GC_DEVIN_API_KEY_PATH", os.path.expanduser("~/.config
 POLL_INTERVAL_SEC = int(os.environ.get("GC_DEVIN_POLL_INTERVAL", "10"))
 
 _WAKEUP_R = None
-_WAKEUP_W = None
 
 
 def _setup_wakeup_fd():
     """Install a self-pipe so SIGUSR1 (nudge) wakes select()-based sleeps."""
-    global _WAKEUP_R, _WAKEUP_W
+    global _WAKEUP_R
+    # Retire the currently registered wakeup descriptor and the previous read
+    # end before creating a new pipe, so the old fd numbers cannot be reused
+    # and alias the descriptor returned by signal.set_wakeup_fd.
+    try:
+        old_w = signal.set_wakeup_fd(-1)
+    except (OSError, ValueError):
+        old_w = -1
+    if old_w >= 0:
+        try:
+            os.close(old_w)
+        except OSError:
+            pass  # expected if fd already closed
     if _WAKEUP_R is not None:
         try:
             os.close(_WAKEUP_R)
         except OSError:
-            pass
-    if _WAKEUP_W is not None:
-        try:
-            os.close(_WAKEUP_W)
-        except OSError:
-            pass
+            pass  # expected if fd already closed
+        _WAKEUP_R = None
     r, w = os.pipe()
-    os.set_blocking(r, False)
-    os.set_blocking(w, False)
-    _WAKEUP_R = r
-    _WAKEUP_W = w
-    signal.set_wakeup_fd(w)
-    signal.siginterrupt(signal.SIGUSR1, True)
+    try:
+        os.set_blocking(r, False)
+        os.set_blocking(w, False)
+        signal.set_wakeup_fd(w)
+        signal.siginterrupt(signal.SIGUSR1, True)
+        _WAKEUP_R = r
+    except Exception:
+        # Roll back on setup failure: disable the new wakeup fd and close both
+        # new pipe descriptors without touching the (already retired) old state.
+        try:
+            signal.set_wakeup_fd(-1)
+        except (OSError, ValueError):
+            pass  # expected if wakeup fd was not registered or already closed
+        try:
+            os.close(r)
+        except OSError:
+            pass  # expected if read fd already closed
+        try:
+            os.close(w)
+        except OSError:
+            pass  # expected if write fd already closed
+        raise
 
 
 def _interruptible_sleep(timeout):
@@ -70,9 +92,11 @@ def _interruptible_sleep(timeout):
                     while os.read(_WAKEUP_R, 1024):
                         pass
                 except BlockingIOError:
+                    # no more data to drain from the wakeup pipe
                     pass
                 break
         except InterruptedError:
+            # retry when a signal interrupts select()
             pass
 
 
@@ -253,8 +277,15 @@ def _stop(name):
                 time.sleep(0.1)
             if _is_alive(name):
                 os.kill(pid, signal.SIGKILL)
-        except (ProcessLookupError, OSError):
+        except ProcessLookupError:
+            # process already gone
             pass
+        except PermissionError as e:
+            _log(f"permission denied stopping worker {name}: {e}")
+            return 1
+        except OSError as e:
+            _log(f"failed to stop worker {name}: {e}")
+            return 1
     _delete_remote_devin(name)
     for f in ["pid"]:
         (d / f).unlink(missing_ok=True)
@@ -284,8 +315,16 @@ def _process_alive(name, process_names):
             os.kill(cpid, 0)
             print("true", flush=True)
             return 0
-        except (ProcessLookupError, OSError, ValueError):
+        except ProcessLookupError:
+            # child process already gone
             pass
+        except ValueError:
+            # pid file contains invalid data
+            pass
+        except PermissionError as e:
+            _log(f"permission denied checking child pid for {name}: {e}")
+        except OSError as e:
+            _log(f"error checking child pid for {name}: {e}")
     for pname in process_names:
         try:
             result = subprocess.run(
@@ -298,6 +337,7 @@ def _process_alive(name, process_names):
                 print("true", flush=True)
                 return 0
         except Exception:
+            # pgrep not available or failed; fall through to next check
             pass
     print("false" if not _is_alive(name) else "true", flush=True)
     return 0
@@ -386,8 +426,12 @@ def _interrupt(name):
     if pid:
         try:
             os.kill(pid, signal.SIGINT)
-        except (ProcessLookupError, OSError):
+        except ProcessLookupError:
+            # expected if the worker is already gone
             pass
+        except OSError as e:
+            _log(f"failed to interrupt worker {name}: {e}")
+            return 1
     return 0
 
 
@@ -635,7 +679,6 @@ def _local_worker(session_dir, cfg):
     signal.signal(signal.SIGUSR1, _noop_signal)
     signal.signal(signal.SIGTERM, _request_exit)
     signal.signal(signal.SIGINT, _request_exit)
-    name = Path(session_dir).name
     command = cfg.get("command", "")
     if not command:
         _worker_log(session_dir, "no local command; exiting")
@@ -677,21 +720,39 @@ def _local_worker(session_dir, cfg):
     if _worker_should_exit and proc.poll() is None:
         try:
             os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-        except Exception:
+        except ProcessLookupError:
+            # process group already gone
             pass
+        except OSError as e:
+            _worker_log(session_dir, f"failed to send SIGTERM to process group: {e}")
         try:
             proc.wait(timeout=5)
-        except Exception:
+        except subprocess.TimeoutExpired:
+            # process still running; attempt SIGKILL below
             pass
+        except (OSError, ValueError) as e:
+            _worker_log(session_dir, f"error waiting for local command: {e}")
         if proc.poll() is None:
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-            except Exception:
+            except ProcessLookupError:
+                # process group already gone
                 pass
-    try:
-        child_pid_file.unlink(missing_ok=True)
-    except Exception:
-        pass
+            except OSError as e:
+                _worker_log(session_dir, f"failed to send SIGKILL to process group: {e}")
+            try:
+                proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                _worker_log(session_dir, "local command did not terminate after SIGKILL")
+            except (OSError, ValueError) as e:
+                _worker_log(session_dir, f"error waiting after SIGKILL: {e}")
+    if proc.poll() is not None:
+        try:
+            child_pid_file.unlink(missing_ok=True)
+        except OSError as e:
+            _worker_log(session_dir, f"failed to remove child pid file: {e}")
+    else:
+        _worker_log(session_dir, "local command still running; child pid file retained")
     _worker_log(session_dir, "local worker exiting")
     return 0
 
@@ -879,6 +940,7 @@ def _devin_worker(session_dir, cfg):
 
     _worker_log(session_dir, "worker exiting")
     _delete_remote_devin(name)
+    return 0
 
 
 def main():

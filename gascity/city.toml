@@ -1,13 +1,24 @@
 [workspace]
-provider = "codex"
-
-[session]
-provider = "exec:/home/ubuntu/.local/bin/gc-session-devin"
+provider = "devin"
+[workspace.env]
+DEVIN_MODEL = "glm-5-2"
 
 [providers]
-[providers.codex]
-base = "builtin:codex"
-ready_delay_ms = 0
+[providers.devin]
+base = ""
+command = "devin"
+prompt_mode = "none"
+ready_delay_ms = 2000
+instructions_file = "AGENTS.md"
+resume_flag = "--resume"
 
 [[rigs]]
 name = "adt-cli"
+default_branch = "main"
+
+[daemon]
+formula_v2 = true
+probe_concurrency = 2
+max_wakes_per_tick = 2
+nudge_dispatcher = "supervisor"
+tick_debounce = "500ms"

@@ -21,7 +21,7 @@ export default {
   elementFormDefault: 'qualified',
   element: [
     {
-      name: 'source',
+      name: 'ddlSource',
       type: 'ddl:DdlSource',
     },
   ],
@@ -31,6 +31,18 @@ export default {
       complexContent: {
         extension: {
           base: 'abapsource:AbapSourceMainObject',
+          attribute: [
+            {
+              name: 'source_origin',
+              type: 'xsd:string',
+              use: 'optional',
+            },
+            {
+              name: 'source_type',
+              type: 'xsd:string',
+              use: 'optional',
+            },
+          ],
         },
       },
     },

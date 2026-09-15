@@ -1,70 +1,78 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!-- Source: GET /sap/bc/adt/oo/interfaces/{name} -->
 <intf:abapInterface
-        xmlns:intf="http://www.sap.com/adt/oo/interfaces"
-        abapoo:modeled="false"
-        abapsource:sourceUri="source/main"
-        abapsource:fixPointArithmetic="false"
-        abapsource:activeUnicodeCheck="false"
-        adtcore:responsible="DEVELOPER"
-        adtcore:masterLanguage="EN"
-        adtcore:masterSystem="DEV"
-        adtcore:abapLanguageVersion="standard"
-        adtcore:name="ZIF_SAMPLE_INTERFACE"
-        adtcore:type="INTF/OI"
-        adtcore:changedAt="2025-01-01T12:00:00Z"
-        adtcore:version="active"
-        adtcore:createdAt="2025-01-01T00:00:00Z"
-        adtcore:changedBy="DEVELOPER"
-        adtcore:createdBy="DEVELOPER"
-        adtcore:description="Sample interface"
-        adtcore:descriptionTextLimit="60"
-        adtcore:language="EN"
-        xmlns:abapoo="http://www.sap.com/adt/oo"
-        xmlns:abapsource="http://www.sap.com/adt/abapsource"
-        xmlns:adtcore="http://www.sap.com/adt/core">
-    <atom:link
-            xmlns:atom="http://www.w3.org/2005/Atom"
-            href="source/main/versions"
-            rel="http://www.sap.com/adt/relations/versions" />
-    <atom:link
-            xmlns:atom="http://www.w3.org/2005/Atom"
-            href="source/main"
-            rel="http://www.sap.com/adt/relations/source"
-            type="text/plain"
-            etag="202501011200000001" />
-    <atom:link
-            xmlns:atom="http://www.w3.org/2005/Atom"
-            href="source/main"
-            rel="http://www.sap.com/adt/relations/source"
-            type="text/html"
-            etag="202501011200000001" />
-    <atom:link
-            xmlns:atom="http://www.w3.org/2005/Atom"
-            href="objectstructure"
-            rel="http://www.sap.com/adt/relations/objectstructure"
-            type="application/vnd.sap.adt.objectstructure.v2+xml" />
-    <atom:link
-            xmlns:atom="http://www.w3.org/2005/Atom"
-            href="/sap/bc/adt/oo/interfaces/zif_sample_interface/source/main?withAbapDocFromShortTexts=true"
-            rel="http://www.sap.com/adt/relations/sources/withabapdocfromshorttexts"
-            type="text/plain"
-            title="Source with ABAP Doc" />
-    <adtcore:packageRef
-            adtcore:uri="/sap/bc/adt/packages/%24tmp"
-            adtcore:type="DEVC/K"
-            adtcore:name="$TMP" />
-    <abapsource:syntaxConfiguration>
-        <abapsource:language>
-            <abapsource:version>X</abapsource:version>
-            <abapsource:description>Standard ABAP</abapsource:description>
-            <atom:link
-                    xmlns:atom="http://www.w3.org/2005/Atom"
-                    href="/sap/bc/adt/abapsource/parsers/rnd/grammar"
-                    rel="http://www.sap.com/adt/relations/abapsource/parser"
-                    type="text/plain"
-                    title="Standard ABAP"
-                    etag="757" />
-        </abapsource:language>
-    </abapsource:syntaxConfiguration>
+  xmlns:intf="http://www.sap.com/adt/oo/interfaces"
+  xmlns:abapoo="http://www.sap.com/adt/oo"
+  xmlns:abapsource="http://www.sap.com/adt/abapsource"
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  abapoo:modeled="false"
+  abapsource:sourceUri="source/main"
+  abapsource:fixPointArithmetic="false"
+  abapsource:activeUnicodeCheck="false"
+  adtcore:responsible="DEVELOPER"
+  adtcore:masterLanguage="EN"
+  adtcore:masterSystem="DEV"
+  adtcore:abapLanguageVersion="standard"
+  adtcore:name="ZIF_SAMPLE_INTERFACE"
+  adtcore:type="INTF/OI"
+  adtcore:changedAt="2025-01-01T12:00:00Z"
+  adtcore:version="active"
+  adtcore:createdAt="2025-01-01T00:00:00Z"
+  adtcore:changedBy="DEVELOPER"
+  adtcore:createdBy="DEVELOPER"
+  adtcore:description="Sample interface"
+  adtcore:descriptionTextLimit="60"
+  adtcore:language="EN"
+>
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="source/main/versions"
+    rel="http://www.sap.com/adt/relations/versions"
+  />
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="source/main"
+    rel="http://www.sap.com/adt/relations/source"
+    type="text/plain"
+    etag="202501011200000001"
+  />
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="source/main"
+    rel="http://www.sap.com/adt/relations/source"
+    type="text/html"
+    etag="202501011200000001"
+  />
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="objectstructure"
+    rel="http://www.sap.com/adt/relations/objectstructure"
+    type="application/vnd.sap.adt.objectstructure.v2+xml"
+  />
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="/sap/bc/adt/oo/interfaces/zif_sample_interface/source/main?withAbapDocFromShortTexts=true"
+    rel="http://www.sap.com/adt/relations/sources/withabapdocfromshorttexts"
+    type="text/plain"
+    title="Source with ABAP Doc"
+  />
+  <adtcore:packageRef
+    adtcore:uri="/sap/bc/adt/packages/%24tmp"
+    adtcore:type="DEVC/K"
+    adtcore:name="$TMP"
+  />
+  <abapsource:syntaxConfiguration>
+    <abapsource:language>
+      <abapsource:version>X</abapsource:version>
+      <abapsource:description>Standard ABAP</abapsource:description>
+      <atom:link
+        xmlns:atom="http://www.w3.org/2005/Atom"
+        href="/sap/bc/adt/abapsource/parsers/rnd/grammar"
+        rel="http://www.sap.com/adt/relations/abapsource/parser"
+        type="text/plain"
+        title="Standard ABAP"
+        etag="757"
+      />
+    </abapsource:language>
+  </abapsource:syntaxConfiguration>
 </intf:abapInterface>

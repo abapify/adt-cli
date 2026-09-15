@@ -22,6 +22,24 @@ export default {
       type: 'adtcore:AdtObjectSets',
     },
   ],
+  attribute: [
+    {
+      name: 'uri',
+      type: 'xsd:anyURI',
+    },
+    {
+      name: 'type',
+      type: 'xsd:string',
+    },
+    {
+      name: 'name',
+      type: 'xsd:string',
+    },
+    {
+      name: 'description',
+      type: 'xsd:string',
+    },
+  ],
   complexType: [
     {
       name: 'AdtObjectSets',

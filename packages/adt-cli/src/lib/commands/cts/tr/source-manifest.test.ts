@@ -44,6 +44,7 @@ describe('cts tr source-manifest', () => {
       async (input: { transports: string[] }) => ({
         requestedTransports: input.transports,
         scopeTransports: input.transports,
+        inventory: [],
         entries: [],
       }),
     );
@@ -73,6 +74,7 @@ describe('cts tr source-manifest', () => {
     const buildTransportManifest = vi.fn(async () => ({
       requestedTransports: ['DEVK900001'],
       scopeTransports: ['DEVK900001', 'DEVK900011'],
+      inventory: [],
       entries: [
         {
           object: { pgmid: 'R3TR', type: 'CLAS', name: 'ZCL_TEST' },
@@ -105,6 +107,7 @@ describe('cts tr source-manifest', () => {
     const buildTransportManifest = vi.fn(async () => ({
       requestedTransports: ['DEVK900001'],
       scopeTransports: ['DEVK900001'],
+      inventory: [],
       entries: [
         {
           object: { pgmid: 'R3TR', type: 'PROG', name: 'ZTEST' },

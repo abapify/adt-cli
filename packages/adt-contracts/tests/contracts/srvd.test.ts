@@ -25,7 +25,7 @@ class SrvdScenario extends ContractScenario {
       response: {
         status: 200,
         schema: srvdSource,
-        fixture: fixtures.ddic.srvd.single,
+        fixture: fixtures.ddic.srvd.singleSanitized,
       },
     },
     {

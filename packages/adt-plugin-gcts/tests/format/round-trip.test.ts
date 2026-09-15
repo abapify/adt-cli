@@ -89,7 +89,7 @@ describe('gctsPlugin.format.import — package round-trip', () => {
 
       const raw = readFileSync(join(packageDir, 'package.devc.json'), 'utf8');
       const parsed = JSON.parse(raw);
-      assert.strictEqual(parsed.header.formatVersion, '1.0');
+      assert.strictEqual(parsed.formatVersion, '1');
       assert.strictEqual(parsed.header.description, 'My Package');
     } finally {
       rmSync(dir, { recursive: true, force: true });

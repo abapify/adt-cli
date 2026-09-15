@@ -61,7 +61,7 @@ const xsd = `
 
 const code = generateSchemaLiteral(xsd, {
   name: 'person',
-  features: { $xmlns: true, $imports: true, $filename: true },
+  features: { $xmlns: true, $filename: true },
   exclude: ['annotation'],
 });
 ```
@@ -255,19 +255,22 @@ import {
 } from '@abapify/ts-xsd/generators';
 
 export default defineConfig({
-  schemas: [
-    { name: 'adtcore', xsd: '.xsd/sap/adtcore.xsd' },
-    { name: 'classes', xsd: '.xsd/sap/classes.xsd', imports: ['adtcore'] },
-  ],
+  sources: {
+    base: {
+      xsdDir: 'schemas',
+      outputDir: 'src/generated',
+      schemas: ['base'],
+    },
+    orders: {
+      xsdDir: 'schemas',
+      outputDir: 'src/generated',
+      schemas: ['orders'],
+      autoLink: true,
+    },
+  },
   generators: [
-    rawSchema({
-      outputDir: 'src/schemas/generated/schemas',
-      features: { $xmlns: true, $imports: true, $filename: true },
-    }),
-    interfaces({
-      outputDir: 'src/schemas/generated/types',
-      flatten: true, // Inline all types
-    }),
+    rawSchema({ $xmlns: true, $imports: true, $filename: true }),
+    interfaces({ flatten: true }),
   ],
 });
 ```
@@ -296,22 +299,22 @@ interface Generator {
 npx nx codegen my-package
 
 # Programmatically
-import { runGenerators } from '@abapify/ts-xsd/generators';
-await runGenerators(config);
+import { runCodegen } from '@abapify/ts-xsd/generators';
+const result = await runCodegen(config, { rootDir: process.cwd() });
 ```
 
-## Usage in adt-schemas
+## Usage Example
 
-The codegen module powers the schema generation pipeline:
+The codegen module powers a typical schema generation pipeline:
 
-```
-XSD Files (.xsd/model/)
+```text
+XSD Files (.xsd)
     ↓ generateSchemaLiteral
 Schema Literals (as const)
     ↓ generateInterfaces
-TypeScript Interfaces (204 types)
+TypeScript Interfaces
     ↓ typed() wrapper
-Typed Schemas (parse/build)
+Typed Schemas (parse/build XML)
 ```
 
 ### Generation Script Example
@@ -325,19 +328,18 @@ import {
 import { readFileSync, writeFileSync } from 'fs';
 
 // 1. Generate schema literal
-const xsd = readFileSync('classes.xsd', 'utf-8');
+const xsd = readFileSync('orders.xsd', 'utf-8');
 const schemaCode = generateSchemaLiteral(xsd, {
-  name: 'classes',
-  features: { $xmlns: true, $imports: true, $filename: true },
+  name: 'orders',
+  features: { $xmlns: true, $filename: true },
   exclude: ['annotation'],
-  importResolver: (loc) => `./${loc.replace('.xsd', '')}`,
 });
-writeFileSync('schemas/classes.ts', schemaCode);
+writeFileSync('schemas/orders.ts', schemaCode);
 
 // 2. Generate interfaces
 const schema = parseXsd(xsd);
-const interfaces = generateInterfaces(schema, { generateAllTypes: true });
-writeFileSync('types/classes.ts', interfaces);
+const { code } = generateInterfaces(schema, { flatten: true });
+writeFileSync('types/orders.ts', code);
 ```
 
 ## Best Practices
@@ -376,7 +378,7 @@ Avoid TypeScript recursion limits:
 
 ```typescript
 // For schemas with 50+ types, generate interfaces
-const interfaces = generateInterfaces(schema, { generateAllTypes: true });
+const { code } = generateInterfaces(schema, { flatten: true });
 ```
 
 ### 5. Verify with Round-Trip Tests
@@ -385,10 +387,10 @@ Ensure generated schemas work correctly:
 
 ```typescript
 import { parseXml, buildXml } from '@abapify/ts-xsd';
-import { classes } from './generated/classes';
+import orders from './src/generated/orders';
 
-const data = parseXml(classes, xmlString);
-const rebuilt = buildXml(classes, data);
+const data = parseXml(orders, xmlString);
+const rebuilt = buildXml(orders, data);
 // Verify rebuilt matches original structure
 ```
 
@@ -397,18 +399,16 @@ const rebuilt = buildXml(classes, data);
 The codegen module includes a CLI for batch generation:
 
 ```bash
-# Generate schema literal
-npx ts-xsd codegen -i schema.xsd -o schema.ts
+# Config-based (recommended) — uses ts-xsd.config.ts in cwd
+npx ts-xsd codegen
 
-# With options
-npx ts-xsd codegen -i schema.xsd -o schema.ts \
-  --name mySchema \
-  --features '$xmlns,$imports,$filename' \
-  --exclude annotation
+# Single-file mode
+npx ts-xsd codegen person.xsd
+npx ts-xsd codegen person.xsd ./generated/person-schema.ts
+npx ts-xsd codegen person.xsd --name=PersonSchema
 ```
 
 ## Reference
 
 - [ts-xsd README](../README.md)
-- [ts-xsd AGENTS.md](../AGENTS.md)
-- [adt-schemas](../../adt-schemas/README.md) - Real-world usage
+- [W3C XML Schema 1.1](https://www.w3.org/TR/xmlschema11-1/)

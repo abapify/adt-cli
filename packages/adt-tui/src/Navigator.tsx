@@ -141,7 +141,7 @@ function NavigatorInner({ systemName }: { systemName?: string }) {
     return <UrlPrompt onSubmit={navigate} />;
   }
 
-  if (!current || !pageResult) {
+  if (!pageResult) {
     return (
       <Box padding={1}>
         <Text dimColor>No content loaded</Text>

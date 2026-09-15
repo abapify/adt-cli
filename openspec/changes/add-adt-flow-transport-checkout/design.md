@@ -69,8 +69,9 @@ Alternatives rejected:
 `adt-flow` calls `buildTransportSourceManifest`. It rejects any relevant
 `ambiguous` or `failed` entry before reading source bodies or changing files.
 It records and excludes `unsupported` entries, so object types with no
-source-history implementation do not block exact components in the same
-transport. It lazily downloads only selected base or head bodies.
+source-history implementation and objects whose ADT metadata cannot be loaded
+do not block exact components in the same transport. It lazily downloads only
+selected base or head bodies.
 
 For an added component, base means absence. For a deleted component, base
 materializes the recoverable predecessor and head means absence. This produces
@@ -128,12 +129,16 @@ An object descriptor records only relevant data:
 
 A transport descriptor is written only by successful head checkout, so
 `.adt/tr/<TR>.json` first appears with the externally created transport commit,
-not in a base commit. It records normalized requested/scope transports,
-relevant object identities, head selection, config/format digests, and released
-transport metadata. Base checkout updates only predecessor object descriptors
+not in a base commit. One descriptor is written for every request/task discovered
+in the scope. It records normalized requested/scope transports, the complete CTS
+object inventory with concrete task provenance, relevant materialized object
+descriptors, and config/format digests. Unsupported and currently filtered object
+identities remain in the inventory so a later format/configuration upgrade can
+identify the exact transports that need another materialization attempt. Base
+checkout updates only predecessor object descriptors
 that actually exist; it does not pre-create the reviewed transport descriptor
 or an absent descriptor for a newly created object. Descriptors exclude source bodies,
-credentials, unrelated transport objects, absolute paths, and wall-clock
+credentials, source bodies, absolute paths, and wall-clock
 `fetchedAt` values.
 
 Deleting `.adt` forces discovery and selected-source reads again but does not

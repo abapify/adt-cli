@@ -1,3 +1,15 @@
+## 0.4.2 (2026-09-08)
+
+### 🩹 Fixes
+
+- **atc:** resolve abapGit paths from full ATC locations ([#194](https://github.com/abapify/adt-cli/pull/194))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-atc to align it with other projects, there were no code changes.

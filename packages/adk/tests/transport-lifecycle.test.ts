@@ -8,9 +8,8 @@ interface TransportState {
 }
 
 interface LifecycleFixtureOptions {
-  releaseStatus?: string;
-  releaseStatusText?: string;
-  releaseMessage?: string;
+  releaseSucceeds?: boolean;
+  releaseThrows?: string;
   applyReassign?: boolean;
   applyAddTask?: boolean;
   addTaskNumber?: string;
@@ -64,24 +63,6 @@ function taskResponse(
   };
 }
 
-function releaseResponse(status: string, statusText: string, message?: string) {
-  return {
-    root: {
-      releasereports: {
-        checkReport: [
-          {
-            status,
-            statusText,
-            ...(message
-              ? { checkMessageList: { checkMessage: [{ shortText: message }] } }
-              : {}),
-          },
-        ],
-      },
-    },
-  };
-}
-
 function createLifecycleFixture(options: LifecycleFixtureOptions = {}) {
   const rootNumber = 'DEVK900001';
   const taskDefinitions = [
@@ -105,18 +86,25 @@ function createLifecycleFixture(options: LifecycleFixtureOptions = {}) {
       : taskResponse(number, rootNumber, state, options.parsedTaskRootName);
   });
   const release = vi.fn(async (number: string) => {
-    const status = options.releaseStatus ?? 'released';
-    if (status === 'released') {
+    // newreleasejobs POST: on success, transition status D -> R.
+    // The PR's release() calls client.fetch(`${objectUri}/newreleasejobs`, ...).
+    if (options.releaseThrows) throw new Error(options.releaseThrows);
+    if (options.releaseSucceeds !== false) {
       const state = states.get(number);
-      if (state) state.status = 'R';
+      if (state && state.status !== 'R') state.status = 'R';
     }
-    return releaseResponse(
-      status,
-      options.releaseStatusText ??
-        (status === 'released' ? 'Released' : 'Release failed'),
-      options.releaseMessage,
-    );
+    return { ok: true, status: 200, text: async () => '' };
   });
+  const fetchFn = vi.fn(
+    async (url: string, requestInit?: { method?: string }) => {
+      if (url.endsWith('/newreleasejobs') && requestInit?.method === 'POST') {
+        return release(url.split('/').slice(-2, -1)[0]);
+      }
+      throw new Error(
+        `Unexpected fetch ${requestInit?.method ?? 'GET'} ${url}`,
+      );
+    },
+  );
   const reassign = vi.fn(
     async (
       number: string,
@@ -166,17 +154,27 @@ function createLifecycleFixture(options: LifecycleFixtureOptions = {}) {
   );
 
   const client = {
+    fetch: fetchFn,
     adt: {
       cts: {
         transportrequests: {
           get,
-          useraction: { release, reassign, addTask },
+          useraction: { reassign, addTask },
         },
       },
     },
   } as unknown as AdtClient;
 
-  return { client, get, release, reassign, addTask, states, rootNumber };
+  return {
+    client,
+    get,
+    fetch: fetchFn,
+    release,
+    reassign,
+    addTask,
+    states,
+    rootNumber,
+  };
 }
 
 describe('AdkTransportRequest CTS lifecycle', () => {
@@ -191,7 +189,10 @@ describe('AdkTransportRequest CTS lifecycle', () => {
 
     expect(task.number).toBe('DEVK900002');
     await expect(task.release()).resolves.toEqual({ success: true });
-    expect(fixture.release).toHaveBeenCalledWith('DEVK900002');
+    expect(fixture.fetch).toHaveBeenCalledWith(
+      '/sap/bc/adt/cts/transportrequests/DEVK900002/newreleasejobs',
+      expect.objectContaining({ method: 'POST' }),
+    );
   });
 
   it('updates cached release state only after a released read-back', async () => {
@@ -203,36 +204,17 @@ describe('AdkTransportRequest CTS lifecycle', () => {
     const result = await transport.release();
 
     expect(result).toEqual({ success: true });
-    expect(fixture.release).toHaveBeenCalledWith(fixture.rootNumber);
+    expect(fixture.fetch).toHaveBeenCalledWith(
+      `/sap/bc/adt/cts/transportrequests/${fixture.rootNumber}/newreleasejobs`,
+      expect.objectContaining({ method: 'POST' }),
+    );
     expect(fixture.get).toHaveBeenCalledTimes(2);
     expect(transport.status).toBe('R');
     expect(transport.statusText).toBe('Released');
   });
 
-  it('surfaces a failed release report instead of reporting success', async () => {
-    const fixture = createLifecycleFixture({
-      releaseStatus: 'abortrelapifail',
-      releaseStatusText: 'Release failed. See Problems view',
-      releaseMessage: 'Task is unclassified and cannot be released',
-    });
-    const transport = await AdkTransportRequest.get(fixture.rootNumber, {
-      client: fixture.client,
-    });
-
-    const result = await transport.release();
-
-    expect(result).toEqual({
-      success: false,
-      message: 'Task is unclassified and cannot be released',
-    });
-    expect(fixture.get).toHaveBeenCalledTimes(1);
-  });
-
-  it('fails release when read-back does not show released status', async () => {
-    const fixture = createLifecycleFixture();
-    fixture.release.mockImplementationOnce(async () =>
-      releaseResponse('released', 'Released'),
-    );
+  it('fails release when SAP does not transition to released status', async () => {
+    const fixture = createLifecycleFixture({ releaseSucceeds: false });
     const transport = await AdkTransportRequest.get(fixture.rootNumber, {
       client: fixture.client,
     });
@@ -240,8 +222,38 @@ describe('AdkTransportRequest CTS lifecycle', () => {
     const result = await transport.release();
 
     expect(result.success).toBe(false);
-    expect(result.message).toContain('still has status D');
+    expect(result.message).toContain('SAP did not release');
+    expect(result.message).toContain('Modifiable');
     expect(transport.status).toBe('D');
+  });
+
+  it('reports release failure when reload fails after a successful POST', async () => {
+    const fixture = createLifecycleFixture();
+    // First get() is the static factory call; the second is this.load() after
+    // the release POST. Reject that second call to simulate a reload failure.
+    fixture.get.mockResolvedValueOnce(
+      requestResponse(
+        fixture.rootNumber,
+        fixture.states.get(fixture.rootNumber)!,
+        [
+          { number: 'DEVK900002', owner: 'OLDUSER', status: 'D' },
+          { number: 'DEVK900003', owner: 'OLDUSER', status: 'R' },
+          { number: 'DEVK900004', owner: 'OLDUSER', status: 'N' },
+        ],
+      ),
+    );
+    fixture.get.mockRejectedValueOnce(new Error('Network error during reload'));
+    const transport = await AdkTransportRequest.get(fixture.rootNumber, {
+      client: fixture.client,
+    });
+
+    const result = await transport.release();
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain(
+      'Released DEVK900001 but failed to verify',
+    );
+    expect(result.message).toContain('Network error during reload');
   });
 
   it('rejects a change-owner response when read-back still has the old owner', async () => {
@@ -296,8 +308,8 @@ describe('AdkTransportRequest CTS lifecycle', () => {
     expect(transport.tasks.map((task) => task.number)).toContain('DEVK900005');
 
     await expect(transport.releaseAll()).resolves.toEqual({ success: true });
-    expect(fixture.release.mock.calls.map(([number]) => number)).toContain(
-      'DEVK900005',
+    expect(fixture.fetch.mock.calls.map(([url]) => url).join('\n')).toContain(
+      '/sap/bc/adt/cts/transportrequests/DEVK900005/newreleasejobs',
     );
   });
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<aunit:runResult
+  xmlns:aunit="http://www.sap.com/adt/aunit"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+>
+  <atom:link
+    href="/sap/bc/adt/runtime/traces/coverage/measurements/6D664D9B46CB1FE1859107ADE8729541"
+    rel="http://www.sap.com/adt/relations/runtime/traces/coverage/measurements"
+  />
+</aunit:runResult>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  abapGit SHLP (Search Help) Schema
+
+  Defines DD30V (search help header), DD31V (text table),
+  DD32P (parameters) and DD33V (field assignments) structures
+  used in *.shlp.xml files.
+
+  Uses xs:redefine to extend AbapValuesType with SHLP-specific elements.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/dd30v.xsd"/>
+  <xs:include schemaLocation="types/dd31v.xsd"/>
+  <xs:include schemaLocation="types/dd32p.xsd"/>
+  <xs:include schemaLocation="types/dd33v.xsd"/>
+
+  <!-- Redefine AbapValuesType to include SHLP-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="DD30V" type="asx:Dd30vType" minOccurs="0"/>
+            <xs:element name="DD31V" type="asx:Dd31vType" minOccurs="0"/>
+            <xs:element name="DD32P_TABLE" type="asx:Dd32pTabType" minOccurs="0"/>
+            <xs:element name="DD33V_TABLE" type="asx:Dd33vTabType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

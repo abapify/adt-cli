@@ -1277,6 +1277,17 @@ test('REST source reads redeem an opaque destination-bound manifest capability',
         return {
           requestedTransports: ['DEVK900001'],
           scopeTransports: ['DEVK900001'],
+          inventory: [
+            {
+              pgmid: 'LIMU',
+              type: 'METH',
+              name: 'ZCL_SAFE RUN',
+              wbtype: 'CLAS',
+              uri: '/sap/bc/adt/oo/classes/zcl_safe',
+              objFunc: '',
+              sourceTransport: 'DEVK900001',
+            },
+          ],
           entries: [
             {
               object: {
@@ -1342,10 +1353,21 @@ test('REST source reads redeem an opaque destination-bound manifest capability',
     );
     assert.strictEqual(manifestResponse.status, 200);
     const manifest = (await manifestResponse.json()) as {
+      inventory: Array<{ uri?: string; name: string }>;
       entries: Array<{ head?: { sourceCapability?: string } }>;
     };
     const encodedManifest = JSON.stringify(manifest);
     assert.ok(!encodedManifest.includes('/sap/bc/adt/'));
+    assert.deepStrictEqual(manifest.inventory, [
+      {
+        pgmid: 'LIMU',
+        type: 'METH',
+        name: 'ZCL_SAFE RUN',
+        wbtype: 'CLAS',
+        objFunc: '',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
     const sourceCapability = manifest.entries[0]?.head?.sourceCapability;
     assert.ok(sourceCapability);
 

@@ -140,7 +140,20 @@ export {
 } from './objects/ddic';
 
 // CDS types (DDL, DCL)
-export { AdkDdlSource, AdkDclSource } from './objects/cds';
+export {
+  AdkDdlSource,
+  AdkDclSource,
+  AdkDdlExtension,
+  AdkScalarFunctionDefinition,
+  AdkScalarFunctionImplementation,
+  AdkEntityBuffer,
+  AdkCdsAspect,
+  AdkCdsType,
+  AdkDynamicCache,
+  AdkTuningIndex,
+  AdkStaticCache,
+  AdkExternalSchema,
+} from './objects/cds';
 
 // RAP types and classes
 export { AdkBehaviorDefinition } from './objects/repository/bdef';

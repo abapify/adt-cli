@@ -26,6 +26,8 @@ export const registry = {
   aunit: {
     runRequest: 'aunit/run-request.xml',
     runResult: 'aunit/run-result.xml',
+    runResultCoverageLink: 'aunit/run-result-coverage-link.xml',
+    runResultCoverageExternal: 'aunit/run-result-coverage-external.xml',
     // Sourced from jfilak/sapcli test fixtures (fixtures_adt_acoverage /
     // fixtures_adt_coverage). Real sanitized SAP responses for the
     // /runtime/traces/coverage endpoints.
@@ -118,8 +120,22 @@ export const registry = {
     dcl: {
       source: 'ddic/dcl/source.xml',
     },
+    ddlx: {
+      single: 'ddic/ddlx/single.xml',
+    },
+    dsfd: {
+      single: 'ddic/dsfd/single.xml',
+    },
+    dsfi: {
+      // Sanitized ADT GET /sap/bc/adt/ddic/dsfi/{name}/source/main response.
+      source: 'ddic/dsfi/source.json',
+    },
+    dteb: {
+      single: 'ddic/dteb/single.xml',
+    },
     srvd: {
       single: 'ddic/srvd/single.xml',
+      singleSanitized: 'ddic/srvd/single-sanitized.xml',
       source: 'ddic/srvd/source.asrvd',
     },
     domains: {

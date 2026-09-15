@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   Fixture: GET /sap/bc/adt/vit/wb/object_type/sxcixi/object_name/ze_mock_classic_badi_impl
 
   TODO-synthetic mock fixture for classic BAdI implementation (SXCI/XI) shape.
 -->
 <adtcore:mainObject
-    xmlns:adtcore="http://www.sap.com/adt/core"
-    adtcore:name="ze_mock_classic_badi_impl"
-    adtcore:type="SXCI/XI"
-    adtcore:version="active"
-    adtcore:description="Mock classic BAdI implementation"
-    adtcore:language="EN"/>
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  adtcore:name="ze_mock_classic_badi_impl"
+  adtcore:type="SXCI/XI"
+  adtcore:version="active"
+  adtcore:description="Mock classic BAdI implementation"
+  adtcore:language="EN"
+/>

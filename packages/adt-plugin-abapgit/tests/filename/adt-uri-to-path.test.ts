@@ -47,17 +47,17 @@ describe('adtUriToAbapGitPath', () => {
       'src/zfoo.fugr.lzfootop.abap',
     ],
 
-    ['/sap/bc/adt/ddic/ddl/sources/zi_foo', 'src/zi_foo.ddls.asddls'],
-    ['/sap/bc/adt/acm/dcl/sources/zi_foo', 'src/zi_foo.dcls.asdcls'],
+    ['/sap/bc/adt/ddic/ddl/sources/zi_foo', 'src/zi_foo.ddls.acds'],
+    ['/sap/bc/adt/acm/dcl/sources/zi_foo', 'src/zi_foo.dcls.acds'],
     ['/sap/bc/adt/bo/behaviordefinitions/zbp_foo', 'src/zbp_foo.bdef.abdl'],
     [
       '/sap/bc/adt/bo/behaviordefinitions/zbp_foo/source/main',
       'src/zbp_foo.bdef.abdl',
     ],
-    ['/sap/bc/adt/ddic/srvd/sources/zui_foo', 'src/zui_foo.srvd.asrvd'],
+    ['/sap/bc/adt/ddic/srvd/sources/zui_foo', 'src/zui_foo.srvd.acds'],
     [
       '/sap/bc/adt/ddic/srvd/sources/zui_foo/source/main',
-      'src/zui_foo.srvd.asrvd',
+      'src/zui_foo.srvd.acds',
     ],
     ['/sap/bc/adt/businessservices/bindings/zui_foo', 'src/zui_foo.srvb.xml'],
     [
@@ -69,7 +69,7 @@ describe('adtUriToAbapGitPath', () => {
     ['/sap/bc/adt/ddic/structures/zs_foo', 'src/zs_foo.tabl.xml'],
     ['/sap/bc/adt/ddic/tables/zt_foo', 'src/zt_foo.tabl.xml'],
 
-    ['/sap/bc/adt/packages/zmy_pack', 'src/zmy_pack.devc.xml'],
+    ['/sap/bc/adt/packages/zmy_pack', 'src/package.devc.xml'],
 
     ['/sap/bc/adt/atc/worklists', null],
     ['', null],

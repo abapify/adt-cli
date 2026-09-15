@@ -459,7 +459,7 @@ npx adt fetch /sap/bc/adt/<endpoint> -H "Accept: application/vnd.sap.adt.feature
 - ❌ Real usernames (PPLENKOV)
 - ✅ Mock usernames (TESTUSER)
 - ❌ Real system URLs
-- ✅ Mock URLs (https://mock-system.example.com)
+- ✅ Mock URLs (<https://mock-system.example.com>)
 
 ```bash
 # Create fixture directory structure matching endpoint path

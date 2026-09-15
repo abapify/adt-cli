@@ -93,6 +93,16 @@ export const sourceSelectionSchema = z.object({
   sourceUri: z.string().min(1),
 });
 
+export const transportObjectInventoryEntrySchema = z.object({
+  pgmid: z.string().min(1),
+  type: z.string().min(1),
+  name: z.string().min(1),
+  wbtype: z.string().min(1).optional(),
+  uri: z.string().startsWith('/sap/bc/adt/').optional(),
+  objFunc: z.string(),
+  sourceTransport: z.string().min(1),
+});
+
 export const objectDescriptorSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -138,9 +148,12 @@ export const transportDescriptorSchema = z.object({
   schemaVersion: z.literal(1),
   requestedTransports: z.array(z.string().min(1)),
   scopeTransports: z.array(z.string().min(1)),
+  inventory: z.array(transportObjectInventoryEntrySchema).optional(),
   objects: z.array(z.string().min(1)),
   configDigest: z.string().regex(/^[a-f0-9]{64}$/),
   formatDigest: z.string().regex(/^[a-f0-9]{64}$/),
+  /** Present only when at least one object was deliberately omitted. */
+  incomplete: z.literal(true).optional(),
 });
 
 export type ObjectDescriptor = z.infer<typeof objectDescriptorSchema>;

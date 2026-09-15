@@ -58,8 +58,8 @@ files.
 | Table (`TABL`)          | `ztab_foo.tabl.xml` | —                                                                                                                    |
 | Table type (`TTYP`)     | `ztt_foo.ttyp.xml`  | —                                                                                                                    |
 | Package (`DEVC`)        | `package.devc.xml`  | —                                                                                                                    |
-| CDS DDLS (`DDLS`)       | `zview.ddls.xml`    | `zview.ddls.asddls` (plain-text ABAP CDS source)                                                                     |
-| CDS DCLS (`DCLS`)       | `zrole.dcls.xml`    | `zrole.dcls.asdcls`                                                                                                  |
+| CDS DDLS (`DDLS`)       | `zview.ddls.xml`    | `zview.ddls.acds` (plain-text ABAP CDS source)                                                                       |
+| CDS DCLS (`DCLS`)       | `zrole.dcls.xml`    | `zrole.dcls.acds`                                                                                                    |
 
 The **include suffix** pattern (`.clas.locals_def.abap`, `.clas.testclasses.abap`)
 is part of the standard and required for abapGit compatibility. Handlers in the

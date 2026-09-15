@@ -113,6 +113,21 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
+      - name: Enrich release notes with PR authors
+        if: ${{ !inputs.dry_run }}
+        # Nx's changelog resolves git emails to GitHub usernames via ungh.cc
+        # and GitHub search. If a contributor's email is private, both fail
+        # and the author gets no @mention — GitHub's release Contributors
+        # section then skips them. This step cross-references PR authors via
+        # the GitHub API (which always knows the login) and appends any
+        # missing @mentions to the release notes.
+        # Non-blocking: enrichment is best-effort and must not prevent the
+        # publish workflow from dispatching on failure.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx tsx tools/enrich-release-notes.ts "${{ steps.get_tag.outputs.tag }}"
+
       - name: Dispatch publish workflow
         if: ${{ !inputs.dry_run && inputs.publish }}
         # Can't rely on `push: tags:` auto-trigger in publish.yml — events

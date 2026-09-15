@@ -280,11 +280,11 @@ grep -r 'xmlns.*sap.com/adt' packages/adt-fixtures/
 
 ### Official sources
 
-| Source               | URL                                                                    | Best For                         |
-| -------------------- | ---------------------------------------------------------------------- | -------------------------------- |
-| SAP Help - ADT API   | https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide | Official endpoint docs           |
-| SAP Community        | https://community.sap.com                                              | Blog posts with endpoint details |
-| SAP API Business Hub | https://api.sap.com                                                    | Some ADT-related APIs            |
+| Source               | URL                                                                      | Best For                         |
+| -------------------- | ------------------------------------------------------------------------ | -------------------------------- |
+| SAP Help - ADT API   | <https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide> | Official endpoint docs           |
+| SAP Community        | <https://community.sap.com>                                              | Blog posts with endpoint details |
+| SAP API Business Hub | <https://api.sap.com>                                                    | Some ADT-related APIs            |
 
 ### Web search patterns
 

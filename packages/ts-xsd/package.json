@@ -1,7 +1,7 @@
 {
   "name": "@abapify/ts-xsd",
-  "version": "0.4.1",
-  "description": "Core XSD parser and builder - W3C XMLSchema 1:1 TypeScript representation",
+  "version": "0.4.2",
+  "description": "W3C XSD 1.1 parser, builder, and TypeScript type inference",
   "license": "MIT",
   "publishConfig": {
     "access": "public"

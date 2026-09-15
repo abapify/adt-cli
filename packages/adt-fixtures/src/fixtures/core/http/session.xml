@@ -1,21 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <http:session
-        xmlns:http="http://www.sap.com/adt/http"
-        xmlns:atom="http://www.w3.org/2005/Atom">
-    <atom:link
-            href="/sap/bc/adt/core/http/sessions/2DACB71BD03211F0A8EE0A7425B8447B"
-            rel="http://www.sap.com/adt/categories/core/http/sessions/securitysession"
-            title="Security session" />
-    <atom:link
-            href="/sap/public/bc/icf/logoff"
-            rel="http://www.sap.com/adt/categories/core/http/sessions/logoff"
-            title="Logoff resource" />
-    <atom:link
-            href="/sap/bc/adt/core/http/systeminformation"
-            rel="http://www.sap.com/adt/categories/core/http/system/systeminformation"
-            type="application/vnd.sap.adt.core.http.systeminformation.v1+json"
-            title="System information resource" />
-    <http:properties>
-        <http:property name="inactivityTimeout">1800</http:property>
-    </http:properties>
+  xmlns:http="http://www.sap.com/adt/http"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+>
+  <atom:link
+    href="/sap/bc/adt/core/http/sessions/2DACB71BD03211F0A8EE0A7425B8447B"
+    rel="http://www.sap.com/adt/categories/core/http/sessions/securitysession"
+    title="Security session"
+  />
+  <atom:link
+    href="/sap/public/bc/icf/logoff"
+    rel="http://www.sap.com/adt/categories/core/http/sessions/logoff"
+    title="Logoff resource"
+  />
+  <atom:link
+    href="/sap/bc/adt/core/http/systeminformation"
+    rel="http://www.sap.com/adt/categories/core/http/system/systeminformation"
+    type="application/vnd.sap.adt.core.http.systeminformation.v1+json"
+    title="System information resource"
+  />
+  <http:properties>
+    <http:property name="inactivityTimeout">1800</http:property>
+  </http:properties>
 </http:session>

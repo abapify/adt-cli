@@ -33,9 +33,14 @@
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:aunit="http://www.sap.com/adt/aunit"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    xmlns:atom="http://www.w3.org/2005/Atom"
     targetNamespace="http://www.sap.com/adt/aunit"
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.w3.org/2005/Atom" schemaLocation="../sap/atom.xsd"/>
+  <xsd:import namespace="http://www.sap.com/adt/core" schemaLocation="adtcoreObjectSets.xsd"/>
 
   <!-- Root element -->
   <xsd:element name="runResult" type="aunit:AunitRunResult"/>
@@ -43,8 +48,21 @@
   <!-- Run Result -->
   <xsd:complexType name="AunitRunResult">
     <xsd:sequence>
+      <xsd:element name="external" type="aunit:AunitExternal" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
       <xsd:element name="program" type="aunit:AunitProgram" minOccurs="0" maxOccurs="unbounded" form="unqualified"/>
     </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Coverage-enabled systems may return the measurement as external/coverage/@adtcore:uri. -->
+  <xsd:complexType name="AunitExternal">
+    <xsd:sequence>
+      <xsd:element name="coverage" type="aunit:AunitCoverage" minOccurs="0" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="AunitCoverage">
+    <xsd:attribute ref="adtcore:uri"/>
   </xsd:complexType>
 
   <!-- Program -->
@@ -53,9 +71,9 @@
       <xsd:element name="testClasses" type="aunit:AunitTestClasses" minOccurs="0" maxOccurs="1" form="unqualified"/>
       <xsd:element name="alerts" type="aunit:AunitAlerts" minOccurs="0" maxOccurs="1" form="unqualified"/>
     </xsd:sequence>
-    <xsd:attribute name="uri" type="xsd:anyURI"/>
-    <xsd:attribute name="type" type="xsd:string"/>
-    <xsd:attribute name="name" type="xsd:string"/>
+    <xsd:attribute ref="adtcore:uri"/>
+    <xsd:attribute ref="adtcore:type"/>
+    <xsd:attribute ref="adtcore:name"/>
     <xsd:attribute name="uriType" type="xsd:string"/>
   </xsd:complexType>
 
@@ -72,8 +90,8 @@
       <xsd:element name="testMethods" type="aunit:AunitTestMethods" minOccurs="0" maxOccurs="1" form="unqualified"/>
       <xsd:element name="alerts" type="aunit:AunitAlerts" minOccurs="0" maxOccurs="1" form="unqualified"/>
     </xsd:sequence>
-    <xsd:attribute name="uri" type="xsd:anyURI"/>
-    <xsd:attribute name="name" type="xsd:string"/>
+    <xsd:attribute ref="adtcore:uri"/>
+    <xsd:attribute ref="adtcore:name"/>
     <xsd:attribute name="uriType" type="xsd:string"/>
     <xsd:attribute name="durationCategory" type="xsd:string"/>
     <xsd:attribute name="riskLevel" type="xsd:string"/>
@@ -91,8 +109,8 @@
     <xsd:sequence>
       <xsd:element name="alerts" type="aunit:AunitAlerts" minOccurs="0" maxOccurs="1" form="unqualified"/>
     </xsd:sequence>
-    <xsd:attribute name="uri" type="xsd:anyURI"/>
-    <xsd:attribute name="name" type="xsd:string"/>
+    <xsd:attribute ref="adtcore:uri"/>
+    <xsd:attribute ref="adtcore:name"/>
     <xsd:attribute name="executionTime" type="xsd:string"/>
     <xsd:attribute name="uriType" type="xsd:string"/>
     <xsd:attribute name="unit" type="xsd:string"/>
@@ -137,10 +155,10 @@
 
   <!-- Stack Entry -->
   <xsd:complexType name="AunitStackEntry">
-    <xsd:attribute name="uri" type="xsd:anyURI"/>
-    <xsd:attribute name="type" type="xsd:string"/>
-    <xsd:attribute name="name" type="xsd:string"/>
-    <xsd:attribute name="description" type="xsd:string"/>
+    <xsd:attribute ref="adtcore:uri"/>
+    <xsd:attribute ref="adtcore:type"/>
+    <xsd:attribute ref="adtcore:name"/>
+    <xsd:attribute ref="adtcore:description"/>
   </xsd:complexType>
 
 </xsd:schema>

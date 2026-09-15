@@ -13,6 +13,111 @@
       "uri": "/sap/bc/adt/oo/interfaces/zif_example",
       "description": "Example interface",
       "packageName": "ZPACKAGE"
+    },
+    {
+      "name": "Z_AFF_DDLS",
+      "type": "DDLS/DF",
+      "uri": "/sap/bc/adt/ddic/ddl/sources/z_aff_ddls",
+      "description": "Sample CDS view",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DCLS",
+      "type": "DCLS/DL",
+      "uri": "/sap/bc/adt/acm/dcl/sources/z_aff_dcls",
+      "description": "Sample access control",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DDLX",
+      "type": "DDLX/DF",
+      "uri": "/sap/bc/adt/ddic/ddlx/sources/z_aff_ddlx",
+      "description": "Sample CDS extension",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DRAS",
+      "type": "DRAS/DF",
+      "uri": "/sap/bc/adt/ddic/dras/sources/z_aff_dras",
+      "description": "Sample CDS aspect",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DRTY",
+      "type": "DRTY/DF",
+      "uri": "/sap/bc/adt/ddic/drty/sources/z_aff_drty",
+      "description": "Sample CDS type",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DSFD",
+      "type": "DSFD/DF",
+      "uri": "/sap/bc/adt/ddic/dsfd/sources/z_aff_dsfd",
+      "description": "Sample scalar function definition",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DSFI",
+      "type": "DSFI/DF",
+      "uri": "/sap/bc/adt/ddic/dsfi/z_aff_dsfi",
+      "description": "Sample scalar function implementation",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DTEB",
+      "type": "DTEB/DF",
+      "uri": "/sap/bc/adt/ddic/dteb/sources/z_aff_dteb",
+      "description": "Sample entity buffer",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DTDC",
+      "type": "DTDC/DF",
+      "uri": "/sap/bc/adt/ddic/dtdc/sources/z_aff_dtdc",
+      "description": "Sample dynamic cache",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DTIX",
+      "type": "DTIX/DF",
+      "uri": "/sap/bc/adt/ddic/dtix/sources/z_aff_dtix",
+      "description": "Sample tuning index",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DTSC",
+      "type": "DTSC/DF",
+      "uri": "/sap/bc/adt/ddic/dtsc/sources/z_aff_dtsc",
+      "description": "Sample static cache",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_DESD",
+      "type": "DESD/DF",
+      "uri": "/sap/bc/adt/ddic/desd/z_aff_desd",
+      "description": "Sample external schema",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_BDEF",
+      "type": "BDEF/DF",
+      "uri": "/sap/bc/adt/bo/behaviordefinitions/z_aff_bdef",
+      "description": "Sample behavior definition",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_SRVD",
+      "type": "SRVD/DF",
+      "uri": "/sap/bc/adt/ddic/srvd/sources/z_aff_srvd",
+      "description": "Sample service definition",
+      "packageName": "$TMP"
+    },
+    {
+      "name": "Z_AFF_SRVB",
+      "type": "SRVB/DF",
+      "uri": "/sap/bc/adt/businessservices/bindings/z_aff_srvb",
+      "description": "Sample service binding",
+      "packageName": "$TMP"
     }
   ]
 }

@@ -13,8 +13,8 @@ description: Import, merge, or combine repositories into an Nx workspace using n
 
 Primary docs:
 
-- https://nx.dev/docs/guides/adopting-nx/import-project
-- https://nx.dev/docs/guides/adopting-nx/preserving-git-histories
+- <https://nx.dev/docs/guides/adopting-nx/import-project>
+- <https://nx.dev/docs/guides/adopting-nx/preserving-git-histories>
 
 Read the nx docs if you have the tools for it.
 

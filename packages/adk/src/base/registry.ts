@@ -11,7 +11,6 @@
  */
 
 import type { AdkContext } from './context';
-import type { AdkObject } from './model';
 import type { AdkKind } from './kinds';
 import * as kinds from './kinds';
 
@@ -19,11 +18,22 @@ import * as kinds from './kinds';
 // Types
 // ============================================
 
+/**
+ * Minimal contract for any object that can be registered.
+ *
+ * Both `AdkObject` subclasses and lightweight source-only CDS/RAP objects
+ * (which do not extend `AdkObject`) satisfy this interface, allowing the
+ * registry to store constructors for both without `as any` casts.
+ */
+export interface AdkRegistrable {
+  readonly name: string;
+  readonly kind: AdkKind;
+}
+
 /** Constructor signature for ADK objects */
 
-export type AdkObjectConstructor<
-  T extends AdkObject<AdkKind, any> = AdkObject<AdkKind, any>,
-> = new (ctx: AdkContext, nameOrData: string | any) => T;
+export type AdkObjectConstructor<T extends AdkRegistrable = AdkRegistrable> =
+  new (ctx: AdkContext, nameOrData: string | Record<string, unknown>) => T;
 
 /** How to transform object name for the URI path segment */
 export type NameTransform = 'lowercase' | 'preserve';

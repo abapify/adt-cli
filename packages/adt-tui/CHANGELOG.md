@@ -1,3 +1,14 @@
+## 0.4.2 (2026-09-08)
+
+### 🩹 Fixes
+
+- **quality:** resolve open GitHub Code Quality findings ([#159](https://github.com/abapify/adt-cli/pull/159))
+
+### ❤️ Thank You
+
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-tui to align it with other projects, there were no code changes.

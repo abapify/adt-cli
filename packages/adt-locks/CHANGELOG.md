@@ -1,3 +1,21 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### 🩹 Fixes
+
+- verify CTS lifecycle, task creation, and lock correlation ([#151](https://github.com/abapify/adt-cli/pull/151))
+- **cts:** reconcile task and source lifecycle ([34469d91](https://github.com/abapify/adt-cli/commit/34469d91))
+- review thread fixes (broker, session, source-history, docs, deps) ([3d20361a](https://github.com/abapify/adt-cli/commit/3d20361a))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-locks to align it with other projects, there were no code changes.

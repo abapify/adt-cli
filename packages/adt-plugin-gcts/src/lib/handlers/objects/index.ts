@@ -13,3 +13,12 @@ export { dataElementHandler } from './dtel';
 export { tableHandler } from './tabl';
 export { tableTypeHandler } from './ttyp';
 export { functionGroupHandler } from './fugr';
+export { ddlSourceHandler } from './ddls';
+export { dclSourceHandler } from './dcls';
+export { behaviorDefinitionHandler } from './bdef';
+export { serviceDefinitionHandler } from './srvd';
+export { serviceBindingHandler } from './srvb';
+export { messageClassHandler } from './msag';
+
+// Wave 2: generic handler stubs for all remaining AFF types.
+import './wave2-generic';

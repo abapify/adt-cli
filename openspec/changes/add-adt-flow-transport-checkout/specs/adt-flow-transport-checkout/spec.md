@@ -27,9 +27,9 @@ current source.
 - **THEN** checkout fails with a typed bounded diagnostic
 - **THEN** no repository path is changed
 
-#### Scenario: Object type has no source-history implementation
+#### Scenario: Object has no materializable source history
 
-- **GIVEN** a transport contains an otherwise relevant object whose manifest entry is `unsupported`
+- **GIVEN** a transport contains an otherwise relevant object whose manifest entry is `unsupported` or carries the `OBJECT_TYPE_UNSUPPORTED` diagnostic, including one whose ADT metadata cannot be loaded
 - **WHEN** checkout is requested
 - **THEN** checkout excludes that object without reading source or changing its repository paths
 - **THEN** checkout continues with the remaining exact source components
@@ -118,7 +118,9 @@ Checkout SHALL maintain deterministic transport and object descriptors under
 #### Scenario: Successful head checkout
 
 - **WHEN** a relevant transport head is checked out successfully
-- **THEN** `.adt/tr/<TR>.json` records the normalized boundary selection without source bodies or unrelated objects
+- **THEN** `.adt/tr/<TR>.json` records the normalized boundary selection without source bodies
+- **THEN** every request/task discovered in the scope has its own descriptor
+- **THEN** each descriptor retains its complete CTS object inventory, including unsupported and currently filtered types
 - **THEN** each relevant object has a uniquely named descriptor under `.adt/objects/<TYPE>/`
 - **THEN** descriptors contain no credentials, absolute paths, or wall-clock-only values
 
@@ -176,6 +178,13 @@ from the root `adt.config.ts` and SHALL persist only relevant identities.
 - **WHEN** checkout is executed again
 - **THEN** the changed config digest invalidates the affected fast path
 - **THEN** newly relevant objects are discovered without requiring a complete system clone
+
+#### Scenario: A previously unsupported type becomes materializable
+
+- **GIVEN** a committed transport descriptor inventories an unsupported CTS object
+- **WHEN** the active flow implementation and configuration later support that repository type
+- **THEN** the descriptor identifies the concrete request/task that must be retried
+- **THEN** a successful head checkout replaces the pending inventory-only state with materialized object descriptors without losing the original CTS identity
 
 ### Requirement: MVP exactness is limited to source
 

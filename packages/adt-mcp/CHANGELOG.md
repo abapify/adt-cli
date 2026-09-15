@@ -1,3 +1,59 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- expose typed CTS transport metadata ([#186](https://github.com/abapify/adt-cli/pull/186))
+- **flow:** persist complete CTS inventories ([#182](https://github.com/abapify/adt-cli/pull/182))
+- **adt-mcp:** arc-1 SAPRead parity for get_source ([#162](https://github.com/abapify/adt-cli/pull/162))
+- **badi:** classic BAdI read via vit/wb ([#153](https://github.com/abapify/adt-cli/pull/153), [#154](https://github.com/abapify/adt-cli/pull/154))
+- **badi:** add `adt badi <name> --implementations` ([#153](https://github.com/abapify/adt-cli/pull/153))
+- **cts:** create verified transport tasks ([99447319](https://github.com/abapify/adt-cli/commit/99447319))
+- **adt-flow:** add incremental transport checkout ([#150](https://github.com/abapify/adt-cli/pull/150))
+- **adt-mcp:** add delegated assistant read scope ([#148](https://github.com/abapify/adt-cli/pull/148))
+- **adt-mcp:** add delegated assistant read scope ([b59006b4](https://github.com/abapify/adt-cli/commit/b59006b4))
+- **adt-mcp:** enforce scoped safe execution ([#143](https://github.com/abapify/adt-cli/pull/143))
+- **adt-mcp:** classify bounded analysis execution ([#141](https://github.com/abapify/adt-cli/pull/141))
+- **adt-mcp:** classify bounded analysis execution ([f1d19e7b](https://github.com/abapify/adt-cli/commit/f1d19e7b))
+- **adt-mcp:** scope autonomous agent reads ([7baa09f8](https://github.com/abapify/adt-cli/commit/7baa09f8))
+- **adt-mcp:** reject raw URI read targets ([c206c1d4](https://github.com/abapify/adt-cli/commit/c206c1d4))
+- **adt-mcp:** scope ATC runs without raw URIs ([6665107c](https://github.com/abapify/adt-cli/commit/6665107c))
+- **adt-server:** add canonical object metadata REST ([be7857dd](https://github.com/abapify/adt-cli/commit/be7857dd))
+- **mcp:** bound current source reads ([e8da7e53](https://github.com/abapify/adt-cli/commit/e8da7e53))
+- **adt-mcp:** scope frozen reads to components ([2676ae8f](https://github.com/abapify/adt-cli/commit/2676ae8f))
+- **adt-mcp:** enforce frozen AI Review reads ([3c19a052](https://github.com/abapify/adt-cli/commit/3c19a052))
+- **adt-server:** configure signed MCP runtime ([d74109ef](https://github.com/abapify/adt-cli/commit/d74109ef))
+- **adt-mcp:** verify signed invocations ([f782bf4f](https://github.com/abapify/adt-cli/commit/f782bf4f))
+- **adt-mcp:** enforce destination scopes ([3bbb9bf9](https://github.com/abapify/adt-cli/commit/3bbb9bf9))
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### 🩹 Fixes
+
+- **aunit:** send SAP coverage query bodies ([#179](https://github.com/abapify/adt-cli/pull/179))
+- **adk:** release transport task via newreleasejobs, verify by reload ([#173](https://github.com/abapify/adt-cli/pull/173))
+- **flow:** skip unsupported transport objects ([#166](https://github.com/abapify/adt-cli/pull/166))
+- verify CTS lifecycle, task creation, and lock correlation ([#151](https://github.com/abapify/adt-cli/pull/151))
+- **cts:** reconcile task and source lifecycle ([34469d91](https://github.com/abapify/adt-cli/commit/34469d91))
+- **cts:** harden task creation verification ([bb8d5862](https://github.com/abapify/adt-cli/commit/bb8d5862))
+- verify CTS lifecycle and task deltas ([cbe83c5b](https://github.com/abapify/adt-cli/commit/cbe83c5b))
+- review thread fixes (broker, session, source-history, docs, deps) ([3d20361a](https://github.com/abapify/adt-cli/commit/3d20361a))
+- **sonar:** resolve S4144, S6551, S6571, S6582, S6644, S7750, S7755, S7786, S5332 ([35b25a45](https://github.com/abapify/adt-cli/commit/35b25a45))
+- **sonar:** resolve MAJOR code smells and regenerate client ([1559c2cd](https://github.com/abapify/adt-cli/commit/1559c2cd))
+- **sast:** add bearer suppression and reduce registry nesting ([b0d7b17a](https://github.com/abapify/adt-cli/commit/b0d7b17a))
+- **sonar/codacy:** reduce destination-mode complexity and add test wrappers ([d0c8413f](https://github.com/abapify/adt-cli/commit/d0c8413f))
+- **codacy:** avoid object-injection and user-controlled URL findings ([9c3a249a](https://github.com/abapify/adt-cli/commit/9c3a249a))
+- **codacy:** suppress false-positive SSRF and object-injection findings ([05c807bc](https://github.com/abapify/adt-cli/commit/05c807bc))
+- **adt-mcp:** include objectUri in find_references and accept uri in get_source_version ([a1cdc51b](https://github.com/abapify/adt-cli/commit/a1cdc51b))
+- **adt-mcp,adt-server,adt-server-client:** resolve ESLint errors and unsafe finally ([cfe1c434](https://github.com/abapify/adt-cli/commit/cfe1c434))
+- **mcp:** bind immutable sources to capabilities ([ad45ebc4](https://github.com/abapify/adt-cli/commit/ad45ebc4))
+- **adt-mcp:** freeze destination access ([8f3fc5c5](https://github.com/abapify/adt-cli/commit/8f3fc5c5))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-mcp to align it with other projects, there were no code changes.

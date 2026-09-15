@@ -2,16 +2,17 @@
  * Coverage link helper for AUnit responses.
  *
  * When coverage is enabled on an ABAP Unit run, the aunit:runResult
- * contains an atom:link with `rel` referring to the coverage measurement.
- * Example:
+ * contains either an Atom link or an external coverage URI referring to the
+ * coverage measurement. Examples:
  *
  *   <atom:link href="/sap/bc/adt/runtime/traces/coverage/measurements/6D664D9B46CB1FE1859107ADE8729541"
  *              rel="http://www.sap.com/adt/relations/runtime/traces/coverage/measurements"/>
+ *   <external><coverage adtcore:uri="/sap/bc/adt/runtime/traces/coverage/measurements/6D664D9B46CB1FE1859107ADE8729541"/></external>
  *
  * The measurement ID is the hex segment after /measurements/.
  */
 
-const COVERAGE_MEASUREMENT_HREF_RE =
+const COVERAGE_MEASUREMENT_URI_RE =
   /\/sap\/bc\/adt\/runtime\/traces\/coverage\/measurements\/([A-Fa-f0-9]+)/;
 
 export interface CoverageLinkCandidate {
@@ -59,7 +60,13 @@ export function extractCoverageMeasurementId(
           ? ((link as CoverageLinkCandidate).href ?? undefined)
           : undefined;
       if (!href) continue;
-      const match = COVERAGE_MEASUREMENT_HREF_RE.exec(href);
+      const match = COVERAGE_MEASUREMENT_URI_RE.exec(href);
+      if (match) return match[1];
+    }
+
+    const uri = typeof obj.uri === 'string' ? obj.uri : undefined;
+    if (uri) {
+      const match = COVERAGE_MEASUREMENT_URI_RE.exec(uri);
       if (match) return match[1];
     }
 

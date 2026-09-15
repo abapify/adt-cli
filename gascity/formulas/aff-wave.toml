@@ -1,0 +1,106 @@
+formula = "aff-wave"
+version = 1
+target_required = false
+
+description = """
+AFF (abap-file-formats) implementation wave: architect designs from spec,
+builder implements (TDD), reviewer gates, mayor finalizes.
+
+This formula extends the standard Gas City build-from-plan-base methodology.
+The spec/bead describes the AFF object type or infrastructure task; the
+architect produces the implementation plan, the builder implements via TDD,
+the reviewer gates, and the mayor finalizes.
+"""
+
+[requires]
+formula_compiler = ">=2.0.0"
+
+[catalog]
+name = "aff-wave"
+description = "Execute one AFF implementation wave: plan -> implement -> review -> finalize."
+
+[metadata.gc.methodology]
+allowed_drain_policies = ["separate", "same-session"]
+implementation_strategy = "drain"
+interaction_modes = ["interactive", "autonomous", "headless"]
+review_modes = ["report", "agent", "interactive"]
+
+[vars]
+[vars.artifact_root]
+description = "Build artifact root (defaults to .gc/build)."
+default = ".gc/build"
+
+[vars.requirements_path]
+description = "Approved requirements artifact path (the spec for this wave)."
+default = ""
+
+[vars.wave_prefix]
+description = "Branch/spec prefix for this wave (e.g. aff-w0, aff-w1)."
+default = "aff-w0"
+
+[vars.wave_package]
+description = "Package name being built in this wave (e.g. adt-plugin-gcts)."
+default = "adt-plugin-gcts"
+
+[vars.drain_policy]
+description = "Implementation drain policy: separate (one session per task) or same-session."
+default = "separate"
+
+[vars.review_mode]
+description = "Review authority: report, agent, or interactive."
+default = "agent"
+
+[vars.push]
+description = "Set true to allow final publish push after all checks pass."
+default = "false"
+
+[vars.open_pr]
+description = "Set true to allow final PR creation after all checks pass."
+default = "false"
+
+# --- Step overrides ---
+
+# Plan: architect produces implementation plan from spec.
+[[steps]]
+id = "design"
+title = "Architect: design spec and plan"
+description = """
+Read the wave spec/bead and produce a detailed implementation plan.
+The architect reads the bead, examines the relevant code in
+packages/adt-plugin-gcts and packages/adt-plugin-abapgit, and defines
+the implementation plan the builder will follow.
+"""
+agent = "architect"
+
+[[steps]]
+id = "implement"
+title = "Builder: implement from spec (TDD)"
+description = """
+The builder reads the spec and implementation plan, writes failing tests
+first, then implements until all tests pass and the build succeeds.
+All work goes into packages/adt-plugin-gcts (or related packages).
+Run: bunx nx test adt-plugin-gcts, bunx nx build adt-plugin-gcts.
+"""
+needs = ["design"]
+agent = "builder"
+
+[[steps]]
+id = "review"
+title = "Reviewer: gate quality"
+description = """
+The reviewer checks the implementation against the spec, runs all checks
+(test, build, lint), verifies AFF JSON schema compliance, and approves
+or rejects. On rejection, reports specific issues back to the mayor.
+"""
+needs = ["implement"]
+agent = "reviewer"
+
+[[steps]]
+id = "finalize"
+title = "Finalize wave"
+description = """
+Wave is complete. Mayor records completion, commits changes, and prepares
+next wave or closes the epic.
+"""
+needs = ["review"]
+agent = "mayor"

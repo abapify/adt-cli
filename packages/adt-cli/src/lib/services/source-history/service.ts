@@ -111,6 +111,7 @@ export function toMetadataOnlyTransportSourceManifest(
   return {
     requestedTransports: manifest.requestedTransports,
     scopeTransports: manifest.scopeTransports,
+    inventory: manifest.inventory.map(({ uri: _uri, ...entry }) => entry),
     entries: manifest.entries.map((entry) => {
       const { sourceUri: _s, versionsUri: _v, ...component } = entry.component;
       const stripSourceUri = (

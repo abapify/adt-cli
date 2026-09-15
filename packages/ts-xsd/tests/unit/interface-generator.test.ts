@@ -2,6 +2,81 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { generateInterfaces } from '../../src/codegen/interface-generator';
 import type { Schema } from '../../src/xsd/types';
+import { parseXsd } from '../../src/xsd/parse';
+
+describe('XML property names', () => {
+  for (const flatten of [false, true] as const) {
+    it(`preserves dotted and hyphenated names in ${flatten ? 'flattened types' : 'interfaces'}`, () => {
+      const schema = parseXsd(`
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+          <xs:complexType name="Properties">
+            <xs:sequence>
+              <xs:element name="MZ.Sequence.EditingModeGUID" type="xs:string"/>
+              <xs:element name="preview-codec" type="xs:int" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="adobe.flag" type="xs:boolean" use="required"/>
+            <xs:attribute name="optional-flag" type="xs:boolean"/>
+          </xs:complexType>
+          <xs:complexType name="Example">
+            <xs:sequence>
+              <xs:element name="properties" type="Properties"/>
+            </xs:sequence>
+          </xs:complexType>
+          <xs:element name="adobe.project" type="Example"/>
+        </xs:schema>
+      `);
+      const { project, sourceFile } = generateInterfaces(schema, {
+        flatten,
+        rootTypeName: 'ExampleSchema',
+        addJsDoc: false,
+      });
+      project.createSourceFile(
+        'consumer.ts',
+        `
+        import type { ExampleSchema } from './${sourceFile.getBaseNameWithoutExtension()}';
+        const project: ExampleSchema = {
+          "adobe.project": {
+            properties: {
+              "MZ.Sequence.EditingModeGUID": "editing-mode",
+              "preview-codec": [1, 2],
+              "adobe.flag": false,
+            },
+          },
+        };
+        const guid: string = project["adobe.project"].properties["MZ.Sequence.EditingModeGUID"];
+        const codecs: number[] | undefined = project["adobe.project"].properties["preview-codec"];
+        const flag: boolean | undefined = project["adobe.project"].properties["optional-flag"];
+      `,
+      );
+      assert.deepStrictEqual(
+        project.getPreEmitDiagnostics().map((d) => d.getMessageText()),
+        [],
+      );
+      const rootType = sourceFile
+        .getTypeAliasOrThrow('ExampleSchema')
+        .getType();
+      assert.deepStrictEqual(
+        rootType.getProperties().map((p) => p.getName()),
+        ['adobe.project'],
+      );
+      const root = rootType
+        .getPropertyOrThrow('adobe.project')
+        .getTypeAtLocation(sourceFile);
+      const properties = root
+        .getPropertyOrThrow('properties')
+        .getTypeAtLocation(sourceFile);
+      assert.deepStrictEqual(
+        properties.getProperties().map((p) => p.getName()),
+        [
+          'MZ.Sequence.EditingModeGUID',
+          'preview-codec',
+          'adobe.flag',
+          'optional-flag',
+        ],
+      );
+    });
+  }
+});
 
 describe('Interface Generator', () => {
   // Simple schema with one complex type

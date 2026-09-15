@@ -6,7 +6,7 @@
  */
 
 export type DdlSourceSchema = {
-    source: {
+    ddlSource: {
         containerRef?: undefined | {
             extension?: undefined | unknown;
             uri?: string | undefined;
@@ -66,5 +66,7 @@ export type DdlSourceSchema = {
         sourceObjectStatus?: undefined | "SAPStandardProduction" | "customerProduction" | "system" | "test";
         fixPointArithmetic?: boolean | undefined;
         activeUnicodeCheck?: boolean | undefined;
+        source_origin?: string | undefined;
+        source_type?: string | undefined;
     };
 };

@@ -1,3 +1,34 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **cds:** support CDS and RAP ABAP File Formats ([#183](https://github.com/abapify/adt-cli/pull/183))
+- **badi:** classic BAdI read via vit/wb ([#153](https://github.com/abapify/adt-cli/pull/153), [#154](https://github.com/abapify/adt-cli/pull/154))
+- **cts:** create verified transport tasks ([99447319](https://github.com/abapify/adt-cli/commit/99447319))
+- **adt-server:** generate typed REST client ([7ac85f6c](https://github.com/abapify/adt-cli/commit/7ac85f6c))
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### 🩹 Fixes
+
+- **import:** support typed CDS and RAP imports ([#185](https://github.com/abapify/adt-cli/pull/185))
+- **coverage:** request SAP XML responses ([#180](https://github.com/abapify/adt-cli/pull/180))
+- **aunit:** send SAP coverage query bodies ([#179](https://github.com/abapify/adt-cli/pull/179))
+- **aunit:** parse external coverage measurement URI ([#176](https://github.com/abapify/adt-cli/pull/176))
+- **aunit:** preserve coverage measurement links ([#175](https://github.com/abapify/adt-cli/pull/175))
+- **quality:** resolve open GitHub Code Quality findings ([#159](https://github.com/abapify/adt-cli/pull/159))
+- verify CTS lifecycle, task creation, and lock correlation ([#151](https://github.com/abapify/adt-cli/pull/151))
+- verify CTS lifecycle and task deltas ([cbe83c5b](https://github.com/abapify/adt-cli/commit/cbe83c5b))
+- **sonar:** add assertions to tests and suppress remaining complexity findings ([983b2dd7](https://github.com/abapify/adt-cli/commit/983b2dd7))
+- **sonar:** resolve S2187 tests and triage cognitive complexity with NOSONAR ([25c39e09](https://github.com/abapify/adt-cli/commit/25c39e09))
+- **sonar/codacy:** reduce destination-mode complexity and add test wrappers ([d0c8413f](https://github.com/abapify/adt-cli/commit/d0c8413f))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-contracts to align it with other projects, there were no code changes.

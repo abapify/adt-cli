@@ -3,9 +3,9 @@
  *
  * Consumes parsed coverage data from the adt-contracts runtime endpoints:
  *
- *   measurements: client.adt.runtime.traces.coverage.measurements.post(id)
+ *   measurements: client.adt.runtime.traces.coverage.measurements.post(id, query)
  *                 → AcoverageResultSchema  (tree of DEVC → CLAS → methods)
- *   statements:   client.adt.runtime.traces.coverage.statements.get(id)
+ *   statements:   client.adt.runtime.traces.coverage.statements.post(id, bulkRequest)
  *                 → AcoverageStatementsSchema (per-method line hits/misses)
  *
  * Emits JaCoCo 1.1 XML:
@@ -30,13 +30,14 @@
  *     <counter …/>
  *   </report>
  *
- * Improvement over sapcli: we use adtUriToAbapGitPath() so the
- * <sourcefile name=…> matches the on-disk abapGit filename (e.g.
- * `cl_foo.clas.abap`), making the report directly consumable by
- * SonarQube.
+ * Improvement over sapcli: we use adtUriToAbapGitPath() and an optional
+ * repository resolver so JaCoCo package + sourcefile names reconstruct the
+ * tracked abapGit path. GitLab can then match changed files for MR diff
+ * annotations, while standard JaCoCo consumers retain the same path.
  */
 
-import { writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, writeFileSync, type Dirent } from 'node:fs';
+import { basename, dirname, join, relative, sep } from 'node:path';
 import {
   acoverageResult,
   acoverageStatements,
@@ -101,6 +102,63 @@ function escapeAttr(s: string): string {
 
 function indent(level: number): string {
   return '   '.repeat(level);
+}
+
+function toPosix(filePath: string): string {
+  return sep === '/' ? filePath : filePath.split(sep).join('/');
+}
+
+function collectAbapSources(root: string): string[] {
+  const sources: string[] = [];
+  const pending = [root];
+  while (pending.length > 0) {
+    const directory = pending.pop()!;
+    let entries: Dirent[];
+    try {
+      entries = readdirSync(directory, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const candidate = join(directory, entry.name);
+      if (entry.isDirectory()) pending.push(candidate);
+      else if (entry.isFile() && entry.name.endsWith('.abap')) {
+        sources.push(candidate);
+      }
+    }
+  }
+  return sources;
+}
+
+export type CoverageSourcePathResolver = (
+  reportedPath: string,
+) => string | null;
+
+/** Resolve an abapGit basename to a unique repository-relative source path. */
+export function createAbapGitCoverageSourceResolver(
+  sourceRoot = 'src',
+  repositoryRoot = process.cwd(),
+): CoverageSourcePathResolver {
+  const absoluteSourceRoot = join(repositoryRoot, sourceRoot);
+  const byBasename = new Map<string, string[]>();
+  if (existsSync(absoluteSourceRoot)) {
+    for (const source of collectAbapSources(absoluteSourceRoot)) {
+      const name = basename(source);
+      const matches = byBasename.get(name) ?? [];
+      matches.push(toPosix(relative(repositoryRoot, source)));
+      byBasename.set(name, matches);
+    }
+  }
+
+  return (reportedPath: string): string | null => {
+    const matches = byBasename.get(basename(reportedPath)) ?? [];
+    if (matches.length > 1) {
+      throw new Error(
+        `Ambiguous ABAP coverage source ${basename(reportedPath)}: ${matches.join(', ')}`,
+      );
+    }
+    return matches[0] ?? null;
+  };
 }
 
 /**
@@ -181,13 +239,14 @@ function emitCounters(
 
 // ─── Emit <class>, <sourcefile> ───────────────────────────────────────
 
-function sourcefileNameFor(ref: ObjectRef | undefined): string {
+function sourcefilePathFor(
+  ref: ObjectRef | undefined,
+  resolver: CoverageSourcePathResolver | undefined,
+): string {
   const uri = ref?.uri;
   const abapgit = uri ? adtUriToAbapGitPath(uri) : null;
   if (abapgit) {
-    // Strip the leading `src/` since JaCoCo `name` is the bare filename;
-    // full path can still be reconstructed by consumers.
-    return abapgit.replace(/^src\//, '');
+    return resolver?.(abapgit) ?? abapgit;
   }
   // Fallback: raw name
   return (ref?.name ?? 'UNKNOWN').toLowerCase();
@@ -195,13 +254,14 @@ function sourcefileNameFor(ref: ObjectRef | undefined): string {
 
 function emitClass(
   classNode: CoverageNode,
+  sourcePath: string,
   lineMap: Map<MethodKey, LineHit[]>,
   indentLevel: number,
   out: string[],
 ): void {
   const ref = classNode.objectReference;
   const className = ref?.name ?? 'UNKNOWN';
-  const sourcefile = sourcefileNameFor(ref);
+  const sourcefile = basename(sourcePath);
 
   out.push(
     `${indent(indentLevel)}<class name="${escapeAttr(className)}" sourcefilename="${escapeAttr(sourcefile)}">`,
@@ -250,17 +310,48 @@ function emitClass(
 function emitPackage(
   packageNode: CoverageNode,
   lineMap: Map<MethodKey, LineHit[]>,
+  resolver: CoverageSourcePathResolver | undefined,
   indentLevel: number,
   out: string[],
 ): void {
-  const packageName = packageNode.objectReference?.name ?? 'UNKNOWN';
-  out.push(`${indent(indentLevel)}<package name="${escapeAttr(packageName)}">`);
   const classNodes = packageNode.nodes?.node ?? [];
-  for (const classNode of classNodes) {
-    emitClass(classNode, lineMap, indentLevel + 1, out);
+  const byDirectory = new Map<
+    string,
+    Array<{ node: CoverageNode; sourcePath: string }>
+  >();
+  for (const node of classNodes) {
+    const sourcePath = sourcefilePathFor(node.objectReference, resolver);
+    const directory = dirname(sourcePath);
+    const group = byDirectory.get(directory) ?? [];
+    group.push({ node, sourcePath });
+    byDirectory.set(directory, group);
   }
-  emitCounters(packageNode, indentLevel + 1, out);
-  out.push(`${indent(indentLevel)}</package>`);
+
+  for (const [directory, classes] of byDirectory) {
+    out.push(`${indent(indentLevel)}<package name="${escapeAttr(directory)}">`);
+    for (const { node, sourcePath } of classes) {
+      emitClass(node, sourcePath, lineMap, indentLevel + 1, out);
+    }
+    // Repository-path resolution can split one SAP package across multiple
+    // JaCoCo packages. Roll up the class nodes actually emitted in this
+    // directory so each package counter remains consistent with its children.
+    for (const counterType of Object.keys(COUNTER_TYPE_MAPPING)) {
+      let total = 0;
+      let executed = 0;
+      for (const { node } of classes) {
+        const counter = node.coverages?.coverage?.find(
+          (coverage) => coverage.type === counterType,
+        );
+        total += counter?.total ?? 0;
+        executed += counter?.executed ?? 0;
+      }
+      if (total === 0 && executed === 0) continue;
+      out.push(
+        `${indent(indentLevel + 1)}<counter type="${COUNTER_TYPE_MAPPING[counterType]}" missed="${Math.max(0, total - executed)}" covered="${executed}"/>`,
+      );
+    }
+    out.push(`${indent(indentLevel)}</package>`);
+  }
 }
 
 // ─── Public API ───────────────────────────────────────────────────────
@@ -269,6 +360,7 @@ export interface JacocoInput {
   measurements: AcoverageResultSchema;
   statements?: AcoverageStatementsSchema;
   reportName?: string;
+  sourcePathResolver?: CoverageSourcePathResolver;
 }
 
 export function toJacocoXml(input: JacocoInput): string {
@@ -285,7 +377,7 @@ export function toJacocoXml(input: JacocoInput): string {
   if (root) {
     const packages = (root.nodes?.node as unknown as CoverageNode[]) ?? [];
     for (const pkg of packages) {
-      emitPackage(pkg, lineMap, 1, out);
+      emitPackage(pkg, lineMap, input.sourcePathResolver, 1, out);
     }
     emitCounters(root as unknown as CoverageNode, 1, out);
   }
@@ -318,7 +410,10 @@ export function toSonarGenericCoverageXml(input: JacocoInput): string {
   function walk(node: CoverageNode): void {
     const ref = node.objectReference;
     if (ref?.uri && ref.type?.startsWith('CLAS')) {
-      const filePath = adtUriToAbapGitPath(ref.uri);
+      const reportedPath = adtUriToAbapGitPath(ref.uri);
+      const filePath = reportedPath
+        ? (input.sourcePathResolver?.(reportedPath) ?? reportedPath)
+        : null;
       if (filePath) {
         const className = ref.name ?? '';
         const methods = node.nodes?.node ?? [];

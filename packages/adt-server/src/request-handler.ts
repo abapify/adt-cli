@@ -63,6 +63,7 @@ type RawSourceVersion = {
 export type RawTransportSourceManifest = {
   requestedTransports: unknown;
   scopeTransports: unknown;
+  inventory: ReadonlyArray<{ uri?: string; [key: string]: unknown }>;
   entries: ReadonlyArray<{
     component: {
       sourceUri?: string;
@@ -273,6 +274,7 @@ function toRestTransportSourceManifest(
   return {
     requestedTransports: manifest.requestedTransports,
     scopeTransports: manifest.scopeTransports,
+    inventory: manifest.inventory.map(({ uri: _uri, ...entry }) => entry),
     entries: manifest.entries.map((entry) => {
       const {
         component: {

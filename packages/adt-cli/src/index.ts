@@ -73,6 +73,12 @@ export {
   type ListObjectVersionsResult,
 } from './lib/services/source-history';
 
+export {
+  CtsTransportMetadataService,
+  type CtsTransportMetadataResult,
+  type CtsTransportMetadataUnit,
+} from './lib/services/cts';
+
 // Source retrieval — shared by CLI and MCP for arc-1 SAPRead parity.
 export {
   getSource,

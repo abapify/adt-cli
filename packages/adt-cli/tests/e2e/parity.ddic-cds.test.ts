@@ -22,11 +22,31 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
+  mkdtempSync,
+  existsSync,
+  readdirSync,
+  rmSync,
+  readFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
   startAdtHarness,
   runCliCommand,
   callMcpTool,
   type AdtHarness,
 } from './index';
+
+/** Recursively collect all file paths under `dir` (relative to `dir`). */
+function walkFiles(dir: string, prefix = ''): string[] {
+  const out: string[] = [];
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(prefix, ent.name);
+    if (ent.isDirectory()) out.push(...walkFiles(join(dir, ent.name), p));
+    else out.push(p);
+  }
+  return out;
+}
 
 describe('CLI + MCP parity: DDIC & CDS', () => {
   let harness: AdtHarness;
@@ -345,4 +365,173 @@ describe('CLI + MCP parity: DDIC & CDS', () => {
     expect(mcp.isError).toBe(false);
     expect(mcp.json).toBeDefined();
   });
+
+  // ─────────────────────────────────────────────────────────────────────
+  // 17–31. Import all 15 CDS/RAP types via `import object` (CLI + MCP)
+  //
+  // PR #183 registered DDLS, DCLS, DDLX, DRAS, DRTY, DSFD, DSFI, DTEB,
+  // DTDC, DTIX, DTSC, DESD, BDEF, SRVD, and SRVB in the ADK factory and
+  // added abapGit handlers for each. These parity tests prove the full
+  // import flow — CLI `import object` and MCP `import_object` — works
+  // end-to-end for every type against the mock ADT backend.
+  // ─────────────────────────────────────────────────────────────────────
+
+  /**
+   * Expected file layout per CDS/RAP type.
+   * - `sourceExt` is the abapGit source file extension (e.g. `.ddls.acds`).
+   *   Metadata-only types (DSFI, DESD, SRVB) omit `sourceExt`.
+   * - `metaExt` is the metadata file extension (e.g. `.ddls.json` or
+   *   `.srvb.xml`).
+   */
+  const CDS_RAP_IMPORT_CASES: Array<{
+    type: string;
+    name: string;
+    sourceExt?: string;
+    metaExt: string;
+  }> = [
+    {
+      type: 'DDLS',
+      name: 'Z_AFF_DDLS',
+      sourceExt: '.ddls.acds',
+      metaExt: '.ddls.json',
+    },
+    {
+      type: 'DCLS',
+      name: 'Z_AFF_DCLS',
+      sourceExt: '.dcls.acds',
+      metaExt: '.dcls.json',
+    },
+    {
+      type: 'DDLX',
+      name: 'Z_AFF_DDLX',
+      sourceExt: '.ddlx.acds',
+      metaExt: '.ddlx.json',
+    },
+    {
+      type: 'DRAS',
+      name: 'Z_AFF_DRAS',
+      sourceExt: '.dras.acds',
+      metaExt: '.dras.json',
+    },
+    {
+      type: 'DRTY',
+      name: 'Z_AFF_DRTY',
+      sourceExt: '.drty.acds',
+      metaExt: '.drty.json',
+    },
+    {
+      type: 'DSFD',
+      name: 'Z_AFF_DSFD',
+      sourceExt: '.dsfd.acds',
+      metaExt: '.dsfd.json',
+    },
+    { type: 'DSFI', name: 'Z_AFF_DSFI', metaExt: '.dsfi.json' },
+    {
+      type: 'DTEB',
+      name: 'Z_AFF_DTEB',
+      sourceExt: '.dteb.acds',
+      metaExt: '.dteb.json',
+    },
+    {
+      type: 'DTDC',
+      name: 'Z_AFF_DTDC',
+      sourceExt: '.dtdc.acds',
+      metaExt: '.dtdc.json',
+    },
+    {
+      type: 'DTIX',
+      name: 'Z_AFF_DTIX',
+      sourceExt: '.dtix.acds',
+      metaExt: '.dtix.json',
+    },
+    {
+      type: 'DTSC',
+      name: 'Z_AFF_DTSC',
+      sourceExt: '.dtsc.acds',
+      metaExt: '.dtsc.json',
+    },
+    { type: 'DESD', name: 'Z_AFF_DESD', metaExt: '.desd.json' },
+    {
+      type: 'BDEF',
+      name: 'Z_AFF_BDEF',
+      sourceExt: '.bdef.abdl',
+      metaExt: '.bdef.json',
+    },
+    {
+      type: 'SRVD',
+      name: 'Z_AFF_SRVD',
+      sourceExt: '.srvd.acds',
+      metaExt: '.srvd.json',
+    },
+    { type: 'SRVB', name: 'Z_AFF_SRVB', metaExt: '.srvb.xml' },
+  ];
+
+  for (const { type, name, sourceExt, metaExt } of CDS_RAP_IMPORT_CASES) {
+    const testNum = 17 + CDS_RAP_IMPORT_CASES.findIndex((c) => c.type === type);
+    it(`${testNum}. imports ${type} (${name}) via \`import object\` (CLI + MCP)`, async () => {
+      // ── CLI path ──
+      const cliDir = mkdtempSync(
+        join(tmpdir(), `cds-import-${type.toLowerCase()}-cli-`),
+      );
+      try {
+        const cli = await runCliCommand(harness, [
+          'import',
+          'object',
+          name,
+          cliDir,
+        ]);
+        expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
+
+        const cliFiles = walkFiles(cliDir);
+        // .abapgit.xml is always present
+        expect(existsSync(join(cliDir, '.abapgit.xml'))).toBe(true);
+        // Metadata file is always present
+        expect(
+          cliFiles.some((f) => f.endsWith(metaExt)),
+          `expected ${metaExt} in ${JSON.stringify(cliFiles)}`,
+        ).toBe(true);
+
+        // Source file (when the type has one) must be present and non-empty
+        if (sourceExt) {
+          expect(
+            cliFiles.some((f) => f.endsWith(sourceExt)),
+            `expected ${sourceExt} in ${JSON.stringify(cliFiles)}`,
+          ).toBe(true);
+          const sourceFile = cliFiles.find((f) => f.endsWith(sourceExt));
+          expect(sourceFile).toBeDefined();
+          const sourceContent = readFileSync(join(cliDir, sourceFile!), 'utf8');
+          expect(sourceContent.length).toBeGreaterThan(0);
+        }
+      } finally {
+        rmSync(cliDir, { recursive: true, force: true });
+      }
+
+      // ── MCP path ──
+      const mcpDir = mkdtempSync(
+        join(tmpdir(), `cds-import-${type.toLowerCase()}-mcp-`),
+      );
+      try {
+        const mcp = await callMcpTool(harness, 'import_object', {
+          objectType: type,
+          objectName: name,
+          outputDir: mcpDir,
+        });
+        expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
+
+        const mcpFiles = walkFiles(mcpDir);
+        expect(
+          mcpFiles.some((f) => f.endsWith(metaExt)),
+          `expected ${metaExt} in ${JSON.stringify(mcpFiles)}`,
+        ).toBe(true);
+        if (sourceExt) {
+          expect(
+            mcpFiles.some((f) => f.endsWith(sourceExt)),
+            `expected ${sourceExt} in ${JSON.stringify(mcpFiles)}`,
+          ).toBe(true);
+        }
+      } finally {
+        rmSync(mcpDir, { recursive: true, force: true });
+      }
+    }, 60_000);
+  }
 });

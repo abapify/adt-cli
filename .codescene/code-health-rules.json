@@ -470,6 +470,20 @@
       ]
     },
     {
+      "matching_content_path": "tools/enrich-release-notes.ts",
+      "matching_content_path_doc": "Release-note enrichment is a one-shot CLI text-processing script; functions take string tag/release identifiers and return string bodies by design. A value-object refactor would not improve a 200-line script.",
+      "rules": [
+        {
+          "name": "Primitive Obsession",
+          "weight": 0.0
+        },
+        {
+          "name": "String Heavy Function Arguments",
+          "weight": 0.0
+        }
+      ]
+    },
+    {
       "matching_content_path": "packages/adt-cli/src/lib/services/source/service.ts",
       "matching_content_path_doc": "Source retrieval service mirrors arc-1 SAPRead parity; many small string helpers for URI/grep/method parsing.",
       "rules": [

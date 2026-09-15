@@ -12,7 +12,7 @@ Contents:
 - `examples/` — usage samples
 - `ci-cd-setup.md` — CI/CD configuration notes
 
-For end-user docs visit https://adt-cli.netlify.app (source: `website/docs/`).
+For end-user docs visit <https://adt-cli.netlify.app> (source: `website/docs/`).
 
 ## Specs → OpenSpec
 

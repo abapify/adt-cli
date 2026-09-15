@@ -3,7 +3,7 @@
   ABAP Coverage Statements Bulk Response Schema
 
   Response of:
-    GET /sap/bc/adt/runtime/traces/coverage/results/{id}/statements
+    POST /sap/bc/adt/runtime/traces/coverage/results/{id}/statements
   Content-Type: application/xml+scov
 
   Sourced from jfilak/sapcli test fixtures (acoverage_statements).

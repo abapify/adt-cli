@@ -5,7 +5,7 @@
  * coverage enabled:
  *
  *   POST /sap/bc/adt/runtime/traces/coverage/measurements/{id}?withAdditionalTypeInfo=true
- *   GET  /sap/bc/adt/runtime/traces/coverage/results/{id}/statements
+ *   POST /sap/bc/adt/runtime/traces/coverage/results/{id}/statements
  *
  * Fixtures are the real (sanitized) SAP responses from jfilak/sapcli.
  */
@@ -14,15 +14,18 @@ import { describe, it, expect } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { acoverageResult, acoverageStatements } from '../../src/schemas';
 import {
+  buildCoverageQuery,
+  buildStatementsBulkRequest,
   coverageContract,
+  coverageXmlBody,
+  extractCoverageStatementUris,
   measurements,
   statements,
 } from '../../src/adt/runtime/traces/coverage';
 import { ContractScenario, runScenario, type ContractOperation } from './base';
 import { TypedContractScenario, runTypedScenario } from './base/typed-scenario';
-import { extractCoverageMeasurementId } from '../../src/adt/aunit/coverage-link';
 
-const SCOV_CONTENT_TYPE = 'application/xml+scov';
+const XML_CONTENT_TYPE = 'application/xml';
 
 // ─────────────────────────────────────────────────────────────
 // 1. Structural contract scenario
@@ -37,10 +40,11 @@ class CoverageContractScenario extends ContractScenario {
       method: 'POST',
       path: '/sap/bc/adt/runtime/traces/coverage/measurements/ABCDEF123',
       headers: {
-        Accept: SCOV_CONTENT_TYPE,
-        'Content-Type': SCOV_CONTENT_TYPE,
+        Accept: XML_CONTENT_TYPE,
+        'Content-Type': 'application/xml',
       },
       query: { withAdditionalTypeInfo: true },
+      body: { schema: coverageXmlBody },
       response: {
         status: 200,
         schema: acoverageResult,
@@ -48,11 +52,15 @@ class CoverageContractScenario extends ContractScenario {
       },
     },
     {
-      name: 'get statements',
-      contract: () => coverageContract.statements.get('ABCDEF123'),
-      method: 'GET',
+      name: 'post statements',
+      contract: () => coverageContract.statements.post('ABCDEF123'),
+      method: 'POST',
       path: '/sap/bc/adt/runtime/traces/coverage/results/ABCDEF123/statements',
-      headers: { Accept: SCOV_CONTENT_TYPE },
+      headers: {
+        Accept: XML_CONTENT_TYPE,
+        'Content-Type': 'application/xml',
+      },
+      body: { schema: coverageXmlBody },
       response: {
         status: 200,
         schema: acoverageStatements,
@@ -110,13 +118,13 @@ runTypedScenario(new MeasurementsTypedScenario());
 // 3. Typed scenario – statements bulk response
 // ─────────────────────────────────────────────────────────────
 class StatementsTypedScenario extends TypedContractScenario<
-  typeof statements.get
+  typeof statements.post
 > {
   readonly name = 'ABAP Coverage – statements (typed)';
-  readonly contract = statements.get;
+  readonly contract = statements.post;
   readonly fixture = fixtures.aunit.coverageStatements;
 
-  override getContractParams(): Parameters<typeof statements.get> {
+  override getContractParams(): Parameters<typeof statements.post> {
     return ['A6B627DB009F1EEB8FAA3720D9128253'];
   }
 
@@ -141,46 +149,35 @@ class StatementsTypedScenario extends TypedContractScenario<
 
 runTypedScenario(new StatementsTypedScenario());
 
-// ─────────────────────────────────────────────────────────────
-// 4. Coverage link helper
-// ─────────────────────────────────────────────────────────────
-
-describe('extractCoverageMeasurementId', () => {
-  it('returns undefined when no coverage link is present', () => {
-    expect(extractCoverageMeasurementId({})).toBeUndefined();
-    expect(extractCoverageMeasurementId(null)).toBeUndefined();
+describe('ABAP Coverage request bodies', () => {
+  it('builds the required cov:query around the tested object URIs', () => {
+    expect(buildCoverageQuery(['/sap/bc/adt/oo/classes/zcl_example&variant=1']))
+      .toBe(`<?xml version="1.0" encoding="UTF-8"?>
+<cov:query xmlns:cov="http://www.sap.com/adt/cov">
+<adtcore:objectSets xmlns:adtcore="http://www.sap.com/adt/core">
+<objectSet kind="inclusive">
+<adtcore:objectReferences>
+<adtcore:objectReference adtcore:uri="/sap/bc/adt/oo/classes/zcl_example&amp;variant=1"/>
+</adtcore:objectReferences>
+</objectSet>
+</adtcore:objectSets>
+</cov:query>`);
   });
 
-  it('finds the measurement id from a flat link array', () => {
-    // Atom link `rel` is an opaque relation-type URI per RFC 5988, not a
-    // network URL. Must match SAP wire format byte-for-byte.
-    const rel =
-      'http://www.sap.com/adt/relations/runtime/traces/coverage/measurements/coveredobjects'; // NOSONAR: link-relation identifier (not a URL)
-    const id = extractCoverageMeasurementId({
-      link: [
-        {
-          href: '/sap/bc/adt/runtime/traces/coverage/measurements/6D664D9B46CB1FE1859107ADE8729541/coveredobjects',
-          rel,
-        },
-      ],
-    });
-    expect(id).toBe('6D664D9B46CB1FE1859107ADE8729541');
-  });
+  it('extracts per-object statement links and builds the bulk request', async () => {
+    const measurementsXml = await fixtures.aunit.coverageMeasurements.load();
+    const parsed = acoverageResult.parse(measurementsXml);
+    const statementUris = extractCoverageStatementUris(parsed);
 
-  it('finds the measurement id by walking nested nodes', () => {
-    const id = extractCoverageMeasurementId({
-      program: {
-        testClasses: {
-          testClass: {
-            link: [
-              {
-                href: '/sap/bc/adt/runtime/traces/coverage/measurements/ABCDEF012345/statements',
-              },
-            ],
-          },
-        },
-      },
-    });
-    expect(id).toBe('ABCDEF012345');
+    expect(statementUris.length).toBeGreaterThan(1);
+    expect(statementUris.every((uri) => uri.includes('/statements/'))).toBe(
+      true,
+    );
+    expect(buildStatementsBulkRequest(statementUris)).toContain(
+      '<cov:statementsBulkRequest xmlns:cov="http://www.sap.com/adt/cov">',
+    );
+    expect(buildStatementsBulkRequest(statementUris)).toContain(
+      `<statementsRequest get="${statementUris[0]}"/>`,
+    );
   });
 });

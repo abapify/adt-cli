@@ -1,0 +1,3 @@
+scope = "city"
+wake_mode = "resume"
+idle_timeout = "30m"

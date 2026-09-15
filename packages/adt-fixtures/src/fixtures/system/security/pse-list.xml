@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!--
   TODO-synthetic: fabricated response for GET /sap/bc/adt/system/security/pses.
 
@@ -16,17 +16,29 @@
   <atom:updated>2026-04-02T21:08:03Z</atom:updated>
   <atom:entry>
     <atom:id>SSLS/ANONYM</atom:id>
-    <atom:link href="/sap/bc/adt/system/security/pses/SSLS/ANONYM" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:link
+      href="/sap/bc/adt/system/security/pses/SSLS/ANONYM"
+      rel="self"
+      type="application/atom+xml;type=entry"
+    />
     <atom:title>SSL client SSL Client (Anonymous)</atom:title>
   </atom:entry>
   <atom:entry>
     <atom:id>SSLC/DFAULT</atom:id>
-    <atom:link href="/sap/bc/adt/system/security/pses/SSLC/DFAULT" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:link
+      href="/sap/bc/adt/system/security/pses/SSLC/DFAULT"
+      rel="self"
+      type="application/atom+xml;type=entry"
+    />
     <atom:title>SSL client SSL Client (Standard)</atom:title>
   </atom:entry>
   <atom:entry>
     <atom:id>SSLS/DFAULT</atom:id>
-    <atom:link href="/sap/bc/adt/system/security/pses/SSLS/DFAULT" rel="self" type="application/atom+xml;type=entry"/>
+    <atom:link
+      href="/sap/bc/adt/system/security/pses/SSLS/DFAULT"
+      rel="self"
+      type="application/atom+xml;type=entry"
+    />
     <atom:title>SSL server Standard</atom:title>
   </atom:entry>
 </atom:feed>

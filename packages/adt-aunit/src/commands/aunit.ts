@@ -9,7 +9,12 @@
  */
 
 import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
-import { extractCoverageMeasurementId } from '@abapify/adt-contracts';
+import {
+  buildCoverageQuery,
+  buildStatementsBulkRequest,
+  extractCoverageMeasurementId,
+  extractCoverageStatementUris,
+} from '@abapify/adt-contracts';
 import {
   acoverageResult,
   acoverageStatements,
@@ -27,7 +32,11 @@ const ansi = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
 };
 import { outputJunitReport, outputSonarReport } from '../formatters';
-import { toJacocoXml, toSonarGenericCoverageXml } from '../formatters/jacoco';
+import {
+  createAbapGitCoverageSourceResolver,
+  toJacocoXml,
+  toSonarGenericCoverageXml,
+} from '../formatters/jacoco';
 import type {
   AunitResult,
   AunitProgram,
@@ -50,15 +59,44 @@ interface AdtClient {
       traces: {
         coverage: {
           measurements: {
-            post: (id: string) => Promise<AcoverageResultSchema>;
+            post: (id: string, body: string) => Promise<AcoverageResultSchema>;
           };
           statements: {
-            get: (id: string) => Promise<AcoverageStatementsSchema>;
+            post: (
+              id: string,
+              body: string,
+            ) => Promise<AcoverageStatementsSchema>;
           };
         };
       };
     };
   };
+}
+
+type CoverageClient = NonNullable<
+  AdtClient['adt']['runtime']
+>['traces']['coverage'];
+
+async function fetchCoverageData(
+  coverage: CoverageClient,
+  measurementId: string,
+  targetUris: string[],
+): Promise<{
+  measurements: AcoverageResultSchema;
+  statements: AcoverageStatementsSchema | undefined;
+}> {
+  const measurements = await coverage.measurements.post(
+    measurementId,
+    buildCoverageQuery(targetUris),
+  );
+  const statementUris = extractCoverageStatementUris(measurements);
+  if (statementUris.length === 0)
+    return { measurements, statements: undefined };
+  const statements = await coverage.statements.post(
+    measurementId,
+    buildStatementsBulkRequest(statementUris),
+  );
+  return { measurements, statements };
 }
 
 // Request body shape (matches aunitRun schema)
@@ -635,13 +673,25 @@ export const aunitCommand: CliCommandPlugin = {
       } else {
         try {
           const cov = client.adt.runtime.traces.coverage;
-          const measurements = await cov.measurements.post(measurementId);
-          const statements = await cov.statements.get(measurementId);
+          const { measurements, statements } = await fetchCoverageData(
+            cov,
+            measurementId,
+            targetUris,
+          );
           const format = options.coverageFormat ?? 'jacoco';
+          const sourcePathResolver = createAbapGitCoverageSourceResolver();
           const xml =
             format === 'sonar-generic'
-              ? toSonarGenericCoverageXml({ measurements, statements })
-              : toJacocoXml({ measurements, statements });
+              ? toSonarGenericCoverageXml({
+                  measurements,
+                  statements,
+                  sourcePathResolver,
+                })
+              : toJacocoXml({
+                  measurements,
+                  statements,
+                  sourcePathResolver,
+                });
           if (options.coverageOutput) {
             const { writeFileSync } = await import('node:fs');
             writeFileSync(options.coverageOutput, xml, 'utf-8');

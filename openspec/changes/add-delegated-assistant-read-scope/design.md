@@ -22,6 +22,19 @@ The exact constraint is:
 `threadId` and `executionId` are UUIDs. Limits are empty because operational
 rate limits remain server-owned and do not determine tool admission.
 
+## Destination binding
+
+The claim constraint carries `systemSid` but not a `destinationKey`. The
+Destination binding is established at the credential level, not inside the
+signed claim: the credential's top-level `destinationKeys` array MUST
+contain exactly one key (validated by `parseDelegatedAssistantReadPolicy`
+via `claims.destinationKeys.length === 1`). That single destination key is
+the deterministic one-to-one mapping for the `systemSid` in the claim —
+the credential issuer guarantees they correspond to the same SAP system.
+`McpRequestAccess.destinationKeys` is populated from
+`invocation.destinationKeys`, so the catalogue and dispatch authorization
+enforce the binding without needing a duplicate field inside the claim.
+
 ## Enforcement
 
 The invocation verifier accepts only the exact claim shape. HTTP session

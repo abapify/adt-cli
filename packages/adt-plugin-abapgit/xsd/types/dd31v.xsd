@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DD31V - Search help text table type (SAP DDIC structure DD31V) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="Dd31vType">
+    <xs:all>
+      <xs:element name="SHLPNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FLDLOCATION" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROLLNAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

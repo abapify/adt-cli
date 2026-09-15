@@ -15,6 +15,8 @@ export interface AdtConnectionConfig {
   client?: string;
   language?: string;
   logger?: Logger;
+  /** Override Undici's response-header timeout for long-running SAP requests. */
+  headersTimeoutMs?: number;
 }
 
 // Note: Class/Interface types are available from adt-schemas via InferXsd

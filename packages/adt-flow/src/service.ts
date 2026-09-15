@@ -37,6 +37,7 @@ import {
   type FlowCheckoutResult,
   type FlowObjectIdentity,
   type FlowObjectModel,
+  type FlowSkippedObject,
 } from './types';
 
 const TRANSPORT = /^[A-Z0-9]{10}$/;
@@ -148,6 +149,17 @@ function isApplicationComponentExcluded(
   );
 }
 
+function isUnsupportedEntry(entry: TransportSourceManifestEntry): boolean {
+  return (
+    entry.changeKind === 'unsupported' ||
+    entry.diagnostic?.code === 'OBJECT_TYPE_UNSUPPORTED'
+  );
+}
+
+function materializedObject(entry: TransportSourceManifestEntry) {
+  return entry.repositoryObject ?? entry.object;
+}
+
 function selectedVersion(
   entry: TransportSourceManifestEntry,
   mode: 'base' | 'head',
@@ -204,7 +216,7 @@ function groupEntries(entries: readonly TransportSourceManifestEntry[]): Array<{
     { identity: FlowObjectIdentity; entries: TransportSourceManifestEntry[] }
   >();
   for (const entry of entries) {
-    const identity = objectIdentity(entry.object);
+    const identity = objectIdentity(materializedObject(entry));
     const group = grouped.get(identity.canonical) ?? { identity, entries: [] };
     group.entries.push(entry);
     grouped.set(identity.canonical, group);
@@ -279,7 +291,41 @@ async function exactHeadFastPath(
     }
   | undefined
 > {
-  const transportPaths = transports.map(transportDescriptorPath);
+  const requestedPaths = transports.map(transportDescriptorPath);
+  const requestedDescriptors = await Promise.all(
+    requestedPaths.map((path) =>
+      readDescriptor(root, path, transportDescriptorSchema),
+    ),
+  );
+  if (
+    requestedDescriptors.some(
+      (descriptor) =>
+        !descriptor ||
+        descriptor.configDigest !== configDigest ||
+        descriptor.formatDigest !== formatDigest ||
+        descriptor.inventory === undefined ||
+        stableJson(descriptor.requestedTransports) !== stableJson(transports),
+    )
+  ) {
+    return undefined;
+  }
+
+  const initialDescriptors = requestedDescriptors as TransportDescriptor[];
+  const scopeTransports = initialDescriptors[0]?.scopeTransports;
+  if (
+    !scopeTransports ||
+    initialDescriptors.some(
+      (descriptor) =>
+        stableJson(descriptor.scopeTransports) !==
+          stableJson(scopeTransports) ||
+        transports.some(
+          (transport) => !descriptor.scopeTransports.includes(transport),
+        ),
+    )
+  ) {
+    return undefined;
+  }
+  const transportPaths = scopeTransports.map(transportDescriptorPath);
   const descriptors = await Promise.all(
     transportPaths.map((path) =>
       readDescriptor(root, path, transportDescriptorSchema),
@@ -287,16 +333,22 @@ async function exactHeadFastPath(
   );
   if (
     descriptors.some(
-      (descriptor) =>
+      (descriptor, index) =>
         !descriptor ||
+        descriptor.incomplete === true ||
         descriptor.configDigest !== configDigest ||
         descriptor.formatDigest !== formatDigest ||
-        stableJson(descriptor.requestedTransports) !== stableJson(transports),
+        descriptor.inventory === undefined ||
+        stableJson(descriptor.requestedTransports) !== stableJson(transports) ||
+        stableJson(descriptor.scopeTransports) !==
+          stableJson(scopeTransports) ||
+        descriptor.inventory.some(
+          (object) => object.sourceTransport !== scopeTransports[index],
+        ),
     )
   ) {
     return undefined;
   }
-
   const validDescriptors = descriptors as TransportDescriptor[];
   const objectPaths = [
     ...new Set(validDescriptors.flatMap((d) => d.objects)),
@@ -328,7 +380,7 @@ async function exactHeadFastPath(
   return {
     descriptorPaths: [...transportPaths, ...objectPaths].sort(compareStrings),
     ownedPaths: ownedPaths.sort(compareStrings),
-    scopeTransports: descriptors[0]?.scopeTransports ?? [...transports],
+    scopeTransports,
   };
 }
 
@@ -830,6 +882,7 @@ export interface AdtFlowService {
 interface CheckoutContext {
   root: string;
   mode: 'base' | 'head';
+  partial: boolean;
   requested: string[];
   config: FlowConfig;
   configDigest: string;
@@ -863,6 +916,7 @@ function createCheckoutContext(
   return {
     root: input.root,
     mode: input.mode ?? 'head',
+    partial: input.partial === true,
     requested: normalizeTransports(input.transports),
     config,
     configDigest: digest(config),
@@ -881,6 +935,10 @@ async function tryExactHeadFastPath(
   ctx: CheckoutContext,
 ): Promise<FlowCheckoutResult | undefined> {
   if (ctx.mode !== 'head') return undefined;
+  // Partial checkouts must rebuild the manifest to know which objects
+  // were skipped; the fast path returns an empty skipped list and would
+  // omit gaps from the partial report.
+  if (ctx.partial) return undefined;
   const fast = await exactHeadFastPath(
     ctx.root,
     ctx.requested,
@@ -941,30 +999,33 @@ function prepareGroups(
   return groups;
 }
 
-async function unsupportedEntries(
+function inexactEntries(
+  entries: readonly TransportSourceManifestEntry[],
+  partial: boolean,
+): TransportSourceManifestEntry[] {
+  const inexact = entries.filter(
+    (entry) => !entry.exact && !isUnsupportedEntry(entry),
+  );
+  if (inexact.length > 0 && !partial) {
+    // Preserve the original all-or-nothing safety contract for every caller
+    // which has not explicitly elected to publish an incomplete boundary.
+    selectedVersion(inexact[0]!, 'head');
+  }
+  return inexact;
+}
+
+async function filterSkippedByApplicationComponent(
   entries: readonly TransportSourceManifestEntry[],
   ctx: CheckoutContext,
   limiter: Limiter,
-  hasApplicationComponentFilter: boolean,
+  toSkipped: (entry: TransportSourceManifestEntry) => FlowSkippedObject,
 ): Promise<FlowCheckoutResult['skipped']> {
-  const unsupported = entries.filter(
-    (entry) => entry.changeKind === 'unsupported',
-  );
-
-  if (!hasApplicationComponentFilter) {
-    return unsupported.map((entry) => ({
-      object: `${entry.object.type}/${entry.object.name}`,
-      component: entry.component.id,
-      diagnostic: entry.diagnostic?.code ?? 'UNSUPPORTED',
-    }));
-  }
-
   const byIdentity = new Map<
     string,
     { identity: FlowObjectIdentity; entries: TransportSourceManifestEntry[] }
   >();
-  for (const entry of unsupported) {
-    const identity = objectIdentity(entry.object);
+  for (const entry of entries) {
+    const identity = objectIdentity(materializedObject(entry));
     const existing = byIdentity.get(identity.canonical);
     if (existing) {
       existing.entries.push(entry);
@@ -974,25 +1035,92 @@ async function unsupportedEntries(
   }
 
   const skipped: FlowCheckoutResult['skipped'] = [];
+  const pushSkipped = (identityEntries: TransportSourceManifestEntry[]) => {
+    for (const entry of identityEntries) {
+      skipped.push(toSkipped(entry));
+    }
+  };
+
   await Promise.all(
     [...byIdentity.values()].map(
       async ({ identity, entries: identityEntries }) => {
-        const model = await limiter.run(() =>
-          ctx.dependencies.loadObject(identity),
-        );
-        ctx.calls.metadata += model.metadataCalls ?? 1;
-        if (isApplicationComponentExcluded(ctx.config, model)) return;
-        for (const entry of identityEntries) {
-          skipped.push({
-            object: `${entry.object.type}/${entry.object.name}`,
-            component: entry.component.id,
-            diagnostic: entry.diagnostic?.code ?? 'UNSUPPORTED',
-          });
+        if (
+          identityEntries.some(
+            (entry) => entry.diagnostic?.code === 'OBJECT_METADATA_LOAD_FAILED',
+          )
+        ) {
+          pushSkipped(identityEntries);
+          return;
+        }
+
+        try {
+          const model = await limiter.run(() =>
+            ctx.dependencies.loadObject(identity),
+          );
+          ctx.calls.metadata += model.metadataCalls ?? 1;
+          if (isApplicationComponentExcluded(ctx.config, model)) return;
+          pushSkipped(identityEntries);
+        } catch (error) {
+          if (error instanceof AdtFlowError) {
+            pushSkipped(identityEntries);
+            return;
+          }
+          throw error;
         }
       },
     ),
   );
   return skipped;
+}
+
+async function skippedInexactEntries(
+  entries: readonly TransportSourceManifestEntry[],
+  ctx: CheckoutContext,
+  limiter: Limiter,
+  hasApplicationComponentFilter: boolean,
+): Promise<FlowCheckoutResult['skipped']> {
+  const toSkipped = (
+    entry: TransportSourceManifestEntry,
+  ): FlowSkippedObject => ({
+    object: `${entry.object.type}/${entry.object.name}`,
+    component: entry.component.id,
+    diagnostic: entry.diagnostic?.code ?? 'MANIFEST_INEXACT',
+    ...(entry.sourceTransport
+      ? { sourceTransport: entry.sourceTransport }
+      : {}),
+  });
+  if (!hasApplicationComponentFilter) {
+    return entries.map(toSkipped);
+  }
+  return filterSkippedByApplicationComponent(entries, ctx, limiter, toSkipped);
+}
+
+async function unsupportedEntries(
+  entries: readonly TransportSourceManifestEntry[],
+  ctx: CheckoutContext,
+  limiter: Limiter,
+  hasApplicationComponentFilter: boolean,
+): Promise<FlowCheckoutResult['skipped']> {
+  const unsupported = entries.filter(isUnsupportedEntry);
+  const toSkipped = (
+    entry: TransportSourceManifestEntry,
+  ): FlowSkippedObject => ({
+    object: `${entry.object.type}/${entry.object.name}`,
+    component: entry.component.id,
+    diagnostic: entry.diagnostic?.code ?? 'UNSUPPORTED',
+    ...(entry.sourceTransport
+      ? { sourceTransport: entry.sourceTransport }
+      : {}),
+  });
+  if (!hasApplicationComponentFilter) {
+    return unsupported.map(toSkipped);
+  }
+  return filterSkippedByApplicationComponent(
+    unsupported,
+    ctx,
+    limiter,
+    toSkipped,
+  );
 }
 
 async function buildManifestAndGroups(
@@ -1017,8 +1145,17 @@ async function buildManifestAndGroups(
     metadataLimiter,
     hasApplicationComponentFilter,
   );
+  const inexact = inexactEntries(scopedEntries, ctx.partial);
+  skipped.push(
+    ...(await skippedInexactEntries(
+      inexact,
+      ctx,
+      metadataLimiter,
+      hasApplicationComponentFilter,
+    )),
+  );
   const entries = scopedEntries.filter(
-    (entry) => entry.changeKind !== 'unsupported',
+    (entry) => !isUnsupportedEntry(entry) && !inexact.includes(entry),
   );
   const sourceLimiter = new Limiter(
     ctx.config.concurrency?.sources ?? DEFAULT_SOURCE_CONCURRENCY,
@@ -1176,12 +1313,13 @@ async function addTransportDescriptors(
   ctx: CheckoutContext,
   manifest: TransportSourceManifest,
   accum: CheckoutAccumulator,
+  incomplete: boolean,
 ): Promise<void> {
   const { descriptorPaths, desired, ownedPaths, ownedOwners } = accum;
   const relevantObjectDescriptors = [...new Set(descriptorPaths)].sort(
     compareStrings,
   );
-  for (const transport of ctx.requested) {
+  for (const transport of manifest.scopeTransports) {
     const path = transportDescriptorPath(transport);
     let existing: TransportDescriptor | undefined;
     try {
@@ -1193,10 +1331,17 @@ async function addTransportDescriptors(
     } catch {
       existing = undefined;
     }
+    const matchesCurrentCheckout =
+      existing !== undefined &&
+      stableJson(existing.requestedTransports) === stableJson(ctx.requested) &&
+      stableJson(existing.scopeTransports) ===
+        stableJson(manifest.scopeTransports);
+    const isPreviousSelfDescriptor =
+      existing?.requestedTransports.includes(transport) === true &&
+      existing.scopeTransports.includes(transport);
     if (
-      existing &&
-      existing.requestedTransports.includes(transport) &&
-      existing.scopeTransports.includes(transport)
+      existing?.scopeTransports.includes(transport) &&
+      (matchesCurrentCheckout || isPreviousSelfDescriptor)
     ) {
       ownedPaths.add(path);
       ownedOwners.set(path, 'flow-index');
@@ -1206,9 +1351,13 @@ async function addTransportDescriptors(
         schemaVersion: 1,
         requestedTransports: ctx.requested,
         scopeTransports: manifest.scopeTransports,
+        inventory: (manifest.inventory ?? []).filter(
+          (object) => object.sourceTransport === transport,
+        ),
         objects: relevantObjectDescriptors,
         configDigest: ctx.configDigest,
         formatDigest: ctx.formatDigest,
+        ...(incomplete ? { incomplete: true } : {}),
       };
       desired.push({
         path,
@@ -1273,7 +1422,12 @@ async function checkoutFlow(
     manifestContext,
     pendingOwnership,
   );
-  await addTransportDescriptors(ctx, manifestContext.manifest, processed);
+  await addTransportDescriptors(
+    ctx,
+    manifestContext.manifest,
+    processed,
+    manifestContext.skipped.length > 0 && ctx.partial,
+  );
   processed.desired.sort((left, right) =>
     compareStrings(left.path, right.path),
   );

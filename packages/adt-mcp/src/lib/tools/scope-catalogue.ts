@@ -36,6 +36,14 @@ export interface McpRequestAccess {
   frozenSource?: McpFrozenSourceAccess;
   /** Exact execution-scoped Scoped catalogue and dispatch policy. */
   scoped?: McpScopedAccess;
+  /** Delegated-assistant read policy — binds tool calls to a signed thread/execution/system. */
+  delegated?: McpDelegatedAccess;
+}
+
+export interface McpDelegatedAccess {
+  readonly threadId: string;
+  readonly executionId: string;
+  readonly systemSid: string;
 }
 
 export interface McpScopedAccess {
@@ -79,6 +87,13 @@ export type McpToolScope = StaticToolScope | DynamicToolScope;
 
 const read = (names: readonly string[]): Record<string, StaticToolScope> =>
   Object.fromEntries(names.map((name) => [name, { operationClass: 'read' }]));
+
+const safeExecute = (
+  names: readonly string[],
+): Record<string, StaticToolScope> =>
+  Object.fromEntries(
+    names.map((name) => [name, { operationClass: 'safe_execute' }]),
+  );
 
 const write = (names: readonly string[]): Record<string, StaticToolScope> =>
   Object.fromEntries(names.map((name) => [name, { operationClass: 'write' }]));
@@ -154,9 +169,8 @@ export const MCP_TOOL_SCOPE_CATALOGUE: Readonly<Record<string, McpToolScope>> =
       'cts_search_transports',
       'cts_transport_objects',
       'cts_transport_source_manifest',
-      'atc_run',
-      'run_unit_tests',
     ]),
+    ...safeExecute(['atc_run', 'run_unit_tests']),
     ...write([
       'activate_object',
       'activate_package',

@@ -17,7 +17,7 @@ fi
 
 # Create temporary file with prompt content (stdin is already occupied by hook input)
 temp_file=$(mktemp)
-trap "rm -f $temp_file" EXIT
+trap 'rm -f "$temp_file"' EXIT
 
 echo -n "$prompt" > "$temp_file"
 

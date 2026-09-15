@@ -4,6 +4,7 @@ import type { AdkContext } from '../src/base/context';
 
 const resolveTransportObjectsMock = vi.hoisted(() => vi.fn());
 const createAdkFactoryMock = vi.hoisted(() => vi.fn());
+const functionModuleGetMock = vi.hoisted(() => vi.fn());
 
 vi.mock('../src/objects/cts', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../src/objects/cts')>()),
@@ -13,6 +14,11 @@ vi.mock('../src/objects/cts', async (importOriginal) => ({
 vi.mock('../src/factory', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../src/factory')>()),
   createAdkFactory: createAdkFactoryMock,
+}));
+
+vi.mock('../src/objects/repository/fugr', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/objects/repository/fugr')>()),
+  AdkFunctionModule: { get: functionModuleGetMock },
 }));
 
 import {
@@ -46,26 +52,49 @@ interface FakeTransportObjectOptions {
   name: string;
   type?: string;
   pgmid?: string;
+  wbtype?: string;
   deleted?: boolean;
   objectUri?: string;
+  factoryName?: string;
   metadata?: Record<string, unknown>;
   load?: () => Promise<void>;
 }
 
 const factoryObjects = new Map<string, unknown>();
 const factoryGet = vi.fn();
+const functionModuleObjects = new Map<string, unknown>();
+
+function functionModuleObject(
+  groupName: string,
+  name: string,
+  metadata: Record<string, unknown> = Object.fromEntries(
+    Object.entries(rootSourceMetadata()).filter(
+      ([key]) => key !== 'packageRef',
+    ),
+  ),
+) {
+  const model = {
+    objectUri: `/sap/bc/adt/functions/groups/${groupName.toLowerCase()}/fmodules/${name.toLowerCase()}`,
+    dataSync: metadata,
+    load: vi.fn().mockResolvedValue(undefined),
+  };
+  functionModuleObjects.set(`${groupName}/${name}`, model);
+  return model;
+}
 
 function transportObject({
   name,
   type = 'PROG',
   pgmid = 'R3TR',
+  wbtype = type,
   deleted = false,
   objectUri = `/sap/bc/adt/programs/programs/${name.toLowerCase()}`,
+  factoryName = name,
   metadata = {},
   load,
 }: FakeTransportObjectOptions) {
   const key = `${pgmid}/${type}/${name}`;
-  factoryObjects.set(name, {
+  factoryObjects.set(factoryName, {
     objectUri,
     dataSync: metadata,
     load: load ?? vi.fn().mockResolvedValue(undefined),
@@ -75,6 +104,8 @@ function transportObject({
     pgmid,
     type,
     name,
+    wbtype,
+    uri: objectUri,
     objFunc: deleted ? 'D' : '',
     isDeleted: deleted,
   };
@@ -112,15 +143,17 @@ function contextWithVersions(
   listVersions: (versionsUri: string) => Promise<SourceVersionRef[]>,
 ) {
   const readVersionSource = vi.fn();
+  const quickSearch = vi.fn();
   const ctx = {
     client: {
+      adt: { repository: { informationsystem: { search: { quickSearch } } } },
       services: {
         sourceHistory: { listVersions, readVersionSource },
       },
     },
   } as unknown as AdkContext;
 
-  return { ctx, readVersionSource };
+  return { ctx, readVersionSource, quickSearch };
 }
 
 describe('selectTransportSourceVersions', () => {
@@ -480,6 +513,31 @@ describe('listObjectSourceVersions', () => {
     expect(listVersions).not.toHaveBeenCalled();
   });
 
+  it('keeps the root component id "main" for a FUGR/FF function module', async () => {
+    transportObject({
+      name: 'ZFM_KEEP_MAIN',
+      type: 'FUGR/FF',
+      objectUri:
+        '/sap/bc/adt/functions/groups/zfg_keep_main/fmodules/zfm_keep_main',
+      metadata: rootSourceMetadata(),
+    });
+    const head = version('00001', 0, ['DEVK900002']);
+    const listVersions = vi.fn().mockResolvedValue([head]);
+    const { ctx } = contextWithVersions(listVersions);
+
+    const result = await listObjectSourceVersions(
+      'ZFM_KEEP_MAIN',
+      'FUGR/FF',
+      { component: 'main' },
+      ctx,
+    );
+
+    expect(result.components.map((component) => component.id)).toEqual([
+      'main',
+    ]);
+    expect(result.components[0]?.versions).toEqual([head]);
+  });
+
   it('returns a stable diagnostic for a component without version history', async () => {
     transportObject({
       name: 'ZNO_HISTORY',
@@ -556,6 +614,12 @@ describe('buildTransportSourceManifest', () => {
     createAdkFactoryMock.mockReturnValue({
       get: factoryGet,
     });
+    functionModuleObjects.clear();
+    functionModuleGetMock.mockReset();
+    functionModuleGetMock.mockImplementation(
+      async (groupName: string, name: string) =>
+        functionModuleObjects.get(`${groupName}/${name}`),
+    );
   });
 
   it('builds an exact metadata-only manifest with concrete task provenance', async () => {
@@ -575,6 +639,17 @@ describe('buildTransportSourceManifest', () => {
     ).resolves.toEqual({
       requestedTransports: ['DEVK900001'],
       scopeTransports: ['DEVK900001', 'DEVK900002'],
+      inventory: [
+        {
+          pgmid: 'R3TR',
+          type: 'PROG',
+          name: 'ZREPORT',
+          wbtype: 'PROG',
+          uri: '/sap/bc/adt/programs/programs/zreport',
+          objFunc: '',
+          sourceTransport: 'DEVK900002',
+        },
+      ],
       entries: [
         {
           object: {
@@ -663,6 +738,328 @@ describe('buildTransportSourceManifest', () => {
         head,
       }),
     ]);
+  });
+
+  it('retains every CTS object and resolves supported LIMU leaves through their repository owner', async () => {
+    const method = transportObject({
+      name: 'ZCL_REVIEWED                  APPLY_CHANGE',
+      type: 'METH',
+      pgmid: 'LIMU',
+      wbtype: 'CLAS',
+      objectUri: '/sap/bc/adt/oo/classes/zcl_reviewed/source/main',
+      factoryName: 'ZCL_REVIEWED',
+      metadata: rootSourceMetadata(),
+    });
+    const unsupported = transportObject({
+      name: 'ZUNSUPPORTED',
+      type: 'ZZZZ',
+      pgmid: 'LIMU',
+      wbtype: 'ZZZZ',
+      objectUri:
+        '/sap/bc/adt/repository/informationsystem/objectproperties/values',
+    });
+    mockResolution(
+      [method, unsupported],
+      ['DEVK900002', 'DEVK900002'],
+      ['DEVK900001', 'DEVK900002'],
+    );
+    const head = version('00002', 0, ['DEVK900002']);
+    const base = version('00001', 1, ['DEVK800001']);
+    const { ctx } = contextWithVersions(
+      vi.fn().mockResolvedValue([head, base]),
+    );
+
+    const manifest = await buildTransportSourceManifest(
+      ['DEVK900002'],
+      { selector: { type: ['CLAS'] } },
+      ctx,
+    );
+
+    expect(resolveTransportObjectsMock).toHaveBeenCalledWith(
+      ['DEVK900002'],
+      {},
+      ctx,
+    );
+    expect(manifest.inventory).toEqual([
+      {
+        pgmid: 'LIMU',
+        type: 'METH',
+        name: 'ZCL_REVIEWED                  APPLY_CHANGE',
+        wbtype: 'CLAS',
+        uri: '/sap/bc/adt/oo/classes/zcl_reviewed/source/main',
+        objFunc: '',
+        sourceTransport: 'DEVK900002',
+      },
+      {
+        pgmid: 'LIMU',
+        type: 'ZZZZ',
+        name: 'ZUNSUPPORTED',
+        wbtype: 'ZZZZ',
+        uri: '/sap/bc/adt/repository/informationsystem/objectproperties/values',
+        objFunc: '',
+        sourceTransport: 'DEVK900002',
+      },
+    ]);
+    expect(factoryGet).toHaveBeenCalledWith('ZCL_REVIEWED', 'CLAS');
+    expect(manifest.entries).toEqual([
+      expect.objectContaining({
+        object: {
+          pgmid: 'LIMU',
+          type: 'METH',
+          name: 'ZCL_REVIEWED                  APPLY_CHANGE',
+          packageName: 'ZPACKAGE',
+        },
+        repositoryObject: {
+          pgmid: 'R3TR',
+          type: 'CLAS',
+          name: 'ZCL_REVIEWED',
+          packageName: 'ZPACKAGE',
+        },
+        sourceTransport: 'DEVK900002',
+        changeKind: 'modified',
+        exact: true,
+      }),
+    ]);
+  });
+
+  it('canonicalizes function and namespaced class leaves without losing their CTS identities', async () => {
+    const functionModule = transportObject({
+      name: '/ESOURC/SVIM_IVALUA_SEND_DP',
+      type: 'FUNC',
+      pgmid: 'LIMU',
+      wbtype: 'FUGR',
+      objectUri:
+        '/sap/bc/adt/functions/groups/%2FESOURC%2FSVIM_IVALUA/source/main',
+      factoryName: '/ESOURC/SVIM_IVALUA',
+      metadata: rootSourceMetadata(),
+    });
+    const classDefinition = transportObject({
+      name: '/ESOURC/CL_SVIM_IVALUA',
+      type: 'CLSD',
+      pgmid: 'LIMU',
+      wbtype: 'CLAS',
+      objectUri:
+        '/sap/bc/adt/oo/classes/%2FESOURC%2FCL_SVIM_IVALUA/source/main',
+      factoryName: '/ESOURC/CL_SVIM_IVALUA',
+      metadata: rootSourceMetadata(),
+    });
+    const classPublicSection = transportObject({
+      name: '/ESOURC/CL_SVIM_IVALUA',
+      type: 'CPUB',
+      pgmid: 'LIMU',
+      wbtype: 'CLAS',
+      objectUri:
+        '/sap/bc/adt/oo/classes/%2FESOURC%2FCL_SVIM_IVALUA/source/main',
+      factoryName: '/ESOURC/CL_SVIM_IVALUA',
+      metadata: rootSourceMetadata(),
+    });
+    mockResolution(
+      [functionModule, classDefinition, classPublicSection],
+      ['DEVK900003', 'DEVK900003', 'DEVK900003'],
+      ['DEVK900003'],
+    );
+    const { ctx } = contextWithVersions(
+      vi
+        .fn()
+        .mockResolvedValue([
+          version('00002', 0, ['DEVK900003']),
+          version('00001', 1, ['DEVK800001']),
+        ]),
+    );
+
+    const manifest = await buildTransportSourceManifest(
+      ['DEVK900003'],
+      {},
+      ctx,
+    );
+
+    expect(manifest.inventory).toHaveLength(3);
+    expect(manifest.inventory.map(({ type }) => type).sort()).toEqual([
+      'CLSD',
+      'CPUB',
+      'FUNC',
+    ]);
+    expect(factoryGet).toHaveBeenCalledWith('/ESOURC/SVIM_IVALUA', 'FUGR');
+    expect(factoryGet).toHaveBeenCalledWith('/ESOURC/CL_SVIM_IVALUA', 'CLAS');
+    expect(manifest.entries).toHaveLength(2);
+    expect(manifest.entries.map((entry) => entry.repositoryObject)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'FUGR',
+          name: '/ESOURC/SVIM_IVALUA',
+        }),
+        expect.objectContaining({
+          type: 'CLAS',
+          name: '/ESOURC/CL_SVIM_IVALUA',
+        }),
+      ]),
+    );
+  });
+
+  it('canonicalizes an R3TR function module to its owning function group', async () => {
+    const functionModule = transportObject({
+      name: 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+      type: 'FUNC',
+      objectUri:
+        '/sap/bc/adt/functions/groups/zfg_py_lean/fmodules/zfm_py_lean_paymedium_event_21',
+      factoryName: 'ZFG_PY_LEAN',
+      metadata: rootSourceMetadata(),
+    });
+    mockResolution([functionModule], ['DEVK900003'], ['DEVK900003']);
+    const { ctx } = contextWithVersions(
+      vi
+        .fn()
+        .mockResolvedValue([
+          version('00002', 0, ['DEVK900003']),
+          version('00001', 1, ['DEVK800001']),
+        ]),
+    );
+
+    const manifest = await buildTransportSourceManifest(
+      ['DEVK900003'],
+      {},
+      ctx,
+    );
+
+    expect(factoryGet).toHaveBeenCalledWith('ZFG_PY_LEAN', 'FUGR');
+    expect(manifest.entries).toEqual([
+      expect.objectContaining({
+        object: {
+          pgmid: 'R3TR',
+          type: 'FUNC',
+          name: 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+          packageName: 'ZPACKAGE',
+        },
+        repositoryObject: {
+          pgmid: 'R3TR',
+          type: 'FUGR',
+          name: 'ZFG_PY_LEAN',
+          packageName: 'ZPACKAGE',
+        },
+        exact: true,
+      }),
+    ]);
+  });
+
+  it('resolves real LIMU FUNC FUGR/FF inventory through its searched group URI', async () => {
+    const functionModule = transportObject({
+      name: 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+      pgmid: 'LIMU',
+      type: 'FUNC',
+      wbtype: 'FUGR/FF',
+      objectUri: '',
+      factoryName: 'ZFG_PY_LEAN',
+      metadata: rootSourceMetadata(),
+    });
+    functionModuleObject('ZFG_PY_LEAN', 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21');
+    mockResolution([functionModule], ['S0DK955760'], ['S0DK955760']);
+    const { ctx, quickSearch } = contextWithVersions(
+      vi.fn().mockResolvedValue([version('00001', 0, ['S0DK955760'])]),
+    );
+    // A same-named non-FUGR result (e.g. a program) appears before the
+    // valid function-module result. The resolver must skip the non-FUGR
+    // URI and select the function-module URI whose path resolves to the
+    // owning function group.
+    quickSearch.mockResolvedValue({
+      objectReferences: {
+        objectReference: [
+          {
+            name: 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+            uri: '/sap/bc/adt/programs/zfm_py_lean_paymedium_event_21',
+          },
+          {
+            name: 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+            uri: '/sap/bc/adt/functions/groups/zfg_py_lean/fmodules/zfm_py_lean_paymedium_event_21',
+          },
+        ],
+      },
+    });
+    const manifest = await buildTransportSourceManifest(
+      ['S0DK955760'],
+      {},
+      ctx,
+    );
+    expect(quickSearch).toHaveBeenCalledWith({
+      query: 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+      maxResults: 10,
+    });
+    expect(functionModuleGetMock).toHaveBeenCalledWith(
+      'ZFG_PY_LEAN',
+      'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+      ctx,
+    );
+    expect(factoryGet).toHaveBeenCalledWith('ZFG_PY_LEAN', 'FUGR');
+    expect(manifest.entries).toEqual([
+      expect.objectContaining({
+        object: expect.objectContaining({
+          pgmid: 'LIMU',
+          type: 'FUNC',
+          name: 'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+          packageName: 'ZPACKAGE',
+        }),
+        repositoryObject: expect.objectContaining({
+          pgmid: 'R3TR',
+          type: 'FUGR',
+          name: 'ZFG_PY_LEAN',
+          packageName: 'ZPACKAGE',
+        }),
+      }),
+    ]);
+  });
+
+  it('keeps separate source components for two function modules in one group', async () => {
+    const functionNames = [
+      'ZFM_PY_LEAN_PAYMEDIUM_EVENT_21',
+      'ZFM_PY_LEAN_PAYMEDIUM_EVENT_41',
+    ];
+    const functionModules = functionNames.map((name) => {
+      const functionModule = transportObject({
+        name,
+        pgmid: 'LIMU',
+        type: 'FUNC',
+        wbtype: 'FUGR/FF',
+        objectUri: '',
+        factoryName: 'ZFG_PY_LEAN',
+        metadata: rootSourceMetadata(),
+      });
+      functionModuleObject('ZFG_PY_LEAN', name);
+      return functionModule;
+    });
+    mockResolution(
+      functionModules,
+      ['S0DK955760', 'S0DK955760'],
+      ['S0DK955760'],
+    );
+    const { ctx, quickSearch } = contextWithVersions(
+      vi.fn().mockResolvedValue([version('00001', 0, ['S0DK955760'])]),
+    );
+    quickSearch.mockImplementation(async ({ query }: { query: string }) => ({
+      objectReferences: {
+        objectReference: [
+          {
+            name: query,
+            uri: `/sap/bc/adt/functions/groups/zfg_py_lean/fmodules/${query.toLowerCase()}`,
+          },
+        ],
+      },
+    }));
+
+    const manifest = await buildTransportSourceManifest(
+      ['S0DK955760'],
+      {},
+      ctx,
+    );
+
+    expect(manifest.entries).toHaveLength(2);
+    expect(manifest.entries.map((entry) => entry.component.id)).toEqual(
+      functionNames.map((name) => name.toLowerCase()),
+    );
+    expect(manifest.entries.map((entry) => entry.component.sourceUri)).toEqual(
+      functionNames.map(
+        (name) =>
+          `/sap/bc/adt/functions/groups/zfg_py_lean/fmodules/${name.toLowerCase()}/source/main`,
+      ),
+    );
   });
 
   it('ignores R3TR SUSK authorization-maintenance assignments as non-source entries', async () => {
@@ -852,7 +1249,7 @@ describe('buildTransportSourceManifest', () => {
     expect(manifest.entries[0]?.diagnostic?.message).not.toContain('sensitive');
   });
 
-  it('marks a concrete ADK metadata load rejection as failed', async () => {
+  it('marks a concrete ADK metadata load rejection unsupported', async () => {
     const object = transportObject({
       name: 'ZLOAD_FAILURE',
       metadata: rootSourceMetadata(),
@@ -868,7 +1265,7 @@ describe('buildTransportSourceManifest', () => {
     );
 
     expect(manifest.entries[0]).toMatchObject({
-      changeKind: 'failed',
+      changeKind: 'unsupported',
       exact: false,
       diagnostic: { code: 'OBJECT_METADATA_LOAD_FAILED' },
     });

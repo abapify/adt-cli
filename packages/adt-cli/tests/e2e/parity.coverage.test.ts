@@ -40,6 +40,27 @@ describe('CLI + MCP parity (aunit coverage)', () => {
     if (harness) await harness.stop();
   });
 
+  it('mock coverage endpoints reject root-only XML bodies', async () => {
+    const baseUrl = harness.connection.baseUrl;
+    const measurement = await fetch(
+      `${baseUrl}/sap/bc/adt/runtime/traces/coverage/measurements/ABC`,
+      {
+        method: 'POST',
+        body: '<cov:query xmlns:cov="http://www.sap.com/adt/cov"/>',
+      },
+    );
+    const statements = await fetch(
+      `${baseUrl}/sap/bc/adt/runtime/traces/coverage/results/ABC/statements`,
+      {
+        method: 'POST',
+        body: '<cov:statementsBulkRequest xmlns:cov="http://www.sap.com/adt/cov"/>',
+      },
+    );
+
+    expect(measurement.status).toBe(400);
+    expect(statements.status).toBe(400);
+  });
+
   it('CLI aunit --coverage --coverage-format jacoco emits JaCoCo XML', async () => {
     const lines: string[] = [];
     const ctx: CliContext = {
@@ -85,8 +106,9 @@ describe('CLI + MCP parity (aunit coverage)', () => {
       '<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">',
     );
     expect(stdout).toContain('<report name="ABAP Coverage">');
-    // The mock measurements tree uses CL_EXAMPLE_CLASS / TEST_EXAMPLE_PACKAGE.
-    expect(stdout).toContain('<package name="TEST_EXAMPLE_PACKAGE">');
+    // No matching repository source exists for the fixture, so the resolver
+    // falls back to the conventional abapGit source root.
+    expect(stdout).toContain('<package name="src">');
     expect(stdout).toMatch(/sourcefilename="cl_example_class\.clas\.abap"/);
   });
 

@@ -1,3 +1,24 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **cds:** support CDS and RAP ABAP File Formats ([#183](https://github.com/abapify/adt-cli/pull/183))
+- **adt-flow:** add incremental transport checkout ([#150](https://github.com/abapify/adt-cli/pull/150))
+
+### 🩹 Fixes
+
+- **atc:** resolve abapGit paths from full ATC locations ([#194](https://github.com/abapify/adt-cli/pull/194))
+- **adk:** keep FUGR function module sources distinct ([#191](https://github.com/abapify/adt-cli/pull/191))
+- **import:** support typed CDS and RAP imports ([#185](https://github.com/abapify/adt-cli/pull/185))
+- **quality:** resolve open GitHub Code Quality findings ([#159](https://github.com/abapify/adt-cli/pull/159))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-plugin-abapgit to align it with other projects, there were no code changes.

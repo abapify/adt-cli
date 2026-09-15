@@ -2,7 +2,7 @@
  * Service Binding (SRVB) contract scenarios
  *
  * Endpoint: /sap/bc/adt/businessservices/bindings
- * Content-Type: application/vnd.sap.adt.businessservices.servicebinding.v1+xml
+ * Content-Type: application/vnd.sap.adt.businessservices.servicebinding.v2+xml
  *
  * SRVB is metadata-only — unlike BDEF/SRVD there is no source text.
  * The contract adds publish/unpublish to the base CRUD surface.
@@ -24,7 +24,22 @@ class SrvbScenario extends ContractScenario {
       path: '/sap/bc/adt/businessservices/bindings/zui_mock_srvb',
       headers: {
         Accept:
-          'application/vnd.sap.adt.businessservices.servicebinding.v1+xml',
+          'application/vnd.sap.adt.businessservices.servicebinding.v2+xml',
+      },
+      response: {
+        status: 200,
+        schema: servicebinding,
+        fixture: fixtures.businessservices.bindings.single,
+      },
+    },
+    {
+      name: 'get namespaced SRVB metadata',
+      contract: () => bindingsContract.get('/ACME/SRV_BINDING'),
+      method: 'GET',
+      path: '/sap/bc/adt/businessservices/bindings/%2Facme%2Fsrv_binding',
+      headers: {
+        Accept:
+          'application/vnd.sap.adt.businessservices.servicebinding.v2+xml',
       },
       response: {
         status: 200,
@@ -39,7 +54,7 @@ class SrvbScenario extends ContractScenario {
       path: '/sap/bc/adt/businessservices/bindings',
       headers: {
         'Content-Type':
-          'application/vnd.sap.adt.businessservices.servicebinding.v1+xml',
+          'application/vnd.sap.adt.businessservices.servicebinding.v2+xml',
       },
       body: { schema: servicebinding },
       response: { status: 200, schema: servicebinding },

@@ -26,8 +26,11 @@ const TYPE_TO_SOURCE_EXT: Record<string, string> = {
   INTF: 'abap',
   PROG: 'abap',
   FUGR: 'abap',
+  FUNC: 'abap',
   DDLS: 'asddls',
   DCLS: 'asdcls',
+  BDEF: 'abdl',
+  SRVD: 'acds',
 };
 
 /** Metadata extension for all AFF/gCTS objects. */
@@ -104,7 +107,14 @@ export function parseGctsFilename(
   }
 
   // Source file — suffix is optional.
-  const knownSourceExts = new Set(['abap', 'asddls', 'asdcls']);
+  const knownSourceExts = new Set([
+    'abap',
+    'asddls',
+    'asdcls',
+    'abdl',
+    'acds',
+    'properties',
+  ]);
   if (!knownSourceExts.has(extension)) {
     return undefined;
   }

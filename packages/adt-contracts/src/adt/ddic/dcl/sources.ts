@@ -5,7 +5,7 @@
  *   (Note: the SAP endpoint for DCL sources lives under `acm/dcl`, not
  *   `ddic/dcl`. The contract is exported under `ddic.dcl` for API
  *   parity with the ADK and the sibling DDL contract.)
- * Content-Type: application/vnd.sap.adt.acm.dcl.source.v1+xml
+ * Content-Type: application/vnd.sap.adt.dclSource+xml
  * Object type: DCLS
  */
 
@@ -20,8 +20,9 @@ export type DclSourceResponse = InferTypedSchema<typeof dclSourceSchema>;
 export const dclSourcesContract = crud({
   basePath: '/sap/bc/adt/acm/dcl/sources',
   schema: dclSourceSchema,
-  contentType: 'application/vnd.sap.adt.acm.dcl.source.v1+xml',
-  accept: 'application/vnd.sap.adt.acm.dcl.source.v1+xml',
+  contentType: 'application/vnd.sap.adt.dclSource+xml',
+  accept: 'application/vnd.sap.adt.dclSource+xml',
+  nameTransform: (name) => encodeURIComponent(name.toLowerCase()),
   sources: ['main'] as const,
 });
 

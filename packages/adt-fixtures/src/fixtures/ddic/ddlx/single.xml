@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Sanitized ADT GET /sap/bc/adt/ddic/ddlx/sources/{name} response. -->
+<ddlx:ddlxSource
+  xmlns:ddlx="http://www.sap.com/adt/ddic/ddlx"
+  xmlns:abapsource="http://www.sap.com/adt/abapsource"
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  abapsource:sourceUri="/sap/bc/adt/ddic/ddlx/sources/z_aff_ddlx/source/main"
+  abapsource:fixPointArithmetic="false"
+  abapsource:activeUnicodeCheck="false"
+  adtcore:responsible="AFF"
+  adtcore:masterLanguage="EN"
+  adtcore:masterSystem="DEV"
+  adtcore:abapLanguageVersion="0"
+  adtcore:name="Z_AFF_DDLX"
+  adtcore:type="DDLX/EX"
+  adtcore:changedAt="2000-01-01T00:00:00Z"
+  adtcore:version="active"
+  adtcore:createdAt="2000-01-01T00:00:00Z"
+  adtcore:changedBy="AFF"
+  adtcore:createdBy="AFF"
+  adtcore:description="Sanitized DDLX fixture"
+  adtcore:language="EN"
+>
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="./z_aff_ddlx/source/main"
+    rel="http://www.sap.com/adt/relations/source"
+    type="text/plain"
+    title="Source Content"
+  />
+  <adtcore:packageRef
+    adtcore:uri="/sap/bc/adt/packages/z_aff"
+    adtcore:type="DEVC/K"
+    adtcore:name="Z_AFF"
+    adtcore:description="Sanitized package"
+  />
+</ddlx:ddlxSource>

@@ -1,1 +1,78 @@
-<?xml version="1.0" encoding="utf-8"?><aunit:runResult xmlns:aunit="http://www.sap.com/adt/aunit"><program adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class" adtcore:type="CLAS/OC" adtcore:name="ZCL_AGE_SAMPLE_CLASS" uriType="semantic" xmlns:adtcore="http://www.sap.com/adt/core"><testClasses><testClass adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class#testclass=LTCL_TEST" adtcore:name="LTCL_TEST" uriType="semantic" durationCategory="short" riskLevel="harmless"><testMethods><testMethod adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class#testclass=LTCL_TEST;testmethod=TEST_ALWAYS_FAILS" adtcore:name="TEST_ALWAYS_FAILS" executionTime="0" uriType="semantic" unit="s"><alerts><alert kind="warning" severity="critical"><title>Use of ABAP List features</title><details><detail text="ABAP List statements like WRITE, ULINE etc. are not permitted within unit tests"/><detail text="Test 'LTCL_TEST-&gt;TEST_ALWAYS_FAILS' in Main Program 'ZCL_AGE_SAMPLE_CLASS==========CP'"/><detail text="Test failed in SETUP or CONSTRUCTOR"/></details></alert><alert kind="failedAssertion" severity="critical"><title>Critical Assertion Error: 'This test is designed to always fail'</title><details><detail text="True expected"/><detail text="Test 'LTCL_TEST-&gt;TEST_ALWAYS_FAILS' in Main Program 'ZCL_AGE_SAMPLE_CLASS==========CP'"/></details><stack><stackEntry adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class/includes/testclasses#start=30,0" adtcore:type="CLAS/OCN/testclasses" adtcore:name="ZCL_AGE_SAMPLE_CLASS" adtcore:description="Include: &lt;ZCL_AGE_SAMPLE_CLASS==========CCAU&gt; Line: &lt;30&gt; (TEST_ALWAYS_FAILS)"/></stack></alert></alerts></testMethod><testMethod adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class#testclass=LTCL_TEST;testmethod=TEST_PUBLIC_METHOD_SUCCESS" adtcore:name="TEST_PUBLIC_METHOD_SUCCESS" executionTime="0" uriType="semantic" unit="s"/></testMethods></testClass></testClasses></program></aunit:runResult>
+<?xml version="1.0" encoding="utf-8" ?>
+<aunit:runResult xmlns:aunit="http://www.sap.com/adt/aunit">
+  <program
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class"
+    adtcore:type="CLAS/OC"
+    adtcore:name="ZCL_AGE_SAMPLE_CLASS"
+    uriType="semantic"
+  >
+    <testClasses>
+      <testClass
+        adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class#testclass=LTCL_TEST"
+        adtcore:name="LTCL_TEST"
+        uriType="semantic"
+        durationCategory="short"
+        riskLevel="harmless"
+      >
+        <testMethods>
+          <testMethod
+            adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class#testclass=LTCL_TEST;testmethod=TEST_ALWAYS_FAILS"
+            adtcore:name="TEST_ALWAYS_FAILS"
+            executionTime="0"
+            uriType="semantic"
+            unit="s"
+          >
+            <alerts>
+              <alert
+                kind="warning"
+                severity="critical"
+              >
+                <title>Use of ABAP List features</title>
+                <details>
+                  <detail
+                    text="ABAP List statements like WRITE, ULINE etc. are not permitted within unit tests"
+                  />
+                  <detail
+                    text="Test 'LTCL_TEST-&gt;TEST_ALWAYS_FAILS' in Main Program 'ZCL_AGE_SAMPLE_CLASS==========CP'"
+                  />
+                  <detail text="Test failed in SETUP or CONSTRUCTOR" />
+                </details>
+              </alert>
+              <alert
+                kind="failedAssertion"
+                severity="critical"
+              >
+                <title>
+                  Critical Assertion Error: 'This test is designed to always
+                  fail'
+                </title>
+                <details>
+                  <detail text="True expected" />
+                  <detail
+                    text="Test 'LTCL_TEST-&gt;TEST_ALWAYS_FAILS' in Main Program 'ZCL_AGE_SAMPLE_CLASS==========CP'"
+                  />
+                </details>
+                <stack>
+                  <stackEntry
+                    adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class/includes/testclasses#start=30,0"
+                    adtcore:type="CLAS/OCN/testclasses"
+                    adtcore:name="ZCL_AGE_SAMPLE_CLASS"
+                    adtcore:description="Include: &lt;ZCL_AGE_SAMPLE_CLASS==========CCAU&gt; Line: &lt;30&gt; (TEST_ALWAYS_FAILS)"
+                  />
+                </stack>
+              </alert>
+            </alerts>
+          </testMethod>
+          <testMethod
+            adtcore:uri="/sap/bc/adt/oo/classes/zcl_age_sample_class#testclass=LTCL_TEST;testmethod=TEST_PUBLIC_METHOD_SUCCESS"
+            adtcore:name="TEST_PUBLIC_METHOD_SUCCESS"
+            executionTime="0"
+            uriType="semantic"
+            unit="s"
+          />
+        </testMethods>
+      </testClass>
+    </testClasses>
+  </program>
+</aunit:runResult>

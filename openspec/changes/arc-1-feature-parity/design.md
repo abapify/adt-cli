@@ -83,10 +83,10 @@ Not all systems are cloud ABAP; some users want to bypass the gate. Following AR
 
 ## Risks / Trade-offs
 
-- **`@abaplint/core` bundle size** — adds ~2–5 MB to `adt-lint`. [Risk] Tree-shaking may not be effective for the core parser. → Mitigation: lazy-load / dynamic import; measure bundle before shipping.
-- **AST stripping accuracy** — `@abaplint/core` may not parse all ABAP dialects (macros, include forms). [Risk] Stripping produces malformed output on edge cases. → Mitigation: strip operation falls back to returning full source if AST parse fails.
-- **Dump/trace endpoint availability** — `/sap/bc/adt/runtime/dumps` is available on NetWeaver 7.50+ but not on BTP. [Risk] Tool fails on BTP with 404. → Mitigation: graceful error message indicating BTP limitation.
-- **Method surgery cursor errors** — finding the method boundary in the AST requires the method to already exist. [Risk] Editing a non-existent method causes confusing errors. → Mitigation: explicit validation step; return `isError: true` with clear message.
+- **`@abaplint/core` bundle size** — adds ~2–5 MB to `adt-lint`. \[Risk] Tree-shaking may not be effective for the core parser. → Mitigation: lazy-load / dynamic import; measure bundle before shipping.
+- **AST stripping accuracy** — `@abaplint/core` may not parse all ABAP dialects (macros, include forms). \[Risk] Stripping produces malformed output on edge cases. → Mitigation: strip operation falls back to returning full source if AST parse fails.
+- **Dump/trace endpoint availability** — `/sap/bc/adt/runtime/dumps` is available on NetWeaver 7.50+ but not on BTP. \[Risk] Tool fails on BTP with 404. → Mitigation: graceful error message indicating BTP limitation.
+- **Method surgery cursor errors** — finding the method boundary in the AST requires the method to already exist. \[Risk] Editing a non-existent method causes confusing errors. → Mitigation: explicit validation step; return `isError: true` with clear message.
 
 ## Migration Plan
 

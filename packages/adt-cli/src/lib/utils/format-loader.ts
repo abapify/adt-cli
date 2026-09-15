@@ -15,10 +15,10 @@ import { getFormatPlugin, type AdtPlugin } from '@abapify/adt-plugin';
 const FORMAT_SHORTCUTS: Record<string, string> = {
   abapgit: '@abapify/adt-plugin-abapgit',
   ag: '@abapify/adt-plugin-abapgit',
-  // gCTS / AFF format plugin (E06). `aff` is a synonym — gCTS and AFF share
-  // the same on-disk layout so a single plugin serves both communities.
-  gcts: '@abapify/adt-plugin-gcts',
+  // AFF / gCTS format plugin (E06). `aff` is the primary id; `gcts` is an
+  // alias — both share the same on-disk layout (SAP/abap-file-formats).
   aff: '@abapify/adt-plugin-gcts',
+  gcts: '@abapify/adt-plugin-gcts',
 };
 
 /** Resolve a CLI format id to its registered package name (if known). */

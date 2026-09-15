@@ -1,74 +1,82 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- Source: GET /sap/bc/adt/atc/worklists/{id}?includeExemptedFindings=false -->
 <!-- Sanitized: worklist ID, transport ID, usernames anonymized -->
-<atcworklist:worklist 
-    atcworklist:id="0A7425B8447B1FE0B782885C456468EE" 
-    atcworklist:timestamp="2025-12-18T13:20:08Z" 
-    atcworklist:usedObjectSet="99999999999999999999999999999999" 
-    atcworklist:objectSetIsComplete="true" 
-    xmlns:atcworklist="http://www.sap.com/adt/atc/worklist">
+<atcworklist:worklist
+  xmlns:atcworklist="http://www.sap.com/adt/atc/worklist"
+  atcworklist:id="0A7425B8447B1FE0B782885C456468EE"
+  atcworklist:timestamp="2025-12-18T13:20:08Z"
+  atcworklist:usedObjectSet="99999999999999999999999999999999"
+  atcworklist:objectSetIsComplete="true"
+>
   <atcworklist:objectSets>
-    <atcworklist:objectSet 
-        atcworklist:name="00000000000000000000000000000000" 
-        atcworklist:title="All Objects" 
-        atcworklist:kind="ALL"/>
-    <atcworklist:objectSet 
-        atcworklist:name="99999999999999999999999999999999" 
-        atcworklist:title="Last Check Run" 
-        atcworklist:kind="LAST_RUN"/>
-    <atcworklist:objectSet 
-        atcworklist:name="0A7425B8447B1FE0B78288C7F680E8EE" 
-        atcworklist:title="Transport: MOCK900001 (Test transport)" 
-        atcworklist:kind="TRANSPORT"/>
+    <atcworklist:objectSet
+      atcworklist:name="00000000000000000000000000000000"
+      atcworklist:title="All Objects"
+      atcworklist:kind="ALL"
+    />
+    <atcworklist:objectSet
+      atcworklist:name="99999999999999999999999999999999"
+      atcworklist:title="Last Check Run"
+      atcworklist:kind="LAST_RUN"
+    />
+    <atcworklist:objectSet
+      atcworklist:name="0A7425B8447B1FE0B78288C7F680E8EE"
+      atcworklist:title="Transport: MOCK900001 (Test transport)"
+      atcworklist:kind="TRANSPORT"
+    />
   </atcworklist:objectSets>
   <atcworklist:objects>
-    <atcobject:object 
-        adtcore:uri="/sap/bc/adt/atc/objects/R3TR/DOMA/ZTEST_DOMAIN" 
-        adtcore:type="DOMA" 
-        adtcore:name="ZTEST_DOMAIN" 
-        adtcore:packageName="ZTEST_PACKAGE" 
-        atcobject:author="TESTUSER" 
-        xmlns:atcobject="http://www.sap.com/adt/atc/object" 
-        xmlns:adtcore="http://www.sap.com/adt/core">
-      <atcobject:findings/>
+    <atcobject:object
+      xmlns:atcobject="http://www.sap.com/adt/atc/object"
+      xmlns:adtcore="http://www.sap.com/adt/core"
+      adtcore:uri="/sap/bc/adt/atc/objects/R3TR/DOMA/ZTEST_DOMAIN"
+      adtcore:type="DOMA"
+      adtcore:name="ZTEST_DOMAIN"
+      adtcore:packageName="ZTEST_PACKAGE"
+      atcobject:author="TESTUSER"
+    >
+      <atcobject:findings />
     </atcobject:object>
-    <atcobject:object 
-        adtcore:uri="/sap/bc/adt/atc/objects/R3TR/CLAS/ZCL_SAMPLE_CLASS" 
-        adtcore:type="CLAS" 
-        adtcore:name="ZCL_SAMPLE_CLASS" 
-        adtcore:packageName="ZTEST_PACKAGE" 
-        atcobject:author="TESTUSER" 
-        xmlns:atcobject="http://www.sap.com/adt/atc/object" 
-        xmlns:adtcore="http://www.sap.com/adt/core">
+    <atcobject:object
+      xmlns:atcobject="http://www.sap.com/adt/atc/object"
+      xmlns:adtcore="http://www.sap.com/adt/core"
+      adtcore:uri="/sap/bc/adt/atc/objects/R3TR/CLAS/ZCL_SAMPLE_CLASS"
+      adtcore:type="CLAS"
+      adtcore:name="ZCL_SAMPLE_CLASS"
+      adtcore:packageName="ZTEST_PACKAGE"
+      atcobject:author="TESTUSER"
+    >
       <atcobject:findings>
-        <atcfinding:finding 
-            atcfinding:uri="/sap/bc/adt/atc/findings/prio3/ZCL_SAMPLE_CLASS/001" 
-            atcfinding:location="/sap/bc/adt/oo/classes/zcl_sample_class/source/main#start=10,0" 
-            atcfinding:processor="TESTUSER" 
-            atcfinding:lastChangedBy="TESTUSER" 
-            atcfinding:priority="3" 
-            atcfinding:checkId="CL_CI_TEST_SELECT" 
-            atcfinding:checkTitle="Analysis of WHERE Condition for SELECT" 
-            atcfinding:messageId="001" 
-            atcfinding:messageTitle="Table SFLIGHT: No WHERE condition" 
-            atcfinding:exemptionApproval="" 
-            atcfinding:exemptionKind="" 
-            atcfinding:checksum="ABC123" 
-            xmlns:atcfinding="http://www.sap.com/adt/atc/finding"/>
-        <atcfinding:finding 
-            atcfinding:uri="/sap/bc/adt/atc/findings/prio3/ZCL_SAMPLE_CLASS/002" 
-            atcfinding:location="/sap/bc/adt/oo/classes/zcl_sample_class/source/main#start=15,0" 
-            atcfinding:processor="TESTUSER" 
-            atcfinding:lastChangedBy="TESTUSER" 
-            atcfinding:priority="3" 
-            atcfinding:checkId="CL_CI_TEST_SELECT_STAR" 
-            atcfinding:checkTitle="Search problematic SELECT * statements" 
-            atcfinding:messageId="002" 
-            atcfinding:messageTitle="Existence check. No fields used" 
-            atcfinding:exemptionApproval="" 
-            atcfinding:exemptionKind="" 
-            atcfinding:checksum="DEF456" 
-            xmlns:atcfinding="http://www.sap.com/adt/atc/finding"/>
+        <atcfinding:finding
+          xmlns:atcfinding="http://www.sap.com/adt/atc/finding"
+          atcfinding:uri="/sap/bc/adt/atc/findings/prio3/ZCL_SAMPLE_CLASS/001"
+          atcfinding:location="/sap/bc/adt/oo/classes/zcl_sample_class/source/main#start=10,0"
+          atcfinding:processor="TESTUSER"
+          atcfinding:lastChangedBy="TESTUSER"
+          atcfinding:priority="3"
+          atcfinding:checkId="CL_CI_TEST_SELECT"
+          atcfinding:checkTitle="Analysis of WHERE Condition for SELECT"
+          atcfinding:messageId="001"
+          atcfinding:messageTitle="Table SFLIGHT: No WHERE condition"
+          atcfinding:exemptionApproval=""
+          atcfinding:exemptionKind=""
+          atcfinding:checksum="ABC123"
+        />
+        <atcfinding:finding
+          xmlns:atcfinding="http://www.sap.com/adt/atc/finding"
+          atcfinding:uri="/sap/bc/adt/atc/findings/prio3/ZCL_SAMPLE_CLASS/002"
+          atcfinding:location="/sap/bc/adt/oo/classes/zcl_sample_class/source/main#start=15,0"
+          atcfinding:processor="TESTUSER"
+          atcfinding:lastChangedBy="TESTUSER"
+          atcfinding:priority="3"
+          atcfinding:checkId="CL_CI_TEST_SELECT_STAR"
+          atcfinding:checkTitle="Search problematic SELECT * statements"
+          atcfinding:messageId="002"
+          atcfinding:messageTitle="Existence check. No fields used"
+          atcfinding:exemptionApproval=""
+          atcfinding:exemptionKind=""
+          atcfinding:checksum="DEF456"
+        />
       </atcobject:findings>
     </atcobject:object>
   </atcworklist:objects>

@@ -28,6 +28,10 @@ export const importObjectCommand = new Command('object')
     (value: string, previous: string[]) => [...previous, value],
     [],
   )
+  .option(
+    '-t, --object-type <type>',
+    'Exact ABAP object type for same-named objects, e.g. DDLX',
+  )
   .option('--debug', 'Enable debug output', false)
   .action(async (objectName, targetFolder, options) => {
     try {
@@ -57,6 +61,7 @@ export const importObjectCommand = new Command('object')
 
       const result = await importService.importObject({
         objectName,
+        objectType: options.objectType,
         outputPath,
         format: options.format,
         formatOptions,

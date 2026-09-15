@@ -53,6 +53,22 @@ export {
   type DclSourceResponse,
 } from './dcl';
 export {
+  ddlxContract,
+  ddlxSourcesContract,
+  type DdlxSourceResponse,
+} from './ddlx';
+export {
+  dsfdContract,
+  dsfdSourcesContract,
+  type DsfdSourceResponse,
+} from './dsfd';
+export { dsfiContract, type DsfiDefinition, type DsfiResponse } from './dsfi';
+export {
+  dtebContract,
+  dtebSourcesContract,
+  type DtebSourceResponse,
+} from './dteb';
+export {
   srvdContract,
   srvdSourcesContract,
   type SrvdContract,
@@ -68,6 +84,10 @@ import { tablesettingsContract } from './tablesettings';
 import { tabletypesContract } from './tabletypes';
 import { ddlContract } from './ddl';
 import { dclContract } from './dcl';
+import { ddlxContract } from './ddlx';
+import { dsfdContract } from './dsfd';
+import { dsfiContract } from './dsfi';
+import { dtebContract } from './dteb';
 import { srvdContract } from './srvd';
 
 export interface DdicContract {
@@ -79,6 +99,10 @@ export interface DdicContract {
   tabletypes: typeof tabletypesContract;
   ddl: typeof ddlContract;
   dcl: typeof dclContract;
+  ddlx: typeof ddlxContract;
+  dsfd: typeof dsfdContract;
+  dsfi: typeof dsfiContract;
+  dteb: typeof dtebContract;
   srvd: typeof srvdContract;
 }
 
@@ -91,5 +115,9 @@ export const ddicContract: DdicContract = {
   tabletypes: tabletypesContract,
   ddl: ddlContract,
   dcl: dclContract,
+  ddlx: ddlxContract,
+  dsfd: dsfdContract,
+  dsfi: dsfiContract,
+  dteb: dtebContract,
   srvd: srvdContract,
 };

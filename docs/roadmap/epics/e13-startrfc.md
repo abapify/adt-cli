@@ -17,7 +17,7 @@ ADT is HTTP REST, but huge swathes of SAP automation still rely on RFC (BAPI cal
 
 - sapcli: `tmp/sapcli-ref/sapcli/sap/cli/startrfc.py` + `sap/rfc/`
 - Two implementation choices:
-  1. Use `node-rfc` (https://github.com/SAP/node-rfc) — official SAP NW RFC SDK binding for Node. Native module; requires SAP NW RFC SDK installed locally. Best fidelity.
+  1. Use `node-rfc` (<https://github.com/SAP/node-rfc>) — official SAP NW RFC SDK binding for Node. Native module; requires SAP NW RFC SDK installed locally. Best fidelity.
   2. Use SOAP-over-HTTP RFC (`/sap/bc/soap/rfc?...`) — REST/SOAP wrapper SAP exposes for some FMs. Doesn't require SDK but is limited.
 
 Recommend: ship Option 2 first (universal, no native deps), keep Option 1 as opt-in plugin (`@abapify/adt-plugin-rfc-native`).

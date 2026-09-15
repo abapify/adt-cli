@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-server-client",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Generated client for @abapify/adt-server OpenAPI",
   "license": "MIT",
   "publishConfig": {

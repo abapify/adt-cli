@@ -6,6 +6,9 @@
 
 export { default as bdef } from './bdef';
 export { default as clas } from './clas';
+export { default as dcls } from './dcls';
+export { default as ddls } from './ddls';
+export { default as ddlx } from './ddlx';
 export { default as devc } from './devc';
 export { default as doma } from './doma';
 export { default as dtel } from './dtel';

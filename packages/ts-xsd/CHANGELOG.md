@@ -1,3 +1,19 @@
+## 0.4.2 (2026-09-08)
+
+### 🩹 Fixes
+
+- **ts-xsd:** quote XML property names in generated types ([#192](https://github.com/abapify/adt-cli/pull/192))
+- **codacy:** resolve open code-scanning alerts ([#167](https://github.com/abapify/adt-cli/pull/167))
+- **quality:** resolve open GitHub Code Quality findings ([#159](https://github.com/abapify/adt-cli/pull/159))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Noah
+- Petr Plenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for ts-xsd to align it with other projects, there were no code changes.

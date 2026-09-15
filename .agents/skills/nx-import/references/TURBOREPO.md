@@ -1,7 +1,7 @@
 ## Turborepo
 
 - Nx replaces Turborepo task orchestration, but a clean migration requires handling Turborepo's config packages.
-- Migration guide: https://nx.dev/docs/guides/adopting-nx/from-turborepo#easy-automated-migration-example
+- Migration guide: <https://nx.dev/docs/guides/adopting-nx/from-turborepo>
 - Since Nx replaces Turborepo, all turbo config files and config packages become dead code and should be removed.
 
 ## The Config-as-Package Pattern
@@ -59,4 +59,4 @@ The config package centralizes ESLint plugin dependencies and exports composable
 
 Helpful docs:
 
-- https://nx.dev/docs/guides/adopting-nx/from-turborepo
+- <https://nx.dev/docs/guides/adopting-nx/from-turborepo>

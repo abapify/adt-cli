@@ -1,3 +1,32 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- expose typed CTS transport metadata ([#186](https://github.com/abapify/adt-cli/pull/186))
+- **cds:** support CDS and RAP ABAP File Formats ([#183](https://github.com/abapify/adt-cli/pull/183))
+- **adt-mcp:** enforce scoped safe execution ([#143](https://github.com/abapify/adt-cli/pull/143))
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### 🩹 Fixes
+
+- **client:** pair timeout agent with undici fetch ([#178](https://github.com/abapify/adt-cli/pull/178))
+- **client:** support long-running SAP requests ([#177](https://github.com/abapify/adt-cli/pull/177))
+- **codacy:** resolve open code-scanning alerts ([#167](https://github.com/abapify/adt-cli/pull/167))
+- **quality:** resolve open GitHub Code Quality findings ([#159](https://github.com/abapify/adt-cli/pull/159))
+- review thread fixes (broker, session, source-history, docs, deps) ([3d20361a](https://github.com/abapify/adt-cli/commit/3d20361a))
+- **sonar:** resolve S4144, S6551, S6571, S6582, S6644, S7750, S7755, S7786, S5332 ([35b25a45](https://github.com/abapify/adt-cli/commit/35b25a45))
+- **codacy:** use bare nosemgrep suppression for fetch URL ([fd406ad3](https://github.com/abapify/adt-cli/commit/fd406ad3))
+- **sast:** add bearer suppression and reduce registry nesting ([b0d7b17a](https://github.com/abapify/adt-cli/commit/b0d7b17a))
+- **codacy:** suppress SSRF false positive on validated ADT URL ([842c2341](https://github.com/abapify/adt-cli/commit/842c2341))
+- **codacy:** avoid object-injection and user-controlled URL findings ([9c3a249a](https://github.com/abapify/adt-cli/commit/9c3a249a))
+- **codacy:** suppress false-positive SSRF and object-injection findings ([05c807bc](https://github.com/abapify/adt-cli/commit/05c807bc))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for @abapify/adt-client to align it with other projects, there were no code changes.

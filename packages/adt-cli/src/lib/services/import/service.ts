@@ -14,6 +14,7 @@ import type { AdkTransportObjectRef } from '@abapify/adk';
 import { Readable } from 'node:stream';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { selectSearchObject, type SearchObject } from './object-selection';
 
 /** Default number of concurrent SAP requests during import */
 const IMPORT_CONCURRENCY = 5;
@@ -49,6 +50,8 @@ async function resolvePackagePath(packageName: string): Promise<string[]> {
 export interface ObjectImportOptions {
   /** Object name to search for (e.g., 'ZAGE_DOMA_CASE_SENSITIVE') */
   objectName: string;
+  /** Exact ABAP object type used to disambiguate same-named objects */
+  objectType?: string;
   /** Output directory for serialized files */
   outputPath: string;
   /** Format plugin name or package (e.g., 'abapgit', '@abapify/adt-plugin-abapgit') */
@@ -692,14 +695,6 @@ export class ImportService {
         maxResults: 10,
       });
 
-    type SearchObject = {
-      name?: string;
-      type?: string;
-      uri?: string;
-      description?: string;
-      packageName?: string;
-    };
-
     // Handle different response shapes from quickSearch
     const resultsAny = searchResult as Record<string, unknown>;
     if (options.debug) {
@@ -730,35 +725,9 @@ export class ImportService {
         : [rawObjects]
       : [];
 
-    // Step 2: Find exact match (case-insensitive)
-    const exactMatch = objects.find(
-      (obj: SearchObject) =>
-        String(obj.name || '').toUpperCase() ===
-        options.objectName.toUpperCase(),
-    );
-
-    if (!exactMatch) {
-      // Show similar objects as a hint
-      const similar = objects
-        .filter((obj: SearchObject) =>
-          String(obj.name || '')
-            .toUpperCase()
-            .includes(options.objectName.toUpperCase()),
-        )
-        .slice(0, 5);
-
-      const similarList = similar
-        .map(
-          (o: SearchObject) => `   • ${o.name} (${o.type}) – ${o.packageName}`,
-        )
-        .join('\n');
-      const hint =
-        similar.length > 0 ? `\n💡 Similar objects:\n${similarList}` : '';
-
-      throw new Error(
-        `Object '${options.objectName}' not found in the system.${hint}`,
-      );
-    }
+    // Step 2: Resolve the exact match. Object names are not globally unique
+    // across ABAP object types, so a caller can select the intended type.
+    const exactMatch = selectSearchObject(objects, options);
 
     // Extract base type (e.g. "DOMA/DD" → "DOMA")
     const fullType = String(exactMatch.type || '');

@@ -110,7 +110,7 @@ mcp_call_tool(server="deepwiki", tool="devin_session_create",
                           "tags": ["sapcli-parity", "eXX"]})
 ```
 
-Otherwise: open https://app.devin.ai/ → New session → paste the **Devin prompt** block from the epic file.
+Otherwise: open <https://app.devin.ai/> → New session → paste the **Devin prompt** block from the epic file.
 
 ## Conventions enforced across all epics
 
@@ -121,5 +121,5 @@ Otherwise: open https://app.devin.ai/ → New session → paste the **Devin prom
 - abapGit-style filenames everywhere a file path is emitted (use `adtUriToAbapGitPath`).
 - Authorized implementation is committed and pushed as verified atomic slices
   without a separate confirmation prompt (see
-  `.agents/rules/git/autonomous-delivery`).
+  `.agents/rules/git/autonomous-delivery.md`).
 - Run `bunx nx format:write` before signalling done.

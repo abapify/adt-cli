@@ -52,6 +52,7 @@ adt atc -t TRLK942970 --format gitlab --output gl-code-quality.json
 | `--max-results <number>`      | Maximum number of results (default: 100)             |
 | `--format <format>`           | Output format: console, json, gitlab, sarif          |
 | `--output <file>`             | Output file (required for gitlab/sarif format)       |
+| `--resolver <name>`           | Resolve report paths (built-in: `abapgit`)           |
 
 ### Programmatic Usage
 
@@ -106,6 +107,14 @@ Raw JSON output of the ATC results for further processing.
 ### GitLab Code Quality
 
 [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html) format for GitLab CI/CD integration.
+
+For abapGit repositories, add `--resolver abapgit`. The resolver uses the
+full ATC location URI to map compound objects such as function modules to
+their serialized filenames, then scans the configured source tree so both
+PREFIX and FULL folder logic point to the actual Git path. When multiple
+files share the same basename (e.g. multiple `package.devc.xml` files in
+different package directories), the resolver rejects the ambiguous match
+rather than guessing.
 
 ## License
 

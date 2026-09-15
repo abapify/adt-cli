@@ -17,90 +17,35 @@
 
 import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
-import { toText } from '../../../base/fetch-utils';
+import { BehaviorDefinition } from '../../../base/kinds';
+import { registerObjectType } from '../../../base/registry';
+import type { AdkCrudSourceContract } from '../../cds/source-object';
+import { AdkCrudSourceObject } from '../../cds/crud-source-object';
 
-export class AdkBehaviorDefinition {
+interface BdefMetadata {
+  blueSource?: {
+    description?: string;
+    masterLanguage?: string;
+    abapLanguageVersion?: string;
+    packageRef?: { name?: string };
+  };
+}
+
+export class AdkBehaviorDefinition extends AdkCrudSourceObject<BdefMetadata> {
   /** Static ADK kind marker — used by abapGit handler registry if needed. */
-  static readonly kind = 'BehaviorDefinition' as const;
+  static readonly kind = BehaviorDefinition;
   readonly kind = AdkBehaviorDefinition.kind;
 
-  readonly name: string;
-  protected readonly ctx: AdkContext;
+  protected readonly objectType = 'BDEF';
+  protected readonly endpoint = 'bo/behaviordefinitions';
 
-  constructor(ctx: AdkContext, name: string) {
-    this.ctx = ctx;
-    this.name = name.toUpperCase();
+  private get contract(): AdkCrudSourceContract {
+    return this.ctx.client.adt.bo
+      .behaviordefinitions as unknown as AdkCrudSourceContract;
   }
 
-  get objectUri(): string {
-    return `/sap/bc/adt/bo/behaviordefinitions/${encodeURIComponent(this.name.toLowerCase())}`;
-  }
-
-  /** Placeholder description — full metadata requires additional SAP fetch */
-  get description(): string {
-    return this.name;
-  }
-
-  private get contract(): any {
-    return this.ctx.client.adt.bo.behaviordefinitions;
-  }
-
-  // ─── Source ────────────────────────────────────────────────────────────────
-
-  async getSource(): Promise<string> {
-    const result = await this.contract.source.main.get(this.name);
-    return toText(result);
-  }
-
-  async saveMainSource(
-    source: string,
-    options?: { lockHandle?: string; transport?: string },
-  ): Promise<void> {
-    await this.contract.source.main.put(
-      this.name,
-      {
-        ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
-        ...(options?.transport ? { corrNr: options.transport } : {}),
-      },
-      source,
-    );
-  }
-
-  // ─── Lock / Unlock ─────────────────────────────────────────────────────────
-
-  async lock(transport?: string): Promise<{ handle: string }> {
-    const lockService = this.ctx.lockService;
-    if (!lockService) {
-      throw new Error(
-        'Lock not available: no lockService in context. Did you call initializeAdk()?',
-      );
-    }
-    return lockService.lock(this.objectUri, {
-      transport,
-      objectName: this.name,
-      objectType: 'BDEF',
-    });
-  }
-
-  async unlock(lockHandle: string): Promise<void> {
-    const lockService = this.ctx.lockService;
-    if (!lockService) {
-      throw new Error(
-        'Unlock not available: no lockService in context. Did you call initializeAdk()?',
-      );
-    }
-    await lockService.unlock(this.objectUri, { lockHandle });
-  }
-
-  // ─── Activate ──────────────────────────────────────────────────────────────
-
-  async activate(): Promise<this> {
-    await this.ctx.client.adt.activation.activate.post({}, {
-      objectReferences: {
-        objectReference: [{ uri: this.objectUri, name: this.name }],
-      },
-    } as any);
-    return this;
+  protected getMetadataKey(): 'blueSource' {
+    return 'blueSource';
   }
 
   // ─── Static Factory Methods ─────────────────────────────────────────────────
@@ -112,20 +57,15 @@ export class AdkBehaviorDefinition {
     name: string,
     ctx?: AdkContext,
   ): Promise<AdkBehaviorDefinition> {
-    const context = ctx ?? getGlobalContext();
-    const obj = new AdkBehaviorDefinition(context, name);
-    // Validate it exists by fetching source
-    await obj.getSource();
-    return obj;
+    return AdkCrudSourceObject.getSourceObject.call(
+      this,
+      name,
+      ctx,
+    ) as Promise<AdkBehaviorDefinition>;
   }
 
   static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
-    try {
-      await AdkBehaviorDefinition.get(name, ctx);
-      return true;
-    } catch {
-      return false;
-    }
+    return AdkCrudSourceObject.sourceObjectExists.call(this, name, ctx);
   }
 
   /**
@@ -143,29 +83,22 @@ export class AdkBehaviorDefinition {
     ctx?: AdkContext,
   ): Promise<AdkBehaviorDefinition> {
     const context = ctx ?? getGlobalContext();
-    const nameU = name.toUpperCase();
-    const pkgU = packageName.toUpperCase();
-
-    await context.client.adt.bo.behaviordefinitions.post(
-      options?.transport ? { corrNr: options.transport } : {},
+    return AdkCrudSourceObject.createSourceSkeleton.call(
+      this,
       {
-        blueSource: {
-          name: nameU,
-          type: 'BDEF/BDO',
-          description,
-          language: 'EN',
-          masterLanguage: 'EN',
-          responsible: pkgU,
-          packageRef: {
-            name: pkgU,
-            type: 'DEVC/K',
-            uri: `/sap/bc/adt/packages/${pkgU.toLowerCase()}`,
-          },
-        },
-      } as any,
-    );
-
-    return new AdkBehaviorDefinition(context, nameU);
+        name,
+        description,
+        packageName,
+        transport: options?.transport,
+        ctx,
+        rootKey: 'blueSource',
+        objectTypeCode: 'BDEF/BDO',
+        responsible: packageName.toUpperCase(),
+      },
+      context.client.adt.bo.behaviordefinitions.post.bind(
+        context.client.adt.bo.behaviordefinitions,
+      ),
+    ) as Promise<AdkBehaviorDefinition>;
   }
 
   static async delete(
@@ -174,9 +107,16 @@ export class AdkBehaviorDefinition {
     ctx?: AdkContext,
   ): Promise<void> {
     const context = ctx ?? getGlobalContext();
-    await context.client.adt.bo.behaviordefinitions.delete(name.toUpperCase(), {
-      ...(options?.transport ? { corrNr: options.transport } : {}),
-      ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
-    });
+    return AdkCrudSourceObject.deleteSource(
+      name,
+      options,
+      context.client.adt.bo.behaviordefinitions.delete.bind(
+        context.client.adt.bo.behaviordefinitions,
+      ),
+    );
   }
 }
+
+registerObjectType('BDEF', BehaviorDefinition, AdkBehaviorDefinition, {
+  endpoint: 'bo/behaviordefinitions',
+});

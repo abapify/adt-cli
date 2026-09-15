@@ -8,6 +8,17 @@
 import type { Logger } from '@abapify/logger';
 
 /**
+ * Fetch function injected into SessionManager so the adapter can route
+ * CSRF handshake requests through the same Undici dispatcher (and
+ * headersTimeout) used for the final adapter request. Defaults to the
+ * global fetch when no dispatcher is configured.
+ */
+export type SessionFetchFn = (
+  input: string | URL,
+  init?: RequestInit,
+) => Promise<Response>;
+
+/**
  * Cookie Store - Manages HTTP cookies for stateful sessions
  */
 export class CookieStore {
@@ -288,7 +299,10 @@ export class SessionManager {
   private readonly etagManager = new ETagManager();
   private securitySessionActive = false;
 
-  constructor(private readonly logger?: Logger) {}
+  constructor(
+    private readonly logger?: Logger,
+    private readonly fetchFn: SessionFetchFn = globalThis.fetch,
+  ) {}
 
   /**
    * Process response to update session state
@@ -572,7 +586,7 @@ export class SessionManager {
   ): Promise<string | undefined> {
     this.logger?.debug('Session: Creating security session');
     // nosemgrep
-    const response = await fetch(sessionsUrl, {
+    const response = await this.fetchFn(sessionsUrl, {
       method: 'GET',
       headers: {
         ...this.buildSessionHeaders(authHeader),
@@ -602,7 +616,7 @@ export class SessionManager {
   ): Promise<boolean> {
     this.logger?.debug('Session: Fetching CSRF token');
     // nosemgrep
-    const response = await fetch(sessionsUrl, {
+    const response = await this.fetchFn(sessionsUrl, {
       method: 'GET',
       headers: {
         ...this.buildSessionHeaders(authHeader),
@@ -659,7 +673,7 @@ export class SessionManager {
     try {
       this.logger?.debug(`Session: Deleting security session ${sessionPath}`);
       // nosemgrep
-      await fetch(deleteUrl, {
+      await this.fetchFn(deleteUrl, {
         method: 'DELETE',
         headers: {
           ...this.buildSessionHeaders(authHeader),
@@ -695,7 +709,7 @@ export class SessionManager {
         'Session: Fetching CSRF token for security session cleanup',
       );
       // nosemgrep
-      const response = await fetch(sessionsUrl, {
+      const response = await this.fetchFn(sessionsUrl, {
         method: 'GET',
         headers: {
           ...this.buildSessionHeaders(authHeader),

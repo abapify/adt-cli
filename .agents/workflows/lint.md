@@ -2,7 +2,10 @@
 name: lint
 description: Run Nx lint with fix and iterate until clean.
 category: workflow
-tags: [nx, lint, quality]
+tags:
+- nx
+- lint
+- quality
 ---
 
 1. Run lint with fix (Nx `lint` target for affected packages).

@@ -1,5 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, isAbsolute, join, relative, sep } from 'node:path';
 import type { AdkObject } from '@abapify/adk';
 import { getTypeForKind } from '@abapify/adk';
 import { getHandler } from './handlers';
@@ -39,6 +39,16 @@ export class AbapGitSerializer {
     const writtenFiles: string[] = [];
     for (const file of serializedFiles) {
       const filePath = join(fullPackageDir, file.path);
+      const relativePath = relative(fullPackageDir, filePath);
+      if (
+        !relativePath ||
+        isAbsolute(relativePath) ||
+        relativePath === '..' ||
+        relativePath.startsWith(`..${sep}`)
+      ) {
+        throw new Error(`Invalid serialized file path: ${file.path}`);
+      }
+      mkdirSync(dirname(filePath), { recursive: true });
       writeFileSync(filePath, file.content, file.encoding ?? 'utf8');
       writtenFiles.push(filePath);
     }

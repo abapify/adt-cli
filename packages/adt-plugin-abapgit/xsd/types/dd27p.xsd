@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DD27P - View field type (SAP DDIC table DD27P) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="Dd27pType">
+    <xs:sequence>
+      <xs:element name="VIEWNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="VIEWFIELD" type="xs:string" minOccurs="0"/>
+      <xs:element name="TABNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FIELDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="KEYFLAG" type="xs:string" minOccurs="0"/>
+      <xs:element name="READONLY" type="xs:string" minOccurs="0"/>
+      <xs:element name="ROLLNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="CHECKTABLE" type="xs:string" minOccurs="0"/>
+      <xs:element name="LOGFLAG" type="xs:string" minOccurs="0"/>
+      <xs:element name="REFTABLE" type="xs:string" minOccurs="0"/>
+      <xs:element name="REFFIELD" type="xs:string" minOccurs="0"/>
+      <xs:element name="OUTPUTLEN" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONVEXIT" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDTEXT" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Dd27pTabType">
+    <xs:sequence>
+      <xs:element name="item" type="Dd27pType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

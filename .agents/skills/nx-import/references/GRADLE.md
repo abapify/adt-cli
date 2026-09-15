@@ -9,4 +9,4 @@
 
 Helpful docs:
 
-- https://nx.dev/docs/technologies/java/gradle/introduction
+- <https://nx.dev/docs/technologies/java/gradle/introduction>

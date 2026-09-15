@@ -17,7 +17,7 @@ We have a starter parser at `packages/acds/`. RAP (E10/E11/E12) needs reliable A
 
 - Existing package: `packages/acds/` (read README/AGENTS.md)
 - ABAP CDS DDL specification: SAP help (download / pin reference grammar locally — `tmp/cds-grammar/`).
-- abaplint CDS support (TS implementation): https://github.com/abaplint/abaplint — for cross-comparison of grammar rules.
+- abaplint CDS support (TS implementation): <https://github.com/abaplint/abaplint> — for cross-comparison of grammar rules.
 
 ## Scope — files
 

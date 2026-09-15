@@ -23,6 +23,7 @@ import { ctsDeleteCommand } from './delete';
 import { ctsReleaseCommand } from './release';
 import { ctsReassignCommand } from './reassign';
 import { ctsSourceManifestCommand } from './source-manifest';
+import { ctsTransportMetadataCommand } from './metadata';
 import { createTaskCommand } from './task';
 
 export function createTrCommand(): Command {
@@ -37,6 +38,7 @@ export function createTrCommand(): Command {
   trCmd.addCommand(ctsReleaseCommand);
   trCmd.addCommand(ctsReassignCommand);
   trCmd.addCommand(ctsSourceManifestCommand);
+  trCmd.addCommand(ctsTransportMetadataCommand);
   trCmd.addCommand(createTaskCommand());
   // NOTE: ctsCheckCommand not yet implemented (check endpoint not available)
 

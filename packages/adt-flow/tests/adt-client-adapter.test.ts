@@ -17,6 +17,7 @@ const format = {
 const manifest: TransportSourceManifest = {
   requestedTransports: ['DEVK900001'],
   scopeTransports: ['DEVK900001'],
+  inventory: [],
   entries: [],
 };
 

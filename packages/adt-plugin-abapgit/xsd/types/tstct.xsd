@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TSTCT - Transaction text type (SAP DDIC table TSTCT) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="TstctType">
+    <xs:sequence>
+      <xs:element name="SPRSL" type="xs:string" minOccurs="0"/>
+      <xs:element name="TCODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TTEXT" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TstctTabType">
+    <xs:sequence>
+      <xs:element name="item" type="TstctType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

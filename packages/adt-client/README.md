@@ -89,6 +89,8 @@ createAdtClient(config: AdtConnectionConfig): AdtClient
 - `password` - SAP password
 - `client` - SAP client (optional, e.g., `'100'`)
 - `language` - SAP language (optional, e.g., `'EN'`)
+- `headersTimeoutMs` - response-header timeout for long-running SAP requests
+  (optional; otherwise the native HTTP client default applies)
 
 ### Class Operations
 

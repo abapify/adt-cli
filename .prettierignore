@@ -6,3 +6,12 @@
 /git_modules
 **/schemas/generated
 .nx/self-healing
+.agents/workflows/lint.md
+.agents/workflows/opsx-archive.md
+.agents/workflows/opsx-apply.md
+.agents/workflows/opsx-propose.md
+.agents/workflows/opsx-explore.md
+.claude/commands/opsx/archive.md
+.claude/commands/opsx/apply.md
+.claude/commands/opsx/explore.md
+.claude/commands/opsx/propose.md

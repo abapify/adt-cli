@@ -54,35 +54,6 @@ function transportResponseName(response: TransportData): string {
   return response.request?.number || '';
 }
 
-type TransportReleaseResponse = Awaited<
-  ReturnType<
-    AdkContext['client']['adt']['cts']['transportrequests']['useraction']['release']
-  >
->;
-
-function releaseReportFailure(
-  response: TransportReleaseResponse,
-): string | undefined {
-  const reports = asArray(response.root.releasereports?.checkReport);
-  if (reports.length === 0) {
-    return 'SAP release response did not contain a release report';
-  }
-
-  const failed = reports.find(
-    (report) => report.status?.toLowerCase() !== 'released',
-  );
-  if (!failed) return undefined;
-
-  const message = asArray(failed.checkMessageList?.checkMessage).find(
-    (entry) => entry.shortText,
-  )?.shortText;
-  return (
-    message ||
-    failed.statusText ||
-    `SAP release report failed with status ${failed.status || 'unknown'}`
-  );
-}
-
 // =============================================================================
 // Config Cache (module-level for efficiency)
 // =============================================================================
@@ -354,25 +325,39 @@ export class AdkTransportRequest extends AdkObject<
 
   async release(): Promise<ReleaseResult> {
     try {
-      const response =
-        await this.ctx.client.adt.cts.transportrequests.useraction.release(
-          this.number,
-        );
-      const reportFailure = releaseReportFailure(response);
-      if (reportFailure) return { success: false, message: reportFailure };
+      // useraction="release" against the base transportrequests URI is a
+      // silent no-op (HTTP 200, empty body, no state change). SAP's own GET
+      // response advertises the real release action as the newreleasejobs
+      // sub-resource link (rel="http://www.sap.com/cts/relations/newreleasejobs")
+      // - that is the endpoint that actually transitions status D -> R.
+      await this.ctx.client.fetch(`${this.objectUri}/newreleasejobs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/vnd.sap.adt.transportorganizer.v1+xml',
+          Accept: 'application/vnd.sap.adt.transportorganizer.v1+xml',
+        },
+        body: '',
+      });
 
-      const verified = await AdkTransportRequest.get(this.number, this.ctx);
-      if (verified.status !== 'R') {
+      // Re-fetch from SAP rather than assume success - a 200 response from
+      // the useraction endpoint above was never proof of a state change.
+      // If the reload itself fails, report that the release POST succeeded
+      // but verification could not be completed — do not conflate it with a
+      // release failure, since SAP may have actually released the transport.
+      try {
+        await this.load();
+      } catch (reloadError) {
         return {
           success: false,
-          message: `Release verification failed for ${this.number}: transport still has status ${verified.status}`,
+          message: `Released ${this.number} but failed to verify: ${reloadError instanceof Error ? reloadError.message : String(reloadError)}`,
         };
       }
-
-      (this.itemData as { status?: string; status_text?: string }).status =
-        verified.status;
-      (this.itemData as { status?: string; status_text?: string }).status_text =
-        verified.statusText;
+      if (this.status !== 'R') {
+        return {
+          success: false,
+          message: `SAP did not release ${this.number} (status: ${this.statusText})`,
+        };
+      }
       return { success: true };
     } catch (error) {
       return {

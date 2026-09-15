@@ -5,11 +5,20 @@
  * Source: xsd/custom/aunitResult.xsd
  */
 
+import atom from '../sap/atom';
+import adtcoreObjectSets from './adtcoreObjectSets';
+
 export default {
   $xmlns: {
     xsd: 'http://www.w3.org/2001/XMLSchema',
     aunit: 'http://www.sap.com/adt/aunit',
+    adtcore: 'http://www.sap.com/adt/core',
+    atom: 'http://www.w3.org/2005/Atom',
   },
+  $imports: [
+    atom,
+    adtcoreObjectSets,
+  ],
   targetNamespace: 'http://www.sap.com/adt/aunit',
   attributeFormDefault: 'unqualified',
   elementFormDefault: 'qualified',
@@ -25,6 +34,18 @@ export default {
       sequence: {
         element: [
           {
+            name: 'external',
+            type: 'aunit:AunitExternal',
+            minOccurs: '0',
+            maxOccurs: '1',
+            form: 'unqualified',
+          },
+          {
+            ref: 'atom:link',
+            minOccurs: '0',
+            maxOccurs: 'unbounded',
+          },
+          {
             name: 'program',
             type: 'aunit:AunitProgram',
             minOccurs: '0',
@@ -33,6 +54,28 @@ export default {
           },
         ],
       },
+    },
+    {
+      name: 'AunitExternal',
+      sequence: {
+        element: [
+          {
+            name: 'coverage',
+            type: 'aunit:AunitCoverage',
+            minOccurs: '0',
+            maxOccurs: '1',
+            form: 'unqualified',
+          },
+        ],
+      },
+    },
+    {
+      name: 'AunitCoverage',
+      attribute: [
+        {
+          ref: 'adtcore:uri',
+        },
+      ],
     },
     {
       name: 'AunitProgram',
@@ -56,16 +99,13 @@ export default {
       },
       attribute: [
         {
-          name: 'uri',
-          type: 'xsd:anyURI',
+          ref: 'adtcore:uri',
         },
         {
-          name: 'type',
-          type: 'xsd:string',
+          ref: 'adtcore:type',
         },
         {
-          name: 'name',
-          type: 'xsd:string',
+          ref: 'adtcore:name',
         },
         {
           name: 'uriType',
@@ -109,12 +149,10 @@ export default {
       },
       attribute: [
         {
-          name: 'uri',
-          type: 'xsd:anyURI',
+          ref: 'adtcore:uri',
         },
         {
-          name: 'name',
-          type: 'xsd:string',
+          ref: 'adtcore:name',
         },
         {
           name: 'uriType',
@@ -159,12 +197,10 @@ export default {
       },
       attribute: [
         {
-          name: 'uri',
-          type: 'xsd:anyURI',
+          ref: 'adtcore:uri',
         },
         {
-          name: 'name',
-          type: 'xsd:string',
+          ref: 'adtcore:name',
         },
         {
           name: 'executionTime',
@@ -273,20 +309,16 @@ export default {
       name: 'AunitStackEntry',
       attribute: [
         {
-          name: 'uri',
-          type: 'xsd:anyURI',
+          ref: 'adtcore:uri',
         },
         {
-          name: 'type',
-          type: 'xsd:string',
+          ref: 'adtcore:type',
         },
         {
-          name: 'name',
-          type: 'xsd:string',
+          ref: 'adtcore:name',
         },
         {
-          name: 'description',
-          type: 'xsd:string',
+          ref: 'adtcore:description',
         },
       ],
     },

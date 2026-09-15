@@ -1,3 +1,25 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **cds:** support CDS and RAP ABAP File Formats ([#183](https://github.com/abapify/adt-cli/pull/183))
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### 🩹 Fixes
+
+- **aunit:** send SAP coverage query bodies ([#179](https://github.com/abapify/adt-cli/pull/179))
+- **aunit:** parse external coverage measurement URI ([#176](https://github.com/abapify/adt-cli/pull/176))
+- **aunit:** preserve coverage measurement links ([#175](https://github.com/abapify/adt-cli/pull/175))
+- **sonar:** add assertions to tests and suppress remaining complexity findings ([983b2dd7](https://github.com/abapify/adt-cli/commit/983b2dd7))
+- **sonar:** resolve S2187 tests and triage cognitive complexity with NOSONAR ([25c39e09](https://github.com/abapify/adt-cli/commit/25c39e09))
+- **sonar/codacy:** reduce destination-mode complexity and add test wrappers ([d0c8413f](https://github.com/abapify/adt-cli/commit/d0c8413f))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-schemas to align it with other projects, there were no code changes.

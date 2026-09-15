@@ -116,7 +116,7 @@ describe('AdkServiceDefinition', () => {
       expect(sources.post).toHaveBeenCalledTimes(1);
       const [query, body] = sources.post.mock.calls[0];
       expect(query).toEqual({ corrNr: 'DEVK900001' });
-      expect(body.source).toMatchObject({
+      expect(body.srvdSource).toMatchObject({
         name: 'ZUI_MOCK_SRVD',
         type: 'SRVD/SRV',
         description: 'Mock SRVD',

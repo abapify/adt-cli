@@ -2,7 +2,9 @@
 name: opsx-archive
 description: Archive a completed OpenSpec change (experimental workflow).
 category: workflow
-tags: [openspec, experimental]
+tags:
+- openspec
+- experimental
 ---
 
 Archive a completed change in the experimental workflow.

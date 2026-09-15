@@ -1,3 +1,34 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **cds:** support CDS and RAP ABAP File Formats ([#183](https://github.com/abapify/adt-cli/pull/183))
+- **adt-mcp:** arc-1 SAPRead parity for get_source ([#162](https://github.com/abapify/adt-cli/pull/162))
+- **badi:** classic BAdI read via vit/wb ([#153](https://github.com/abapify/adt-cli/pull/153), [#154](https://github.com/abapify/adt-cli/pull/154))
+- **badi:** add `adt badi <name> --implementations` ([#153](https://github.com/abapify/adt-cli/pull/153))
+- **cts:** create verified transport tasks ([99447319](https://github.com/abapify/adt-cli/commit/99447319))
+- **adt-mcp:** scope ATC runs without raw URIs ([6665107c](https://github.com/abapify/adt-cli/commit/6665107c))
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### 🩹 Fixes
+
+- **import:** support typed CDS and RAP imports ([#185](https://github.com/abapify/adt-cli/pull/185))
+- **aunit:** send SAP coverage query bodies ([#179](https://github.com/abapify/adt-cli/pull/179))
+- **aunit:** parse external coverage measurement URI ([#176](https://github.com/abapify/adt-cli/pull/176))
+- **aunit:** preserve coverage measurement links ([#175](https://github.com/abapify/adt-cli/pull/175))
+- CTS lifecycle follow-ups — lock correlation, release details, flow scope ([#157](https://github.com/abapify/adt-cli/pull/157))
+- verify CTS lifecycle, task creation, and lock correlation ([#151](https://github.com/abapify/adt-cli/pull/151))
+- **cts:** reconcile task and source lifecycle ([34469d91](https://github.com/abapify/adt-cli/commit/34469d91))
+- **cts:** harden task creation verification ([bb8d5862](https://github.com/abapify/adt-cli/commit/bb8d5862))
+- verify CTS lifecycle and task deltas ([cbe83c5b](https://github.com/abapify/adt-cli/commit/cbe83c5b))
+
+### ❤️ Thank You
+
+- Cursor @cursoragent
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for @abapify/adt-fixtures to align it with other projects, there were no code changes.

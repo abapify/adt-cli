@@ -1,3 +1,15 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **gcts:** Full AFF abap-file-formats support — Wave 0+1+2 ([#193](https://github.com/abapify/adt-cli/pull/193))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 ### 🩹 Fixes

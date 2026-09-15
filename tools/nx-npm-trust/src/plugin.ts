@@ -5,10 +5,20 @@ import { spawnSync } from 'node:child_process';
 
 interface NxNpmTrustOptions {
   /**
-   * Target name registered on each publishable package.
+   * Target name registered on each publishable package for the read-only
+   * trust preflight check.
    * @default "npm-trust-check"
    */
   targetName?: string;
+  /**
+   * Target name registered on each publishable package for the one-shot
+   * bootstrap command (`--prepare` baked in). Publishes a 0.0.0 placeholder
+   * for packages not yet on npm and registers the GitHub OIDC trusted
+   * publisher. If npm 2FA is required, the script automatically triggers
+   * `npm login --auth-type=web` and prints a clickable browser link.
+   * @default "prepare-for-publish"
+   */
+  prepareTargetName?: string;
   /**
    * Runtime used to execute the checker script.
    * @default "bun"
@@ -127,6 +137,7 @@ export const createNodesV2: CreateNodes<NxNpmTrustOptions> = [
   '**/package.json',
   (configFiles, options = {}) => {
     const targetName = options.targetName ?? 'npm-trust-check';
+    const prepareTargetName = options.prepareTargetName ?? 'prepare-for-publish';
     const runtime = options.runtime ?? 'bun';
     const registry = options.registry ?? 'https://registry.npmjs.org/';
     const trustWorkflow = options.trustWorkflow ?? 'publish.yml';
@@ -179,7 +190,7 @@ export const createNodesV2: CreateNodes<NxNpmTrustOptions> = [
           return null;
         }
 
-        log(`register ${targetName} for ${pkg.name}`);
+        log(`register ${targetName} + ${prepareTargetName} for ${pkg.name}`);
 
         return [
           configFile,
@@ -194,6 +205,18 @@ export const createNodesV2: CreateNodes<NxNpmTrustOptions> = [
                       cwd: projectRoot,
                       // Allow the caller to add flags via `nx --args="--fix"`
                       // etc. without re-declaring the target.
+                      forwardAllArgs: true,
+                    },
+                    cache: false,
+                    inputs: ['{projectRoot}/package.json'],
+                  },
+                  [prepareTargetName]: {
+                    executor: 'nx:run-commands',
+                    options: {
+                      // Same script but with `--prepare` baked in. Callers
+                      // can still pass `--otp=<code>` via `nx --args`.
+                      command: `${command} --prepare`,
+                      cwd: projectRoot,
                       forwardAllArgs: true,
                     },
                     cache: false,

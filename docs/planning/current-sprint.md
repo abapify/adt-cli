@@ -42,7 +42,7 @@
 
 ### 🔄 In Progress
 
-- **[#5] Reporting Stage** - Comprehensive summary generation (ON HOLD)
+- **\[#5] Reporting Stage** - Comprehensive summary generation (ON HOLD)
   - Dependencies: Transport import (✅ completed), Quality check (✅ completed)
   - Next: Template engine implementation and markdown report generation
   - Status: Paused pending ADT CLI decoupling completion

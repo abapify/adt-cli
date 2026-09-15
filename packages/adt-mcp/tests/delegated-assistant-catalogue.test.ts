@@ -23,11 +23,12 @@ test('delegated read envelope projects the complete server-owned read catalogue'
     'get_object',
     'find_references',
     'cts_get_transport',
-    'atc_run',
-    'run_unit_tests',
   ]) {
     assert.ok(listed.includes(readTool), `missing read tool ${readTool}`);
   }
+  // atc_run and run_unit_tests require safe_execute, not ordinary read.
+  assert.ok(!listed.includes('atc_run'));
+  assert.ok(!listed.includes('run_unit_tests'));
   assert.ok(!listed.includes('lock_object'));
 });
 
@@ -46,12 +47,13 @@ test('delegated read envelope permits review checks but denies mutation', () => 
     }),
     false,
   );
+  // atc_run and run_unit_tests require safe_execute class, not read.
   assert.strictEqual(
     isMcpToolAllowed(access, 'atc_run', {
       destination: 'dev',
       scope: { kind: 'transport_request', trkorr: 'DEVK900001' },
     }),
-    true,
+    false,
   );
   assert.strictEqual(
     isMcpToolAllowed(access, 'run_unit_tests', {
@@ -61,7 +63,7 @@ test('delegated read envelope permits review checks but denies mutation', () => 
       withCoverage: true,
       coverageFormat: 'sonar-generic',
     }),
-    true,
+    false,
   );
   assert.strictEqual(isMcpToolAllowed(access, 'unknown_tool'), false);
 });

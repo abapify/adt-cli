@@ -4,5 +4,17 @@
   "sourceRoot": "packages/adt-atc/src",
   "projectType": "library",
   "tags": ["scope:adt", "type:plugin"],
-  "targets": {}
+  "targets": {
+    "test": {
+      "command": "bunx vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/tests/**/*.ts",
+        "{projectRoot}/src/**/*.ts",
+        "{projectRoot}/vitest.config.ts"
+      ]
+    }
+  }
 }

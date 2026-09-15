@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   Fixture: GET /sap/bc/adt/enhancements/enhoxhh/{name}
 
@@ -13,23 +13,36 @@
   Sanitized: mock name ZE_MOCK_BADI, mock user TESTUSER.
 -->
 <enh:enhancementImplementation
-    xmlns:enh="http://www.sap.com/adt/abapsource/enhancements"
-    xmlns:adtcore="http://www.sap.com/adt/core"
-    xmlns:atom="http://www.w3.org/2005/Atom"
-    adtcore:responsible="TESTUSER"
-    adtcore:masterLanguage="EN"
-    adtcore:masterSystem="MCK"
-    adtcore:abapLanguageVersion="standard"
-    adtcore:name="ZE_MOCK_BADI"
-    adtcore:type="ENHO/XHH"
-    adtcore:changedAt="2025-01-01T12:00:00Z"
-    adtcore:version="active"
-    adtcore:createdAt="2025-01-01T12:00:00Z"
-    adtcore:changedBy="TESTUSER"
-    adtcore:createdBy="TESTUSER"
-    adtcore:description="Mock BAdI enhancement implementation"
-    adtcore:language="EN">
-  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
-  <atom:link href="source/main" rel="http://www.sap.com/adt/relations/source" type="text/plain"/>
-  <atom:link href="source/main" rel="http://www.sap.com/adt/relations/source" type="text/plain;version=active"/>
+  xmlns:enh="http://www.sap.com/adt/abapsource/enhancements"
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  adtcore:responsible="TESTUSER"
+  adtcore:masterLanguage="EN"
+  adtcore:masterSystem="MCK"
+  adtcore:abapLanguageVersion="standard"
+  adtcore:name="ZE_MOCK_BADI"
+  adtcore:type="ENHO/XHH"
+  adtcore:changedAt="2025-01-01T12:00:00Z"
+  adtcore:version="active"
+  adtcore:createdAt="2025-01-01T12:00:00Z"
+  adtcore:changedBy="TESTUSER"
+  adtcore:createdBy="TESTUSER"
+  adtcore:description="Mock BAdI enhancement implementation"
+  adtcore:language="EN"
+>
+  <adtcore:packageRef
+    adtcore:uri="/sap/bc/adt/packages/%24tmp"
+    adtcore:type="DEVC/K"
+    adtcore:name="$TMP"
+  />
+  <atom:link
+    href="source/main"
+    rel="http://www.sap.com/adt/relations/source"
+    type="text/plain"
+  />
+  <atom:link
+    href="source/main"
+    rel="http://www.sap.com/adt/relations/source"
+    type="text/plain;version=active"
+  />
 </enh:enhancementImplementation>

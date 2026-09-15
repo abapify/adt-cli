@@ -98,6 +98,7 @@ export async function outputGitLabCodeQuality(
           finding.objectName,
           atcLine,
           methodName,
+          finding.location,
         );
         if (resolved) {
           filePath = resolved.path;

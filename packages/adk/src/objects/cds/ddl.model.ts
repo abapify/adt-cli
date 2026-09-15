@@ -13,86 +13,42 @@
 
 import { getGlobalContext } from '../../base/global-context';
 import type { AdkContext } from '../../base/context';
-import { toText } from '../../base/fetch-utils';
+import { DdlSource } from '../../base/kinds';
+import { registerObjectType } from '../../base/registry';
+import type { AdkCrudSourceContract } from './source-object';
+import { AdkCrudSourceObject } from './crud-source-object';
 
-export class AdkDdlSource {
-  readonly name: string;
-  protected readonly ctx: AdkContext;
+interface DdlMetadata {
+  ddlSource?: {
+    description?: string;
+    masterLanguage?: string;
+    abapLanguageVersion?: string;
+    packageRef?: { name?: string };
+    source_origin?: string;
+    source_type?: string;
+  };
+}
 
-  constructor(ctx: AdkContext, name: string) {
-    this.ctx = ctx;
-    this.name = name.toUpperCase();
+export class AdkDdlSource extends AdkCrudSourceObject<DdlMetadata> {
+  static readonly kind = DdlSource;
+  readonly kind = AdkDdlSource.kind;
+
+  protected readonly objectType = 'DDLS';
+  protected readonly endpoint = 'ddic/ddl/sources';
+
+  private get contract(): AdkCrudSourceContract {
+    return this.ctx.client.adt.ddic.ddl.sources as AdkCrudSourceContract;
   }
 
-  get objectUri(): string {
-    return `/sap/bc/adt/ddic/ddl/sources/${encodeURIComponent(this.name.toLowerCase())}`;
+  protected getMetadataKey(): 'ddlSource' {
+    return 'ddlSource';
   }
 
-  /** Placeholder description — full metadata requires additional SAP fetch */
-  get description(): string {
-    return this.name;
+  get sourceOrigin(): string | undefined {
+    return this.metadata?.ddlSource?.source_origin;
   }
-
-  private get contract(): any {
-    return this.ctx.client.adt.ddic.ddl.sources;
-  }
-
-  // ─── Source ────────────────────────────────────────────────────────────────
-
-  async getSource(): Promise<string> {
-    const result = await this.contract.source.main.get(this.name);
-    return toText(result);
-  }
-
-  async saveMainSource(
-    source: string,
-    options?: { lockHandle?: string; transport?: string },
-  ): Promise<void> {
-    await this.contract.source.main.put(
-      this.name,
-      {
-        ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
-        ...(options?.transport ? { corrNr: options.transport } : {}),
-      },
-      source,
-    );
-  }
-
-  // ─── Lock / Unlock ─────────────────────────────────────────────────────────
-
-  async lock(transport?: string): Promise<{ handle: string }> {
-    const lockService = this.ctx.lockService;
-    if (!lockService) {
-      throw new Error(
-        'Lock not available: no lockService in context. Did you call initializeAdk()?',
-      );
-    }
-    return lockService.lock(this.objectUri, {
-      transport,
-      objectName: this.name,
-      objectType: 'DDLS',
-    });
-  }
-
-  async unlock(lockHandle: string): Promise<void> {
-    const lockService = this.ctx.lockService;
-    if (!lockService) {
-      throw new Error(
-        'Unlock not available: no lockService in context. Did you call initializeAdk()?',
-      );
-    }
-    await lockService.unlock(this.objectUri, { lockHandle });
-  }
-
-  // ─── Activate ──────────────────────────────────────────────────────────────
-
-  async activate(): Promise<this> {
-    await this.ctx.client.adt.activation.activate.post({}, {
-      objectReferences: {
-        objectReference: [{ uri: this.objectUri, name: this.name }],
-      },
-    } as any);
-    return this;
+  get sourceType(): string | undefined {
+    return this.metadata?.ddlSource?.source_type;
   }
 
   // ─── Static Factory Methods ─────────────────────────────────────────────────
@@ -101,20 +57,15 @@ export class AdkDdlSource {
    * Get a DDL source (does not fetch metadata, just returns handle)
    */
   static async get(name: string, ctx?: AdkContext): Promise<AdkDdlSource> {
-    const context = ctx ?? getGlobalContext();
-    const obj = new AdkDdlSource(context, name);
-    // Validate it exists by fetching source
-    await obj.getSource();
-    return obj;
+    return AdkCrudSourceObject.getSourceObject.call(
+      this,
+      name,
+      ctx,
+    ) as Promise<AdkDdlSource>;
   }
 
   static async exists(name: string, ctx?: AdkContext): Promise<boolean> {
-    try {
-      await AdkDdlSource.get(name, ctx);
-      return true;
-    } catch {
-      return false;
-    }
+    return AdkCrudSourceObject.sourceObjectExists.call(this, name, ctx);
   }
 
   /**
@@ -131,28 +82,21 @@ export class AdkDdlSource {
     ctx?: AdkContext,
   ): Promise<AdkDdlSource> {
     const context = ctx ?? getGlobalContext();
-    const nameU = name.toUpperCase();
-    const pkgU = packageName.toUpperCase();
-
-    await context.client.adt.ddic.ddl.sources.post(
-      options?.transport ? { corrNr: options.transport } : {},
+    return AdkCrudSourceObject.createSourceSkeleton.call(
+      this,
       {
-        source: {
-          name: nameU,
-          description,
-          language: 'EN',
-          masterLanguage: 'EN',
-          responsible: '$TMP',
-          packageRef: {
-            name: pkgU,
-            type: 'DEVC/K',
-            uri: `/sap/bc/adt/packages/${pkgU.toLowerCase()}`,
-          },
-        },
-      } as any,
-    );
-
-    return new AdkDdlSource(context, nameU);
+        name,
+        description,
+        packageName,
+        transport: options?.transport,
+        ctx,
+        rootKey: 'source',
+        objectTypeCode: '',
+      },
+      context.client.adt.ddic.ddl.sources.post.bind(
+        context.client.adt.ddic.ddl.sources,
+      ),
+    ) as Promise<AdkDdlSource>;
   }
 
   static async delete(
@@ -161,9 +105,16 @@ export class AdkDdlSource {
     ctx?: AdkContext,
   ): Promise<void> {
     const context = ctx ?? getGlobalContext();
-    await context.client.adt.ddic.ddl.sources.delete(name.toUpperCase(), {
-      ...(options?.transport ? { corrNr: options.transport } : {}),
-      ...(options?.lockHandle ? { lockHandle: options.lockHandle } : {}),
-    });
+    return AdkCrudSourceObject.deleteSource(
+      name,
+      options,
+      context.client.adt.ddic.ddl.sources.delete.bind(
+        context.client.adt.ddic.ddl.sources,
+      ),
+    );
   }
 }
+
+registerObjectType('DDLS', DdlSource, AdkDdlSource, {
+  endpoint: 'ddic/ddl/sources',
+});

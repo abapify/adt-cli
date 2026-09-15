@@ -1,3 +1,16 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **gcts:** Full AFF abap-file-formats support — Wave 0+1+2 ([#193](https://github.com/abapify/adt-cli/pull/193))
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-export to align it with other projects, there were no code changes.

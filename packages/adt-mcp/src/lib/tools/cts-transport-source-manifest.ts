@@ -36,6 +36,7 @@ type SourceManifestEntry = {
 type SourceManifestWithUris = {
   requestedTransports: unknown;
   scopeTransports: unknown;
+  inventory: ReadonlyArray<{ uri?: string; [key: string]: unknown }>;
   entries: readonly SourceManifestEntry[];
 };
 
@@ -63,6 +64,7 @@ export function toMcpTransportSourceManifest(
   return {
     requestedTransports: manifest.requestedTransports,
     scopeTransports: manifest.scopeTransports,
+    inventory: manifest.inventory.map(({ uri: _uri, ...entry }) => entry),
     entries: manifest.entries.map((entry) => {
       const {
         component: {

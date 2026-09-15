@@ -21,7 +21,9 @@ the source immediately before it and the source introduced by it.
 - Add deterministic `.adt/tr/<TR>.json` and
   `.adt/objects/<TYPE>/<encoded-name>.<type>.adt.json` descriptors as an optional,
   committed incremental index. Head checkout writes the reviewed transport
-  descriptor; base checkout writes predecessor object descriptors. Removing
+  descriptor for every discovered request/task and retains the complete CTS
+  object inventory, including objects not yet supported by the active format.
+  Base checkout writes predecessor object descriptors. Removing
   `.adt` affects performance, not source selection correctness.
 - Add a pure format-materialization extension to `@abapify/adt-plugin` and an
   abapGit implementation. The MVP supports only abapGit output while keeping
@@ -31,7 +33,8 @@ the source immediately before it and the source introduced by it.
 - Fail closed before filesystem mutation when the source boundary is
   ambiguous or failed, or when paths collide or diverge from indexed state;
   record and skip unsupported object types so exact source components in the
-  same transport remain reviewable.
+  same transport remain reviewable and the skipped inventory can be retried
+  when support is added.
 - Explicitly limit MVP exactness to versioned source components. Full history
   replication and reconstruction of historical object metadata are deferred.
 

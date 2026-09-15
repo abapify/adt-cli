@@ -1,2 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<tm:root xmlns:tm="http://www.sap.com/cts/adt/tm" tm:useraction="changeowner" tm:targetuser="NEWOWNER"/>
+<?xml version="1.0" encoding="UTF-8" ?>
+<tm:root
+  xmlns:tm="http://www.sap.com/cts/adt/tm"
+  tm:useraction="changeowner"
+  tm:targetuser="NEWOWNER"
+/>

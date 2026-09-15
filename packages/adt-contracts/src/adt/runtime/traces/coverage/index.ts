@@ -11,6 +11,12 @@ import { statements, type StatementsContract } from './statements';
 
 export { measurements } from './measurements';
 export { statements } from './statements';
+export {
+  buildCoverageQuery,
+  buildStatementsBulkRequest,
+  coverageXmlBody,
+  extractCoverageStatementUris,
+} from './request';
 export type { MeasurementsContract } from './measurements';
 export type { StatementsContract } from './statements';
 

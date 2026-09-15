@@ -17,10 +17,12 @@
 
 import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
+import { ServiceBinding } from '../../../base/kinds';
+import { registerObjectType } from '../../../base/registry';
 
 export class AdkServiceBinding {
   /** Static ADK kind marker — used by abapGit handler registry if needed. */
-  static readonly kind = 'ServiceBinding' as const;
+  static readonly kind = ServiceBinding;
   readonly kind = AdkServiceBinding.kind;
 
   readonly name: string;
@@ -57,6 +59,11 @@ export class AdkServiceBinding {
   async getSource(): Promise<string> {
     // Metadata-only object — no source code.
     return '';
+  }
+
+  async load(): Promise<this> {
+    await this.getMetadata();
+    return this;
   }
 
   // ─── Lock / Unlock ─────────────────────────────────────────────────────────
@@ -201,3 +208,7 @@ export class AdkServiceBinding {
     await obj.unpublish();
   }
 }
+
+registerObjectType('SRVB', ServiceBinding, AdkServiceBinding, {
+  endpoint: 'businessservices/bindings',
+});

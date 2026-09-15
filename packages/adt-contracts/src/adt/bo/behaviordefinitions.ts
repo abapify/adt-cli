@@ -46,6 +46,7 @@ export const behaviordefinitionsContract = crud({
   schema: blueSourceSchema,
   contentType: 'application/vnd.sap.adt.blues.v1+xml',
   accept: 'application/vnd.sap.adt.blues.v1+xml',
+  nameTransform: (name) => encodeURIComponent(name.toLowerCase()),
   sources: ['main'] as const,
 });
 

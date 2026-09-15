@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  abapGit ENQU (Lock Object) Schema
+
+  Defines DD25V (lock object header), DD26V (table assignments) and
+  DD27P (lock parameters) structures used in *.enqu.xml files.
+
+  Uses xs:redefine to extend AbapValuesType with ENQU-specific elements.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/dd25v.xsd"/>
+  <xs:include schemaLocation="types/dd26v.xsd"/>
+  <xs:include schemaLocation="types/dd27p.xsd"/>
+
+  <!-- Redefine AbapValuesType to include ENQU-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="DD25V" type="asx:Dd25vType" minOccurs="0"/>
+            <xs:element name="DD26V_TABLE" type="asx:Dd26vTabType" minOccurs="0"/>
+            <xs:element name="DD27P_TABLE" type="asx:Dd27pTabType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

@@ -14,9 +14,11 @@ to request a second commit or push confirmation.
 Before committing and pushing:
 
 1. Inspect the exact staged files and diff.
-2. Run the relevant verification gates and record known blockers.
-3. Use a scoped, public-safe commit message and author identity where required.
-4. Push only the intended feature branch and report the resulting commit/MR.
+2. Verify that the current branch and remote match the authorized feature branch and repository.
+3. Verify that every staged path is within the authorized scope and excludes pre-existing changes.
+4. Run the relevant verification gates and record known blockers.
+5. Use a scoped, public-safe commit message and author identity where required.
+6. Push only the verified feature branch and report the resulting commit/MR.
 
 ## Actions that remain gated
 

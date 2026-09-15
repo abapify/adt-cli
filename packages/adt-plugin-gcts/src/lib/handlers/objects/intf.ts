@@ -1,34 +1,49 @@
 /**
  * INTF handler for gCTS / AFF format.
+ *
+ * Projects ADK interface data to the AFF intf-v1.json schema shape:
+ *
+ *   {
+ *     formatVersion: "1",
+ *     header: { description, originalLanguage, abapLanguageVersion? },
+ *     category?,
+ *     proxy?,
+ *     descriptions?
+ *   }
  */
+
 import { AdkInterface } from '@abapify/adk';
 import { createHandler } from '../base';
+import type { IntfAff } from '../../../schemas/generated';
 
 export const interfaceHandler = createHandler(AdkInterface, {
-  toMetadata(intf) {
+  toMetadata(intf): IntfAff {
     const data = intf.dataSync;
+    const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();
     return {
+      formatVersion: '1',
       header: {
-        formatVersion: '1.0',
         description: intf.description ?? data.description ?? '',
-        originalLanguage: data.language ?? data.masterLanguage,
-        abapLanguageVersion: data.abapLanguageVersion,
-      },
-      interface: {
-        unicodeChecksActive: data.activeUnicodeCheck !== false,
+        originalLanguage: lang,
+        ...(data.abapLanguageVersion && data.abapLanguageVersion !== 'standard'
+          ? {
+              abapLanguageVersion:
+                data.abapLanguageVersion as IntfAff['header']['abapLanguageVersion'],
+            }
+          : {}),
       },
     };
   },
 
   getSource: (obj) => obj.getSource(),
 
-  fromMetadata: (meta: any) => ({
-    name: (meta?.interface?.name ?? '').toUpperCase(),
+  fromMetadata: (meta: IntfAff) => ({
+    name: '',
     type: 'INTF/OI',
-    description: meta?.header?.description,
-    language: meta?.header?.originalLanguage,
-    masterLanguage: meta?.header?.originalLanguage,
-    abapLanguageVersion: meta?.header?.abapLanguageVersion,
+    description: meta.header.description,
+    language: meta.header.originalLanguage?.toUpperCase(),
+    masterLanguage: meta.header.originalLanguage?.toUpperCase(),
+    abapLanguageVersion: meta.header.abapLanguageVersion,
   }),
 
   setSources: (intf, sources) => {

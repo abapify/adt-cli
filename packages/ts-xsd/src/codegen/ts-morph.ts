@@ -65,6 +65,12 @@ export interface SchemaSourceFileResult {
 // Helpers
 // =============================================================================
 
+function propertyName(name: string): string {
+  return /^[\p{ID_Start}$_][\p{ID_Continue}$\u200C\u200D]*$/u.test(name)
+    ? name
+    : JSON.stringify(name);
+}
+
 function deriveRootTypeName(filename: string | undefined): string | undefined {
   if (!filename) return undefined;
   const baseName = filename.replace(/\.xsd$/, '').replace(/^.*\//, '');
@@ -358,7 +364,7 @@ export function expandTypeToString(
         indent + '  ',
         newVisited,
       );
-      lines.push(`${indent}  ${name}${optional}: ${expanded};`);
+      lines.push(`${indent}  ${propertyName(name)}${optional}: ${expanded};`);
     }
     lines.push(`${indent}}`);
     return lines.join('\n');
@@ -689,7 +695,7 @@ function generateInterface(
     isExported: true,
     extends: extendsTypes.length > 0 ? extendsTypes : undefined,
     properties: properties.map((p) => ({
-      name: p.name,
+      name: propertyName(p.name),
       type: p.type,
       hasQuestionToken: p.hasQuestionToken,
     })),
@@ -968,7 +974,7 @@ function generateRootType(rootTypeName: string, ctx: GeneratorContext): void {
   // For multi-root: union of wrapped types { el1: Type1 } | { el2: Type2 }
   // Root type matches what parse() returns - wrapped with element name for type discrimination
   const wrappedTypes = elementNames.map(
-    (name, i) => `{ ${name}: ${elementTypes[i]} }`,
+    (name, i) => `{ ${propertyName(name)}: ${elementTypes[i]} }`,
   );
   const rootType =
     wrappedTypes.length === 1 ? wrappedTypes[0] : wrappedTypes.join(' | ');

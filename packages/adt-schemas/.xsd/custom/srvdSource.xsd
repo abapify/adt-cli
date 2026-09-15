@@ -5,7 +5,7 @@
   GET/POST/PUT /sap/bc/adt/ddic/srvd/sources/{name}
   Content-Type: application/vnd.sap.adt.ddic.srvd.v1+xml
 
-  The root element is <srvd:source> in the http://www.sap.com/adt/ddic/srvd
+  The root element is <srvd:srvdSource> in the http://www.sap.com/adt/ddic/srvd
   namespace and extends abapsource:AbapSourceMainObject (the standard
   ABAP source object base type), so it automatically carries
   adtcore + abapsource metadata (name, package, syntaxConfiguration,
@@ -23,11 +23,13 @@
   <xsd:import namespace="http://www.sap.com/adt/abapsource"
               schemaLocation="../sap/abapsource.xsd"/>
 
-  <xsd:element name="source" type="srvd:SrvdSource"/>
+  <xsd:element name="srvdSource" type="srvd:SrvdSource"/>
 
   <xsd:complexType name="SrvdSource">
     <xsd:complexContent>
       <xsd:extension base="abapsource:AbapSourceMainObject">
+        <xsd:attribute name="sourceOrigin" type="xsd:string" use="optional"/>
+        <xsd:attribute name="srvdSourceType" type="xsd:string" use="optional"/>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>

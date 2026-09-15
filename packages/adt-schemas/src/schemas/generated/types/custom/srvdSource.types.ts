@@ -6,7 +6,7 @@
  */
 
 export type SrvdSourceSchema = {
-    source: {
+    srvdSource: {
         containerRef?: undefined | {
             extension?: undefined | unknown;
             uri?: string | undefined;
@@ -66,5 +66,7 @@ export type SrvdSourceSchema = {
         sourceObjectStatus?: undefined | "SAPStandardProduction" | "customerProduction" | "system" | "test";
         fixPointArithmetic?: boolean | undefined;
         activeUnicodeCheck?: boolean | undefined;
+        sourceOrigin?: string | undefined;
+        srvdSourceType?: string | undefined;
     };
 };

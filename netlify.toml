@@ -30,3 +30,12 @@
 [build.environment]
   NODE_VERSION = "20"
   NX_DAEMON = "false"
+
+# Only run production deploys from the main branch.
+# Deploy previews for pull requests and branch deploys are disabled to save
+# Netlify build minutes; the ignore script above still applies to production.
+[context.deploy-preview]
+  ignore = "exit 0"
+
+[context.branch-deploy]
+  ignore = "exit 0"

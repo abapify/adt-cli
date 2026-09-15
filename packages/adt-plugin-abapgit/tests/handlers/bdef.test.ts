@@ -3,7 +3,7 @@
  *
  * Validates that:
  *  - handler is registered for 'BDEF'
- *  - serialize produces `<name>.bdef.abdl` + `<name>.bdef.xml`
+ *  - serialize produces `<name>.bdef.abdl` + `<name>.bdef.json`
  *  - fromAbapGit round-trips SKEY/NAME → ADK data
  *  - schema is valid and builds the expected XML shape
  */
@@ -22,7 +22,7 @@ describe('BDEF abapGit handler', () => {
     assert.strictEqual(handler!.fileExtension, 'bdef');
   });
 
-  it('serialize produces .bdef.abdl and .bdef.xml files', async () => {
+  it('serializes the official AFF .bdef.abdl and .bdef.json layout', async () => {
     const handler = getHandler('BDEF');
     assert.ok(handler);
 
@@ -37,19 +37,23 @@ describe('BDEF abapGit handler', () => {
 
     assert.deepStrictEqual(
       [...paths].sort((a: string, b: string) => a.localeCompare(b)),
-      ['zbp_mock_bdef.bdef.abdl', 'zbp_mock_bdef.bdef.xml'],
+      ['zbp_mock_bdef.bdef.abdl', 'zbp_mock_bdef.bdef.json'],
     );
 
     const source = files.find((f) => f.path.endsWith('.abdl'));
     assert.ok(source?.content.includes('managed implementation'));
 
-    const xml = files.find((f) => f.path.endsWith('.xml'));
-    assert.ok(xml?.content.includes('<abapGit'));
-    assert.ok(xml?.content.includes('SKEY'));
-    assert.ok(xml?.content.includes('ZBP_MOCK_BDEF'));
+    const metadata = files.find((f) => f.path.endsWith('.json'));
+    assert.deepStrictEqual(JSON.parse(metadata!.content), {
+      formatVersion: '1',
+      header: {
+        description: 'ZBP_MOCK_BDEF',
+        originalLanguage: 'en',
+      },
+    });
   });
 
-  it('serialize skips .abdl file when source is empty', async () => {
+  it('serializes JSON when the .abdl source is empty', async () => {
     const handler = getHandler('BDEF');
     assert.ok(handler);
 
@@ -61,7 +65,7 @@ describe('BDEF abapGit handler', () => {
     const files = await handler!.serialize(mockBdef as any);
     const paths = files.map((f) => f.path);
 
-    assert.deepStrictEqual(paths, ['zbp_empty.bdef.xml']);
+    assert.deepStrictEqual(paths, ['zbp_empty.bdef.json']);
   });
 
   it('fromAbapGit maps SKEY.NAME to ADK data', () => {

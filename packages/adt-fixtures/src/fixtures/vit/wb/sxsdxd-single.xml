@@ -1,21 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   Fixture: GET /sap/bc/adt/vit/wb/object_type/sxsdxd/object_name/mock_cts_request_check
 
   TODO-synthetic mock fixture per packages/adt-fixtures/AGENTS.md sanitization rules.
 -->
 <adtcore:mainObject
-    xmlns:adtcore="http://www.sap.com/adt/core"
-    adtcore:responsible="TESTUSER"
-    adtcore:masterLanguage="EN"
-    adtcore:masterSystem="MCK"
-    adtcore:name="MOCK_CTS_REQUEST_CHECK"
-    adtcore:type="SXSD/XD"
-    adtcore:version="active"
-    adtcore:description="Mock request checks BAdI definition"
-    adtcore:language="EN">
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  adtcore:responsible="TESTUSER"
+  adtcore:masterLanguage="EN"
+  adtcore:masterSystem="MCK"
+  adtcore:name="MOCK_CTS_REQUEST_CHECK"
+  adtcore:type="SXSD/XD"
+  adtcore:version="active"
+  adtcore:description="Mock request checks BAdI definition"
+  adtcore:language="EN"
+>
   <adtcore:packageRef
-      adtcore:uri="/sap/bc/adt/packages/mock_pkg"
-      adtcore:type="DEVC/K"
-      adtcore:name="MOCK_PKG"/>
+    adtcore:uri="/sap/bc/adt/packages/mock_pkg"
+    adtcore:type="DEVC/K"
+    adtcore:name="MOCK_PKG"
+  />
 </adtcore:mainObject>

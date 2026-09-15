@@ -57,12 +57,12 @@ Before writing code, gather details about the object type from live system or re
 ### Option B: No Live System — Web Research
 
 1. **ADT endpoint details:**
-   - SAP Help Portal: https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide
+   - SAP Help Portal: <https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide>
    - Search GitHub for `sap/bc/adt/{path}` to find client implementations
    - Look at `packages/adt-schemas/src/schemas/generated/schemas/sap/` for existing patterns
 
 2. **abapGit serializer and schema:**
-   - abapGit repository: https://github.com/abapGit/abapGit
+   - abapGit repository: <https://github.com/abapGit/abapGit>
    - Look in `src/objects/` for the relevant handler class (`ZCL_ABAPGIT_OBJECT_{TYPE}`)
    - Find `.abap` or `.xml` sample files in abapGit test fixtures
    - Search abapGit issues/PRs for the object type
@@ -446,7 +446,7 @@ The abapGit schema captures the structure of the XML file that abapGit writes fo
 
 Find out what fields the abapGit serializer writes. Resources:
 
-- **abapGit repository**: https://github.com/abapGit/abapGit — look in `src/objects/` for `ZCL_ABAPGIT_OBJECT_{TYPE}.clas.abap`
+- **abapGit repository**: <https://github.com/abapGit/abapGit> — look in `src/objects/` for `ZCL_ABAPGIT_OBJECT_{TYPE}.clas.abap`
 - Look for `CREATE_VSEO*`, `ZIF_ABAPGIT_OBJECT~DESERIALIZE`, or `SERIALIZE` methods
 - Look at `.xml` files in abapGit test repositories
 - Search for `{TYPE}` in abapGit's `docs/` directory

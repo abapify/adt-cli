@@ -54,10 +54,10 @@ If you have a running SAP system connection:
 If no system connection is available, research the endpoint:
 
 1. **Search SAP ADT documentation and community resources:**
-   - SAP Help Portal: https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide
-   - abapGit source (has XSD/schema reference implementations): https://github.com/abapGit/abapGit
+   - SAP Help Portal: <https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide>
+   - abapGit source (has XSD/schema reference implementations): <https://github.com/abapGit/abapGit>
    - SAP ADT API examples: search GitHub for `sap/bc/adt/{your-path}`
-   - Eclipse ADT plugin source: https://github.com/SAP/abap-adt-api
+   - Eclipse ADT plugin source: <https://github.com/SAP/abap-adt-api>
 
 2. **Search for XSD schema definitions:**
    - Look in the existing XSD files under `packages/adt-schemas/` for similar patterns

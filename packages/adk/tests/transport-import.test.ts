@@ -539,7 +539,7 @@ describe('matchesSelector()', () => {
     const corrRele = new AdkTransportObjectRef({} as any, {
       pgmid: 'CORR',
       type: 'RELE',
-      name: 'S0DK954871',
+      name: 'DEVK954871',
     });
 
     const selector = { pgmid: ['R3TR', 'LIMU'] };

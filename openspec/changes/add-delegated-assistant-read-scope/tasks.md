@@ -4,7 +4,7 @@
 - [x] Add failing policy-parser and HTTP catalogue tests.
 - [x] Implement exact invocation verification.
 - [x] Prove catalogue and dispatch remain server-owned and read-only.
-- [ ] Run adt-mcp build, typecheck, tests, lint, and full-tree formatting.
+- [x] Run adt-mcp build, typecheck, tests, lint, and full-tree formatting.
   - Focused policy, catalogue, and signed-JWT tests pass.
   - Scoped ESLint and Prettier checks pass; strict OpenSpec validation passes.
   - Full build/typecheck and server-construction tests remain blocked by the

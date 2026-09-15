@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { execOutput, ensureDir } from '../lib/utils';
+import { extractJars } from './extract';
 
 interface Artifact {
   id: string;
@@ -133,7 +134,6 @@ export async function download(
 
   // Extract if requested
   if (extract) {
-    const { extractJars } = await import('./extract');
     console.log('');
     await extractJars(pluginsDir, {
       output: extractOutput || join(output, 'extracted'),

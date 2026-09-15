@@ -210,6 +210,21 @@ describe('adt-mcp integration tests', () => {
     });
   });
 
+  describe('cts_transport_metadata tool', () => {
+    it('returns typed CTS metadata', async () => {
+      const { json } = await callTool('cts_transport_metadata', {
+        ...connArgs(),
+        transport: 'DEVK900001',
+      });
+      const data = json as {
+        requestedTransport: string;
+        units: Array<{ number: string }>;
+      };
+      assert.strictEqual(data.requestedTransport, 'DEVK900001');
+      assert.ok(data.units.some((unit) => unit.number === 'DEVK900001'));
+    });
+  });
+
   // ── cts_delete_transport ───────────────────────────────────────
 
   describe('cts_delete_transport tool', () => {

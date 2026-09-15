@@ -1,3 +1,14 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- **adt-flow:** add incremental transport checkout ([#150](https://github.com/abapify/adt-cli/pull/150))
+
+### ❤️ Thank You
+
+- Devin AI @devin-ai-integration[bot]
+- Petr Plenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for @abapify/adt-config to align it with other projects, there were no code changes.

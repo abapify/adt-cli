@@ -297,6 +297,11 @@ export interface LoadedFixtures {
   srvdSource: string;
   // SRVB (RAP service binding)
   srvbSingle: string;
+  // CDS/RAP source types (DDLX, DSFD, DSFI, DTEB, DESD)
+  ddlxSingle: string;
+  dsfdSingle: string;
+  dsfiSource: string;
+  dtebSingle: string;
   // FLP (E14) — Page Builder OData
   flpCatalogList: string;
   flpCatalogSingle: string;
@@ -391,6 +396,10 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     srvdSingle,
     srvdSource,
     srvbSingle,
+    ddlxSingle,
+    dsfdSingle,
+    dsfiSource,
+    dtebSingle,
     flpCatalogList,
     flpCatalogSingle,
     flpGroupList,
@@ -476,6 +485,10 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.ddic.srvd.single.load(),
     fixtures.ddic.srvd.source.load(),
     fixtures.businessservices.bindings.single.load(),
+    fixtures.ddic.ddlx.single.load(),
+    fixtures.ddic.dsfd.single.load(),
+    fixtures.ddic.dsfi.source.load(),
+    fixtures.ddic.dteb.single.load(),
     fixtures.flp.catalogList.load(),
     fixtures.flp.catalogSingle.load(),
     fixtures.flp.groupList.load(),
@@ -567,6 +580,10 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     srvdSingle,
     srvdSource,
     srvbSingle,
+    ddlxSingle,
+    dsfdSingle,
+    dsfiSource,
+    dtebSingle,
     flpCatalogList,
     flpCatalogSingle,
     flpGroupList,
@@ -578,6 +595,82 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
 function extractObjectUri(url: string): string {
   // strip query string; caller supplies the full pathname+query
   return url.split('?')[0];
+}
+
+function matchCoverageStatements(
+  method: string,
+  pathname: string,
+  requestBody: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (
+    method !== 'POST' ||
+    !/^\/sap\/bc\/adt\/runtime\/traces\/coverage\/results\/[^/]+\/statements/.test(
+      pathname,
+    )
+  ) {
+    return;
+  }
+  if (
+    !requestBody.includes('<cov:statementsBulkRequest') ||
+    !/<statementsRequest\b[^>]*\bget=(["'])[^"']+\1/.test(requestBody)
+  ) {
+    return {
+      status: 400,
+      body: 'Expected cov:statementsBulkRequest',
+      contentType: 'text/plain',
+    };
+  }
+  return {
+    status: 200,
+    body: f.coverageStatements,
+    contentType: 'application/xml+scov',
+  };
+}
+
+function matchCoverageMeasurements(
+  method: string,
+  pathname: string,
+  requestBody: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (
+    method !== 'POST' ||
+    !/^\/sap\/bc\/adt\/runtime\/traces\/coverage\/measurements\/[^/]+/.test(
+      pathname,
+    )
+  ) {
+    return;
+  }
+  if (
+    !requestBody.includes('<cov:query') ||
+    !/<adtcore:objectReference\b[^>]*\badtcore:uri=(["'])[^"']+\1/.test(
+      requestBody,
+    )
+  ) {
+    return {
+      status: 400,
+      body: 'Expected cov:query',
+      contentType: 'text/plain',
+    };
+  }
+  return {
+    status: 200,
+    body: f.coverageMeasurements,
+    contentType: 'application/xml+scov',
+  };
+}
+
+function matchCoverageRoute(
+  method: string,
+  pathname: string,
+  requestBody: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  return (
+    matchCoverageStatements(method, pathname, requestBody, f) ??
+    matchCoverageMeasurements(method, pathname, requestBody, f)
+  );
 }
 
 /**
@@ -594,6 +687,8 @@ export function matchRoute(
 ): RouteResult | undefined {
   const m = method.toUpperCase();
   const pathname = url.split('?')[0];
+  const coverageRoute = matchCoverageRoute(m, pathname, requestBody, f);
+  if (coverageRoute) return coverageRoute;
 
   // ── ADT security session endpoints (strict-protocol aware) ─────────────
   // When called with x-sap-security-session: create, return an atom feed
@@ -1058,7 +1153,7 @@ export function matchRoute(
       status: 200,
       body: f.srvbSingle,
       contentType:
-        'application/vnd.sap.adt.businessservices.servicebinding.v1+xml',
+        'application/vnd.sap.adt.businessservices.servicebinding.v2+xml',
     };
   }
   if (
@@ -1077,6 +1172,85 @@ export function matchRoute(
   ) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+
+  // ── CDS/RAP source types (DDLX, DSFD, DTEB) ───────────────────
+  // These share the blueSource / ddlxSource metadata envelope and a
+  // text/plain source/main endpoint. The generic /source/main catch-all
+  // below (line ~1610) already serves the source text; these blocks add
+  // the metadata GET so that AdkCdsSourceObject.load() succeeds.
+  //
+  // Endpoint: /sap/bc/adt/ddic/ddlx/sources/{name}
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/ddic\/ddlx\/sources\/[^/?]+/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.ddlxSingle,
+      contentType: 'application/vnd.sap.adt.ddlxSource+xml',
+    };
+  }
+  // Endpoint: /sap/bc/adt/ddic/dsfd/sources/{name}
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/ddic\/dsfd\/sources\/[^/?]+/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.dsfdSingle,
+      contentType: 'application/vnd.sap.adt.blues.v1+xml',
+    };
+  }
+  // Endpoint: /sap/bc/adt/ddic/dteb/sources/{name}
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/ddic\/dteb\/sources\/[^/?]+/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.dtebSingle,
+      contentType: 'application/vnd.sap.adt.blues.v1+xml',
+    };
+  }
+
+  // ── DSFI (scalar function implementation) ─────────────────────
+  // Endpoint: /sap/bc/adt/ddic/dsfi/{name}           — metadata (blueSource XML)
+  //           /sap/bc/adt/ddic/dsfi/{name}/source/main — JSON definition
+  // The source/main endpoint returns JSON, so it must be matched before the
+  // generic text/plain /source/main catch-all.
+  if (
+    m === 'GET' &&
+    /^\/sap\/bc\/adt\/ddic\/dsfi\/[^/?]+\/source\/main/.test(pathname)
+  ) {
+    return {
+      status: 200,
+      body: f.dsfiSource,
+      contentType: 'application/json',
+    };
+  }
+  if (m === 'GET' && /^\/sap\/bc\/adt\/ddic\/dsfi\/[^/?]+/.test(pathname)) {
+    return {
+      status: 200,
+      body: f.dsfdSingle, // reuse blueSource metadata envelope
+      contentType: 'application/vnd.sap.adt.blues.v1+xml',
+    };
+  }
+
+  // ── DESD (external schema definition) ─────────────────────────
+  // Endpoint: GET /sap/bc/adt/ddic/desd/{name} — returns XML directly
+  if (m === 'GET' && /^\/sap\/bc\/adt\/ddic\/desd\/[^/?]+/.test(pathname)) {
+    return {
+      status: 200,
+      body: f.dsfiSource, // DESD load() only reads text, content is not parsed
+      contentType: 'application/xml',
+    };
+  }
+
+  // ── Source-only CDS types (DRAS, DRTY, DTDC, DTIX, DTSC) ──────
+  // These objects have no metadata endpoint; load() only calls
+  // getSource() which hits /sap/bc/adt/ddic/<type>/sources/<name>/source/main.
+  // The generic /source/main catch-all below already serves text/plain
+  // for any GET .../source/main request, so no dedicated routes are needed.
 
   // ── OO Classrun (execute console class) ────────────────────────
   if (m === 'POST' && url.startsWith('/sap/bc/adt/oo/classrun/')) {
@@ -1682,36 +1856,6 @@ export function matchRoute(
   // AUnit test run
   if (m === 'POST' && url.startsWith('/sap/bc/adt/abapunit/testruns')) {
     return { status: 200, body: f.aunit, contentType: 'application/json' };
-  }
-
-  // ABAP Coverage — statements bulk response
-  // GET /sap/bc/adt/runtime/traces/coverage/results/{id}/statements
-  if (
-    m === 'GET' &&
-    /^\/sap\/bc\/adt\/runtime\/traces\/coverage\/results\/[^/]+\/statements/.test(
-      pathname,
-    )
-  ) {
-    return {
-      status: 200,
-      body: f.coverageStatements,
-      contentType: 'application/xml+scov',
-    };
-  }
-
-  // ABAP Coverage — measurement tree
-  // POST /sap/bc/adt/runtime/traces/coverage/measurements/{id}
-  if (
-    m === 'POST' &&
-    /^\/sap\/bc\/adt\/runtime\/traces\/coverage\/measurements\/[^/]+/.test(
-      pathname,
-    )
-  ) {
-    return {
-      status: 200,
-      body: f.coverageMeasurements,
-      contentType: 'application/xml+scov',
-    };
   }
 
   // Function module source

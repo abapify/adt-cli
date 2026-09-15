@@ -6,7 +6,7 @@
  */
 
 export type DclSourceSchema = {
-    source: {
+    dclSource: {
         containerRef?: undefined | {
             extension?: undefined | unknown;
             uri?: string | undefined;

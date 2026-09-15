@@ -37,6 +37,16 @@ export interface GctsSourceEntry {
 }
 
 /**
+ * Extra file emitted alongside the standard metadata + source files.
+ * Used by compound handlers (e.g. FUGR emitting per-function-module files).
+ * `path` is relative to the object directory.
+ */
+export interface GctsExtraFile {
+  path: string;
+  content: string | Promise<string> | (() => string | Promise<string>);
+}
+
+/**
  * Handler definition for a single ABAP object type.
  *
  * The shape intentionally mirrors the abapGit `HandlerDefinition` so that
@@ -56,6 +66,9 @@ export interface GctsHandlerDefinition<
 
   /** Optional: multiple source files (e.g. CLAS includes). */
   getSources?(object: T): GctsSourceEntry[];
+
+  /** Optional: extra files with full paths (e.g. FUGR per-FM .func.json). */
+  getExtraFiles?(object: T): GctsExtraFile[] | Promise<GctsExtraFile[]>;
 
   /** Optional: custom metadata filename (e.g. `package.devc.json` for DEVC). */
   metadataFileName?: string | ((object: T) => string);
@@ -209,6 +222,16 @@ export function createHandler<
         path: metadataFile,
         content: buildMetadataFile(metadata),
       });
+
+      // Extra files (e.g. FUGR per-function-module .func.json + .func.abap).
+      if (definition.getExtraFiles) {
+        const extras = await definition.getExtraFiles(object);
+        for (const extra of extras) {
+          const content = await resolveSource(extra);
+          if (!content) continue;
+          files.push({ path: extra.path, content });
+        }
+      }
 
       return files;
     },

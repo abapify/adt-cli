@@ -1,7 +1,7 @@
 # ABAP Code Review CI/CD Pipeline - Project Plan
 
 **Specification Reference**: `openspec/specs/cicd/abap-cicd-pipeline.md`  
-**GitHub Project**: https://github.com/orgs/abapify/projects/3  
+**GitHub Project**: <https://github.com/orgs/abapify/projects/3>  
 **Epic Issue**: [#2](https://github.com/abapify/js/issues/2)
 
 ## Project Overview
@@ -20,27 +20,27 @@ Implement a complete CI/CD pipeline for ABAP code review using transport request
 
 ### 🔄 Ready for Implementation
 
-- **[#3] Transport Import Stage** - Extract and serialize transport objects
+- **\[#3] Transport Import Stage** - Extract and serialize transport objects
   - Status: `status:ready`
   - Dependencies: ADT CLI auth, ADK adapters, abapGit format
   - Estimated effort: 2-3 days
-- **[#4] Quality Check Stage** - ATC integration with multi-platform output
+- **\[#4] Quality Check Stage** - ATC integration with multi-platform output
   - Status: `status:ready`
   - Dependencies: Transport import, ATC API integration
   - Estimated effort: 3-4 days
-- **[#5] Reporting Stage** - Comprehensive summary generation
+- **\[#5] Reporting Stage** - Comprehensive summary generation
   - Status: `status:ready`
   - Dependencies: Transport import, Quality check results
   - Estimated effort: 2-3 days
 
 ### 📋 Backlog
 
-- **[#7] CI/CD Platform Templates** - Integration templates for major platforms
+- **\[#7] CI/CD Platform Templates** - Integration templates for major platforms
   - Status: `status:backlog`
   - Dependencies: Core pipeline stages
   - Estimated effort: 1-2 days
 
-- **[#6] Delta Analysis Stage** - Change impact analysis (Future)
+- **\[#6] Delta Analysis Stage** - Change impact analysis (Future)
   - Status: `status:backlog`
   - Dependencies: Transport import, historical data
   - Estimated effort: 4-5 days

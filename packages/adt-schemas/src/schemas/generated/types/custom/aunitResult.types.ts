@@ -7,6 +7,21 @@
 
 export type AunitResultSchema = {
     runResult: {
+        external?: undefined | {
+            coverage?: undefined | {
+                uri?: string | undefined;
+            };
+        };
+        link?: undefined | {
+            href: string;
+            rel?: string | undefined;
+            type?: string | undefined;
+            hreflang?: string | undefined;
+            title?: string | undefined;
+            length?: number | undefined;
+            etag?: string | undefined;
+            _text?: string | undefined;
+        }[];
         program?: undefined | {
             testClasses?: undefined | {
                 testClass?: undefined | {

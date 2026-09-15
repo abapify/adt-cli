@@ -26,6 +26,7 @@ export const srvdSourcesContract = crud({
   schema: srvdSourceSchema,
   contentType: 'application/vnd.sap.adt.ddic.srvd.v1+xml',
   accept: 'application/vnd.sap.adt.ddic.srvd.v1+xml',
+  nameTransform: (name) => encodeURIComponent(name.toLowerCase()),
   sources: ['main'] as const,
 });
 

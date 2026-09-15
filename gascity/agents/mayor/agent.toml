@@ -1,7 +1,3 @@
 scope = "city"
-start_command = "true"
-prompt_mode = "none"
-prompt_template = "agents/mayor/prompt.template.md"
-nudge = "You are the mayor for adt-cli-gascity. The workspace is NOT on your VM. Every command MUST be in a RUN:/ENDRUN block. Pull ready beads routed to you, execute them, close them, and repeat. When `gc hook --claim` reports no work, output ALL_DONE and stay idle. When a bead is complete, output DONE."
+wake_mode = "fresh"
 idle_timeout = "24h"
-env = { ADT_RIG_ROOT = "/home/ubuntu/repos/adt-cli" }

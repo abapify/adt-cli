@@ -3,6 +3,7 @@ import type { AdtClient } from '@abapify/adt-client';
 import {
   ExactSourceHistoryService,
   ExactSourceHistoryServiceError,
+  toMetadataOnlyTransportSourceManifest,
   type BuildTransportManifestResult,
   type ExactSourceHistoryOperations,
   type ListObjectVersionsResult,
@@ -36,6 +37,7 @@ function createOperations(results?: {
         results?.manifest ?? {
           requestedTransports: ['DEVK900001'],
           scopeTransports: ['DEVK900001'],
+          inventory: [],
           entries: [],
         },
       ),
@@ -112,5 +114,40 @@ describe('ExactSourceHistoryService', () => {
         'SAP ADT source-version metadata retrieval failed.',
       ),
     );
+  });
+
+  it('keeps the complete CTS inventory while stripping SAP object URIs', () => {
+    const output = toMetadataOnlyTransportSourceManifest({
+      requestedTransports: ['DEVK900001'],
+      scopeTransports: ['DEVK900001'],
+      inventory: [
+        {
+          pgmid: 'LIMU',
+          type: 'METH',
+          name: 'ZCL_TEST RUN',
+          wbtype: 'CLAS',
+          uri: '/sap/bc/adt/oo/classes/zcl_test',
+          objFunc: '',
+          sourceTransport: 'DEVK900001',
+        },
+      ],
+      entries: [],
+    });
+
+    expect(output).toEqual({
+      requestedTransports: ['DEVK900001'],
+      scopeTransports: ['DEVK900001'],
+      inventory: [
+        {
+          pgmid: 'LIMU',
+          type: 'METH',
+          name: 'ZCL_TEST RUN',
+          wbtype: 'CLAS',
+          objFunc: '',
+          sourceTransport: 'DEVK900001',
+        },
+      ],
+      entries: [],
+    });
   });
 });

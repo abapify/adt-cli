@@ -1,17 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- Source: GET /sap/bc/adt/atc/customizing -->
 <!-- Sanitized: check variant name anonymized -->
 <atc:customizing xmlns:atc="http://www.sap.com/adt/atc">
   <properties>
-    <property name="ciCheckFlavour" value="true"/>
-    <property name="systemCheckVariant" value="DEFAULT_CHECK_VARIANT"/>
-    <property name="isCCSTunnelEnabled" value="true"/>
-    <property name="isTransportableExemptionTypeUsed" value="false"/>
+    <property
+      name="ciCheckFlavour"
+      value="true"
+    />
+    <property
+      name="systemCheckVariant"
+      value="DEFAULT_CHECK_VARIANT"
+    />
+    <property
+      name="isCCSTunnelEnabled"
+      value="true"
+    />
+    <property
+      name="isTransportableExemptionTypeUsed"
+      value="false"
+    />
   </properties>
   <exemption>
     <reasons>
-      <reason id="FPOS" justificationMandatory="true" title="False Positive - finding does not apply - see justification"/>
-      <reason id="OTHR" justificationMandatory="true" title="Other Reason - see justification"/>
+      <reason
+        id="FPOS"
+        justificationMandatory="true"
+        title="False Positive - finding does not apply - see justification"
+      />
+      <reason
+        id="OTHR"
+        justificationMandatory="true"
+        title="Other Reason - see justification"
+      />
     </reasons>
   </exemption>
 </atc:customizing>

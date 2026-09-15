@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   Fixture: GET /sap/bc/adt/enhancements/enhoxhb/{name}
 
@@ -6,60 +6,70 @@
   including BAdI implementations. Shape is based on real SAP responses
   captured by sapcli and ARC-1; data is sanitized.
 -->
-<enho:objectData xmlns:enho="http://www.sap.com/adt/enhancements/enho"
-    xmlns:adtcore="http://www.sap.com/adt/core"
-    xmlns:enhcore="http://www.sap.com/abapsource/enhancementscore"
-    adtcore:name="ZE_MOCK_BADI"
-    adtcore:type="ENHO/XHB"
-    adtcore:description="Mock BAdI enhancement implementation"
-    adtcore:language="EN"
-    adtcore:masterLanguage="EN"
-    adtcore:masterSystem="MCK"
-    adtcore:responsible="TESTUSER"
-    adtcore:version="active"
-    adtcore:abapLanguageVersion="standard"
-    adtcore:createdAt="2025-01-01T12:00:00Z"
-    adtcore:changedAt="2025-01-01T12:00:00Z"
-    adtcore:createdBy="TESTUSER"
-    adtcore:changedBy="TESTUSER">
+<enho:objectData
+  xmlns:enho="http://www.sap.com/adt/enhancements/enho"
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  xmlns:enhcore="http://www.sap.com/abapsource/enhancementscore"
+  adtcore:name="ZE_MOCK_BADI"
+  adtcore:type="ENHO/XHB"
+  adtcore:description="Mock BAdI enhancement implementation"
+  adtcore:language="EN"
+  adtcore:masterLanguage="EN"
+  adtcore:masterSystem="MCK"
+  adtcore:responsible="TESTUSER"
+  adtcore:version="active"
+  adtcore:abapLanguageVersion="standard"
+  adtcore:createdAt="2025-01-01T12:00:00Z"
+  adtcore:changedAt="2025-01-01T12:00:00Z"
+  adtcore:createdBy="TESTUSER"
+  adtcore:changedBy="TESTUSER"
+>
   <adtcore:packageRef
-      adtcore:uri="/sap/bc/adt/packages/%24tmp"
-      adtcore:type="DEVC/K"
-      adtcore:name="$TMP"
-      adtcore:description="Mock package"/>
+    adtcore:uri="/sap/bc/adt/packages/%24tmp"
+    adtcore:type="DEVC/K"
+    adtcore:name="$TMP"
+    adtcore:description="Mock package"
+  />
   <enho:contentCommon
-      enho:toolType="BADI_IMPL"
-      enho:adjustmentStatus="adjusted"
-      enho:upgradeFlag="false"
-      enho:switchSupported="true">
+    enho:toolType="BADI_IMPL"
+    enho:adjustmentStatus="adjusted"
+    enho:upgradeFlag="false"
+    enho:switchSupported="true"
+  >
     <enho:usages>
       <enhcore:referencedObject
-          enhcore:program_id="R3TR"
-          enhcore:element_usage="USEO"
-          enhcore:upgrade="false"
-          enhcore:automatic_transport="false">
+        enhcore:program_id="R3TR"
+        enhcore:element_usage="USEO"
+        enhcore:upgrade="false"
+        enhcore:automatic_transport="false"
+      >
         <enhcore:objectReference
-            adtcore:uri="/sap/bc/adt/oo/classes/zcl_mock_badi_impl"
-            adtcore:type="CLAS/OC"
-            adtcore:name="ZCL_MOCK_BADI_IMPL"/>
+          adtcore:uri="/sap/bc/adt/oo/classes/zcl_mock_badi_impl"
+          adtcore:type="CLAS/OC"
+          adtcore:name="ZCL_MOCK_BADI_IMPL"
+        />
         <enhcore:mainObjectReference
-            adtcore:uri="/sap/bc/adt/oo/classes/zcl_mock_badi_impl"
-            adtcore:type="CLAS/OC"
-            adtcore:name="ZCL_MOCK_BADI_IMPL"/>
+          adtcore:uri="/sap/bc/adt/oo/classes/zcl_mock_badi_impl"
+          adtcore:type="CLAS/OC"
+          adtcore:name="ZCL_MOCK_BADI_IMPL"
+        />
       </enhcore:referencedObject>
       <enhcore:referencedObject
-          enhcore:program_id="R3TR"
-          enhcore:element_usage="EXTO"
-          enhcore:upgrade="false"
-          enhcore:automatic_transport="false">
+        enhcore:program_id="R3TR"
+        enhcore:element_usage="EXTO"
+        enhcore:upgrade="false"
+        enhcore:automatic_transport="false"
+      >
         <enhcore:objectReference
-            adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot"
-            adtcore:type="ENHS/XSB"
-            adtcore:name="ZE_MOCK_ENH_SPOT"/>
+          adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot"
+          adtcore:type="ENHS/XSB"
+          adtcore:name="ZE_MOCK_ENH_SPOT"
+        />
         <enhcore:mainObjectReference
-            adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot"
-            adtcore:type="ENHS/XSB"
-            adtcore:name="ZE_MOCK_ENH_SPOT"/>
+          adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot"
+          adtcore:type="ENHS/XSB"
+          adtcore:name="ZE_MOCK_ENH_SPOT"
+        />
       </enhcore:referencedObject>
     </enho:usages>
   </enho:contentCommon>
@@ -67,25 +77,29 @@
     <enho:badiTechnology>
       <enho:badiImplementations>
         <enho:badiImplementation
-            enho:name="ZE_MOCK_BADI_IMPL"
-            enho:shortText="Mock BAdI implementation"
-            enho:example="false"
-            enho:default="false"
-            enho:active="true"
-            enho:customizingLock=""
-            enho:runtimeBehaviorShorttext="The implementation will be called">
+          enho:name="ZE_MOCK_BADI_IMPL"
+          enho:shortText="Mock BAdI implementation"
+          enho:example="false"
+          enho:default="false"
+          enho:active="true"
+          enho:customizingLock=""
+          enho:runtimeBehaviorShorttext="The implementation will be called"
+        >
           <enho:enhancementSpot
-              adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot"
-              adtcore:type="ENHS/XSB"
-              adtcore:name="ZE_MOCK_ENH_SPOT"/>
+            adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot"
+            adtcore:type="ENHS/XSB"
+            adtcore:name="ZE_MOCK_ENH_SPOT"
+          />
           <enho:badiDefinition
-              adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot#type=enhs%2fxb;name=ze_mock_badi_def"
-              adtcore:type="ENHS/XB"
-              adtcore:name="ZE_MOCK_BADI_DEF"/>
+            adtcore:uri="/sap/bc/adt/enhancements/enhsxsb/ze_mock_enh_spot#type=enhs%2fxb;name=ze_mock_badi_def"
+            adtcore:type="ENHS/XB"
+            adtcore:name="ZE_MOCK_BADI_DEF"
+          />
           <enho:implementingClass
-              adtcore:uri="/sap/bc/adt/oo/classes/zcl_mock_badi_impl"
-              adtcore:type="CLAS/OC"
-              adtcore:name="ZCL_MOCK_BADI_IMPL"/>
+            adtcore:uri="/sap/bc/adt/oo/classes/zcl_mock_badi_impl"
+            adtcore:type="CLAS/OC"
+            adtcore:name="ZCL_MOCK_BADI_IMPL"
+          />
         </enho:badiImplementation>
       </enho:badiImplementations>
     </enho:badiTechnology>

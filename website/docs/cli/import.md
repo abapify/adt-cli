@@ -27,6 +27,7 @@ support.
 | `<objectName>`                | ABAP object name to import (e.g. `ZAGE_DOMA_CASE_SENSITIVE`).                  |
 | `[targetFolder]`              | Target folder for output.                                                      |
 | `-o, --output <path>`         | Output directory (overrides `targetFolder`).                                   |
+| `-t, --object-type <type>`    | Exact ABAP object type for same-named objects, e.g. `DDLX`.                    |
 | `--format <format>`           | Output format: `abapgit` \| `@abapify/adt-plugin-abapgit`. Default: `abapgit`. |
 | `--format-option <key=value>` | Format-specific option (repeatable), e.g. `--format-option folderLogic=full`.  |
 | `--debug`                     | Enable debug output.                                                           |
@@ -46,22 +47,25 @@ support.
 
 ### `transport`
 
-| Flag                          | Description                                                 |
-| ----------------------------- | ----------------------------------------------------------- |
-| `<transportNumber>`           | Transport request number to import.                         |
-| `[targetFolder]`              | Target folder for output.                                   |
-| `-o, --output <path>`         | Output directory (overrides `targetFolder`).                |
-| `-t, --object-types <types>`  | Comma-separated object types.                               |
-| `--format <format>`           | Output format. Default: `abapgit`.                          |
-| `--format-option <key=value>` | Repeatable format option.                                   |
-| `--folder-logic <logic>`      | **[DEPRECATED]** Use `--format-option folderLogic=<logic>`. |
-| `--debug`                     | Enable debug output.                                        |
+| Flag                          | Description                                               |
+| ----------------------------- | --------------------------------------------------------- |
+| `<transportNumber>`           | Transport request number to import.                       |
+| `[targetFolder]`              | Target folder for output.                                 |
+| `-o, --output <path>`         | Output directory (overrides `targetFolder`).              |
+| `-t, --object-types <types>`  | Comma-separated object types.                             |
+| `--format <format>`           | Output format. Default: `abapgit`.                        |
+| `--format-option <key=value>` | Repeatable format option.                                 |
+| `--folder-logic <logic>`      | **DEPRECATED** Use `--format-option folderLogic=<logic>`. |
+| `--debug`                     | Enable debug output.                                      |
 
 ## Examples
 
 ```bash
 # Single class, abapGit
 adt import object ZCL_DEMO ./src
+
+# Disambiguate same-named objects across ABAP object types
+adt import object Z_SHARED ./src --object-type DDLX
 
 # Package with type filter and subpackages excluded
 adt import package $ZDEMO ./repo \

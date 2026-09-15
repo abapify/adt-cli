@@ -1,6 +1,6 @@
 [pack]
 name = "adt-cli-gascity"
-description = "Generic Gas City pack for orchestrating adt-cli work via the adt CLI and adt-mcp API."
+description = "Gas City pack for orchestrating adt-cli work: AFF (abap-file-formats) support alongside abapGit."
 schema = 2
 
 [imports]
@@ -12,10 +12,30 @@ version = "sha:f895c0ff47d6ee9334ed282a416387eb5b084d24"
 source = "https://github.com/gastownhall/gascity/tree/main/examples/bd"
 version = "sha:f895c0ff47d6ee9334ed282a416387eb5b084d24"
 
+[imports.gascity]
+source = "https://github.com/gastownhall/gascity-packs/tree/main/gascity"
+version = "sha:db4bd054af468dce715293544d3a55d94f029a05"
+
+[imports.gc-roles]
+source = "https://github.com/gastownhall/gascity-packs/tree/main/gascity/roles"
+version = "sha:db4bd054af468dce715293544d3a55d94f029a05"
+
+# Mayor — always-on orchestrator: plans waves, dispatches beads, gates quality
 [[named_session]]
 template = "mayor"
 mode = "always"
 
+# Architect — designs specs, plans waves, reviews structural decisions
 [[named_session]]
-template = "coder"
+template = "architect"
+mode = "on_demand"
+
+# Builder — implements code from specs, TDD style
+[[named_session]]
+template = "builder"
+mode = "on_demand"
+
+# Reviewer — reviews PRs, runs checks, gates quality
+[[named_session]]
+template = "reviewer"
 mode = "on_demand"

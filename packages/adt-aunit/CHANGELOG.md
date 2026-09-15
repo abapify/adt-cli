@@ -1,3 +1,14 @@
+## 0.4.2 (2026-09-08)
+
+### 🩹 Fixes
+
+- **aunit:** emit GitLab-resolvable JaCoCo paths ([#181](https://github.com/abapify/adt-cli/pull/181))
+- **aunit:** send SAP coverage query bodies ([#179](https://github.com/abapify/adt-cli/pull/179))
+
+### ❤️ Thank You
+
+- Petr Plenkov
+
 ## 0.4.1 (2026-05-29)
 
 This was a version bump only for adt-aunit to align it with other projects, there were no code changes.

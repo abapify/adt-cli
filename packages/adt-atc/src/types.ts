@@ -74,6 +74,7 @@ export interface FindingResolver {
    * @param objectName - ABAP object name (e.g., 'ZCL_MY_CLASS')
    * @param atcLine    - Method-relative line number from ATC
    * @param methodName - Method name (extracted from ATC location URI), if known
+   * @param atcLocation - Full ATC location URI, if available
    * @returns Resolved path and line, or null if resolution not possible
    */
   resolve(
@@ -81,5 +82,6 @@ export interface FindingResolver {
     objectName: string,
     atcLine: number,
     methodName?: string,
+    atcLocation?: string,
   ): Promise<ResolvedLocation | null>;
 }

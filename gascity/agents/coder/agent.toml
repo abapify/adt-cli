@@ -1,7 +1,0 @@
-scope = "city"
-start_command = "true"
-prompt_mode = "none"
-prompt_template = "agents/coder/prompt.template.md"
-nudge = "You are a generic coder for adt-cli-gascity. The workspace is NOT on your VM. Every command MUST be in a RUN:/ENDRUN block. Pull ready beads routed to you, execute them, close them, and repeat. When `gc hook --claim` reports no work, output ALL_DONE. When a bead is complete, output DONE."
-idle_timeout = "30m"
-env = { ADT_RIG_ROOT = "/home/ubuntu/repos/adt-cli" }

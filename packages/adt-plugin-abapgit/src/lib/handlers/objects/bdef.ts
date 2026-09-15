@@ -1,55 +1,38 @@
 /**
  * BDEF (RAP Behavior Definition) object handler for abapGit format
  *
- * BDEF is source-driven: the semantic content lives in a `.abdl` file
- * (the RAP behavior definition language) and abapGit stores it alongside
- * a minimal SKEY metadata block.
+ * BDEF is source-driven: the semantic content lives in an `.abdl` file.
+ * Supports BOTH formats:
+ *   - AFF (default): `.bdef.abdl` source + `.bdef.json` metadata sidecar
+ *   - Legacy XML:    `.bdef.abdl` source + `.bdef.xml` metadata
  *
- * File layout:
- *   src/zbp_foo.bdef.abdl   — behavior source (.abdl text)
- *   src/zbp_foo.bdef.xml    — minimal metadata wrapper
+ * File layout (AFF):
+ *   src/zbp_foo.bdef.abdl — behavior source text
+ *   src/zbp_foo.bdef.json — ABAP File Formats metadata
  *
- * The handler uses the string form of `createHandler` ('BDEF') because
- * the ADK object (`AdkBehaviorDefinition`) is a lightweight class without
- * the AdkObject save/lock machinery — all lifecycle is source-based.
- *
- * We override `serialize` so the source file gets the `.abdl` extension
- * instead of the default `.abap`.
+ * File layout (legacy):
+ *   src/zbp_foo.bdef.abdl — behavior source text
+ *   src/zbp_foo.bdef.xml  — legacy abapGit XML metadata
  */
 
 import { bdef } from '../../../schemas/generated';
-import { createHandler, type SerializedFile } from '../base';
-import { shouldIncludeSource } from '../source-inclusion';
+import { createHandler } from '../base';
 import {
-  FormatMaterializationError,
-  type FormatSerializeOptions,
-} from '@abapify/adt-plugin';
+  serializeDualFormat,
+  affGetSource,
+  affFromAbapGit,
+  affSetSources,
+  affFromAffJson,
+} from '../source-resolver';
+import type { FormatSerializeOptions } from '@abapify/adt-plugin';
 
-// BDEF is not derived from AdkObject — we cast to the minimal handler shape
-// via the string form of createHandler.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type BdefLike = any;
-
-type BdefSourceObject = { getSource?: () => Promise<string> | string };
-
-async function resolveBdefSource(
-  object: BdefSourceObject,
-  sources: Readonly<Record<string, string | undefined>> | undefined,
-): Promise<string | undefined> {
-  if (sources !== undefined) {
-    const keys = Object.keys(sources);
-    if (keys.some((key) => key !== 'main')) {
-      throw new FormatMaterializationError(
-        'FORMAT_SOURCE_COMPONENT_UNSUPPORTED',
-        `BDEF only supports the 'main' source component; received ${keys.join(', ')}.`,
-      );
-    }
-    return sources.main;
-  }
-  return typeof object?.getSource === 'function'
-    ? await object.getSource()
-    : '';
-}
+type BdefLike = {
+  name: string;
+  description?: string;
+  originalLanguage?: string;
+  abapLanguageVersion?: string;
+  getSource?: () => Promise<string> | string;
+};
 
 export const behaviorDefinitionHandler = createHandler<BdefLike, typeof bdef>(
   'BDEF',
@@ -66,48 +49,17 @@ export const behaviorDefinitionHandler = createHandler<BdefLike, typeof bdef>(
       },
     }),
 
-    // Source is `.abdl` text retrieved from ADT `source/main`.
-    getSource: (obj) =>
-      typeof obj?.getSource === 'function'
-        ? obj.getSource()
-        : Promise.resolve(''),
+    getSource: affGetSource,
+    fromAbapGit: ({ SKEY }) => affFromAbapGit(SKEY),
+    fromAffJson: (json) => affFromAffJson(json, ''),
 
-    fromAbapGit: ({ SKEY }) => ({
-      name: String(SKEY?.NAME ?? '').toUpperCase(),
-    }),
+    serialize: (object, ctx, options?: FormatSerializeOptions) =>
+      serializeDualFormat(object, ctx, options, {
+        typeLabel: 'BDEF',
+        sourceExt: 'abdl',
+        jsonExt: `${ctx.fileExtension}.json`,
+      }),
 
-    // Custom serialize — file extension for BDEF source is `.abdl`, not `.abap`.
-    async serialize(
-      object,
-      ctx,
-      options?: FormatSerializeOptions,
-    ): Promise<SerializedFile[]> {
-      const files: SerializedFile[] = [];
-      const objectName = ctx.getObjectName(object);
-
-      // Source: <name>.bdef.abdl. When a source map is supplied it is
-      // authoritative; otherwise fall back to the mutable object getter.
-      const source = await resolveBdefSource(object, options?.sources);
-      if (shouldIncludeSource(source, options?.sources?.main)) {
-        files.push(
-          ctx.createFile(`${objectName}.${ctx.fileExtension}.abdl`, source),
-        );
-      }
-
-      // Metadata: <name>.bdef.xml
-      const xmlContent = ctx.toAbapGitXml(object);
-      files.push(
-        ctx.createFile(`${objectName}.${ctx.fileExtension}.xml`, xmlContent),
-      );
-
-      return files;
-    },
-
-    setSources: (obj, sources) => {
-      if (sources.main !== undefined) {
-        (obj as unknown as { _pendingSource: string })._pendingSource =
-          sources.main;
-      }
-    },
+    setSources: affSetSources,
   },
 );

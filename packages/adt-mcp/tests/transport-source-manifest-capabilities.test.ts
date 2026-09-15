@@ -12,6 +12,17 @@ test('a transport source manifest replaces every immutable source URI with a cap
     {
       requestedTransports: ['DEVK900001'],
       scopeTransports: ['DEVK900001'],
+      inventory: [
+        {
+          pgmid: 'LIMU',
+          type: 'METH',
+          name: 'ZCL_SAFE RUN',
+          wbtype: 'CLAS',
+          uri: '/sap/bc/adt/oo/classes/zcl_safe',
+          objFunc: '',
+          sourceTransport: 'DEVK900001',
+        },
+      ],
       entries: [
         {
           canonicalKey: 'CLAS:ZCL_SAFE',
@@ -41,6 +52,16 @@ test('a transport source manifest replaces every immutable source URI with a cap
 
   const encoded = JSON.stringify(response);
   assert.ok(!encoded.includes('/sap/bc/adt/'));
+  assert.deepEqual(response.inventory, [
+    {
+      pgmid: 'LIMU',
+      type: 'METH',
+      name: 'ZCL_SAFE RUN',
+      wbtype: 'CLAS',
+      objFunc: '',
+      sourceTransport: 'DEVK900001',
+    },
+  ]);
   const entry = response.entries[0]!;
   assert.match(entry.base!.sourceCapability, /^src_/u);
   assert.match(entry.head!.sourceCapability, /^src_/u);

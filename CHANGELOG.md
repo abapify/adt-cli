@@ -1,3 +1,130 @@
+## 0.4.2 (2026-09-08)
+
+### 🚀 Features
+
+- add ADT proxy server with JSON↔XML conversion ([49271e22](https://github.com/abapify/adt-cli/commit/49271e22))
+- expose typed CTS transport metadata ([#186](https://github.com/abapify/adt-cli/pull/186))
+- **adt-flow:** add incremental transport checkout ([#150](https://github.com/abapify/adt-cli/pull/150))
+- **adt-mcp:** enforce destination scopes ([3bbb9bf9](https://github.com/abapify/adt-cli/commit/3bbb9bf9))
+- **adt-mcp:** verify signed invocations ([f782bf4f](https://github.com/abapify/adt-cli/commit/f782bf4f))
+- **adt-mcp:** enforce frozen AI Review reads ([3c19a052](https://github.com/abapify/adt-cli/commit/3c19a052))
+- **adt-mcp:** scope frozen reads to components ([2676ae8f](https://github.com/abapify/adt-cli/commit/2676ae8f))
+- **adt-mcp:** scope ATC runs without raw URIs ([6665107c](https://github.com/abapify/adt-cli/commit/6665107c))
+- **adt-mcp:** reject raw URI read targets ([c206c1d4](https://github.com/abapify/adt-cli/commit/c206c1d4))
+- **adt-mcp:** scope autonomous agent reads ([7baa09f8](https://github.com/abapify/adt-cli/commit/7baa09f8))
+- **adt-mcp:** classify bounded analysis execution ([f1d19e7b](https://github.com/abapify/adt-cli/commit/f1d19e7b))
+- **adt-mcp:** classify bounded analysis execution ([#141](https://github.com/abapify/adt-cli/pull/141))
+- **adt-mcp:** enforce scoped safe execution ([#143](https://github.com/abapify/adt-cli/pull/143))
+- **adt-mcp:** add delegated assistant read scope ([b59006b4](https://github.com/abapify/adt-cli/commit/b59006b4))
+- **adt-mcp:** add delegated assistant read scope ([#148](https://github.com/abapify/adt-cli/pull/148))
+- **adt-mcp:** arc-1 SAPRead parity for get_source ([#162](https://github.com/abapify/adt-cli/pull/162))
+- **adt-server:** add guarded MCP sidecar ([ebd6f5f5](https://github.com/abapify/adt-cli/commit/ebd6f5f5))
+- **adt-server:** configure signed MCP runtime ([d74109ef](https://github.com/abapify/adt-cli/commit/d74109ef))
+- **adt-server:** add capability-bound source reads ([c07df84d](https://github.com/abapify/adt-cli/commit/c07df84d))
+- **adt-server:** allow local REST bearer auth ([eff9104d](https://github.com/abapify/adt-cli/commit/eff9104d))
+- **adt-server:** normalize system transport search ([e9b0779e](https://github.com/abapify/adt-cli/commit/e9b0779e))
+- **adt-server:** release broker leases with audit ([90a43953](https://github.com/abapify/adt-cli/commit/90a43953))
+- **adt-server:** add canonical transport detail REST ([d6a74218](https://github.com/abapify/adt-cli/commit/d6a74218))
+- **adt-server:** schema capability source responses ([28a77ab5](https://github.com/abapify/adt-cli/commit/28a77ab5))
+- **adt-server:** paginate canonical package search ([96c41c30](https://github.com/abapify/adt-cli/commit/96c41c30))
+- **adt-server:** paginate canonical object search ([9e43a2ad](https://github.com/abapify/adt-cli/commit/9e43a2ad))
+- **adt-server:** require shared REST state secrets ([d031b846](https://github.com/abapify/adt-cli/commit/d031b846))
+- **adt-server:** page direct package objects ([f7971303](https://github.com/abapify/adt-cli/commit/f7971303))
+- **adt-server:** add canonical object metadata REST ([be7857dd](https://github.com/abapify/adt-cli/commit/be7857dd))
+- **adt-server:** add canonical object history REST ([40ba0aa5](https://github.com/abapify/adt-cli/commit/40ba0aa5))
+- **adt-server:** add bounded object source REST ([05ce2705](https://github.com/abapify/adt-cli/commit/05ce2705))
+- **adt-server:** add canonical ATC REST ([0c16a8f3](https://github.com/abapify/adt-cli/commit/0c16a8f3))
+- **adt-server:** generate typed REST client ([7ac85f6c](https://github.com/abapify/adt-cli/commit/7ac85f6c))
+- **adt-server:** wire safe_execute hooks from environment URLs ([#146](https://github.com/abapify/adt-cli/pull/146))
+- **badi:** add `adt badi <name> --implementations` ([#153](https://github.com/abapify/adt-cli/pull/153))
+- **badi:** classic BAdI read via vit/wb ([#153](https://github.com/abapify/adt-cli/pull/153), [#154](https://github.com/abapify/adt-cli/pull/154))
+- **cds:** support CDS and RAP ABAP File Formats ([#183](https://github.com/abapify/adt-cli/pull/183))
+- **cts:** create verified transport tasks ([99447319](https://github.com/abapify/adt-cli/commit/99447319))
+- **flow:** persist complete CTS inventories ([#182](https://github.com/abapify/adt-cli/pull/182))
+- **flow:** report partial transport import gaps ([#190](https://github.com/abapify/adt-cli/pull/190))
+- **gcts:** Full AFF abap-file-formats support — Wave 0+1+2 ([#193](https://github.com/abapify/adt-cli/pull/193))
+- **mcp:** bound current source reads ([e8da7e53](https://github.com/abapify/adt-cli/commit/e8da7e53))
+- **source-history:** add bounded ADT source history support ([04ecb578](https://github.com/abapify/adt-cli/commit/04ecb578))
+
+### 🩹 Fixes
+
+- address CodeRabbit review feedback ([a9676264](https://github.com/abapify/adt-cli/commit/a9676264))
+- address all review feedback - round 2 ([bbef42f2](https://github.com/abapify/adt-cli/commit/bbef42f2))
+- address CI feedback - error handling, fetch timeout, server crash risk ([0f2bb0c5](https://github.com/abapify/adt-cli/commit/0f2bb0c5))
+- use bunx instead of npx in auth hint ([89fc796b](https://github.com/abapify/adt-cli/commit/89fc796b))
+- address 3 blocking issues in ADT proxy rework ([c259a4e8](https://github.com/abapify/adt-cli/commit/c259a4e8))
+- address CI review feedback - security, reliability, and code quality ([4d540802](https://github.com/abapify/adt-cli/commit/4d540802))
+- address CI failures - remove dynamic RegExp, fix lint errors, add NX Cloud fallback ([66837675](https://github.com/abapify/adt-cli/commit/66837675))
+- review thread fixes (broker, session, source-history, docs, deps) ([3d20361a](https://github.com/abapify/adt-cli/commit/3d20361a))
+- verify CTS lifecycle and task deltas ([cbe83c5b](https://github.com/abapify/adt-cli/commit/cbe83c5b))
+- verify CTS lifecycle, task creation, and lock correlation ([#151](https://github.com/abapify/adt-cli/pull/151))
+- CTS lifecycle follow-ups — lock correlation, release details, flow scope ([#157](https://github.com/abapify/adt-cli/pull/157))
+- resolve R3TR function modules via function groups ([#187](https://github.com/abapify/adt-cli/pull/187))
+- **adk:** exclude SUSK CTS entries from source manifests ([#164](https://github.com/abapify/adt-cli/pull/164))
+- **adk:** skip unmaterializable transport objects ([#168](https://github.com/abapify/adt-cli/pull/168))
+- **adk:** release transport task via newreleasejobs, verify by reload ([#173](https://github.com/abapify/adt-cli/pull/173))
+- **adk:** resolve LIMU function module owners ([#188](https://github.com/abapify/adt-cli/pull/188))
+- **adk:** keep FUGR function module sources distinct ([#191](https://github.com/abapify/adt-cli/pull/191))
+- **adt-cli:** normalize source-history metadata output to avoid leaking source URIs ([4fbe2a8f](https://github.com/abapify/adt-cli/commit/4fbe2a8f))
+- **adt-flow:** ignore CTS release metadata during checkout ([#156](https://github.com/abapify/adt-cli/pull/156))
+- **adt-mcp:** freeze destination access ([8f3fc5c5](https://github.com/abapify/adt-cli/commit/8f3fc5c5))
+- **adt-mcp:** include objectUri in find_references and accept uri in get_source_version ([a1cdc51b](https://github.com/abapify/adt-cli/commit/a1cdc51b))
+- **adt-mcp,adt-server,adt-server-client:** resolve ESLint errors and unsafe finally ([cfe1c434](https://github.com/abapify/adt-cli/commit/cfe1c434))
+- **adt-server:** pass explicit authTagLength to aes-256-gcm decipher ([5186a0d4](https://github.com/abapify/adt-cli/commit/5186a0d4))
+- **adt-server:** require capability secrets in startAdtServer, use test helper in server tests ([d491cfae](https://github.com/abapify/adt-cli/commit/d491cfae))
+- **adt-server:** guard capability services behind rest/mcp, share secret assertion ([d43cc8a1](https://github.com/abapify/adt-cli/commit/d43cc8a1))
+- **atc:** resolve abapGit paths from full ATC locations ([#194](https://github.com/abapify/adt-cli/pull/194))
+- **aunit:** preserve coverage measurement links ([#175](https://github.com/abapify/adt-cli/pull/175))
+- **aunit:** parse external coverage measurement URI ([#176](https://github.com/abapify/adt-cli/pull/176))
+- **aunit:** send SAP coverage query bodies ([#179](https://github.com/abapify/adt-cli/pull/179))
+- **aunit:** emit GitLab-resolvable JaCoCo paths ([#181](https://github.com/abapify/adt-cli/pull/181))
+- **broker:** suppress Codacy SSRF false positive after UAA URL validation ([53a01945](https://github.com/abapify/adt-cli/commit/53a01945))
+- **broker:** use nosemgrep to suppress validated UAA fetch finding ([73829783](https://github.com/abapify/adt-cli/commit/73829783))
+- **broker:** use node:https for UAA token to avoid Codacy fetch SSRF false positive ([f30fabc8](https://github.com/abapify/adt-cli/commit/f30fabc8))
+- **cli:** honor lock correlation on source writes ([b2763ef7](https://github.com/abapify/adt-cli/commit/b2763ef7))
+- **cli:** honor explicit config for plugins ([#163](https://github.com/abapify/adt-cli/pull/163))
+- **cli:** keep payload stdout pipe-safe ([#165](https://github.com/abapify/adt-cli/pull/165))
+- **cli:** expose safe fetch failure diagnostics ([#174](https://github.com/abapify/adt-cli/pull/174))
+- **client:** support long-running SAP requests ([#177](https://github.com/abapify/adt-cli/pull/177))
+- **client:** pair timeout agent with undici fetch ([#178](https://github.com/abapify/adt-cli/pull/178))
+- **codacy:** suppress false-positive SSRF and object-injection findings ([05c807bc](https://github.com/abapify/adt-cli/commit/05c807bc))
+- **codacy:** avoid object-injection and user-controlled URL findings ([9c3a249a](https://github.com/abapify/adt-cli/commit/9c3a249a))
+- **codacy:** suppress SSRF false positive on validated ADT URL ([842c2341](https://github.com/abapify/adt-cli/commit/842c2341))
+- **codacy:** use bare nosemgrep suppression for fetch URL ([fd406ad3](https://github.com/abapify/adt-cli/commit/fd406ad3))
+- **codacy:** resolve open code-scanning alerts ([#167](https://github.com/abapify/adt-cli/pull/167))
+- **coverage:** request SAP XML responses ([#180](https://github.com/abapify/adt-cli/pull/180))
+- **cts:** harden task creation verification ([bb8d5862](https://github.com/abapify/adt-cli/commit/bb8d5862))
+- **cts:** preserve task identity from SAP response ([6bd4d02d](https://github.com/abapify/adt-cli/commit/6bd4d02d))
+- **cts:** prefer authoritative task number ([18266a60](https://github.com/abapify/adt-cli/commit/18266a60))
+- **cts:** reconcile task and source lifecycle ([34469d91](https://github.com/abapify/adt-cli/commit/34469d91))
+- **flow:** skip unsupported transport objects ([#166](https://github.com/abapify/adt-cli/pull/166))
+- **flow:** ignore unsupported manifest diagnostics ([#172](https://github.com/abapify/adt-cli/pull/172))
+- **import:** support typed CDS and RAP imports ([#185](https://github.com/abapify/adt-cli/pull/185))
+- **lint:** use const for defaultHeaders in proxy command ([8ebef5f4](https://github.com/abapify/adt-cli/commit/8ebef5f4))
+- **mcp:** bind immutable sources to capabilities ([ad45ebc4](https://github.com/abapify/adt-cli/commit/ad45ebc4))
+- **proxy:** skip set-cookie in forEach loop to prevent header flattening ([46a1ca47](https://github.com/abapify/adt-cli/commit/46a1ca47))
+- **quality:** resolve open GitHub Code Quality findings ([#159](https://github.com/abapify/adt-cli/pull/159))
+- **sast:** add bearer suppression and reduce registry nesting ([b0d7b17a](https://github.com/abapify/adt-cli/commit/b0d7b17a))
+- **server:** propagate request cancellation through ADT Server ([#160](https://github.com/abapify/adt-cli/pull/160))
+- **sonar:** resolve S2187 tests and triage cognitive complexity with NOSONAR ([25c39e09](https://github.com/abapify/adt-cli/commit/25c39e09))
+- **sonar:** add assertions to tests and suppress remaining complexity findings ([983b2dd7](https://github.com/abapify/adt-cli/commit/983b2dd7))
+- **sonar:** resolve MAJOR code smells and regenerate client ([1559c2cd](https://github.com/abapify/adt-cli/commit/1559c2cd))
+- **sonar:** resolve S4144, S6551, S6571, S6582, S6644, S7750, S7755, S7786, S5332 ([35b25a45](https://github.com/abapify/adt-cli/commit/35b25a45))
+- **sonar/codacy:** reduce destination-mode complexity and add test wrappers ([d0c8413f](https://github.com/abapify/adt-cli/commit/d0c8413f))
+- **source-capabilities:** require explicit secret or allowEphemeralSecret opt-in ([c421fba2](https://github.com/abapify/adt-cli/commit/c421fba2))
+- **ts-xsd:** quote XML property names in generated types ([#192](https://github.com/abapify/adt-cli/pull/192))
+
+### ❤️ Thank You
+
+- Birch (gastown)
+- Cursor @cursoragent
+- Devin @devin-ai-integration[bot]
+- Devin AI @devin-ai-integration[bot]
+- Maple (gastown)
+- Noah
+- Petr Plenkov @ThePlenkov
+- ThePlenkov @ThePlenkov
+
 ## 0.4.1 (2026-05-29)
 
 ### 🩹 Fixes
@@ -34,17 +161,17 @@
 - apply CodeRabbit auto-fixes ([68e47903](https://github.com/abapify/adt-cli/commit/68e47903))
 - address PR review — regex security, method detection, BTP 404, lint gate, specs ([bf634260](https://github.com/abapify/adt-cli/commit/bf634260))
 - reduce duplication, remove useless conditional, harden JSONC parser ([7181ab33](https://github.com/abapify/adt-cli/commit/7181ab33))
-- guard starts[0] with nullish coalescing for SonarCloud reliability ([77334cf7](https://github.com/abapify/adt-cli/commit/77334cf7))
+- guard starts\[0] with nullish coalescing for SonarCloud reliability ([77334cf7](https://github.com/abapify/adt-cli/commit/77334cf7))
 - use localeCompare in sort for SonarCloud S2871 reliability ([a40e9dec](https://github.com/abapify/adt-cli/commit/a40e9dec))
 - prefer-const lint error in cts tr objects command ([11da0c54](https://github.com/abapify/adt-cli/commit/11da0c54))
 - apply prettier formatting to service.ts ([52dfffae](https://github.com/abapify/adt-cli/commit/52dfffae))
 - optimize findObjectFiles index, restore transportNumber compat, dedup ImportContext ([4f08ee94](https://github.com/abapify/adt-cli/commit/4f08ee94))
 - resolve SonarCloud reliability and duplication findings ([ac951739](https://github.com/abapify/adt-cli/commit/ac951739))
-- use const variable for transportNumbers[0] to avoid non-null assertions ([12dbce6c](https://github.com/abapify/adt-cli/commit/12dbce6c))
+- use const variable for transportNumbers\[0] to avoid non-null assertions ([12dbce6c](https://github.com/abapify/adt-cli/commit/12dbce6c))
 - **aclass:** proper regex metacharacter escaping in `kw()` helper ([77908b41](https://github.com/abapify/adt-cli/commit/77908b41))
 - **aclass:** qualified method names + keyword method names ([cfe5839d](https://github.com/abapify/adt-cli/commit/cfe5839d))
 - **aclass+openai-codegen:** address PR #111 review findings ([#111](https://github.com/abapify/adt-cli/issues/111))
-- **adt-lint:** replace lazy '._?' with '[^']_' in token regex to fix S5852/polynomial-redos ([6238f973](https://github.com/abapify/adt-cli/commit/6238f973))
+- **adt-lint:** replace lazy '._?' with '\[^']_' in token regex to fix S5852/polynomial-redos ([6238f973](https://github.com/abapify/adt-cli/commit/6238f973))
 - **adt-pilot:** use https in test/example URLs to clear SonarCloud hotspots ([f7246654](https://github.com/abapify/adt-cli/commit/f7246654))
 - **adt-pilot:** use extensionless internal imports per bundler-imports rule ([d819a8de](https://github.com/abapify/adt-cli/commit/d819a8de))
 - **adt-pilot:** align declared deps with actual usage ([ffa6346f](https://github.com/abapify/adt-cli/commit/ffa6346f))
@@ -60,8 +187,8 @@
 
 - CodeRabbit
 - Cursor @cursoragent
-- Devin @devin-ai-integration[bot]
-- Devin AI @devin-ai-integration[bot]
+- Devin @devin-ai-integration\[bot]
+- Devin AI @devin-ai-integration\[bot]
 - Petr Plenkov
 - ThePlenkov @ThePlenkov
 
@@ -149,7 +276,7 @@
 
 ### ❤️ Thank You
 
-- Devin @devin-ai-integration[bot]
+- Devin @devin-ai-integration\[bot]
 - Petr Plenkov
 
 ## 0.3.0 (2026-04-20)
@@ -256,7 +383,7 @@
 
 - CodeRabbit
 - Codex @oai-codex
-- Devin @devin-ai-integration[bot]
+- Devin @devin-ai-integration\[bot]
 - Petr Plenkov
 - ThePlenkov @ThePlenkov
 
@@ -304,7 +431,7 @@
 - resolve SonarCloud quality gate failures ([e8cfed9](https://github.com/abapify/adt-cli/commit/e8cfed9))
 - address remaining SonarQube findings - complexity, duplication, and code quality ([11a3408](https://github.com/abapify/adt-cli/commit/11a3408))
 - update sonar-project.properties with exclusions and project key ([dc374f8](https://github.com/abapify/adt-cli/commit/dc374f8))
-- use [^<]+ in XML tag regexes to require non-empty content ([b459ea7](https://github.com/abapify/adt-cli/commit/b459ea7))
+- use \[^<]+ in XML tag regexes to require non-empty content ([b459ea7](https://github.com/abapify/adt-cli/commit/b459ea7))
 - simplify sonar exclusions to **/generated/** ([ecc42c5](https://github.com/abapify/adt-cli/commit/ecc42c5))
 - simplify sonar exclusions to **/generated/** ([2c2dad3](https://github.com/abapify/adt-cli/commit/2c2dad3))
 - remove trailing blank lines from sonar-project.properties ([56b8e5e](https://github.com/abapify/adt-cli/commit/56b8e5e))
@@ -325,7 +452,7 @@
 
 ### ❤️ Thank You
 
-- Devin @devin-ai-integration[bot]
+- Devin @devin-ai-integration\[bot]
 - Petr Plenkov
 - ThePlenkov @ThePlenkov
 

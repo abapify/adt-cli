@@ -5,5 +5,7 @@ export {
   outputJacocoReport,
   toSonarGenericCoverageXml,
   outputSonarGenericCoverageReport,
+  createAbapGitCoverageSourceResolver,
   type JacocoInput,
+  type CoverageSourcePathResolver,
 } from './jacoco';

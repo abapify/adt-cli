@@ -19,6 +19,7 @@ export {
   operationClassForMcpTool,
   type McpOperationClass,
   type McpRequestAccess,
+  type McpDelegatedAccess,
   type McpToolScope,
 } from './lib/tools/scope-catalogue.js';
 export type { ConnectionParams, ToolContext } from './lib/types';

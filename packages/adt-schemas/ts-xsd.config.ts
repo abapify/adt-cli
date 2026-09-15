@@ -87,6 +87,8 @@ const targetSchemas = [
   'custom/objectProperties',
   'custom/transportUseraction',
   'custom/ddlSource',
+  'custom/ddlxSource',
+  'custom/dtebSource',
   'custom/dclSource',
   'custom/srvdSource',
   'custom/acoverageResult',

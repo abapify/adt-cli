@@ -1,22 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Source: GET /sap/bc/adt/ddic/ddl/sources/{name} -->
-<ddl:source
-    xmlns:ddl="http://www.sap.com/adt/ddl"
-    xmlns:abapsource="http://www.sap.com/adt/abapsource"
-    xmlns:adtcore="http://www.sap.com/adt/core"
-    abapsource:fixPointArithmetic="true"
-    abapsource:activeUnicodeCheck="true"
-    adtcore:responsible="DEVELOPER"
-    adtcore:masterLanguage="EN"
-    adtcore:masterSystem="DEV"
-    adtcore:name="ZDDL_SAMPLE"
-    adtcore:type="DDLS/DF"
-    adtcore:changedAt="2025-01-01T12:00:00Z"
-    adtcore:version="active"
-    adtcore:createdAt="2025-01-01T12:00:00Z"
-    adtcore:changedBy="DEVELOPER"
-    adtcore:createdBy="DEVELOPER"
-    adtcore:description="Sample CDS view"
-    adtcore:language="EN">
-  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
-</ddl:source>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Sanitized ADT GET /sap/bc/adt/ddic/ddl/sources/{name} response. -->
+<ddl:ddlSource
+  xmlns:ddl="http://www.sap.com/adt/ddl"
+  xmlns:abapsource="http://www.sap.com/adt/abapsource"
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  abapsource:sourceUri="/sap/bc/adt/ddic/ddl/sources/z_aff_ddls/source/main"
+  abapsource:fixPointArithmetic="false"
+  abapsource:activeUnicodeCheck="false"
+  adtcore:responsible="AFF"
+  adtcore:masterLanguage="EN"
+  adtcore:masterSystem="DEV"
+  adtcore:abapLanguageVersion="0"
+  adtcore:name="Z_AFF_DDLS"
+  adtcore:type="DDLS/DF"
+  adtcore:changedAt="2000-01-01T00:00:00Z"
+  adtcore:version="active"
+  adtcore:createdAt="2000-01-01T00:00:00Z"
+  adtcore:changedBy="AFF"
+  adtcore:createdBy="AFF"
+  adtcore:description="Sanitized DDLS fixture"
+  adtcore:language="EN"
+  ddl:source_origin="abapDevelopmentTools"
+  ddl:source_type="viewEntity"
+>
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="./z_aff_ddls/source/main"
+    rel="http://www.sap.com/adt/relations/source"
+    type="text/plain"
+    title="Source Content"
+  />
+  <adtcore:packageRef
+    adtcore:uri="/sap/bc/adt/packages/z_aff"
+    adtcore:type="DEVC/K"
+    adtcore:name="Z_AFF"
+    adtcore:description="Sanitized package"
+  />
+</ddl:ddlSource>

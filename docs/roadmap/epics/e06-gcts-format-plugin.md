@@ -17,7 +17,7 @@ gCTS has its own on-disk layout (different from abapGit). Users on S/4HANA Cloud
 
 - gCTS file format docs: SAP Help → "git-enabled CTS file format". Capture relevant pages locally as references.
 - sapcli gCTS module (for shape, NOT for format — sapcli doesn't serialize, only commands): `tmp/sapcli-ref/sapcli/sap/cli/gcts.py`, `sap/adt/gcts.py`
-- Real gCTS-formatted repo example: see https://github.com/SAP-samples/abap-platform-sample-app or similar; clone to `tmp/gcts-sample/` for reference.
+- Real gCTS-formatted repo example: see <https://github.com/SAP-samples/abap-platform-sample-app> or similar; clone to `tmp/gcts-sample/` for reference.
 - Our abapGit plugin (template to mimic): `packages/adt-plugin-abapgit/src/lib/handlers/`
 
 ## Scope — files

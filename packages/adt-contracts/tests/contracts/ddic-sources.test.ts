@@ -18,8 +18,7 @@ class DdlSourcesScenario extends ContractScenario {
       method: 'GET',
       path: '/sap/bc/adt/ddic/ddl/sources/zddl_sample',
       headers: {
-        Accept:
-          'application/vnd.sap.adt.ddl.source.v2+xml, application/vnd.sap.adt.ddl.source.v1+xml',
+        Accept: 'application/vnd.sap.adt.ddlSource+xml',
       },
       response: {
         status: 200,
@@ -33,7 +32,7 @@ class DdlSourcesScenario extends ContractScenario {
       method: 'POST',
       path: '/sap/bc/adt/ddic/ddl/sources',
       headers: {
-        'Content-Type': 'application/vnd.sap.adt.ddl.source.v2+xml',
+        'Content-Type': 'application/vnd.sap.adt.ddlSource+xml',
       },
       body: { schema: ddlSource },
       response: { status: 200, schema: ddlSource },
@@ -69,7 +68,7 @@ class DclSourcesScenario extends ContractScenario {
       method: 'GET',
       path: '/sap/bc/adt/acm/dcl/sources/zdcl_sample',
       headers: {
-        Accept: 'application/vnd.sap.adt.acm.dcl.source.v1+xml',
+        Accept: 'application/vnd.sap.adt.dclSource+xml',
       },
       response: {
         status: 200,
@@ -83,7 +82,7 @@ class DclSourcesScenario extends ContractScenario {
       method: 'POST',
       path: '/sap/bc/adt/acm/dcl/sources',
       headers: {
-        'Content-Type': 'application/vnd.sap.adt.acm.dcl.source.v1+xml',
+        'Content-Type': 'application/vnd.sap.adt.dclSource+xml',
       },
       body: { schema: dclSource },
       response: { status: 200, schema: dclSource },

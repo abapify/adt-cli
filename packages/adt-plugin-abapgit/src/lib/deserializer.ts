@@ -22,36 +22,17 @@ import { extractFunctionDescriptors } from './handlers/objects/fugr';
 /**
  * abapGit file naming convention:
  * - XML metadata: {name}.{type}.xml (e.g., zcl_myclass.clas.xml)
+ * - AFF JSON metadata: {name}.{type}.json (e.g., zfoo.bdef.json)
  * - Source code: {name}.{type}.abap (e.g., zcl_myclass.clas.abap)
  * - Source includes: {name}.{type}.{suffix}.abap (e.g., zcl_myclass.clas.testclasses.abap)
+ * - AFF source files: {name}.{type}.abdl, {name}.{type}.acds, {name}.{type}.asrvd
  */
 
-/**
- * Parse abapGit filename to extract object info
- */
-export function parseAbapGitFilename(filename: string): {
-  name: string;
-  type: string;
-  suffix?: string;
-  extension: string;
-} | null {
-  // Match patterns like: name.type.xml, name.type.suffix.abap, or
-  // name.type.<suffix>.abdl/.asrvd source files.
-  const match = filename.match(
-    /^([^.]+)\.([^.]+)(?:\.([^.]+))?\.(xml|abap|abdl|asrvd)$/,
-  );
-  if (!match) return null;
+import { parseAbapGitFilename } from './filename-parser';
 
-  const [, name, type, suffixOrExt, extension] = match;
-
-  // If 4 parts, middle is suffix; if 3 parts, no suffix
-  return {
-    name: name.toUpperCase(),
-    type: type.toUpperCase(),
-    suffix: suffixOrExt && suffixOrExt !== extension ? suffixOrExt : undefined,
-    extension,
-  };
-}
+// Re-export for backward compatibility — format-plugin and other modules
+// import parseAbapGitFilename from deserializer.
+export { parseAbapGitFilename };
 
 /**
  * Group related files by object (name + type)
@@ -59,8 +40,205 @@ export function parseAbapGitFilename(filename: string): {
 interface ObjectFiles {
   name: string;
   type: string;
+  /** Legacy XML metadata file path (if present) */
   xmlFile?: string;
+  /** AFF JSON metadata file path (if present) */
+  jsonFile?: string;
   sourceFiles: Array<{ path: string; suffix?: string }>;
+}
+
+/**
+ * Resolve folder logic and start dir from .abapgit.xml
+ */
+async function resolveFolderConfig(fileTree: FileTree): Promise<{
+  folderLogic: import('./folder-logic').FolderLogic;
+  startDir: string;
+  hasAbapGitXml: boolean;
+}> {
+  let folderLogic: import('./folder-logic').FolderLogic = 'prefix';
+  let startDir = '';
+  const hasAbapGitXml = await fileTree.exists('.abapgit.xml');
+  if (hasAbapGitXml) {
+    try {
+      const xml = await fileTree.read('.abapgit.xml');
+      const meta = parseAbapGitMetadata(xml);
+      folderLogic = meta.folderLogic;
+      startDir = stripSlashes(meta.startingFolder);
+    } catch {
+      // Fall through to defaults if XML parsing fails
+    }
+  }
+  return { folderLogic, startDir, hasAbapGitXml };
+}
+
+/**
+ * Parse a metadata file path into an object key and register it in the map.
+ */
+function registerMetadataFile(
+  path: string,
+  supportedTypes: Set<string>,
+  objectMap: Map<string, ObjectFiles>,
+  field: 'xmlFile' | 'jsonFile',
+): void {
+  const filename = path.slice(path.lastIndexOf('/') + 1);
+  const parsed = parseAbapGitFilename(filename);
+  if (!parsed) return;
+  if (!supportedTypes.has(parsed.type.toLowerCase())) return;
+  if (parsed.suffix) return;
+
+  const key = `${parsed.name}:${parsed.type}`;
+  if (!objectMap.has(key)) {
+    objectMap.set(key, {
+      name: parsed.name,
+      type: parsed.type,
+      sourceFiles: [],
+    });
+  }
+  objectMap.get(key)![field] = path;
+}
+
+/**
+ * Collect all source files and attach them to their objects in the map.
+ */
+async function collectSourceFiles(
+  fileTree: FileTree,
+  objectMap: Map<string, ObjectFiles>,
+): Promise<void> {
+  const [abapFiles, abdlFiles, acdsFiles, asrvdFiles] = await Promise.all([
+    fileTree.glob('**/*.abap'),
+    fileTree.glob('**/*.abdl'),
+    fileTree.glob('**/*.acds'),
+    fileTree.glob('**/*.asrvd'),
+  ]);
+  for (const sourcePath of [
+    ...abapFiles,
+    ...abdlFiles,
+    ...acdsFiles,
+    ...asrvdFiles,
+  ]) {
+    const filename = sourcePath.slice(sourcePath.lastIndexOf('/') + 1);
+    const parsed = parseAbapGitFilename(filename);
+    if (!parsed) continue;
+    const obj = objectMap.get(`${parsed.name}:${parsed.type}`);
+    if (obj) obj.sourceFiles.push({ path: sourcePath, suffix: parsed.suffix });
+  }
+}
+
+/**
+ * Parse metadata (XML or JSON) and return values + isAffJson flag.
+ */
+async function parseMetadata(
+  fileTree: FileTree,
+  objFiles: ObjectFiles,
+  handler: ReturnType<typeof getHandler>,
+): Promise<{ values: Record<string, unknown>; isAffJson: boolean } | null> {
+  if (objFiles.jsonFile) {
+    const jsonContent = await fileTree.read(objFiles.jsonFile);
+    let jsonData: Record<string, unknown>;
+    try {
+      jsonData = JSON.parse(jsonContent) as Record<string, unknown>;
+    } catch (parseError) {
+      console.error(
+        `Failed to parse AFF JSON ${objFiles.jsonFile}:`,
+        parseError,
+      );
+      return null;
+    }
+    const values = handler?.fromAffJson
+      ? (handler.fromAffJson(jsonData) as Record<string, unknown>)
+      : jsonData;
+    return { values, isAffJson: true };
+  }
+  if (objFiles.xmlFile) {
+    const xmlContent = await fileTree.read(objFiles.xmlFile);
+    const parsed = handler!.schema.parse(xmlContent);
+    return {
+      values: (parsed as any)?.abapGit?.abap?.values ?? {},
+      isAffJson: false,
+    };
+  }
+  return null;
+}
+
+/**
+ * Build the payload from handler or filename fallback.
+ */
+function buildPayload(
+  handler: ReturnType<typeof getHandler>,
+  values: Record<string, unknown>,
+  isAffJson: boolean,
+  objFiles: ObjectFiles,
+): { name: string; description?: string; [key: string]: unknown } {
+  if (isAffJson && handler?.fromAffJson) {
+    return values as { name: string; description?: string };
+  }
+  if (isAffJson) {
+    return { name: objFiles.name };
+  }
+  if (handler?.fromAbapGit) {
+    return handler.fromAbapGit(values);
+  }
+  return { name: objFiles.name };
+}
+
+/**
+ * Set sources on an ADK object using handler or fallback.
+ */
+function setObjectSources(
+  handler: ReturnType<typeof getHandler>,
+  adkObject: AdkObject,
+  sources: Record<string, string>,
+): void {
+  if (Object.keys(sources).length === 0) return;
+  if (handler?.setSources) {
+    handler.setSources(adkObject, sources);
+    return;
+  }
+  if (sources['main']) (adkObject as any)._pendingSource = sources['main'];
+  if (Object.keys(sources).length > 1) {
+    (adkObject as any)._pendingSources = sources;
+  }
+}
+
+/**
+ * Resolve packageRef on an ADK object from folder logic or rootPackage.
+ */
+function resolvePackageRef(
+  adkObject: AdkObject,
+  options: ExportOptions | undefined,
+  hasAbapGitXml: boolean,
+  folderLogic: import('./folder-logic').FolderLogic,
+): void {
+  if (!options?.rootPackage) return;
+  const data = (adkObject as any)._data;
+  if (!data || data.packageRef) return;
+  if (hasAbapGitXml) {
+    const relDir = (adkObject as any)._relDir ?? '';
+    const pkgName = resolvePackageFromDir(
+      relDir,
+      folderLogic,
+      options.rootPackage,
+    );
+    data.packageRef = { name: pkgName };
+  } else {
+    data.packageRef = { name: options.rootPackage };
+  }
+}
+
+/**
+ * Set abapLanguageVersion on an ADK object if provided in options.
+ */
+function setAbapLanguageVersion(
+  adkObject: AdkObject,
+  options: ExportOptions | undefined,
+): void {
+  if (!options?.abapLanguageVersion) return;
+  const data = (adkObject as any)._data;
+  if (data && !data.abapLanguageVersion) {
+    data.abapLanguageVersion =
+      abapLangVerToAdt(options.abapLanguageVersion) ??
+      options.abapLanguageVersion;
+  }
 }
 
 /**
@@ -78,159 +256,74 @@ export async function* deserialize(
   client: AdtClient,
   options?: ExportOptions,
 ): AsyncGenerator<AdkObject> {
-  // Get ADK factory for creating objects
   const adk = createAdk(client);
+  const { folderLogic, startDir, hasAbapGitXml } =
+    await resolveFolderConfig(fileTree);
 
-  // Resolve folder logic from .abapgit.xml (optional — defaults used when missing)
-  let folderLogic: import('./folder-logic').FolderLogic = 'prefix';
-  let startDir = '';
-  const hasAbapGitXml = await fileTree.exists('.abapgit.xml');
-  if (hasAbapGitXml) {
-    try {
-      const xml = await fileTree.read('.abapgit.xml');
-      const meta = parseAbapGitMetadata(xml);
-      folderLogic = meta.folderLogic;
-      startDir = stripSlashes(meta.startingFolder);
-    } catch {
-      // Fall through to defaults if XML parsing fails
-    }
-  }
+  // Find all metadata files (XML = legacy, JSON = AFF)
+  const [xmlFiles, jsonFiles] = await Promise.all([
+    fileTree.glob('**/*.xml'),
+    fileTree.glob('**/*.json'),
+  ]);
 
-  // Find all XML files (these define the objects)
-  const xmlFiles = await fileTree.glob('**/*.xml');
-
-  // Filter to supported types and group by object
   const objectMap = new Map<string, ObjectFiles>();
   const supportedTypes = new Set(
     getSupportedTypes().map((t) => t.toLowerCase()),
   );
 
   for (const xmlPath of xmlFiles) {
-    // Skip .abapgit.xml metadata file
     if (xmlPath.endsWith('.abapgit.xml')) continue;
-
-    // Skip package.devc.xml - packages are not deployed, they must exist in target
     if (xmlPath.endsWith('package.devc.xml')) continue;
-
-    const filename = xmlPath.slice(xmlPath.lastIndexOf('/') + 1);
-    const parsed = parseAbapGitFilename(filename);
-
-    if (!parsed) continue;
-    if (!supportedTypes.has(parsed.type.toLowerCase())) continue;
-
-    // For compound objects (e.g., FUGR), multiple XML files share the same
-    // name:type key. Only the main XML (no suffix) is the metadata file;
-    // include XMLs (with suffix, e.g., PROGDIR) are sub-artifacts.
-    if (parsed.suffix) continue;
-
-    const key = `${parsed.name}:${parsed.type}`;
-
-    if (!objectMap.has(key)) {
-      objectMap.set(key, {
-        name: parsed.name,
-        type: parsed.type,
-        sourceFiles: [],
-      });
-    }
-
-    const obj = objectMap.get(key)!;
-    obj.xmlFile = xmlPath;
+    registerMetadataFile(xmlPath, supportedTypes, objectMap, 'xmlFile');
   }
 
-  // Find source files for each object (abap + new BDEF/SRVD extensions)
-  const [abapFiles, abdlFiles, asrvdFiles] = await Promise.all([
-    fileTree.glob('**/*.abap'),
-    fileTree.glob('**/*.abdl'),
-    fileTree.glob('**/*.asrvd'),
-  ]);
-  const sourceFiles = [...abapFiles, ...abdlFiles, ...asrvdFiles];
-
-  for (const sourcePath of sourceFiles) {
-    const filename = sourcePath.slice(sourcePath.lastIndexOf('/') + 1);
-    const parsed = parseAbapGitFilename(filename);
-
-    if (!parsed) continue;
-
-    const key = `${parsed.name}:${parsed.type}`;
-    const obj = objectMap.get(key);
-
-    if (obj) {
-      obj.sourceFiles.push({ path: sourcePath, suffix: parsed.suffix });
-    }
+  for (const jsonPath of jsonFiles) {
+    registerMetadataFile(jsonPath, supportedTypes, objectMap, 'jsonFile');
   }
+
+  await collectSourceFiles(fileTree, objectMap);
 
   // Process each object and yield
   for (const [, objFiles] of objectMap) {
-    if (!objFiles.xmlFile) continue;
+    if (!objFiles.xmlFile && !objFiles.jsonFile) continue;
 
     const handler = getHandler(objFiles.type);
     if (!handler) continue;
 
     try {
-      // Read and parse XML using handler's schema
-      const xmlContent = await fileTree.read(objFiles.xmlFile);
-      const parsed = handler.schema.parse(xmlContent);
-      // Schema parses to { abapGit: { abap: { values: ... } } }
-      const values = (parsed as any)?.abapGit?.abap?.values ?? {};
+      const meta = await parseMetadata(fileTree, objFiles, handler);
+      if (!meta) continue;
+      const { values, isAffJson } = meta;
 
-      // Read source files, mapping suffixes using handler's suffixToSourceKey
+      // Read source files
       const sources: Record<string, string> = {};
       for (const { path, suffix } of objFiles.sourceFiles) {
         const content = await fileTree.read(path);
-        // Map suffix to source key using handler's mapping, or use suffix as-is
         const sourceKey = suffix
           ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
           : 'main';
         sources[sourceKey] = content;
       }
 
-      // Get payload from handler (pure data mapping) or build default
-      const payload: {
-        name: string;
-        description?: string;
-        [key: string]: unknown;
-      } = handler.fromAbapGit
-        ? handler.fromAbapGit(values)
-        : { name: objFiles.name };
-
-      // Use filename as fallback if name not in XML (e.g., DEVC)
+      const payload = buildPayload(handler, values, isAffJson, objFiles);
       const objectName = payload.name || objFiles.name;
-
-      // Build full data object with name
-      const fullData = { ...payload, name: objectName };
-
-      // Create ADK object with data (pre-loaded, no need to call load())
-      // Use payload type if available (e.g., TABL/DS for structures),
-      // falling back to filename-derived type
       const adkType =
         typeof payload.type === 'string' ? payload.type : objFiles.type;
-      const adkObject = adk.getWithData(fullData, adkType) as AdkObject;
+      const adkObject = adk.getWithData(
+        { ...payload, name: objectName },
+        adkType,
+      ) as AdkObject;
 
-      // Set sources on object using handler's setSources method
-      if (Object.keys(sources).length > 0) {
-        if (handler.setSources) {
-          handler.setSources(adkObject, sources);
-        } else {
-          // Fallback: store sources directly if handler doesn't provide setSources
-          if (sources['main']) {
-            (adkObject as any)._pendingSource = sources['main'];
-          }
-          if (Object.keys(sources).length > 1) {
-            (adkObject as any)._pendingSources = sources;
-          }
-        }
-      }
+      setObjectSources(handler, adkObject, sources);
 
-      // Store additional payload properties
       if (payload.description) {
         (adkObject as any)._pendingDescription = payload.description;
       }
 
-      // Compute relative directory and store on object for package resolution
-      // This metadata is always computed so the export command can auto-detect
-      // the root package from SAP and resolve packages later if needed.
+      // Compute relative directory for package resolution
       if (hasAbapGitXml) {
-        const sourceDir = objFiles.xmlFile.split('/').slice(0, -1).join('/');
+        const metadataFile = objFiles.xmlFile ?? objFiles.jsonFile ?? '';
+        const sourceDir = metadataFile.split('/').slice(0, -1).join('/');
         const relDir = sourceDir.startsWith(startDir)
           ? sourceDir.slice(startDir.length).replace(/^\/+/, '')
           : sourceDir;
@@ -238,89 +331,58 @@ export async function* deserialize(
         (adkObject as any)._folderLogic = folderLogic;
       }
 
-      // Resolve packageRef when rootPackage is explicitly provided
-      if (options?.rootPackage) {
-        const data = (adkObject as any)._data;
-        if (data && !data.packageRef) {
-          if (hasAbapGitXml) {
-            const relDir = (adkObject as any)._relDir ?? '';
-            const pkgName = resolvePackageFromDir(
-              relDir,
-              folderLogic,
-              options.rootPackage,
-            );
-            data.packageRef = { name: pkgName };
-          } else {
-            // No .abapgit.xml: assign rootPackage directly
-            data.packageRef = { name: options.rootPackage };
-          }
-        }
-      }
-
-      // Set abapLanguageVersion if provided and not already set
-      // Map numeric codes ("5") to ADT values ("cloudDevelopment")
-      if (options?.abapLanguageVersion) {
-        const data = (adkObject as any)._data;
-        if (data && !data.abapLanguageVersion) {
-          data.abapLanguageVersion =
-            abapLangVerToAdt(options.abapLanguageVersion) ??
-            options.abapLanguageVersion;
-        }
-      }
+      resolvePackageRef(adkObject, options, hasAbapGitXml, folderLogic);
+      setAbapLanguageVersion(adkObject, options);
 
       yield adkObject;
 
       // For compound objects (FUGR), yield child objects (function modules)
       if (objFiles.type === 'FUGR' && payload._functions) {
-        const fmDescriptors = extractFunctionDescriptors(payload._functions);
-        const fmSources = (adkObject as any)._pendingFmSources as
-          Record<string, string> | undefined;
-
-        for (const fm of fmDescriptors) {
-          try {
-            // Build FM data object with _groupName for factory construction
-            const fmData: Record<string, unknown> = {
-              name: fm.funcName,
-              type: 'FUGR/FF',
-              _groupName: objectName, // parent FUGR name
-              description: fm.shortText ?? '',
-              processingType: fm.processingType,
-              basXMLEnabled: fm.basXMLEnabled,
-            };
-
-            const fmObject = adk.getWithData(fmData, 'FUGR/FF') as AdkObject;
-
-            // Set FM source if available
-            const fmSourceKey = fm.funcName.toLowerCase();
-            const fmSource = fmSources?.[fmSourceKey];
-            if (fmSource) {
-              (fmObject as any)._pendingSource = fmSource;
-            }
-
-            // Set abapLanguageVersion if provided
-            if (options?.abapLanguageVersion) {
-              const fmObjData = (fmObject as any)._data;
-              if (fmObjData && !fmObjData.abapLanguageVersion) {
-                fmObjData.abapLanguageVersion =
-                  abapLangVerToAdt(options.abapLanguageVersion) ??
-                  options.abapLanguageVersion;
-              }
-            }
-
-            yield fmObject;
-          } catch (fmError) {
-            console.error(
-              `Failed to deserialize FM ${fm.funcName} in FUGR ${objectName}:`,
-              fmError,
-            );
-          }
-        }
+        yield* yieldFugrChildren(adk, payload, objectName, options, adkObject);
       }
     } catch (error) {
-      // Log error but continue with other objects
       console.error(
         `Failed to deserialize ${objFiles.type} ${objFiles.name}:`,
         error,
+      );
+    }
+  }
+}
+
+/**
+ * Yield FUGR child function modules as separate ADK objects.
+ */
+async function* yieldFugrChildren(
+  adk: ReturnType<typeof createAdk>,
+  payload: { _functions?: unknown },
+  parentName: string,
+  options: ExportOptions | undefined,
+  parentObject: AdkObject,
+): AsyncGenerator<AdkObject> {
+  const fmDescriptors = extractFunctionDescriptors(payload._functions);
+  const fmSources = (parentObject as any)._pendingFmSources as
+    Record<string, string> | undefined;
+  for (const fm of fmDescriptors) {
+    try {
+      const fmObject = adk.getWithData(
+        {
+          name: fm.funcName,
+          type: 'FUGR/FF',
+          _groupName: parentName,
+          description: fm.shortText ?? '',
+          processingType: fm.processingType,
+          basXMLEnabled: fm.basXMLEnabled,
+        },
+        'FUGR/FF',
+      ) as AdkObject;
+      const fmSource = fmSources?.[fm.funcName.toLowerCase()];
+      if (fmSource) (fmObject as any)._pendingSource = fmSource;
+      setAbapLanguageVersion(fmObject, options);
+      yield fmObject;
+    } catch (fmError) {
+      console.error(
+        `Failed to deserialize FM ${fm.funcName} in FUGR ${parentName}:`,
+        fmError,
       );
     }
   }

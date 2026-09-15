@@ -5,7 +5,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TransportSourceManifest } from '@abapify/adk';
 import type { SourceVersionRef } from '@abapify/adt-client';
 import type { FormatPlugin } from '@abapify/adt-plugin';
-import { createAdtFlowService, type FlowCheckoutDependencies } from '../src';
+import {
+  createAdtFlowService,
+  AdtFlowError,
+  type FlowCheckoutDependencies,
+} from '../src';
 
 const roots: string[] = [];
 
@@ -37,6 +41,17 @@ function manifest(
   return {
     requestedTransports: [transport],
     scopeTransports: [transport],
+    inventory: [
+      {
+        pgmid: 'R3TR',
+        type: 'CLAS',
+        name: 'ZCL_SAMPLE',
+        wbtype: 'CLAS',
+        uri: '/sap/bc/adt/oo/classes/zcl_sample',
+        objFunc: '',
+        sourceTransport: transport,
+      },
+    ],
     entries: [
       {
         object: {
@@ -58,6 +73,7 @@ function manifest(
 
 function unsupportedEntry(
   name = 'PAYHX01',
+  sourceTransport = 'DEVK900001',
 ): TransportSourceManifest['entries'][number] {
   return {
     object: {
@@ -67,12 +83,37 @@ function unsupportedEntry(
       packageName: 'ZROOT_FEATURE',
     },
     component: { id: 'object' },
-    sourceTransport: 'DEVK900001',
+    sourceTransport,
     changeKind: 'unsupported',
     exact: false,
     diagnostic: {
       code: 'OBJECT_TYPE_UNSUPPORTED',
       message: 'No source-history loader is registered for this object type.',
+    },
+  };
+}
+
+function unsupportedDiagnosticEntry(): TransportSourceManifest['entries'][number] {
+  return {
+    ...unsupportedEntry('ZCL_TR_LOAN_CUSTOM_ENTITY FETCH_DATA_LIST'),
+    object: {
+      pgmid: 'R3TR',
+      type: 'METH',
+      name: 'ZCL_TR_LOAN_CUSTOM_ENTITY FETCH_DATA_LIST',
+      packageName: 'ZROOT_FEATURE',
+    },
+    changeKind: 'ambiguous',
+  };
+}
+
+function metadataLoadFailedEntry(
+  name = 'PAYHX01',
+): TransportSourceManifest['entries'][number] {
+  return {
+    ...unsupportedEntry(name),
+    diagnostic: {
+      code: 'OBJECT_METADATA_LOAD_FAILED',
+      message: 'SAP ADT rejected repository object metadata retrieval.',
     },
   };
 }
@@ -263,6 +304,132 @@ describe('transport checkout', () => {
           await readFile(join(workspace, `.adt/tr/${transport}.json`), 'utf8'),
         ).requestedTransports,
       ).toEqual(['DEVK900001', 'DEVK900002']);
+    }
+  });
+
+  it('persists a complete CTS inventory in one descriptor per request and task', async () => {
+    const workspace = await root();
+    const current = manifest(
+      'modified',
+      version('before'),
+      version('after'),
+      'DEVK900002',
+    );
+    current.scopeTransports = ['DEVK900001', 'DEVK900002'];
+    current.inventory.push({
+      pgmid: 'LIMU',
+      type: 'ZZZZ',
+      name: 'ZUNSUPPORTED',
+      wbtype: 'ZZZZ',
+      uri: '/sap/bc/adt/repository/informationsystem/objectproperties/values',
+      objFunc: '',
+      sourceTransport: 'DEVK900002',
+    });
+    current.entries.push(unsupportedEntry('ZUNSUPPORTED', 'DEVK900002'));
+
+    await createAdtFlowService(dependencies(() => current)).checkout({
+      root: workspace,
+      transports: ['DEVK900002'],
+      config,
+    });
+
+    const parent = JSON.parse(
+      await readFile(join(workspace, '.adt/tr/DEVK900001.json'), 'utf8'),
+    );
+    const task = JSON.parse(
+      await readFile(join(workspace, '.adt/tr/DEVK900002.json'), 'utf8'),
+    );
+    expect(parent.inventory).toEqual([]);
+    expect(task.inventory).toEqual([
+      expect.objectContaining({
+        type: 'CLAS',
+        name: 'ZCL_SAMPLE',
+        sourceTransport: 'DEVK900002',
+      }),
+      expect.objectContaining({
+        type: 'ZZZZ',
+        name: 'ZUNSUPPORTED',
+        sourceTransport: 'DEVK900002',
+      }),
+    ]);
+  });
+
+  it('rejects the exact-head fast path when a scoped descriptor is missing', async () => {
+    const workspace = await root();
+    const current = manifest(
+      'added',
+      undefined,
+      version('task-two'),
+      'DEVK900002',
+    );
+    current.scopeTransports = ['DEVK900001', 'DEVK900002'];
+    const ports = dependencies(() => current);
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900002'],
+      config,
+    });
+    await rm(join(workspace, '.adt/tr/DEVK900001.json'));
+    ports.buildManifest.mockClear();
+
+    const result = await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900002'],
+      config,
+    });
+
+    expect(result.fastPath).not.toBe('exact-head');
+    expect(ports.buildManifest).toHaveBeenCalledOnce();
+    await expect(
+      readFile(join(workspace, '.adt/tr/DEVK900001.json'), 'utf8'),
+    ).resolves.toContain('DEVK900001');
+  });
+
+  it('updates every scoped descriptor during a repeated task-only checkout', async () => {
+    const workspace = await root();
+    let current = manifest(
+      'added',
+      undefined,
+      version('task-two'),
+      'DEVK900002',
+    );
+    current.scopeTransports = ['DEVK900001', 'DEVK900002'];
+    const ports = dependencies(() => current);
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900002'],
+      config,
+    });
+
+    current = {
+      ...current,
+      entries: [
+        {
+          ...current.entries[0]!,
+          head: version('task-two-updated'),
+        },
+      ],
+    };
+    const taskDescriptorPath = join(workspace, '.adt/tr/DEVK900002.json');
+    const taskDescriptor = JSON.parse(
+      await readFile(taskDescriptorPath, 'utf8'),
+    );
+    taskDescriptor.configDigest = '0'.repeat(64);
+    await writeFile(taskDescriptorPath, JSON.stringify(taskDescriptor));
+
+    await expect(
+      flow.checkout({
+        root: workspace,
+        transports: ['DEVK900002'],
+        config,
+      }),
+    ).resolves.toMatchObject({ fastPath: 'none' });
+    for (const transport of ['DEVK900001', 'DEVK900002']) {
+      await expect(
+        readFile(join(workspace, `.adt/tr/${transport}.json`), 'utf8'),
+      ).resolves.toContain('DEVK900002');
     }
   });
 
@@ -544,6 +711,51 @@ describe('transport checkout', () => {
     expect(ports.loadObject).not.toHaveBeenCalled();
   });
 
+  it('materializes the exact subset only when partial mode explicitly opts in', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('before'), version('after'));
+    current.entries.push({
+      object: {
+        pgmid: 'R3TR',
+        type: 'CLAS',
+        name: 'ZCL_ZZZ_INEXACT',
+        packageName: 'ZROOT_FEATURE',
+      },
+      component: { id: 'main' },
+      sourceTransport: 'DEVK900001',
+      changeKind: 'ambiguous',
+      exact: false,
+      diagnostic: {
+        code: 'SOURCE_HISTORY_INTERVENING_VERSION',
+        message: 'A version from another transport occurs inside this scope.',
+      },
+    });
+    const ports = dependencies(() => current);
+
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+      partial: true,
+    });
+
+    expect(result.changed).toContain('src/feature/zcl_sample.clas.abap');
+    expect(result.skipped).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          object: 'CLAS/ZCL_ZZZ_INEXACT',
+          component: 'main',
+          diagnostic: 'SOURCE_HISTORY_INTERVENING_VERSION',
+          sourceTransport: 'DEVK900001',
+        }),
+      ]),
+    );
+    const descriptor = JSON.parse(
+      await readFile(join(workspace, '.adt/tr/DEVK900001.json'), 'utf8'),
+    );
+    expect(descriptor.incomplete).toBe(true);
+  });
+
   it('skips unsupported objects while materializing supported objects from the same transport', async () => {
     const workspace = await root();
     const current = manifest('modified', version('before'), version('after'));
@@ -566,10 +778,44 @@ describe('transport checkout', () => {
         object: 'TABD/PAYHX01',
         component: 'object',
         diagnostic: 'OBJECT_TYPE_UNSUPPORTED',
+        sourceTransport: 'DEVK900001',
       },
     ]);
     expect(result.changed).toContain('src/feature/zcl_sample.clas.abap');
     expect(ports.loadObject).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips an unsupported diagnostic even when its manifest change kind is ambiguous', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('before'), version('after'));
+    current.entries.push(unsupportedDiagnosticEntry());
+    const ports = dependencies(() => current);
+    ports.readSource.mockResolvedValue('stable source\n');
+    ports.loadObject.mockResolvedValue({
+      object: { name: 'ZCL_SAMPLE' },
+      packagePath: ['ZROOT', 'ZROOT_FEATURE'],
+    });
+
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+
+    expect(result.skipped).toEqual([
+      {
+        object: 'METH/ZCL_TR_LOAN_CUSTOM_ENTITY FETCH_DATA_LIST',
+        component: 'object',
+        diagnostic: 'OBJECT_TYPE_UNSUPPORTED',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+    expect(result.changed).toEqual([
+      'src/feature/zcl_sample.clas.abap',
+      'src/feature/zcl_sample.clas.xml',
+    ]);
+    expect(ports.loadObject).toHaveBeenCalledTimes(1);
+    expect(ports.readSource).toHaveBeenCalledTimes(1);
   });
 
   it('reconciles a package reassignment as old-path removal plus new-path writes', async () => {
@@ -707,6 +953,7 @@ describe('transport checkout', () => {
     const current: TransportSourceManifest = {
       requestedTransports: ['DEVK900001'],
       scopeTransports: ['DEVK900001'],
+      inventory: [],
       entries: [unsupportedEntry()],
     };
     const ports = dependencies(() => current);
@@ -726,6 +973,72 @@ describe('transport checkout', () => {
     });
 
     expect(result.skipped).toEqual([]);
+    expect(ports.loadObject).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips metadata-load-failed objects without re-loading metadata when an application component filter is configured', async () => {
+    const workspace = await root();
+    const current: TransportSourceManifest = {
+      requestedTransports: ['DEVK900001'],
+      scopeTransports: ['DEVK900001'],
+      inventory: [],
+      entries: [metadataLoadFailedEntry()],
+    };
+    const ports = dependencies(() => current);
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config: {
+        ...config,
+        include: { applicationComponents: ['ZAPP'] },
+      },
+    });
+
+    expect(result.skipped).toEqual([
+      {
+        object: 'TABD/PAYHX01',
+        component: 'object',
+        diagnostic: 'OBJECT_METADATA_LOAD_FAILED',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+    expect(ports.loadObject).not.toHaveBeenCalled();
+  });
+
+  it('records unsupported objects in skipped when loadObject fails during application component filtering', async () => {
+    const workspace = await root();
+    const current: TransportSourceManifest = {
+      requestedTransports: ['DEVK900001'],
+      scopeTransports: ['DEVK900001'],
+      inventory: [],
+      entries: [unsupportedEntry()],
+    };
+    const ports = dependencies(() => current);
+    ports.loadObject.mockRejectedValue(
+      new AdtFlowError(
+        'object_metadata_unavailable',
+        'ADT returned an unsupported object metadata model.',
+        { object: 'R3TR/TABD/PAYHX01' },
+      ),
+    );
+
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config: {
+        ...config,
+        include: { applicationComponents: ['ZAPP'] },
+      },
+    });
+
+    expect(result.skipped).toEqual([
+      {
+        object: 'TABD/PAYHX01',
+        component: 'object',
+        diagnostic: 'OBJECT_TYPE_UNSUPPORTED',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
     expect(ports.loadObject).toHaveBeenCalledTimes(1);
   });
 });

@@ -13,6 +13,10 @@ import { gctsFormatPlugin } from './lib/format/gcts-format';
 // evaluation (the same guard abapGit uses).
 registerFormatPlugin(gctsFormatPlugin);
 
+// Register 'aff' as an alias for the same plugin so `getFormatPlugin('aff')`
+// resolves to the gCTS/AFF plugin (both ids share the same on-disk layout).
+registerFormatPlugin({ ...gctsFormatPlugin, id: 'aff' });
+
 // FormatPlugin — preferred public entry-point.
 export { gctsFormatPlugin } from './lib/format/gcts-format';
 

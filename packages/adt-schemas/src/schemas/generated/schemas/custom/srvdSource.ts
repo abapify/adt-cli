@@ -21,7 +21,7 @@ export default {
   elementFormDefault: 'qualified',
   element: [
     {
-      name: 'source',
+      name: 'srvdSource',
       type: 'srvd:SrvdSource',
     },
   ],
@@ -31,6 +31,18 @@ export default {
       complexContent: {
         extension: {
           base: 'abapsource:AbapSourceMainObject',
+          attribute: [
+            {
+              name: 'sourceOrigin',
+              type: 'xsd:string',
+              use: 'optional',
+            },
+            {
+              name: 'srvdSourceType',
+              type: 'xsd:string',
+              use: 'optional',
+            },
+          ],
         },
       },
     },

@@ -82,7 +82,7 @@ Commit and push verified changes to the scoped feature branch without a separate
   `/sap/bc/adt/businessservices/bindings` (GET/POST/PUT/DELETE +
   lock/unlock + `publish` / `unpublish` on `/publishedstates`).
   Content-Type
-  `application/vnd.sap.adt.businessservices.servicebinding.v1+xml`.
+  `application/vnd.sap.adt.businessservices.servicebinding.v2+xml`.
   Built on the `crud()` helper with the publish/unpublish endpoints
   spliced on top. SRVB is metadata-only — no source text endpoints.
 - Schema: `sap/servicebinding.xsd` added to the adt-schemas target

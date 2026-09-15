@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<aunit:runResult xmlns:aunit="http://www.sap.com/adt/aunit">
+  <external>
+    <coverage
+      xmlns:adtcore="http://www.sap.com/adt/core"
+      adtcore:uri="/sap/bc/adt/runtime/traces/coverage/measurements/06B02025CD671FD1A7B6AB1C7D024677"
+    />
+  </external>
+  <program
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    adtcore:uri="/sap/bc/adt/oo/classes/zcl_example"
+    adtcore:type="CLAS/OC"
+    adtcore:name="ZCL_EXAMPLE"
+    uriType="semantic"
+  />
+</aunit:runResult>

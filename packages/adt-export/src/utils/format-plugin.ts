@@ -11,6 +11,10 @@ import type { AdtPlugin } from '@abapify/adt-plugin';
 const FORMAT_SHORTCUTS: Record<string, string> = {
   abapgit: '@abapify/adt-plugin-abapgit',
   ag: '@abapify/adt-plugin-abapgit', // alias
+  // gCTS / AFF format plugin. `aff` is the primary id; `gcts` is an alias —
+  // both share the same on-disk layout (SAP/abap-file-formats).
+  aff: '@abapify/adt-plugin-gcts',
+  gcts: '@abapify/adt-plugin-gcts',
 };
 
 /**

@@ -26,6 +26,16 @@ import _ttyp from './schemas/ttyp';
 import _bdef from './schemas/bdef';
 import _srvd from './schemas/srvd';
 import _srvb from './schemas/srvb';
+import _dcls from './schemas/dcls';
+import _ddls from './schemas/ddls';
+import _ddlx from './schemas/ddlx';
+import _msag from './schemas/msag';
+import _view from './schemas/view';
+import _enqu from './schemas/enqu';
+import _shlp from './schemas/shlp';
+import _tran from './schemas/tran';
+import _type from './schemas/type';
+import _xslt from './schemas/xslt';
 
 // Full AbapGit types - using flattened root types
 // Note: Generated types may be unions, we import the raw schema type
@@ -41,6 +51,16 @@ import type { TtypSchema as _TtypSchema } from './types/ttyp';
 import type { BdefSchema as _BdefSchema } from './types/bdef';
 import type { SrvdSchema as _SrvdSchema } from './types/srvd';
 import type { SrvbSchema as _SrvbSchema } from './types/srvb';
+import type { DclsSchema as _DclsSchema } from './types/dcls';
+import type { DdlsSchema as _DdlsSchema } from './types/ddls';
+import type { DdlxSchema as _DdlxSchema } from './types/ddlx';
+import type { MsagSchema as _MsagSchema } from './types/msag';
+import type { ViewSchema as _ViewSchema } from './types/view';
+import type { EnquSchema as _EnquSchema } from './types/enqu';
+import type { ShlpSchema as _ShlpSchema } from './types/shlp';
+import type { TranSchema as _TranSchema } from './types/tran';
+import type { TypeSchema as _TypeSchema } from './types/type';
+import type { XsltSchema as _XsltSchema } from './types/xslt';
 
 // Extract the abapGit variant from union types (generated types may be unions)
 type ClasAbapGitType = Extract<_ClasSchema, { abapGit: unknown }>;
@@ -55,6 +75,16 @@ type TtypAbapGitType = Extract<_TtypSchema, { abapGit: unknown }>;
 type BdefAbapGitType = Extract<_BdefSchema, { abapGit: unknown }>;
 type SrvdAbapGitType = Extract<_SrvdSchema, { abapGit: unknown }>;
 type SrvbAbapGitType = Extract<_SrvbSchema, { abapGit: unknown }>;
+type DclsAbapGitType = Extract<_DclsSchema, { abapGit: unknown }>;
+type DdlsAbapGitType = Extract<_DdlsSchema, { abapGit: unknown }>;
+type DdlxAbapGitType = Extract<_DdlxSchema, { abapGit: unknown }>;
+type MsagAbapGitType = Extract<_MsagSchema, { abapGit: unknown }>;
+type ViewAbapGitType = Extract<_ViewSchema, { abapGit: unknown }>;
+type EnquAbapGitType = Extract<_EnquSchema, { abapGit: unknown }>;
+type ShlpAbapGitType = Extract<_ShlpSchema, { abapGit: unknown }>;
+type TranAbapGitType = Extract<_TranSchema, { abapGit: unknown }>;
+type TypeAbapGitType = Extract<_TypeSchema, { abapGit: unknown }>;
+type XsltAbapGitType = Extract<_XsltSchema, { abapGit: unknown }>;
 
 // AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values
 export const clas = abapGitSchema<ClasAbapGitType, ClasAbapGitType['abapGit']['abap']['values']>(_clas);
@@ -69,6 +99,16 @@ export const ttyp = abapGitSchema<TtypAbapGitType, TtypAbapGitType['abapGit']['a
 export const bdef = abapGitSchema<BdefAbapGitType, BdefAbapGitType['abapGit']['abap']['values']>(_bdef);
 export const srvd = abapGitSchema<SrvdAbapGitType, SrvdAbapGitType['abapGit']['abap']['values']>(_srvd);
 export const srvb = abapGitSchema<SrvbAbapGitType, SrvbAbapGitType['abapGit']['abap']['values']>(_srvb);
+export const dcls = abapGitSchema<DclsAbapGitType, DclsAbapGitType['abapGit']['abap']['values']>(_dcls);
+export const ddls = abapGitSchema<DdlsAbapGitType, DdlsAbapGitType['abapGit']['abap']['values']>(_ddls);
+export const ddlx = abapGitSchema<DdlxAbapGitType, DdlxAbapGitType['abapGit']['abap']['values']>(_ddlx);
+export const msag = abapGitSchema<MsagAbapGitType, MsagAbapGitType['abapGit']['abap']['values']>(_msag);
+export const view = abapGitSchema<ViewAbapGitType, ViewAbapGitType['abapGit']['abap']['values']>(_view);
+export const enqu = abapGitSchema<EnquAbapGitType, EnquAbapGitType['abapGit']['abap']['values']>(_enqu);
+export const shlp = abapGitSchema<ShlpAbapGitType, ShlpAbapGitType['abapGit']['abap']['values']>(_shlp);
+export const tran = abapGitSchema<TranAbapGitType, TranAbapGitType['abapGit']['abap']['values']>(_tran);
+export const type = abapGitSchema<TypeAbapGitType, TypeAbapGitType['abapGit']['abap']['values']>(_type);
+export const xslt = abapGitSchema<XsltAbapGitType, XsltAbapGitType['abapGit']['abap']['values']>(_xslt);
 
 // Re-export types and utilities
 export { abapGitSchema, type AbapGitSchema, type InferAbapGitType, type InferValuesType } from '../../lib/handlers/abapgit-schema';

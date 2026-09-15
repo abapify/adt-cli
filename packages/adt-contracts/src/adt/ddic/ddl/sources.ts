@@ -2,7 +2,7 @@
  * ADT CDS DDL Source Contract
  *
  * Endpoint: /sap/bc/adt/ddic/ddl/sources
- * Content-Type: application/vnd.sap.adt.ddl.source.v2+xml
+ * Content-Type: application/vnd.sap.adt.ddlSource+xml
  * Object type: DDLS
  *
  * CDS Data Definition sources — the SAP endpoint for CDS views / data
@@ -21,9 +21,9 @@ export type DdlSourceResponse = InferTypedSchema<typeof ddlSourceSchema>;
 export const ddlSourcesContract = crud({
   basePath: '/sap/bc/adt/ddic/ddl/sources',
   schema: ddlSourceSchema,
-  contentType: 'application/vnd.sap.adt.ddl.source.v2+xml',
-  accept:
-    'application/vnd.sap.adt.ddl.source.v2+xml, application/vnd.sap.adt.ddl.source.v1+xml',
+  contentType: 'application/vnd.sap.adt.ddlSource+xml',
+  accept: 'application/vnd.sap.adt.ddlSource+xml',
+  nameTransform: (name) => encodeURIComponent(name.toLowerCase()),
   sources: ['main'] as const,
 });
 

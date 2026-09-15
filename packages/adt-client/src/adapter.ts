@@ -11,6 +11,7 @@ import type { ResponsePlugin, ResponseContext } from './plugins/types';
 import { SessionManager } from './utils/session';
 import { createAdtError } from './errors';
 import { activeAdtAbortSignal } from './cancellation';
+import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici';
 
 // Re-export HttpAdapter type for consumers
 /**
@@ -176,7 +177,60 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
     logger,
     plugins = [],
     onSessionExpired,
+    headersTimeoutMs,
   } = config;
+
+  const dispatcher =
+    headersTimeoutMs === undefined
+      ? undefined
+      : new Agent({ headersTimeout: headersTimeoutMs });
+
+  /** Merge the optional Undici dispatcher into a fetch RequestInit. */
+  function withDispatcher<T extends RequestInit>(
+    init: T,
+  ): T & { dispatcher?: Dispatcher } {
+    return dispatcher ? { ...init, dispatcher } : init;
+  }
+
+  /** Keep a configured Agent paired with the Undici fetch ABI that created it. */
+  async function requestFetch(
+    input: string,
+    init: RequestInit & { dispatcher?: Dispatcher },
+  ): Promise<Response> {
+    if (!dispatcher) return globalThis.fetch(input, init);
+    return (await undiciFetch(
+      input,
+      init as Parameters<typeof undiciFetch>[1],
+    )) as unknown as Response;
+  }
+
+  /**
+   * Route a session-manager request through the same paired Undici
+   * fetch/dispatcher used for the final adapter request, so the
+   * configured headersTimeout applies to the entire write flow
+   * (CSRF handshake included), not just the last hop.
+   */
+  async function sessionFetch(
+    input: string | URL,
+    init?: RequestInit,
+  ): Promise<Response> {
+    return requestFetch(input.toString(), withDispatcher(init ?? {}));
+  }
+
+  /**
+   * Resolve `options.url` against the configured `baseUrl` and reject
+   * absolute URLs that would send credentials to a different origin.
+   */
+  function resolveAdtUrl(requestUrl: string): URL {
+    const resolved = new URL(requestUrl, baseUrl);
+    const baseOrigin = new URL(baseUrl).origin;
+    if (resolved.origin !== baseOrigin) {
+      throw new RangeError(
+        `Refusing to fetch ${resolved.origin} — ADT requests must target the configured base origin ${baseOrigin}`,
+      );
+    }
+    return resolved;
+  }
 
   // Determine auth method
   const isSamlAuth = !!cookieHeader;
@@ -192,7 +246,7 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
       : `Basic ${Buffer.from(basicCredentials).toString('base64')}`);
 
   // Create session manager for stateful sessions
-  const sessionManager = new SessionManager(logger);
+  const sessionManager = new SessionManager(logger, sessionFetch);
 
   // Inject SAML cookie if provided
   if (cookieHeader) {
@@ -214,8 +268,8 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
         options.bodySchema ? 'present' : 'undefined',
       );
 
-      // Build full URL
-      const url = new URL(options.url, baseUrl);
+      // Build full URL (validated against the configured base origin)
+      const url = resolveAdtUrl(options.url);
 
       // Add query parameters
       if (options.query) {
@@ -379,12 +433,15 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
           'Request headers (names only): ' + JSON.stringify(headerNames),
         );
       }
-      const response = await fetch(url.toString(), {
-        method: options.method,
-        headers,
-        body: requestBody,
-        signal: executionSignal,
-      });
+      const response = await requestFetch(
+        url.toString(),
+        withDispatcher({
+          method: options.method,
+          headers,
+          body: requestBody,
+          signal: executionSignal,
+        }),
+      );
 
       // Process response for session management (cookies, CSRF, ETags)
       sessionManager.processResponse(response, url.pathname);
@@ -548,7 +605,7 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
         throw new RangeError('maxBytes must be a non-negative safe integer.');
       }
 
-      const url = new URL(options.url, baseUrl);
+      const url = resolveAdtUrl(options.url);
       if (client) url.searchParams.append('sap-client', client);
       if (language) url.searchParams.append('sap-language', language);
 
@@ -561,12 +618,14 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
 
       const { abortController, dispose } = executionAbortController();
       try {
-        // nosemgrep
-        const response = await fetch(url, {
-          method: 'GET',
-          headers,
-          signal: abortController.signal,
-        });
+        const response = await requestFetch(
+          url.toString(), // nosemgrep — origin validated by resolveAdtUrl above
+          withDispatcher({
+            method: 'GET',
+            headers,
+            signal: abortController.signal,
+          }),
+        );
         sessionManager.processResponse(response, url.pathname);
 
         const text = await readResponseTextBounded(

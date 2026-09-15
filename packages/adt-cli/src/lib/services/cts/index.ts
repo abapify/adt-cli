@@ -9,3 +9,8 @@ export {
   type ReleaseTransportInput,
   type ReleaseTransportResult,
 } from './transport-lifecycle';
+export {
+  CtsTransportMetadataService,
+  type CtsTransportMetadataResult,
+  type CtsTransportMetadataUnit,
+} from './transport-metadata';

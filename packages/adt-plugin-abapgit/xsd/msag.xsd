@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  abapGit MSAG (Message Class) Schema
+
+  Defines T100A (message class header) and T100 (message lines) structures
+  used in *.msag.xml files.
+
+  Uses xs:redefine to extend AbapValuesType with MSAG-specific elements.
+  This ensures T100A/T100 can only appear inside asx:values, not as root.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/t100a.xsd"/>
+  <xs:include schemaLocation="types/t100.xsd"/>
+
+  <!-- Redefine AbapValuesType to include MSAG-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="T100A" type="asx:T100aType" minOccurs="0"/>
+            <xs:element name="T100" type="asx:T100TabType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

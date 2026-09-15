@@ -186,7 +186,7 @@ type SchemaLike = {
 
 ### Adding a New XSD Type
 
-1. **Find in W3C spec**: https://www.w3.org/TR/xmlschema11-1/XMLSchema.xsd
+1. **Find in W3C spec**: <https://www.w3.org/TR/xmlschema11-1/XMLSchema.xsd>
 2. **Add interface** to `src/xsd/types.ts`:
    ```typescript
    export interface NewType extends Annotated {

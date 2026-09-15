@@ -1,6 +1,17 @@
 {
   "name": "adt-plugin-gcts",
   "targets": {
+    "codegen": {
+      "command": "bun scripts/generate-aff-schemas.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{workspaceRoot}/git_modules/abap-file-formats/file-formats/**/*-v1.json",
+        "{projectRoot}/scripts/generate-aff-schemas.ts"
+      ],
+      "outputs": ["{projectRoot}/src/schemas/generated"]
+    },
     "test": {
       "command": "node --import tsx --test tests/**/*.test.ts",
       "options": {

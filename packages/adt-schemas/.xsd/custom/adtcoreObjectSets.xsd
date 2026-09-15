@@ -21,6 +21,21 @@
   <!-- Global element for namespace-qualified adtcore:objectSets -->
   <xsd:element name="objectSets" type="adtcore:AdtObjectSets"/>
 
+  <!--
+    Global attribute declarations for ADT core attributes that SAP qualifies
+    with the adtcore: prefix in AUnit, ATC, and coverage responses.
+
+    adtcore.xsd declares these as local attributes inside complexTypes (e.g.
+    AdtObject), but never as top-level globals.  Other namespaces that need
+    to reference adtcore:uri / adtcore:type / adtcore:name / adtcore:description
+    via xsd:attribute ref="adtcore:..." require global declarations in the
+    adtcore target namespace, which this extension provides.
+  -->
+  <xsd:attribute name="uri" type="xsd:anyURI"/>
+  <xsd:attribute name="type" type="xsd:string"/>
+  <xsd:attribute name="name" type="xsd:string"/>
+  <xsd:attribute name="description" type="xsd:string"/>
+
   <xsd:complexType name="AdtObjectSets">
     <xsd:sequence>
       <xsd:element name="objectSet" type="adtcore:AdtObjectSet" minOccurs="0" maxOccurs="unbounded" form="unqualified"/>

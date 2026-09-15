@@ -1,22 +1,37 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Source: GET /sap/bc/adt/acm/dcl/sources/{name} -->
-<dcl:source
-    xmlns:dcl="http://www.sap.com/adt/dcl"
-    xmlns:abapsource="http://www.sap.com/adt/abapsource"
-    xmlns:adtcore="http://www.sap.com/adt/core"
-    abapsource:fixPointArithmetic="true"
-    abapsource:activeUnicodeCheck="true"
-    adtcore:responsible="DEVELOPER"
-    adtcore:masterLanguage="EN"
-    adtcore:masterSystem="DEV"
-    adtcore:name="ZDCL_SAMPLE"
-    adtcore:type="DCLS/DL"
-    adtcore:changedAt="2025-01-01T12:00:00Z"
-    adtcore:version="active"
-    adtcore:createdAt="2025-01-01T12:00:00Z"
-    adtcore:changedBy="DEVELOPER"
-    adtcore:createdBy="DEVELOPER"
-    adtcore:description="Sample access control"
-    adtcore:language="EN">
-  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
-</dcl:source>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Sanitized ADT GET /sap/bc/adt/acm/dcl/sources/{name} response. -->
+<dcl:dclSource
+  xmlns:dcl="http://www.sap.com/adt/dcl"
+  xmlns:abapsource="http://www.sap.com/adt/abapsource"
+  xmlns:adtcore="http://www.sap.com/adt/core"
+  abapsource:sourceUri="/sap/bc/adt/acm/dcl/sources/z_aff_dcls/source/main"
+  abapsource:fixPointArithmetic="false"
+  abapsource:activeUnicodeCheck="false"
+  adtcore:responsible="AFF"
+  adtcore:masterLanguage="EN"
+  adtcore:masterSystem="DEV"
+  adtcore:abapLanguageVersion="0"
+  adtcore:name="Z_AFF_DCLS"
+  adtcore:type="DCLS/DL"
+  adtcore:changedAt="2000-01-01T00:00:00Z"
+  adtcore:version="active"
+  adtcore:createdAt="2000-01-01T00:00:00Z"
+  adtcore:changedBy="AFF"
+  adtcore:createdBy="AFF"
+  adtcore:description="Sanitized DCLS fixture"
+  adtcore:language="EN"
+>
+  <atom:link
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    href="./z_aff_dcls/source/main"
+    rel="http://www.sap.com/adt/relations/source"
+    type="text/plain"
+    title="Source Content"
+  />
+  <adtcore:packageRef
+    adtcore:uri="/sap/bc/adt/packages/z_aff"
+    adtcore:type="DEVC/K"
+    adtcore:name="Z_AFF"
+    adtcore:description="Sanitized package"
+  />
+</dcl:dclSource>

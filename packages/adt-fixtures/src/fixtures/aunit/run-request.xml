@@ -1,21 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!-- Source: POST /sap/bc/adt/abapunit/testruns (request body) -->
 <!-- Sanitized: class name anonymized -->
 <aunit:runConfiguration xmlns:aunit="http://www.sap.com/adt/aunit">
   <external>
-    <coverage active="false"/>
+    <coverage active="false" />
   </external>
   <options>
-    <uriType value="semantic"/>
-    <testDeterminationStrategy sameProgram="true" assignedTests="false" appendAssignedTestsPreview="true"/>
-    <testRiskLevels harmless="true" dangerous="true" critical="true"/>
-    <testDurations short="true" medium="true" long="true"/>
-    <withNavigationUri enabled="false"/>
+    <uriType value="semantic" />
+    <testDeterminationStrategy
+      sameProgram="true"
+      assignedTests="false"
+      appendAssignedTestsPreview="true"
+    />
+    <testRiskLevels
+      harmless="true"
+      dangerous="true"
+      critical="true"
+    />
+    <testDurations
+      short="true"
+      medium="true"
+      long="true"
+    />
+    <withNavigationUri enabled="false" />
   </options>
   <adtcore:objectSets xmlns:adtcore="http://www.sap.com/adt/core">
     <objectSet kind="inclusive">
       <adtcore:objectReferences>
-        <adtcore:objectReference adtcore:uri="/sap/bc/adt/oo/classes/zcl_sample_class"/>
+        <adtcore:objectReference
+          adtcore:uri="/sap/bc/adt/oo/classes/zcl_sample_class"
+        />
       </adtcore:objectReferences>
     </objectSet>
   </adtcore:objectSets>
