@@ -6,7 +6,7 @@
  */
 
 import { iamu } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type IamuLike = {
   name: string;
@@ -22,17 +22,20 @@ export const iamuHandler = createHandler<IamuLike, typeof iamu>('IAMU', {
   serializer: 'LCL_OBJECT_IAMU',
   serializer_version: 'v2.0.0',
 
-  toAbapGit: (obj) => ({
-    IAMU: {
-      ATTRIBUTES: {
-        OBJID: String(obj.name ?? '').toUpperCase(),
-        TEXT: obj.text,
-        MIMETYPE: obj.mimeType,
-        DEVCLASS: obj.packageName,
+  toAbapGit: (raw) => {
+    const obj = unwrapData<IamuLike>(raw);
+    return {
+      IAMU: {
+        ATTRIBUTES: {
+          OBJID: String(obj.name ?? '').toUpperCase(),
+          TEXT: obj.text,
+          MIMETYPE: obj.mimeType,
+          DEVCLASS: obj.packageName,
+        },
+        EXTENSION: obj.extension,
       },
-      EXTENSION: obj.extension,
-    },
-  }),
+    };
+  },
 
   fromAbapGit: ({ IAMU }) => ({
     name: (IAMU?.ATTRIBUTES?.OBJID ?? '').toUpperCase(),

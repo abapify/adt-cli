@@ -3,7 +3,7 @@
  */
 
 import { ucsa } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type UnitCaseLike = {
   name: string;
@@ -19,14 +19,17 @@ export const unitCaseHandler = createHandler<UnitCaseLike, typeof ucsa>(
     serializer: 'LCL_OBJECT_UCSA',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      UCSA: {
-        HEADER: {
-          ID: obj.id ?? String(obj.name ?? '').toUpperCase(),
-          DESCRIPTION: obj.description,
+    toAbapGit: (raw) => {
+      const obj = unwrapData<UnitCaseLike>(raw);
+      return {
+        UCSA: {
+          HEADER: {
+            ID: obj.id ?? String(obj.name ?? '').toUpperCase(),
+            DESCRIPTION: obj.description,
+          },
         },
-      },
-    }),
+      };
+    },
 
     fromAbapGit: ({ UCSA }) => ({
       name: (UCSA?.HEADER?.ID ?? '').toUpperCase(),

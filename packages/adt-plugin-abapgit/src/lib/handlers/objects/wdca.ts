@@ -3,7 +3,7 @@
  */
 
 import { wdca } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type WdcaLike = {
@@ -20,25 +20,28 @@ export const wdcaHandler = createHandler<WdcaLike, typeof wdca>('WDCA', {
   serializer: 'LCL_OBJECT_WDCA',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    OUTLINE: {
-      CONFIG_ID: String(obj.name ?? '').toUpperCase(),
-      CONFIG_TYPE: obj.configType,
-      CONFIG_VAR: obj.configVar,
-    },
-    DATA: obj.data?.length
-      ? {
-          item: obj.data.map((d) => ({
-            CONFIG_ID: String(obj.name ?? '').toUpperCase(),
-            CONFIG_TYPE: obj.configType,
-            CONFIG_VAR: obj.configVar,
-            COMPNAME: d.compName,
-            CONTENT: d.content,
-          })),
-        }
-      : undefined,
-    DESCR_LANG: isoToSapLang(obj.descrLang),
-  }),
+  toAbapGit: (raw) => {
+    const obj = unwrapData<WdcaLike>(raw);
+    return {
+      OUTLINE: {
+        CONFIG_ID: String(obj.name ?? '').toUpperCase(),
+        CONFIG_TYPE: obj.configType,
+        CONFIG_VAR: obj.configVar,
+      },
+      DATA: obj.data?.length
+        ? {
+            item: obj.data.map((d) => ({
+              CONFIG_ID: String(obj.name ?? '').toUpperCase(),
+              CONFIG_TYPE: obj.configType,
+              CONFIG_VAR: obj.configVar,
+              COMPNAME: d.compName,
+              CONTENT: d.content,
+            })),
+          }
+        : undefined,
+      DESCR_LANG: isoToSapLang(obj.descrLang),
+    };
+  },
 
   fromAbapGit: ({ OUTLINE, DATA, DESCR_LANG }) => {
     const data = normalizeItems(DATA?.item);

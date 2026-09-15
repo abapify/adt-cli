@@ -6,7 +6,7 @@
  */
 
 import { sucu } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type AuthGroupLike = {
@@ -28,7 +28,9 @@ export const authGroupHandler = createHandler<AuthGroupLike, typeof sucu>(
     serializer: 'LCL_OBJECT_SUCU',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<AuthGroupLike>(raw);
+
       const name = String(obj.name ?? '').toUpperCase();
       return {
         TBRG_AUTH: {

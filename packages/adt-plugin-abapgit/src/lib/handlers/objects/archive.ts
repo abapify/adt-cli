@@ -5,7 +5,7 @@
  * the only difference is the object type and generated schema.
  */
 
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import type { AbapGitSchema } from '../abapgit-schema';
 
 type ArchiveLike = {
@@ -33,21 +33,24 @@ export function createArchiveHandler<
     serializer: `LCL_OBJECT_${type}`,
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      ATTR: {
-        NAME: String(obj.name ?? '').toUpperCase(),
-        DEVCLASS: obj.packageName,
-        VERSION: obj.version,
-      },
-      PARAMETERS: obj.parameters?.length
-        ? {
-            item: obj.parameters.map((p) => ({
-              NAME: p.name,
-              VALUE: p.value,
-            })),
-          }
-        : undefined,
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<ArchiveLike>(raw);
+      return {
+        ATTR: {
+          NAME: String(obj.name ?? '').toUpperCase(),
+          DEVCLASS: obj.packageName,
+          VERSION: obj.version,
+        },
+        PARAMETERS: obj.parameters?.length
+          ? {
+              item: obj.parameters.map((p) => ({
+                NAME: p.name,
+                VALUE: p.value,
+              })),
+            }
+          : undefined,
+      };
+    },
 
     fromAbapGit: ({ ATTR, PARAMETERS }) => {
       const params = normalizeItems(PARAMETERS?.item);

@@ -6,7 +6,7 @@
  */
 
 import { pdts } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type PdtsLike = {
   name: string;
@@ -21,16 +21,19 @@ export const pdtsHandler = createHandler<PdtsLike, typeof pdts>('PDTS', {
   serializer: 'LCL_OBJECT_PDTS',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    PDTS: {
-      HEADER: {
-        OTYPE: obj.otype ?? 'TS',
-        OBJID: String(obj.name ?? '').toUpperCase(),
-        SHORT: obj.short,
-        STEXT: obj.stext,
+  toAbapGit: (raw) => {
+    const obj = unwrapData<PdtsLike>(raw);
+    return {
+      PDTS: {
+        HEADER: {
+          OTYPE: obj.otype ?? 'TS',
+          OBJID: String(obj.name ?? '').toUpperCase(),
+          SHORT: obj.short,
+          STEXT: obj.stext,
+        },
       },
-    },
-  }),
+    };
+  },
 
   fromAbapGit: ({ PDTS }) => ({
     name: (PDTS?.HEADER?.OBJID ?? '').toUpperCase(),

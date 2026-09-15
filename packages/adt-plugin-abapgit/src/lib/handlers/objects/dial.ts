@@ -3,7 +3,7 @@
  */
 
 import { dial } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type DialogModuleLike = {
@@ -31,30 +31,33 @@ export const dialogModuleHandler = createHandler<DialogModuleLike, typeof dial>(
     serializer: 'LCL_OBJECT_DIAL',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      DIAL: {
-        TDCT: {
-          DIALOGNAME: String(obj.name ?? '').toUpperCase(),
-          DYNR: obj.dynr,
-          PROG: obj.program,
-          SPRAS: isoToSapLang(obj.language),
-          DDTEXT: obj.description,
+    toAbapGit: (raw) => {
+      const obj = unwrapData<DialogModuleLike>(raw);
+      return {
+        DIAL: {
+          TDCT: {
+            DIALOGNAME: String(obj.name ?? '').toUpperCase(),
+            DYNR: obj.dynr,
+            PROG: obj.program,
+            SPRAS: isoToSapLang(obj.language),
+            DDTEXT: obj.description,
+          },
+          DIA_PARS: obj.parameters?.length
+            ? {
+                item: obj.parameters.map((p) => ({
+                  DNAM: p.dnam,
+                  DYNR: p.dynr,
+                  PARAM: p.param,
+                  DPNAM: p.dpnam,
+                  DTYPE: p.dtype,
+                  DPLEN: p.dplen,
+                  P_TEXT: p.text,
+                })),
+              }
+            : undefined,
         },
-        DIA_PARS: obj.parameters?.length
-          ? {
-              item: obj.parameters.map((p) => ({
-                DNAM: p.dnam,
-                DYNR: p.dynr,
-                PARAM: p.param,
-                DPNAM: p.dpnam,
-                DTYPE: p.dtype,
-                DPLEN: p.dplen,
-                P_TEXT: p.text,
-              })),
-            }
-          : undefined,
-      },
-    }),
+      };
+    },
 
     fromAbapGit: ({ DIAL }) => {
       const parameters = normalizeItems(DIAL?.DIA_PARS?.item);

@@ -3,7 +3,7 @@
  */
 
 import { splo } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type SpoolDescLike = {
@@ -27,25 +27,28 @@ export const spoolDescHandler = createHandler<SpoolDescLike, typeof splo>(
     serializer: 'LCL_OBJECT_SPLO',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      TSPLT: {
-        SPRAS: isoToSapLang(obj.language),
-        PAPART: String(obj.name ?? '').toUpperCase(),
-        TXT: obj.description,
-      },
-      TSPLD: {
-        PAPART: String(obj.name ?? '').toUpperCase(),
-        PFORMAT: obj.format,
-        ORIENT: obj.orientation,
-        TYPE: obj.type,
-        OUTCOLUMNS: obj.columns,
-        OUTROWS: obj.rows,
-        LISTAREA: obj.listArea,
-      },
-      TSP0P: {
-        PDPAPER: obj.paper,
-      },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<SpoolDescLike>(raw);
+      return {
+        TSPLT: {
+          SPRAS: isoToSapLang(obj.language),
+          PAPART: String(obj.name ?? '').toUpperCase(),
+          TXT: obj.description,
+        },
+        TSPLD: {
+          PAPART: String(obj.name ?? '').toUpperCase(),
+          PFORMAT: obj.format,
+          ORIENT: obj.orientation,
+          TYPE: obj.type,
+          OUTCOLUMNS: obj.columns,
+          OUTROWS: obj.rows,
+          LISTAREA: obj.listArea,
+        },
+        TSP0P: {
+          PDPAPER: obj.paper,
+        },
+      };
+    },
 
     fromAbapGit: ({ TSPLT, TSPLD, TSP0P }) => ({
       name: (TSPLT?.PAPART ?? TSPLD?.PAPART ?? '').toUpperCase(),

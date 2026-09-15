@@ -3,7 +3,7 @@
  */
 
 import { prag } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type PragmaLike = {
   name: string;
@@ -18,14 +18,17 @@ export const pragmaHandler = createHandler<PragmaLike, typeof prag>('PRAG', {
   serializer: 'LCL_OBJECT_PRAG',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    PRAG: {
-      PRAGMA: String(obj.name ?? '').toUpperCase(),
-      EXTENSION: obj.extension,
-      SIGNATURE: obj.signature,
-      DESCRIPTION: obj.description,
-    },
-  }),
+  toAbapGit: (raw) => {
+    const obj = unwrapData<PragmaLike>(raw);
+    return {
+      PRAG: {
+        PRAGMA: String(obj.name ?? '').toUpperCase(),
+        EXTENSION: obj.extension,
+        SIGNATURE: obj.signature,
+        DESCRIPTION: obj.description,
+      },
+    };
+  },
 
   fromAbapGit: ({ PRAG }) => ({
     name: (PRAG?.PRAGMA ?? '').toUpperCase(),

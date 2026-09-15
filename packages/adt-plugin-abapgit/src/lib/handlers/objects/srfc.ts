@@ -6,7 +6,7 @@
  */
 
 import { srfc } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type RfcServiceLike = {
   name: string;
@@ -24,15 +24,18 @@ export const rfcServiceHandler = createHandler<RfcServiceLike, typeof srfc>(
     serializer: 'LCL_OBJECT_SRFC',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SRFC: {
-        ID: String(obj.name ?? '').toUpperCase(),
-        VERSION: obj.version ?? 'A',
-        SCOPE: obj.scope,
-        FUNCNAME: obj.funcname,
-        TEXT: obj.description,
-      },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<RfcServiceLike>(raw);
+      return {
+        SRFC: {
+          ID: String(obj.name ?? '').toUpperCase(),
+          VERSION: obj.version ?? 'A',
+          SCOPE: obj.scope,
+          FUNCNAME: obj.funcname,
+          TEXT: obj.description,
+        },
+      };
+    },
 
     fromAbapGit: ({ SRFC }) => ({
       name: (SRFC?.ID ?? '').toUpperCase(),

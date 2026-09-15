@@ -7,7 +7,7 @@
  */
 
 import { enqu } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type LockObjectLike = {
@@ -43,7 +43,9 @@ export const lockObjectHandler = createHandler<LockObjectLike, typeof enqu>(
     serializer: 'LCL_OBJECT_ENQU',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<LockObjectLike>(raw);
+
       const tables = obj.tables ?? [];
       const parameters = obj.parameters ?? [];
       return {

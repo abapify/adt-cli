@@ -6,7 +6,7 @@
  */
 
 import { sqsc } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type DbProcProxyLike = {
   name: string;
@@ -54,54 +54,57 @@ export const dbProcProxyHandler = createHandler<DbProcProxyLike, typeof sqsc>(
     serializer: 'LCL_OBJECT_SQSC',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SQSC: {
-        DESCRIPTION: obj.description,
-        HEADER: {
-          DB_REPOSITORY_PACKAGE: obj.dbRepositoryPackage,
-          DB_REPOSITORY_PROC_NAME: obj.dbRepositoryProcName,
-          DB_CATALOG_SCHEMA: obj.dbCatalogSchema,
-          DB_CATALOG_PROC_NAME: obj.dbCatalogProcName,
-          READ_ONLY: obj.readOnly ? 'X' : undefined,
-          INTERFACE_POOL: obj.interfacePool,
+    toAbapGit: (raw) => {
+      const obj = unwrapData<DbProcProxyLike>(raw);
+      return {
+        SQSC: {
+          DESCRIPTION: obj.description,
+          HEADER: {
+            DB_REPOSITORY_PACKAGE: obj.dbRepositoryPackage,
+            DB_REPOSITORY_PROC_NAME: obj.dbRepositoryProcName,
+            DB_CATALOG_SCHEMA: obj.dbCatalogSchema,
+            DB_CATALOG_PROC_NAME: obj.dbCatalogProcName,
+            READ_ONLY: obj.readOnly ? 'X' : undefined,
+            INTERFACE_POOL: obj.interfacePool,
+          },
+          PARAMETERS: obj.parameters?.length
+            ? {
+                item: obj.parameters.map((p) => ({
+                  POSITION: p.position,
+                  DB_NAME: p.dbName,
+                  DIRECTION: p.direction,
+                  KIND: p.kind,
+                  DB_TABLE_TYPE_SCHEMA: p.dbTableTypeSchema,
+                  DB_TABLE_TYPE_NAME: p.dbTableTypeName,
+                  DB_TABLE_TYPE_IS_DDIC: p.dbTableTypeIsDdic ? 'X' : undefined,
+                  TRANSFER_TABLE_SCHEMA: p.transferTableSchema,
+                  TRANSFER_TABLE_NAME: p.transferTableName,
+                  ABAP_NAME: p.abapName,
+                  ABAP_NAME_IS_RO: p.abapNameIsRo ? 'X' : undefined,
+                  DDIC_TABLE: p.ddicTable,
+                  DDIC_TABLE_IS_RO: p.ddicTableIsRo ? 'X' : undefined,
+                })),
+              }
+            : undefined,
+          PARAMETER_TYPES: obj.parameterTypes?.length
+            ? {
+                item: obj.parameterTypes.map((t) => ({
+                  PARAM_POSITION: t.paramPosition,
+                  COMP_INDEX: t.compIndex,
+                  DB_COMP_NAME: t.dbCompName,
+                  ABAP_COMP_NAME: t.abapCompName,
+                  ABAP_COMP_NAME_IS_RO: t.abapCompNameIsRo ? 'X' : undefined,
+                  DB_TYPE: t.dbType,
+                  DB_TYPE_TEXT: t.dbTypeText,
+                  ABAP_TYPE_IS_RO: t.abapTypeIsRo ? 'X' : undefined,
+                  DDIC_TYPE: t.ddicType,
+                  DDIC_TYPE_IS_RO: t.ddicTypeIsRo ? 'X' : undefined,
+                })),
+              }
+            : undefined,
         },
-        PARAMETERS: obj.parameters?.length
-          ? {
-              item: obj.parameters.map((p) => ({
-                POSITION: p.position,
-                DB_NAME: p.dbName,
-                DIRECTION: p.direction,
-                KIND: p.kind,
-                DB_TABLE_TYPE_SCHEMA: p.dbTableTypeSchema,
-                DB_TABLE_TYPE_NAME: p.dbTableTypeName,
-                DB_TABLE_TYPE_IS_DDIC: p.dbTableTypeIsDdic ? 'X' : undefined,
-                TRANSFER_TABLE_SCHEMA: p.transferTableSchema,
-                TRANSFER_TABLE_NAME: p.transferTableName,
-                ABAP_NAME: p.abapName,
-                ABAP_NAME_IS_RO: p.abapNameIsRo ? 'X' : undefined,
-                DDIC_TABLE: p.ddicTable,
-                DDIC_TABLE_IS_RO: p.ddicTableIsRo ? 'X' : undefined,
-              })),
-            }
-          : undefined,
-        PARAMETER_TYPES: obj.parameterTypes?.length
-          ? {
-              item: obj.parameterTypes.map((t) => ({
-                PARAM_POSITION: t.paramPosition,
-                COMP_INDEX: t.compIndex,
-                DB_COMP_NAME: t.dbCompName,
-                ABAP_COMP_NAME: t.abapCompName,
-                ABAP_COMP_NAME_IS_RO: t.abapCompNameIsRo ? 'X' : undefined,
-                DB_TYPE: t.dbType,
-                DB_TYPE_TEXT: t.dbTypeText,
-                ABAP_TYPE_IS_RO: t.abapTypeIsRo ? 'X' : undefined,
-                DDIC_TYPE: t.ddicType,
-                DDIC_TYPE_IS_RO: t.ddicTypeIsRo ? 'X' : undefined,
-              })),
-            }
-          : undefined,
-      },
-    }),
+      };
+    },
 
     fromAbapGit: ({ SQSC }) => {
       const parameters = normalizeItems(SQSC?.PARAMETERS?.item);

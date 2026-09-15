@@ -3,7 +3,7 @@
  */
 
 import { sots } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type OtrTextLike = {
@@ -24,29 +24,33 @@ export const otrTextHandler = createHandler<OtrTextLike, typeof sots>('SOTS', {
   serializer: 'LCL_OBJECT_SOTS',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    SOTS: {
-      item: [
-        {
-          HEADER: {
-            CONCEPT: obj.concept ?? String(obj.name ?? '').toUpperCase(),
-            CREA_LAN: isoToSapLang(obj.language),
+  toAbapGit: (raw) => {
+    const obj = unwrapData<OtrTextLike>(raw);
+    return {
+      SOTS: {
+        item: [
+          {
+            HEADER: {
+              CONCEPT: obj.concept ?? String(obj.name ?? '').toUpperCase(),
+              CREA_LAN: isoToSapLang(obj.language),
+            },
+            ENTRIES: obj.texts?.length
+              ? {
+                  item: obj.texts.map((t) => ({
+                    CONCEPT:
+                      obj.concept ?? String(obj.name ?? '').toUpperCase(),
+                    LANGU: isoToSapLang(t.langu ?? obj.language),
+                    OBJECT: t.object,
+                    LFD_NUM: t.lfdNum,
+                    TEXT: t.text,
+                  })),
+                }
+              : undefined,
           },
-          ENTRIES: obj.texts?.length
-            ? {
-                item: obj.texts.map((t) => ({
-                  CONCEPT: obj.concept ?? String(obj.name ?? '').toUpperCase(),
-                  LANGU: isoToSapLang(t.langu ?? obj.language),
-                  OBJECT: t.object,
-                  LFD_NUM: t.lfdNum,
-                  TEXT: t.text,
-                })),
-              }
-            : undefined,
-        },
-      ],
-    },
-  }),
+        ],
+      },
+    };
+  },
 
   fromAbapGit: ({ SOTS }) => {
     const items = normalizeItems(SOTS?.item);

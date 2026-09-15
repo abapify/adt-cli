@@ -3,7 +3,7 @@
  */
 
 import { wdya } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type WdyaLike = {
   name: string;
@@ -21,19 +21,25 @@ export const webDynproAppHandler = createHandler<WdyaLike, typeof wdya>(
     serializer: 'LCL_OBJECT_WDYA',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      APP: {
-        APPLICATION_NAME: String(obj.name ?? '').toUpperCase(),
-        COMPONENT: obj.component,
-        INTERFACE: obj.interface,
-        DESCRIPTION: obj.description,
-      },
-      PROPERTIES: obj.properties?.length
-        ? {
-            item: obj.properties.map((p) => ({ NAME: p.name, VALUE: p.value })),
-          }
-        : undefined,
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<WdyaLike>(raw);
+      return {
+        APP: {
+          APPLICATION_NAME: String(obj.name ?? '').toUpperCase(),
+          COMPONENT: obj.component,
+          INTERFACE: obj.interface,
+          DESCRIPTION: obj.description,
+        },
+        PROPERTIES: obj.properties?.length
+          ? {
+              item: obj.properties.map((p) => ({
+                NAME: p.name,
+                VALUE: p.value,
+              })),
+            }
+          : undefined,
+      };
+    },
 
     fromAbapGit: ({ APP, PROPERTIES }) => {
       const props = normalizeItems(PROPERTIES?.item);

@@ -6,7 +6,7 @@
  */
 
 import { styl } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type StyleLike = {
@@ -59,65 +59,68 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
   serializer: 'LCL_OBJECT_STYL',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    STYLE: {
-      HEADER: {
-        TDSTYLE: String(obj.name ?? '').toUpperCase(),
-        TDSPRAS: isoToSapLang(obj.language),
-        TDOSPRAS: isoToSapLang(obj.origLanguage),
-        TDPRINTER: obj.printer,
-        TDTEXT: obj.description,
-        TDFIRSTPAR: obj.firstParagraph,
-        TDCPI: obj.cpi,
-        TDLPI: obj.lpi,
-        TDTRANSTAT: obj.transtat,
-        TDSTATUS: obj.status,
-        TDPAGEFORM: obj.pageForm,
-        TDPAGHEIGH: obj.pageHeight,
-        TDPAGWIDTH: obj.pageWidth,
-        TDFAMILY: obj.family,
-        TDVERSION: obj.version,
-        PVERS: obj.pvers,
+  toAbapGit: (raw) => {
+    const obj = unwrapData<StyleLike>(raw);
+    return {
+      STYLE: {
+        HEADER: {
+          TDSTYLE: String(obj.name ?? '').toUpperCase(),
+          TDSPRAS: isoToSapLang(obj.language),
+          TDOSPRAS: isoToSapLang(obj.origLanguage),
+          TDPRINTER: obj.printer,
+          TDTEXT: obj.description,
+          TDFIRSTPAR: obj.firstParagraph,
+          TDCPI: obj.cpi,
+          TDLPI: obj.lpi,
+          TDTRANSTAT: obj.transtat,
+          TDSTATUS: obj.status,
+          TDPAGEFORM: obj.pageForm,
+          TDPAGHEIGH: obj.pageHeight,
+          TDPAGWIDTH: obj.pageWidth,
+          TDFAMILY: obj.family,
+          TDVERSION: obj.version,
+          PVERS: obj.pvers,
+        },
+        PARAGRAPHS: obj.paragraphs?.length
+          ? {
+              item: obj.paragraphs.map((p) => ({
+                TDPARGRAPH: p.paragraph,
+                TDTEXT: p.text,
+                TDPJUSTIFY: p.justify,
+                TDPLDIST: p.lineDist,
+                TDPTOP: p.top,
+                TDPBOT: p.bot,
+                TDPLEFT: p.left,
+                TDPRIGHT: p.right,
+              })),
+            }
+          : undefined,
+        STRINGS: obj.strings?.length
+          ? {
+              item: obj.strings.map((s) => ({
+                TDSTRING: s.string,
+                TDTEXT: s.text,
+                TDMARK: s.mark,
+                TDSUPER: s.sup,
+                TDSUB: s.sub,
+                TDHIDDEN: s.hidden,
+                TDPROTLINE: s.protline,
+              })),
+            }
+          : undefined,
+        TABS: obj.tabs?.length
+          ? {
+              item: obj.tabs.map((t) => ({
+                TDPARGRAPH: t.paragraph,
+                TDPOSITION: t.position,
+                TDTABPOS: t.tabPos,
+                TDTJUSTIFY: t.tjustify,
+              })),
+            }
+          : undefined,
       },
-      PARAGRAPHS: obj.paragraphs?.length
-        ? {
-            item: obj.paragraphs.map((p) => ({
-              TDPARGRAPH: p.paragraph,
-              TDTEXT: p.text,
-              TDPJUSTIFY: p.justify,
-              TDPLDIST: p.lineDist,
-              TDPTOP: p.top,
-              TDPBOT: p.bot,
-              TDPLEFT: p.left,
-              TDPRIGHT: p.right,
-            })),
-          }
-        : undefined,
-      STRINGS: obj.strings?.length
-        ? {
-            item: obj.strings.map((s) => ({
-              TDSTRING: s.string,
-              TDTEXT: s.text,
-              TDMARK: s.mark,
-              TDSUPER: s.sup,
-              TDSUB: s.sub,
-              TDHIDDEN: s.hidden,
-              TDPROTLINE: s.protline,
-            })),
-          }
-        : undefined,
-      TABS: obj.tabs?.length
-        ? {
-            item: obj.tabs.map((t) => ({
-              TDPARGRAPH: t.paragraph,
-              TDPOSITION: t.position,
-              TDTABPOS: t.tabPos,
-              TDTJUSTIFY: t.tjustify,
-            })),
-          }
-        : undefined,
-    },
-  }),
+    };
+  },
 
   fromAbapGit: ({ STYLE }) => {
     const paragraphs = normalizeItems(STYLE?.PARAGRAPHS?.item);

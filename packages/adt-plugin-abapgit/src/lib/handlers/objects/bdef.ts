@@ -16,7 +16,7 @@
  */
 
 import { bdef } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import {
   serializeDualFormat,
   affGetSource,
@@ -42,12 +42,15 @@ export const behaviorDefinitionHandler = createHandler<BdefLike, typeof bdef>(
     serializer: 'LCL_OBJECT_BDEF',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SKEY: {
-        TYPE: 'BDEF',
-        NAME: String(obj?.name ?? '').toUpperCase(),
-      },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<BdefLike>(raw);
+      return {
+        SKEY: {
+          TYPE: 'BDEF',
+          NAME: String(obj?.name ?? '').toUpperCase(),
+        },
+      };
+    },
 
     getSource: affGetSource,
     fromAbapGit: ({ SKEY }) => affFromAbapGit(SKEY),
