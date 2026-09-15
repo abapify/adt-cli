@@ -126,8 +126,18 @@ async function collectSourceFiles(
     if (obj) obj.sourceFiles.push({ path: sourcePath, suffix: parsed.suffix });
   }
 
-  // Suffixed XML companions (e.g. {name}.form.tdlines_E.xml) are sources,
-  // not metadata — non-suffixed .xml files are already the xmlFile.
+  collectXmlCompanions(xmlFiles, objectMap);
+  collectBinaryCompanions(allFiles, objectMap);
+}
+
+/**
+ * Suffixed XML companions (e.g. {name}.form.tdlines_E.xml) are sources,
+ * not metadata — non-suffixed .xml files are already the xmlFile.
+ */
+function collectXmlCompanions(
+  xmlFiles: string[],
+  objectMap: Map<string, ObjectFiles>,
+): void {
   for (const sourcePath of xmlFiles) {
     const filename = sourcePath.slice(sourcePath.lastIndexOf('/') + 1);
     const parsed = parseAbapGitFilename(filename);
@@ -135,9 +145,16 @@ async function collectSourceFiles(
     const obj = objectMap.get(`${parsed.name}:${parsed.type}`);
     if (obj) obj.sourceFiles.push({ path: sourcePath, suffix: parsed.suffix });
   }
+}
 
-  // Binary/other companions ({name}.{type}.{filename}, e.g. SMIM MIME
-  // objects) don't match the source/metadata extensions at all.
+/**
+ * Binary/other companions ({name}.{type}.{filename}, e.g. SMIM MIME
+ * objects) don't match the source/metadata extensions at all.
+ */
+function collectBinaryCompanions(
+  allFiles: string[],
+  objectMap: Map<string, ObjectFiles>,
+): void {
   for (const sourcePath of allFiles) {
     const filename = sourcePath.slice(sourcePath.lastIndexOf('/') + 1);
     const match = filename.match(/^([^.]+)\.([^.]+)\..+$/);
