@@ -32,6 +32,20 @@ type BadiImplData = {
   FILTERS?: unknown;
 };
 
+type BadiImplLike = {
+  spotName?: string;
+  badiName?: string;
+  implName?: string;
+  implClass?: string;
+  active?: boolean;
+  implShorttext?: string;
+  implShorttextId?: string;
+  lockedInCustomizing?: boolean;
+  filterRoot?: unknown;
+  filterValues?: unknown;
+  filters?: unknown;
+};
+
 type EnhancementImplementationLike = {
   name: string;
   description?: string;
@@ -47,6 +61,7 @@ type EnhancementImplementationLike = {
   filterRoot?: unknown;
   filterValues?: unknown;
   filters?: unknown;
+  impls?: BadiImplLike[];
   originalObject?: {
     pgmid?: string;
     objType?: string;
@@ -79,22 +94,22 @@ export const enhancementImplementationHandler = createHandler<
     };
 
     if (tool === 'BADI_IMPL') {
+      const toImplXml = (i: BadiImplLike): BadiImplData => ({
+        SPOT_NAME: i.spotName,
+        BADI_NAME: i.badiName,
+        IMPL_NAME: i.implName,
+        IMPL_CLASS: i.implClass,
+        ACTIVE: i.active ? 'X' : undefined,
+        IMPL_SHORTTEXT: i.implShorttext,
+        IMPL_SHORTTEXT_ID: i.implShorttextId,
+        LOCKED_IN_CUSTOMIZING: i.lockedInCustomizing ? 'X' : undefined,
+        FILTER_ROOT: i.filterRoot,
+        FILTER_VALUES: i.filterValues,
+        FILTERS: i.filters,
+      });
+      const impls = obj.impls?.length ? obj.impls : [obj];
       result.SPOT_NAME = obj.spotName;
-      result.IMPL = {
-        ENH_BADI_IMPL_DATA: {
-          SPOT_NAME: obj.spotName,
-          BADI_NAME: obj.badiName,
-          IMPL_NAME: obj.implName,
-          IMPL_CLASS: obj.implClass,
-          ACTIVE: obj.active ? 'X' : undefined,
-          IMPL_SHORTTEXT: obj.implShorttext,
-          IMPL_SHORTTEXT_ID: obj.implShorttextId,
-          LOCKED_IN_CUSTOMIZING: obj.lockedInCustomizing ? 'X' : undefined,
-          FILTER_ROOT: obj.filterRoot,
-          FILTER_VALUES: obj.filterValues,
-          FILTERS: obj.filters,
-        } satisfies BadiImplData,
-      };
+      result.IMPL = { ENH_BADI_IMPL_DATA: impls.map(toImplXml) };
     } else if (obj.originalObject) {
       result.ORIGINAL_OBJECT = {
         PGMID: obj.originalObject.pgmid ?? 'R3TR',
@@ -126,12 +141,13 @@ export const enhancementImplementationHandler = createHandler<
     SOTR,
     SOTR_USE,
   }) => {
-    const implData = normalizeItems(
+    const implRows = normalizeItems(
       (
         IMPL as
           { ENH_BADI_IMPL_DATA?: BadiImplData | BadiImplData[] } | undefined
       )?.ENH_BADI_IMPL_DATA,
-    )[0];
+    );
+    const implData = implRows[0];
     return {
       name: '', // ENHO name comes from filename, not XML content
       description: SHORTTEXT,
@@ -147,6 +163,19 @@ export const enhancementImplementationHandler = createHandler<
       filterRoot: implData?.FILTER_ROOT,
       filterValues: implData?.FILTER_VALUES,
       filters: implData?.FILTERS,
+      impls: implRows.map((i) => ({
+        spotName: i.SPOT_NAME,
+        badiName: i.BADI_NAME,
+        implName: i.IMPL_NAME,
+        implClass: i.IMPL_CLASS,
+        active: i.ACTIVE === 'X',
+        implShorttext: i.IMPL_SHORTTEXT,
+        implShorttextId: i.IMPL_SHORTTEXT_ID,
+        lockedInCustomizing: i.LOCKED_IN_CUSTOMIZING === 'X',
+        filterRoot: i.FILTER_ROOT,
+        filterValues: i.FILTER_VALUES,
+        filters: i.FILTERS,
+      })),
       originalObject: ORIGINAL_OBJECT
         ? {
             pgmid: ORIGINAL_OBJECT.PGMID,
