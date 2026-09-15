@@ -58,13 +58,11 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
   -subj "/CN=localhost" \
   -addext "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:adt-mcp"
 
-# Minimal env file
-cat > .env.mcp <<'EOF'
-MCP_TLS_CERT=/app/certs/cert.pem
-MCP_TLS_KEY=/app/certs/key.pem
-MCP_AUTH_TOKEN=change-me
-MCP_ALLOWED_HOSTS=localhost,127.0.0.1
-EOF
+# Env file — the shipped .env.mcp.example carries the container paths
+# (/app/certs/...); a repo-root .env must NOT be used here since its
+# ../../cert.pem paths are relative to packages/adt-mcp.
+cp .env.mcp.example .env.mcp
+$EDITOR .env.mcp   # set MCP_AUTH_TOKEN etc.
 
 docker compose -f docker-compose.mcp.yaml --env-file .env.mcp up -d
 ```
