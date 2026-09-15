@@ -17,7 +17,10 @@
 - ✅ ONE root element per document schema (`abapGit`)
 - ✅ Reuse via `xs:complexType`, NOT via elements
 - ✅ Payload types are TYPES ONLY (never global elements)
-- ❌ NO `xs:redefine` or `xs:override`
+- ✅ Document schemas live in the `asx` namespace and `xs:redefine` the
+  shared `asx:AbapValuesType` envelope (see `intf.xsd`) — this is the
+  established pattern; the ts-xsd resolver expands redefinitions
+- ❌ NO `xs:override`
 - ❌ NO substitution groups
 - ❌ NO abstract elements
 
@@ -25,13 +28,13 @@
 
 ```
 xsd/
-├── asx.xsd              # ASX envelope (structural types only, xs:any for payload)
-├── abapgit.xsd          # AbapGitRootType (TYPE ONLY - no element!)
+├── asx.xsd              # ASX envelope: abap/values elements + AbapValuesType
+├── abapgit.xsd          # THE shared abapGit root element (imported by all docs)
 ├── types/               # Reusable SAP structure TYPES
 │   ├── vseointerf.xsd   # VseoInterfType (no element!)
 │   ├── vseoclass.xsd    # VseoClassType (no element!)
 │   └── ...
-└── {type}.xsd           # Concrete document schemas (ONE root each)
+└── {type}.xsd           # Concrete document schemas (xs:redefine envelope)
 ```
 
 ### Generated Code Structure
@@ -95,50 +98,42 @@ toAbapGit: (obj) => ({
 </xs:schema>
 ```
 
-**Step 2:** Create concrete document schema in `xsd/{type}.xsd`:
+**Step 2:** Create concrete document schema in `xsd/{type}.xsd` — the
+envelope pattern from `intf.xsd` (`xs:redefine` of `asx:AbapValuesType`):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
            xmlns:asx="http://www.sap.com/abapxml"
            elementFormDefault="unqualified">
 
-  <!-- Import ASX namespace -->
-  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
-
-  <!-- Include reusable types -->
-  <xs:include schemaLocation="abapgit.xsd"/>
+  <!-- Include payload types (brought into asx namespace) -->
   <xs:include schemaLocation="types/{typename}.xsd"/>
 
-  <!-- Object-specific values type -->
-  <xs:complexType name="{Type}ValuesType">
-    <xs:sequence>
-      <xs:element name="{STRUCTNAME}" type="{TypeName}Type" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Object-specific ABAP envelope -->
-  <xs:complexType name="{Type}AbapType">
-    <xs:sequence>
-      <xs:element name="values" type="{Type}ValuesType"/>
-    </xs:sequence>
-    <xs:attribute name="version" type="xs:string" default="1.0"/>
-  </xs:complexType>
-
-  <!-- THE ONLY ROOT ELEMENT -->
-  <xs:element name="abapGit">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="abap" type="{Type}AbapType"/>
-      </xs:sequence>
-      <xs:attribute name="version" type="xs:string" use="required"/>
-      <xs:attribute name="serializer" type="xs:string" use="required"/>
-      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+  <!-- Redefine AbapValuesType to include this object's elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="{STRUCTNAME}" type="asx:{TypeName}Type" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
     </xs:complexType>
-  </xs:element>
+  </xs:redefine>
+
+  <!-- Import the abapGit root element (declared once, in abapgit.xsd) -->
+  <xs:import schemaLocation="abapgit.xsd"/>
 
 </xs:schema>
 ```
+
+The shared `abapGit` root element and `abap`/`values` envelope live in
+`abapgit.xsd`/`asx.xsd`; each document schema only extends the values
+type. After resolution every schema still yields exactly one `abapGit`
+root with `asx:values` carrying the object payload.
 
 ### 3. Handler Template
 
