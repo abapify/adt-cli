@@ -469,7 +469,16 @@ function buildAnyField(
     for (const [key, nested] of Object.entries(
       value as Record<string, unknown>,
     )) {
-      buildAnyField(doc, el, key, nested);
+      if (key.startsWith('@')) {
+        // Captured attribute (e.g. "@xmlns:asx") — restore as attribute
+        if (nested !== undefined && nested !== null) {
+          el.setAttribute(key.slice(1), String(nested));
+        }
+      } else if (key === '_text') {
+        el.textContent = String(nested ?? '');
+      } else {
+        buildAnyField(doc, el, key, nested);
+      }
     }
   } else {
     el.textContent = String(value);
