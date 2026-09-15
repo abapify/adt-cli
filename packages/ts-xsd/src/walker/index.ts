@@ -786,38 +786,32 @@ export function hasWildcard(ct: ComplexTypeLike, schema: SchemaLike): boolean {
   function groupHasAny(group: GroupLike | undefined): boolean {
     if (!group) return false;
     if (group.any && group.any.length > 0) return true;
-    for (const nested of group.sequence ?? []) {
-      if (groupHasAny(nested)) return true;
+    if (
+      [...(group.sequence ?? []), ...(group.choice ?? [])].some(groupHasAny)
+    ) {
+      return true;
     }
-    for (const nested of group.choice ?? []) {
-      if (groupHasAny(nested)) return true;
-    }
-    for (const ref of group.group ?? []) {
-      if (namedGroupHasAny(ref.ref)) return true;
-    }
-    return false;
+    return (group.group ?? []).some((ref) => namedGroupHasAny(ref.ref));
+  }
+
+  function extHasAny(current: ComplexTypeLike): boolean {
+    const ext =
+      current.complexContent?.extension ?? current.complexContent?.restriction;
+    if (!ext) return false;
+    if (groupsHaveAny(ext.sequence, ext.choice, ext.all)) return true;
+    if (namedGroupHasAny(ext.group?.ref)) return true;
+    if (!ext.base) return false;
+    const baseEntry = findComplexType(stripNsPrefix(ext.base), schema);
+    return baseEntry ? visit(baseEntry.ct) : false;
   }
 
   function visit(current: ComplexTypeLike): boolean {
     if (seenTypes.has(current)) return false;
     seenTypes.add(current);
-
     if (groupsHaveAny(current.sequence, current.choice, current.all)) {
       return true;
     }
-
-    const ext =
-      current.complexContent?.extension ?? current.complexContent?.restriction;
-    if (ext) {
-      if (groupsHaveAny(ext.sequence, ext.choice, ext.all)) return true;
-      if (namedGroupHasAny(ext.group?.ref)) return true;
-      if (ext.base) {
-        const baseEntry = findComplexType(stripNsPrefix(ext.base), schema);
-        if (baseEntry && visit(baseEntry.ct)) return true;
-      }
-    }
-
-    return namedGroupHasAny(current.group?.ref);
+    return extHasAny(current) || namedGroupHasAny(current.group?.ref);
   }
 
   return visit(ct);
