@@ -3,7 +3,7 @@
  */
 
 import { sfsw } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type SwitchLike = {
   name: string;
@@ -20,22 +20,25 @@ export const switchHandler = createHandler<SwitchLike, typeof sfsw>('SFSW', {
   serializer: 'LCL_OBJECT_SFSW',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    HEADER: {
-      SWITCH_ID: String(obj.name ?? '').toUpperCase(),
-    },
-    NAME32: obj.name32,
-    NAME80: obj.name80,
-    PARENT_BF: obj.parentBfs?.length
-      ? { item: obj.parentBfs.map((b) => ({ BF: b })) }
-      : undefined,
-    CONFLICTS: obj.conflicts?.length
-      ? { item: obj.conflicts.map((c) => ({ CONFLICT: c })) }
-      : undefined,
-    PACKAGES: obj.packages?.length
-      ? { item: obj.packages.map((p) => ({ PACKAGE: p })) }
-      : undefined,
-  }),
+  toAbapGit: (raw) => {
+    const obj = unwrapData<SwitchLike>(raw);
+    return {
+      HEADER: {
+        SWITCH_ID: String(obj.name ?? '').toUpperCase(),
+      },
+      NAME32: obj.name32,
+      NAME80: obj.name80,
+      PARENT_BF: obj.parentBfs?.length
+        ? { item: obj.parentBfs.map((b) => ({ BF: b })) }
+        : undefined,
+      CONFLICTS: obj.conflicts?.length
+        ? { item: obj.conflicts.map((c) => ({ CONFLICT: c })) }
+        : undefined,
+      PACKAGES: obj.packages?.length
+        ? { item: obj.packages.map((p) => ({ PACKAGE: p })) }
+        : undefined,
+    };
+  },
 
   fromAbapGit: ({ HEADER, NAME32, NAME80, PARENT_BF, CONFLICTS, PACKAGES }) => {
     const parentBfs = normalizeItems(PARENT_BF?.item);

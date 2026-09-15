@@ -9,7 +9,7 @@
  */
 
 import type { AbapGitSchema } from '../base';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { formatAbapGitXml } from '../xml-format';
 import {
   ecat,
@@ -39,7 +39,10 @@ function createRawXmlHandler<TSchema extends AbapGitSchema<unknown, unknown>>(
     serializer: `LCL_OBJECT_${type}`,
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({ ...(obj.raw ?? {}) }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<RawXmlObject>(raw);
+      return { ...(obj.raw ?? {}) };
+    },
 
     fromAbapGit: (values) => ({
       name: '',

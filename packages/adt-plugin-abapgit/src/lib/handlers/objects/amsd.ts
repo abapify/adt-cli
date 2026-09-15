@@ -3,7 +3,7 @@
  */
 
 import { amsd } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type AmdpSchemaLike = {
@@ -20,15 +20,18 @@ export const amdpSchemaHandler = createHandler<AmdpSchemaLike, typeof amsd>(
     serializer: 'LCL_OBJECT_AMSD',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      AMSD: {
-        METADATA: {
-          NAME: String(obj.name ?? '').toUpperCase(),
-          MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
-          PACKAGE_REF: obj.packageName,
+    toAbapGit: (raw) => {
+      const obj = unwrapData<AmdpSchemaLike>(raw);
+      return {
+        AMSD: {
+          METADATA: {
+            NAME: String(obj.name ?? '').toUpperCase(),
+            MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+            PACKAGE_REF: obj.packageName,
+          },
         },
-      },
-    }),
+      };
+    },
 
     fromAbapGit: ({ AMSD }) => ({
       name: (AMSD?.METADATA?.NAME ?? '').toUpperCase(),

@@ -3,7 +3,7 @@
  */
 
 import { wdcc } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type WdccLike = {
@@ -24,19 +24,22 @@ export const wdccHandler = createHandler<WdccLike, typeof wdcc>('WDCC', {
   serializer: 'LCL_OBJECT_WDCC',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    OBJECT_NAME: String(obj.name ?? '').toUpperCase(),
-    CONFIG_ID: obj.configId,
-    CONFIG_TYPE: obj.configType,
-    CONFIG_VAR: obj.configVar,
-    WDA_COMPONENT: obj.wdaComponent,
-    PARENT: obj.parent,
-    RELID: obj.relId,
-    OTR_TEXT: obj.otrTexts?.length
-      ? { item: obj.otrTexts.map((t) => ({ NAME: t.name, TEXT: t.text })) }
-      : undefined,
-    DESCR_LANG: isoToSapLang(obj.descrLang),
-  }),
+  toAbapGit: (raw) => {
+    const obj = unwrapData<WdccLike>(raw);
+    return {
+      OBJECT_NAME: String(obj.name ?? '').toUpperCase(),
+      CONFIG_ID: obj.configId,
+      CONFIG_TYPE: obj.configType,
+      CONFIG_VAR: obj.configVar,
+      WDA_COMPONENT: obj.wdaComponent,
+      PARENT: obj.parent,
+      RELID: obj.relId,
+      OTR_TEXT: obj.otrTexts?.length
+        ? { item: obj.otrTexts.map((t) => ({ NAME: t.name, TEXT: t.text })) }
+        : undefined,
+      DESCR_LANG: isoToSapLang(obj.descrLang),
+    };
+  },
 
   fromAbapGit: (values) => {
     const otrTexts = normalizeItems(values.OTR_TEXT?.item);

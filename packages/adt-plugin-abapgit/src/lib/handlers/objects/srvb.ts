@@ -17,7 +17,7 @@
  */
 
 import { srvb } from '../../../schemas/generated';
-import { createHandler, type SerializedFile } from '../base';
+import { createHandler, type SerializedFile, unwrapData } from '../base';
 import { buildAffJson } from '../source-resolver';
 import type { FormatSerializeOptions } from '@abapify/adt-plugin';
 
@@ -34,17 +34,20 @@ export const serviceBindingHandler = createHandler<SrvbLike, typeof srvb>(
     serializer: 'LCL_OBJECT_SRVB',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SKEY: {
-        TYPE: 'SRVB',
-        NAME: String(obj?.name ?? '').toUpperCase(),
-      },
-      BINDING: {
-        TYPE: 'odataV4',
-        VERSION: '4',
-        CATEGORY: 'odata_v4_ui',
-      },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<SrvbLike>(raw);
+      return {
+        SKEY: {
+          TYPE: 'SRVB',
+          NAME: String(obj?.name ?? '').toUpperCase(),
+        },
+        BINDING: {
+          TYPE: 'odataV4',
+          VERSION: '4',
+          CATEGORY: 'odata_v4_ui',
+        },
+      };
+    },
 
     fromAbapGit: ({ SKEY }) => ({
       name: String(SKEY?.NAME ?? '').toUpperCase(),

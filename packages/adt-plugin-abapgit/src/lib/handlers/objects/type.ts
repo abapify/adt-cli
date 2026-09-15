@@ -6,7 +6,7 @@
  */
 
 import { type as typeSchema } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type TypeGroupLike = {
   name: string;
@@ -22,12 +22,15 @@ export const typeGroupHandler = createHandler<TypeGroupLike, typeof typeSchema>(
     serializer: 'LCL_OBJECT_TYPE',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      TYPE: {
-        TYPEGROUP: String(obj.name ?? '').toUpperCase(),
-        DESCRIPT: obj.description ?? '',
-      },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<TypeGroupLike>(raw);
+      return {
+        TYPE: {
+          TYPEGROUP: String(obj.name ?? '').toUpperCase(),
+          DESCRIPT: obj.description ?? '',
+        },
+      };
+    },
 
     getSource: (obj) =>
       typeof obj?.getSource === 'function'

@@ -17,6 +17,7 @@ import { AdkFunctionGroup } from '../adk';
 import { fugr } from '../../../schemas/generated';
 import {
   createHandler,
+  unwrapData,
   type HandlerContext,
   type SerializedFile,
 } from '../base';
@@ -207,7 +208,9 @@ function createFunctionGroupHandler(type: 'FUGR' | 'FUGS') {
 
     // SAP → Git: Map ADK object to abapGit values
     // Note: FUNCTIONS are added dynamically in the custom serialize method
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<FugrObject>(raw);
+
       const name = obj.name.toUpperCase();
       return {
         AREAT: obj.description ?? '',

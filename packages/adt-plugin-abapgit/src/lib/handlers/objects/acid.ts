@@ -3,7 +3,7 @@
  */
 
 import { acid } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type AcidObjectLike = {
   name: string;
@@ -16,9 +16,12 @@ export const acidHandler = createHandler<AcidObjectLike, typeof acid>('ACID', {
   serializer: 'LCL_OBJECT_ACID',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    DESCRIPTION: obj.description,
-  }),
+  toAbapGit: (raw) => {
+    const obj = unwrapData<AcidObjectLike>(raw);
+    return {
+      DESCRIPTION: obj.description,
+    };
+  },
 
   fromAbapGit: ({ DESCRIPTION }) => ({
     name: '',

@@ -3,7 +3,7 @@
  */
 
 import { udmo } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type DataModelLike = {
@@ -22,32 +22,35 @@ export const dataModelHandler = createHandler<DataModelLike, typeof udmo>(
     serializer: 'LCL_OBJECT_UDMO',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      DM40L: {
-        DMOID: String(obj.name ?? '').toUpperCase(),
-        AS4LOCAL: obj.as4local,
-        DMOTYPE: obj.dmoType,
-      },
-      UDMO_ENTITIES: obj.entities?.length
-        ? {
-            item: obj.entities.map((e) => ({
-              DMOID: String(obj.name ?? '').toUpperCase(),
-              ENTID: e.entId,
-              AS4LOCAL: e.as4local,
-            })),
-          }
-        : undefined,
-      UDMO_TEXTS: obj.texts?.length
-        ? {
-            item: obj.texts.map((t) => ({
-              SPRACHE: isoToSapLang(t.language),
-              DMOID: String(obj.name ?? '').toUpperCase(),
-              LANGBEZ: t.longText,
-              AS4LOCAL: t.as4local,
-            })),
-          }
-        : undefined,
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<DataModelLike>(raw);
+      return {
+        DM40L: {
+          DMOID: String(obj.name ?? '').toUpperCase(),
+          AS4LOCAL: obj.as4local,
+          DMOTYPE: obj.dmoType,
+        },
+        UDMO_ENTITIES: obj.entities?.length
+          ? {
+              item: obj.entities.map((e) => ({
+                DMOID: String(obj.name ?? '').toUpperCase(),
+                ENTID: e.entId,
+                AS4LOCAL: e.as4local,
+              })),
+            }
+          : undefined,
+        UDMO_TEXTS: obj.texts?.length
+          ? {
+              item: obj.texts.map((t) => ({
+                SPRACHE: isoToSapLang(t.language),
+                DMOID: String(obj.name ?? '').toUpperCase(),
+                LANGBEZ: t.longText,
+                AS4LOCAL: t.as4local,
+              })),
+            }
+          : undefined,
+      };
+    },
 
     fromAbapGit: ({ DM40L, UDMO_ENTITIES, UDMO_TEXTS }) => {
       const entities = normalizeItems(UDMO_ENTITIES?.item);

@@ -7,7 +7,7 @@
  */
 
 import { tran } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type TransactionLike = {
@@ -131,7 +131,8 @@ function buildTstct(
   };
 }
 
-function buildTransactionToAbapGit(obj: TransactionLike) {
+function buildTransactionToAbapGit(raw: TransactionLike) {
+  const obj = unwrapData<TransactionLike>(raw);
   const texts = obj.texts ?? [];
   const tcode = String(obj.name ?? '').toUpperCase();
   return {

@@ -3,7 +3,7 @@
  */
 
 import { apis } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type ApiStateLike = {
   name: string;
@@ -18,14 +18,17 @@ export const apiStateHandler = createHandler<ApiStateLike, typeof apis>(
     serializer: 'LCL_OBJECT_APIS',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      APIS: {
-        HEADER: {
-          API_NAME: String(obj.name ?? '').toUpperCase(),
-          DESCRIPTION: obj.description,
+    toAbapGit: (raw) => {
+      const obj = unwrapData<ApiStateLike>(raw);
+      return {
+        APIS: {
+          HEADER: {
+            API_NAME: String(obj.name ?? '').toUpperCase(),
+            DESCRIPTION: obj.description,
+          },
         },
-      },
-    }),
+      };
+    },
 
     fromAbapGit: ({ APIS }) => ({
       name: (APIS?.HEADER?.API_NAME ?? '').toUpperCase(),

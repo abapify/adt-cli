@@ -3,7 +3,7 @@
  */
 
 import { iaxu } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type IaxuLike = {
   name: string;
@@ -18,14 +18,17 @@ export const iaxuHandler = createHandler<IaxuLike, typeof iaxu>('IAXU', {
   serializer: 'LCL_OBJECT_IAXU',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    ATTR: {
-      NAME: String(obj.name ?? '').toUpperCase(),
-      TEXT: obj.text,
-      MIMETYPE: obj.mimeType,
-      DEVCLASS: obj.packageName,
-    },
-  }),
+  toAbapGit: (raw) => {
+    const obj = unwrapData<IaxuLike>(raw);
+    return {
+      ATTR: {
+        NAME: String(obj.name ?? '').toUpperCase(),
+        TEXT: obj.text,
+        MIMETYPE: obj.mimeType,
+        DEVCLASS: obj.packageName,
+      },
+    };
+  },
 
   fromAbapGit: ({ ATTR }) => ({
     name: (ATTR?.NAME ?? '').toUpperCase(),

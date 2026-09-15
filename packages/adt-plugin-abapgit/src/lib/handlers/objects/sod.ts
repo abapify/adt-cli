@@ -5,7 +5,7 @@
  * the only difference is the object type and generated schema.
  */
 
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import type { AbapGitSchema } from '../abapgit-schema';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
@@ -28,14 +28,17 @@ export function createOdsHandler<
     serializer: `LCL_OBJECT_${type}`,
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      [type]: {
-        METADATA: {
-          NAME: String(obj.name ?? '').toUpperCase(),
-          MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<OdsObjectLike>(raw);
+      return {
+        [type]: {
+          METADATA: {
+            NAME: String(obj.name ?? '').toUpperCase(),
+            MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+          },
         },
-      },
-    }),
+      };
+    },
 
     fromAbapGit: (values) => {
       const node = values[type];

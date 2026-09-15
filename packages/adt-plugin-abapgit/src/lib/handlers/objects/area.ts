@@ -3,7 +3,7 @@
  */
 
 import { area } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type InfoAreaLike = {
   name: string;
@@ -20,12 +20,15 @@ export const infoAreaHandler = createHandler<InfoAreaLike, typeof area>(
     serializer: 'LCL_OBJECT_AREA',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      NODENAME: String(obj.name ?? '').toUpperCase(),
-      PARENTNAME: obj.parentName,
-      TXTSH: obj.shortText,
-      TXTLG: obj.longText,
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<InfoAreaLike>(raw);
+      return {
+        NODENAME: String(obj.name ?? '').toUpperCase(),
+        PARENTNAME: obj.parentName,
+        TXTSH: obj.shortText,
+        TXTLG: obj.longText,
+      };
+    },
 
     fromAbapGit: ({ NODENAME, PARENTNAME, TXTSH, TXTLG }) => ({
       name: (NODENAME ?? '').toUpperCase(),

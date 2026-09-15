@@ -362,6 +362,18 @@ export function mapItems<T, R>(
 }
 
 /**
+ * Unwrap the ADK payload: AdkObject instances store the payload under
+ * `.data`, plain literals carry fields directly. A literal `data` field
+ * that is an array (e.g. SPRX) is left untouched.
+ */
+export function unwrapData<T>(raw: T | { data?: unknown }): T {
+  const d = (raw as { data?: unknown }).data;
+  return d !== null && typeof d === 'object' && !Array.isArray(d)
+    ? (d as T)
+    : (raw as T);
+}
+
+/**
  * Create an object handler from ADK class
  */
 export function createHandler<

@@ -6,7 +6,7 @@
  */
 
 import { sktd } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import {
   abapLangVerFromAdt,
   abapLangVerToAdt,
@@ -32,19 +32,22 @@ export const ktdDocumentHandler = createHandler<KtdDocumentLike, typeof sktd>(
     serializer: 'LCL_OBJECT_SKTD',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SKTD: {
-        METADATA: {
-          MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
-          RESPONSIBLE: obj.responsible,
-          ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(obj.abapLanguageVersion),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<KtdDocumentLike>(raw);
+      return {
+        SKTD: {
+          METADATA: {
+            MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+            RESPONSIBLE: obj.responsible,
+            ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(obj.abapLanguageVersion),
+          },
+          REF_OBJECT: {
+            URI: obj.refObjectUri,
+            DESCRIPTION: obj.refObjectDescription ?? obj.description,
+          },
         },
-        REF_OBJECT: {
-          URI: obj.refObjectUri,
-          DESCRIPTION: obj.refObjectDescription ?? obj.description,
-        },
-      },
-    }),
+      };
+    },
 
     fromAbapGit: ({ SKTD }) => ({
       name: '',

@@ -5,7 +5,7 @@
  */
 
 import { doct } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type GeneralTextLike = {
@@ -22,32 +22,35 @@ export const generalTextHandler = createHandler<GeneralTextLike, typeof doct>(
     serializer: 'LCL_OBJECT_DOCT',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      LONGTEXTS: {
-        item: [
-          {
-            DOKIL: {
-              ID: 'TX',
-              OBJECT: String(obj.name ?? '').toUpperCase(),
-              LANGU: isoToSapLang(obj.language),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<GeneralTextLike>(raw);
+      return {
+        LONGTEXTS: {
+          item: [
+            {
+              DOKIL: {
+                ID: 'TX',
+                OBJECT: String(obj.name ?? '').toUpperCase(),
+                LANGU: isoToSapLang(obj.language),
+              },
+              HEAD: {
+                TDNAME: String(obj.name ?? '').toUpperCase(),
+                TDID: 'TX',
+                TDSPRAS: isoToSapLang(obj.language),
+              },
+              LINES: obj.lines?.length
+                ? {
+                    item: obj.lines.map((l) => ({
+                      TDFORMAT: l.format,
+                      TDLINE: l.line,
+                    })),
+                  }
+                : undefined,
             },
-            HEAD: {
-              TDNAME: String(obj.name ?? '').toUpperCase(),
-              TDID: 'TX',
-              TDSPRAS: isoToSapLang(obj.language),
-            },
-            LINES: obj.lines?.length
-              ? {
-                  item: obj.lines.map((l) => ({
-                    TDFORMAT: l.format,
-                    TDLINE: l.line,
-                  })),
-                }
-              : undefined,
-          },
-        ],
-      },
-    }),
+          ],
+        },
+      };
+    },
 
     fromAbapGit: ({ LONGTEXTS }) => {
       const items = normalizeItems(LONGTEXTS?.item);

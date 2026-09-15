@@ -7,7 +7,7 @@
  */
 
 import { view } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type ViewLike = {
@@ -51,7 +51,9 @@ export const viewHandler = createHandler<ViewLike, typeof view>('VIEW', {
   serializer: 'LCL_OBJECT_VIEW',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => {
+  toAbapGit: (raw) => {
+    const obj = unwrapData<ViewLike>(raw);
+
     const tables = obj.tables ?? [];
     const fields = obj.fields ?? [];
     const conditions = obj.selectionConditions ?? [];

@@ -6,7 +6,7 @@
  */
 
 import { iobj } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type InfoObjectLike = {
   name: string;
@@ -41,43 +41,46 @@ export const infoObjectHandler = createHandler<InfoObjectLike, typeof iobj>(
     serializer: 'LCL_OBJECT_IOBJ',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      IOBJ: {
-        INFOOBJECT: String(obj.name ?? '').toUpperCase(),
-        VERSION: obj.version ?? 'A',
-        TYPE: obj.type,
-        OBJSTAT: obj.objStat,
-        ACTIVFL: obj.activFl,
-        FIELDNM: obj.fieldName,
-        CONTREL: obj.contRel,
-        DATATP: obj.dataTp,
-        INTLEN: obj.intLen,
-        OUTPUTLEN: obj.outputLen,
-        LOWCASE: obj.lowCase,
-        CONVEXIT: obj.convExit,
-        KYFNM: obj.keyFigName,
-        TXTLONG: obj.description,
-        TXTSHRT: obj.shortText,
-      },
-      COMPOUNDS: obj.compounds?.length
-        ? {
-            BAPI6108CM: obj.compounds.map((c) => ({
-              IOBJNM_Z: c.iobjnm,
-              COMPOUND: c.compound,
-            })),
-          }
-        : undefined,
-      ATTRIBUTES: obj.attributes?.length
-        ? {
-            BAPI6108AT: obj.attributes.map((a) => ({
-              ATRNM: a.atrnm,
-              OBJSTAT: a.objstat,
-              ATTRIB: a.attrib,
-              KYFNM: a.kyfnm,
-            })),
-          }
-        : undefined,
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<InfoObjectLike>(raw);
+      return {
+        IOBJ: {
+          INFOOBJECT: String(obj.name ?? '').toUpperCase(),
+          VERSION: obj.version ?? 'A',
+          TYPE: obj.type,
+          OBJSTAT: obj.objStat,
+          ACTIVFL: obj.activFl,
+          FIELDNM: obj.fieldName,
+          CONTREL: obj.contRel,
+          DATATP: obj.dataTp,
+          INTLEN: obj.intLen,
+          OUTPUTLEN: obj.outputLen,
+          LOWCASE: obj.lowCase,
+          CONVEXIT: obj.convExit,
+          KYFNM: obj.keyFigName,
+          TXTLONG: obj.description,
+          TXTSHRT: obj.shortText,
+        },
+        COMPOUNDS: obj.compounds?.length
+          ? {
+              BAPI6108CM: obj.compounds.map((c) => ({
+                IOBJNM_Z: c.iobjnm,
+                COMPOUND: c.compound,
+              })),
+            }
+          : undefined,
+        ATTRIBUTES: obj.attributes?.length
+          ? {
+              BAPI6108AT: obj.attributes.map((a) => ({
+                ATRNM: a.atrnm,
+                OBJSTAT: a.objstat,
+                ATTRIB: a.attrib,
+                KYFNM: a.kyfnm,
+              })),
+            }
+          : undefined,
+      };
+    },
 
     fromAbapGit: ({ IOBJ, COMPOUNDS, ATTRIBUTES }) => {
       const compounds = normalizeItems(COMPOUNDS?.BAPI6108CM);

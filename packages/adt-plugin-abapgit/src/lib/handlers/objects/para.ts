@@ -3,7 +3,7 @@
  */
 
 import { para } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type SpagpaParamLike = {
@@ -20,7 +20,9 @@ export const spagpaParamHandler = createHandler<SpagpaParamLike, typeof para>(
     serializer: 'LCL_OBJECT_PARA',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<SpagpaParamLike>(raw);
+
       const name = String(obj.name ?? '').toUpperCase();
       const lang = isoToSapLang(obj.language);
       return {

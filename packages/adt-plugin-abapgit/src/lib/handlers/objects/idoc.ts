@@ -6,7 +6,7 @@
  */
 
 import { idoc } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type IdocTypeLike = {
   name: string;
@@ -37,34 +37,37 @@ export const idocTypeHandler = createHandler<IdocTypeLike, typeof idoc>(
     serializer: 'LCL_OBJECT_IDOC',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      IDOC: {
-        ATTRIBUTES: {
-          IDOCTYP: String(obj.name ?? '').toUpperCase(),
-          DESCRP: obj.description,
-          CLOSED: obj.closed,
-          RELEASED: obj.released,
-          APPLREL: obj.applrel,
-          FIRSTTYP: obj.firsttyp,
-          PRETYP: obj.pretyp,
-          SUCCTYP: obj.succtyp,
-          LASTTYP: obj.lasttyp,
-          GENERATED: obj.generated,
+    toAbapGit: (raw) => {
+      const obj = unwrapData<IdocTypeLike>(raw);
+      return {
+        IDOC: {
+          ATTRIBUTES: {
+            IDOCTYP: String(obj.name ?? '').toUpperCase(),
+            DESCRP: obj.description,
+            CLOSED: obj.closed,
+            RELEASED: obj.released,
+            APPLREL: obj.applrel,
+            FIRSTTYP: obj.firsttyp,
+            PRETYP: obj.pretyp,
+            SUCCTYP: obj.succtyp,
+            LASTTYP: obj.lasttyp,
+            GENERATED: obj.generated,
+          },
+          T_SYNTAX: obj.syntax?.length
+            ? {
+                EDI_IAPI02: obj.syntax.map((s) => ({
+                  NR: s.nr,
+                  SEGTYP: s.segtyp,
+                  PARSEG: s.parseg,
+                  PARPNO: s.parpno,
+                  PARFLG: s.parflg,
+                  MUSTFL: s.mustfl,
+                })),
+              }
+            : undefined,
         },
-        T_SYNTAX: obj.syntax?.length
-          ? {
-              EDI_IAPI02: obj.syntax.map((s) => ({
-                NR: s.nr,
-                SEGTYP: s.segtyp,
-                PARSEG: s.parseg,
-                PARPNO: s.parpno,
-                PARFLG: s.parflg,
-                MUSTFL: s.mustfl,
-              })),
-            }
-          : undefined,
-      },
-    }),
+      };
+    },
 
     fromAbapGit: ({ IDOC }) => {
       const syntax = normalizeItems(IDOC?.T_SYNTAX?.EDI_IAPI02);
