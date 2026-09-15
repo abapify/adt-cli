@@ -54,6 +54,10 @@ type EnhancementImplementationLike = {
     mainName?: string;
     programName?: string;
   };
+  enhancements?: unknown;
+  files?: unknown;
+  sotr?: unknown;
+  sotrUse?: unknown;
   getSource?: () => Promise<string> | string;
 };
 
@@ -89,7 +93,7 @@ export const enhancementImplementationHandler = createHandler<
           FILTERS: obj.filters,
         } satisfies BadiImplData,
       };
-    } else if (tool === 'HOOK_IMPL' && obj.originalObject) {
+    } else if (obj.originalObject) {
       result.ORIGINAL_OBJECT = {
         PGMID: obj.originalObject.pgmid ?? 'R3TR',
         ORG_OBJ_TYPE: obj.originalObject.objType,
@@ -100,10 +104,26 @@ export const enhancementImplementationHandler = createHandler<
       };
     }
 
+    // Pass through enhancement metadata shared by all tool sub-types
+    result.ENHANCEMENTS = obj.enhancements;
+    result.FILES = obj.files;
+    result.SOTR = obj.sotr;
+    result.SOTR_USE = obj.sotrUse;
+
     return result;
   },
 
-  fromAbapGit: ({ TOOL, SHORTTEXT, SPOT_NAME, IMPL, ORIGINAL_OBJECT }) => {
+  fromAbapGit: ({
+    TOOL,
+    SHORTTEXT,
+    SPOT_NAME,
+    IMPL,
+    ORIGINAL_OBJECT,
+    ENHANCEMENTS,
+    FILES,
+    SOTR,
+    SOTR_USE,
+  }) => {
     const implData = normalizeItems(
       (
         IMPL as
@@ -134,6 +154,10 @@ export const enhancementImplementationHandler = createHandler<
             programName: ORIGINAL_OBJECT.PROGRAMNAME,
           }
         : undefined,
+      enhancements: ENHANCEMENTS,
+      files: FILES,
+      sotr: SOTR,
+      sotrUse: SOTR_USE,
     };
   },
 
