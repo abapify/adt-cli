@@ -37,6 +37,8 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
 # key world-readable on the host (keeps mode 600):
 sudo chown 10001:10001 key.pem
 # … or run with your own uid instead:  --user "$(id -u):$(id -g)"
+# Note: after chown the key is owned by uid 10001 — delete it (rm key.pem)
+# or chown it back before regenerating the pair.
 
 docker run --rm -p 127.0.0.1:3000:3000 \
   -v "$PWD/cert.pem:/app/cert.pem:ro" \
@@ -65,6 +67,7 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
 # The container runs as uid 10001 — keep the key at mode 600 but assign it
 # to the container uid so it can be read:
 sudo chown 10001:10001 certs/key.pem
+# (to regenerate the pair later, first rm certs/key.pem or chown it back)
 
 # Env file — the shipped .env.mcp.example carries the container paths
 # (/app/certs/...); a repo-root .env must NOT be used here since its
