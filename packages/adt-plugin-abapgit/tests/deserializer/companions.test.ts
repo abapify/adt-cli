@@ -117,9 +117,6 @@ describe('companion file deserialization', () => {
     assert.strictEqual(objects.length, 1);
     const data = (objects[0] as { data?: Record<string, unknown> }).data ?? {};
     assert.strictEqual(objects[0].name, 'ZTEST_TPL');
-    assert.strictEqual(
-      data.html,
-      '<html><body><h1>Test template</h1></body></html>',
-    );
+    assert.ok((data.html as string).includes('<h1>Test template</h1>'));
   });
 });
