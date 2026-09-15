@@ -7,7 +7,7 @@
  */
 
 import { iatu } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { formatAbapGitXml } from '../xml-format';
 
 type IatuLike = {
@@ -26,7 +26,7 @@ export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: IatuLike }).data ?? raw;
+    const obj = unwrapData<IatuLike>(raw);
     return {
       ATTR: {
         NAME: String(obj.name ?? '').toUpperCase(),
@@ -38,7 +38,7 @@ export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
   },
 
   serialize: async (raw, ctx) => {
-    const obj = (raw as { data?: IatuLike }).data ?? raw;
+    const obj = unwrapData<IatuLike>(raw);
     const objectName = ctx.getObjectName(obj);
     const files = [
       ctx.createFile(
@@ -55,8 +55,7 @@ export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
   // {name}.iatu.html is collected as a binary source during
   // deserialization (base64-encoded by the deserializer).
   setSources: (obj, sources) => {
-    const data = ((obj as { data?: Record<string, unknown> }).data ??
-      obj) as Record<string, unknown>;
+    const data = unwrapData<Record<string, unknown>>(obj);
     for (const [, content] of Object.entries(sources)) {
       data.html = Buffer.from(content, 'base64').toString('utf-8');
     }

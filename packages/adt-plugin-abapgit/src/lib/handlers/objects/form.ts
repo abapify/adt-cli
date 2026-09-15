@@ -8,7 +8,7 @@
  */
 
 import { form, tdlines } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { formatAbapGitXml } from '../xml-format';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
@@ -153,8 +153,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
   // Language-specific tdlines companion files ({name}.form.tdlines_{lang}.xml)
   // are collected as sources during deserialization.
   setSources: (obj, sources) => {
-    const data = ((obj as { data?: Record<string, unknown> }).data ??
-      obj) as Record<string, unknown>;
+    const data = unwrapData<Record<string, unknown>>(obj);
     const tdlinesData = (data.tdlines ?? {}) as Record<string, TdlineRow[]>;
     for (const [key, content] of Object.entries(sources)) {
       const match = key.match(/^tdlines_([a-zA-Z0-9]+)$/);

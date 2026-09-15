@@ -3,7 +3,7 @@
  */
 
 import { ssst } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type SmartFormStyleLike = {
@@ -25,7 +25,7 @@ export const smartFormStyleHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: SmartFormStyleLike }).data ?? raw;
+    const obj = unwrapData<SmartFormStyleLike>(raw);
     return {
       HEADER: {
         SSFNAME: String(obj.name ?? '').toUpperCase(),

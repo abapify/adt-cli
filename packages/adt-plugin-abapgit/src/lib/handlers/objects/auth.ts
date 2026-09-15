@@ -3,7 +3,7 @@
  */
 
 import { auth } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type AuthFieldLike = {
   name: string;
@@ -25,7 +25,7 @@ export const authFieldHandler = createHandler<AuthFieldLike, typeof auth>(
     serializer_version: 'v1.0.0',
 
     toAbapGit: (raw) => {
-      const obj = (raw as { data?: AuthFieldLike }).data ?? raw;
+      const obj = unwrapData<AuthFieldLike>(raw);
       return {
         AUTHX: {
           FIELDNAME: String(obj.name ?? '').toUpperCase(),

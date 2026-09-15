@@ -3,7 +3,7 @@
  */
 
 import { shi8 } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type HierarchySwitchAssignmentLike = {
   name: string;
@@ -23,7 +23,7 @@ export const hierarchySwitchAssignmentHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: HierarchySwitchAssignmentLike }).data ?? raw;
+    const obj = unwrapData<HierarchySwitchAssignmentLike>(raw);
     return {
       SHI8: {
         SFW_ASS_ID: String(obj.name ?? '').toUpperCase(),

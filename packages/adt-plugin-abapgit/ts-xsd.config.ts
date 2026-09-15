@@ -198,6 +198,20 @@ export default defineConfig({
     // Get all schemas from context
     const schemas = Object.values(ctx.sources).flatMap((s) => s.schemas);
 
+    // Raw-document schemas: payload lives directly under <abapGit> (xs:any),
+    // there is no abap/values envelope to index into
+    const rawSchemas = new Set([
+      'ecat',
+      'ecsd',
+      'ecsp',
+      'ectc',
+      'ectd',
+      'ecvo',
+      'fdt0',
+      'sfpi',
+      'ssfo',
+    ]);
+
     // Helper to capitalize first letter
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -254,9 +268,10 @@ export default defineConfig({
       ),
       '',
       '// AbapGit schema instances - using flattened types with values extracted from abapGit.abap.values',
-      ...schemas.map(
-        (s) =>
-          `export const ${s} = abapGitSchema<${capitalize(s)}AbapGitType, ${capitalize(s)}AbapGitType['abapGit']['abap']['values']>(_${s});`,
+      ...schemas.map((s) =>
+        rawSchemas.has(s)
+          ? `export const ${s} = abapGitSchema<${capitalize(s)}AbapGitType, Record<string, unknown>>(_${s});`
+          : `export const ${s} = abapGitSchema<${capitalize(s)}AbapGitType, ${capitalize(s)}AbapGitType['abapGit']['abap']['values']>(_${s});`,
       ),
       '',
       '// Re-export types and utilities',

@@ -10,7 +10,7 @@
  */
 
 import type { AbapGitSchema } from '../base';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import {
   aifc,
   aqbg,
@@ -49,7 +49,7 @@ function createGenericObjslHandler<
     serializer_version: 'v1.0.0',
 
     toAbapGit: (raw) => {
-      const obj = (raw as { data?: GenericObjslObject }).data ?? raw;
+      const obj = unwrapData<GenericObjslObject>(raw);
       return { ...(obj.tables ?? {}) };
     },
 

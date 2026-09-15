@@ -3,7 +3,7 @@
  */
 
 import { vcls } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type ViewClusterLike = {
   name: string;
@@ -22,7 +22,7 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
     serializer_version: 'v1.0.0',
 
     toAbapGit: (raw) => {
-      const obj = (raw as { data?: ViewClusterLike }).data ?? raw;
+      const obj = unwrapData<ViewClusterLike>(raw);
       return {
         VCLDIR: {
           VCLNAME: String(obj.name ?? '').toUpperCase(),
