@@ -2,11 +2,12 @@
  * SMTG (Email Template) handler for abapGit format
  *
  * Email templates are XML-only. The abapGit format stores the template
- * header (ID, name, type, category) and content (subject, body).
+ * header (ID, name, type, category), header texts (HEADER_T), and
+ * content (subject, body).
  */
 
 import { smtg } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type EmailTemplateLike = {
@@ -17,17 +18,17 @@ type EmailTemplateLike = {
   templateCategory?: string;
   language?: string;
   masterLanguage?: string;
+  headerTexts?: Array<{
+    name?: string;
+    description?: string;
+    language?: string;
+  }>;
   contents?: Array<{
     language?: string;
     subject?: string;
     body?: string;
   }>;
 };
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 export const emailTemplateHandler = createHandler<
   EmailTemplateLike,
@@ -38,7 +39,8 @@ export const emailTemplateHandler = createHandler<
   serializer: 'LCL_OBJECT_SMTG',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => {
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: EmailTemplateLike }).data ?? raw;
     const name = String(obj.name ?? '').toUpperCase();
     return {
       SMTG: {
@@ -49,7 +51,16 @@ export const emailTemplateHandler = createHandler<
           TMPL_CATEGORY: obj.templateCategory,
           TMPL_LANGU: isoToSapLang(obj.masterLanguage || obj.language),
         },
-        CONTENTS: obj.contents?.length
+        HEADER_T: obj.headerTexts?.length
+          ? {
+              item: obj.headerTexts.map((t) => ({
+                NAME: t.name,
+                DESCRIPTION: t.description,
+                LANGU: isoToSapLang(t.language || obj.masterLanguage),
+              })),
+            }
+          : undefined,
+        CONTENT: obj.contents?.length
           ? {
               item: obj.contents.map((c) => ({
                 TMPL_ID: name,
@@ -64,7 +75,8 @@ export const emailTemplateHandler = createHandler<
   },
 
   fromAbapGit: ({ SMTG }) => {
-    const contents = normalizeItems(SMTG?.CONTENTS?.item);
+    const headerTexts = normalizeItems(SMTG?.HEADER_T?.item);
+    const contents = normalizeItems(SMTG?.CONTENT?.item);
     return {
       name: (SMTG?.HEADER?.TMPL_ID ?? '').toUpperCase(),
       description: SMTG?.HEADER?.TMPL_NAME,
@@ -73,7 +85,12 @@ export const emailTemplateHandler = createHandler<
       templateCategory: SMTG?.HEADER?.TMPL_CATEGORY,
       language: sapLangToIso(SMTG?.HEADER?.TMPL_LANGU),
       masterLanguage: sapLangToIso(SMTG?.HEADER?.TMPL_LANGU),
-      contents: contents.map((c) => ({
+      headerTexts: mapItems(headerTexts, (t) => ({
+        name: t.NAME,
+        description: t.DESCRIPTION,
+        language: sapLangToIso(t.LANGU),
+      })),
+      contents: mapItems(contents, (c) => ({
         language: sapLangToIso(c.LANGU),
         subject: c.SUBJECT,
         body: c.BODY,

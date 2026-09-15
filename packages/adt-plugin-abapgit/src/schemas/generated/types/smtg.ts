@@ -22,7 +22,14 @@ export type SmtgSchema = {
                         LST_CH_DATE_TIME?: string | undefined;
                         LST_CH_USER_ACCT?: string | undefined;
                     };
-                    CONTENTS?: undefined | {
+                    HEADER_T?: undefined | {
+                        item?: undefined | {
+                            NAME?: string | undefined;
+                            DESCRIPTION?: string | undefined;
+                            LANGU?: string | undefined;
+                        }[];
+                    };
+                    CONTENT?: undefined | {
                         item?: undefined | {
                             TMPL_ID?: string | undefined;
                             LANGU?: string | undefined;
@@ -37,5 +44,72 @@ export type SmtgSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        SMTG?: undefined | {
+            HEADER?: undefined | {
+                TMPL_ID?: string | undefined;
+                TMPL_NAME?: string | undefined;
+                TMPL_TYPE?: string | undefined;
+                TMPL_CATEGORY?: string | undefined;
+                TMPL_LANGU?: string | undefined;
+                TMPL_APPL?: string | undefined;
+                CREA_DATE_TIME?: string | undefined;
+                CREA_USER_ACCT?: string | undefined;
+                LST_CH_DATE_TIME?: string | undefined;
+                LST_CH_USER_ACCT?: string | undefined;
+            };
+            HEADER_T?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                    LANGU?: string | undefined;
+                }[];
+            };
+            CONTENT?: undefined | {
+                item?: undefined | {
+                    TMPL_ID?: string | undefined;
+                    LANGU?: string | undefined;
+                    SUBJECT?: string | undefined;
+                    BODY?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SMTG?: undefined | {
+                HEADER?: undefined | {
+                    TMPL_ID?: string | undefined;
+                    TMPL_NAME?: string | undefined;
+                    TMPL_TYPE?: string | undefined;
+                    TMPL_CATEGORY?: string | undefined;
+                    TMPL_LANGU?: string | undefined;
+                    TMPL_APPL?: string | undefined;
+                    CREA_DATE_TIME?: string | undefined;
+                    CREA_USER_ACCT?: string | undefined;
+                    LST_CH_DATE_TIME?: string | undefined;
+                    LST_CH_USER_ACCT?: string | undefined;
+                };
+                HEADER_T?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        DESCRIPTION?: string | undefined;
+                        LANGU?: string | undefined;
+                    }[];
+                };
+                CONTENT?: undefined | {
+                    item?: undefined | {
+                        TMPL_ID?: string | undefined;
+                        LANGU?: string | undefined;
+                        SUBJECT?: string | undefined;
+                        BODY?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

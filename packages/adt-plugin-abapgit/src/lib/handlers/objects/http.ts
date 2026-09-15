@@ -7,7 +7,7 @@
  */
 
 import { http } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type HttpServiceLike = {
@@ -17,6 +17,7 @@ type HttpServiceLike = {
   masterLanguage?: string;
   handlerClass?: string;
   serviceOrder?: string;
+  handlers?: Array<{ handler?: string; serviceOrder?: string }>;
 };
 
 export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
@@ -27,7 +28,9 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
     serializer: 'LCL_OBJECT_HTTP',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<HttpServiceLike>(raw);
+
       const name = String(obj.name ?? '').toUpperCase();
       const lang = isoToSapLang(obj.masterLanguage || obj.language);
       return {
@@ -38,16 +41,25 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
           LANG: lang,
           SHORTTEXT: obj.description ?? '',
         },
-        HTTPHDL: obj.handlerClass
+        HTTPHDL: obj.handlers?.length
           ? {
-              UCONSERVHANDLER: {
+              UCONSERVHANDLER: obj.handlers.map((h, i) => ({
                 ID: name,
                 VERSION: 'A',
-                SERVICEORDER: obj.serviceOrder ?? '01',
-                SERVICEHANDLER: obj.handlerClass,
-              },
+                SERVICEORDER: h.serviceOrder ?? String(i + 1).padStart(2, '0'),
+                SERVICEHANDLER: h.handler,
+              })),
             }
-          : undefined,
+          : obj.handlerClass
+            ? {
+                UCONSERVHANDLER: {
+                  ID: name,
+                  VERSION: 'A',
+                  SERVICEORDER: obj.serviceOrder ?? '01',
+                  SERVICEHANDLER: obj.handlerClass,
+                },
+              }
+            : undefined,
       };
     },
 
@@ -66,6 +78,10 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
         masterLanguage: sapLangToIso(HTTPTEXT?.LANG),
         handlerClass: firstHandler?.SERVICEHANDLER,
         serviceOrder: firstHandler?.SERVICEORDER,
+        handlers: items.map((h) => ({
+          handler: h.SERVICEHANDLER,
+          serviceOrder: h.SERVICEORDER,
+        })),
       };
     },
   },

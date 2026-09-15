@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "NrobAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,76 +46,37 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "NrobValuesType",
+      name: "AbapValuesType",
       all: {
         element: [
           {
             name: "ATTRIBUTES",
-            type: "NrobAttributesType",
+            type: "asx:NrobAttributesType",
             minOccurs: "0",
           },
           {
             name: "TEXT",
-            type: "NrobTextType",
+            type: "asx:NrobTextType",
             minOccurs: "0",
           },
           {
             name: "INTERVALS",
-            type: "NrobIntervalsType",
+            type: "asx:NrobIntervalsType",
             minOccurs: "0",
           },
         ],
       },
-    },
-    {
-      name: "NrobAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "NrobValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "NrobAttributesType",
@@ -247,26 +208,21 @@ export default {
       },
     },
     {
-      name: "NrobType",
-      all: {
+      name: "AbapType",
+      sequence: {
         element: [
           {
-            name: "ATTRIBUTES",
-            type: "NrobAttributesType",
-            minOccurs: "0",
-          },
-          {
-            name: "TEXT",
-            type: "NrobTextType",
-            minOccurs: "0",
-          },
-          {
-            name: "INTERVALS",
-            type: "NrobIntervalsType",
-            minOccurs: "0",
+            ref: "asx:values",
           },
         ],
       },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

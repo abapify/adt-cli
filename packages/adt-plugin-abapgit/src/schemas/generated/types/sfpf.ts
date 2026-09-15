@@ -29,4 +29,39 @@ export type SfpfSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SFPF?: undefined | {
+            HEADER?: undefined | {
+                NAME?: string | undefined;
+                STATE?: string | undefined;
+                LANGUAGE?: string | undefined;
+                TYPE?: string | undefined;
+                DESCRIPTION?: string | undefined;
+            };
+            LAYOUT?: undefined | {
+                NAME?: string | undefined;
+                XDP?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SFPF?: undefined | {
+                HEADER?: undefined | {
+                    NAME?: string | undefined;
+                    STATE?: string | undefined;
+                    LANGUAGE?: string | undefined;
+                    TYPE?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                };
+                LAYOUT?: undefined | {
+                    NAME?: string | undefined;
+                    XDP?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };
