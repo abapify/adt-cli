@@ -57,32 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "AssignedSwitchesType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfbfAssignedSwitchItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "ParentBfsType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfbfParentBfItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -103,12 +77,12 @@ export default {
           },
           {
             name: "ASSIGNED_SWITCHES",
-            type: "AssignedSwitchesType",
+            type: "asx:AssignedSwitchesType",
             minOccurs: "0",
           },
           {
             name: "PARENT_BFS",
-            type: "ParentBfsType",
+            type: "asx:ParentBfsType",
             minOccurs: "0",
           },
         ],
@@ -161,33 +135,27 @@ export default {
       },
     },
     {
-      name: "SfbfType",
+      name: "AssignedSwitchesType",
       sequence: {
         element: [
           {
-            name: "HEADER",
-            type: "SfbfHeaderType",
+            name: "item",
+            type: "SfbfAssignedSwitchItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "ParentBfsType",
+      sequence: {
+        element: [
           {
-            name: "NAME32",
-            type: "xs:string",
+            name: "item",
+            type: "SfbfParentBfItemType",
             minOccurs: "0",
-          },
-          {
-            name: "NAME80",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "ASSIGNED_SWITCHES",
-            type: "AssignedSwitchesType",
-            minOccurs: "0",
-          },
-          {
-            name: "PARENT_BFS",
-            type: "ParentBfsType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

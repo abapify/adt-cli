@@ -366,8 +366,35 @@ export function expandTypeToString(
       );
       lines.push(`${indent}  ${propertyName(name)}${optional}: ${expanded};`);
     }
+
+    // Preserve index signatures (e.g. [key: string]: unknown from xs:any)
+    const stringIndexType = type.getStringIndexType();
+    if (stringIndexType) {
+      const expandedIndex = expandTypeToString(
+        stringIndexType,
+        checker,
+        context,
+        indent + '  ',
+        newVisited,
+      );
+      lines.push(`${indent}  [key: string]: ${expandedIndex};`);
+    }
+
     lines.push(`${indent}}`);
     return lines.join('\n');
+  }
+
+  // Type with only an index signature (no named properties)
+  const stringIndexType = type.getStringIndexType();
+  if (stringIndexType) {
+    const expandedIndex = expandTypeToString(
+      stringIndexType,
+      checker,
+      context,
+      indent + '  ',
+      visited,
+    );
+    return `{\n${indent}  [key: string]: ${expandedIndex};\n${indent}}`;
   }
 
   // For types without properties, check if getText() returns an import() - if so, try to expand

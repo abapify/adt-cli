@@ -3,7 +3,7 @@
  */
 
 import { cus1 } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type CustomizingActivityLike = {
@@ -44,7 +44,7 @@ export const customizingActivityHandler = createHandler<
     return {
       name: (CUS1?.ACTIVITY_HEADER?.ACT_ID ?? '').toUpperCase(),
       actType: CUS1?.ACTIVITY_HEADER?.ACT_TYPE,
-      titles: titles.map((t) => ({
+      titles: mapItems(titles, (t) => ({
         language: sapLangToIso(t.SPRAS),
         text: t.TEXT,
       })),

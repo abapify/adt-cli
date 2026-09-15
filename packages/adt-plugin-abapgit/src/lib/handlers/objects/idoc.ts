@@ -6,7 +6,7 @@
  */
 
 import { idoc } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type IdocTypeLike = {
   name: string;
@@ -79,7 +79,7 @@ export const idocTypeHandler = createHandler<IdocTypeLike, typeof idoc>(
         succtyp: IDOC?.ATTRIBUTES?.SUCCTYP,
         lasttyp: IDOC?.ATTRIBUTES?.LASTTYP,
         generated: IDOC?.ATTRIBUTES?.GENERATED,
-        syntax: syntax.map((s) => ({
+        syntax: mapItems(syntax, (s) => ({
           nr: s.NR,
           segtyp: s.SEGTYP,
           parseg: s.PARSEG,

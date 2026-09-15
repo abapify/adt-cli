@@ -1,28 +1,25 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
-  
-  <xs:include schemaLocation="types/sfbs.xsd" />
+  <xs:include schemaLocation="types/sfbs.xsd"/>
 
-  
   <xs:redefine schemaLocation="asx.xsd">
     <xs:complexType name="AbapValuesType">
       <xs:complexContent>
         <xs:extension base="asx:AbapValuesType">
           <xs:sequence>
-            <xs:element name="HEADER" type="asx:SfbsHeaderType" minOccurs="0" />
+            <xs:element name="HEADER" type="asx:SfbsHeaderType" minOccurs="0"/>
                   
-            <xs:element name="NAME32" type="xs:string" minOccurs="0" />
+            <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
                   
-            <xs:element name="NAME80" type="xs:string" minOccurs="0" />
+            <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
                   
-            <xs:element name="ASSIGNED_BF" minOccurs="0" type="AssignedBfType">
+            <xs:element name="ASSIGNED_BF" minOccurs="0" type="asx:AssignedBfType">
                     </xs:element>
                   
-            <xs:element name="NESTED_BFS" minOccurs="0" type="NestedBfsType">
+            <xs:element name="NESTED_BFS" minOccurs="0" type="asx:NestedBfsType">
                     </xs:element>
                   
-            <xs:element name="PARENT_BFS" minOccurs="0" type="ParentBfsType">
+            <xs:element name="PARENT_BFS" minOccurs="0" type="asx:ParentBfsType">
                     </xs:element>
                 
           </xs:sequence>
@@ -31,22 +28,6 @@
     </xs:complexType>
   </xs:redefine>
 
-  
-  <xs:import schemaLocation="abapgit.xsd" />
+  <xs:import schemaLocation="abapgit.xsd"/>
 
-<xs:complexType name="AssignedBfType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SfbsAssignedBfItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  <xs:complexType name="NestedBfsType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SfbsNestedBfsItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  <xs:complexType name="ParentBfsType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SfbsParentBfsItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
                   </xs:schema>

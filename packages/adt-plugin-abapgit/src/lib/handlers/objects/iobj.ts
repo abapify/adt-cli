@@ -6,7 +6,7 @@
  */
 
 import { iobj } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type InfoObjectLike = {
   name: string;
@@ -98,11 +98,11 @@ export const infoObjectHandler = createHandler<InfoObjectLike, typeof iobj>(
         lowCase: IOBJ?.LOWCASE,
         convExit: IOBJ?.CONVEXIT,
         keyFigName: IOBJ?.KYFNM,
-        compounds: compounds.map((c) => ({
+        compounds: mapItems(compounds, (c) => ({
           iobjnm: c.IOBJNM_Z,
           compound: c.COMPOUND,
         })),
-        attributes: attributes.map((a) => ({
+        attributes: mapItems(attributes, (a) => ({
           atrnm: a.ATRNM,
           objstat: a.OBJSTAT,
           attrib: a.ATTRIB,

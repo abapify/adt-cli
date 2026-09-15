@@ -6,7 +6,7 @@
  */
 
 import { scp1 } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type BusinessConfigSetLike = {
@@ -116,7 +116,7 @@ export const businessConfigSetHandler = createHandler<
       refName: SCP1?.SCPRATTR?.REFNAME,
       orgId: SCP1?.SCPRATTR?.ORGID,
       actInfo: SCP1?.SCPRATTR?.ACT_INFO,
-      texts: texts.map((t) => ({
+      texts: mapItems(texts, (t) => ({
         language: sapLangToIso(t.LANGU),
         text: t.TEXT,
       })),

@@ -57,19 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "ParametersType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:IarpParamItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -80,7 +67,7 @@ export default {
           },
           {
             name: "PARAMETERS",
-            type: "ParametersType",
+            type: "asx:ParametersType",
             minOccurs: "0",
           },
         ],
@@ -126,18 +113,14 @@ export default {
       },
     },
     {
-      name: "IarpType",
+      name: "ParametersType",
       sequence: {
         element: [
           {
-            name: "ATTR",
-            type: "IarpAttrType",
+            name: "item",
+            type: "IarpParamItemType",
             minOccurs: "0",
-          },
-          {
-            name: "PARAMETERS",
-            type: "ParametersType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

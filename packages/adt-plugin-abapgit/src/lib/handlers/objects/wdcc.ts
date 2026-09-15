@@ -3,7 +3,7 @@
  */
 
 import { wdcc } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type WdccLike = {
@@ -48,7 +48,7 @@ export const wdccHandler = createHandler<WdccLike, typeof wdcc>('WDCC', {
       wdaComponent: values.WDA_COMPONENT,
       parent: values.PARENT,
       relId: values.RELID,
-      otrTexts: otrTexts.map((t) => ({ name: t.NAME, text: t.TEXT })),
+      otrTexts: mapItems(otrTexts, (t) => ({ name: t.NAME, text: t.TEXT })),
       descrLang: sapLangToIso(values.DESCR_LANG),
     };
   },

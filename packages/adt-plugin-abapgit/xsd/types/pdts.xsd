@@ -14,4 +14,12 @@
       <xs:element name="HEADER" type="PdtsHeaderType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
+
+  <!-- Raw workflow container XML (upstream add_xml CONTAINER) -->
+  <xs:complexType name="PdtsContainerType">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+    <xs:anyAttribute processContents="lax"/>
+  </xs:complexType>
 </xs:schema>

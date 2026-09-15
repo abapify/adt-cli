@@ -57,32 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "VclstrucTabType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:VclsVclstrucItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "VclmfTabType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:VclsVclmfItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -93,12 +67,12 @@ export default {
           },
           {
             name: "VCLSTRUC_TAB",
-            type: "VclstrucTabType",
+            type: "asx:VclstrucTabType",
             minOccurs: "0",
           },
           {
             name: "VCLMF_TAB",
-            type: "VclmfTabType",
+            type: "asx:VclmfTabType",
             minOccurs: "0",
           },
         ],
@@ -171,23 +145,27 @@ export default {
       },
     },
     {
-      name: "VclsType",
+      name: "VclstrucTabType",
       sequence: {
         element: [
           {
-            name: "VCLDIR",
-            type: "VclsVcldirType",
+            name: "item",
+            type: "VclsVclstrucItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "VclmfTabType",
+      sequence: {
+        element: [
           {
-            name: "VCLSTRUC_TAB",
-            type: "VclstrucTabType",
+            name: "item",
+            type: "VclsVclmfItemType",
             minOccurs: "0",
-          },
-          {
-            name: "VCLMF_TAB",
-            type: "VclmfTabType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

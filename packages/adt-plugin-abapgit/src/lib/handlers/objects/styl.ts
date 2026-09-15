@@ -6,7 +6,7 @@
  */
 
 import { styl } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type StyleLike = {
@@ -140,7 +140,7 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
       family: STYLE?.HEADER?.TDFAMILY,
       version: STYLE?.HEADER?.TDVERSION,
       pvers: STYLE?.HEADER?.PVERS,
-      paragraphs: paragraphs.map((p) => ({
+      paragraphs: mapItems(paragraphs, (p) => ({
         paragraph: p.TDPARGRAPH,
         text: p.TDTEXT,
         justify: p.TDPJUSTIFY,
@@ -150,7 +150,7 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
         left: p.TDPLEFT,
         right: p.TDPRIGHT,
       })),
-      strings: strings.map((s) => ({
+      strings: mapItems(strings, (s) => ({
         string: s.TDSTRING,
         text: s.TDTEXT,
         mark: s.TDMARK,
@@ -159,7 +159,7 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
         hidden: s.TDHIDDEN,
         protline: s.TDPROTLINE,
       })),
-      tabs: tabs.map((t) => ({
+      tabs: mapItems(tabs, (t) => ({
         paragraph: t.TDPARGRAPH,
         position: t.TDPOSITION,
         tabPos: t.TDTABPOS,

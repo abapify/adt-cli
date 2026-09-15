@@ -3,7 +3,7 @@
  */
 
 import { shi5 } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type HierarchyExtensionLike = {
@@ -44,7 +44,7 @@ export const hierarchyExtensionHandler = createHandler<
     return {
       name: (SHI5?.HEADER?.EXT_ID ?? '').toUpperCase(),
       treeId: SHI5?.HEADER?.TREE_ID,
-      texts: texts.map((t) => ({
+      texts: mapItems(texts, (t) => ({
         language: sapLangToIso(t.SPRAS),
         text: t.TEXT,
       })),

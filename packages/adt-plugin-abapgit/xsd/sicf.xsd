@@ -1,10 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
-  
   <xs:include schemaLocation="types/sicf.xsd" />
 
-  
   <xs:redefine schemaLocation="asx.xsd">
     <xs:complexType name="AbapValuesType">
       <xs:complexContent>
@@ -16,7 +14,7 @@
                   
             <xs:element name="ICFDOCU" type="asx:IcfDocuType" minOccurs="0" />
                   
-            <xs:element name="ICFHANDLER_TABLE" minOccurs="0" type="IcfhandlerTableType">
+            <xs:element name="ICFHANDLER_TABLE" minOccurs="0" type="asx:IcfHandlerTableType">
                     </xs:element>
                   
             <xs:element name="SOTS" type="asx:SicfSotsType" minOccurs="0" />
@@ -29,12 +27,5 @@
     </xs:complexType>
   </xs:redefine>
 
-  
   <xs:import schemaLocation="abapgit.xsd" />
-
-<xs:complexType name="IcfhandlerTableType">
-                      <xs:sequence>
-                        <xs:element name="ICFHANDLER" type="asx:IcfHandlerType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
                   </xs:schema>

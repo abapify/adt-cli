@@ -7,7 +7,7 @@
  */
 
 import { view } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type ViewLike = {
@@ -199,8 +199,8 @@ function parseViewFromAbapGit({
     viewClass: DD25V?.VIEWCLASS,
     baseTable: DD25V?.ROOTTAB,
     baseTableField: DD25V?.ROOTFIELD,
-    tables: tableItems.map(parseViewTable),
-    fields: fieldItems.map(parseViewField),
-    selectionConditions: condItems.map(parseViewCondition),
+    tables: mapItems(tableItems, parseViewTable),
+    fields: mapItems(fieldItems, parseViewField),
+    selectionConditions: mapItems(condItems, parseViewCondition),
   };
 }

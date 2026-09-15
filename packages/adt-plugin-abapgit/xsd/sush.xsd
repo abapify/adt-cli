@@ -1,21 +1,18 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
-  
-  <xs:include schemaLocation="types/sush.xsd" />
+  <xs:include schemaLocation="types/sush.xsd"/>
 
-  
   <xs:redefine schemaLocation="asx.xsd">
     <xs:complexType name="AbapValuesType">
       <xs:complexContent>
         <xs:extension base="asx:AbapValuesType">
           <xs:sequence>
-            <xs:element name="HEAD" type="asx:SushHeadType" minOccurs="0" />
+            <xs:element name="HEAD" type="asx:SushHeadType" minOccurs="0"/>
                   
-            <xs:element name="USOBX" minOccurs="0" type="UsobxType">
+            <xs:element name="USOBX" minOccurs="0" type="asx:UsobxType">
                     </xs:element>
                   
-            <xs:element name="USOBT" minOccurs="0" type="UsobtType">
+            <xs:element name="USOBT" minOccurs="0" type="asx:UsobtType">
                     </xs:element>
                 
           </xs:sequence>
@@ -24,17 +21,6 @@
     </xs:complexType>
   </xs:redefine>
 
-  
-  <xs:import schemaLocation="abapgit.xsd" />
+  <xs:import schemaLocation="abapgit.xsd"/>
 
-<xs:complexType name="UsobxType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SushUsobxItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  <xs:complexType name="UsobtType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SushUsobtItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
                   </xs:schema>

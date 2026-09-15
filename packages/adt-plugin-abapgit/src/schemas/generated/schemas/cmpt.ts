@@ -95,6 +95,13 @@ export default {
             minOccurs: "0",
           },
         ],
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
       },
     },
     {

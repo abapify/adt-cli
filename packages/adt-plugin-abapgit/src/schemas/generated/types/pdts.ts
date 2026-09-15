@@ -17,6 +17,9 @@ export type PdtsSchema = {
                         STEXT?: string | undefined;
                     };
                 };
+                CONTAINER?: undefined | {
+                    [key: string]: unknown;
+                };
             };
             version?: string | undefined;
         };
@@ -34,6 +37,9 @@ export type PdtsSchema = {
                 STEXT?: string | undefined;
             };
         };
+        CONTAINER?: undefined | {
+            [key: string]: unknown;
+        };
     };
 } | {
     abap: {
@@ -45,6 +51,9 @@ export type PdtsSchema = {
                     SHORT?: string | undefined;
                     STEXT?: string | undefined;
                 };
+            };
+            CONTAINER?: undefined | {
+                [key: string]: unknown;
             };
         };
         version?: string | undefined;

@@ -10,5 +10,6 @@ export type EcspSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+        [key: string]: unknown;
     };
 };

@@ -7,7 +7,7 @@
  */
 
 import { enqu } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type LockObjectLike = {
@@ -150,7 +150,7 @@ function parseLockObjectFromAbapGit({
     masterLanguage: sapLangToIso(DD25V?.DDLANGUAGE),
     baseTable: DD25V?.ROOTTAB,
     baseTableField: DD25V?.ROOTFIELD,
-    tables: tableItems.map(parseEnquTable),
-    parameters: paramItems.map(parseEnquParam),
+    tables: mapItems(tableItems, parseEnquTable),
+    parameters: mapItems(paramItems, parseEnquParam),
   };
 }

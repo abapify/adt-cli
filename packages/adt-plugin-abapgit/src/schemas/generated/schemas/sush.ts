@@ -57,32 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "UsobxType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SushUsobxItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "UsobtType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SushUsobtItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -93,12 +67,12 @@ export default {
           },
           {
             name: "USOBX",
-            type: "UsobxType",
+            type: "asx:UsobxType",
             minOccurs: "0",
           },
           {
             name: "USOBT",
-            type: "UsobtType",
+            type: "asx:UsobtType",
             minOccurs: "0",
           },
         ],
@@ -186,23 +160,27 @@ export default {
       },
     },
     {
-      name: "SushType",
+      name: "UsobxType",
       sequence: {
         element: [
           {
-            name: "HEAD",
-            type: "SushHeadType",
+            name: "item",
+            type: "SushUsobxItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "UsobtType",
+      sequence: {
+        element: [
           {
-            name: "USOBX",
-            type: "UsobxType",
+            name: "item",
+            type: "SushUsobtItemType",
             minOccurs: "0",
-          },
-          {
-            name: "USOBT",
-            type: "UsobtType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

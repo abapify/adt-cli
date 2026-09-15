@@ -10,6 +10,8 @@
   <xs:complexType name="CmptType">
     <xs:sequence>
       <xs:element name="HEADER" type="CmptHeaderType" minOccurs="0"/>
+      <!-- TYP_TEMPLATE body fields (STR_BODY etc.) pass through lax -->
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

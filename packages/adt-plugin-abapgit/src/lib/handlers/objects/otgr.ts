@@ -3,7 +3,7 @@
  */
 
 import { otgr } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type ObjectTypeGroupLike = {
@@ -54,11 +54,11 @@ export const objectTypeGroupHandler = createHandler<
     return {
       name: (OTGR?.CLS_TYPE_GROUP?.NAME ?? '').toUpperCase(),
       type: OTGR?.CLS_TYPE_GROUP?.TYPE,
-      texts: texts.map((t) => ({
+      texts: mapItems(texts, (t) => ({
         language: sapLangToIso(t.SPRAS),
         text: t.TEXT,
       })),
-      elements: elements.map((e) => ({ objType: e.OBJ_TYPE })),
+      elements: mapItems(elements, (e) => ({ objType: e.OBJ_TYPE })),
     };
   },
 });

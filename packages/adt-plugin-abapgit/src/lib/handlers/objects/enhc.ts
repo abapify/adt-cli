@@ -3,7 +3,7 @@
  */
 
 import { enhc } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type EnhancementCompositeLike = {
   name: string;
@@ -42,8 +42,11 @@ export const enhancementCompositeHandler = createHandler<
     return {
       name: '',
       shortText: SHORTTEXT,
-      compositeChilds: compositeChilds.map((c) => c.ENHCOMPOSITENAME ?? ''),
-      enhChilds: enhChilds.map((c) => c.ENHNAME ?? ''),
+      compositeChilds: mapItems(
+        compositeChilds,
+        (c) => c.ENHCOMPOSITENAME ?? '',
+      ),
+      enhChilds: mapItems(enhChilds, (c) => c.ENHNAME ?? ''),
       longtextId: LONGTEXT_ID,
     };
   },

@@ -5,16 +5,6 @@
       <xs:element name="ENHSPOTNAME" type="xs:string" minOccurs="0" />
     </xs:all>
   </xs:complexType>
-
-  <xs:complexType name="EnscType">
-    <xs:sequence>
-      <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0" />
-      <xs:element name="ENH_SPOTS" minOccurs="0" type="EnhSpotsType">
-        </xs:element>
-      <xs:element name="COMP_ENH_SPOTS" minOccurs="0" type="EnhSpotsType">
-        </xs:element>
-    </xs:sequence>
-  </xs:complexType>
 <xs:complexType name="EnhSpotsType">
           <xs:sequence>
             <xs:element name="item" type="EnscEnhSpotItemType" minOccurs="0" maxOccurs="unbounded" />

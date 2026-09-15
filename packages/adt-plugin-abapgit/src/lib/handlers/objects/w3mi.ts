@@ -7,7 +7,7 @@
  */
 
 import { w3mi } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type W3MimeLike = {
   name: string;
@@ -40,7 +40,7 @@ export const w3miHandler = createHandler<W3MimeLike, typeof w3mi>('W3MI', {
     return {
       name: (NAME ?? '').toUpperCase(),
       text: TEXT,
-      params: params.map((p) => ({ name: p.NAME, value: p.VALUE })),
+      params: mapItems(params, (p) => ({ name: p.NAME, value: p.VALUE })),
     };
   },
 });

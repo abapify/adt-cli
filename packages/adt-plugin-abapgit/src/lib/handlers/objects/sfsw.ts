@@ -3,7 +3,7 @@
  */
 
 import { sfsw } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type SwitchLike = {
   name: string;
@@ -45,9 +45,9 @@ export const switchHandler = createHandler<SwitchLike, typeof sfsw>('SFSW', {
       name: (HEADER?.SWITCH_ID ?? '').toUpperCase(),
       name32: NAME32,
       name80: NAME80,
-      parentBfs: parentBfs.map((p) => p.BF ?? ''),
-      conflicts: conflicts.map((c) => c.CONFLICT ?? ''),
-      packages: packages.map((p) => p.PACKAGE ?? ''),
+      parentBfs: mapItems(parentBfs, (p) => p.BF ?? ''),
+      conflicts: mapItems(conflicts, (c) => c.CONFLICT ?? ''),
+      packages: mapItems(packages, (p) => p.PACKAGE ?? ''),
     };
   },
 });

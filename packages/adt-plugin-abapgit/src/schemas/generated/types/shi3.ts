@@ -29,10 +29,14 @@ export type Shi3Schema = {
                     }[];
                 };
                 TREE_REFS?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
                 TREE_TEXTS?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
             };
             version?: string | undefined;
@@ -63,10 +67,14 @@ export type Shi3Schema = {
             }[];
         };
         TREE_REFS?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
         TREE_TEXTS?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
     };
 } | {
@@ -92,10 +100,14 @@ export type Shi3Schema = {
                 }[];
             };
             TREE_REFS?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
             TREE_TEXTS?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
         };
         version?: string | undefined;

@@ -1,28 +1,25 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
-  
-  <xs:include schemaLocation="types/sfsw.xsd" />
+  <xs:include schemaLocation="types/sfsw.xsd"/>
 
-  
   <xs:redefine schemaLocation="asx.xsd">
     <xs:complexType name="AbapValuesType">
       <xs:complexContent>
         <xs:extension base="asx:AbapValuesType">
           <xs:sequence>
-            <xs:element name="HEADER" type="asx:SfswHeaderType" minOccurs="0" />
+            <xs:element name="HEADER" type="asx:SfswHeaderType" minOccurs="0"/>
                   
-            <xs:element name="NAME32" type="xs:string" minOccurs="0" />
+            <xs:element name="NAME32" type="xs:string" minOccurs="0"/>
                   
-            <xs:element name="NAME80" type="xs:string" minOccurs="0" />
+            <xs:element name="NAME80" type="xs:string" minOccurs="0"/>
                   
-            <xs:element name="PARENT_BF" minOccurs="0" type="ParentBfType">
+            <xs:element name="PARENT_BF" minOccurs="0" type="asx:ParentBfType">
                     </xs:element>
                   
-            <xs:element name="CONFLICTS" minOccurs="0" type="ConflictsType">
+            <xs:element name="CONFLICTS" minOccurs="0" type="asx:ConflictsType">
                     </xs:element>
                   
-            <xs:element name="PACKAGES" minOccurs="0" type="PackagesType">
+            <xs:element name="PACKAGES" minOccurs="0" type="asx:PackagesType">
                     </xs:element>
                 
           </xs:sequence>
@@ -31,22 +28,6 @@
     </xs:complexType>
   </xs:redefine>
 
-  
-  <xs:import schemaLocation="abapgit.xsd" />
+  <xs:import schemaLocation="abapgit.xsd"/>
 
-<xs:complexType name="ParentBfType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SfswParentBfItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  <xs:complexType name="ConflictsType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SfswConflictItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  <xs:complexType name="PackagesType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:SfswPackageItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
                   </xs:schema>

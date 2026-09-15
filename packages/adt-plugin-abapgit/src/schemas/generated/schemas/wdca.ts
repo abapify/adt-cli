@@ -57,19 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "DataType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:WdcaDataItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -80,7 +67,7 @@ export default {
           },
           {
             name: "DATA",
-            type: "DataType",
+            type: "asx:DataType",
             minOccurs: "0",
           },
           {
@@ -146,18 +133,14 @@ export default {
       },
     },
     {
-      name: "WdcaType",
+      name: "DataType",
       sequence: {
         element: [
           {
-            name: "OUTLINE",
-            type: "WdcaOutlineType",
+            name: "item",
+            type: "WdcaDataItemType",
             minOccurs: "0",
-          },
-          {
-            name: "DATA",
-            type: "DataType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

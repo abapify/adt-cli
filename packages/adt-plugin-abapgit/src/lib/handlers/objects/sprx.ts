@@ -3,7 +3,7 @@
  */
 
 import { sprx } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type ProxyObjectLike = {
   name: string;
@@ -75,7 +75,7 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
       const data = normalizeItems(PROXY_DATA?.item);
       return {
         name: (headers[0]?.OBJ_NAME ?? '').toUpperCase(),
-        headers: headers.map((h) => ({
+        headers: mapItems(headers, (h) => ({
           object: h.OBJECT,
           objName: h.OBJ_NAME,
           inactive: h.INACTIVE,
@@ -84,7 +84,7 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
           ifrNspce: h.IFR_NSPCE,
           ifrGnspce: h.IFR_GNSPCE,
         })),
-        data: data.map((d) => ({
+        data: mapItems(data, (d) => ({
           object: d.OBJECT,
           objName: d.OBJ_NAME,
           object1: d.OBJECT1,

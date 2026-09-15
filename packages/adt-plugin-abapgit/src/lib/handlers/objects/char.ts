@@ -3,7 +3,7 @@
  */
 
 import { char } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type CharacteristicLike = {
@@ -54,7 +54,7 @@ export const characteristicHandler = createHandler<
       className: CHAR?.CLS_ATTRIBUTE?.CLSNAME,
       format: CHAR?.CLS_ATTRIBUTE?.ATFOR,
       values: CHAR?.CLS_ATTRIBUTE?.ATVOR,
-      texts: texts.map((t) => ({
+      texts: mapItems(texts, (t) => ({
         language: sapLangToIso(t.SPRAS),
         className: t.CLSNAME,
         description: t.ATBEZ,

@@ -7,7 +7,7 @@
  */
 
 import { tran } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type TransactionLike = {
@@ -88,7 +88,7 @@ function parseTransactionFromAbapGit({
     dynproNumber: TSTC?.DYPNO,
     transactionType: TSTC?.TYPE,
     guiAttributes: parseGuiAttributes(TSTCC),
-    texts: textItems.map((t) => ({
+    texts: mapItems(textItems, (t) => ({
       language: sapLangToIso(t.SPRSL),
       text: t.TTEXT,
     })),

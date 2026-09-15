@@ -57,19 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "IcfhandlerTableType",
-      sequence: {
-        element: [
-          {
-            name: "ICFHANDLER",
-            type: "asx:IcfHandlerType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -90,7 +77,7 @@ export default {
           },
           {
             name: "ICFHANDLER_TABLE",
-            type: "IcfhandlerTableType",
+            type: "asx:IcfHandlerTableType",
             minOccurs: "0",
           },
           {

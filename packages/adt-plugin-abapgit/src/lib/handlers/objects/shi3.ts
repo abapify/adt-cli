@@ -3,7 +3,7 @@
  */
 
 import { shi3 } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type HierarchyDisplayLike = {
@@ -54,11 +54,11 @@ export const hierarchyDisplayHandler = createHandler<
     return {
       name: (TREE_HEAD?.TREE_ID ?? '').toUpperCase(),
       type: TREE_HEAD?.TYPE,
-      titles: titles.map((t) => ({
+      titles: mapItems(titles, (t) => ({
         language: sapLangToIso(t.SPRAS),
         text: t.TEXT,
       })),
-      nodes: nodes.map((n) => ({
+      nodes: mapItems(nodes, (n) => ({
         nodeId: n.NODE_ID,
         parentId: n.PARENT_ID,
         text: n.TEXT,

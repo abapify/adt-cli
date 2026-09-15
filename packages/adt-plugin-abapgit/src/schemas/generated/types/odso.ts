@@ -30,9 +30,15 @@ export type OdsoSchema = {
                         KEYFLAG?: string | undefined;
                     }[];
                 };
-                NAVIGATION?: undefined | unknown;
-                INDEXES?: undefined | unknown;
-                INDEX_IOBJ?: undefined | unknown;
+                NAVIGATION?: undefined | {
+                    [key: string]: unknown;
+                };
+                INDEXES?: undefined | {
+                    [key: string]: unknown;
+                };
+                INDEX_IOBJ?: undefined | {
+                    [key: string]: unknown;
+                };
             };
             version?: string | undefined;
         };
@@ -63,9 +69,15 @@ export type OdsoSchema = {
                 KEYFLAG?: string | undefined;
             }[];
         };
-        NAVIGATION?: undefined | unknown;
-        INDEXES?: undefined | unknown;
-        INDEX_IOBJ?: undefined | unknown;
+        NAVIGATION?: undefined | {
+            [key: string]: unknown;
+        };
+        INDEXES?: undefined | {
+            [key: string]: unknown;
+        };
+        INDEX_IOBJ?: undefined | {
+            [key: string]: unknown;
+        };
     };
 } | {
     abap: {
@@ -91,9 +103,15 @@ export type OdsoSchema = {
                     KEYFLAG?: string | undefined;
                 }[];
             };
-            NAVIGATION?: undefined | unknown;
-            INDEXES?: undefined | unknown;
-            INDEX_IOBJ?: undefined | unknown;
+            NAVIGATION?: undefined | {
+                [key: string]: unknown;
+            };
+            INDEXES?: undefined | {
+                [key: string]: unknown;
+            };
+            INDEX_IOBJ?: undefined | {
+                [key: string]: unknown;
+            };
         };
         version?: string | undefined;
     };

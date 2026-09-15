@@ -3,7 +3,7 @@
  */
 
 import { vcls } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type ViewClusterLike = {
   name: string;
@@ -21,31 +21,34 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
     serializer: 'LCL_OBJECT_VCLS',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      VCLDIR: {
-        VCLNAME: String(obj.name ?? '').toUpperCase(),
-        AUTHOR: obj.author,
-        CHANGEDATE: obj.changedDate,
-      },
-      VCLSTRUC_TAB: obj.structures?.length
-        ? {
-            item: obj.structures.map((s) => ({
-              VCLNAME: String(obj.name ?? '').toUpperCase(),
-              OBJECT: s.object,
-              OBJTEXT: s.objText,
-            })),
-          }
-        : undefined,
-      VCLMF_TAB: obj.maintenanceForms?.length
-        ? {
-            item: obj.maintenanceForms.map((m) => ({
-              VCLNAME: String(obj.name ?? '').toUpperCase(),
-              OBJECT: m.object,
-              FORM: m.form,
-            })),
-          }
-        : undefined,
-    }),
+    toAbapGit: (raw) => {
+      const obj = (raw as { data?: ViewClusterLike }).data ?? raw;
+      return {
+        VCLDIR: {
+          VCLNAME: String(obj.name ?? '').toUpperCase(),
+          AUTHOR: obj.author,
+          CHANGEDATE: obj.changedDate,
+        },
+        VCLSTRUC_TAB: obj.structures?.length
+          ? {
+              item: obj.structures.map((s) => ({
+                VCLNAME: String(obj.name ?? '').toUpperCase(),
+                OBJECT: s.object,
+                OBJTEXT: s.objText,
+              })),
+            }
+          : undefined,
+        VCLMF_TAB: obj.maintenanceForms?.length
+          ? {
+              item: obj.maintenanceForms.map((m) => ({
+                VCLNAME: String(obj.name ?? '').toUpperCase(),
+                OBJECT: m.object,
+                FORM: m.form,
+              })),
+            }
+          : undefined,
+      };
+    },
 
     fromAbapGit: ({ VCLDIR, VCLSTRUC_TAB, VCLMF_TAB }) => {
       const structures = normalizeItems(VCLSTRUC_TAB?.item);
@@ -54,11 +57,11 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
         name: (VCLDIR?.VCLNAME ?? '').toUpperCase(),
         author: VCLDIR?.AUTHOR,
         changedDate: VCLDIR?.CHANGEDATE,
-        structures: structures.map((s) => ({
+        structures: mapItems(structures, (s) => ({
           object: s.OBJECT,
           objText: s.OBJTEXT,
         })),
-        maintenanceForms: forms.map((m) => ({
+        maintenanceForms: mapItems(forms, (m) => ({
           object: m.OBJECT,
           form: m.FORM,
         })),

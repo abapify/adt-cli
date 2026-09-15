@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:complexType name="SusoTobjType">
     <xs:all>
       <xs:element name="OBJCT" type="xs:string" minOccurs="0"/>
@@ -27,10 +26,4 @@
     </xs:all>
   </xs:complexType>
 
-  <xs:complexType name="SusoType">
-    <xs:sequence>
-      <xs:element name="TOBJ" type="SusoTobjType" minOccurs="0"/>
-      <xs:element name="TOBJT" type="SusoTobjtType" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
 </xs:schema>

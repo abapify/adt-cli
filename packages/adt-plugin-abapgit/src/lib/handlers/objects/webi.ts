@@ -3,7 +3,7 @@
  */
 
 import { webi } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type WebiLike = {
@@ -44,7 +44,7 @@ export const webiHandler = createHandler<WebiLike, typeof webi>('WEBI', {
       name: (WEBI?.VEPTEXT?.VEPNAME ?? '').toUpperCase(),
       description: WEBI?.VEPTEXT?.DESCRIPT,
       language: sapLangToIso(WEBI?.VEPTEXT?.LANGU),
-      headers: headers.map((h) => ({
+      headers: mapItems(headers, (h) => ({
         generator: h.GENERATOR,
         features: h.FEATURES,
       })),

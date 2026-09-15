@@ -6,7 +6,7 @@
  */
 
 import { sush } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type AuthHierarchyLike = {
   name: string;
@@ -70,13 +70,13 @@ export const authHierarchyHandler = createHandler<
     return {
       name: (HEAD?.DISPLAY_NAME ?? '').toUpperCase(),
       displayName: HEAD?.DISPLAY_NAME,
-      usobx: usobx.map((u) => ({
+      usobx: mapItems(usobx, (u) => ({
         name: u.NAME,
         type: u.TYPE,
         object: u.OBJECT,
         okFlag: u.OKFLAG,
       })),
-      usobt: usobt.map((u) => ({
+      usobt: mapItems(usobt, (u) => ({
         name: u.NAME,
         type: u.TYPE,
         object: u.OBJECT,

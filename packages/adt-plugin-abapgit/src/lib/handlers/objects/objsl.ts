@@ -48,7 +48,10 @@ function createGenericObjslHandler<
     serializer: `LCL_OBJECT_${type}`,
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({ ...(obj.tables ?? {}) }),
+    toAbapGit: (raw) => {
+      const obj = (raw as { data?: GenericObjslObject }).data ?? raw;
+      return { ...(obj.tables ?? {}) };
+    },
 
     fromAbapGit: (values) => ({
       name: '',

@@ -22,15 +22,18 @@ export const hierarchySwitchAssignmentHandler = createHandler<
   serializer: 'LCL_OBJECT_SHI8',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    SHI8: {
-      SFW_ASS_ID: String(obj.name ?? '').toUpperCase(),
-      SWITCH_ID: obj.switchId,
-      REACTION: obj.reaction,
-      TREE_ID: obj.treeId,
-      NODE_ID: obj.nodeId,
-    },
-  }),
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: HierarchySwitchAssignmentLike }).data ?? raw;
+    return {
+      SHI8: {
+        SFW_ASS_ID: String(obj.name ?? '').toUpperCase(),
+        SWITCH_ID: obj.switchId,
+        REACTION: obj.reaction,
+        TREE_ID: obj.treeId,
+        NODE_ID: obj.nodeId,
+      },
+    };
+  },
 
   fromAbapGit: ({ SHI8 }) => ({
     name: (SHI8?.SFW_ASS_ID ?? '').toUpperCase(),

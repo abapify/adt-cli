@@ -3,7 +3,7 @@
  */
 
 import { avar } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type ActivationVariantLike = {
   name: string;
@@ -38,7 +38,7 @@ export const activationVariantHandler = createHandler<
     return {
       name: '',
       description: DESCRIPTION,
-      ids: ids.map((i) => ({
+      ids: mapItems(ids, (i) => ({
         objName: i.OBJ_NAME,
         objType: i.OBJ_TYPE,
         active: i.ACTIVE === 'X',

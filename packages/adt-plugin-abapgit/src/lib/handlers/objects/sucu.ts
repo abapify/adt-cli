@@ -6,7 +6,7 @@
  */
 
 import { sucu } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type AuthGroupLike = {
@@ -58,7 +58,7 @@ export const authGroupHandler = createHandler<AuthGroupLike, typeof sucu>(
         object: firstAuth?.OBJECT,
         description: firstText?.BEZEI,
         language: sapLangToIso(firstText?.SPRAS),
-        texts: texts.map((t) => ({
+        texts: mapItems(texts, (t) => ({
           language: sapLangToIso(t.SPRAS),
           text: t.BEZEI,
         })),

@@ -40,12 +40,24 @@ export type IobjSchema = {
                         KYFNM?: string | undefined;
                     }[];
                 };
-                NAVIGATION_ATTRIBUTES?: undefined | unknown;
-                ATTR_NAVIGATION?: undefined | unknown;
-                HIERARCHY?: undefined | unknown;
-                ELIMINATION?: undefined | unknown;
-                HANA_FIELDS_MAPPING?: undefined | unknown;
-                XXL_ATTRIBUTES?: undefined | unknown;
+                NAVIGATION_ATTRIBUTES?: undefined | {
+                    [key: string]: unknown;
+                };
+                ATTR_NAVIGATION?: undefined | {
+                    [key: string]: unknown;
+                };
+                HIERARCHY?: undefined | {
+                    [key: string]: unknown;
+                };
+                ELIMINATION?: undefined | {
+                    [key: string]: unknown;
+                };
+                HANA_FIELDS_MAPPING?: undefined | {
+                    [key: string]: unknown;
+                };
+                XXL_ATTRIBUTES?: undefined | {
+                    [key: string]: unknown;
+                };
             };
             version?: string | undefined;
         };
@@ -86,12 +98,24 @@ export type IobjSchema = {
                 KYFNM?: string | undefined;
             }[];
         };
-        NAVIGATION_ATTRIBUTES?: undefined | unknown;
-        ATTR_NAVIGATION?: undefined | unknown;
-        HIERARCHY?: undefined | unknown;
-        ELIMINATION?: undefined | unknown;
-        HANA_FIELDS_MAPPING?: undefined | unknown;
-        XXL_ATTRIBUTES?: undefined | unknown;
+        NAVIGATION_ATTRIBUTES?: undefined | {
+            [key: string]: unknown;
+        };
+        ATTR_NAVIGATION?: undefined | {
+            [key: string]: unknown;
+        };
+        HIERARCHY?: undefined | {
+            [key: string]: unknown;
+        };
+        ELIMINATION?: undefined | {
+            [key: string]: unknown;
+        };
+        HANA_FIELDS_MAPPING?: undefined | {
+            [key: string]: unknown;
+        };
+        XXL_ATTRIBUTES?: undefined | {
+            [key: string]: unknown;
+        };
     };
 } | {
     abap: {
@@ -127,12 +151,24 @@ export type IobjSchema = {
                     KYFNM?: string | undefined;
                 }[];
             };
-            NAVIGATION_ATTRIBUTES?: undefined | unknown;
-            ATTR_NAVIGATION?: undefined | unknown;
-            HIERARCHY?: undefined | unknown;
-            ELIMINATION?: undefined | unknown;
-            HANA_FIELDS_MAPPING?: undefined | unknown;
-            XXL_ATTRIBUTES?: undefined | unknown;
+            NAVIGATION_ATTRIBUTES?: undefined | {
+                [key: string]: unknown;
+            };
+            ATTR_NAVIGATION?: undefined | {
+                [key: string]: unknown;
+            };
+            HIERARCHY?: undefined | {
+                [key: string]: unknown;
+            };
+            ELIMINATION?: undefined | {
+                [key: string]: unknown;
+            };
+            HANA_FIELDS_MAPPING?: undefined | {
+                [key: string]: unknown;
+            };
+            XXL_ATTRIBUTES?: undefined | {
+                [key: string]: unknown;
+            };
         };
         version?: string | undefined;
     };

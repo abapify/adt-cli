@@ -3,7 +3,7 @@
  */
 
 import { cmod } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type EnhancementProjectLike = {
@@ -48,13 +48,13 @@ export const enhancementProjectHandler = createHandler<
     const attrs = normalizeItems(MODATTR?.item);
     return {
       name: (members[0]?.NAME ?? '').toUpperCase(),
-      members: members.map((m) => ({ name: m.NAME, member: m.MEMBER })),
-      texts: texts.map((t) => ({
+      members: mapItems(members, (m) => ({ name: m.NAME, member: m.MEMBER })),
+      texts: mapItems(texts, (t) => ({
         name: t.NAME,
         language: sapLangToIso(t.SPRAS),
         text: t.MODTEXT,
       })),
-      attributes: attrs.map((a) => ({ name: a.NAME, status: a.STATUS })),
+      attributes: mapItems(attrs, (a) => ({ name: a.NAME, status: a.STATUS })),
     };
   },
 });

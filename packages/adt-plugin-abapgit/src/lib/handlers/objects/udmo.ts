@@ -3,7 +3,7 @@
  */
 
 import { udmo } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type DataModelLike = {
@@ -56,11 +56,11 @@ export const dataModelHandler = createHandler<DataModelLike, typeof udmo>(
         name: (DM40L?.DMOID ?? '').toUpperCase(),
         as4local: DM40L?.AS4LOCAL,
         dmoType: DM40L?.DMOTYPE,
-        entities: entities.map((e) => ({
+        entities: mapItems(entities, (e) => ({
           entId: e.ENTID,
           as4local: e.AS4LOCAL,
         })),
-        texts: texts.map((t) => ({
+        texts: mapItems(texts, (t) => ({
           language: sapLangToIso(t.SPRACHE),
           longText: t.LANGBEZ,
           as4local: t.AS4LOCAL,

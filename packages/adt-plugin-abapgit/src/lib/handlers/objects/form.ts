@@ -8,7 +8,7 @@
  */
 
 import { form, tdlines } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { formatAbapGitXml } from '../xml-format';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
@@ -187,22 +187,28 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
       description: data?.FORM_HEADER?.TDTEXT,
       language: sapLangToIso(data?.FORM_HEADER?.TDSPRAS ?? data?.ORIG_LANGUAGE),
       firstPage: data?.FORM_HEADER?.TDFIRSTPAG,
-      pages: pages.map((p) => ({ pageName: p.PAGENAME, nextPage: p.NEXTPAGE })),
-      windows: windows.map((w) => ({ window: w.WINDOW, pageName: w.PAGENAME })),
-      pageWindows: pageWindows.map((w) => ({
+      pages: mapItems(pages, (p) => ({
+        pageName: p.PAGENAME,
+        nextPage: p.NEXTPAGE,
+      })),
+      windows: mapItems(windows, (w) => ({
+        window: w.WINDOW,
+        pageName: w.PAGENAME,
+      })),
+      pageWindows: mapItems(pageWindows, (w) => ({
         window: w.TDWINDOW,
         pageName: w.PAGENAME,
       })),
-      paragraphs: paragraphs.map((p) => ({
+      paragraphs: mapItems(paragraphs, (p) => ({
         paragraph: p.TDPARGRAPH,
         text: p.TDTEXT,
       })),
-      strings: strings.map((s) => ({
+      strings: mapItems(strings, (s) => ({
         string: s.TDSTRING,
         text: s.TDTEXT,
         mark: s.TDMARK,
       })),
-      tabs: tabs.map((t) => ({
+      tabs: mapItems(tabs, (t) => ({
         paragraph: t.TDPARGRAPH,
         position: t.TDPOSITION,
       })),

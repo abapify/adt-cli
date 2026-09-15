@@ -3,7 +3,7 @@
  */
 
 import { docv } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type DocumentationLike = {
@@ -47,7 +47,7 @@ export const documentationHandler = createHandler<
       name: (DOC?.HEAD?.TDNAME ?? '').toUpperCase(),
       docTitle: DOC?.DOCTITLE,
       language: sapLangToIso(DOC?.HEAD?.TDSPRAS),
-      lines: lines.map((l) => ({ format: l.TDFORMAT, line: l.TDLINE })),
+      lines: mapItems(lines, (l) => ({ format: l.TDFORMAT, line: l.TDLINE })),
     };
   },
 });

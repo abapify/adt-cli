@@ -57,19 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "EnhSpotsType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:EnscEnhSpotItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -80,12 +67,12 @@ export default {
           },
           {
             name: "ENH_SPOTS",
-            type: "EnhSpotsType",
+            type: "asx:EnhSpotsType",
             minOccurs: "0",
           },
           {
             name: "COMP_ENH_SPOTS",
-            type: "EnhSpotsType",
+            type: "asx:EnhSpotsType",
             minOccurs: "0",
           },
         ],
@@ -104,23 +91,14 @@ export default {
       },
     },
     {
-      name: "EnscType",
+      name: "EnhSpotsType",
       sequence: {
         element: [
           {
-            name: "SHORTTEXT",
-            type: "xs:string",
+            name: "item",
+            type: "EnscEnhSpotItemType",
             minOccurs: "0",
-          },
-          {
-            name: "ENH_SPOTS",
-            type: "EnhSpotsType",
-            minOccurs: "0",
-          },
-          {
-            name: "COMP_ENH_SPOTS",
-            type: "EnhSpotsType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

@@ -5,7 +5,7 @@
  */
 
 import { doct } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type GeneralTextLike = {
@@ -56,7 +56,7 @@ export const generalTextHandler = createHandler<GeneralTextLike, typeof doct>(
       return {
         name: (first?.DOKIL?.OBJECT ?? '').toUpperCase(),
         language: sapLangToIso(first?.DOKIL?.LANGU),
-        lines: lines.map((l) => ({ format: l.TDFORMAT, line: l.TDLINE })),
+        lines: mapItems(lines, (l) => ({ format: l.TDFORMAT, line: l.TDLINE })),
       };
     },
   },
