@@ -9,11 +9,11 @@ export type DevcSchema = {
     abapGit: {
         abap: {
             values: {
-                DEVC?: {
+                DEVC?: undefined | {
                     CTEXT: string;
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
@@ -21,17 +21,17 @@ export type DevcSchema = {
     };
 } | {
     values: {
-        DEVC?: {
+        DEVC?: undefined | {
             CTEXT: string;
         };
     };
 } | {
     abap: {
         values: {
-            DEVC?: {
+            DEVC?: undefined | {
                 CTEXT: string;
             };
         };
-        version?: string;
+        version?: string | undefined;
     };
 };

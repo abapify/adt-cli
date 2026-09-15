@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="types/enhs.xsd"/>
+
+  <!-- Redefine AbapValuesType to include ENHS-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="TOOL" type="xs:string" minOccurs="0"/>
+                  <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0"/>
+                  <xs:element name="PARENT_COMP" type="xs:string" minOccurs="0"/>
+                  <xs:element name="BADI_DATA" type="asx:EnhBadiDataType" minOccurs="0"/>
+                  <xs:element name="ABAP_LANGUAGE_VERSION" type="xs:string" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

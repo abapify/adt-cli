@@ -5,73 +5,171 @@
  * Mode: Flattened
  */
 
-type ViewValues = {
-    DD25V?: {
-        VIEWNAME: string;
-        DDLANGUAGE?: string;
-        DDTEXT?: string;
-        VIEWCLASS?: string;
-        ROOTTAB?: string;
-        ROOTFIELD?: string;
-        ACTFLAG?: string;
-        MULTITAB?: string;
-    };
-    DD26V_TABLE?: {
-        item?: {
-            VIEWNAME?: string;
-            TABNAME?: string;
-            TABPOS?: string;
-            FVIEWNAME?: string;
-            FFIELDNAME?: string;
-            READONLY?: string;
-        }[];
-    };
-    DD27P_TABLE?: {
-        item?: {
-            VIEWNAME?: string;
-            VIEWFIELD?: string;
-            TABNAME?: string;
-            FIELDNAME?: string;
-            KEYFLAG?: string;
-            READONLY?: string;
-            ROLLNAME?: string;
-            CHECKTABLE?: string;
-            LOGFLAG?: string;
-            REFTABLE?: string;
-            REFFIELD?: string;
-            OUTPUTLEN?: string;
-            CONVEXIT?: string;
-            DDTEXT?: string;
-        }[];
-    };
-    DD28V_TABLE?: {
-        item?: {
-            VIEWNAME?: string;
-            ANDOR?: string;
-            LEFTBRACKET?: string;
-            FIELDNAME?: string;
-            OPERATOR?: string;
-            CONST_VALUE?: string;
-            RIGHTBRACKET?: string;
-        }[];
-    };
-};
-
 export type ViewSchema = {
     abapGit: {
         abap: {
-            values: ViewValues;
-            version?: string;
+            values: {
+                DD25V?: undefined | {
+                    VIEWNAME: string;
+                    DDLANGUAGE?: string | undefined;
+                    DDTEXT?: string | undefined;
+                    VIEWCLASS?: string | undefined;
+                    ROOTTAB?: string | undefined;
+                    ROOTFIELD?: string | undefined;
+                    ACTFLAG?: string | undefined;
+                    MULTITAB?: string | undefined;
+                };
+                DD26V_TABLE?: undefined | {
+                    item?: undefined | {
+                        VIEWNAME?: string | undefined;
+                        TABNAME?: string | undefined;
+                        TABPOS?: string | undefined;
+                        FVIEWNAME?: string | undefined;
+                        FFIELDNAME?: string | undefined;
+                        READONLY?: string | undefined;
+                    }[];
+                };
+                DD27P_TABLE?: undefined | {
+                    item?: undefined | {
+                        VIEWNAME?: string | undefined;
+                        VIEWFIELD?: string | undefined;
+                        TABNAME?: string | undefined;
+                        FIELDNAME?: string | undefined;
+                        KEYFLAG?: string | undefined;
+                        READONLY?: string | undefined;
+                        ROLLNAME?: string | undefined;
+                        CHECKTABLE?: string | undefined;
+                        LOGFLAG?: string | undefined;
+                        REFTABLE?: string | undefined;
+                        REFFIELD?: string | undefined;
+                        OUTPUTLEN?: string | undefined;
+                        CONVEXIT?: string | undefined;
+                        DDTEXT?: string | undefined;
+                    }[];
+                };
+                DD28V_TABLE?: undefined | {
+                    item?: undefined | {
+                        VIEWNAME?: string | undefined;
+                        ANDOR?: string | undefined;
+                        LEFTBRACKET?: string | undefined;
+                        FIELDNAME?: string | undefined;
+                        OPERATOR?: string | undefined;
+                        CONST_VALUE?: string | undefined;
+                        RIGHTBRACKET?: string | undefined;
+                    }[];
+                };
+            };
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
     };
 } | {
-    values: ViewValues;
+    values: {
+        DD25V?: undefined | {
+            VIEWNAME: string;
+            DDLANGUAGE?: string | undefined;
+            DDTEXT?: string | undefined;
+            VIEWCLASS?: string | undefined;
+            ROOTTAB?: string | undefined;
+            ROOTFIELD?: string | undefined;
+            ACTFLAG?: string | undefined;
+            MULTITAB?: string | undefined;
+        };
+        DD26V_TABLE?: undefined | {
+            item?: undefined | {
+                VIEWNAME?: string | undefined;
+                TABNAME?: string | undefined;
+                TABPOS?: string | undefined;
+                FVIEWNAME?: string | undefined;
+                FFIELDNAME?: string | undefined;
+                READONLY?: string | undefined;
+            }[];
+        };
+        DD27P_TABLE?: undefined | {
+            item?: undefined | {
+                VIEWNAME?: string | undefined;
+                VIEWFIELD?: string | undefined;
+                TABNAME?: string | undefined;
+                FIELDNAME?: string | undefined;
+                KEYFLAG?: string | undefined;
+                READONLY?: string | undefined;
+                ROLLNAME?: string | undefined;
+                CHECKTABLE?: string | undefined;
+                LOGFLAG?: string | undefined;
+                REFTABLE?: string | undefined;
+                REFFIELD?: string | undefined;
+                OUTPUTLEN?: string | undefined;
+                CONVEXIT?: string | undefined;
+                DDTEXT?: string | undefined;
+            }[];
+        };
+        DD28V_TABLE?: undefined | {
+            item?: undefined | {
+                VIEWNAME?: string | undefined;
+                ANDOR?: string | undefined;
+                LEFTBRACKET?: string | undefined;
+                FIELDNAME?: string | undefined;
+                OPERATOR?: string | undefined;
+                CONST_VALUE?: string | undefined;
+                RIGHTBRACKET?: string | undefined;
+            }[];
+        };
+    };
 } | {
     abap: {
-        values: ViewValues;
-        version?: string;
+        values: {
+            DD25V?: undefined | {
+                VIEWNAME: string;
+                DDLANGUAGE?: string | undefined;
+                DDTEXT?: string | undefined;
+                VIEWCLASS?: string | undefined;
+                ROOTTAB?: string | undefined;
+                ROOTFIELD?: string | undefined;
+                ACTFLAG?: string | undefined;
+                MULTITAB?: string | undefined;
+            };
+            DD26V_TABLE?: undefined | {
+                item?: undefined | {
+                    VIEWNAME?: string | undefined;
+                    TABNAME?: string | undefined;
+                    TABPOS?: string | undefined;
+                    FVIEWNAME?: string | undefined;
+                    FFIELDNAME?: string | undefined;
+                    READONLY?: string | undefined;
+                }[];
+            };
+            DD27P_TABLE?: undefined | {
+                item?: undefined | {
+                    VIEWNAME?: string | undefined;
+                    VIEWFIELD?: string | undefined;
+                    TABNAME?: string | undefined;
+                    FIELDNAME?: string | undefined;
+                    KEYFLAG?: string | undefined;
+                    READONLY?: string | undefined;
+                    ROLLNAME?: string | undefined;
+                    CHECKTABLE?: string | undefined;
+                    LOGFLAG?: string | undefined;
+                    REFTABLE?: string | undefined;
+                    REFFIELD?: string | undefined;
+                    OUTPUTLEN?: string | undefined;
+                    CONVEXIT?: string | undefined;
+                    DDTEXT?: string | undefined;
+                }[];
+            };
+            DD28V_TABLE?: undefined | {
+                item?: undefined | {
+                    VIEWNAME?: string | undefined;
+                    ANDOR?: string | undefined;
+                    LEFTBRACKET?: string | undefined;
+                    FIELDNAME?: string | undefined;
+                    OPERATOR?: string | undefined;
+                    CONST_VALUE?: string | undefined;
+                    RIGHTBRACKET?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

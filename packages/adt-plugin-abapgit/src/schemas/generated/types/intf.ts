@@ -9,17 +9,17 @@ export type IntfSchema = {
     abapGit: {
         abap: {
             values: {
-                VSEOINTERF?: {
+                VSEOINTERF?: undefined | {
                     CLSNAME: string;
-                    LANGU?: string;
-                    DESCRIPT?: string;
-                    EXPOSURE?: string;
-                    STATE?: string;
-                    UNICODE?: string;
-                    ABAP_LANGUAGE_VERSION?: string;
+                    LANGU?: string | undefined;
+                    DESCRIPT?: string | undefined;
+                    EXPOSURE?: string | undefined;
+                    STATE?: string | undefined;
+                    UNICODE?: string | undefined;
+                    ABAP_LANGUAGE_VERSION?: string | undefined;
                 };
             };
-            version?: string;
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
@@ -27,29 +27,29 @@ export type IntfSchema = {
     };
 } | {
     values: {
-        VSEOINTERF?: {
+        VSEOINTERF?: undefined | {
             CLSNAME: string;
-            LANGU?: string;
-            DESCRIPT?: string;
-            EXPOSURE?: string;
-            STATE?: string;
-            UNICODE?: string;
-            ABAP_LANGUAGE_VERSION?: string;
+            LANGU?: string | undefined;
+            DESCRIPT?: string | undefined;
+            EXPOSURE?: string | undefined;
+            STATE?: string | undefined;
+            UNICODE?: string | undefined;
+            ABAP_LANGUAGE_VERSION?: string | undefined;
         };
     };
 } | {
     abap: {
         values: {
-            VSEOINTERF?: {
+            VSEOINTERF?: undefined | {
                 CLSNAME: string;
-                LANGU?: string;
-                DESCRIPT?: string;
-                EXPOSURE?: string;
-                STATE?: string;
-                UNICODE?: string;
-                ABAP_LANGUAGE_VERSION?: string;
+                LANGU?: string | undefined;
+                DESCRIPT?: string | undefined;
+                EXPOSURE?: string | undefined;
+                STATE?: string | undefined;
+                UNICODE?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
             };
         };
-        version?: string;
+        version?: string | undefined;
     };
 };

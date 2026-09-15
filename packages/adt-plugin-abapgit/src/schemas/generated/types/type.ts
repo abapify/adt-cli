@@ -5,28 +5,36 @@
  * Mode: Flattened
  */
 
-type TypeValues = {
-    TYPE?: {
-        TYPEGROUP: string;
-        DESCRIPT?: string;
-    };
-};
-
 export type TypeSchema = {
     abapGit: {
         abap: {
-            values: TypeValues;
-            version?: string;
+            values: {
+                TYPE?: undefined | {
+                    TYPEGROUP: string;
+                    DESCRIPT?: string | undefined;
+                };
+            };
+            version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
     };
 } | {
-    values: TypeValues;
+    values: {
+        TYPE?: undefined | {
+            TYPEGROUP: string;
+            DESCRIPT?: string | undefined;
+        };
+    };
 } | {
     abap: {
-        values: TypeValues;
-        version?: string;
+        values: {
+            TYPE?: undefined | {
+                TYPEGROUP: string;
+                DESCRIPT?: string | undefined;
+            };
+        };
+        version?: string | undefined;
     };
 };

@@ -343,6 +343,37 @@ export interface HandlerContext<T extends AdkObject, _TData = unknown> {
 }
 
 /**
+ * Normalize an XML child element that may be a single item or array into an array
+ */
+export function normalizeItems<T>(raw: T | T[] | undefined): T[] {
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+}
+
+/**
+ * Map normalized items, returning undefined for empty input
+ * (keeps fromAbapGit symmetric with toAbapGit which omits empty tables)
+ */
+export function mapItems<T, R>(
+  items: T[],
+  fn: (item: T) => R,
+): R[] | undefined {
+  return items.length ? items.map(fn) : undefined;
+}
+
+/**
+ * Unwrap the ADK payload: AdkObject instances store the payload under
+ * `.data`, plain literals carry fields directly. A literal `data` field
+ * that is an array (e.g. SPRX) is left untouched.
+ */
+export function unwrapData<T>(raw: T | { data?: unknown }): T {
+  const d = (raw as { data?: unknown }).data;
+  return d !== null && typeof d === 'object' && !Array.isArray(d)
+    ? (d as T)
+    : (raw as T);
+}
+
+/**
  * Create an object handler from ADK class
  */
 export function createHandler<

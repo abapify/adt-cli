@@ -1,0 +1,180 @@
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="EnhOriginalObjectType">
+    <xs:all>
+      <xs:element name="PGMID" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORG_OBJ_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORG_OBJ_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORG_MAIN_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORG_MAIN_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROGRAMNAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhHookImplType">
+    <xs:all>
+      <xs:element name="PROGRAMNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ENHMODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="FULL_NAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhHookImplsType">
+    <xs:sequence>
+      <xs:element name="ENH_HOOK_IMPL" type="EnhHookImplType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="EnhFileType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhFilesType">
+    <xs:sequence>
+      <xs:element name="item" type="EnhFileType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="EnhBadiFilterIdType">
+    <xs:all>
+      <xs:element name="FILTER_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ID" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhBadiFilterRootType">
+    <xs:all>
+      <xs:element name="ROOT" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTERS" minOccurs="0" type="FiltersType">
+        </xs:element>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhBadiFilterValueType">
+    <xs:all>
+      <xs:element name="ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTER_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTER_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMPARE" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTER_STRING_VALUE1" type="xs:string" minOccurs="0"/>
+      <xs:element name="CHECK_CLASS" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhBadiFilterValuesType">
+    <xs:sequence>
+      <xs:element name="ENH_BADIIMPL_FILTER_VALUE" type="EnhBadiFilterValueType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="EnhBadiFilterImplType">
+    <xs:all>
+      <xs:element name="DISJ_IDX" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONJ_IDX" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTER_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTER_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMPARE" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTER_STRING_VALUE1" type="xs:string" minOccurs="0"/>
+      <xs:element name="CHECK_CLASS" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhBadiFiltersType">
+    <xs:sequence>
+      <xs:element name="ENH_BADI_FILTER_IMPL" type="EnhBadiFilterImplType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="EnhBadiImplDataType">
+    <xs:all>
+      <xs:element name="SPOT_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="BADI_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="IMPL_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="IMPL_CLASS" type="xs:string" minOccurs="0"/>
+      <xs:element name="ACTIVE" type="xs:string" minOccurs="0"/>
+      <xs:element name="FILTER_ROOT" minOccurs="0" type="FilterRootType">
+        </xs:element>
+      <xs:element name="FILTER_VALUES" type="EnhBadiFilterValuesType" minOccurs="0"/>
+      <xs:element name="FILTERS" type="EnhBadiFiltersType" minOccurs="0"/>
+      <xs:element name="IMPL_SHORTTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="IMPL_SHORTTEXT_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="LOCKED_IN_CUSTOMIZING" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="EnhImplType">
+    <xs:sequence>
+      <xs:element name="ENH_BADI_IMPL_DATA" type="EnhBadiImplDataType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SotrTextType">
+    <xs:all>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="LFD_NUM" type="xs:string" minOccurs="0"/>
+      <xs:element name="FLAG_CNTXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="STATUS" type="xs:string" minOccurs="0"/>
+      <xs:element name="LENGTH" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SotrHeaderType">
+    <xs:all>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="CREA_LAN" type="xs:string" minOccurs="0"/>
+      <xs:element name="TRALA_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJID_VEC" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SotrItemType">
+    <xs:all>
+      <xs:element name="HEADER" type="SotrHeaderType" minOccurs="0"/>
+      <xs:element name="ENTRIES" minOccurs="0" type="EntriesType">
+        </xs:element>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SotrType">
+    <xs:sequence>
+      <xs:element name="item" type="SotrItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SotrUseType">
+    <xs:all>
+      <xs:element name="PGMID" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LFD_NUM" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SotrUseTabType">
+    <xs:sequence>
+      <xs:element name="SOTR_USE" type="SotrUseType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+<xs:complexType name="FiltersType">
+          <xs:sequence>
+            <xs:element name="ENH_BADIIMPL_FILTER_ID" type="EnhBadiFilterIdType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      <xs:complexType name="FilterRootType">
+          <xs:sequence>
+            <xs:element name="ENH_BADIIMPL_FILTER_ROOT" type="EnhBadiFilterRootType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      <xs:complexType name="EntriesType">
+          <xs:sequence>
+            <xs:element name="SOTR_TEXT" type="SotrTextType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>
