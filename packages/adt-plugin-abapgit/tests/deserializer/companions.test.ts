@@ -28,13 +28,19 @@ function createMockFileTree(fixturesDir: string): FileTree {
   collectFiles(fixturesDir);
 
   function matchGlob(pattern: string, filePath: string): boolean {
-    const toRegex = (glob: string): string =>
-      glob.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll(/\*/g, '[^/]*');
-    if (pattern.startsWith('**/')) {
-      const suffixRegex = toRegex(pattern.slice(3));
-      return new RegExp(`^(.*\\/)?${suffixRegex}$`).test(filePath);
+    const pat = pattern.startsWith('**/') ? pattern.slice(3) : pattern;
+    const parts = pat.split('*');
+    let pos = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (!part) continue;
+      if (i === 0 && !filePath.startsWith(part)) return false;
+      const idx = filePath.indexOf(part, pos);
+      if (idx === -1) return false;
+      pos = idx + part.length;
     }
-    return new RegExp(`^${toRegex(pattern)}$`).test(filePath);
+    const last = parts[parts.length - 1];
+    return !last || pat.endsWith('*') || filePath.endsWith(last);
   }
 
   return {
