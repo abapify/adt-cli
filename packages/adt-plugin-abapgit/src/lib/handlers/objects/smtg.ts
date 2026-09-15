@@ -30,6 +30,31 @@ type EmailTemplateLike = {
   }>;
 };
 
+type SmtgHeaderTextXml = {
+  NAME?: string;
+  DESCRIPTION?: string;
+  LANGU?: string;
+};
+
+type SmtgContentXml = {
+  TMPL_ID?: string;
+  LANGU?: string;
+  SUBJECT?: string;
+  BODY?: string;
+};
+
+const smtgHeaderTextFromXml = (t: SmtgHeaderTextXml) => ({
+  name: t.NAME,
+  description: t.DESCRIPTION,
+  language: sapLangToIso(t.LANGU),
+});
+
+const smtgContentFromXml = (c: SmtgContentXml) => ({
+  language: sapLangToIso(c.LANGU),
+  subject: c.SUBJECT,
+  body: c.BODY,
+});
+
 export const emailTemplateHandler = createHandler<
   EmailTemplateLike,
   typeof smtg
@@ -79,26 +104,20 @@ export const emailTemplateHandler = createHandler<
   },
 
   fromAbapGit: ({ SMTG }) => {
+    const header = SMTG?.HEADER;
     const headerTexts = normalizeItems(SMTG?.HEADER_T?.item);
     const contents = normalizeItems(SMTG?.CONTENT?.item);
+    const lang = sapLangToIso(header?.TMPL_LANGU);
     return {
-      name: (SMTG?.HEADER?.TMPL_ID ?? '').toUpperCase(),
-      description: SMTG?.HEADER?.TMPL_NAME,
-      templateName: SMTG?.HEADER?.TMPL_NAME,
-      templateType: SMTG?.HEADER?.TMPL_TYPE,
-      templateCategory: SMTG?.HEADER?.TMPL_CATEGORY,
-      language: sapLangToIso(SMTG?.HEADER?.TMPL_LANGU),
-      masterLanguage: sapLangToIso(SMTG?.HEADER?.TMPL_LANGU),
-      headerTexts: mapItems(headerTexts, (t) => ({
-        name: t.NAME,
-        description: t.DESCRIPTION,
-        language: sapLangToIso(t.LANGU),
-      })),
-      contents: mapItems(contents, (c) => ({
-        language: sapLangToIso(c.LANGU),
-        subject: c.SUBJECT,
-        body: c.BODY,
-      })),
+      name: (header?.TMPL_ID ?? '').toUpperCase(),
+      description: header?.TMPL_NAME,
+      templateName: header?.TMPL_NAME,
+      templateType: header?.TMPL_TYPE,
+      templateCategory: header?.TMPL_CATEGORY,
+      language: lang,
+      masterLanguage: lang,
+      headerTexts: mapItems(headerTexts, smtgHeaderTextFromXml),
+      contents: mapItems(contents, smtgContentFromXml),
     };
   },
 });
