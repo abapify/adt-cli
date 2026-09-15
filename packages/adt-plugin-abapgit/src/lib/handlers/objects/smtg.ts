@@ -7,7 +7,7 @@
  */
 
 import { smtg } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type EmailTemplateLike = {
@@ -65,7 +65,7 @@ export const emailTemplateHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: EmailTemplateLike }).data ?? raw;
+    const obj = unwrapData<EmailTemplateLike>(raw);
     const name = String(obj.name ?? '').toUpperCase();
     return {
       SMTG: {

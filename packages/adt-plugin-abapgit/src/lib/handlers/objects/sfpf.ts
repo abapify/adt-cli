@@ -6,7 +6,7 @@
  */
 
 import { sfpf } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type FormObjectLike = {
@@ -27,7 +27,7 @@ export const formObjectHandler = createHandler<FormObjectLike, typeof sfpf>(
     serializer_version: 'v1.0.0',
 
     toAbapGit: (raw) => {
-      const obj = (raw as { data?: FormObjectLike }).data ?? raw;
+      const obj = unwrapData<FormObjectLike>(raw);
       return {
         SFPF: {
           HEADER: {

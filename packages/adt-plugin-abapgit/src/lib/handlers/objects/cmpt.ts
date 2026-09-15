@@ -7,7 +7,7 @@
  */
 
 import { cmpt } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 
 type CompositeTemplateLike = {
   name: string;
@@ -26,7 +26,7 @@ export const compositeTemplateHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: CompositeTemplateLike }).data ?? raw;
+    const obj = unwrapData<CompositeTemplateLike>(raw);
     return {
       CMPT: {
         HEADER: {

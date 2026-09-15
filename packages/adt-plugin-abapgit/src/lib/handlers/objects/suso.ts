@@ -6,7 +6,7 @@
  */
 
 import { suso } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type AuthObjectLike = {
@@ -28,7 +28,7 @@ export const authObjectHandler = createHandler<AuthObjectLike, typeof suso>(
     serializer_version: 'v1.0.0',
 
     toAbapGit: (raw) => {
-      const obj = (raw as { data?: AuthObjectLike }).data ?? raw;
+      const obj = unwrapData<AuthObjectLike>(raw);
       const name = String(obj.name ?? '').toUpperCase();
       const fields = obj.fields ?? [];
       return {

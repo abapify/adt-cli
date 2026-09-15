@@ -7,7 +7,7 @@
  */
 
 import { smim } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { formatAbapGitXml } from '../xml-format';
 
 type MimeObjectLike = {
@@ -66,8 +66,7 @@ export const mimeObjectHandler = createHandler<MimeObjectLike, typeof smim>(
     // Binary companion {name}.smim.{filename} is collected as a source
     // during deserialization (base64-encoded by the deserializer).
     setSources: (obj, sources) => {
-      const data = ((obj as { data?: Record<string, unknown> }).data ??
-        obj) as Record<string, unknown>;
+      const data = unwrapData<Record<string, unknown>>(obj);
       for (const [fileName, content] of Object.entries(sources)) {
         data.fileName = data.fileName ?? fileName;
         data.content = content;

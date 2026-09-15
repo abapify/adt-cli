@@ -6,7 +6,7 @@
  */
 
 import { sicf } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type SicfOtrText = {
@@ -50,7 +50,7 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
     serializer_version: 'v1.0.0',
 
     toAbapGit: (raw) => {
-      const obj = (raw as { data?: IcfServiceLike }).data ?? raw;
+      const obj = unwrapData<IcfServiceLike>(raw);
       const name = String(obj.name ?? '').toUpperCase();
       const lang = isoToSapLang(obj.language);
       const handlers = obj.handlers?.length

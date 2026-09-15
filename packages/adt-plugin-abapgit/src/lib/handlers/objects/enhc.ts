@@ -3,7 +3,7 @@
  */
 
 import { enhc } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type EnhancementCompositeLike = {
   name: string;
@@ -23,7 +23,7 @@ export const enhancementCompositeHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: EnhancementCompositeLike }).data ?? raw;
+    const obj = unwrapData<EnhancementCompositeLike>(raw);
     return {
       SHORTTEXT: obj.shortText,
       COMPOSITE_CHILDS: obj.compositeChilds?.length

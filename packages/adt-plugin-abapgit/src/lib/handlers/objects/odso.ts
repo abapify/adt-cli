@@ -6,7 +6,7 @@
  */
 
 import { odso } from '../../../schemas/generated';
-import { createHandler, normalizeItems, mapItems } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 
 type DataStoreObjectLike = {
   name: string;
@@ -41,7 +41,7 @@ export const dataStoreObjectHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: DataStoreObjectLike }).data ?? raw;
+    const obj = unwrapData<DataStoreObjectLike>(raw);
     return {
       ODSO: {
         ODSOBJECT: String(obj.name ?? '').toUpperCase(),

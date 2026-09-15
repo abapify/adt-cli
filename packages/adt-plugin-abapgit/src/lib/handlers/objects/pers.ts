@@ -3,7 +3,7 @@
  */
 
 import { pers } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, unwrapData } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type PersonalizationObjLike = {
@@ -28,7 +28,7 @@ export const personalizationHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (raw) => {
-    const obj = (raw as { data?: PersonalizationObjLike }).data ?? raw;
+    const obj = unwrapData<PersonalizationObjLike>(raw);
     return {
       PERS: {
         PERS_REG: {
