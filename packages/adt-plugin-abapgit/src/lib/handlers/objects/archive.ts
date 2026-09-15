@@ -5,7 +5,7 @@
  * the only difference is the object type and generated schema.
  */
 
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import type { AbapGitSchema } from '../abapgit-schema';
 
 type ArchiveLike = {
@@ -55,7 +55,7 @@ export function createArchiveHandler<
         name: (ATTR?.NAME ?? '').toUpperCase(),
         packageName: ATTR?.DEVCLASS,
         version: ATTR?.VERSION,
-        parameters: params.map((p) => ({ name: p.NAME, value: p.VALUE })),
+        parameters: mapItems(params, (p) => ({ name: p.NAME, value: p.VALUE })),
       };
     },
   });

@@ -1,18 +1,22 @@
 /**
  * IATU (Internet Application HTML Template) handler for abapGit format
  *
- * Upstream stores the HTML source in a {name}.iatu.html side file;
- * this handler covers the ATTR metadata XML.
+ * Upstream stores the HTML source in a {name}.iatu.html side file
+ * (mo_files->add_string iv_ext='html'); this handler covers the
+ * ATTR metadata XML plus the HTML companion.
  */
 
 import { iatu } from '../../../schemas/generated';
 import { createHandler } from '../base';
+import { formatAbapGitXml } from '../xml-format';
 
 type IatuLike = {
   name: string;
   text?: string;
   mimeType?: string;
   packageName?: string;
+  /** HTML template source stored in {name}.iatu.html */
+  html?: string;
 };
 
 export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
@@ -21,14 +25,42 @@ export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
   serializer: 'LCL_OBJECT_IATU',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    ATTR: {
-      NAME: String(obj.name ?? '').toUpperCase(),
-      TEXT: obj.text,
-      MIMETYPE: obj.mimeType,
-      DEVCLASS: obj.packageName,
-    },
-  }),
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: IatuLike }).data ?? raw;
+    return {
+      ATTR: {
+        NAME: String(obj.name ?? '').toUpperCase(),
+        TEXT: obj.text,
+        MIMETYPE: obj.mimeType,
+        DEVCLASS: obj.packageName,
+      },
+    };
+  },
+
+  serialize: async (raw, ctx) => {
+    const obj = (raw as { data?: IatuLike }).data ?? raw;
+    const objectName = ctx.getObjectName(obj);
+    const files = [
+      ctx.createFile(
+        `${objectName}.iatu.xml`,
+        formatAbapGitXml(ctx.toAbapGitXml(obj)),
+      ),
+    ];
+    if (obj.html) {
+      files.push(ctx.createFile(`${objectName}.iatu.html`, obj.html));
+    }
+    return files;
+  },
+
+  // {name}.iatu.html is collected as a binary source during
+  // deserialization (base64-encoded by the deserializer).
+  setSources: (obj, sources) => {
+    const data = ((obj as { data?: Record<string, unknown> }).data ??
+      obj) as Record<string, unknown>;
+    for (const [, content] of Object.entries(sources)) {
+      data.html = Buffer.from(content, 'base64').toString('utf-8');
+    }
+  },
 
   fromAbapGit: ({ ATTR }) => ({
     name: (ATTR?.NAME ?? '').toUpperCase(),

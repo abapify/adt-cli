@@ -212,30 +212,6 @@ export default {
       sequence: {
         element: [
           {
-            name: "ATTRIBUTES",
-            type: "NrobAttributesType",
-            minOccurs: "0",
-          },
-          {
-            name: "TEXT",
-            type: "NrobTextType",
-            minOccurs: "0",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
             ref: "asx:values",
           },
         ],

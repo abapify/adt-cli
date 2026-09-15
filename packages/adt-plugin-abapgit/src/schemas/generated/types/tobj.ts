@@ -24,13 +24,19 @@ export type TobjSchema = {
                     DDTEXT?: string | undefined;
                 };
                 OBJS?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
                 OBJSL?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
                 OBJM?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
                 TOBJ?: undefined | {
                     TDDAT?: undefined | {
@@ -39,8 +45,12 @@ export type TobjSchema = {
                         CCLASS?: string | undefined;
                         FLAG?: string | undefined;
                     };
-                    TVDIR?: undefined | unknown;
-                    TVIMF?: undefined | unknown[];
+                    TVDIR?: undefined | {
+                        [key: string]: unknown;
+                    };
+                    TVIMF?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
             };
             version?: string | undefined;
@@ -66,13 +76,19 @@ export type TobjSchema = {
             DDTEXT?: string | undefined;
         };
         OBJS?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
         OBJSL?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
         OBJM?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
         TOBJ?: undefined | {
             TDDAT?: undefined | {
@@ -81,8 +97,12 @@ export type TobjSchema = {
                 CCLASS?: string | undefined;
                 FLAG?: string | undefined;
             };
-            TVDIR?: undefined | unknown;
-            TVIMF?: undefined | unknown[];
+            TVDIR?: undefined | {
+                [key: string]: unknown;
+            };
+            TVIMF?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
     };
 } | {
@@ -103,13 +123,19 @@ export type TobjSchema = {
                 DDTEXT?: string | undefined;
             };
             OBJS?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
             OBJSL?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
             OBJM?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
             TOBJ?: undefined | {
                 TDDAT?: undefined | {
@@ -118,8 +144,12 @@ export type TobjSchema = {
                     CCLASS?: string | undefined;
                     FLAG?: string | undefined;
                 };
-                TVDIR?: undefined | unknown;
-                TVIMF?: undefined | unknown[];
+                TVDIR?: undefined | {
+                    [key: string]: unknown;
+                };
+                TVIMF?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
         };
         version?: string | undefined;

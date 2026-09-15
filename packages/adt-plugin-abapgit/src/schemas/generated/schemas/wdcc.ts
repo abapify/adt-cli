@@ -57,19 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "OtrTextType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:WdccOtrTextItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -110,7 +97,7 @@ export default {
           },
           {
             name: "OTR_TEXT",
-            type: "OtrTextType",
+            type: "asx:OtrTextType",
             minOccurs: "0",
           },
           {
@@ -139,53 +126,14 @@ export default {
       },
     },
     {
-      name: "WdccType",
+      name: "OtrTextType",
       sequence: {
         element: [
           {
-            name: "OBJECT_NAME",
-            type: "xs:string",
+            name: "item",
+            type: "WdccOtrTextItemType",
             minOccurs: "0",
-          },
-          {
-            name: "CONFIG_ID",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "CONFIG_TYPE",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "CONFIG_VAR",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "WDA_COMPONENT",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "PARENT",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "RELID",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "OTR_TEXT",
-            type: "OtrTextType",
-            minOccurs: "0",
-          },
-          {
-            name: "DESCR_LANG",
-            type: "xs:string",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

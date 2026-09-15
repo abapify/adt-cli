@@ -1,21 +1,18 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
-  
-  <xs:include schemaLocation="types/vcls.xsd" />
+  <xs:include schemaLocation="types/vcls.xsd"/>
 
-  
   <xs:redefine schemaLocation="asx.xsd">
     <xs:complexType name="AbapValuesType">
       <xs:complexContent>
         <xs:extension base="asx:AbapValuesType">
           <xs:sequence>
-            <xs:element name="VCLDIR" type="asx:VclsVcldirType" minOccurs="0" />
+            <xs:element name="VCLDIR" type="asx:VclsVcldirType" minOccurs="0"/>
                   
-            <xs:element name="VCLSTRUC_TAB" minOccurs="0" type="VclstrucTabType">
+            <xs:element name="VCLSTRUC_TAB" minOccurs="0" type="asx:VclstrucTabType">
                     </xs:element>
                   
-            <xs:element name="VCLMF_TAB" minOccurs="0" type="VclmfTabType">
+            <xs:element name="VCLMF_TAB" minOccurs="0" type="asx:VclmfTabType">
                     </xs:element>
                 
           </xs:sequence>
@@ -24,17 +21,6 @@
     </xs:complexType>
   </xs:redefine>
 
-  
-  <xs:import schemaLocation="abapgit.xsd" />
+  <xs:import schemaLocation="abapgit.xsd"/>
 
-<xs:complexType name="VclstrucTabType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:VclsVclstrucItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  <xs:complexType name="VclmfTabType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:VclsVclmfItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
                   </xs:schema>

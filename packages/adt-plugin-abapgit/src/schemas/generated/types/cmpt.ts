@@ -14,6 +14,7 @@ export type CmptSchema = {
                         NAME?: string | undefined;
                         DESCRIPTION?: string | undefined;
                     };
+                    [key: string]: unknown;
                 };
             };
             version?: string | undefined;
@@ -29,6 +30,7 @@ export type CmptSchema = {
                 NAME?: string | undefined;
                 DESCRIPTION?: string | undefined;
             };
+            [key: string]: unknown;
         };
     };
 } | {
@@ -39,6 +41,7 @@ export type CmptSchema = {
                     NAME?: string | undefined;
                     DESCRIPTION?: string | undefined;
                 };
+                [key: string]: unknown;
             };
         };
         version?: string | undefined;

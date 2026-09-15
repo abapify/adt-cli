@@ -8,7 +8,9 @@
 export type IwprSchema = {
     abapGit: {
         abap: {
-            values: unknown;
+            values: {
+                [key: string]: unknown;
+            };
             version?: string | undefined;
         };
         version: string;
@@ -16,10 +18,14 @@ export type IwprSchema = {
         serializer_version: string;
     };
 } | {
-    values: unknown;
+    values: {
+        [key: string]: unknown;
+    };
 } | {
     abap: {
-        values: unknown;
+        values: {
+            [key: string]: unknown;
+        };
         version?: string | undefined;
     };
 };

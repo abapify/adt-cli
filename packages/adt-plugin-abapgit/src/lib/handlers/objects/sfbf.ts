@@ -3,7 +3,7 @@
  */
 
 import { sfbf } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type BusinessFunctionLike = {
   name: string;
@@ -43,8 +43,8 @@ export const businessFunctionHandler = createHandler<
       name: (HEADER?.BF_NAME ?? '').toUpperCase(),
       name32: NAME32,
       name80: NAME80,
-      assignedSwitches: switches.map((s) => s.SWITCH ?? ''),
-      parentBfs: parentBfs.map((b) => b.BF ?? ''),
+      assignedSwitches: mapItems(switches, (s) => s.SWITCH ?? ''),
+      parentBfs: mapItems(parentBfs, (b) => b.BF ?? ''),
     };
   },
 });

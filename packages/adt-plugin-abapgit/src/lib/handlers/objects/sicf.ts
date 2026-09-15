@@ -6,7 +6,7 @@
  */
 
 import { sicf } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type SicfOtrText = {
@@ -49,7 +49,8 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
     serializer: 'LCL_OBJECT_SICF',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = (raw as { data?: IcfServiceLike }).data ?? raw;
       const name = String(obj.name ?? '').toUpperCase();
       const lang = isoToSapLang(obj.language);
       const handlers = obj.handlers?.length
@@ -134,13 +135,13 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
         url: URL,
         language: sapLangToIso(ICFDOCU?.LANGU),
         handlerClass: handlers[0]?.ICFHANDLER,
-        handlers: handlers.map((h) => ({
+        handlers: mapItems(handlers, (h) => ({
           handler: h.ICFHANDLER,
           order: h.ICFHANDLERORDER,
         })),
         parent: ICFSERVICE?.ICF_PARENT,
         auth: ICFSERVICE?.ICF_AUTH,
-        otrTexts: otrTexts.map((t) => ({
+        otrTexts: mapItems(otrTexts, (t) => ({
           concept: t.HEADER?.CONCEPT,
           paket: t.HEADER?.PAKET,
           creaLan: t.HEADER?.CREA_LAN,
@@ -152,7 +153,7 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
             text: e.TEXT,
           })),
         })),
-        otrUses: otrUses.map((u) => ({
+        otrUses: mapItems(otrUses, (u) => ({
           pgmid: u.PGMID,
           object: u.OBJECT,
           objName: u.OBJ_NAME,

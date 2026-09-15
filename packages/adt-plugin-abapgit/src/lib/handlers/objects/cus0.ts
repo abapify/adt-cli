@@ -3,7 +3,7 @@
  */
 
 import { cus0 } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type ImgActivityLike = {
@@ -51,7 +51,7 @@ export const imgActivityHandler = createHandler<ImgActivityLike, typeof cus0>(
         attributes: CUS0?.HEADER?.ATTRIBUTES,
         cActivity: CUS0?.HEADER?.C_ACTIVITY,
         tcode: CUS0?.HEADER?.TCODE,
-        texts: texts.map((t) => ({
+        texts: mapItems(texts, (t) => ({
           language: sapLangToIso(t.SPRAS),
           text: t.TEXT,
         })),

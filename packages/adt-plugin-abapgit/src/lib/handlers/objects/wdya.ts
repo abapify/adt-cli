@@ -3,7 +3,7 @@
  */
 
 import { wdya } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type WdyaLike = {
   name: string;
@@ -42,7 +42,7 @@ export const webDynproAppHandler = createHandler<WdyaLike, typeof wdya>(
         component: APP?.COMPONENT,
         interface: APP?.INTERFACE,
         description: APP?.DESCRIPTION,
-        properties: props.map((p) => ({ name: p.NAME, value: p.VALUE })),
+        properties: mapItems(props, (p) => ({ name: p.NAME, value: p.VALUE })),
       };
     },
   },

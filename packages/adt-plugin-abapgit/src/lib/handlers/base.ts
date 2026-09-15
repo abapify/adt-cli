@@ -351,6 +351,17 @@ export function normalizeItems<T>(raw: T | T[] | undefined): T[] {
 }
 
 /**
+ * Map normalized items, returning undefined for empty input
+ * (keeps fromAbapGit symmetric with toAbapGit which omits empty tables)
+ */
+export function mapItems<T, R>(
+  items: T[],
+  fn: (item: T) => R,
+): R[] | undefined {
+  return items.length ? items.map(fn) : undefined;
+}
+
+/**
  * Create an object handler from ADK class
  */
 export function createHandler<

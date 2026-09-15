@@ -3,7 +3,7 @@
  */
 
 import { sots } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type OtrTextLike = {
@@ -56,7 +56,7 @@ export const otrTextHandler = createHandler<OtrTextLike, typeof sots>('SOTS', {
       name: (first?.HEADER?.CONCEPT ?? '').toUpperCase(),
       concept: first?.HEADER?.CONCEPT,
       language: sapLangToIso(first?.HEADER?.CREA_LAN),
-      texts: entries.map((e) => ({
+      texts: mapItems(entries, (e) => ({
         langu: sapLangToIso(e.LANGU),
         object: e.OBJECT,
         lfdNum: e.LFD_NUM,

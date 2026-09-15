@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!--
     Generic OBJSL-driven objects (zcl_abapgit_objects_generic).
     Each table listed in OBJSL for the object type serializes as an
@@ -13,10 +12,4 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="ObjslAbapType">
-    <xs:sequence>
-      <xs:element name="values" type="ObjslValuesType"/>
-    </xs:sequence>
-    <xs:attribute name="version" type="xs:string" default="1.0"/>
-  </xs:complexType>
 </xs:schema>

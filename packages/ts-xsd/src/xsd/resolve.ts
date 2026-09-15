@@ -24,6 +24,7 @@ import type {
   LocalAttribute,
   ExplicitGroup,
   All,
+  Any,
 } from './types';
 import { SchemaTraverser, stripNsPrefix } from './traverser';
 
@@ -262,6 +263,7 @@ function expandComplexTypeExtension(
 
   // Collect elements from base type and extension
   const mergedElements: LocalElement[] = [];
+  const mergedAnys: Any[] = [];
   const mergedAttributes: LocalAttribute[] = [];
 
   // Get base type elements
@@ -277,6 +279,7 @@ function expandComplexTypeExtension(
 
     // Collect elements from base
     collectElementsFromType(expandedBase, mergedElements);
+    collectAnysFromType(expandedBase, mergedAnys);
 
     // Collect attributes from base
     if (expandedBase.attribute) {
@@ -288,6 +291,9 @@ function expandComplexTypeExtension(
   collectElementsFromGroup(extension.sequence, mergedElements);
   collectElementsFromGroup(extension.choice, mergedElements);
   collectElementsFromGroup(extension.all, mergedElements);
+  collectAnysFromGroup(extension.sequence, mergedAnys);
+  collectAnysFromGroup(extension.choice, mergedAnys);
+  collectAnysFromGroup(extension.all, mergedAnys);
 
   // Add extension attributes
   if (extension.attribute) {
@@ -299,8 +305,11 @@ function expandComplexTypeExtension(
     name: ct.name,
   };
 
-  if (mergedElements.length > 0) {
-    flattened.all = { element: mergedElements };
+  if (mergedElements.length > 0 || mergedAnys.length > 0) {
+    flattened.all = {
+      ...(mergedElements.length > 0 ? { element: mergedElements } : {}),
+      ...(mergedAnys.length > 0 ? { any: mergedAnys } : {}),
+    };
   }
 
   if (mergedAttributes.length > 0) {
@@ -339,6 +348,15 @@ function collectElementsFromType(
 }
 
 /**
+ * Collect xs:any wildcards from a complex type's content model.
+ */
+function collectAnysFromType(ct: TopLevelComplexType, anys: Any[]): void {
+  collectAnysFromGroup(ct.sequence, anys);
+  collectAnysFromGroup(ct.choice, anys);
+  collectAnysFromGroup(ct.all, anys);
+}
+
+/**
  * Collect elements from a group (sequence/choice/all).
  */
 function collectElementsFromGroup(
@@ -347,6 +365,26 @@ function collectElementsFromGroup(
 ): void {
   if (!group?.element) return;
   elements.push(...group.element);
+}
+
+/**
+ * Collect xs:any wildcards from a group (sequence/choice/all),
+ * descending into nested groups.
+ */
+function collectAnysFromGroup(
+  group: ExplicitGroup | All | undefined,
+  anys: Any[],
+): void {
+  if (!group) return;
+  if (group.any) {
+    anys.push(...group.any);
+  }
+  for (const nested of (group as ExplicitGroup).sequence ?? []) {
+    collectAnysFromGroup(nested, anys);
+  }
+  for (const nested of (group as ExplicitGroup).choice ?? []) {
+    collectAnysFromGroup(nested, anys);
+  }
 }
 
 // =============================================================================

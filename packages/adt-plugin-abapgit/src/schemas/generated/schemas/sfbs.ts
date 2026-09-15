@@ -57,45 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "AssignedBfType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfbsAssignedBfItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "NestedBfsType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfbsNestedBfsItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "ParentBfsType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfbsParentBfsItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -116,17 +77,17 @@ export default {
           },
           {
             name: "ASSIGNED_BF",
-            type: "AssignedBfType",
+            type: "asx:AssignedBfType",
             minOccurs: "0",
           },
           {
             name: "NESTED_BFS",
-            type: "NestedBfsType",
+            type: "asx:NestedBfsType",
             minOccurs: "0",
           },
           {
             name: "PARENT_BFS",
-            type: "ParentBfsType",
+            type: "asx:ParentBfsType",
             minOccurs: "0",
           },
         ],
@@ -191,38 +152,40 @@ export default {
       },
     },
     {
-      name: "SfbsType",
+      name: "AssignedBfType",
       sequence: {
         element: [
           {
-            name: "HEADER",
-            type: "SfbsHeaderType",
+            name: "item",
+            type: "SfbsAssignedBfItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "NestedBfsType",
+      sequence: {
+        element: [
           {
-            name: "NAME32",
-            type: "xs:string",
+            name: "item",
+            type: "SfbsNestedBfsItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "ParentBfsType",
+      sequence: {
+        element: [
           {
-            name: "NAME80",
-            type: "xs:string",
+            name: "item",
+            type: "SfbsParentBfsItemType",
             minOccurs: "0",
-          },
-          {
-            name: "ASSIGNED_BF",
-            type: "AssignedBfType",
-            minOccurs: "0",
-          },
-          {
-            name: "NESTED_BFS",
-            type: "NestedBfsType",
-            minOccurs: "0",
-          },
-          {
-            name: "PARENT_BFS",
-            type: "ParentBfsType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

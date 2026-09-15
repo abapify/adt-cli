@@ -153,61 +153,6 @@ export default {
       },
     },
     {
-      name: "EnhBadiDefTabType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "EnhBadiDefType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "EnhHookDefType",
-      all: {
-        element: [
-          {
-            name: "PGMID",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "OBJ_NAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "OBJ_TYPE",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "MAIN_TYPE",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "MAIN_NAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "PROGRAM",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "DEF_HOOKS",
-            type: "DefHooksType",
-            minOccurs: "0",
-          },
-        ],
-      },
-    },
-    {
       name: "EnhHookDefEntryType",
       all: {
         element: [
@@ -280,67 +225,6 @@ export default {
           {
             name: "MAIN_TYPE",
             type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "MAIN_NAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "PROGRAM",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "DEF_HOOKS",
-            type: "EnhDefHooksType",
-            minOccurs: "0",
-          },
-        ],
-      },
-    },
-    {
-      name: "EnhsType",
-      all: {
-        element: [
-          {
-            name: "item",
-            type: "EnhHookDefEntryType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "EnhBadiDataType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "EnhBadiDefType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-          {
-            name: "PGMID",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "OBJ_NAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "OBJ_TYPE",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "BADI_DATA",
-            type: "EnhBadiDataType",
             minOccurs: "0",
           },
           {

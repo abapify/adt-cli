@@ -3,7 +3,7 @@
  */
 
 import { sfbs } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type BusinessFunctionSetLike = {
   name: string;
@@ -55,9 +55,9 @@ export const businessFunctionSetHandler = createHandler<
       name: (HEADER?.BS_NAME ?? '').toUpperCase(),
       name32: NAME32,
       name80: NAME80,
-      assignedBfs: assignedBfs.map((b) => b.BF ?? ''),
-      nestedBfs: nestedBfs.map((b) => b.BFS ?? ''),
-      parentBfs: parentBfs.map((b) => b.BFS ?? ''),
+      assignedBfs: mapItems(assignedBfs, (b) => b.BF ?? ''),
+      nestedBfs: mapItems(nestedBfs, (b) => b.BFS ?? ''),
+      parentBfs: mapItems(parentBfs, (b) => b.BFS ?? ''),
     };
   },
 });

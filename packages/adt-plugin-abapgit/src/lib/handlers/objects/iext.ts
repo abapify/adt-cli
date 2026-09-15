@@ -3,7 +3,7 @@
  */
 
 import { iext } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type IdocExtensionLike = {
   name: string;
@@ -48,7 +48,7 @@ export const idocExtensionHandler = createHandler<
       idocType: IEXT?.ATTRIBUTES?.IDOCTYP,
       cimType: IEXT?.ATTRIBUTES?.CIMTYP,
       description: IEXT?.ATTRIBUTES?.DESCRP,
-      syntax: syntax.map((s) => ({ segment: s.SEGMENT })),
+      syntax: mapItems(syntax, (s) => ({ segment: s.SEGMENT })),
     };
   },
 });

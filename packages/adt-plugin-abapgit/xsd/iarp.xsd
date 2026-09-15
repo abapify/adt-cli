@@ -1,18 +1,15 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
-  
-  <xs:include schemaLocation="types/iarp.xsd" />
+  <xs:include schemaLocation="types/iarp.xsd"/>
 
-  
   <xs:redefine schemaLocation="asx.xsd">
     <xs:complexType name="AbapValuesType">
       <xs:complexContent>
         <xs:extension base="asx:AbapValuesType">
           <xs:sequence>
-            <xs:element name="ATTR" type="asx:IarpAttrType" minOccurs="0" />
+            <xs:element name="ATTR" type="asx:IarpAttrType" minOccurs="0"/>
                   
-            <xs:element name="PARAMETERS" minOccurs="0" type="ParametersType">
+            <xs:element name="PARAMETERS" minOccurs="0" type="asx:ParametersType">
                     </xs:element>
                 
           </xs:sequence>
@@ -21,12 +18,6 @@
     </xs:complexType>
   </xs:redefine>
 
-  
-  <xs:import schemaLocation="abapgit.xsd" />
+  <xs:import schemaLocation="abapgit.xsd"/>
 
-<xs:complexType name="ParametersType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:IarpParamItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
                   </xs:schema>

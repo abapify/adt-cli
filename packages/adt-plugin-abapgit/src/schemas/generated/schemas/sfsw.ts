@@ -57,45 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "ParentBfType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfswParentBfItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "ConflictsType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfswConflictItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "PackagesType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:SfswPackageItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -116,17 +77,17 @@ export default {
           },
           {
             name: "PARENT_BF",
-            type: "ParentBfType",
+            type: "asx:ParentBfType",
             minOccurs: "0",
           },
           {
             name: "CONFLICTS",
-            type: "ConflictsType",
+            type: "asx:ConflictsType",
             minOccurs: "0",
           },
           {
             name: "PACKAGES",
-            type: "PackagesType",
+            type: "asx:PackagesType",
             minOccurs: "0",
           },
         ],
@@ -191,38 +152,40 @@ export default {
       },
     },
     {
-      name: "SfswType",
+      name: "ParentBfType",
       sequence: {
         element: [
           {
-            name: "HEADER",
-            type: "SfswHeaderType",
+            name: "item",
+            type: "SfswParentBfItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "ConflictsType",
+      sequence: {
+        element: [
           {
-            name: "NAME32",
-            type: "xs:string",
+            name: "item",
+            type: "SfswConflictItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "PackagesType",
+      sequence: {
+        element: [
           {
-            name: "NAME80",
-            type: "xs:string",
+            name: "item",
+            type: "SfswPackageItemType",
             minOccurs: "0",
-          },
-          {
-            name: "PARENT_BF",
-            type: "ParentBfType",
-            minOccurs: "0",
-          },
-          {
-            name: "CONFLICTS",
-            type: "ConflictsType",
-            minOccurs: "0",
-          },
-          {
-            name: "PACKAGES",
-            type: "PackagesType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

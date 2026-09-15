@@ -58,6 +58,15 @@ export default {
   complexType: [
     {
       name: "AbapValuesType",
+      all: {
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
+      },
     },
     {
       name: "ObjslValuesType",
@@ -70,24 +79,6 @@ export default {
           },
         ],
       },
-    },
-    {
-      name: "ObjslAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "ObjslValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "AbapType",

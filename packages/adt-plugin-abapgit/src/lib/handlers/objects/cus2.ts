@@ -3,7 +3,7 @@
  */
 
 import { cus2 } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type CustomizingAttributeLike = {
@@ -44,7 +44,7 @@ export const customizingAttributeHandler = createHandler<
     return {
       name: (CUS2?.HEADER?.ATTR_ID ?? '').toUpperCase(),
       attrType: CUS2?.HEADER?.ATTR_TYPE,
-      titles: titles.map((t) => ({
+      titles: mapItems(titles, (t) => ({
         language: sapLangToIso(t.SPRAS),
         text: t.TEXT,
       })),

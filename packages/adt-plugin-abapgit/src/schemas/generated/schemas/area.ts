@@ -84,33 +84,6 @@ export default {
       },
     },
     {
-      name: "AreaType",
-      all: {
-        element: [
-          {
-            name: "NODENAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "PARENTNAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "TXTSH",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "TXTLG",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapType",
       sequence: {
         element: [

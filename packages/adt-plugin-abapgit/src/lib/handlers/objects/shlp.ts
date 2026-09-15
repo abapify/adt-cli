@@ -7,7 +7,7 @@
  */
 
 import { shlp } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type SearchHelpLike = {
@@ -184,7 +184,7 @@ function parseSearchHelpFromAbapGit({
           rollName: DD31V.ROLLNAME,
         }
       : undefined,
-    parameters: paramItems.map(parseShlpParam),
-    fieldAssignments: assignItems.map(parseShlpAssign),
+    parameters: mapItems(paramItems, parseShlpParam),
+    fieldAssignments: mapItems(assignItems, parseShlpAssign),
   };
 }

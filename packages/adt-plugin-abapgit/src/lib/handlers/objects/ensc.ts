@@ -3,7 +3,7 @@
  */
 
 import { ensc } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type EnhancementSpotCompositeLike = {
   name: string;
@@ -37,8 +37,8 @@ export const enhancementSpotCompositeHandler = createHandler<
     return {
       name: '',
       shortText: SHORTTEXT,
-      enhSpots: enhSpots.map((s) => s.ENHSPOTNAME ?? ''),
-      compEnhSpots: compEnhSpots.map((s) => s.ENHSPOTNAME ?? ''),
+      enhSpots: mapItems(enhSpots, (s) => s.ENHSPOTNAME ?? ''),
+      compEnhSpots: mapItems(compEnhSpots, (s) => s.ENHSPOTNAME ?? ''),
     };
   },
 });

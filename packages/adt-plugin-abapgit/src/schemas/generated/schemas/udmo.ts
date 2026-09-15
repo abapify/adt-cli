@@ -57,32 +57,6 @@ export default {
   ],
   complexType: [
     {
-      name: "UdmoEntitiesType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:UdmoEntityItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "UdmoTextsType",
-      sequence: {
-        element: [
-          {
-            name: "item",
-            type: "asx:UdmoTextItemType",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapValuesType",
       all: {
         element: [
@@ -93,12 +67,12 @@ export default {
           },
           {
             name: "UDMO_ENTITIES",
-            type: "UdmoEntitiesType",
+            type: "asx:UdmoEntitiesType",
             minOccurs: "0",
           },
           {
             name: "UDMO_TEXTS",
-            type: "UdmoTextsType",
+            type: "asx:UdmoTextsType",
             minOccurs: "0",
           },
         ],
@@ -176,23 +150,27 @@ export default {
       },
     },
     {
-      name: "UdmoType",
+      name: "UdmoEntitiesType",
       sequence: {
         element: [
           {
-            name: "DM40L",
-            type: "UdmoDm40lType",
+            name: "item",
+            type: "UdmoEntityItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
+        ],
+      },
+    },
+    {
+      name: "UdmoTextsType",
+      sequence: {
+        element: [
           {
-            name: "UDMO_ENTITIES",
-            type: "UdmoEntitiesType",
+            name: "item",
+            type: "UdmoTextItemType",
             minOccurs: "0",
-          },
-          {
-            name: "UDMO_TEXTS",
-            type: "UdmoTextsType",
-            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },

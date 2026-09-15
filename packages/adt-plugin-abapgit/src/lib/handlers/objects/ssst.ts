@@ -10,6 +10,9 @@ type SmartFormStyleLike = {
   name: string;
   masterLanguage?: string;
   fontFamily?: string;
+  ssfparas?: unknown;
+  ssfstrings?: unknown;
+  stxstab?: unknown;
 };
 
 export const smartFormStyleHandler = createHandler<
@@ -21,17 +24,26 @@ export const smartFormStyleHandler = createHandler<
   serializer: 'LCL_OBJECT_SSST',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    HEADER: {
-      SSFNAME: String(obj.name ?? '').toUpperCase(),
-      MASTERLANG: isoToSapLang(obj.masterLanguage),
-      TDFAMILY: obj.fontFamily,
-    },
-  }),
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: SmartFormStyleLike }).data ?? raw;
+    return {
+      HEADER: {
+        SSFNAME: String(obj.name ?? '').toUpperCase(),
+        MASTERLANG: isoToSapLang(obj.masterLanguage),
+        TDFAMILY: obj.fontFamily,
+      },
+      SSFPARAS: obj.ssfparas,
+      SSFSTRINGS: obj.ssfstrings,
+      STXSTAB: obj.stxstab,
+    };
+  },
 
-  fromAbapGit: ({ HEADER }) => ({
+  fromAbapGit: ({ HEADER, SSFPARAS, SSFSTRINGS, STXSTAB }) => ({
     name: (HEADER?.SSFNAME ?? '').toUpperCase(),
     masterLanguage: sapLangToIso(HEADER?.MASTERLANG),
     fontFamily: HEADER?.TDFAMILY,
+    ssfparas: SSFPARAS,
+    ssfstrings: SSFSTRINGS,
+    stxstab: STXSTAB,
   }),
 });

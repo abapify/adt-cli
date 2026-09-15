@@ -3,7 +3,7 @@
  */
 
 import { dial } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type DialogModuleLike = {
@@ -64,7 +64,7 @@ export const dialogModuleHandler = createHandler<DialogModuleLike, typeof dial>(
         description: DIAL?.TDCT?.DDTEXT,
         dynr: DIAL?.TDCT?.DYNR,
         program: DIAL?.TDCT?.PROG,
-        parameters: parameters.map((p) => ({
+        parameters: mapItems(parameters, (p) => ({
           dnam: p.DNAM,
           dynr: p.DYNR,
           param: p.PARAM,

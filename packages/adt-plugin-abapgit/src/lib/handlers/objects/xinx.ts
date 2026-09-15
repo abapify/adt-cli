@@ -3,7 +3,7 @@
  */
 
 import { xinx } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type ExtensionIndexLike = {
   name: string;
@@ -50,7 +50,7 @@ export const extensionIndexHandler = createHandler<
       indexName: XINX?.DD12V?.INDEXNAME,
       description: XINX?.DD12V?.DDTEXT,
       unique: XINX?.DD12V?.UNIQUEFLAG === 'X',
-      fields: dd17v.map((f) => ({
+      fields: mapItems(dd17v, (f) => ({
         position: f.POSITION,
         fieldName: f.FIELDNAME,
       })),

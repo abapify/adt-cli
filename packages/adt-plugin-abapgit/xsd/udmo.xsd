@@ -1,21 +1,18 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
-  
-  <xs:include schemaLocation="types/udmo.xsd" />
+  <xs:include schemaLocation="types/udmo.xsd"/>
 
-  
   <xs:redefine schemaLocation="asx.xsd">
     <xs:complexType name="AbapValuesType">
       <xs:complexContent>
         <xs:extension base="asx:AbapValuesType">
           <xs:sequence>
-            <xs:element name="DM40L" type="asx:UdmoDm40lType" minOccurs="0" />
+            <xs:element name="DM40L" type="asx:UdmoDm40lType" minOccurs="0"/>
                   
-            <xs:element name="UDMO_ENTITIES" minOccurs="0" type="UdmoEntitiesType">
+            <xs:element name="UDMO_ENTITIES" minOccurs="0" type="asx:UdmoEntitiesType">
                     </xs:element>
                   
-            <xs:element name="UDMO_TEXTS" minOccurs="0" type="UdmoTextsType">
+            <xs:element name="UDMO_TEXTS" minOccurs="0" type="asx:UdmoTextsType">
                     </xs:element>
                 
           </xs:sequence>
@@ -24,17 +21,6 @@
     </xs:complexType>
   </xs:redefine>
 
-  
-  <xs:import schemaLocation="abapgit.xsd" />
+  <xs:import schemaLocation="abapgit.xsd"/>
 
-<xs:complexType name="UdmoEntitiesType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:UdmoEntityItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  <xs:complexType name="UdmoTextsType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:UdmoTextItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
                   </xs:schema>

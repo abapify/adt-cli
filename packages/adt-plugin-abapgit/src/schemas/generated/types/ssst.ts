@@ -15,13 +15,19 @@ export type SsstSchema = {
                     TDFAMILY?: string | undefined;
                 };
                 SSFPARAS?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
                 SSFSTRINGS?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
                 STXSTAB?: undefined | {
-                    item?: undefined | unknown[];
+                    item?: undefined | {
+                        [key: string]: unknown;
+                    }[];
                 };
             };
             version?: string | undefined;
@@ -38,13 +44,19 @@ export type SsstSchema = {
             TDFAMILY?: string | undefined;
         };
         SSFPARAS?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
         SSFSTRINGS?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
         STXSTAB?: undefined | {
-            item?: undefined | unknown[];
+            item?: undefined | {
+                [key: string]: unknown;
+            }[];
         };
     };
 } | {
@@ -56,13 +68,19 @@ export type SsstSchema = {
                 TDFAMILY?: string | undefined;
             };
             SSFPARAS?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
             SSFSTRINGS?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
             STXSTAB?: undefined | {
-                item?: undefined | unknown[];
+                item?: undefined | {
+                    [key: string]: unknown;
+                }[];
             };
         };
         version?: string | undefined;

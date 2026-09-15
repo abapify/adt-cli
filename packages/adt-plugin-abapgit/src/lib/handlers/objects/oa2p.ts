@@ -3,7 +3,7 @@
  */
 
 import { oa2p } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type Oauth2ProfileLike = {
   name: string;
@@ -45,7 +45,7 @@ export const oauth2ProfileHandler = createHandler<
       profile: PROFILE?.PROFILE,
       type: PROFILE?.TYPE,
       header: PROFILE?.HEADER,
-      scopes: scopes.map((s) => ({
+      scopes: mapItems(scopes, (s) => ({
         scope: s.SCOPE,
         description: s.DESCRIPTION,
       })),

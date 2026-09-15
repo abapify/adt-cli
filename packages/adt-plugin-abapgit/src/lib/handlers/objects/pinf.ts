@@ -3,7 +3,7 @@
  */
 
 import { pinf } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type PackageInterfaceLike = {
   name: string;
@@ -51,7 +51,7 @@ export const packageInterfaceHandler = createHandler<
       name: (PINF?.ATTRIBUTES?.INTF_NAME ?? '').toUpperCase(),
       packageName: PINF?.ATTRIBUTES?.PACK_NAME,
       description: PINF?.ATTRIBUTES?.DESCR,
-      elements: elements.map((e) => ({
+      elements: mapItems(elements, (e) => ({
         elementName: e.ELEMENT_NAME,
         elementType: e.ELEMENT_TYPE,
       })),

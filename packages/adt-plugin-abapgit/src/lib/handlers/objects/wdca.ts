@@ -3,7 +3,7 @@
  */
 
 import { wdca } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
 type WdcaLike = {
@@ -46,7 +46,10 @@ export const wdcaHandler = createHandler<WdcaLike, typeof wdca>('WDCA', {
       name: (OUTLINE?.CONFIG_ID ?? '').toUpperCase(),
       configType: OUTLINE?.CONFIG_TYPE,
       configVar: OUTLINE?.CONFIG_VAR,
-      data: data.map((d) => ({ compName: d.COMPNAME, content: d.CONTENT })),
+      data: mapItems(data, (d) => ({
+        compName: d.COMPNAME,
+        content: d.CONTENT,
+      })),
       descrLang: sapLangToIso(DESCR_LANG),
     };
   },

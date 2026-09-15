@@ -6,7 +6,7 @@
  */
 
 import { sqsc } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type DbProcProxyLike = {
   name: string;
@@ -115,7 +115,7 @@ export const dbProcProxyHandler = createHandler<DbProcProxyLike, typeof sqsc>(
         dbCatalogProcName: SQSC?.HEADER?.DB_CATALOG_PROC_NAME,
         readOnly: SQSC?.HEADER?.READ_ONLY === 'X',
         interfacePool: SQSC?.HEADER?.INTERFACE_POOL,
-        parameters: parameters.map((p) => ({
+        parameters: mapItems(parameters, (p) => ({
           position: p.POSITION,
           dbName: p.DB_NAME,
           direction: p.DIRECTION,
@@ -130,7 +130,7 @@ export const dbProcProxyHandler = createHandler<DbProcProxyLike, typeof sqsc>(
           ddicTable: p.DDIC_TABLE,
           ddicTableIsRo: p.DDIC_TABLE_IS_RO === 'X',
         })),
-        parameterTypes: parameterTypes.map((t) => ({
+        parameterTypes: mapItems(parameterTypes, (t) => ({
           paramPosition: t.PARAM_POSITION,
           compIndex: t.COMP_INDEX,
           dbCompName: t.DB_COMP_NAME,

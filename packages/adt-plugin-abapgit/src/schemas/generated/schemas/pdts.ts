@@ -65,6 +65,11 @@ export default {
             type: "asx:PdtsType",
             minOccurs: "0",
           },
+          {
+            name: "CONTAINER",
+            type: "asx:PdtsContainerType",
+            minOccurs: "0",
+          },
         ],
       },
     },
@@ -105,6 +110,21 @@ export default {
             minOccurs: "0",
           },
         ],
+      },
+    },
+    {
+      name: "PdtsContainerType",
+      sequence: {
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
+      },
+      anyAttribute: {
+        processContents: "lax",
       },
     },
     {

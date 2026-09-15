@@ -6,7 +6,7 @@
  */
 
 import { odso } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type DataStoreObjectLike = {
   name: string;
@@ -26,6 +26,9 @@ type DataStoreObjectLike = {
     version?: string;
     keyflag?: string;
   }>;
+  navigation?: unknown;
+  indexes?: unknown;
+  indexIobj?: unknown;
 };
 
 export const dataStoreObjectHandler = createHandler<
@@ -37,33 +40,39 @@ export const dataStoreObjectHandler = createHandler<
   serializer: 'LCL_OBJECT_ODSO',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    ODSO: {
-      ODSOBJECT: String(obj.name ?? '').toUpperCase(),
-      ODSOTYPE: obj.odsotype,
-      OBJVERS: obj.version ?? 'A',
-      ODSASIZCAT: obj.sizeCategory,
-      ODSADATCLS: obj.dataClass,
-      NOEDSFL: obj.noEdSfl,
-      KEY_NOT_UNIQUE: obj.keyNotUnique,
-      IMOFL: obj.imofl,
-      PLANNING_MODE: obj.planningMode,
-      ACTVIEWGEN: obj.actViewGen,
-      TXTLG: obj.description,
-      TXTSH: obj.shortText,
-    },
-    INFOOBJECTS: obj.infoObjects?.length
-      ? {
-          BAPI6116IO: obj.infoObjects.map((io) => ({
-            INFOBJECT: io.infoobject,
-            OBJVERS: io.version,
-            KEYFLAG: io.keyflag,
-          })),
-        }
-      : undefined,
-  }),
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: DataStoreObjectLike }).data ?? raw;
+    return {
+      ODSO: {
+        ODSOBJECT: String(obj.name ?? '').toUpperCase(),
+        ODSOTYPE: obj.odsotype,
+        OBJVERS: obj.version ?? 'A',
+        ODSASIZCAT: obj.sizeCategory,
+        ODSADATCLS: obj.dataClass,
+        NOEDSFL: obj.noEdSfl,
+        KEY_NOT_UNIQUE: obj.keyNotUnique,
+        IMOFL: obj.imofl,
+        PLANNING_MODE: obj.planningMode,
+        ACTVIEWGEN: obj.actViewGen,
+        TXTLG: obj.description,
+        TXTSH: obj.shortText,
+      },
+      INFOOBJECTS: obj.infoObjects?.length
+        ? {
+            BAPI6116IO: obj.infoObjects.map((io) => ({
+              INFOBJECT: io.infoobject,
+              OBJVERS: io.version,
+              KEYFLAG: io.keyflag,
+            })),
+          }
+        : undefined,
+      NAVIGATION: obj.navigation,
+      INDEXES: obj.indexes,
+      INDEX_IOBJ: obj.indexIobj,
+    };
+  },
 
-  fromAbapGit: ({ ODSO, INFOOBJECTS }) => {
+  fromAbapGit: ({ ODSO, INFOOBJECTS, NAVIGATION, INDEXES, INDEX_IOBJ }) => {
     const infoObjects = normalizeItems(INFOOBJECTS?.BAPI6116IO);
     return {
       name: (ODSO?.ODSOBJECT ?? '').toUpperCase(),
@@ -78,11 +87,14 @@ export const dataStoreObjectHandler = createHandler<
       imofl: ODSO?.IMOFL,
       planningMode: ODSO?.PLANNING_MODE,
       actViewGen: ODSO?.ACTVIEWGEN,
-      infoObjects: infoObjects.map((io) => ({
+      infoObjects: mapItems(infoObjects, (io) => ({
         infoobject: io.INFOBJECT,
         version: io.OBJVERS,
         keyflag: io.KEYFLAG,
       })),
+      navigation: NAVIGATION,
+      indexes: INDEXES,
+      indexIobj: INDEX_IOBJ,
     };
   },
 });

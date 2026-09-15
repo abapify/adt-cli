@@ -1,29 +1,14 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:complexType name="WdccOtrTextItemType">
     <xs:all>
-      <xs:element name="NAME" type="xs:string" minOccurs="0" />
-      <xs:element name="TEXT" type="xs:string" minOccurs="0" />
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
 
-  <xs:complexType name="WdccType">
-    <xs:sequence>
-      <xs:element name="OBJECT_NAME" type="xs:string" minOccurs="0" />
-      <xs:element name="CONFIG_ID" type="xs:string" minOccurs="0" />
-      <xs:element name="CONFIG_TYPE" type="xs:string" minOccurs="0" />
-      <xs:element name="CONFIG_VAR" type="xs:string" minOccurs="0" />
-      <xs:element name="WDA_COMPONENT" type="xs:string" minOccurs="0" />
-      <xs:element name="PARENT" type="xs:string" minOccurs="0" />
-      <xs:element name="RELID" type="xs:string" minOccurs="0" />
-      <xs:element name="OTR_TEXT" minOccurs="0" type="OtrTextType">
-        </xs:element>
-      <xs:element name="DESCR_LANG" type="xs:string" minOccurs="0" />
-    </xs:sequence>
-  </xs:complexType>
 <xs:complexType name="OtrTextType">
           <xs:sequence>
-            <xs:element name="item" type="WdccOtrTextItemType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="item" type="WdccOtrTextItemType" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:schema>

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
 
   
   <xs:include schemaLocation="types/ensc.xsd" />
@@ -12,11 +12,8 @@
           <xs:sequence>
             <xs:element name="SHORTTEXT" type="xs:string" minOccurs="0" />
                   
-            <xs:element name="ENH_SPOTS" minOccurs="0" type="EnhSpotsType">
-                    </xs:element>
-                  
-            <xs:element name="COMP_ENH_SPOTS" minOccurs="0" type="EnhSpotsType">
-                    </xs:element>
+            <xs:element name="ENH_SPOTS" minOccurs="0" type="asx:EnhSpotsType"/>
+            <xs:element name="COMP_ENH_SPOTS" minOccurs="0" type="asx:EnhSpotsType"/>
                 
           </xs:sequence>
         </xs:extension>
@@ -27,9 +24,4 @@
   
   <xs:import schemaLocation="abapgit.xsd" />
 
-<xs:complexType name="EnhSpotsType">
-                      <xs:sequence>
-                        <xs:element name="item" type="asx:EnscEnhSpotItemType" minOccurs="0" maxOccurs="unbounded" />
-                      </xs:sequence>
-                    </xs:complexType>
-                  </xs:schema>
+</xs:schema>

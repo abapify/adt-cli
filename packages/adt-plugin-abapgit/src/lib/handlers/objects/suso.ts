@@ -27,7 +27,8 @@ export const authObjectHandler = createHandler<AuthObjectLike, typeof suso>(
     serializer: 'LCL_OBJECT_SUSO',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = (raw as { data?: AuthObjectLike }).data ?? raw;
       const name = String(obj.name ?? '').toUpperCase();
       const fields = obj.fields ?? [];
       return {

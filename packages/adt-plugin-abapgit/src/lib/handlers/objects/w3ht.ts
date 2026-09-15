@@ -7,7 +7,7 @@
  */
 
 import { w3ht } from '../../../schemas/generated';
-import { createHandler, normalizeItems } from '../base';
+import { createHandler, normalizeItems, mapItems } from '../base';
 
 type W3TemplateLike = {
   name: string;
@@ -40,7 +40,7 @@ export const w3htHandler = createHandler<W3TemplateLike, typeof w3ht>('W3HT', {
     return {
       name: (NAME ?? '').toUpperCase(),
       text: TEXT,
-      params: params.map((p) => ({ name: p.NAME, value: p.VALUE })),
+      params: mapItems(params, (p) => ({ name: p.NAME, value: p.VALUE })),
     };
   },
 });

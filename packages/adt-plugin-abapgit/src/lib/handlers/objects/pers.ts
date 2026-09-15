@@ -27,32 +27,35 @@ export const personalizationHandler = createHandler<
   serializer: 'LCL_OBJECT_PERS',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    PERS: {
-      PERS_REG: {
-        item: [
-          {
-            PERS_KEY: String(obj.name ?? '').toUpperCase(),
-            ACCESS_CL: obj.accessClass,
-            DISTRIB_CL: obj.distribClass,
-            DIALOG_FB: obj.dialogFb,
-            COMPONENT: obj.component,
-            DATATYPE: obj.datatype,
-            TYPENAME: obj.typename,
-          },
-        ],
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: PersonalizationObjLike }).data ?? raw;
+    return {
+      PERS: {
+        PERS_REG: {
+          item: [
+            {
+              PERS_KEY: String(obj.name ?? '').toUpperCase(),
+              ACCESS_CL: obj.accessClass,
+              DISTRIB_CL: obj.distribClass,
+              DIALOG_FB: obj.dialogFb,
+              COMPONENT: obj.component,
+              DATATYPE: obj.datatype,
+              TYPENAME: obj.typename,
+            },
+          ],
+        },
+        PERS_REG_TEXT: {
+          item: [
+            {
+              LANG: isoToSapLang(obj.language),
+              PERS_KEY: String(obj.name ?? '').toUpperCase(),
+              TEXT: obj.description,
+            },
+          ],
+        },
       },
-      PERS_REG_TEXT: {
-        item: [
-          {
-            LANG: isoToSapLang(obj.language),
-            PERS_KEY: String(obj.name ?? '').toUpperCase(),
-            TEXT: obj.description,
-          },
-        ],
-      },
-    },
-  }),
+    };
+  },
 
   fromAbapGit: ({ PERS }) => {
     const reg = normalizeItems(PERS?.PERS_REG?.item)[0];

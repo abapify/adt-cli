@@ -10,5 +10,6 @@ export type EctcSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+        [key: string]: unknown;
     };
 };

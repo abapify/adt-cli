@@ -24,18 +24,21 @@ export const authFieldHandler = createHandler<AuthFieldLike, typeof auth>(
     serializer: 'LCL_OBJECT_AUTH',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      AUTHX: {
-        FIELDNAME: String(obj.name ?? '').toUpperCase(),
-        ROLLNAME: obj.rollName,
-        AUTHCLASS: obj.authClass,
-        DATATYPE: obj.datatype,
-        LENG: obj.length,
-        OUTPUTLEN: obj.outputLength,
-        LOWERCASE: obj.lowercase ? 'X' : undefined,
-        LNG: obj.lng,
-      },
-    }),
+    toAbapGit: (raw) => {
+      const obj = (raw as { data?: AuthFieldLike }).data ?? raw;
+      return {
+        AUTHX: {
+          FIELDNAME: String(obj.name ?? '').toUpperCase(),
+          ROLLNAME: obj.rollName,
+          AUTHCLASS: obj.authClass,
+          DATATYPE: obj.datatype,
+          LENG: obj.length,
+          OUTPUTLEN: obj.outputLength,
+          LOWERCASE: obj.lowercase ? 'X' : undefined,
+          LNG: obj.lng,
+        },
+      };
+    },
 
     fromAbapGit: ({ AUTHX }) => ({
       name: (AUTHX?.FIELDNAME ?? '').toUpperCase(),

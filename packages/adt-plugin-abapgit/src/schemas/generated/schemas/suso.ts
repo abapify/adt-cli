@@ -173,23 +173,6 @@ export default {
       },
     },
     {
-      name: "SusoType",
-      sequence: {
-        element: [
-          {
-            name: "TOBJ",
-            type: "SusoTobjType",
-            minOccurs: "0",
-          },
-          {
-            name: "TOBJT",
-            type: "SusoTobjtType",
-            minOccurs: "0",
-          },
-        ],
-      },
-    },
-    {
       name: "AbapType",
       sequence: {
         element: [

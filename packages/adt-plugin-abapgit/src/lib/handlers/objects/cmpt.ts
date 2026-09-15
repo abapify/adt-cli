@@ -1,5 +1,9 @@
 /**
  * CMPT (Composite Template) handler for abapGit format
+ *
+ * Upstream serializes the full IF_CMP_TEMPLATE_DB=>TYP_TEMPLATE
+ * structure under CMPT — HEADER plus body fields (STR_BODY etc.)
+ * that pass through lax.
  */
 
 import { cmpt } from '../../../schemas/generated';
@@ -8,6 +12,8 @@ import { createHandler } from '../base';
 type CompositeTemplateLike = {
   name: string;
   description?: string;
+  /** Additional CMPT children (STR_BODY etc.) preserved verbatim */
+  extra?: Record<string, unknown>;
 };
 
 export const compositeTemplateHandler = createHandler<
@@ -19,17 +25,25 @@ export const compositeTemplateHandler = createHandler<
   serializer: 'LCL_OBJECT_CMPT',
   serializer_version: 'v1.0.0',
 
-  toAbapGit: (obj) => ({
-    CMPT: {
-      HEADER: {
-        NAME: String(obj.name ?? '').toUpperCase(),
-        DESCRIPTION: obj.description,
+  toAbapGit: (raw) => {
+    const obj = (raw as { data?: CompositeTemplateLike }).data ?? raw;
+    return {
+      CMPT: {
+        HEADER: {
+          NAME: String(obj.name ?? '').toUpperCase(),
+          DESCRIPTION: obj.description,
+        },
+        ...(obj.extra ?? {}),
       },
-    },
-  }),
+    };
+  },
 
-  fromAbapGit: ({ CMPT }) => ({
-    name: (CMPT?.HEADER?.NAME ?? '').toUpperCase(),
-    description: CMPT?.HEADER?.DESCRIPTION,
-  }),
+  fromAbapGit: ({ CMPT }) => {
+    const { HEADER, ...rest } = CMPT ?? {};
+    return {
+      name: (HEADER?.NAME ?? '').toUpperCase(),
+      description: HEADER?.DESCRIPTION,
+      extra: rest,
+    };
+  },
 });
