@@ -173,3 +173,8 @@ __pycache__/
 .agents/skills/.gc-skill-ownership.json
 .agents/skills/adt-tools
 .agents/skills/core.gc-*
+
+# Dev TLS material — private keys must never be committed.
+# (already-tracked fixture PEMs are unaffected)
+*.pem
+*.key

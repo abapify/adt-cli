@@ -6,6 +6,11 @@
 #   cp .env.mcp.example .env.mcp     # or create your own
 #   docker compose -f docker-compose.mcp.yaml --env-file .env.mcp up
 #
+# Do NOT copy .env.example to a root .env for compose — its TLS paths are
+# relative to packages/adt-mcp for the dev serve target and would be
+# injected as container paths, breaking startup. Always use --env-file
+# .env.mcp (above) which replaces .env interpolation entirely.
+#
 # The stack ships one required service (`adt-mcp`) and one optional,
 # commented-out example (`oauth2-proxy`) showing how to front the MCP
 # server with an OIDC reverse proxy (Okta, Entra ID, Cognito, …) and
@@ -40,6 +45,10 @@ services:
       MCP_TLS_CERT: '${MCP_TLS_CERT:-/app/certs/cert.pem}'
       # TLS name the healthcheck verifies (match the cert's DNS SAN).
       MCP_HEALTH_HOST: '${MCP_HEALTH_HOST:-localhost}'
+      # Optional CA bundle the healthcheck also trusts — set when the
+      # server cert is a leaf issued by a private CA (mount the CA under
+      # /app/certs and point this at it).
+      MCP_HEALTH_CA: '${MCP_HEALTH_CA:-}'
       MCP_TLS_KEY: '${MCP_TLS_KEY:-/app/certs/key.pem}'
       # ── auth: pick exactly one mode ──────────────────────────────
       # 1) bearer — shared secret. Simplest for single-user setups.
@@ -69,7 +78,7 @@ services:
           'CMD',
           'node',
           '-e',
-          "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');const p=process.env.MCP_TLS_CERT;let ca=t.rootCertificates;if(p&&f.existsSync(p))ca=[...ca,f.readFileSync(p,'utf8')];h.get({host:'127.0.0.1',servername:process.env.MCP_HEALTH_HOST||'localhost',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
+          "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');let ca=[...t.rootCertificates];for(const p of[process.env.MCP_TLS_CERT,process.env.MCP_HEALTH_CA]){if(p&&f.existsSync(p))ca.push(f.readFileSync(p,'utf8'))}h.get({host:'127.0.0.1',servername:process.env.MCP_HEALTH_HOST||'localhost',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
         ]
       interval: 30s
       timeout: 5s

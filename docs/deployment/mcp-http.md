@@ -29,16 +29,20 @@ TLS material is mandatory — mount a certificate and key into the container:
 
 ```bash
 openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
-  -keyout key.pem -out cert.pem -days 1 -nodes \
+  -keyout key.pem -out cert.pem -days 365 -nodes \
   -subj "/CN=localhost" \
   -addext "subjectAltName=IP:127.0.0.1,DNS:localhost"
+
+# The container runs as uid 10001 — the mounted key must be readable by it
+# (openssl writes key.pem mode 0600). For a throwaway dev key:
+chmod 644 key.pem
 
 docker run --rm -p 127.0.0.1:3000:3000 \
   -v "$PWD/cert.pem:/app/cert.pem:ro" \
   -v "$PWD/key.pem:/app/key.pem:ro" \
   -e MCP_TLS_CERT=/app/cert.pem \
   -e MCP_TLS_KEY=/app/key.pem \
-  -e MCP_AUTH_TOKEN=change-me \
+  -e MCP_AUTH_TOKEN="$(openssl rand -hex 32)" \
   -e MCP_ALLOWED_HOSTS=localhost,127.0.0.1 \
   ghcr.io/abapify/adt-mcp:latest
 ```
@@ -54,9 +58,11 @@ git clone https://github.com/abapify/adt-cli.git && cd adt-cli
 # Generate the TLS pair into ./certs — compose mounts it at /app/certs.
 mkdir -p certs
 openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
-  -keyout certs/key.pem -out certs/cert.pem -days 1 -nodes \
+  -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes \
   -subj "/CN=localhost" \
   -addext "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:adt-mcp"
+# The container runs as uid 10001 — make the mounted key readable:
+chmod 644 certs/key.pem
 
 # Env file — the shipped .env.mcp.example carries the container paths
 # (/app/certs/...); a repo-root .env must NOT be used here since its
@@ -129,10 +135,13 @@ generate a short-lived self-signed certificate, for example:
 
 ```bash
 openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
-  -keyout key.pem -out cert.pem -days 1 -nodes \
+  -keyout key.pem -out cert.pem -days 365 -nodes \
   -subj "/CN=localhost" \
   -addext "subjectAltName=IP:127.0.0.1,DNS:localhost"
 ```
+
+Repo-root `key.pem`/`cert.pem` files are covered by `.gitignore` — the
+private key cannot be committed accidentally.
 
 ## Authentication modes
 

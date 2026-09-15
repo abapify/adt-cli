@@ -17,6 +17,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  statSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
@@ -46,15 +47,25 @@ function isExecutable(path: string): boolean {
   }
 }
 
+/** Directory is not writable by group/other — only the owner can plant binaries. */
+function isTrustedDir(dir: string): boolean {
+  try {
+    return (statSync(dir).mode & 0o022) === 0;
+  } catch {
+    return false;
+  }
+}
+
 function* opensslCandidates(): Generator<string> {
   const override = process.env.ADT_OPENSSL_BIN;
   if (override) yield override;
   yield* OPENSSL_CANDIDATES;
-  // PATH scan covers non-standard installs (e.g. Nix profiles). The resolved
-  // absolute path — never a bare command name — is passed to execFileSync.
+  // PATH scan covers non-standard installs (e.g. Nix profiles). Directories
+  // writable by group/other are skipped — another user could otherwise plant
+  // a shadowing openssl there (SonarCloud S4036).
   const ext = process.platform === 'win32' ? '.exe' : '';
   for (const dir of (process.env.PATH ?? '').split(delimiter)) {
-    if (dir) yield join(dir, `openssl${ext}`);
+    if (dir && isTrustedDir(dir)) yield join(dir, `openssl${ext}`);
   }
 }
 

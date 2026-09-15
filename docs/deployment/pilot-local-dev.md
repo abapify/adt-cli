@@ -110,7 +110,9 @@ The agent calls `list_package_objects` and `atc_run` via the MCP server.
 
 ## Alternatively — run servers separately
 
-**MCP server only:**
+**MCP server only** — run these from the **repo root** (the `./cert.pem`
+paths below are relative to your shell's cwd, unlike Step 2's `.env`
+paths which are relative to `packages/adt-mcp/`):
 
 ```bash
 # With adt-config (cert.pem/key.pem generated per .env.example)

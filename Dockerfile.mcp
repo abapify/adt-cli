@@ -11,13 +11,16 @@
 #     --build-arg BUN_CONFIG_REGISTRY="$BUN_CONFIG_REGISTRY" \
 #     -t adt-mcp:local .
 #
-# Run (TLS material is mandatory — mount a cert and key):
+# Run (TLS material is mandatory — mount a cert and key). The container
+# runs as uid 10001, so the mounted key must be readable by it — e.g.
+# `chmod 644 key.pem` for a throwaway dev key, or group/owner permissions
+# for real key material:
 #   docker run --rm -p 3000:3000 \
 #     -v "$PWD/cert.pem:/app/cert.pem:ro" \
 #     -v "$PWD/key.pem:/app/key.pem:ro" \
 #     -e MCP_TLS_CERT=/app/cert.pem \
 #     -e MCP_TLS_KEY=/app/key.pem \
-#     -e MCP_AUTH_TOKEN=change-me \
+#     -e MCP_AUTH_TOKEN="$(openssl rand -hex 32)" \
 #     -e MCP_ALLOWED_HOSTS=localhost,127.0.0.1 \
 #     ghcr.io/abapify/adt-mcp:latest
 #
@@ -85,14 +88,19 @@ COPY --from=builder --chown=root:root --chmod=644 /build/package.json ./package.
 
 USER appuser
 
+# MCP_HEALTH_HOST is the TLS servername the healthcheck verifies — set it
+# to a DNS SAN on your certificate if it is not `localhost`.
+# MCP_HEALTH_CA optionally points at an extra CA bundle (container path)
+# the probe also trusts, for leaf certs issued by a private CA.
 ENV NODE_ENV=production \
     MCP_HOST=0.0.0.0 \
-    MCP_PORT=3000
+    MCP_PORT=3000 \
+    MCP_HEALTH_HOST=localhost
 
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');const p=process.env.MCP_TLS_CERT;let ca=t.rootCertificates;if(p&&f.existsSync(p))ca=[...ca,f.readFileSync(p,'utf8')];h.get({host:'127.0.0.1',servername:process.env.MCP_HEALTH_HOST||'localhost',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))" || exit 1
+  CMD node -e "const h=require('node:https'),t=require('node:tls'),f=require('node:fs');let ca=[...t.rootCertificates];for(const p of[process.env.MCP_TLS_CERT,process.env.MCP_HEALTH_CA]){if(p&&f.existsSync(p))ca.push(f.readFileSync(p,'utf8'))}h.get({host:'127.0.0.1',servername:process.env.MCP_HEALTH_HOST||'localhost',port:process.env.MCP_PORT||3000,path:'/healthz',ca},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))" || exit 1
 
 # Default CMD runs the Streamable HTTP entry-point. Override with
 # `docker run ... adt-mcp` to run the stdio transport instead.
