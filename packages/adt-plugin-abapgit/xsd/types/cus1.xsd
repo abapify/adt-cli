@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="Cus1ActhType">
+    <xs:all>
+      <xs:element name="ACT_ID" type="xs:string" minOccurs="0" />
+      <xs:element name="ACT_TYPE" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Cus1ActtItemType">
+    <xs:all>
+      <xs:element name="ACT_ID" type="xs:string" minOccurs="0" />
+      <xs:element name="SPRAS" type="xs:string" minOccurs="0" />
+      <xs:element name="TEXT" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Cus1Type">
+    <xs:sequence>
+      <xs:element name="ACTIVITY_HEADER" type="Cus1ActhType" minOccurs="0" />
+      <xs:element name="ACTIVITY_TITLE" minOccurs="0" type="ActivityTitleType">
+        </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="ActivityTitleType">
+          <xs:sequence>
+            <xs:element name="item" type="Cus1ActtItemType" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

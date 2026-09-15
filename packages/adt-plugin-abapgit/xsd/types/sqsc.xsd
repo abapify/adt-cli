@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SqscHeaderType">
+    <xs:all>
+      <xs:element name="DB_REPOSITORY_PACKAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_REPOSITORY_PROC_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_CATALOG_SCHEMA" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_CATALOG_PROC_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="READ_ONLY" type="xs:string" minOccurs="0"/>
+      <xs:element name="INTERFACE_POOL" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- Parameter row (ty_param_ui_s) -->
+  <xs:complexType name="SqscParamType">
+    <xs:all>
+      <xs:element name="POSITION" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DIRECTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="KIND" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_TABLE_TYPE_SCHEMA" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_TABLE_TYPE_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_TABLE_TYPE_IS_DDIC" type="xs:string" minOccurs="0"/>
+      <xs:element name="TRANSFER_TABLE_SCHEMA" type="xs:string" minOccurs="0"/>
+      <xs:element name="TRANSFER_TABLE_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_NAME_IS_RO" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDIC_TABLE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDIC_TABLE_IS_RO" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- PARAMETERS table -->
+  <xs:complexType name="SqscParamsType">
+    <xs:sequence>
+      <xs:element name="item" type="SqscParamType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Parameter type row (ty_param_type_ui_s) -->
+  <xs:complexType name="SqscParamTypeType">
+    <xs:all>
+      <xs:element name="PARAM_POSITION" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMP_INDEX" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_COMP_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_COMP_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_COMP_NAME_IS_RO" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DB_TYPE_TEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ABAP_TYPE_IS_RO" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDIC_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DDIC_TYPE_IS_RO" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- PARAMETER_TYPES table -->
+  <xs:complexType name="SqscParamTypesType">
+    <xs:sequence>
+      <xs:element name="item" type="SqscParamTypeType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SqscType">
+    <xs:sequence>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="HEADER" type="SqscHeaderType" minOccurs="0"/>
+      <xs:element name="PARAMETERS" type="SqscParamsType" minOccurs="0"/>
+      <xs:element name="PARAMETER_TYPES" type="SqscParamTypesType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

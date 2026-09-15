@@ -1,44 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
            xmlns:asx="http://www.sap.com/abapxml"
            elementFormDefault="unqualified">
 
-  <!-- Import ASX namespace -->
-  <xs:import namespace="http://www.sap.com/abapxml" schemaLocation="asx.xsd"/>
-
-  <!-- Include base abapGit types -->
-  <xs:include schemaLocation="abapgit.xsd"/>
-
-  <!-- Include FUGR types -->
   <xs:include schemaLocation="types/fugr.xsd"/>
 
-  <!-- Function group-specific values type -->
-  <xs:complexType name="FugrValuesType">
-    <xs:all>
-      <xs:element name="AREAT" type="xs:string" minOccurs="0"/>
-      <xs:element name="INCLUDES" type="FugrIncludesType" minOccurs="0"/>
-      <xs:element name="FUNCTIONS" type="FugrFunctionsType" minOccurs="0"/>
-    </xs:all>
-  </xs:complexType>
-
-  <!-- Function group-specific ABAP envelope -->
-  <xs:complexType name="FugrAbapType">
-    <xs:sequence>
-      <xs:element name="values" type="FugrValuesType"/>
-    </xs:sequence>
-    <xs:attribute name="version" type="xs:string" default="1.0"/>
-  </xs:complexType>
-
-  <!-- THE ONLY ROOT ELEMENT -->
-  <xs:element name="abapGit">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="abap" type="FugrAbapType"/>
-      </xs:sequence>
-      <xs:attribute name="version" type="xs:string" use="required"/>
-      <xs:attribute name="serializer" type="xs:string" use="required"/>
-      <xs:attribute name="serializer_version" type="xs:string" use="required"/>
+  <!-- Redefine AbapValuesType to include FUGR-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="AREAT" type="xs:string" minOccurs="0"/>
+                  <xs:element name="INCLUDES" type="asx:FugrIncludesType" minOccurs="0"/>
+                  <xs:element name="FUNCTIONS" type="asx:FugrFunctionsType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
     </xs:complexType>
-  </xs:element>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
 
 </xs:schema>

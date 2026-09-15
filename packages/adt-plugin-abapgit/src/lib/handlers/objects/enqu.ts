@@ -7,7 +7,7 @@
  */
 
 import { enqu } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type LockObjectLike = {
@@ -43,7 +43,9 @@ export const lockObjectHandler = createHandler<LockObjectLike, typeof enqu>(
     serializer: 'LCL_OBJECT_ENQU',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<LockObjectLike>(raw);
+
       const tables = obj.tables ?? [];
       const parameters = obj.parameters ?? [];
       return {
@@ -88,11 +90,6 @@ export const lockObjectHandler = createHandler<LockObjectLike, typeof enqu>(
     fromAbapGit: parseLockObjectFromAbapGit,
   },
 );
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 function parseEnquTable(t: {
   TABNAME?: string;
@@ -155,7 +152,7 @@ function parseLockObjectFromAbapGit({
     masterLanguage: sapLangToIso(DD25V?.DDLANGUAGE),
     baseTable: DD25V?.ROOTTAB,
     baseTableField: DD25V?.ROOTFIELD,
-    tables: tableItems.map(parseEnquTable),
-    parameters: paramItems.map(parseEnquParam),
+    tables: mapItems(tableItems, parseEnquTable),
+    parameters: mapItems(paramItems, parseEnquParam),
   };
 }

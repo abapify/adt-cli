@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FORM" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <FORM>
+    <item>
+     <FORM_HEADER>
+      <TDFORM>ZTEST_FORM</TDFORM>
+      <TDSPRAS>E</TDSPRAS>
+      <TDTEXT>Test SAPscript form</TDTEXT>
+      <TDFIRSTPAG>FIRST</TDFIRSTPAG>
+     </FORM_HEADER>
+     <PAGES>
+      <item>
+       <PAGENAME>FIRST</PAGENAME>
+       <NEXTPAGE>NEXT</NEXTPAGE>
+      </item>
+     </PAGES>
+    </item>
+   </FORM>
+  </asx:values>
+ </asx:abap>
+</abapGit>

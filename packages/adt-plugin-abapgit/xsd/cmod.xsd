@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+
+  
+  <xs:include schemaLocation="types/cmod.xsd" />
+
+  
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="MODACT" minOccurs="0" type="ModactType">
+                    </xs:element>
+                  
+            <xs:element name="MODTEXT" minOccurs="0" type="ModtextType">
+                    </xs:element>
+                  
+            <xs:element name="MODATTR" minOccurs="0" type="ModattrType">
+                    </xs:element>
+                
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  
+  <xs:import schemaLocation="abapgit.xsd" />
+
+<xs:complexType name="ModactType">
+                      <xs:sequence>
+                        <xs:element name="item" type="asx:CmodModactItemType" minOccurs="0" maxOccurs="unbounded" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  <xs:complexType name="ModtextType">
+                      <xs:sequence>
+                        <xs:element name="item" type="asx:CmodModTextItemType" minOccurs="0" maxOccurs="unbounded" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  <xs:complexType name="ModattrType">
+                      <xs:sequence>
+                        <xs:element name="item" type="asx:CmodModAttrItemType" minOccurs="0" maxOccurs="unbounded" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:schema>

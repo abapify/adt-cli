@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="UdmoDm40lType">
+    <xs:all>
+      <xs:element name="DMOID" type="xs:string" minOccurs="0"/>
+      <xs:element name="AS4LOCAL" type="xs:string" minOccurs="0"/>
+      <xs:element name="DMOTYPE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="UdmoEntityItemType">
+    <xs:all>
+      <xs:element name="DMOID" type="xs:string" minOccurs="0"/>
+      <xs:element name="ENTID" type="xs:string" minOccurs="0"/>
+      <xs:element name="AS4LOCAL" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="UdmoTextItemType">
+    <xs:all>
+      <xs:element name="SPRACHE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DMOID" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGBEZ" type="xs:string" minOccurs="0"/>
+      <xs:element name="AS4LOCAL" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+<xs:complexType name="UdmoEntitiesType">
+          <xs:sequence>
+            <xs:element name="item" type="UdmoEntityItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      <xs:complexType name="UdmoTextsType">
+          <xs:sequence>
+            <xs:element name="item" type="UdmoTextItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

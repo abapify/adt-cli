@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="FormHeaderType">
+    <xs:all>
+      <xs:element name="TDFORM" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDFIRSTPAG" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormTextHeaderType">
+    <xs:all>
+      <xs:element name="TDOBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDID" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSPRAS" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTITLE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDFORM" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDSTYLE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormPageItemType">
+    <xs:all>
+      <xs:element name="PAGENAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="NEXTPAGE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormWindowItemType">
+    <xs:all>
+      <xs:element name="WINDOW" type="xs:string" minOccurs="0"/>
+      <xs:element name="PAGENAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormParagraphItemType">
+    <xs:all>
+      <xs:element name="TDPARGRAPH" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormStringItemType">
+    <xs:all>
+      <xs:element name="TDSTRING" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDTEXT" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDMARK" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormTabItemType">
+    <xs:all>
+      <xs:element name="TDPARGRAPH" type="xs:string" minOccurs="0"/>
+      <xs:element name="TDPOSITION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormPageWindowItemType">
+    <xs:all>
+      <xs:element name="TDWINDOW" type="xs:string" minOccurs="0"/>
+      <xs:element name="PAGENAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="FormPagesType">
+    <xs:sequence>
+      <xs:element name="item" type="FormPageItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FormWindowsType">
+    <xs:sequence>
+      <xs:element name="item" type="FormWindowItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FormPageWindowsType">
+    <xs:sequence>
+      <xs:element name="item" type="FormPageWindowItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FormParagraphsType">
+    <xs:sequence>
+      <xs:element name="item" type="FormParagraphItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FormStringsType">
+    <xs:sequence>
+      <xs:element name="item" type="FormStringItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FormTabsType">
+    <xs:sequence>
+      <xs:element name="item" type="FormTabItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FormDataType">
+    <xs:sequence>
+      <xs:element name="FORM_HEADER" type="FormHeaderType" minOccurs="0"/>
+      <xs:element name="TEXT_HEADER" type="FormTextHeaderType" minOccurs="0"/>
+      <xs:element name="ORIG_LANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="PAGES" type="FormPagesType" minOccurs="0"/>
+      <xs:element name="WINDOWS" type="FormWindowsType" minOccurs="0"/>
+      <xs:element name="PAGE_WINDOWS" type="FormPageWindowsType" minOccurs="0"/>
+      <xs:element name="PARAGRAPHS" type="FormParagraphsType" minOccurs="0"/>
+      <xs:element name="STRINGS" type="FormStringsType" minOccurs="0"/>
+      <xs:element name="TABS" type="FormTabsType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- FORM element: table of FormDataType rows -->
+  <xs:complexType name="FormTableType">
+    <xs:sequence>
+      <xs:element name="item" type="FormDataType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

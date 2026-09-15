@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="Cus2AtrhType">
+    <xs:all>
+      <xs:element name="ATTR_ID" type="xs:string" minOccurs="0" />
+      <xs:element name="ATTR_TYPE" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Cus2AtrtItemType">
+    <xs:all>
+      <xs:element name="ATTR_ID" type="xs:string" minOccurs="0" />
+      <xs:element name="SPRAS" type="xs:string" minOccurs="0" />
+      <xs:element name="TEXT" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Cus2Type">
+    <xs:sequence>
+      <xs:element name="HEADER" type="Cus2AtrhType" minOccurs="0" />
+      <xs:element name="TITLES" minOccurs="0" type="TitlesType">
+        </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="TitlesType">
+          <xs:sequence>
+            <xs:element name="item" type="Cus2AtrtItemType" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

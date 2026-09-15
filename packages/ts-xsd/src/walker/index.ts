@@ -760,6 +760,64 @@ function isArray(item: { maxOccurs?: number | string | 'unbounded' }): boolean {
 }
 
 // =============================================================================
+// Wildcard (xs:any) Support
+// =============================================================================
+
+/**
+ * Check whether a complexType permits wildcard child elements (xs:any).
+ * Handles sequence/choice/all, nested groups, group references,
+ * and complexContent extension/restriction (including base types).
+ */
+export function hasWildcard(ct: ComplexTypeLike, schema: SchemaLike): boolean {
+  const seenTypes = new Set<ComplexTypeLike>();
+  const seenGroupRefs = new Set<string>();
+
+  const groupsHaveAny = (...groups: (GroupLike | undefined)[]): boolean =>
+    groups.some(groupHasAny);
+
+  function namedGroupHasAny(ref: string | undefined): boolean {
+    if (!ref || seenGroupRefs.has(ref)) return false;
+    seenGroupRefs.add(ref);
+    const named = findGroup(stripNsPrefix(ref), schema);
+    if (!named) return false;
+    return groupsHaveAny(named.sequence, named.choice, named.all);
+  }
+
+  function groupHasAny(group: GroupLike | undefined): boolean {
+    if (!group) return false;
+    if (group.any && group.any.length > 0) return true;
+    if (
+      [...(group.sequence ?? []), ...(group.choice ?? [])].some(groupHasAny)
+    ) {
+      return true;
+    }
+    return (group.group ?? []).some((ref) => namedGroupHasAny(ref.ref));
+  }
+
+  function extHasAny(current: ComplexTypeLike): boolean {
+    const ext =
+      current.complexContent?.extension ?? current.complexContent?.restriction;
+    if (!ext) return false;
+    if (groupsHaveAny(ext.sequence, ext.choice, ext.all)) return true;
+    if (namedGroupHasAny(ext.group?.ref)) return true;
+    if (!ext.base) return false;
+    const baseEntry = findComplexType(stripNsPrefix(ext.base), schema);
+    return baseEntry ? visit(baseEntry.ct) : false;
+  }
+
+  function visit(current: ComplexTypeLike): boolean {
+    if (seenTypes.has(current)) return false;
+    seenTypes.add(current);
+    if (groupsHaveAny(current.sequence, current.choice, current.all)) {
+      return true;
+    }
+    return extHasAny(current) || namedGroupHasAny(current.group?.ref);
+  }
+
+  return visit(ct);
+}
+
+// =============================================================================
 // Substitution Group Support
 // =============================================================================
 

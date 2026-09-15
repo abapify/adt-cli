@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="DoctHeadType">
+    <xs:all>
+      <xs:element name="TDOBJECT" type="xs:string" minOccurs="0" />
+      <xs:element name="TDNAME" type="xs:string" minOccurs="0" />
+      <xs:element name="TDID" type="xs:string" minOccurs="0" />
+      <xs:element name="TDSPRAS" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="DoctLineItemType">
+    <xs:all>
+      <xs:element name="TDFORMAT" type="xs:string" minOccurs="0" />
+      <xs:element name="TDLINE" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="DoctLongtextItemType">
+    <xs:sequence>
+      <xs:element name="DOKIL" minOccurs="0" type="DokilType">
+        </xs:element>
+      <xs:element name="HEAD" type="DoctHeadType" minOccurs="0" />
+      <xs:element name="LINES" minOccurs="0" type="LinesType">
+        </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="DokilType">
+          <xs:all>
+            <xs:element name="ID" type="xs:string" minOccurs="0" />
+            <xs:element name="OBJECT" type="xs:string" minOccurs="0" />
+            <xs:element name="LANGU" type="xs:string" minOccurs="0" />
+            <xs:element name="TYP" type="xs:string" minOccurs="0" />
+          </xs:all>
+        </xs:complexType>
+      <xs:complexType name="LinesType">
+          <xs:sequence>
+            <xs:element name="item" type="DoctLineItemType" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="WdcaOutlineType">
+    <xs:all>
+      <xs:element name="CONFIG_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONFIG_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONFIG_VAR" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="WdcaDataItemType">
+    <xs:all>
+      <xs:element name="CONFIG_ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONFIG_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONFIG_VAR" type="xs:string" minOccurs="0"/>
+      <xs:element name="COMPNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONTENT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+<xs:complexType name="DataType">
+          <xs:sequence>
+            <xs:element name="item" type="WdcaDataItemType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

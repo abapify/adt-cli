@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!--
+    Generic OBJSL-driven objects (zcl_abapgit_objects_generic).
+    Each table listed in OBJSL for the object type serializes as an
+    element named after the table, containing <item> rows with the
+    table's DDIC fields. The table list is SAP runtime metadata, so
+    the payload is a wildcard.
+  -->
+  <xs:complexType name="ObjslValuesType">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

@@ -1,5 +1,5 @@
 import { bdef } from '../../../schemas/generated';
-import { createHandler, type SerializedFile } from '../base';
+import { createHandler, type SerializedFile, unwrapData } from '../base';
 import { affFromAffJson } from '../source-resolver';
 
 type DesdLike = {
@@ -15,9 +15,12 @@ export const externalSchemaHandler = createHandler<DesdLike, typeof bdef>(
     version: 'v1.0.0',
     serializer: 'LCL_OBJECT_DESD',
     serializer_version: 'v1.0.0',
-    toAbapGit: (obj) => ({
-      SKEY: { TYPE: 'DESD', NAME: String(obj?.name ?? '').toUpperCase() },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<DesdLike>(raw);
+      return {
+        SKEY: { TYPE: 'DESD', NAME: String(obj?.name ?? '').toUpperCase() },
+      };
+    },
     fromAffJson: (json) => affFromAffJson(json, ''),
     async serialize(object, ctx): Promise<SerializedFile[]> {
       const header = {

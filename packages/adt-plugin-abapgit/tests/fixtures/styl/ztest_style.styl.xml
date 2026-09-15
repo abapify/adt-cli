@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abapGit
+  version="v1.0.0"
+  serializer="LCL_OBJECT_STYL"
+  serializer_version="v1.0.0"
+>
+  <asx:abap
+    xmlns:asx="http://www.sap.com/abapxml"
+    version="1.0"
+  >
+    <asx:values>
+      <STYLE>
+        <HEADER>
+          <TDSTYLE>ZTEST_STYLE</TDSTYLE>
+          <TDSPRAS>E</TDSPRAS>
+          <TDPRINTER>LP01</TDPRINTER>
+          <TDTEXT>Test style</TDTEXT>
+          <TDFIRSTPAR>PA</TDFIRSTPAR>
+        </HEADER>
+        <PARAGRAPHS>
+          <item>
+            <TDPARGRAPH>PA</TDPARGRAPH>
+            <TDTEXT>Standard paragraph</TDTEXT>
+            <TDPJUSTIFY>L</TDPJUSTIFY>
+          </item>
+        </PARAGRAPHS>
+        <STRINGS>
+          <item>
+            <TDSTRING>S1</TDSTRING>
+            <TDTEXT>Character string</TDTEXT>
+            <TDMARK>X</TDMARK>
+          </item>
+        </STRINGS>
+        <TABS>
+          <item>
+            <TDPARGRAPH>PA</TDPARGRAPH>
+            <TDPOSITION>10.00</TDPOSITION>
+          </item>
+        </TABS>
+      </STYLE>
+    </asx:values>
+  </asx:abap>
+</abapGit>

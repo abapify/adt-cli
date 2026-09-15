@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="UcsaHeaderType">
+    <xs:all>
+      <xs:element name="ID" type="xs:string" minOccurs="0"/>
+      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="UcsaType">
+    <xs:sequence>
+      <xs:element name="HEADER" type="UcsaHeaderType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

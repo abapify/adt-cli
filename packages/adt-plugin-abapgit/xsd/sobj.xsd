@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="types/objsl.xsd"/>
+
+  <!-- Redefine AbapValuesType to include SOBJ-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

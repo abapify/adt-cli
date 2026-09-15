@@ -2,8 +2,9 @@
  * Deserializer tests - verify fromAbapGit mapping
  */
 
-import { describe, it, expect } from 'vitest';
-import { deserialize } from '../src/lib/deserializer';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { deserialize } from '../../src/lib/deserializer.ts';
 import type { FileTree } from '@abapify/adt-plugin';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -85,7 +86,7 @@ function createMockFileTree(fixturesDir: string): FileTree {
 const mockClient = {} as any;
 
 describe('deserializer', () => {
-  const fixturesDir = path.join(__dirname, 'fixtures');
+  const fixturesDir = path.join(import.meta.dirname, '..', 'fixtures');
 
   it('should deserialize CLAS from fixture', async () => {
     // Create FileTree with just the clas fixture
@@ -96,10 +97,10 @@ describe('deserializer', () => {
       objects.push(obj);
     }
 
-    expect(objects).toHaveLength(1);
-    expect(objects[0].name).toBe('ZCL_AGE_SAMPLE_CLASS');
+    assert.strictEqual(objects.length, 1);
+    assert.strictEqual(objects[0].name, 'ZCL_AGE_SAMPLE_CLASS');
     // kind returns human-readable name, not type code
-    expect(objects[0].kind).toBe('Class');
+    assert.strictEqual(objects[0].kind, 'Class');
   });
 
   it('should deserialize INTF from fixture', async () => {
@@ -110,9 +111,9 @@ describe('deserializer', () => {
       objects.push(obj);
     }
 
-    expect(objects).toHaveLength(1);
-    expect(objects[0].name).toBe('ZIF_AGE_TEST');
-    expect(objects[0].kind).toBe('Interface');
+    assert.strictEqual(objects.length, 1);
+    assert.strictEqual(objects[0].name, 'ZIF_AGE_TEST');
+    assert.strictEqual(objects[0].kind, 'Interface');
   });
 
   it('should deserialize DEVC from fixture', async () => {
@@ -123,10 +124,10 @@ describe('deserializer', () => {
       objects.push(obj);
     }
 
-    expect(objects).toHaveLength(1);
+    assert.strictEqual(objects.length, 1);
     // DEVC name comes from filename (uppercase) since it's not in XML
-    expect(objects[0].name).toBe('PACKAGE');
-    expect(objects[0].kind).toBe('Package');
+    assert.strictEqual(objects[0].name, 'ZTEST_PKG');
+    assert.strictEqual(objects[0].kind, 'Package');
   });
 
   it('should deserialize multiple objects from mixed fixtures', async () => {
@@ -139,8 +140,8 @@ describe('deserializer', () => {
 
     // Should have CLAS, INTF, DEVC (DOMA and DTEL don't have handlers yet)
     const kinds = objects.map((o) => o.kind);
-    expect(kinds).toContain('Class');
-    expect(kinds).toContain('Interface');
-    expect(kinds).toContain('Package');
+    assert.ok(kinds.includes('Class'));
+    assert.ok(kinds.includes('Interface'));
+    assert.ok(kinds.includes('Package'));
   });
 });

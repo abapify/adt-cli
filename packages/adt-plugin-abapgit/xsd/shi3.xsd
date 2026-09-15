@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/shi3.xsd"/>
+
+  <!-- Redefine AbapValuesType to include SHI3-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="TREE_HEAD" type="asx:Shi3TreeHeadType" minOccurs="0" />
+                  
+            <xs:element name="TREE_TITLES" type="asx:Shi3TreeTitlesType" minOccurs="0" />
+                  
+            <xs:element name="TREE_NODES" type="asx:Shi3TreeNodesType" minOccurs="0" />
+                  
+            <xs:element name="TREE_REFS" type="asx:Shi3AnyTableType" minOccurs="0" />
+                  
+            <xs:element name="TREE_TEXTS" type="asx:Shi3AnyTableType" minOccurs="0" />
+                
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

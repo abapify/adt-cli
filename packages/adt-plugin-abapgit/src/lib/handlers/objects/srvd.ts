@@ -16,7 +16,7 @@
  */
 
 import { srvd } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import {
   serializeDualFormat,
   affGetSource,
@@ -44,12 +44,15 @@ export const serviceDefinitionHandler = createHandler<SrvdLike, typeof srvd>(
     serializer: 'LCL_OBJECT_SRVD',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SKEY: {
-        TYPE: 'SRVD',
-        NAME: String(obj?.name ?? '').toUpperCase(),
-      },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<SrvdLike>(raw);
+      return {
+        SKEY: {
+          TYPE: 'SRVD',
+          NAME: String(obj?.name ?? '').toUpperCase(),
+        },
+      };
+    },
 
     getSource: affGetSource,
     fromAbapGit: ({ SKEY }) => affFromAbapGit(SKEY),

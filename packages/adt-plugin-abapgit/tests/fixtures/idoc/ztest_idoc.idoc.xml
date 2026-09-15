@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abapGit
+  version="v1.0.0"
+  serializer="LCL_OBJECT_IDOC"
+  serializer_version="v1.0.0"
+>
+  <asx:abap
+    xmlns:asx="http://www.sap.com/abapxml"
+    version="1.0"
+  >
+    <asx:values>
+      <IDOC>
+        <ATTRIBUTES>
+          <IDOCTYP>ZTEST_IDOC</IDOCTYP>
+          <DESCRP>Test IDoc type</DESCRP>
+          <RELEASED>X</RELEASED>
+          <APPLREL>46C</APPLREL>
+        </ATTRIBUTES>
+        <T_SYNTAX>
+          <EDI_IAPI02>
+            <NR>0000</NR>
+            <SEGTYP>ZTEST_SEG1</SEGTYP>
+            <PARSEG></PARSEG>
+            <PARPNO>0000</PARPNO>
+            <PARFLG></PARFLG>
+            <MUSTFL>X</MUSTFL>
+          </EDI_IAPI02>
+          <EDI_IAPI02>
+            <NR>0001</NR>
+            <SEGTYP>ZTEST_SEG2</SEGTYP>
+            <PARSEG>0000</PARSEG>
+            <PARPNO>0001</PARPNO>
+            <PARFLG>X</PARFLG>
+            <MUSTFL></MUSTFL>
+          </EDI_IAPI02>
+        </T_SYNTAX>
+      </IDOC>
+    </asx:values>
+  </asx:abap>
+</abapGit>

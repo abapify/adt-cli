@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/odso.xsd"/>
+
+  <!-- Redefine AbapValuesType to include ODSO-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+          <xs:element name="ODSO" type="asx:OdsoDetailsType" minOccurs="0"/>
+          <xs:element name="INFOOBJECTS" type="asx:OdsoInfoObjectsType" minOccurs="0"/>
+          <xs:element name="NAVIGATION" type="asx:OdsoAnyTableType" minOccurs="0"/>
+          <xs:element name="INDEXES" type="asx:OdsoAnyTableType" minOccurs="0"/>
+          <xs:element name="INDEX_IOBJ" type="asx:OdsoAnyTableType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

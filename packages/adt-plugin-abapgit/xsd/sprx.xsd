@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+
+  
+  <xs:include schemaLocation="types/sprx.xsd" />
+
+  
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="PROXY_HEADER" minOccurs="0" type="ProxyHeaderType">
+                    </xs:element>
+                  
+            <xs:element name="PROXY_DATA" minOccurs="0" type="ProxyDataType">
+                    </xs:element>
+                
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  
+  <xs:import schemaLocation="abapgit.xsd" />
+
+<xs:complexType name="ProxyHeaderType">
+                      <xs:sequence>
+                        <xs:element name="item" type="asx:SprxHeaderItemType" minOccurs="0" maxOccurs="unbounded" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  <xs:complexType name="ProxyDataType">
+                      <xs:sequence>
+                        <xs:element name="item" type="asx:SprxDataItemType" minOccurs="0" maxOccurs="unbounded" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:schema>

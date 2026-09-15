@@ -7,7 +7,7 @@
  */
 
 import { tran } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type TransactionLike = {
@@ -43,11 +43,6 @@ export const transactionHandler = createHandler<TransactionLike, typeof tran>(
     fromAbapGit: parseTransactionFromAbapGit,
   },
 );
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 function parseGuiAttributes(
   TSTCC:
@@ -93,7 +88,7 @@ function parseTransactionFromAbapGit({
     dynproNumber: TSTC?.DYPNO,
     transactionType: TSTC?.TYPE,
     guiAttributes: parseGuiAttributes(TSTCC),
-    texts: textItems.map((t) => ({
+    texts: mapItems(textItems, (t) => ({
       language: sapLangToIso(t.SPRSL),
       text: t.TTEXT,
     })),
@@ -136,7 +131,8 @@ function buildTstct(
   };
 }
 
-function buildTransactionToAbapGit(obj: TransactionLike) {
+function buildTransactionToAbapGit(raw: TransactionLike) {
+  const obj = unwrapData<TransactionLike>(raw);
   const texts = obj.texts ?? [];
   const tcode = String(obj.name ?? '').toUpperCase();
   return {

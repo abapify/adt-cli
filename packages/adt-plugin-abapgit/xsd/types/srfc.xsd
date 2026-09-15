@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SrfcHeaderType">
+    <xs:all>
+      <xs:element name="CREATEDBY" type="xs:string" minOccurs="0"/>
+      <xs:element name="CREATEDON" type="xs:string" minOccurs="0"/>
+      <xs:element name="CREATEDAT" type="xs:string" minOccurs="0"/>
+      <xs:element name="CHANGEDBY" type="xs:string" minOccurs="0"/>
+      <xs:element name="CHANGEDON" type="xs:string" minOccurs="0"/>
+      <xs:element name="CHANGEDAT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="SrfcType">
+    <xs:all>
+      <xs:element name="HEADER" type="SrfcHeaderType" minOccurs="0"/>
+      <xs:element name="ID" type="xs:string"/>
+      <xs:element name="VERSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="SCOPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="FUNCNAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="DEFAULT_PROFILE" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+</xs:schema>

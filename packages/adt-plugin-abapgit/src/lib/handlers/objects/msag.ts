@@ -7,7 +7,7 @@
  */
 
 import { msag } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type MessageClassLike = {
@@ -30,7 +30,9 @@ export const messageClassHandler = createHandler<MessageClassLike, typeof msag>(
     serializer: 'LCL_OBJECT_MSAG',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<MessageClassLike>(raw);
+
       const messages = obj.messages ?? [];
       return {
         T100A: {

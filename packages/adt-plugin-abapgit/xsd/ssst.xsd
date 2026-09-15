@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/ssst.xsd"/>
+
+  <!-- Redefine AbapValuesType to include SSST-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+          <xs:element name="HEADER" type="asx:SsstHeaderType" minOccurs="0"/>
+          <xs:element name="SSFPARAS" type="asx:SsstAnyTableType" minOccurs="0"/>
+          <xs:element name="SSFSTRINGS" type="asx:SsstAnyTableType" minOccurs="0"/>
+          <xs:element name="STXSTAB" type="asx:SsstAnyTableType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

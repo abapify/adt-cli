@@ -1,5 +1,5 @@
 import { bdef } from '../../../schemas/generated';
-import { createHandler, type AbapGitSchema } from '../base';
+import { createHandler, type AbapGitSchema, unwrapData } from '../base';
 import {
   serializeDualFormat,
   affGetSource,
@@ -40,9 +40,12 @@ export function createCdsAffSourceHandler(
     version: 'v1.0.0',
     serializer: `LCL_OBJECT_${type}`,
     serializer_version: 'v1.0.0',
-    toAbapGit: (obj) => ({
-      SKEY: { TYPE: type, NAME: String(obj?.name ?? '').toUpperCase() },
-    }),
+    toAbapGit: (raw) => {
+      const obj = unwrapData<CdsAffSourceObject>(raw);
+      return {
+        SKEY: { TYPE: type, NAME: String(obj?.name ?? '').toUpperCase() },
+      };
+    },
     getSource: affGetSource,
     fromAbapGit: ({ SKEY }) => affFromAbapGit(SKEY),
     fromAffJson: (json) =>

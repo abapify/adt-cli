@@ -7,7 +7,7 @@
  */
 
 import { shlp } from '../../../schemas/generated';
-import { createHandler } from '../base';
+import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type SearchHelpLike = {
@@ -50,7 +50,9 @@ export const searchHelpHandler = createHandler<SearchHelpLike, typeof shlp>(
     serializer: 'LCL_OBJECT_SHLP',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => {
+    toAbapGit: (raw) => {
+      const obj = unwrapData<SearchHelpLike>(raw);
+
       const parameters = obj.parameters ?? [];
       const assignments = obj.fieldAssignments ?? [];
       return {
@@ -105,11 +107,6 @@ export const searchHelpHandler = createHandler<SearchHelpLike, typeof shlp>(
     fromAbapGit: parseSearchHelpFromAbapGit,
   },
 );
-
-function normalizeItems<T>(raw: T | T[] | undefined): T[] {
-  if (!raw) return [];
-  return Array.isArray(raw) ? raw : [raw];
-}
 
 function parseShlpParam(p: {
   FIELDNAME?: string;
@@ -189,7 +186,7 @@ function parseSearchHelpFromAbapGit({
           rollName: DD31V.ROLLNAME,
         }
       : undefined,
-    parameters: paramItems.map(parseShlpParam),
-    fieldAssignments: assignItems.map(parseShlpAssign),
+    parameters: mapItems(paramItems, parseShlpParam),
+    fieldAssignments: mapItems(assignItems, parseShlpAssign),
   };
 }

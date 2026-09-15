@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+
+  
+  <xs:include schemaLocation="types/sucu.xsd" />
+
+  
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="TBRG_AUTH" minOccurs="0" type="TbrgAuthType">
+                    </xs:element>
+                  
+            <xs:element name="TBRG_AUTHT" minOccurs="0" type="TbrgAuthtType">
+                    </xs:element>
+                
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  
+  <xs:import schemaLocation="abapgit.xsd" />
+
+<xs:complexType name="TbrgAuthType">
+                      <xs:sequence>
+                        <xs:element name="item" type="asx:SucuAuthType" minOccurs="0" maxOccurs="unbounded" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  <xs:complexType name="TbrgAuthtType">
+                      <xs:sequence>
+                        <xs:element name="item" type="asx:SucuAuthTextType" minOccurs="0" maxOccurs="unbounded" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:schema>

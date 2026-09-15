@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:asx="http://www.sap.com/abapxml" targetNamespace="http://www.sap.com/abapxml" elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="types/sicf.xsd" />
+
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="URL" type="xs:string" minOccurs="0" />
+                  
+            <xs:element name="ICFSERVICE" type="asx:IcfServiceType" minOccurs="0" />
+                  
+            <xs:element name="ICFDOCU" type="asx:IcfDocuType" minOccurs="0" />
+                  
+            <xs:element name="ICFHANDLER_TABLE" minOccurs="0" type="asx:IcfHandlerTableType">
+                    </xs:element>
+                  
+            <xs:element name="SOTS" type="asx:SicfSotsType" minOccurs="0" />
+                  
+            <xs:element name="SOTS_USE" type="asx:SicfSotsUseType" minOccurs="0" />
+                
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <xs:import schemaLocation="abapgit.xsd" />
+                  </xs:schema>

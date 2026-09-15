@@ -64,3 +64,116 @@ export { changeDocumentObjectHandler } from './chdo';
 export { emailTemplateHandler } from './smtg';
 export { formObjectHandler } from './sfpf';
 export { businessConfigSetHandler } from './scp1';
+export { icfServiceHandler } from './sicf';
+export { rfcServiceHandler } from './srfc';
+export { idocTypeHandler } from './idoc';
+export { infoObjectHandler } from './iobj';
+export { dataStoreObjectHandler } from './odso';
+export { sharedMemoryAreaHandler } from './shma';
+export { styleHandler } from './styl';
+export { authObjectClassHandler } from './susc';
+export { authGroupHandler } from './sucu';
+export { badiImplementationHandler } from './sxci';
+export { mimeObjectHandler } from './smim';
+export { dbProcProxyHandler } from './sqsc';
+export { authObjectHandler } from './suso';
+export { authHierarchyHandler } from './sush';
+export { ktdDocumentHandler } from './sktd';
+export { formHandler } from './form';
+export { extensionIndexHandler } from './xinx';
+export { spagpaParamHandler } from './para';
+export { personalizationHandler } from './pers';
+export { oauth2ProfileHandler } from './oa2p';
+export { spoolDescHandler } from './splo';
+export { transportObjectHandler } from './tobj';
+export { proxyObjectHandler } from './sprx';
+export { otrTextHandler } from './sots';
+export { archiveObjectHandler } from './iarp';
+export { archivePathHandler } from './iasp';
+export { characteristicHandler } from './char';
+export { authFieldHandler } from './auth';
+export { infoAreaHandler } from './area';
+export { activationVariantHandler } from './avar';
+export { jobDefinitionHandler } from './jobd';
+export { namespaceHandler } from './nspc';
+export { packageInterfaceHandler } from './pinf';
+export { viewClusterHandler } from './vcls';
+export { transactionVariantHandler } from './stvi';
+export { odsObject1Handler } from './sod1';
+export { odsObject2Handler } from './sod2';
+export { hierarchyDisplayHandler } from './shi3';
+export { hierarchyExtensionHandler } from './shi5';
+export { hierarchySwitchAssignmentHandler } from './shi8';
+export { screenVariantHandler } from './scvi';
+export { acidHandler } from './acid';
+export { variantAssignmentHandler } from './avas';
+export { enhancementProjectHandler } from './cmod';
+export { dialogModuleHandler } from './dial';
+export { enhancementCompositeHandler } from './enhc';
+export { enhancementSpotCompositeHandler } from './ensc';
+export { objectTypeGroupHandler } from './otgr';
+export { switchHandler } from './sfsw';
+export { smartFormStyleHandler } from './ssst';
+export { businessFunctionHandler } from './sfbf';
+export { businessFunctionSetHandler } from './sfbs';
+export { badiDefinitionHandler } from './sxsd';
+export { unitCaseHandler } from './ucsa';
+export { dataModelHandler } from './udmo';
+export { iaxuHandler } from './iaxu';
+export { idocExtensionHandler } from './iext';
+export { amcApplicationHandler } from './samc';
+export { apcApplicationHandler } from './sapc';
+export { documentationObjectHandler } from './dsys';
+export { featureToggleHandler } from './ftgl';
+export { pragmaHandler } from './prag';
+export { imgActivityHandler } from './cus0';
+export { customizingActivityHandler } from './cus1';
+export { customizingAttributeHandler } from './cus2';
+export { documentationHandler } from './docv';
+export { generalTextHandler } from './doct';
+export { compositeTemplateHandler } from './cmpt';
+export { amdpSchemaHandler } from './amsd';
+export { apiStateHandler } from './apis';
+export { webDynproAppHandler } from './wdya';
+export { webiHandler } from './webi';
+export { wdcaHandler } from './wdca';
+export { wdccHandler } from './wdcc';
+export { pdtsHandler } from './pdts';
+export { w3htHandler } from './w3ht';
+export { w3miHandler } from './w3mi';
+export { iatuHandler } from './iatu';
+export { iamuHandler } from './iamu';
+export { derivationRuleHandler } from './drul';
+export {
+  aifcHandler,
+  aqbgHandler,
+  aqquHandler,
+  aqsgHandler,
+  asfcHandler,
+  g4baHandler,
+  g4bsHandler,
+  iwmoHandler,
+  iwomHandler,
+  iwprHandler,
+  iwsgHandler,
+  iwsvHandler,
+  iwvbHandler,
+  slddHandler,
+  sobjHandler,
+  sppfHandler,
+  uenoHandler,
+  wapaHandler,
+  wdynHandler,
+} from './objsl';
+export {
+  ecatHandler,
+  ecsdHandler,
+  ecspHandler,
+  ectcHandler,
+  ectdHandler,
+  ecvoHandler,
+  fdt0Handler,
+  sfpiHandler,
+  ssfoHandler,
+} from './rawxml';
+export { functionGroupScreensHandler } from './fugr';

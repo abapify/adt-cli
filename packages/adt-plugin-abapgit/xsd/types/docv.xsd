@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="DocvHeadType">
+    <xs:all>
+      <xs:element name="TDOBJECT" type="xs:string" minOccurs="0" />
+      <xs:element name="TDNAME" type="xs:string" minOccurs="0" />
+      <xs:element name="TDID" type="xs:string" minOccurs="0" />
+      <xs:element name="TDSPRAS" type="xs:string" minOccurs="0" />
+      <xs:element name="TDTITLE" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="DocvLineItemType">
+    <xs:all>
+      <xs:element name="TDFORMAT" type="xs:string" minOccurs="0" />
+      <xs:element name="TDLINE" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="DocvType">
+    <xs:sequence>
+      <xs:element name="DOCTITLE" type="xs:string" minOccurs="0" />
+      <xs:element name="HEAD" type="DocvHeadType" minOccurs="0" />
+      <xs:element name="LINES" minOccurs="0" type="LinesType">
+        </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="LinesType">
+          <xs:sequence>
+            <xs:element name="item" type="DocvLineItemType" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

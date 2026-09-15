@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/splo.xsd"/>
+
+  <!-- Redefine AbapValuesType to include SPLO-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+          <xs:element name="TSPLT" type="asx:SploTspltType" minOccurs="0"/>
+                <xs:element name="TSPLD" type="asx:SploTspldType" minOccurs="0"/>
+                <xs:element name="TSP0P" type="asx:SploTsp0pType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

@@ -20,4 +20,21 @@ export type DdlxSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SKEY?: undefined | {
+            TYPE?: string | undefined;
+            NAME?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SKEY?: undefined | {
+                TYPE?: string | undefined;
+                NAME?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

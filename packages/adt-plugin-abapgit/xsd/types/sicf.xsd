@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="IcfServiceType">
+    <xs:all>
+      <xs:element name="ICF_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFALTNME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ORIG_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_PARENT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_NODE_LOGON" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_AUTH" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICF_MANDT" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFNODGUID" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFPARGUID" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IcfDocuType">
+    <xs:all>
+      <xs:element name="ICF_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="DESCRIPT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IcfHandlerType">
+    <xs:all>
+      <xs:element name="ICF_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFHANDLER" type="xs:string" minOccurs="0"/>
+      <xs:element name="ICFHANDLERORDER" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- ICFHANDLER_TABLE wraps handler rows -->
+
+  <!-- OTR header (sotr_headu) -->
+
+  <!-- ICFHANDLER_TABLE wraps handler rows -->
+  <xs:complexType name="IcfHandlerTableType">
+    <xs:sequence>
+      <xs:element name="ICFHANDLER" type="IcfHandlerType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SicfSotsHeaderType">
+    <xs:all>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="PAKET" type="xs:string" minOccurs="0"/>
+      <xs:element name="CREA_LAN" type="xs:string" minOccurs="0"/>
+      <xs:element name="ALIAS_NAME" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- OTR text row (sotr_textl) -->
+  <xs:complexType name="SicfSotsEntryType">
+    <xs:all>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LANGU" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LFD_NUM" type="xs:string" minOccurs="0"/>
+      <xs:element name="TEXT" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- OTR entries table -->
+  <xs:complexType name="SicfSotsEntriesType">
+    <xs:sequence>
+      <xs:element name="item" type="SicfSotsEntryType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- SOTS row: header + entries -->
+  <xs:complexType name="SicfSotsItemType">
+    <xs:all>
+      <xs:element name="HEADER" type="SicfSotsHeaderType" minOccurs="0"/>
+      <xs:element name="ENTRIES" type="SicfSotsEntriesType" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- SOTS table -->
+  <xs:complexType name="SicfSotsType">
+    <xs:sequence>
+      <xs:element name="item" type="SicfSotsItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- SOTS_USE row (sotr_useu) -->
+  <xs:complexType name="SicfSotsUseItemType">
+    <xs:all>
+      <xs:element name="PGMID" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJECT" type="xs:string" minOccurs="0"/>
+      <xs:element name="OBJ_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="CONCEPT" type="xs:string" minOccurs="0"/>
+      <xs:element name="LFD_NUM" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <!-- SOTS_USE table -->
+  <xs:complexType name="SicfSotsUseType">
+    <xs:sequence>
+      <xs:element name="item" type="SicfSotsUseItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="AmsdMetadataType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="MASTER_LANGUAGE" type="xs:string" minOccurs="0"/>
+      <xs:element name="PACKAGE_REF" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="AmsdType">
+    <xs:sequence>
+      <xs:element name="METADATA" type="AmsdMetadataType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

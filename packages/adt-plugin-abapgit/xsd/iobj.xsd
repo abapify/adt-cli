@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/iobj.xsd"/>
+
+  <!-- Redefine AbapValuesType to include IOBJ-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="IOBJ" type="asx:IobjDetailsType" minOccurs="0"/>
+            <xs:element name="COMPOUNDS" type="asx:IobjCompoundsType" minOccurs="0"/>
+            <xs:element name="ATTRIBUTES" type="asx:IobjAttributesType" minOccurs="0"/>
+            <xs:element name="NAVIGATION_ATTRIBUTES" type="asx:IobjAnyTableType" minOccurs="0"/>
+            <xs:element name="ATTR_NAVIGATION" type="asx:IobjAnyTableType" minOccurs="0"/>
+            <xs:element name="HIERARCHY" type="asx:IobjAnyTableType" minOccurs="0"/>
+            <xs:element name="ELIMINATION" type="asx:IobjAnyTableType" minOccurs="0"/>
+            <xs:element name="HANA_FIELDS_MAPPING" type="asx:IobjAnyTableType" minOccurs="0"/>
+            <xs:element name="XXL_ATTRIBUTES" type="asx:IobjAnyTableType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.sap.com/abapxml"
+           xmlns:asx="http://www.sap.com/abapxml"
+           elementFormDefault="unqualified">
+
+  <!-- Include types (brought into asx namespace) -->
+  <xs:include schemaLocation="types/tobj.xsd"/>
+
+  <!-- Redefine AbapValuesType to include TOBJ-specific elements -->
+  <xs:redefine schemaLocation="asx.xsd">
+    <xs:complexType name="AbapValuesType">
+      <xs:complexContent>
+        <xs:extension base="asx:AbapValuesType">
+          <xs:sequence>
+            <xs:element name="OBJH" type="asx:TobjObjhType" minOccurs="0" />
+                  
+            <xs:element name="OBJT" type="asx:TobjObjtType" minOccurs="0" />
+                  
+            <xs:element name="OBJS" type="asx:TobjTableType" minOccurs="0" />
+                  
+            <xs:element name="OBJSL" type="asx:TobjTableType" minOccurs="0" />
+                  
+            <xs:element name="OBJM" type="asx:TobjTableType" minOccurs="0" />
+                  
+            <xs:element name="TOBJ" type="asx:TobjExtraType" minOccurs="0" />
+                
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:redefine>
+
+  <!-- Import abapGit root element -->
+  <xs:import schemaLocation="abapgit.xsd"/>
+
+</xs:schema>

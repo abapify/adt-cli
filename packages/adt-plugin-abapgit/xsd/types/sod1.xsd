@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="Sod1MetadataType">
+    <xs:all>
+      <xs:element name="NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="MASTER_LANGUAGE" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Sod1Type">
+    <xs:sequence>
+      <xs:element name="METADATA" type="Sod1MetadataType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

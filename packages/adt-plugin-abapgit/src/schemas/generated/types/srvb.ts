@@ -25,4 +25,31 @@ export type SrvbSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SKEY?: undefined | {
+            TYPE?: string | undefined;
+            NAME?: string | undefined;
+        };
+        BINDING?: undefined | {
+            TYPE?: string | undefined;
+            VERSION?: string | undefined;
+            CATEGORY?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SKEY?: undefined | {
+                TYPE?: string | undefined;
+                NAME?: string | undefined;
+            };
+            BINDING?: undefined | {
+                TYPE?: string | undefined;
+                VERSION?: string | undefined;
+                CATEGORY?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

@@ -10,7 +10,14 @@
  * - flattenType: Flatten a type from a SourceFile into a new file with inline types
  */
 
-import { Project, SourceFile, Type, TypeChecker, Node } from 'ts-morph';
+import {
+  Project,
+  SourceFile,
+  Type,
+  TypeChecker,
+  Node,
+  Symbol as TsSymbol,
+} from 'ts-morph';
 import type {
   Schema,
   TopLevelComplexType,
@@ -275,6 +282,79 @@ export function isPrimitiveType(type: Type): boolean {
 }
 
 /**
+ * Expand a type's string index signature (e.g. from xs:any wildcards)
+ * to a `[key: string]: T;` line, or null when absent.
+ */
+function expandIndexSignature(
+  type: Type,
+  checker: TypeChecker,
+  context: Node,
+  indent: string,
+  visited: Set<string>,
+): string | null {
+  const stringIndexType = type.getStringIndexType();
+  if (!stringIndexType) return null;
+  const expandedIndex = expandTypeToString(
+    stringIndexType,
+    checker,
+    context,
+    indent + '  ',
+    visited,
+  );
+  return `${indent}  [key: string]: ${expandedIndex};`;
+}
+
+/**
+ * Expand a type's named properties (and any index signature) into an
+ * object-literal string. Caller handles cycle detection via `visited`.
+ */
+function expandObjectLiteral(
+  type: Type,
+  props: TsSymbol[],
+  checker: TypeChecker,
+  context: Node,
+  indent: string,
+  visited: Set<string>,
+): string {
+  const lines: string[] = ['{'];
+  for (const prop of props) {
+    let name = prop.getName();
+
+    // Handle namespaced property names like "xml: base" -> "base"
+    // These come from XSD attribute references like xml:base
+    if (name.includes(': ')) {
+      name = name.split(': ').pop() ?? name;
+    }
+
+    const declarations = prop.getDeclarations();
+    const declNode = declarations[0] ?? context;
+    const propType = checker.getTypeOfSymbolAtLocation(prop, declNode);
+    const optional = prop.isOptional() ? '?' : '';
+    const expanded = expandTypeToString(
+      propType,
+      checker,
+      context,
+      indent + '  ',
+      visited,
+    );
+    lines.push(`${indent}  ${propertyName(name)}${optional}: ${expanded};`);
+  }
+
+  // Preserve index signatures (e.g. [key: string]: unknown from xs:any)
+  const indexLine = expandIndexSignature(
+    type,
+    checker,
+    context,
+    indent,
+    visited,
+  );
+  if (indexLine) lines.push(indexLine);
+
+  lines.push(`${indent}}`);
+  return lines.join('\n');
+}
+
+/**
  * Recursively expand a type to an inline string representation.
  * Fully inlines all types - no import() statements in output.
  */
@@ -343,31 +423,26 @@ export function expandTypeToString(
     const newVisited = new Set(visited);
     newVisited.add(typeId);
 
-    const lines: string[] = ['{'];
-    for (const prop of props) {
-      let name = prop.getName();
+    return expandObjectLiteral(
+      type,
+      props,
+      checker,
+      context,
+      indent,
+      newVisited,
+    );
+  }
 
-      // Handle namespaced property names like "xml: base" -> "base"
-      // These come from XSD attribute references like xml:base
-      if (name.includes(': ')) {
-        name = name.split(': ').pop() ?? name;
-      }
-
-      const declarations = prop.getDeclarations();
-      const declNode = declarations[0] ?? context;
-      const propType = checker.getTypeOfSymbolAtLocation(prop, declNode);
-      const optional = prop.isOptional() ? '?' : '';
-      const expanded = expandTypeToString(
-        propType,
-        checker,
-        context,
-        indent + '  ',
-        newVisited,
-      );
-      lines.push(`${indent}  ${propertyName(name)}${optional}: ${expanded};`);
-    }
-    lines.push(`${indent}}`);
-    return lines.join('\n');
+  // Type with only an index signature (no named properties)
+  const indexLine = expandIndexSignature(
+    type,
+    checker,
+    context,
+    indent,
+    visited,
+  );
+  if (indexLine) {
+    return `{\n${indexLine}\n${indent}}`;
   }
 
   // For types without properties, check if getText() returns an import() - if so, try to expand

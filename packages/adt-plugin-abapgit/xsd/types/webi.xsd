@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="WebbiVepTextType">
+    <xs:all>
+      <xs:element name="VEPNAME" type="xs:string" minOccurs="0" />
+      <xs:element name="DESCRIPT" type="xs:string" minOccurs="0" />
+      <xs:element name="LANGU" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="WebbiVepHeaderItemType">
+    <xs:all>
+      <xs:element name="VEPNAME" type="xs:string" minOccurs="0" />
+      <xs:element name="GENERATOR" type="xs:string" minOccurs="0" />
+      <xs:element name="FEATURES" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="WebbiType">
+    <xs:sequence>
+      <xs:element name="VEPTEXT" type="WebbiVepTextType" minOccurs="0" />
+      <xs:element name="PVEPHEADER" minOccurs="0" type="PvepheaderType">
+        </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="PvepheaderType">
+          <xs:sequence>
+            <xs:element name="item" type="WebbiVepHeaderItemType" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

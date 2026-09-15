@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="IextAttributesType">
+    <xs:all>
+      <xs:element name="EXTTYPE" type="xs:string" minOccurs="0" />
+      <xs:element name="IDOCTYP" type="xs:string" minOccurs="0" />
+      <xs:element name="CIMTYP" type="xs:string" minOccurs="0" />
+      <xs:element name="DESCRP" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IextSyntaxItemType">
+    <xs:all>
+      <xs:element name="EXTTYPE" type="xs:string" minOccurs="0" />
+      <xs:element name="SEGMENT" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="IextType">
+    <xs:sequence>
+      <xs:element name="ATTRIBUTES" type="IextAttributesType" minOccurs="0" />
+      <xs:element name="T_SYNTAX" minOccurs="0" type="TSyntaxType">
+        </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="TSyntaxType">
+          <xs:sequence>
+            <xs:element name="item" type="IextSyntaxItemType" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

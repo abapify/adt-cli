@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="SsstHeaderType">
+    <xs:all>
+      <xs:element name="SSFNAME" type="xs:string" minOccurs="0" />
+      <xs:element name="MASTERLANG" type="xs:string" minOccurs="0" />
+      <xs:element name="TDFAMILY" type="xs:string" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  
+  <xs:complexType name="SsstAnyTableType">
+    <xs:sequence>
+      <xs:element name="item" minOccurs="0" maxOccurs="unbounded" type="ItemType">
+        </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="ItemType">
+          <xs:sequence>
+            <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:schema>

@@ -15,6 +15,7 @@ import type {
 import {
   findComplexType,
   findElement,
+  hasWildcard,
   walkElements,
   walkAttributes,
   stripNsPrefix,
@@ -272,6 +273,59 @@ function parseElement(
     }
   }
 
+  // Capture wildcard (xs:any) children not covered by declared elements
+  if (hasWildcard(typeDef, schema)) {
+    const seen = new Set<string>();
+    for (const child of getAllChildElements(node)) {
+      const name = child.tagName; // qualified name preserves ns prefixes
+      if (result[name] !== undefined || seen.has(name)) continue;
+      seen.add(name);
+      const same = getAllChildElements(node).filter((c) => c.tagName === name);
+      result[name] =
+        same.length > 1 ? same.map(parseAnyValue) : parseAnyValue(child);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parse a wildcard (xs:any) element generically:
+ * leaf elements become strings, element children become nested records,
+ * repeated names become arrays. Attributes are preserved under `@name`
+ * keys (including xmlns:* for namespace round-trips) and text content of
+ * attributed elements under `_text`. Qualified tag names keep their
+ * namespace prefixes so prefixed children round-trip faithfully.
+ */
+function parseAnyValue(node: XmlElement): unknown {
+  const result: Record<string, unknown> = {};
+  // NamedNodeMap is not iterable in xmldom — use index-based access
+  for (let i = 0; i < node.attributes.length; i++) {
+    const attr = node.attributes[i];
+    result[`@${attr.name}`] = attr.value;
+  }
+
+  const children = getAllChildElements(node);
+  if (children.length === 0) {
+    if (Object.keys(result).length === 0) {
+      return getTextContent(node);
+    }
+    const text = getTextContent(node);
+    if (text) result._text = text;
+    return result;
+  }
+  for (const child of children) {
+    const name = child.tagName;
+    const value = parseAnyValue(child);
+    const existing = result[name];
+    if (existing === undefined) {
+      result[name] = value;
+    } else if (Array.isArray(existing)) {
+      existing.push(value);
+    } else {
+      result[name] = [existing, value];
+    }
+  }
   return result;
 }
 

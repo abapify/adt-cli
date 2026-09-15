@@ -10,6 +10,7 @@ import type { SchemaLike, ComplexTypeLike, ElementLike } from '../infer';
 import {
   findComplexType,
   findElement,
+  hasWildcard,
   walkElements,
   walkAttributes,
   stripNsPrefix,
@@ -296,11 +297,47 @@ function buildElement(
   // Build attributes using walker (handles inheritance)
   // The walker now returns the schema where each attribute is defined,
   // which is critical for correct namespace prefix resolution in inherited types
+  const wildcard = hasWildcard(typeDef, schema);
+  const consumed = new Set<string>();
+  buildAttributes(node, data, typeDef, schema, rootSchema, consumed);
+  buildDeclaredElements(
+    doc,
+    node,
+    data,
+    typeDef,
+    schema,
+    rootSchema,
+    prefix,
+    consumed,
+  );
+
+  // Emit wildcard (xs:any) children for data keys not covered by declared elements
+  if (wildcard) {
+    for (const key of Object.keys(data)) {
+      if (consumed.has(key)) continue;
+      buildAnyField(doc, node, key, data[key]);
+    }
+  }
+}
+
+/**
+ * Build declared attributes from the type definition (walker handles
+ * inheritance). Adds each declared attribute name to `consumed`.
+ */
+function buildAttributes(
+  node: XmlElement,
+  data: Record<string, unknown>,
+  typeDef: ComplexTypeLike,
+  schema: SchemaLike,
+  rootSchema: SchemaLike,
+  consumed: Set<string>,
+): void {
   for (const { attribute, schema: attrSchema } of walkAttributes(
     typeDef,
     schema,
   )) {
     if (!attribute.name) continue;
+    consumed.add(attribute.name);
     const value = data[attribute.name];
     if (value !== undefined && value !== null) {
       // Check attributeFormDefault - attributes get prefix when "qualified"
@@ -328,10 +365,25 @@ function buildElement(
       );
     }
   }
+}
 
-  // Build child elements using walker (handles inheritance, groups, refs)
-  // The walker returns schema per element so we can resolve the correct namespace prefix
-  // for elements inherited from imported schemas (e.g., packageRef from adtcore)
+/**
+ * Build declared child elements via the walker (handles inheritance,
+ * groups, refs, substitution). Adds each declared key to `consumed`.
+ */
+function buildDeclaredElements(
+  doc: XmlDocument,
+  node: XmlElement,
+  data: Record<string, unknown>,
+  typeDef: ComplexTypeLike,
+  schema: SchemaLike,
+  rootSchema: SchemaLike,
+  prefix: string | undefined,
+  consumed: Set<string>,
+): void {
+  // The walker returns schema per element so we can resolve the correct
+  // namespace prefix for elements inherited from imported schemas
+  // (e.g., packageRef from adtcore)
   for (const { element, schema: elementDefSchema } of walkElements(
     typeDef,
     schema,
@@ -347,6 +399,7 @@ function buildElement(
         for (const substitute of substitutes) {
           const subName = substitute.element.name;
           if (!subName) continue;
+          consumed.add(subName);
 
           const value = data[subName];
           if (value != null) {
@@ -371,6 +424,7 @@ function buildElement(
 
     const resolved = resolveElementInfo(element, elementDefSchema);
     if (!resolved) continue;
+    consumed.add(resolved.dataKey);
 
     const value = data[resolved.dataKey];
     if (value != null) {
@@ -388,6 +442,48 @@ function buildElement(
       );
     }
   }
+}
+
+/**
+ * Build a wildcard (xs:any) element generically:
+ * primitives become text elements, objects become nested elements,
+ * arrays become repeated sibling elements.
+ */
+function buildAnyField(
+  doc: XmlDocument,
+  parent: XmlElement,
+  tagName: string,
+  value: unknown,
+): void {
+  if (value === undefined || value === null) return;
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      buildAnyField(doc, parent, tagName, item);
+    }
+    return;
+  }
+
+  const el = doc.createElement(tagName);
+  if (typeof value === 'object') {
+    for (const [key, nested] of Object.entries(
+      value as Record<string, unknown>,
+    )) {
+      if (key.startsWith('@')) {
+        // Captured attribute (e.g. "@xmlns:asx") — restore as attribute
+        if (nested !== undefined && nested !== null) {
+          el.setAttribute(key.slice(1), String(nested));
+        }
+      } else if (key === '_text') {
+        el.textContent = String(nested ?? '');
+      } else {
+        buildAnyField(doc, el, key, nested);
+      }
+    }
+  } else {
+    el.textContent = String(value);
+  }
+  parent.appendChild(el);
 }
 
 /**
