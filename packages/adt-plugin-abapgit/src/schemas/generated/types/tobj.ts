@@ -23,12 +23,105 @@ export type TobjSchema = {
                     OBJECTTYPE?: string | undefined;
                     DDTEXT?: string | undefined;
                 };
-                TOBJ?: unknown;
+                OBJS?: undefined | {
+                    item?: undefined | unknown[];
+                };
+                OBJSL?: undefined | {
+                    item?: undefined | unknown[];
+                };
+                OBJM?: undefined | {
+                    item?: undefined | unknown[];
+                };
+                TOBJ?: undefined | {
+                    TDDAT?: undefined | {
+                        TABNAME?: string | undefined;
+                        MCLASS?: string | undefined;
+                        CCLASS?: string | undefined;
+                        FLAG?: string | undefined;
+                    };
+                    TVDIR?: undefined | unknown;
+                    TVIMF?: undefined | unknown[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        OBJH?: undefined | {
+            OBJECTNAME?: string | undefined;
+            OBJECTTYPE?: string | undefined;
+            CLIDEP?: string | undefined;
+            LANGDEP?: string | undefined;
+            OBJCATEG?: string | undefined;
+            OBJTRANSP?: string | undefined;
+        };
+        OBJT?: undefined | {
+            LANGUAGE?: string | undefined;
+            OBJECTNAME?: string | undefined;
+            OBJECTTYPE?: string | undefined;
+            DDTEXT?: string | undefined;
+        };
+        OBJS?: undefined | {
+            item?: undefined | unknown[];
+        };
+        OBJSL?: undefined | {
+            item?: undefined | unknown[];
+        };
+        OBJM?: undefined | {
+            item?: undefined | unknown[];
+        };
+        TOBJ?: undefined | {
+            TDDAT?: undefined | {
+                TABNAME?: string | undefined;
+                MCLASS?: string | undefined;
+                CCLASS?: string | undefined;
+                FLAG?: string | undefined;
+            };
+            TVDIR?: undefined | unknown;
+            TVIMF?: undefined | unknown[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            OBJH?: undefined | {
+                OBJECTNAME?: string | undefined;
+                OBJECTTYPE?: string | undefined;
+                CLIDEP?: string | undefined;
+                LANGDEP?: string | undefined;
+                OBJCATEG?: string | undefined;
+                OBJTRANSP?: string | undefined;
+            };
+            OBJT?: undefined | {
+                LANGUAGE?: string | undefined;
+                OBJECTNAME?: string | undefined;
+                OBJECTTYPE?: string | undefined;
+                DDTEXT?: string | undefined;
+            };
+            OBJS?: undefined | {
+                item?: undefined | unknown[];
+            };
+            OBJSL?: undefined | {
+                item?: undefined | unknown[];
+            };
+            OBJM?: undefined | {
+                item?: undefined | unknown[];
+            };
+            TOBJ?: undefined | {
+                TDDAT?: undefined | {
+                    TABNAME?: string | undefined;
+                    MCLASS?: string | undefined;
+                    CCLASS?: string | undefined;
+                    FLAG?: string | undefined;
+                };
+                TVDIR?: undefined | unknown;
+                TVIMF?: undefined | unknown[];
+            };
+        };
+        version?: string | undefined;
     };
 };

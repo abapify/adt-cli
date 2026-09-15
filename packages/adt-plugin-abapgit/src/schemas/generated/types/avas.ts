@@ -23,4 +23,27 @@ export type AvasSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        AVAS?: undefined | {
+            HEADER?: undefined | {
+                GUID?: string | undefined;
+                ATTRIBUTE?: string | undefined;
+                OBJECT?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            AVAS?: undefined | {
+                HEADER?: undefined | {
+                    GUID?: string | undefined;
+                    ATTRIBUTE?: string | undefined;
+                    OBJECT?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

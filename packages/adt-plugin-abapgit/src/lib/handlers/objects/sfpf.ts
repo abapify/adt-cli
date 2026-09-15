@@ -26,14 +26,23 @@ export const formObjectHandler = createHandler<FormObjectLike, typeof sfpf>(
     serializer: 'LCL_OBJECT_SFPF',
     serializer_version: 'v1.0.0',
 
-    toAbapGit: (obj) => ({
-      SFPF: {
-        HEADER: {
-          NAME: String(obj.name ?? '').toUpperCase(),
-          STATE: obj.state,
-          LANGUAGE: isoToSapLang(obj.language),
-          TYPE: obj.type,
-          DESCRIPTION: obj.description,
+    toAbapGit: (raw) => {
+      const obj = (raw as { data?: FormObjectLike }).data ?? raw;
+      return {
+        SFPF: {
+          HEADER: {
+            NAME: String(obj.name ?? '').toUpperCase(),
+            STATE: obj.state,
+            LANGUAGE: isoToSapLang(obj.language),
+            TYPE: obj.type,
+            DESCRIPTION: obj.description,
+          },
+          LAYOUT: obj.layout
+            ? {
+                NAME: String(obj.name ?? '').toUpperCase(),
+                XDP: obj.layout,
+              }
+            : undefined,
         },
       };
     },

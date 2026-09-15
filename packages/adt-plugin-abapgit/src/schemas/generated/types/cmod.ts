@@ -9,14 +9,77 @@ export type CmodSchema = {
     abapGit: {
         abap: {
             values: {
-                MODACT?: unknown;
-                MODTEXT?: unknown;
-                MODATTR?: unknown;
+                MODACT?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        MEMBER?: string | undefined;
+                    }[];
+                };
+                MODTEXT?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        SPRAS?: string | undefined;
+                        MODTEXT?: string | undefined;
+                    }[];
+                };
+                MODATTR?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        STATUS?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        MODACT?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                MEMBER?: string | undefined;
+            }[];
+        };
+        MODTEXT?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                SPRAS?: string | undefined;
+                MODTEXT?: string | undefined;
+            }[];
+        };
+        MODATTR?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                STATUS?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            MODACT?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    MEMBER?: string | undefined;
+                }[];
+            };
+            MODTEXT?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    SPRAS?: string | undefined;
+                    MODTEXT?: string | undefined;
+                }[];
+            };
+            MODATTR?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    STATUS?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

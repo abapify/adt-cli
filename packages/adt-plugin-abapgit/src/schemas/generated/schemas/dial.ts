@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "DialAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,46 +46,128 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "DialValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "DIAL",
-            type: "DialType",
+            type: "asx:DialType",
             minOccurs: "0",
           },
         ],
       },
     },
     {
-      name: "DialAbapType",
-      sequence: {
+      name: "DialTdctType",
+      all: {
         element: [
           {
-            name: "values",
-            type: "DialValuesType",
+            name: "DIALOGNAME",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DYNR",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "PROG",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "SPRAS",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DDTEXT",
+            type: "xs:string",
+            minOccurs: "0",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
-      name: "AbapValuesType",
+      name: "DialDiaparType",
+      all: {
+        element: [
+          {
+            name: "DNAM",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DYNR",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "PARAM",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DPNAM",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DTYPE",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "DPLEN",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+          {
+            name: "P_TEXT",
+            type: "xs:string",
+            minOccurs: "0",
+          },
+        ],
+      },
+    },
+    {
+      name: "DialDiaparTabType",
       sequence: {
         element: [
           {
-            ref: "asx:Schema",
+            name: "item",
+            type: "DialDiaparType",
             minOccurs: "0",
             maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "DialType",
+      sequence: {
+        element: [
+          {
+            name: "TDCT",
+            type: "DialTdctType",
+            minOccurs: "0",
+          },
+          {
+            name: "DIA_PARS",
+            type: "DialDiaparTabType",
+            minOccurs: "0",
           },
         ],
       },
@@ -106,40 +188,6 @@ export default {
           "default": "1.0",
         },
       ],
-    },
-    {
-      name: "DialTdctType",
-      all: {
-        element: [
-          {
-            name: "DIALOGNAME",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "SPRAS",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "DDTEXT",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-        ],
-      },
-    },
-    {
-      name: "DialType",
-      sequence: {
-        element: [
-          {
-            name: "TDCT",
-            type: "DialTdctType",
-            minOccurs: "0",
-          },
-        ],
-      },
     },
   ],
 } as const;

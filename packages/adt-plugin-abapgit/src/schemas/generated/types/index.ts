@@ -51,6 +51,7 @@ export type { SusoSchema as SusoAbapGitType } from './suso';
 export type { SushSchema as SushAbapGitType } from './sush';
 export type { SktdSchema as SktdAbapGitType } from './sktd';
 export type { FormSchema as FormAbapGitType } from './form';
+export type { TdlinesSchema as TdlinesAbapGitType } from './tdlines';
 export type { XinxSchema as XinxAbapGitType } from './xinx';
 export type { ParaSchema as ParaAbapGitType } from './para';
 export type { PersSchema as PersAbapGitType } from './pers';

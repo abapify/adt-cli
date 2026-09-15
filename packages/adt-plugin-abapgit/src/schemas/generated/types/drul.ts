@@ -24,4 +24,29 @@ export type DrulSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        DRUL?: undefined | {
+            METADATA?: undefined | {
+                NAME?: string | undefined;
+                MASTER_LANGUAGE?: string | undefined;
+                RESPONSIBLE?: string | undefined;
+                PACKAGE_REF?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DRUL?: undefined | {
+                METADATA?: undefined | {
+                    NAME?: string | undefined;
+                    MASTER_LANGUAGE?: string | undefined;
+                    RESPONSIBLE?: string | undefined;
+                    PACKAGE_REF?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

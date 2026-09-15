@@ -9,13 +9,95 @@ export type SprxSchema = {
     abapGit: {
         abap: {
             values: {
-                PROXY_HEADER?: unknown;
-                PROXY_DATA?: unknown;
+                PROXY_HEADER?: undefined | {
+                    item?: undefined | {
+                        OBJECT?: string | undefined;
+                        OBJ_NAME?: string | undefined;
+                        INACTIVE?: string | undefined;
+                        IFR_TYPE?: string | undefined;
+                        IFR_NAME?: string | undefined;
+                        IFR_NSPCE?: string | undefined;
+                        IFR_GNSPCE?: string | undefined;
+                    }[];
+                };
+                PROXY_DATA?: undefined | {
+                    item?: undefined | {
+                        OBJECT?: string | undefined;
+                        OBJ_NAME?: string | undefined;
+                        OBJECT1?: string | undefined;
+                        OBJ_NAME1?: string | undefined;
+                        INACTIVE?: string | undefined;
+                        IFR_TYPE?: string | undefined;
+                        IFR_NAME?: string | undefined;
+                        IFR_TEXT?: string | undefined;
+                        R3_TYPE?: string | undefined;
+                        R3_NAME?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        PROXY_HEADER?: undefined | {
+            item?: undefined | {
+                OBJECT?: string | undefined;
+                OBJ_NAME?: string | undefined;
+                INACTIVE?: string | undefined;
+                IFR_TYPE?: string | undefined;
+                IFR_NAME?: string | undefined;
+                IFR_NSPCE?: string | undefined;
+                IFR_GNSPCE?: string | undefined;
+            }[];
+        };
+        PROXY_DATA?: undefined | {
+            item?: undefined | {
+                OBJECT?: string | undefined;
+                OBJ_NAME?: string | undefined;
+                OBJECT1?: string | undefined;
+                OBJ_NAME1?: string | undefined;
+                INACTIVE?: string | undefined;
+                IFR_TYPE?: string | undefined;
+                IFR_NAME?: string | undefined;
+                IFR_TEXT?: string | undefined;
+                R3_TYPE?: string | undefined;
+                R3_NAME?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            PROXY_HEADER?: undefined | {
+                item?: undefined | {
+                    OBJECT?: string | undefined;
+                    OBJ_NAME?: string | undefined;
+                    INACTIVE?: string | undefined;
+                    IFR_TYPE?: string | undefined;
+                    IFR_NAME?: string | undefined;
+                    IFR_NSPCE?: string | undefined;
+                    IFR_GNSPCE?: string | undefined;
+                }[];
+            };
+            PROXY_DATA?: undefined | {
+                item?: undefined | {
+                    OBJECT?: string | undefined;
+                    OBJ_NAME?: string | undefined;
+                    OBJECT1?: string | undefined;
+                    OBJ_NAME1?: string | undefined;
+                    INACTIVE?: string | undefined;
+                    IFR_TYPE?: string | undefined;
+                    IFR_NAME?: string | undefined;
+                    IFR_TEXT?: string | undefined;
+                    R3_TYPE?: string | undefined;
+                    R3_NAME?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

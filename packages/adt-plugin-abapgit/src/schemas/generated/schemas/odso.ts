@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "OdsoAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,65 +46,47 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "OdsoValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "ODSO",
-            type: "OdsoType",
-          },
-        ],
-      },
-    },
-    {
-      name: "OdsoAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "OdsoValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            type: "asx:OdsoDetailsType",
             minOccurs: "0",
-            maxOccurs: "unbounded",
           },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
           {
-            ref: "asx:values",
+            name: "INFOOBJECTS",
+            type: "asx:OdsoInfoObjectsType",
+            minOccurs: "0",
+          },
+          {
+            name: "NAVIGATION",
+            type: "asx:OdsoAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "INDEXES",
+            type: "asx:OdsoAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "INDEX_IOBJ",
+            type: "asx:OdsoAnyTableType",
+            minOccurs: "0",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "OdsoDetailsType",
@@ -195,31 +177,46 @@ export default {
       },
     },
     {
-      name: "OdsoType",
+      name: "OdsoInfoObjectsType",
       sequence: {
         element: [
           {
-            name: "ODSO",
-            type: "OdsoDetailsType",
-          },
-          {
-            name: "INFOOBJECTS",
+            name: "BAPI6116IO",
+            type: "OdsoInfoObjectsItemType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "BAPI6116IO",
-                    type: "OdsoInfoObjectsItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
+            maxOccurs: "unbounded",
           },
         ],
       },
+    },
+    {
+      name: "OdsoAnyTableType",
+      sequence: {
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

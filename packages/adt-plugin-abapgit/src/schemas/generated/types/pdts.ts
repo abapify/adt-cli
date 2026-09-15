@@ -24,4 +24,29 @@ export type PdtsSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        PDTS?: undefined | {
+            HEADER?: undefined | {
+                OTYPE?: string | undefined;
+                OBJID?: string | undefined;
+                SHORT?: string | undefined;
+                STEXT?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            PDTS?: undefined | {
+                HEADER?: undefined | {
+                    OTYPE?: string | undefined;
+                    OBJID?: string | undefined;
+                    SHORT?: string | undefined;
+                    STEXT?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

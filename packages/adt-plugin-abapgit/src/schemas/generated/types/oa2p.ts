@@ -13,7 +13,12 @@ export type Oa2pSchema = {
                     HEADER?: string | undefined;
                     PROFILE?: string | undefined;
                     TYPE?: string | undefined;
-                    T_SCOPES?: unknown;
+                    T_SCOPES?: undefined | {
+                        item?: undefined | {
+                            SCOPE?: string | undefined;
+                            DESCRIPTION?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -21,5 +26,36 @@ export type Oa2pSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        PROFILE?: undefined | {
+            HEADER?: string | undefined;
+            PROFILE?: string | undefined;
+            TYPE?: string | undefined;
+            T_SCOPES?: undefined | {
+                item?: undefined | {
+                    SCOPE?: string | undefined;
+                    DESCRIPTION?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            PROFILE?: undefined | {
+                HEADER?: string | undefined;
+                PROFILE?: string | undefined;
+                TYPE?: string | undefined;
+                T_SCOPES?: undefined | {
+                    item?: undefined | {
+                        SCOPE?: string | undefined;
+                        DESCRIPTION?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

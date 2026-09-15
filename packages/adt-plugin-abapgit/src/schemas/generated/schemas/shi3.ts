@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "Shi3AbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,98 +46,47 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "Shi3ValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "TREE_HEAD",
-            type: "Shi3TreeHeadType",
+            type: "asx:Shi3TreeHeadType",
             minOccurs: "0",
           },
           {
             name: "TREE_TITLES",
+            type: "asx:Shi3TreeTitlesType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "Shi3TreeTitleItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "TREE_NODES",
+            type: "asx:Shi3TreeNodesType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "Shi3TreeNodeItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
-        ],
-      },
-    },
-    {
-      name: "Shi3AbapType",
-      sequence: {
-        element: [
           {
-            name: "values",
-            type: "Shi3ValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "TREE_REFS",
+            type: "asx:Shi3AnyTableType",
             minOccurs: "0",
-            maxOccurs: "unbounded",
           },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
           {
-            ref: "asx:values",
+            name: "TREE_TEXTS",
+            type: "asx:Shi3AnyTableType",
+            minOccurs: "0",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "Shi3TreeHeadType",
@@ -206,48 +155,72 @@ export default {
       },
     },
     {
-      name: "Shi3Type",
+      name: "Shi3TreeTitlesType",
       sequence: {
         element: [
           {
-            name: "TREE_HEAD",
-            type: "Shi3TreeHeadType",
+            name: "item",
+            type: "Shi3TreeTitleItemType",
             minOccurs: "0",
-          },
-          {
-            name: "TREE_TITLES",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "Shi3TreeTitleItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "TREE_NODES",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "Shi3TreeNodeItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
+            maxOccurs: "unbounded",
           },
         ],
       },
+    },
+    {
+      name: "Shi3TreeNodesType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "Shi3TreeNodeItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "Shi3AnyTableType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "ItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "ItemType",
+      sequence: {
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

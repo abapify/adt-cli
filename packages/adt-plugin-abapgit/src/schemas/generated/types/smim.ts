@@ -26,4 +26,33 @@ export type SmimSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        URL?: string | undefined;
+        FOLDER?: string | undefined;
+        CLASS?: string | undefined;
+        EXTRA?: undefined | {
+            FILE_NAME?: string | undefined;
+            MIMETYPE?: string | undefined;
+            DESCRIPTION?: string | undefined;
+            ABAP_LANGUAGE_VERSION?: string | undefined;
+            PARENT_FOLDER_ID?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            URL?: string | undefined;
+            FOLDER?: string | undefined;
+            CLASS?: string | undefined;
+            EXTRA?: undefined | {
+                FILE_NAME?: string | undefined;
+                MIMETYPE?: string | undefined;
+                DESCRIPTION?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
+                PARENT_FOLDER_ID?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

@@ -9,13 +9,62 @@ export type SucuSchema = {
     abapGit: {
         abap: {
             values: {
-                TBRG_AUTH?: unknown;
-                TBRG_AUTHT?: unknown;
+                TBRG_AUTH?: undefined | {
+                    item?: undefined | {
+                        BRGRU?: string | undefined;
+                        OBJECT?: string | undefined;
+                    }[];
+                };
+                TBRG_AUTHT?: undefined | {
+                    item?: undefined | {
+                        SPRAS?: string | undefined;
+                        BRGRU?: string | undefined;
+                        OBJECT?: string | undefined;
+                        BEZEI?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        TBRG_AUTH?: undefined | {
+            item?: undefined | {
+                BRGRU?: string | undefined;
+                OBJECT?: string | undefined;
+            }[];
+        };
+        TBRG_AUTHT?: undefined | {
+            item?: undefined | {
+                SPRAS?: string | undefined;
+                BRGRU?: string | undefined;
+                OBJECT?: string | undefined;
+                BEZEI?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            TBRG_AUTH?: undefined | {
+                item?: undefined | {
+                    BRGRU?: string | undefined;
+                    OBJECT?: string | undefined;
+                }[];
+            };
+            TBRG_AUTHT?: undefined | {
+                item?: undefined | {
+                    SPRAS?: string | undefined;
+                    BRGRU?: string | undefined;
+                    OBJECT?: string | undefined;
+                    BEZEI?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

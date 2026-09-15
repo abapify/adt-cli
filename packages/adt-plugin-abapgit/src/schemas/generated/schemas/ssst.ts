@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "SsstAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,66 +46,42 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "SsstValuesType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "HEADER",
-            type: "SsstHeaderType",
+            type: "asx:SsstHeaderType",
+            minOccurs: "0",
+          },
+          {
+            name: "SSFPARAS",
+            type: "asx:SsstAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "SSFSTRINGS",
+            type: "asx:SsstAnyTableType",
+            minOccurs: "0",
+          },
+          {
+            name: "STXSTAB",
+            type: "asx:SsstAnyTableType",
             minOccurs: "0",
           },
         ],
       },
-    },
-    {
-      name: "SsstAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "SsstValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "SsstHeaderType",
@@ -130,16 +106,46 @@ export default {
       },
     },
     {
-      name: "SsstType",
+      name: "SsstAnyTableType",
       sequence: {
         element: [
           {
-            name: "HEADER",
-            type: "SsstHeaderType",
+            name: "item",
+            type: "ItemType",
             minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },
+    },
+    {
+      name: "ItemType",
+      sequence: {
+        any: [
+          {
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+            processContents: "lax",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

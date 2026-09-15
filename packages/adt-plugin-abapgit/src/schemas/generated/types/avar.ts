@@ -10,12 +10,43 @@ export type AvarSchema = {
         abap: {
             values: {
                 DESCRIPTION?: string | undefined;
-                IDS?: unknown;
+                IDS?: undefined | {
+                    item?: undefined | {
+                        OBJ_NAME?: string | undefined;
+                        OBJ_TYPE?: string | undefined;
+                        ACTIVE?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        DESCRIPTION?: string | undefined;
+        IDS?: undefined | {
+            item?: undefined | {
+                OBJ_NAME?: string | undefined;
+                OBJ_TYPE?: string | undefined;
+                ACTIVE?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DESCRIPTION?: string | undefined;
+            IDS?: undefined | {
+                item?: undefined | {
+                    OBJ_NAME?: string | undefined;
+                    OBJ_TYPE?: string | undefined;
+                    ACTIVE?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

@@ -22,4 +22,25 @@ export type Sod2Schema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SOD2?: undefined | {
+            METADATA?: undefined | {
+                NAME?: string | undefined;
+                MASTER_LANGUAGE?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SOD2?: undefined | {
+                METADATA?: undefined | {
+                    NAME?: string | undefined;
+                    MASTER_LANGUAGE?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

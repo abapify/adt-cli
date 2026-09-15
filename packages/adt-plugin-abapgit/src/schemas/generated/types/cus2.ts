@@ -14,7 +14,13 @@ export type Cus2Schema = {
                         ATTR_ID?: string | undefined;
                         ATTR_TYPE?: string | undefined;
                     };
-                    TITLES?: unknown;
+                    TITLES?: undefined | {
+                        item?: undefined | {
+                            ATTR_ID?: string | undefined;
+                            SPRAS?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -22,5 +28,40 @@ export type Cus2Schema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        CUS2?: undefined | {
+            HEADER?: undefined | {
+                ATTR_ID?: string | undefined;
+                ATTR_TYPE?: string | undefined;
+            };
+            TITLES?: undefined | {
+                item?: undefined | {
+                    ATTR_ID?: string | undefined;
+                    SPRAS?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            CUS2?: undefined | {
+                HEADER?: undefined | {
+                    ATTR_ID?: string | undefined;
+                    ATTR_TYPE?: string | undefined;
+                };
+                TITLES?: undefined | {
+                    item?: undefined | {
+                        ATTR_ID?: string | undefined;
+                        SPRAS?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

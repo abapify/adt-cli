@@ -23,4 +23,27 @@ export type Shi8Schema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SHI8?: undefined | {
+            SFW_ASS_ID?: string | undefined;
+            SWITCH_ID?: string | undefined;
+            REACTION?: string | undefined;
+            TREE_ID?: string | undefined;
+            NODE_ID?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SHI8?: undefined | {
+                SFW_ASS_ID?: string | undefined;
+                SWITCH_ID?: string | undefined;
+                REACTION?: string | undefined;
+                TREE_ID?: string | undefined;
+                NODE_ID?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

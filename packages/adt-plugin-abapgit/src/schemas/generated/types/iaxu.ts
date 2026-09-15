@@ -25,4 +25,31 @@ export type IaxuSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        ATTR?: undefined | {
+            NAME?: string | undefined;
+            TEXT?: string | undefined;
+            MIMETYPE?: string | undefined;
+            CHNAME?: string | undefined;
+            TDATE?: string | undefined;
+            TTIME?: string | undefined;
+            DEVCLASS?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            ATTR?: undefined | {
+                NAME?: string | undefined;
+                TEXT?: string | undefined;
+                MIMETYPE?: string | undefined;
+                CHNAME?: string | undefined;
+                TDATE?: string | undefined;
+                TTIME?: string | undefined;
+                DEVCLASS?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

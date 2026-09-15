@@ -16,7 +16,12 @@ export type IextSchema = {
                         CIMTYP?: string | undefined;
                         DESCRP?: string | undefined;
                     };
-                    T_SYNTAX?: unknown;
+                    T_SYNTAX?: undefined | {
+                        item?: undefined | {
+                            EXTTYPE?: string | undefined;
+                            SEGMENT?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -24,5 +29,42 @@ export type IextSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        IEXT?: undefined | {
+            ATTRIBUTES?: undefined | {
+                EXTTYPE?: string | undefined;
+                IDOCTYP?: string | undefined;
+                CIMTYP?: string | undefined;
+                DESCRP?: string | undefined;
+            };
+            T_SYNTAX?: undefined | {
+                item?: undefined | {
+                    EXTTYPE?: string | undefined;
+                    SEGMENT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            IEXT?: undefined | {
+                ATTRIBUTES?: undefined | {
+                    EXTTYPE?: string | undefined;
+                    IDOCTYP?: string | undefined;
+                    CIMTYP?: string | undefined;
+                    DESCRP?: string | undefined;
+                };
+                T_SYNTAX?: undefined | {
+                    item?: undefined | {
+                        EXTTYPE?: string | undefined;
+                        SEGMENT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

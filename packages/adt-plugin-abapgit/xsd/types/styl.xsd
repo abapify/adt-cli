@@ -55,30 +55,30 @@
     </xs:all>
   </xs:complexType>
 
+  <xs:complexType name="StylParagraphsType">
+    <xs:sequence>
+      <xs:element name="item" type="StylParagraphItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StylStringsType">
+    <xs:sequence>
+      <xs:element name="item" type="StylStringItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StylTabsType">
+    <xs:sequence>
+      <xs:element name="item" type="StylTabItemType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="StylType">
     <xs:sequence>
       <xs:element name="HEADER" type="StylHeaderType" minOccurs="0"/>
-      <xs:element name="PARAGRAPHS" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="item" type="StylParagraphItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="STRINGS" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="item" type="StylStringItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="TABS" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="item" type="StylTabItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="PARAGRAPHS" type="StylParagraphsType" minOccurs="0"/>
+      <xs:element name="STRINGS" type="StylStringsType" minOccurs="0"/>
+      <xs:element name="TABS" type="StylTabsType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

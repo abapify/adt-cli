@@ -16,7 +16,12 @@ export type WdccSchema = {
                 WDA_COMPONENT?: string | undefined;
                 PARENT?: string | undefined;
                 RELID?: string | undefined;
-                OTR_TEXT?: unknown;
+                OTR_TEXT?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
                 DESCR_LANG?: string | undefined;
             };
             version?: string | undefined;
@@ -24,5 +29,42 @@ export type WdccSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        OBJECT_NAME?: string | undefined;
+        CONFIG_ID?: string | undefined;
+        CONFIG_TYPE?: string | undefined;
+        CONFIG_VAR?: string | undefined;
+        WDA_COMPONENT?: string | undefined;
+        PARENT?: string | undefined;
+        RELID?: string | undefined;
+        OTR_TEXT?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                TEXT?: string | undefined;
+            }[];
+        };
+        DESCR_LANG?: string | undefined;
+    };
+} | {
+    abap: {
+        values: {
+            OBJECT_NAME?: string | undefined;
+            CONFIG_ID?: string | undefined;
+            CONFIG_TYPE?: string | undefined;
+            CONFIG_VAR?: string | undefined;
+            WDA_COMPONENT?: string | undefined;
+            PARENT?: string | undefined;
+            RELID?: string | undefined;
+            OTR_TEXT?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+            DESCR_LANG?: string | undefined;
+        };
+        version?: string | undefined;
     };
 };

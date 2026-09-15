@@ -15,7 +15,13 @@ export type WebiSchema = {
                         DESCRIPT?: string | undefined;
                         LANGU?: string | undefined;
                     };
-                    PVEPHEADER?: unknown;
+                    PVEPHEADER?: undefined | {
+                        item?: undefined | {
+                            VEPNAME?: string | undefined;
+                            GENERATOR?: string | undefined;
+                            FEATURES?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -23,5 +29,42 @@ export type WebiSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        WEBI?: undefined | {
+            VEPTEXT?: undefined | {
+                VEPNAME?: string | undefined;
+                DESCRIPT?: string | undefined;
+                LANGU?: string | undefined;
+            };
+            PVEPHEADER?: undefined | {
+                item?: undefined | {
+                    VEPNAME?: string | undefined;
+                    GENERATOR?: string | undefined;
+                    FEATURES?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            WEBI?: undefined | {
+                VEPTEXT?: undefined | {
+                    VEPNAME?: string | undefined;
+                    DESCRIPT?: string | undefined;
+                    LANGU?: string | undefined;
+                };
+                PVEPHEADER?: undefined | {
+                    item?: undefined | {
+                        VEPNAME?: string | undefined;
+                        GENERATOR?: string | undefined;
+                        FEATURES?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

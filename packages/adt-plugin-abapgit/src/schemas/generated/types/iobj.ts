@@ -9,31 +9,131 @@ export type IobjSchema = {
     abapGit: {
         abap: {
             values: {
-                IOBJ: {
-                    IOBJ: {
-                        INFOOBJECT: string;
-                        VERSION?: string | undefined;
-                        TYPE?: string | undefined;
-                        OBJSTAT?: string | undefined;
-                        ACTIVFL?: string | undefined;
-                        FIELDNM?: string | undefined;
-                        CONTREL?: string | undefined;
-                        DATATP?: string | undefined;
-                        INTLEN?: string | undefined;
-                        OUTPUTLEN?: string | undefined;
-                        LOWCASE?: string | undefined;
-                        CONVEXIT?: string | undefined;
-                        TXTLONG?: string | undefined;
-                        TXTSHRT?: string | undefined;
-                    };
-                    COMPOUNDS?: unknown;
-                    ATTRIBUTES?: unknown;
+                IOBJ?: undefined | {
+                    INFOOBJECT: string;
+                    VERSION?: string | undefined;
+                    TYPE?: string | undefined;
+                    OBJSTAT?: string | undefined;
+                    ACTIVFL?: string | undefined;
+                    FIELDNM?: string | undefined;
+                    CONTREL?: string | undefined;
+                    DATATP?: string | undefined;
+                    INTLEN?: string | undefined;
+                    OUTPUTLEN?: string | undefined;
+                    LOWCASE?: string | undefined;
+                    CONVEXIT?: string | undefined;
+                    KYFNM?: string | undefined;
+                    TXTLONG?: string | undefined;
+                    TXTSHRT?: string | undefined;
                 };
+                COMPOUNDS?: undefined | {
+                    BAPI6108CM?: undefined | {
+                        IOBJNM_Z?: string | undefined;
+                        COMPOUND?: string | undefined;
+                    }[];
+                };
+                ATTRIBUTES?: undefined | {
+                    BAPI6108AT?: undefined | {
+                        ATRNM?: string | undefined;
+                        OBJSTAT?: string | undefined;
+                        ATTRIB?: string | undefined;
+                        KYFNM?: string | undefined;
+                    }[];
+                };
+                NAVIGATION_ATTRIBUTES?: undefined | unknown;
+                ATTR_NAVIGATION?: undefined | unknown;
+                HIERARCHY?: undefined | unknown;
+                ELIMINATION?: undefined | unknown;
+                HANA_FIELDS_MAPPING?: undefined | unknown;
+                XXL_ATTRIBUTES?: undefined | unknown;
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        IOBJ?: undefined | {
+            INFOOBJECT: string;
+            VERSION?: string | undefined;
+            TYPE?: string | undefined;
+            OBJSTAT?: string | undefined;
+            ACTIVFL?: string | undefined;
+            FIELDNM?: string | undefined;
+            CONTREL?: string | undefined;
+            DATATP?: string | undefined;
+            INTLEN?: string | undefined;
+            OUTPUTLEN?: string | undefined;
+            LOWCASE?: string | undefined;
+            CONVEXIT?: string | undefined;
+            KYFNM?: string | undefined;
+            TXTLONG?: string | undefined;
+            TXTSHRT?: string | undefined;
+        };
+        COMPOUNDS?: undefined | {
+            BAPI6108CM?: undefined | {
+                IOBJNM_Z?: string | undefined;
+                COMPOUND?: string | undefined;
+            }[];
+        };
+        ATTRIBUTES?: undefined | {
+            BAPI6108AT?: undefined | {
+                ATRNM?: string | undefined;
+                OBJSTAT?: string | undefined;
+                ATTRIB?: string | undefined;
+                KYFNM?: string | undefined;
+            }[];
+        };
+        NAVIGATION_ATTRIBUTES?: undefined | unknown;
+        ATTR_NAVIGATION?: undefined | unknown;
+        HIERARCHY?: undefined | unknown;
+        ELIMINATION?: undefined | unknown;
+        HANA_FIELDS_MAPPING?: undefined | unknown;
+        XXL_ATTRIBUTES?: undefined | unknown;
+    };
+} | {
+    abap: {
+        values: {
+            IOBJ?: undefined | {
+                INFOOBJECT: string;
+                VERSION?: string | undefined;
+                TYPE?: string | undefined;
+                OBJSTAT?: string | undefined;
+                ACTIVFL?: string | undefined;
+                FIELDNM?: string | undefined;
+                CONTREL?: string | undefined;
+                DATATP?: string | undefined;
+                INTLEN?: string | undefined;
+                OUTPUTLEN?: string | undefined;
+                LOWCASE?: string | undefined;
+                CONVEXIT?: string | undefined;
+                KYFNM?: string | undefined;
+                TXTLONG?: string | undefined;
+                TXTSHRT?: string | undefined;
+            };
+            COMPOUNDS?: undefined | {
+                BAPI6108CM?: undefined | {
+                    IOBJNM_Z?: string | undefined;
+                    COMPOUND?: string | undefined;
+                }[];
+            };
+            ATTRIBUTES?: undefined | {
+                BAPI6108AT?: undefined | {
+                    ATRNM?: string | undefined;
+                    OBJSTAT?: string | undefined;
+                    ATTRIB?: string | undefined;
+                    KYFNM?: string | undefined;
+                }[];
+            };
+            NAVIGATION_ATTRIBUTES?: undefined | unknown;
+            ATTR_NAVIGATION?: undefined | unknown;
+            HIERARCHY?: undefined | unknown;
+            ELIMINATION?: undefined | unknown;
+            HANA_FIELDS_MAPPING?: undefined | unknown;
+            XXL_ATTRIBUTES?: undefined | unknown;
+        };
+        version?: string | undefined;
     };
 };

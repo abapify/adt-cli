@@ -17,7 +17,12 @@ export type Cus0Schema = {
                         C_ACTIVITY?: string | undefined;
                         TCODE?: string | undefined;
                     };
-                    TEXTS?: unknown;
+                    TEXTS?: undefined | {
+                        item?: undefined | {
+                            SPRAS?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -25,5 +30,44 @@ export type Cus0Schema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        CUS0?: undefined | {
+            HEADER?: undefined | {
+                ACTIVITY?: string | undefined;
+                DOCU_ID?: string | undefined;
+                ATTRIBUTES?: string | undefined;
+                C_ACTIVITY?: string | undefined;
+                TCODE?: string | undefined;
+            };
+            TEXTS?: undefined | {
+                item?: undefined | {
+                    SPRAS?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            CUS0?: undefined | {
+                HEADER?: undefined | {
+                    ACTIVITY?: string | undefined;
+                    DOCU_ID?: string | undefined;
+                    ATTRIBUTES?: string | undefined;
+                    C_ACTIVITY?: string | undefined;
+                    TCODE?: string | undefined;
+                };
+                TEXTS?: undefined | {
+                    item?: undefined | {
+                        SPRAS?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

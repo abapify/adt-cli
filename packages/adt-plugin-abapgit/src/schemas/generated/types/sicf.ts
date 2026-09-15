@@ -26,19 +26,39 @@ export type SicfSchema = {
                     LANGU?: string | undefined;
                     DESCRIPT?: string | undefined;
                 };
-                ICFHANDLER_TABLE?: unknown;
+                ICFHANDLER_TABLE?: undefined | {
+                    ICFHANDLER?: undefined | {
+                        ICF_NAME?: string | undefined;
+                        ICFHANDLER?: string | undefined;
+                        ICFHANDLERORDER?: string | undefined;
+                    }[];
+                };
                 SOTS?: undefined | {
                     item?: undefined | {
-                        CONCEPT?: string | undefined;
-                        LANGU?: string | undefined;
-                        TEXT?: string | undefined;
+                        HEADER?: undefined | {
+                            CONCEPT?: string | undefined;
+                            PAKET?: string | undefined;
+                            CREA_LAN?: string | undefined;
+                            ALIAS_NAME?: string | undefined;
+                        };
+                        ENTRIES?: undefined | {
+                            item?: undefined | {
+                                CONCEPT?: string | undefined;
+                                LANGU?: string | undefined;
+                                OBJECT?: string | undefined;
+                                LFD_NUM?: string | undefined;
+                                TEXT?: string | undefined;
+                            }[];
+                        };
                     }[];
                 };
                 SOTS_USE?: undefined | {
                     item?: undefined | {
+                        PGMID?: string | undefined;
+                        OBJECT?: string | undefined;
+                        OBJ_NAME?: string | undefined;
                         CONCEPT?: string | undefined;
-                        LANGU?: string | undefined;
-                        TEXT?: string | undefined;
+                        LFD_NUM?: string | undefined;
                     }[];
                 };
             };
@@ -47,5 +67,118 @@ export type SicfSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        URL?: string | undefined;
+        ICFSERVICE?: undefined | {
+            ICF_NAME?: string | undefined;
+            ICFALTNME?: string | undefined;
+            ORIG_NAME?: string | undefined;
+            ICF_PARENT?: string | undefined;
+            ICF_NODE_LOGON?: string | undefined;
+            ICF_AUTH?: string | undefined;
+            ICF_MANDT?: string | undefined;
+            ICFNODGUID?: string | undefined;
+            ICFPARGUID?: string | undefined;
+        };
+        ICFDOCU?: undefined | {
+            ICF_NAME?: string | undefined;
+            LANGU?: string | undefined;
+            DESCRIPT?: string | undefined;
+        };
+        ICFHANDLER_TABLE?: undefined | {
+            ICFHANDLER?: undefined | {
+                ICF_NAME?: string | undefined;
+                ICFHANDLER?: string | undefined;
+                ICFHANDLERORDER?: string | undefined;
+            }[];
+        };
+        SOTS?: undefined | {
+            item?: undefined | {
+                HEADER?: undefined | {
+                    CONCEPT?: string | undefined;
+                    PAKET?: string | undefined;
+                    CREA_LAN?: string | undefined;
+                    ALIAS_NAME?: string | undefined;
+                };
+                ENTRIES?: undefined | {
+                    item?: undefined | {
+                        CONCEPT?: string | undefined;
+                        LANGU?: string | undefined;
+                        OBJECT?: string | undefined;
+                        LFD_NUM?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            }[];
+        };
+        SOTS_USE?: undefined | {
+            item?: undefined | {
+                PGMID?: string | undefined;
+                OBJECT?: string | undefined;
+                OBJ_NAME?: string | undefined;
+                CONCEPT?: string | undefined;
+                LFD_NUM?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            URL?: string | undefined;
+            ICFSERVICE?: undefined | {
+                ICF_NAME?: string | undefined;
+                ICFALTNME?: string | undefined;
+                ORIG_NAME?: string | undefined;
+                ICF_PARENT?: string | undefined;
+                ICF_NODE_LOGON?: string | undefined;
+                ICF_AUTH?: string | undefined;
+                ICF_MANDT?: string | undefined;
+                ICFNODGUID?: string | undefined;
+                ICFPARGUID?: string | undefined;
+            };
+            ICFDOCU?: undefined | {
+                ICF_NAME?: string | undefined;
+                LANGU?: string | undefined;
+                DESCRIPT?: string | undefined;
+            };
+            ICFHANDLER_TABLE?: undefined | {
+                ICFHANDLER?: undefined | {
+                    ICF_NAME?: string | undefined;
+                    ICFHANDLER?: string | undefined;
+                    ICFHANDLERORDER?: string | undefined;
+                }[];
+            };
+            SOTS?: undefined | {
+                item?: undefined | {
+                    HEADER?: undefined | {
+                        CONCEPT?: string | undefined;
+                        PAKET?: string | undefined;
+                        CREA_LAN?: string | undefined;
+                        ALIAS_NAME?: string | undefined;
+                    };
+                    ENTRIES?: undefined | {
+                        item?: undefined | {
+                            CONCEPT?: string | undefined;
+                            LANGU?: string | undefined;
+                            OBJECT?: string | undefined;
+                            LFD_NUM?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
+                    };
+                }[];
+            };
+            SOTS_USE?: undefined | {
+                item?: undefined | {
+                    PGMID?: string | undefined;
+                    OBJECT?: string | undefined;
+                    OBJ_NAME?: string | undefined;
+                    CONCEPT?: string | undefined;
+                    LFD_NUM?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

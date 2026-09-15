@@ -10,13 +10,18 @@ type ProxyObjectLike = {
   headers?: Array<{
     object?: string;
     objName?: string;
+    inactive?: string;
     ifrType?: string;
     ifrName?: string;
     ifrNspce?: string;
+    ifrGnspce?: string;
   }>;
   data?: Array<{
     object?: string;
     objName?: string;
+    object1?: string;
+    objName1?: string;
+    inactive?: string;
     ifrType?: string;
     ifrName?: string;
     ifrText?: string;
@@ -39,9 +44,11 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
             item: obj.headers.map((h) => ({
               OBJECT: h.object,
               OBJ_NAME: h.objName,
+              INACTIVE: h.inactive,
               IFR_TYPE: h.ifrType,
               IFR_NAME: h.ifrName,
               IFR_NSPCE: h.ifrNspce,
+              IFR_GNSPCE: h.ifrGnspce,
             })),
           }
         : undefined,
@@ -50,6 +57,9 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
             item: obj.data.map((d) => ({
               OBJECT: d.object,
               OBJ_NAME: d.objName,
+              OBJECT1: d.object1,
+              OBJ_NAME1: d.objName1,
+              INACTIVE: d.inactive,
               IFR_TYPE: d.ifrType,
               IFR_NAME: d.ifrName,
               IFR_TEXT: d.ifrText,
@@ -68,13 +78,18 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
         headers: headers.map((h) => ({
           object: h.OBJECT,
           objName: h.OBJ_NAME,
+          inactive: h.INACTIVE,
           ifrType: h.IFR_TYPE,
           ifrName: h.IFR_NAME,
           ifrNspce: h.IFR_NSPCE,
+          ifrGnspce: h.IFR_GNSPCE,
         })),
         data: data.map((d) => ({
           object: d.OBJECT,
           objName: d.OBJ_NAME,
+          object1: d.OBJECT1,
+          objName1: d.OBJ_NAME1,
+          inactive: d.INACTIVE,
           ifrType: d.IFR_TYPE,
           ifrName: d.IFR_NAME,
           ifrText: d.IFR_TEXT,

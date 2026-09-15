@@ -15,4 +15,11 @@ export type G4bsSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: unknown;
+} | {
+    abap: {
+        values: unknown;
+        version?: string | undefined;
+    };
 };

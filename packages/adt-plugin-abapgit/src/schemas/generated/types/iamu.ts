@@ -25,4 +25,31 @@ export type IamuSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        IAMU?: undefined | {
+            ATTRIBUTES?: undefined | {
+                OBJID?: string | undefined;
+                TEXT?: string | undefined;
+                MIMETYPE?: string | undefined;
+                DEVCLASS?: string | undefined;
+            };
+            EXTENSION?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            IAMU?: undefined | {
+                ATTRIBUTES?: undefined | {
+                    OBJID?: string | undefined;
+                    TEXT?: string | undefined;
+                    MIMETYPE?: string | undefined;
+                    DEVCLASS?: string | undefined;
+                };
+                EXTENSION?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

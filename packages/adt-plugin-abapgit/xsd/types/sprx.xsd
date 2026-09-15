@@ -27,22 +27,4 @@
     </xs:all>
   </xs:complexType>
 
-  <xs:complexType name="SprxType">
-    <xs:sequence>
-      <xs:element name="PROXY_HEADER" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="item" type="SprxHeaderItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="PROXY_DATA" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="item" type="SprxDataItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
 </xs:schema>

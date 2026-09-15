@@ -16,14 +16,79 @@ export type SfbsSchema = {
                 };
                 NAME32?: string | undefined;
                 NAME80?: string | undefined;
-                ASSIGNED_BF?: unknown;
-                NESTED_BFS?: unknown;
-                PARENT_BFS?: unknown;
+                ASSIGNED_BF?: undefined | {
+                    item?: undefined | {
+                        BF?: string | undefined;
+                    }[];
+                };
+                NESTED_BFS?: undefined | {
+                    item?: undefined | {
+                        BFS?: string | undefined;
+                    }[];
+                };
+                PARENT_BFS?: undefined | {
+                    item?: undefined | {
+                        BFS?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        HEADER?: undefined | {
+            BS_NAME?: string | undefined;
+            NAME32?: string | undefined;
+            NAME80?: string | undefined;
+        };
+        NAME32?: string | undefined;
+        NAME80?: string | undefined;
+        ASSIGNED_BF?: undefined | {
+            item?: undefined | {
+                BF?: string | undefined;
+            }[];
+        };
+        NESTED_BFS?: undefined | {
+            item?: undefined | {
+                BFS?: string | undefined;
+            }[];
+        };
+        PARENT_BFS?: undefined | {
+            item?: undefined | {
+                BFS?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            HEADER?: undefined | {
+                BS_NAME?: string | undefined;
+                NAME32?: string | undefined;
+                NAME80?: string | undefined;
+            };
+            NAME32?: string | undefined;
+            NAME80?: string | undefined;
+            ASSIGNED_BF?: undefined | {
+                item?: undefined | {
+                    BF?: string | undefined;
+                }[];
+            };
+            NESTED_BFS?: undefined | {
+                item?: undefined | {
+                    BFS?: string | undefined;
+                }[];
+            };
+            PARENT_BFS?: undefined | {
+                item?: undefined | {
+                    BFS?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

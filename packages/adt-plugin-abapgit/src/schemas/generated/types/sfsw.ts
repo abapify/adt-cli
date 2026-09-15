@@ -16,14 +16,79 @@ export type SfswSchema = {
                 };
                 NAME32?: string | undefined;
                 NAME80?: string | undefined;
-                PARENT_BF?: unknown;
-                CONFLICTS?: unknown;
-                PACKAGES?: unknown;
+                PARENT_BF?: undefined | {
+                    item?: undefined | {
+                        BF?: string | undefined;
+                    }[];
+                };
+                CONFLICTS?: undefined | {
+                    item?: undefined | {
+                        CONFLICT?: string | undefined;
+                    }[];
+                };
+                PACKAGES?: undefined | {
+                    item?: undefined | {
+                        PACKAGE?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        HEADER?: undefined | {
+            SWITCH_ID?: string | undefined;
+            NAME32?: string | undefined;
+            NAME80?: string | undefined;
+        };
+        NAME32?: string | undefined;
+        NAME80?: string | undefined;
+        PARENT_BF?: undefined | {
+            item?: undefined | {
+                BF?: string | undefined;
+            }[];
+        };
+        CONFLICTS?: undefined | {
+            item?: undefined | {
+                CONFLICT?: string | undefined;
+            }[];
+        };
+        PACKAGES?: undefined | {
+            item?: undefined | {
+                PACKAGE?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            HEADER?: undefined | {
+                SWITCH_ID?: string | undefined;
+                NAME32?: string | undefined;
+                NAME80?: string | undefined;
+            };
+            NAME32?: string | undefined;
+            NAME80?: string | undefined;
+            PARENT_BF?: undefined | {
+                item?: undefined | {
+                    BF?: string | undefined;
+                }[];
+            };
+            CONFLICTS?: undefined | {
+                item?: undefined | {
+                    CONFLICT?: string | undefined;
+                }[];
+            };
+            PACKAGES?: undefined | {
+                item?: undefined | {
+                    PACKAGE?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

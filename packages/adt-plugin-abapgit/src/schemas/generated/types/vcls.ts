@@ -14,13 +14,72 @@ export type VclsSchema = {
                     AUTHOR?: string | undefined;
                     CHANGEDATE?: string | undefined;
                 };
-                VLCSTRUC_TAB?: unknown;
-                VCLMF_TAB?: unknown;
+                VCLSTRUC_TAB?: undefined | {
+                    item?: undefined | {
+                        VCLNAME?: string | undefined;
+                        OBJECT?: string | undefined;
+                        OBJTEXT?: string | undefined;
+                    }[];
+                };
+                VCLMF_TAB?: undefined | {
+                    item?: undefined | {
+                        VCLNAME?: string | undefined;
+                        OBJECT?: string | undefined;
+                        FORM?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        VCLDIR?: undefined | {
+            VCLNAME?: string | undefined;
+            AUTHOR?: string | undefined;
+            CHANGEDATE?: string | undefined;
+        };
+        VCLSTRUC_TAB?: undefined | {
+            item?: undefined | {
+                VCLNAME?: string | undefined;
+                OBJECT?: string | undefined;
+                OBJTEXT?: string | undefined;
+            }[];
+        };
+        VCLMF_TAB?: undefined | {
+            item?: undefined | {
+                VCLNAME?: string | undefined;
+                OBJECT?: string | undefined;
+                FORM?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            VCLDIR?: undefined | {
+                VCLNAME?: string | undefined;
+                AUTHOR?: string | undefined;
+                CHANGEDATE?: string | undefined;
+            };
+            VCLSTRUC_TAB?: undefined | {
+                item?: undefined | {
+                    VCLNAME?: string | undefined;
+                    OBJECT?: string | undefined;
+                    OBJTEXT?: string | undefined;
+                }[];
+            };
+            VCLMF_TAB?: undefined | {
+                item?: undefined | {
+                    VCLNAME?: string | undefined;
+                    OBJECT?: string | undefined;
+                    FORM?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

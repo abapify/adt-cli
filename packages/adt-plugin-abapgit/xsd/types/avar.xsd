@@ -8,16 +8,4 @@
     </xs:all>
   </xs:complexType>
 
-  <xs:complexType name="AvarType">
-    <xs:sequence>
-      <xs:element name="DESCRIPTION" type="xs:string" minOccurs="0"/>
-      <xs:element name="IDS" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="item" type="AvarIdItemType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
 </xs:schema>

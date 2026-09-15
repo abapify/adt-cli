@@ -22,4 +22,25 @@ export type SamcSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SAMC?: undefined | {
+            HEADER?: undefined | {
+                AMC_NAME?: string | undefined;
+                DESCRIPT?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SAMC?: undefined | {
+                HEADER?: undefined | {
+                    AMC_NAME?: string | undefined;
+                    DESCRIPT?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

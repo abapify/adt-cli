@@ -10,8 +10,16 @@ export type EnhcSchema = {
         abap: {
             values: {
                 SHORTTEXT?: string | undefined;
-                COMPOSITE_CHILDS?: unknown;
-                ENH_CHILDS?: unknown;
+                COMPOSITE_CHILDS?: undefined | {
+                    item?: undefined | {
+                        ENHCOMPOSITENAME?: string | undefined;
+                    }[];
+                };
+                ENH_CHILDS?: undefined | {
+                    item?: undefined | {
+                        ENHNAME?: string | undefined;
+                    }[];
+                };
                 LONGTEXT_ID?: string | undefined;
             };
             version?: string | undefined;
@@ -19,5 +27,38 @@ export type EnhcSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        SHORTTEXT?: string | undefined;
+        COMPOSITE_CHILDS?: undefined | {
+            item?: undefined | {
+                ENHCOMPOSITENAME?: string | undefined;
+            }[];
+        };
+        ENH_CHILDS?: undefined | {
+            item?: undefined | {
+                ENHNAME?: string | undefined;
+            }[];
+        };
+        LONGTEXT_ID?: string | undefined;
+    };
+} | {
+    abap: {
+        values: {
+            SHORTTEXT?: string | undefined;
+            COMPOSITE_CHILDS?: undefined | {
+                item?: undefined | {
+                    ENHCOMPOSITENAME?: string | undefined;
+                }[];
+            };
+            ENH_CHILDS?: undefined | {
+                item?: undefined | {
+                    ENHNAME?: string | undefined;
+                }[];
+            };
+            LONGTEXT_ID?: string | undefined;
+        };
+        version?: string | undefined;
     };
 };

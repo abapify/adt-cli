@@ -16,13 +16,64 @@ export type SfbfSchema = {
                 };
                 NAME32?: string | undefined;
                 NAME80?: string | undefined;
-                ASSIGNED_SWITCHES?: unknown;
-                PARENT_BFS?: unknown;
+                ASSIGNED_SWITCHES?: undefined | {
+                    item?: undefined | {
+                        SWITCH?: string | undefined;
+                    }[];
+                };
+                PARENT_BFS?: undefined | {
+                    item?: undefined | {
+                        BF?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        HEADER?: undefined | {
+            BF_NAME?: string | undefined;
+            NAME32?: string | undefined;
+            NAME80?: string | undefined;
+        };
+        NAME32?: string | undefined;
+        NAME80?: string | undefined;
+        ASSIGNED_SWITCHES?: undefined | {
+            item?: undefined | {
+                SWITCH?: string | undefined;
+            }[];
+        };
+        PARENT_BFS?: undefined | {
+            item?: undefined | {
+                BF?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            HEADER?: undefined | {
+                BF_NAME?: string | undefined;
+                NAME32?: string | undefined;
+                NAME80?: string | undefined;
+            };
+            NAME32?: string | undefined;
+            NAME80?: string | undefined;
+            ASSIGNED_SWITCHES?: undefined | {
+                item?: undefined | {
+                    SWITCH?: string | undefined;
+                }[];
+            };
+            PARENT_BFS?: undefined | {
+                item?: undefined | {
+                    BF?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

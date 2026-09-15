@@ -12,8 +12,21 @@ export type DialSchema = {
                 DIAL?: undefined | {
                     TDCT?: undefined | {
                         DIALOGNAME?: string | undefined;
+                        DYNR?: string | undefined;
+                        PROG?: string | undefined;
                         SPRAS?: string | undefined;
                         DDTEXT?: string | undefined;
+                    };
+                    DIA_PARS?: undefined | {
+                        item?: undefined | {
+                            DNAM?: string | undefined;
+                            DYNR?: string | undefined;
+                            PARAM?: string | undefined;
+                            DPNAM?: string | undefined;
+                            DTYPE?: string | undefined;
+                            DPLEN?: string | undefined;
+                            P_TEXT?: string | undefined;
+                        }[];
                     };
                 };
             };
@@ -22,5 +35,54 @@ export type DialSchema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        DIAL?: undefined | {
+            TDCT?: undefined | {
+                DIALOGNAME?: string | undefined;
+                DYNR?: string | undefined;
+                PROG?: string | undefined;
+                SPRAS?: string | undefined;
+                DDTEXT?: string | undefined;
+            };
+            DIA_PARS?: undefined | {
+                item?: undefined | {
+                    DNAM?: string | undefined;
+                    DYNR?: string | undefined;
+                    PARAM?: string | undefined;
+                    DPNAM?: string | undefined;
+                    DTYPE?: string | undefined;
+                    DPLEN?: string | undefined;
+                    P_TEXT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            DIAL?: undefined | {
+                TDCT?: undefined | {
+                    DIALOGNAME?: string | undefined;
+                    DYNR?: string | undefined;
+                    PROG?: string | undefined;
+                    SPRAS?: string | undefined;
+                    DDTEXT?: string | undefined;
+                };
+                DIA_PARS?: undefined | {
+                    item?: undefined | {
+                        DNAM?: string | undefined;
+                        DYNR?: string | undefined;
+                        PARAM?: string | undefined;
+                        DPNAM?: string | undefined;
+                        DTYPE?: string | undefined;
+                        DPLEN?: string | undefined;
+                        P_TEXT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

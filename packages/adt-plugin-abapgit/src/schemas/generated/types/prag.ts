@@ -22,4 +22,25 @@ export type PragSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        PRAG?: undefined | {
+            PRAGMA?: string | undefined;
+            EXTENSION?: string | undefined;
+            SIGNATURE?: string | undefined;
+            DESCRIPTION?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            PRAG?: undefined | {
+                PRAGMA?: string | undefined;
+                EXTENSION?: string | undefined;
+                SIGNATURE?: string | undefined;
+                DESCRIPTION?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

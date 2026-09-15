@@ -27,7 +27,7 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
         AUTHOR: obj.author,
         CHANGEDATE: obj.changedDate,
       },
-      VLCSTRUC_TAB: obj.structures?.length
+      VCLSTRUC_TAB: obj.structures?.length
         ? {
             item: obj.structures.map((s) => ({
               VCLNAME: String(obj.name ?? '').toUpperCase(),
@@ -47,8 +47,8 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
         : undefined,
     }),
 
-    fromAbapGit: ({ VCLDIR, VLCSTRUC_TAB, VCLMF_TAB }) => {
-      const structures = normalizeItems(VLCSTRUC_TAB?.item);
+    fromAbapGit: ({ VCLDIR, VCLSTRUC_TAB, VCLMF_TAB }) => {
+      const structures = normalizeItems(VCLSTRUC_TAB?.item);
       const forms = normalizeItems(VCLMF_TAB?.item);
       return {
         name: (VCLDIR?.VCLNAME ?? '').toUpperCase(),

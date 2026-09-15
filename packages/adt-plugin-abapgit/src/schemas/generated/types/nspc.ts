@@ -28,4 +28,37 @@ export type NspcSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        NSPC?: undefined | {
+            NAMESPACE?: string | undefined;
+            REPLICENSE?: string | undefined;
+            SSCRFLAG?: string | undefined;
+            SAPFLAG?: string | undefined;
+            GEN_ONLY?: string | undefined;
+        };
+        NSPC_TEXT?: undefined | {
+            SPRAS?: string | undefined;
+            DESCRIPTN?: string | undefined;
+            OWNER?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            NSPC?: undefined | {
+                NAMESPACE?: string | undefined;
+                REPLICENSE?: string | undefined;
+                SSCRFLAG?: string | undefined;
+                SAPFLAG?: string | undefined;
+                GEN_ONLY?: string | undefined;
+            };
+            NSPC_TEXT?: undefined | {
+                SPRAS?: string | undefined;
+                DESCRIPTN?: string | undefined;
+                OWNER?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

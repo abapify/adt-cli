@@ -16,6 +16,7 @@ type SpoolDescLike = {
   columns?: string;
   rows?: string;
   paper?: string;
+  listArea?: string;
 };
 
 export const spoolDescHandler = createHandler<SpoolDescLike, typeof splo>(
@@ -39,6 +40,7 @@ export const spoolDescHandler = createHandler<SpoolDescLike, typeof splo>(
         TYPE: obj.type,
         OUTCOLUMNS: obj.columns,
         OUTROWS: obj.rows,
+        LISTAREA: obj.listArea,
       },
       TSP0P: {
         PDPAPER: obj.paper,
@@ -54,6 +56,7 @@ export const spoolDescHandler = createHandler<SpoolDescLike, typeof splo>(
       type: TSPLD?.TYPE,
       columns: TSPLD?.OUTCOLUMNS,
       rows: TSPLD?.OUTROWS,
+      listArea: TSPLD?.LISTAREA,
       paper: TSP0P?.PDPAPER,
     }),
   },

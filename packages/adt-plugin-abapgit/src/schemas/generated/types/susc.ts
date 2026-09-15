@@ -24,4 +24,29 @@ export type SuscSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        TOBC?: undefined | {
+            OCLSS?: string | undefined;
+        };
+        TOBCT?: undefined | {
+            LANGU?: string | undefined;
+            OCLSS?: string | undefined;
+            CTEXT?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            TOBC?: undefined | {
+                OCLSS?: string | undefined;
+            };
+            TOBCT?: undefined | {
+                LANGU?: string | undefined;
+                OCLSS?: string | undefined;
+                CTEXT?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "UdmoAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,76 +46,23 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "UdmoValuesType",
+      name: "UdmoEntitiesType",
       sequence: {
         element: [
           {
-            name: "DM40L",
-            type: "UdmoDm40lType",
-            minOccurs: "0",
-          },
-          {
-            name: "UDMO_ENTITIES",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "UdmoEntityItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "UDMO_TEXTS",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "UdmoTextItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      name: "UdmoAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "UdmoValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "item",
+            type: "asx:UdmoEntityItemType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -123,21 +70,39 @@ export default {
       },
     },
     {
-      name: "AbapType",
+      name: "UdmoTextsType",
       sequence: {
         element: [
           {
-            ref: "asx:values",
+            name: "item",
+            type: "asx:UdmoTextItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
+    },
+    {
+      name: "AbapValuesType",
+      all: {
+        element: [
+          {
+            name: "DM40L",
+            type: "asx:UdmoDm40lType",
+            minOccurs: "0",
+          },
+          {
+            name: "UDMO_ENTITIES",
+            type: "UdmoEntitiesType",
+            minOccurs: "0",
+          },
+          {
+            name: "UDMO_TEXTS",
+            type: "UdmoTextsType",
+            minOccurs: "0",
+          },
+        ],
+      },
     },
     {
       name: "UdmoDm40lType",
@@ -221,38 +186,33 @@ export default {
           },
           {
             name: "UDMO_ENTITIES",
+            type: "UdmoEntitiesType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "UdmoEntityItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "UDMO_TEXTS",
+            type: "UdmoTextsType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "UdmoTextItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

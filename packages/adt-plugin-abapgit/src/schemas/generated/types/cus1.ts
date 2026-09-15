@@ -14,7 +14,13 @@ export type Cus1Schema = {
                         ACT_ID?: string | undefined;
                         ACT_TYPE?: string | undefined;
                     };
-                    ACTIVITY_TITLE?: unknown;
+                    ACTIVITY_TITLE?: undefined | {
+                        item?: undefined | {
+                            ACT_ID?: string | undefined;
+                            SPRAS?: string | undefined;
+                            TEXT?: string | undefined;
+                        }[];
+                    };
                 };
             };
             version?: string | undefined;
@@ -22,5 +28,40 @@ export type Cus1Schema = {
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        CUS1?: undefined | {
+            ACTIVITY_HEADER?: undefined | {
+                ACT_ID?: string | undefined;
+                ACT_TYPE?: string | undefined;
+            };
+            ACTIVITY_TITLE?: undefined | {
+                item?: undefined | {
+                    ACT_ID?: string | undefined;
+                    SPRAS?: string | undefined;
+                    TEXT?: string | undefined;
+                }[];
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            CUS1?: undefined | {
+                ACTIVITY_HEADER?: undefined | {
+                    ACT_ID?: string | undefined;
+                    ACT_TYPE?: string | undefined;
+                };
+                ACTIVITY_TITLE?: undefined | {
+                    item?: undefined | {
+                        ACT_ID?: string | undefined;
+                        SPRAS?: string | undefined;
+                        TEXT?: string | undefined;
+                    }[];
+                };
+            };
+        };
+        version?: string | undefined;
     };
 };

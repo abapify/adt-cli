@@ -24,4 +24,29 @@ export type ScviSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        SCVI?: undefined | {
+            SHDSVCI?: undefined | {
+                TCODE?: string | undefined;
+                SCREEN?: string | undefined;
+                VARIANT?: string | undefined;
+                TEXT?: string | undefined;
+            };
+        };
+    };
+} | {
+    abap: {
+        values: {
+            SCVI?: undefined | {
+                SHDSVCI?: undefined | {
+                    TCODE?: string | undefined;
+                    SCREEN?: string | undefined;
+                    VARIANT?: string | undefined;
+                    TEXT?: string | undefined;
+                };
+            };
+        };
+        version?: string | undefined;
+    };
 };

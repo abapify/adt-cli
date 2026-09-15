@@ -33,4 +33,47 @@ export type SploSchema = {
         serializer: string;
         serializer_version: string;
     };
+} | {
+    values: {
+        TSPLT?: undefined | {
+            SPRAS?: string | undefined;
+            PAPART?: string | undefined;
+            TXT?: string | undefined;
+        };
+        TSPLD?: undefined | {
+            PAPART?: string | undefined;
+            PFORMAT?: string | undefined;
+            ORIENT?: string | undefined;
+            TYPE?: string | undefined;
+            OUTCOLUMNS?: string | undefined;
+            OUTROWS?: string | undefined;
+            LISTAREA?: string | undefined;
+        };
+        TSP0P?: undefined | {
+            PDPAPER?: string | undefined;
+        };
+    };
+} | {
+    abap: {
+        values: {
+            TSPLT?: undefined | {
+                SPRAS?: string | undefined;
+                PAPART?: string | undefined;
+                TXT?: string | undefined;
+            };
+            TSPLD?: undefined | {
+                PAPART?: string | undefined;
+                PFORMAT?: string | undefined;
+                ORIENT?: string | undefined;
+                TYPE?: string | undefined;
+                OUTCOLUMNS?: string | undefined;
+                OUTROWS?: string | undefined;
+                LISTAREA?: string | undefined;
+            };
+            TSP0P?: undefined | {
+                PDPAPER?: string | undefined;
+            };
+        };
+        version?: string | undefined;
+    };
 };

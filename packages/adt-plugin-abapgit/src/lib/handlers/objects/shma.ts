@@ -19,6 +19,9 @@ type SharedMemoryAreaLike = {
   lifeContext?: string;
   propagationKind?: string;
   displaceKind?: string;
+  maxVersions?: string;
+  maxAreaSize?: string;
+  maxVersionSize?: string;
 };
 
 export const sharedMemoryAreaHandler = createHandler<
@@ -42,6 +45,9 @@ export const sharedMemoryAreaHandler = createHandler<
       LIFE_CONTEXT: obj.lifeContext,
       PROPAGATION_KIND: obj.propagationKind,
       DISPLACE_KIND: obj.displaceKind,
+      MAX_VERSIONS: obj.maxVersions,
+      MAX_AREA_SIZE: obj.maxAreaSize,
+      MAX_VERSION_SIZE: obj.maxVersionSize,
     },
   }),
 
@@ -56,5 +62,8 @@ export const sharedMemoryAreaHandler = createHandler<
     lifeContext: SHMA?.LIFE_CONTEXT,
     propagationKind: SHMA?.PROPAGATION_KIND,
     displaceKind: SHMA?.DISPLACE_KIND,
+    maxVersions: SHMA?.MAX_VERSIONS,
+    maxAreaSize: SHMA?.MAX_AREA_SIZE,
+    maxVersionSize: SHMA?.MAX_VERSION_SIZE,
   }),
 });

@@ -11,12 +11,48 @@ export type W3miSchema = {
             values: {
                 NAME?: string | undefined;
                 TEXT?: string | undefined;
-                PARAMS?: unknown;
+                PARAMS?: undefined | {
+                    item?: undefined | {
+                        RELID?: string | undefined;
+                        OBJID?: string | undefined;
+                        NAME?: string | undefined;
+                        VALUE?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        NAME?: string | undefined;
+        TEXT?: string | undefined;
+        PARAMS?: undefined | {
+            item?: undefined | {
+                RELID?: string | undefined;
+                OBJID?: string | undefined;
+                NAME?: string | undefined;
+                VALUE?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            NAME?: string | undefined;
+            TEXT?: string | undefined;
+            PARAMS?: undefined | {
+                item?: undefined | {
+                    RELID?: string | undefined;
+                    OBJID?: string | undefined;
+                    NAME?: string | undefined;
+                    VALUE?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

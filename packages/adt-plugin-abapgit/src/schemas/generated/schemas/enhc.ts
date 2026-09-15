@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "EnhcAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,11 +46,45 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "EnhcValuesType",
+      name: "CompositeChildsType",
       sequence: {
+        element: [
+          {
+            name: "item",
+            type: "asx:EnhcCompositeChildItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "EnhChildsType",
+      sequence: {
+        element: [
+          {
+            name: "item",
+            type: "asx:EnhcEnhChildItemType",
+            minOccurs: "0",
+            maxOccurs: "unbounded",
+          },
+        ],
+      },
+    },
+    {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
             name: "SHORTTEXT",
@@ -59,35 +93,13 @@ export default {
           },
           {
             name: "COMPOSITE_CHILDS",
+            type: "CompositeChildsType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "EnhcCompositeChildItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "ENH_CHILDS",
+            type: "EnhChildsType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "EnhcEnhChildItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
           {
             name: "LONGTEXT_ID",
@@ -96,53 +108,6 @@ export default {
           },
         ],
       },
-    },
-    {
-      name: "EnhcAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "EnhcValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
-            minOccurs: "0",
-            maxOccurs: "unbounded",
-          },
-        ],
-      },
-    },
-    {
-      name: "AbapType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:values",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "EnhcCompositeChildItemType",
@@ -169,53 +134,21 @@ export default {
       },
     },
     {
-      name: "EnhcType",
+      name: "AbapType",
       sequence: {
         element: [
           {
-            name: "SHORTTEXT",
-            type: "xs:string",
-            minOccurs: "0",
-          },
-          {
-            name: "COMPOSITE_CHILDS",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "EnhcCompositeChildItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "ENH_CHILDS",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "EnhcEnhChildItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-          {
-            name: "LONGTEXT_ID",
-            type: "xs:string",
-            minOccurs: "0",
+            ref: "asx:values",
           },
         ],
       },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

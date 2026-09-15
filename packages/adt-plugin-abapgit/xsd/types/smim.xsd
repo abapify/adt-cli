@@ -9,13 +9,4 @@
       <xs:element name="PARENT_FOLDER_ID" type="xs:string" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
-
-  <xs:complexType name="SmimType">
-    <xs:sequence>
-      <xs:element name="URL" type="xs:string" minOccurs="0"/>
-      <xs:element name="FOLDER" type="xs:string" minOccurs="0"/>
-      <xs:element name="CLASS" type="xs:string" minOccurs="0"/>
-      <xs:element name="EXTRA" type="SmimExtraType" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
 </xs:schema>

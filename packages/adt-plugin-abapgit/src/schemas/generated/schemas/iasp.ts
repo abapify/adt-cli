@@ -10,6 +10,7 @@ export default {
     xs: "http://www.w3.org/2001/XMLSchema",
     asx: "http://www.sap.com/abapxml",
   },
+  targetNamespace: "http://www.sap.com/abapxml",
   elementFormDefault: "unqualified",
   element: [
     {
@@ -18,8 +19,7 @@ export default {
         sequence: {
           element: [
             {
-              name: "abap",
-              type: "IaspAbapType",
+              ref: "asx:abap",
             },
           ],
         },
@@ -46,60 +46,23 @@ export default {
       name: "Schema",
       abstract: true,
     },
+    {
+      name: "values",
+      type: "asx:AbapValuesType",
+    },
+    {
+      name: "abap",
+      type: "asx:AbapType",
+    },
   ],
   complexType: [
     {
-      name: "IaspValuesType",
+      name: "ParametersType",
       sequence: {
         element: [
           {
-            name: "ATTR",
-            type: "IaspAttrType",
-            minOccurs: "0",
-          },
-          {
-            name: "PARAMETERS",
-            minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "IaspParamItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      name: "IaspAbapType",
-      sequence: {
-        element: [
-          {
-            name: "values",
-            type: "IaspValuesType",
-          },
-        ],
-      },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
-    },
-    {
-      name: "AbapValuesType",
-      sequence: {
-        element: [
-          {
-            ref: "asx:Schema",
+            name: "item",
+            type: "asx:IaspParamItemType",
             minOccurs: "0",
             maxOccurs: "unbounded",
           },
@@ -107,21 +70,21 @@ export default {
       },
     },
     {
-      name: "AbapType",
-      sequence: {
+      name: "AbapValuesType",
+      all: {
         element: [
           {
-            ref: "asx:values",
+            name: "ATTR",
+            type: "asx:IaspAttrType",
+            minOccurs: "0",
+          },
+          {
+            name: "PARAMETERS",
+            type: "ParametersType",
+            minOccurs: "0",
           },
         ],
       },
-      attribute: [
-        {
-          name: "version",
-          type: "xs:string",
-          "default": "1.0",
-        },
-      ],
     },
     {
       name: "IaspAttrType",
@@ -173,22 +136,28 @@ export default {
           },
           {
             name: "PARAMETERS",
+            type: "ParametersType",
             minOccurs: "0",
-            complexType: {
-              sequence: {
-                element: [
-                  {
-                    name: "item",
-                    type: "IaspParamItemType",
-                    minOccurs: "0",
-                    maxOccurs: "unbounded",
-                  },
-                ],
-              },
-            },
           },
         ],
       },
+    },
+    {
+      name: "AbapType",
+      sequence: {
+        element: [
+          {
+            ref: "asx:values",
+          },
+        ],
+      },
+      attribute: [
+        {
+          name: "version",
+          type: "xs:string",
+          "default": "1.0",
+        },
+      ],
     },
   ],
 } as const;

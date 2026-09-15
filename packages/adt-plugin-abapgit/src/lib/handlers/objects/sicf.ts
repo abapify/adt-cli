@@ -9,14 +9,36 @@ import { sicf } from '../../../schemas/generated';
 import { createHandler, normalizeItems } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
 
+type SicfOtrText = {
+  concept?: string;
+  paket?: string;
+  creaLan?: string;
+  aliasName?: string;
+  entries?: Array<{
+    langu?: string;
+    object?: string;
+    lfdNum?: string;
+    text?: string;
+  }>;
+};
+
 type IcfServiceLike = {
   name: string;
   description?: string;
   url?: string;
   language?: string;
   handlerClass?: string;
+  handlers?: Array<{ handler?: string; order?: string }>;
   parent?: string;
   auth?: string;
+  otrTexts?: SicfOtrText[];
+  otrUses?: Array<{
+    pgmid?: string;
+    object?: string;
+    objName?: string;
+    concept?: string;
+    lfdNum?: string;
+  }>;
 };
 
 export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
@@ -30,6 +52,11 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
     toAbapGit: (obj) => {
       const name = String(obj.name ?? '').toUpperCase();
       const lang = isoToSapLang(obj.language);
+      const handlers = obj.handlers?.length
+        ? obj.handlers
+        : obj.handlerClass
+          ? [{ handler: obj.handlerClass }]
+          : [];
       return {
         URL: obj.url ?? '',
         ICFSERVICE: {
@@ -44,27 +71,94 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
           LANGU: lang,
           DESCRIPT: obj.description ?? '',
         },
-        ICFHANDLER_TABLE: obj.handlerClass
+        ICFHANDLER_TABLE: handlers.length
           ? {
-              ICFHANDLER: {
+              ICFHANDLER: handlers.map((h, i) => ({
                 ICF_NAME: name,
-                ICFHANDLER: obj.handlerClass,
-              },
+                ICFHANDLER: h.handler,
+                ICFHANDLERORDER: h.order ?? String(i + 1),
+              })),
+            }
+          : undefined,
+        SOTS: obj.otrTexts?.length
+          ? {
+              item: obj.otrTexts.map((t) => ({
+                HEADER: {
+                  CONCEPT: t.concept,
+                  PAKET: t.paket,
+                  CREA_LAN: t.creaLan,
+                  ALIAS_NAME: t.aliasName,
+                },
+                ENTRIES: t.entries?.length
+                  ? {
+                      item: t.entries.map((e) => ({
+                        CONCEPT: t.concept,
+                        LANGU: e.langu,
+                        OBJECT: e.object,
+                        LFD_NUM: e.lfdNum,
+                        TEXT: e.text,
+                      })),
+                    }
+                  : undefined,
+              })),
+            }
+          : undefined,
+        SOTS_USE: obj.otrUses?.length
+          ? {
+              item: obj.otrUses.map((u) => ({
+                PGMID: u.pgmid,
+                OBJECT: u.object,
+                OBJ_NAME: u.objName ?? name,
+                CONCEPT: u.concept,
+                LFD_NUM: u.lfdNum,
+              })),
             }
           : undefined,
       };
     },
 
-    fromAbapGit: ({ URL, ICFSERVICE, ICFDOCU, ICFHANDLER_TABLE }) => {
+    fromAbapGit: ({
+      URL,
+      ICFSERVICE,
+      ICFDOCU,
+      ICFHANDLER_TABLE,
+      SOTS,
+      SOTS_USE,
+    }) => {
       const handlers = normalizeItems(ICFHANDLER_TABLE?.ICFHANDLER);
+      const otrTexts = normalizeItems(SOTS?.item);
+      const otrUses = normalizeItems(SOTS_USE?.item);
       return {
         name: (ICFSERVICE?.ICF_NAME ?? '').toUpperCase(),
         description: ICFDOCU?.DESCRIPT,
         url: URL,
         language: sapLangToIso(ICFDOCU?.LANGU),
         handlerClass: handlers[0]?.ICFHANDLER,
+        handlers: handlers.map((h) => ({
+          handler: h.ICFHANDLER,
+          order: h.ICFHANDLERORDER,
+        })),
         parent: ICFSERVICE?.ICF_PARENT,
         auth: ICFSERVICE?.ICF_AUTH,
+        otrTexts: otrTexts.map((t) => ({
+          concept: t.HEADER?.CONCEPT,
+          paket: t.HEADER?.PAKET,
+          creaLan: t.HEADER?.CREA_LAN,
+          aliasName: t.HEADER?.ALIAS_NAME,
+          entries: normalizeItems(t.ENTRIES?.item).map((e) => ({
+            langu: e.LANGU,
+            object: e.OBJECT,
+            lfdNum: e.LFD_NUM,
+            text: e.TEXT,
+          })),
+        })),
+        otrUses: otrUses.map((u) => ({
+          pgmid: u.PGMID,
+          object: u.OBJECT,
+          objName: u.OBJ_NAME,
+          concept: u.CONCEPT,
+          lfdNum: u.LFD_NUM,
+        })),
       };
     },
   },

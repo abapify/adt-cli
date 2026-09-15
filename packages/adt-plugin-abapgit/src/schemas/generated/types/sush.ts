@@ -13,13 +13,82 @@ export type SushSchema = {
                     DISPLAY_NAME?: string | undefined;
                     ABAP_LANGUAGE_VERSION?: string | undefined;
                 };
-                USOBX?: unknown;
-                USOBT?: unknown;
+                USOBX?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        TYPE?: string | undefined;
+                        OBJECT?: string | undefined;
+                        OKFLAG?: string | undefined;
+                    }[];
+                };
+                USOBT?: undefined | {
+                    item?: undefined | {
+                        NAME?: string | undefined;
+                        TYPE?: string | undefined;
+                        OBJECT?: string | undefined;
+                        FIELD?: string | undefined;
+                        LOW?: string | undefined;
+                        HIGH?: string | undefined;
+                    }[];
+                };
             };
             version?: string | undefined;
         };
         version: string;
         serializer: string;
         serializer_version: string;
+    };
+} | {
+    values: {
+        HEAD?: undefined | {
+            DISPLAY_NAME?: string | undefined;
+            ABAP_LANGUAGE_VERSION?: string | undefined;
+        };
+        USOBX?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                TYPE?: string | undefined;
+                OBJECT?: string | undefined;
+                OKFLAG?: string | undefined;
+            }[];
+        };
+        USOBT?: undefined | {
+            item?: undefined | {
+                NAME?: string | undefined;
+                TYPE?: string | undefined;
+                OBJECT?: string | undefined;
+                FIELD?: string | undefined;
+                LOW?: string | undefined;
+                HIGH?: string | undefined;
+            }[];
+        };
+    };
+} | {
+    abap: {
+        values: {
+            HEAD?: undefined | {
+                DISPLAY_NAME?: string | undefined;
+                ABAP_LANGUAGE_VERSION?: string | undefined;
+            };
+            USOBX?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    TYPE?: string | undefined;
+                    OBJECT?: string | undefined;
+                    OKFLAG?: string | undefined;
+                }[];
+            };
+            USOBT?: undefined | {
+                item?: undefined | {
+                    NAME?: string | undefined;
+                    TYPE?: string | undefined;
+                    OBJECT?: string | undefined;
+                    FIELD?: string | undefined;
+                    LOW?: string | undefined;
+                    HIGH?: string | undefined;
+                }[];
+            };
+        };
+        version?: string | undefined;
     };
 };

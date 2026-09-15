@@ -123,6 +123,7 @@ export { default as suso } from './suso';
 export { default as sxci } from './sxci';
 export { default as sxsd } from './sxsd';
 export { default as tabl } from './tabl';
+export { default as tdlines } from './tdlines';
 export { default as tobj } from './tobj';
 export { default as tran } from './tran';
 export { default as ttyp } from './ttyp';

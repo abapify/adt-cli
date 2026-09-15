@@ -2,7 +2,7 @@
  * ODSO (DataStore Object - BW) handler for abapGit format
  *
  * DataStore Objects are XML-only. The abapGit format stores details
- * (BAPI6116) and info objects (BAPI6116IO) under an ODSO node.
+ * (BAPI6116) and info objects (BAPI6116IO) as flat siblings under values.
  */
 
 import { odso } from '../../../schemas/generated';
@@ -11,9 +11,21 @@ import { createHandler, normalizeItems } from '../base';
 type DataStoreObjectLike = {
   name: string;
   description?: string;
+  shortText?: string;
   odsotype?: string;
   version?: string;
-  infoObjects?: Array<{ infoobject?: string; keyflag?: string }>;
+  sizeCategory?: string;
+  dataClass?: string;
+  noEdSfl?: string;
+  keyNotUnique?: string;
+  imofl?: string;
+  planningMode?: string;
+  actViewGen?: string;
+  infoObjects?: Array<{
+    infoobject?: string;
+    version?: string;
+    keyflag?: string;
+  }>;
 };
 
 export const dataStoreObjectHandler = createHandler<
@@ -27,32 +39,48 @@ export const dataStoreObjectHandler = createHandler<
 
   toAbapGit: (obj) => ({
     ODSO: {
-      ODSO: {
-        ODSOBJECT: String(obj.name ?? '').toUpperCase(),
-        ODSOTYPE: obj.odsotype,
-        OBJVERS: obj.version ?? 'A',
-        TXTLG: obj.description,
-      },
-      INFOOBJECTS: obj.infoObjects?.length
-        ? {
-            BAPI6116IO: obj.infoObjects.map((io) => ({
-              INFOBJECT: io.infoobject,
-              KEYFLAG: io.keyflag,
-            })),
-          }
-        : undefined,
+      ODSOBJECT: String(obj.name ?? '').toUpperCase(),
+      ODSOTYPE: obj.odsotype,
+      OBJVERS: obj.version ?? 'A',
+      ODSASIZCAT: obj.sizeCategory,
+      ODSADATCLS: obj.dataClass,
+      NOEDSFL: obj.noEdSfl,
+      KEY_NOT_UNIQUE: obj.keyNotUnique,
+      IMOFL: obj.imofl,
+      PLANNING_MODE: obj.planningMode,
+      ACTVIEWGEN: obj.actViewGen,
+      TXTLG: obj.description,
+      TXTSH: obj.shortText,
     },
+    INFOOBJECTS: obj.infoObjects?.length
+      ? {
+          BAPI6116IO: obj.infoObjects.map((io) => ({
+            INFOBJECT: io.infoobject,
+            OBJVERS: io.version,
+            KEYFLAG: io.keyflag,
+          })),
+        }
+      : undefined,
   }),
 
-  fromAbapGit: ({ ODSO }) => {
-    const infoObjects = normalizeItems(ODSO?.INFOOBJECTS?.BAPI6116IO);
+  fromAbapGit: ({ ODSO, INFOOBJECTS }) => {
+    const infoObjects = normalizeItems(INFOOBJECTS?.BAPI6116IO);
     return {
-      name: (ODSO?.ODSO?.ODSOBJECT ?? '').toUpperCase(),
-      description: ODSO?.ODSO?.TXTLG,
-      odsotype: ODSO?.ODSO?.ODSOTYPE,
-      version: ODSO?.ODSO?.OBJVERS,
+      name: (ODSO?.ODSOBJECT ?? '').toUpperCase(),
+      description: ODSO?.TXTLG,
+      shortText: ODSO?.TXTSH,
+      odsotype: ODSO?.ODSOTYPE,
+      version: ODSO?.OBJVERS,
+      sizeCategory: ODSO?.ODSASIZCAT,
+      dataClass: ODSO?.ODSADATCLS,
+      noEdSfl: ODSO?.NOEDSFL,
+      keyNotUnique: ODSO?.KEY_NOT_UNIQUE,
+      imofl: ODSO?.IMOFL,
+      planningMode: ODSO?.PLANNING_MODE,
+      actViewGen: ODSO?.ACTVIEWGEN,
       infoObjects: infoObjects.map((io) => ({
         infoobject: io.INFOBJECT,
+        version: io.OBJVERS,
         keyflag: io.KEYFLAG,
       })),
     };

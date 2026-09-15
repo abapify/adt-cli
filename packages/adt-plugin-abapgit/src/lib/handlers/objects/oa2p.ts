@@ -9,6 +9,7 @@ type Oauth2ProfileLike = {
   name: string;
   profile?: string;
   type?: string;
+  header?: string;
   scopes?: Array<{ scope?: string; description?: string }>;
 };
 
@@ -25,6 +26,7 @@ export const oauth2ProfileHandler = createHandler<
     PROFILE: {
       PROFILE: obj.profile ?? String(obj.name ?? '').toUpperCase(),
       TYPE: obj.type,
+      HEADER: obj.header,
       T_SCOPES: obj.scopes?.length
         ? {
             item: obj.scopes.map((s) => ({
@@ -42,6 +44,7 @@ export const oauth2ProfileHandler = createHandler<
       name: (PROFILE?.PROFILE ?? '').toUpperCase(),
       profile: PROFILE?.PROFILE,
       type: PROFILE?.TYPE,
+      header: PROFILE?.HEADER,
       scopes: scopes.map((s) => ({
         scope: s.SCOPE,
         description: s.DESCRIPTION,
