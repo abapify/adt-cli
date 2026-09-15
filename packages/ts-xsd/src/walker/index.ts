@@ -772,7 +772,18 @@ export function hasWildcard(ct: ComplexTypeLike, schema: SchemaLike): boolean {
   const seenTypes = new Set<ComplexTypeLike>();
   const seenGroupRefs = new Set<string>();
 
-  const groupHasAny = (group: GroupLike | undefined): boolean => {
+  const groupsHaveAny = (...groups: (GroupLike | undefined)[]): boolean =>
+    groups.some(groupHasAny);
+
+  function namedGroupHasAny(ref: string | undefined): boolean {
+    if (!ref || seenGroupRefs.has(ref)) return false;
+    seenGroupRefs.add(ref);
+    const named = findGroup(stripNsPrefix(ref), schema);
+    if (!named) return false;
+    return groupsHaveAny(named.sequence, named.choice, named.all);
+  }
+
+  function groupHasAny(group: GroupLike | undefined): boolean {
     if (!group) return false;
     if (group.any && group.any.length > 0) return true;
     for (const nested of group.sequence ?? []) {
@@ -782,77 +793,32 @@ export function hasWildcard(ct: ComplexTypeLike, schema: SchemaLike): boolean {
       if (groupHasAny(nested)) return true;
     }
     for (const ref of group.group ?? []) {
-      if (ref.ref && !seenGroupRefs.has(ref.ref)) {
-        seenGroupRefs.add(ref.ref);
-        const named = findGroup(stripNsPrefix(ref.ref), schema);
-        if (
-          named &&
-          (groupHasAny(named.sequence) ||
-            groupHasAny(named.choice) ||
-            groupHasAny(named.all))
-        ) {
-          return true;
-        }
-      }
+      if (namedGroupHasAny(ref.ref)) return true;
     }
     return false;
-  };
+  }
 
-  const visit = (current: ComplexTypeLike): boolean => {
+  function visit(current: ComplexTypeLike): boolean {
     if (seenTypes.has(current)) return false;
     seenTypes.add(current);
 
-    if (
-      groupHasAny(current.sequence) ||
-      groupHasAny(current.choice) ||
-      groupHasAny(current.all)
-    ) {
+    if (groupsHaveAny(current.sequence, current.choice, current.all)) {
       return true;
     }
 
     const ext =
       current.complexContent?.extension ?? current.complexContent?.restriction;
     if (ext) {
-      if (
-        groupHasAny(ext.sequence) ||
-        groupHasAny(ext.choice) ||
-        groupHasAny(ext.all)
-      ) {
-        return true;
-      }
-      if (ext.group?.ref && !seenGroupRefs.has(ext.group.ref)) {
-        seenGroupRefs.add(ext.group.ref);
-        const named = findGroup(stripNsPrefix(ext.group.ref), schema);
-        if (
-          named &&
-          (groupHasAny(named.sequence) ||
-            groupHasAny(named.choice) ||
-            groupHasAny(named.all))
-        ) {
-          return true;
-        }
-      }
+      if (groupsHaveAny(ext.sequence, ext.choice, ext.all)) return true;
+      if (namedGroupHasAny(ext.group?.ref)) return true;
       if (ext.base) {
         const baseEntry = findComplexType(stripNsPrefix(ext.base), schema);
         if (baseEntry && visit(baseEntry.ct)) return true;
       }
     }
 
-    if (current.group?.ref && !seenGroupRefs.has(current.group.ref)) {
-      seenGroupRefs.add(current.group.ref);
-      const named = findGroup(stripNsPrefix(current.group.ref), schema);
-      if (
-        named &&
-        (groupHasAny(named.sequence) ||
-          groupHasAny(named.choice) ||
-          groupHasAny(named.all))
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  };
+    return namedGroupHasAny(current.group?.ref);
+  }
 
   return visit(ct);
 }

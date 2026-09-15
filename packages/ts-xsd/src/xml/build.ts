@@ -299,6 +299,39 @@ function buildElement(
   // which is critical for correct namespace prefix resolution in inherited types
   const wildcard = hasWildcard(typeDef, schema);
   const consumed = new Set<string>();
+  buildAttributes(node, data, typeDef, schema, rootSchema, consumed);
+  buildDeclaredElements(
+    doc,
+    node,
+    data,
+    typeDef,
+    schema,
+    rootSchema,
+    prefix,
+    consumed,
+  );
+
+  // Emit wildcard (xs:any) children for data keys not covered by declared elements
+  if (wildcard) {
+    for (const key of Object.keys(data)) {
+      if (consumed.has(key)) continue;
+      buildAnyField(doc, node, key, data[key]);
+    }
+  }
+}
+
+/**
+ * Build declared attributes from the type definition (walker handles
+ * inheritance). Adds each declared attribute name to `consumed`.
+ */
+function buildAttributes(
+  node: XmlElement,
+  data: Record<string, unknown>,
+  typeDef: ComplexTypeLike,
+  schema: SchemaLike,
+  rootSchema: SchemaLike,
+  consumed: Set<string>,
+): void {
   for (const { attribute, schema: attrSchema } of walkAttributes(
     typeDef,
     schema,
@@ -332,10 +365,25 @@ function buildElement(
       );
     }
   }
+}
 
-  // Build child elements using walker (handles inheritance, groups, refs)
-  // The walker returns schema per element so we can resolve the correct namespace prefix
-  // for elements inherited from imported schemas (e.g., packageRef from adtcore)
+/**
+ * Build declared child elements via the walker (handles inheritance,
+ * groups, refs, substitution). Adds each declared key to `consumed`.
+ */
+function buildDeclaredElements(
+  doc: XmlDocument,
+  node: XmlElement,
+  data: Record<string, unknown>,
+  typeDef: ComplexTypeLike,
+  schema: SchemaLike,
+  rootSchema: SchemaLike,
+  prefix: string | undefined,
+  consumed: Set<string>,
+): void {
+  // The walker returns schema per element so we can resolve the correct
+  // namespace prefix for elements inherited from imported schemas
+  // (e.g., packageRef from adtcore)
   for (const { element, schema: elementDefSchema } of walkElements(
     typeDef,
     schema,
@@ -392,14 +440,6 @@ function buildElement(
         prefix,
         resolved.form,
       );
-    }
-  }
-
-  // Emit wildcard (xs:any) children for data keys not covered by declared elements
-  if (wildcard) {
-    for (const key of Object.keys(data)) {
-      if (consumed.has(key)) continue;
-      buildAnyField(doc, node, key, data[key]);
     }
   }
 }
