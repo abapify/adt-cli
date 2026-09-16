@@ -587,8 +587,12 @@
     },
     {
       "matching_content_path": "packages/adt-plugin-abapgit/src/lib/handlers/objects/*.ts",
-      "matching_content_path_doc": "abapGit object handlers are declarative XSD-schema field mappers; ?? / ?. fallback chains and SAP field-name string literals are inherent to the mapping layer, not fixable complexity.",
+      "matching_content_path_doc": "abapGit object handlers are declarative XSD-schema field mappers; long ?? / ?. fallback chains and SAP field-name string literals are inherent to the mapping layer, not fixable complexity. Real control-flow smells (Deep Nested, Bumpy Road, Large Method) stay enabled.",
       "rules": [
+        {
+          "name": "Complex Method",
+          "weight": 0.0
+        },
         {
           "name": "Complex Conditional",
           "weight": 0.5
