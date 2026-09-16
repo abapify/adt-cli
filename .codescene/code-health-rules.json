@@ -605,6 +605,20 @@
           "name": "Code Duplication",
           "weight": 0.5
         }
+      ],
+      "thresholds": [
+        {
+          "name": "function_cyclomatic_complexity_warning",
+          "value": 25
+        },
+        {
+          "name": "function_lines_of_code_warning",
+          "value": 160
+        },
+        {
+          "name": "file_mean_cyclomatic_complexity_warning",
+          "value": 8
+        }
       ]
     }
   ]
