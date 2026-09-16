@@ -394,30 +394,15 @@ function buildDeclaredElements(
       const refElement = findElement(refName, elementDefSchema);
 
       if (refElement && refElement.element.abstract) {
-        // Abstract element - find substitutes in data using rootSchema
-        const substitutes = findSubstitutes(refName, rootSchema);
-        for (const substitute of substitutes) {
-          const subName = substitute.element.name;
-          if (!subName) continue;
-          consumed.add(subName);
-
-          const value = data[subName];
-          if (value != null) {
-            const typeName = substitute.element.type
-              ? stripNsPrefix(substitute.element.type)
-              : undefined;
-            buildField(
-              doc,
-              node,
-              value,
-              subName,
-              typeName,
-              substitute.schema,
-              rootSchema,
-              prefix,
-            );
-          }
-        }
+        buildSubstituteElements(
+          doc,
+          node,
+          data,
+          refName,
+          rootSchema,
+          prefix,
+          consumed,
+        );
         continue;
       }
     }
@@ -439,6 +424,45 @@ function buildDeclaredElements(
         rootSchema,
         prefix,
         resolved.form,
+      );
+    }
+  }
+}
+
+/**
+ * Build elements that substitute for an abstract element — substitutes can
+ * live in any imported schema, so lookups use the root schema. Adds each
+ * emitted key to `consumed`.
+ */
+function buildSubstituteElements(
+  doc: XmlDocument,
+  node: XmlElement,
+  data: Record<string, unknown>,
+  refName: string,
+  rootSchema: SchemaLike,
+  prefix: string | undefined,
+  consumed: Set<string>,
+): void {
+  const substitutes = findSubstitutes(refName, rootSchema);
+  for (const substitute of substitutes) {
+    const subName = substitute.element.name;
+    if (!subName) continue;
+    consumed.add(subName);
+
+    const value = data[subName];
+    if (value != null) {
+      const typeName = substitute.element.type
+        ? stripNsPrefix(substitute.element.type)
+        : undefined;
+      buildField(
+        doc,
+        node,
+        value,
+        subName,
+        typeName,
+        substitute.schema,
+        rootSchema,
+        prefix,
       );
     }
   }

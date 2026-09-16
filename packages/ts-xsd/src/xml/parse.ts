@@ -227,28 +227,7 @@ function parseElement(
     // Use rootSchema for substitution lookups since substitutes can be in any imported schema
     const isAbstract = isAbstractElement(resolved.name, rootSchema);
     if (isAbstract) {
-      // Find all elements that substitute for this abstract element
-      const substitutes = findSubstitutingElements(resolved.name, rootSchema);
-
-      // Get all child elements and check if any match a substituting element
-      const allChildren = getAllChildElements(node);
-      for (const child of allChildren) {
-        const childName = getLocalName(child);
-        const substitute = substitutes.find(
-          (s) => s.element.name === childName,
-        );
-        if (substitute && substitute.element.name) {
-          const subTypeName = substitute.element.type
-            ? stripNsPrefix(substitute.element.type)
-            : undefined;
-          result[substitute.element.name] = parseChildValue(
-            child,
-            subTypeName,
-            substitute.schema,
-            rootSchema,
-          );
-        }
-      }
+      parseSubstitutionChildren(node, resolved.name, rootSchema, result);
     } else {
       // Normal element handling
       const children = getChildElements(node, resolved.name);
@@ -275,18 +254,57 @@ function parseElement(
 
   // Capture wildcard (xs:any) children not covered by declared elements
   if (hasWildcard(typeDef, schema)) {
-    const seen = new Set<string>();
-    for (const child of getAllChildElements(node)) {
-      const name = child.tagName; // qualified name preserves ns prefixes
-      if (result[name] !== undefined || seen.has(name)) continue;
-      seen.add(name);
-      const same = getAllChildElements(node).filter((c) => c.tagName === name);
-      result[name] =
-        same.length > 1 ? same.map(parseAnyValue) : parseAnyValue(child);
-    }
+    parseWildcardChildren(node, result);
   }
 
   return result;
+}
+
+/**
+ * Parse children that substitute for an abstract element — substitutes can
+ * live in any imported schema, so lookups use the root schema.
+ */
+function parseSubstitutionChildren(
+  node: XmlElement,
+  headName: string,
+  rootSchema: SchemaLike,
+  result: Record<string, unknown>,
+): void {
+  const substitutes = findSubstitutingElements(headName, rootSchema);
+  for (const child of getAllChildElements(node)) {
+    const childName = getLocalName(child);
+    const substitute = substitutes.find((s) => s.element.name === childName);
+    if (substitute && substitute.element.name) {
+      const subTypeName = substitute.element.type
+        ? stripNsPrefix(substitute.element.type)
+        : undefined;
+      result[substitute.element.name] = parseChildValue(
+        child,
+        subTypeName,
+        substitute.schema,
+        rootSchema,
+      );
+    }
+  }
+}
+
+/**
+ * Collect wildcard (xs:any) children under their qualified tag names.
+ * Repeated sibling names become arrays.
+ */
+function parseWildcardChildren(
+  node: XmlElement,
+  result: Record<string, unknown>,
+): void {
+  const seen = new Set<string>();
+  for (const child of getAllChildElements(node)) {
+    const name = child.tagName; // qualified name preserves ns prefixes
+    if (result[name] !== undefined || seen.has(name)) continue;
+    seen.add(name);
+    const same = getAllChildElements(node).filter((c) => c.tagName === name);
+    result[name] =
+      same.length > 1 ? same.map(parseAnyValue) : parseAnyValue(child);
+  }
 }
 
 /**
