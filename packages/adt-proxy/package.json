@@ -3,6 +3,9 @@
   "version": "0.4.2",
   "description": "ADT proxy server with JSON↔XML conversion",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
