@@ -14,6 +14,26 @@ describe('formatPluginExecutionError', () => {
     );
   });
 
+  it('renders allow-listed diagnostic details without leaking arbitrary fields', () => {
+    const error = Object.assign(
+      new Error('An indexed file differs from its recorded content hash.'),
+      {
+        code: 'working_tree_diverged',
+        details: {
+          object: 'CLAS/ZCL_SAMPLE',
+          path: 'src/feature/zcl_sample.clas.abap',
+          token: 'must-not-be-logged',
+        },
+      },
+    );
+
+    const rendered = formatPluginExecutionError(error);
+
+    expect(rendered).toContain('object=CLAS/ZCL_SAMPLE');
+    expect(rendered).toContain('path=src/feature/zcl_sample.clas.abap');
+    expect(rendered).not.toContain('must-not-be-logged');
+  });
+
   it('does not stringify an arbitrary thrown value', () => {
     expect(formatPluginExecutionError({ token: 'must-not-be-logged' })).toBe(
       '❌ Command failed: unexpected failure',

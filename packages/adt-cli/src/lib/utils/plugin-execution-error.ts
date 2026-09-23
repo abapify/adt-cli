@@ -1,6 +1,13 @@
 const GENERIC_FAILURE = '❌ Command failed: unexpected failure';
 const CODE_PATTERN = /^[a-z0-9_]{1,64}$/i;
 const MAX_MESSAGE_LENGTH = 300;
+const DIAGNOSTIC_DETAIL_KEYS = [
+  'object',
+  'component',
+  'path',
+  'diagnostic',
+  'changeKind',
+] as const;
 // eslint-disable-next-line no-control-regex
 const ANSI_CSI = /\u001b\[[0-9;:]*[ -/]*[@-~]/gu;
 // eslint-disable-next-line no-control-regex
@@ -19,6 +26,20 @@ function sanitizeLogText(text: string): string {
     .slice(0, MAX_MESSAGE_LENGTH);
 }
 
+function formatDiagnosticDetails(error: Error): string {
+  const details = (error as { details?: unknown }).details;
+  if (details === null || typeof details !== 'object') return '';
+
+  const rendered = DIAGNOSTIC_DETAIL_KEYS.flatMap((key) => {
+    const value = (details as Record<string, unknown>)[key];
+    return typeof value === 'string' && value.length > 0
+      ? [`${key}=${sanitizeLogText(value)}`]
+      : [];
+  }).join(', ');
+
+  return rendered ? ` [${rendered}]` : '';
+}
+
 /**
  * Render typed plugin failures as a stable single-line message so CI logs do
  * not expose implementation stacks, control sequences, or arbitrary thrown
@@ -34,7 +55,8 @@ export function formatPluginExecutionError(error: unknown): string {
     return GENERIC_FAILURE;
   }
   const message = sanitizeLogText(error.message);
+  const details = formatDiagnosticDetails(error);
   return message
-    ? `❌ Command failed [${code}]: ${message}`
-    : `❌ Command failed [${code}]`;
+    ? `❌ Command failed [${code}]: ${message}${details}`
+    : `❌ Command failed [${code}]${details}`;
 }
