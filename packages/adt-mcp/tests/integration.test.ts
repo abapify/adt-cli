@@ -10,17 +10,50 @@
 import { describe, it, beforeAll, afterAll } from 'vitest';
 import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
+import { mkdtemp, realpath, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createMcpServer } from '../src/lib/server';
 import { createMockAdtServer, type MockAdtServer } from '@abapify/adt-fixtures';
 import { createAdtClient, type AdtClient } from '@abapify/adt-client';
-import type { ConnectionParams } from '../src/lib/types';
+import { AdtFlowError } from '@abapify/adt-flow';
+import type { FormatPlugin } from '@abapify/adt-plugin';
+import type { ConnectionParams, ToolContext } from '../src/lib/types';
+import { registerFlowIndexTrTool } from '../src/lib/tools/flow-index-tr';
 
 let mockAdt: MockAdtServer;
 let mockPort: number;
 let client: Client;
 let boundedSourceReadCalls = 0;
+
+type FlowToolResult = {
+  isError?: boolean;
+  content: Array<{ type: 'text'; text: string }>;
+  structuredContent?: Record<string, unknown>;
+};
+
+class CapturingServer {
+  handler?: (
+    args: Record<string, unknown>,
+    extra: { sessionId?: string },
+  ) => Promise<FlowToolResult>;
+  annotations?: Record<string, unknown>;
+
+  tool(...args: unknown[]): void {
+    this.annotations = args[3] as Record<string, unknown>;
+    this.handler = args.at(-1) as CapturingServer['handler'];
+  }
+}
+
+const flowFormat = {
+  id: 'abapgit',
+  description: 'test',
+  supportedTypes: ['CLAS'],
+  getHandler: () => undefined,
+} satisfies FormatPlugin;
 
 /**
  * Helper – call a tool and return the first text content block parsed as JSON.
@@ -1478,9 +1511,120 @@ describe('adt-mcp integration tests', () => {
         'get_structure',
         'get_cds_ddl',
         'get_cds_dcl',
+        'flow_index_tr',
       ];
       for (const name of expected) {
         assert.ok(names.has(name), `tool "${name}" should be listed`);
+      }
+    });
+  });
+
+  describe('flow index tool', () => {
+    it('delegates source-free indexing to the shared flow service', async () => {
+      const allowed = await realpath(
+        await mkdtemp(join(tmpdir(), 'adt-flow-index-mcp-')),
+      );
+      const target = new CapturingServer();
+      let indexInput: unknown;
+      const ctx = {
+        getClient: () => ({}) as AdtClient,
+        workspaceRoots: [allowed],
+        flowConfig: { format: { id: 'abapgit' } },
+      } satisfies ToolContext;
+      registerFlowIndexTrTool(target as unknown as McpServer, ctx, {
+        getFormat: () => flowFormat,
+        createService: () => ({
+          async checkout() {
+            throw new Error('checkout must not be called by flow_index_tr');
+          },
+          async index(input) {
+            indexInput = input;
+            return {
+              mode: 'head',
+              requestedTransports: ['DEVK900001'],
+              scopeTransports: ['DEVK900001'],
+              changed: [],
+              moved: [],
+              removed: [],
+              unchanged: [],
+              descriptors: ['.adt/tr/DEVK900001.json'],
+              skipped: [],
+              sapCalls: { manifest: 1, metadata: 0, source: 0 },
+              fastPath: 'none',
+            };
+          },
+        }),
+      });
+
+      try {
+        const result = await target.handler!(
+          {
+            baseUrl: 'https://example.invalid',
+            transports: ['DEVK900001'],
+            workspaceRoot: allowed,
+          },
+          {},
+        );
+
+        assert.notStrictEqual(result.isError, true);
+        assert.deepStrictEqual(indexInput, {
+          root: allowed,
+          transports: ['DEVK900001'],
+          config: ctx.flowConfig,
+        });
+        assert.strictEqual(result.structuredContent?.sapCalls.source, 0);
+        assert.deepStrictEqual(target.annotations, {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: true,
+        });
+      } finally {
+        await rm(allowed, { recursive: true, force: true });
+      }
+    });
+
+    it('does not expose raw failure causes from the flow service', async () => {
+      const allowed = await realpath(
+        await mkdtemp(join(tmpdir(), 'adt-flow-index-error-')),
+      );
+      const target = new CapturingServer();
+      const ctx = {
+        getClient: () => ({}) as AdtClient,
+        workspaceRoots: [allowed],
+        flowConfig: { format: { id: 'abapgit' } },
+      } satisfies ToolContext;
+      registerFlowIndexTrTool(target as unknown as McpServer, ctx, {
+        getFormat: () => flowFormat,
+        createService: () => ({
+          async checkout() {
+            throw new Error('checkout must not be called by flow_index_tr');
+          },
+          async index() {
+            throw new AdtFlowError('apply_failed', 'Index apply failed.', {
+              cause: 'private adapter detail',
+              rollback: 'private rollback detail',
+              path: '.adt/tr/DEVK900001.json',
+            });
+          },
+        }),
+      });
+
+      try {
+        const result = await target.handler!(
+          {
+            baseUrl: 'https://example.invalid',
+            transports: ['DEVK900001'],
+            workspaceRoot: allowed,
+          },
+          {},
+        );
+        const body = result.content[0]?.text ?? '';
+        assert.strictEqual(result.isError, true);
+        assert.match(body, /\.adt\/tr\/DEVK900001\.json/u);
+        assert.doesNotMatch(body, /private adapter|private rollback/u);
+      } finally {
+        await rm(allowed, { recursive: true, force: true });
       }
     });
   });

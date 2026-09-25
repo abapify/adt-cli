@@ -540,6 +540,23 @@ SAP-call counts. It never contains source bodies or credentials.
 
 ---
 
+#### `flow_index_tr`
+
+Persist inventory and unresolved-boundary descriptors for an allowed local
+workspace without reading or materializing source files. Unlike strict
+`flow_checkout_tr`, this tool records inexact components as omissions so a
+later exact checkout can retry them.
+
+| Parameter       | Type     | Description                                   |
+| --------------- | -------- | --------------------------------------------- |
+| `transports`    | string[] | Non-empty transport scope                     |
+| `workspaceRoot` | string   | Absolute directory within a server-owned root |
+
+The JSON result contains transport/object descriptors and omission diagnostics;
+its source-call count is always zero.
+
+---
+
 ### ABAP Test Cockpit (ATC)
 
 #### `atc_run`
@@ -707,6 +724,7 @@ bunx nx test adt-mcp       # run integration tests with Vitest
 | `adt cts tr create`          | `cts_create_transport`          | ✅        |
 | `adt cts tr release`         | `cts_release_transport`         | ✅        |
 | `adt flow checkout tr`       | `flow_checkout_tr`              | ✅        |
+| `adt flow index tr`          | `flow_index_tr`                 | ✅        |
 | `adt ls`                     | —                               | 🔜 Future |
 | `adt cts search`             | —                               | 🔜 Future |
 | `adt import package`         | —                               | 🔜 Future |

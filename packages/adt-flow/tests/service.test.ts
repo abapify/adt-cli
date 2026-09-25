@@ -715,6 +715,109 @@ describe('transport checkout', () => {
     ).rejects.toMatchObject({ code: 'manifest_inexact' });
     expect(ports.readSource).not.toHaveBeenCalled();
     expect(ports.loadObject).not.toHaveBeenCalled();
+    await expect(
+      readFile(join(workspace, '.adt/tr/DEVK900001.json'), 'utf8'),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('indexes an inexact transport without reading or materializing source', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('before'), version('after'));
+    current.entries.push({
+      object: {
+        pgmid: 'R3TR',
+        type: 'CLAS',
+        name: 'ZCL_ZZZ_INEXACT',
+        packageName: 'ZROOT_FEATURE',
+      },
+      component: { id: 'main' },
+      sourceTransport: 'DEVK900001',
+      changeKind: 'ambiguous',
+      exact: false,
+      diagnostic: {
+        code: 'SOURCE_HISTORY_SCOPE_VERSION_MISSING',
+        message: 'No exact version belongs to the scope.',
+      },
+    });
+    const ports = dependencies(() => current);
+
+    const result = await createAdtFlowService(ports).index({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+
+    expect(result.changed).toEqual([]);
+    expect(result.skipped).toEqual([
+      {
+        object: 'CLAS/ZCL_ZZZ_INEXACT',
+        component: 'main',
+        diagnostic: 'SOURCE_HISTORY_SCOPE_VERSION_MISSING',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+    expect(ports.readSource).not.toHaveBeenCalled();
+    expect(ports.loadObject).not.toHaveBeenCalled();
+    await expect(
+      readFile(join(workspace, 'src/feature/zcl_sample.clas.abap'), 'utf8'),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+    await expect(
+      readFile(
+        join(workspace, '.adt/objects/CLAS/zcl_zzz_inexact.clas.adt.json'),
+        'utf8',
+      ),
+    ).resolves.toContain('SOURCE_HISTORY_SCOPE_VERSION_MISSING');
+  });
+
+  it('indexes inventory without requiring a materializing format plugin', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('modified', version('before'), version('after')),
+    );
+    ports.format = { ...format, materialize: undefined };
+
+    await expect(
+      createAdtFlowService(ports).index({
+        root: workspace,
+        transports: ['DEVK900001'],
+        config,
+      }),
+    ).resolves.toMatchObject({
+      descriptors: ['.adt/tr/DEVK900001.json'],
+      sapCalls: { source: 0 },
+    });
+    expect(ports.readSource).not.toHaveBeenCalled();
+    expect(ports.loadObject).not.toHaveBeenCalled();
+  });
+
+  it('retains existing exact object descriptors in a refreshed inventory', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('modified', version('before'), version('after')),
+    );
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+    ports.readSource.mockClear();
+    ports.loadObject.mockClear();
+
+    await flow.index({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+
+    const transport = JSON.parse(
+      await readFile(join(workspace, '.adt/tr/DEVK900001.json'), 'utf8'),
+    ) as { objects: string[] };
+    expect(transport.objects).toEqual([
+      '.adt/objects/CLAS/zcl_sample.clas.adt.json',
+    ]);
+    expect(ports.readSource).not.toHaveBeenCalled();
+    expect(ports.loadObject).not.toHaveBeenCalled();
   });
 
   it('materializes the exact subset only when partial mode explicitly opts in', async () => {

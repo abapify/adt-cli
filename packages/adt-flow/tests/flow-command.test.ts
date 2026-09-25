@@ -16,6 +16,8 @@ import type {
   FormatPlugin,
 } from '@abapify/adt-plugin';
 import { createFlowCommand } from '../src/commands/flow';
+import type { AdtFlowService } from '../src/service';
+import type { FlowCheckoutResult } from '../src/types';
 
 const format = {
   id: 'abapgit',
@@ -26,6 +28,10 @@ const format = {
 
 function leaf(command: CliCommandPlugin): CliCommandPlugin {
   return command.subcommands?.[0]?.subcommands?.[0] as CliCommandPlugin;
+}
+
+function indexLeaf(command: CliCommandPlugin): CliCommandPlugin {
+  return command.subcommands?.[1]?.subcommands?.[0] as CliCommandPlugin;
 }
 
 const emptyCheckoutResult = {
@@ -40,18 +46,23 @@ const emptyCheckoutResult = {
   skipped: [],
   sapCalls: { manifest: 1, metadata: 1, source: 1 },
   fastPath: 'none' as const,
-};
+} satisfies FlowCheckoutResult;
 
-function makeCheckout(
-  overrides: Partial<typeof emptyCheckoutResult> = {},
-): ReturnType<typeof vi.fn> {
-  return vi.fn(async () => ({ ...emptyCheckoutResult, ...overrides }));
+function makeCheckout(overrides: Partial<FlowCheckoutResult> = {}) {
+  return vi.fn<AdtFlowService['checkout']>(async () => ({
+    ...emptyCheckoutResult,
+    ...overrides,
+  }));
 }
 
-function makeCommand(checkout: ReturnType<typeof vi.fn>) {
+function makeIndex() {
+  return vi.fn<AdtFlowService['index']>(async () => emptyCheckoutResult);
+}
+
+function makeCommand(checkout: AdtFlowService['checkout']) {
   return createFlowCommand({
     getFormat: vi.fn(() => format),
-    createService: vi.fn(() => ({ checkout })),
+    createService: vi.fn(() => ({ checkout, index: makeIndex() })),
   });
 }
 
@@ -74,6 +85,28 @@ async function withTempRoot<T>(fn: (root: string) => Promise<T>): Promise<T> {
 }
 
 describe('flow CLI command', () => {
+  it('exposes an explicit source-free flow index tr hierarchy', async () => {
+    const index = makeIndex();
+    const command = createFlowCommand({
+      getFormat: vi.fn(() => format),
+      createService: vi.fn(() => ({ checkout: makeCheckout(), index })),
+    });
+    const ctx = makeContext('/workspace');
+
+    expect(command.subcommands?.[1]?.name).toBe('index');
+    expect(indexLeaf(command).name).toBe('tr');
+    await indexLeaf(command).execute?.(
+      { transport: 'DEVK900002, DEVK900001' },
+      ctx,
+    );
+
+    expect(index).toHaveBeenCalledWith({
+      root: '/workspace',
+      transports: ['DEVK900002', 'DEVK900001'],
+      config: ctx.config['flow'],
+    });
+  });
+
   it('exposes an explicit flow checkout tr hierarchy and applies base mode', async () => {
     const checkout = vi.fn(async () => ({
       mode: 'base' as const,
@@ -96,7 +129,7 @@ describe('flow CLI command', () => {
     }));
     const command = createFlowCommand({
       getFormat: vi.fn(() => format),
-      createService: vi.fn(() => ({ checkout })),
+      createService: vi.fn(() => ({ checkout, index: makeIndex() })),
     });
     const info = vi.fn();
     const warn = vi.fn();
@@ -125,7 +158,7 @@ describe('flow CLI command', () => {
       transports: ['DEVK900002', 'DEVK900001'],
       mode: 'base',
       partial: false,
-      config: ctx.config.flow,
+      config: ctx.config['flow'],
     });
     expect(info).toHaveBeenCalledWith(
       expect.stringContaining('1 changed, 0 moved, 0 removed'),

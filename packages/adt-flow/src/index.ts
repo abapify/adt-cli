@@ -25,6 +25,7 @@ export {
   AdtFlowError,
   type FlowCheckoutDependencies,
   type FlowCheckoutInput,
+  type FlowIndexInput,
   type FlowCheckoutMode,
   type FlowCheckoutResult,
   type FlowErrorCode,

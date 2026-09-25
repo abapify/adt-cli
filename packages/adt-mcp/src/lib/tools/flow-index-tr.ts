@@ -8,21 +8,22 @@ import {
   type FlowMcpDependencies,
 } from './flow-transport-common';
 
-export { type FlowMcpDependencies } from './flow-transport-common';
-
-export function registerFlowCheckoutTrTool(
+/**
+ * Persist a transport's inventory and unresolved-boundary descriptors without
+ * materializing any source files into the workspace.
+ */
+export function registerFlowIndexTrTool(
   server: McpServer,
   ctx: ToolContext,
   overrides: Partial<FlowMcpDependencies> = {},
 ): void {
   const dependencies = { ...DEFAULT_FLOW_MCP_DEPENDENCIES, ...overrides };
   server.tool(
-    'flow_checkout_tr',
-    'Reconcile a confined workspace to the exact base or head source boundary of one or more transports.',
+    'flow_index_tr',
+    'Persist a confined workspace transport inventory without materializing source files.',
     {
       ...sessionOrConnectionShape,
       transports: z.array(z.string().trim().min(1)).min(1),
-      base: z.boolean().optional(),
       workspaceRoot: z
         .string()
         .min(1)
@@ -30,7 +31,7 @@ export function registerFlowCheckoutTrTool(
     },
     {
       readOnlyHint: false,
-      destructiveHint: true,
+      destructiveHint: false,
       idempotentHint: true,
       openWorldHint: true,
     },
@@ -42,15 +43,10 @@ export function registerFlowCheckoutTrTool(
         extra: extra ?? {},
         options: {
           rootChangedMessage:
-            'Workspace root changed between configuration load and checkout.',
-          failureCode: 'FLOW_CHECKOUT_FAILED',
-          failureMessage:
-            'Could not materialize the requested transport boundary.',
-          run: (service, input) =>
-            service.checkout({
-              ...input,
-              mode: args.base ? 'base' : 'head',
-            }),
+            'Workspace root changed between configuration load and indexing.',
+          failureCode: 'FLOW_INDEX_FAILED',
+          failureMessage: 'Could not index the requested transport inventory.',
+          run: (service, input) => service.index(input),
         },
       }),
   );
