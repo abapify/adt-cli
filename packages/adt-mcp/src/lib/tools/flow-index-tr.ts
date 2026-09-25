@@ -36,12 +36,18 @@ export function registerFlowIndexTrTool(
       openWorldHint: true,
     },
     (args, extra) =>
-      runFlowTransportTool(ctx, dependencies, args, extra ?? {}, {
-        rootChangedMessage:
-          'Workspace root changed between configuration load and indexing.',
-        failureCode: 'FLOW_INDEX_FAILED',
-        failureMessage: 'Could not index the requested transport inventory.',
-        run: (service, input) => service.index(input),
+      runFlowTransportTool({
+        ctx,
+        dependencies,
+        args,
+        extra: extra ?? {},
+        options: {
+          rootChangedMessage:
+            'Workspace root changed between configuration load and indexing.',
+          failureCode: 'FLOW_INDEX_FAILED',
+          failureMessage: 'Could not index the requested transport inventory.',
+          run: (service, input) => service.index(input),
+        },
       }),
   );
 }

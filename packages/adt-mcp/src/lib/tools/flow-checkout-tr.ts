@@ -35,17 +35,23 @@ export function registerFlowCheckoutTrTool(
       openWorldHint: true,
     },
     (args, extra) =>
-      runFlowTransportTool(ctx, dependencies, args, extra ?? {}, {
-        rootChangedMessage:
-          'Workspace root changed between configuration load and checkout.',
-        failureCode: 'FLOW_CHECKOUT_FAILED',
-        failureMessage:
-          'Could not materialize the requested transport boundary.',
-        run: (service, input) =>
-          service.checkout({
-            ...input,
-            mode: args.base ? 'base' : 'head',
-          }),
+      runFlowTransportTool({
+        ctx,
+        dependencies,
+        args,
+        extra: extra ?? {},
+        options: {
+          rootChangedMessage:
+            'Workspace root changed between configuration load and checkout.',
+          failureCode: 'FLOW_CHECKOUT_FAILED',
+          failureMessage:
+            'Could not materialize the requested transport boundary.',
+          run: (service, input) =>
+            service.checkout({
+              ...input,
+              mode: args.base ? 'base' : 'head',
+            }),
+        },
       }),
   );
 }

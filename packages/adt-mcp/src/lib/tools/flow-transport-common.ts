@@ -57,11 +57,11 @@ type FlowToolResult = {
   structuredContent?: Record<string, unknown>;
 };
 
-export async function runFlowTransportTool(
-  ctx: ToolContext,
-  dependencies: FlowMcpDependencies,
-  args: FlowToolArgs,
-  extra: { sessionId?: string },
+interface FlowTransportToolRequest {
+  ctx: ToolContext;
+  dependencies: FlowMcpDependencies;
+  args: FlowToolArgs;
+  extra: { sessionId?: string };
   options: {
     rootChangedMessage: string;
     failureCode: string;
@@ -70,8 +70,16 @@ export async function runFlowTransportTool(
       service: AdtFlowService,
       input: FlowIndexInput,
     ): Promise<FlowCheckoutResult>;
-  },
-): Promise<FlowToolResult> {
+  };
+}
+
+export async function runFlowTransportTool({
+  ctx,
+  dependencies,
+  args,
+  extra,
+  options,
+}: FlowTransportToolRequest): Promise<FlowToolResult> {
   try {
     const root = await resolveFlowWorkspaceRoot(
       args.workspaceRoot,
