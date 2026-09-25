@@ -19,6 +19,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createMcpServer } from '../src/lib/server';
 import { createMockAdtServer, type MockAdtServer } from '@abapify/adt-fixtures';
 import { createAdtClient, type AdtClient } from '@abapify/adt-client';
+import { AdtFlowError } from '@abapify/adt-flow';
 import type { FormatPlugin } from '@abapify/adt-plugin';
 import type { ConnectionParams, ToolContext } from '../src/lib/types';
 import { registerFlowIndexTrTool } from '../src/lib/tools/flow-index-tr';
@@ -1578,6 +1579,50 @@ describe('adt-mcp integration tests', () => {
           idempotentHint: true,
           openWorldHint: true,
         });
+      } finally {
+        await rm(allowed, { recursive: true, force: true });
+      }
+    });
+
+    it('does not expose raw failure causes from the flow service', async () => {
+      const allowed = await realpath(
+        await mkdtemp(join(tmpdir(), 'adt-flow-index-error-')),
+      );
+      const target = new CapturingServer();
+      const ctx = {
+        getClient: () => ({}) as AdtClient,
+        workspaceRoots: [allowed],
+        flowConfig: { format: { id: 'abapgit' } },
+      } satisfies ToolContext;
+      registerFlowIndexTrTool(target as unknown as McpServer, ctx, {
+        getFormat: () => flowFormat,
+        createService: () => ({
+          async checkout() {
+            throw new Error('checkout must not be called by flow_index_tr');
+          },
+          async index() {
+            throw new AdtFlowError('apply_failed', 'Index apply failed.', {
+              cause: 'private adapter detail',
+              rollback: 'private rollback detail',
+              path: '.adt/tr/DEVK900001.json',
+            });
+          },
+        }),
+      });
+
+      try {
+        const result = await target.handler!(
+          {
+            baseUrl: 'https://example.invalid',
+            transports: ['DEVK900001'],
+            workspaceRoot: allowed,
+          },
+          {},
+        );
+        const body = result.content[0]?.text ?? '';
+        assert.strictEqual(result.isError, true);
+        assert.match(body, /\.adt\/tr\/DEVK900001\.json/u);
+        assert.doesNotMatch(body, /private adapter|private rollback/u);
       } finally {
         await rm(allowed, { recursive: true, force: true });
       }

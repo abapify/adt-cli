@@ -57,6 +57,18 @@ type FlowToolResult = {
   structuredContent?: Record<string, unknown>;
 };
 
+function safeFlowErrorDetails(
+  error: AdtFlowError,
+): Record<string, unknown> | undefined {
+  if (!error.details) return undefined;
+  const details = Object.fromEntries(
+    Object.entries(error.details).filter(
+      ([key]) => key !== 'cause' && key !== 'rollback',
+    ),
+  );
+  return Object.keys(details).length > 0 ? details : undefined;
+}
+
 interface FlowTransportToolRequest {
   ctx: ToolContext;
   dependencies: FlowMcpDependencies;
@@ -122,7 +134,7 @@ export async function runFlowTransportTool({
     const isFlowError = error instanceof AdtFlowError;
     const code = isFlowError ? error.code : options.failureCode;
     const message = isFlowError ? error.message : options.failureMessage;
-    const cause = error instanceof Error ? error.message : String(error);
+    const details = isFlowError ? safeFlowErrorDetails(error) : undefined;
     return {
       isError: true,
       content: [
@@ -132,7 +144,7 @@ export async function runFlowTransportTool({
             error: {
               code,
               message,
-              details: isFlowError ? (error.details ?? { cause }) : { cause },
+              ...(details ? { details } : {}),
             },
           }),
         },
