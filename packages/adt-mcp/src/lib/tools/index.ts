@@ -125,6 +125,7 @@ import { registerListSourceVersionsTool } from './list-source-versions';
 import { registerGetSourceVersionTool } from './get-source-version';
 import { registerCtsTransportSourceManifestTool } from './cts-transport-source-manifest';
 import { registerFlowCheckoutTrTool } from './flow-checkout-tr';
+import { registerFlowIndexTrTool } from './flow-index-tr';
 
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   // Session lifecycle tools (HTTP transport only)
@@ -246,4 +247,5 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerGetSourceVersionTool(server, ctx);
   registerCtsTransportSourceManifestTool(server, ctx);
   registerFlowCheckoutTrTool(server, ctx);
+  registerFlowIndexTrTool(server, ctx);
 }

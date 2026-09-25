@@ -1,65 +1,31 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import {
-  AdtFlowError,
-  createAdtFlowDependencies,
-  createAdtFlowService,
-  flowConfigSchema,
-  type AdtFlowService,
-} from '@abapify/adt-flow';
-import { loadConfig, type FlowConfig } from '@abapify/adt-config';
-import { getFormatPlugin, type FormatPlugin } from '@abapify/adt-plugin';
-import type { AdtClient } from '@abapify/adt-client';
+import { AdtFlowError } from '@abapify/adt-flow';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
 import { resolveFlowWorkspaceRoot } from '../flow-workspace';
+import {
+  DEFAULT_FLOW_MCP_DEPENDENCIES,
+  type FlowMcpDependencies,
+} from './flow-checkout-tr';
 
-export interface FlowMcpDependencies {
-  loadFlowConfig(root: string, context: ToolContext): Promise<FlowConfig>;
-  getFormat(id: string): FormatPlugin | undefined;
-  createService(client: AdtClient, format: FormatPlugin): AdtFlowService;
-}
-
-export const DEFAULT_FLOW_MCP_DEPENDENCIES: FlowMcpDependencies = {
-  async loadFlowConfig(root, context) {
-    if (context.flowConfig) return context.flowConfig;
-    const loaded = await loadConfig({ cwd: root });
-    const flowValue = loaded.raw.flow;
-    if (flowValue === undefined) {
-      throw new AdtFlowError(
-        'configuration_invalid',
-        'Flow configuration is unavailable in this context.',
-      );
-    }
-    try {
-      return flowConfigSchema.parse(flowValue);
-    } catch (error) {
-      throw new AdtFlowError(
-        'configuration_invalid',
-        'Flow configuration is invalid.',
-        { cause: String(error) },
-      );
-    }
-  },
-  getFormat: getFormatPlugin,
-  createService: (client, format) =>
-    createAdtFlowService(createAdtFlowDependencies(client, format)),
-};
-
-export function registerFlowCheckoutTrTool(
+/**
+ * Persist a transport's inventory and unresolved-boundary descriptors without
+ * materializing any source files into the workspace.
+ */
+export function registerFlowIndexTrTool(
   server: McpServer,
   ctx: ToolContext,
   overrides: Partial<FlowMcpDependencies> = {},
 ): void {
   const dependencies = { ...DEFAULT_FLOW_MCP_DEPENDENCIES, ...overrides };
   server.tool(
-    'flow_checkout_tr',
-    'Reconcile a confined workspace to the exact base or head source boundary of one or more transports.',
+    'flow_index_tr',
+    'Persist a confined workspace transport inventory without materializing source files.',
     {
       ...sessionOrConnectionShape,
       transports: z.array(z.string().trim().min(1)).min(1),
-      base: z.boolean().optional(),
       workspaceRoot: z
         .string()
         .min(1)
@@ -67,7 +33,7 @@ export function registerFlowCheckoutTrTool(
     },
     {
       readOnlyHint: false,
-      destructiveHint: true,
+      destructiveHint: false,
       idempotentHint: true,
       openWorldHint: true,
     },
@@ -92,18 +58,15 @@ export function registerFlowCheckoutTrTool(
         if (revalidatedRoot !== root) {
           throw new AdtFlowError(
             'workspace_root_changed',
-            'Workspace root changed between configuration load and checkout.',
+            'Workspace root changed between configuration load and indexing.',
           );
         }
         const { client } = await resolveClient(ctx, args, extra ?? {});
-        const result = await dependencies
-          .createService(client, format)
-          .checkout({
-            root,
-            transports: args.transports,
-            mode: args.base ? 'base' : 'head',
-            config,
-          });
+        const result = await dependencies.createService(client, format).index({
+          root,
+          transports: args.transports,
+          config,
+        });
         return {
           content: [
             { type: 'text' as const, text: JSON.stringify(result, null, 2) },
@@ -112,10 +75,10 @@ export function registerFlowCheckoutTrTool(
         };
       } catch (error) {
         const isFlowError = error instanceof AdtFlowError;
-        const code = isFlowError ? error.code : 'FLOW_CHECKOUT_FAILED';
+        const code = isFlowError ? error.code : 'FLOW_INDEX_FAILED';
         const message = isFlowError
           ? error.message
-          : 'Could not materialize the requested transport boundary.';
+          : 'Could not index the requested transport inventory.';
         const cause = error instanceof Error ? error.message : String(error);
         return {
           isError: true,

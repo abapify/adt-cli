@@ -68,6 +68,13 @@ export interface FlowCheckoutInput {
   config: FlowConfig;
 }
 
+/** Persist transport inventory and unresolved-boundary descriptors only. */
+export interface FlowIndexInput {
+  root: string;
+  transports: string[];
+  config: FlowConfig;
+}
+
 export interface FlowSkippedObject {
   object: string;
   component: string;

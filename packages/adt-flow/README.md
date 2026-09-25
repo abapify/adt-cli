@@ -27,6 +27,20 @@ adt flow checkout tr DEVK900001
 adt flow checkout tr DEVK900001,DEVK900002 --base
 ```
 
+To persist only transport inventory and unresolved-boundary descriptors under
+`.adt`, without reading or materializing source files, use the explicit
+index-only command:
+
+```text
+adt flow index tr DEVK900001,DEVK900002
+```
+
+`checkout` remains strict: if any versioned component has no exact source
+boundary, it fails without changing the workspace. `checkout --partial` is a
+separate explicit opt-in that materializes only exact objects. `index` never
+materializes source; it retains the complete transport inventory and records
+every unresolved component as an `omitted` descriptor for a later retry.
+
 ```typescript
 import {
   createAdtFlowService,
@@ -48,6 +62,15 @@ await flow.checkout({
   root: process.cwd(),
   transports: ['DEVK900001'],
   mode: 'base',
+  config: {
+    format: { id: 'abapgit', options: { folderLogic: 'prefix' } },
+    include: { objectTypes: ['CLAS', 'INTF'] },
+  },
+});
+
+await flow.index({
+  root: process.cwd(),
+  transports: ['DEVK900001'],
   config: {
     format: { id: 'abapgit', options: { folderLogic: 'prefix' } },
     include: { objectTypes: ['CLAS', 'INTF'] },

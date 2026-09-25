@@ -36,6 +36,7 @@ import {
   type FlowCheckoutDependencies,
   type FlowCheckoutInput,
   type FlowCheckoutResult,
+  type FlowIndexInput,
   type FlowObjectIdentity,
   type FlowObjectModel,
   type FlowSkippedObject,
@@ -885,6 +886,7 @@ async function processGroup(ctx: ProcessGroupContext): Promise<GroupResult> {
 
 export interface AdtFlowService {
   checkout(input: FlowCheckoutInput): Promise<FlowCheckoutResult>;
+  index(input: FlowIndexInput): Promise<FlowCheckoutResult>;
 }
 
 interface CheckoutContext {
@@ -1567,12 +1569,57 @@ async function checkoutFlow(
   );
 }
 
+async function indexFlow(
+  input: FlowIndexInput,
+  dependencies: FlowCheckoutDependencies,
+): Promise<FlowCheckoutResult> {
+  // Reuse partial manifest classification so inexact entries become durable
+  // omissions, but deliberately skip every source/materialization path.
+  const ctx = createCheckoutContext(
+    { ...input, mode: 'head', partial: true },
+    dependencies,
+  );
+  const manifestContext = await buildManifestAndGroups(ctx);
+  const indexed: ProcessedGroups = {
+    desired: [],
+    descriptorPaths: [],
+    ownedPaths: new Set<string>(),
+    ownedOwners: new Map<string, string>(),
+    reusedIndexedComponent: false,
+  };
+  await addOmittedObjectDescriptors(
+    ctx,
+    manifestContext.manifest,
+    manifestContext.skipped,
+    indexed,
+  );
+  await addTransportDescriptors(ctx, manifestContext.manifest, indexed, true);
+  indexed.desired.sort((left, right) => compareStrings(left.path, right.path));
+  const plan = await planRepositoryChanges(
+    ctx.root,
+    indexed.desired,
+    indexed.ownedPaths,
+    indexed.ownedOwners,
+  );
+  await applyRepositoryPlan(ctx.root, plan);
+  return buildCheckoutResult(
+    ctx,
+    manifestContext.manifest,
+    manifestContext.skipped,
+    plan,
+    indexed,
+  );
+}
+
 export function createAdtFlowService(
   dependencies: FlowCheckoutDependencies,
 ): AdtFlowService {
   return {
     async checkout(input): Promise<FlowCheckoutResult> {
       return checkoutFlow(input, dependencies);
+    },
+    async index(input): Promise<FlowCheckoutResult> {
+      return indexFlow(input, dependencies);
     },
   };
 }
