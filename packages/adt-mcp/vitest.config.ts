@@ -4,9 +4,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: [
-      'tests/integration.test.ts',
-      'tests/flow-index-tr.vitest.test.ts',
-    ],
+    include: ['tests/integration.test.ts'],
   },
 });

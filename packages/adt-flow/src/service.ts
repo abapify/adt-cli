@@ -889,7 +889,7 @@ export interface AdtFlowService {
   index(input: FlowIndexInput): Promise<FlowCheckoutResult>;
 }
 
-interface CheckoutContext {
+interface FlowContext {
   root: string;
   mode: 'base' | 'head';
   partial: boolean;
@@ -898,14 +898,20 @@ interface CheckoutContext {
   configDigest: string;
   formatDigest: string;
   dependencies: FlowCheckoutDependencies;
-  materialize: NonNullable<FormatPlugin['materialize']>;
   calls: { manifest: number; metadata: number; source: number };
 }
 
-function createCheckoutContext(
-  input: FlowCheckoutInput,
+interface CheckoutContext extends FlowContext {
+  materialize: NonNullable<FormatPlugin['materialize']>;
+}
+
+function createFlowContext(
+  input: Pick<
+    FlowCheckoutInput,
+    'root' | 'transports' | 'mode' | 'partial' | 'config'
+  >,
   dependencies: FlowCheckoutDependencies,
-): CheckoutContext {
+): FlowContext {
   const parsed = flowConfigSchema.safeParse(input.config);
   if (!parsed.success) {
     throw new AdtFlowError(
@@ -914,13 +920,10 @@ function createCheckoutContext(
     );
   }
   const config = parsed.data;
-  const materialize = dependencies.format.materialize?.bind(
-    dependencies.format,
-  );
-  if (config.format.id !== dependencies.format.id || !materialize) {
+  if (config.format.id !== dependencies.format.id) {
     throw new AdtFlowError(
       'format_unsupported',
-      'The selected format does not support flow materialization.',
+      'The selected format is not registered for flow.',
     );
   }
   return {
@@ -936,9 +939,25 @@ function createCheckoutContext(
       supportedTypes: [...dependencies.format.supportedTypes].sort(),
     }),
     dependencies,
-    materialize,
     calls: { manifest: 0, metadata: 0, source: 0 },
   };
+}
+
+function createCheckoutContext(
+  input: FlowCheckoutInput,
+  dependencies: FlowCheckoutDependencies,
+): CheckoutContext {
+  const context = createFlowContext(input, dependencies);
+  const materialize = dependencies.format.materialize?.bind(
+    dependencies.format,
+  );
+  if (!materialize) {
+    throw new AdtFlowError(
+      'format_unsupported',
+      'The selected format does not support flow materialization.',
+    );
+  }
+  return { ...context, materialize };
 }
 
 async function tryExactHeadFastPath(
@@ -985,7 +1004,7 @@ interface ManifestContext {
 }
 
 function buildManifestRequestOptions(
-  config: CheckoutContext['config'],
+  config: FlowContext['config'],
 ): BuildManifestOptions {
   const options: BuildManifestOptions = {
     concurrency: config.concurrency?.metadata ?? DEFAULT_METADATA_CONCURRENCY,
@@ -1026,7 +1045,7 @@ function inexactEntries(
 
 async function filterSkippedByApplicationComponent(
   entries: readonly TransportSourceManifestEntry[],
-  ctx: CheckoutContext,
+  ctx: FlowContext,
   limiter: Limiter,
   toSkipped: (entry: TransportSourceManifestEntry) => FlowSkippedObject,
 ): Promise<FlowCheckoutResult['skipped']> {
@@ -1085,7 +1104,7 @@ async function filterSkippedByApplicationComponent(
 
 async function skippedInexactEntries(
   entries: readonly TransportSourceManifestEntry[],
-  ctx: CheckoutContext,
+  ctx: FlowContext,
   limiter: Limiter,
   hasApplicationComponentFilter: boolean,
 ): Promise<FlowCheckoutResult['skipped']> {
@@ -1107,7 +1126,7 @@ async function skippedInexactEntries(
 
 async function unsupportedEntries(
   entries: readonly TransportSourceManifestEntry[],
-  ctx: CheckoutContext,
+  ctx: FlowContext,
   limiter: Limiter,
   hasApplicationComponentFilter: boolean,
 ): Promise<FlowCheckoutResult['skipped']> {
@@ -1134,7 +1153,7 @@ async function unsupportedEntries(
 }
 
 async function buildManifestAndGroups(
-  ctx: CheckoutContext,
+  ctx: FlowContext,
 ): Promise<ManifestContext> {
   ctx.calls.manifest += 1;
   const manifest = await ctx.dependencies.buildManifest(
@@ -1198,7 +1217,7 @@ type PendingOwnership = Map<
 >;
 
 async function validateIndexedOwnership(
-  ctx: CheckoutContext,
+  ctx: FlowContext,
   identity: FlowObjectIdentity,
   descriptor: ObjectDescriptor,
 ): Promise<void> {
@@ -1329,7 +1348,7 @@ async function processAllGroups(
 }
 
 async function addTransportDescriptors(
-  ctx: CheckoutContext,
+  ctx: FlowContext,
   manifest: TransportSourceManifest,
   accum: CheckoutAccumulator,
   incomplete: boolean,
@@ -1408,7 +1427,7 @@ function skippedEntryMatches(
  * with the exact reason that prevented materialization.
  */
 async function addOmittedObjectDescriptors(
-  ctx: CheckoutContext,
+  ctx: FlowContext,
   manifest: TransportSourceManifest,
   skipped: FlowCheckoutResult['skipped'],
   accum: CheckoutAccumulator,
@@ -1486,8 +1505,39 @@ async function addOmittedObjectDescriptors(
   }
 }
 
+/**
+ * Keep links to exact, already-materialized objects when refreshing a
+ * transport inventory. Indexing must not rewrite their source or descriptor,
+ * but the transport descriptor still needs them for a later exact-head reuse.
+ */
+async function addExistingObjectDescriptors(
+  ctx: FlowContext,
+  groups: ManifestContext['groups'],
+  accum: CheckoutAccumulator,
+): Promise<void> {
+  await Promise.all(
+    groups.map(async ({ identity }) => {
+      const descriptorPath = objectDescriptorPath(identity);
+      if (accum.descriptorPaths.includes(descriptorPath)) return;
+      const descriptor = await readDescriptor(
+        ctx.root,
+        descriptorPath,
+        objectDescriptorSchema,
+      );
+      if (
+        descriptor?.state === 'present' &&
+        descriptor.identity.canonical === identity.canonical &&
+        descriptor.configDigest === ctx.configDigest &&
+        descriptor.formatDigest === ctx.formatDigest
+      ) {
+        accum.descriptorPaths.push(descriptorPath);
+      }
+    }),
+  );
+}
+
 function buildCheckoutResult(
-  ctx: CheckoutContext,
+  ctx: FlowContext,
   manifest: TransportSourceManifest,
   skipped: FlowCheckoutResult['skipped'],
   plan: RepositoryPlan,
@@ -1575,7 +1625,7 @@ async function indexFlow(
 ): Promise<FlowCheckoutResult> {
   // Reuse partial manifest classification so inexact entries become durable
   // omissions, but deliberately skip every source/materialization path.
-  const ctx = createCheckoutContext(
+  const ctx = createFlowContext(
     { ...input, mode: 'head', partial: true },
     dependencies,
   );
@@ -1593,6 +1643,7 @@ async function indexFlow(
     manifestContext.skipped,
     indexed,
   );
+  await addExistingObjectDescriptors(ctx, manifestContext.groups, indexed);
   await addTransportDescriptors(ctx, manifestContext.manifest, indexed, true);
   indexed.desired.sort((left, right) => compareStrings(left.path, right.path));
   const plan = await planRepositoryChanges(
