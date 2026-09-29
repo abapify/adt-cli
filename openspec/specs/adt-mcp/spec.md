@@ -1,41 +1,117 @@
-# Delta — `adt-mcp` capability
+# adt-mcp Specification
 
-## MODIFIED Requirements
+## Purpose
 
-### Requirement: Stateless server — connection-per-call
+MCP server bridging AI assistants to SAP ADT — tool registration, delegated/ambient authorization, scoped dispatch policies, Streamable HTTP transport, sessions, and changesets.
 
-> Previous wording (invariant #4 in `packages/adt-mcp/AGENTS.md`):
-> "Each tool call creates its own AdtClient via ctx.getClient(args). The
-> server holds no session, no cached client, and no credentials between
-> calls."
+## Requirements
 
-The server SHALL support two transports with different state models:
+### Requirement: Delegated assistants receive a server-owned read catalogue
 
-- **stdio transport** — remains stateless connection-per-call by default.
-  Each tool call constructs a fresh `AdtClient` from the arguments
-  provided, and no state persists across calls.
-- **Streamable HTTP transport** — session-scoped state. Each MCP session
-  (identified by `Mcp-Session-Id`) owns a cached `AdtClient`, a lock
-  registry, and an optional active changeset. State is cleaned up on
-  session close (explicit `DELETE /mcp`, `sap_disconnect`, or idle TTL).
-  Across sessions and processes no state persists; credentials are never
-  written to disk.
+The server SHALL accept an exact signed delegated-assistant policy bound to
+one principal, thread, execution, System, and Destination. The resulting MCP
+catalogue SHALL contain every registered tool whose server-owned operation
+class is `server` or `read`.
 
-#### Scenario: stdio remains stateless
+#### Scenario: Delegated assistant lists tools
 
-- **GIVEN** `adt-mcp` started without `--http` and without `MCP_HTTP_PORT`
-- **WHEN** two tool calls arrive carrying inline `baseUrl/username/password`
-- **THEN** each call performs its own SAP security-session handshake and
-  no state is shared between the calls.
+- **GIVEN** a valid delegated-assistant credential requests the read envelope
+- **WHEN** the client calls `tools/list`
+- **THEN** the server advertises multiple permitted read tools without a
+  client-provided tool-name allowlist
 
-#### Scenario: HTTP session caches the SAP client
+#### Scenario: A new read tool is registered
 
-- **GIVEN** an HTTP MCP session has successfully called `sap_connect`
-- **WHEN** a subsequent tool call arrives on the same `Mcp-Session-Id`
-- **THEN** the server reuses the cached `AdtClient` and does not perform
-  a new SAP security-session handshake.
+- **GIVEN** a new tool has a complete `read` catalogue classification
+- **WHEN** a delegated assistant refreshes `tools/list`
+- **THEN** the new tool is admitted without changing the client credential
+  contract
 
-## ADDED Requirements
+### Requirement: Delegated read authority cannot widen
+
+The server SHALL reject malformed delegated-assistant policies and SHALL deny
+`safe_execute`, `write`, unknown, and out-of-Destination operations at both
+catalogue and dispatch.
+
+#### Scenario: Delegated assistant attempts a write
+
+- **WHEN** the client requests or directly calls a write-class tool
+- **THEN** the tool is absent from discovery and dispatch returns
+  `mcp_scope_denied` before a Destination lease or SAP operation
+
+#### Scenario: Delegated policy carries additional authority
+
+- **WHEN** the signed claim adds a tool list, resource override, non-empty
+  limits, another operation class, or an additional Destination
+- **THEN** the invocation exposes no MCP tools
+
+### Requirement: Code review checks remain bounded analysis
+
+The server SHALL classify `atc_run` and `run_unit_tests`, including coverage,
+as `safe_execute` operations. An authenticated credential containing only
+`server` and `read` authority SHALL NOT see or dispatch them; SAP analysis
+execution requires an explicit execution grant.
+
+> Note: this change originally reclassified these checks as `read`. During
+> PR #173 review the exposure of SAP analysis execution to ordinary read
+> credentials was flagged as a security finding and deliberately reverted —
+> the `safe_execute` classification is the intended end state.
+
+#### Scenario: Delegated read assistant lists tools
+
+- **GIVEN** a delegated assistant has only `read` authority for one
+  Destination
+- **WHEN** it lists tools or directly calls `atc_run` / `run_unit_tests`
+- **THEN** the checks are absent from the catalogue and dispatch is denied
+  before a Destination lease or SAP operation
+
+#### Scenario: Read authority remains non-mutating and non-executing
+
+- **WHEN** the same assistant lists or calls a mutation or an analysis
+  execution
+- **THEN** the operation is absent or denied before SAP state is created
+
+### Requirement: Stricter scoped ATC remains supported
+
+The server SHALL accept an exact object-bound `safe_execute` credential for
+`atc_run` or `run_unit_tests` when a workflow chooses that narrower
+execution policy.
+
+#### Scenario: Workflow supplies an exact ATC grant
+
+- **WHEN** a valid scoped `safe_execute` credential names `atc_run` and exact
+  object keys
+- **THEN** catalogue and dispatch enforce the existing scoped policy
+
+### Requirement: Bounded analysis is a separate operation class
+
+The server SHALL classify every MCP tool that creates diagnostic analysis
+state as `safe_execute`, independently of its HTTP method and independently
+of repository mutation authority.
+
+#### Scenario: Read credential requests ATC
+
+- **WHEN** a credential contains only the `read` class
+- **THEN** `atc_run` is absent from the destination-mode tool list and a direct
+  call is denied before a destination lease or tool handler
+
+#### Scenario: Explicit bounded-analysis credential requests ATC
+
+- **WHEN** a trusted request access snapshot contains `safe_execute`
+- **THEN** the scope catalogue permits `atc_run` subject to all other
+  destination and resource checks
+
+### Requirement: Unsupported signed policies fail closed
+
+The server SHALL not dispatch a signed invocation that includes
+`safe_execute` until it can enforce every policy field required for that
+operation.
+
+#### Scenario: Future-form safe-execution credential arrives early
+
+- **WHEN** a valid signed credential contains `safe_execute` but no supported
+  exact execution policy exists
+- **THEN** the server exposes no MCP tools through that invocation
 
 ### Requirement: Streamable HTTP transport
 
@@ -57,6 +133,30 @@ and `DELETE /mcp` and SHALL assign session IDs via `randomUUID`.
 - **WHEN** a client opens an SSE stream against the server
 - **THEN** the server responds with HTTP 404 or 405, and documentation
   directs the client to Streamable HTTP.
+
+### Requirement: Two transports, two client state models
+
+Both transports SHALL share every tool handler, but SHALL differ in
+`AdtClient` state: over **stdio** the server creates a fresh `AdtClient`
+per tool call from the call arguments and no state persists across
+calls; over **Streamable HTTP** each MCP session (`Mcp-Session-Id`)
+owns a cached `AdtClient`, a lock registry, and an optional active
+changeset, established via `sap_connect`. Stateful tools such as
+`changeset_*` therefore require an HTTP session.
+
+#### Scenario: stdio calls are stateless
+
+- **GIVEN** the server runs on the stdio transport
+- **WHEN** two consecutive tool calls arrive
+- **THEN** each constructs its own `AdtClient` from its arguments and no
+  client state carries over between the calls.
+
+#### Scenario: HTTP session reuses the connected client
+
+- **GIVEN** an HTTP session that called `sap_connect`
+- **WHEN** subsequent tool calls arrive on the same `Mcp-Session-Id`
+- **THEN** they reuse the session's cached `AdtClient` and lock
+  registry.
 
 ### Requirement: Session lifecycle cleanup
 
@@ -107,6 +207,11 @@ check SHALL be skipped and the server SHALL instead require a non-empty
   `x-forwarded-user: alice`
 - **THEN** the request is accepted and the user identity is available to
   tool handlers for logging.
+
+> Deployment note: proxy mode trusts whatever client sets
+> `x-forwarded-user`; the listener currently only warns on non-loopback
+> binds. Enforcing the trusted-proxy boundary (loopback-only or
+> allowlist enforcement) is tracked as follow-up work.
 
 ### Requirement: Host header and CORS protection
 
@@ -192,24 +297,37 @@ open per MCP session.
   objects, releases every lock, and the session's changeset state
   returns to idle.
 
-#### Scenario: Rollback discards operations and releases locks
+#### Scenario: Rollback releases locks without reverting applied source
 
-- **GIVEN** an open changeset with one update queued and one lock held
+- **GIVEN** an open changeset whose `changeset_add` calls already PUT
+  source to SAP under lock
 - **WHEN** the client calls `changeset_rollback`
-- **THEN** no activation occurs, the lock is released, and the session's
-  changeset state returns to idle.
+- **THEN** no activation occurs, every lock is released, and the session's
+  changeset state returns to idle. The already-written source PUTs are
+  NOT reverted — SAP has no transactional discard over ADT; the inactive
+  version stays on the system until the next edit/activate cycle
+  (matching Eclipse ADT editor-close behaviour).
 
-#### Scenario: Nested begin is rejected
+#### Scenario: Nested begin without force is rejected
 
 - **GIVEN** a session with an already open changeset
-- **WHEN** the client calls `changeset_begin` again
+- **WHEN** the client calls `changeset_begin` again without `force`
 - **THEN** the tool returns an error without modifying the existing
   changeset.
+
+#### Scenario: Forced begin rolls back and restarts
+
+- **GIVEN** a session with an already open changeset
+- **WHEN** the client calls `changeset_begin` with `force: true`
+- **THEN** the server rolls back the existing changeset (releasing its
+  locks, without reverting applied source) and opens a new changeset.
 
 ### Requirement: CLI ↔ MCP parity for changesets
 
 Every changeset operation SHALL be available as both an
-`adt changeset …` CLI subcommand and an `sap_*_changeset` MCP tool, and
+`adt changeset …` CLI subcommand and a `changeset_*` MCP tool
+(`changeset_begin`, `changeset_add`, `changeset_commit`,
+`changeset_rollback`), and
 both SHALL exercise the same `ChangesetService`. A parity test at
 `packages/adt-cli/tests/e2e/parity.changeset.test.ts` SHALL drive the
 CLI and MCP paths through the same mock server and assert equivalent

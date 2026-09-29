@@ -349,6 +349,31 @@ describe('parse — MethodImpl.bodySpan', () => {
     expect(m.bodySpan.startLine).toBe(3); // body content line
   });
 
+  it('body is the exact source slice — whitespace, comments, casing preserved byte-for-byte', () => {
+    const src = [
+      'CLASS zcl_x IMPLEMENTATION.',
+      '  METHOD foo.',
+      '    DATA   lv_x   TYPE i.   " trailing comment kept',
+      '    lv_x =   lv_x   +  1  .',
+      '    " a full-line comment',
+      '    WRITE lv_x.',
+      '  ENDMETHOD.',
+      'ENDCLASS.',
+    ].join('\n');
+    const { ast, errors } = parse(src);
+    expect(errors).toEqual([]);
+    const impl = ast.definitions.find((d) => d.kind === 'ClassImpl');
+    if (impl?.kind !== 'ClassImpl') throw new Error('expected ClassImpl');
+    const m = impl.methods[0];
+    const expected = src.slice(
+      m.bodySpan.startOffset,
+      m.bodySpan.endOffset + 1,
+    );
+    expect(m.body).toBe(expected);
+    expect(m.body).toContain('" trailing comment kept');
+    expect(m.body).toContain('lv_x =   lv_x   +  1  .');
+  });
+
   it('empty method body still produces a valid bodySpan', () => {
     const src = [
       'CLASS zcl_x IMPLEMENTATION.',
