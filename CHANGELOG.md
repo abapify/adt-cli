@@ -1,3 +1,15 @@
+## 0.4.16 (2026-09-29)
+
+### 🩹 Fixes
+
+- **openspec:** align archived specs with shipped behavior ([0f016a54](https://github.com/abapify/adt-cli/commit/0f016a54))
+- **openspec:** second review pass — strict_sql blocking, context --json ([2b9f2c3d](https://github.com/abapify/adt-cli/commit/2b9f2c3d))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- ThePlenkov @ThePlenkov
+
 ## 0.4.15 (2026-09-29)
 
 ### 🩹 Fixes

@@ -1,3 +1,14 @@
+## 0.4.16 (2026-09-29)
+
+### 🩹 Fixes
+
+- **openspec:** align archived specs with shipped behavior ([0f016a54](https://github.com/abapify/adt-cli/commit/0f016a54))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- ThePlenkov @ThePlenkov
+
 ## 0.4.15 (2026-09-29)
 
 This was a version bump only for @abapify/aclass to align it with other projects, there were no code changes.

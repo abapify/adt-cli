@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-contracts",
-  "version": "0.4.15",
+  "version": "0.4.16",
   "description": "SAP ADT REST API contracts using speci + ts-xsd",
   "license": "MIT",
   "publishConfig": {
@@ -15,11 +15,11 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/speci": "0.4.15",
-    "@abapify/adt-schemas": "0.4.15"
+    "@abapify/speci": "0.4.16",
+    "@abapify/adt-schemas": "0.4.16"
   },
   "devDependencies": {
-    "@abapify/adt-fixtures": "0.4.15"
+    "@abapify/adt-fixtures": "0.4.16"
   },
   "files": [
     "dist"

@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt",
-  "version": "0.4.15",
+  "version": "0.4.16",
   "description": "Standalone single-file bundle of the ADT CLI — all runtime dependencies embedded",
   "license": "MIT",
   "type": "module",
@@ -18,11 +18,11 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@abapify/adt-atc": "0.4.15",
-    "@abapify/adt-cli": "0.4.15",
-    "@abapify/adt-codegen": "0.4.15",
-    "@abapify/adt-diff": "0.4.15",
-    "@abapify/adt-export": "0.4.15"
+    "@abapify/adt-atc": "0.4.16",
+    "@abapify/adt-cli": "0.4.16",
+    "@abapify/adt-codegen": "0.4.16",
+    "@abapify/adt-diff": "0.4.16",
+    "@abapify/adt-export": "0.4.16"
   },
   "publishConfig": {
     "access": "public"
