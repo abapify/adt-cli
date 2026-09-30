@@ -40,28 +40,16 @@
       "path": "./packages/adt-flow"
     },
     {
-      "path": "./tools/nx-typecheck"
-    },
-    {
       "path": "./packages/adt-auth"
     },
     {
       "path": "./packages/logger"
     },
     {
-      "path": "./tools/nx-tsdown"
-    },
-    {
-      "path": "./tools/nx-vitest"
-    },
-    {
       "path": "./packages/ts-xsd"
     },
     {
       "path": "./packages/speci"
-    },
-    {
-      "path": "./tools/nx-sync"
     },
     {
       "path": "./packages/adk"

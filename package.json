@@ -56,7 +56,7 @@
     "@abapify/adt-playwright": "workspace:*",
     "@eslint/js": "^10.0.1",
     "@nx-devkit/nx-cloud": "0.0.2",
-    "@nx-devkit/typescript": "0.2.8",
+    "@nx-devkit/typescript": "0.2.17",
     "@nx/eslint": "23.2.0",
     "@nx/eslint-plugin": "23.2.0",
     "@nx/jest": "23.2.0",

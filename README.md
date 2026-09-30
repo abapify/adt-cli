@@ -214,7 +214,7 @@ bunx nx run adt-cli:test      # single-package
 adt-cli/
 ├── packages/        # Every @abapify/* package lives here
 ├── samples/         # Example consumer projects
-├── tools/           # Internal Nx plugins (nx-tsdown, nx-vitest, nx-npm-trust, …)
+├── tools/           # Internal tooling (nx-npm-trust plugin, p2-cli, release helpers)
 ├── docs/            # Maintainer docs (not rendered on the site)
 ├── website/         # Docusaurus site (→ adt-cli.netlify.app)
 ├── openspec/        # Specs + proposals for in-flight changes

@@ -176,6 +176,7 @@ __pycache__/
 # Gas City
 .beads/*
 !.beads/identity.toml
+.beads.gate.lock
 gascity/AGENTS.md
 
 # Dev TLS material — private keys must never be committed.

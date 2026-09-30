@@ -91,7 +91,7 @@ const classes = {
 - ❌ No `devDependencies` in package.json
 - ❌ No `scripts` in package.json
 - ✅ Use `project.json` for Nx targets
-- ✅ Build target inferred by nx-tsdown plugin
+- ✅ Build target inferred by @nx-devkit/typescript plugin
 
 ## Architecture
 

@@ -41,8 +41,8 @@ packages/[name]/
 │   └── index.ts
 ├── package.json
 ├── tsconfig.json
-├── tsdown.config.ts      # ← nx-tsdown plugin detects → creates 'build' target
-└── vitest.config.ts      # ← nx-vitest plugin detects → creates 'test' targets
+├── tsdown.config.ts      # ← @nx-devkit/typescript detects → creates 'build' target
+└── vitest.config.ts      # ← @nx-devkit/typescript detects → creates 'test' targets
 ```
 
 **Step 3: Minimal project.json**
@@ -105,8 +105,8 @@ export default defineConfig({
 ## Technology Stack
 
 - **Language**: TypeScript (ES2015+, strict mode)
-- **Build**: tsdown (via nx-tsdown plugin inference)
-- **Testing**: Vitest (via nx-vitest plugin inference)
+- **Build**: tsdown (via @nx-devkit/typescript inference)
+- **Testing**: Vitest (via @nx-devkit/typescript inference)
 - **Linting**: ESLint (via @nx/eslint plugin)
 - **Package Manager**: bun
 
@@ -142,7 +142,7 @@ Then add `tsdown.config.ts` and `vitest.config.ts` - targets will be inferred au
 
 ### ✅ DO: Let plugins infer targets
 
-Just create `tsdown.config.ts` and the nx-tsdown plugin will automatically create the `build` target.
+Just create `tsdown.config.ts` and the @nx-devkit/typescript plugin will automatically create the `build` target.
 
 ### Verification
 
