@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "nxCloudId": "69e6f81c01adefdeabf2c971",
+  "nxCloudId": "6aad1f30948146843c8151ea",
   "cli": {
     "packageManager": "bun"
   },
@@ -75,6 +75,10 @@
     {
       "plugin": "@nx/vitest",
       "exclude": ["**/*"]
+    },
+    {
+      "plugin": "@nx-devkit/nx-cloud",
+      "options": {}
     }
   ],
   "release": {
