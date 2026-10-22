@@ -17,18 +17,15 @@
 import { createHandler } from '../base';
 import {
   genericFromMetadata,
+  genericGetExtraFiles,
+  genericGetSources,
+  genericSetSources,
   genericToMetadata,
   type GenericAffLike,
   type MinimalAff,
 } from '../../aff/generic';
 
-type GenericLike = GenericAffLike & {
-  getSource?: () => Promise<string> | string;
-};
-
-function getSource(obj: GenericLike): string | Promise<string> {
-  return typeof obj.getSource === 'function' ? obj.getSource() : '';
-}
+type GenericLike = GenericAffLike;
 
 /**
  * Remaining AFF types with schemas but no dedicated handler.
@@ -115,7 +112,9 @@ const WAVE2_TYPES = [
 for (const type of WAVE2_TYPES) {
   createHandler<GenericLike, MinimalAff>(type, {
     toMetadata: genericToMetadata(type.toLowerCase()),
-    getSource,
+    getSources: genericGetSources,
+    getExtraFiles: genericGetExtraFiles(type.toLowerCase()),
     fromMetadata: genericFromMetadata,
+    setSources: genericSetSources,
   });
 }
