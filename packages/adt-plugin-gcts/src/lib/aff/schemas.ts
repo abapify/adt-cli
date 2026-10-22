@@ -78,6 +78,18 @@ export function affSchema(type: string, version?: number): AffSchema {
   throw new Error(`No AFF schema ${type}-v${v} under ${affRoot()}`);
 }
 
+/**
+ * Top-level body properties of a type's schema (everything beyond the
+ * mandatory `formatVersion`/`header` envelope), newest version by default.
+ * Empty array for header-only types.
+ */
+export function affBodyProps(type: string, version?: number): string[] {
+  const schema = affSchema(type, version);
+  return Object.keys(schema.properties ?? {}).filter(
+    (p) => p !== 'formatVersion' && p !== 'header',
+  );
+}
+
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 const validators = new Map<string, ValidateFunction>();
 
