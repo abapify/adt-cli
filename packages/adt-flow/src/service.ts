@@ -242,11 +242,18 @@ function groupEntries(entries: readonly TransportSourceManifestEntry[]): Array<{
     );
 }
 
+const ACTIVE_VERSION_ID = '00000';
+
+function isMutableVersion(versionId: string): boolean {
+  return versionId === ACTIVE_VERSION_ID;
+}
+
 function descriptorSelectionMatches(
   descriptor: ObjectDescriptor,
   component: string,
   version: SourceVersionRef,
 ): boolean {
+  if (isMutableVersion(version.id)) return false;
   return descriptor.selections.some(
     (selection) =>
       selection.component === component &&
@@ -368,7 +375,10 @@ async function exactHeadFastPath(
     if (
       !descriptor ||
       descriptor.configDigest !== configDigest ||
-      descriptor.formatDigest !== formatDigest
+      descriptor.formatDigest !== formatDigest ||
+      descriptor.selections.some((selection) =>
+        isMutableVersion(selection.versionId),
+      )
     ) {
       return undefined;
     }

@@ -497,6 +497,89 @@ describe('transport checkout', () => {
     ).toBe('source indexed\n');
   });
 
+  it('re-reads an indexed active 00000 head instead of reusing it', async () => {
+    const workspace = await root();
+    let current = manifest(
+      'modified',
+      version('before'),
+      version('00000'),
+      'DEVK900001',
+    );
+    const ports = dependencies(() => current);
+    let liveSource = 'source first\n';
+    ports.readSource.mockImplementation(async () => liveSource);
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+    ports.readSource.mockClear();
+    ports.loadObject.mockClear();
+    liveSource = 'source second\n';
+    current = manifest(
+      'modified',
+      version('before'),
+      version('00000'),
+      'DEVK900002',
+    );
+
+    const result = await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900002'],
+      config,
+    });
+
+    expect(result.fastPath).toBe('none');
+    expect(result.sapCalls).toEqual({ manifest: 1, metadata: 1, source: 1 });
+    expect(ports.loadObject).toHaveBeenCalledTimes(1);
+    expect(result.changed).toEqual(['src/feature/zcl_sample.clas.abap']);
+    expect(
+      await readFile(
+        join(workspace, 'src/feature/zcl_sample.clas.abap'),
+        'utf8',
+      ),
+    ).toBe('source second\n');
+  });
+
+  it('does not repeat an active 00000 head through the exact-head fast path', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('modified', version('before'), version('00000')),
+    );
+    let liveSource = 'source first\n';
+    ports.readSource.mockImplementation(async () => liveSource);
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+
+    const unchanged = await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+    expect(unchanged.fastPath).toBe('none');
+    expect(unchanged.changed).toEqual([]);
+
+    liveSource = 'source second\n';
+    const changed = await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+    expect(changed.fastPath).toBe('none');
+    expect(changed.changed).toEqual(['src/feature/zcl_sample.clas.abap']);
+    expect(
+      await readFile(
+        join(workspace, 'src/feature/zcl_sample.clas.abap'),
+        'utf8',
+      ),
+    ).toBe('source second\n');
+  });
+
   it('preserves an indexed object as the base of a later parent-attributed task', async () => {
     const workspace = await root();
     let current = manifest(
