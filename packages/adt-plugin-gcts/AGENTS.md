@@ -99,17 +99,41 @@ package directly: `adt-cli/src/lib/cli.ts` does a bootstrap-only
 | Hard-code `.abap` in filenames           | Use `gctsFilename(name, type, 'source')`      |
 | Duplicate abapGit handlers byte-for-byte | Share logic via ADK — only mapping lives here |
 
+## AFF schemas — vendored via submodule
+
+`git_modules/abap-file-formats` (pinned in `.gitmodules`) is the schema
+source of truth. Re-sync = `git submodule update --remote
+git_modules/abap-file-formats` + commit; schemas declare `formatVersion`
+consts so a re-sync is always reviewed, never silent.
+
+- **Runtime access**: `src/lib/aff/schemas.ts` (`affSchema`,
+  `affVersions`, `affValidate` via ajv 2020-12, `affExamples`). No
+  workspace deps — safe to import from tests without builds.
+- **Typed models**: `bunx nx codegen adt-plugin-gcts` regenerates
+  `src/schemas/generated/{stem}-v{n}.ts` (namespaced as
+  `AffGenerated.{Type}V{n}` from `src/index.ts`). Generated files are
+  artifacts — never hand-edit.
+- **Conformance test**: `tests/aff/schema-conformance.test.ts` validates
+  every upstream example against its official schema (version-matched;
+  `.docu.` companions routed to the `docu` schema; LIMU sub-objects
+  skipped).
+- **Coverage**: `bun scripts/aff-coverage.ts` prints the
+  `type × [versions, body-fields, examples, handler-kind]` matrix —
+  dedicated `objects/{type}.ts` vs `wave2-generic.ts` stub. Wave-1..5
+  enrich work = graduating stubs to dedicated handlers; see
+  `openspec/changes/add-aff-full-coverage/`.
+
 ## Build / test
 
 ```bash
-bunx nx test adt-plugin-gcts       # node --test
-bunx nx build adt-plugin-gcts      # tsdown
+bunx nx test adt-plugin-gcts         # node --test
+bunx nx build adt-plugin-gcts        # tsdown
 bunx nx lint adt-plugin-gcts
+bunx nx codegen adt-plugin-gcts      # AFF schema → TS models
+bunx nx aff-coverage adt-plugin-gcts # coverage matrix
 ```
 
 ## Open items (tracked in E06)
 
 - FUGR sub-module (FUNC) serialization deferred.
 - Git → SAP direction (`format.export`) deferred to E08.
-- Concrete AFF JSON schemas not yet imported — using loose typing until
-  `SAP/abap-file-formats` is vendored into `git_modules/`.
