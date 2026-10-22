@@ -110,6 +110,12 @@ export async function* deserialize(
         sourceFiles: [],
       });
     }
+    // `{name}.{type}.docu.json` is a DOCU companion of the parent object —
+    // it flows through the source pipeline, not the metadata anchor.
+    if (parsed.suffix === 'docu') {
+      objectMap.get(key)!.sourceFiles.push({ path: jsonPath, suffix: 'docu' });
+      continue;
+    }
     objectMap.get(key)!.metadataFile = jsonPath;
   }
 
