@@ -7,7 +7,7 @@
         "cwd": "{projectRoot}"
       },
       "inputs": [
-        "{workspaceRoot}/git_modules/abap-file-formats/file-formats/**/*-v1.json",
+        "{workspaceRoot}/git_modules/abap-file-formats/file-formats/**/*-v*.json",
         "{projectRoot}/scripts/generate-aff-schemas.ts"
       ],
       "outputs": ["{projectRoot}/src/schemas/generated"]
@@ -17,7 +17,22 @@
       "options": {
         "cwd": "{projectRoot}"
       },
-      "inputs": ["{projectRoot}/tests/**/*.ts", "{projectRoot}/src/**/*.ts"]
+      "inputs": [
+        "{projectRoot}/tests/**/*.ts",
+        "{projectRoot}/src/**/*.ts",
+        "{workspaceRoot}/git_modules/abap-file-formats/file-formats/**"
+      ]
+    },
+    "aff-coverage": {
+      "command": "bun scripts/aff-coverage.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{workspaceRoot}/git_modules/abap-file-formats/file-formats/**",
+        "{projectRoot}/src/lib/handlers/objects/*.ts",
+        "{projectRoot}/scripts/aff-coverage.ts"
+      ]
     }
   }
 }
