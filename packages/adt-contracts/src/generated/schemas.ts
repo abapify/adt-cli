@@ -35,6 +35,7 @@ export const badi = toSpeciSchema(adtSchemas.badi);
 export const blueSource = toSpeciSchema(adtSchemas.blueSource);
 export const checklist = toSpeciSchema(adtSchemas.checklist);
 export const checkrun = toSpeciSchema(adtSchemas.checkrun);
+export const chkvFormTemplate = toSpeciSchema(adtSchemas.chkvFormTemplate);
 export const classes = toSpeciSchema(adtSchemas.classes);
 export const configuration = toSpeciSchema(adtSchemas.configuration);
 export const configurations = toSpeciSchema(adtSchemas.configurations);

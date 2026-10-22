@@ -6,36 +6,52 @@
  */
 
 export type TransportmanagmentSingleSchema = {
-    root: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+  root: {
+    containerRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
+    link?:
+      | undefined
+      | {
+          href: string;
+          rel?: string | undefined;
+          type?: string | undefined;
+          hreflang?: string | undefined;
+          title?: string | undefined;
+          length?: number | undefined;
+          etag?: string | undefined;
+          _text?: string | undefined;
         }[];
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
+    adtTemplate?:
+      | undefined
+      | {
+          adtProperty?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        request?: undefined | {
-            long_desc?: string | undefined;
-            link?: undefined | {
+    request?:
+      | undefined
+      | {
+          long_desc?: string | undefined;
+          link?:
+            | undefined
+            | {
                 href: string;
                 rel?: string | undefined;
                 type?: string | undefined;
@@ -44,24 +60,30 @@ export type TransportmanagmentSingleSchema = {
                 length?: number | undefined;
                 etag?: string | undefined;
                 _text?: string | undefined;
-            }[];
-            attributes?: undefined | {
+              }[];
+          attributes?:
+            | undefined
+            | {
                 attribute?: string | undefined;
                 description?: string | undefined;
                 value?: string | undefined;
                 position?: string | undefined;
-            }[];
-            abap_object?: undefined | {
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
+              }[];
+          abap_object?:
+            | undefined
+            | {
+                link?:
+                  | undefined
+                  | {
+                      href: string;
+                      rel?: string | undefined;
+                      type?: string | undefined;
+                      hreflang?: string | undefined;
+                      title?: string | undefined;
+                      length?: number | undefined;
+                      etag?: string | undefined;
+                      _text?: string | undefined;
+                    }[];
                 pgmid?: string | undefined;
                 type?: string | undefined;
                 name?: string | undefined;
@@ -74,69 +96,83 @@ export type TransportmanagmentSingleSchema = {
                 position?: string | undefined;
                 img_activity?: string | undefined;
                 obj_func?: string | undefined;
-            }[];
-            all_objects?: undefined | {
-                abap_object?: undefined | {
-                    link?: undefined | {
-                        href: string;
-                        rel?: string | undefined;
-                        type?: string | undefined;
-                        hreflang?: string | undefined;
-                        title?: string | undefined;
-                        length?: number | undefined;
-                        etag?: string | undefined;
-                        _text?: string | undefined;
+              }[];
+          all_objects?:
+            | undefined
+            | {
+                abap_object?:
+                  | undefined
+                  | {
+                      link?:
+                        | undefined
+                        | {
+                            href: string;
+                            rel?: string | undefined;
+                            type?: string | undefined;
+                            hreflang?: string | undefined;
+                            title?: string | undefined;
+                            length?: number | undefined;
+                            etag?: string | undefined;
+                            _text?: string | undefined;
+                          }[];
+                      pgmid?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      wbtype?: string | undefined;
+                      uri?: string | undefined;
+                      dummy_uri?: string | undefined;
+                      obj_info?: string | undefined;
+                      obj_desc?: string | undefined;
+                      lock_status?: string | undefined;
+                      position?: string | undefined;
+                      img_activity?: string | undefined;
+                      obj_func?: string | undefined;
                     }[];
-                    pgmid?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    wbtype?: string | undefined;
-                    uri?: string | undefined;
-                    dummy_uri?: string | undefined;
-                    obj_info?: string | undefined;
-                    obj_desc?: string | undefined;
-                    lock_status?: string | undefined;
-                    position?: string | undefined;
-                    img_activity?: string | undefined;
-                    obj_func?: string | undefined;
-                }[];
-            };
-            task?: undefined | {
+              };
+          task?:
+            | undefined
+            | {
                 long_desc?: string | undefined;
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
-                abap_object?: undefined | {
-                    link?: undefined | {
-                        href: string;
-                        rel?: string | undefined;
-                        type?: string | undefined;
-                        hreflang?: string | undefined;
-                        title?: string | undefined;
-                        length?: number | undefined;
-                        etag?: string | undefined;
-                        _text?: string | undefined;
+                link?:
+                  | undefined
+                  | {
+                      href: string;
+                      rel?: string | undefined;
+                      type?: string | undefined;
+                      hreflang?: string | undefined;
+                      title?: string | undefined;
+                      length?: number | undefined;
+                      etag?: string | undefined;
+                      _text?: string | undefined;
                     }[];
-                    pgmid?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    wbtype?: string | undefined;
-                    uri?: string | undefined;
-                    dummy_uri?: string | undefined;
-                    obj_info?: string | undefined;
-                    obj_desc?: string | undefined;
-                    lock_status?: string | undefined;
-                    position?: string | undefined;
-                    img_activity?: string | undefined;
-                    obj_func?: string | undefined;
-                }[];
+                abap_object?:
+                  | undefined
+                  | {
+                      link?:
+                        | undefined
+                        | {
+                            href: string;
+                            rel?: string | undefined;
+                            type?: string | undefined;
+                            hreflang?: string | undefined;
+                            title?: string | undefined;
+                            length?: number | undefined;
+                            etag?: string | undefined;
+                            _text?: string | undefined;
+                          }[];
+                      pgmid?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      wbtype?: string | undefined;
+                      uri?: string | undefined;
+                      dummy_uri?: string | undefined;
+                      obj_info?: string | undefined;
+                      obj_desc?: string | undefined;
+                      lock_status?: string | undefined;
+                      position?: string | undefined;
+                      img_activity?: string | undefined;
+                      obj_func?: string | undefined;
+                    }[];
                 number?: string | undefined;
                 owner?: string | undefined;
                 desc?: string | undefined;
@@ -152,46 +188,60 @@ export type TransportmanagmentSingleSchema = {
                 cts_project_desc?: string | undefined;
                 lastchanged_timestamp?: string | undefined;
                 docu?: string | undefined;
-            }[];
-            review?: undefined | {
+              }[];
+          review?:
+            | undefined
+            | {
                 repository_id?: string | undefined;
                 repository_url?: string | undefined;
                 repository_branch?: string | undefined;
                 pull_request_url?: string | undefined;
-            };
-            dynamic_attributes?: undefined | {
-                dynamic_attribute?: undefined | {
-                    properties?: undefined | {
-                        property?: undefined | {
-                            key?: string | undefined;
-                            value?: string | undefined;
-                        }[];
-                    };
-                    attribute?: string | undefined;
-                    value?: string | undefined;
-                    description?: string | undefined;
-                    domain_name?: string | undefined;
-                }[];
-            };
-            number?: string | undefined;
-            owner?: string | undefined;
-            desc?: string | undefined;
-            status?: string | undefined;
-            uri?: string | undefined;
-            type?: string | undefined;
-            status_text?: string | undefined;
-            target?: string | undefined;
-            target_desc?: string | undefined;
-            source_client?: string | undefined;
-            parent?: string | undefined;
-            cts_project?: string | undefined;
-            cts_project_desc?: string | undefined;
-            lastchanged_timestamp?: string | undefined;
-            docu?: string | undefined;
+              };
+          dynamic_attributes?:
+            | undefined
+            | {
+                dynamic_attribute?:
+                  | undefined
+                  | {
+                      properties?:
+                        | undefined
+                        | {
+                            property?:
+                              | undefined
+                              | {
+                                  key?: string | undefined;
+                                  value?: string | undefined;
+                                }[];
+                          };
+                      attribute?: string | undefined;
+                      value?: string | undefined;
+                      description?: string | undefined;
+                      domain_name?: string | undefined;
+                    }[];
+              };
+          number?: string | undefined;
+          owner?: string | undefined;
+          desc?: string | undefined;
+          status?: string | undefined;
+          uri?: string | undefined;
+          type?: string | undefined;
+          status_text?: string | undefined;
+          target?: string | undefined;
+          target_desc?: string | undefined;
+          source_client?: string | undefined;
+          parent?: string | undefined;
+          cts_project?: string | undefined;
+          cts_project_desc?: string | undefined;
+          lastchanged_timestamp?: string | undefined;
+          docu?: string | undefined;
         };
-        task?: undefined | {
-            long_desc?: string | undefined;
-            link?: undefined | {
+    task?:
+      | undefined
+      | {
+          long_desc?: string | undefined;
+          link?:
+            | undefined
+            | {
                 href: string;
                 rel?: string | undefined;
                 type?: string | undefined;
@@ -200,18 +250,22 @@ export type TransportmanagmentSingleSchema = {
                 length?: number | undefined;
                 etag?: string | undefined;
                 _text?: string | undefined;
-            }[];
-            abap_object?: undefined | {
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
+              }[];
+          abap_object?:
+            | undefined
+            | {
+                link?:
+                  | undefined
+                  | {
+                      href: string;
+                      rel?: string | undefined;
+                      type?: string | undefined;
+                      hreflang?: string | undefined;
+                      title?: string | undefined;
+                      length?: number | undefined;
+                      etag?: string | undefined;
+                      _text?: string | undefined;
+                    }[];
                 pgmid?: string | undefined;
                 type?: string | undefined;
                 name?: string | undefined;
@@ -224,33 +278,41 @@ export type TransportmanagmentSingleSchema = {
                 position?: string | undefined;
                 img_activity?: string | undefined;
                 obj_func?: string | undefined;
-            }[];
-            number?: string | undefined;
-            owner?: string | undefined;
-            desc?: string | undefined;
-            status?: string | undefined;
-            uri?: string | undefined;
-            type?: string | undefined;
-            status_text?: string | undefined;
-            target?: string | undefined;
-            target_desc?: string | undefined;
-            source_client?: string | undefined;
-            parent?: string | undefined;
-            cts_project?: string | undefined;
-            cts_project_desc?: string | undefined;
-            lastchanged_timestamp?: string | undefined;
-            docu?: string | undefined;
+              }[];
+          number?: string | undefined;
+          owner?: string | undefined;
+          desc?: string | undefined;
+          status?: string | undefined;
+          uri?: string | undefined;
+          type?: string | undefined;
+          status_text?: string | undefined;
+          target?: string | undefined;
+          target_desc?: string | undefined;
+          source_client?: string | undefined;
+          parent?: string | undefined;
+          cts_project?: string | undefined;
+          cts_project_desc?: string | undefined;
+          lastchanged_timestamp?: string | undefined;
+          docu?: string | undefined;
         }[];
-        name: string;
-        type: string;
-        changedBy?: string | undefined;
-        changedAt?: string | undefined;
-        createdAt?: string | undefined;
-        createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string | undefined;
-        descriptionTextLimit?: number | undefined;
-        language?: string | undefined;
-        object_type?: string | undefined;
-    };
+    name: string;
+    type: string;
+    changedBy?: string | undefined;
+    changedAt?: string | undefined;
+    createdAt?: string | undefined;
+    createdBy?: string | undefined;
+    version?:
+      | undefined
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string | undefined;
+    descriptionTextLimit?: number | undefined;
+    language?: string | undefined;
+    object_type?: string | undefined;
+  };
 };

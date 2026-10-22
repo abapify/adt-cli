@@ -6,34 +6,44 @@
  */
 
 export type DataelementsSchema = {
-    dataElement: {
-        typeKind: "domain" | "predefinedAbapType" | "refToPredefinedAbapType" | "refToDictionaryType" | "refToClifType";
-        typeName?: string | undefined;
-        dataType?: string | undefined;
-        dataTypeLength?: number | undefined;
-        dataTypeLengthEnabled?: boolean | undefined;
-        dataTypeDecimals?: number | undefined;
-        dataTypeDecimalsEnabled?: boolean | undefined;
-        shortFieldLabel?: string | undefined;
-        shortFieldLength?: number | undefined;
-        shortFieldMaxLength?: number | undefined;
-        mediumFieldLabel?: string | undefined;
-        mediumFieldLength?: number | undefined;
-        mediumFieldMaxLength?: number | undefined;
-        longFieldLabel?: string | undefined;
-        longFieldLength?: number | undefined;
-        longFieldMaxLength?: number | undefined;
-        headingFieldLabel?: string | undefined;
-        headingFieldLength?: number | undefined;
-        headingFieldMaxLength?: number | undefined;
-        searchHelp?: string | undefined;
-        searchHelpParameter?: string | undefined;
-        setGetParameter?: string | undefined;
-        defaultComponentName?: string | undefined;
-        deactivateInputHistory?: boolean | undefined;
-        changeDocument?: boolean | undefined;
-        leftToRightDirection?: boolean | undefined;
-        deactivateBIDIFiltering?: boolean | undefined;
-        documentationStatus?: undefined | "required" | "notUsedInScreens" | "explainedByShortText" | "postponed";
-    };
+  dataElement: {
+    typeKind:
+      | 'domain'
+      | 'predefinedAbapType'
+      | 'refToPredefinedAbapType'
+      | 'refToDictionaryType'
+      | 'refToClifType';
+    typeName?: string | undefined;
+    dataType?: string | undefined;
+    dataTypeLength?: number | undefined;
+    dataTypeLengthEnabled?: boolean | undefined;
+    dataTypeDecimals?: number | undefined;
+    dataTypeDecimalsEnabled?: boolean | undefined;
+    shortFieldLabel?: string | undefined;
+    shortFieldLength?: number | undefined;
+    shortFieldMaxLength?: number | undefined;
+    mediumFieldLabel?: string | undefined;
+    mediumFieldLength?: number | undefined;
+    mediumFieldMaxLength?: number | undefined;
+    longFieldLabel?: string | undefined;
+    longFieldLength?: number | undefined;
+    longFieldMaxLength?: number | undefined;
+    headingFieldLabel?: string | undefined;
+    headingFieldLength?: number | undefined;
+    headingFieldMaxLength?: number | undefined;
+    searchHelp?: string | undefined;
+    searchHelpParameter?: string | undefined;
+    setGetParameter?: string | undefined;
+    defaultComponentName?: string | undefined;
+    deactivateInputHistory?: boolean | undefined;
+    changeDocument?: boolean | undefined;
+    leftToRightDirection?: boolean | undefined;
+    deactivateBIDIFiltering?: boolean | undefined;
+    documentationStatus?:
+      | undefined
+      | 'required'
+      | 'notUsedInScreens'
+      | 'explainedByShortText'
+      | 'postponed';
+  };
 };

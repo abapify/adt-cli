@@ -6,56 +6,70 @@
  */
 
 export type AtcobjectSchema = {
-    object: {
-        extension?: undefined | unknown;
-        findings: {
-            finding?: undefined | {
-                extension?: undefined | unknown;
-                quickfixes: {
-                    manual?: boolean | undefined;
-                    automatic?: boolean | undefined;
-                    pseudo?: boolean | undefined;
-                    ai_enabled?: boolean | undefined;
-                    aiBasedQF?: boolean | undefined;
+  object: {
+    extension?:
+      | undefined
+      | {
+          [key: string]: unknown;
+        };
+    findings: {
+      finding?:
+        | undefined
+        | {
+            extension?:
+              | undefined
+              | {
+                  [key: string]: unknown;
                 };
-                tags?: undefined | {
-                    tag?: undefined | {
+            quickfixes: {
+              manual?: boolean | undefined;
+              automatic?: boolean | undefined;
+              pseudo?: boolean | undefined;
+              ai_enabled?: boolean | undefined;
+              aiBasedQF?: boolean | undefined;
+            };
+            tags?:
+              | undefined
+              | {
+                  tag?:
+                    | undefined
+                    | {
                         name?: string | undefined;
                         value?: string | undefined;
-                    }[];
+                      }[];
                 };
-                uri?: string | undefined;
-                parentUri?: string | undefined;
-                type?: string | undefined;
-                name?: string | undefined;
-                packageName?: string | undefined;
-                description?: string | undefined;
-                location?: string | undefined;
-                effectOnTransports?: string | undefined;
-                priority?: string | undefined;
-                checkTitle?: string | undefined;
-                checkId?: string | undefined;
-                messageTitle?: string | undefined;
-                messageId?: string | undefined;
-                exemptionKind?: string | undefined;
-                exemptionApproval?: string | undefined;
-                noExemption?: string | undefined;
-                quickfixInfo?: string | undefined;
-                contactPerson?: string | undefined;
-                lastChangedBy?: string | undefined;
-                processor?: string | undefined;
-                checksum?: number | undefined;
-                remarkText?: string | undefined;
-                remarkLink?: string | undefined;
-            }[];
-        };
-        uri?: string | undefined;
-        parentUri?: string | undefined;
-        type?: string | undefined;
-        name?: string | undefined;
-        packageName?: string | undefined;
-        description?: string | undefined;
-        author?: string | undefined;
-        objectTypeId?: string | undefined;
+            uri?: string | undefined;
+            parentUri?: string | undefined;
+            type?: string | undefined;
+            name?: string | undefined;
+            packageName?: string | undefined;
+            description?: string | undefined;
+            location?: string | undefined;
+            effectOnTransports?: string | undefined;
+            priority?: string | undefined;
+            checkTitle?: string | undefined;
+            checkId?: string | undefined;
+            messageTitle?: string | undefined;
+            messageId?: string | undefined;
+            exemptionKind?: string | undefined;
+            exemptionApproval?: string | undefined;
+            noExemption?: string | undefined;
+            quickfixInfo?: string | undefined;
+            contactPerson?: string | undefined;
+            lastChangedBy?: string | undefined;
+            processor?: string | undefined;
+            checksum?: number | undefined;
+            remarkText?: string | undefined;
+            remarkLink?: string | undefined;
+          }[];
     };
+    uri?: string | undefined;
+    parentUri?: string | undefined;
+    type?: string | undefined;
+    name?: string | undefined;
+    packageName?: string | undefined;
+    description?: string | undefined;
+    author?: string | undefined;
+    objectTypeId?: string | undefined;
+  };
 };

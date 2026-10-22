@@ -6,120 +6,187 @@
  */
 
 export type DomainSchema = {
-    domain: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+  domain: {
+    containerRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
+    adtTemplate?:
+      | undefined
+      | {
+          adtProperty?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+    packageRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        content: {
-            typeInformation?: undefined | {
-                datatype: string;
-                length: number;
-                decimals: number;
-            };
-            outputInformation?: undefined | {
-                length: number;
-                style: string;
-                conversionExit?: string | undefined;
-                signExists?: boolean | undefined;
-                lowercase?: boolean | undefined;
-                ampmFormat?: boolean | undefined;
-            };
-            valueInformation: {
-                valueTableRef: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                };
-                appendExists?: boolean | undefined;
-                fixValues: {
-                    fixValue?: undefined | {
-                        position: number;
-                        low: string;
-                        high: string;
-                        text: string;
-                        contributingAppendRef?: undefined | {
-                            extension?: undefined | unknown;
-                            uri?: string | undefined;
-                            parentUri?: string | undefined;
-                            type?: string | undefined;
-                            name?: string | undefined;
-                            packageName?: string | undefined;
-                            description?: string | undefined;
-                        };
-                        switchRef?: undefined | {
-                            extension?: undefined | unknown;
-                            uri?: string | undefined;
-                            parentUri?: string | undefined;
-                            type?: string | undefined;
-                            name?: string | undefined;
-                            packageName?: string | undefined;
-                            description?: string | undefined;
-                            state?: undefined | "" | "undefined" | "on" | "off" | "stand-by";
-                        };
-                    }[];
-                };
-            };
-            appendInformation?: undefined | {
-                appendedDomainRef?: undefined | {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                };
-                switchRef?: undefined | {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                    state?: undefined | "" | "undefined" | "on" | "off" | "stand-by";
-                };
-            };
+    content: {
+      typeInformation?:
+        | undefined
+        | {
+            datatype: string;
+            length: number;
+            decimals: number;
+          };
+      outputInformation?:
+        | undefined
+        | {
+            length: number;
+            style: string;
+            conversionExit?: string | undefined;
+            signExists?: boolean | undefined;
+            lowercase?: boolean | undefined;
+            ampmFormat?: boolean | undefined;
+          };
+      valueInformation: {
+        valueTableRef: {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        name: string;
-        type: string;
-        changedBy?: string | undefined;
-        changedAt?: string | undefined;
-        createdAt?: string | undefined;
-        createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string | undefined;
-        descriptionTextLimit?: number | undefined;
-        language?: string | undefined;
-        masterSystem?: string | undefined;
-        masterLanguage?: string | undefined;
-        responsible?: string | undefined;
-        abapLanguageVersion?: string | undefined;
+        appendExists?: boolean | undefined;
+        fixValues: {
+          fixValue?:
+            | undefined
+            | {
+                position: number;
+                low: string;
+                high: string;
+                text: string;
+                contributingAppendRef?:
+                  | undefined
+                  | {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    };
+                switchRef?:
+                  | undefined
+                  | {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                      state?:
+                        | undefined
+                        | ''
+                        | 'undefined'
+                        | 'on'
+                        | 'off'
+                        | 'stand-by';
+                    };
+              }[];
+        };
+      };
+      appendInformation?:
+        | undefined
+        | {
+            appendedDomainRef?:
+              | undefined
+              | {
+                  extension?:
+                    | undefined
+                    | {
+                        [key: string]: unknown;
+                      };
+                  uri?: string | undefined;
+                  parentUri?: string | undefined;
+                  type?: string | undefined;
+                  name?: string | undefined;
+                  packageName?: string | undefined;
+                  description?: string | undefined;
+                };
+            switchRef?:
+              | undefined
+              | {
+                  extension?:
+                    | undefined
+                    | {
+                        [key: string]: unknown;
+                      };
+                  uri?: string | undefined;
+                  parentUri?: string | undefined;
+                  type?: string | undefined;
+                  name?: string | undefined;
+                  packageName?: string | undefined;
+                  description?: string | undefined;
+                  state?:
+                    undefined | '' | 'undefined' | 'on' | 'off' | 'stand-by';
+                };
+          };
     };
+    name: string;
+    type: string;
+    changedBy?: string | undefined;
+    changedAt?: string | undefined;
+    createdAt?: string | undefined;
+    createdBy?: string | undefined;
+    version?:
+      | undefined
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string | undefined;
+    descriptionTextLimit?: number | undefined;
+    language?: string | undefined;
+    masterSystem?: string | undefined;
+    masterLanguage?: string | undefined;
+    responsible?: string | undefined;
+    abapLanguageVersion?: string | undefined;
+  };
 };

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ATC Check Parameter Schema (chkoParameter)
+
+  The check parameters block inside a check object (chko:content) in the
+  check variant form template. Describes each modifiable check parameter.
+
+  Live shape (sanitized):
+  <chkoParameter:parameters xmlns:chkoParameter="http://www.sap.com/wbobj/atc/chkoParameter">
+    <chkoParameter:parameter>
+      <chkoParameter:parameterTechnicalId>1</chkoParameter:parameterTechnicalId>
+      <chkoParameter:parameterName>NoWhereCondition</chkoParameter:parameterName>
+      <chkoParameter:parameterDescription>No WHERE condition</chkoParameter:parameterDescription>
+      <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+    </chkoParameter:parameter>
+  </chkoParameter:parameters>
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:chkoParameter="http://www.sap.com/wbobj/atc/chkoParameter"
+    targetNamespace="http://www.sap.com/wbobj/atc/chkoParameter"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <!-- The parameters block of a check object -->
+  <xsd:element name="parameters" type="chkoParameter:Parameters"/>
+
+  <xsd:complexType name="Parameters">
+    <xsd:sequence>
+      <xsd:element name="parameter" type="chkoParameter:Parameter" minOccurs="0" maxOccurs="unbounded" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="Parameter">
+    <xsd:sequence>
+      <xsd:element name="parameterTechnicalId" type="xsd:string" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="parameterName" type="xsd:string" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="parameterDescription" type="xsd:string" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="parameterModifiable" type="xsd:boolean" minOccurs="0" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+</xsd:schema>

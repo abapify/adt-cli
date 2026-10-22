@@ -1,13 +1,14 @@
 import { expect } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { Scenario, runScenario } from './base/scenario';
-import { atc, atcworklist } from '../../src/schemas/index';
+import { atc, atcworklist, chkvFormTemplate } from '../../src/schemas/index';
 import type { InferTypedSchema } from '@abapify/ts-xsd';
 
 // Extract types from schemas using ts-xsd's official type extractor
 // Generated types now match parse() behavior - content directly without wrapper
 type AtcCustomizing = InferTypedSchema<typeof atc>;
 type AtcWorklist = InferTypedSchema<typeof atcworklist>;
+type ChkvFormTemplate = InferTypedSchema<typeof chkvFormTemplate>;
 
 /**
  * Test for ATC customizing response
@@ -143,6 +144,106 @@ class AtcWorklistScenario extends Scenario<typeof atcworklist> {
   }
 }
 
+/**
+ * Test for ATC check variant form template response
+ * GET /sap/bc/adt/atc/checkvariants/formtemplate?chkvName={name}
+ *
+ * The form template is the check catalog: each available check category
+ * lists its checks, and each check's implementingClass name is the checkId
+ * that ATC worklist findings carry (the basis for check category
+ * enrichment).
+ */
+class ChkvFormTemplateScenario extends Scenario<typeof chkvFormTemplate> {
+  readonly schema = chkvFormTemplate;
+  readonly fixtures = [fixtures.atc.formtemplate];
+
+  validateParsed(data: ChkvFormTemplate): void {
+    const formTemplate = (data as any).formTemplate;
+    expect(formTemplate).toBeDefined();
+
+    const categories =
+      formTemplate.availableCheckCategories?.availableCheckCategory;
+    expect(categories).toBeDefined();
+    expect(categories?.length).toBeGreaterThanOrEqual(2);
+
+    // Category objects carry name + description and a CHKC/TYP typed content
+    const performance = categories?.find(
+      (c: any) => c.checkCategoryObject?.name === 'CI_PERFORMANCE',
+    );
+    expect(performance).toBeDefined();
+    expect(performance?.checkCategoryObject?.description).toBe('Performance');
+    expect(performance?.checkCategoryObject?.content?.category?.type).toBe(
+      'CHKC/TYP',
+    );
+
+    // Checks carry the implementing class (the finding checkId) and their
+    // category assignment
+    const checks = performance?.check ?? [];
+    expect(checks.length).toBeGreaterThanOrEqual(2);
+    const analyzeWhere = checks.find(
+      (c: any) => c.checkObject?.name === 'CI_ANALYZE_WHERE',
+    );
+    expect(analyzeWhere).toBeDefined();
+    expect(analyzeWhere?.checkObject?.content?.category?.name).toBe(
+      'CI_PERFORMANCE',
+    );
+    expect(analyzeWhere?.checkObject?.content?.implementingClass?.name).toBe(
+      'CL_CI_TEST_SELECT_TAW_A',
+    );
+    expect(analyzeWhere?.checkObject?.content?.remoteEnabled).toBe(true);
+
+    // Check parameters are optional and keep their real shape
+    const parameters =
+      analyzeWhere?.checkObject?.content?.parameters?.parameter ?? [];
+    expect(parameters.length).toBeGreaterThan(0);
+    const noWhere = parameters.find(
+      (p: any) => p.parameterName === 'NoWhereCondition',
+    );
+    expect(noWhere).toBeDefined();
+    expect(noWhere?.parameterDescription).toBe('No WHERE condition');
+    expect(noWhere?.parameterModifiable).toBe(true);
+
+    // A check without parameters still parses (parameters optional)
+    const bybuf = checks.find(
+      (c: any) => c.checkObject?.name === 'CI_SELECT_TAW_BYBUF',
+    );
+    expect(bybuf).toBeDefined();
+    expect(bybuf?.checkObject?.content?.parameters).toBeUndefined();
+
+    // Documentation links are kept on each check
+    const links = analyzeWhere?.link ?? [];
+    expect(
+      links.some(
+        (l: any) => l.rel === 'http://www.sap.com/adt/relations/documentation',
+      ),
+    ).toBe(true);
+
+    // Sanitized custom category survives with its sanitized names
+    const custom = categories?.find(
+      (c: any) => c.checkCategoryObject?.name === 'ZEXAMPLE_CI_CATEGORY',
+    );
+    expect(custom).toBeDefined();
+    expect(custom?.checkCategoryObject?.description).toBe(
+      'Example custom category',
+    );
+    expect(custom?.check?.[0]?.checkObject?.content?.category?.name).toBe(
+      'ZEXAMPLE_CI_CATEGORY',
+    );
+  }
+
+  override validateBuilt(xml: string): void {
+    expect(xml).toContain(
+      'xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate"',
+    );
+    // Local elements are built unqualified (form="unqualified"); match the
+    // element name without assuming the wire prefix form.
+    expect(xml).toContain('<availableCheckCategories>');
+    expect(xml).toContain('CL_CI_TEST_SELECT_TAW_A');
+    expect(xml).toContain('CI_PERFORMANCE');
+  }
+}
+
 // Run all ATC scenarios
 runScenario(new AtcCustomizingScenario());
 runScenario(new AtcWorklistScenario());
+runScenario(new ChkvFormTemplateScenario());

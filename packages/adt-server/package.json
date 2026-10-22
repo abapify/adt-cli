@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "@abapify/adt-client": "0.4.20",
+    "@abapify/adt-atc": "0.4.20",
     "@abapify/adt-mcp": "0.4.20",
     "@abapify/adt-services": "0.4.20",
     "yaml": "^2.8.2",

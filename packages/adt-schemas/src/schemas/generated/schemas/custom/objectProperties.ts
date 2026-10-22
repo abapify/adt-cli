@@ -11,12 +11,12 @@ export default {
   $xmlns: {
     xsd: 'http://www.w3.org/2001/XMLSchema',
     atom: 'http://www.w3.org/2005/Atom',
-    objprops: 'http://www.sap.com/adt/repository/informationsystem/objectproperties',
+    objprops:
+      'http://www.sap.com/adt/repository/informationsystem/objectproperties',
   },
-  $imports: [
-    atom,
-  ],
-  targetNamespace: 'http://www.sap.com/adt/repository/informationsystem/objectproperties',
+  $imports: [atom],
+  targetNamespace:
+    'http://www.sap.com/adt/repository/informationsystem/objectproperties',
   attributeFormDefault: 'unqualified',
   elementFormDefault: 'qualified',
   element: [

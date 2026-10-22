@@ -5,32 +5,43 @@
  * Mode: Flattened
  */
 
-export type AtcfindingSchema = {
-    finding: {
-        extension?: undefined | unknown;
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
-        }[];
-        quickfixes: {
-            manual?: boolean | undefined;
-            automatic?: boolean | undefined;
-            pseudo?: boolean | undefined;
-            ai_enabled?: boolean | undefined;
-            aiBasedQF?: boolean | undefined;
-        };
-        tags?: undefined | {
-            tag?: undefined | {
-                name?: string | undefined;
-                value?: string | undefined;
+export type AtcfindingSchema =
+  | {
+      finding: {
+        extension?:
+          | undefined
+          | {
+              [key: string]: unknown;
+            };
+        link?:
+          | undefined
+          | {
+              href: string;
+              rel?: string | undefined;
+              type?: string | undefined;
+              hreflang?: string | undefined;
+              title?: string | undefined;
+              length?: number | undefined;
+              etag?: string | undefined;
+              _text?: string | undefined;
             }[];
+        quickfixes: {
+          manual?: boolean | undefined;
+          automatic?: boolean | undefined;
+          pseudo?: boolean | undefined;
+          ai_enabled?: boolean | undefined;
+          aiBasedQF?: boolean | undefined;
         };
+        tags?:
+          | undefined
+          | {
+              tag?:
+                | undefined
+                | {
+                    name?: string | undefined;
+                    value?: string | undefined;
+                  }[];
+            };
         uri?: string | undefined;
         parentUri?: string | undefined;
         type?: string | undefined;
@@ -54,47 +65,68 @@ export type AtcfindingSchema = {
         checksum?: number | undefined;
         remarkText?: string | undefined;
         remarkLink?: string | undefined;
+      };
+    }
+  | {
+      findingReferences: {
+        findingReference?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            }[];
+      };
+    }
+  | {
+      items: {
+        item?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+              processor?: string | undefined;
+              status?: number | undefined;
+              remarkText?: string | undefined;
+              remarkLink?: string | undefined;
+            }[];
+      };
+    }
+  | {
+      remarks: {
+        remark?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+              remarkText?: string | undefined;
+              remarkLink?: string | undefined;
+            }[];
+      };
     };
-} | {
-    findingReferences: {
-        findingReference?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        }[];
-    };
-} | {
-    items: {
-        item?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-            processor?: string | undefined;
-            status?: number | undefined;
-            remarkText?: string | undefined;
-            remarkLink?: string | undefined;
-        }[];
-    };
-} | {
-    remarks: {
-        remark?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-            remarkText?: string | undefined;
-            remarkLink?: string | undefined;
-        }[];
-    };
-};

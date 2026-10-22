@@ -323,6 +323,49 @@ describe('adt-mcp integration tests', () => {
       );
     });
 
+    it('enriches findings with check categories, bridging GUID checkIds through the documentation page', async () => {
+      const { json, raw } = await callTool('atc_run', {
+        ...connArgs(),
+        scope: { kind: 'package', packageName: 'ZPACKAGE' },
+        variant: 'TEST_VARIANT',
+      });
+      assert.notStrictEqual((raw as { isError?: boolean }).isError, true);
+      const data = json as {
+        checkVariant: string;
+        findings: Array<{
+          checkId: string;
+          checkCategory?: string;
+          documentationUri?: string;
+        }>;
+      };
+      assert.ok(data.findings.length >= 2, 'should return both findings');
+      // The first finding carries a GUID checkId (the live worklist shape);
+      // the mock documentation page names CL_CI_TEST_AMDP_HDB_MIGRATION,
+      // which the catalog assigns to CI_SYNTAX — resolved via the bridge
+      assert.strictEqual(
+        data.findings[0]!.checkId,
+        '6A277D3B1C4E4F80A9B2C3D4E5F60718',
+      );
+      assert.strictEqual(
+        data.findings[0]!.checkCategory,
+        'CI_SYNTAX',
+        'the GUID-checkId finding should carry its category via the documentation bridge',
+      );
+      // The second finding's checkId is already a catalog class name and
+      // resolves directly
+      assert.strictEqual(data.findings[1]!.checkId, 'CL_CI_TEST_SELECT_TAW_A');
+      assert.strictEqual(
+        data.findings[1]!.checkCategory,
+        'CI_PERFORMANCE',
+        'the class-name finding should resolve directly through the catalog',
+      );
+      // The model-facing response must stay URI-free: the documentation
+      // link is internal enrichment state only
+      for (const finding of data.findings) {
+        assert.strictEqual(finding.documentationUri, undefined);
+      }
+    });
+
     it('rejects a raw ADT URI as an ATC target', async () => {
       const { raw } = await callTool('atc_run', {
         ...connArgs(),

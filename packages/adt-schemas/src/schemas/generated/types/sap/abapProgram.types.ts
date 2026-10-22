@@ -71,10 +71,7 @@ export type AbapProgramSchema = {
     abapLanguageVersion?: string;
     sourceUri?: string;
     sourceObjectStatus?:
-      | 'SAPStandardProduction'
-      | 'customerProduction'
-      | 'system'
-      | 'test';
+      'SAPStandardProduction' | 'customerProduction' | 'system' | 'test';
     fixPointArithmetic?: boolean;
     activeUnicodeCheck?: boolean;
     programType?: string;

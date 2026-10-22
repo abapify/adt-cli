@@ -5,74 +5,109 @@
  * Mode: Flattened
  */
 
-export type CheckrunSchema = {
-    checkObjectList: {
-        checkObject?: undefined | {
-            extension?: undefined | unknown;
-            artifacts?: undefined | {
-                artifact?: undefined | {
-                    content?: string | undefined;
-                    uri?: string | undefined;
-                    contentType?: string | undefined;
-                }[];
+export type CheckrunSchema =
+  | {
+      checkObjectList: {
+        checkObject?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              artifacts?:
+                | undefined
+                | {
+                    artifact?:
+                      | undefined
+                      | {
+                          content?: string | undefined;
+                          uri?: string | undefined;
+                          contentType?: string | undefined;
+                        }[];
+                  }[];
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+              version?:
+                | undefined
+                | ''
+                | 'active'
+                | 'inactive'
+                | 'workingArea'
+                | 'new'
+                | 'partlyActive'
+                | 'activeWithInactiveVersion';
             }[];
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-            version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        }[];
+      };
+    }
+  | {
+      checkRunReports: {
+        checkReport?:
+          | undefined
+          | {
+              checkMessageList?:
+                | undefined
+                | {
+                    checkMessage?:
+                      | undefined
+                      | {
+                          t100Key?:
+                            | undefined
+                            | {
+                                msgno?: number | undefined;
+                                msgid?: string | undefined;
+                                msgv1?: string | undefined;
+                                msgv2?: string | undefined;
+                                msgv3?: string | undefined;
+                                msgv4?: string | undefined;
+                              };
+                          correctionHint?:
+                            | undefined
+                            | {
+                                number?: number | undefined;
+                                kind?: string | undefined;
+                                line?: number | undefined;
+                                column?: number | undefined;
+                                word?: string | undefined;
+                              }[];
+                          link?:
+                            | undefined
+                            | {
+                                href: string;
+                                rel?: string | undefined;
+                                type?: string | undefined;
+                                hreflang?: string | undefined;
+                                title?: string | undefined;
+                                length?: number | undefined;
+                                etag?: string | undefined;
+                                _text?: string | undefined;
+                              }[];
+                          uri?: string | undefined;
+                          type?: undefined | unknown;
+                          shortText?: string | undefined;
+                          category?: string | undefined;
+                          code?: string | undefined;
+                        }[];
+                  };
+              reporter?: string | undefined;
+              triggeringUri?: string | undefined;
+              status?: string | undefined;
+              statusText?: string | undefined;
+            }[];
+      };
+    }
+  | {
+      checkReporters: {
+        reporter?:
+          | undefined
+          | {
+              supportedType?: undefined | string[];
+              name?: string | undefined;
+            }[];
+      };
     };
-} | {
-    checkRunReports: {
-        checkReport?: undefined | {
-            checkMessageList?: undefined | {
-                checkMessage?: undefined | {
-                    t100Key?: undefined | {
-                        msgno?: number | undefined;
-                        msgid?: string | undefined;
-                        msgv1?: string | undefined;
-                        msgv2?: string | undefined;
-                        msgv3?: string | undefined;
-                        msgv4?: string | undefined;
-                    };
-                    correctionHint?: undefined | {
-                        number?: number | undefined;
-                        kind?: string | undefined;
-                        line?: number | undefined;
-                        column?: number | undefined;
-                        word?: string | undefined;
-                    }[];
-                    link?: undefined | {
-                        href: string;
-                        rel?: string | undefined;
-                        type?: string | undefined;
-                        hreflang?: string | undefined;
-                        title?: string | undefined;
-                        length?: number | undefined;
-                        etag?: string | undefined;
-                        _text?: string | undefined;
-                    }[];
-                    uri?: string | undefined;
-                    type?: undefined | unknown;
-                    shortText?: string | undefined;
-                    category?: string | undefined;
-                    code?: string | undefined;
-                }[];
-            };
-            reporter?: string | undefined;
-            triggeringUri?: string | undefined;
-            status?: string | undefined;
-            statusText?: string | undefined;
-        }[];
-    };
-} | {
-    checkReporters: {
-        reporter?: undefined | {
-            supportedType?: undefined | string[];
-            name?: string | undefined;
-        }[];
-    };
-};

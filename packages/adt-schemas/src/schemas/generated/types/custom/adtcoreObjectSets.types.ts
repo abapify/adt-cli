@@ -5,58 +5,92 @@
  * Mode: Flattened
  */
 
-export type AdtcoreObjectSetsSchema = {
-    objectSets: {
-        objectSet?: undefined | {
-            objectReferences?: undefined | {
-                objectReference: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
+export type AdtcoreObjectSetsSchema =
+  | {
+      objectSets: {
+        objectSet?:
+          | undefined
+          | {
+              objectReferences?:
+                | undefined
+                | {
+                    objectReference: {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    }[];
                     name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                }[];
-                name?: string | undefined;
-            };
-            kind?: string | undefined;
-        }[];
-    };
-} | {
-    mainObject: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
-                $value?: string | undefined;
-                key?: string | undefined;
+                  };
+              kind?: string | undefined;
             }[];
-            name?: string | undefined;
-        };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
+      };
+    }
+  | {
+      mainObject: {
+        containerRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        adtTemplate?:
+          | undefined
+          | {
+              adtProperty?:
+                | undefined
+                | {
+                    $value?: string | undefined;
+                    key?: string | undefined;
+                  }[];
+              name?: string | undefined;
+            };
+        packageRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
         name: string;
         type: string;
         changedBy?: string | undefined;
         changedAt?: string | undefined;
         createdAt?: string | undefined;
         createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        version?:
+          | undefined
+          | ''
+          | 'active'
+          | 'inactive'
+          | 'workingArea'
+          | 'new'
+          | 'partlyActive'
+          | 'activeWithInactiveVersion';
         description?: string | undefined;
         descriptionTextLimit?: number | undefined;
         language?: string | undefined;
@@ -64,34 +98,45 @@ export type AdtcoreObjectSetsSchema = {
         masterLanguage?: string | undefined;
         responsible?: string | undefined;
         abapLanguageVersion?: string | undefined;
-    };
-} | {
-    objectReferences: {
+      };
+    }
+  | {
+      objectReferences: {
         objectReference: {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         }[];
         name?: string | undefined;
-    };
-} | {
-    objectReference: {
-        extension?: undefined | unknown;
+      };
+    }
+  | {
+      objectReference: {
+        extension?:
+          | undefined
+          | {
+              [key: string]: unknown;
+            };
         uri?: string | undefined;
         parentUri?: string | undefined;
         type?: string | undefined;
         name?: string | undefined;
         packageName?: string | undefined;
         description?: string | undefined;
-    };
-} | {
-    content: {
+      };
+    }
+  | {
+      content: {
         $value?: string | undefined;
         type?: string | undefined;
         encoding?: string | undefined;
+      };
     };
-};

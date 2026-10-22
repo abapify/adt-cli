@@ -9,12 +9,14 @@
  */
 
 import { fixtures } from '@abapify/adt-fixtures';
-import { atcworklist } from '../../src/schemas';
+import { atcworklist, chkvFormTemplate } from '../../src/schemas';
 import { ContractScenario, runScenario, type ContractOperation } from './base';
 
 // Import GENERATED contracts
 import { worklistsContract } from '../../src/generated/adt/sap/bc/adt/atc/worklists';
 import { resultsContract } from '../../src/generated/adt/sap/bc/adt/atc/results';
+// Import MANUAL (extended) contract
+import { atcContract } from '../../src/adt/atc';
 
 // =============================================================================
 // Contract Definition Tests - using generated contracts
@@ -116,5 +118,35 @@ class AtcResultsScenario extends ContractScenario {
 // Run contract definition scenarios
 // =============================================================================
 
+class AtcCheckvariantsScenario extends ContractScenario {
+  readonly name = 'ATC Check Variants (Manual)';
+
+  readonly operations: ContractOperation[] = [
+    {
+      name: 'get form template for a check variant',
+      contract: () => atcContract.checkvariants.formtemplate(),
+      method: 'GET',
+      path: '/sap/bc/adt/atc/checkvariants/formtemplate',
+      headers: { Accept: 'application/xml' },
+      response: {
+        status: 200,
+        schema: chkvFormTemplate,
+        fixture: fixtures.atc.formtemplate,
+      },
+    },
+    {
+      name: 'get form template with a named variant',
+      contract: () =>
+        atcContract.checkvariants.formtemplate({ chkvName: 'DEFAULT' }),
+      method: 'GET',
+      path: '/sap/bc/adt/atc/checkvariants/formtemplate',
+      headers: { Accept: 'application/xml' },
+      query: { chkvName: 'DEFAULT' },
+      response: { status: 200, schema: chkvFormTemplate },
+    },
+  ];
+}
+
 runScenario(new AtcWorklistsScenario());
 runScenario(new AtcResultsScenario());
+runScenario(new AtcCheckvariantsScenario());

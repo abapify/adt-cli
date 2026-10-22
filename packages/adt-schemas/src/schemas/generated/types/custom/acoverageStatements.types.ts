@@ -6,9 +6,13 @@
  */
 
 export type AcoverageStatementsSchema = {
-    statementsBulkResponse: {
-        statementsResponse?: undefined | {
-            link?: undefined | {
+  statementsBulkResponse: {
+    statementsResponse?:
+      | undefined
+      | {
+          link?:
+            | undefined
+            | {
                 href: string;
                 rel?: string | undefined;
                 type?: string | undefined;
@@ -17,46 +21,70 @@ export type AcoverageStatementsSchema = {
                 length?: number | undefined;
                 etag?: string | undefined;
                 _text?: string | undefined;
-            }[];
-            procedure?: undefined | {
-                objectReference?: undefined | {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                };
-                executed?: number | undefined;
-            }[];
-            statement?: undefined | {
-                objectReference?: undefined | {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                };
-                branch?: undefined | {
-                    objectReference?: undefined | {
-                        extension?: undefined | unknown;
-                        uri?: string | undefined;
-                        parentUri?: string | undefined;
-                        type?: string | undefined;
-                        name?: string | undefined;
-                        packageName?: string | undefined;
-                        description?: string | undefined;
+              }[];
+          procedure?:
+            | undefined
+            | {
+                objectReference?:
+                  | undefined
+                  | {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
                     };
-                    kind?: string | undefined;
-                    executedTrue?: string | undefined;
-                    executedFalse?: string | undefined;
-                }[];
                 executed?: number | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          statement?:
+            | undefined
+            | {
+                objectReference?:
+                  | undefined
+                  | {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    };
+                branch?:
+                  | undefined
+                  | {
+                      objectReference?:
+                        | undefined
+                        | {
+                            extension?:
+                              | undefined
+                              | {
+                                  [key: string]: unknown;
+                                };
+                            uri?: string | undefined;
+                            parentUri?: string | undefined;
+                            type?: string | undefined;
+                            name?: string | undefined;
+                            packageName?: string | undefined;
+                            description?: string | undefined;
+                          };
+                      kind?: string | undefined;
+                      executedTrue?: string | undefined;
+                      executedFalse?: string | undefined;
+                    }[];
+                executed?: number | undefined;
+              }[];
+          name?: string | undefined;
         }[];
-    };
+  };
 };

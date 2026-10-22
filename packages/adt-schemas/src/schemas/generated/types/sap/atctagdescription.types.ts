@@ -6,15 +6,19 @@
  */
 
 export type AtctagdescriptionSchema = {
-    descriptionTags: {
-        tagWithDescription?: undefined | {
-            name: string;
-            descriptions: {
-                description?: undefined | {
-                    value?: string | undefined;
-                    description?: string | undefined;
+  descriptionTags: {
+    tagWithDescription?:
+      | undefined
+      | {
+          name: string;
+          descriptions: {
+            description?:
+              | undefined
+              | {
+                  value?: string | undefined;
+                  description?: string | undefined;
                 }[];
-            };
+          };
         }[];
-    };
+  };
 };

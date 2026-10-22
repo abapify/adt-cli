@@ -5,73 +5,106 @@
  * Mode: Flattened
  */
 
-export type QuickfixesSchema = {
-    evaluationRequest: {
-        affectedObjects?: undefined | {
-            unit?: undefined | {
-                content: string;
-                objectReference: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                };
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
+export type QuickfixesSchema =
+  | {
+      evaluationRequest: {
+        affectedObjects?:
+          | undefined
+          | {
+              unit?:
+                | undefined
+                | {
+                    content: string;
+                    objectReference: {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    };
+                    link?:
+                      | undefined
+                      | {
+                          href: string;
+                          rel?: string | undefined;
+                          type?: string | undefined;
+                          hreflang?: string | undefined;
+                          title?: string | undefined;
+                          length?: number | undefined;
+                          etag?: string | undefined;
+                          _text?: string | undefined;
+                        }[];
+                  }[];
+            };
+      };
+    }
+  | {
+      evaluationResults: {
+        evaluationResult?:
+          | undefined
+          | {
+              objectReference: {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
+                uri?: string | undefined;
+                parentUri?: string | undefined;
+                type?: string | undefined;
+                name?: string | undefined;
+                packageName?: string | undefined;
+                description?: string | undefined;
+              };
+              userContent?: string | undefined;
+              affectedObjects?:
+                | undefined
+                | {
+                    objectReference?:
+                      | undefined
+                      | {
+                          extension?:
+                            | undefined
+                            | {
+                                [key: string]: unknown;
+                              };
+                          uri?: string | undefined;
+                          parentUri?: string | undefined;
+                          type?: string | undefined;
+                          name?: string | undefined;
+                          packageName?: string | undefined;
+                          description?: string | undefined;
+                        }[];
+                  };
             }[];
-        };
-    };
-} | {
-    evaluationResults: {
-        evaluationResult?: undefined | {
-            objectReference: {
-                extension?: undefined | unknown;
-                uri?: string | undefined;
-                parentUri?: string | undefined;
-                type?: string | undefined;
-                name?: string | undefined;
-                packageName?: string | undefined;
-                description?: string | undefined;
-            };
-            userContent?: string | undefined;
-            affectedObjects?: undefined | {
-                objectReference?: undefined | {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                }[];
-            };
-        }[];
-    };
-} | {
-    proposalRequest: {
+      };
+    }
+  | {
+      proposalRequest: {
         input: {
-            content: string;
-            objectReference: {
-                extension?: undefined | unknown;
-                uri?: string | undefined;
-                parentUri?: string | undefined;
-                type?: string | undefined;
-                name?: string | undefined;
-                packageName?: string | undefined;
-                description?: string | undefined;
-            };
-            link?: undefined | {
+          content: string;
+          objectReference: {
+            extension?:
+              | undefined
+              | {
+                  [key: string]: unknown;
+                };
+            uri?: string | undefined;
+            parentUri?: string | undefined;
+            type?: string | undefined;
+            name?: string | undefined;
+            packageName?: string | undefined;
+            description?: string | undefined;
+          };
+          link?:
+            | undefined
+            | {
                 href: string;
                 rel?: string | undefined;
                 type?: string | undefined;
@@ -80,90 +113,127 @@ export type QuickfixesSchema = {
                 length?: number | undefined;
                 etag?: string | undefined;
                 _text?: string | undefined;
-            }[];
+              }[];
         };
-        affectedObjects?: undefined | {
-            unit?: undefined | {
-                content: string;
-                objectReference: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                };
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
-            }[];
-        };
+        affectedObjects?:
+          | undefined
+          | {
+              unit?:
+                | undefined
+                | {
+                    content: string;
+                    objectReference: {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    };
+                    link?:
+                      | undefined
+                      | {
+                          href: string;
+                          rel?: string | undefined;
+                          type?: string | undefined;
+                          hreflang?: string | undefined;
+                          title?: string | undefined;
+                          length?: number | undefined;
+                          etag?: string | undefined;
+                          _text?: string | undefined;
+                        }[];
+                  }[];
+            };
         userContent?: string | undefined;
-    };
-} | {
-    proposalResult: {
+      };
+    }
+  | {
+      proposalResult: {
         deltas: {
-            unit?: undefined | {
+          unit?:
+            | undefined
+            | {
                 content: string;
                 objectReference: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
+                  extension?:
+                    | undefined
+                    | {
+                        [key: string]: unknown;
+                      };
+                  uri?: string | undefined;
+                  parentUri?: string | undefined;
+                  type?: string | undefined;
+                  name?: string | undefined;
+                  packageName?: string | undefined;
+                  description?: string | undefined;
                 };
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
-            }[];
+                link?:
+                  | undefined
+                  | {
+                      href: string;
+                      rel?: string | undefined;
+                      type?: string | undefined;
+                      hreflang?: string | undefined;
+                      title?: string | undefined;
+                      length?: number | undefined;
+                      etag?: string | undefined;
+                      _text?: string | undefined;
+                    }[];
+              }[];
         };
-        selection?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        variableSourceStates?: undefined | {
-            objectReferences?: undefined | {
-                objectReference: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
+        selection?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        variableSourceStates?:
+          | undefined
+          | {
+              objectReferences?:
+                | undefined
+                | {
+                    objectReference: {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    }[];
                     name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                }[];
-                name?: string | undefined;
-            }[];
-            keepCursor?: boolean | undefined;
-        };
-        statusMessages?: undefined | {
-            statusMessage?: undefined | {
-                severity: "info" | "warning";
-                message: string;
-                id?: string | undefined;
-            }[];
-        };
+                  }[];
+              keepCursor?: boolean | undefined;
+            };
+        statusMessages?:
+          | undefined
+          | {
+              statusMessage?:
+                | undefined
+                | {
+                    severity: 'info' | 'warning';
+                    message: string;
+                    id?: string | undefined;
+                  }[];
+            };
+      };
     };
-};

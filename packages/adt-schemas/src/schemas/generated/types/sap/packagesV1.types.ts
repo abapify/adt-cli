@@ -5,145 +5,209 @@
  * Mode: Flattened
  */
 
-export type PackagesV1Schema = {
-    package: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
-                $value?: string | undefined;
-                key?: string | undefined;
-            }[];
-            name?: string | undefined;
-        };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
+export type PackagesV1Schema =
+  | {
+      package: {
+        containerRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        adtTemplate?:
+          | undefined
+          | {
+              adtProperty?:
+                | undefined
+                | {
+                    $value?: string | undefined;
+                    key?: string | undefined;
+                  }[];
+              name?: string | undefined;
+            };
+        packageRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
         attributes: {
-            packageType: unknown;
-            isPackageTypeEditable?: boolean | undefined;
-            isAddingObjectsAllowed?: boolean | undefined;
-            isAddingObjectsAllowedEditable?: boolean | undefined;
-            isEncapsulated?: boolean | undefined;
-            isEncapsulationEditable?: boolean | undefined;
-            isEncapsulationVisible?: boolean | undefined;
-            recordChanges?: boolean | undefined;
-            isRecordChangesEditable?: boolean | undefined;
-            isSwitchVisible?: boolean | undefined;
-            languageVersion?: undefined | "" | "2" | "5";
-            isLanguageVersionEditable?: boolean | undefined;
-            isLanguageVersionVisible?: boolean | undefined;
+          packageType: unknown;
+          isPackageTypeEditable?: boolean | undefined;
+          isAddingObjectsAllowed?: boolean | undefined;
+          isAddingObjectsAllowedEditable?: boolean | undefined;
+          isEncapsulated?: boolean | undefined;
+          isEncapsulationEditable?: boolean | undefined;
+          isEncapsulationVisible?: boolean | undefined;
+          recordChanges?: boolean | undefined;
+          isRecordChangesEditable?: boolean | undefined;
+          isSwitchVisible?: boolean | undefined;
+          languageVersion?: undefined | '' | '2' | '5';
+          isLanguageVersionEditable?: boolean | undefined;
+          isLanguageVersionVisible?: boolean | undefined;
         };
-        superPackage?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
+        superPackage?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
         extensionAlias: {
-            name?: string | undefined;
-            isVisible?: boolean | undefined;
-            isEditable?: boolean | undefined;
+          name?: string | undefined;
+          isVisible?: boolean | undefined;
+          isEditable?: boolean | undefined;
         };
         switch: {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-            state?: undefined | "" | "undefined" | "on" | "off" | "stand-by";
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
+          state?: undefined | '' | 'undefined' | 'on' | 'off' | 'stand-by';
         };
-        applicationComponent?: undefined | {
-            name?: string | undefined;
-            description?: string | undefined;
-            isVisible?: boolean | undefined;
-            isEditable?: boolean | undefined;
-        };
+        applicationComponent?:
+          | undefined
+          | {
+              name?: string | undefined;
+              description?: string | undefined;
+              isVisible?: boolean | undefined;
+              isEditable?: boolean | undefined;
+            };
         transport: {
-            softwareComponent?: undefined | {
+          softwareComponent?:
+            | undefined
+            | {
                 name?: string | undefined;
                 description?: string | undefined;
                 type?: string | undefined;
                 typeDescription?: string | undefined;
                 isVisible?: boolean | undefined;
                 isEditable?: boolean | undefined;
-            };
-            transportLayer?: undefined | {
+              };
+          transportLayer?:
+            | undefined
+            | {
                 name?: string | undefined;
                 description?: string | undefined;
                 isVisible?: boolean | undefined;
                 isEditable?: boolean | undefined;
+              };
+        };
+        translation?:
+          | undefined
+          | {
+              relevance?: string | undefined;
+              relevanceDescription?: string | undefined;
+              isVisible?: boolean | undefined;
             };
-        };
-        translation?: undefined | {
-            relevance?: string | undefined;
-            relevanceDescription?: string | undefined;
-            isVisible?: boolean | undefined;
-        };
         useAccesses: {
-            useAccess?: undefined | {
+          useAccess?:
+            | undefined
+            | {
                 packageInterfaceRef: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
+                  extension?:
+                    | undefined
+                    | {
+                        [key: string]: unknown;
+                      };
+                  uri?: string | undefined;
+                  parentUri?: string | undefined;
+                  type?: string | undefined;
+                  name?: string | undefined;
+                  packageName?: string | undefined;
+                  description?: string | undefined;
                 };
                 packageRef: {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
+                  extension?:
+                    | undefined
+                    | {
+                        [key: string]: unknown;
+                      };
+                  uri?: string | undefined;
+                  parentUri?: string | undefined;
+                  type?: string | undefined;
+                  name?: string | undefined;
+                  packageName?: string | undefined;
+                  description?: string | undefined;
                 };
-                severity?: undefined | "" | "none" | "error" | "warning" | "information" | "obsolet";
-            }[];
-            isVisible?: boolean | undefined;
+                severity?:
+                  | undefined
+                  | ''
+                  | 'none'
+                  | 'error'
+                  | 'warning'
+                  | 'information'
+                  | 'obsolet';
+              }[];
+          isVisible?: boolean | undefined;
         };
         packageInterfaces: {
-            packageInterfaceRef?: undefined | {
-                extension?: undefined | unknown;
+          packageInterfaceRef?:
+            | undefined
+            | {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
                 uri?: string | undefined;
                 parentUri?: string | undefined;
                 type?: string | undefined;
                 name?: string | undefined;
                 packageName?: string | undefined;
                 description?: string | undefined;
-            }[];
-            isVisible?: boolean | undefined;
+              }[];
+          isVisible?: boolean | undefined;
         };
         subPackages: {
-            packageRef?: undefined | {
-                extension?: undefined | unknown;
+          packageRef?:
+            | undefined
+            | {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
                 uri?: string | undefined;
                 parentUri?: string | undefined;
                 type?: string | undefined;
                 name?: string | undefined;
                 packageName?: string | undefined;
                 description?: string | undefined;
-            }[];
+              }[];
         };
         name: string;
         type: string;
@@ -151,7 +215,15 @@ export type PackagesV1Schema = {
         changedAt?: string | undefined;
         createdAt?: string | undefined;
         createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        version?:
+          | undefined
+          | ''
+          | 'active'
+          | 'inactive'
+          | 'workingArea'
+          | 'new'
+          | 'partlyActive'
+          | 'activeWithInactiveVersion';
         description?: string | undefined;
         descriptionTextLimit?: number | undefined;
         language?: string | undefined;
@@ -159,42 +231,59 @@ export type PackagesV1Schema = {
         masterLanguage?: string | undefined;
         responsible?: string | undefined;
         abapLanguageVersion?: string | undefined;
-    };
-} | {
-    packageTree: {
-        treeNode?: undefined | {
-            extension?: undefined | unknown;
-            superPackageRef: {
-                extension?: undefined | unknown;
+      };
+    }
+  | {
+      packageTree: {
+        treeNode?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              superPackageRef: {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
                 uri?: string | undefined;
                 parentUri?: string | undefined;
                 type?: string | undefined;
                 name?: string | undefined;
                 packageName?: string | undefined;
                 description?: string | undefined;
-            };
-            packageInterfaces: {
-                packageInterfaceRef?: undefined | {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                }[];
+              };
+              packageInterfaces: {
+                packageInterfaceRef?:
+                  | undefined
+                  | {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    }[];
                 isVisible?: boolean | undefined;
-            };
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-            isEncapsulated?: boolean | undefined;
-            hasSubpackages?: boolean | undefined;
-            hasInterfaces?: boolean | undefined;
-        }[];
+              };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+              isEncapsulated?: boolean | undefined;
+              hasSubpackages?: boolean | undefined;
+              hasInterfaces?: boolean | undefined;
+            }[];
         isSuperTree?: boolean | undefined;
+      };
     };
-};

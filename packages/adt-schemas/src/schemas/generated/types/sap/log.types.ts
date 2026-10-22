@@ -5,44 +5,58 @@
  * Mode: Flattened
  */
 
-export type LogSchema = {
-    logKeys: {
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
-        }[];
-        progVersion?: undefined | {
-            key?: undefined | {
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
-                value?: string | undefined;
-                calls?: number | undefined;
-                lastCall?: string | undefined;
+export type LogSchema =
+  | {
+      logKeys: {
+        link?:
+          | undefined
+          | {
+              href: string;
+              rel?: string | undefined;
+              type?: string | undefined;
+              hreflang?: string | undefined;
+              title?: string | undefined;
+              length?: number | undefined;
+              etag?: string | undefined;
+              _text?: string | undefined;
             }[];
-            generatedAt?: string | undefined;
-        }[];
+        progVersion?:
+          | undefined
+          | {
+              key?:
+                | undefined
+                | {
+                    link?:
+                      | undefined
+                      | {
+                          href: string;
+                          rel?: string | undefined;
+                          type?: string | undefined;
+                          hreflang?: string | undefined;
+                          title?: string | undefined;
+                          length?: number | undefined;
+                          etag?: string | undefined;
+                          _text?: string | undefined;
+                        }[];
+                    value?: string | undefined;
+                    calls?: number | undefined;
+                    lastCall?: string | undefined;
+                  }[];
+              generatedAt?: string | undefined;
+            }[];
         base?: string | undefined;
-    };
-} | {
-    logEntry: {
+      };
+    }
+  | {
+      logEntry: {
         fieldList: {
-            field?: undefined | {
+          field?:
+            | undefined
+            | {
                 value: {
-                    link?: undefined | {
+                  link?:
+                    | undefined
+                    | {
                         href: string;
                         rel?: string | undefined;
                         type?: string | undefined;
@@ -51,52 +65,67 @@ export type LogSchema = {
                         length?: number | undefined;
                         etag?: string | undefined;
                         _text?: string | undefined;
-                    }[];
-                    e?: undefined | {
+                      }[];
+                  e?:
+                    | undefined
+                    | {
                         t?: boolean | undefined;
                         v?: string | undefined;
                         y?: string | undefined;
-                    };
-                    s?: undefined | {
+                      };
+                  s?:
+                    | undefined
+                    | {
                         c: unknown[];
                         t?: boolean | undefined;
-                    };
-                    t?: undefined | {
+                      };
+                  t?:
+                    | undefined
+                    | {
                         c?: undefined | unknown[];
                         t?: boolean | undefined;
-                    };
+                      };
                 };
                 name?: string | undefined;
+              }[];
+        };
+        link?:
+          | undefined
+          | {
+              href: string;
+              rel?: string | undefined;
+              type?: string | undefined;
+              hreflang?: string | undefined;
+              title?: string | undefined;
+              length?: number | undefined;
+              etag?: string | undefined;
+              _text?: string | undefined;
             }[];
-        };
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
-        }[];
-    };
-} | {
-    collectionSummary: {
-        success?: undefined | {
-            server: {
+      };
+    }
+  | {
+      collectionSummary: {
+        success?:
+          | undefined
+          | {
+              server: {
                 name?: string | undefined;
+              };
             };
-        };
-        unreached?: undefined | {
-            server: {
+        unreached?:
+          | undefined
+          | {
+              server: {
                 name?: string | undefined;
+              };
             };
-        };
-        failed?: undefined | {
-            server?: string | undefined;
-            returnCode?: number | undefined;
-            errorMessage?: string | undefined;
-        }[];
+        failed?:
+          | undefined
+          | {
+              server?: string | undefined;
+              returnCode?: number | undefined;
+              errorMessage?: string | undefined;
+            }[];
         collectedLogs?: number | undefined;
+      };
     };
-};

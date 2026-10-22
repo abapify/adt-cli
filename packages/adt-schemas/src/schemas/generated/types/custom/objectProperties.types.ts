@@ -6,9 +6,13 @@
  */
 
 export type ObjectPropertiesSchema = {
-    objectProperties: {
-        object?: undefined | {
-            link?: undefined | {
+  objectProperties: {
+    object?:
+      | undefined
+      | {
+          link?:
+            | undefined
+            | {
                 href: string;
                 rel?: string | undefined;
                 type?: string | undefined;
@@ -17,17 +21,21 @@ export type ObjectPropertiesSchema = {
                 length?: number | undefined;
                 etag?: string | undefined;
                 _text?: string | undefined;
-            }[];
-            name?: string | undefined;
-            type?: string | undefined;
-            package?: string | undefined;
-            uri?: string | undefined;
-            vituri?: string | undefined;
-            text?: string | undefined;
-            expandable?: boolean | undefined;
+              }[];
+          name?: string | undefined;
+          type?: string | undefined;
+          package?: string | undefined;
+          uri?: string | undefined;
+          vituri?: string | undefined;
+          text?: string | undefined;
+          expandable?: boolean | undefined;
         };
-        property?: undefined | {
-            link?: undefined | {
+    property?:
+      | undefined
+      | {
+          link?:
+            | undefined
+            | {
                 href: string;
                 rel?: string | undefined;
                 type?: string | undefined;
@@ -36,13 +44,13 @@ export type ObjectPropertiesSchema = {
                 length?: number | undefined;
                 etag?: string | undefined;
                 _text?: string | undefined;
-            }[];
-            facet?: string | undefined;
-            name?: string | undefined;
-            displayName?: string | undefined;
-            text?: string | undefined;
-            hasChildrenOfSameFacet?: boolean | undefined;
-            version?: string | undefined;
+              }[];
+          facet?: string | undefined;
+          name?: string | undefined;
+          displayName?: string | undefined;
+          text?: string | undefined;
+          hasChildrenOfSameFacet?: boolean | undefined;
+          version?: string | undefined;
         }[];
-    };
+  };
 };

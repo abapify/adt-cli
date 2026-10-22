@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  MCP mock-server ATC check variant form template.
+
+  TODO-synthetic: minimal fabricated catalog for the mock server's ATC
+  worklist fixture. The worklist's first finding carries a GUID checkId
+  (the live worklist shape), so the atc_run tool resolves it through the
+  documentation bridge: the mock documentation page (documentation/
+  amdp-hdb-migration.html) names CL_CI_TEST_AMDP_HDB_MIGRATION, which
+  this catalog assigns to CI_SYNTAX. The second finding's checkId is
+  already a catalog class name and resolves directly to CI_PERFORMANCE.
+  Entry shapes follow the real sanitized fixture at
+  fixtures/atc/formtemplate.xml (source:
+  GET /sap/bc/adt/atc/checkvariants/formtemplate?chkvName=DEFAULT,
+  a live S/4 system, read-only capture, 2026-10-21).
+-->
+<chkvFormTemplate:formTemplate xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate"
+    xmlns:chkc="http://www.sap.com/wbobj/atc/chkc"
+    xmlns:chkvcheck="http://www.sap.com/wbobj/atc/chkvCheck"
+    xmlns:chko="http://www.sap.com/wbobj/atc/chko"
+    xmlns:adtcore="http://www.sap.com/adt/core">
+  <chkvFormTemplate:availableCheckCategories>
+    <chkvFormTemplate:availableCheckCategory>
+      <chkc:checkCategoryObject adtcore:name="CI_SYNTAX" adtcore:description="Syntax and activation">
+        <chkc:content>
+          <chkc:category adtcore:type="CHKC/TYP"/>
+        </chkc:content>
+      </chkc:checkCategoryObject>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="CI_AMDP_HDB_MIGRATION" adtcore:description="Usage of ABAP Managed Database Procedures">
+          <chko:content>
+            <chko:category adtcore:name="CI_SYNTAX"/>
+            <chko:implementingClass adtcore:name="CL_CI_TEST_AMDP_HDB_MIGRATION"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+      </chkvcheck:check>
+    </chkvFormTemplate:availableCheckCategory>
+    <chkvFormTemplate:availableCheckCategory>
+      <chkc:checkCategoryObject adtcore:name="CI_PERFORMANCE" adtcore:description="Performance">
+        <chkc:content>
+          <chkc:category adtcore:type="CHKC/TYP"/>
+        </chkc:content>
+      </chkc:checkCategoryObject>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="CI_ANALYZE_WHERE" adtcore:description="Analysis of WHERE conditions of SELECT statements">
+          <chko:content>
+            <chko:category adtcore:name="CI_PERFORMANCE"/>
+            <chko:implementingClass adtcore:name="CL_CI_TEST_SELECT_TAW_A"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+      </chkvcheck:check>
+    </chkvFormTemplate:availableCheckCategory>
+  </chkvFormTemplate:availableCheckCategories>
+</chkvFormTemplate:formTemplate>

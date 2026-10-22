@@ -5,13 +5,60 @@
  * Mode: Flattened
  */
 
-export type AbapsourceSchema = {
-    syntaxConfigurations: {
-        syntaxConfiguration?: undefined | {
-            language?: undefined | {
-                version?: string | undefined;
-                description?: string | undefined;
-                link?: undefined | {
+export type AbapsourceSchema =
+  | {
+      syntaxConfigurations: {
+        syntaxConfiguration?:
+          | undefined
+          | {
+              language?:
+                | undefined
+                | {
+                    version?: string | undefined;
+                    description?: string | undefined;
+                    link?:
+                      | undefined
+                      | {
+                          href: string;
+                          rel?: string | undefined;
+                          type?: string | undefined;
+                          hreflang?: string | undefined;
+                          title?: string | undefined;
+                          length?: number | undefined;
+                          etag?: string | undefined;
+                          _text?: string | undefined;
+                        }[];
+                  };
+              objectUsage?:
+                | undefined
+                | {
+                    link?:
+                      | undefined
+                      | {
+                          href: string;
+                          rel?: string | undefined;
+                          type?: string | undefined;
+                          hreflang?: string | undefined;
+                          title?: string | undefined;
+                          length?: number | undefined;
+                          etag?: string | undefined;
+                          _text?: string | undefined;
+                        }[];
+                    restricted?: boolean | undefined;
+                  };
+            }[];
+      };
+    }
+  | {
+      syntaxConfiguration: {
+        language?:
+          | undefined
+          | {
+              version?: string | undefined;
+              description?: string | undefined;
+              link?:
+                | undefined
+                | {
                     href: string;
                     rel?: string | undefined;
                     type?: string | undefined;
@@ -20,10 +67,14 @@ export type AbapsourceSchema = {
                     length?: number | undefined;
                     etag?: string | undefined;
                     _text?: string | undefined;
-                }[];
+                  }[];
             };
-            objectUsage?: undefined | {
-                link?: undefined | {
+        objectUsage?:
+          | undefined
+          | {
+              link?:
+                | undefined
+                | {
                     href: string;
                     rel?: string | undefined;
                     type?: string | undefined;
@@ -32,39 +83,8 @@ export type AbapsourceSchema = {
                     length?: number | undefined;
                     etag?: string | undefined;
                     _text?: string | undefined;
-                }[];
-                restricted?: boolean | undefined;
+                  }[];
+              restricted?: boolean | undefined;
             };
-        }[];
+      };
     };
-} | {
-    syntaxConfiguration: {
-        language?: undefined | {
-            version?: string | undefined;
-            description?: string | undefined;
-            link?: undefined | {
-                href: string;
-                rel?: string | undefined;
-                type?: string | undefined;
-                hreflang?: string | undefined;
-                title?: string | undefined;
-                length?: number | undefined;
-                etag?: string | undefined;
-                _text?: string | undefined;
-            }[];
-        };
-        objectUsage?: undefined | {
-            link?: undefined | {
-                href: string;
-                rel?: string | undefined;
-                type?: string | undefined;
-                hreflang?: string | undefined;
-                title?: string | undefined;
-                length?: number | undefined;
-                etag?: string | undefined;
-                _text?: string | undefined;
-            }[];
-            restricted?: boolean | undefined;
-        };
-    };
-};

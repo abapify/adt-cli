@@ -6,11 +6,11 @@
  */
 
 export type TemplatelinkSchema = {
-    templateLink: {
-        template: string;
-        rel: string;
-        type?: string | undefined;
-        title?: string | undefined;
-        _text?: string | undefined;
-    };
+  templateLink: {
+    template: string;
+    rel: string;
+    type?: string | undefined;
+    title?: string | undefined;
+    _text?: string | undefined;
+  };
 };

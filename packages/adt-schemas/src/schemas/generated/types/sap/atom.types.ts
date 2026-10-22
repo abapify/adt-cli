@@ -6,14 +6,14 @@
  */
 
 export type AtomSchema = {
-    link: {
-        href: string;
-        rel?: string | undefined;
-        type?: string | undefined;
-        hreflang?: string | undefined;
-        title?: string | undefined;
-        length?: number | undefined;
-        etag?: string | undefined;
-        _text?: string | undefined;
-    };
+  link: {
+    href: string;
+    rel?: string | undefined;
+    type?: string | undefined;
+    hreflang?: string | undefined;
+    title?: string | undefined;
+    length?: number | undefined;
+    etag?: string | undefined;
+    _text?: string | undefined;
+  };
 };

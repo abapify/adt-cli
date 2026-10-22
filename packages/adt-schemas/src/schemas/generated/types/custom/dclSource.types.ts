@@ -6,65 +6,104 @@
  */
 
 export type DclSourceSchema = {
-    dclSource: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+  dclSource: {
+    containerRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
+    adtTemplate?:
+      | undefined
+      | {
+          adtProperty?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+    packageRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        template?: undefined | {
-            property?: undefined | {
+    template?:
+      | undefined
+      | {
+          property?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        syntaxConfiguration?: undefined | {
-            language?: undefined | {
+    syntaxConfiguration?:
+      | undefined
+      | {
+          language?:
+            | undefined
+            | {
                 version?: string | undefined;
                 description?: string | undefined;
-            };
-            objectUsage?: undefined | {
+              };
+          objectUsage?:
+            | undefined
+            | {
                 restricted?: boolean | undefined;
-            };
+              };
         };
-        name: string;
-        type: string;
-        changedBy?: string | undefined;
-        changedAt?: string | undefined;
-        createdAt?: string | undefined;
-        createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string | undefined;
-        descriptionTextLimit?: number | undefined;
-        language?: string | undefined;
-        masterSystem?: string | undefined;
-        masterLanguage?: string | undefined;
-        responsible?: string | undefined;
-        abapLanguageVersion?: string | undefined;
-        sourceUri?: string | undefined;
-        sourceObjectStatus?: undefined | "SAPStandardProduction" | "customerProduction" | "system" | "test";
-        fixPointArithmetic?: boolean | undefined;
-        activeUnicodeCheck?: boolean | undefined;
-    };
+    name: string;
+    type: string;
+    changedBy?: string | undefined;
+    changedAt?: string | undefined;
+    createdAt?: string | undefined;
+    createdBy?: string | undefined;
+    version?:
+      | undefined
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string | undefined;
+    descriptionTextLimit?: number | undefined;
+    language?: string | undefined;
+    masterSystem?: string | undefined;
+    masterLanguage?: string | undefined;
+    responsible?: string | undefined;
+    abapLanguageVersion?: string | undefined;
+    sourceUri?: string | undefined;
+    sourceObjectStatus?:
+      | undefined
+      | 'SAPStandardProduction'
+      | 'customerProduction'
+      | 'system'
+      | 'test';
+    fixPointArithmetic?: boolean | undefined;
+    activeUnicodeCheck?: boolean | undefined;
+  };
 };

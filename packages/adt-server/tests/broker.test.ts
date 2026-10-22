@@ -1258,6 +1258,262 @@ test('runs ATC from a canonical package scope and retains only the trusted docum
   }
 });
 
+test('enriches ATC findings with check categories from the variant form template', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));
+  const documentationReads: string[] = [];
+  const tokenFile = path.join(directory, 'broker-token');
+  await writeFile(tokenFile, 'sidecar-token\n', 'utf8');
+  const formtemplateCalls: unknown[] = [];
+  const operations = createHttpBrokerOperations({
+    baseUrl: 'http://adt-api.internal',
+    tokenFile,
+    fetch: async (input) => {
+      if (String(input).endsWith(':acquire')) {
+        return new Response(
+          JSON.stringify({
+            leaseId: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+            destination: 'dev',
+            version: 1,
+            expiresAt: '2026-07-20T00:00:00.000Z',
+            connection: {
+              baseUrl: 'https://sap.example.test',
+              sapClient: null,
+              authMethod: 'basic',
+              authConfig: { username: 'service', password: 'secret' },
+            },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
+      return new Response(null, { status: 204 });
+    },
+    createClient: async () =>
+      ({
+        adt: {
+          atc: {
+            customizing: {
+              async get() {
+                return { customizing: { properties: { property: [] } } };
+              },
+            },
+            worklists: {
+              async create(value: unknown) {
+                return { worklist: { id: 'worklist-1' } };
+              },
+              async get() {
+                return {
+                  worklist: {
+                    objects: {
+                      object: [
+                        {
+                          uri: '/sap/bc/adt/oo/classes/zcl_safe',
+                          type: 'CLAS',
+                          name: 'ZCL_SAFE',
+                          findings: {
+                            finding: [
+                              {
+                                uri: '/sap/bc/adt/atc/findings/itemid/ABC/index/1',
+                                priority: '2',
+                                checkId: 'SCI',
+                                checkTitle: 'Safe check',
+                                messageTitle: 'Avoid unsafe access',
+                                location:
+                                  '/sap/bc/adt/oo/classes/zcl_safe/source/main?start=12',
+                              },
+                              {
+                                uri: '/sap/bc/adt/atc/findings/itemid/ABC/index/2',
+                                priority: '2',
+                                checkId: 'UNKNOWN_IMPL',
+                                checkTitle: 'Uncatalogued check',
+                                messageTitle: 'Outside the catalog',
+                                location:
+                                  '/sap/bc/adt/oo/classes/zcl_safe/source/main?start=20',
+                              },
+                              {
+                                uri: '/sap/bc/adt/atc/findings/itemid/DEF/index/1',
+                                priority: '2',
+                                checkId: '6A277D3B1C4E4F80A9B2C3D4E5F60718',
+                                checkTitle: 'Guid check',
+                                messageTitle: 'Guid-shaped checkId',
+                                location:
+                                  '/sap/bc/adt/oo/classes/zcl_safe/source/main?start=30',
+                                link: [
+                                  {
+                                    rel: 'http://www.sap.com/adt/relations/documentation',
+                                    href: '/sap/bc/adt/documentation/atc/documents/itemid/DEF/index/1',
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                };
+              },
+            },
+            runs: {
+              async post() {
+                return undefined;
+              },
+            },
+            checkvariants: {
+              async formtemplate(params: unknown) {
+                formtemplateCalls.push(params);
+                return {
+                  formTemplate: {
+                    availableCheckCategories: {
+                      availableCheckCategory: [
+                        {
+                          checkCategoryObject: {
+                            name: 'CI_PERFORMANCE',
+                            description: 'Performance',
+                          },
+                          check: [
+                            {
+                              checkObject: {
+                                name: 'CI_ANALYZE_WHERE',
+                                content: {
+                                  category: { name: 'CI_PERFORMANCE' },
+                                  implementingClass: { name: 'SCI' },
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                };
+              },
+            },
+          },
+        },
+        async readTextBounded(uri: string) {
+          documentationReads.push(uri);
+          // The GUID finding's page names the catalogued class; the
+          // uncatalogued finding's page names a class outside the catalog
+          const checkClass = uri.endsWith('/DEF/index/1')
+            ? 'SCI'
+            : 'CL_UNCATALOGUED_IMPL';
+          return `<h3>Appl. Comp. Check / Check Class / Message Code</h3><p>BC-ABA-LA / ${checkClass} / 0501</p>`;
+        },
+      }) as never,
+  });
+
+  try {
+    const result = await operations.runAtc!({
+      destination: 'dev',
+      scope: { kind: 'package', packageName: '$TEST' },
+    });
+
+    // The catalogued check gains its category directly; the uncatalogued
+    // one keeps none; the GUID-checkId finding gains its category through
+    // the documentation bridge
+    assert.ok(result.findings[0]!.checkCategory === 'CI_PERFORMANCE');
+    assert.ok(result.findings[1]!.checkCategory === undefined);
+    assert.ok(result.findings[2]!.checkCategory === 'CI_PERFORMANCE');
+    // The form template is fetched for the run's resolved variant
+    assert.deepStrictEqual(formtemplateCalls, [{ chkvName: 'DEFAULT' }]);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('runs ATC with unavailable check categories without failing the run', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));
+  const tokenFile = path.join(directory, 'broker-token');
+  await writeFile(tokenFile, 'sidecar-token\n', 'utf8');
+  const operations = createHttpBrokerOperations({
+    baseUrl: 'http://adt-api.internal',
+    tokenFile,
+    fetch: async (input) => {
+      if (String(input).endsWith(':acquire')) {
+        return new Response(
+          JSON.stringify({
+            leaseId: 'abababab-abab-4bab-8bab-abababababab',
+            destination: 'dev',
+            version: 1,
+            expiresAt: '2026-07-20T00:00:00.000Z',
+            connection: {
+              baseUrl: 'https://sap.example.test',
+              sapClient: null,
+              authMethod: 'basic',
+              authConfig: { username: 'service', password: 'secret' },
+            },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
+      return new Response(null, { status: 204 });
+    },
+    createClient: async () =>
+      ({
+        adt: {
+          atc: {
+            customizing: {
+              async get() {
+                return { customizing: { properties: { property: [] } } };
+              },
+            },
+            worklists: {
+              async create() {
+                return { worklist: { id: 'worklist-1' } };
+              },
+              async get() {
+                return {
+                  worklist: {
+                    objects: {
+                      object: [
+                        {
+                          uri: '/sap/bc/adt/oo/classes/zcl_safe',
+                          type: 'CLAS',
+                          name: 'ZCL_SAFE',
+                          findings: {
+                            finding: [
+                              {
+                                uri: '/sap/bc/adt/atc/findings/itemid/ABC/index/1',
+                                priority: '2',
+                                checkId: 'SCI',
+                                checkTitle: 'Safe check',
+                                messageTitle: 'Avoid unsafe access',
+                                location:
+                                  '/sap/bc/adt/oo/classes/zcl_safe/source/main?start=12',
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                };
+              },
+            },
+            runs: {
+              async post() {
+                return undefined;
+              },
+            },
+            // No checkvariants surface: enrichment must degrade to a no-op
+          },
+        },
+      }) as never,
+  });
+
+  try {
+    const result = await operations.runAtc!({
+      destination: 'dev',
+      scope: { kind: 'package', packageName: '$TEST' },
+    });
+
+    assert.ok(result.findings.length === 1);
+    assert.ok(result.findings[0]!.checkCategory === undefined);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('reads trusted ATC documentation through the bounded text primitive', async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));
   const tokenFile = path.join(directory, 'broker-token');

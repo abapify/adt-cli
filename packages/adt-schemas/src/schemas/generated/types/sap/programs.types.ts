@@ -6,122 +6,183 @@
  */
 
 export type ProgramsSchema = {
-    abapProgram: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+  abapProgram: {
+    containerRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
+    link?:
+      | undefined
+      | {
+          href: string;
+          rel?: string | undefined;
+          type?: string | undefined;
+          hreflang?: string | undefined;
+          title?: string | undefined;
+          length?: number | undefined;
+          etag?: string | undefined;
+          _text?: string | undefined;
         }[];
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
+    adtTemplate?:
+      | undefined
+      | {
+          adtProperty?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+    packageRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        template?: undefined | {
-            property?: undefined | {
+    template?:
+      | undefined
+      | {
+          property?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        syntaxConfiguration?: undefined | {
-            language?: undefined | {
+    syntaxConfiguration?:
+      | undefined
+      | {
+          language?:
+            | undefined
+            | {
                 version?: string | undefined;
                 description?: string | undefined;
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
-            };
-            objectUsage?: undefined | {
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
+                link?:
+                  | undefined
+                  | {
+                      href: string;
+                      rel?: string | undefined;
+                      type?: string | undefined;
+                      hreflang?: string | undefined;
+                      title?: string | undefined;
+                      length?: number | undefined;
+                      etag?: string | undefined;
+                      _text?: string | undefined;
+                    }[];
+              };
+          objectUsage?:
+            | undefined
+            | {
+                link?:
+                  | undefined
+                  | {
+                      href: string;
+                      rel?: string | undefined;
+                      type?: string | undefined;
+                      hreflang?: string | undefined;
+                      title?: string | undefined;
+                      length?: number | undefined;
+                      etag?: string | undefined;
+                      _text?: string | undefined;
+                    }[];
                 restricted?: boolean | undefined;
-            };
+              };
         };
-        logicalDatabase?: undefined | {
-            ref?: undefined | {
-                extension?: undefined | unknown;
+    logicalDatabase?:
+      | undefined
+      | {
+          ref?:
+            | undefined
+            | {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
                 uri?: string | undefined;
                 parentUri?: string | undefined;
                 type?: string | undefined;
                 name?: string | undefined;
                 packageName?: string | undefined;
                 description?: string | undefined;
-            };
-            selectionScreen?: string | undefined;
+              };
+          selectionScreen?: string | undefined;
         };
-        authorizationGroup?: undefined | {
-            ref?: undefined | {
-                extension?: undefined | unknown;
+    authorizationGroup?:
+      | undefined
+      | {
+          ref?:
+            | undefined
+            | {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
                 uri?: string | undefined;
                 parentUri?: string | undefined;
                 type?: string | undefined;
                 name?: string | undefined;
                 packageName?: string | undefined;
                 description?: string | undefined;
-            };
-            application?: string | undefined;
+              };
+          application?: string | undefined;
         };
-        name: string;
-        type: string;
-        changedBy?: string | undefined;
-        changedAt?: string | undefined;
-        createdAt?: string | undefined;
-        createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string | undefined;
-        descriptionTextLimit?: number | undefined;
-        language?: string | undefined;
-        masterSystem?: string | undefined;
-        masterLanguage?: string | undefined;
-        responsible?: string | undefined;
-        abapLanguageVersion?: string | undefined;
-        sourceUri?: string | undefined;
-        sourceObjectStatus?: undefined | "SAPStandardProduction" | "customerProduction" | "system" | "test";
-        fixPointArithmetic?: boolean | undefined;
-        activeUnicodeCheck?: boolean | undefined;
-        programType?: undefined | unknown;
-        startUsingVariant?: boolean | undefined;
-        lockedByEditor?: boolean | undefined;
-    };
+    name: string;
+    type: string;
+    changedBy?: string | undefined;
+    changedAt?: string | undefined;
+    createdAt?: string | undefined;
+    createdBy?: string | undefined;
+    version?:
+      | undefined
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string | undefined;
+    descriptionTextLimit?: number | undefined;
+    language?: string | undefined;
+    masterSystem?: string | undefined;
+    masterLanguage?: string | undefined;
+    responsible?: string | undefined;
+    abapLanguageVersion?: string | undefined;
+    sourceUri?: string | undefined;
+    sourceObjectStatus?:
+      | undefined
+      | 'SAPStandardProduction'
+      | 'customerProduction'
+      | 'system'
+      | 'test';
+    fixPointArithmetic?: boolean | undefined;
+    activeUnicodeCheck?: boolean | undefined;
+    programType?: undefined | unknown;
+    startUsingVariant?: boolean | undefined;
+    lockedByEditor?: boolean | undefined;
+  };
 };

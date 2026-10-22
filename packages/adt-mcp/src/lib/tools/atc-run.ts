@@ -9,6 +9,11 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AdtClient } from '@abapify/adt-client';
+import {
+  fetchCheckCategoryIndex,
+  enrichFindingsWithCategories,
+  resolveCategoriesViaDocumentation,
+} from '@abapify/adt-atc';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
@@ -96,7 +101,22 @@ function lineFromLocation(value: unknown): number | undefined {
   return Number.isSafeInteger(line) && line > 0 ? line : undefined;
 }
 
-function canonicalFindings(response: unknown): UnknownRecord[] {
+/** Canonical finding record: an unknown record with a guaranteed checkId. */
+type CanonicalFindingRecord = UnknownRecord & { checkId: string };
+
+/** The trusted documentation link of one worklist finding (atom:link). */
+function documentationUriFromFinding(
+  finding: UnknownRecord,
+): string | undefined {
+  const link = records(finding.link).find(
+    (entry) =>
+      stringField(entry, 'rel') ===
+      'http://www.sap.com/adt/relations/documentation',
+  );
+  return link ? stringField(link, 'href') : undefined;
+}
+
+function canonicalFindings(response: unknown): CanonicalFindingRecord[] {
   const root = record(response);
   const worklist = record(root?.worklist) ?? root;
   const objects = records(worklist?.objects).flatMap((entry) =>
@@ -108,6 +128,7 @@ function canonicalFindings(response: unknown): UnknownRecord[] {
     const findings = records(findingsContainer?.finding ?? object.findings);
     return findings.map((finding) => {
       const line = lineFromLocation(finding.location);
+      const documentationUri = documentationUriFromFinding(finding);
       return {
         checkId: stringField(finding, 'checkId') ?? '',
         checkTitle: stringField(finding, 'checkTitle') ?? '',
@@ -116,6 +137,7 @@ function canonicalFindings(response: unknown): UnknownRecord[] {
         objectType: stringField(object, 'type') ?? '',
         objectName: stringField(object, 'name') ?? '',
         ...(line ? { lineStart: line, lineEnd: line } : {}),
+        ...(documentationUri ? { documentationUri } : {}),
         ...(stringField(finding, 'messageId')
           ? { messageId: stringField(finding, 'messageId') }
           : {}),
@@ -240,6 +262,24 @@ export function registerAtcRunTool(server: McpServer, ctx: ToolContext): void {
           includeExemptedFindings: 'false',
         });
         const findings = canonicalFindings(worklist);
+        // Enrich findings with check categories from the run's check variant
+        // form template (best-effort: never fails the run). Live worklist
+        // checkIds are GUIDs, so unresolved findings go through the
+        // documentation bridge (each finding's documentation page names the
+        // check class).
+        const categoryIndex = await fetchCheckCategoryIndex(
+          client,
+          checkVariant,
+        );
+        enrichFindingsWithCategories(findings, categoryIndex);
+        await resolveCategoriesViaDocumentation(
+          client,
+          findings,
+          categoryIndex,
+        );
+        // The model-facing response must stay URI-free: the documentation
+        // link is internal enrichment state only.
+        for (const finding of findings) delete finding.documentationUri;
         if (safePolicy && findings.length > safePolicy.maxFindings) {
           return safeExecuteLimitResult('safe_execute_limit_exceeded');
         }

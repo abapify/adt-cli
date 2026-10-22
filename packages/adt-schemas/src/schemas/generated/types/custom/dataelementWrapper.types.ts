@@ -6,75 +6,111 @@
  */
 
 export type DataelementWrapperSchema = {
-    wbobj: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+  wbobj: {
+    containerRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
+    adtTemplate?:
+      | undefined
+      | {
+          adtProperty?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+    packageRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        dataElement?: undefined | {
-            typeKind: "domain" | "predefinedAbapType" | "refToPredefinedAbapType" | "refToDictionaryType" | "refToClifType";
-            typeName?: string | undefined;
-            dataType?: string | undefined;
-            dataTypeLength?: number | undefined;
-            dataTypeLengthEnabled?: boolean | undefined;
-            dataTypeDecimals?: number | undefined;
-            dataTypeDecimalsEnabled?: boolean | undefined;
-            shortFieldLabel?: string | undefined;
-            shortFieldLength?: number | undefined;
-            shortFieldMaxLength?: number | undefined;
-            mediumFieldLabel?: string | undefined;
-            mediumFieldLength?: number | undefined;
-            mediumFieldMaxLength?: number | undefined;
-            longFieldLabel?: string | undefined;
-            longFieldLength?: number | undefined;
-            longFieldMaxLength?: number | undefined;
-            headingFieldLabel?: string | undefined;
-            headingFieldLength?: number | undefined;
-            headingFieldMaxLength?: number | undefined;
-            searchHelp?: string | undefined;
-            searchHelpParameter?: string | undefined;
-            setGetParameter?: string | undefined;
-            defaultComponentName?: string | undefined;
-            deactivateInputHistory?: boolean | undefined;
-            changeDocument?: boolean | undefined;
-            leftToRightDirection?: boolean | undefined;
-            deactivateBIDIFiltering?: boolean | undefined;
-            documentationStatus?: undefined | "required" | "notUsedInScreens" | "explainedByShortText" | "postponed";
+    dataElement?:
+      | undefined
+      | {
+          typeKind:
+            | 'domain'
+            | 'predefinedAbapType'
+            | 'refToPredefinedAbapType'
+            | 'refToDictionaryType'
+            | 'refToClifType';
+          typeName?: string | undefined;
+          dataType?: string | undefined;
+          dataTypeLength?: number | undefined;
+          dataTypeLengthEnabled?: boolean | undefined;
+          dataTypeDecimals?: number | undefined;
+          dataTypeDecimalsEnabled?: boolean | undefined;
+          shortFieldLabel?: string | undefined;
+          shortFieldLength?: number | undefined;
+          shortFieldMaxLength?: number | undefined;
+          mediumFieldLabel?: string | undefined;
+          mediumFieldLength?: number | undefined;
+          mediumFieldMaxLength?: number | undefined;
+          longFieldLabel?: string | undefined;
+          longFieldLength?: number | undefined;
+          longFieldMaxLength?: number | undefined;
+          headingFieldLabel?: string | undefined;
+          headingFieldLength?: number | undefined;
+          headingFieldMaxLength?: number | undefined;
+          searchHelp?: string | undefined;
+          searchHelpParameter?: string | undefined;
+          setGetParameter?: string | undefined;
+          defaultComponentName?: string | undefined;
+          deactivateInputHistory?: boolean | undefined;
+          changeDocument?: boolean | undefined;
+          leftToRightDirection?: boolean | undefined;
+          deactivateBIDIFiltering?: boolean | undefined;
+          documentationStatus?:
+            | undefined
+            | 'required'
+            | 'notUsedInScreens'
+            | 'explainedByShortText'
+            | 'postponed';
         };
-        name: string;
-        type: string;
-        changedBy?: string | undefined;
-        changedAt?: string | undefined;
-        createdAt?: string | undefined;
-        createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string | undefined;
-        descriptionTextLimit?: number | undefined;
-        language?: string | undefined;
-        masterSystem?: string | undefined;
-        masterLanguage?: string | undefined;
-        responsible?: string | undefined;
-        abapLanguageVersion?: string | undefined;
-    };
+    name: string;
+    type: string;
+    changedBy?: string | undefined;
+    changedAt?: string | undefined;
+    createdAt?: string | undefined;
+    createdBy?: string | undefined;
+    version?:
+      | undefined
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string | undefined;
+    descriptionTextLimit?: number | undefined;
+    language?: string | undefined;
+    masterSystem?: string | undefined;
+    masterLanguage?: string | undefined;
+    responsible?: string | undefined;
+    abapLanguageVersion?: string | undefined;
+  };
 };

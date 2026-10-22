@@ -118,6 +118,12 @@ export async function outputGitLabCodeQuality(
       return {
         description: finding.messageText,
         check_name: finding.checkTitle || finding.checkId,
+        // The worklist checkId as SAP reports it. On live systems this is a
+        // per-instance GUID (stable for the finding, but not a catalog
+        // identity); checkTitle is a display name that SAP can rename, so
+        // downstream consumers should key on this field rather than the
+        // title.
+        check_id: finding.checkId || undefined,
         fingerprint,
         severity,
         location: {
@@ -130,6 +136,9 @@ export async function outputGitLabCodeQuality(
         // Extra fields for downstream processing
         ...(methodName && { method: methodName }),
         ...(finding.location && { atc_location: finding.location }),
+        ...(finding.checkCategory && {
+          check_category: finding.checkCategory,
+        }),
       };
     }),
   );

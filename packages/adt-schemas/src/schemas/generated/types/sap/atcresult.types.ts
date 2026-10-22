@@ -5,127 +5,163 @@
  * Mode: Flattened
  */
 
-export type AtcresultSchema = {
-    resultList: {
-        result?: undefined | {
-            displayId: string;
-            title: string;
-            checkVariant: string;
-            runSeries: string;
-            createdAt: string;
-            aggregates: {
+export type AtcresultSchema =
+  | {
+      resultList: {
+        result?:
+          | undefined
+          | {
+              displayId: string;
+              title: string;
+              checkVariant: string;
+              runSeries: string;
+              createdAt: string;
+              aggregates: {
                 numPrio1: number;
                 numPrio2: number;
                 numPrio3: number;
                 numPrio4: number;
                 numFailure: number;
-            };
-            objects: {
-                object?: undefined | {
-                    extension?: undefined | unknown;
-                    findings: {
-                        finding?: undefined | {
-                            extension?: undefined | unknown;
-                            quickfixes: {
+              };
+              objects: {
+                object?:
+                  | undefined
+                  | {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      findings: {
+                        finding?:
+                          | undefined
+                          | {
+                              extension?:
+                                | undefined
+                                | {
+                                    [key: string]: unknown;
+                                  };
+                              quickfixes: {
                                 manual?: boolean | undefined;
                                 automatic?: boolean | undefined;
                                 pseudo?: boolean | undefined;
                                 ai_enabled?: boolean | undefined;
                                 aiBasedQF?: boolean | undefined;
-                            };
-                            tags?: undefined | {
-                                tag?: undefined | {
-                                    name?: string | undefined;
-                                    value?: string | undefined;
-                                }[];
-                            };
-                            uri?: string | undefined;
-                            parentUri?: string | undefined;
-                            type?: string | undefined;
-                            name?: string | undefined;
-                            packageName?: string | undefined;
-                            description?: string | undefined;
-                            location?: string | undefined;
-                            effectOnTransports?: string | undefined;
-                            priority?: string | undefined;
-                            checkTitle?: string | undefined;
-                            checkId?: string | undefined;
-                            messageTitle?: string | undefined;
-                            messageId?: string | undefined;
-                            exemptionKind?: string | undefined;
-                            exemptionApproval?: string | undefined;
-                            noExemption?: string | undefined;
-                            quickfixInfo?: string | undefined;
-                            contactPerson?: string | undefined;
-                            lastChangedBy?: string | undefined;
-                            processor?: string | undefined;
-                            checksum?: number | undefined;
-                            remarkText?: string | undefined;
-                            remarkLink?: string | undefined;
+                              };
+                              tags?:
+                                | undefined
+                                | {
+                                    tag?:
+                                      | undefined
+                                      | {
+                                          name?: string | undefined;
+                                          value?: string | undefined;
+                                        }[];
+                                  };
+                              uri?: string | undefined;
+                              parentUri?: string | undefined;
+                              type?: string | undefined;
+                              name?: string | undefined;
+                              packageName?: string | undefined;
+                              description?: string | undefined;
+                              location?: string | undefined;
+                              effectOnTransports?: string | undefined;
+                              priority?: string | undefined;
+                              checkTitle?: string | undefined;
+                              checkId?: string | undefined;
+                              messageTitle?: string | undefined;
+                              messageId?: string | undefined;
+                              exemptionKind?: string | undefined;
+                              exemptionApproval?: string | undefined;
+                              noExemption?: string | undefined;
+                              quickfixInfo?: string | undefined;
+                              contactPerson?: string | undefined;
+                              lastChangedBy?: string | undefined;
+                              processor?: string | undefined;
+                              checksum?: number | undefined;
+                              remarkText?: string | undefined;
+                              remarkLink?: string | undefined;
+                            }[];
+                      };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                      author?: string | undefined;
+                      objectTypeId?: string | undefined;
+                    }[];
+              };
+              descriptionTags: {
+                tagWithDescription?:
+                  | undefined
+                  | {
+                      name: string;
+                      descriptions: {
+                        description?:
+                          | undefined
+                          | {
+                              value?: string | undefined;
+                              description?: string | undefined;
+                            }[];
+                      };
+                    }[];
+              };
+              scaAttributes?:
+                | undefined
+                | {
+                    scaAttribute?:
+                      | undefined
+                      | {
+                          attributeName?: string | undefined;
+                          refAttributeName?: string | undefined;
+                          label?: boolean | undefined;
+                          labelS?: string | undefined;
+                          labelM?: string | undefined;
+                          labelL?: string | undefined;
                         }[];
-                    };
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                    author?: string | undefined;
-                    objectTypeId?: string | undefined;
-                }[];
+                  };
+              infos: {
+                info?:
+                  | undefined
+                  | {
+                      type: string;
+                      description: string;
+                    }[];
+              };
+            }[];
+      };
+    }
+  | {
+      queryChoice: {
+        activeResultQuery?:
+          | undefined
+          | {
+              includeAggregates: boolean;
+              includeFindings: boolean;
+              contactPerson: string;
+              queryEnabled: boolean;
             };
-            descriptionTags: {
-                tagWithDescription?: undefined | {
-                    name: string;
-                    descriptions: {
-                        description?: undefined | {
-                            value?: string | undefined;
-                            description?: string | undefined;
-                        }[];
-                    };
-                }[];
+        specificResultQuery?:
+          | undefined
+          | {
+              includeAggregates: boolean;
+              includeFindings: boolean;
+              contactPerson: string;
+              queryEnabled: boolean;
+              displayId: string;
             };
-            scaAttributes?: undefined | {
-                scaAttribute?: undefined | {
-                    attributeName?: string | undefined;
-                    refAttributeName?: string | undefined;
-                    label?: boolean | undefined;
-                    labelS?: string | undefined;
-                    labelM?: string | undefined;
-                    labelL?: string | undefined;
-                }[];
+        userResultQuery?:
+          | undefined
+          | {
+              includeAggregates: boolean;
+              includeFindings: boolean;
+              contactPerson: string;
+              queryEnabled: boolean;
+              createdBy: string;
+              ageMin: number;
+              ageMax: number;
             };
-            infos: {
-                info?: undefined | {
-                    type: string;
-                    description: string;
-                }[];
-            };
-        }[];
+      };
     };
-} | {
-    queryChoice: {
-        activeResultQuery?: undefined | {
-            includeAggregates: boolean;
-            includeFindings: boolean;
-            contactPerson: string;
-            queryEnabled: boolean;
-        };
-        specificResultQuery?: undefined | {
-            includeAggregates: boolean;
-            includeFindings: boolean;
-            contactPerson: string;
-            queryEnabled: boolean;
-            displayId: string;
-        };
-        userResultQuery?: undefined | {
-            includeAggregates: boolean;
-            includeFindings: boolean;
-            contactPerson: string;
-            queryEnabled: boolean;
-            createdBy: string;
-            ageMin: number;
-            ageMax: number;
-        };
-    };
-};

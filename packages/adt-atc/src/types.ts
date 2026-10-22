@@ -18,6 +18,20 @@ export interface AtcFinding {
   objectName: string;
   location?: string;
   findingUri?: string;
+  /**
+   * Trusted ATC documentation link for this occurrence (the worklist
+   * atom:link). The documentation page names the check class
+   * ("Appl. Comp. Check / Check Class / Message Code" header line), which
+   * is the bridge from the finding's GUID checkId to the check catalog.
+   */
+  documentationUri?: string;
+  /**
+   * Check category name (e.g., 'CI_PERFORMANCE') the finding's check is
+   * assigned to, resolved from the run's check variant form template.
+   * Optional: enrichment is best-effort and absent when the form template
+   * is unavailable or the checkId is not in its catalog.
+   */
+  checkCategory?: string;
 }
 
 /**

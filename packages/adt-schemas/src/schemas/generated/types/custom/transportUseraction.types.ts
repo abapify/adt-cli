@@ -6,19 +6,23 @@
  */
 
 export type TransportUseractionSchema = {
-    root: {
-        request?: undefined | {
-            task?: undefined | {
+  root: {
+    request?:
+      | undefined
+      | {
+          task?:
+            | undefined
+            | {
                 owner?: string | undefined;
-            }[];
-            desc?: string | undefined;
-            type?: string | undefined;
-            target?: string | undefined;
-            cts_project?: string | undefined;
+              }[];
+          desc?: string | undefined;
+          type?: string | undefined;
+          target?: string | undefined;
+          cts_project?: string | undefined;
         };
-        useraction?: string | undefined;
-        targetuser?: string | undefined;
-        recursive?: string | undefined;
-        useraction_desc?: string | undefined;
-    };
+    useraction?: string | undefined;
+    targetuser?: string | undefined;
+    recursive?: string | undefined;
+    useraction_desc?: string | undefined;
+  };
 };

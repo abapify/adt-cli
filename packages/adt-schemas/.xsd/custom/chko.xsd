@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ATC Check Object Schema (chko)
+
+  The check workbench object as it appears inside the check variant form
+  template (GET /sap/bc/adt/atc/checkvariants/formtemplate). The
+  ATC check catalog (its implementing class resolves a finding to its
+  category; see the documentation bridge in adt-atc for the GUID checkId
+  case).
+
+  Live shape (sanitized):
+  <chko:checkObject xmlns:chko="http://www.sap.com/wbobj/atc/chko"
+      xmlns:adtcore="http://www.sap.com/adt/core"
+      adtcore:name="CI_ANALYZE_WHERE"
+      adtcore:description="Analysis of WHERE conditions of SELECT statements">
+    <chko:content>
+      <chko:category adtcore:name="CI_PERFORMANCE"/>
+      <chko:implementingClass adtcore:name="CL_CI_TEST_SELECT_TAW_A"/>
+      <chko:remoteEnabled>true</chko:remoteEnabled>
+      <chkoParameter:parameters xmlns:chkoParameter="http://www.sap.com/wbobj/atc/chkoParameter">
+        <chkoParameter:parameter>
+          <chkoParameter:parameterTechnicalId>1</chkoParameter:parameterTechnicalId>
+          <chkoParameter:parameterName>NoWhereCondition</chkoParameter:parameterName>
+          <chkoParameter:parameterDescription>No WHERE condition</chkoParameter:parameterDescription>
+          <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+        </chkoParameter:parameter>
+      </chkoParameter:parameters>
+    </chko:content>
+  </chko:checkObject>
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:chko="http://www.sap.com/wbobj/atc/chko"
+    xmlns:chkoParameter="http://www.sap.com/wbobj/atc/chkoParameter"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    targetNamespace="http://www.sap.com/wbobj/atc/chko"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.sap.com/adt/core" schemaLocation="../sap/adtcore.xsd"/>
+  <xsd:import namespace="http://www.sap.com/wbobj/atc/chkoParameter" schemaLocation="chkoParameter.xsd"/>
+
+  <!-- The check workbench object -->
+  <xsd:element name="checkObject" type="chko:CheckObject"/>
+
+  <xsd:complexType name="CheckObject">
+    <xsd:sequence>
+      <xsd:element name="content" type="chko:CheckObjectContent" minOccurs="0" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+    <xsd:attribute ref="adtcore:name" use="required"/>
+    <xsd:attribute ref="adtcore:description"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="CheckObjectContent">
+    <xsd:sequence>
+      <xsd:element name="category" type="chko:CheckCategoryAssignment" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="implementingClass" type="chko:ImplementingClass" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="remoteEnabled" type="xsd:boolean" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element ref="chkoParameter:parameters" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- The category assignment of the check; named CheckCategoryAssignment
+       (not CheckCategory) so its generated interface name does not collide
+       with chkc:CheckCategory in flattened aggregates -->
+  <xsd:complexType name="CheckCategoryAssignment">
+    <xsd:attribute ref="adtcore:name"/>
+  </xsd:complexType>
+
+  <!-- The implementing class: worklist findings carry a GUID checkId, which
+       the documentation bridge resolves to this class name -->
+  <xsd:complexType name="ImplementingClass">
+    <xsd:attribute ref="adtcore:name" use="required"/>
+  </xsd:complexType>
+
+</xsd:schema>

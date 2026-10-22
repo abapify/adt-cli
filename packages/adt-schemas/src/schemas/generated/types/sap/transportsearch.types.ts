@@ -6,8 +6,8 @@
  */
 
 export type TransportsearchSchema = {
-    searchresults: {
-        requests?: string | undefined;
-        tasks?: string | undefined;
-    };
+  searchresults: {
+    requests?: string | undefined;
+    tasks?: string | undefined;
+  };
 };

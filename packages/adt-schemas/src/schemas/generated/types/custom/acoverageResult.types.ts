@@ -6,48 +6,66 @@
  */
 
 export type AcoverageResultSchema = {
-    result: {
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
+  result: {
+    link?:
+      | undefined
+      | {
+          href: string;
+          rel?: string | undefined;
+          type?: string | undefined;
+          hreflang?: string | undefined;
+          title?: string | undefined;
+          length?: number | undefined;
+          etag?: string | undefined;
+          _text?: string | undefined;
         }[];
-        nodes?: undefined | {
-            node?: undefined | {
-                objectReference?: undefined | {
-                    extension?: undefined | unknown;
-                    uri?: string | undefined;
-                    parentUri?: string | undefined;
-                    type?: string | undefined;
-                    name?: string | undefined;
-                    packageName?: string | undefined;
-                    description?: string | undefined;
-                };
-                coverages?: undefined | {
-                    coverage?: undefined | {
-                        type?: string | undefined;
-                        total?: number | undefined;
-                        executed?: number | undefined;
+    nodes?:
+      | undefined
+      | {
+          node?:
+            | undefined
+            | {
+                objectReference?:
+                  | undefined
+                  | {
+                      extension?:
+                        | undefined
+                        | {
+                            [key: string]: unknown;
+                          };
+                      uri?: string | undefined;
+                      parentUri?: string | undefined;
+                      type?: string | undefined;
+                      name?: string | undefined;
+                      packageName?: string | undefined;
+                      description?: string | undefined;
+                    };
+                coverages?:
+                  | undefined
+                  | {
+                      coverage?:
+                        | undefined
+                        | {
+                            type?: string | undefined;
+                            total?: number | undefined;
+                            executed?: number | undefined;
+                          }[];
+                    };
+                link?:
+                  | undefined
+                  | {
+                      href: string;
+                      rel?: string | undefined;
+                      type?: string | undefined;
+                      hreflang?: string | undefined;
+                      title?: string | undefined;
+                      length?: number | undefined;
+                      etag?: string | undefined;
+                      _text?: string | undefined;
                     }[];
-                };
-                link?: undefined | {
-                    href: string;
-                    rel?: string | undefined;
-                    type?: string | undefined;
-                    hreflang?: string | undefined;
-                    title?: string | undefined;
-                    length?: number | undefined;
-                    etag?: string | undefined;
-                    _text?: string | undefined;
-                }[];
                 nodes?: undefined | unknown;
-            }[];
+              }[];
         };
-        name?: string | undefined;
-    };
+    name?: string | undefined;
+  };
 };

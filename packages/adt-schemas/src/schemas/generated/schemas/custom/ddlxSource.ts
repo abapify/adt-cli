@@ -13,9 +13,7 @@ export default {
     ddlx: 'http://www.sap.com/adt/ddic/ddlx',
     abapsource: 'http://www.sap.com/adt/abapsource',
   },
-  $imports: [
-    abapsource,
-  ],
+  $imports: [abapsource],
   targetNamespace: 'http://www.sap.com/adt/ddic/ddlx',
   attributeFormDefault: 'qualified',
   elementFormDefault: 'qualified',

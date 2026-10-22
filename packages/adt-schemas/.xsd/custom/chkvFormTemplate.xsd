@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ATC Check Variant Form Template Schema
+
+  GET /sap/bc/adt/atc/checkvariants/formtemplate?chkvName={name}
+
+  The form template is the check variant editor's catalog: every check
+  category the variant can select, each with the checks it contains.
+  A check carries its category assignment and implementing class; the
+  implementing class name is the checkId used in ATC worklist findings,
+  so the form template is the source for checkId -> check category
+  enrichment.
+
+  Example (live shape, sanitized):
+  <chkvFormTemplate:formTemplate xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate">
+    <chkvFormTemplate:availableCheckCategories>
+      <chkvFormTemplate:availableCheckCategory>
+        <chkc:checkCategoryObject xmlns:chkc="http://www.sap.com/wbobj/atc/chkc"
+            adtcore:name="CI_PERFORMANCE" adtcore:description="Performance"
+            xmlns:adtcore="http://www.sap.com/adt/core">
+          <chkc:content><chkc:category adtcore:type="CHKC/TYP"/></chkc:content>
+        </chkc:checkCategoryObject>
+        <chkvcheck:check xmlns:chkvcheck="http://www.sap.com/wbobj/atc/chkvCheck">
+          <chko:checkObject xmlns:chko="http://www.sap.com/wbobj/atc/chko"
+              adtcore:name="CI_ANALYZE_WHERE"
+              adtcore:description="Analysis of WHERE conditions of SELECT statements">
+            <chko:content>
+              <chko:category adtcore:name="CI_PERFORMANCE"/>
+              <chko:implementingClass adtcore:name="CL_CI_TEST_SELECT_TAW_A"/>
+              <chko:remoteEnabled>true</chko:remoteEnabled>
+            </chko:content>
+          </chko:checkObject>
+          <chkvcheck:parameterValueXml/>
+        </chkvcheck:check>
+      </chkvFormTemplate:availableCheckCategory>
+    </chkvFormTemplate:availableCheckCategories>
+  </chkvFormTemplate:formTemplate>
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate"
+    targetNamespace="http://www.sap.com/wbobj/atc/chkvFormTemplate"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.sap.com/adt/core" schemaLocation="../sap/adtcore.xsd"/>
+  <xsd:import namespace="http://www.w3.org/2005/Atom" schemaLocation="../sap/atom.xsd"/>
+  <xsd:import namespace="http://www.sap.com/wbobj/atc/chkc" schemaLocation="chkc.xsd"/>
+  <xsd:import namespace="http://www.sap.com/wbobj/atc/chko" schemaLocation="chko.xsd"/>
+  <xsd:import namespace="http://www.sap.com/wbobj/atc/chkvCheck" schemaLocation="chkvcheck.xsd"/>
+  <!-- Direct import of chkoParameter: chko's content references its elements,
+       and interface generation resolves element refs only against direct
+       imports. Without this, the check parameters are dropped from the
+       generated form template types. -->
+  <xsd:import namespace="http://www.sap.com/wbobj/atc/chkoParameter" schemaLocation="chkoParameter.xsd"/>
+
+  <!-- Root element: the check variant form template -->
+  <xsd:element name="formTemplate" type="chkvFormTemplate:FormTemplate"/>
+
+  <xsd:complexType name="FormTemplate">
+    <xsd:sequence>
+      <xsd:element name="availableCheckCategories" type="chkvFormTemplate:AvailableCheckCategories" minOccurs="1" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="AvailableCheckCategories">
+    <xsd:sequence>
+      <xsd:element name="availableCheckCategory" type="chkvFormTemplate:AvailableCheckCategory" minOccurs="1" maxOccurs="unbounded" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- One category plus the checks it contains -->
+  <xsd:complexType name="AvailableCheckCategory">
+    <xsd:sequence>
+      <xsd:element ref="chkc:checkCategoryObject" minOccurs="1" maxOccurs="1"/>
+      <xsd:element ref="chkvcheck:check" minOccurs="1" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+</xsd:schema>

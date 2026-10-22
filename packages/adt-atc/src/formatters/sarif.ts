@@ -33,6 +33,7 @@ export async function outputSarifReport(
           properties: {
             tags: ['abap', 'code-quality'],
             precision: 'high',
+            ...(f.checkCategory && { category: f.checkCategory }),
           },
         },
       ]),

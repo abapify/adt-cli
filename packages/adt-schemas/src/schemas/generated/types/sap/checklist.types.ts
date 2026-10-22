@@ -6,30 +6,40 @@
  */
 
 export type ChecklistSchema = {
-    messages: {
-        msg?: undefined | {
-            shortText: {
+  messages: {
+    msg?:
+      | undefined
+      | {
+          shortText: {
+            txt: string[];
+          };
+          longText?:
+            | undefined
+            | {
                 txt: string[];
-            };
-            longText?: undefined | {
-                txt: string[];
-            };
-            t100Key?: undefined | {
+              };
+          t100Key?:
+            | undefined
+            | {
                 msgno?: number | undefined;
                 msgid?: string | undefined;
                 msgv1?: string | undefined;
                 msgv2?: string | undefined;
                 msgv3?: string | undefined;
                 msgv4?: string | undefined;
-            };
-            correctionHint?: undefined | {
+              };
+          correctionHint?:
+            | undefined
+            | {
                 number?: number | undefined;
                 kind?: string | undefined;
                 line?: number | undefined;
                 column?: number | undefined;
                 word?: string | undefined;
-            }[];
-            link?: undefined | {
+              }[];
+          link?:
+            | undefined
+            | {
                 href: string;
                 rel?: string | undefined;
                 type?: string | undefined;
@@ -38,20 +48,20 @@ export type ChecklistSchema = {
                 length?: number | undefined;
                 etag?: string | undefined;
                 _text?: string | undefined;
-            }[];
-            objDescr: string;
-            type: unknown;
-            line?: number | undefined;
-            offset?: number | undefined;
-            href?: string | undefined;
-            forceSupported?: boolean | undefined;
-            code?: string | undefined;
+              }[];
+          objDescr: string;
+          type: unknown;
+          line?: number | undefined;
+          offset?: number | undefined;
+          href?: string | undefined;
+          forceSupported?: boolean | undefined;
+          code?: string | undefined;
         }[];
-        properties: {
-            checkExecuted?: boolean | undefined;
-            activationExecuted?: boolean | undefined;
-            generationExecuted?: boolean | undefined;
-        };
-        forceSupported?: boolean | undefined;
+    properties: {
+      checkExecuted?: boolean | undefined;
+      activationExecuted?: boolean | undefined;
+      generationExecuted?: boolean | undefined;
     };
+    forceSupported?: boolean | undefined;
+  };
 };

@@ -71,10 +71,7 @@ export type AbapFunctionGroupSchema = {
     abapLanguageVersion?: string;
     sourceUri?: string;
     sourceObjectStatus?:
-      | 'SAPStandardProduction'
-      | 'customerProduction'
-      | 'system'
-      | 'test';
+      'SAPStandardProduction' | 'customerProduction' | 'system' | 'test';
     fixPointArithmetic?: boolean;
     activeUnicodeCheck?: boolean;
   };

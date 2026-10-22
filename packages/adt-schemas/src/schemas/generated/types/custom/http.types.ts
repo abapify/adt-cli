@@ -6,22 +6,28 @@
  */
 
 export type HttpSchema = {
-    session: {
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
+  session: {
+    link?:
+      | undefined
+      | {
+          href: string;
+          rel?: string | undefined;
+          type?: string | undefined;
+          hreflang?: string | undefined;
+          title?: string | undefined;
+          length?: number | undefined;
+          etag?: string | undefined;
+          _text?: string | undefined;
         }[];
-        properties?: undefined | {
-            property?: undefined | {
+    properties?:
+      | undefined
+      | {
+          property?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 name: string;
-            }[];
+              }[];
         };
-    };
+  };
 };

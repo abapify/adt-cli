@@ -6,11 +6,24 @@
       "name": "ZCL_EXAMPLE",
       "findings": [
         {
-          "checkId": "CL_CI_TEST_AMDP_HDB_MIGRATION",
+          "checkId": "6A277D3B1C4E4F80A9B2C3D4E5F60718",
           "checkTitle": "AMDP HDB Migration",
           "messageTitle": "Consider migrating to AMDP",
           "priority": 2,
-          "uri": "/sap/bc/adt/oo/classes/zcl_example/source/main#start=10,0"
+          "uri": "/sap/bc/adt/oo/classes/zcl_example/source/main#start=10,0",
+          "link": [
+            {
+              "href": "/sap/bc/adt/documentation/atc/documents/itemid/6A277D3B/index/1",
+              "rel": "http://www.sap.com/adt/relations/documentation"
+            }
+          ]
+        },
+        {
+          "checkId": "CL_CI_TEST_SELECT_TAW_A",
+          "checkTitle": "Analysis of WHERE Condition for SELECT",
+          "messageTitle": "No WHERE condition",
+          "priority": 3,
+          "uri": "/sap/bc/adt/oo/classes/zcl_example/source/main#start=15,0"
         }
       ]
     }

@@ -5,8 +5,9 @@
  * Mode: Flattened
  */
 
-export type AtcexemptionSchema = {
-    exemptionProposal: {
+export type AtcexemptionSchema =
+  | {
+      exemptionProposal: {
         finding?: string | undefined;
         package: string;
         subObject?: string | undefined;
@@ -14,31 +15,33 @@ export type AtcexemptionSchema = {
         subObjectTypeDescr: string;
         objectTypeDescr: string;
         restriction: {
-            thisFinding: {
-                $value?: boolean | undefined;
-                enabled: boolean;
+          thisFinding: {
+            $value?: boolean | undefined;
+            enabled: boolean;
+          };
+          rangeOfFindings: {
+            restrictByObject: {
+              $value?: string | undefined;
+              subobject?: boolean | undefined;
+              object?: boolean | undefined;
+              package?: boolean | undefined;
             };
-            rangeOfFindings: {
-                restrictByObject: {
-                    $value?: string | undefined;
-                    subobject?: boolean | undefined;
-                    object?: boolean | undefined;
-                    package?: boolean | undefined;
-                };
-                restrictByCheck: {
-                    $value?: string | undefined;
-                    message?: boolean | undefined;
-                    check?: boolean | undefined;
-                };
-                restrictByValidity?: undefined | {
-                    $value?: string | undefined;
-                    unrestricted?: boolean | undefined;
-                    date?: boolean | undefined;
-                    component_release?: boolean | undefined;
-                    support_package?: boolean | undefined;
-                };
-                enabled: boolean;
+            restrictByCheck: {
+              $value?: string | undefined;
+              message?: boolean | undefined;
+              check?: boolean | undefined;
             };
+            restrictByValidity?:
+              | undefined
+              | {
+                  $value?: string | undefined;
+                  unrestricted?: boolean | undefined;
+                  date?: boolean | undefined;
+                  component_release?: boolean | undefined;
+                  support_package?: boolean | undefined;
+                };
+            enabled: boolean;
+          };
         };
         approver: string;
         apprIsArea?: string | undefined;
@@ -52,90 +55,110 @@ export type AtcexemptionSchema = {
         checkClass: string;
         validUntil: string;
         supportPackage?: string | undefined;
-        reasons?: undefined | {
-            reason?: undefined | {
-                id?: string | undefined;
-                justificationMandatory?: boolean | undefined;
-                title?: string | undefined;
-            }[];
-        };
-        validities?: undefined | {
-            validity?: undefined | {
-                id?: string | undefined;
-                value?: string | undefined;
-            }[];
-        };
-    };
-} | {
-    exemptionApply: {
-        exemptionProposal: {
-            finding?: string | undefined;
-            package: string;
-            subObject?: string | undefined;
-            subObjectType?: string | undefined;
-            subObjectTypeDescr: string;
-            objectTypeDescr: string;
-            restriction: {
-                thisFinding: {
-                    $value?: boolean | undefined;
-                    enabled: boolean;
-                };
-                rangeOfFindings: {
-                    restrictByObject: {
-                        $value?: string | undefined;
-                        subobject?: boolean | undefined;
-                        object?: boolean | undefined;
-                        package?: boolean | undefined;
-                    };
-                    restrictByCheck: {
-                        $value?: string | undefined;
-                        message?: boolean | undefined;
-                        check?: boolean | undefined;
-                    };
-                    restrictByValidity?: undefined | {
-                        $value?: string | undefined;
-                        unrestricted?: boolean | undefined;
-                        date?: boolean | undefined;
-                        component_release?: boolean | undefined;
-                        support_package?: boolean | undefined;
-                    };
-                    enabled: boolean;
-                };
-            };
-            approver: string;
-            apprIsArea?: string | undefined;
-            reason: string;
-            validity: string;
-            release: string;
-            softwareComponent: string;
-            softwareComponentDescription: string;
-            justification: string;
-            notify: string;
-            checkClass: string;
-            validUntil: string;
-            supportPackage?: string | undefined;
-            reasons?: undefined | {
-                reason?: undefined | {
+        reasons?:
+          | undefined
+          | {
+              reason?:
+                | undefined
+                | {
                     id?: string | undefined;
                     justificationMandatory?: boolean | undefined;
                     title?: string | undefined;
-                }[];
+                  }[];
             };
-            validities?: undefined | {
-                validity?: undefined | {
+        validities?:
+          | undefined
+          | {
+              validity?:
+                | undefined
+                | {
                     id?: string | undefined;
                     value?: string | undefined;
-                }[];
+                  }[];
             };
+      };
+    }
+  | {
+      exemptionApply: {
+        exemptionProposal: {
+          finding?: string | undefined;
+          package: string;
+          subObject?: string | undefined;
+          subObjectType?: string | undefined;
+          subObjectTypeDescr: string;
+          objectTypeDescr: string;
+          restriction: {
+            thisFinding: {
+              $value?: boolean | undefined;
+              enabled: boolean;
+            };
+            rangeOfFindings: {
+              restrictByObject: {
+                $value?: string | undefined;
+                subobject?: boolean | undefined;
+                object?: boolean | undefined;
+                package?: boolean | undefined;
+              };
+              restrictByCheck: {
+                $value?: string | undefined;
+                message?: boolean | undefined;
+                check?: boolean | undefined;
+              };
+              restrictByValidity?:
+                | undefined
+                | {
+                    $value?: string | undefined;
+                    unrestricted?: boolean | undefined;
+                    date?: boolean | undefined;
+                    component_release?: boolean | undefined;
+                    support_package?: boolean | undefined;
+                  };
+              enabled: boolean;
+            };
+          };
+          approver: string;
+          apprIsArea?: string | undefined;
+          reason: string;
+          validity: string;
+          release: string;
+          softwareComponent: string;
+          softwareComponentDescription: string;
+          justification: string;
+          notify: string;
+          checkClass: string;
+          validUntil: string;
+          supportPackage?: string | undefined;
+          reasons?:
+            | undefined
+            | {
+                reason?:
+                  | undefined
+                  | {
+                      id?: string | undefined;
+                      justificationMandatory?: boolean | undefined;
+                      title?: string | undefined;
+                    }[];
+              };
+          validities?:
+            | undefined
+            | {
+                validity?:
+                  | undefined
+                  | {
+                      id?: string | undefined;
+                      value?: string | undefined;
+                    }[];
+              };
         };
         status: {
-            message: string;
-            type: string;
+          message: string;
+          type: string;
         };
-    };
-} | {
-    status: {
+      };
+    }
+  | {
+      status: {
         message: string;
         type: string;
+      };
     };
-};

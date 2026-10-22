@@ -8,6 +8,11 @@
 import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
 import chalk from 'chalk';
 import { outputSarifReport, outputGitLabCodeQuality } from '../formatters';
+import {
+  fetchCheckCategoryIndex,
+  enrichResultWithCategories,
+} from '../check-categories';
+import { resolveCategoriesViaDocumentation } from '../documentation-bridge';
 import type { AtcResult, AtcFinding, OutputFormat } from '../types';
 
 // Client type - the plugin receives a typed client from context
@@ -34,6 +39,11 @@ interface AdtClient {
           params: { includeExemptedFindings: string },
         ) => Promise<WorklistResponse>;
       };
+      checkvariants: {
+        formtemplate: (params?: {
+          chkvName?: string;
+        }) => Promise<import('../check-categories').FormTemplateDocument>;
+      };
       runs: {
         post: (
           params: { worklistId: string },
@@ -54,6 +64,15 @@ interface AdtClient {
       };
     };
   };
+  /**
+   * Bounded documentation text read (the real ADT client provides it).
+   * Optional: without it the documentation category bridge is skipped.
+   */
+  readTextBounded?: (
+    uri: string,
+    maxBytes: number,
+    options?: { headers?: Record<string, string> },
+  ) => Promise<string>;
 }
 
 // Worklist response type
@@ -75,6 +94,8 @@ interface WorklistResponse {
             checkTitle?: string;
             messageId?: string;
             messageTitle?: string;
+            /** Documentation link: the page that names the check class. */
+            link?: Array<{ href?: string; rel?: string }>;
           }>;
         };
       }>;
@@ -106,6 +127,25 @@ function adtLink(name: string, uri: string, systemName?: string): string {
 }
 
 /**
+ * The trusted documentation link of one worklist finding.
+ *
+ * Live shape (2026-10-22): <atom:link rel="http://www.sap.com/adt/
+ * relations/documentation" href="/sap/bc/adt/documentation/atc/documents/
+ * itemid/{guid}/index/{n}"/> inside the atcfinding:finding element.
+ */
+function documentationUriFromFinding(
+  finding: NonNullable<
+    NonNullable<
+      NonNullable<WorklistResponse['worklist']>['objects']['object']
+    >[number]['findings']['finding']
+  >[number],
+): string | undefined {
+  return finding.link?.find(
+    (link) => link.rel === 'http://www.sap.com/adt/relations/documentation',
+  )?.href;
+}
+
+/**
  * Convert worklist response to AtcResult
  */
 function convertWorklistToResult(
@@ -131,6 +171,7 @@ function convertWorklistToResult(
           objectName: obj.name || '',
           location: finding.location,
           findingUri: finding.uri,
+          documentationUri: documentationUriFromFinding(finding),
         });
       }
     }
@@ -405,6 +446,38 @@ export const atcCommand: CliCommandPlugin = {
       worklistResult as WorklistResponse,
       checkVariant,
     );
+
+    // Enrich findings with check categories from the run's check variant
+    // form template (best-effort: never fails the run itself)
+    const categoryIndex = await fetchCheckCategoryIndex(
+      client,
+      checkVariant,
+      ctx.logger,
+    );
+    const enriched = enrichResultWithCategories(result, categoryIndex);
+    if (enriched > 0) {
+      ctx.logger.info(
+        `🏷️ Enriched ${enriched}/${result.totalFindings} finding(s) with check categories`,
+      );
+    }
+
+    // Bridge remaining findings through their ATC documentation page: the
+    // worklist checkId is a check-instance GUID, not the implementing class
+    // the form-template catalog lists (live evidence, 2026-10-22), so
+    // the direct index match cannot resolve them. The documentation page
+    // names the check class, which resolves through the same index.
+    // Best-effort: never fails the run.
+    const bridged = await resolveCategoriesViaDocumentation(
+      client,
+      result.findings,
+      categoryIndex,
+      { logger: ctx.logger },
+    );
+    if (bridged > 0) {
+      ctx.logger.info(
+        `🏷 Bridged ${bridged} finding(s) to check categories via ATC documentation`,
+      );
+    }
 
     // Load finding resolver if requested
     let resolver: import('../types').FindingResolver | undefined;

@@ -6,29 +6,31 @@
  */
 
 export type ConfigurationSchema = {
-    configuration: {
-        properties: {
-            property: {
-                $value?: string | undefined;
-                key?: string | undefined;
-                isMandatory?: boolean | undefined;
-            }[];
-        };
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
-        };
-        client?: string | undefined;
-        configName?: string | undefined;
-        createdBy?: string | undefined;
-        createdAt?: string | undefined;
-        changedBy?: string | undefined;
-        changedAt?: string | undefined;
+  configuration: {
+    properties: {
+      property: {
+        $value?: string | undefined;
+        key?: string | undefined;
+        isMandatory?: boolean | undefined;
+      }[];
     };
+    link?:
+      | undefined
+      | {
+          href: string;
+          rel?: string | undefined;
+          type?: string | undefined;
+          hreflang?: string | undefined;
+          title?: string | undefined;
+          length?: number | undefined;
+          etag?: string | undefined;
+          _text?: string | undefined;
+        };
+    client?: string | undefined;
+    configName?: string | undefined;
+    createdBy?: string | undefined;
+    createdAt?: string | undefined;
+    changedBy?: string | undefined;
+    changedAt?: string | undefined;
+  };
 };

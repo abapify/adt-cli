@@ -9,6 +9,11 @@ import {
   type AdtClient,
 } from '@abapify/adt-client';
 import { ExactSourceHistoryService, BadiService } from '@abapify/adt-services';
+import {
+  fetchCheckCategoryIndex,
+  enrichFindingsWithCategories,
+  resolveCategoriesViaDocumentation,
+} from '@abapify/adt-atc';
 import type {
   DestinationContextFactory,
   DestinationLeaseProvider,
@@ -151,6 +156,11 @@ interface TransportDetail extends TransportSummary {
 type CanonicalAtcFinding = {
   checkId: string;
   checkTitle: string;
+  /**
+   * Check category name (e.g., 'CI_PERFORMANCE') from the run's check
+   * variant form template. Absent when enrichment is unavailable.
+   */
+  checkCategory?: string;
   messageText: string;
   priority: number;
   objectType: string;
@@ -1418,9 +1428,25 @@ export function createHttpBrokerOperations(
         const worklist = await client.adt.atc.worklists.get(worklistId, {
           includeExemptedFindings: 'false',
         });
+        const findings = toCanonicalAtcFindings(worklist);
+        // Enrich findings with check categories from the run's check
+        // variant form template (best-effort: never fails the run). Live
+        // worklist checkIds are GUIDs, so unresolved findings go through
+        // the documentation bridge (each finding's documentation page names
+        // the check class).
+        const categoryIndex = await fetchCheckCategoryIndex(
+          client,
+          checkVariant,
+        );
+        enrichFindingsWithCategories(findings, categoryIndex);
+        await resolveCategoriesViaDocumentation(
+          client,
+          findings,
+          categoryIndex,
+        );
         return {
           checkVariant,
-          findings: toCanonicalAtcFindings(worklist),
+          findings,
         };
       });
     },

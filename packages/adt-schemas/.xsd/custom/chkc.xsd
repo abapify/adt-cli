@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ATC Check Category Object Schema (chkc)
+
+  The check category workbench object as it appears inside the check
+  variant form template (GET /sap/bc/adt/atc/checkvariants/formtemplate).
+
+  Live shape (sanitized):
+  <chkc:checkCategoryObject xmlns:chkc="http://www.sap.com/wbobj/atc/chkc"
+      xmlns:adtcore="http://www.sap.com/adt/core"
+      adtcore:name="CI_PERFORMANCE" adtcore:description="Performance">
+    <chkc:content><chkc:category adtcore:type="CHKC/TYP"/></chkc:content>
+  </chkc:checkCategoryObject>
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:chkc="http://www.sap.com/wbobj/atc/chkc"
+    xmlns:adtcore="http://www.sap.com/adt/core"
+    targetNamespace="http://www.sap.com/wbobj/atc/chkc"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.sap.com/adt/core" schemaLocation="../sap/adtcore.xsd"/>
+
+  <!-- The check category workbench object -->
+  <xsd:element name="checkCategoryObject" type="chkc:CheckCategoryObject"/>
+
+  <xsd:complexType name="CheckCategoryObject">
+    <xsd:sequence>
+      <xsd:element name="content" type="chkc:CheckCategoryContent" minOccurs="0" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+    <xsd:attribute ref="adtcore:name" use="required"/>
+    <xsd:attribute ref="adtcore:description"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="CheckCategoryContent">
+    <xsd:sequence>
+      <xsd:element name="category" type="chkc:CheckCategory" minOccurs="0" maxOccurs="1" form="unqualified"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="CheckCategory">
+    <xsd:attribute ref="adtcore:type"/>
+  </xsd:complexType>
+
+</xsd:schema>

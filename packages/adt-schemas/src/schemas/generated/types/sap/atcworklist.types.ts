@@ -5,34 +5,53 @@
  * Mode: Flattened
  */
 
-export type AtcworklistSchema = {
-    worklist: {
+export type AtcworklistSchema =
+  | {
+      worklist: {
         objectSets: {
-            objectSet?: undefined | {
+          objectSet?:
+            | undefined
+            | {
                 name?: string | undefined;
                 title?: string | undefined;
                 kind?: string | undefined;
-            }[];
+              }[];
         };
         objects: {
-            object?: undefined | {
-                extension?: undefined | unknown;
+          object?:
+            | undefined
+            | {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
                 findings: {
-                    finding?: undefined | {
-                        extension?: undefined | unknown;
+                  finding?:
+                    | undefined
+                    | {
+                        extension?:
+                          | undefined
+                          | {
+                              [key: string]: unknown;
+                            };
                         quickfixes: {
-                            manual?: boolean | undefined;
-                            automatic?: boolean | undefined;
-                            pseudo?: boolean | undefined;
-                            ai_enabled?: boolean | undefined;
-                            aiBasedQF?: boolean | undefined;
+                          manual?: boolean | undefined;
+                          automatic?: boolean | undefined;
+                          pseudo?: boolean | undefined;
+                          ai_enabled?: boolean | undefined;
+                          aiBasedQF?: boolean | undefined;
                         };
-                        tags?: undefined | {
-                            tag?: undefined | {
-                                name?: string | undefined;
-                                value?: string | undefined;
-                            }[];
-                        };
+                        tags?:
+                          | undefined
+                          | {
+                              tag?:
+                                | undefined
+                                | {
+                                    name?: string | undefined;
+                                    value?: string | undefined;
+                                  }[];
+                            };
                         uri?: string | undefined;
                         parentUri?: string | undefined;
                         type?: string | undefined;
@@ -56,7 +75,7 @@ export type AtcworklistSchema = {
                         checksum?: number | undefined;
                         remarkText?: string | undefined;
                         remarkLink?: string | undefined;
-                    }[];
+                      }[];
                 };
                 uri?: string | undefined;
                 parentUri?: string | undefined;
@@ -66,49 +85,62 @@ export type AtcworklistSchema = {
                 description?: string | undefined;
                 author?: string | undefined;
                 objectTypeId?: string | undefined;
-            }[];
+              }[];
         };
-        scaAttributes?: undefined | {
-            scaAttribute?: undefined | {
-                attributeName?: string | undefined;
-                refAttributeName?: string | undefined;
-                label?: boolean | undefined;
-                labelS?: string | undefined;
-                labelM?: string | undefined;
-                labelL?: string | undefined;
-            }[];
-        };
+        scaAttributes?:
+          | undefined
+          | {
+              scaAttribute?:
+                | undefined
+                | {
+                    attributeName?: string | undefined;
+                    refAttributeName?: string | undefined;
+                    label?: boolean | undefined;
+                    labelS?: string | undefined;
+                    labelM?: string | undefined;
+                    labelL?: string | undefined;
+                  }[];
+            };
         descriptionTags: {
-            tagWithDescription?: undefined | {
+          tagWithDescription?:
+            | undefined
+            | {
                 name: string;
                 descriptions: {
-                    description?: undefined | {
+                  description?:
+                    | undefined
+                    | {
                         value?: string | undefined;
                         description?: string | undefined;
-                    }[];
+                      }[];
                 };
-            }[];
+              }[];
         };
         infos: {
-            info?: undefined | {
+          info?:
+            | undefined
+            | {
                 type: string;
                 description: string;
-            }[];
+              }[];
         };
         id: string;
         timestamp: string;
         usedObjectSet?: string | undefined;
         objectSetIsComplete?: boolean | undefined;
-    };
-} | {
-    worklistRun: {
+      };
+    }
+  | {
+      worklistRun: {
         worklistId: string;
         worklistTimestamp: string;
         infos: {
-            info?: undefined | {
+          info?:
+            | undefined
+            | {
                 type: string;
                 description: string;
-            }[];
+              }[];
         };
+      };
     };
-};

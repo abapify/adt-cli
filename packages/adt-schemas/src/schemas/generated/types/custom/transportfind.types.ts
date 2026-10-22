@@ -6,23 +6,25 @@
  */
 
 export type TransportfindSchema = {
-    abap: {
-        values: {
-            DATA: {
-                CTS_REQ_HEADER?: undefined | {
-                    TRKORR: string;
-                    TRFUNCTION: string;
-                    TRSTATUS: string;
-                    TARSYSTEM: string;
-                    AS4USER: string;
-                    AS4DATE: string;
-                    AS4TIME: string;
-                    AS4TEXT: string;
-                    CLIENT: string;
-                    REPOID: string;
-                }[];
-            };
-        };
-        version?: string | undefined;
+  abap: {
+    values: {
+      DATA: {
+        CTS_REQ_HEADER?:
+          | undefined
+          | {
+              TRKORR: string;
+              TRFUNCTION: string;
+              TRSTATUS: string;
+              TARSYSTEM: string;
+              AS4USER: string;
+              AS4DATE: string;
+              AS4TIME: string;
+              AS4TEXT: string;
+              CLIENT: string;
+              REPOID: string;
+            }[];
+      };
     };
+    version?: string | undefined;
+  };
 };

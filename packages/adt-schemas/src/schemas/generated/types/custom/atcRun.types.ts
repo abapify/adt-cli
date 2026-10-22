@@ -6,24 +6,30 @@
  */
 
 export type AtcRunSchema = {
-    run: {
-        objectSets: {
-            objectSet: {
-                objectReferences?: undefined | {
-                    objectReference: {
-                        extension?: undefined | unknown;
-                        uri?: string | undefined;
-                        parentUri?: string | undefined;
-                        type?: string | undefined;
-                        name?: string | undefined;
-                        packageName?: string | undefined;
-                        description?: string | undefined;
-                    }[];
-                    name?: string | undefined;
-                };
-                kind?: string | undefined;
-            }[];
-        };
-        maximumVerdicts?: number | undefined;
+  run: {
+    objectSets: {
+      objectSet: {
+        objectReferences?:
+          | undefined
+          | {
+              objectReference: {
+                extension?:
+                  | undefined
+                  | {
+                      [key: string]: unknown;
+                    };
+                uri?: string | undefined;
+                parentUri?: string | undefined;
+                type?: string | undefined;
+                name?: string | undefined;
+                packageName?: string | undefined;
+                description?: string | undefined;
+              }[];
+              name?: string | undefined;
+            };
+        kind?: string | undefined;
+      }[];
     };
+    maximumVerdicts?: number | undefined;
+  };
 };

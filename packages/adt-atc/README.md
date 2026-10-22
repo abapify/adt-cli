@@ -82,6 +82,9 @@ const result: AtcResult = {
       objectType: 'CLAS',
       objectName: 'ZCL_MY_CLASS',
       location: '/sap/bc/adt/oo/classes/zcl_my_class/source/main#start=10,0',
+      // Optional: resolved by the atc command from the run's check variant
+      // form template (check categories are best-effort enrichment)
+      checkCategory: 'CI_PERFORMANCE',
     },
   ],
 };
@@ -89,6 +92,40 @@ const result: AtcResult = {
 await outputSarifReport(result, 'atc-results.sarif');
 await outputGitLabCodeQuality(result, 'gl-code-quality.json');
 ```
+
+## Check Categories
+
+Each finding can carry a `checkCategory` (e.g., `CI_PERFORMANCE`,
+`CI_SECURITY`): the name of the ATC check category its check is assigned
+to. The `atc` command resolves it automatically from the run's check
+variant form template (`GET /sap/bc/adt/atc/checkvariants/formtemplate`)
+by mapping the finding's `checkId` (the check's implementing class name)
+to the category that contains it. The enrichment is best-effort: when
+the form template is unavailable, or the check is outside its catalog,
+findings simply carry no category and the run still succeeds.
+
+The enrichment helpers are exported for reuse:
+
+```typescript
+import {
+  parseCheckCategoryIndex,
+  fetchCheckCategoryIndex,
+  enrichResultWithCategories,
+} from '@abapify/adt-atc';
+
+// Build the checkId -> category name index from a parsed form template
+const index = parseCheckCategoryIndex(formTemplateDocument);
+
+// Or fetch it through an ADT client (never throws)
+const fetched = await fetchCheckCategoryIndex(client, 'DEFAULT');
+
+// Enrich a result in place
+enrichResultWithCategories(result, index);
+```
+
+The GitLab Code Quality formatter emits the category as `check_category`
+per finding; the SARIF formatter sets it on each rule's
+`properties.category`.
 
 ## Output Formats
 

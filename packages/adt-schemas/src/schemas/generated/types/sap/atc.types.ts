@@ -6,37 +6,47 @@
  */
 
 export type AtcSchema = {
-    customizing: {
-        properties: {
-            property?: undefined | {
-                name?: string | undefined;
-                value?: string | undefined;
+  customizing: {
+    properties: {
+      property?:
+        | undefined
+        | {
+            name?: string | undefined;
+            value?: string | undefined;
+          }[];
+    };
+    exemption: {
+      reasons: {
+        reason?:
+          | undefined
+          | {
+              id?: string | undefined;
+              justificationMandatory?: boolean | undefined;
+              title?: string | undefined;
             }[];
-        };
-        exemption: {
-            reasons: {
-                reason?: undefined | {
-                    id?: string | undefined;
-                    justificationMandatory?: boolean | undefined;
-                    title?: string | undefined;
-                }[];
-            };
-            validities: {
-                validity?: undefined | {
-                    id?: string | undefined;
-                    value?: string | undefined;
-                }[];
-            };
-        };
-        scaAttributes?: undefined | {
-            scaAttribute?: undefined | {
+      };
+      validities: {
+        validity?:
+          | undefined
+          | {
+              id?: string | undefined;
+              value?: string | undefined;
+            }[];
+      };
+    };
+    scaAttributes?:
+      | undefined
+      | {
+          scaAttribute?:
+            | undefined
+            | {
                 attributeName?: string | undefined;
                 refAttributeName?: string | undefined;
                 label?: boolean | undefined;
                 labelS?: string | undefined;
                 labelM?: string | undefined;
                 labelL?: string | undefined;
-            }[];
+              }[];
         };
-    };
+  };
 };

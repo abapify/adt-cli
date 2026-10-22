@@ -5,88 +5,114 @@
  * Mode: Flattened
  */
 
-export type AtomFeedSchema = {
-    feed: {
-        author?: undefined | {
-            name?: string | undefined;
-        };
+export type AtomFeedSchema =
+  | {
+      feed: {
+        author?:
+          | undefined
+          | {
+              name?: string | undefined;
+            };
         title?: string | undefined;
         updated?: string | undefined;
         id?: string | undefined;
-        entry?: undefined | {
-            id?: string | undefined;
-            title?: string | undefined;
-            link?: undefined | {
-                href: string;
-                rel?: string | undefined;
-                type?: string | undefined;
-                hreflang?: string | undefined;
-                title?: string | undefined;
-                length?: number | undefined;
-                etag?: string | undefined;
-                _text?: string | undefined;
+        entry?:
+          | undefined
+          | {
+              id?: string | undefined;
+              title?: string | undefined;
+              link?:
+                | undefined
+                | {
+                    href: string;
+                    rel?: string | undefined;
+                    type?: string | undefined;
+                    hreflang?: string | undefined;
+                    title?: string | undefined;
+                    length?: number | undefined;
+                    etag?: string | undefined;
+                    _text?: string | undefined;
+                  }[];
+              updated?: string | undefined;
+              author?:
+                | undefined
+                | {
+                    name?: string | undefined;
+                  };
+              content?:
+                | undefined
+                | {
+                    type?: string | undefined;
+                    src?: string | undefined;
+                    _text?: string | undefined;
+                  };
             }[];
-            updated?: string | undefined;
-            author?: undefined | {
-                name?: string | undefined;
-            };
-            content?: undefined | {
-                type?: string | undefined;
-                src?: string | undefined;
-                _text?: string | undefined;
-            };
-        }[];
-    };
-} | {
-    entry: {
+      };
+    }
+  | {
+      entry: {
         id?: string | undefined;
         title?: string | undefined;
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
-        }[];
+        link?:
+          | undefined
+          | {
+              href: string;
+              rel?: string | undefined;
+              type?: string | undefined;
+              hreflang?: string | undefined;
+              title?: string | undefined;
+              length?: number | undefined;
+              etag?: string | undefined;
+              _text?: string | undefined;
+            }[];
         updated?: string | undefined;
-        author?: undefined | {
-            name?: string | undefined;
-        };
-        content?: undefined | {
-            type?: string | undefined;
-            src?: string | undefined;
-            _text?: string | undefined;
-        };
-    };
-} | {
-    id: string;
-} | {
-    updated: string;
-} | {
-    author: {
+        author?:
+          | undefined
+          | {
+              name?: string | undefined;
+            };
+        content?:
+          | undefined
+          | {
+              type?: string | undefined;
+              src?: string | undefined;
+              _text?: string | undefined;
+            };
+      };
+    }
+  | {
+      id: string;
+    }
+  | {
+      updated: string;
+    }
+  | {
+      author: {
         name?: string | undefined;
-    };
-} | {
-    name: string;
-} | {
-    content: {
+      };
+    }
+  | {
+      name: string;
+    }
+  | {
+      content: {
         type?: string | undefined;
         src?: string | undefined;
         _text?: string | undefined;
-    };
-} | {
-    title: string;
-} | {
-    category: {
+      };
+    }
+  | {
+      title: string;
+    }
+  | {
+      category: {
         term?: string | undefined;
         scheme?: string | undefined;
         label?: string | undefined;
-    };
-} | {
-    link: {
+      };
+    }
+  | {
+      link: {
         href: string;
         rel?: string | undefined;
         type?: string | undefined;
@@ -95,5 +121,5 @@ export type AtomFeedSchema = {
         length?: number | undefined;
         etag?: string | undefined;
         _text?: string | undefined;
+      };
     };
-};

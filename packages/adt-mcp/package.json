@@ -32,6 +32,7 @@
   "dependencies": {
     "@abapify/adk": "0.4.20",
     "@abapify/adt-aunit": "0.4.20",
+    "@abapify/adt-atc": "0.4.20",
     "@abapify/adt-client": "0.4.20",
     "@abapify/adt-config": "0.4.20",
     "@abapify/adt-contracts": "0.4.20",

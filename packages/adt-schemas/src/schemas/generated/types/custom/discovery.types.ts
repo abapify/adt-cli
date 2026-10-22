@@ -6,20 +6,26 @@
  */
 
 export type DiscoverySchema = {
-    service: {
-        workspace?: undefined | {
-            title?: string | undefined;
-            collection?: undefined | {
+  service: {
+    workspace?:
+      | undefined
+      | {
+          title?: string | undefined;
+          collection?:
+            | undefined
+            | {
                 title?: string | undefined;
                 accept?: undefined | string[];
-                category?: undefined | {
-                    term?: string | undefined;
-                    scheme?: string | undefined;
-                    label?: string | undefined;
-                }[];
+                category?:
+                  | undefined
+                  | {
+                      term?: string | undefined;
+                      scheme?: string | undefined;
+                      label?: string | undefined;
+                    }[];
                 templateLinks?: undefined | unknown;
                 href: string;
-            }[];
+              }[];
         }[];
-    };
+  };
 };

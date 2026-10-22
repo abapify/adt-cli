@@ -5,16 +5,19 @@
  * Mode: Flattened
  */
 
-export type AtomExtendedSchema = {
-    title: string;
-} | {
-    category: {
+export type AtomExtendedSchema =
+  | {
+      title: string;
+    }
+  | {
+      category: {
         term?: string | undefined;
         scheme?: string | undefined;
         label?: string | undefined;
-    };
-} | {
-    link: {
+      };
+    }
+  | {
+      link: {
         href: string;
         rel?: string | undefined;
         type?: string | undefined;
@@ -23,5 +26,5 @@ export type AtomExtendedSchema = {
         length?: number | undefined;
         etag?: string | undefined;
         _text?: string | undefined;
+      };
     };
-};

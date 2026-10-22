@@ -6,139 +6,175 @@
  */
 
 export type TabletypeSchema = {
-    tableType: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+  tableType: {
+    containerRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
+    adtTemplate?:
+      | undefined
+      | {
+          adtProperty?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
-            name?: string | undefined;
+              }[];
+          name?: string | undefined;
         };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
+    packageRef?:
+      | undefined
+      | {
+          extension?:
+            | undefined
+            | {
+                [key: string]: unknown;
+              };
+          uri?: string | undefined;
+          parentUri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          packageName?: string | undefined;
+          description?: string | undefined;
         };
-        rowType: {
-            typeKind?: string | undefined;
-            typeName?: string | undefined;
-            builtInType?: undefined | {
-                dataType?: string | undefined;
-                length?: number | undefined;
-                decimals?: number | undefined;
-            };
-            rangeType?: string | undefined;
-        };
-        initialRowCount?: number | undefined;
-        accessType: string;
-        primaryKey: {
-            definition: string;
-            kind: string;
-            components?: undefined | {
-                component?: undefined | {
-                    name?: string | undefined;
-                }[];
-                isVisible?: boolean | undefined;
-            };
-            alias?: string | undefined;
-            isVisible?: boolean | undefined;
-            isEditable?: boolean | undefined;
-        };
-        secondaryKeys: {
-            allowed: string;
-            secondaryKey?: undefined | {
-                components?: undefined | {
-                    component?: undefined | {
-                        name?: string | undefined;
-                    }[];
-                    isVisible?: boolean | undefined;
-                };
-                identifier?: string | undefined;
-                description?: string | undefined;
-                language?: string | undefined;
-                access?: string | undefined;
-                definition?: string | undefined;
-            }[];
-            isVisible?: boolean | undefined;
-            isEditable?: boolean | undefined;
-        };
-        valueHelps: {
-            typeKindValues: {
-                valueHelp: {
-                    key: string;
-                    value: string;
-                    description?: string | undefined;
-                }[];
-            };
-            keyDefinitionValues: {
-                valueHelp: {
-                    key: string;
-                    value: string;
-                    description?: string | undefined;
-                }[];
-            };
-            keyKindValues: {
-                valueHelp: {
-                    key: string;
-                    value: string;
-                    description?: string | undefined;
-                }[];
-            };
-            accessTypeValues: {
-                valueHelp: {
-                    key: string;
-                    value: string;
-                    description?: string | undefined;
-                }[];
-            };
-            secKeyAccessValues: {
-                valueHelp: {
-                    key: string;
-                    value: string;
-                    description?: string | undefined;
-                }[];
-            };
-            secKeyDefinitionValues: {
-                valueHelp: {
-                    key: string;
-                    value: string;
-                    description?: string | undefined;
-                }[];
-            };
-            secKeyAllowedValues: {
-                valueHelp: {
-                    key: string;
-                    value: string;
-                    description?: string | undefined;
-                }[];
-            };
-        };
-        name: string;
-        type: string;
-        changedBy?: string | undefined;
-        changedAt?: string | undefined;
-        createdAt?: string | undefined;
-        createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-        description?: string | undefined;
-        descriptionTextLimit?: number | undefined;
-        language?: string | undefined;
-        masterSystem?: string | undefined;
-        masterLanguage?: string | undefined;
-        responsible?: string | undefined;
-        abapLanguageVersion?: string | undefined;
+    rowType: {
+      typeKind?: string | undefined;
+      typeName?: string | undefined;
+      builtInType?:
+        | undefined
+        | {
+            dataType?: string | undefined;
+            length?: number | undefined;
+            decimals?: number | undefined;
+          };
+      rangeType?: string | undefined;
     };
+    initialRowCount?: number | undefined;
+    accessType: string;
+    primaryKey: {
+      definition: string;
+      kind: string;
+      components?:
+        | undefined
+        | {
+            component?:
+              | undefined
+              | {
+                  name?: string | undefined;
+                }[];
+            isVisible?: boolean | undefined;
+          };
+      alias?: string | undefined;
+      isVisible?: boolean | undefined;
+      isEditable?: boolean | undefined;
+    };
+    secondaryKeys: {
+      allowed: string;
+      secondaryKey?:
+        | undefined
+        | {
+            components?:
+              | undefined
+              | {
+                  component?:
+                    | undefined
+                    | {
+                        name?: string | undefined;
+                      }[];
+                  isVisible?: boolean | undefined;
+                };
+            identifier?: string | undefined;
+            description?: string | undefined;
+            language?: string | undefined;
+            access?: string | undefined;
+            definition?: string | undefined;
+          }[];
+      isVisible?: boolean | undefined;
+      isEditable?: boolean | undefined;
+    };
+    valueHelps: {
+      typeKindValues: {
+        valueHelp: {
+          key: string;
+          value: string;
+          description?: string | undefined;
+        }[];
+      };
+      keyDefinitionValues: {
+        valueHelp: {
+          key: string;
+          value: string;
+          description?: string | undefined;
+        }[];
+      };
+      keyKindValues: {
+        valueHelp: {
+          key: string;
+          value: string;
+          description?: string | undefined;
+        }[];
+      };
+      accessTypeValues: {
+        valueHelp: {
+          key: string;
+          value: string;
+          description?: string | undefined;
+        }[];
+      };
+      secKeyAccessValues: {
+        valueHelp: {
+          key: string;
+          value: string;
+          description?: string | undefined;
+        }[];
+      };
+      secKeyDefinitionValues: {
+        valueHelp: {
+          key: string;
+          value: string;
+          description?: string | undefined;
+        }[];
+      };
+      secKeyAllowedValues: {
+        valueHelp: {
+          key: string;
+          value: string;
+          description?: string | undefined;
+        }[];
+      };
+    };
+    name: string;
+    type: string;
+    changedBy?: string | undefined;
+    changedAt?: string | undefined;
+    createdAt?: string | undefined;
+    createdBy?: string | undefined;
+    version?:
+      | undefined
+      | ''
+      | 'active'
+      | 'inactive'
+      | 'workingArea'
+      | 'new'
+      | 'partlyActive'
+      | 'activeWithInactiveVersion';
+    description?: string | undefined;
+    descriptionTextLimit?: number | undefined;
+    language?: string | undefined;
+    masterSystem?: string | undefined;
+    masterLanguage?: string | undefined;
+    responsible?: string | undefined;
+    abapLanguageVersion?: string | undefined;
+  };
 };

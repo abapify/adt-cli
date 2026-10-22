@@ -121,3 +121,84 @@ class AtcWorklistGetScenario extends TypedContractScenario<WorklistGetContract> 
 
 // Run the typed scenario
 runTypedScenario(new AtcWorklistGetScenario());
+
+// =============================================================================
+// ATC Check Variant Form Template - Typed Contract Scenario
+// =============================================================================
+
+import { atcContract } from '../../src/adt/atc';
+import { chkvFormTemplate } from '../../src/schemas';
+
+type FormtemplateContract = (typeof atcContract.checkvariants)['formtemplate'];
+type FormtemplateRequest = ExtractRequest<FormtemplateContract>;
+type FormtemplateResponse = InferTypedSchema<typeof chkvFormTemplate>;
+
+/**
+ * ATC Check Variant Form Template GET Scenario
+ *
+ * Validates the manually defined checkvariants.formtemplate contract with
+ * full type inference: the parsed form template gives typed access to
+ * category objects, checks, implementing classes (finding checkIds) and
+ * check parameters.
+ */
+class AtcFormtemplateGetScenario extends TypedContractScenario<FormtemplateContract> {
+  readonly name = 'ATC Check Variant Form Template GET - Typed';
+  readonly contract = atcContract.checkvariants.formtemplate;
+  readonly fixture = fixtures.atc.formtemplate;
+
+  override getContractParams(): Parameters<FormtemplateContract> {
+    return [{ chkvName: 'DEFAULT' }];
+  }
+
+  override assertRequest(req: FormtemplateRequest): void {
+    // ✅ TYPE CHECK: method is typed as 'GET'
+    expect(req.method).toBe('GET');
+
+    // ✅ TYPE CHECK: path is typed as a literal
+    expect(req.path).toBe('/sap/bc/adt/atc/checkvariants/formtemplate');
+
+    // ✅ TYPE CHECK: query params are typed from the contract definition
+    expect(req.query?.chkvName).toBe('DEFAULT');
+  }
+
+  override assertResponse(res: FormtemplateResponse): void {
+    // ✅ TYPE CHECK: response is typed from the chkvFormTemplate schema
+    expect(res).toBeDefined();
+    expect(typeof res).toBe('object');
+
+    // ✅ FULLY TYPED: category objects, checks, implementing classes
+    const categories =
+      res.formTemplate.availableCheckCategories.availableCheckCategory;
+    expect(categories.length).toBeGreaterThanOrEqual(2);
+
+    const performance = categories.find(
+      (c) => c.checkCategoryObject.name === 'CI_PERFORMANCE',
+    );
+    expect(performance).toBeDefined();
+    expect(performance!.checkCategoryObject.description).toBe('Performance');
+
+    const analyzeWhere = (performance!.check ?? []).find(
+      (c) => c.checkObject.name === 'CI_ANALYZE_WHERE',
+    );
+    expect(analyzeWhere).toBeDefined();
+    // The implementing class name is the checkId findings carry
+    expect(analyzeWhere!.checkObject.content?.implementingClass?.name).toBe(
+      'CL_CI_TEST_SELECT_TAW_A',
+    );
+    expect(analyzeWhere!.checkObject.content?.category?.name).toBe(
+      'CI_PERFORMANCE',
+    );
+    expect(analyzeWhere!.checkObject.content?.remoteEnabled).toBe(true);
+
+    // ✅ FULLY TYPED: check parameters
+    const parameters =
+      analyzeWhere!.checkObject.content?.parameters?.parameter ?? [];
+    expect(parameters.length).toBeGreaterThan(0);
+    expect(parameters.some((p) => p.parameterName === 'NoWhereCondition')).toBe(
+      true,
+    );
+  }
+}
+
+// Run the typed form template scenario
+runTypedScenario(new AtcFormtemplateGetScenario());

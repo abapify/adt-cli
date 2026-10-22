@@ -532,6 +532,7 @@ export const atcFindingResponse = z
   .object({
     checkId: z.string().max(256),
     checkTitle: z.string().max(1_024),
+    checkCategory: z.string().trim().min(1).max(256).optional(),
     messageText: z.string().max(8 * 1_024),
     priority: z.number().int().min(1).max(99),
     objectType: objectTypePathParameter,

@@ -22,6 +22,10 @@ export const registry = {
     customizing: 'atc/customizing.xml',
     worklist: 'atc/worklist.xml',
     runsResponse: 'atc/runs-response.xml',
+    // Check variant form template (the ATC check catalog): categories,
+    // checks, implementing classes (= worklist finding checkIds) and check
+    // parameters. Sanitized from a live S/4 system capture (see file header).
+    formtemplate: 'atc/formtemplate.xml',
   },
   aunit: {
     runRequest: 'aunit/run-request.xml',
@@ -206,6 +210,10 @@ export const registry = {
     atc: {
       run: 'mcp/atc/run.json',
       worklist: 'mcp/atc/worklist.json',
+      // Synthetic minimal catalog + documentation page for the mock worklist
+      // fixture (TODO-synthetic; see file headers for the real sources).
+      formtemplate: 'mcp/atc/formtemplate.xml',
+      documentation: 'mcp/atc/documentation-amdp-hdb-migration.html',
     },
     source: {
       class: 'mcp/source/class.abap',

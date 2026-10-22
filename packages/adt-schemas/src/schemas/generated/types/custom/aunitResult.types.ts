@@ -6,105 +6,162 @@
  */
 
 export type AunitResultSchema = {
-    runResult: {
-        external?: undefined | {
-            coverage?: undefined | {
+  runResult: {
+    external?:
+      | undefined
+      | {
+          coverage?:
+            | undefined
+            | {
                 uri?: string | undefined;
-            };
+              };
         };
-        link?: undefined | {
-            href: string;
-            rel?: string | undefined;
-            type?: string | undefined;
-            hreflang?: string | undefined;
-            title?: string | undefined;
-            length?: number | undefined;
-            etag?: string | undefined;
-            _text?: string | undefined;
+    link?:
+      | undefined
+      | {
+          href: string;
+          rel?: string | undefined;
+          type?: string | undefined;
+          hreflang?: string | undefined;
+          title?: string | undefined;
+          length?: number | undefined;
+          etag?: string | undefined;
+          _text?: string | undefined;
         }[];
-        program?: undefined | {
-            testClasses?: undefined | {
-                testClass?: undefined | {
-                    testMethods?: undefined | {
-                        testMethod?: undefined | {
-                            alerts?: undefined | {
-                                alert?: undefined | {
-                                    title?: string | undefined;
-                                    details?: undefined | {
-                                        detail?: undefined | {
-                                            text?: string | undefined;
-                                        }[];
-                                    };
-                                    stack?: undefined | {
-                                        stackEntry?: undefined | {
-                                            uri?: string | undefined;
-                                            type?: string | undefined;
-                                            name?: string | undefined;
-                                            description?: string | undefined;
-                                        }[];
-                                    };
-                                    kind?: string | undefined;
-                                    severity?: string | undefined;
+    program?:
+      | undefined
+      | {
+          testClasses?:
+            | undefined
+            | {
+                testClass?:
+                  | undefined
+                  | {
+                      testMethods?:
+                        | undefined
+                        | {
+                            testMethod?:
+                              | undefined
+                              | {
+                                  alerts?:
+                                    | undefined
+                                    | {
+                                        alert?:
+                                          | undefined
+                                          | {
+                                              title?: string | undefined;
+                                              details?:
+                                                | undefined
+                                                | {
+                                                    detail?:
+                                                      | undefined
+                                                      | {
+                                                          text?:
+                                                            string | undefined;
+                                                        }[];
+                                                  };
+                                              stack?:
+                                                | undefined
+                                                | {
+                                                    stackEntry?:
+                                                      | undefined
+                                                      | {
+                                                          uri?:
+                                                            string | undefined;
+                                                          type?:
+                                                            string | undefined;
+                                                          name?:
+                                                            string | undefined;
+                                                          description?:
+                                                            string | undefined;
+                                                        }[];
+                                                  };
+                                              kind?: string | undefined;
+                                              severity?: string | undefined;
+                                            }[];
+                                      };
+                                  uri?: string | undefined;
+                                  name?: string | undefined;
+                                  executionTime?: string | undefined;
+                                  uriType?: string | undefined;
+                                  unit?: string | undefined;
                                 }[];
-                            };
-                            uri?: string | undefined;
-                            name?: string | undefined;
-                            executionTime?: string | undefined;
-                            uriType?: string | undefined;
-                            unit?: string | undefined;
-                        }[];
-                    };
-                    alerts?: undefined | {
-                        alert?: undefined | {
-                            title?: string | undefined;
-                            details?: undefined | {
-                                detail?: undefined | {
-                                    text?: string | undefined;
+                          };
+                      alerts?:
+                        | undefined
+                        | {
+                            alert?:
+                              | undefined
+                              | {
+                                  title?: string | undefined;
+                                  details?:
+                                    | undefined
+                                    | {
+                                        detail?:
+                                          | undefined
+                                          | {
+                                              text?: string | undefined;
+                                            }[];
+                                      };
+                                  stack?:
+                                    | undefined
+                                    | {
+                                        stackEntry?:
+                                          | undefined
+                                          | {
+                                              uri?: string | undefined;
+                                              type?: string | undefined;
+                                              name?: string | undefined;
+                                              description?: string | undefined;
+                                            }[];
+                                      };
+                                  kind?: string | undefined;
+                                  severity?: string | undefined;
                                 }[];
-                            };
-                            stack?: undefined | {
-                                stackEntry?: undefined | {
-                                    uri?: string | undefined;
-                                    type?: string | undefined;
-                                    name?: string | undefined;
-                                    description?: string | undefined;
+                          };
+                      uri?: string | undefined;
+                      name?: string | undefined;
+                      uriType?: string | undefined;
+                      durationCategory?: string | undefined;
+                      riskLevel?: string | undefined;
+                    }[];
+              };
+          alerts?:
+            | undefined
+            | {
+                alert?:
+                  | undefined
+                  | {
+                      title?: string | undefined;
+                      details?:
+                        | undefined
+                        | {
+                            detail?:
+                              | undefined
+                              | {
+                                  text?: string | undefined;
                                 }[];
-                            };
-                            kind?: string | undefined;
-                            severity?: string | undefined;
-                        }[];
-                    };
-                    uri?: string | undefined;
-                    name?: string | undefined;
-                    uriType?: string | undefined;
-                    durationCategory?: string | undefined;
-                    riskLevel?: string | undefined;
-                }[];
-            };
-            alerts?: undefined | {
-                alert?: undefined | {
-                    title?: string | undefined;
-                    details?: undefined | {
-                        detail?: undefined | {
-                            text?: string | undefined;
-                        }[];
-                    };
-                    stack?: undefined | {
-                        stackEntry?: undefined | {
-                            uri?: string | undefined;
-                            type?: string | undefined;
-                            name?: string | undefined;
-                            description?: string | undefined;
-                        }[];
-                    };
-                    kind?: string | undefined;
-                    severity?: string | undefined;
-                }[];
-            };
-            uri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            uriType?: string | undefined;
+                          };
+                      stack?:
+                        | undefined
+                        | {
+                            stackEntry?:
+                              | undefined
+                              | {
+                                  uri?: string | undefined;
+                                  type?: string | undefined;
+                                  name?: string | undefined;
+                                  description?: string | undefined;
+                                }[];
+                          };
+                      kind?: string | undefined;
+                      severity?: string | undefined;
+                    }[];
+              };
+          uri?: string | undefined;
+          type?: string | undefined;
+          name?: string | undefined;
+          uriType?: string | undefined;
         }[];
-    };
+  };
 };

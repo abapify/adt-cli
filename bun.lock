@@ -305,6 +305,7 @@
       },
       "dependencies": {
         "@abapify/adk": "0.4.19",
+        "@abapify/adt-atc": "0.4.20",
         "@abapify/adt-aunit": "0.4.19",
         "@abapify/adt-client": "0.4.19",
         "@abapify/adt-config": "0.4.19",
@@ -437,6 +438,7 @@
         "adt-server": "./dist/bin/adt-server.mjs",
       },
       "dependencies": {
+        "@abapify/adt-atc": "0.4.20",
         "@abapify/adt-client": "0.4.19",
         "@abapify/adt-mcp": "0.4.19",
         "@abapify/adt-services": "0.4.19",

@@ -222,6 +222,8 @@ export interface LoadedFixtures {
   searchconfigMetadata: string;
   atcRun: string;
   atcWorklist: string;
+  atcFormtemplate: string;
+  atcDocumentation: string;
   sourceClass: string;
   sourceTestClasses: string;
   lockResponse: string;
@@ -332,6 +334,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     searchconfigMetadata,
     atcRun,
     atcWorklist,
+    atcFormtemplate,
+    atcDocumentation,
     sourceClass,
     sourceTestClasses,
     lockResponse,
@@ -421,6 +425,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     fixtures.transport.searchconfigMetadata.load(),
     m.atc.run.load(),
     m.atc.worklist.load(),
+    m.atc.formtemplate.load(),
+    m.atc.documentation.load(),
     m.source.class.load(),
     m.source.testClasses.load(),
     m.lockResponse.load(),
@@ -516,6 +522,8 @@ export async function loadRouteFixtures(): Promise<LoadedFixtures> {
     searchconfigMetadata,
     atcRun,
     atcWorklist,
+    atcFormtemplate,
+    atcDocumentation,
     sourceClass,
     sourceTestClasses,
     lockResponse,
@@ -1682,6 +1690,32 @@ export function matchRoute(
       status: 200,
       body: f.atcWorklist,
       contentType: 'application/json',
+    };
+  }
+
+  // ATC check variant form template (the check catalog used for the
+  // atc_run tool's check category enrichment)
+  if (
+    m === 'GET' &&
+    pathname === '/sap/bc/adt/atc/checkvariants/formtemplate'
+  ) {
+    return {
+      status: 200,
+      body: f.atcFormtemplate,
+      contentType: 'application/xml',
+    };
+  }
+
+  // ATC finding documentation page (the documentation bridge for the
+  // atc_run tool's GUID checkId enrichment)
+  if (
+    m === 'GET' &&
+    url.startsWith('/sap/bc/adt/documentation/atc/documents/')
+  ) {
+    return {
+      status: 200,
+      body: f.atcDocumentation,
+      contentType: 'text/html',
     };
   }
 

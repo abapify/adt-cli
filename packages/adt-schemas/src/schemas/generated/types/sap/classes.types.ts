@@ -5,122 +5,201 @@
  * Mode: Flattened
  */
 
-export type ClassesSchema = {
-    abapClass: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
-                $value?: string | undefined;
-                key?: string | undefined;
-            }[];
-            name?: string | undefined;
-        };
-        packageRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        template?: undefined | {
-            property?: undefined | {
-                $value?: string | undefined;
-                key?: string | undefined;
-            }[];
-            name?: string | undefined;
-        };
-        syntaxConfiguration?: undefined | {
-            language?: undefined | {
-                version?: string | undefined;
-                description?: string | undefined;
+export type ClassesSchema =
+  | {
+      abapClass: {
+        containerRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
             };
-            objectUsage?: undefined | {
-                restricted?: boolean | undefined;
-            };
-        };
-        interfaceRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        }[];
-        include?: undefined | {
-            containerRef?: undefined | {
-                extension?: undefined | unknown;
-                uri?: string | undefined;
-                parentUri?: string | undefined;
-                type?: string | undefined;
-                name?: string | undefined;
-                packageName?: string | undefined;
-                description?: string | undefined;
-            };
-            adtTemplate?: undefined | {
-                adtProperty?: undefined | {
+        adtTemplate?:
+          | undefined
+          | {
+              adtProperty?:
+                | undefined
+                | {
                     $value?: string | undefined;
                     key?: string | undefined;
-                }[];
-                name?: string | undefined;
+                  }[];
+              name?: string | undefined;
             };
-            name: string;
-            type: string;
-            changedBy?: string | undefined;
-            changedAt?: string | undefined;
-            createdAt?: string | undefined;
-            createdBy?: string | undefined;
-            version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
-            description?: string | undefined;
-            descriptionTextLimit?: number | undefined;
-            language?: string | undefined;
-            sourceUri?: string | undefined;
-            includeType?: undefined | unknown;
-        }[];
-        superClassRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        messageClassRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        rootEntityRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
+        packageRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        template?:
+          | undefined
+          | {
+              property?:
+                | undefined
+                | {
+                    $value?: string | undefined;
+                    key?: string | undefined;
+                  }[];
+              name?: string | undefined;
+            };
+        syntaxConfiguration?:
+          | undefined
+          | {
+              language?:
+                | undefined
+                | {
+                    version?: string | undefined;
+                    description?: string | undefined;
+                  };
+              objectUsage?:
+                | undefined
+                | {
+                    restricted?: boolean | undefined;
+                  };
+            };
+        interfaceRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            }[];
+        include?:
+          | undefined
+          | {
+              containerRef?:
+                | undefined
+                | {
+                    extension?:
+                      | undefined
+                      | {
+                          [key: string]: unknown;
+                        };
+                    uri?: string | undefined;
+                    parentUri?: string | undefined;
+                    type?: string | undefined;
+                    name?: string | undefined;
+                    packageName?: string | undefined;
+                    description?: string | undefined;
+                  };
+              adtTemplate?:
+                | undefined
+                | {
+                    adtProperty?:
+                      | undefined
+                      | {
+                          $value?: string | undefined;
+                          key?: string | undefined;
+                        }[];
+                    name?: string | undefined;
+                  };
+              name: string;
+              type: string;
+              changedBy?: string | undefined;
+              changedAt?: string | undefined;
+              createdAt?: string | undefined;
+              createdBy?: string | undefined;
+              version?:
+                | undefined
+                | ''
+                | 'active'
+                | 'inactive'
+                | 'workingArea'
+                | 'new'
+                | 'partlyActive'
+                | 'activeWithInactiveVersion';
+              description?: string | undefined;
+              descriptionTextLimit?: number | undefined;
+              language?: string | undefined;
+              sourceUri?: string | undefined;
+              includeType?: undefined | unknown;
+            }[];
+        superClassRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        messageClassRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        rootEntityRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
         name: string;
         type: string;
         changedBy?: string | undefined;
         changedAt?: string | undefined;
         createdAt?: string | undefined;
         createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        version?:
+          | undefined
+          | ''
+          | 'active'
+          | 'inactive'
+          | 'workingArea'
+          | 'new'
+          | 'partlyActive'
+          | 'activeWithInactiveVersion';
         description?: string | undefined;
         descriptionTextLimit?: number | undefined;
         language?: string | undefined;
@@ -129,7 +208,12 @@ export type ClassesSchema = {
         responsible?: string | undefined;
         abapLanguageVersion?: string | undefined;
         sourceUri?: string | undefined;
-        sourceObjectStatus?: undefined | "SAPStandardProduction" | "customerProduction" | "system" | "test";
+        sourceObjectStatus?:
+          | undefined
+          | 'SAPStandardProduction'
+          | 'customerProduction'
+          | 'system'
+          | 'test';
         fixPointArithmetic?: boolean | undefined;
         activeUnicodeCheck?: boolean | undefined;
         modeled?: boolean | undefined;
@@ -137,40 +221,59 @@ export type ClassesSchema = {
         final?: boolean | undefined;
         state?: string | undefined;
         abstract?: boolean | undefined;
-        visibility?: undefined | "private" | "protected" | "package" | "public";
+        visibility?: undefined | 'private' | 'protected' | 'package' | 'public';
         sharedMemoryEnabled?: boolean | undefined;
         constructorGenerated?: boolean | undefined;
         hasTests?: boolean | undefined;
-    };
-} | {
-    abapClassInclude: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
-                $value?: string | undefined;
-                key?: string | undefined;
-            }[];
-            name?: string | undefined;
-        };
+      };
+    }
+  | {
+      abapClassInclude: {
+        containerRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        adtTemplate?:
+          | undefined
+          | {
+              adtProperty?:
+                | undefined
+                | {
+                    $value?: string | undefined;
+                    key?: string | undefined;
+                  }[];
+              name?: string | undefined;
+            };
         name: string;
         type: string;
         changedBy?: string | undefined;
         changedAt?: string | undefined;
         createdAt?: string | undefined;
         createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        version?:
+          | undefined
+          | ''
+          | 'active'
+          | 'inactive'
+          | 'workingArea'
+          | 'new'
+          | 'partlyActive'
+          | 'activeWithInactiveVersion';
         description?: string | undefined;
         descriptionTextLimit?: number | undefined;
         language?: string | undefined;
         sourceUri?: string | undefined;
         includeType?: undefined | unknown;
+      };
     };
-};

@@ -13,9 +13,7 @@ export default {
     dteb: 'http://www.sap.com/adt/ddic/dteb',
     abapsource: 'http://www.sap.com/adt/abapsource',
   },
-  $imports: [
-    abapsource,
-  ],
+  $imports: [abapsource],
   targetNamespace: 'http://www.sap.com/adt/ddic/dteb',
   attributeFormDefault: 'qualified',
   elementFormDefault: 'qualified',

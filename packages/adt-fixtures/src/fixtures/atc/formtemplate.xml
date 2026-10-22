@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Source: GET /sap/bc/adt/atc/checkvariants/formtemplate?chkvName=DEFAULT
+  (a live S/4 system, read-only capture, 2026-10-21)
+
+  Sanitized: the customer-owned check category and its checks were renamed
+  to ZEXAMPLE_* and their descriptions paraphrased; SAP-standard
+  categories, checks, implementing classes and parameters are unchanged.
+  Truncated to three categories (CI_PERFORMANCE, CI_SECURITY, and the
+  sanitized custom category) to keep the fixture small; the retained check
+  entries keep their full real shape (parameters, parameterValueXml,
+  documentation/technicalsettings links).
+
+  The check variant form template is the ATC check catalog: each
+  availableCheckCategory lists its checks, and each check's
+  implementingClass name is the checkId that ATC worklist findings carry.
+-->
+<chkvFormTemplate:formTemplate xmlns:adtcore="http://www.sap.com/adt/core" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:chkc="http://www.sap.com/wbobj/atc/chkc" xmlns:chko="http://www.sap.com/wbobj/atc/chko" xmlns:chkoParameter="http://www.sap.com/wbobj/atc/chkoParameter" xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate" xmlns:chkvcheck="http://www.sap.com/wbobj/atc/chkvCheck">
+  <chkvFormTemplate:availableCheckCategories>
+    <chkvFormTemplate:availableCheckCategory>
+      <chkc:checkCategoryObject adtcore:name="CI_PERFORMANCE" adtcore:description="Performance">
+        <chkc:content>
+          <chkc:category adtcore:type="CHKC/TYP"/>
+        </chkc:content>
+      </chkc:checkCategoryObject>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="CI_ANALYZE_WHERE" adtcore:description="Analysis of WHERE conditions of SELECT statements">
+          <chko:content>
+            <chko:category adtcore:name="CI_PERFORMANCE"/>
+            <chko:implementingClass adtcore:name="CL_CI_TEST_SELECT_TAW_A"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+            <chkoParameter:parameters>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>1</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>NoWhereCondition</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>No WHERE condition</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>2</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>NoIndexInWhereCondition</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>No index field in WHERE</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>3</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>NoFirstIndexFieldInWhereCondition</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>No first index field in WHERE</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>4</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>ClientSpecifiedWithoutMandt</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>CLIENT SPECIFIED without MANDT</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+            </chkoParameter:parameters>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+        <atom:link href="/sap/bc/adt/documentation/atc/documents/test/CL_CI_TEST_SELECT_TAW_A" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.adt.docu.v1+html"/>
+        <atom:link href="/sap/bc/adt/atc/checkvariants/formtemplate?test=CI_ANALYZE_WHERE" rel="http://www.sap.com/adt/relations/technicalsettings" type="text/plain"/>
+      </chkvcheck:check>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="CI_ANALYZE_SELECT_HANA" adtcore:description="Search suboptimal SELECT * statements">
+          <chko:content>
+            <chko:category adtcore:name="CI_PERFORMANCE"/>
+            <chko:implementingClass adtcore:name="CL_CI_TEST_ANALYZE_SELECT_HANA"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+            <chkoParameter:parameters>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>10</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>DisplayDetails</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Display detail information</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>false</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>12</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>AssignmentEffort</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Effort for one assignment</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>13</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>AssignmentColumnAccess</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Effort for one column access</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>2</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>RestrictToTables</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Only search for these tables</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>3</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>MinimumTableSizeCategory</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Minimum table size category</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>4</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>MinimumNumberOfTableFields</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Minimum number of table fields</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>5</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>PercentageOfFields</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Percentage of fields</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>6</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>ExcludeBufferedReads</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Exclude buffered reads</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>7</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>OnlyLocalProcedures</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Analyze only local procedures</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>8</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>NonLocalAnalysisDepth</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Non-local analysis depth</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>9</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>DoNotTransformSelects</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Not to be transformed selects</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+            </chkoParameter:parameters>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+        <atom:link href="/sap/bc/adt/documentation/atc/documents/test/CL_CI_TEST_ANALYZE_SELECT_HANA" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.adt.docu.v1+html"/>
+        <atom:link href="/sap/bc/adt/atc/checkvariants/formtemplate?test=CI_ANALYZE_SELECT_HANA" rel="http://www.sap.com/adt/relations/technicalsettings" type="text/plain"/>
+      </chkvcheck:check>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="CI_SELECT_TAW_BYBUF" adtcore:description="SELECT statements that bypass the table buffer">
+          <chko:content>
+            <chko:category adtcore:name="CI_PERFORMANCE"/>
+            <chko:implementingClass adtcore:name="CL_CI_TEST_SELECT_TAW_BYBUF"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+        <atom:link href="/sap/bc/adt/documentation/atc/documents/test/CL_CI_TEST_SELECT_TAW_BYBUF" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.adt.docu.v1+html"/>
+        <atom:link href="/sap/bc/adt/atc/checkvariants/formtemplate?test=CI_SELECT_TAW_BYBUF" rel="http://www.sap.com/adt/relations/technicalsettings" type="text/plain"/>
+      </chkvcheck:check>
+    </chkvFormTemplate:availableCheckCategory>
+    <chkvFormTemplate:availableCheckCategory>
+      <chkc:checkCategoryObject adtcore:name="CI_SECURITY" adtcore:description="Security">
+        <chkc:content>
+          <chkc:category adtcore:type="CHKC/TYP"/>
+        </chkc:content>
+      </chkc:checkCategoryObject>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="BSP_SEC" adtcore:description="BSP Security Checks">
+          <chko:content>
+            <chko:category adtcore:name="CI_SECURITY"/>
+            <chko:implementingClass adtcore:name="CL_CI_TEST_CVA_BSP_SEC"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+        <atom:link href="/sap/bc/adt/documentation/atc/documents/test/CL_CI_TEST_CVA_BSP_SEC" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.adt.docu.v1+html"/>
+        <atom:link href="/sap/bc/adt/atc/checkvariants/formtemplate?test=BSP_SEC" rel="http://www.sap.com/adt/relations/technicalsettings" type="text/plain"/>
+      </chkvcheck:check>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="CI_FIND_DYN_SQL" adtcore:description="Usage of ADBC-interface">
+          <chko:content>
+            <chko:category adtcore:name="CI_SECURITY"/>
+            <chko:implementingClass adtcore:name="CL_CI_TEST_FIND_DYN_SQL"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+            <chkoParameter:parameters>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>2</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>UsageOfADBCClasses</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Find usages of ADBC classes</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>3</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>UsageOfClasses</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Find usages of the following classes</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>MSGF</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>FindingGranularity</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Report findings on the level of programs, includes or statements</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+            </chkoParameter:parameters>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+        <atom:link href="/sap/bc/adt/documentation/atc/documents/test/CL_CI_TEST_FIND_DYN_SQL" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.adt.docu.v1+html"/>
+        <atom:link href="/sap/bc/adt/atc/checkvariants/formtemplate?test=CI_FIND_DYN_SQL" rel="http://www.sap.com/adt/relations/technicalsettings" type="text/plain"/>
+      </chkvcheck:check>
+    </chkvFormTemplate:availableCheckCategory>
+    <chkvFormTemplate:availableCheckCategory>
+      <chkc:checkCategoryObject adtcore:name="ZEXAMPLE_CI_CATEGORY" adtcore:description="Example custom category">
+        <chkc:content>
+          <chkc:category adtcore:type="CHKC/TYP"/>
+        </chkc:content>
+      </chkc:checkCategoryObject>
+      <chkvcheck:check>
+        <chko:checkObject adtcore:name="ZEXAMPLE_CI_CHECK" adtcore:description="Example custom check implementation">
+          <chko:content>
+            <chko:category adtcore:name="ZEXAMPLE_CI_CATEGORY"/>
+            <chko:implementingClass adtcore:name="ZEXAMPLE_CL_CHECK_IMPL"/>
+            <chko:remoteEnabled>true</chko:remoteEnabled>
+            <chkoParameter:parameters>
+              <chkoParameter:parameter>
+                <chkoParameter:parameterTechnicalId>1</chkoParameter:parameterTechnicalId>
+                <chkoParameter:parameterName>trackLanguageVersion</chkoParameter:parameterName>
+                <chkoParameter:parameterDescription>Track Language Version</chkoParameter:parameterDescription>
+                <chkoParameter:parameterModifiable>true</chkoParameter:parameterModifiable>
+              </chkoParameter:parameter>
+            </chkoParameter:parameters>
+          </chko:content>
+        </chko:checkObject>
+        <chkvcheck:parameterValueXml/>
+        <atom:link href="/sap/bc/adt/documentation/atc/documents/test/ZEXAMPLE_CL_CHECK_IMPL" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.adt.docu.v1+html"/>
+        <atom:link href="/sap/bc/adt/atc/checkvariants/formtemplate?test=ZEXAMPLE_CI_CHECK" rel="http://www.sap.com/adt/relations/technicalsettings" type="text/plain"/>
+      </chkvcheck:check>
+    </chkvFormTemplate:availableCheckCategory>
+  </chkvFormTemplate:availableCheckCategories>
+</chkvFormTemplate:formTemplate>

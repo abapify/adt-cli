@@ -6,26 +6,38 @@
  */
 
 export type ExceptionSchema = {
-    exception: {
-        namespace?: undefined | {
-            id?: string | undefined;
+  exception: {
+    namespace?:
+      | undefined
+      | {
+          id?: string | undefined;
         };
-        type?: undefined | {
-            id?: string | undefined;
+    type?:
+      | undefined
+      | {
+          id?: string | undefined;
         };
-        message?: undefined | {
-            $value?: string | undefined;
-            lang?: string | undefined;
+    message?:
+      | undefined
+      | {
+          $value?: string | undefined;
+          lang?: string | undefined;
         };
-        localizedMessage?: undefined | {
-            $value?: string | undefined;
-            lang?: string | undefined;
+    localizedMessage?:
+      | undefined
+      | {
+          $value?: string | undefined;
+          lang?: string | undefined;
         };
-        properties?: undefined | {
-            entry?: undefined | {
+    properties?:
+      | undefined
+      | {
+          entry?:
+            | undefined
+            | {
                 $value?: string | undefined;
                 key?: string | undefined;
-            }[];
+              }[];
         };
-    };
+  };
 };

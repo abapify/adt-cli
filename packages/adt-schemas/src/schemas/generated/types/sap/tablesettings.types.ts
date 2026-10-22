@@ -5,39 +5,50 @@
  * Mode: Flattened
  */
 
-export type TablesettingsSchema = {
-    tableSettings: {
-        containerRef?: undefined | {
-            extension?: undefined | unknown;
-            uri?: string | undefined;
-            parentUri?: string | undefined;
-            type?: string | undefined;
-            name?: string | undefined;
-            packageName?: string | undefined;
-            description?: string | undefined;
-        };
-        adtTemplate?: undefined | {
-            adtProperty?: undefined | {
-                $value?: string | undefined;
-                key?: string | undefined;
-            }[];
-            name?: string | undefined;
-        };
+export type TablesettingsSchema =
+  | {
+      tableSettings: {
+        containerRef?:
+          | undefined
+          | {
+              extension?:
+                | undefined
+                | {
+                    [key: string]: unknown;
+                  };
+              uri?: string | undefined;
+              parentUri?: string | undefined;
+              type?: string | undefined;
+              name?: string | undefined;
+              packageName?: string | undefined;
+              description?: string | undefined;
+            };
+        adtTemplate?:
+          | undefined
+          | {
+              adtProperty?:
+                | undefined
+                | {
+                    $value?: string | undefined;
+                    key?: string | undefined;
+                  }[];
+              name?: string | undefined;
+            };
         dataClassCategory: string;
         sizeCategory: string;
         buffering: {
-            allowed: "N" | "X" | "A";
-            type: unknown;
-            areaKeyFields: string;
+          allowed: 'N' | 'X' | 'A';
+          type: unknown;
+          areaKeyFields: string;
         };
-        storageType: "" | "R" | "C";
-        sharingType: "" | "R" | "L" | "W" | "T" | "S";
-        loadUnit: "" | "A" | "P" | "Q";
+        storageType: '' | 'R' | 'C';
+        sharingType: '' | 'R' | 'L' | 'W' | 'T' | 'S';
+        loadUnit: '' | 'A' | 'P' | 'Q';
         translation: {
-            value?: undefined | "" | "N" | "X" | "L" | "T";
-            granularity?: undefined | "" | "1" | "2";
-            isVisible?: boolean | undefined;
-            isEditable?: boolean | undefined;
+          value?: undefined | '' | 'N' | 'X' | 'L' | 'T';
+          granularity?: undefined | '' | '1' | '2';
+          isVisible?: boolean | undefined;
+          isEditable?: boolean | undefined;
         };
         loggingEnabled: boolean;
         supportsLoggingAssessment: boolean;
@@ -48,18 +59,28 @@ export type TablesettingsSchema = {
         changedAt?: string | undefined;
         createdAt?: string | undefined;
         createdBy?: string | undefined;
-        version?: undefined | "" | "active" | "inactive" | "workingArea" | "new" | "partlyActive" | "activeWithInactiveVersion";
+        version?:
+          | undefined
+          | ''
+          | 'active'
+          | 'inactive'
+          | 'workingArea'
+          | 'new'
+          | 'partlyActive'
+          | 'activeWithInactiveVersion';
         description?: string | undefined;
         descriptionTextLimit?: number | undefined;
         language?: string | undefined;
-    };
-} | {
-    loggingAssessment: {
+      };
+    }
+  | {
+      loggingAssessment: {
         allowed: boolean;
-        rating: "" | "REQUIRED" | "NOT_REQUIRED" | "MAY_BE_REQUIRED" | "UNDEFINED";
+        rating:
+          '' | 'REQUIRED' | 'NOT_REQUIRED' | 'MAY_BE_REQUIRED' | 'UNDEFINED';
         reason: string;
         isVisible?: boolean | undefined;
         isEditable?: boolean | undefined;
         name?: string | undefined;
+      };
     };
-};

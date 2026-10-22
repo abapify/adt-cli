@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ATC Check Variant Check Schema (chkvCheck)
+
+  One check entry inside the check variant form template
+  (GET /sap/bc/adt/atc/checkvariants/formtemplate): the check workbench
+  object plus the variant's parameter values for it.
+
+  Live shape (sanitized):
+  <chkvcheck:check xmlns:chkvcheck="http://www.sap.com/wbobj/atc/chkvCheck">
+    <chko:checkObject xmlns:chko="http://www.sap.com/wbobj/atc/chko"
+        adtcore:name="CI_ANALYZE_WHERE" adtcore:description="Analysis of WHERE conditions"
+        xmlns:adtcore="http://www.sap.com/adt/core">
+      <chko:content>...</chko:content>
+    </chko:checkObject>
+    <chkvcheck:parameterValueXml/>
+    <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="/sap/bc/adt/documentation/..."
+        rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.adt.docu.v1+html"/>
+  </chkvcheck:check>
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:chkvcheck="http://www.sap.com/wbobj/atc/chkvCheck"
+    xmlns:chko="http://www.sap.com/wbobj/atc/chko"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    targetNamespace="http://www.sap.com/wbobj/atc/chkvCheck"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.sap.com/wbobj/atc/chko" schemaLocation="chko.xsd"/>
+  <!-- Direct import of chkoParameter: chko's content references its elements,
+       and interface generation resolves element refs only against direct
+       imports. Without this, the check parameters are dropped from
+       generated types of dependent schemas. -->
+  <xsd:import namespace="http://www.sap.com/wbobj/atc/chkoParameter" schemaLocation="chkoParameter.xsd"/>
+  <xsd:import namespace="http://www.w3.org/2005/Atom" schemaLocation="../sap/atom.xsd"/>
+
+  <!-- One check entry of the form template -->
+  <xsd:element name="check" type="chkvcheck:Check"/>
+
+  <xsd:complexType name="Check">
+    <xsd:sequence>
+      <xsd:element ref="chko:checkObject" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="parameterValueXml" type="xsd:string" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+</xsd:schema>
