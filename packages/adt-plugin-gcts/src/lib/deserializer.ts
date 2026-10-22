@@ -29,8 +29,19 @@ import { createAdk, type AdkObject, type AdtClient } from '@abapify/adk';
 import { getHandler, getSupportedTypes } from './handlers/base';
 import { parseGctsFilename, PACKAGE_FILENAME } from './format/filename';
 
-/** Source-file extensions emitted by gCTS handlers. */
-const SOURCE_EXTENSIONS = new Set(['abap', 'asddls', 'asdcls']);
+/** Source-file extensions emitted by gCTS handlers. `.properties`
+ * translation files are deliberately excluded — they are companions
+ * routed into `data.properties`, never ABAP source staging. */
+const SOURCE_EXTENSIONS = new Set([
+  'abap',
+  'asddls',
+  'asdcls',
+  'acds',
+  'abdl',
+  'csn',
+  'xdp',
+  'ddic',
+]);
 
 /**
  * Map numeric abapLanguageVersion codes (`'5'` etc.) to the descriptive
@@ -53,6 +64,10 @@ interface ObjectFiles {
   type: string;
   metadataFile?: string;
   sourceFiles: Array<{ path: string; suffix?: string }>;
+  /** `{name}.{type}.{docu}.json` companion — not the metadata anchor. */
+  docuFile?: string;
+  /** `.properties` translations keyed by suffix (`en`, `texts.en`, `''`). */
+  propertyFiles: Array<{ path: string; suffix?: string }>;
 }
 
 /**
@@ -98,9 +113,27 @@ export async function* deserialize(
         name: parsed.name.toUpperCase(),
         type: parsed.type.toUpperCase(),
         sourceFiles: [],
+        propertyFiles: [],
       });
     }
-    objectMap.get(key)!.metadataFile = jsonPath;
+    // `{name}.{type}.docu.json` is a DOCU companion, not a second
+    // metadata anchor — without this it can overwrite metadataFile
+    // depending on glob order.
+    if (parsed.suffix === 'docu') {
+      objectMap.get(key)!.docuFile = jsonPath;
+    } else {
+      objectMap.get(key)!.metadataFile = jsonPath;
+    }
+  }
+
+  // `.properties` translation companions — routed into `data.properties`
+  // so they round-trip through metadata, not source staging.
+  for (const path of await fileTree.glob('**/*.properties')) {
+    const filename = path.split('/').pop()!;
+    const parsed = parseGctsFilename(filename);
+    if (!parsed) continue;
+    const key = `${parsed.name.toUpperCase()}:${parsed.type.toUpperCase()}`;
+    objectMap.get(key)?.propertyFiles.push({ path, suffix: parsed.suffix });
   }
 
   // Collect every source file (.abap/.asddls/.asdcls) and group by name:type.
@@ -119,6 +152,38 @@ export async function* deserialize(
     }
   }
 
+  // Pre-read all companion contents in bounded batches — sequential
+  // `await`s inside the object loop both serialize I/O and trip static
+  // analysis, while an unbounded Promise.all over thousands of files can
+  // exhaust file descriptors (EMFILE). Per-path failures are recorded
+  // (not thrown) so one unreadable file fails only its owning object
+  // inside the per-object try/catch below.
+  const companionContents = new Map<string, string>();
+  const readErrors = new Map<string, unknown>();
+  const companionPaths = [...objectMap.values()].flatMap((o) => [
+    ...(o.docuFile ? [o.docuFile] : []),
+    ...o.propertyFiles.map((f) => f.path),
+    ...o.sourceFiles.map((f) => f.path),
+  ]);
+  const READ_BATCH = 32;
+  let cursor = 0;
+  const readNext = async (): Promise<void> => {
+    const path = companionPaths[cursor++];
+    if (path === undefined) return;
+    try {
+      companionContents.set(path, await fileTree.read(path));
+    } catch (error) {
+      readErrors.set(path, error);
+    }
+    return readNext();
+  };
+  await Promise.all(
+    Array.from(
+      { length: Math.min(READ_BATCH, companionPaths.length) },
+      readNext,
+    ),
+  );
+
   for (const [, objFiles] of objectMap) {
     if (!objFiles.metadataFile) continue;
 
@@ -131,10 +196,21 @@ export async function* deserialize(
       // metadata passed to fromMetadata.
       const metadata = handler.schema.parse(raw);
 
+      // Surface any companion read failure here, inside the per-object
+      // try — one bad file fails only this object, not the generator.
+      for (const path of [
+        ...(objFiles.docuFile ? [objFiles.docuFile] : []),
+        ...objFiles.propertyFiles.map((f) => f.path),
+        ...objFiles.sourceFiles.map((f) => f.path),
+      ]) {
+        if (readErrors.has(path)) throw readErrors.get(path);
+      }
+
       // Read sources, mapping suffix → source key via handler map.
       const sources: Record<string, string> = {};
       for (const { path, suffix } of objFiles.sourceFiles) {
-        const content = await fileTree.read(path);
+        const content = companionContents.get(path);
+        if (content === undefined) continue;
         const sourceKey = suffix
           ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
           : 'main';
@@ -148,6 +224,29 @@ export async function* deserialize(
       } = handler.fromAbapGit
         ? handler.fromAbapGit(metadata)
         : { name: objFiles.name };
+
+      // DOCU companion → `data.docu` (genericGetExtraFiles re-emits it).
+      const docuRaw = objFiles.docuFile
+        ? companionContents.get(objFiles.docuFile)
+        : undefined;
+      if (docuRaw !== undefined) {
+        try {
+          payload.docu = JSON.parse(docuRaw) as unknown;
+        } catch {
+          payload.docu = docuRaw;
+        }
+      }
+
+      // `.properties` translations → `data.properties` keyed by suffix
+      // ('' = master file, 'en', 'texts.en', …).
+      if (objFiles.propertyFiles.length > 0) {
+        const props: Record<string, string> = {};
+        for (const { path, suffix } of objFiles.propertyFiles) {
+          const content = companionContents.get(path);
+          if (content !== undefined) props[suffix ?? ''] = content;
+        }
+        payload.properties = props;
+      }
 
       // AFF metadata frequently omits the object name (it's encoded in the
       // filename). Fall back to the filename-derived name.

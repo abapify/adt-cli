@@ -31,6 +31,19 @@ const TYPE_TO_SOURCE_EXT: Record<string, string> = {
   DCLS: 'asdcls',
   BDEF: 'abdl',
   SRVD: 'acds',
+  // AFF-`.acds` CDS-family sources (upstream examples are uniform:
+  // `<name>.<type>.acds` for every CDS-bearing type).
+  DDLA: 'acds',
+  DDLX: 'acds',
+  DTSC: 'acds',
+  DTIX: 'acds',
+  DTEB: 'acds',
+  DTDC: 'acds',
+  DRAS: 'acds',
+  DRTY: 'acds',
+  DSFD: 'acds',
+  CSNM: 'csn',
+  SFPF: 'xdp',
 };
 
 /** Metadata extension for all AFF/gCTS objects. */
@@ -64,6 +77,19 @@ export function gctsFilename(
     : `${base}.${typeLower}.${ext}`;
 }
 
+/** Source/companion extensions recognised by the spec file-name grammar. */
+const KNOWN_SOURCE_EXTS = new Set([
+  'abap',
+  'asddls',
+  'asdcls',
+  'abdl',
+  'acds',
+  'csn',
+  'xdp',
+  'ddic',
+  'properties',
+]);
+
 /**
  * Parse an AFF/gCTS filename back into its components.
  *
@@ -75,53 +101,80 @@ export function parseGctsFilename(
 ): ParsedFormatFilename | undefined {
   // Fixed package filename.
   if (filename === PACKAGE_FILENAME) {
-    return {
-      name: '',
-      type: 'DEVC',
-      extension: METADATA_EXTENSION,
-    };
+    return { name: '', type: 'DEVC', extension: METADATA_EXTENSION };
   }
 
   const parts = filename.split('.');
-  if (parts.length < 3) {
-    return undefined;
-  }
+  if (parts.length < 3) return undefined;
 
   const extension = parts.at(-1)!;
-  const maybeSuffix = parts.length >= 4 ? parts.at(-2) : undefined;
-  const nameParts = maybeSuffix ? parts.slice(0, -3) : parts.slice(0, -2);
+  if (extension === METADATA_EXTENSION) return parseMetadataName(parts);
+  if (extension === 'properties') return parsePropertiesName(parts);
+  return parseSourceName(parts, extension);
+}
 
-  if (nameParts.length === 0) {
-    return undefined;
-  }
-
-  // For 3-part filenames (name.type.ext) the "maybeSuffix" branch would
-  // misclassify a 4-part filename vs a 3-part filename. Use a recognised
-  // source extension to decide: if ext is 'json' there can't be a suffix.
-  if (extension === METADATA_EXTENSION) {
+/**
+ * `{name}.{type}.json` metadata files, plus the DOCU companion form
+ * `{name}.{type}.docu.json` which belongs to the parent object.
+ */
+function parseMetadataName(parts: string[]): ParsedFormatFilename {
+  if (parts.at(-2) === 'docu' && parts.length >= 4) {
     return {
-      name: nameParts.length === 0 ? '' : parts.slice(0, -2).join('.'),
-      type: parts.at(-2)!.toUpperCase(),
-      extension,
+      name: parts.slice(0, -3).join('.'),
+      type: parts.at(-3)!.toUpperCase(),
+      suffix: 'docu',
+      extension: METADATA_EXTENSION,
     };
   }
+  return {
+    name: parts.slice(0, -2).join('.'),
+    type: parts.at(-2)!.toUpperCase(),
+    extension: METADATA_EXTENSION,
+  };
+}
 
-  // Source file — suffix is optional.
-  const knownSourceExts = new Set([
-    'abap',
-    'asddls',
-    'asdcls',
-    'abdl',
-    'acds',
-    'properties',
-  ]);
-  if (!knownSourceExts.has(extension)) {
-    return undefined;
+/**
+ * `.properties` text files have their own grammar:
+ *   {name}.{type}.properties                        — master (3 parts)
+ *   {name}.{type}.{lang}.properties                 — language (4 parts)
+ *   {name}.{type}.{content_type}.{lang}.properties  — e.g. PROG
+ *   selections/headings/texts (5 parts)
+ * The composite suffix (`de`, `texts.en`) stays opaque — handlers map
+ * suffixes to source keys via `suffixToSourceKey`.
+ */
+function parsePropertiesName(parts: string[]): ParsedFormatFilename {
+  if (parts.length >= 5) {
+    return {
+      name: parts.slice(0, -4).join('.'),
+      type: parts.at(-4)!.toUpperCase(),
+      suffix: `${parts.at(-3)}.${parts.at(-2)}`,
+      extension: 'properties',
+    };
   }
+  if (parts.length === 4) {
+    return {
+      name: parts.slice(0, -3).join('.'),
+      type: parts.at(-3)!.toUpperCase(),
+      suffix: parts.at(-2),
+      extension: 'properties',
+    };
+  }
+  return {
+    name: parts.slice(0, -2).join('.'),
+    type: parts.at(-2)!.toUpperCase(),
+    extension: 'properties',
+  };
+}
 
-  // Detect suffix: the part before the extension is a suffix only if the part
-  // before THAT is a valid-looking lowercase type code. Use a narrow heuristic:
-  // suffix present iff parts.length >= 4.
+/**
+ * `{name}.{type}.{ext}` and `{name}.{type}.{suffix}.{ext}` source files —
+ * a suffix is present iff there are ≥4 dot-segments.
+ */
+function parseSourceName(
+  parts: string[],
+  extension: string,
+): ParsedFormatFilename | undefined {
+  if (!KNOWN_SOURCE_EXTS.has(extension)) return undefined;
   if (parts.length >= 4) {
     return {
       name: parts.slice(0, -3).join('.'),
@@ -130,7 +183,6 @@ export function parseGctsFilename(
       extension,
     };
   }
-
   return {
     name: parts.slice(0, -2).join('.'),
     type: parts.at(-2)!.toUpperCase(),

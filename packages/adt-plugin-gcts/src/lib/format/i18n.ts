@@ -43,11 +43,34 @@ export function propertiesFilename(
   name: string,
   type: string,
   language?: string,
+  contentType?: string,
 ): string {
+  // A content-type segment without a language would emit the ambiguous
+  // 4-part `{name}.{type}.{ct}.properties`, which reparses as a language
+  // file — the AFF grammar only defines 3-, 4- (lang) and 5-part forms.
+  if (contentType && !language) {
+    throw new Error(
+      'propertiesFilename: contentType requires a language — ' +
+        'the 4-part `{name}.{type}.{content_type}.properties` form is ambiguous',
+    );
+  }
+  // Filename segments are dot-separated — a dotted value would parse back
+  // with a different suffix/language than it was emitted with.
+  for (const [label, seg] of [
+    ['contentType', contentType],
+    ['language', language],
+  ] as const) {
+    if (seg?.includes('.')) {
+      throw new Error(
+        `propertiesFilename: ${label} must be a single filename segment, got "${seg}"`,
+      );
+    }
+  }
   const base = gctsFilename(name, type, 'metadata').replace(/\.json$/, '');
-  return language
-    ? `${base}.${language.toLowerCase()}.properties`
-    : `${base}.properties`;
+  const segments = [base];
+  if (contentType) segments.push(contentType.toLowerCase());
+  if (language) segments.push(language.toLowerCase());
+  return `${segments.join('.')}.properties`;
 }
 
 /**
@@ -57,18 +80,23 @@ export function propertiesFilename(
  * @param type        ABAP object type code
  * @param translations Map of language code → entries. The key '' (empty
  *                    string) represents the master / default language.
+ * @param contentType  Optional content-type segment (e.g. `texts`,
+ *                    `selections`, `headings`) — emits the 5-part
+ *                    `{name}.{type}.{content_type}.{lang}.properties`
+ *                    form and therefore requires a non-empty language key.
  */
 export function createPropertiesFiles(
   name: string,
   type: string,
   translations: Record<string, TranslationEntry[]>,
+  contentType?: string,
 ): PropertiesFile[] {
   const files: PropertiesFile[] = [];
   for (const [lang, entries] of Object.entries(translations)) {
     if (!entries || entries.length === 0) continue;
     const path = lang
-      ? propertiesFilename(name, type, lang)
-      : propertiesFilename(name, type);
+      ? propertiesFilename(name, type, lang, contentType)
+      : propertiesFilename(name, type, undefined, contentType);
     files.push({ path, content: buildProperties(entries) });
   }
   return files;
