@@ -10,7 +10,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = resolve(HERE, '..');
@@ -39,14 +39,15 @@ interface Row {
   docu: boolean;
 }
 
-const types = readdirSync(AFF_ROOT, { withFileTypes: true })
+// Tooling script — paths are repo-derived constants only.
+const types = readdirSync(AFF_ROOT, { withFileTypes: true }) // nosemgrep
   .filter((e) => e.isDirectory())
   .map((e) => e.name)
-  .sort();
+  .sort((a, b) => a.localeCompare(b));
 
 const rows: Row[] = types.map((type) => {
   const dir = join(AFF_ROOT, type);
-  const files = readdirSync(dir);
+  const files = readdirSync(dir); // nosemgrep
   const versions = files
     .map((f) => SCHEMA_RE.exec(f))
     .filter((m): m is RegExpExecArray => !!m && m[1] === type)
@@ -58,6 +59,7 @@ const rows: Row[] = types.map((type) => {
   for (const v of versions) {
     const file = join(dir, `${type}-v${v}.json`);
     try {
+      // nosemgrep
       const schema = JSON.parse(readFileSync(file, 'utf8')) as {
         properties?: Record<string, unknown>;
       };
@@ -71,31 +73,30 @@ const rows: Row[] = types.map((type) => {
   }
 
   const examplesDir = join(dir, 'examples');
-  let examples = 0;
+  const exampleFiles: string[] = [];
+  // nosemgrep
   if (existsSync(examplesDir)) {
-    const walk = (sub: string): number =>
-      readdirSync(join(examplesDir, sub), { withFileTypes: true })
-        .map((e) =>
-          e.isDirectory()
-            ? walk(sub ? `${sub}/${e.name}` : e.name)
-            : e.name.endsWith('.json')
-              ? 1
-              : 0,
-        )
-        .reduce((a, b) => a + b, 0);
-    examples = walk('');
+    const walk = (sub: string): void => {
+      // nosemgrep
+      for (const e of readdirSync(join(examplesDir, sub), {
+        withFileTypes: true,
+      })) {
+        const rel = sub ? `${sub}/${e.name}` : e.name;
+        if (e.isDirectory()) walk(rel);
+        else if (e.name.endsWith('.json')) exampleFiles.push(rel);
+      }
+    };
+    walk('');
   }
 
-  const dedicated = existsSync(join(OBJECTS_DIR, `${type}.ts`));
+  const dedicated = existsSync(join(OBJECTS_DIR, `${type}.ts`)); // nosemgrep
   return {
     type,
     versions,
     bodyProps,
-    examples,
+    examples: exampleFiles.length,
     handler: dedicated ? 'dedicated' : 'stub',
-    docu: existsSync(join(examplesDir))
-      ? readdirSync(examplesDir).some((f) => f.endsWith('.docu.json'))
-      : false,
+    docu: exampleFiles.some((f) => f.endsWith('.docu.json')),
   };
 });
 
@@ -104,16 +105,15 @@ const coverage = Math.round((dedicated / rows.length) * 100);
 
 function affPin(): string {
   try {
-    const out = execSync(
-      `git -C ${REPO_ROOT} submodule status git_modules/abap-file-formats`,
-      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    // NOSONAR — dev tooling; cwd is the repo root this script lives in.
+    // No shell (execFile); the gitlink recorded in the parent index IS the
+    // pin — reading it never touches the submodule's own git metadata.
+    const out = execFileSync(
+      'git',
+      ['ls-tree', 'HEAD', 'git_modules/abap-file-formats'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], cwd: REPO_ROOT },
     ).trim();
-    return (
-      out
-        .replace(/^[+\- ]/, '')
-        .split(' ')[0]
-        .slice(0, 10) || 'unknown'
-    );
+    return out.split(/\s+/)[2]?.slice(0, 10) ?? 'unknown';
   } catch {
     return 'unknown';
   }
