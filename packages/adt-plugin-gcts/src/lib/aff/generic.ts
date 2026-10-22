@@ -29,6 +29,10 @@ export type GenericAffLike = {
   abapLanguageVersion?: string;
   /** Raw payload fields (deserialized AFF body, ADT response, …). */
   data?: Record<string, unknown>;
+  /** Companion sources keyed by file suffix — `main` → no suffix
+   *  (`{name}.{type}.{ext}`), any other key becomes the middle segment
+   *  (`{name}.{type}.{key}.{ext}`, e.g. csnm's `model_inferred`). */
+  sources?: Record<string, string>;
 };
 
 export function genericToMetadata(type: string) {
@@ -61,6 +65,72 @@ export function genericToMetadata(type: string) {
       if (value !== undefined) meta[prop] = value;
     }
     return meta;
+  };
+}
+
+/**
+ * Companion-source emit for source-bearing types (`.abap`, `.acds`,
+ * `.csn`, …): reads `obj.sources` — `main` emits the suffix-less file,
+ * other keys emit `{name}.{type}.{suffix}.{ext}`. Falls back to
+ * `obj.getSource()` as the single `main` source.
+ */
+export function genericGetSources(obj: GenericAffLike) {
+  if (obj.sources && Object.keys(obj.sources).length > 0) {
+    return Object.entries(obj.sources)
+      .filter(([, content]) => !!content)
+      .map(([key, content]) => ({
+        suffix: key === 'main' ? undefined : key,
+        content,
+      }));
+  }
+  const getSource = (obj as { getSource?: () => string | Promise<string> })
+    .getSource;
+  const src = typeof getSource === 'function' ? getSource.call(obj) : undefined;
+  return src ? [{ suffix: undefined, content: src }] : [];
+}
+
+/**
+ * DOCU companion emit: `data.docu` carries the raw DOCU JSON document —
+ * emitted as `{name}.{type}.docu.json` beside the main metadata file
+ * (AFF spec: DOCU is companion metadata, not a standalone object).
+ */
+export function genericGetExtraFiles(type: string) {
+  return (obj: GenericAffLike) => {
+    const docu = obj.data?.docu;
+    if (docu === undefined || docu === null) return [];
+    const name = (obj.name ?? '').toLowerCase();
+    // Parsed documents re-serialize; a raw string (unparseable JSON kept
+    // by genericSetSources) re-emits verbatim instead of double-encoding.
+    const content =
+      typeof docu === 'string' ? docu : JSON.stringify(docu, null, 2) + '\n';
+    return [
+      {
+        path: `${name}.${type.toLowerCase()}.docu.json`,
+        content,
+      },
+    ];
+  };
+}
+
+/** Deserialize side: stage companion sources back onto the object. */
+export function genericSetSources(
+  obj: GenericAffLike,
+  sources: Record<string, string>,
+): void {
+  const data = (obj.data ??= {});
+  const { docu, ...rest } = sources;
+  // DOCU companions are JSON documents, not source text — parse once,
+  // re-emit via genericGetExtraFiles.
+  if (docu !== undefined) {
+    try {
+      data.docu = JSON.parse(docu) as unknown;
+    } catch {
+      data.docu = docu;
+    }
+  }
+  data.sources = {
+    ...(data.sources as Record<string, string> | undefined),
+    ...rest,
   };
 }
 

@@ -113,13 +113,20 @@ export function parseGctsFilename(
   return parseSourceName(parts, extension);
 }
 
-/** `{name}.{type}.json` metadata files. */
+/**
+ * `{name}.{type}.json`, plus the DOCU companion form
+ * `{name}.{type}.docu.json` which belongs to the parent object.
+ */
 function parseMetadataName(parts: string[]): ParsedFormatFilename {
-  return {
-    name: parts.slice(0, -2).join('.'),
-    type: parts.at(-2)!.toUpperCase(),
+  const docu = parts.at(-2) === 'docu' && parts.length >= 4;
+  const offset = docu ? -3 : -2;
+  const parsed: ParsedFormatFilename = {
+    name: parts.slice(0, offset).join('.'),
+    type: parts.at(offset)!.toUpperCase(),
     extension: METADATA_EXTENSION,
   };
+  if (docu) parsed.suffix = 'docu';
+  return parsed;
 }
 
 /**
