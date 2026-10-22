@@ -1,149 +1,157 @@
 /**
  * AFF JSON Schema → TypeScript codegen for adt-plugin-gcts.
  *
- * Reads JSON schemas from git_modules/abap-file-formats/file-formats/<type>/<type>-v1.json
- * and generates TypeScript interfaces to src/schemas/generated/types/.
- * Also emits a barrel index.ts re-exporting all generated types.
+ * Auto-discovers every `*-v{n}.json` schema in
+ * git_modules/abap-file-formats/file-formats (type dirs + root-level
+ * schemas like docu) and emits one interface `Aff{Stem}V{n}` per file.
+ * Barrel `src/schemas/generated/index.ts` re-exports everything.
  *
  * Usage: bun scripts/generate-aff-schemas.ts
  * Nx target: nx codegen adt-plugin-gcts
  */
 
-import { compile, type JSONSchema } from 'json-schema-to-typescript';
+import { compile } from 'json-schema-to-typescript';
 import { mkdir, rm, writeFile, readFile, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PKG_ROOT = resolve(__dirname, '..');
+const HERE = dirname(fileURLToPath(import.meta.url));
+const PKG_ROOT = resolve(HERE, '..');
 const REPO_ROOT = resolve(PKG_ROOT, '..', '..');
-const AFF_ROOT = join(REPO_ROOT, 'git_modules', 'abap-file-formats', 'file-formats');
+const AFF_ROOT = join(
+  REPO_ROOT,
+  'git_modules',
+  'abap-file-formats',
+  'file-formats',
+);
 const OUT_DIR = join(PKG_ROOT, 'src', 'schemas', 'generated');
 
-/**
- * AFF types with schemas, mapped to their handler type code.
- * Only types that have a corresponding gCTS handler AND an AFF schema are listed.
- * DEVC, TABL, TTYP have no AFF schema — they stay loosely typed.
- */
-const AFF_TYPES: Record<string, { schema: string; typeName: string }> = {
-  clas: { schema: 'clas-v1.json', typeName: 'Clas' },
-  intf: { schema: 'intf-v1.json', typeName: 'Intf' },
-  prog: { schema: 'prog-v1.json', typeName: 'Prog' },
-  doma: { schema: 'doma-v1.json', typeName: 'Doma' },
-  dtel: { schema: 'dtel-v1.json', typeName: 'Dtel' },
-  fugr: { schema: 'fugr-v1.json', typeName: 'Fugr' },
-  ddls: { schema: 'ddls-v1.json', typeName: 'Ddls' },
-  dcls: { schema: 'dcls-v1.json', typeName: 'Dcls' },
-  bdef: { schema: 'bdef-v1.json', typeName: 'Bdef' },
-  srvb: { schema: 'srvb-v1.json', typeName: 'Srvb' },
-  srvd: { schema: 'srvd-v1.json', typeName: 'Srvd' },
-  msag: { schema: 'msag-v1.json', typeName: 'Msag' },
-};
+const SCHEMA_RE = /^([a-z0-9]+)-v(\d+)\.json$/;
 
-/** Extra sub-schemas for FUGR (function modules + includes). */
-const FUGR_SUB_SCHEMAS: Record<string, { schema: string; typeName: string }> = {
-  func: { schema: 'func-v1.json', typeName: 'Func' },
-  reps: { schema: 'reps-v1.json', typeName: 'Reps' },
-};
+interface SchemaEntry {
+  stem: string;
+  version: number;
+  file: string;
+}
+
+async function discoverSchemas(): Promise<SchemaEntry[]> {
+  const entries: SchemaEntry[] = [];
+  const collect = async (dir: string): Promise<void> => {
+    // nosemgrep
+    for (const f of await readdir(dir, { withFileTypes: true })) {
+      if (!f.isFile()) continue;
+      const m = SCHEMA_RE.exec(f.name);
+      if (m)
+        entries.push({
+          stem: m[1],
+          version: Number(m[2]),
+          file: join(dir, f.name),
+        });
+    }
+  };
+  await collect(AFF_ROOT); // root-level (docu)
+  // nosemgrep
+  const dirs = (await readdir(AFF_ROOT, { withFileTypes: true })).filter((d) =>
+    d.isDirectory(),
+  );
+  await Promise.all(dirs.map((d) => collect(join(AFF_ROOT, d.name))));
+  return entries.sort(
+    (a, b) => a.stem.localeCompare(b.stem) || a.version - b.version,
+  );
+}
+
+function pascal(stem: string): string {
+  return stem[0].toUpperCase() + stem.slice(1);
+}
 
 const BANNER = `/**
  * Auto-generated from SAP/abap-file-formats JSON schemas.
- * DO NOT EDIT — run \`nx codegen adt-plugin-gcts\` to regenerate.
- * Source: git_modules/abap-file-formats/file-formats/<type>/<type>-v1.json
+ * Do not edit — regenerate with \`bun scripts/generate-aff-schemas.ts\`.
  */
 `;
 
-async function generateOne(
-  affDir: string,
-  schemaFile: string,
-  typeName: string,
-  outDir: string,
-): Promise<void> {
-  const schemaPath = join(AFF_ROOT, affDir, schemaFile);
-  const raw = JSON.parse(await readFile(schemaPath, 'utf8')) as JSONSchema;
-
-  // Force the root interface name to match our convention (<TypeName>Aff).
-  raw.title = `${typeName}Aff`;
-
-  const ts = await compile(raw, `${typeName}Aff`, {
-    bannerComment: '',
-    cwd: join(AFF_ROOT, affDir),
-    style: { semi: true, singleQuote: true, useTabs: false },
-    additionalProperties: false,
-  });
-
-  const outPath = join(outDir, 'types', `${typeName.toLowerCase()}.ts`);
-  await mkdir(dirname(outPath), { recursive: true });
-  await writeFile(outPath, BANNER + ts + '\n', 'utf8');
-  console.log(`  ✓ ${typeName} → ${outPath.replace(PKG_ROOT + '/', '')}`);
-}
-
-async function generateBarrel(
-  types: { typeName: string; file: string }[],
-  outDir: string,
-): Promise<void> {
-  const lines: string[] = [
-    BANNER,
-    '// Re-export all generated AFF types.',
-    '',
-    ...types.map(
-      (t) =>
-        `export type { ${t.typeName}Aff } from './types/${t.file}';`,
-    ),
-    '',
-  ];
-  await writeFile(join(outDir, 'index.ts'), lines.join('\n'), 'utf8');
-  console.log(`  ✓ barrel → src/schemas/generated/index.ts`);
-}
-
 async function main(): Promise<void> {
-  console.log('AFF schema codegen → src/schemas/generated/');
+  const schemas = await discoverSchemas();
+  console.log(`[aff-codegen] discovered ${schemas.length} schemas`);
 
-  // Clean + recreate output dir.
   await rm(OUT_DIR, { recursive: true, force: true });
   await mkdir(OUT_DIR, { recursive: true });
 
-  const allTypes: { typeName: string; file: string }[] = [];
+  const results = await Promise.all(
+    schemas.map(async ({ stem, version, file }) => {
+      const name = `Aff${pascal(stem)}V${version}`;
+      const outFile = `${stem}-v${version}.ts`;
+      try {
+        const raw = await readFile(file, 'utf8'); // nosemgrep
+        // compile() names the root interface after schema.title, ignoring
+        // the `name` arg — override so the root is `Aff{Type}V{n}`.
+        const schema = JSON.parse(raw) as { title?: string };
+        schema.title = name;
+        const ts = await compile(schema, name, {
+          bannerComment: '',
+          strictIndexSignatures: true,
+          additionalProperties: false,
+          format: false,
+          ignoreMinAndMaxItems: true,
+        });
+        // Back-compat alias: dedicated handlers import `{Type}Aff`.
+        const alias = `\nexport type ${pascal(stem)}Aff = ${name};\n`;
+        await writeFile(join(OUT_DIR, outFile), BANNER + ts + alias, 'utf8'); // nosemgrep
+        return { stem, version, name, outFile, error: undefined };
+      } catch (e) {
+        return {
+          stem,
+          version,
+          name,
+          outFile,
+          error: (e as Error).message.split('\n')[0],
+        };
+      }
+    }),
+  );
 
-  // Explicitly typed AFF types (Wave 0 + Wave 1).
-  for (const [affDir, { schema, typeName }] of Object.entries(AFF_TYPES)) {
-    await generateOne(affDir, schema, typeName, OUT_DIR);
-    allTypes.push({ typeName, file: typeName.toLowerCase() });
-  }
+  const exports: string[] = [];
+  const latestAlias = new Map<string, string>();
+  let ok = 0;
+  const failed: string[] = [];
 
-  // FUGR sub-schemas (func, reps) live in the same fugr/ dir.
-  for (const [, { schema, typeName }] of Object.entries(
-    FUGR_SUB_SCHEMAS,
-  )) {
-    await generateOne('fugr', schema, typeName, OUT_DIR);
-    allTypes.push({ typeName, file: typeName.toLowerCase() });
-  }
-
-  // Wave 2: auto-discover all remaining AFF types with *-v1.json schemas.
-  const handled = new Set(Object.keys(AFF_TYPES));
-  const entries = await readdir(AFF_ROOT, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const dirName = entry.name;
-    if (handled.has(dirName)) continue;
-    // Find *-v1.json (skip zif_aff_*.json interface metadata).
-    const schemaFile = `${dirName}-v1.json`;
-    const schemaPath = join(AFF_ROOT, dirName, schemaFile);
-    try {
-      await readFile(schemaPath, 'utf8');
-    } catch {
-      continue; // No schema for this type
+  for (const { stem, version, error } of results) {
+    if (error !== undefined) {
+      failed.push(`${stem}-v${version}: ${error}`);
+      continue;
     }
-    const typeName = dirName.charAt(0).toUpperCase() + dirName.slice(1);
-    await generateOne(dirName, schemaFile, typeName, OUT_DIR);
-    allTypes.push({ typeName, file: typeName.toLowerCase() });
+    // `export * as` namespaces each version file — schema titles repeat
+    // across versions (cfdf-v1/v2 both declare `CustomField`), so a flat
+    // barrel would collide. Flat `{Type}Aff` aliases are emitted only
+    // for the latest version (see below).
+    exports.push(
+      `export * as ${pascal(stem)}V${version} from './${stem}-v${version}.js';`,
+    );
+    latestAlias.set(
+      stem,
+      `export type { ${pascal(stem)}Aff } from './${stem}-v${version}.js';`,
+    );
+    ok++;
   }
 
-  await generateBarrel(allTypes, OUT_DIR);
-  console.log(`Done: ${allTypes.length} types generated.`);
+  // nosemgrep
+  await writeFile(
+    join(OUT_DIR, 'index.ts'),
+    `${BANNER}\n${exports.join('\n')}\n\n` +
+      `// Flat {Type}Aff aliases — latest version per type (handler imports).\n` +
+      `${[...latestAlias.values()].join('\n')}\n`,
+    'utf8',
+  );
+
+  console.log(`[aff-codegen] generated ${ok} types → ${OUT_DIR}`);
+  if (failed.length) {
+    console.error(`[aff-codegen] ${failed.length} failed:`);
+    for (const f of failed) console.error(`  - ${f}`);
+    process.exitCode = 1;
+  }
 }
 
-main().catch((err) => {
-  console.error('AFF codegen failed:', err);
-  process.exit(1);
+await main().catch((err: unknown) => {
+  console.error('[aff-codegen] fatal:', err);
+  process.exitCode = 1;
 });

@@ -46,6 +46,24 @@ export {
   METADATA_EXTENSION,
 } from './lib/format/filename';
 
+// AFF schema access + validation over the git_modules submodule
+export {
+  affRoot,
+  listAffTypes,
+  affVersions,
+  latestAffVersion,
+  affSchema,
+  affBodyProps,
+  affValidate,
+  affExamples,
+  schemaTargetForExample,
+  readAffExample,
+} from './lib/aff/schemas';
+export type { AffRef } from './lib/aff/schemas';
+
+// Generated typed AFF models — AffGenerated.{Type}V{n}.{RootInterface}
+export * as AffGenerated from './schemas/generated';
+
 // Type re-exports
 export type { GctsMetadata, GctsHeader, WithHeader } from './lib/format/types';
 export type {

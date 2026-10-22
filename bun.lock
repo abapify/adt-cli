@@ -380,6 +380,7 @@
       "dependencies": {
         "@abapify/adk": "0.4.19",
         "@abapify/adt-plugin": "0.4.19",
+        "ajv": "^8.20.0",
       },
       "devDependencies": {
         "json-schema-to-typescript": "15.0.4",
