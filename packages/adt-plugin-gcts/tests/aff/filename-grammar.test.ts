@@ -14,6 +14,8 @@ import { fileURLToPath } from 'node:url';
 import {
   parseGctsFilename,
   gctsFilename,
+  sourceKey,
+  splitSourceKey,
 } from '../../src/lib/format/filename.ts';
 
 const AFF_EXAMPLES = join(
@@ -76,6 +78,94 @@ describe('parseGctsFilename — upstream example shapes', () => {
   it('LIMU sub-object: fugr.reps.json parses as metadata', () => {
     const p = parseGctsFilename('z_aff_example_fugr.fugr.reps.json');
     assert.equal(p?.extension, 'json');
+  });
+});
+
+describe('LIMU sub-objects — `{parent}.{ptype}.{sub}.{stype}.{ext}`', () => {
+  it('routes .func.json to the parent FUGR object', () => {
+    const p = parseGctsFilename(
+      'z_aff_example_fugr.fugr.z_aff_example_func.func.json',
+    );
+    assert.equal(p?.name, 'z_aff_example_fugr');
+    assert.equal(p?.type, 'FUGR');
+    assert.equal(p?.suffix, 'z_aff_example_func.func');
+    assert.equal(p?.extension, 'json');
+  });
+
+  it('routes .reps.abap sources the same way', () => {
+    const p = parseGctsFilename(
+      'z_aff_example_fugr.fugr.lz_aff_example_fugrtop.reps.abap',
+    );
+    assert.equal(p?.name, 'z_aff_example_fugr');
+    assert.equal(p?.type, 'FUGR');
+    assert.equal(p?.suffix, 'lz_aff_example_fugrtop.reps');
+    assert.equal(p?.extension, 'abap');
+  });
+
+  it('every upstream LIMU filename resolves to its parent type', () => {
+    const fugrDir = join(AFF_EXAMPLES, 'fugr', 'examples');
+    for (const f of readdirSync(fugrDir)) {
+      if (!f.includes('.')) continue;
+      const p = parseGctsFilename(f);
+      assert.equal(p?.type, 'FUGR', `${f} must resolve to FUGR`);
+    }
+  });
+});
+
+describe('source keys — extension-aware encoding', () => {
+  it('sourceKey encodes non-default extensions into the key', () => {
+    assert.equal(sourceKey('FUGR', 'z_func.func', 'json'), 'z_func.func.json');
+    assert.equal(sourceKey('FUGR', 'z_func.func', 'abap'), 'z_func.func');
+    assert.equal(
+      sourceKey('PROG', 'texts.en', 'properties'),
+      'texts.en.properties',
+    );
+    assert.equal(sourceKey('CSNM', 'model_inferred', 'csn'), 'model_inferred');
+    // suffix-less companion with non-default ext: `name.prog.properties`
+    assert.equal(sourceKey('PROG', 'main', 'properties'), 'main.properties');
+    assert.equal(sourceKey('PROG', 'main', 'abap'), 'main');
+  });
+
+  it('splitSourceKey inverts it', () => {
+    assert.deepEqual(splitSourceKey('z_func.func.json'), {
+      suffix: 'z_func.func',
+      ext: 'json',
+    });
+    assert.deepEqual(splitSourceKey('texts.en.properties'), {
+      suffix: 'texts.en',
+      ext: 'properties',
+    });
+    assert.deepEqual(splitSourceKey('z_func.func'), {
+      suffix: 'z_func.func',
+      ext: undefined,
+    });
+    assert.deepEqual(splitSourceKey('model_inferred'), {
+      suffix: 'model_inferred',
+      ext: undefined,
+    });
+    assert.deepEqual(splitSourceKey('main'), {
+      suffix: undefined,
+      ext: undefined,
+    });
+    assert.deepEqual(splitSourceKey('main.properties'), {
+      suffix: undefined,
+      ext: 'properties',
+    });
+  });
+
+  it('gctsFilename emits LIMU and .properties filenames', () => {
+    assert.equal(
+      gctsFilename('z_fugr', 'FUGR', 'source', 'z_func.func', 'json'),
+      'z_fugr.fugr.z_func.func.json',
+    );
+    assert.equal(
+      gctsFilename('z_prog', 'PROG', 'source', 'texts.en', 'properties'),
+      'z_prog.prog.texts.en.properties',
+    );
+    assert.equal(
+      gctsFilename('z_fugr', 'FUGR', 'source', 'z_func.func'),
+      'z_fugr.fugr.z_func.func.abap',
+    );
   });
 });
 

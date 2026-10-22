@@ -26,8 +26,16 @@
 
 import type { FileTree, ExportOptions } from '@abapify/adt-plugin';
 import { createAdk, type AdkObject, type AdtClient } from '@abapify/adk';
-import { getHandler, getSupportedTypes } from './handlers/base';
-import { parseGctsFilename, PACKAGE_FILENAME } from './format/filename';
+import {
+  getHandler,
+  getSupportedTypes,
+  type GctsHandler,
+} from './handlers/base';
+import {
+  parseGctsFilename,
+  PACKAGE_FILENAME,
+  sourceKey,
+} from './format/filename';
 
 /** Source-file extensions emitted by gCTS handlers. `.properties`
  * translation files are deliberately excluded — they are companions
@@ -63,7 +71,7 @@ interface ObjectFiles {
   name: string;
   type: string;
   metadataFile?: string;
-  sourceFiles: Array<{ path: string; suffix?: string }>;
+  sourceFiles: Array<{ path: string; suffix?: string; ext?: string }>;
   /** `{name}.{type}.{docu}.json` companion — not the metadata anchor. */
   docuFile?: string;
   /** `.properties` translations keyed by suffix (`en`, `texts.en`, `''`). */
@@ -118,9 +126,18 @@ export async function* deserialize(
     }
     // `{name}.{type}.docu.json` is a DOCU companion, not a second
     // metadata anchor — without this it can overwrite metadataFile
-    // depending on glob order.
+    // depending on glob order. Other suffixed `.json` companions (LIMU
+    // sub-object metadata, `{sub}.{stype}`) flow through the source
+    // pipeline with an explicit `json` ext marker.
     if (parsed.suffix === 'docu') {
       objectMap.get(key)!.docuFile = jsonPath;
+    } else if (parsed.suffix) {
+      objectMap.get(key)!.sourceFiles.push({
+        path: jsonPath,
+        suffix: parsed.suffix,
+        ext: 'json',
+      });
+      continue;
     } else {
       objectMap.get(key)!.metadataFile = jsonPath;
     }
@@ -148,17 +165,21 @@ export async function* deserialize(
       const obj = objectMap.get(key);
       if (!obj) continue;
 
-      obj.sourceFiles.push({ path, suffix: parsed.suffix });
+      obj.sourceFiles.push({
+        path,
+        suffix: parsed.suffix,
+        ext: parsed.extension,
+      });
     }
   }
 
-  // Pre-read all companion contents in bounded batches — sequential
-  // `await`s inside the object loop both serialize I/O and trip static
-  // analysis, while an unbounded Promise.all over thousands of files can
-  // exhaust file descriptors (EMFILE). Per-path failures are recorded
-  // (not thrown) so one unreadable file fails only its owning object
-  // inside the per-object try/catch below.
-  const companionContents = new Map<string, string>();
+  // Pre-read all companion + source contents in bounded batches —
+  // sequential `await`s inside the object loop both serialize I/O and
+  // trip static analysis, while an unbounded Promise.all over thousands
+  // of files can exhaust file descriptors (EMFILE). Per-path failures
+  // are recorded (not thrown) so one unreadable file fails only its
+  // owning object inside the per-object try/catch below.
+  const fileContents = new Map<string, string>();
   const readErrors = new Map<string, unknown>();
   const companionPaths = [...objectMap.values()].flatMap((o) => [
     ...(o.docuFile ? [o.docuFile] : []),
@@ -171,7 +192,7 @@ export async function* deserialize(
     const path = companionPaths[cursor++];
     if (path === undefined) return;
     try {
-      companionContents.set(path, await fileTree.read(path));
+      fileContents.set(path, await fileTree.read(path));
     } catch (error) {
       readErrors.set(path, error);
     }
@@ -195,116 +216,15 @@ export async function* deserialize(
       // Handler schema.parse is plain JSON.parse — the parsed object IS the
       // metadata passed to fromMetadata.
       const metadata = handler.schema.parse(raw);
-
-      // Surface any companion read failure here, inside the per-object
-      // try — one bad file fails only this object, not the generator.
-      for (const path of [
-        ...(objFiles.docuFile ? [objFiles.docuFile] : []),
-        ...objFiles.propertyFiles.map((f) => f.path),
-        ...objFiles.sourceFiles.map((f) => f.path),
-      ]) {
-        if (readErrors.has(path)) throw readErrors.get(path);
-      }
-
-      // Read sources, mapping suffix → source key via handler map.
-      const sources: Record<string, string> = {};
-      for (const { path, suffix } of objFiles.sourceFiles) {
-        const content = companionContents.get(path);
-        if (content === undefined) continue;
-        const sourceKey = suffix
-          ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
-          : 'main';
-        sources[sourceKey] = content;
-      }
-
-      const payload: {
-        name: string;
-        description?: string;
-        [key: string]: unknown;
-      } = handler.fromAbapGit
-        ? handler.fromAbapGit(metadata)
-        : { name: objFiles.name };
-
-      // DOCU companion → `data.docu` (genericGetExtraFiles re-emits it).
-      const docuRaw = objFiles.docuFile
-        ? companionContents.get(objFiles.docuFile)
-        : undefined;
-      if (docuRaw !== undefined) {
-        try {
-          payload.docu = JSON.parse(docuRaw) as unknown;
-        } catch {
-          payload.docu = docuRaw;
-        }
-      }
-
-      // `.properties` translations → `data.properties` keyed by suffix
-      // ('' = master file, 'en', 'texts.en', …).
-      if (objFiles.propertyFiles.length > 0) {
-        const props: Record<string, string> = {};
-        for (const { path, suffix } of objFiles.propertyFiles) {
-          const content = companionContents.get(path);
-          if (content !== undefined) props[suffix ?? ''] = content;
-        }
-        payload.properties = props;
-      }
-
-      // AFF metadata frequently omits the object name (it's encoded in the
-      // filename). Fall back to the filename-derived name.
-      const objectName = payload.name || objFiles.name;
-      const fullData = { ...payload, name: objectName };
-
-      const adkType =
-        typeof payload.type === 'string' ? payload.type : objFiles.type;
-      const adkObject = adk.getWithData(fullData, adkType) as AdkObject;
-
-      if (Object.keys(sources).length > 0) {
-        if (handler.setSources) {
-          handler.setSources(adkObject, sources);
-        } else if (sources.main) {
-          (adkObject as unknown as { _pendingSource: string })._pendingSource =
-            sources.main;
-        }
-      }
-
-      if (payload.description) {
-        (
-          adkObject as unknown as { _pendingDescription: string }
-        )._pendingDescription = payload.description;
-      }
-
-      // Record relative directory (useful for future directory-based package
-      // resolution). Plain metadata dir, no starting-folder normalisation —
-      // gCTS does not define one.
-      const sourceDir = objFiles
-        .metadataFile!.split('/')
-        .slice(0, -1)
-        .join('/');
-      (adkObject as unknown as { _relDir: string })._relDir = sourceDir;
-
-      // Assign rootPackage to every object without a packageRef — no folder
-      // logic available, so we cannot derive per-package assignments (see
-      // E06 follow-ups). Matches abapGit's "no .abapgit.xml" fallback.
-      if (options?.rootPackage) {
-        const data = (
-          adkObject as unknown as { _data?: Record<string, unknown> }
-        )._data;
-        if (data && !data.packageRef) {
-          data.packageRef = { name: options.rootPackage };
-        }
-      }
-
-      if (options?.abapLanguageVersion) {
-        const data = (
-          adkObject as unknown as { _data?: Record<string, unknown> }
-        )._data;
-        if (data && !data.abapLanguageVersion) {
-          data.abapLanguageVersion =
-            abapLangVerToAdt(options.abapLanguageVersion) ??
-            options.abapLanguageVersion;
-        }
-      }
-
-      yield adkObject;
+      yield objectFromFiles(
+        objFiles,
+        handler,
+        metadata,
+        fileContents,
+        readErrors,
+        adk,
+        options,
+      );
     } catch (error) {
       // Mirrors abapGit: log and continue so one bad object does not abort
       // the whole checkin.
@@ -314,4 +234,172 @@ export async function* deserialize(
       );
     }
   }
+}
+
+/**
+ * Read the collected source/companion files into a source-key map.
+ * Companions whose extension differs from the type's default encode it
+ * into the key (`{suffix}.{ext}`) — LIMU `.json` metadata and
+ * `.properties` texts stay distinguishable from `.abap` sources.
+ */
+function collectSources(
+  objFiles: ObjectFiles,
+  handler: GctsHandler,
+  contents: ReadonlyMap<string, string>,
+): Record<string, string> {
+  const sources: Record<string, string> = {};
+  for (const { path, suffix, ext } of objFiles.sourceFiles) {
+    const content = contents.get(path);
+    if (content === undefined) continue;
+    let key: string;
+    if (suffix) {
+      key = sourceKey(
+        objFiles.type,
+        handler.suffixToSourceKey?.[suffix] ?? suffix,
+        ext ?? '',
+      );
+    } else if (ext && ext !== 'json') {
+      key = sourceKey(objFiles.type, 'main', ext);
+    } else {
+      key = 'main';
+    }
+    sources[key] = content;
+  }
+  return sources;
+}
+
+/**
+ * Stage companion keys on an ADK object without a dedicated
+ * `setSources` hook — everything lands on `_pendingSources` /
+ * `_pendingSource` so the shared emit path in `base.ts` re-emits
+ * LIMU/sub-object files instead of silently dropping them.
+ */
+function stagePendingSources(
+  adkObject: AdkObject,
+  sources: Record<string, string>,
+): void {
+  const staged = adkObject as unknown as {
+    _pendingSource?: string;
+    _pendingSources?: Record<string, string>;
+  };
+  const { main, ...rest } = sources;
+  if (main !== undefined) staged._pendingSource = main;
+  if (Object.keys(rest).length > 0) {
+    staged._pendingSources = { ...staged._pendingSources, ...rest };
+  }
+}
+
+/** Build the payload record: handler projection + docu + properties. */
+function buildPayload(
+  objFiles: ObjectFiles,
+  handler: GctsHandler,
+  metadata: unknown,
+  contents: ReadonlyMap<string, string>,
+): { name: string; description?: string; [key: string]: unknown } {
+  const payload = (
+    handler.fromAbapGit
+      ? handler.fromAbapGit(metadata)
+      : { name: objFiles.name }
+  ) as { name: string; description?: string; [key: string]: unknown };
+
+  // DOCU companion → `data.docu` (the shared emit path re-emits it).
+  const docuRaw = objFiles.docuFile
+    ? contents.get(objFiles.docuFile)
+    : undefined;
+  if (docuRaw !== undefined) {
+    try {
+      payload.docu = JSON.parse(docuRaw) as unknown;
+    } catch {
+      payload.docu = docuRaw;
+    }
+  }
+
+  // `.properties` translations → `data.properties` keyed by suffix
+  // ('' = master file, 'en', 'texts.en', …).
+  if (objFiles.propertyFiles.length > 0) {
+    const props: Record<string, string> = {};
+    for (const { path, suffix } of objFiles.propertyFiles) {
+      const content = contents.get(path);
+      if (content !== undefined) props[suffix ?? ''] = content;
+    }
+    payload.properties = props;
+  }
+  return payload;
+}
+
+/** Merge `data.packageRef`/`abapLanguageVersion` fallbacks onto the object. */
+function applyOptionsFallbacks(
+  adkObject: AdkObject,
+  options?: ExportOptions,
+): void {
+  const data = (adkObject as unknown as { _data?: Record<string, unknown> })
+    ._data;
+  if (!data) return;
+  // Assign rootPackage to every object without a packageRef — no folder
+  // logic available, so we cannot derive per-package assignments (see
+  // E06 follow-ups). Matches abapGit's "no .abapgit.xml" fallback.
+  if (options?.rootPackage && !data.packageRef) {
+    data.packageRef = { name: options.rootPackage };
+  }
+  if (options?.abapLanguageVersion && !data.abapLanguageVersion) {
+    data.abapLanguageVersion =
+      abapLangVerToAdt(options.abapLanguageVersion) ??
+      options.abapLanguageVersion;
+  }
+}
+
+/** Metadata + collected files → a staged ADK object. */
+function objectFromFiles(
+  objFiles: ObjectFiles,
+  handler: GctsHandler,
+  metadata: unknown,
+  contents: ReadonlyMap<string, string>,
+  readErrors: ReadonlyMap<string, unknown>,
+  adk: ReturnType<typeof createAdk>,
+  options?: ExportOptions,
+): AdkObject {
+  // Surface any companion read failure here — the caller invokes us
+  // inside the per-object try, so one bad file fails only this object.
+  for (const path of [
+    ...(objFiles.docuFile ? [objFiles.docuFile] : []),
+    ...objFiles.propertyFiles.map((f) => f.path),
+    ...objFiles.sourceFiles.map((f) => f.path),
+  ]) {
+    if (readErrors.has(path)) throw readErrors.get(path);
+  }
+
+  const sources = collectSources(objFiles, handler, contents);
+  const payload = buildPayload(objFiles, handler, metadata, contents);
+
+  // AFF metadata frequently omits the object name (it's encoded in the
+  // filename). Fall back to the filename-derived name.
+  const objectName = payload.name || objFiles.name;
+  const fullData = { ...payload, name: objectName };
+
+  const adkType =
+    typeof payload.type === 'string' ? payload.type : objFiles.type;
+  const adkObject = adk.getWithData(fullData, adkType) as AdkObject;
+
+  if (Object.keys(sources).length > 0) {
+    if (handler.setSources) {
+      handler.setSources(adkObject, sources);
+    } else {
+      stagePendingSources(adkObject, sources);
+    }
+  }
+
+  if (payload.description) {
+    (
+      adkObject as unknown as { _pendingDescription: string }
+    )._pendingDescription = payload.description;
+  }
+
+  // Record relative directory (useful for future directory-based package
+  // resolution). Plain metadata dir, no starting-folder normalisation —
+  // gCTS does not define one.
+  const sourceDir = objFiles.metadataFile!.split('/').slice(0, -1).join('/');
+  (adkObject as unknown as { _relDir: string })._relDir = sourceDir;
+
+  applyOptionsFallbacks(adkObject, options);
+  return adkObject;
 }

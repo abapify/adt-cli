@@ -12,14 +12,16 @@
  *
  * AFF's FUGR representation nests function modules under the group
  * directory. This handler emits the group metadata plus per-function-module
- * files when function module data is available:
- *   <fmname>.func.json — FM metadata (func-v1.json schema)
- *   <fmname>.func.abap — FM source
+ * files when function module data is available (LIMU naming keeps the
+ * submodule files inside the parent's namespace):
+ *   <parent>.fugr.<fmname>.func.json — FM metadata (func-v1.json schema)
+ *   <parent>.fugr.<fmname>.func.abap — FM source
  */
 
 import { AdkFunctionGroup } from '@abapify/adk';
 import { createHandler, type GctsExtraFile } from '../base';
-import type { FugrAff, FuncAff } from '../../../schemas/generated';
+import { affName } from '../../format/filename';
+import type { FugrAff } from '../../../schemas/generated';
 
 type FmDescriptor = {
   name: string;
@@ -73,15 +75,19 @@ export const functionGroupHandler = createHandler(AdkFunctionGroup, {
   getExtraFiles(fugr: FugrLike): GctsExtraFile[] {
     const fms = fugr.functionModules ?? [];
     const files: GctsExtraFile[] = [];
+    // LIMU naming: `{parent}.{ptype}.{sub}.{stype}.{ext}` — the parent
+    // prefix keeps the file inside the FUGR object's namespace so the
+    // deserializer's suffix routing can re-attach it.
+    const parent = affName(fugr.name ?? '');
     for (const fm of fms) {
-      const fmName = fm.name.toLowerCase();
+      const fmName = affName(fm.name);
       files.push({
-        path: `${fmName}.func.json`,
+        path: `${parent}.fugr.${fmName}.func.json`,
         content: buildFuncMetadata(fm),
       });
       if (fm.source) {
         files.push({
-          path: `${fmName}.func.abap`,
+          path: `${parent}.fugr.${fmName}.func.abap`,
           content: fm.source,
         });
       }

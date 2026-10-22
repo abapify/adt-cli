@@ -53,28 +53,68 @@ export const METADATA_EXTENSION = 'json';
 export const PACKAGE_FILENAME = 'package.devc.json';
 
 /**
+ * AFF filename-safe form of an object name: namespaces encode as brackets
+ * (`/NMSPC/CL_OBJECT` → `(nmspc)cl_object`, AFF spec §file-names) so a
+ * `/` in the name can never split the file into nested directories.
+ */
+export function affName(name: string): string {
+  return name.toLowerCase().replace(/^\/([^/]+)\//, '($1)');
+}
+
+/**
  * Build the AFF/gCTS on-disk filename for an object.
  *
  * @param name     Object name (case preserved — AFF normalises to lowercase)
  * @param type     ABAP object type code (CLAS, INTF, ...)
  * @param kind     `"metadata"` (default) or `"source"`.
- * @param suffix   Optional sub-include suffix (e.g. `locals_def` for CLAS).
+ * @param suffix   Optional sub-include suffix (e.g. `locals_def` for CLAS,
+ *                  or `z_func.func` for a LIMU sub-object).
+ * @param ext      Source-file extension override — defaults to the type's
+ *                  extension (`abap`, `acds`, …). Needed for companions whose
+ *                  extension differs from the type's main source (`.json`
+ *                  LIMU metadata, `.properties` texts).
  */
 export function gctsFilename(
   name: string,
   type: string,
   kind: 'metadata' | 'source' = 'metadata',
   suffix?: string,
+  ext?: string,
 ): string {
-  const base = name.toLowerCase();
+  const base = affName(name);
   const typeLower = mainType(type).toLowerCase();
   if (kind === 'metadata') {
     return `${base}.${typeLower}.${METADATA_EXTENSION}`;
   }
-  const ext = TYPE_TO_SOURCE_EXT[mainType(type).toUpperCase()] ?? 'abap';
+  const sourceExt =
+    ext ?? TYPE_TO_SOURCE_EXT[mainType(type).toUpperCase()] ?? 'abap';
   return suffix
-    ? `${base}.${typeLower}.${suffix}.${ext}`
-    : `${base}.${typeLower}.${ext}`;
+    ? `${base}.${typeLower}.${suffix}.${sourceExt}`
+    : `${base}.${typeLower}.${sourceExt}`;
+}
+
+/**
+ * LIMU sub-object type codes (AFF spec §file-names): they never appear as
+ * root objects — a `{parent}.{ptype}.{sub}.{stype}.{ext}` filename routes to
+ * the parent object with `{sub}.{stype}` as its suffix.
+ */
+export const LIMU_SUBTYPES = new Set([
+  'func',
+  'reps',
+  'cpub',
+  'cpro',
+  'cprt',
+  'cpri',
+  'sotr',
+  'sotu',
+]);
+
+/**
+ * The default source-file extension for an object type (`abap` fallback) —
+ * used to decide whether a source-key suffix carries an explicit extension.
+ */
+export function gctsSourceExt(type: string): string {
+  return TYPE_TO_SOURCE_EXT[mainType(type).toUpperCase()] ?? 'abap';
 }
 
 /** Source/companion extensions recognised by the spec file-name grammar. */
@@ -89,6 +129,41 @@ const KNOWN_SOURCE_EXTS = new Set([
   'ddic',
   'properties',
 ]);
+
+/** Every file extension the spec grammar can carry after the suffix. */
+const KNOWN_FILE_EXTS = new Set([...KNOWN_SOURCE_EXTS, METADATA_EXTENSION]);
+
+/**
+ * Encode a companion file as a source-map key: bare `suffix` when the file
+ * uses the type's default source extension, `{suffix}.{ext}` when it does
+ * not (e.g. `z_func.func.json` → LIMU metadata, `texts.en.properties` →
+ * translated texts). Symmetric with `splitSourceKey`.
+ */
+export function sourceKey(type: string, suffix: string, ext: string): string {
+  return !ext || ext === gctsSourceExt(type) ? suffix : `${suffix}.${ext}`;
+}
+
+/**
+ * Inverse of `sourceKey`: splits a source-map key into the filename suffix
+ * and an optional extension override (`undefined` → the type's default).
+ */
+export function splitSourceKey(key: string): {
+  suffix?: string;
+  ext?: string;
+} {
+  if (key === 'main') return { suffix: undefined, ext: undefined };
+  // Suffix-less companions with a non-default extension key as
+  // `main.{ext}` (e.g. master texts `name.prog.properties`).
+  if (key.startsWith('main.')) {
+    const tail = key.slice(5);
+    if (KNOWN_FILE_EXTS.has(tail)) return { suffix: undefined, ext: tail };
+  }
+  const dot = key.lastIndexOf('.');
+  if (dot > 0 && KNOWN_FILE_EXTS.has(key.slice(dot + 1))) {
+    return { suffix: key.slice(0, dot), ext: key.slice(dot + 1) };
+  }
+  return { suffix: key, ext: undefined };
+}
 
 /**
  * Parse an AFF/gCTS filename back into its components.
@@ -119,13 +194,19 @@ export function parseGctsFilename(
  */
 function parseMetadataName(parts: string[]): ParsedFormatFilename {
   const docu = parts.at(-2) === 'docu' && parts.length >= 4;
-  const offset = docu ? -3 : -2;
+  // `{parent}.{ptype}.{sub}.{stype}.json` — LIMU sub-object metadata is a
+  // companion of the parent (`z_fugr.fugr.z_func.func.json`).
+  const limu = parts.length >= 5 && LIMU_SUBTYPES.has(parts.at(-2)!);
+  let offset = -2;
+  if (docu) offset = -3;
+  else if (limu) offset = -4;
   const parsed: ParsedFormatFilename = {
     name: parts.slice(0, offset).join('.'),
     type: parts.at(offset)!.toUpperCase(),
     extension: METADATA_EXTENSION,
   };
   if (docu) parsed.suffix = 'docu';
+  else if (limu) parsed.suffix = `${parts.at(-3)}.${parts.at(-2)}`;
   return parsed;
 }
 
@@ -171,6 +252,16 @@ function parseSourceName(
   extension: string,
 ): ParsedFormatFilename | undefined {
   if (!KNOWN_SOURCE_EXTS.has(extension)) return undefined;
+  // LIMU sub-object source: `{parent}.{ptype}.{sub}.{stype}.{ext}` —
+  // the suffix carries `{sub}.{stype}` (e.g. `z_func.func`).
+  if (parts.length >= 5 && LIMU_SUBTYPES.has(parts.at(-2)!)) {
+    return {
+      name: parts.slice(0, -4).join('.'),
+      type: parts.at(-4)!.toUpperCase(),
+      suffix: `${parts.at(-3)}.${parts.at(-2)}`,
+      extension,
+    };
+  }
   if (parts.length >= 4) {
     return {
       name: parts.slice(0, -3).join('.'),

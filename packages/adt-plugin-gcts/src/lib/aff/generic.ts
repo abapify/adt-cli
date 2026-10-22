@@ -11,6 +11,7 @@
  */
 
 import { affBodyProps, latestAffVersion } from './schemas';
+import { splitSourceKey } from '../format/filename';
 
 /** Minimal AFF metadata shape shared by all types. */
 export interface MinimalAff {
@@ -30,9 +31,11 @@ export type GenericAffLike = {
   abapLanguageVersion?: string;
   /** Raw payload fields (deserialized AFF body, ADT response, …). */
   data?: Record<string, unknown>;
-  /** Companion sources keyed by file suffix — `main` → no suffix
-   *  (`{name}.{type}.{ext}`), any other key becomes the middle segment
-   *  (`{name}.{type}.{key}.{ext}`, e.g. csnm's `model_inferred`). */
+  /** Companion sources keyed by filename — `main` → the suffix-less file
+   *  (`{name}.{type}.{ext}`); other keys are suffixes
+   *  (`{name}.{type}.{key}.{typeExt}`, e.g. csnm's `model_inferred`); a key
+   *  ending in a file extension selects that extension instead
+   *  (`z_func.func.json`, `texts.en.properties`). */
   sources?: Record<string, string>;
 };
 
@@ -118,8 +121,10 @@ export function genericToMetadata(type: string) {
 /**
  * Companion-source emit for source-bearing types (`.abap`, `.acds`,
  * `.csn`, …): reads `obj.sources` — `main` emits the suffix-less file,
- * other keys emit `{name}.{type}.{suffix}.{ext}`. Falls back to
- * `obj.getSource()` as the single `main` source.
+ * other keys emit `{name}.{type}.{suffix}.{ext}`. A key ending in a file
+ * extension selects that extension instead of the type default
+ * (`z_func.func.json` → LIMU metadata, `texts.en.properties` → texts).
+ * Falls back to `obj.getSource()` as the single `main` source.
  */
 export function genericGetSources(obj: GenericAffLike) {
   // Read from the same place genericSetSources writes: the payload's
@@ -136,7 +141,7 @@ export function genericGetSources(obj: GenericAffLike) {
     return Object.entries(merged)
       .filter(([, content]) => !!content)
       .map(([key, content]) => ({
-        suffix: key === 'main' ? undefined : key,
+        ...splitSourceKey(key),
         content,
       }));
   }

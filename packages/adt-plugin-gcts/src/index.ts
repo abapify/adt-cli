@@ -40,8 +40,12 @@ export type {
 // Filename utilities
 export {
   gctsFilename,
+  gctsSourceExt,
   parseGctsFilename,
   adtUriToGctsPath,
+  sourceKey,
+  splitSourceKey,
+  LIMU_SUBTYPES,
   PACKAGE_FILENAME,
   METADATA_EXTENSION,
 } from './lib/format/filename';

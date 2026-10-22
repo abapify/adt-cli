@@ -382,12 +382,15 @@ describe('FUGR handler — per-function-module files', () => {
         ],
       }),
     );
-    const fm1Json = files.find((f) => f.path === 'z_fm1.func.json');
-    const fm1Abap = files.find((f) => f.path === 'z_fm1.func.abap');
-    const fm2Json = files.find((f) => f.path === 'z_fm2.func.json');
-    assert.ok(fm1Json, 'z_fm1.func.json emitted');
-    assert.ok(fm1Abap, 'z_fm1.func.abap emitted');
-    assert.ok(fm2Json, 'z_fm2.func.json emitted');
+    // LIMU naming: `{parent}.fugr.{fm}.func.{json,abap}` — the parent
+    // prefix keeps the file inside the FUGR namespace so the
+    // deserializer's LIMU suffix routing re-attaches it.
+    const fm1Json = files.find((f) => f.path === 'zgrp.fugr.z_fm1.func.json');
+    const fm1Abap = files.find((f) => f.path === 'zgrp.fugr.z_fm1.func.abap');
+    const fm2Json = files.find((f) => f.path === 'zgrp.fugr.z_fm2.func.json');
+    assert.ok(fm1Json, 'zgrp.fugr.z_fm1.func.json emitted');
+    assert.ok(fm1Abap, 'zgrp.fugr.z_fm1.func.abap emitted');
+    assert.ok(fm2Json, 'zgrp.fugr.z_fm2.func.json emitted');
 
     const m1 = JSON.parse(fm1Json!.content);
     assert.strictEqual(m1.formatVersion, '1');

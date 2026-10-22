@@ -15,7 +15,8 @@
 import type { AdkObject, AdkKind } from '@abapify/adk';
 import { getTypeForKind, getMainType } from '@abapify/adk';
 import type { FormatHandler, SerializedFile } from '@abapify/adt-plugin';
-import { gctsFilename } from '../format/filename';
+import { gctsFilename, splitSourceKey } from '../format/filename';
+import { payloadOf } from '../aff/generic';
 import type { GctsMetadata } from '../format/types';
 
 export type AbapObjectType = string;
@@ -33,6 +34,12 @@ export type AdkObjectClass<T extends AdkObject = AdkObject> = {
  */
 export interface GctsSourceEntry {
   suffix?: string;
+  /**
+   * File extension override — defaults to the object type's source
+   * extension. Required for companions whose extension differs
+   * (`.properties` texts, `.json` LIMU sub-object metadata, `.xdp`).
+   */
+  ext?: string;
   content: string | Promise<string> | (() => string | Promise<string>);
 }
 
@@ -130,6 +137,108 @@ function buildMetadataFile(meta: GctsMetadata): string {
   return JSON.stringify(meta, null, 2) + '\n';
 }
 
+/** Staged source companions → files (extension-aware keys → LIMU names). */
+function sourceCompanionFiles(
+  object: unknown,
+  type: string,
+  objectName: string,
+  suffixToSourceKey?: Record<string, string>,
+): SerializedFile[] {
+  const payload = payloadOf(object as Parameters<typeof payloadOf>[0]);
+  const pending = object as {
+    _pendingSource?: string;
+    _pendingSources?: Record<string, string>;
+  };
+  const map: Record<string, string> = {
+    ...(payload?.sources as Record<string, string> | undefined),
+    ...pending._pendingSources,
+  };
+  if (pending._pendingSource && !map.main) map.main = pending._pendingSource;
+  // Staged keys are ADK include/source names — the file suffix is the
+  // inverse of `suffixToSourceKey` (CLAS `locals_def` → `definitions`).
+  const keyToSuffix = Object.fromEntries(
+    Object.entries(suffixToSourceKey ?? {}).map(([suffix, key]) => [
+      key,
+      suffix,
+    ]),
+  );
+  const files: SerializedFile[] = [];
+  for (const [key, content] of Object.entries(map)) {
+    // Skip absent entries only — an empty companion is still a companion
+    // and must round-trip (e.g. an intentionally empty include).
+    if (content == null) continue;
+    const { suffix, ext } = splitSourceKey(key);
+    const fileSuffix = suffix ? (keyToSuffix[suffix] ?? suffix) : suffix;
+    files.push({
+      path: gctsFilename(objectName, type, 'source', fileSuffix, ext),
+      content,
+    });
+  }
+  return files;
+}
+
+/** `data.docu` → `{name}.{type}.docu.json` file (or nothing). */
+function docuCompanionFile(
+  payload: Record<string, unknown> | undefined,
+  objectName: string,
+  typeLower: string,
+): SerializedFile[] {
+  const docu = payload?.docu;
+  if (docu === undefined || docu === null) return [];
+  return [
+    {
+      path: `${objectName}.${typeLower}.docu.json`,
+      content:
+        typeof docu === 'string' ? docu : JSON.stringify(docu, null, 2) + '\n',
+    },
+  ];
+}
+
+/** `data.properties` map → `.properties` files ('' key → master file). */
+function propertyCompanionFiles(
+  payload: Record<string, unknown> | undefined,
+  objectName: string,
+  typeLower: string,
+): SerializedFile[] {
+  const props = payload?.properties as Record<string, string> | undefined;
+  const files: SerializedFile[] = [];
+  for (const [key, content] of Object.entries(props ?? {})) {
+    if (content == null) continue;
+    files.push({
+      path: key
+        ? `${objectName}.${typeLower}.${key}.properties`
+        : `${objectName}.${typeLower}.properties`,
+      content,
+    });
+  }
+  return files;
+}
+
+/**
+ * Universal companion preservation. Deserialization stages every
+ * companion a dedicated hook does not claim into `_pendingSources` /
+ * `data.sources` (extension-aware keys), `data.docu`, and
+ * `data.properties` — emitted here so handlers without a matching emit
+ * hook still round-trip LIMU sub-objects, DOCU texts, and translations
+ * instead of silently dropping them. Paths already in `emitted` win.
+ */
+function companionFiles(
+  object: unknown,
+  type: string,
+  objectName: string,
+  emitted: ReadonlySet<string>,
+  suffixToSourceKey?: Record<string, string>,
+): SerializedFile[] {
+  const typeLower = type.split('/')[0].toLowerCase();
+  const payload = payloadOf(object as Parameters<typeof payloadOf>[0]);
+  const candidates = [
+    ...sourceCompanionFiles(object, type, objectName, suffixToSourceKey),
+    ...docuCompanionFile(payload, objectName, typeLower),
+    ...propertyCompanionFiles(payload, objectName, typeLower),
+  ];
+  return candidates.filter((f) => !emitted.has(f.path));
+}
+
 /**
  * Register a handler for an ADK class (preferred — `type` is derived from
  * the static `kind`) or an explicit type string (for types without an ADK
@@ -197,7 +306,13 @@ export function createHandler<
           const content = await resolveSource(entry);
           if (!content) continue;
           files.push({
-            path: gctsFilename(objectName, type, 'source', entry.suffix),
+            path: gctsFilename(
+              objectName,
+              type,
+              'source',
+              entry.suffix,
+              entry.ext,
+            ),
             content,
           });
         }
@@ -232,6 +347,16 @@ export function createHandler<
           files.push({ path: extra.path, content });
         }
       }
+
+      files.push(
+        ...companionFiles(
+          object,
+          type,
+          objectName,
+          new Set(files.map((f) => f.path)),
+          definition.suffixToSourceKey,
+        ),
+      );
 
       return files;
     },
