@@ -30,7 +30,17 @@ import { getHandler, getSupportedTypes } from './handlers/base';
 import { parseGctsFilename, PACKAGE_FILENAME } from './format/filename';
 
 /** Source-file extensions emitted by gCTS handlers. */
-const SOURCE_EXTENSIONS = new Set(['abap', 'asddls', 'asdcls']);
+const SOURCE_EXTENSIONS = new Set([
+  'abap',
+  'asddls',
+  'asdcls',
+  'acds',
+  'abdl',
+  'csn',
+  'xdp',
+  'ddic',
+  'properties',
+]);
 
 /**
  * Map numeric abapLanguageVersion codes (`'5'` etc.) to the descriptive
