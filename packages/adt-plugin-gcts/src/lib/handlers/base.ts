@@ -33,6 +33,12 @@ export type AdkObjectClass<T extends AdkObject = AdkObject> = {
  */
 export interface GctsSourceEntry {
   suffix?: string;
+  /**
+   * File extension override — defaults to the object type's source
+   * extension. Required for companions whose extension differs
+   * (`.properties` texts, `.json` LIMU sub-object metadata, `.xdp`).
+   */
+  ext?: string;
   content: string | Promise<string> | (() => string | Promise<string>);
 }
 
@@ -197,7 +203,13 @@ export function createHandler<
           const content = await resolveSource(entry);
           if (!content) continue;
           files.push({
-            path: gctsFilename(objectName, type, 'source', entry.suffix),
+            path: gctsFilename(
+              objectName,
+              type,
+              'source',
+              entry.suffix,
+              entry.ext,
+            ),
             content,
           });
         }
