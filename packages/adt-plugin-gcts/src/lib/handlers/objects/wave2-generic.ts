@@ -1,62 +1,30 @@
 /**
  * Generic AFF handler stubs for the remaining object types.
  *
- * Wave 2 mass-generates handlers for all AFF types that have JSON schemas
- * but no dedicated handler. Each stub emits the minimal AFF contract:
- *   { formatVersion: "1", header: { description, originalLanguage } }
+ * Wave 2 mass-registers handlers for all AFF types that have JSON schemas
+ * but no dedicated handler. Each stub runs the schema-aware generic
+ * emit/parse from `../../aff/generic`: the `{formatVersion, header}`
+ * envelope at the type's latest schema version plus every top-level body
+ * property present in the payload — schema-valid whenever the payload is.
  *
- * Type-specific fields can be added later by promoting a stub to a
- * dedicated handler file (like clas.ts, ddls.ts, etc.) when the ADK
- * object model exposes richer data for that type.
+ * Types needing semantic mapping, source companions, or special file
+ * shapes graduate to a dedicated file (like clas.ts, ddls.ts, …).
  *
  * All types here are registered via the string-type form of
  * `createHandler` — no ADK class required.
  */
 
 import { createHandler } from '../base';
+import {
+  genericFromMetadata,
+  genericToMetadata,
+  type GenericAffLike,
+  type MinimalAff,
+} from '../../aff/generic';
 
-/** Minimal AFF metadata shape shared by all types. */
-interface MinimalAff {
-  formatVersion: string;
-  header: {
-    description: string;
-    originalLanguage: string;
-    abapLanguageVersion?: string;
-  };
-  [key: string]: unknown;
-}
-
-type GenericLike = {
-  name: string;
-  description?: string;
-  originalLanguage?: string;
-  abapLanguageVersion?: string;
+type GenericLike = GenericAffLike & {
   getSource?: () => Promise<string> | string;
 };
-
-function toMetadata(obj: GenericLike): MinimalAff {
-  const lang = (obj.originalLanguage ?? '').toLowerCase();
-  const meta: MinimalAff = {
-    formatVersion: '1',
-    header: {
-      description: obj.description ?? obj.name ?? '',
-      originalLanguage: lang,
-    },
-  };
-  if (obj.abapLanguageVersion) {
-    meta.header.abapLanguageVersion = obj.abapLanguageVersion;
-  }
-  return meta;
-}
-
-function fromMetadata(meta: MinimalAff) {
-  return {
-    name: '',
-    description: meta.header.description,
-    language: meta.header.originalLanguage?.toUpperCase(),
-    masterLanguage: meta.header.originalLanguage?.toUpperCase(),
-  };
-}
 
 function getSource(obj: GenericLike): string | Promise<string> {
   return typeof obj.getSource === 'function' ? obj.getSource() : '';
@@ -146,8 +114,8 @@ const WAVE2_TYPES = [
 
 for (const type of WAVE2_TYPES) {
   createHandler<GenericLike, MinimalAff>(type, {
-    toMetadata,
+    toMetadata: genericToMetadata(type.toLowerCase()),
     getSource,
-    fromMetadata,
+    fromMetadata: genericFromMetadata,
   });
 }
