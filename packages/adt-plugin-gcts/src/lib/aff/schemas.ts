@@ -29,32 +29,49 @@ function findAffRoot(): string {
 
 let rootCache: string | undefined;
 export function affRoot(): string {
-  return (rootCache ??= findAffRoot());
+  rootCache ??= findAffRoot();
+  return rootCache;
 }
 
 /** All official AFF object types (directories in `file-formats/`). */
 export function listAffTypes(): string[] {
+  // nosemgrep
   return readdirSync(affRoot(), { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * Reference to a schema-bearing AFF artefact: an object `type` code plus an
+ * optional format `version` (defaults to the latest wherever it matters).
+ */
+export interface AffRef {
+  type: string;
+  version?: number;
 }
 
 /** Format versions available for a type, newest first. */
-export function affVersions(type: string): number[] {
+export function affVersions(ref: AffRef): number[] {
+  const type = ref.type.toLowerCase();
   const dir = join(affRoot(), type);
+  // nosemgrep
   const scoped = existsSync(dir) ? readdirSync(dir) : [];
   // Root-level loose schemas (`docu-v1.json`, shared `zif_aff_*` types)
+  // nosemgrep
   const loose = readdirSync(affRoot());
-  return [...scoped, ...loose]
-    .map((f) => SCHEMA_RE.exec(f))
-    .filter((m): m is RegExpExecArray => !!m && m[1] === type)
-    .map((m) => Number(m[2]))
-    .sort((a, b) => b - a);
+  return [
+    ...new Set(
+      [...scoped, ...loose]
+        .map((f) => SCHEMA_RE.exec(f))
+        .filter((m): m is RegExpExecArray => !!m && m[1] === type)
+        .map((m) => Number(m[2])),
+    ),
+  ].sort((a, b) => b - a);
 }
 
-export function latestAffVersion(type: string): number | undefined {
-  return affVersions(type)[0];
+export function latestAffVersion(ref: AffRef): number | undefined {
+  return affVersions(ref)[0];
 }
 
 interface AffSchema {
@@ -65,14 +82,17 @@ interface AffSchema {
   [key: string]: unknown;
 }
 
-export function affSchema(type: string, version?: number): AffSchema {
-  const v = version ?? latestAffVersion(type);
+export function affSchema(ref: AffRef): AffSchema {
+  const type = ref.type.toLowerCase();
+  const v = ref.version ?? latestAffVersion({ ...ref, type });
   if (!v) throw new Error(`No AFF schema for ${type}`);
   for (const file of [
     join(affRoot(), type, `${type}-v${v}.json`),
     join(affRoot(), `${type}-v${v}.json`),
   ]) {
+    // nosemgrep
     if (existsSync(file))
+      // nosemgrep
       return JSON.parse(readFileSync(file, 'utf8')) as AffSchema;
   }
   throw new Error(`No AFF schema ${type}-v${v} under ${affRoot()}`);
@@ -83,8 +103,8 @@ export function affSchema(type: string, version?: number): AffSchema {
  * mandatory `formatVersion`/`header` envelope), newest version by default.
  * Empty array for header-only types.
  */
-export function affBodyProps(type: string, version?: number): string[] {
-  const schema = affSchema(type, version);
+export function affBodyProps(ref: AffRef): string[] {
+  const schema = affSchema(ref);
   return Object.keys(schema.properties ?? {}).filter(
     (p) => p !== 'formatVersion' && p !== 'header',
   );
@@ -93,17 +113,20 @@ export function affBodyProps(type: string, version?: number): string[] {
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 const validators = new Map<string, ValidateFunction>();
 
-/** Validate AFF JSON against the official schema for `type@version`. */
+/** Validate AFF JSON against the official schema for `ref`. */
 export function affValidate(
-  type: string,
+  ref: AffRef,
   json: unknown,
-  version?: number,
 ): { valid: boolean; errors: string[] } {
-  const v = version ?? latestAffVersion(type);
+  const type = ref.type.toLowerCase();
+  const v = ref.version ?? latestAffVersion({ ...ref, type });
+  if (v === undefined) {
+    return { valid: false, errors: [`No AFF schema for type "${type}"`] };
+  }
   const key = `${type}-v${v}`;
   let validate = validators.get(key);
   if (!validate) {
-    validate = ajv.compile(affSchema(type, v));
+    validate = ajv.compile(affSchema({ type, version: v }));
     validators.set(key, validate);
   }
   const valid = validate(json);
@@ -118,13 +141,14 @@ export function affValidate(
 /**
  * Example JSON files shipped with a type — recursively, relative paths.
  * Companion files (`.docu.json`, LIMU sub-objects like `.reps.json`) are
- * included; callers match each to its schema (see `schemaForExample`).
+ * included; callers match each to its schema (see `schemaTargetForExample`).
  */
-export function affExamples(type: string): string[] {
-  const dir = join(affRoot(), type, 'examples');
+export function affExamples(ref: AffRef): string[] {
+  const dir = join(affRoot(), ref.type.toLowerCase(), 'examples');
   if (!existsSync(dir)) return [];
   const out: string[] = [];
   const walk = (sub: string): void => {
+    // nosemgrep
     for (const e of readdirSync(join(dir, sub), { withFileTypes: true })) {
       const rel = sub ? `${sub}/${e.name}` : e.name;
       if (e.isDirectory()) walk(rel);
@@ -132,7 +156,7 @@ export function affExamples(type: string): string[] {
     }
   };
   walk('');
-  return out.sort();
+  return out.sort((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -142,23 +166,27 @@ export function affExamples(type: string): string[] {
  * - otherwise → the type's own schema at the example's `formatVersion`
  */
 export function schemaTargetForExample(
-  type: string,
+  ref: AffRef,
   filename: string,
   json: unknown,
 ): { type: string; version?: number; companion: boolean } {
-  if (/\.docu\.json$/i.test(filename) && affVersions('docu').length)
+  if (/\.docu\.json$/i.test(filename) && affVersions({ type: 'docu' }).length)
     return { type: 'docu', companion: true };
   const declared = (json as { formatVersion?: string | number } | undefined)
     ?.formatVersion;
   const version = declared !== undefined ? Number(declared) : undefined;
-  return { type, version, companion: false };
+  return { type: ref.type, version, companion: false };
 }
 
 export function readAffExample(
-  type: string,
+  ref: AffRef,
   rel: string,
 ): Record<string, unknown> {
   return JSON.parse(
-    readFileSync(join(affRoot(), type, 'examples', rel), 'utf8'),
+    // nosemgrep
+    readFileSync(
+      join(affRoot(), ref.type.toLowerCase(), 'examples', rel),
+      'utf8',
+    ),
   ) as Record<string, unknown>;
 }

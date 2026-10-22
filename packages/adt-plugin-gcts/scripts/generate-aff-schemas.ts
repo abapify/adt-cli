@@ -37,6 +37,7 @@ interface SchemaEntry {
 async function discoverSchemas(): Promise<SchemaEntry[]> {
   const entries: SchemaEntry[] = [];
   const collect = async (dir: string): Promise<void> => {
+    // nosemgrep
     for (const f of await readdir(dir, { withFileTypes: true })) {
       if (!f.isFile()) continue;
       const m = SCHEMA_RE.exec(f.name);
@@ -49,9 +50,11 @@ async function discoverSchemas(): Promise<SchemaEntry[]> {
     }
   };
   await collect(AFF_ROOT); // root-level (docu)
-  for (const d of await readdir(AFF_ROOT, { withFileTypes: true })) {
-    if (d.isDirectory()) await collect(join(AFF_ROOT, d.name));
-  }
+  // nosemgrep
+  const dirs = (await readdir(AFF_ROOT, { withFileTypes: true })).filter((d) =>
+    d.isDirectory(),
+  );
+  await Promise.all(dirs.map((d) => collect(join(AFF_ROOT, d.name))));
   return entries.sort(
     (a, b) => a.stem.localeCompare(b.stem) || a.version - b.version,
   );
@@ -74,49 +77,64 @@ async function main(): Promise<void> {
   await rm(OUT_DIR, { recursive: true, force: true });
   await mkdir(OUT_DIR, { recursive: true });
 
+  const results = await Promise.all(
+    schemas.map(async ({ stem, version, file }) => {
+      const name = `Aff${pascal(stem)}V${version}`;
+      const outFile = `${stem}-v${version}.ts`;
+      try {
+        const raw = await readFile(file, 'utf8'); // nosemgrep
+        // compile() names the root interface after schema.title, ignoring
+        // the `name` arg — override so the root is `Aff{Type}V{n}`.
+        const schema = JSON.parse(raw) as { title?: string };
+        schema.title = name;
+        const ts = await compile(schema, name, {
+          bannerComment: '',
+          strictIndexSignatures: true,
+          additionalProperties: false,
+          format: false,
+          ignoreMinAndMaxItems: true,
+        });
+        // Back-compat alias: dedicated handlers import `{Type}Aff`.
+        const alias = `\nexport type ${pascal(stem)}Aff = ${name};\n`;
+        await writeFile(join(OUT_DIR, outFile), BANNER + ts + alias, 'utf8'); // nosemgrep
+        return { stem, version, name, outFile, error: undefined };
+      } catch (e) {
+        return {
+          stem,
+          version,
+          name,
+          outFile,
+          error: (e as Error).message.split('\n')[0],
+        };
+      }
+    }),
+  );
+
   const exports: string[] = [];
   const latestAlias = new Map<string, string>();
   let ok = 0;
   const failed: string[] = [];
 
-  for (const { stem, version, file } of schemas) {
-    const name = `Aff${pascal(stem)}V${version}`;
-    const outFile = `${stem}-v${version}.ts`;
-    try {
-      const raw = await readFile(file, 'utf8');
-      // compile() names the root interface after schema.title, ignoring
-      // the `name` arg — override so the root is `Aff{Type}V{n}`.
-      const schema = JSON.parse(raw) as { title?: string };
-      schema.title = name;
-      const ts = await compile(schema, name, {
-        bannerComment: '',
-        strictIndexSignatures: true,
-        additionalProperties: false,
-        format: false,
-        ignoreMinAndMaxItems: true,
-      });
-      // Back-compat alias: dedicated handlers import `{Type}Aff`.
-      const alias = `\nexport type ${pascal(stem)}Aff = ${name};\n`;
-      await writeFile(join(OUT_DIR, outFile), BANNER + ts + alias, 'utf8');
-      // `export * as` namespaces each version file — schema titles repeat
-      // across versions (cfdf-v1/v2 both declare `CustomField`), so a flat
-      // barrel would collide. Flat `{Type}Aff` aliases are emitted only
-      // for the latest version (see below).
-      exports.push(
-        `export * as ${pascal(stem)}V${version} from './${stem}-v${version}.js';`,
-      );
-      latestAlias.set(
-        stem,
-        `export type { ${pascal(stem)}Aff } from './${stem}-v${version}.js';`,
-      );
-      ok++;
-    } catch (e) {
-      failed.push(
-        `${stem}-v${version}: ${(e as Error).message.split('\n')[0]}`,
-      );
+  for (const { stem, version, error } of results) {
+    if (error !== undefined) {
+      failed.push(`${stem}-v${version}: ${error}`);
+      continue;
     }
+    // `export * as` namespaces each version file — schema titles repeat
+    // across versions (cfdf-v1/v2 both declare `CustomField`), so a flat
+    // barrel would collide. Flat `{Type}Aff` aliases are emitted only
+    // for the latest version (see below).
+    exports.push(
+      `export * as ${pascal(stem)}V${version} from './${stem}-v${version}.js';`,
+    );
+    latestAlias.set(
+      stem,
+      `export type { ${pascal(stem)}Aff } from './${stem}-v${version}.js';`,
+    );
+    ok++;
   }
 
+  // nosemgrep
   await writeFile(
     join(OUT_DIR, 'index.ts'),
     `${BANNER}\n${exports.join('\n')}\n\n` +
@@ -133,4 +151,7 @@ async function main(): Promise<void> {
   }
 }
 
-await main();
+await main().catch((err: unknown) => {
+  console.error('[aff-codegen] fatal:', err);
+  process.exitCode = 1;
+});

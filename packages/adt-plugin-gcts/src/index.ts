@@ -53,11 +53,13 @@ export {
   affVersions,
   latestAffVersion,
   affSchema,
+  affBodyProps,
   affValidate,
   affExamples,
   schemaTargetForExample,
   readAffExample,
 } from './lib/aff/schemas';
+export type { AffRef } from './lib/aff/schemas';
 
 // Generated typed AFF models — AffGenerated.{Type}V{n}.{RootInterface}
 export * as AffGenerated from './schemas/generated';
