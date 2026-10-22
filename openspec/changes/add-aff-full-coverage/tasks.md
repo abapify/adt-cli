@@ -3,10 +3,10 @@
 ## 0. Machinery (Wave 0)
 
 - [x] 0.1 Vendored schemas — already done via `git_modules/abap-file-formats` submodule (pinned `5ed949a`); document the bump-to-sync workflow in the package AGENTS.md.
-- [ ] 0.2 Wire existing `scripts/generate-aff-schemas.ts` into `nx codegen adt-plugin-gcts` → `src/schemas/generated/{type}.ts` typed models.
+- [x] 0.2 Wire existing `scripts/generate-aff-schemas.ts` into `nx codegen adt-plugin-gcts` → `src/schemas/generated/{type}-v{n}.ts` typed models, one file per schema version.
 - [ ] 0.3 AFF handler contract — gcts `createHandler` `toMetadata`/`fromMetadata` already is the contract; extend with `sourceExt`/`companions` declaration for source-bearing types. abapGit `toAffJson` stays a Wave-4 parity concern inside that plugin only.
-- [ ] 0.4 ajv-based schema-validation harness — shared `affValidate(type, json, version)` reading schemas from `git_modules/` + golden-fixture runner over the submodule's `examples/` (match example→schema by `formatVersion` field; `.docu.`/`.reps.` files use their own companion schemas).
-- [ ] 0.5 `aff-coverage` nx target on `adt-plugin-gcts` — emits `type × [handler-kind, body-fields, companions, fixtures, schema-validated]` matrix; fails under threshold.
+- [x] 0.4 ajv-based schema-validation harness — shared `affValidate(type, json, version)` reading schemas from `git_modules/` + golden-fixture runner over the submodule's `examples/` (match example→schema by `formatVersion` field; `.docu.`/`.reps.` files use their own companion schemas). Emit-side round-trip tests that pass handler-emitted metadata through `affValidate` land with the generic emitters in Waves 1–3 (`tests/aff/generic-roundtrip.test.ts`).
+- [x] 0.5 `aff-coverage` nx target on `adt-plugin-gcts` — emits `type × [handler-kind, versions, body-fields, examples, schema-validated]` matrix; fails under threshold.
 
 ## 1. Enrich stubs — AFF families (Wave 1)
 
@@ -15,13 +15,13 @@ means a dedicated handler emitting the full schema body._
 
 - [ ] 1.1 AIF framework: `aifa` `aifd` `aiff` `aifi` `aifn` `aifp` `aifr`
 - [ ] 1.2 eDocument: `edcc` `edck` `edcr` `edoi`
-- [ ] 1.3 FLP / IAM / auth: `sia5` `siad` `sito` `suco` `susi`
+- [ ] 1.3 FLP / IAM / auth: `siad` `sito` `suco` `susi` `uiaf`
 - [ ] 1.4 Notes: `ntta` `ntty`
 
 ## 2. Enrich stubs — metadata singletons (Wave 2)
 
-- [ ] 2.1 `advc` `aobj` `apic` `apob` `chke` `dcat` `dmon` `dobj`
-- [ ] 2.2 `ilmb` `intm` `rvbc` `saia` `sco2` `sprv` `srvc` `svim` `sxtg`
+- [ ] 2.1 `advc` `aobj` `apic` `aplo` `apob` `dcat` `dmon` `dobj`
+- [ ] 2.2 `ilmb` `intm` `rvbc` `saia` `sco2` `sprv` `srvc` `sxtg`
 - [ ] 2.3 `cfdf` (v2 — confirm multi-version envelope handling)
 
 ## 3. Enrich stubs — source-bearing / special (Wave 3)

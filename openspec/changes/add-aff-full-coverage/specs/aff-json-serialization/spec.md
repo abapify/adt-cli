@@ -4,7 +4,7 @@
 
 ### Requirement: Every covered type can emit AFF JSON
 
-Every registered object type SHALL support `format: 'aff'`, emitting the
+Every registered gCTS object type SHALL support `format: 'aff'`, emitting the
 spec file set: `<name>.<type>.json` metadata plus the companion files the
 type's format defines (`.abap`/`.abdl`/`.acds`/`.csn`/`.ddic`/`.xdp`
 sources, `.properties` texts).
@@ -43,8 +43,8 @@ BCP47.
 
 ### Requirement: Emitted files follow formatting conventions
 
-AFF files SHALL be UTF-8 without BOM, `\n` line endings, a trailing empty
-line at EOF, and 2-space JSON indentation.
+AFF files SHALL be UTF-8 without BOM, `\n` line endings, a single trailing
+newline at EOF, and 2-space JSON indentation.
 
 #### Scenario: JSON formatting is stable
 
@@ -53,9 +53,13 @@ line at EOF, and 2-space JSON indentation.
 
 ### Requirement: AFF JSON is deserializable
 
-For every AFF-capable type, `fromAffJson` SHALL reconstruct the object
-data (at minimum `name`, `header` fields, and source-bearing companions)
-needed for the import path.
+For every registered gCTS type, its `fromMetadata` hook SHALL reconstruct
+the metadata fields (at minimum the `header` fields) needed for the
+import path; the object name MAY come from `fromMetadata` or fall back to
+the filename-derived name at deserialization. Source and companion files
+are restored separately by the importer via `setSources` or
+`_pendingSource`/`_pendingSources` staging — `fromMetadata` receives only
+the parsed metadata JSON.
 
 #### Scenario: Import of an AFF-serialized object
 

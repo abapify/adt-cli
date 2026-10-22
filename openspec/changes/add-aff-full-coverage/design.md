@@ -13,10 +13,10 @@ through handler reuse across the format boundary.
 
 | Metric                                    | Value |
 | ----------------------------------------- | ----- |
-| Official AFF object types (pin `5ed949a`) | 91    |
-| Registered in `adt-plugin-gcts`           | 91    |
+| Official AFF object types (pin `5ed949a`) | 87    |
+| Registered in `adt-plugin-gcts`           | 87    |
 | …dedicated handlers                       | 15    |
-| …`wave2-generic.ts` minimal stubs         | 76    |
+| …`wave2-generic.ts` minimal stubs         | 75    |
 | abapGit emitting AFF JSON today           | ~13   |
 | abapGit legacy-XML only                   | ~48   |
 
@@ -60,8 +60,10 @@ submodule pin + `formatVersion` consts isolate us.
 `packages/adt-plugin-gcts/scripts/generate-aff-schemas.ts` already exists
 (`json-schema-to-typescript`, reading `git_modules` schemas) — wire its
 `codegen` target output into `src/schemas/generated/{type}.ts` exporting
-`Aff{Type}V{n}` plus an ajv validator per version. Generated files are
-build artifacts — never hand-edit.
+versioned type-only models (`Aff{Type}V{n}` namespaces). Validation does
+not come from codegen — `affValidate` compiles the ajv validator at
+runtime against the same vendored schema. Generated files are build
+artifacts — never hand-edit.
 
 ### 4. `toAffJson` derivation from `toAbapGit`
 
@@ -76,7 +78,7 @@ fixtures are the oracle.
 
 ### 5. Stubs become conformant handlers — no new registrations
 
-All 91 types are already registered; the work is **enriching the 76
+All 87 types are already registered; the work is **enriching the 75
 wave2 stubs** into schema-conformant emitters: generated model →
 full `toMetadata`/`fromMetadata` (gcts `createHandler` contract) →
 companion sources. A stub graduates to a dedicated `objects/{type}.ts`
@@ -94,7 +96,7 @@ Every type follows the same checklist (automatable for ~80% of types):
    plain metadata, source-bearing (`.abap`/`.acds`/`.csn`/…), or
    texts-bearing (`.properties`).
 5. Golden test: vendored upstream example parses→emits→validates.
-6. Register, index, coverage matrix row flips green.
+6. Index + coverage matrix row flips green.
 
 ## Wave plan
 
@@ -102,12 +104,14 @@ Every type follows the same checklist (automatable for ~80% of types):
 | ---- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | W0   | Machinery: wire `generate-aff-schemas` codegen, `affValidate` ajv harness over `git_modules` examples, `aff-coverage` nx target + matrix  | infra         |
 | W1   | Enrich stubs — families: AIF ×7, eDoc ×4, FLP/IAM/auth ×5, Notes ×2                                                                       | 18            |
-| W2   | Enrich stubs — metadata singletons: `advc aobj apic apob chke dcat dmon dobj ilmb intm rvbc saia sco2 sprv srvc svim sxtg` + `cfdf` (v2)  | 18            |
+| W2   | Enrich stubs — metadata singletons: `advc aobj apic aplo apob dcat dmon dobj ilmb intm rvbc saia sco2 sprv srvc sxtg` + `cfdf` (v2)       | 17            |
 | W3   | Enrich stubs — source-bearing/special: `ddla` (`.acds`), `csnm` (`.csn`), `evto`, `ints`, `iwng`, `docu` (root-level schema file, no dir) | 6             |
 | W4   | abapGit AFF-JSON parity for its ~48 legacy-only types (in `adt-plugin-abapgit`, via `toAffJson` derived from `toAbapGit`)                 | ~48           |
 | W5   | Conformance hardening: LIMU naming, `.properties` texts, namespace brackets, multi-`formatVersion`, deserialize parity, docs + CI gate    | cross-cutting |
 
-_76 stubs split 18+18+5(+1 docu edge) in W1–W3, the rest graduate during
+_75 stubs split 18+17+6 in W1–W3; remaining gCTS stubs graduate during
+W4 (abapGit parity sweep) and W5 (cross-cutting hardening), tracked via
+the `aff-coverage` matrix_
 W4/W5 — per-type file shapes are derived from each type's `examples/`
 dir during its wave, not pre-guessed here._
 

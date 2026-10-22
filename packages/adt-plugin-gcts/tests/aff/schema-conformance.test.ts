@@ -30,18 +30,17 @@ let companions = 0;
 let subObjects = 0;
 
 for (const type of listAffTypes()) {
-  for (const rel of affExamples(type)) {
-    const json = readAffExample(type, rel);
-    const target = schemaTargetForExample(type, rel, json);
-    if (target.companion) {
-      companions++;
-    } else if (SUB_OBJECT_RE.test(rel)) {
+  for (const rel of affExamples({ type })) {
+    const json = readAffExample({ type }, rel);
+    const target = schemaTargetForExample({ type }, rel, json);
+    if (!target.companion && SUB_OBJECT_RE.test(rel)) {
       subObjects++;
       continue;
     }
-    const { valid, errors } = affValidate(target.type, json, target.version);
-    if (valid) checked++;
-    else failures.push({ type: target.type, file: rel, errors });
+    const { valid, errors } = affValidate(target, json);
+    if (!valid) failures.push({ type: target.type, file: rel, errors });
+    else if (target.companion) companions++;
+    else checked++;
   }
 }
 
@@ -60,10 +59,15 @@ describe('AFF schema conformance (upstream examples)', () => {
     );
   });
 
-  it('reports', () => {
+  it('classifies companion and sub-object examples', () => {
     console.log(
       `[conformance] root-valid=${checked} companions=${companions} ` +
         `sub-objects=${subObjects} failures=${failures.length}`,
+    );
+    assert.ok(companions >= 1, `expected ≥1 DOCU companion, got ${companions}`);
+    assert.ok(
+      subObjects >= 1,
+      `expected ≥1 LIMU sub-object (e.g. func/reps), got ${subObjects}`,
     );
   });
 });
