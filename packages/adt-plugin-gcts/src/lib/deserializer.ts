@@ -27,7 +27,11 @@
 import type { FileTree, ExportOptions } from '@abapify/adt-plugin';
 import { createAdk, type AdkObject, type AdtClient } from '@abapify/adk';
 import { getHandler, getSupportedTypes } from './handlers/base';
-import { parseGctsFilename, PACKAGE_FILENAME } from './format/filename';
+import {
+  parseGctsFilename,
+  PACKAGE_FILENAME,
+  sourceKey,
+} from './format/filename';
 
 /** Source-file extensions emitted by gCTS handlers. */
 const SOURCE_EXTENSIONS = new Set([
@@ -62,7 +66,7 @@ interface ObjectFiles {
   name: string;
   type: string;
   metadataFile?: string;
-  sourceFiles: Array<{ path: string; suffix?: string }>;
+  sourceFiles: Array<{ path: string; suffix?: string; ext?: string }>;
 }
 
 /**
@@ -110,10 +114,15 @@ export async function* deserialize(
         sourceFiles: [],
       });
     }
-    // `{name}.{type}.docu.json` is a DOCU companion of the parent object —
-    // it flows through the source pipeline, not the metadata anchor.
-    if (parsed.suffix === 'docu') {
-      objectMap.get(key)!.sourceFiles.push({ path: jsonPath, suffix: 'docu' });
+    // Any suffixed `.json` is a companion of the parent object — DOCU texts
+    // (`docu`), LIMU sub-object metadata (`{sub}.{stype}`) — it flows
+    // through the source pipeline, not the metadata anchor.
+    if (parsed.suffix) {
+      objectMap.get(key)!.sourceFiles.push({
+        path: jsonPath,
+        suffix: parsed.suffix,
+        ext: 'json',
+      });
       continue;
     }
     objectMap.get(key)!.metadataFile = jsonPath;
@@ -131,7 +140,11 @@ export async function* deserialize(
       const obj = objectMap.get(key);
       if (!obj) continue;
 
-      obj.sourceFiles.push({ path, suffix: parsed.suffix });
+      obj.sourceFiles.push({
+        path,
+        suffix: parsed.suffix,
+        ext: parsed.extension,
+      });
     }
   }
 
@@ -148,13 +161,25 @@ export async function* deserialize(
       const metadata = handler.schema.parse(raw);
 
       // Read sources, mapping suffix → source key via handler map.
+      // Companions whose extension differs from the type's default encode
+      // it into the key (`{suffix}.{ext}`) — LIMU `.json` metadata and
+      // `.properties` texts stay distinguishable from `.abap` sources.
       const sources: Record<string, string> = {};
-      for (const { path, suffix } of objFiles.sourceFiles) {
+      for (const { path, suffix, ext } of objFiles.sourceFiles) {
         const content = await fileTree.read(path);
-        const sourceKey = suffix
-          ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
-          : 'main';
-        sources[sourceKey] = content;
+        const key =
+          suffix === 'docu'
+            ? 'docu'
+            : suffix
+              ? sourceKey(
+                  objFiles.type,
+                  handler.suffixToSourceKey?.[suffix] ?? suffix,
+                  ext ?? '',
+                )
+              : ext && ext !== 'json'
+                ? sourceKey(objFiles.type, 'main', ext)
+                : 'main';
+        sources[key] = content;
       }
 
       const payload: {
