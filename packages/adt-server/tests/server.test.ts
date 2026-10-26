@@ -1532,6 +1532,7 @@ test('one disconnected caller does not cancel the shared readiness check', async
     release = resolve;
   });
   let calls = 0;
+  let probeSignal: AbortSignal | undefined;
   const createServer = vi.spyOn(http, 'createServer');
   let server: Awaited<ReturnType<typeof startTestAdtServer>>;
   let listener: http.Server;
@@ -1540,10 +1541,18 @@ test('one disconnected caller does not cancel the shared readiness check', async
       operations,
       host: '127.0.0.1',
       port: 0,
-      readinessProbe: async () => {
+      readinessProbe: async (signal) => {
         calls++;
+        probeSignal = signal;
         started();
-        await released;
+        await new Promise<void>((resolve, reject) => {
+          const onAbort = () => reject(new Error('Aborted'));
+          signal.addEventListener('abort', onAbort, { once: true });
+          void released.then(() => {
+            signal.removeEventListener('abort', onAbort);
+            resolve();
+          });
+        });
       },
     });
     listener = createServer.mock.results[0].value as http.Server;
@@ -1551,6 +1560,11 @@ test('one disconnected caller does not cancel the shared readiness check', async
     createServer.mockRestore();
   }
   try {
+    const disconnected = new Promise<void>((resolve) => {
+      listener.once('request', (request) => {
+        request.socket.once('close', () => resolve());
+      });
+    });
     const abandoned = http.get(`${server.url}/readyz`);
     abandoned.on('error', () => undefined);
     await running;
@@ -1560,6 +1574,8 @@ test('one disconnected caller does not cancel the shared readiness check', async
     const surviving = fetch(`${server.url}/readyz`);
     await survivingArrived;
     abandoned.destroy();
+    await disconnected;
+    assert.strictEqual(probeSignal?.aborted, false);
     release();
     assert.strictEqual((await surviving).status, 200);
     assert.strictEqual(calls, 1);
