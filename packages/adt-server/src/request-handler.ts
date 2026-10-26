@@ -125,8 +125,12 @@ function writeProblem(
   response.end(JSON.stringify({ title, status }));
 }
 
-function sendJson(response: http.ServerResponse, data: unknown): void {
-  response.writeHead(200, { 'content-type': 'application/json' });
+function sendJson(
+  response: http.ServerResponse,
+  data: unknown,
+  status = 200,
+): void {
+  response.writeHead(status, { 'content-type': 'application/json' });
   response.end(JSON.stringify(data));
 }
 
@@ -322,6 +326,7 @@ function toRestAtcRun(
 
 export interface RequestHandlerContext {
   options: AdtServerOptions;
+  readinessProbe?: () => Promise<void>;
   mcpHandler?: HttpMcpHandler;
   sourceCapabilities?: ReturnType<typeof createRestSourceCapabilityService>;
   atcDocumentationCapabilities?: ReturnType<
@@ -385,11 +390,16 @@ async function handleHealth(
 }
 
 async function handleReady(
-  _ctx: RequestHandlerContext,
+  ctx: RequestHandlerContext,
   _request: http.IncomingMessage,
   response: http.ServerResponse,
 ): Promise<void> {
-  sendJson(response, { status: 'ready' });
+  try {
+    await ctx.readinessProbe?.();
+    sendJson(response, { status: 'ready' });
+  } catch {
+    sendJson(response, { status: 'not ready' }, 503);
+  }
 }
 
 async function handleOpenApiJson(

@@ -188,6 +188,86 @@ test('keeps MCP unavailable when no guarded handler is configured', async () => 
   }
 });
 
+test('keeps liveness available while a configured readiness probe fails without leaking its error', async () => {
+  const server = await startTestAdtServer({
+    operations,
+    host: '127.0.0.1',
+    port: 0,
+    readinessProbe: async () => {
+      throw new Error('broker destination summary contained secret-details');
+    },
+  } as Parameters<typeof startTestAdtServer>[0]);
+
+  try {
+    const ready = await fetch(`${server.url}/readyz`);
+    assert.strictEqual(ready.status, 503);
+    assert.doesNotMatch(
+      await ready.text(),
+      /broker|destination|secret-details/i,
+    );
+
+    const health = await fetch(`${server.url}/healthz`);
+    assert.strictEqual(health.status, 200);
+    assert.deepStrictEqual(await health.json(), { status: 'ok' });
+  } finally {
+    await server.close();
+  }
+});
+
+test('checks a configured readiness probe only for readiness', async () => {
+  let probeCalls = 0;
+  const server = await startTestAdtServer({
+    operations,
+    host: '127.0.0.1',
+    port: 0,
+    readinessProbe: async () => {
+      probeCalls++;
+    },
+  });
+
+  try {
+    const health = await fetch(`${server.url}/healthz`);
+    assert.strictEqual(health.status, 200);
+    assert.strictEqual(probeCalls, 0);
+
+    const ready = await fetch(`${server.url}/readyz`);
+    assert.strictEqual(ready.status, 200);
+    assert.deepStrictEqual(await ready.json(), { status: 'ready' });
+    assert.strictEqual(probeCalls, 1);
+  } finally {
+    await server.close();
+  }
+});
+
+test('aborts a readiness probe that exceeds its deadline', async () => {
+  let aborted = false;
+  const server = await startTestAdtServer({
+    operations,
+    host: '127.0.0.1',
+    port: 0,
+    readinessTimeoutMs: 20,
+    readinessProbe: async (signal) =>
+      await new Promise<void>((resolve) => {
+        signal.addEventListener(
+          'abort',
+          () => {
+            aborted = true;
+            resolve();
+          },
+          { once: true },
+        );
+      }),
+  });
+
+  try {
+    const ready = await fetch(`${server.url}/readyz`);
+    assert.strictEqual(ready.status, 503);
+    assert.strictEqual(aborted, true);
+  } finally {
+    await server.close();
+  }
+});
+
 test('keeps broker-backed REST routes disabled until S2S authentication is configured', async () => {
   let destinationReads = 0;
   const server = await startTestAdtServer({

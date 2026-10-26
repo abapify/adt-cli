@@ -4,9 +4,92 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from 'vitest';
 import {
+  createHttpBrokerReadinessProbe,
   createHttpBrokerOperations,
   createHttpDestinationContexts,
 } from '../src/broker.js';
+
+test('rejects a malformed broker destination summary without acquiring a destination lease', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));
+  const tokenFile = path.join(directory, 'broker-token');
+  await writeFile(tokenFile, 'sidecar-token\n', 'utf8');
+  const requests: Array<{
+    url: string;
+    authorization: string | null;
+    redirect: RequestRedirect | undefined;
+  }> = [];
+  const readinessProbe = createHttpBrokerReadinessProbe({
+    baseUrl: 'http://adt-api.internal',
+    tokenFile,
+    fetch: async (input, init) => {
+      requests.push({
+        url: String(input),
+        authorization: new Headers(init?.headers).get('x-adt-server-token'),
+        redirect: init?.redirect,
+      });
+      return new Response(
+        JSON.stringify({ data: { destination: 'not-an-array' } }),
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        },
+      );
+    },
+  });
+
+  try {
+    await assert.rejects(() => readinessProbe(new AbortController().signal));
+    assert.deepStrictEqual(requests, [
+      {
+        url: 'http://adt-api.internal/internal/adt-server/destinations',
+        authorization: 'sidecar-token',
+        redirect: 'error',
+      },
+    ]);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('accepts an empty broker destination summary', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));
+  const tokenFile = path.join(directory, 'broker-token');
+  await writeFile(tokenFile, 'sidecar-token\n', 'utf8');
+  const readinessProbe = createHttpBrokerReadinessProbe({
+    baseUrl: 'http://adt-api.internal',
+    tokenFile,
+    fetch: async () =>
+      new Response(JSON.stringify({ data: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+  });
+
+  try {
+    await assert.doesNotReject(() =>
+      readinessProbe(new AbortController().signal),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('rejects an unavailable broker destination summary', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));
+  const tokenFile = path.join(directory, 'broker-token');
+  await writeFile(tokenFile, 'sidecar-token\n', 'utf8');
+  const readinessProbe = createHttpBrokerReadinessProbe({
+    baseUrl: 'http://adt-api.internal',
+    tokenFile,
+    fetch: async () => new Response(null, { status: 503 }),
+  });
+
+  try {
+    await assert.rejects(() => readinessProbe(new AbortController().signal));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 test('redeems a frozen source reference through the private ADT broker', async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));

@@ -1,4 +1,7 @@
-import { createHttpBrokerOperations } from '../broker.js';
+import {
+  createHttpBrokerOperations,
+  createHttpBrokerReadinessProbe,
+} from '../broker.js';
 import {
   createAdtServerMcpOptions,
   executeWithDeadlineAndAbort,
@@ -34,6 +37,7 @@ async function main(): Promise<void> {
   ]);
   await startAdtServer({
     operations: createHttpBrokerOperations(brokerOptions),
+    readinessProbe: createHttpBrokerReadinessProbe(brokerOptions),
     host: process.env.ADT_SERVER_HOST,
     port: Number(process.env.ADT_SERVER_PORT ?? '3002'),
     mcp,

@@ -38,6 +38,8 @@ export type ResolveFrozenSource = (input: {
   sourceRef: string;
 }) => Promise<FrozenSourceResolution>;
 
+export type ReadinessProbe = (signal: AbortSignal) => Promise<void>;
+
 /**
  * The ADT broker may return a direct adapter URI or a source capability
  * previously issued by this same sidecar REST process. Redeem the latter
@@ -186,6 +188,40 @@ export interface AdtServerOptions {
   pageCursors?: ReturnType<typeof createRestPageCursorService>;
   /** Override the default test secret used to create page cursors. */
   pageCursorSecret?: string;
+  /** Optional deployment-owned dependency check for /readyz. */
+  readinessProbe?: ReadinessProbe;
+  /** Finite readiness deadline; defaults to two seconds. */
+  readinessTimeoutMs?: number;
+}
+
+function createBoundedReadinessProbe(options: AdtServerOptions) {
+  const readinessProbe = options.readinessProbe;
+  if (!readinessProbe) return undefined;
+  const timeoutMs = options.readinessTimeoutMs ?? 2_000;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new Error('readinessTimeoutMs must be a positive finite number');
+  }
+  return async (): Promise<void> => {
+    const controller = new AbortController();
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Readiness probe timed out'));
+        controller.abort();
+      }, timeoutMs);
+      void Promise.resolve()
+        .then(() => readinessProbe(controller.signal))
+        .then(
+          () => {
+            clearTimeout(timeout);
+            resolve();
+          },
+          (error: unknown) => {
+            clearTimeout(timeout);
+            reject(error);
+          },
+        );
+    });
+  };
 }
 
 export interface RunningAdtServer {
@@ -296,10 +332,12 @@ export async function startAdtServer(
     createServerAtcDocumentationCapabilities(options);
   const pageCursors = createServerPageCursors(options);
   const mcpHandler = createServerMcpHandler(options, host, sourceCapabilities);
+  const readinessProbe = createBoundedReadinessProbe(options);
 
   const server = http.createServer(
     createRequestHandler({
       options,
+      readinessProbe,
       mcpHandler,
       sourceCapabilities,
       atcDocumentationCapabilities,

@@ -15,6 +15,7 @@ export {
 } from './mcp-runtime.js';
 export {
   createHttpBrokerOperations,
+  createHttpBrokerReadinessProbe,
   createHttpDestinationContexts,
   type HttpBrokerOptions,
 } from './broker.js';

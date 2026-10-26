@@ -19,7 +19,11 @@ import type {
   DestinationLeaseProvider,
 } from '@abapify/adt-mcp';
 import { resolveObjectUri } from '@abapify/adt-mcp';
-import type { DestinationSummary, AdtServerOperations } from './server.js';
+import type {
+  DestinationSummary,
+  AdtServerOperations,
+  ReadinessProbe,
+} from './server.js';
 import {
   MAX_PACKAGE_SEARCH_RESULTS,
   MAX_SOURCE_BYTES,
@@ -1084,6 +1088,53 @@ function brokerLeaseHelpers(options: HttpBrokerOptions) {
       throw new Error(`Destination lease release failed (${response.status})`);
   };
   return { fetcher, readBrokerToken, acquireLease, releaseLease };
+}
+
+function isDestinationSummary(value: unknown): value is DestinationSummary {
+  if (!record(value)) return false;
+  const summary = value as DestinationSummary;
+  return (
+    typeof summary.key === 'string' &&
+    typeof summary.displayName === 'string' &&
+    Array.isArray(summary.systemSids) &&
+    summary.systemSids.every((systemSid) => typeof systemSid === 'string') &&
+    typeof summary.authConfigured === 'boolean' &&
+    Number.isInteger(summary.version)
+  );
+}
+
+function isDestinationSummaryResponse(
+  value: unknown,
+): value is { data: DestinationSummary[] } {
+  const body = record(value);
+  return (
+    !!body && Array.isArray(body.data) && body.data.every(isDestinationSummary)
+  );
+}
+
+/** Read-only broker probe; it never acquires a destination lease or contacts SAP. */
+export function createHttpBrokerReadinessProbe(
+  options: HttpBrokerOptions,
+): ReadinessProbe {
+  const { fetcher, readBrokerToken } = brokerLeaseHelpers(options);
+  return async (signal) => {
+    const token = await readBrokerToken();
+    const response = await fetcher(
+      new URL('/internal/adt-server/destinations', options.baseUrl),
+      {
+        headers: { 'x-adt-server-token': token },
+        redirect: 'error',
+        signal,
+      },
+    );
+    if (!response.ok)
+      throw new Error(`ADT Server broker request failed (${response.status})`);
+    if (!isDestinationSummaryResponse(await response.json())) {
+      throw new Error(
+        'ADT Server broker returned an invalid destination summary',
+      );
+    }
+  };
 }
 
 /** ADT-private broker client. It exposes only safe summaries to the public server layer. */
