@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import http from 'node:http';
-import { test } from 'vitest';
+import { test, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -1526,36 +1527,44 @@ test('one disconnected caller does not cancel the shared readiness check', async
   const running = new Promise<void>((resolve) => {
     started = resolve;
   });
-  let calls = 0;
-  const server = await startTestAdtServer({
-    operations,
-    host: '127.0.0.1',
-    port: 0,
-    readinessProbe: async (signal) => {
-      calls++;
-      started();
-      await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(resolve, 80);
-        signal.addEventListener(
-          'abort',
-          () => {
-            clearTimeout(timer);
-            reject(new Error('Aborted'));
-          },
-          { once: true },
-        );
-      });
-    },
+  let release!: () => void;
+  const released = new Promise<void>((resolve) => {
+    release = resolve;
   });
+  let calls = 0;
+  const createServer = vi.spyOn(http, 'createServer');
+  let server: Awaited<ReturnType<typeof startTestAdtServer>>;
+  let listener: http.Server;
+  try {
+    server = await startTestAdtServer({
+      operations,
+      host: '127.0.0.1',
+      port: 0,
+      readinessProbe: async () => {
+        calls++;
+        started();
+        await released;
+      },
+    });
+    listener = createServer.mock.results[0].value as http.Server;
+  } finally {
+    createServer.mockRestore();
+  }
   try {
     const abandoned = http.get(`${server.url}/readyz`);
     abandoned.on('error', () => undefined);
     await running;
+    const survivingArrived = new Promise<void>((resolve) => {
+      listener.once('request', () => resolve());
+    });
     const surviving = fetch(`${server.url}/readyz`);
+    await survivingArrived;
     abandoned.destroy();
+    release();
     assert.strictEqual((await surviving).status, 200);
     assert.strictEqual(calls, 1);
   } finally {
+    release();
     await server.close();
   }
 });
@@ -1619,13 +1628,13 @@ test.each(['sync', 'async'])(
   'safe readiness reporting isolates %s reporter errors and never discloses probe secrets',
   async (mode) => {
     const reports: unknown[][] = [];
-    const secret = 'token=private-token https://private.invalid/destination';
+    const probeErrorMessage = `authorization=${randomUUID()} https://private.invalid/destination`;
     const server = await startTestAdtServer({
       operations,
       host: '127.0.0.1',
       port: 0,
       readinessProbe: async () => {
-        throw new Error(secret);
+        throw new Error(probeErrorMessage);
       },
       onReadinessFailure: (...args) => {
         reports.push(args);
@@ -1640,7 +1649,10 @@ test.each(['sync', 'async'])(
       assert.strictEqual(ready.status, 503);
       assert.deepStrictEqual(await ready.json(), { status: 'not ready' });
       assert.deepStrictEqual(reports, [['probe_failed']]);
-      assert.strictEqual(JSON.stringify(reports).includes(secret), false);
+      assert.strictEqual(
+        JSON.stringify(reports).includes(probeErrorMessage),
+        false,
+      );
       await new Promise((resolve) => setImmediate(resolve));
       assert.strictEqual((await fetch(`${server.url}/healthz`)).status, 200);
     } finally {

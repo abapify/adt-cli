@@ -83,6 +83,9 @@ or contact SAP systems.
 
 ### Requirement: Liveness remains independent
 
+The server SHALL keep `GET /healthz` independent of broker and readiness probe
+availability.
+
 #### Scenario: Broker or probe is unavailable
 
 - **GIVEN** the configured broker or readiness probe is unavailable
