@@ -1,8 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { test } from 'vitest';
+import { test, vi } from 'vitest';
+
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs/promises')>();
+  return { ...actual, readFile: vi.fn(actual.readFile) };
+});
 import {
   createHttpBrokerReadinessProbe,
   createHttpBrokerOperations,
@@ -55,20 +60,35 @@ test('accepts an empty broker destination summary', async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'adt-server-broker-'));
   const tokenFile = path.join(directory, 'broker-token');
   await writeFile(tokenFile, 'sidecar-token\n', 'utf8');
+  const requests: Array<{ url: string; method: string; token: string | null }> =
+    [];
   const readinessProbe = createHttpBrokerReadinessProbe({
     baseUrl: 'http://adt-api.internal',
     tokenFile,
-    fetch: async () =>
-      new Response(JSON.stringify({ data: [] }), {
+    fetch: async (input, init) => {
+      requests.push({
+        url: String(input),
+        method: init?.method ?? 'GET',
+        token: new Headers(init?.headers).get('x-adt-server-token'),
+      });
+      return new Response(JSON.stringify({ data: [] }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
-      }),
+      });
+    },
   });
 
   try {
     await assert.doesNotReject(() =>
       readinessProbe(new AbortController().signal),
     );
+    assert.deepStrictEqual(requests, [
+      {
+        url: 'http://adt-api.internal/internal/adt-server/destinations',
+        method: 'GET',
+        token: 'sidecar-token',
+      },
+    ]);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -81,11 +101,15 @@ test('rejects an unavailable broker destination summary', async () => {
   const readinessProbe = createHttpBrokerReadinessProbe({
     baseUrl: 'http://adt-api.internal',
     tokenFile,
-    fetch: async () => new Response(null, { status: 503 }),
+    fetch: async () =>
+      new Response(JSON.stringify({ data: [] }), { status: 503 }),
   });
 
   try {
-    await assert.rejects(() => readinessProbe(new AbortController().signal));
+    await assert.rejects(
+      () => readinessProbe(new AbortController().signal),
+      /ADT Server broker request failed \(503\)/u,
+    );
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -1802,4 +1826,140 @@ test('releases an MCP destination context through the private broker', async () 
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+const validReadinessSummary = {
+  key: 'dev',
+  displayName: 'Development',
+  systemSids: ['DEV'],
+  authConfigured: true,
+  version: 1,
+};
+
+test.each([
+  ['populated', { data: [validReadinessSummary] }, true],
+  [
+    'whitespace-only key',
+    { data: [{ ...validReadinessSummary, key: ' ' }] },
+    false,
+  ],
+  [
+    'blank display name',
+    { data: [{ ...validReadinessSummary, displayName: '' }] },
+    false,
+  ],
+  [
+    'blank system SID',
+    { data: [{ ...validReadinessSummary, systemSids: [' '] }] },
+    false,
+  ],
+  ['zero version', { data: [{ ...validReadinessSummary, version: 0 }] }, false],
+  [
+    'negative version',
+    { data: [{ ...validReadinessSummary, version: -1 }] },
+    false,
+  ],
+  [
+    'unknown entry field',
+    { data: [{ ...validReadinessSummary, extra: 'private' }] },
+    false,
+  ],
+  ['unknown response field', { data: [], extra: 'private' }, false],
+  [
+    'mixed valid and invalid entries',
+    { data: [validReadinessSummary, { ...validReadinessSummary, key: '' }] },
+    false,
+  ],
+])(
+  'validates %s broker readiness summary against the REST contract',
+  async (_name, body, accepted) => {
+    const directory = await mkdtemp(
+      path.join(os.tmpdir(), 'adt-readiness-contract-'),
+    );
+    try {
+      const tokenFile = path.join(directory, 'token');
+      await writeFile(tokenFile, 'synthetic-token');
+      const probe = createHttpBrokerReadinessProbe({
+        baseUrl: 'http://broker.invalid',
+        tokenFile,
+        fetch: async () => new Response(JSON.stringify(body), { status: 200 }),
+      });
+      if (accepted) {
+        await assert.doesNotReject(() => probe(new AbortController().signal));
+      } else {
+        await assert.rejects(
+          () => probe(new AbortController().signal),
+          /invalid destination summary/u,
+        );
+      }
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
+
+test('already aborted readiness never reads a token or fetches', async () => {
+  const controller = new AbortController();
+  controller.abort();
+  const fetcher = vi.fn();
+  vi.mocked(readFile).mockClear();
+  const probe = createHttpBrokerReadinessProbe({
+    baseUrl: 'http://broker.invalid',
+    tokenFile: '/not-read',
+    fetch: fetcher,
+  });
+  await assert.rejects(() => probe(controller.signal), { name: 'AbortError' });
+  assert.strictEqual(vi.mocked(readFile).mock.calls.length, 0);
+  assert.strictEqual(fetcher.mock.calls.length, 0);
+});
+
+test('cancels a pending token read with the readiness signal and never fetches', async () => {
+  const controller = new AbortController();
+  const fetcher = vi.fn();
+  let started!: () => void;
+  const reading = new Promise<void>((resolve) => {
+    started = resolve;
+  });
+  vi.mocked(readFile).mockImplementationOnce(async (_path, options) => {
+    const signal =
+      typeof options === 'object' && options !== null
+        ? options.signal
+        : undefined;
+    started();
+    assert.strictEqual(signal, controller.signal);
+    return await new Promise<never>((_resolve, reject) => {
+      signal!.addEventListener(
+        'abort',
+        () => reject(new DOMException('Aborted', 'AbortError')),
+        { once: true },
+      );
+    });
+  });
+  const probe = createHttpBrokerReadinessProbe({
+    baseUrl: 'http://broker.invalid',
+    tokenFile: '/mocked-token',
+    fetch: fetcher,
+  });
+  const pending = probe(controller.signal);
+  const rejected = assert.rejects(pending, { name: 'AbortError' });
+  await reading;
+  controller.abort();
+  await rejected;
+  assert.strictEqual(fetcher.mock.calls.length, 0);
+});
+
+test('does not fetch when cancellation arrives just after the token read', async () => {
+  const controller = new AbortController();
+  const fetcher = vi.fn(async () => new Response(JSON.stringify({ data: [] })));
+  vi.mocked(readFile).mockImplementationOnce(async () => {
+    controller.abort();
+    return 'synthetic-token';
+  });
+  const probe = createHttpBrokerReadinessProbe({
+    baseUrl: 'http://broker.invalid',
+    tokenFile: '/mocked-token',
+    fetch: fetcher,
+  });
+  await assert.rejects(() => probe(controller.signal), { name: 'AbortError' });
+  assert.strictEqual(fetcher.mock.calls.length, 0);
 });

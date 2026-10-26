@@ -1,13 +1,13 @@
 import {
   createHttpBrokerOperations,
   createHttpBrokerReadinessProbe,
-} from '../broker.js';
+} from '../broker';
 import {
   createAdtServerMcpOptions,
   executeWithDeadlineAndAbort,
-} from '../mcp-runtime.js';
-import { loadRestRuntimeSecurity } from '../rest-runtime.js';
-import { startAdtServer } from '../server.js';
+} from '../mcp-runtime';
+import { loadRestRuntimeSecurity } from '../rest-runtime';
+import { startAdtServer } from '../server';
 
 const baseUrl = process.env.ADT_BROKER_BASE_URL;
 const tokenFile = process.env.ADT_SERVER_BROKER_TOKEN_FILE;
@@ -38,6 +38,11 @@ async function main(): Promise<void> {
   await startAdtServer({
     operations: createHttpBrokerOperations(brokerOptions),
     readinessProbe: createHttpBrokerReadinessProbe(brokerOptions),
+    onReadinessFailure: (reason) => {
+      process.stderr.write(
+        `${JSON.stringify({ event: 'adt_server_readiness_failed', reason })}\n`,
+      );
+    },
     host: process.env.ADT_SERVER_HOST,
     port: Number(process.env.ADT_SERVER_PORT ?? '3002'),
     mcp,

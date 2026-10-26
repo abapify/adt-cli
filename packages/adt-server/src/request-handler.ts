@@ -9,15 +9,15 @@ import type { HttpMcpHandler } from '@abapify/adt-mcp';
 import {
   RestAtcDocumentationCapabilityError,
   createRestAtcDocumentationCapabilityService,
-} from './atc-documentation-capabilities.js';
+} from './atc-documentation-capabilities';
 import {
   RestSourceCapabilityError,
   createRestSourceCapabilityService,
-} from './source-capabilities.js';
+} from './source-capabilities';
 import {
   RestPageCursorError,
   createRestPageCursorService,
-} from './page-cursors.js';
+} from './page-cursors';
 import {
   atcDocumentationReadBody,
   atcDocumentationReadResponse,
@@ -51,8 +51,8 @@ import {
   transportSourceManifestBody,
   transportSourceManifestResponse,
   type TransportSourceManifestInput,
-} from './rest-schemas.js';
-import type { AdtServerOptions } from './server.js';
+} from './rest-schemas';
+import type { AdtServerOptions } from './server';
 
 const MAX_JSON_BODY_BYTES = 64 * 1024;
 
@@ -407,7 +407,7 @@ async function handleOpenApiJson(
   _request: http.IncomingMessage,
   response: http.ServerResponse,
 ): Promise<void> {
-  const { openApiDocument } = await import('./openapi.js');
+  const { openApiDocument } = await import('./openapi');
   sendJson(response, openApiDocument);
 }
 
@@ -416,7 +416,7 @@ async function handleOpenApiYaml(
   _request: http.IncomingMessage,
   response: http.ServerResponse,
 ): Promise<void> {
-  const { openApiYaml } = await import('./openapi.js');
+  const { openApiYaml } = await import('./openapi');
   response.writeHead(200, { 'content-type': 'application/yaml' });
   response.end(openApiYaml());
 }

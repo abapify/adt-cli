@@ -4,20 +4,20 @@ import {
   type DestinationContextRegistry,
   type McpInvocationVerifier,
 } from '@abapify/adt-mcp';
-import { createRestAtcDocumentationCapabilityService } from './atc-documentation-capabilities.js';
-import { createRestSourceCapabilityService } from './source-capabilities.js';
-import { assertSecret } from './sealed-capability.js';
-import { createRestPageCursorService } from './page-cursors.js';
+import { createRestAtcDocumentationCapabilityService } from './atc-documentation-capabilities';
+import { createRestSourceCapabilityService } from './source-capabilities';
+import { assertSecret } from './sealed-capability';
+import { createRestPageCursorService } from './page-cursors';
 import {
   type TransportSearchCriteria,
   type TransportSourceManifestInput,
   type AtcRunBody,
-} from './rest-schemas.js';
+} from './rest-schemas';
 import {
   createRequestHandler,
   type RawTransportSourceManifest,
   type AtcRunOperationResult,
-} from './request-handler.js';
+} from './request-handler';
 
 type AtcRunOperationInput = AtcRunBody & { destination: string };
 
@@ -37,6 +37,8 @@ export type ResolveFrozenSource = (input: {
   systemSid: string;
   sourceRef: string;
 }) => Promise<FrozenSourceResolution>;
+
+export type ReadinessFailureReason = 'timeout' | 'probe_failed';
 
 export type ReadinessProbe = (signal: AbortSignal) => Promise<void>;
 
@@ -67,13 +69,13 @@ export interface AdtServerOperations {
   ): Promise<unknown>;
   searchPackages(
     destination: string,
-    criteria?: import('./rest-schemas.js').PackageSearchCriteria,
+    criteria?: import('./rest-schemas').PackageSearchCriteria,
   ): Promise<unknown>;
   /** Reads a bounded hierarchy below one named package; never a global forest. */
   getPackageTree(destination: string, rootPackage: string): Promise<unknown>;
   searchObjects(
     destination: string,
-    criteria?: import('./rest-schemas.js').ObjectSearchCriteria,
+    criteria?: import('./rest-schemas').ObjectSearchCriteria,
   ): Promise<unknown>;
   listPackageObjects(
     destination: string,
@@ -190,37 +192,57 @@ export interface AdtServerOptions {
   pageCursorSecret?: string;
   /** Optional deployment-owned dependency check for /readyz. */
   readinessProbe?: ReadinessProbe;
-  /** Finite readiness deadline; defaults to two seconds. */
+  /** Readiness deadline in milliseconds: > 0 and <= 2147483647; defaults to 2000. */
   readinessTimeoutMs?: number;
+  /** Deployment-owned diagnostics receive only a safe classification, never probe errors. */
+  onReadinessFailure?: (reason: ReadinessFailureReason) => void | Promise<void>;
 }
 
 function createBoundedReadinessProbe(options: AdtServerOptions) {
+  const timeoutMs = options.readinessTimeoutMs ?? 2_000;
+  if (
+    !Number.isFinite(timeoutMs) ||
+    timeoutMs <= 0 ||
+    timeoutMs > 2_147_483_647
+  ) {
+    throw new Error('readinessTimeoutMs must be > 0 and <= 2147483647');
+  }
   const readinessProbe = options.readinessProbe;
   if (!readinessProbe) return undefined;
-  const timeoutMs = options.readinessTimeoutMs ?? 2_000;
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-    throw new Error('readinessTimeoutMs must be a positive finite number');
-  }
-  return async (): Promise<void> => {
+  let inFlight: Promise<void> | undefined;
+  const run = async (): Promise<void> => {
     const controller = new AbortController();
-    await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Readiness probe timed out'));
-        controller.abort();
-      }, timeoutMs);
-      void Promise.resolve()
-        .then(() => readinessProbe(controller.signal))
-        .then(
-          () => {
-            clearTimeout(timeout);
-            resolve();
-          },
-          (error: unknown) => {
-            clearTimeout(timeout);
-            reject(error);
-          },
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let reason: ReadinessFailureReason = 'probe_failed';
+    try {
+      await Promise.race([
+        Promise.resolve().then(() => readinessProbe(controller.signal)),
+        new Promise<never>((_resolve, reject) => {
+          timeout = setTimeout(() => {
+            reason = 'timeout';
+            reject(new Error('Readiness probe timed out'));
+            controller.abort();
+          }, timeoutMs);
+        }),
+      ]);
+    } catch {
+      try {
+        void Promise.resolve(options.onReadinessFailure?.(reason)).catch(
+          () => undefined,
         );
+      } catch {
+        // Diagnostics must not affect readiness or expose arbitrary reporter errors.
+      }
+      throw new Error('Readiness probe failed');
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+  return (): Promise<void> => {
+    inFlight ??= run().finally(() => {
+      inFlight = undefined;
     });
+    return inFlight;
   };
 }
 
@@ -326,13 +348,13 @@ function createServerMcpHandler(
 export async function startAdtServer(
   options: AdtServerOptions,
 ): Promise<RunningAdtServer> {
+  const readinessProbe = createBoundedReadinessProbe(options);
   const host = options.host ?? '127.0.0.1';
   const sourceCapabilities = createServerSourceCapabilities(options);
   const atcDocumentationCapabilities =
     createServerAtcDocumentationCapabilities(options);
   const pageCursors = createServerPageCursors(options);
   const mcpHandler = createServerMcpHandler(options, host, sourceCapabilities);
-  const readinessProbe = createBoundedReadinessProbe(options);
 
   const server = http.createServer(
     createRequestHandler({

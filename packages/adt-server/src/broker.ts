@@ -23,15 +23,16 @@ import type {
   DestinationSummary,
   AdtServerOperations,
   ReadinessProbe,
-} from './server.js';
+} from './server';
 import {
+  destinationSummaryResponse,
   MAX_PACKAGE_SEARCH_RESULTS,
   MAX_SOURCE_BYTES,
   type AtcRunBody,
   type ObjectSearchCriteria,
   type PackageSearchCriteria,
   type TransportSearchCriteria,
-} from './rest-schemas.js';
+} from './rest-schemas';
 
 export interface HttpBrokerOptions {
   baseUrl: string;
@@ -1029,8 +1030,12 @@ function extractTransportHeaders(response: unknown): CtsRequestHeader[] {
 
 function brokerLeaseHelpers(options: HttpBrokerOptions) {
   const fetcher = options.fetch ?? globalThis.fetch;
-  const readBrokerToken = async (): Promise<string> => {
-    const token = (await readFile(options.tokenFile, 'utf8')).trim();
+  const readBrokerToken = async (signal?: AbortSignal): Promise<string> => {
+    signal?.throwIfAborted();
+    const token = (
+      await readFile(options.tokenFile, { encoding: 'utf8', signal })
+    ).trim();
+    signal?.throwIfAborted();
     if (!token) throw new Error('ADT Server broker token file is empty');
     return token;
   };
@@ -1090,35 +1095,15 @@ function brokerLeaseHelpers(options: HttpBrokerOptions) {
   return { fetcher, readBrokerToken, acquireLease, releaseLease };
 }
 
-function isDestinationSummary(value: unknown): value is DestinationSummary {
-  if (!record(value)) return false;
-  const summary = value as DestinationSummary;
-  return (
-    typeof summary.key === 'string' &&
-    typeof summary.displayName === 'string' &&
-    Array.isArray(summary.systemSids) &&
-    summary.systemSids.every((systemSid) => typeof systemSid === 'string') &&
-    typeof summary.authConfigured === 'boolean' &&
-    Number.isInteger(summary.version)
-  );
-}
-
-function isDestinationSummaryResponse(
-  value: unknown,
-): value is { data: DestinationSummary[] } {
-  const body = record(value);
-  return (
-    !!body && Array.isArray(body.data) && body.data.every(isDestinationSummary)
-  );
-}
-
 /** Read-only broker probe; it never acquires a destination lease or contacts SAP. */
 export function createHttpBrokerReadinessProbe(
   options: HttpBrokerOptions,
 ): ReadinessProbe {
   const { fetcher, readBrokerToken } = brokerLeaseHelpers(options);
   return async (signal) => {
-    const token = await readBrokerToken();
+    signal.throwIfAborted();
+    const token = await readBrokerToken(signal);
+    signal.throwIfAborted();
     const response = await fetcher(
       new URL('/internal/adt-server/destinations', options.baseUrl),
       {
@@ -1129,7 +1114,7 @@ export function createHttpBrokerReadinessProbe(
     );
     if (!response.ok)
       throw new Error(`ADT Server broker request failed (${response.status})`);
-    if (!isDestinationSummaryResponse(await response.json())) {
+    if (!destinationSummaryResponse.safeParse(await response.json()).success) {
       throw new Error(
         'ADT Server broker returned an invalid destination summary',
       );

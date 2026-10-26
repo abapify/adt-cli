@@ -6,21 +6,23 @@ export {
   type DestinationSummary,
   type RestServiceAuthorizer,
   type RunningAdtServer,
-} from './server.js';
-export { openApiDocument, openApiYaml } from './openapi.js';
+  type ReadinessProbe,
+  type ReadinessFailureReason,
+} from './server';
+export { openApiDocument, openApiYaml } from './openapi';
 export {
   createAdtServerMcpOptions,
   executeWithDeadlineAndAbort,
   type AdtServerMcpRuntimeOptions,
-} from './mcp-runtime.js';
+} from './mcp-runtime';
 export {
   createHttpBrokerOperations,
   createHttpBrokerReadinessProbe,
   createHttpDestinationContexts,
   type HttpBrokerOptions,
-} from './broker.js';
+} from './broker';
 export {
   loadRestRuntimeSecurity,
   type RestRuntimeSecurity,
   type RestRuntimeSecurityOptions,
-} from './rest-runtime.js';
+} from './rest-runtime';
