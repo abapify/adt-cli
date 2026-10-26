@@ -29,7 +29,7 @@
   "dependencies": {
     "@abapify/adt-plugin": "0.4.24",
     "@abapify/adt-contracts": "0.4.24",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   },
   "repository": {
     "type": "git",
