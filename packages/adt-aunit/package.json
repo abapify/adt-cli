@@ -32,7 +32,8 @@
     "@abapify/adt-plugin": "0.4.24",
     "@abapify/adt-schemas": "0.4.24",
     "@abapify/adt-contracts": "0.4.24",
-    "@abapify/adt-plugin-abapgit": "0.4.24"
+    "@abapify/adt-plugin-abapgit": "0.4.24",
+    "@abapify/adt-fixtures": "0.4.24"
   },
   "module": "./dist/index.mjs",
   "repository": {

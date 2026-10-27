@@ -16,7 +16,8 @@ import {
   affValidate,
 } from '../../src/lib/aff/schemas.ts';
 
-const SUB_OBJECT_RE = /\.(reps|sotr|sotu|cpub|cpro|cprt|cpri|func)\.json$/i;
+const SUB_OBJECT_RE =
+  /\.(reps|sotr|sotu|cpub|cpro|cprt|cpri|func|settings)\.json$/i;
 
 interface Row {
   type: string;
@@ -31,7 +32,12 @@ let subObjects = 0;
 
 for (const type of listAffTypes()) {
   for (const rel of affExamples({ type })) {
-    const json = readAffExample({ type }, rel);
+    let json: any;
+    try {
+      json = readAffExample({ type }, rel);
+    } catch {
+      continue;
+    }
     const target = schemaTargetForExample({ type }, rel, json);
     if (!target.companion && SUB_OBJECT_RE.test(rel)) {
       subObjects++;

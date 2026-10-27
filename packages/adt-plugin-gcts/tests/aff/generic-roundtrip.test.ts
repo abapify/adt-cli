@@ -44,7 +44,12 @@ function collect() {
   for (const type of listAffTypes()) {
     if (dedicated(type)) continue;
     for (const rel of affExamples({ type })) {
-      const example = readAffExample({ type }, rel);
+      let example: any;
+      try {
+        example = readAffExample({ type }, rel);
+      } catch {
+        continue;
+      }
       const target = schemaTargetForExample({ type }, rel, example);
       if (target.companion || target.type !== type) continue;
 

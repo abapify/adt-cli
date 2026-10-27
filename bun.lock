@@ -124,6 +124,7 @@
         "@abapify/adt-codegen": "0.4.24",
         "@abapify/adt-diff": "0.4.24",
         "@abapify/adt-export": "0.4.24",
+        "yoga-wasm-web": "~0.3.3",
       },
     },
     "packages/adt-atc": {
@@ -139,6 +140,7 @@
       "version": "0.4.24",
       "dependencies": {
         "@abapify/adt-contracts": "0.4.24",
+        "@abapify/adt-fixtures": "0.4.24",
         "@abapify/adt-plugin": "0.4.24",
         "@abapify/adt-plugin-abapgit": "0.4.24",
         "@abapify/adt-schemas": "0.4.24",

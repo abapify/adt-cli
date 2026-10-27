@@ -10,7 +10,7 @@
  * wave2-registered types.
  */
 
-import { affBodyProps, latestAffVersion } from './schemas';
+import { affBodyProps, affHeaderProps, latestAffVersion } from './schemas';
 import { splitSourceKey } from '../format/filename';
 
 /** Minimal AFF metadata shape shared by all types. */
@@ -93,10 +93,13 @@ export function genericToMetadata(type: string) {
       type,
       version: Number.isNaN(Number(version)) ? undefined : Number(version),
     });
+    const headerProps = affHeaderProps({
+      type,
+      version: Number.isNaN(Number(version)) ? undefined : Number(version),
+    });
     const meta: MinimalAff = {
       formatVersion: version,
       header: {
-        description: str(data.description) ?? obj.description ?? obj.name,
         originalLanguage: (
           obj.originalLanguage ??
           str(data.originalLanguage) ??
@@ -106,8 +109,16 @@ export function genericToMetadata(type: string) {
         ).toLowerCase(),
       },
     };
+    if (headerProps.includes('description')) {
+      meta.header.description =
+        str(data.description) ?? obj.description ?? obj.name;
+    }
     const abapLang = str(data.abapLanguageVersion) ?? obj.abapLanguageVersion;
-    if (abapLang && abapLang !== 'standard') {
+    if (
+      abapLang &&
+      abapLang !== 'standard' &&
+      headerProps.includes('abapLanguageVersion')
+    ) {
       meta.header.abapLanguageVersion = abapLang;
     }
     for (const prop of bodyProps) {

@@ -174,6 +174,23 @@ export function affBodyProps(ref: AffRef): string[] {
   );
 }
 
+export function affHeaderProps(ref: AffRef): string[] {
+  let schema: AffSchema;
+  try {
+    schema = affSchema(ref);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('No AFF schema'))
+      return [];
+    throw error;
+  }
+  const header = (schema.properties ?? {}).header;
+  return Object.keys(
+    header && typeof header === 'object' && header.properties
+      ? header.properties
+      : {},
+  );
+}
+
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 const validators = new Map<string, ValidateFunction>();
 

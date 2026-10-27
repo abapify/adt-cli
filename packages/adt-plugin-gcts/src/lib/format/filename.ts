@@ -44,6 +44,7 @@ const TYPE_TO_SOURCE_EXT: Record<string, string> = {
   DSFD: 'acds',
   CSNM: 'csn',
   SFPF: 'xdp',
+  XSLT: 'xml',
 };
 
 /** Metadata extension for all AFF/gCTS objects. */
@@ -128,6 +129,7 @@ const KNOWN_SOURCE_EXTS = new Set([
   'xdp',
   'ddic',
   'properties',
+  'xml',
 ]);
 
 /** Every file extension the spec grammar can carry after the suffix. */
