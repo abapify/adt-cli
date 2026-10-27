@@ -126,7 +126,8 @@
     },
     "nx": {
       "undici": "7.29.1"
-    }
+    },
+    "webpack": "~5.105.4"
   },
   "exports": {
     ".": "./packages/adk/dist/index.mjs",
