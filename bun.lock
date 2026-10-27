@@ -471,6 +471,8 @@
         "@abapify/adt-lint": "0.4.24",
         "@abapify/adt-locks": "0.4.24",
         "@abapify/adt-plugin": "0.4.24",
+        "@abapify/adt-plugin-abapgit": "0.4.24",
+        "@abapify/adt-plugin-gcts": "0.4.24",
         "@abapify/adt-schemas": "0.4.24",
         "@abapify/logger": "0.4.24",
         "@xmldom/xmldom": "^0.9.12",
