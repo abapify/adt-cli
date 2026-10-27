@@ -28,6 +28,7 @@ export default [
             '@docusaurus/plugin-content-docs',
             '@docusaurus/preset-classic',
             '@easyops-cn/docusaurus-search-local',
+            '@mdx-js/react',
             '@nx/devkit',
             'commander',
             'fast-xml-parser',
