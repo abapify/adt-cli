@@ -44,9 +44,6 @@
       "path": "../adt-flow"
     },
     {
-      "path": "../adt-fixtures"
-    },
-    {
       "path": "../adt-contracts"
     },
     {
@@ -56,10 +53,16 @@
       "path": "../adt-client"
     },
     {
+      "path": "../adt-atc"
+    },
+    {
       "path": "../adt-aunit"
     },
     {
       "path": "../adk"
+    },
+    {
+      "path": "../adt-fixtures"
     }
   ]
 }
