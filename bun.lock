@@ -198,6 +198,7 @@
       "devDependencies": {
         "@abapify/adt-fixtures": "0.4.24",
         "@abapify/adt-mcp": "0.4.24",
+        "@modelcontextprotocol/sdk": "^1.32.2",
         "@types/react": "18.3.0",
       },
     },
@@ -450,6 +451,8 @@
       },
       "devDependencies": {
         "@apidevtools/swagger-parser": "^10.1.0",
+        "@modelcontextprotocol/sdk": "^1.32.2",
+        "jose": "^6.2.1",
       },
     },
     "packages/adt-server-client": {
@@ -583,6 +586,7 @@
         "@docusaurus/core": "3.10.0",
         "@docusaurus/preset-classic": "3.10.0",
         "@easyops-cn/docusaurus-search-local": "0.55.1",
+        "@mdx-js/react": "^3.1.1",
         "prism-react-renderer": "2.4.1",
         "react": "19.2.5",
         "react-dom": "19.2.5",

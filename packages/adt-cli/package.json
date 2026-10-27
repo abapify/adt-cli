@@ -55,7 +55,8 @@
   "devDependencies": {
     "@abapify/adt-fixtures": "0.4.24",
     "@abapify/adt-mcp": "0.4.24",
-    "@types/react": "18.3.0"
+    "@types/react": "18.3.0",
+    "@modelcontextprotocol/sdk": "^1.32.2"
   },
   "bin": {
     "adt": "./dist/bin/adt.mjs"
@@ -69,5 +70,5 @@
   "bugs": {
     "url": "https://github.com/abapify/adt-cli/issues"
   },
-  "description": "Command-line interface for SAP ABAP Development Tools \u2014 the adt binary, plus plugin loader and top-level service layer"
+  "description": "Command-line interface for SAP ABAP Development Tools — the adt binary, plus plugin loader and top-level service layer"
 }
