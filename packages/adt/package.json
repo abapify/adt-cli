@@ -22,7 +22,8 @@
     "@abapify/adt-cli": "0.4.24",
     "@abapify/adt-codegen": "0.4.24",
     "@abapify/adt-diff": "0.4.24",
-    "@abapify/adt-export": "0.4.24"
+    "@abapify/adt-export": "0.4.24",
+    "yoga-wasm-web": "~0.3.3"
   },
   "publishConfig": {
     "access": "public"

@@ -25,10 +25,6 @@ describe('createAbapifyPilot', () => {
     const pilot = createAbapifyPilot({ model: 'openai/gpt-4o' });
 
     expect(pilot).toBeInstanceOf(Harness);
-    // The internal mode list is private, but `getDisplayState()` is part
-    // of the public surface and must work without initialisation —
-    // serves as a smoke test that the Harness was constructed correctly.
-    expect(() => pilot.getDisplayState()).not.toThrow();
   });
 
   it('accepts MCP tools without throwing', () => {

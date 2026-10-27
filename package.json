@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@fission-ai/openspec": "^1.14.3",
-    "@nx/devkit": "23.3.0",
     "@xmldom/xmldom": "^0.9.12",
     "axios": "^1.20.0",
     "dset": "^3.1.4",
@@ -57,16 +56,16 @@
     "@eslint/js": "^10.0.1",
     "@nx-devkit/nx-cloud": "0.0.17",
     "@nx-devkit/typescript": "0.2.18",
-    "@nx/eslint": "23.3.0",
-    "@nx/eslint-plugin": "23.3.0",
-    "@nx/jest": "23.3.0",
-    "@nx/js": "23.3.0",
-    "@nx/node": "23.3.0",
-    "@nx/plugin": "23.3.0",
-    "@nx/rollup": "23.3.0",
-    "@nx/vite": "23.3.0",
-    "@nx/vitest": "23.3.0",
-    "@nx/web": "23.3.0",
+    "@nx/eslint": "24.0.2",
+    "@nx/eslint-plugin": "24.0.2",
+    "@nx/jest": "24.0.2",
+    "@nx/js": "24.0.2",
+    "@nx/node": "24.0.2",
+    "@nx/plugin": "24.0.2",
+    "@nx/rollup": "24.0.2",
+    "@nx/vite": "24.0.2",
+    "@nx/vitest": "24.0.2",
+    "@nx/web": "24.0.2",
     "@prettier/plugin-xml": "^3.4.2",
     "@swc-node/register": "~1.12.1",
     "@swc/cli": "0.8.1",
@@ -92,7 +91,7 @@
     "jsonc-eslint-parser": "^3.3.0",
     "knip": "^6.42.1",
     "lint-staged": "^17.6.0",
-    "nx": "23.3.0",
+    "nx": "24.0.2",
     "pino-pretty": "^13.2.0",
     "prettier": "^3.9.10",
     "rollup": "4.63.1",
@@ -106,7 +105,8 @@
     "typescript-eslint": "8.70.0",
     "verdaccio": "6.10.3",
     "vite": "8.2.4",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "@nx/devkit": "24.0.2"
   },
   "overrides": {
     "handlebars": "^4.7.10",
@@ -126,7 +126,8 @@
     },
     "nx": {
       "undici": "7.29.1"
-    }
+    },
+    "webpack": "~5.105.4"
   },
   "exports": {
     ".": "./packages/adk/dist/index.mjs",

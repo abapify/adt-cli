@@ -29,7 +29,9 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^10.1.0"
+    "@apidevtools/swagger-parser": "^10.1.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "jose": "^6.2.1"
   },
   "repository": {
     "type": "git",

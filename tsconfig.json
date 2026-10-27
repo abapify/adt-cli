@@ -122,6 +122,9 @@
     },
     {
       "path": "./packages/adt-services"
+    },
+    {
+      "path": "./packages/adt-tui"
     }
   ],
   "compilerOptions": {}

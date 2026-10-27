@@ -7,7 +7,7 @@ AI agent conventions for the **abapify / adt-cli** monorepo. Root [`AGENTS.md`](
 | Item             | Value                                                              |
 | ---------------- | ------------------------------------------------------------------ |
 | Package manager  | **bun workspaces** — use `bun`/`bunx`, not `npm`, `pnpm` or `yarn` |
-| Monorepo tooling | **Nx 22**                                                          |
+| Monorepo tooling | **Nx 24.0.2**                                                      |
 | Language         | **TypeScript 5 strict ESM**                                        |
 | Build tool       | **tsdown** (per package)                                           |
 | Test runner      | **Vitest** (some packages use Jest)                                |

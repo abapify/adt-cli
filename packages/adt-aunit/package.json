@@ -43,5 +43,8 @@
   "homepage": "https://github.com/abapify/adt-cli/tree/main/packages/adt-aunit#readme",
   "bugs": {
     "url": "https://github.com/abapify/adt-cli/issues"
+  },
+  "devDependencies": {
+    "@abapify/adt-fixtures": "0.4.24"
   }
 }
