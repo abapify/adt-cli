@@ -6,7 +6,6 @@
       "name": "abapify",
       "dependencies": {
         "@fission-ai/openspec": "^1.14.3",
-        "@nx/devkit": "24.0.2",
         "@xmldom/xmldom": "^0.9.12",
         "axios": "^1.20.0",
         "dset": "^3.1.4",
@@ -32,6 +31,7 @@
         "@eslint/js": "^10.0.1",
         "@nx-devkit/nx-cloud": "0.0.17",
         "@nx-devkit/typescript": "0.2.18",
+        "@nx/devkit": "24.0.2",
         "@nx/eslint": "24.0.2",
         "@nx/eslint-plugin": "24.0.2",
         "@nx/jest": "24.0.2",
@@ -140,10 +140,12 @@
       "version": "0.4.24",
       "dependencies": {
         "@abapify/adt-contracts": "0.4.24",
-        "@abapify/adt-fixtures": "0.4.24",
         "@abapify/adt-plugin": "0.4.24",
         "@abapify/adt-plugin-abapgit": "0.4.24",
         "@abapify/adt-schemas": "0.4.24",
+      },
+      "devDependencies": {
+        "@abapify/adt-fixtures": "0.4.24",
       },
     },
     "packages/adt-auth": {

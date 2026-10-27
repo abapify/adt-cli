@@ -35,7 +35,8 @@ for (const type of listAffTypes()) {
     let json: any;
     try {
       json = readAffExample({ type }, rel);
-    } catch {
+    } catch (e) {
+      if (!(e instanceof SyntaxError)) throw e;
       continue;
     }
     const target = schemaTargetForExample({ type }, rel, json);

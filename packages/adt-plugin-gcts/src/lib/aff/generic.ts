@@ -109,7 +109,7 @@ export function genericToMetadata(type: string) {
         ).toLowerCase(),
       },
     };
-    if (headerProps.includes('description')) {
+    if (headerProps.length === 0 || headerProps.includes('description')) {
       meta.header.description =
         str(data.description) ?? obj.description ?? obj.name;
     }
@@ -117,7 +117,7 @@ export function genericToMetadata(type: string) {
     if (
       abapLang &&
       abapLang !== 'standard' &&
-      headerProps.includes('abapLanguageVersion')
+      (headerProps.length === 0 || headerProps.includes('abapLanguageVersion'))
     ) {
       meta.header.abapLanguageVersion = abapLang;
     }

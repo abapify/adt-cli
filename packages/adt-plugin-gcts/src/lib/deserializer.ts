@@ -49,6 +49,7 @@ const SOURCE_EXTENSIONS = new Set([
   'csn',
   'xdp',
   'ddic',
+  'xml',
 ]);
 
 /**

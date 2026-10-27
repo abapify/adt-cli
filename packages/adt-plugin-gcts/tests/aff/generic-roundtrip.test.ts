@@ -47,7 +47,8 @@ function collect() {
       let example: any;
       try {
         example = readAffExample({ type }, rel);
-      } catch {
+      } catch (e) {
+        if (!(e instanceof SyntaxError)) throw e;
         continue;
       }
       const target = schemaTargetForExample({ type }, rel, example);

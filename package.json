@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@fission-ai/openspec": "^1.14.3",
-    "@nx/devkit": "24.0.2",
     "@xmldom/xmldom": "^0.9.12",
     "axios": "^1.20.0",
     "dset": "^3.1.4",
@@ -106,7 +105,8 @@
     "typescript-eslint": "8.70.0",
     "verdaccio": "6.10.3",
     "vite": "8.2.4",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "@nx/devkit": "24.0.2"
   },
   "overrides": {
     "handlebars": "^4.7.10",
