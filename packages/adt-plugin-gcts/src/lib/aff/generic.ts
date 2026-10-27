@@ -17,7 +17,7 @@ import { splitSourceKey } from '../format/filename';
 export interface MinimalAff {
   formatVersion: string;
   header: {
-    description: string;
+    description?: string;
     originalLanguage: string;
     abapLanguageVersion?: string;
   };
