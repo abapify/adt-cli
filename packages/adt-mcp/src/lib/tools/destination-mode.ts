@@ -7,7 +7,6 @@
  */
 
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import type {
   McpServer,
   RegisteredTool,
@@ -122,10 +121,7 @@ function toolListEntry(
   return {
     name,
     ...(tool.description ? { description: tool.description } : {}),
-    inputSchema: zodToJsonSchema(tool.inputSchema, {
-      strictUnions: true,
-      pipeStrategy: 'input',
-    }) as Record<string, unknown>,
+    inputSchema: z.toJSONSchema(tool.inputSchema) as Record<string, unknown>,
     ...(tool.annotations ? { annotations: tool.annotations } : {}),
   };
 }
