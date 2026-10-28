@@ -1,7 +1,7 @@
 {
   "name": "@abapify/adt-mcp",
   "version": "0.4.24",
-  "description": "MCP server for SAP ADT operations \u2013 exposes adt-cli features as MCP tools",
+  "description": "MCP server for SAP ADT operations – exposes adt-cli features as MCP tools",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -47,8 +47,7 @@
     "@modelcontextprotocol/sdk": "^1.27.0",
     "@xmldom/xmldom": "^0.9.9",
     "jose": "^6.2.1",
-    "zod": "^4.6.7",
-    "zod-to-json-schema": "^3.25.1"
+    "zod": "^4.6.7"
   },
   "repository": {
     "type": "git",
