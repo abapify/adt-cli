@@ -76,6 +76,26 @@ export const Identifier = createToken({
  * in a namespace. Must be tried before the generic `Slash` token so the
  * whole qualified name is captured as one token.
  */
+const EXPRESSION_ATOMS = new Set([
+  'Identifier',
+  'NamespacedIdentifier',
+  'NumberLiteral',
+  'StringLiteral',
+  'EnumLiteral',
+  'RParen',
+  'RBracket',
+  'RBrace',
+]);
+
+function lastScannedToken(tokens: any[]): any {
+  if (!tokens) return null;
+  for (let i = tokens.length - 1; i >= 0; i--) {
+    const token = tokens[i];
+    if (token?.tokenType?.name !== 'WhiteSpace') return token;
+  }
+  return null;
+}
+
 /**
  * ABAP namespace-qualified identifier: `/NS/NAME` (optionally with further
  * segments, e.g. `/NS/SUB/NAME`). Used for repository object names that live
@@ -92,38 +112,11 @@ export const NamespacedIdentifier = createToken({
   pattern: (text: string, offset: number, tokens: any[]) => {
     if (text.charAt(offset) !== '/') return null;
 
-    // Division context: a preceding expression atom means this slash is an
-    // operator, not the start of a namespace name.
-    if (tokens && tokens.length > 0) {
-      let prev: any = null;
-      for (let i = tokens.length - 1; i >= 0; i--) {
-        const t = tokens[i];
-        if (t && t.tokenType && t.tokenType.name !== 'WhiteSpace') {
-          prev = t;
-          break;
-        }
-      }
-      if (prev) {
-        const name = prev.tokenType ? prev.tokenType.name : '';
-        if (
-          name === 'Identifier' ||
-          name === 'NamespacedIdentifier' ||
-          name === 'NumberLiteral' ||
-          name === 'StringLiteral' ||
-          name === 'EnumLiteral' ||
-          name === 'RParen' ||
-          name === 'RBracket' ||
-          name === 'RBrace'
-        ) {
-          return null;
-        }
-      }
-    }
+    const previous = lastScannedToken(tokens);
+    if (EXPRESSION_ATOMS.has(previous?.tokenType?.name)) return null;
 
-    const slice = text.slice(offset);
-    const m = slice.match(/^\/[A-Za-z0-9_]+(?:\/[A-Za-z0-9_]+)+/);
-    if (!m) return null;
-    return [m[0]];
+    const match = /^\/\w+(?:\/\w+)+/.exec(text.slice(offset));
+    return match ? [match[0]] : null;
   },
 });
 
