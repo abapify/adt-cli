@@ -2521,9 +2521,13 @@ export class CdsParser extends CstParser {
   private readonly callArgument = this.RULE('callArgument', () => {
     // Named argument syntax: `name => <expr>` (built-in function calls
     // such as `currency_conversion(amount => …, source_currency => …)`).
-    this.OPTION(() => {
-      this.SUBRULE(this.cdsName);
-      this.CONSUME(FatArrow);
+    this.OPTION({
+      GATE: () =>
+        this.isNameToken(this.LA(1)) && this.LA(2).tokenType === FatArrow,
+      DEF: () => {
+        this.SUBRULE(this.cdsName);
+        this.CONSUME(FatArrow);
+      },
     });
     this.OR([
       { ALT: () => this.CONSUME(Star) },
