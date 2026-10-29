@@ -76,6 +76,7 @@ export const Identifier = createToken({
  * in a namespace. Must be tried before the generic `Slash` token so the
  * whole qualified name is captured as one token.
  */
+/** Token types that may end an expression atom; a following `/` is division. */
 const EXPRESSION_ATOMS = new Set([
   'Identifier',
   'NamespacedIdentifier',
