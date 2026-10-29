@@ -26,7 +26,7 @@
 
   <xsd:complexType name="CheckCategoryObject">
     <xsd:sequence>
-      <xsd:element name="content" type="chkc:CheckCategoryContent" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="content" type="chkc:CheckCategoryContent" minOccurs="0" maxOccurs="1""/>
     </xsd:sequence>
     <xsd:attribute ref="adtcore:name" use="required"/>
     <xsd:attribute ref="adtcore:description"/>
@@ -34,7 +34,7 @@
 
   <xsd:complexType name="CheckCategoryContent">
     <xsd:sequence>
-      <xsd:element name="category" type="chkc:CheckCategory" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="category" type="chkc:CheckCategory" minOccurs="0" maxOccurs="1""/>
     </xsd:sequence>
   </xsd:complexType>
 

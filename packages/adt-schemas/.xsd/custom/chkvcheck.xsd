@@ -40,7 +40,7 @@
   <xsd:complexType name="Check">
     <xsd:sequence>
       <xsd:element ref="chko:checkObject" minOccurs="1" maxOccurs="1"/>
-      <xsd:element name="parameterValueXml" type="xsd:string" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="parameterValueXml" type="xsd:string" minOccurs="0" maxOccurs="1""/>
       <xsd:element ref="atom:link" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
   </xsd:complexType>

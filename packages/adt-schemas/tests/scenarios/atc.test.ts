@@ -235,9 +235,8 @@ class ChkvFormTemplateScenario extends Scenario<typeof chkvFormTemplate> {
     expect(xml).toContain(
       'xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate"',
     );
-    // Local elements are built unqualified (form="unqualified"); match the
-    // element name without assuming the wire prefix form.
-    expect(xml).toContain('<availableCheckCategories>');
+    // Local elements build namespace-qualified like the live SAP shape.
+    expect(xml).toContain('<chkvFormTemplate:availableCheckCategories>');
     expect(xml).toContain('CL_CI_TEST_SELECT_TAW_A');
     expect(xml).toContain('CI_PERFORMANCE');
   }
