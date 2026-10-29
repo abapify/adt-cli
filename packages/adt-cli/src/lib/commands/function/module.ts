@@ -41,7 +41,8 @@ function writeFileAtomic(filePath: string, content: string): void {
   const dir = dirname(filePath) || '.';
   const tmp = join(dir, `.${basename(filePath)}.${process.pid}.tmp`);
   try {
-    writeFileSync(tmp, content, 'utf8'); // NOSONAR: output destination is an explicit user-controlled path (accept-by-design for a local CLI)
+    // sonar-disable-next-line tssecurity:S8707
+    writeFileSync(tmp, content, 'utf8'); // NOSONAR
     renameSync(tmp, filePath);
   } catch (error) {
     try {
