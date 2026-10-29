@@ -13,7 +13,14 @@
  */
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  renameSync,
+  unlinkSync,
+  statSync,
+} from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { dirname, basename, join } from 'node:path';
 import { getAdtClientV2, getCliContext } from '../../utils/adt-client-v2';
 import { createProgressReporter } from '../../utils/progress-reporter';
@@ -254,10 +261,22 @@ async function readSource(fileArg: string): Promise<string> {
 // ============================================================================
 function writeFileAtomic(filePath: string, content: string): void {
   const dir = dirname(filePath) || '.';
-  const tmp = join(dir, `.${basename(filePath)}.${process.pid}.tmp`);
+  let mode: number | undefined;
   try {
-    // sonar-disable-next-line tssecurity:S8707
-    writeFileSync(tmp, content, 'utf8'); // NOSONAR
+    mode = statSync(filePath).mode & 0o777;
+  } catch {
+    mode = undefined;
+  }
+  const tmp = join(
+    dir,
+    `.${basename(filePath)}.${process.pid}.${randomBytes(16).toString('hex')}.tmp`,
+  );
+  try {
+    writeFileSync(tmp, content, {
+      encoding: 'utf8',
+      flag: 'wx',
+      ...(mode !== undefined ? { mode } : {}),
+    });
     renameSync(tmp, filePath);
   } catch (error) {
     try {
@@ -433,6 +452,14 @@ export function buildObjectCrudCommands<
           progress.step(`🔍 Loading ${name.toUpperCase()}...`);
           const obj = await def.get(name.toUpperCase());
           progress.done();
+
+          if (options.json && options.output !== undefined) {
+            progress.done(`❌ --json and --output cannot be used together`);
+            console.error(
+              `❌ --json and --output cannot be used together (${def.label} ${obj.name})`,
+            );
+            process.exit(1);
+          }
 
           if (options.json) {
             console.log(
