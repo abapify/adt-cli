@@ -95,3 +95,64 @@ describe('DOCU companions', () => {
     assert.equal(extras[0]?.path, 'z.doma.docu.json');
   });
 });
+
+describe('companion preservation — deserialize → serialize (#243/#244)', () => {
+  it('generic wave2 handler round-trips docu + .properties', async () => {
+    const { deserialize } = await import('../../src/lib/deserializer.ts');
+    const { getHandler } = await import('../../src/lib/handlers/base.ts');
+    await import('../../src/lib/handlers/objects/index.ts');
+
+    const files = new Map<string, string>([
+      [
+        'src/z.nrob.json',
+        JSON.stringify({
+          formatVersion: '1',
+          header: { description: 'Number range' },
+        }),
+      ],
+      ['src/z.nrob.docu.json', '{"formatVersion":"1","header":{}}'],
+      ['src/z.nrob.properties', 'master=1\n'],
+      ['src/z.nrob.en.properties', 'eng=1\n'],
+    ]);
+    const fileTree = {
+      root: '/',
+      glob: async (p: string) =>
+        [...files.keys()].filter((f) =>
+          p.startsWith('**/*.') ? f.endsWith(p.slice(4)) : f === p,
+        ),
+      read: async (p: string) => {
+        const c = files.get(p);
+        if (c === undefined) throw new Error(`ENOENT ${p}`);
+        return c;
+      },
+      readBuffer: async (p: string) => Buffer.from(files.get(p) ?? ''),
+      exists: async (p: string) => files.has(p),
+      list: async () => [...files.keys()],
+    };
+
+    const objects = [];
+    for await (const obj of deserialize(fileTree as never, {} as never)) {
+      objects.push(obj);
+    }
+    assert.equal(objects.length, 1);
+
+    const handler = getHandler('NROB');
+    assert.ok(handler);
+    const out = await handler.serialize(objects[0] as never);
+    const paths = out.map((f) => f.path);
+    const byPath = new Map(out.map((f) => [f.path, f.content]));
+    const docuPath = paths.find((p) => p.endsWith('.docu.json'));
+    assert.ok(docuPath, `docu emitted: ${paths}`);
+    assert.deepEqual(JSON.parse(byPath.get(docuPath!) as string), {
+      formatVersion: '1',
+      header: {},
+    });
+    const props = paths.filter((p) => p.endsWith('.properties')).sort();
+    assert.deepEqual(props, [
+      docuPath!.replace('.docu.json', '.en.properties'),
+      docuPath!.replace('.docu.json', '.properties'),
+    ]);
+    assert.equal(byPath.get(props[0]!), 'eng=1\n');
+    assert.equal(byPath.get(props[1]!), 'master=1\n');
+  });
+});

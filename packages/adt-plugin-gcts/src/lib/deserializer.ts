@@ -174,66 +174,138 @@ export async function* deserialize(
     }
   }
 
-  // Pre-read all companion + source contents in bounded batches —
-  // sequential `await`s inside the object loop both serialize I/O and
-  // trip static analysis, while an unbounded Promise.all over thousands
-  // of files can exhaust file descriptors (EMFILE). Per-path failures
-  // are recorded (not thrown) so one unreadable file fails only its
-  // owning object inside the per-object try/catch below.
-  const fileContents = new Map<string, string>();
-  const readErrors = new Map<string, unknown>();
-  const companionPaths = [...objectMap.values()].flatMap((o) => [
-    ...(o.docuFile ? [o.docuFile] : []),
-    ...o.propertyFiles.map((f) => f.path),
-    ...o.sourceFiles.map((f) => f.path),
-  ]);
-  const READ_BATCH = 32;
-  let cursor = 0;
-  const readNext = async (): Promise<void> => {
-    const path = companionPaths[cursor++];
-    if (path === undefined) return;
-    try {
-      fileContents.set(path, await fileTree.read(path));
-    } catch (error) {
-      readErrors.set(path, error);
-    }
-    return readNext();
+  // Per-object pipeline: each worker claims the next object and reads
+  // its metadata + companions through a shared throttle, so at most
+  // MAX_CONCURRENT_READS file descriptors are open at once (no EMFILE).
+  // Completed objects land in `pending` and are yielded in input order
+  // as soon as they are ready, so memory stays bounded to the in-flight
+  // objects plus the small not-yet-drained backlog — a large repository
+  // no longer retains every companion at once. A failure inside one
+  // object rejects only that object's task; other workers keep going,
+  // mirroring the abapGit log-and-continue rule.
+  const readThrottled = throttledReader(fileTree);
+  const entries = [...objectMap.values()];
+  const pending = new Map<number, AdkObject | undefined>();
+  let wake: (() => void) | undefined;
+  const notify = () => {
+    const w = wake;
+    wake = undefined;
+    w?.();
   };
-  await Promise.all(
+  let cursor = 0;
+  const worker = async (): Promise<void> => {
+    const index = cursor++;
+    const objFiles = entries[index];
+    if (!objFiles) return;
+    pending.set(
+      index,
+      await buildObject(objFiles, readThrottled, adk, options),
+    );
+    notify();
+    return worker();
+  };
+  const workersDone = Promise.all(
     Array.from(
-      { length: Math.min(READ_BATCH, companionPaths.length) },
-      readNext,
+      { length: Math.min(MAX_CONCURRENT_READS, entries.length) },
+      worker,
     ),
   );
+  let finished = false;
+  void workersDone.then(() => {
+    finished = true;
+    notify();
+  });
 
-  for (const [, objFiles] of objectMap) {
-    if (!objFiles.metadataFile) continue;
+  // Ordered async iterator: `for await` yields each object as soon as
+  // its index slot completes — objects drain in input order and the
+  // buffer stays bounded to not-yet-yielded work.
+  let drain = 0;
+  const stream: AsyncIterable<AdkObject> = {
+    [Symbol.asyncIterator]() {
+      return {
+        async next(): Promise<IteratorResult<AdkObject>> {
+          if (pending.has(drain)) {
+            const obj = pending.get(drain);
+            pending.delete(drain++);
+            return obj ? { value: obj, done: false } : this.next();
+          }
+          if (finished) return { value: undefined, done: true };
+          await new Promise<void>((resolve) => {
+            wake = resolve;
+          });
+          return this.next();
+        },
+      };
+    },
+  };
+  for await (const obj of stream) yield obj;
+  await workersDone;
+}
 
-    const handler = getHandler(objFiles.type);
-    if (!handler) continue;
+const MAX_CONCURRENT_READS = 32;
 
-    try {
-      const raw = await fileTree.read(objFiles.metadataFile);
-      // Handler schema.parse is plain JSON.parse — the parsed object IS the
-      // metadata passed to fromMetadata.
-      const metadata = handler.schema.parse(raw);
-      yield objectFromFiles(
-        objFiles,
-        handler,
-        metadata,
-        fileContents,
-        readErrors,
-        adk,
-        options,
-      );
-    } catch (error) {
-      // Mirrors abapGit: log and continue so one bad object does not abort
-      // the whole checkin.
-      console.error(
-        `Failed to deserialize ${objFiles.type} ${objFiles.name}:`,
-        error,
-      );
+/**
+ * Throttled `fileTree.read` — caps concurrently open reads globally.
+ * A finishing read hands its slot directly to the oldest waiter instead
+ * of releasing it first, so a fresh caller can never sneak in and push
+ * `inflight` past `limit`.
+ */
+function throttledReader(
+  fileTree: FileTree,
+  limit = MAX_CONCURRENT_READS,
+): (path: string) => Promise<string> {
+  let inflight = 0;
+  const queue: (() => void)[] = [];
+  return async (path: string) => {
+    if (inflight >= limit) {
+      // Wait for a slot to be handed over — inflight already counts it.
+      await new Promise<void>((resolve) => queue.push(resolve));
+    } else {
+      inflight++;
     }
+    try {
+      return await fileTree.read(path);
+    } finally {
+      const next = queue.shift();
+      if (next) next();
+      else inflight--;
+    }
+  };
+}
+
+/** Read one object's files and build its ADK object, or undefined. */
+async function buildObject(
+  objFiles: ObjectFiles,
+  read: (path: string) => Promise<string>,
+  adk: ReturnType<typeof createAdk>,
+  options?: ExportOptions,
+): Promise<AdkObject | undefined> {
+  if (!objFiles.metadataFile) return undefined;
+  const handler = getHandler(objFiles.type);
+  if (!handler) return undefined;
+  try {
+    const companionPaths = [
+      ...(objFiles.docuFile ? [objFiles.docuFile] : []),
+      ...objFiles.propertyFiles.map((f) => f.path),
+      ...objFiles.sourceFiles.map((f) => f.path),
+    ];
+    const [raw, ...companions] = await Promise.all(
+      [objFiles.metadataFile, ...companionPaths].map(read),
+    );
+    const contents = new Map<string, string>();
+    companionPaths.forEach((path, i) => contents.set(path, companions[i]!));
+    // Handler schema.parse is plain JSON.parse — the parsed object IS the
+    // metadata passed to fromMetadata.
+    const metadata = handler.schema.parse(raw);
+    return objectFromFiles(objFiles, handler, metadata, contents, adk, options);
+  } catch (error) {
+    // Mirrors abapGit: log and continue so one bad object does not abort
+    // the whole checkin.
+    console.error(
+      `Failed to deserialize ${objFiles.type} ${objFiles.name}:`,
+      error,
+    );
+    return undefined;
   }
 }
 
@@ -355,20 +427,9 @@ function objectFromFiles(
   handler: GctsHandler,
   metadata: unknown,
   contents: ReadonlyMap<string, string>,
-  readErrors: ReadonlyMap<string, unknown>,
   adk: ReturnType<typeof createAdk>,
   options?: ExportOptions,
 ): AdkObject {
-  // Surface any companion read failure here — the caller invokes us
-  // inside the per-object try, so one bad file fails only this object.
-  for (const path of [
-    ...(objFiles.docuFile ? [objFiles.docuFile] : []),
-    ...objFiles.propertyFiles.map((f) => f.path),
-    ...objFiles.sourceFiles.map((f) => f.path),
-  ]) {
-    if (readErrors.has(path)) throw readErrors.get(path);
-  }
-
   const sources = collectSources(objFiles, handler, contents);
   const payload = buildPayload(objFiles, handler, metadata, contents);
 
