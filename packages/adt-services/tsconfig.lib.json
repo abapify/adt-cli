@@ -13,6 +13,12 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
+      "path": "../adt-plugin-gcts/tsconfig.lib.json"
+    },
+    {
+      "path": "../adt-plugin-abapgit/tsconfig.lib.json"
+    },
+    {
       "path": "../logger"
     },
     {

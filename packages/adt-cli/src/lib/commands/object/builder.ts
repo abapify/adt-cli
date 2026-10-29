@@ -430,7 +430,7 @@ export function buildObjectCrudCommands<
             progress.done();
             if (options.output) {
               progress.step(`📝 Writing source to ${options.output}...`);
-              writeFileSync(options.output, source, 'utf8');
+              writeFileSync(options.output, source, 'utf8'); // NOSONAR: output destination is an explicit user-controlled path (accept-by-design for a local CLI)
               progress.done();
               console.log(
                 `✅ Source written to ${options.output} (${source.length} chars, UTF-8)`,
