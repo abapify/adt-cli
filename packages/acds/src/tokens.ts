@@ -76,9 +76,55 @@ export const Identifier = createToken({
  * in a namespace. Must be tried before the generic `Slash` token so the
  * whole qualified name is captured as one token.
  */
+/**
+ * ABAP namespace-qualified identifier: `/NS/NAME` (optionally with further
+ * segments, e.g. `/NS/SUB/NAME`). Used for repository object names that live
+ * in a namespace.
+ *
+ * The lexer cannot tell a namespace name apart from a division chain on
+ * syntax alone (`a/b/c` vs `/b/c`), so the match is context-sensitive: it
+ * only fires when the preceding token is NOT an expression atom, keeping
+ * compact division (`a/b/c`) tokenized as `Slash` operators. Numeric-leading
+ * namespace segments (e.g. `/1BCDWB/NAME`) are allowed.
+ */
 export const NamespacedIdentifier = createToken({
   name: 'NamespacedIdentifier',
-  pattern: /\/[A-Za-z_][A-Za-z0-9_]*(\/[A-Za-z_][A-Za-z0-9_]*)+/,
+  pattern: (text: string, offset: number, tokens: any[]) => {
+    if (text.charAt(offset) !== '/') return null;
+
+    // Division context: a preceding expression atom means this slash is an
+    // operator, not the start of a namespace name.
+    if (tokens && tokens.length > 0) {
+      let prev: any = null;
+      for (let i = tokens.length - 1; i >= 0; i--) {
+        const t = tokens[i];
+        if (t && t.tokenType && t.tokenType.name !== 'WhiteSpace') {
+          prev = t;
+          break;
+        }
+      }
+      if (prev) {
+        const name = prev.tokenType ? prev.tokenType.name : '';
+        if (
+          name === 'Identifier' ||
+          name === 'NamespacedIdentifier' ||
+          name === 'NumberLiteral' ||
+          name === 'StringLiteral' ||
+          name === 'EnumLiteral' ||
+          name === 'RParen' ||
+          name === 'RBracket' ||
+          name === 'RBrace'
+        ) {
+          return null;
+        }
+      }
+    }
+
+    const slice = text.slice(offset);
+    const m = slice.match(/^\/[A-Za-z0-9_]+(?:\/[A-Za-z0-9_]+)+/);
+    if (!m) return null;
+    return [m[0]];
+  },
 });
 
 // ============================================
