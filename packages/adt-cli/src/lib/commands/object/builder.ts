@@ -13,7 +13,8 @@
  */
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
+import { dirname, basename, join } from 'node:path';
 import { getAdtClientV2, getCliContext } from '../../utils/adt-client-v2';
 import { createProgressReporter } from '../../utils/progress-reporter';
 import { createCliLogger } from '../../utils/logger-config';
@@ -249,6 +250,25 @@ async function readSource(fileArg: string): Promise<string> {
 }
 
 // ============================================================================
+// Helper: atomically write a file (temp + rename) to avoid partial writes
+// ============================================================================
+function writeFileAtomic(filePath: string, content: string): void {
+  const dir = dirname(filePath) || '.';
+  const tmp = join(dir, `.${basename(filePath)}.${process.pid}.tmp`);
+  try {
+    writeFileSync(tmp, content, 'utf8'); // NOSONAR: output destination is an explicit user-controlled path (accept-by-design for a local CLI)
+    renameSync(tmp, filePath);
+  } catch (error) {
+    try {
+      unlinkSync(tmp);
+    } catch {
+      // ignore cleanup errors
+    }
+    throw error;
+  }
+}
+
+// ============================================================================
 // Command Builder
 // ============================================================================
 
@@ -380,77 +400,86 @@ export function buildObjectCrudCommands<
   );
 
   // ─── read ─────────────────────────────────────────────────────────────────
-  group.addCommand(
-    new Command('read')
-      .description(`Read source code of an ABAP ${def.label}`)
-      .argument('<name>', `${def.label} name`)
-      .option('--json', 'Output metadata as JSON (no source)')
-      .option(
-        '-o, --output <file>',
-        'Write source to <file> in UTF-8 instead of stdout (avoids shell redirect encoding issues)',
-      )
-      .action(async function (
-        this: Command,
-        name: string,
-        options: { json: boolean; output?: string },
-      ) {
-        const globalOpts = this.optsWithGlobals?.() ?? {};
-        const ctx = getCliContext();
-        const verboseFlag = globalOpts.verbose ?? ctx.verbose ?? false;
-        const logger =
-          (this as any).logger ??
-          ctx.logger ??
-          createCliLogger({ verbose: verboseFlag });
-        const progress = createProgressReporter({
-          compact: !verboseFlag,
-          logger,
-        });
+  const readCmd = new Command('read')
+    .description(`Read source code of an ABAP ${def.label}`)
+    .argument('<name>', `${def.label} name`)
+    .option('--json', 'Output metadata as JSON (no source)');
+  if (def.getSource) {
+    readCmd.option(
+      '-o, --output <file>',
+      'Write source to <file> in UTF-8 instead of stdout (avoids shell redirect encoding issues)',
+    );
+  }
+  (readCmd.action(async function (
+    this: Command,
+    name: string,
+    options: { json: boolean; output?: string },
+  ) {
+    const globalOpts = this.optsWithGlobals?.() ?? {};
+    const ctx = getCliContext();
+    const verboseFlag = globalOpts.verbose ?? ctx.verbose ?? false;
+    const logger =
+      (this as any).logger ??
+      ctx.logger ??
+      createCliLogger({ verbose: verboseFlag });
+    const progress = createProgressReporter({
+      compact: !verboseFlag,
+      logger,
+    });
 
-        try {
-          await getAdtClientV2();
+    try {
+      await getAdtClientV2();
 
-          progress.step(`🔍 Loading ${name.toUpperCase()}...`);
-          const obj = await def.get(name.toUpperCase());
-          progress.done();
+      progress.step(`🔍 Loading ${name.toUpperCase()}...`);
+      const obj = await def.get(name.toUpperCase());
+      progress.done();
 
-          if (options.json) {
-            console.log(
-              JSON.stringify(
-                { name: obj.name, description: obj.description },
-                null,
-                2,
-              ),
-            );
-            return;
-          }
+      if (options.json) {
+        console.log(
+          JSON.stringify(
+            { name: obj.name, description: obj.description },
+            null,
+            2,
+          ),
+        );
+      }
 
-          if (def.getSource) {
-            progress.step('📄 Fetching source...');
-            const source = await def.getSource(obj);
-            progress.done();
-            if (options.output) {
-              progress.step(`📝 Writing source to ${options.output}...`);
-              writeFileSync(options.output, source, 'utf8'); // NOSONAR: output destination is an explicit user-controlled path (accept-by-design for a local CLI)
-              progress.done();
-              console.log(
-                `✅ Source written to ${options.output} (${source.length} chars, UTF-8)`,
-              );
-            } else {
-              process.stdout.write(source);
-            }
-          } else {
-            console.log(`📦 ${def.label}: ${obj.name}`);
-            console.log(`   Description: ${obj.description}`);
-          }
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : String(error);
-          progress.done(`❌ ${message}`);
-          console.error(`❌ Read failed:`, message);
+      if (options.output !== undefined) {
+        if (!def.getSource) {
+          progress.done(`❌ ${def.label} has no source to write`);
+          console.error(
+            `❌ ${def.label} ${obj.name} has no source; --output is not supported`,
+          );
           process.exit(1);
         }
-      }),
-  );
+        progress.step('📄 Fetching source...');
+        const source = await def.getSource(obj);
+        progress.done();
+        progress.step(`📝 Writing source to ${options.output}...`);
+        writeFileAtomic(options.output, source);
+        progress.done();
+        console.log(
+          `✅ Source written to ${options.output} (${source.length} chars, UTF-8)`,
+        );
+      } else if (!options.json) {
+        if (def.getSource) {
+          progress.step('📄 Fetching source...');
+          const source = await def.getSource(obj);
+          progress.done();
+          process.stdout.write(source);
+        } else {
+          console.log(`📦 ${def.label}: ${obj.name}`);
+          console.log(`   Description: ${obj.description}`);
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      progress.done(`❌ ${message}`);
+      console.error(`❌ Read failed:`, message);
+      process.exit(1);
+    }
+  }),
+    group.addCommand(readCmd));
 
   // ─── write ────────────────────────────────────────────────────────────────
   if (def.getSource) {

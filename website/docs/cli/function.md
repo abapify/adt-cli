@@ -52,9 +52,10 @@ Function modules are children of a function group — every subcommand takes
 
 ### `module read`
 
-| Flag     | Description                          |
-| -------- | ------------------------------------ |
-| `--json` | Output metadata as JSON (no source). |
+| Flag                  | Description                                          |
+| --------------------- | ---------------------------------------------------- |
+| `--json`              | Output metadata as JSON (no source).                 |
+| `-o, --output <file>` | Write source to `<file>` in UTF-8 instead of stdout. |
 
 ### `module write`
 

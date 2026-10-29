@@ -34,9 +34,10 @@ Replace `<type>` with `class`, `interface`, `program`, or `include`.
 
 ### `read`
 
-| Flag     | Description                          |
-| -------- | ------------------------------------ |
-| `--json` | Output metadata as JSON (no source). |
+| Flag                  | Description                                          |
+| --------------------- | ---------------------------------------------------- |
+| `--json`              | Output metadata as JSON (no source).                 |
+| `-o, --output <file>` | Write source to `<file>` in UTF-8 instead of stdout. |
 
 ### `write`
 

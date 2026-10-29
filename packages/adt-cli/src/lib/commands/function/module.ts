@@ -16,7 +16,8 @@
  */
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
+import { dirname, basename, join } from 'node:path';
 import { AdkFunctionModule } from '@abapify/adk';
 import { resolveLockCorrelation } from '@abapify/adt-locks';
 import { getAdtClientV2, getCliContext } from '../../utils/adt-client-v2';
@@ -34,6 +35,22 @@ async function readSource(fileArg: string): Promise<string> {
     });
   }
   return readFileSync(fileArg, 'utf8');
+}
+
+function writeFileAtomic(filePath: string, content: string): void {
+  const dir = dirname(filePath) || '.';
+  const tmp = join(dir, `.${basename(filePath)}.${process.pid}.tmp`);
+  try {
+    writeFileSync(tmp, content, 'utf8'); // NOSONAR: output destination is an explicit user-controlled path (accept-by-design for a local CLI)
+    renameSync(tmp, filePath);
+  } catch (error) {
+    try {
+      unlinkSync(tmp);
+    } catch {
+      // ignore cleanup errors
+    }
+    throw error;
+  }
 }
 
 function setupLoggerAndProgress(cmd: Command) {
@@ -185,18 +202,22 @@ functionModuleCommand.addCommand(
               2,
             ),
           );
-          return;
         }
 
-        progress.step('📄 Fetching source...');
-        const source = await fm.getSource();
-        progress.done();
-        if (options.output) {
-          writeFileSync(options.output, source, 'utf8'); // NOSONAR: output destination is an explicit user-controlled path (accept-by-design for a local CLI)
+        if (options.output !== undefined) {
+          progress.step('📄 Fetching source...');
+          const source = await fm.getSource();
+          progress.done();
+          progress.step(`📝 Writing source to ${options.output}...`);
+          writeFileAtomic(options.output, source);
+          progress.done();
           console.log(
             `✅ Source written to ${options.output} (${source.length} chars, UTF-8)`,
           );
-        } else {
+        } else if (!options.json) {
+          progress.step('📄 Fetching source...');
+          const source = await fm.getSource();
+          progress.done();
           process.stdout.write(source);
         }
       } catch (error) {
