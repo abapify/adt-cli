@@ -170,6 +170,7 @@ import {
   Optional,
   Elements,
   Identifier,
+  NamespacedIdentifier,
   StringLiteral,
   NumberLiteral,
   EnumLiteral,
@@ -200,6 +201,7 @@ export class CdsParser extends CstParser {
    */
   private static readonly NAME_TOKENS: readonly TokenType[] = [
     Identifier,
+    NamespacedIdentifier,
     ...keywordTokens,
   ];
 
@@ -2517,6 +2519,12 @@ export class CdsParser extends CstParser {
    * (bare operands are legal inside argument lists).
    */
   private readonly callArgument = this.RULE('callArgument', () => {
+    // Named argument syntax: `name => <expr>` (built-in function calls
+    // such as `currency_conversion(amount => …, source_currency => …)`).
+    this.OPTION(() => {
+      this.SUBRULE(this.cdsName);
+      this.CONSUME(FatArrow);
+    });
     this.OR([
       { ALT: () => this.CONSUME(Star) },
       {

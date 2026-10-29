@@ -70,6 +70,17 @@ export const Identifier = createToken({
   pattern: /[A-Za-z_][A-Za-z0-9_]*/,
 });
 
+/**
+ * ABAP namespace-qualified identifier: `/NS/NAME` (optionally with further
+ * segments, e.g. `/NS/SUB/NAME`). Used for repository object names that live
+ * in a namespace. Must be tried before the generic `Slash` token so the
+ * whole qualified name is captured as one token.
+ */
+export const NamespacedIdentifier = createToken({
+  name: 'NamespacedIdentifier',
+  pattern: /\/[A-Za-z_][A-Za-z0-9_]*(\/[A-Za-z_][A-Za-z0-9_]*)+/,
+});
+
 // ============================================
 // Keywords (use longer_alt: Identifier)
 // ============================================
@@ -1128,6 +1139,9 @@ export const allTokens = [
 
   // Identifier (catch-all for names)
   Identifier,
+
+  // Namespace-qualified identifiers (/NS/NAME) — before Slash
+  NamespacedIdentifier,
 
   // Multi-char symbols (before single-char equivalents)
   EqEq,
