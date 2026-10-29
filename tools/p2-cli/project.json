@@ -3,11 +3,23 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "tools/p2-cli/src",
   "projectType": "library",
-  "release": {
-    "version": {
-      "manifestRootsToUpdate": ["{projectRoot}"]
-    }
-  },
   "tags": [],
-  "targets": {}
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsdown",
+        "cwd": "{projectRoot}"
+      },
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/src/**/*.ts",
+        "{projectRoot}/tsdown.config.ts",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/package.json"
+      ],
+      "dependsOn": ["^build"]
+    }
+  }
 }

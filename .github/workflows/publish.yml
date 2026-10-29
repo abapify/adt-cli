@@ -200,7 +200,6 @@ jobs:
           const affected = new Set(process.env.AFFECTED.split(',').filter(Boolean));
           const roots = fs.readdirSync('packages', { withFileTypes: true })
             .filter(d => d.isDirectory()).map(d => `packages/${d.name}`);
-          roots.push('tools/p2-cli');
           const proj = new Map();
           for (const root of roots) {
             if (!fs.existsSync(`${root}/package.json`)) continue;

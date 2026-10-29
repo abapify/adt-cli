@@ -23,20 +23,6 @@ npx nx build p2-cli
 npx tsx tools/p2-cli/src/cli.ts
 ```
 
-## Publishing Bootstrap (maintainers)
-
-`p2-cli` is wired into workspace release publishing via `nx release`.
-
-```bash
-# Validate npm publish/trusted-publisher readiness
-bunx nx run p2-cli:npm-trust-check
-
-# One-time bootstrap for new npm package/trusted publishing
-bunx nx run p2-cli:npm-trust-check --prepare
-```
-
-Then publish from CI using the repository release workflow (which triggers `.github/workflows/publish.yml`).
-
 ## Commands
 
 ### `p2 download <url>`

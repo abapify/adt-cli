@@ -39,7 +39,7 @@
     {
       "plugin": "./tools/nx-npm-trust/src/index.ts",
       "options": {
-        "publishablePaths": ["packages/", "tools/"]
+        "publishablePaths": ["packages/"]
       }
     },
     {
@@ -70,7 +70,7 @@
     }
   ],
   "release": {
-    "projects": ["packages/*", "tools/p2-cli"],
+    "projects": ["packages/*"],
     "version": {
       "preVersionCommand": "npx nx run-many -t build",
       "conventionalCommits": true,
