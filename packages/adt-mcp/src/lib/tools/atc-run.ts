@@ -267,15 +267,22 @@ export function registerAtcRunTool(server: McpServer, ctx: ToolContext): void {
         // checkIds are GUIDs, so unresolved findings go through the
         // documentation bridge (each finding's documentation page names the
         // check class).
+        const logger = {
+          warn: (message: string) => console.error(message),
+        };
         const categoryIndex = await fetchCheckCategoryIndex(
           client,
           checkVariant,
+          logger,
         );
         enrichFindingsWithCategories(findings, categoryIndex);
         await resolveCategoriesViaDocumentation(
           client,
           findings,
           categoryIndex,
+          {
+            logger,
+          },
         );
         // The model-facing response must stay URI-free: the documentation
         // link is internal enrichment state only.

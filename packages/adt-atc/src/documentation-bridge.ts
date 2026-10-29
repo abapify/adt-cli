@@ -53,10 +53,19 @@ export interface DocumentationBridgeFinding {
   documentationUri?: string;
 }
 
+/**
+ * Only ATC documentation paths may be fetched — a worklist-provided URI
+ * must never drive an authenticated read outside the documentation space.
+ */
+const ATC_DOCUMENTATION_URI =
+  /^\/sap\/bc\/adt\/documentation\/atc\/documents\/[\w/%-]+$/u;
+
 /** Shared state for the per-URI documentation fetch. */
 interface DocumentationFetchContext {
   read: NonNullable<DocumentationReadingClient['readTextBounded']>;
   maxBytes: number;
+  maxReads: number;
+  reads: number;
   classByDocumentationUri: Map<string, string | undefined>;
   logger?: { warn: (message: string) => void };
 }
@@ -70,6 +79,18 @@ async function resolveCheckClassForUri(
   context: DocumentationFetchContext,
 ): Promise<void> {
   if (context.classByDocumentationUri.has(documentationUri)) return;
+  if (!ATC_DOCUMENTATION_URI.test(documentationUri)) {
+    context.logger?.warn?.(
+      `⚠️ Skipping non-ATC documentation URI: ${documentationUri}`,
+    );
+    context.classByDocumentationUri.set(documentationUri, undefined);
+    return;
+  }
+  if (context.reads >= context.maxReads) {
+    context.classByDocumentationUri.set(documentationUri, undefined);
+    return;
+  }
+  context.reads++;
   try {
     const html = await context.read(documentationUri, context.maxBytes, {
       headers: { Accept: 'application/vnd.sap.adt.docu.v1+html' },
@@ -113,6 +134,7 @@ export async function resolveCategoriesViaDocumentation(
   classToCategory: ReadonlyMap<string, string>,
   options: {
     maxBytes?: number;
+    maxReads?: number;
     logger?: { warn: (message: string) => void };
   } = {},
 ): Promise<number> {
@@ -127,6 +149,8 @@ export async function resolveCategoriesViaDocumentation(
   const context: DocumentationFetchContext = {
     read,
     maxBytes: options.maxBytes ?? 64 * 1024,
+    maxReads: options.maxReads ?? 500,
+    reads: 0,
     classByDocumentationUri: new Map<string, string | undefined>(),
     logger: options.logger,
   };

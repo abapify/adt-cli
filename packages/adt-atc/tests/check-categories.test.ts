@@ -297,7 +297,13 @@ describe('resolveCategoriesViaDocumentation', () => {
   it('skips the bridge without readTextBounded and never fails on fetch errors', async () => {
     const withoutRead = await resolveCategoriesViaDocumentation(
       {},
-      [{ checkId: 'X', documentationUri: '/doc' }],
+      [
+        {
+          checkId: 'X',
+          documentationUri:
+            '/sap/bc/adt/documentation/atc/documents/itemid/ABC/index/1',
+        },
+      ],
       new Map([['CL_X', 'CI_PERFORMANCE']]),
     );
     assert.equal(withoutRead, 0);
@@ -309,7 +315,13 @@ describe('resolveCategoriesViaDocumentation', () => {
           throw new Error('HTTP 404');
         },
       },
-      [{ checkId: 'X', documentationUri: '/doc' }],
+      [
+        {
+          checkId: 'X',
+          documentationUri:
+            '/sap/bc/adt/documentation/atc/documents/itemid/ABC/index/1',
+        },
+      ],
       new Map([['CL_X', 'CI_PERFORMANCE']]),
       { logger: { warn: (message) => warnings.push(message) } },
     );
