@@ -13,7 +13,7 @@
  */
 
 import { Command } from 'commander';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { getAdtClientV2, getCliContext } from '../../utils/adt-client-v2';
 import { createProgressReporter } from '../../utils/progress-reporter';
 import { createCliLogger } from '../../utils/logger-config';
@@ -385,10 +385,14 @@ export function buildObjectCrudCommands<
       .description(`Read source code of an ABAP ${def.label}`)
       .argument('<name>', `${def.label} name`)
       .option('--json', 'Output metadata as JSON (no source)')
+      .option(
+        '-o, --output <file>',
+        'Write source to <file> in UTF-8 instead of stdout (avoids shell redirect encoding issues)',
+      )
       .action(async function (
         this: Command,
         name: string,
-        options: { json: boolean },
+        options: { json: boolean; output?: string },
       ) {
         const globalOpts = this.optsWithGlobals?.() ?? {};
         const ctx = getCliContext();
@@ -424,7 +428,16 @@ export function buildObjectCrudCommands<
             progress.step('📄 Fetching source...');
             const source = await def.getSource(obj);
             progress.done();
-            process.stdout.write(source);
+            if (options.output) {
+              progress.step(`📝 Writing source to ${options.output}...`);
+              writeFileSync(options.output, source, 'utf8');
+              progress.done();
+              console.log(
+                `✅ Source written to ${options.output} (${source.length} chars, UTF-8)`,
+              );
+            } else {
+              process.stdout.write(source);
+            }
           } else {
             console.log(`📦 ${def.label}: ${obj.name}`);
             console.log(`   Description: ${obj.description}`);

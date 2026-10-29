@@ -16,7 +16,7 @@
  */
 
 import { Command } from 'commander';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { AdkFunctionModule } from '@abapify/adk';
 import { resolveLockCorrelation } from '@abapify/adt-locks';
 import { getAdtClientV2, getCliContext } from '../../utils/adt-client-v2';
@@ -154,11 +154,15 @@ functionModuleCommand.addCommand(
     .argument('<group>', 'Function group name')
     .argument('<name>', 'Function module name')
     .option('--json', 'Output metadata as JSON (no source)')
+    .option(
+      '-o, --output <file>',
+      'Write source to <file> in UTF-8 instead of stdout',
+    )
     .action(async function (
       this: Command,
       group: string,
       name: string,
-      options: { json: boolean },
+      options: { json: boolean; output?: string },
     ) {
       const { progress } = setupLoggerAndProgress(this);
       try {
@@ -187,7 +191,14 @@ functionModuleCommand.addCommand(
         progress.step('📄 Fetching source...');
         const source = await fm.getSource();
         progress.done();
-        process.stdout.write(source);
+        if (options.output) {
+          writeFileSync(options.output, source, 'utf8');
+          console.log(
+            `✅ Source written to ${options.output} (${source.length} chars, UTF-8)`,
+          );
+        } else {
+          process.stdout.write(source);
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         progress.done(`❌ ${message}`);
