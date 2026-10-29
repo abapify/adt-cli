@@ -99,7 +99,7 @@ Each finding can carry a `checkCategory` (e.g., `CI_PERFORMANCE`,
 `CI_SECURITY`): the name of the ATC check category its check is assigned
 to. The `atc` command resolves it automatically from the run's check
 variant form template (`GET /sap/bc/adt/atc/checkvariants/formtemplate`)
-by mapping the finding's `checkId` (the check's implementing class name)
+by mapping the finding's `checkId` (the check's implementing class name on classic systems, or an instance GUID resolved through the check's documentation link)
 to the category that contains it. The enrichment is best-effort: when
 the form template is unavailable, or the check is outside its catalog,
 findings simply carry no category and the run still succeeds.

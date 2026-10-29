@@ -69,8 +69,10 @@ const checkvariantsExtended = contract({
    *
    * Reads a check variant's form template: the check catalog with every
    * available check category and its checks. Each check carries its
-   * implementing class, whose name is the checkId that ATC worklist
-   * findings report — the basis for check category enrichment.
+   * implementing class. On classic systems its name is the checkId that
+   * ATC worklist findings report; newer systems may report an instance
+   * GUID instead — resolvable through the check's documentation link.
+   * The basis for check category enrichment.
    *
    * NOTE: Not in SAP discovery - manually defined
    * @source live S/4 system capture, 2026-10-21

@@ -44,7 +44,7 @@
 
   <xsd:complexType name="CheckObject">
     <xsd:sequence>
-      <xsd:element name="content" type="chko:CheckObjectContent" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="content" type="chko:CheckObjectContent" minOccurs="0" maxOccurs="1""/>
     </xsd:sequence>
     <xsd:attribute ref="adtcore:name" use="required"/>
     <xsd:attribute ref="adtcore:description"/>
@@ -52,9 +52,9 @@
 
   <xsd:complexType name="CheckObjectContent">
     <xsd:sequence>
-      <xsd:element name="category" type="chko:CheckCategoryAssignment" minOccurs="0" maxOccurs="1" form="unqualified"/>
-      <xsd:element name="implementingClass" type="chko:ImplementingClass" minOccurs="0" maxOccurs="1" form="unqualified"/>
-      <xsd:element name="remoteEnabled" type="xsd:boolean" minOccurs="0" maxOccurs="1" form="unqualified"/>
+      <xsd:element name="category" type="chko:CheckCategoryAssignment" minOccurs="0" maxOccurs="1""/>
+      <xsd:element name="implementingClass" type="chko:ImplementingClass" minOccurs="0" maxOccurs="1""/>
+      <xsd:element name="remoteEnabled" type="xsd:boolean" minOccurs="0" maxOccurs="1""/>
       <xsd:element ref="chkoParameter:parameters" minOccurs="0" maxOccurs="1"/>
     </xsd:sequence>
   </xsd:complexType>

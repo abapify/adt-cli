@@ -41,7 +41,6 @@ export default {
             type: 'xsd:string',
             minOccurs: '0',
             maxOccurs: '1',
-            form: 'unqualified',
           },
           {
             ref: 'atom:link',
