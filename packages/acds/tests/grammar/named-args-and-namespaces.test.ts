@@ -8,7 +8,9 @@ describe('named call arguments', () => {
     );
     expect(r.errors).toHaveLength(0);
     const v = r.ast.definitions[0] as any;
-    expect(v.members[0].expression).toContain('=>');
+    expect(v.members[0].expression).toBe(
+      'currency_conversion(amount => price, source_currency => currency)',
+    );
   });
 
   it('parses nested call as argument value', () => {
@@ -16,6 +18,8 @@ describe('named call arguments', () => {
       `define view entity V as select from t { foo(bar => baz(qux => 1)) as x }`,
     );
     expect(r.errors).toHaveLength(0);
+    const v = r.ast.definitions[0] as any;
+    expect(v.members[0].expression).toBe('foo(bar => baz(qux => 1))');
   });
 
   it('parses positional call', () => {
@@ -35,6 +39,8 @@ describe('namespace-qualified names and division', () => {
       `define view entity V as select from /NS/CLASS { key a as A }`,
     );
     expect(r.errors).toHaveLength(0);
+    const v = r.ast.definitions[0] as any;
+    expect(v.source.name).toBe('/NS/CLASS');
   });
 
   it('parses digit-leading namespace', () => {
@@ -42,5 +48,7 @@ describe('namespace-qualified names and division', () => {
       `define view entity V as select from /1BCDWB/NAME { key a as A }`,
     );
     expect(r.errors).toHaveLength(0);
+    const v = r.ast.definitions[0] as any;
+    expect(v.source.name).toBe('/1BCDWB/NAME');
   });
 });
