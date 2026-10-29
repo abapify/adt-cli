@@ -249,14 +249,7 @@ async function buildObject(
     // Handler schema.parse is plain JSON.parse — the parsed object IS the
     // metadata passed to fromMetadata.
     const metadata = handler.schema.parse(raw);
-    return objectFromFiles(
-      objFiles,
-      handler,
-      metadata,
-      contents,
-      adk,
-      options,
-    );
+    return objectFromFiles(objFiles, handler, metadata, contents, adk, options);
   } catch (error) {
     // Mirrors abapGit: log and continue so one bad object does not abort
     // the whole checkin.

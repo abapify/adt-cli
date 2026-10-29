@@ -98,9 +98,7 @@ describe('DOCU companions', () => {
 
 describe('companion preservation — deserialize → serialize (#243/#244)', () => {
   it('generic wave2 handler round-trips docu + .properties', async () => {
-    const { deserialize } = await import(
-      '../../src/lib/deserializer.ts'
-    );
+    const { deserialize } = await import('../../src/lib/deserializer.ts');
     const { getHandler } = await import('../../src/lib/handlers/base.ts');
     await import('../../src/lib/handlers/objects/index.ts');
 
@@ -133,17 +131,13 @@ describe('companion preservation — deserialize → serialize (#243/#244)', () 
         if (c === undefined) throw new Error(`ENOENT ${p}`);
         return c;
       },
-      readBuffer: async (p: string) =>
-        Buffer.from(files.get(p) ?? ''),
+      readBuffer: async (p: string) => Buffer.from(files.get(p) ?? ''),
       exists: async (p: string) => files.has(p),
       list: async () => [...files.keys()],
     };
 
     const objects = [];
-    for await (const obj of deserialize(
-      fileTree as never,
-      {} as never,
-    )) {
+    for await (const obj of deserialize(fileTree as never, {} as never)) {
       objects.push(obj);
     }
     assert.equal(objects.length, 1);
@@ -152,8 +146,10 @@ describe('companion preservation — deserialize → serialize (#243/#244)', () 
     assert.ok(handler);
     const out = await handler.serialize(objects[0] as never);
     const paths = out.map((f) => f.path);
-    assert.ok(paths.includes('Z.nrob.docu.json') ||
-      paths.includes('z.nrob.docu.json'), `docu emitted: ${paths}`);
+    assert.ok(
+      paths.includes('Z.nrob.docu.json') || paths.includes('z.nrob.docu.json'),
+      `docu emitted: ${paths}`,
+    );
     const props = paths.filter((p) => p.endsWith('.properties'));
     assert.equal(props.length, 2, `properties emitted: ${paths}`);
   });
