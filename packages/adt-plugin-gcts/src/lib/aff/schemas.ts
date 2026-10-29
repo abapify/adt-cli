@@ -265,10 +265,15 @@ export function affExamples(ref: AffRef): string[] {
   return out.sort((a, b) => a.localeCompare(b));
 }
 
+/** LIMU sub-object document suffix → schema type (nested under parent dir). */
+const LIMU_SUB_SCHEMA = /\.(reps|sotr|sotu|cpub|cpro|cprt|cpri|func)\.json$/i;
+
 /**
  * Pick the schema a given example file should validate against.
  *
  * - `z_x.doma.docu.json` → the `docu` schema (companion documentation)
+ * - `x.fugr.z_fm.func.json` / `x.fugr.y.reps.json` → the LIMU
+ *   sub-object's own schema (nested under the parent type dir)
  * - otherwise → the type's own schema at the example's `formatVersion`
  */
 export function schemaTargetForExample(
@@ -281,6 +286,9 @@ export function schemaTargetForExample(
   const declared = (json as { formatVersion?: string | number } | undefined)
     ?.formatVersion;
   const version = declared !== undefined ? Number(declared) : undefined;
+  const limu = LIMU_SUB_SCHEMA.exec(filename)?.[1]?.toLowerCase();
+  if (limu && affVersions({ type: limu }).length)
+    return { type: limu, version, companion: true };
   return { type: ref.type, version, companion: false };
 }
 

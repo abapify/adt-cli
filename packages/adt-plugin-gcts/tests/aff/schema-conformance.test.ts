@@ -28,6 +28,7 @@ interface Row {
 const failures: Row[] = [];
 let checked = 0;
 let companions = 0;
+let limuObjects = 0;
 let subObjects = 0;
 
 for (const type of listAffTypes()) {
@@ -46,6 +47,7 @@ for (const type of listAffTypes()) {
     }
     const { valid, errors } = affValidate(target, json);
     if (!valid) failures.push({ type: target.type, file: rel, errors });
+    else if (target.companion && SUB_OBJECT_RE.test(rel)) limuObjects++;
     else if (target.companion) companions++;
     else checked++;
   }
@@ -54,7 +56,7 @@ for (const type of listAffTypes()) {
 describe('AFF schema conformance (upstream examples)', () => {
   it('has a substantial corpus', () => {
     assert.ok(
-      checked + companions + subObjects > 50,
+      checked + companions + limuObjects + subObjects > 50,
       `expected >50 example files, got ${checked + companions + subObjects}`,
     );
   });
@@ -69,12 +71,18 @@ describe('AFF schema conformance (upstream examples)', () => {
   it('classifies companion and sub-object examples', () => {
     console.log(
       `[conformance] root-valid=${checked} companions=${companions} ` +
-        `sub-objects=${subObjects} failures=${failures.length}`,
+        `limu=${limuObjects} unvalidated-sub-objects=${subObjects} ` +
+        `failures=${failures.length}`,
     );
     assert.ok(companions >= 1, `expected ≥1 DOCU companion, got ${companions}`);
     assert.ok(
-      subObjects >= 1,
-      `expected ≥1 LIMU sub-object (e.g. func/reps), got ${subObjects}`,
+      limuObjects >= 1,
+      `expected ≥1 schema-validated LIMU sub-object (func/reps), got ${limuObjects}`,
+    );
+    assert.equal(
+      subObjects,
+      0,
+      `all LIMU sub-objects should validate now, got ${subObjects} skipped`,
     );
   });
 });

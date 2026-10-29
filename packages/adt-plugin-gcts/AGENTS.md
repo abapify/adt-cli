@@ -116,7 +116,8 @@ consts so a re-sync is always reviewed, never silent.
 - **Conformance test**: `tests/aff/schema-conformance.test.ts` validates
   every upstream example against its official schema (version-matched;
   `.docu.` companions routed to the `docu` schema; LIMU sub-objects
-  skipped).
+  routed to their nested schemas (e.g. `fugr/func-v1.json`,
+  `fugr/reps-v1.json`).
 - **Coverage**: `bun scripts/aff-coverage.ts` prints the
   `type × [versions, body-fields, examples, handler-kind]` matrix —
   dedicated `objects/{type}.ts` vs `wave2-generic.ts` stub. Wave-1..5

@@ -6,7 +6,7 @@
 - [x] 0.2 Wire existing `scripts/generate-aff-schemas.ts` into `nx codegen adt-plugin-gcts` → `src/schemas/generated/{type}-v{n}.ts` typed models, one file per schema version.
 - [ ] 0.3 AFF handler contract — gcts `createHandler` `toMetadata`/`fromMetadata` already is the contract; extend with `sourceExt`/`companions` declaration for source-bearing types. abapGit `toAffJson` stays a Wave-4 parity concern inside that plugin only.
 - [x] 0.4 ajv-based schema-validation harness — shared `affValidate(type, json, version)` reading schemas from `git_modules/` + golden-fixture runner over the submodule's `examples/` (match example→schema by `formatVersion` field; `.docu.` files route to the docu companion schema). Emit-side round-trip tests that pass handler-emitted metadata through `affValidate` land with the generic emitters in Waves 1–3 (`tests/aff/generic-roundtrip.test.ts`).
-- [ ] 0.4a Route `.reps.`/`.func.` LIMU sub-object examples to their nested schemas (`fugr/func-v1.json` etc.) — currently counted but not schema-validated.
+- [x] 0.4a Route `.reps.`/`.func.` LIMU sub-object examples to their nested schemas (`fugr/func-v1.json` etc.) — currently counted but not schema-validated.
 - [x] 0.5 `aff-coverage` nx target on `adt-plugin-gcts` — emits `type × [handler-kind, versions, body-fields, examples, schema-validated]` matrix; fails under threshold.
 
 ## 1. Enrich stubs — AFF families (Wave 1)
