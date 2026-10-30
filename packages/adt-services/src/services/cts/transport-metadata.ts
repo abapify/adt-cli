@@ -51,14 +51,18 @@ export class CtsTransportMetadataService {
         lastChangedTimestamp: task.lastChangedTimestamp,
       })),
     ];
-    // Select the unit matching the requested transport before returning, so a
-    // task query projects the requested task rather than a parent request.
-    const selected = units.filter(
-      (unit) => unit.number.toUpperCase() === requestedTransport,
-    );
-    return {
-      requestedTransport,
-      units: selected.length > 0 ? selected : units,
-    };
+    // Select the requested transport unit before returning. A request query
+    // keeps its request unit plus child tasks; a task query keeps only the
+    // matching task unit instead of projecting a parent request.
+    const requested = requestedTransport.toUpperCase();
+    if (units.length > 0 && units[0].number.toUpperCase() !== requested) {
+      const selected = units.filter(
+        (unit) => unit.number.toUpperCase() === requested,
+      );
+      if (selected.length > 0) {
+        units.splice(0, units.length, ...selected);
+      }
+    }
+    return { requestedTransport, units };
   }
 }

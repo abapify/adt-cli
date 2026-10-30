@@ -95,7 +95,15 @@ export class TransportService {
     // root.task=DEVK900002). Prefer the unit whose number matches the
     // requested trkorr so a task fetch does not map its parent request.
     const wanted = trkorr.trim().toUpperCase();
-    const request =
+    const siblingRequest =
+      (Array.isArray(data?.request)
+        ? (data.request as Record<string, unknown>[])[0]
+        : (data?.request as Record<string, unknown> | undefined)) ?? undefined;
+    const siblingRequestNumber = siblingRequest
+      ? String(siblingRequest.number ?? '').toUpperCase()
+      : '';
+
+    let selected =
       this.findUnit(data?.task, wanted) ??
       this.findUnit(data?.request, wanted) ??
       (data?.request as Record<string, unknown> | undefined) ??
@@ -103,7 +111,21 @@ export class TransportService {
         ? (data.task as unknown[])[0]
         : (data?.task as Record<string, unknown> | undefined)) ??
       data;
-    return this.mapToTransport(request);
+
+    // Preserve the sibling request number as parent when a task lacks an
+    // explicit parent field (SAP sometimes omits it on task siblings).
+    if (selected && typeof selected === 'object') {
+      const sel = selected as Record<string, unknown>;
+      const hasParent = Boolean(sel.parent);
+      // Only patch when selected came from the task sibling list.
+      const fromTaskList =
+        Array.isArray(data?.task) && data.task.includes(selected);
+      if (fromTaskList && !hasParent && siblingRequestNumber) {
+        sel.parent = siblingRequestNumber;
+      }
+    }
+
+    return this.mapToTransport(selected);
   }
 
   /**
