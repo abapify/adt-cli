@@ -1718,6 +1718,61 @@ async function checkoutFlow(
   );
 }
 
+async function isIndexedBaseObjectAbsent(
+  ctx: FlowContext,
+  manifestContext: ManifestContext,
+  presentDescriptors: ReadonlySet<string>,
+  group: ManifestContext['groups'][number],
+): Promise<boolean> {
+  const { identity, entries } = group;
+  if (
+    !entries.every((entry) => entry.exact && entry.changeKind === 'added') ||
+    presentDescriptors.has(identity.canonical)
+  ) {
+    return false;
+  }
+
+  const first = entries[0];
+  const object = first?.repositoryObject ?? first?.object;
+  const key = `${repositoryType(object?.pgmid ?? identity.pgmid, object?.type ?? identity.type)}/${object?.name ?? identity.name}`;
+  if (manifestContext.srcFilesByObject.get(key)?.length) return false;
+
+  if ((ctx.config.include?.applicationComponents?.length ?? 0) === 0) {
+    return true;
+  }
+
+  try {
+    const model = await ctx.dependencies.loadObject(identity);
+    ctx.calls.metadata += model.metadataCalls ?? 1;
+    return !isApplicationComponentExcluded(ctx.config, model);
+  } catch {
+    // Do not claim absence when the application-component filter cannot be evaluated.
+    return false;
+  }
+}
+
+async function indexedBaseAbsentObjects(
+  ctx: FlowContext,
+  manifestContext: ManifestContext,
+  presentDescriptors: ReadonlySet<string>,
+): Promise<string[]> {
+  const absent = await Promise.all(
+    manifestContext.groups.map(async (group) =>
+      (await isIndexedBaseObjectAbsent(
+        ctx,
+        manifestContext,
+        presentDescriptors,
+        group,
+      ))
+        ? group.identity.canonical
+        : undefined,
+    ),
+  );
+  return absent
+    .filter((identity): identity is string => identity !== undefined)
+    .sort(compareStrings);
+}
+
 async function indexFlow(
   input: FlowIndexInput,
   dependencies: FlowCheckoutDependencies,
@@ -1749,30 +1804,11 @@ async function indexFlow(
     indexed,
   );
   if (ctx.mode === 'base') {
-    const baseAddedGroups = manifestContext.groups.filter(({ entries }) =>
-      entries.every((entry) => entry.exact && entry.changeKind === 'added'),
+    indexed.absentObjects = await indexedBaseAbsentObjects(
+      ctx,
+      manifestContext,
+      presentDescriptors,
     );
-    const absentObjects: string[] = [];
-    for (const group of baseAddedGroups) {
-      const { identity, entries } = group;
-      if (presentDescriptors.has(identity.canonical)) continue;
-      const first = entries[0];
-      const object = first?.repositoryObject ?? first?.object;
-      const key = `${repositoryType(object?.pgmid ?? identity.pgmid, object?.type ?? identity.type)}/${object?.name ?? identity.name}`;
-      if (manifestContext.srcFilesByObject.get(key)?.length) continue;
-      if ((ctx.config.include?.applicationComponents?.length ?? 0) > 0) {
-        try {
-          const model = await dependencies.loadObject(identity);
-          ctx.calls.metadata += model.metadataCalls ?? 1;
-          if (isApplicationComponentExcluded(ctx.config, model)) continue;
-        } catch {
-          // Do not claim absence when the application-component filter cannot be evaluated.
-          continue;
-        }
-      }
-      absentObjects.push(identity.canonical);
-    }
-    indexed.absentObjects = absentObjects.sort(compareStrings);
   }
   await addTransportDescriptors(ctx, manifestContext.manifest, indexed, true);
   indexed.desired.sort((left, right) => compareStrings(left.path, right.path));

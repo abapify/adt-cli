@@ -980,7 +980,16 @@ describe('transport checkout', () => {
 
   it('indexes only a manifest-inexact checkout when the caller explicitly opts in', async () => {
     const workspace = await root();
-    const current = manifest('modified', version('before'), version('after'));
+    const current = manifest('added', undefined, version('prior-task'));
+    const ports = dependencies(() => current);
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+    ports.readSource.mockClear();
+    ports.loadObject.mockClear();
     current.entries.push({
       object: {
         pgmid: 'R3TR',
@@ -1010,10 +1019,9 @@ describe('transport checkout', () => {
         message: 'No exact version belongs to the scope.',
       },
     });
-    const ports = dependencies(() => current);
 
     await expect(
-      createAdtFlowService(ports).checkout({
+      flow.checkout({
         root: workspace,
         transports: ['DEVK900001'],
         mode: 'base',
@@ -1037,6 +1045,12 @@ describe('transport checkout', () => {
     });
     expect(ports.readSource).not.toHaveBeenCalled();
     expect(ports.loadObject).not.toHaveBeenCalled();
+    expect(
+      await readFile(
+        join(workspace, 'src/feature/zcl_sample.clas.abap'),
+        'utf8',
+      ),
+    ).toBe('source prior-task\n');
   });
 
   it('indexes inventory without requiring a materializing format plugin', async () => {
