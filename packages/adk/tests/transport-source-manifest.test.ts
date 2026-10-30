@@ -647,6 +647,7 @@ describe('buildTransportSourceManifest', () => {
       scopeTransports: ['DEVK900001', 'DEVK900002'],
       inventoryResolutions: [
         {
+          outcome: 'resolved',
           object: { pgmid: 'R3TR', type: 'PROG', name: 'ZREPORT' },
           sourceTransport: 'DEVK900002',
           repositoryObject: { pgmid: 'R3TR', type: 'PROG', name: 'ZREPORT' },
@@ -929,9 +930,18 @@ describe('buildTransportSourceManifest', () => {
       expect(result.inventoryResolutions).toHaveLength(3);
       expect(
         result.inventoryResolutions?.every(
-          (resolution) => resolution.repositoryObject.type === 'CLAS',
+          (resolution) =>
+            resolution.outcome === 'resolved' &&
+            resolution.repositoryObject.type === 'CLAS',
         ),
       ).toBe(true);
+      expect(result.inventoryResolutions?.map(({ object }) => object)).toEqual(
+        objects.map(({ pgmid, type, name: objectName }) => ({
+          pgmid,
+          type,
+          name: objectName,
+        })),
+      );
       const descriptor = JSON.parse(
         await readFile(join(workspace, '.adt/tr/S0DK958193.json'), 'utf8'),
       );
@@ -1267,6 +1277,27 @@ describe('buildTransportSourceManifest', () => {
         head,
       }),
     ]);
+    expect(manifest.inventoryResolutions).toEqual(
+      expect.arrayContaining([
+        {
+          outcome: 'non-source',
+          object: {
+            pgmid: 'R3TR',
+            type: 'SUSK',
+            name: 'Z_CONCUR_RECON',
+          },
+          sourceTransport: 'DEVK900002',
+        },
+        expect.objectContaining({
+          outcome: 'resolved',
+          object: {
+            pgmid: 'R3TR',
+            type: 'PROG',
+            name: 'ZREVIEWED_PROGRAM',
+          },
+        }),
+      ]),
+    );
     expect(factoryGet).not.toHaveBeenCalledWith('Z_CONCUR_RECON', 'SUSK');
   });
 

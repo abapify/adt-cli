@@ -36,13 +36,16 @@ adt flow checkout tr DEVK900001 --base --report .adt/checkout-coverage.json
 ```
 
 The report (`schemaVersion: 1`, `coverageVersion: 1`) records mode/scope, original
-CTS inventory, every inventory-to-repository resolution (including deduplicated
-leaves), object descriptor paths, exact added-object absence at base, skips and
-index-only status. Consumers can validate owned-file hashes and selected source
-components before publishing a snapshot. Requesting a report recomputes the
-inventory instead of using the exact-head transport-index shortcut. Existing
-partial reports keep their original format. The default CLI skip policy is
-unchanged; consumers must enforce their desired completeness policy.
+CTS inventory, and one resolution outcome for every inventory item. Resolutions
+identify the repository object, including deduplicated leaves; non-source CTS
+items such as `R3TR SUSK` carry `outcome: "non-source"` and do not claim a
+repository owner. The report also records object descriptor paths, added
+objects absent from the resulting base workspace, skips and index-only status.
+Consumers can validate owned-file hashes and selected source components before
+publishing a snapshot. Requesting a report recomputes the inventory instead of
+using the exact-head transport-index shortcut. Existing partial reports keep
+their original format. The default CLI skip policy is unchanged; consumers must
+enforce their desired completeness policy.
 
 Class components with ADT subtypes `CLAS/OC`, `CLAS/OSU`, `CLAS/OM` resolve to
 their full `R3TR CLAS` owner and use ordinary class source/abapGit materialization.

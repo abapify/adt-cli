@@ -191,10 +191,50 @@ const config = {
 };
 
 describe('transport checkout', () => {
+  it('serializes workspace checkout through after-checkout report publication', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('modified', version('before'), version('after')),
+    );
+    const flow = createAdtFlowService(ports);
+    let enteredAfterCheckout!: () => void;
+    let releaseAfterCheckout!: () => void;
+    const afterCheckoutEntered = new Promise<void>((resolve) => {
+      enteredAfterCheckout = resolve;
+    });
+    const holdAfterCheckout = new Promise<void>((resolve) => {
+      releaseAfterCheckout = resolve;
+    });
+
+    const first = flow.checkout(
+      { root: workspace, transports: ['DEVK900001'], config },
+      {
+        afterCheckout: async () => {
+          enteredAfterCheckout();
+          await holdAfterCheckout;
+        },
+      },
+    );
+    await afterCheckoutEntered;
+    const second = flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      verifyInventory: true,
+      config,
+    });
+    await Promise.resolve();
+
+    expect(ports.buildManifest).toHaveBeenCalledTimes(1);
+    releaseAfterCheckout();
+    await Promise.all([first, second]);
+    expect(ports.buildManifest).toHaveBeenCalledTimes(2);
+  });
+
   it('recomputes report inventory instead of trusting an exact-head index', async () => {
     const workspace = await root();
     const current = manifest('modified', version('before'), version('after'));
     current.inventoryResolutions = current.inventory.map((item) => ({
+      outcome: 'resolved',
       object: { pgmid: item.pgmid, type: item.type, name: item.name },
       sourceTransport: item.sourceTransport,
       repositoryObject: { pgmid: item.pgmid, type: item.type, name: item.name },
@@ -636,6 +676,7 @@ describe('transport checkout', () => {
     expect(base.fastPath).toBe('indexed-components');
     expect(base.changed).toEqual([]);
     expect(base.removed).toEqual([]);
+    expect(base.absentObjects).toEqual([]);
     expect(base.sapCalls).toEqual({ manifest: 1, metadata: 0, source: 0 });
     expect(ports.readSource).not.toHaveBeenCalled();
     expect(ports.loadObject).not.toHaveBeenCalled();
@@ -687,6 +728,7 @@ describe('transport checkout', () => {
 
     expect(base.changed).toEqual([]);
     expect(base.removed).toEqual([]);
+    expect(base.absentObjects).toEqual([]);
     expect(ports.readSource).not.toHaveBeenCalled();
     expect(
       await readFile(
@@ -706,6 +748,7 @@ describe('transport checkout', () => {
         'utf8',
       ),
     ).rejects.toMatchObject({ code: 'ENOENT' });
+    expect(base.absentObjects).toEqual([]);
 
     const head = await flow.checkout({
       root: workspace,
@@ -721,6 +764,62 @@ describe('transport checkout', () => {
         'utf8',
       ),
     ).toBe('source task-head\n');
+  });
+
+  it('reports an exact added object absent when base checkout has no retained files', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('added', undefined, version('task-head')),
+    );
+    const base = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      mode: 'base',
+      config,
+    });
+
+    expect(base.absentObjects).toEqual(['R3TR/CLAS/ZCL_SAMPLE']);
+  });
+
+  it('does not report filtered application-component objects as absent', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('added', undefined, version('task-head')),
+    );
+    ports.loadObject.mockResolvedValue({
+      object: { name: 'ZCL_SAMPLE' },
+      packagePath: ['ZROOT', 'ZROOT_FEATURE'],
+      applicationComponent: 'ZOTHER',
+    });
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      mode: 'base',
+      config: {
+        ...config,
+        include: { objectTypes: ['CLAS'], applicationComponents: ['ZAPP'] },
+      },
+    });
+
+    expect(result.absentObjects).toEqual([]);
+  });
+
+  it('does not report package-filtered objects as absent', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('added', undefined, version('task-head')),
+    );
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      mode: 'base',
+      config: {
+        ...config,
+        include: { objectTypes: ['CLAS'], packages: ['ZOTHER'] },
+      },
+    });
+
+    expect(result.absentObjects).toEqual([]);
   });
 
   it('shows a first-observed deletion even when no descriptor exists', async () => {
@@ -885,6 +984,19 @@ describe('transport checkout', () => {
     current.entries.push({
       object: {
         pgmid: 'R3TR',
+        type: 'PROG',
+        name: 'ZNEW_PROGRAM',
+        packageName: 'ZROOT_FEATURE',
+      },
+      component: { id: 'main' },
+      sourceTransport: 'DEVK900001',
+      changeKind: 'added',
+      exact: true,
+      head: version('new-program'),
+    });
+    current.entries.push({
+      object: {
+        pgmid: 'R3TR',
         type: 'CLAS',
         name: 'ZCL_ZZZ_INEXACT',
         packageName: 'ZROOT_FEATURE',
@@ -904,12 +1016,15 @@ describe('transport checkout', () => {
       createAdtFlowService(ports).checkout({
         root: workspace,
         transports: ['DEVK900001'],
+        mode: 'base',
         config,
         indexOnInexact: true,
       }),
     ).resolves.toMatchObject({
+      mode: 'base',
+      indexedOnly: true,
       changed: [],
-      descriptors: expect.arrayContaining(['.adt/tr/DEVK900001.json']),
+      absentObjects: ['R3TR/PROG/ZNEW_PROGRAM'],
       skipped: [
         {
           object: 'CLAS/ZCL_ZZZ_INEXACT',

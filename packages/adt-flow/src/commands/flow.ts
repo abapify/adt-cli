@@ -63,14 +63,18 @@ function escapeRoot(realRoot: string, path: string): boolean {
   );
 }
 
-function assertNoSymlinkEscape(path: string, realRoot: string): void {
+function assertNoSymlinkEscape(
+  path: string,
+  realRoot: string,
+  optionName = '--partial-report',
+): void {
   let linkCurrent = path;
   const seen = new Set<string>();
   for (;;) {
     if (seen.has(linkCurrent)) {
       throw new AdtFlowError(
         'invalid_input',
-        '--partial-report path contains a symlink loop.',
+        `${optionName} path contains a symlink loop.`,
       );
     }
     seen.add(linkCurrent);
@@ -78,7 +82,7 @@ function assertNoSymlinkEscape(path: string, realRoot: string): void {
     if (stat === undefined) {
       // Dangling or non-existent target — check parent chain for
       // intermediate symlink components that escape the checkout.
-      assertParentChainSafe(linkCurrent, realRoot);
+      assertParentChainSafe(linkCurrent, realRoot, optionName);
       return;
     }
     if (!stat.isSymbolicLink()) return;
@@ -86,7 +90,7 @@ function assertNoSymlinkEscape(path: string, realRoot: string): void {
     if (escapeRoot(realRoot, linkTarget)) {
       throw new AdtFlowError(
         'invalid_input',
-        '--partial-report must not escape the checkout root via symlinks.',
+        `${optionName} must not escape the checkout root via symlinks.`,
       );
     }
     linkCurrent = linkTarget;
@@ -101,11 +105,15 @@ function tryLstat(path: string): ReturnType<typeof lstatSync> | undefined {
   }
 }
 
-function assertParentChainSafe(path: string, realRoot: string): void {
+function assertParentChainSafe(
+  path: string,
+  realRoot: string,
+  optionName: string,
+): void {
   const parent = dirname(path);
   if (parent === path) return;
   try {
-    assertNoSymlinkEscape(parent, realRoot);
+    assertNoSymlinkEscape(parent, realRoot, optionName);
   } catch (error) {
     if (error instanceof AdtFlowError) throw error;
   }
@@ -115,18 +123,19 @@ function partialReportPath(
   value: unknown,
   root: string,
   realRoot: string,
+  optionName = '--partial-report',
 ): string | undefined {
   if (value === undefined || value === false) return undefined;
   if (typeof value !== 'string' || !value.trim()) {
     throw new AdtFlowError(
       'invalid_input',
-      '--partial-report requires a non-empty repository-relative file path.',
+      `${optionName} requires a non-empty repository-relative file path.`,
     );
   }
   if (isAbsolute(value)) {
     throw new AdtFlowError(
       'invalid_input',
-      '--partial-report must be a repository-relative path, not absolute.',
+      `${optionName} must be a repository-relative path, not absolute.`,
     );
   }
   const target = resolve(root, value);
@@ -134,13 +143,13 @@ function partialReportPath(
   if (fromRoot === '') {
     throw new AdtFlowError(
       'invalid_input',
-      '--partial-report must not target the checkout root directory.',
+      `${optionName} must not target the checkout root directory.`,
     );
   }
   if (escapeRoot(root, target)) {
     throw new AdtFlowError(
       'invalid_input',
-      '--partial-report must remain inside the checkout root.',
+      `${optionName} must remain inside the checkout root.`,
     );
   }
   // Resolve symlinks in the parent directory to detect in-root symlinks
@@ -164,7 +173,7 @@ function partialReportPath(
       // Check if current is a symlink (including dangling ones) whose
       // chain escapes the checkout root.
       try {
-        assertNoSymlinkEscape(current, realRoot);
+        assertNoSymlinkEscape(current, realRoot, optionName);
       } catch (error) {
         if (error instanceof AdtFlowError) throw error;
         // lstat failed — path doesn't exist at all, continue walking up.
@@ -187,13 +196,66 @@ function partialReportPath(
   if (escapeRoot(realRoot, realTarget)) {
     throw new AdtFlowError(
       'invalid_input',
-      '--partial-report must not escape the checkout root via symlinks.',
+      `${optionName} must not escape the checkout root via symlinks.`,
     );
   }
   // Validate the target file itself — if it already exists as a symlink,
   // the report write would replace it or follow it outside the checkout.
-  assertNoSymlinkEscape(target, realRoot);
-  return target;
+  assertNoSymlinkEscape(target, realRoot, optionName);
+  return realTarget;
+}
+
+function assertReportPathNotManaged(
+  output: string,
+  root: string,
+  optionName: string,
+): void {
+  const path = relative(root, output)
+    .replaceAll('\\', '/')
+    .toLocaleLowerCase('en-US');
+  const segments = path.split('/');
+  const reserved =
+    segments[0] === 'src' ||
+    segments[0] === '.git' ||
+    (segments[0] === '.adt' &&
+      (segments[1] === 'tr' || segments[1] === 'objects'));
+  if (reserved) {
+    throw new AdtFlowError(
+      'invalid_input',
+      `${optionName} must not target flow-managed source, descriptor, or Git paths.`,
+      { path },
+    );
+  }
+}
+
+function assertReportPathsDistinct(
+  partialReport: string | undefined,
+  coverageReport: string | undefined,
+): void {
+  if (!partialReport || !coverageReport) return;
+  const normalize = (path: string) =>
+    process.platform === 'win32' ? resolve(path).toLowerCase() : resolve(path);
+  if (normalize(partialReport) === normalize(coverageReport)) {
+    throw new AdtFlowError(
+      'invalid_input',
+      '--partial-report and --report must use different output paths.',
+    );
+  }
+}
+
+async function removeStaleReport(output: string): Promise<void> {
+  try {
+    await unlink(output);
+  } catch (error) {
+    if (
+      error === null ||
+      typeof error !== 'object' ||
+      !('code' in error) ||
+      error.code !== 'ENOENT'
+    ) {
+      throw error;
+    }
+  }
 }
 
 async function writePartialReport(
@@ -201,6 +263,7 @@ async function writePartialReport(
   realRoot: string,
   result: Awaited<ReturnType<AdtFlowService['checkout']>>,
   coverage = false,
+  optionName = coverage ? '--report' : '--partial-report',
 ): Promise<void> {
   const skipped = [...result.skipped].sort((a, b) => {
     return (
@@ -234,8 +297,8 @@ async function writePartialReport(
   // Re-validate the output path right before writing to mitigate
   // TOCTOU: a parent directory could be replaced with a symlink
   // between partialReportPath validation and the actual write.
-  assertNoSymlinkEscape(output, realRoot);
-  assertNoSymlinkEscape(dirname(output), realRoot);
+  assertNoSymlinkEscape(output, realRoot, optionName);
+  assertNoSymlinkEscape(dirname(output), realRoot, optionName);
   await mkdir(dirname(output), { recursive: true });
   const temporary = `${output}.${randomUUID()}.tmp`;
   try {
@@ -317,6 +380,7 @@ function checkoutTrCommand(
         args['partialReport'] ?? args['partial-report'],
         ctx.cwd,
         realRoot,
+        '--partial-report',
       );
       if (report && args['partial'] !== true) {
         throw new AdtFlowError(
@@ -328,8 +392,17 @@ function checkoutTrCommand(
         args['report'],
         ctx.cwd,
         realRoot,
+        '--report',
       );
-      const result = await dependencies.createService(client, format).checkout({
+      assertReportPathsDistinct(report, coverageReport);
+      if (report)
+        assertReportPathNotManaged(report, realRoot, '--partial-report');
+      if (coverageReport)
+        assertReportPathNotManaged(coverageReport, realRoot, '--report');
+      const reportTargets = [report, coverageReport].filter(
+        (path): path is string => path !== undefined,
+      );
+      const checkoutInput = {
         root: ctx.cwd,
         transports: transports(args['transport']),
         mode: args['base'] === true ? 'base' : 'head',
@@ -337,10 +410,36 @@ function checkoutTrCommand(
         ...(coverageReport ? { verifyInventory: true } : {}),
         ...(args['indexOnInexact'] === true ? { indexOnInexact: true } : {}),
         config,
-      });
-      if (report) await writePartialReport(report, realRoot, result);
-      if (coverageReport)
-        await writePartialReport(coverageReport, realRoot, result, true);
+      };
+      const service = dependencies.createService(client, format);
+      const result =
+        reportTargets.length > 0
+          ? await service.checkout(checkoutInput, {
+              beforeCheckout: async () => {
+                for (const target of reportTargets) {
+                  await removeStaleReport(target);
+                }
+              },
+              afterCheckout: async (checkoutResult) => {
+                if (report)
+                  await writePartialReport(
+                    report,
+                    realRoot,
+                    checkoutResult,
+                    false,
+                    '--partial-report',
+                  );
+                if (coverageReport)
+                  await writePartialReport(
+                    coverageReport,
+                    realRoot,
+                    checkoutResult,
+                    true,
+                    '--report',
+                  );
+              },
+            })
+          : await service.checkout(checkoutInput);
       ctx.logger.info(
         `Checked out ${result.mode} for ${result.requestedTransports.join(', ')}: ` +
           `${result.changed.length} changed, ${result.moved.length} moved, ` +

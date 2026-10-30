@@ -23,6 +23,12 @@ export function registerFlowCheckoutTrTool(
       ...sessionOrConnectionShape,
       transports: z.array(z.string().trim().min(1)).min(1),
       base: z.boolean().optional(),
+      verifyInventory: z
+        .boolean()
+        .optional()
+        .describe(
+          'Recompute transport inventory instead of reusing an exact-head index',
+        ),
       workspaceRoot: z
         .string()
         .min(1)
@@ -50,6 +56,9 @@ export function registerFlowCheckoutTrTool(
             service.checkout({
               ...input,
               mode: args.base ? 'base' : 'head',
+              ...(args.verifyInventory === true
+                ? { verifyInventory: true }
+                : {}),
             }),
         },
       }),

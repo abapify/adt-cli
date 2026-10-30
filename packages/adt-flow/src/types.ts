@@ -79,6 +79,8 @@ export interface FlowCheckoutInput {
 export interface FlowIndexInput {
   root: string;
   transports: string[];
+  /** Preserve an explicit base boundary when indexing a checkout fallback. */
+  mode?: FlowCheckoutMode;
   config: FlowConfig;
 }
 
@@ -92,7 +94,7 @@ export interface FlowSkippedObject {
 export interface FlowCheckoutResult {
   inventory?: TransportSourceManifest['inventory'];
   inventoryResolutions?: TransportSourceManifest['inventoryResolutions'];
-  /** Repository identities proved absent before an added object. */
+  /** Exact added-object identities left absent from the resulting base workspace. */
   absentObjects?: string[];
   indexedOnly?: boolean;
   mode: FlowCheckoutMode;

@@ -118,11 +118,18 @@ export interface TransportObjectInventoryEntry {
   sourceTransport: string;
 }
 
-export interface TransportInventoryResolution {
-  object: TransportSourceManifestObject;
-  sourceTransport: string;
-  repositoryObject: TransportSourceManifestObject;
-}
+export type TransportInventoryResolution =
+  | {
+      outcome: 'resolved';
+      object: TransportSourceManifestObject;
+      sourceTransport: string;
+      repositoryObject: TransportSourceManifestObject;
+    }
+  | {
+      outcome: 'non-source';
+      object: TransportSourceManifestObject;
+      sourceTransport: string;
+    };
 
 export interface TransportSourceManifest {
   requestedTransports: string[];
@@ -1235,8 +1242,9 @@ export async function buildTransportSourceManifest(
     requestedTransports: requested,
     scopeTransports,
     inventory,
-    inventoryResolutions: resolutions
-      .map(({ original, repository, sourceTransport }) => ({
+    inventoryResolutions: [
+      ...resolutions.map(({ original, repository, sourceTransport }) => ({
+        outcome: 'resolved' as const,
         object: {
           pgmid: original.pgmid,
           type: original.type,
@@ -1248,14 +1256,24 @@ export async function buildTransportSourceManifest(
           type: repository.functionGroupName ? 'FUGR' : repository.type,
           name: repository.functionGroupName ?? repository.name,
         },
-      }))
-      .sort(
-        (left, right) =>
-          compareText(left.sourceTransport, right.sourceTransport) ||
-          compareText(left.object.pgmid, right.object.pgmid) ||
-          compareText(left.object.type, right.object.type) ||
-          compareText(left.object.name, right.object.name),
-      ),
+      })),
+      ...resolved.objects.filter(isNonSourceCtsObject).map((original) => ({
+        outcome: 'non-source' as const,
+        object: {
+          pgmid: original.pgmid,
+          type: original.type,
+          name: original.name,
+        },
+        sourceTransport:
+          resolved.sourceTransportMap.get(original.key) ?? requested[0] ?? '',
+      })),
+    ].sort(
+      (left, right) =>
+        compareText(left.sourceTransport, right.sourceTransport) ||
+        compareText(left.object.pgmid, right.object.pgmid) ||
+        compareText(left.object.type, right.object.type) ||
+        compareText(left.object.name, right.object.name),
+    ),
     entries: perObjectEntries.flat(),
   };
 }

@@ -49,6 +49,7 @@ export const DEFAULT_FLOW_MCP_DEPENDENCIES: FlowMcpDependencies = {
 type FlowToolArgs = {
   transports: string[];
   workspaceRoot: string;
+  verifyInventory?: boolean;
 };
 
 type FlowToolResult = {

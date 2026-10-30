@@ -529,14 +529,17 @@ Delete a transport request.
 Reconcile an allowed local workspace to an exact transport source boundary.
 The tool delegates to `@abapify/adt-flow`; it does not run Git commands.
 
-| Parameter       | Type     | Default | Description                                     |
-| --------------- | -------- | ------- | ----------------------------------------------- |
-| `transports`    | string[] | ✅      | Non-empty transport scope                       |
-| `workspaceRoot` | string   | ✅      | Absolute directory within a server-owned root   |
-| `base`          | boolean  | `false` | Select the version immediately before the scope |
+| Parameter         | Type     | Default | Description                                                |
+| ----------------- | -------- | ------- | ---------------------------------------------------------- |
+| `transports`      | string[] | ✅      | Non-empty transport scope                                  |
+| `workspaceRoot`   | string   | ✅      | Absolute directory within a server-owned root              |
+| `base`            | boolean  | `false` | Select the version immediately before the scope            |
+| `verifyInventory` | boolean  | `false` | Recompute inventory instead of reusing an exact-head index |
 
 The JSON result contains changed, moved, removed, unchanged, descriptor, and
-SAP-call counts. It never contains source bodies or credentials.
+SAP-call counts. With `verifyInventory: true`, it also contains refreshed
+inventory and per-item resolution outcomes. It never contains source bodies or
+credentials.
 
 ---
 

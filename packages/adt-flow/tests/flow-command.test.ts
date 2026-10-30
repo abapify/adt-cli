@@ -6,6 +6,7 @@ import {
   readdir,
   rm,
   symlink,
+  writeFile,
 } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -49,10 +50,12 @@ const emptyCheckoutResult = {
 } satisfies FlowCheckoutResult;
 
 function makeCheckout(overrides: Partial<FlowCheckoutResult> = {}) {
-  return vi.fn<AdtFlowService['checkout']>(async () => ({
-    ...emptyCheckoutResult,
-    ...overrides,
-  }));
+  return vi.fn<AdtFlowService['checkout']>(async (_input, hooks) => {
+    await hooks?.beforeCheckout?.();
+    const result = { ...emptyCheckoutResult, ...overrides };
+    await hooks?.afterCheckout?.(result);
+    return result;
+  });
 }
 
 function makeIndex() {
@@ -172,9 +175,33 @@ describe('flow CLI command', () => {
   it('writes structured evidence in full mode and forces inventory verification', async () => {
     await withTempRoot(async (root) => {
       const checkout = makeCheckout({
-        inventory: [],
-        inventoryResolutions: [],
-        absentObjects: [],
+        inventory: [
+          {
+            pgmid: 'LIMU',
+            type: 'METH',
+            name: 'ZCL_SAMPLE=>RUN',
+            objFunc: '',
+            sourceTransport: 'DEVK900001',
+          },
+        ],
+        inventoryResolutions: [
+          {
+            outcome: 'resolved',
+            object: {
+              pgmid: 'LIMU',
+              type: 'METH',
+              name: 'ZCL_SAMPLE=>RUN',
+            },
+            sourceTransport: 'DEVK900001',
+            repositoryObject: {
+              pgmid: 'R3TR',
+              type: 'CLAS',
+              name: 'ZCL_SAMPLE',
+            },
+          },
+        ],
+        absentObjects: ['R3TR/PROG/ZNEW'],
+        descriptors: ['.adt/tr/DEVK900001.json'],
       });
       const command = makeCommand(checkout);
       await leaf(command).execute?.(
@@ -183,6 +210,10 @@ describe('flow CLI command', () => {
       );
       expect(checkout).toHaveBeenCalledWith(
         expect.objectContaining({ verifyInventory: true, partial: false }),
+        expect.objectContaining({
+          beforeCheckout: expect.any(Function),
+          afterCheckout: expect.any(Function),
+        }),
       );
       const report = JSON.parse(
         await readFile(join(root, '.adt/coverage.json'), 'utf8'),
@@ -190,10 +221,16 @@ describe('flow CLI command', () => {
       expect(report).toMatchObject({
         coverageVersion: 1,
         mode: 'head',
-        inventory: [],
-        inventoryResolutions: [],
-        descriptors: [],
-        absentObjects: [],
+        inventory: [expect.objectContaining({ type: 'METH' })],
+        inventoryResolutions: [
+          expect.objectContaining({
+            outcome: 'resolved',
+            object: expect.objectContaining({ type: 'METH' }),
+            repositoryObject: expect.objectContaining({ type: 'CLAS' }),
+          }),
+        ],
+        descriptors: ['.adt/tr/DEVK900001.json'],
+        absentObjects: ['R3TR/PROG/ZNEW'],
         indexedOnly: false,
         skipped: [],
       });
@@ -266,6 +303,10 @@ describe('flow CLI command', () => {
 
       expect(checkout).toHaveBeenCalledWith(
         expect.objectContaining({ partial: true }),
+        expect.objectContaining({
+          beforeCheckout: expect.any(Function),
+          afterCheckout: expect.any(Function),
+        }),
       );
       expect(JSON.parse(await readFile(join(root, report), 'utf8'))).toEqual({
         schemaVersion: 1,
@@ -287,6 +328,117 @@ describe('flow CLI command', () => {
           ctx,
         ),
       ).rejects.toMatchObject({ code: 'invalid_input' });
+      expect(checkout).not.toHaveBeenCalled();
+    });
+  });
+
+  it('rejects identical --partial-report and --report paths before checkout', async () => {
+    const checkout = makeCheckout();
+    const command = makeCommand(checkout);
+
+    await withTempRoot(async (root) => {
+      await expect(
+        leaf(command).execute?.(
+          {
+            transport: 'DEVK900001',
+            partial: true,
+            partialReport: '.adt/coverage.json',
+            report: '.adt/coverage.json',
+          },
+          makeContext(root),
+        ),
+      ).rejects.toMatchObject({
+        code: 'invalid_input',
+        message: expect.stringContaining('different output paths'),
+      });
+      expect(checkout).not.toHaveBeenCalled();
+    });
+  });
+
+  it.each([
+    'src/zcl_sample.clas.abap',
+    '.adt/tr/DEVK900001.json',
+    '.adt/objects/CLAS/zcl_sample.clas.adt.json',
+  ])(
+    'rejects --report targeting flow-managed path %s before checkout',
+    async (report) => {
+      const checkout = makeCheckout();
+      const command = makeCommand(checkout);
+
+      await withTempRoot(async (root) => {
+        await expect(
+          leaf(command).execute?.(
+            { transport: 'DEVK900001', report },
+            makeContext(root),
+          ),
+        ).rejects.toMatchObject({
+          code: 'invalid_input',
+          message: expect.stringContaining('--report'),
+        });
+        expect(checkout).not.toHaveBeenCalled();
+      });
+    },
+  );
+
+  it.skipIf(process.platform === 'win32')(
+    'rejects --report paths whose in-root symlink parent points into src',
+    async () => {
+      const checkout = makeCheckout();
+      const command = makeCommand(checkout);
+
+      await withTempRoot(async (root) => {
+        await mkdir(join(root, 'src'), { recursive: true });
+        await symlink(join(root, 'src'), join(root, 'source-alias'));
+        await expect(
+          leaf(command).execute?.(
+            { transport: 'DEVK900001', report: 'source-alias/report.json' },
+            makeContext(root),
+          ),
+        ).rejects.toMatchObject({ code: 'invalid_input' });
+        expect(checkout).not.toHaveBeenCalled();
+      });
+    },
+  );
+
+  it('removes stale report evidence before a checkout that later fails', async () => {
+    const checkout = vi.fn<AdtFlowService['checkout']>(
+      async (_input, hooks) => {
+        await hooks?.beforeCheckout?.();
+        throw new Error('checkout failed');
+      },
+    );
+    const command = makeCommand(checkout);
+
+    await withTempRoot(async (root) => {
+      const report = join(root, '.adt/coverage.json');
+      await mkdir(join(root, '.adt'), { recursive: true });
+      await writeFile(report, '{"old":true}\n');
+      await expect(
+        leaf(command).execute?.(
+          { transport: 'DEVK900001', report: '.adt/coverage.json' },
+          makeContext(root),
+        ),
+      ).rejects.toThrow('checkout failed');
+      await expect(readFile(report, 'utf8')).rejects.toMatchObject({
+        code: 'ENOENT',
+      });
+    });
+  });
+
+  it('uses --report in report-path validation errors', async () => {
+    const checkout = makeCheckout();
+    const command = makeCommand(checkout);
+
+    await withTempRoot(async (root) => {
+      await expect(
+        leaf(command).execute?.(
+          { transport: 'DEVK900001', report: join(root, 'coverage.json') },
+          makeContext(root),
+        ),
+      ).rejects.toMatchObject({
+        code: 'invalid_input',
+        message: expect.stringContaining('--report'),
+      });
       expect(checkout).not.toHaveBeenCalled();
     });
   });

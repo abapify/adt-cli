@@ -1,4 +1,8 @@
-export { createAdtFlowService, type AdtFlowService } from './service';
+export {
+  createAdtFlowService,
+  type AdtFlowService,
+  type FlowCheckoutHooks,
+} from './service';
 export {
   createAdtFlowDependencies,
   type AdtFlowAdapterOperations,
