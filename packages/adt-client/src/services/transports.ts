@@ -103,7 +103,7 @@ export class TransportService {
       ? String(siblingRequest.number ?? '').toUpperCase()
       : '';
 
-    let selected =
+    const selected =
       this.findUnit(data?.task, wanted) ??
       this.findUnit(data?.request, wanted) ??
       (data?.request as Record<string, unknown> | undefined) ??
@@ -117,9 +117,15 @@ export class TransportService {
     if (selected && typeof selected === 'object') {
       const sel = selected as Record<string, unknown>;
       const hasParent = Boolean(sel.parent);
-      // Only patch when selected came from the task sibling list.
-      const fromTaskList =
-        Array.isArray(data?.task) && data.task.includes(selected);
+      // Only patch when selected came from the task sibling list. Normalize a
+      // single task node to an array so the fallback also applies to
+      // single-object task responses.
+      const taskNodes = Array.isArray(data?.task)
+        ? (data.task as unknown[])
+        : data?.task
+          ? [data.task]
+          : [];
+      const fromTaskList = taskNodes.includes(selected);
       if (fromTaskList && !hasParent && siblingRequestNumber) {
         sel.parent = siblingRequestNumber;
       }
