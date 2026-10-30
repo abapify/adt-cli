@@ -70,6 +70,8 @@ export interface FlowCheckoutInput {
    * unavailable. Other checkout failures remain fail-closed.
    */
   indexOnInexact?: boolean;
+  /** Recompute the inventory so a report cannot reuse a legacy incomplete index. */
+  verifyInventory?: boolean;
   config: FlowConfig;
 }
 
@@ -88,6 +90,11 @@ export interface FlowSkippedObject {
 }
 
 export interface FlowCheckoutResult {
+  inventory?: TransportSourceManifest['inventory'];
+  inventoryResolutions?: TransportSourceManifest['inventoryResolutions'];
+  /** Repository identities proved absent before an added object. */
+  absentObjects?: string[];
+  indexedOnly?: boolean;
   mode: FlowCheckoutMode;
   requestedTransports: string[];
   scopeTransports: string[];

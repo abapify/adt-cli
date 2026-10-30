@@ -1577,6 +1577,18 @@ function buildCheckoutResult(
     unchanged: plan.unchanged.filter((path) => !descriptorSet.has(path)),
     descriptors: [...descriptorSet].sort(),
     skipped,
+    inventory: manifest.inventory,
+    inventoryResolutions: manifest.inventoryResolutions,
+    absentObjects:
+      ctx.mode === 'base'
+        ? groupEntries(manifest.entries)
+            .filter(({ entries }) =>
+              entries.every(
+                (entry) => entry.exact && entry.changeKind === 'added',
+              ),
+            )
+            .map(({ identity }) => identity.canonical)
+        : [],
     sapCalls: ctx.calls,
     fastPath: reusedIndexedComponent ? 'indexed-components' : 'none',
   };
@@ -1587,7 +1599,9 @@ async function checkoutFlow(
   dependencies: FlowCheckoutDependencies,
 ): Promise<FlowCheckoutResult> {
   const ctx = createCheckoutContext(input, dependencies);
-  const fast = await tryExactHeadFastPath(ctx);
+  const fast = input.verifyInventory
+    ? undefined
+    : await tryExactHeadFastPath(ctx);
   if (fast) return fast;
 
   let manifestContext: ManifestContext;
@@ -1678,13 +1692,16 @@ async function indexFlow(
     indexed.ownedOwners,
   );
   await applyRepositoryPlan(ctx.root, plan);
-  return buildCheckoutResult(
-    ctx,
-    manifestContext.manifest,
-    manifestContext.skipped,
-    plan,
-    indexed,
-  );
+  return {
+    ...buildCheckoutResult(
+      ctx,
+      manifestContext.manifest,
+      manifestContext.skipped,
+      plan,
+      indexed,
+    ),
+    indexedOnly: true,
+  };
 }
 
 export function createAdtFlowService(

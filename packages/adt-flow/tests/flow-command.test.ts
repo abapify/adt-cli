@@ -169,6 +169,37 @@ describe('flow CLI command', () => {
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
+  it('writes structured evidence in full mode and forces inventory verification', async () => {
+    await withTempRoot(async (root) => {
+      const checkout = makeCheckout({
+        inventory: [],
+        inventoryResolutions: [],
+        absentObjects: [],
+      });
+      const command = makeCommand(checkout);
+      await leaf(command).execute?.(
+        { transport: 'DEVK900001', report: '.adt/coverage.json' },
+        makeContext(root),
+      );
+      expect(checkout).toHaveBeenCalledWith(
+        expect.objectContaining({ verifyInventory: true, partial: false }),
+      );
+      const report = JSON.parse(
+        await readFile(join(root, '.adt/coverage.json'), 'utf8'),
+      );
+      expect(report).toMatchObject({
+        coverageVersion: 1,
+        mode: 'head',
+        inventory: [],
+        inventoryResolutions: [],
+        descriptors: [],
+        absentObjects: [],
+        indexedOnly: false,
+        skipped: [],
+      });
+    });
+  });
+
   it('forwards the explicit index-on-inexact opt-in to checkout', async () => {
     const checkout = makeCheckout();
     const command = createFlowCommand({

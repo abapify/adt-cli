@@ -27,6 +27,26 @@ adt flow checkout tr DEVK900001
 adt flow checkout tr DEVK900001,DEVK900002 --base
 ```
 
+Automation can request structured inventory/materialization evidence in either
+mode:
+
+```text
+adt flow checkout tr DEVK900001 --report .adt/checkout-coverage.json
+adt flow checkout tr DEVK900001 --base --report .adt/checkout-coverage.json
+```
+
+The report (`schemaVersion: 1`, `coverageVersion: 1`) records mode/scope, original
+CTS inventory, every inventory-to-repository resolution (including deduplicated
+leaves), object descriptor paths, exact added-object absence at base, skips and
+index-only status. Consumers can validate owned-file hashes and selected source
+components before publishing a snapshot. Requesting a report recomputes the
+inventory instead of using the exact-head transport-index shortcut. Existing
+partial reports keep their original format. The default CLI skip policy is
+unchanged; consumers must enforce their desired completeness policy.
+
+Class components with ADT subtypes `CLAS/OC`, `CLAS/OSU`, `CLAS/OM` resolve to
+their full `R3TR CLAS` owner and use ordinary class source/abapGit materialization.
+
 To persist only transport inventory and unresolved-boundary descriptors under
 `.adt`, without reading or materializing source files, use the explicit
 index-only command:

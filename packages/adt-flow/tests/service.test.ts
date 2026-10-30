@@ -191,6 +191,33 @@ const config = {
 };
 
 describe('transport checkout', () => {
+  it('recomputes report inventory instead of trusting an exact-head index', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('before'), version('after'));
+    current.inventoryResolutions = current.inventory.map((item) => ({
+      object: { pgmid: item.pgmid, type: item.type, name: item.name },
+      sourceTransport: item.sourceTransport,
+      repositoryObject: { pgmid: item.pgmid, type: item.type, name: item.name },
+    }));
+    const ports = dependencies(() => current);
+    const service = createAdtFlowService(ports);
+    await service.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+    ports.buildManifest.mockClear();
+    const verified = await service.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+      verifyInventory: true,
+    });
+    expect(ports.buildManifest).toHaveBeenCalledTimes(1);
+    expect(verified.fastPath).not.toBe('exact-head');
+    expect(verified.inventoryResolutions).toEqual(current.inventoryResolutions);
+  });
+
   it('materializes before then head so the workspace contains a real update', async () => {
     const workspace = await root();
     let current = manifest('modified', version('before'), version('after'));

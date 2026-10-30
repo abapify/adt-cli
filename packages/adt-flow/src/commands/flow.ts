@@ -200,6 +200,7 @@ async function writePartialReport(
   output: string,
   realRoot: string,
   result: Awaited<ReturnType<AdtFlowService['checkout']>>,
+  coverage = false,
 ): Promise<void> {
   const skipped = [...result.skipped].sort((a, b) => {
     return (
@@ -213,6 +214,18 @@ async function writePartialReport(
     {
       schemaVersion: 1,
       requestedTransports: result.requestedTransports,
+      ...(coverage
+        ? {
+            mode: result.mode,
+            scopeTransports: result.scopeTransports,
+            inventory: result.inventory,
+            inventoryResolutions: result.inventoryResolutions,
+            descriptors: result.descriptors,
+            absentObjects: result.absentObjects,
+            indexedOnly: result.indexedOnly === true,
+            coverageVersion: 1,
+          }
+        : {}),
       skipped,
     },
     null,
@@ -264,6 +277,11 @@ function checkoutTrCommand(
           'Write skipped-object JSON after a successful partial checkout',
       },
       {
+        flags: '--report <file>',
+        description:
+          'Write inventory and materialization evidence after a successful checkout',
+      },
+      {
         flags: '--index-on-inexact',
         description:
           'Persist source-free inventory when an exact source boundary is unavailable',
@@ -306,15 +324,23 @@ function checkoutTrCommand(
           '--partial-report requires the explicit --partial opt-in.',
         );
       }
+      const coverageReport = partialReportPath(
+        args['report'],
+        ctx.cwd,
+        realRoot,
+      );
       const result = await dependencies.createService(client, format).checkout({
         root: ctx.cwd,
         transports: transports(args['transport']),
         mode: args['base'] === true ? 'base' : 'head',
         partial: args['partial'] === true,
+        ...(coverageReport ? { verifyInventory: true } : {}),
         ...(args['indexOnInexact'] === true ? { indexOnInexact: true } : {}),
         config,
       });
       if (report) await writePartialReport(report, realRoot, result);
+      if (coverageReport)
+        await writePartialReport(coverageReport, realRoot, result, true);
       ctx.logger.info(
         `Checked out ${result.mode} for ${result.requestedTransports.join(', ')}: ` +
           `${result.changed.length} changed, ${result.moved.length} moved, ` +

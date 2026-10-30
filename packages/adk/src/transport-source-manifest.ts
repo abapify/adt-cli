@@ -118,10 +118,18 @@ export interface TransportObjectInventoryEntry {
   sourceTransport: string;
 }
 
+export interface TransportInventoryResolution {
+  object: TransportSourceManifestObject;
+  sourceTransport: string;
+  repositoryObject: TransportSourceManifestObject;
+}
+
 export interface TransportSourceManifest {
   requestedTransports: string[];
   scopeTransports: string[];
   inventory: TransportObjectInventoryEntry[];
+  /** All CTS leaves, including those deduplicated to one repository owner. */
+  inventoryResolutions?: TransportInventoryResolution[];
   entries: TransportSourceManifestEntry[];
 }
 
@@ -773,7 +781,10 @@ function resolveLimuReference(
   rawType: string,
 ): RepositoryObjectReference | undefined {
   if (pgmid !== 'LIMU') return undefined;
-  const ownerType = reference.wbtype?.trim().toUpperCase();
+  const wbtype = reference.wbtype?.trim().toUpperCase();
+  // CLAS/OC, CLAS/OSU and CLAS/OM describe CTS leaves, not separate
+  // repository objects. Every class component uses the complete CLAS model.
+  const ownerType = wbtype?.split('/')[0] === 'CLAS' ? 'CLAS' : wbtype;
   const ownerName = ownerType
     ? repositoryNameFromUri(reference.uri, ownerType)
     : undefined;
@@ -1180,18 +1191,17 @@ export async function buildTransportSourceManifest(
         compareText(left.name, right.name),
     );
   const seenRepositoryObjects = new Set<string>();
-  const objects = (
-    await mapOrdered(
-      resolved.objects.filter((reference) => !isNonSourceCtsObject(reference)),
-      normalizeConcurrency(options.concurrency),
-      async (original) => ({
-        original,
-        repository: await repositoryObjectReference(original, context),
-        sourceTransport:
-          resolved.sourceTransportMap.get(original.key) ?? requested[0] ?? '',
-      }),
-    )
-  )
+  const resolutions = await mapOrdered(
+    resolved.objects.filter((reference) => !isNonSourceCtsObject(reference)),
+    normalizeConcurrency(options.concurrency),
+    async (original) => ({
+      original,
+      repository: await repositoryObjectReference(original, context),
+      sourceTransport:
+        resolved.sourceTransportMap.get(original.key) ?? requested[0] ?? '',
+    }),
+  );
+  const objects = resolutions
     .filter(({ original, repository }) =>
       manifestSelectorMatches(original, repository, options.selector),
     )
@@ -1225,6 +1235,27 @@ export async function buildTransportSourceManifest(
     requestedTransports: requested,
     scopeTransports,
     inventory,
+    inventoryResolutions: resolutions
+      .map(({ original, repository, sourceTransport }) => ({
+        object: {
+          pgmid: original.pgmid,
+          type: original.type,
+          name: original.name,
+        },
+        sourceTransport,
+        repositoryObject: {
+          pgmid: repository.pgmid,
+          type: repository.functionGroupName ? 'FUGR' : repository.type,
+          name: repository.functionGroupName ?? repository.name,
+        },
+      }))
+      .sort(
+        (left, right) =>
+          compareText(left.sourceTransport, right.sourceTransport) ||
+          compareText(left.object.pgmid, right.object.pgmid) ||
+          compareText(left.object.type, right.object.type) ||
+          compareText(left.object.name, right.object.name),
+      ),
     entries: perObjectEntries.flat(),
   };
 }

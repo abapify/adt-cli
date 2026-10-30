@@ -217,6 +217,7 @@ export {
   type TransportSourceChangeKind,
   type TransportSourceDiagnostic,
   type TransportSourceManifest,
+  type TransportInventoryResolution,
   type TransportSourceManifestComponent,
   type TransportSourceManifestEntry,
   type TransportSourceManifestObject,
