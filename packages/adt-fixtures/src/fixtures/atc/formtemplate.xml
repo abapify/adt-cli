@@ -13,8 +13,10 @@
 
   The check variant form template is the ATC check catalog: each
   availableCheckCategory lists its checks, and each check's
-  implementingClass name is the implementing class; worklist findings carry a
-  GUID checkId that is resolved to this class via the documentation page.
+  implementingClass name is the implementing class; live worklist findings
+  carry a GUID checkId that is resolved to this class via the documentation
+  page (the bundled atc/worklist.xml fixture uses class-like checkIds for
+  direct-lookup tests).
 -->
 <chkvFormTemplate:formTemplate xmlns:adtcore="http://www.sap.com/adt/core" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:chkc="http://www.sap.com/wbobj/atc/chkc" xmlns:chko="http://www.sap.com/wbobj/atc/chko" xmlns:chkoParameter="http://www.sap.com/wbobj/atc/chkoParameter" xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate" xmlns:chkvcheck="http://www.sap.com/wbobj/atc/chkvCheck">
   <chkvFormTemplate:availableCheckCategories>

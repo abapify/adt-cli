@@ -118,7 +118,7 @@ import {
   enrichResultWithCategories,
 } from '@abapify/adt-atc';
 
-// Build the checkId -> category name index from a parsed form template
+// Build the implementing class -> category name index from a parsed form template
 const index = parseCheckCategoryIndex(formTemplateDocument);
 
 // Or fetch it through an ADT client (never throws)
