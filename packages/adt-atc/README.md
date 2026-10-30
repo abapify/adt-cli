@@ -99,10 +99,15 @@ Each finding can carry a `checkCategory` (e.g., `CI_PERFORMANCE`,
 `CI_SECURITY`): the name of the ATC check category its check is assigned
 to. The `atc` command resolves it automatically from the run's check
 variant form template (`GET /sap/bc/adt/atc/checkvariants/formtemplate`)
-by mapping the finding's `checkId` (the check's implementing class name)
-to the category that contains it. The enrichment is best-effort: when
-the form template is unavailable, or the check is outside its catalog,
-findings simply carry no category and the run still succeeds.
+by resolving each finding's documentation page to its implementing class
+(the worklist `checkId` is a GUID), then mapping that class to a category.
+The `enrichResultWithCategories` helper only does a direct `checkId` lookup;
+the command uses the documentation bridge for normal worklist findings.
+This is best-effort: unavailable templates, unreadable pages, or uncatalogued
+checks leave the category unset without failing the run. Categories are
+resolved from the variant's catalog as fetched after the run, so they
+reflect the variant configuration in effect at that time (including any
+edits made in the meantime).
 
 The enrichment helpers are exported for reuse:
 

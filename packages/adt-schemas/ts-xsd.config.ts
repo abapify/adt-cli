@@ -94,7 +94,7 @@ const targetSchemas = [
   'custom/acoverageResult',
   'custom/acoverageStatements',
   'custom/badi', // BAdI / Enhancement Implementation (ENHO) wrapper
-  'custom/chkvFormTemplate', // ATC check variant form template (check catalog: checkId -> category)
+  'custom/chkvFormTemplate', // ATC check variant form template (check catalog: implementing class -> category)
 ];
 
 export default defineConfig({

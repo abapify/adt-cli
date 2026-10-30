@@ -23,8 +23,9 @@ export const registry = {
     worklist: 'atc/worklist.xml',
     runsResponse: 'atc/runs-response.xml',
     // Check variant form template (the ATC check catalog): categories,
-    // checks, implementing classes (= worklist finding checkIds) and check
-    // parameters. Sanitized from a live S/4 system capture (see file header).
+    // checks, implementing classes (class names; not worklist checkIds, which
+    // are GUIDs) and check parameters. Sanitized from a live S/4 system capture
+    // (see file header).
     formtemplate: 'atc/formtemplate.xml',
   },
   aunit: {

@@ -6,10 +6,10 @@
 
   The form template is the check variant editor's catalog: every check
   category the variant can select, each with the checks it contains.
-  A check carries its category assignment and implementing class; the
-  implementing class name is the checkId used in ATC worklist findings,
-  so the form template is the source for checkId -> check category
-  enrichment.
+  A check carries its category assignment and implementing class. Worklist
+  findings carry a GUID checkId that is resolved to this class via the
+  documentation page, so the form template is the source for implementing
+  class -> check category enrichment.
 
   Example (live shape, sanitized):
   <chkvFormTemplate:formTemplate xmlns:chkvFormTemplate="http://www.sap.com/wbobj/atc/chkvFormTemplate">

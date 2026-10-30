@@ -448,7 +448,9 @@ export const atcCommand: CliCommandPlugin = {
     );
 
     // Enrich findings with check categories from the run's check variant
-    // form template (best-effort: never fails the run itself)
+    // form template (best-effort: never fails the run itself). The catalog is
+    // fetched after the run, so categories reflect the variant configuration
+    // in effect at that time.
     const categoryIndex = await fetchCheckCategoryIndex(
       client,
       checkVariant,
