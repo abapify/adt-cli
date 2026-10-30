@@ -1078,6 +1078,72 @@ describe('transport checkout', () => {
     expect(ports.loadObject).not.toHaveBeenCalled();
   });
 
+  it('limits metadata lookups while calculating indexed base absence', async () => {
+    const workspace = await root();
+    const current = manifest('added', undefined, version('first'));
+    current.entries.push(
+      {
+        object: {
+          pgmid: 'R3TR',
+          type: 'CLAS',
+          name: 'ZCL_EXTRA',
+          packageName: 'ZROOT_FEATURE',
+        },
+        component: { id: 'main' },
+        sourceTransport: 'DEVK900001',
+        changeKind: 'added',
+        exact: true,
+        head: version('second'),
+      },
+      {
+        object: {
+          pgmid: 'R3TR',
+          type: 'CLAS',
+          name: 'ZCL_INEXACT',
+          packageName: 'ZROOT_FEATURE',
+        },
+        component: { id: 'main' },
+        sourceTransport: 'DEVK900001',
+        changeKind: 'ambiguous',
+        exact: false,
+        diagnostic: {
+          code: 'SOURCE_HISTORY_SCOPE_VERSION_MISSING',
+          message: 'No exact version belongs to the scope.',
+        },
+      },
+    );
+    const ports = dependencies(() => current);
+    let active = 0;
+    let maximumActive = 0;
+    ports.loadObject.mockImplementation(async (identity) => {
+      active += 1;
+      maximumActive = Math.max(maximumActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      active -= 1;
+      return {
+        object: { name: identity.name },
+        packagePath: ['ZROOT', 'ZROOT_FEATURE'],
+        applicationComponent: 'ZAPP',
+      };
+    });
+
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      mode: 'base',
+      indexOnInexact: true,
+      config: {
+        ...config,
+        concurrency: { metadata: 1 },
+        include: { objectTypes: ['CLAS'], applicationComponents: ['ZAPP'] },
+      },
+    });
+
+    expect(result.indexedOnly).toBe(true);
+    expect(maximumActive).toBe(1);
+    expect(ports.loadObject).toHaveBeenCalledTimes(3);
+  });
+
   it('retains existing exact object descriptors in a refreshed inventory', async () => {
     const workspace = await root();
     const ports = dependencies(() =>

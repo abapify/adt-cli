@@ -1740,7 +1740,9 @@ async function isIndexedBaseObjectAbsent(
   }
 
   try {
-    const model = await ctx.dependencies.loadObject(identity);
+    const model = await manifestContext.metadataLimiter.run(() =>
+      ctx.dependencies.loadObject(identity),
+    );
     ctx.calls.metadata += model.metadataCalls ?? 1;
     return !isApplicationComponentExcluded(ctx.config, model);
   } catch {
