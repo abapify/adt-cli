@@ -12,7 +12,7 @@
   abapoo:modeled="false"
   abapsource:fixPointArithmetic="true"
   abapsource:activeUnicodeCheck="true"
-  adtcore:responsible="PPLENKOV"
+  adtcore:responsible="TESTUSER"
   adtcore:masterLanguage="EN"
   adtcore:masterSystem="TRL"
   adtcore:abapLanguageVersion="X"
@@ -21,8 +21,8 @@
   adtcore:changedAt="2025-11-09T17:22:33Z"
   adtcore:version="active"
   adtcore:createdAt="2025-11-09T00:00:00Z"
-  adtcore:changedBy="PPLENKOV"
-  adtcore:createdBy="PPLENKOV"
+  adtcore:changedBy="TESTUSER"
+  adtcore:createdBy="TESTUSER"
   adtcore:description="Sample class"
   adtcore:descriptionTextLimit="60"
   adtcore:language="EN"
@@ -101,8 +101,8 @@
     adtcore:changedAt="2025-11-09T17:21:38Z"
     adtcore:version="active"
     adtcore:createdAt="2025-11-09T00:00:00Z"
-    adtcore:changedBy="PPLENKOV"
-    adtcore:createdBy="PPLENKOV"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
   >
     <atom:link
       xmlns:atom="http://www.w3.org/2005/Atom"
@@ -139,8 +139,8 @@
     adtcore:changedAt="2025-11-09T17:21:38Z"
     adtcore:version="active"
     adtcore:createdAt="2025-11-09T00:00:00Z"
-    adtcore:changedBy="PPLENKOV"
-    adtcore:createdBy="PPLENKOV"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
   >
     <atom:link
       xmlns:atom="http://www.w3.org/2005/Atom"
@@ -177,8 +177,8 @@
     adtcore:changedAt="2025-11-09T17:21:38Z"
     adtcore:version="active"
     adtcore:createdAt="2025-11-09T00:00:00Z"
-    adtcore:changedBy="PPLENKOV"
-    adtcore:createdBy="PPLENKOV"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
   >
     <atom:link
       xmlns:atom="http://www.w3.org/2005/Atom"
@@ -215,8 +215,8 @@
     adtcore:changedAt="2025-11-09T17:21:38Z"
     adtcore:version="active"
     adtcore:createdAt="2025-11-09T00:00:00Z"
-    adtcore:changedBy="PPLENKOV"
-    adtcore:createdBy="PPLENKOV"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
   >
     <atom:link
       xmlns:atom="http://www.w3.org/2005/Atom"
@@ -253,8 +253,8 @@
     adtcore:changedAt="2025-11-09T17:22:33Z"
     adtcore:version="active"
     adtcore:createdAt="2025-11-09T00:00:00Z"
-    adtcore:changedBy="PPLENKOV"
-    adtcore:createdBy="PPLENKOV"
+    adtcore:changedBy="TESTUSER"
+    adtcore:createdBy="TESTUSER"
   >
     <atom:link
       xmlns:atom="http://www.w3.org/2005/Atom"

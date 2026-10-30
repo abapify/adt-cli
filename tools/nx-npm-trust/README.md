@@ -54,7 +54,9 @@ For each non-private publishable workspace:
 
 Exits non-zero when required metadata is missing or
 `publishConfig.access` is wrong. **First publish** (package not yet on
-npm) is NOT an error — it is reported as `NOT on npm — first publish`.
+npm) is NOT an error — it is reported as `NOT on npm — first publish` —
+unless `--require-existing` is passed, in which case a missing package is
+an error.
 
 ## What `--fix` does
 

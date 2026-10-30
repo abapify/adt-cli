@@ -43,10 +43,7 @@
                 kind="failedAssertion"
                 severity="critical"
               >
-                <title>
-                  Critical Assertion Error: 'This test is designed to always
-                  fail'
-                </title>
+                <title>Critical Assertion Error: 'This test is designed to always fail'</title>
                 <details>
                   <detail text="True expected" />
                   <detail

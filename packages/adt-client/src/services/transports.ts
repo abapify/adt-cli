@@ -8,7 +8,7 @@
  * Provides orchestrated transport operations for CLI and SDK consumers.
  */
 
-import type { AdtClientType } from '@abapify/adt-contracts';
+import type { AdtClientType, TransportResponse } from '@abapify/adt-contracts';
 
 /**
  * Transport data structure (simplified for service consumers)
@@ -77,28 +77,32 @@ export class TransportService {
    * Get a single transport by number
    */
   async get(trkorr: string): Promise<Transport> {
-    const response = await this.adt.cts.transportrequests.get(trkorr);
+    const response: TransportResponse =
+      await this.adt.cts.transportrequests.get(trkorr);
 
     // Single transport response may be shaped as
-    //   { root: { request: { ... } } }   (XML — ts-xsd keeps the root wrapper)
-    //   { request: { ... } }             (when the root is already unwrapped)
-    //   { ... }                          (flat)
-    const data = response as Record<string, unknown>;
-    const unwrapped =
-      data?.root && typeof data.root === 'object'
-        ? (data.root as Record<string, unknown>)
-        : data;
+    //   { root: { request: { ... }, task: [...] } }   (XML — ts-xsd keeps the root wrapper)
+    //   { request: { ... }, task: [...] }             (when the root is already unwrapped)
+    //   { ... }                                      (flat)
+    const root =
+      response && typeof response === 'object' && 'root' in response
+        ? (response as { root?: Record<string, unknown> }).root
+        : (response as Record<string, unknown>);
+    const data = (root ?? response) as Record<string, unknown>;
+
     // SAP returns the parent request and the requested task as siblings
     // (e.g. GET .../DEVK900002 yields root.request=DEVK900001 and
     // root.task=DEVK900002). Prefer the unit whose number matches the
     // requested trkorr so a task fetch does not map its parent request.
     const wanted = trkorr.trim().toUpperCase();
     const request =
-      this.findUnit(unwrapped?.task, wanted) ??
-      this.findUnit(unwrapped?.request, wanted) ??
-      (unwrapped?.request as Record<string, unknown> | undefined) ??
-      (unwrapped?.task as Record<string, unknown> | undefined) ??
-      unwrapped;
+      this.findUnit(data?.task, wanted) ??
+      this.findUnit(data?.request, wanted) ??
+      (data?.request as Record<string, unknown> | undefined) ??
+      (Array.isArray(data?.task)
+        ? (data.task as unknown[])[0]
+        : (data?.task as Record<string, unknown> | undefined)) ??
+      data;
     return this.mapToTransport(request);
   }
 
