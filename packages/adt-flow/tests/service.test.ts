@@ -988,6 +988,10 @@ describe('transport checkout', () => {
       transports: ['DEVK900001'],
       config,
     });
+    await rm(join(workspace, '.adt/objects/CLAS/zcl_sample.clas.adt.json'));
+    current.entries[0]!.object.pgmid = 'r3tr';
+    current.entries[0]!.object.type = 'clas';
+    current.entries[0]!.object.name = 'zcl_sample';
     ports.readSource.mockClear();
     ports.loadObject.mockClear();
     current.entries.push({

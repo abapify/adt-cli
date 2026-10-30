@@ -1732,9 +1732,7 @@ async function isIndexedBaseObjectAbsent(
     return false;
   }
 
-  const first = entries[0];
-  const object = first?.repositoryObject ?? first?.object;
-  const key = `${repositoryType(object?.pgmid ?? identity.pgmid, object?.type ?? identity.type)}/${object?.name ?? identity.name}`;
+  const key = `${repositoryType(identity.pgmid, identity.type).toUpperCase()}/${identity.name.toUpperCase()}`;
   if (manifestContext.srcFilesByObject.get(key)?.length) return false;
 
   if ((ctx.config.include?.applicationComponents?.length ?? 0) === 0) {
