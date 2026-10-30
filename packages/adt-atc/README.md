@@ -124,7 +124,9 @@ const index = parseCheckCategoryIndex(formTemplateDocument);
 // Or fetch it through an ADT client (never throws)
 const fetched = await fetchCheckCategoryIndex(client, 'DEFAULT');
 
-// Enrich a result in place
+// Enrich a result in place (direct lookup: only resolves findings whose
+// checkId is already the implementing class name; normal worklist findings
+// are enriched by the command via the documentation bridge)
 enrichResultWithCategories(result, index);
 ```
 
