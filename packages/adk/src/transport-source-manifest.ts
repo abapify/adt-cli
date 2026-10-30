@@ -782,8 +782,9 @@ function resolveLimuReference(
       pgmid: 'R3TR',
       type: ownerType,
       name: ownerName,
-      // A deleted leaf changes its owner. Only REPS preserves the legacy
-      // whole-program deletion behavior when no R3TR parent is present.
+      // Only non-REPS leaf deletions stop here — a deleted FUNC leaves
+      // its FUGR alive. A deleted REPS leaf still maps to the legacy
+      // whole-program deletion of its owner, resolved below.
       isDeleted: rawType === 'REPS' && reference.isDeleted,
     };
   }

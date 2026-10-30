@@ -319,6 +319,9 @@ async function exactHeadFastPath(
         !descriptor ||
         descriptor.configDigest !== configDigest ||
         descriptor.formatDigest !== formatDigest ||
+        // A descriptor without inventory cannot prove its objects'
+        // source transports still match — the fast path must skip it
+        // rather than silently trusting an unverifiable cache entry.
         descriptor.inventory === undefined ||
         stableJson(descriptor.requestedTransports) !== stableJson(transports),
     )

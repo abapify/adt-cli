@@ -542,15 +542,6 @@ export interface ResolvedTransportObjects {
   scopeTransportNumbers: string[];
 }
 
-function getFilteredObjects(
-  transport: AdkTransport,
-  selector: TransportObjectSelector,
-): AdkTransportObjectRef[] {
-  return Object.keys(selector).length > 0
-    ? transport.getObjectsBySelector(selector)
-    : transport.objects;
-}
-
 function addResolvedObject(
   object: AdkTransportObjectRef,
   sourceTransport: string,
@@ -645,6 +636,8 @@ export async function resolveTransportObjects(
     transportNumbers.map((number) => AdkTransport.get(number, ctx)),
   );
   const seenObjectKeys = new Set<string>();
+  // Selector dims are ANDed; emptiness is the same for every transport.
+  const hasSelector = Object.keys(selector).length > 0;
 
   for (const [index, transport] of transports.entries()) {
     const requestedNumber = transportNumbers[index] ?? '';
@@ -671,7 +664,10 @@ export async function resolveTransportObjects(
       transport,
       requestedNumber,
     );
-    for (const object of getFilteredObjects(transport, selector)) {
+    const filteredObjects = hasSelector
+      ? transport.getObjectsBySelector(selector)
+      : transport.objects;
+    for (const object of filteredObjects) {
       const sourceTransport =
         concreteSources.get(object.key) ?? transportNumber;
       addResolvedObject(
