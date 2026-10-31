@@ -18,6 +18,8 @@ export default [
             '@abapify/adt-aunit',
             '@abapify/adt-client',
             '@abapify/adt-fixtures',
+            // Loaded through the CLI command configuration at runtime.
+            '@abapify/adt-flow',
             '@abapify/adt-config',
             '@abapify/adt-mcp',
             '@abapify/adt-plugin-abapgit',

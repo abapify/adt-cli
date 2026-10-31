@@ -22,11 +22,18 @@ import { codegenCommand } from '@abapify/adt-codegen/commands/codegen';
 import { atcCommand } from '@abapify/adt-atc/commands/atc';
 import { exportCommand } from '@abapify/adt-export/commands/export';
 import { diffCommand } from '@abapify/adt-diff/commands/diff';
+import { flowCommand } from '@abapify/adt-flow/commands/flow';
 
 import { main } from '../lib/cli';
 
 main({
-  preloadedPlugins: [codegenCommand, atcCommand, exportCommand, diffCommand],
+  preloadedPlugins: [
+    codegenCommand,
+    atcCommand,
+    exportCommand,
+    diffCommand,
+    flowCommand,
+  ],
 }).catch((error) => {
   console.error('❌ CLI Error:', error.message);
   process.exit(1);

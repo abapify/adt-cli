@@ -173,6 +173,7 @@
         "@abapify/adt-contracts": "0.4.29",
         "@abapify/adt-diff": "0.4.29",
         "@abapify/adt-export": "0.4.29",
+        "@abapify/adt-flow": "0.4.30",
         "@abapify/adt-lint": "0.4.29",
         "@abapify/adt-locks": "0.4.29",
         "@abapify/adt-plugin": "0.4.29",
