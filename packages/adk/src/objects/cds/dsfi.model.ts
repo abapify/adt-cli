@@ -1,7 +1,10 @@
 import type { AdkContext } from '../../base/context';
 import { ScalarFunctionImplementation } from '../../base/kinds';
 import { registerObjectType } from '../../base/registry';
-import type { AdkCdsSourceContract } from './source-object';
+import {
+  loadCdsMetadataAndSource,
+  type AdkCdsSourceContract,
+} from './source-object';
 
 export class AdkScalarFunctionImplementation {
   static readonly kind = ScalarFunctionImplementation;
@@ -32,10 +35,10 @@ export class AdkScalarFunctionImplementation {
   }
 
   async load(): Promise<this> {
-    const [, definition] = await Promise.all([
-      this.contract.get(this.name),
-      this.contract.source.main.get(this.name),
-    ]);
+    const [, definition] = await loadCdsMetadataAndSource(
+      () => this.contract.get(this.name),
+      () => this.contract.source.main.get(this.name),
+    );
     this.definition = definition;
     return this;
   }

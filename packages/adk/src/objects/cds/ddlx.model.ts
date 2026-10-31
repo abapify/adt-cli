@@ -2,7 +2,10 @@ import type { AdkContext } from '../../base/context';
 import { toText } from '../../base/fetch-utils';
 import { DdlExtension } from '../../base/kinds';
 import { registerObjectType } from '../../base/registry';
-import type { AdkCdsSourceContract } from './source-object';
+import {
+  loadCdsMetadataAndSource,
+  type AdkCdsSourceContract,
+} from './source-object';
 
 export class AdkDdlExtension {
   static readonly kind = DdlExtension;
@@ -47,10 +50,10 @@ export class AdkDdlExtension {
     return toText(await this.contract.source.main.get(this.name));
   }
   async load(): Promise<this> {
-    const [metadata] = await Promise.all([
-      this.contract.get(this.name),
-      this.getSource(),
-    ]);
+    const [metadata] = await loadCdsMetadataAndSource(
+      () => this.contract.get(this.name),
+      () => this.getSource(),
+    );
     this.metadata = metadata as {
       ddlxSource?: {
         description?: string;

@@ -16,7 +16,7 @@ import {
   unlinkSync,
   readdirSync,
 } from 'node:fs';
-import { join, relative, basename } from 'node:path';
+import { join, relative, basename, resolve, sep, isAbsolute } from 'node:path';
 
 import {
   type FolderLogic,
@@ -30,8 +30,8 @@ import {
 
 const serializer = new AbapGitSerializer();
 
-// Store folder logic for afterImport hook (set during import, read in afterImport)
-let currentFolderLogic: FolderLogic = 'prefix';
+// Keep each output's folder logic until its afterImport hook runs.
+const folderLogicByTarget = new Map<string, FolderLogic>();
 
 /**
  * Recursively collect all file paths under a directory.
@@ -49,14 +49,23 @@ function walkDir(dir: string, results: string[] = []): string[] {
   return results;
 }
 
+function getObjectFilePrefix(filePath: string): string | undefined {
+  const fname = basename(filePath).toLowerCase();
+  const first = fname.indexOf('.');
+  if (first === -1) return undefined;
+  const second = fname.indexOf('.', first + 1);
+  if (second === -1) return undefined;
+  return fname.substring(0, second + 1);
+}
+
 /**
  * Lazy per-srcDir file index.
  *
  * Maps srcDir → (prefix → [absolute file paths]), where prefix is
- * `${name}.${type}.` in lower-case.  Built at most once per srcDir per
- * process, so the O(repo-size) directory walk is amortised across all
- * `format.delete()` calls in a single import run instead of repeated for
- * every deleted object.
+ * `${name}.${type}.` in lower-case. Reused between plugin writes so a
+ * deletion batch avoids repeating the O(repo-size) directory walk for
+ * every deleted object. Successful writes update a built index; failures
+ * invalidate it because serialization may have left partial files.
  */
 const srcDirIndexCache = new Map<string, Map<string, string[]>>();
 
@@ -66,13 +75,8 @@ function getOrBuildSrcIndex(srcDir: string): Map<string, string[]> {
 
   const index = new Map<string, string[]>();
   for (const filePath of walkDir(srcDir)) {
-    const fname = basename(filePath).toLowerCase();
-    // Extract the "<name>.<type>." prefix (first two dot-segments + trailing dot)
-    const first = fname.indexOf('.');
-    if (first === -1) continue;
-    const second = fname.indexOf('.', first + 1);
-    if (second === -1) continue;
-    const key = fname.substring(0, second + 1); // e.g. "zcl_foo.clas."
+    const key = getObjectFilePrefix(filePath);
+    if (!key) continue;
     const bucket = index.get(key);
     if (bucket) {
       bucket.push(filePath);
@@ -82,6 +86,53 @@ function getOrBuildSrcIndex(srcDir: string): Map<string, string[]> {
   }
   srcDirIndexCache.set(srcDir, index);
   return index;
+}
+
+function isWithinDirectory(dir: string, absolutePath: string): boolean {
+  const relativePath = relative(dir, absolutePath);
+  return (
+    relativePath.length > 0 &&
+    !isAbsolute(relativePath) &&
+    relativePath !== '..' &&
+    !relativePath.startsWith(`..${sep}`)
+  );
+}
+
+function addPathToSrcIndex(
+  index: Map<string, string[]>,
+  key: string,
+  absolutePath: string,
+): void {
+  const paths = index.get(key) ?? [];
+  if (!paths.includes(absolutePath)) paths.push(absolutePath);
+  index.set(key, paths);
+}
+
+function addFileToBuiltSrcIndex(
+  srcDir: string,
+  index: Map<string, string[]>,
+  filePath: string,
+): boolean {
+  const absolutePath = resolve(filePath);
+  if (!isWithinDirectory(srcDir, absolutePath)) return false;
+
+  const key = getObjectFilePrefix(absolutePath);
+  if (key) addPathToSrcIndex(index, key, absolutePath);
+  return true;
+}
+
+function addFilesToBuiltSrcIndex(srcDir: string, files: string[]): void {
+  const index = srcDirIndexCache.get(srcDir);
+  if (!index) return;
+
+  const hasOutOfSrcFile = files.some(
+    (filePath) => !addFileToBuiltSrcIndex(srcDir, index, filePath),
+  );
+  if (hasOutOfSrcFile) {
+    // A successful serializer should only write below src. If it returns an
+    // unexpected path, discard the cache so the next lookup rebuilds safely.
+    srcDirIndexCache.delete(srcDir);
+  }
 }
 
 /**
@@ -163,6 +214,7 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
   // Format service
   format: {
     async import(object, targetPath, context) {
+      let serializationCompleted = false;
       try {
         // Get the object's package - for DEVC objects, use name; for others, use package property
         // Note: object.type might be 'DEVC/K' not just 'DEVC'
@@ -183,7 +235,7 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
         const folderLogic = resolveFolderLogic(context, targetPath);
 
         // Store for afterImport hook
-        currentFolderLogic = folderLogic;
+        folderLogicByTarget.set(resolve(targetPath), folderLogic);
 
         // Calculate package directory based on folder logic
         const packageDir = calculatePackageDir(packagePath, folderLogic);
@@ -194,6 +246,8 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
           targetPath,
           packageDir,
         );
+        addFilesToBuiltSrcIndex(resolve(targetPath, 'src'), files);
+        serializationCompleted = true;
 
         return {
           success: true,
@@ -205,6 +259,11 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
           filesCreated: [],
           errors: [error instanceof Error ? error.message : String(error)],
         };
+      } finally {
+        if (!serializationCompleted) {
+          // Serialization can write some files before reporting an error.
+          srcDirIndexCache.delete(resolve(targetPath, 'src'));
+        }
       }
     },
 
@@ -237,7 +296,7 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
       _context: ImportContext,
     ): Promise<DeleteResult> {
       try {
-        const srcDir = join(targetPath, 'src');
+        const srcDir = resolve(targetPath, 'src');
         const matchedFiles = findObjectFiles(
           srcDir,
           objectRef.name,
@@ -266,6 +325,11 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
           }
         }
 
+        srcDirIndexCache.get(srcDir)?.set(
+          `${objectRef.name.toLowerCase()}.${objectRef.type.toLowerCase()}.`,
+          matchedFiles.filter((filePath) => existsSync(filePath)),
+        );
+
         return {
           success: errors.length === 0,
           filesRemoved,
@@ -284,12 +348,19 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
   // Lifecycle hooks
   hooks: {
     async afterImport(targetPath) {
-      // Ensure target directory exists before writing metadata
-      mkdirSync(targetPath, { recursive: true });
-      // Generate .abapgit.xml metadata file after import completes
-      const abapgitXmlPath = join(targetPath, '.abapgit.xml');
-      const abapgitXmlContent = generateAbapGitXml(currentFolderLogic);
-      writeFileSync(abapgitXmlPath, abapgitXmlContent, 'utf-8');
+      const target = resolve(targetPath);
+      const folderLogic =
+        folderLogicByTarget.get(target) ??
+        readFolderLogicFromExistingRepo(targetPath) ??
+        'prefix';
+      try {
+        mkdirSync(targetPath, { recursive: true });
+        const abapgitXmlPath = join(targetPath, '.abapgit.xml');
+        writeFileSync(abapgitXmlPath, generateAbapGitXml(folderLogic), 'utf-8');
+      } finally {
+        folderLogicByTarget.delete(target);
+        srcDirIndexCache.delete(resolve(targetPath, 'src'));
+      }
     },
   },
 });

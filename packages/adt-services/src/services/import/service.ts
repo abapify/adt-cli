@@ -7,6 +7,7 @@ import type {
   FormatOptionValue,
 } from '@abapify/adt-plugin';
 import {
+  AdkGenericObject,
   AdkPackage,
   AdkTransport,
   MergedTransportView,
@@ -40,6 +41,7 @@ type MissingObjectDelete = (
 interface MissingObjectCleanupResult {
   deleted: number;
   skipped: number;
+  failed: number;
   filesRemoved: string[];
 }
 
@@ -111,14 +113,18 @@ async function cleanupMissingObjectBatch({
   total,
   debug,
 }: MissingObjectCleanupContext): Promise<MissingObjectCleanupResult> {
-  // AdkTransportObjectRef.load() maps transient errors and absence to undefined.
-  // Undefined therefore cannot authorize deleting a complete class owner.
+  // AdkTransportObjectRef.load() maps confirmed HTTP 404 responses to undefined.
+  // Transient read errors propagate so ImportService records a failed acquisition.
   const deleteObjects = batch.classOwnerName
-    ? batch.objects.filter((object) => !isRepositoryClassOwner(object))
+    ? [{ pgmid: 'R3TR', type: 'CLAS', name: batch.classOwnerName }]
     : [fallbackObject];
+  const representedObjectCount = batch.classOwnerName
+    ? batch.objects.length
+    : 1;
   const result: MissingObjectCleanupResult = {
     deleted: 0,
-    skipped: batch.objects.length - deleteObjects.length,
+    skipped: 0,
+    failed: 0,
     filesRemoved: [],
   };
 
@@ -129,7 +135,7 @@ async function cleanupMissingObjectBatch({
       name: deleteObject.name,
     };
     const deleteReason = batch.classOwnerName
-      ? 'class owner could not be loaded; checking leaf files only'
+      ? 'class owner metadata confirmed not found in SAP'
       : 'not found in SAP';
     console.log(
       `  🗑️  [${firstProgress}/${total}] ${deleteRef.type} ${deleteRef.name}: ${deleteReason}`,
@@ -138,23 +144,28 @@ async function cleanupMissingObjectBatch({
     try {
       delResult = await deleteFn(deleteRef, outputPath, importContext);
     } catch (error: unknown) {
+      result.failed += representedObjectCount;
+      console.log(`  ❌ ${deleteRef.type} ${deleteRef.name}: cleanup failed`);
       if (debug) {
         console.log(
           `  ⚠️  ${deleteRef.type} ${deleteRef.name}: delete failed — ${error instanceof Error ? error.message : String(error)}`,
         );
       }
-    }
-
-    if (
-      !delResult?.success ||
-      (batch.classOwnerName && delResult.filesRemoved.length === 0)
-    ) {
-      result.skipped++;
       continue;
     }
 
-    result.deleted++;
-    result.filesRemoved.push(...delResult.filesRemoved);
+    result.filesRemoved.push(...(delResult?.filesRemoved ?? []));
+    if (!delResult?.success) {
+      result.failed += representedObjectCount;
+      console.log(`  ❌ ${deleteRef.type} ${deleteRef.name}: cleanup failed`);
+      continue;
+    }
+    if (batch.classOwnerName && delResult.filesRemoved.length === 0) {
+      result.skipped += representedObjectCount;
+      continue;
+    }
+
+    result.deleted += representedObjectCount;
   }
 
   return result;
@@ -215,7 +226,11 @@ export interface TransportImportOptions {
    *   - `'DEVK900001,DEVK900002,DEVK900003'` — multiple TRs (merged, deduplicated)
    */
   transportNumber: string;
-  /** Output directory for serialized files */
+  /**
+   * Output directory for serialized files. Concurrent imports must use distinct
+   * directories; this service does not coordinate writers to a shared directory.
+   * Use one comma-separated transportNumber call to combine transports.
+   */
   outputPath: string;
   /** Filter by object types (e.g., ['CLAS', 'INTF']) - if not specified, imports all */
   objectTypes?: string[];
@@ -237,9 +252,10 @@ export interface TransportImportOptions {
    */
   saveTrMetadata?: boolean;
   /**
-   * When true, objects that are in the TR list but cannot be fetched from SAP
-   * (i.e., `objRef.load()` returns null — the object no longer exists in the system)
-   * are treated as deletions: `format.delete()` is called to remove their local files.
+   * When true, confirmed HTTP 404/not-found objects (`objRef.load()` returns
+   * undefined) are eligible for local cleanup via `format.delete()`.
+   * Class-component metadata 404s remove the canonical CLAS files once per
+   * owner. Other read errors are recorded as failures and never trigger cleanup.
    *
    * This catches the "orphan sync" case where an object was removed in SAP without
    * an explicit `obj_func=D` entry in the transport.
@@ -521,6 +537,7 @@ export class ImportService {
               });
               results.deleted += cleanup.deleted;
               results.skipped += cleanup.skipped;
+              results.failed += cleanup.failed;
               filesRemoved.push(...cleanup.filesRemoved);
             } else {
               results.skipped += batchObjects.length;
@@ -532,6 +549,18 @@ export class ImportService {
                 );
               }
             }
+            return;
+          }
+
+          // An unloaded generic fallback proves neither acquisition nor absence.
+          // Count it as failed and never serialize its default-only fields.
+          if (adkObject instanceof AdkGenericObject && !adkObject.isLoaded) {
+            results.failed += batchObjects.length;
+            batchObjects.forEach((object) =>
+              console.log(
+                `  ❌ ${object.type} ${object.name}: ADK returned an unloaded generic object`,
+              ),
+            );
             return;
           }
 
