@@ -58,7 +58,7 @@ export function registerImportTransportTool(
         .boolean()
         .optional()
         .describe(
-          'Remove local files for objects in the TR that cannot be fetched from SAP (orphan sync, default: false)',
+          'Remove local files only for confirmed HTTP 404/not-found objects; other read errors fail without cleanup (default: false)',
         ),
     },
     async (args, extra) => {

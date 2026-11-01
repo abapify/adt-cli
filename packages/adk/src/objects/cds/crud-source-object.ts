@@ -1,7 +1,10 @@
 import { getGlobalContext } from '../../base/global-context';
 import type { AdkContext } from '../../base/context';
 import { toText } from '../../base/fetch-utils';
-import type { AdkCrudSourceContract } from './source-object';
+import {
+  loadCdsMetadataAndSource,
+  type AdkCrudSourceContract,
+} from './source-object';
 
 /**
  * Shared implementation for standalone CDS/RAP source objects that support
@@ -71,10 +74,10 @@ export abstract class AdkCrudSourceObject<TMetadata = Record<string, unknown>> {
   }
 
   async load(): Promise<this> {
-    const [metadata] = await Promise.all([
-      this.contract.get(this.name),
-      this.getSource(),
-    ]);
+    const [metadata] = await loadCdsMetadataAndSource(
+      () => this.contract.get(this.name),
+      () => this.getSource(),
+    );
     this.metadata = metadata as TMetadata;
     return this;
   }
