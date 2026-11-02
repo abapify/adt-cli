@@ -117,8 +117,6 @@ const NODE_BUILTINS = new Set([
   'zlib',
   'bun',
   'bun:test',
-  'node:test',
-  'test',
 ]);
 
 const SKIP_DIRS = new Set([
@@ -184,41 +182,42 @@ function* scanFiles(dir: string): Generator<string> {
   }
 }
 
+/** The literal module specifier of a node, when it carries one. */
+function moduleSpec(node: ts.Node): ts.StringLiteral | null {
+  if (
+    (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+    node.moduleSpecifier &&
+    ts.isStringLiteral(node.moduleSpecifier)
+  ) {
+    return node.moduleSpecifier;
+  }
+  if (
+    ts.isImportEqualsDeclaration(node) &&
+    ts.isExternalModuleReference(node.moduleReference) &&
+    ts.isStringLiteral(node.moduleReference.expression)
+  ) {
+    return node.moduleReference.expression;
+  }
+  if (
+    ts.isCallExpression(node) &&
+    node.arguments.length === 1 &&
+    ts.isStringLiteral(node.arguments[0]) &&
+    ((ts.isIdentifier(node.expression) && node.expression.text === 'require') ||
+      node.expression.kind === ts.SyntaxKind.ImportKeyword)
+  ) {
+    return node.arguments[0];
+  }
+  return null;
+}
+
 function* importSpecs(
   sf: ts.SourceFile,
 ): Generator<{ spec: string; pos: number }> {
   const stack: ts.Node[] = [sf];
   while (stack.length) {
     const node = stack.pop()!;
-    if (
-      (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
-      node.moduleSpecifier &&
-      ts.isStringLiteral(node.moduleSpecifier)
-    ) {
-      yield {
-        spec: node.moduleSpecifier.text,
-        pos: node.moduleSpecifier.getStart(sf),
-      };
-    } else if (
-      ts.isImportEqualsDeclaration(node) &&
-      ts.isExternalModuleReference(node.moduleReference) &&
-      ts.isStringLiteral(node.moduleReference.expression)
-    ) {
-      yield {
-        spec: node.moduleReference.expression.text,
-        pos: node.moduleReference.expression.getStart(sf),
-      };
-    } else if (
-      ts.isCallExpression(node) &&
-      node.arguments.length === 1 &&
-      ts.isStringLiteral(node.arguments[0]) &&
-      ((ts.isIdentifier(node.expression) &&
-        node.expression.text === 'require') ||
-        node.expression.kind === ts.SyntaxKind.ImportKeyword)
-    ) {
-      const arg = node.arguments[0] as ts.StringLiteral;
-      yield { spec: arg.text, pos: arg.getStart(sf) };
-    }
+    const lit = moduleSpec(node);
+    if (lit) yield { spec: lit.text, pos: lit.getStart(sf) };
     node.forEachChild((c) => stack.push(c));
   }
 }

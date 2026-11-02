@@ -14,5 +14,9 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     }
+  },
+  "dependencies": {
+    "@nx/devkit": "24.0.2",
+    "typescript": "^6.0.3"
   }
 }
