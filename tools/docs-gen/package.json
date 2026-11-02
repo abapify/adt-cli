@@ -1,0 +1,21 @@
+{
+  "name": "@abapify/docs-gen",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Generates the CLI and MCP reference pages of the website from code",
+  "dependencies": {
+    "@abapify/adt-atc": "workspace:*",
+    "@abapify/adt-aunit": "workspace:*",
+    "@abapify/adt-cli": "workspace:*",
+    "@abapify/adt-codegen": "workspace:*",
+    "@abapify/adt-diff": "workspace:*",
+    "@abapify/adt-export": "workspace:*",
+    "@abapify/adt-flow": "workspace:*",
+    "@abapify/adt-mcp": "workspace:*",
+    "commander": "^12.0.0",
+    "prettier": "^3.9.10",
+    "zod": "^4.6.7"
+  }
+}

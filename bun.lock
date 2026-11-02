@@ -560,6 +560,23 @@
         "tslib": "^2.3.0",
       },
     },
+    "tools/docs-gen": {
+      "name": "@abapify/docs-gen",
+      "version": "0.0.1",
+      "dependencies": {
+        "@abapify/adt-atc": "workspace:*",
+        "@abapify/adt-aunit": "workspace:*",
+        "@abapify/adt-cli": "workspace:*",
+        "@abapify/adt-codegen": "workspace:*",
+        "@abapify/adt-diff": "workspace:*",
+        "@abapify/adt-export": "workspace:*",
+        "@abapify/adt-flow": "workspace:*",
+        "@abapify/adt-mcp": "workspace:*",
+        "commander": "^12.0.0",
+        "prettier": "^3.9.10",
+        "zod": "^4.6.7",
+      },
+    },
     "tools/nx-deps-check": {
       "name": "@abapify/nx-deps-check",
       "version": "0.0.1",
@@ -699,6 +716,8 @@
     "@abapify/asjson-parser": ["@abapify/asjson-parser@workspace:packages/asjson-parser"],
 
     "@abapify/browser-auth": ["@abapify/browser-auth@workspace:packages/browser-auth"],
+
+    "@abapify/docs-gen": ["@abapify/docs-gen@workspace:tools/docs-gen"],
 
     "@abapify/logger": ["@abapify/logger@workspace:packages/logger"],
 
