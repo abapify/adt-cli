@@ -67,7 +67,7 @@ on top of a single **schema-driven typed-contract** stack:
 The monorepo also hosts `@abapify/adt-codegen`, `@abapify/adt-atc`,
 `@abapify/adt-aunit`, `@abapify/adt-diff`, `@abapify/adt-export`,
 `@abapify/adt-rfc`, `@abapify/adt-tui` and supporting tools (`speci`,
-`logger`, etc.). See the [SDK → Packages](../../packages/overview) section
+`logger`, etc.). See the [SDK → Packages](https://adt-cli.netlify.app/sdk/packages/overview) section
 for the full list.
 
 ## Layering principles
@@ -86,8 +86,8 @@ for the full list.
    `createMockAdtServer()` from `@abapify/adt-fixtures`. See the
    [mock-server page](./mock-server.md).
 5. **Real SAP is opt-in.** `packages/adt-cli/tests/real-e2e/` reaches a
-   real system only when a session file + env var are present. See
-   [real-e2e](./real-e2e.md).
+   real system only when a session file is present (writes additionally
+   need `ADT_REAL_E2E_WRITE=1`). See [real-e2e](./real-e2e.md).
 
 ## Security session protocol (CSRF handshake)
 
@@ -116,4 +116,4 @@ Deep dives:
 - [Real-SAP e2e](./real-e2e.md) — the `describeReal` harness.
 - [Coverage pipeline](./coverage.md) — ABAP Unit + JaCoCo + Sonar.
 - [Checkin batch lock](./checkin-batch-lock.md) — E08 multi-object save.
-- [CLI reference](https://adt-cli.netlify.app/cli/overview) · [MCP tools](https://adt-cli.netlify.app/mcp/overview) · [SDK packages](../../packages/overview)
+- [CLI reference](https://adt-cli.netlify.app/cli/overview) · [MCP tools](https://adt-cli.netlify.app/mcp/overview) · [SDK packages](https://adt-cli.netlify.app/sdk/packages/overview)

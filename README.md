@@ -56,8 +56,8 @@ flowchart TD
 
 The design rests on a few deliberate choices:
 
-1. **Contract-first, schema-driven.** Every XML endpoint has an XSD → typed schema → `speci` contract chain. Request and response types are inferred end-to-end; there is no hand-written XML parsing in application code. Fix a schema once and the CLI, MCP tools and SDK all pick it up.
-2. **One service layer, two front ends.** CLI commands and MCP tools call the same transport-agnostic operations in `adt-services`, so the two surfaces stay at parity instead of drifting apart.
+1. **Contract-first, schema-driven.** XSD-backed endpoints follow an XSD → typed schema → `speci` contract chain; a small number of endpoints still use focused XML parser adapters. Fix a schema once and every caller of that contract picks it up.
+2. **Shared service layer where applicable.** CLI commands and MCP tools reuse transport-agnostic operations in `adt-services` for shared workflows, while object-specific flows may use `adk` or typed client contracts directly.
 3. **Writes go through the ADK.** Lock → write → activate → unlock, ETag refresh and batch lock sessions live in one place (`adk` + `adt-locks`), so callers cannot get the SAP protocol subtly wrong.
 4. **Plugins instead of a monolith.** Serialization formats (abapGit, gCTS) and command groups (ATC, AUnit, export, diff, gCTS) are plugins behind small interfaces in `adt-plugin`; core packages never import a concrete plugin.
 5. **Credentials stay at the edge.** Authentication is pluggable (`adt-auth` + browser adapters). For shared and agent deployments, `adt-server` holds destinations and credentials and exposes only scoped MCP / REST access.
@@ -69,11 +69,11 @@ The deep dives live in [`docs/architecture/`](./docs/architecture/overview.md).
 
 ```bash
 npm i -g @abapify/adt-cli
-adt auth login                     # interactive: basic, service key, or browser SSO
+adt auth login                     # interactive basic auth (pass --service-key <path> for SSO)
 adt search "ZCL_*"                 # find objects
 adt source get ZCL_MY_CLASS        # read source to stdout
 adt checkout package ZMY_PKG ./src # abapGit-compatible files on disk
-adt checkin ./src                  # push local changes back to SAP
+adt checkin ./src -p ZMY_PKG -t DEVK900001  # push local changes back to SAP
 ```
 
 Hooking an AI assistant up is one entry in its MCP config (`npx @abapify/adt-mcp`). Everything else — commands, MCP tools, SDK usage, CI recipes — is in the **[user documentation](https://adt-cli.netlify.app)**.
@@ -93,7 +93,7 @@ All packages live in [`packages/`](./packages) and are published to npm under [`
 | **ABAP language tooling**   | [`aclass`](./packages/aclass) · [`acds`](./packages/acds) · [`abap-ast`](./packages/abap-ast) · [`asjson-parser`](./packages/asjson-parser) · [`openai-codegen`](./packages/openai-codegen)                                                                                                             |
 | **Shared & test**           | [`logger`](./packages/logger) · [`adt-fixtures`](./packages/adt-fixtures) _(private)_                                                                                                                                                                                                                   |
 
-Every package has its own README (what you see on npm) and a reference page on the [docs site](https://adt-cli.netlify.app/sdk/packages/overview).
+Package READMEs and reference pages are available individually in the package directories and on the [docs site](https://adt-cli.netlify.app/sdk/packages/overview).
 
 ## Status
 

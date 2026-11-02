@@ -98,17 +98,17 @@ endpoints where the CLI / MCP surface ships but the tenant does not
 implement the call. The contracts and synthetic fixtures remain
 correct; we simply could not promote them to real captures from TRL.
 
-| Area | Endpoint | Result on TRL | Action |
-| ------------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------- | -------------- | ------------------------------------------------------ |
-| STRUST cert management (E04) | `/sap/bc/adt/system/security/pses` | **404 Not Found** | Synthetic fixtures only; needs on-prem. |
-| gCTS plugin (E07) | `/sap/bc/cts_abapvcs/repository`, `/…/config` | **403 Forbidden (UC gate)** | gCTS disabled on BTP Trial; on-prem/S4HC needed. |
-| BAdI / Enhancements (E03) | `/sap/bc/adt/enhancements/*` | **403 "No authorization"** | Synthetic `enhancements/enhoxhh/single.xml` — awaits on-prem capture. |
-| Workbench navigation: callers / callees (E15) | `/informationsystem/callers                         | callees`, `/abapsource/callers                | callees` | **404** on TRL | Surface retained for on-prem; synthetic fixtures only. |
-| Workbench navigation: "go to definition" (E15) | `/sap/bc/adt/navigation/target` (POST) | **400 "I::000"** | Body shape undocumented; stub only. |
-| Where-used (E15) | `/informationsystem/usageReferences/{scope,search}` | **PASS** (187 hits for `CL_ABAP_UNIT_ASSERT`) | Real fixtures captured, legacy `/usages` MCP tool retired. |
-| Fiori Launchpad (E14) | `/sap/bc/adt/flp/*` | **PASS** | Real fixtures in the registry. |
-| RFC over SOAP (E13) | `/sap/bc/soap/rfc` | **PASS** | Real round-trip tested. |
-| Core: discovery, info, search, fetch, ls, packages, CTS, activation, aUnit, ATC | various | **PASS** | Stable since the initial v2 migration. |
+| Area                                                                            | Endpoint                                                                  | Result on TRL                                 | Action                                                                |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------- |
+| STRUST cert management (E04)                                                    | `/sap/bc/adt/system/security/pses`                                        | **404 Not Found**                             | Synthetic fixtures only; needs on-prem.                               |
+| gCTS plugin (E07)                                                               | `/sap/bc/cts_abapvcs/repository`, `/…/config`                             | **403 Forbidden (UC gate)**                   | gCTS disabled on BTP Trial; on-prem/S4HC needed.                      |
+| BAdI / Enhancements (E03)                                                       | `/sap/bc/adt/enhancements/*`                                              | **403 "No authorization"**                    | Synthetic `enhancements/enhoxhh/single.xml` — awaits on-prem capture. |
+| Workbench navigation: callers / callees (E15)                                   | `/informationsystem/callers \| callees`, `/abapsource/callers \| callees` | **404** on TRL                                | Surface retained for on-prem; synthetic fixtures only.                |
+| Workbench navigation: "go to definition" (E15)                                  | `/sap/bc/adt/navigation/target` (POST)                                    | **400 "I::000"**                              | Body shape undocumented; stub only.                                   |
+| Where-used (E15)                                                                | `/informationsystem/usageReferences/{scope,search}`                       | **PASS** (187 hits for `CL_ABAP_UNIT_ASSERT`) | Real fixtures captured, legacy `/usages` MCP tool retired.            |
+| Fiori Launchpad (E14)                                                           | `/sap/bc/adt/flp/*`                                                       | **PASS**                                      | Real fixtures in the registry.                                        |
+| RFC over SOAP (E13)                                                             | `/sap/bc/soap/rfc`                                                        | **PASS**                                      | Real round-trip tested.                                               |
+| Core: discovery, info, search, fetch, ls, packages, CTS, activation, aUnit, ATC | various                                                                   | **PASS**                                      | Stable since the initial v2 migration.                                |
 
 These results are mirrored per-epic inside the repository's
 `docs/roadmap/epics/*.md` files (under "Real-SAP verification" /

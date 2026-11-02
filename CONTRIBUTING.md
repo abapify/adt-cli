@@ -15,13 +15,11 @@ bun install
 Every task runs through [Nx](https://nx.dev):
 
 ```bash
-bunx nx build                         # build every package
-bunx nx test                          # run every test suite
-bunx nx typecheck                     # type-check every package
-bunx nx lint                          # lint (with auto-fix)
-bunx nx format:write                  # Prettier — run before every commit
-bunx nx run adt-cli:test              # a single project
-bunx nx affected -t build test typecheck lint   # what CI runs on a PR
+bunx nx run-many -t build test typecheck lint   # every package
+bunx nx run-many -t lint -- --fix                 # lint with auto-fix
+bunx nx format:write                            # Prettier — run before every commit
+bunx nx run adt-cli:test                        # a single project
+bunx nx affected -t lint test build e2e-ci      # affected tasks run by CI; CI also checks format and dependencies
 ```
 
 Run the CLI you just built with `node packages/adt-cli/dist/bin/adt.mjs …`.
@@ -55,19 +53,19 @@ Coding agents: [`AGENTS.md`](./AGENTS.md) and [`.agents/repo-guide.md`](./.agent
 
 ## Testing
 
-- Unit and integration tests run against an in-process mock ADT server (`createMockAdtServer()` from `adt-fixtures`) — no SAP system needed. See [`docs/architecture/mock-server.md`](./docs/architecture/mock-server.md).
-- A real-system suite is opt-in and only runs when a session file and environment variable are present. See [`docs/architecture/real-e2e.md`](./docs/architecture/real-e2e.md).
+- Unit and integration tests run against an in-process mock ADT server (`createMockAdtServer()` from `@abapify/adt-fixtures`) — no SAP system needed. See [`docs/architecture/mock-server.md`](./docs/architecture/mock-server.md).
+- A real-system suite is skipped unless a session file is present; write tests additionally require `ADT_REAL_E2E_WRITE=1`. See [`docs/architecture/real-e2e.md`](./docs/architecture/real-e2e.md).
 
 ## Pull requests
 
 1. Branch from `main` (`feat/…`, `fix/…`, `docs/…`).
 2. Make the change, with tests and docs.
-3. Run `bunx nx affected -t build test typecheck lint` and `bunx nx format:check`.
+3. Run `bunx nx affected -t lint test build e2e-ci` and `bunx nx format:check`.
 4. Open a pull request against `main`. CI must be green before merge.
 
 ## Releases
 
-All packages are versioned and released together. Maintainers trigger the **Release** workflow on GitHub Actions; it computes the next version from conventional commits, tags, and dispatches `publish.yml`, which publishes every public package to npm through **OIDC trusted publishing** — no `NPM_TOKEN` exists anywhere. See [`tools/nx-npm-trust`](./tools/nx-npm-trust/README.md) for how trusted publishers are registered.
+All packages are versioned and released together. Maintainers trigger the **Release** workflow on GitHub Actions; it computes the next version from conventional commits, tags, and dispatches `publish.yml`, which by default publishes only affected public packages to npm through **OIDC trusted publishing** — no `NPM_TOKEN` exists anywhere. Run `publish.yml` with `affected_only=false` to publish every public package. See [`tools/nx-npm-trust`](./tools/nx-npm-trust/README.md) for how trusted publishers are registered.
 
 ## Security
 

@@ -158,7 +158,7 @@ The end-to-end "upload source" flow for an ABAP class:
    return type — this fails at `tsc` time if inference breaks.
 8. **Fixture + mock route.** Drop a sanitised real response into
    `packages/adt-fixtures/src/fixtures/<path>/` and add a route in
-   [`mock-server/routes.ts`](./mock-server.md).
+   [`mock-server/routes.ts`](../../packages/adt-fixtures/src/mock-server/routes.ts).
 9. **Consumer.** Expose via ADK / CLI command / MCP tool as appropriate.
 10. **Verify.**
     ```bash

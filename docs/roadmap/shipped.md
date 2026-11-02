@@ -34,12 +34,12 @@ Small, parallelisable epics closing legacy gaps vs. `sapcli`.
 
 ## Wave 3 — ABAP CDS & RAP
 
-| Epic | Title                | Outcome                                                                                       |
-| ---- | -------------------- | --------------------------------------------------------------------------------------------- |
-| E09  | Extend `acds` parser | Phase-1 grammar for TABL / structure / DRTY / SRVD / DDLX. [SDK → acds](../../packages/acds). |
-| E10  | RAP BDEF             | `adt rap bdef …` + `create_bdef` / `get_bdef` / `delete_bdef`.                                |
-| E11  | RAP SRVD             | `adt rap srvd …` + `create_srvd` / `get_srvd` / `delete_srvd`.                                |
-| E12  | RAP SRVB             | `adt rap srvb …` + `create_srvb` / `get_srvb` / `delete_srvb` / `publish_service_binding`.    |
+| Epic | Title                | Outcome                                                                                                                 |
+| ---- | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| E09  | Extend `acds` parser | Phase-1 grammar for TABL / structure / DRTY / SRVD / DDLX. [SDK → acds](https://adt-cli.netlify.app/sdk/packages/acds). |
+| E10  | RAP BDEF             | `adt rap bdef …` + `create_bdef` / `get_bdef` / `delete_bdef`.                                                          |
+| E11  | RAP SRVD             | `adt rap srvd …` + `create_srvd` / `get_srvd` / `delete_srvd`.                                                          |
+| E12  | RAP SRVB             | `adt rap srvb …` + `create_srvb` / `get_srvb` / `delete_srvb` / `publish_service_binding`.                              |
 
 ## QC waves
 
