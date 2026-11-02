@@ -6,6 +6,7 @@ import { AdkCdsAspect } from '../src/objects/cds/dras.model';
 import { AdkCdsType } from '../src/objects/cds/drty.model';
 import { AdkScalarFunctionDefinition } from '../src/objects/cds/dsfd.model';
 import { AdkScalarFunctionImplementation } from '../src/objects/cds/dsfi.model';
+import { AdkDdlSource } from '../src/objects/cds/ddl.model';
 import { AdkEntityBuffer } from '../src/objects/cds/dteb.model';
 import { AdkDdlExtension } from '../src/objects/cds/ddlx.model';
 import { AdkDynamicCache } from '../src/objects/cds/dtdc.model';
@@ -25,6 +26,7 @@ function sourceContract(
 }
 
 function createCtx() {
+  const ddl = { sources: sourceContract() };
   const ddlx = { sources: sourceContract() };
   const dsfd = { sources: sourceContract() };
   const dteb = { sources: sourceContract() };
@@ -37,11 +39,11 @@ function createCtx() {
   const readTextBounded = vi.fn().mockResolvedValue('define type Z_AFF_TYPE');
   const ctx = {
     client: {
-      adt: { ddic: { ddlx, dsfd, dsfi, dteb } },
+      adt: { ddic: { ddl, ddlx, dsfd, dsfi, dteb } },
       readTextBounded,
     },
   } as unknown as AdkContext;
-  return { ctx, ddlx, dsfd, dsfi, dteb, readTextBounded };
+  return { ctx, ddl, ddlx, dsfd, dsfi, dteb, readTextBounded };
 }
 
 describe('CDS/RAP source object loaders', () => {
@@ -96,6 +98,60 @@ describe('CDS/RAP source object loaders', () => {
     });
     expect(setup.dsfi.get).toHaveBeenCalledWith('Z_AFF_DSFI');
     expect(setup.dsfi.source.main.get).toHaveBeenCalledWith('Z_AFF_DSFI');
+  });
+
+  it.each(['DDLS', 'DDLX', 'DSFD', 'DTEB', 'DSFI'] as const)(
+    'keeps %s source/main 404 distinguishable from metadata 404',
+    async (objectType) => {
+      const setup = createCtx();
+      const sourceError = Object.assign(new Error('source endpoint missing'), {
+        status: 404,
+      });
+      const contracts = {
+        DDLS: setup.ddl.sources,
+        DDLX: setup.ddlx.sources,
+        DSFD: setup.dsfd.sources,
+        DTEB: setup.dteb.sources,
+        DSFI: setup.dsfi,
+      };
+      const objects = {
+        DDLS: new AdkDdlSource(setup.ctx, 'Z_AFF_OBJECT'),
+        DDLX: new AdkDdlExtension(setup.ctx, 'Z_AFF_OBJECT'),
+        DSFD: new AdkScalarFunctionDefinition(setup.ctx, 'Z_AFF_OBJECT'),
+        DTEB: new AdkEntityBuffer(setup.ctx, 'Z_AFF_OBJECT'),
+        DSFI: new AdkScalarFunctionImplementation(setup.ctx, 'Z_AFF_OBJECT'),
+      };
+      const contract = contracts[objectType];
+      contract.source.main.get.mockRejectedValue(sourceError);
+
+      const object = objects[objectType];
+      const readError = await object.load().then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+
+      expect(readError).toMatchObject({
+        message: 'CDS source/main read failed: source endpoint missing',
+        phase: 'source',
+        cause: sourceError,
+      });
+      expect(readError).not.toHaveProperty('status');
+      expect(contract.get).toHaveBeenCalledTimes(1);
+      expect(contract.source.main.get).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('includes a string source-read reason in the failure message', async () => {
+    const setup = createCtx();
+    const reason = 'source endpoint unavailable';
+    setup.ddl.sources.source.main.get.mockRejectedValue(reason);
+    const object = new AdkDdlSource(setup.ctx, 'Z_AFF_OBJECT');
+
+    await expect(object.load()).rejects.toMatchObject({
+      message: 'CDS source/main read failed: source endpoint unavailable',
+      phase: 'source',
+      cause: reason,
+    });
   });
 
   it.each([

@@ -1,3 +1,14 @@
+## 0.4.31 (2026-11-01)
+
+### 🩹 Fixes
+
+- **import:** acquire CTS class owners and preserve failed objects ([#279](https://github.com/abapify/adt-cli/pull/279))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.30 (2026-10-30)
 
 ### 🩹 Fixes

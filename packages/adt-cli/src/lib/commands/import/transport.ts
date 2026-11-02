@@ -80,7 +80,7 @@ export const importTransportCommand = new Command('transport')
   )
   .option(
     '--remove-missing-objects',
-    'Remove local files for objects that are in the TR but cannot be fetched from SAP (orphan sync)',
+    'Remove local files only for confirmed HTTP 404/not-found objects; other read errors fail without cleanup (orphan sync)',
     false,
   )
   .option('--debug', 'Enable debug output', false)

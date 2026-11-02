@@ -30,6 +30,38 @@ export interface AdkCrudSourceContract extends AdkCdsSourceContract {
   delete(name: string, options: Record<string, unknown>): Promise<unknown>;
 }
 
+/** A failed subordinate source read, distinct from missing object metadata. */
+export class AdkCdsSourceReadError extends Error {
+  override readonly name = 'AdkCdsSourceReadError';
+  readonly phase = 'source' as const;
+
+  constructor(cause: unknown) {
+    super(
+      `CDS source/main read failed: ${cause instanceof Error ? cause.message : String(cause)}`,
+      { cause },
+    );
+  }
+}
+
+/** Load both requests together while keeping metadata errors authoritative. */
+export async function loadCdsMetadataAndSource<TMetadata, TSource>(
+  loadMetadata: () => Promise<TMetadata>,
+  loadSource: () => Promise<TSource>,
+): Promise<[TMetadata, TSource]> {
+  const metadataRequest = loadMetadata();
+  const sourceResult = Promise.resolve()
+    .then(() => loadSource())
+    .then(
+      (value) => ({ value }),
+      (cause: unknown) => ({ error: new AdkCdsSourceReadError(cause) }),
+    );
+
+  const metadata = await metadataRequest;
+  const source = await sourceResult;
+  if ('error' in source) throw source.error;
+  return [metadata, source.value];
+}
+
 /** Minimal shared implementation for CDS source objects used by import. */
 export abstract class AdkCdsSourceObject {
   readonly name: string;
@@ -80,10 +112,10 @@ export abstract class AdkCdsSourceObject {
   }
 
   async load(): Promise<this> {
-    const [metadata] = await Promise.all([
-      this.contract.get(this.name),
-      this.getSource(),
-    ]);
+    const [metadata] = await loadCdsMetadataAndSource(
+      () => this.contract.get(this.name),
+      () => this.getSource(),
+    );
     this.metadata = metadata as {
       blueSource?: {
         description?: string;

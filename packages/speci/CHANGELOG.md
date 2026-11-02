@@ -1,3 +1,7 @@
+## 0.4.31 (2026-11-01)
+
+This was a version bump only for speci to align it with other projects, there were no code changes.
+
 ## 0.4.30 (2026-10-30)
 
 This was a version bump only for speci to align it with other projects, there were no code changes.
