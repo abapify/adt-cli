@@ -32,7 +32,6 @@ import {
   scanFiles,
   toPackageName,
 } from './imports.js';
-import ts from 'typescript';
 
 const projectRoot = process.cwd();
 

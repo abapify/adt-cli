@@ -1,7 +1,7 @@
 /** Import specifiers collected from a project's sources — AST walker. */
 
-import { join, extname } from 'node:path';
-import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { readdirSync } from 'node:fs';
 import ts from 'typescript';
 
 export const NODE_BUILTINS = new Set([
