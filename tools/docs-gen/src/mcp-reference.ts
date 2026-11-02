@@ -54,22 +54,26 @@ function isRawShape(value: unknown): boolean {
   );
 }
 
+/** Splits the `McpServer.tool(name, [description], [shape], [annotations], cb)` overloads. */
+function parseToolArgs(name: string, rest: unknown[]): ToolInfo {
+  const args = rest.slice(0, -1);
+  const info: ToolInfo = { name };
+  if (typeof args[0] === 'string') info.description = args.shift() as string;
+  if (isRawShape(args[0])) info.inputSchema = args.shift();
+  if (typeof args[0] === 'object' && args[0] !== null) {
+    info.annotations = args.shift() as Record<string, unknown>;
+  }
+  return info;
+}
+
 /** Registers every tool against a recording stand-in for `McpServer`. */
 function collectTools(): ToolInfo[] {
   const tools: ToolInfo[] = [];
   const recorder = {
-    tool(name: string, ...rest: unknown[]) {
-      const args = rest.slice(0, -1);
-      const info: ToolInfo = { name };
-      if (typeof args[0] === 'string')
-        info.description = args.shift() as string;
-      if (isRawShape(args[0])) info.inputSchema = args.shift();
-      if (typeof args[0] === 'object' && args[0] !== null) {
-        info.annotations = args.shift() as Record<string, unknown>;
-      }
-      tools.push(info);
+    tool: (name: string, ...rest: unknown[]) => {
+      tools.push(parseToolArgs(name, rest));
     },
-    registerTool(name: string, config: Omit<ToolInfo, 'name'>) {
+    registerTool: (name: string, config: Omit<ToolInfo, 'name'>) => {
       tools.push({ name, ...config });
     },
   };
@@ -95,44 +99,56 @@ function toJsonSchema(input: unknown): JsonSchema {
   }) as JsonSchema;
 }
 
+function arrayLabel(s: JsonSchema): string {
+  const item = s.items ? typeLabel(s.items) : 'unknown';
+  return item.includes(' | ') ? `(${item})[]` : `${item}[]`;
+}
+
 function typeLabel(s: JsonSchema): string {
   if (s.enum) return s.enum.map((v) => JSON.stringify(v)).join(' | ');
   if (s.const !== undefined) return JSON.stringify(s.const);
   const union = s.anyOf ?? s.oneOf;
   if (union) return union.map(typeLabel).join(' | ');
-  if (s.type === 'array') {
-    const item = s.items ? typeLabel(s.items) : 'unknown';
-    return item.includes(' | ') ? `(${item})[]` : `${item}[]`;
+  if (s.type === 'array') return arrayLabel(s);
+  return Array.isArray(s.type) ? s.type.join(' | ') : (s.type ?? 'unknown');
+}
+
+function parameterRow(
+  name: string,
+  prop: JsonSchema,
+  required: boolean,
+): string[] {
+  const notes = [prop.description];
+  if (prop.default !== undefined) {
+    notes.push(`Default: \`${JSON.stringify(prop.default)}\`.`);
   }
-  if (Array.isArray(s.type)) return s.type.join(' | ');
-  return s.type ?? 'unknown';
+  return [
+    code(name),
+    code(typeLabel(prop)),
+    required ? 'yes' : 'no',
+    escapeCell(notes.filter(Boolean).join(' ')),
+  ];
+}
+
+/** Rows for nested object fields (`a.b`) and array item fields (`a[].b`). */
+function nestedRows(prop: JsonSchema, name: string, depth: number): string[][] {
+  if (depth >= 2) return [];
+  const own = prop.properties ? parameterRows(prop, `${name}.`, depth + 1) : [];
+  const items = prop.items?.properties
+    ? parameterRows(prop.items, `${name}[].`, depth + 1)
+    : [];
+  return [...own, ...items];
 }
 
 function parameterRows(schema: JsonSchema, prefix = '', depth = 0): string[][] {
-  const rows: string[][] = [];
   const required = new Set(schema.required ?? []);
-  for (const [key, prop] of Object.entries(schema.properties ?? {})) {
+  return Object.entries(schema.properties ?? {}).flatMap(([key, prop]) => {
     const name = `${prefix}${key}`;
-    const notes = [
-      prop.description,
-      prop.default !== undefined &&
-        `Default: \`${JSON.stringify(prop.default)}\`.`,
-    ].filter(Boolean);
-    rows.push([
-      code(name),
-      code(typeLabel(prop)),
-      required.has(key) ? 'yes' : 'no',
-      escapeCell(notes.join(' ')),
-    ]);
-    if (depth < 2) {
-      if (prop.properties)
-        rows.push(...parameterRows(prop, `${name}.`, depth + 1));
-      if (prop.items?.properties) {
-        rows.push(...parameterRows(prop.items, `${name}[].`, depth + 1));
-      }
-    }
-  }
-  return rows;
+    return [
+      parameterRow(name, prop, required.has(key)),
+      ...nestedRows(prop, name, depth),
+    ];
+  });
 }
 
 function listSources(dir: string): string[] {
@@ -157,22 +173,48 @@ function findSource(
   return (preferred ?? matches[0])?.[0];
 }
 
+const DEFAULT_TAIL = [
+  '## Output',
+  'The tool returns a single text content item whose body is JSON (`content[0].text`). On error, the response has `isError: true` and a human-readable message.',
+  '## See also',
+  '- [MCP overview](../overview.md)',
+].join('\n\n');
+
+const INPUT_SCHEMA_HEADING = /^## Input schema\s*$/;
+
 /** Hand-written sections (everything after "Input schema") are preserved. */
 function handwrittenTail(existing: string | undefined): string {
-  if (existing === undefined) {
-    return [
-      '## Output',
-      'The tool returns a single text content item whose body is JSON (`content[0].text`). On error, the response has `isError: true` and a human-readable message.',
-      '## See also',
-      '- [MCP overview](../overview.md)',
-    ].join('\n\n');
-  }
+  if (existing === undefined) return DEFAULT_TAIL;
   const lines = existing.split('\n');
-  const schemaAt = lines.findIndex((l) => /^## Input schema\s*$/.test(l));
+  const schemaAt = lines.findIndex((l) => INPUT_SCHEMA_HEADING.test(l));
   const tailAt = lines.findIndex(
-    (l, i) => i > schemaAt && /^## /.test(l) && !/^## Input schema\s*$/.test(l),
+    (l, i) => i > schemaAt && /^## /.test(l) && !INPUT_SCHEMA_HEADING.test(l),
   );
   return tailAt === -1 ? '' : lines.slice(tailAt).join('\n').trim();
+}
+
+function sourceLine(rootDir: string, source: string | undefined): string {
+  if (!source || !existsSync(source)) return '';
+  const rel = relative(rootDir, source);
+  return `Defined in [\`${rel}\`](${GITHUB_BLOB}${rel}).`;
+}
+
+function inputSchemaSection(tool: ToolInfo): string {
+  const rows = parameterRows(toJsonSchema(tool.inputSchema));
+  const body =
+    rows.length > 0
+      ? table(['Parameter', 'Type', 'Required', 'Description'], rows)
+      : 'This tool takes no arguments.';
+  return `## Input schema\n\n${body}`;
+}
+
+function annotationsSection(tool: ToolInfo): string {
+  const entries = Object.entries(tool.annotations ?? {});
+  if (entries.length === 0) return '';
+  const list = entries
+    .map(([k, v]) => `- ${code(k)}: ${code(JSON.stringify(v))}`)
+    .join('\n');
+  return `**Annotations**\n\n${list}`;
 }
 
 export function generateMcpPages(rootDir: string): McpPage[] {
@@ -187,12 +229,8 @@ export function generateMcpPages(rootDir: string): McpPage[] {
   return collectTools().map((tool) => ({
     id: `mcp/tools/${tool.name}`,
     name: tool.name,
-    render(existing) {
+    render: (existing) => {
       const description = tool.description?.trim() ?? '';
-      const source = findSource(tool.name, sources);
-      const rows = parameterRows(toJsonSchema(tool.inputSchema));
-      const annotations = Object.entries(tool.annotations ?? {});
-      const sourceRel = source && relative(rootDir, source);
       return [
         frontmatter({
           title: tool.name,
@@ -201,21 +239,10 @@ export function generateMcpPages(rootDir: string): McpPage[] {
         }),
         note,
         `# \`${tool.name}\``,
-        description && escapeText(description),
-        sourceRel &&
-          existsSync(source) &&
-          `Defined in [\`${sourceRel}\`](${GITHUB_BLOB}${sourceRel}).`,
-        '## Input schema',
-        rows.length > 0
-          ? table(['Parameter', 'Type', 'Required', 'Description'], rows)
-          : 'This tool takes no arguments.',
-        annotations.length > 0 &&
-          [
-            '**Annotations**',
-            annotations
-              .map(([k, v]) => `- ${code(k)}: ${code(JSON.stringify(v))}`)
-              .join('\n'),
-          ].join('\n\n'),
+        escapeText(description),
+        sourceLine(rootDir, findSource(tool.name, sources)),
+        inputSchemaSection(tool),
+        annotationsSection(tool),
         handwrittenTail(existing),
       ]
         .filter(Boolean)
