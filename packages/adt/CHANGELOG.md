@@ -1,3 +1,14 @@
+## 0.4.32 (2026-11-02)
+
+### 🩹 Fixes
+
+- **cli:** declare flow as a production dependency ([#278](https://github.com/abapify/adt-cli/pull/278))
+
+### ❤️ Thank You
+
+- OpenAI Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.31 (2026-11-01)
 
 This was a version bump only for adt to align it with other projects, there were no code changes.

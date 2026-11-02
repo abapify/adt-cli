@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-locks",
-  "version": "0.4.31",
+  "version": "0.4.32",
   "description": "ADT lock/unlock operations and lock store management",
   "license": "MIT",
   "type": "module",
@@ -10,7 +10,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/adt-client": "0.4.31"
+    "@abapify/adt-client": "0.4.32"
   },
   "publishConfig": {
     "access": "public"
