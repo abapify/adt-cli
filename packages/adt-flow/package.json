@@ -19,7 +19,7 @@
     "@abapify/adt-client": "0.4.31",
     "@abapify/adt-config": "0.4.31",
     "@abapify/adt-plugin": "0.4.31",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@abapify/adt-plugin-abapgit": "0.4.31"

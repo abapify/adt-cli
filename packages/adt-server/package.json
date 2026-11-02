@@ -26,7 +26,7 @@
     "@abapify/adt-mcp": "0.4.31",
     "@abapify/adt-services": "0.4.31",
     "yaml": "^2.8.2",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
