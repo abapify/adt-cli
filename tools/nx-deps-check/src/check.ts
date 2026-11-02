@@ -53,6 +53,7 @@ if (!existsSync(manifestPath)) {
 const manifest = readJson(manifestPath);
 
 const declared = new Set<string>();
+const runtimeDeclared = new Set<string>();
 for (const field of [
   'dependencies',
   'devDependencies',
@@ -64,10 +65,26 @@ for (const field of [
     for (const name of Object.keys(deps)) declared.add(name);
   }
 }
+for (const field of [
+  'dependencies',
+  'peerDependencies',
+  'optionalDependencies',
+]) {
+  const deps = manifest[field];
+  if (deps && typeof deps === 'object') {
+    for (const name of Object.keys(deps)) runtimeDeclared.add(name);
+  }
+}
+// devDependencies don't ship — only private projects may lean on them
+// at runtime. Published packages must declare src/ imports in
+// dependencies|peerDependencies|optionalDependencies.
+const isPrivate = manifest['private'] === true;
 const rootDevDeps = rootManifest['devDependencies'];
 const rootAllowed = new Set<string>(
   rootDevDeps && typeof rootDevDeps === 'object'
-    ? Object.keys(rootDevDeps)
+    ? // Shared toolchain only — workspace packages must always be
+      // declared by the importing project itself.
+      Object.keys(rootDevDeps).filter((n) => !n.startsWith('@abapify/'))
     : [],
 );
 const selfName =
@@ -200,12 +217,19 @@ function moduleSpec(node: ts.Node): ts.StringLiteral | null {
   }
   if (
     ts.isCallExpression(node) &&
-    node.arguments.length === 1 &&
+    node.arguments.length >= 1 &&
     ts.isStringLiteral(node.arguments[0]) &&
     ((ts.isIdentifier(node.expression) && node.expression.text === 'require') ||
       node.expression.kind === ts.SyntaxKind.ImportKeyword)
   ) {
     return node.arguments[0];
+  }
+  if (
+    ts.isImportTypeNode(node) &&
+    ts.isLiteralTypeNode(node.argument) &&
+    ts.isStringLiteral(node.argument.literal)
+  ) {
+    return node.argument.literal;
   }
   return null;
 }
@@ -218,12 +242,17 @@ function* importSpecs(
     const node = stack.pop()!;
     const lit = moduleSpec(node);
     if (lit) yield { spec: lit.text, pos: lit.getStart(sf) };
-    node.forEachChild((c) => stack.push(c));
+    node.forEachChild((c) => {
+      stack.push(c);
+    });
   }
 }
 
 // package name -> list of "file:line"
 const violations = new Map<string, string[]>();
+
+const DEV_FILE =
+  /(^|\/)(tests?|__tests__|e2e|fixtures?|scripts?|generators?|config)\/|\.(test|spec|config|d)\.[a-z]+$|\.config\.[a-z]+$/i;
 
 for (const file of scanFiles(projectRoot)) {
   const ext = file.slice(file.lastIndexOf('.'));
@@ -240,14 +269,25 @@ for (const file of scanFiles(projectRoot)) {
     true,
     SCAN_EXT.get(ext)!,
   );
+  const rel = file.slice(projectRoot.length + 1);
+  const devContext = isPrivate || DEV_FILE.test(rel);
   for (const { spec, pos } of importSpecs(sf)) {
     const pkg = toPackageName(spec);
     if (!pkg) continue;
     if (NODE_BUILTINS.has(pkg)) continue;
     if (selfName && pkg === selfName) continue;
-    if (declared.has(pkg) || rootAllowed.has(pkg)) continue;
+    if (declared.has(pkg) || rootAllowed.has(pkg)) {
+      // Published packages ship only deps|peer|optional — a production
+      // file leaning on devDeps or root tooling breaks for consumers.
+      if (devContext || runtimeDeclared.has(pkg)) continue;
+      const { line } = sf.getLineAndCharacterOfPosition(pos);
+      const list = violations.get(pkg) ?? [];
+      if (list.length < 5)
+        list.push(`${rel}:${line + 1} (devDependency — not shipped)`);
+      violations.set(pkg, list);
+      continue;
+    }
     const { line } = sf.getLineAndCharacterOfPosition(pos);
-    const rel = file.slice(projectRoot.length + 1);
     const list = violations.get(pkg) ?? [];
     if (list.length < 5) list.push(`${rel}:${line + 1}`);
     violations.set(pkg, list);

@@ -101,8 +101,13 @@ jobs:
         run: ./node_modules/.bin/nx format:check --base=$NX_BASE --head=$NX_HEAD
       - name: Run affected lint, test, build and e2e-ci
         if: ${{ env.NX_CLOUD_ACCESS_TOKEN != '' && steps.changes.outputs.has-code-changes == 'true' }}
-        run: ./node_modules/.bin/nx affected -t lint test build e2e-ci deps-check --verbose=false --parallel=3
-      - run: ./node_modules/.bin/nx affected -t lint test build e2e-ci deps-check --verbose=false --parallel=3 --no-cloud
+        run: ./node_modules/.bin/nx affected -t lint test build e2e-ci --verbose=false --parallel=3
+      - run: ./node_modules/.bin/nx affected -t lint test build e2e-ci --verbose=false --parallel=3 --no-cloud
         if: ${{ env.NX_CLOUD_ACCESS_TOKEN == '' && steps.changes.outputs.has-code-changes == 'true' }}
+      - name: Run deps-check workspace-wide
+        # Always full sweep — affected would miss packages when only the
+        # checker itself or an excluded path (website) changes.
+        if: steps.changes.outputs.has-code-changes == 'true'
+        run: ./node_modules/.bin/nx run-many -t deps-check --verbose=false --parallel=6
       - run: ./node_modules/.bin/nx-cloud fix-ci
         if: always() && env.NX_CLOUD_ACCESS_TOKEN != '' && steps.changes.outputs.has-code-changes == 'true'

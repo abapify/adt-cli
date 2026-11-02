@@ -229,6 +229,7 @@
         "@abapify/speci": "0.4.33",
       },
       "devDependencies": {
+        "@abapify/adt-codegen": "0.4.33",
         "@abapify/adt-fixtures": "0.4.33",
       },
     },
@@ -563,6 +564,10 @@
     "tools/nx-deps-check": {
       "name": "@abapify/nx-deps-check",
       "version": "0.0.1",
+      "dependencies": {
+        "@nx/devkit": "24.0.2",
+        "typescript": "^6.0.3",
+      },
     },
     "tools/nx-npm-trust": {
       "name": "@abapify/nx-npm-trust",
