@@ -80,12 +80,19 @@ for (const field of [
 // dependencies|peerDependencies|optionalDependencies.
 const isPrivate = manifest['private'] === true;
 const rootDevDeps = rootManifest['devDependencies'];
-const rootAllowed = new Set<string>(
+const rootDevNames =
   rootDevDeps && typeof rootDevDeps === 'object'
-    ? // Shared toolchain only — workspace packages must always be
-      // declared by the importing project itself.
-      Object.keys(rootDevDeps).filter((n) => !n.startsWith('@abapify/'))
-    : [],
+    ? Object.keys(rootDevDeps)
+    : [];
+// Shared toolchain — usable from dev-context files in any project.
+const rootAllowed = new Set<string>(
+  rootDevNames.filter((n) => !n.startsWith('@abapify/')),
+);
+// Workspace packages linked via root `workspace:*` devDeps — dev-context
+// files (tests, scripts, codegen config) may reach them without creating
+// a dependency edge. Production files must still declare them.
+const rootWorkspace = new Set<string>(
+  rootDevNames.filter((n) => n.startsWith('@abapify/')),
 );
 const selfName =
   typeof manifest['name'] === 'string' ? (manifest['name'] as string) : null;
@@ -276,7 +283,11 @@ for (const file of scanFiles(projectRoot)) {
     if (!pkg) continue;
     if (NODE_BUILTINS.has(pkg)) continue;
     if (selfName && pkg === selfName) continue;
-    if (declared.has(pkg) || rootAllowed.has(pkg)) {
+    if (
+      declared.has(pkg) ||
+      rootAllowed.has(pkg) ||
+      (devContext && rootWorkspace.has(pkg))
+    ) {
       // Published packages ship only deps|peer|optional — a production
       // file leaning on devDeps or root tooling breaks for consumers.
       if (devContext || runtimeDeclared.has(pkg)) continue;
