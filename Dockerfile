@@ -54,5 +54,16 @@ RUN ln -sf ../../packages/adt-cli/dist/bin/adt.mjs node_modules/.bin/adt \
 # Expose workspace binaries (adt, adt-codegen, …) as global commands
 ENV PATH="/app/node_modules/.bin:$PATH"
 
+# Verify the configured flow command is resolvable from the installed CLI in
+# the final runtime image. This catches missing package dependencies that a
+# successful workspace build alone does not expose.
+RUN smoke_dir="$(mktemp -d)" \
+ && trap 'rm -rf "$smoke_dir"' EXIT \
+ && printf '%s\n' 'export default { commands: ["@abapify/adt-flow/commands/flow"] };' > "$smoke_dir/adt.config.mjs" \
+ && ADT_FLOW_SMOKE_CLI="$(command -v adt)" node -e "const load = require(\"node:module\").createRequire(require(\"node:fs\").realpathSync(process.env.ADT_FLOW_SMOKE_CLI)); if (!load(\"@abapify/adt-cli/package.json\").dependencies?.[\"@abapify/adt-flow\"]) throw new Error(\"CLI does not declare its flow runtime dependency\");" \
+ && adt --config "$smoke_dir/adt.config.mjs" flow checkout tr --help > "$smoke_dir/flow-help.txt" \
+ && grep -Eq -- '(^|[[:space:],])--partial([[:space:],]|$)' "$smoke_dir/flow-help.txt" \
+ && grep -q -- '--report <file>' "$smoke_dir/flow-help.txt"
+
 # Default: show adt help (GitLab CI overrides entrypoint anyway)
 CMD ["bash", "-c", "adt --help"]
