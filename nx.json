@@ -43,6 +43,10 @@
       }
     },
     {
+      "plugin": "./tools/nx-deps-check/src/index.ts",
+      "options": {}
+    },
+    {
       "plugin": "@nx/js/typescript",
       "options": {
         "typecheck": {

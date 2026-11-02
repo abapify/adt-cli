@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@docusaurus/core": "3.10.0",
+    "@docusaurus/plugin-content-docs": "3.10.0",
     "@docusaurus/preset-classic": "3.10.0",
     "@easyops-cn/docusaurus-search-local": "0.55.1",
     "prism-react-renderer": "2.4.1",
@@ -20,5 +21,8 @@
   },
   "engines": {
     "node": ">=20.0"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "3.10.0"
   }
 }
