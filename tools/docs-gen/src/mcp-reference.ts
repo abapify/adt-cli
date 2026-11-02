@@ -165,8 +165,10 @@ function findSource(
   name: string,
   sources: Map<string, string>,
 ): string | undefined {
-  const quoted = new RegExp(`['"\`]${name}['"\`]`);
-  const matches = [...sources].filter(([, text]) => quoted.test(text));
+  const quoted = ["'", '"', '`'].map((q) => `${q}${name}${q}`);
+  const matches = [...sources].filter(([, text]) =>
+    quoted.some((literal) => text.includes(literal)),
+  );
   const preferred = matches.find(
     ([file]) => basename(file, '.ts') === name.replace(/_/g, '-'),
   );
