@@ -142,6 +142,72 @@ function buildPathInfo(resolvedPath: string): {
   };
 }
 
+type WalkedEndpoint = {
+  operation: OperationFunction;
+  descriptor: RestEndpointDescriptor;
+};
+
+function routeFromEndpoint({
+  descriptor,
+}: WalkedEndpoint): RouteDefinition & { _regex: RegExp } {
+  const resolvedPath = descriptor.path || '';
+  const { regex, template, paramNames } = buildPathInfo(resolvedPath);
+
+  const bodySchema =
+    descriptor.body && isSerializable(descriptor.body)
+      ? descriptor.body
+      : undefined;
+
+  const responseSchemas: Record<number, Serializable> = {};
+  if (descriptor.responses) {
+    for (const [status, schema] of Object.entries(descriptor.responses)) {
+      if (isSerializable(schema)) {
+        responseSchemas[Number(status)] = schema;
+      }
+    }
+  }
+
+  return {
+    method: descriptor.method,
+    path: resolvedPath,
+    pathTemplate: template,
+    pathParamNames: paramNames,
+    bodySchema,
+    responseSchemas,
+    requestHeaders: descriptor.headers as Record<string, string> | undefined,
+    _regex: regex,
+  } as RouteDefinition & { _regex: RegExp };
+}
+
+function matchRoute(
+  routes: RouteDefinition[],
+  method: string,
+  url: string,
+  basePath: string,
+): { route: RouteDefinition; params: Record<string, string> } | null {
+  const pathname = url.split('?')[0];
+  const relativePath =
+    basePath && pathname.startsWith(basePath)
+      ? pathname.slice(basePath.length) || '/'
+      : pathname;
+
+  const targetMethod = method.toUpperCase();
+  for (const route of routes) {
+    if (route.method !== targetMethod) continue;
+    const match = relativePath.match(
+      (route as RouteDefinition & { _regex: RegExp })._regex,
+    );
+    if (match) {
+      const params: Record<string, string> = {};
+      for (let i = 0; i < route.pathParamNames.length; i++) {
+        params[route.pathParamNames[i]] = match[i + 1] || '';
+      }
+      return { route, params };
+    }
+  }
+  return null;
+}
+
 /**
  * Create server-ready route definitions from a REST contract.
  *
@@ -168,75 +234,13 @@ function buildPathInfo(resolvedPath: string): {
 export function createServer<T extends Record<string, any>>(
   contract: T,
 ): ServerRoutes {
-  const endpoints = walkContract(contract, []);
-
-  const routes: RouteDefinition[] = endpoints.map(
-    ({ operation, descriptor }) => {
-      const resolvedPath = descriptor.path || '';
-
-      const { regex, template, paramNames } = buildPathInfo(resolvedPath);
-
-      // Extract body schema
-      const bodySchema =
-        descriptor.body && isSerializable(descriptor.body)
-          ? descriptor.body
-          : undefined;
-
-      // Extract response schemas (only those that are Serializable)
-      const responseSchemas: Record<number, Serializable> = {};
-      if (descriptor.responses) {
-        for (const [status, schema] of Object.entries(descriptor.responses)) {
-          if (isSerializable(schema)) {
-            responseSchemas[Number(status)] = schema;
-          }
-        }
-      }
-
-      return {
-        method: descriptor.method,
-        path: resolvedPath,
-        pathTemplate: template,
-        pathParamNames: paramNames,
-        bodySchema,
-        responseSchemas,
-        requestHeaders: descriptor.headers as
-          | Record<string, string>
-          | undefined,
-        _regex: regex,
-      } as RouteDefinition & { _regex: RegExp };
-    },
+  const routes: RouteDefinition[] = walkContract(contract, []).map(
+    routeFromEndpoint,
   );
 
   return {
     routes,
-
-    match(
-      method: string,
-      url: string,
-      basePath = '',
-    ): { route: RouteDefinition; params: Record<string, string> } | null {
-      const pathname = url.split('?')[0];
-      let relativePath = pathname;
-      if (basePath && pathname.startsWith(basePath)) {
-        relativePath = pathname.slice(basePath.length) || '/';
-      }
-
-      const targetMethod = method.toUpperCase();
-      for (const route of routes) {
-        if (route.method !== targetMethod) continue;
-
-        const routeWithRegex = route as RouteDefinition & { _regex: RegExp };
-        const match = relativePath.match(routeWithRegex._regex);
-        if (match) {
-          const params: Record<string, string> = {};
-          for (let i = 0; i < route.pathParamNames.length; i++) {
-            params[route.pathParamNames[i]] = match[i + 1] || '';
-          }
-          return { route, params };
-        }
-      }
-
-      return null;
-    },
+    match: (method, url, basePath = '') =>
+      matchRoute(routes, method, url, basePath),
   };
 }

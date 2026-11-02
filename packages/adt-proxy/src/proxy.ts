@@ -95,11 +95,12 @@ function addAuthHeaders(
   }
 }
 
-function convertRequestBody(
-  body: string,
-  contentType: string | undefined,
-  bodySchema?: RouteDefinition['bodySchema'],
-): { body: string; converted: boolean } {
+function convertRequestBody(params: {
+  body: string;
+  contentType: string | undefined;
+  bodySchema?: RouteDefinition['bodySchema'];
+}): { body: string; converted: boolean } {
+  const { body, contentType, bodySchema } = params;
   if (!body || !bodySchema || !contentType) {
     return { body, converted: false };
   }
@@ -109,12 +110,13 @@ function convertRequestBody(
   return { body: jsonToXml(body, bodySchema), converted: true };
 }
 
-function convertResponseBody(
-  body: string,
-  contentType: string,
-  status: number,
-  responseSchemas: RouteDefinition['responseSchemas'],
-): { body: string; converted: boolean } {
+function convertResponseBody(params: {
+  body: string;
+  contentType: string;
+  status: number;
+  responseSchemas: RouteDefinition['responseSchemas'];
+}): { body: string; converted: boolean } {
+  const { body, contentType, status, responseSchemas } = params;
   if (!body || !isXmlContentType(contentType) || !responseSchemas[status]) {
     return { body, converted: false };
   }
@@ -123,17 +125,18 @@ function convertResponseBody(
   return { body: converted, converted: wasConverted };
 }
 
-async function forwardRequest(
-  method: string,
-  url: string,
-  headers: Record<string, string>,
-  body?: string,
-  timeoutMs = 30_000,
-): Promise<{
+async function forwardRequest(params: {
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  body?: string;
+  timeoutMs?: number;
+}): Promise<{
   status: number;
   headers: Record<string, string | string[]>;
   body: string;
 }> {
+  const { method, url, headers, body, timeoutMs = 30_000 } = params;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -225,7 +228,11 @@ export function createAdtProxy(config: AdtProxyConfig) {
 
     const reqContentType = getContentType(incomingHeaders);
     const { body: downstreamBody, converted: reqConverted } =
-      convertRequestBody(requestBody, reqContentType, route.bodySchema);
+      convertRequestBody({
+        body: requestBody,
+        contentType: reqContentType,
+        bodySchema: route.bodySchema,
+      });
 
     const downstreamHeaders = buildDownstreamHeaders(
       incomingHeaders,
@@ -235,23 +242,23 @@ export function createAdtProxy(config: AdtProxyConfig) {
       downstreamHeaders['content-type'] = 'application/xml';
     }
 
-    const response = await forwardRequest(
+    const response = await forwardRequest({
       method,
-      buildDownstreamUrl(url),
-      downstreamHeaders,
-      downstreamBody,
-    );
+      url: buildDownstreamUrl(url),
+      headers: downstreamHeaders,
+      body: downstreamBody,
+    });
 
     const respContentType = Array.isArray(response.headers['content-type'])
       ? response.headers['content-type'][0]
       : response.headers['content-type'] || '';
     const { body: responseBody, converted: respConverted } =
-      convertResponseBody(
-        response.body,
-        respContentType,
-        response.status,
-        route.responseSchemas,
-      );
+      convertResponseBody({
+        body: response.body,
+        contentType: respContentType,
+        status: response.status,
+        responseSchemas: route.responseSchemas,
+      });
 
     return {
       status: response.status,
@@ -270,12 +277,12 @@ export function createAdtProxy(config: AdtProxyConfig) {
     logger.debug(`No route match for ${method} ${url} - forwarding as-is`);
 
     const downstreamHeaders = buildDownstreamHeaders(incomingHeaders);
-    const response = await forwardRequest(
+    const response = await forwardRequest({
       method,
-      buildDownstreamUrl(url),
-      downstreamHeaders,
-      requestBody,
-    );
+      url: buildDownstreamUrl(url),
+      headers: downstreamHeaders,
+      body: requestBody,
+    });
 
     return {
       status: response.status,
@@ -397,12 +404,12 @@ export function createAdtProxy(config: AdtProxyConfig) {
         req.headers,
         match.route.requestHeaders,
       );
-      const response = await forwardRequest(
+      const response = await forwardRequest({
         method,
-        buildDownstreamUrl(url),
-        downstreamHeaders,
-        requestBody,
-      );
+        url: buildDownstreamUrl(url),
+        headers: downstreamHeaders,
+        body: requestBody,
+      });
       sendResponse(res, {
         status: response.status,
         headers: response.headers,
