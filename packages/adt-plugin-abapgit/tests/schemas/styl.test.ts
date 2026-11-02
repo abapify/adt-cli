@@ -55,12 +55,9 @@ const scenario: SchemaScenario<StylSchema> = {
   ],
 };
 
-runSchemaTests(scenario);
-
-import { it } from 'node:test';
-import assert from 'node:assert';
-
 it('styl schema scenario is configured', () => {
   assert.strictEqual(scenario.name, 'STYL');
   assert.ok(scenario.fixtures.length > 0);
 });
+
+runSchemaTests(scenario);
