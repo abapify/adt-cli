@@ -29,8 +29,8 @@ export const createNodesV2: CreateNodesV2<NxDepsCheckOptions> = [
       const projectRoot = dirname(configFile);
       if (!projectRoot || projectRoot === '.') return null;
       const rel = relative(workspaceRoot, join(workspaceRoot, projectRoot));
-      if (!rel || rel.startsWith('..') || rel.includes('node_modules'))
-        return null;
+      if (!rel || rel.startsWith('..')) return null;
+      if (rel.includes('node_modules')) return null;
       const excluded = excludePaths.some(
         (p) => projectRoot === p || projectRoot.startsWith(p + '/'),
       );
