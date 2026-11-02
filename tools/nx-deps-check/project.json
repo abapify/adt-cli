@@ -3,5 +3,17 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "tools/nx-deps-check/src",
   "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/tools/nx-deps-check",
+        "main": "tools/nx-deps-check/src/index.ts",
+        "tsConfig": "tools/nx-deps-check/tsconfig.lib.json",
+        "assets": []
+      }
+    }
+  },
   "tags": []
 }

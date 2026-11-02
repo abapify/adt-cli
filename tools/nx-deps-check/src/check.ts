@@ -259,7 +259,7 @@ function* importSpecs(
 const violations = new Map<string, string[]>();
 
 const DEV_FILE =
-  /(^|\/)(tests?|__tests__|e2e|fixtures?|scripts?|generators?|config)\/|\.(test|spec|config|d)\.[a-z]+$|\.config\.[a-z]+$/i;
+  /(^|\/)(tests?|__tests__|e2e|fixtures?|scripts?|generators?|config)\/|\.(test|spec|config)\.[a-z]+$|\.config\.[a-z]+$/i;
 
 for (const file of scanFiles(projectRoot)) {
   const ext = file.slice(file.lastIndexOf('.'));
@@ -277,7 +277,11 @@ for (const file of scanFiles(projectRoot)) {
     SCAN_EXT.get(ext)!,
   );
   const rel = file.slice(projectRoot.length + 1);
-  const devContext = isPrivate || DEV_FILE.test(rel);
+  const fileDev = DEV_FILE.test(rel);
+  // Private projects never ship, so their files may lean on devDeps —
+  // but the root workspace-link allowance stays gated on dev files so a
+  // private project's prod file can't silently pull a sibling package.
+  const devContext = isPrivate || fileDev;
   for (const { spec, pos } of importSpecs(sf)) {
     const pkg = toPackageName(spec);
     if (!pkg) continue;
@@ -286,7 +290,7 @@ for (const file of scanFiles(projectRoot)) {
     if (
       declared.has(pkg) ||
       rootAllowed.has(pkg) ||
-      (devContext && rootWorkspace.has(pkg))
+      (fileDev && rootWorkspace.has(pkg))
     ) {
       // Published packages ship only deps|peer|optional — a production
       // file leaning on devDeps or root tooling breaks for consumers.

@@ -32,7 +32,12 @@ export const createNodesV2: CreateNodesV2<NxDepsCheckOptions> = [
         const rel = relative(workspaceRoot, join(workspaceRoot, projectRoot));
         if (!rel || rel.startsWith('..') || rel.includes('node_modules'))
           return null;
-        if (excludePaths.some((p) => projectRoot.startsWith(p))) return null;
+        if (
+          excludePaths.some(
+            (p) => projectRoot === p || projectRoot.startsWith(p + '/'),
+          )
+        )
+          return null;
 
         return [
           configFile,
