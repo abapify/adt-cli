@@ -18,7 +18,7 @@ import { createAdtServerClient } from '@abapify/adt-server-client';
 
 const api = createAdtServerClient({
   baseUrl: 'http://127.0.0.1:3002',
-  headers: { authorization: `Bearer ${token}` },
+  headers: authHeaders, // e.g. your sidecar REST credential
 });
 ```
 

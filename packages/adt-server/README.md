@@ -14,10 +14,16 @@ npm install -g @abapify/adt-server
 ## Usage
 
 ```bash
-export ADT_BROKER_BASE_URL=http://127.0.0.1:3001
-export ADT_SERVER_BROKER_TOKEN_FILE=/run/secrets/broker-token
-adt-server   # listens on ADT_SERVER_HOST:ADT_SERVER_PORT (default port 3002)
+adt-server
 ```
+
+Required environment:
+
+| Variable                              | Purpose                                        |
+| ------------------------------------- | ---------------------------------------------- |
+| `ADT_BROKER_BASE_URL`                 | URL of the credential broker                   |
+| `ADT_SERVER_BROKER_TOKEN_FILE`        | Path to the file holding the broker credential |
+| `ADT_SERVER_HOST` / `ADT_SERVER_PORT` | Bind address (optional)                        |
 
 ## Features
 
