@@ -23,7 +23,7 @@
  * root `dependencies` — is a phantom and fails the check.
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import ts from 'typescript';
 
@@ -180,48 +180,32 @@ function toPackageName(spec: string): string | null {
 }
 
 function* scanFiles(dir: string): Generator<string> {
-  let entries: string[];
-  try {
-    entries = readdirSync(dir);
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    const full = join(dir, entry);
-    let st;
-    try {
-      st = statSync(full);
-    } catch {
-      continue;
-    }
-    if (st.isDirectory()) {
-      if (!SKIP_DIRS.has(entry)) yield* scanFiles(full);
-    } else {
-      const ext = entry.slice(entry.lastIndexOf('.'));
-      if (SCAN_EXT.has(ext)) yield full;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (!SKIP_DIRS.has(entry.name)) yield* scanFiles(full);
+    } else if (SCAN_EXT.has(entry.name.slice(entry.name.lastIndexOf('.')))) {
+      yield full;
     }
   }
 }
 
+/** A node narrowed to ts.StringLiteral or null. */
+function strLit(n: ts.Node | undefined): ts.StringLiteral | null {
+  return n && ts.isStringLiteral(n) ? n : null;
+}
+
 /** The literal module specifier of a node, when it carries one. */
 function moduleSpec(node: ts.Node): ts.StringLiteral | null {
-  if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
-    const s = node.moduleSpecifier;
-    return s && ts.isStringLiteral(s) ? s : null;
-  }
-  if (ts.isImportEqualsDeclaration(node)) {
-    const ref = node.moduleReference;
-    return ts.isExternalModuleReference(ref) &&
-      ts.isStringLiteral(ref.expression)
-      ? ref.expression
-      : null;
-  }
-  if (ts.isImportTypeNode(node)) {
-    const a = node.argument;
-    return ts.isLiteralTypeNode(a) && ts.isStringLiteral(a.literal)
-      ? a.literal
-      : null;
-  }
+  if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node))
+    return strLit(node.moduleSpecifier);
+  if (
+    ts.isImportEqualsDeclaration(node) &&
+    ts.isExternalModuleReference(node.moduleReference)
+  )
+    return strLit(node.moduleReference.expression);
+  if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument))
+    return strLit(node.argument.literal);
   return literalArg(node);
 }
 
@@ -232,8 +216,7 @@ function literalArg(node: ts.Node): ts.StringLiteral | null {
   const cjs =
     ts.isIdentifier(node.expression) && node.expression.text === 'require';
   if (!dynamic && !cjs) return null;
-  const [first] = node.arguments;
-  return ts.isStringLiteral(first) ? first : null;
+  return strLit(node.arguments[0]);
 }
 
 function* importSpecs(

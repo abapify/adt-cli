@@ -25,37 +25,33 @@ export const createNodesV2: CreateNodesV2<NxDepsCheckOptions> = [
     const script = join(workspaceRoot, 'tools/nx-deps-check/src/check.ts');
     const command = `${runtime} ${JSON.stringify(script)}`;
 
-    return configFiles
-      .map((configFile) => {
-        const projectRoot = dirname(configFile);
-        if (!projectRoot || projectRoot === '.') return null;
-        const rel = relative(workspaceRoot, join(workspaceRoot, projectRoot));
-        if (!rel || rel.startsWith('..') || rel.includes('node_modules'))
-          return null;
-        if (
-          excludePaths.some(
-            (p) => projectRoot === p || projectRoot.startsWith(p + '/'),
-          )
-        )
-          return null;
-
-        return [
-          configFile,
-          {
-            projects: {
-              [projectRoot]: {
-                targets: {
-                  [targetName]: {
-                    executor: 'nx:run-commands',
-                    options: { command, cwd: projectRoot },
-                    cache: false,
-                  },
+    function toNode(configFile: string) {
+      const projectRoot = dirname(configFile);
+      if (!projectRoot || projectRoot === '.') return null;
+      const rel = relative(workspaceRoot, join(workspaceRoot, projectRoot));
+      if (!rel || rel.startsWith('..') || rel.includes('node_modules'))
+        return null;
+      const excluded = excludePaths.some(
+        (p) => projectRoot === p || projectRoot.startsWith(p + '/'),
+      );
+      if (excluded) return null;
+      return [
+        configFile,
+        {
+          projects: {
+            [projectRoot]: {
+              targets: {
+                [targetName]: {
+                  executor: 'nx:run-commands',
+                  options: { command, cwd: projectRoot },
+                  cache: false,
                 },
               },
             },
           },
-        ] as const;
-      })
-      .filter((n): n is NonNullable<typeof n> => n !== null);
+        },
+      ] as const;
+    }
+    return configFiles.map(toNode).filter((n) => n !== null);
   },
 ];
