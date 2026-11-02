@@ -7,6 +7,7 @@ import type {
 import type { SourceVersionRef } from '@abapify/adt-client';
 import type { FormatPlugin, MaterializedFormatFile } from '@abapify/adt-plugin';
 import { compareStrings, digest, sha256, stableJson } from './deterministic';
+import { preserveUnselectedClassComponents } from './class-component-preservation';
 import {
   objectDescriptorPath,
   objectIdentity,
@@ -729,7 +730,18 @@ async function buildMaterializedResult(
     sources,
     formatOptions: config.format.options,
   });
-  const files = materialized.files.sort((left, right) =>
+  const preserved = await preserveUnselectedClassComponents({
+    root: ctx.root,
+    identity,
+    format: ctx.dependencies.format,
+    selectedComponents: new Set(
+      group.entries.map((entry) => entry.component.id),
+    ),
+    existingPaths: pending.ownedPaths,
+    files: materialized.files,
+    previous: pending.previous,
+  });
+  const files = preserved.files.sort((left, right) =>
     compareStrings(left.path, right.path),
   );
   const desired: DesiredFile[] = files.map((file) => ({
@@ -750,13 +762,14 @@ async function buildMaterializedResult(
     },
     state: 'present',
     packagePath: model.packagePath,
-    selections: presentSelections
-      .map(({ entry, version }) => ({
+    selections: [
+      ...presentSelections.map(({ entry, version }) => ({
         component: entry.component.id,
         versionId: version.id,
         sourceUri: version.sourceUri,
-      }))
-      .sort((left, right) => compareStrings(left.component, right.component)),
+      })),
+      ...preserved.selections,
+    ].sort((left, right) => compareStrings(left.component, right.component)),
     ownedFiles,
     configDigest,
     formatDigest,
