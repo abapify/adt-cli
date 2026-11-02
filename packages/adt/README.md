@@ -15,7 +15,7 @@ of `node_modules`.
 ## What's inside
 
 - The full `adt` CLI built from `adt-cli/src/bin/adt-all.ts` (built-in
-  plugins: codegen, ATC, export, diff, abapGit, gCTS)
+  plugins: codegen, ATC, export, diff, flow, abapGit, gCTS)
 - `yoga.wasm` — layout engine asset, shipped next to the bundle
 
 Externally-installed command plugins still work: dynamic `import()` calls
