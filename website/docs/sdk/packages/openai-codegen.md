@@ -301,6 +301,44 @@ for the full walk-through.
   for `s4-onprem-modern` and `on-prem-classic`, but only `s4-cloud`
   emits in v1.
 
+## Type mapping
+
+| JSON Schema                               | ABAP                                                        |
+| ----------------------------------------- | ----------------------------------------------------------- |
+| `boolean`                                 | `abap_bool`                                                 |
+| `integer` / `integer, format: int64`      | `i` / `int8`                                                |
+| `number` (default / `float` / `double`)   | `decfloat34` / `f`                                          |
+| `string` (default)                        | `string`                                                    |
+| `string, format: date`                    | `d`                                                         |
+| `string, format: date-time`               | `timestampl`                                                |
+| `string, format: uuid`                    | `sysuuid_x16`                                               |
+| `string, format: byte` / `binary`         | `xstring`                                                   |
+| `array of X`                              | `STANDARD TABLE OF <X> WITH EMPTY KEY`                      |
+| `object` (properties)                     | `BEGIN OF <name> … END OF <name>.`                          |
+| `object` with `additionalProperties` only | `_map` table of `BEGIN OF entry, key, value, END OF entry`  |
+| `enum`                                    | Field typed as base scalar; values documented via ABAPDoc.  |
+| `allOf`                                   | Flattened into one structure.                               |
+| `oneOf` / `anyOf`                         | Union merge — fields from every branch, optional semantics. |
+| `$ref` (forward)                          | `NamedTypeRef` into the existing plan entry.                |
+| `$ref` (back-edge — cyclic)               | `REF TO data` with `"! @openapi-ref <field>:<Target>`.      |
+| `nullable: true`                          | Same ABAP type (nullability preserved at (de)serialise).    |
+
+Types are emitted in semantic topological order. Back-edges introduced
+by cyclic schemas are broken with a `REF TO data` plus a structured
+`@openapi-ref` marker, so a future reader can reconstruct the original
+reference target.
+
+## Not yet supported
+
+- OpenAPI webhooks and callbacks.
+- Server-Sent Events / streaming responses.
+- Full OAuth2 `authorization_code` / `client_credentials` flows
+  (`apiKey`, `http bearer`, `http basic` are emitted; `oauth2` exposes
+  an overridable hook only).
+- `.aclass` DSL parser — tracked in `@abapify/abap-ast`.
+- Per-target runtime bundles beyond `s4-cloud` (profile slots exist for
+  `s4-onprem-modern` and `on-prem-classic`; only `s4-cloud` emits in v1).
+
 ## See also
 
 - [`abap-ast`](./abap-ast) — the AST and printer every emitter is built on.

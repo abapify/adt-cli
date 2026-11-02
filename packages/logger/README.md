@@ -1,14 +1,11 @@
 # @abapify/logger
 
-[![version](https://img.shields.io/github/package-json/v/abapify/adt-cli?filename=packages/logger/package.json)](https://github.com/abapify/adt-cli/pkgs/npm/%40abapify%2Flogger)
+[![npm](https://img.shields.io/npm/v/%40abapify%2Flogger)](https://www.npmjs.com/package/@abapify/logger)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-Shared logger interface for `@abapify` packages.
+Shared logger interface for abapify packages.
 
-## Overview
-
-This package defines the `Logger` interface used across all abapify packages. It is compatible with [pino](https://getpino.io/), winston, bunyan, and any other logger that exposes a standard log-level API.
-
-## Installation
+## Install
 
 ```bash
 npm install @abapify/logger
@@ -16,48 +13,23 @@ npm install @abapify/logger
 
 ## Usage
 
-### Accept the interface in your package
-
-```typescript
+```ts
 import type { Logger } from '@abapify/logger';
+import { ConsoleLogger } from '@abapify/logger';
 
-export function createMyService(logger: Logger) {
-  logger.info('Service started');
-  logger.debug('Detail', { key: 'value' });
-}
+const logger: Logger = new ConsoleLogger();
+logger.info('Service started');
 ```
 
-### Use the no-op logger in tests
+## Features
 
-```typescript
-import { noopLogger } from '@abapify/logger';
+- Minimal `Logger` interface shared by abapify packages
+- `ConsoleLogger` and `NoOpLogger` implementations
 
-const service = createMyService(noopLogger);
-```
+## Documentation
 
-### Use pino in production
+**[adt-cli.netlify.app/sdk/packages/logger](https://adt-cli.netlify.app/sdk/packages/logger)**
 
-```typescript
-import pino from 'pino';
-import type { Logger } from '@abapify/logger';
+---
 
-const logger: Logger = pino();
-```
-
-## Interface
-
-```typescript
-interface Logger {
-  trace(msg: string, obj?: any): void;
-  debug(msg: string, obj?: any): void;
-  info(msg: string, obj?: any): void;
-  warn(msg: string, obj?: any): void;
-  error(msg: string, obj?: any): void;
-  fatal(msg: string, obj?: any): void;
-  child(bindings: Record<string, any>): Logger;
-}
-```
-
-## License
-
-MIT
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.

@@ -54,6 +54,28 @@ export default defineConfig({
 - Consumed by [`adt-cli`](./adt-cli), [`adt-playwright`](./adt-playwright),
   [`adt-puppeteer`](./adt-puppeteer).
 
+## Architecture
+
+```
+CLI (adt-cli)
+    │
+    ├── @abapify/adt-config (this package)
+    │   └── loads destinations from adt.config.ts/json
+    │
+    ├── @abapify/adt-auth
+    │   ├── auth methods (basic, slc, oauth, puppeteer)
+    │   └── session management (~/.adt/sessions/)
+    │
+    └── @abapify/adt-client
+        └── HTTP client (receives session at runtime)
+```
+
+## Config Precedence
+
+1. `adt.config.ts` (project - TypeScript)
+2. `adt.config.json` (project - JSON)
+3. `~/.adt/config.json` (global defaults)
+
 ## See also
 
 - [`adt-auth`](./adt-auth), [`adt-cli`](./adt-cli)

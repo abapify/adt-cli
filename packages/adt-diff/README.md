@@ -1,23 +1,19 @@
 # @abapify/adt-diff
 
-Diff CLI plugin for [`adt-cli`](https://github.com/abapify/adt-cli). Compares
-local abapGit-serialised files (`*.clas.xml`, `*.tabl.xml`, …) against the
-current source in a connected SAP system and prints a coloured unified diff.
-Any object type supported by `@abapify/adt-plugin-abapgit` can be compared.
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-diff)](https://www.npmjs.com/package/@abapify/adt-diff)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-diff.svg)](https://www.npmjs.com/package/@abapify/adt-diff)
+Diff CLI plugin for adt-cli - compare local serialized files against SAP remote source.
 
 ## Install
 
 ```bash
-npm i @abapify/adt-diff
-# or
-bun add @abapify/adt-diff
+npm install @abapify/adt-diff @abapify/adt-cli
 ```
 
 ## Usage
 
-Register the command in `adt.config.ts`:
+Register the command plugin in your project config:
 
 ```ts
 // adt.config.ts
@@ -26,46 +22,21 @@ export default {
 };
 ```
 
-Then diff one or more files, or scan the whole abapGit repo in the working
-directory:
+Then:
 
 ```bash
-# Diff specific files
-adt diff zcl_myclass.clas.xml ztab.tabl.xml
-
-# Glob patterns
-adt diff "*.tabl.xml" --context 5
-
-# Scan the whole repo, ignoring unchanged objects
-adt diff --package ZMY_PACKAGE
-
-# Compare ADK-rendered source instead of raw XML (TABL only)
-adt diff zmy_table.tabl.xml --source
+adt diff zcl_my_class.clas.xml
 ```
 
-The package also exposes a small TABL-to-CDS DDL utility that is independent
-of the diff command:
+## Features
 
-```ts
-import { tablXmlToCdsDdl, buildCdsDdl } from '@abapify/adt-diff';
+- Compare local abapGit / gCTS files with SAP
+- Unified diff output for review and CI
 
-const ddl = tablXmlToCdsDdl(xmlString);
-```
+## Documentation
 
-## Role in the monorepo
+**[adt-cli.netlify.app/sdk/packages/adt-diff](https://adt-cli.netlify.app/sdk/packages/adt-diff)**
 
-- CLI plugin loaded by `@abapify/adt-cli`; it owns the `diff` command only.
-- Uses `@abapify/adk` to render local XML back to source and
-  `@abapify/adt-plugin-abapgit` to resolve filenames to ADT object URIs.
-- Read-only: it never locks, writes, or imports objects. For round-tripping
-  objects into and out of the system, see `@abapify/adt-export` and the
-  relevant ADK save flow.
+---
 
-## Related
-
-- [abapify/adt-cli monorepo](https://github.com/abapify/adt-cli)
-- [Full docs](https://adt-cli.netlify.app)
-
-## License
-
-MIT
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.
