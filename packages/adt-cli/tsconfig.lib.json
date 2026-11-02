@@ -49,6 +49,9 @@
       "path": "../adt-lint/tsconfig.lib.json"
     },
     {
+      "path": "../adt-flow/tsconfig.lib.json"
+    },
+    {
       "path": "../adt-export"
     },
     {
