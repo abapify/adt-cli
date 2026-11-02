@@ -70,3 +70,10 @@ legacy preserved files SHALL NOT receive invented SAP versions.
 - **GIVEN** indexed ownership names a companion symlink, including a target inside the repository
 - **WHEN** checkout attempts to preserve or relocate that companion
 - **THEN** it fails before source or descriptors change and does not copy the target bytes
+
+#### Scenario: Baseline before a companion addition keeps the class
+
+- **GIVEN** an existing class with main and local source components
+- **WHEN** baseline checkout selects a companion added by the requested transport
+- **THEN** that companion is absent from the baseline, with the other components unchanged
+- **THEN** the class remains present for the subsequent head checkout

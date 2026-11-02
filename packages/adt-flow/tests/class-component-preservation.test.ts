@@ -47,6 +47,8 @@ async function fixture(name = 'ZCL_DEMO') {
   let sources: Record<string, string> = { ...oldSources };
   let selected = [...components];
   let deleted: string[] = [];
+  let added: string[] = [];
+  let mode: 'base' | 'head' = 'head';
   let packagePath = ['ZROOT'];
   let transport = 'DEVK900101';
   let versionId = '00002';
@@ -101,14 +103,22 @@ async function fixture(name = 'ZCL_DEMO') {
         object: identity,
         component: { id: component },
         sourceTransport: transport,
-        changeKind: deleted.includes(component) ? 'deleted' : 'modified',
+        changeKind: deleted.includes(component)
+          ? 'deleted'
+          : added.includes(component)
+            ? 'added'
+            : 'modified',
         exact: true,
-        base: {
-          id: '00001',
-          ordinal: 1,
-          sourceUri: `/fixture/${component}/00001`,
-          transports: [],
-        },
+        ...(added.includes(component)
+          ? {}
+          : {
+              base: {
+                id: '00001',
+                ordinal: 1,
+                sourceUri: `/fixture/${component}/00001`,
+                transports: [],
+              },
+            }),
         ...(deleted.includes(component)
           ? {}
           : {
@@ -177,9 +187,24 @@ async function fixture(name = 'ZCL_DEMO') {
       transports: [transport],
       config,
       partial,
+      mode,
     });
   };
-  return { root, filename, file, seed, checkout, oldSources, main };
+  const baseBeforeAddition = () => {
+    mode = 'base';
+    added = ['implementations'];
+    return checkout(['implementations']);
+  };
+  return {
+    baseBeforeAddition,
+    root,
+    filename,
+    file,
+    seed,
+    checkout,
+    oldSources,
+    main,
+  };
 }
 
 describe('class component preservation in an existing repository', () => {
@@ -268,6 +293,23 @@ describe('class component preservation in an existing repository', () => {
       const f = await fixture();
       await f.seed(indexed);
       const result = await f.checkout(['implementations'], ['implementations']);
+      expect(result.removed).toEqual(['src/zcl_demo.clas.locals_imp.abap']);
+      await expect(readFile(f.file('implementations'))).rejects.toMatchObject({
+        code: 'ENOENT',
+      });
+      for (const component of ['main', 'definitions', 'macros', 'testclasses'])
+        expect(await readFile(f.file(component), 'utf8')).toBe(
+          f.oldSources[component],
+        );
+    },
+  );
+
+  it.each([false, true])(
+    'keeps the class when a selected companion is absent before its addition (indexed=%s)',
+    async (indexed) => {
+      const f = await fixture();
+      await f.seed(indexed);
+      const result = await f.baseBeforeAddition();
       expect(result.removed).toEqual(['src/zcl_demo.clas.locals_imp.abap']);
       await expect(readFile(f.file('implementations'))).rejects.toMatchObject({
         code: 'ENOENT',
