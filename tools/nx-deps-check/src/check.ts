@@ -171,15 +171,12 @@ const SCAN_EXT = new Map<string, ts.ScriptKind>([
 
 function toPackageName(spec: string): string | null {
   const clean = spec.split('?')[0];
-  if (!clean || clean.startsWith('.') || clean.startsWith('/')) return null;
-  if (clean.startsWith('#')) return null;
-  if (clean.startsWith('node:')) return null;
-  if (clean.startsWith('virtual:')) return null;
+  const skip = ['.', '/', '#', 'node:', 'virtual:'];
+  if (!clean || skip.some((p) => clean.startsWith(p))) return null;
   const parts = clean.split('/');
-  if (clean.startsWith('@')) {
-    return parts.length >= 2 ? `${parts[0]}/${parts[1]}` : clean;
-  }
-  return parts[0];
+  return clean.startsWith('@') && parts.length >= 2
+    ? `${parts[0]}/${parts[1]}`
+    : parts[0];
 }
 
 function* scanFiles(dir: string): Generator<string> {
@@ -208,37 +205,35 @@ function* scanFiles(dir: string): Generator<string> {
 
 /** The literal module specifier of a node, when it carries one. */
 function moduleSpec(node: ts.Node): ts.StringLiteral | null {
-  if (
-    (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
-    node.moduleSpecifier &&
-    ts.isStringLiteral(node.moduleSpecifier)
-  ) {
-    return node.moduleSpecifier;
+  if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+    const s = node.moduleSpecifier;
+    return s && ts.isStringLiteral(s) ? s : null;
   }
-  if (
-    ts.isImportEqualsDeclaration(node) &&
-    ts.isExternalModuleReference(node.moduleReference) &&
-    ts.isStringLiteral(node.moduleReference.expression)
-  ) {
-    return node.moduleReference.expression;
+  if (ts.isImportEqualsDeclaration(node)) {
+    const ref = node.moduleReference;
+    return ts.isExternalModuleReference(ref) &&
+      ts.isStringLiteral(ref.expression)
+      ? ref.expression
+      : null;
   }
-  if (
-    ts.isCallExpression(node) &&
-    node.arguments.length >= 1 &&
-    ts.isStringLiteral(node.arguments[0]) &&
-    ((ts.isIdentifier(node.expression) && node.expression.text === 'require') ||
-      node.expression.kind === ts.SyntaxKind.ImportKeyword)
-  ) {
-    return node.arguments[0];
+  if (ts.isImportTypeNode(node)) {
+    const a = node.argument;
+    return ts.isLiteralTypeNode(a) && ts.isStringLiteral(a.literal)
+      ? a.literal
+      : null;
   }
-  if (
-    ts.isImportTypeNode(node) &&
-    ts.isLiteralTypeNode(node.argument) &&
-    ts.isStringLiteral(node.argument.literal)
-  ) {
-    return node.argument.literal;
-  }
-  return null;
+  return literalArg(node);
+}
+
+/** The literal first argument of `import('x')` / `require('x')` calls. */
+function literalArg(node: ts.Node): ts.StringLiteral | null {
+  if (!ts.isCallExpression(node) || node.arguments.length < 1) return null;
+  const dynamic = node.expression.kind === ts.SyntaxKind.ImportKeyword;
+  const cjs =
+    ts.isIdentifier(node.expression) && node.expression.text === 'require';
+  if (!dynamic && !cjs) return null;
+  const [first] = node.arguments;
+  return ts.isStringLiteral(first) ? first : null;
 }
 
 function* importSpecs(
