@@ -4,8 +4,7 @@ import type { ObjectDescriptor } from './schemas';
 import { readText } from './repository';
 import { AdtFlowError, type FlowObjectIdentity } from './types';
 
-/** Keep baseline class parts which this transport did not select or delete. */
-export async function preserveUnselectedClassComponents(input: {
+interface PreservationInput {
   root: string;
   identity: FlowObjectIdentity;
   format: FormatPlugin;
@@ -13,70 +12,83 @@ export async function preserveUnselectedClassComponents(input: {
   existingPaths: readonly string[];
   files: readonly MaterializedFormatFile[];
   previous?: ObjectDescriptor;
-}): Promise<{
+}
+
+function classFilename(input: PreservationInput, path: string) {
+  const parsed = input.format.parseFilename?.(basename(path));
+  if (parsed?.type.toUpperCase() !== 'CLAS') return undefined;
+  return parsed.name.toUpperCase() === input.identity.name.toUpperCase()
+    ? parsed
+    : undefined;
+}
+
+function unselectedComponent(input: PreservationInput, path: string) {
+  const parsed = classFilename(input, path);
+  if (parsed?.extension !== 'abap') return undefined;
+  const sourceKeys = input.format.getHandler('CLAS')?.suffixToSourceKey;
+  const component = parsed.suffix
+    ? (sourceKeys?.[parsed.suffix] ?? parsed.suffix)
+    : 'main';
+  return input.selectedComponents.has(component) ? undefined : component;
+}
+
+async function retainedSource(
+  input: PreservationInput,
+  path: string,
+  targetPath: string,
+  component: string,
+): Promise<MaterializedFormatFile> {
+  const content = await readText(input.root, path);
+  if (content === undefined) {
+    throw new AdtFlowError(
+      'working_tree_diverged',
+      'An unselected class component disappeared before preservation.',
+      { object: input.identity.canonical, path },
+    );
+  }
+  return {
+    path: targetPath,
+    content,
+    role: 'source',
+    sourceComponent: component,
+  };
+}
+
+/** Keep baseline class parts which this transport did not select or delete. */
+export async function preserveUnselectedClassComponents(
+  input: PreservationInput,
+): Promise<{
   files: MaterializedFormatFile[];
   selections: ObjectDescriptor['selections'];
 }> {
-  const { root, identity, format, selectedComponents, existingPaths } = input;
   const files = [...input.files];
-  const selections: ObjectDescriptor['selections'] = [];
-  if (identity.type !== 'CLAS' || !format.parseFilename || files.length === 0) {
-    return { files, selections };
-  }
-  const parse = format.parseFilename;
-  const belongsToClass = (path: string) => {
-    const parsed = parse(basename(path));
-    return parsed?.type.toUpperCase() === 'CLAS' &&
-      parsed.name.toUpperCase() === identity.name.toUpperCase()
-      ? parsed
-      : undefined;
-  };
-  const anchor = files.find((file) => belongsToClass(file.path));
-  if (!anchor) return { files, selections };
+  if (input.identity.type !== 'CLAS') return { files, selections: [] };
+  const anchor = files.find((file) => classFilename(input, file.path));
+  if (!anchor) return { files, selections: [] };
   const targetDirectory = dirname(anchor.path);
   const materializedPaths = new Set(files.map((file) => file.path));
-  const selectedPaths = new Set(materializedPaths);
-  const sourceKeys = format.getHandler('CLAS')?.suffixToSourceKey;
+  const retainedPaths = new Set<string>();
   const retainedComponents = new Set<string>();
-  for (const path of existingPaths) {
-    const parsed = belongsToClass(path);
-    if (!parsed || parsed.extension !== 'abap') continue;
-    const component = parsed.suffix
-      ? (sourceKeys?.[parsed.suffix] ?? parsed.suffix)
-      : 'main';
-    if (selectedComponents.has(component)) continue;
+  for (const path of input.existingPaths) {
+    const component = unselectedComponent(input, path);
+    if (component === undefined) continue;
     const targetPath = posix.join(targetDirectory, basename(path));
     if (materializedPaths.has(targetPath)) continue;
-    if (selectedPaths.has(targetPath)) {
+    if (retainedPaths.has(targetPath)) {
       throw new AdtFlowError(
         'path_collision',
         'Legacy class components have an ambiguous destination.',
-        { object: identity.canonical, path: targetPath },
+        { object: input.identity.canonical, path: targetPath },
       );
     }
-    const content = await readText(root, path);
-    if (content === undefined) {
-      throw new AdtFlowError(
-        'working_tree_diverged',
-        'An unselected class component disappeared before preservation.',
-        { object: identity.canonical, path },
-      );
-    }
-    files.push({
-      path: targetPath,
-      content,
-      role: 'source',
-      sourceComponent: component,
-    });
-    selectedPaths.add(targetPath);
+    files.push(await retainedSource(input, path, targetPath, component));
+    retainedPaths.add(targetPath);
     retainedComponents.add(component);
   }
   // A preserved legacy file has no invented SAP version. Previously indexed
   // components keep their original selection, never the selected main version.
-  selections.push(
-    ...(input.previous?.selections ?? []).filter((selection) =>
-      retainedComponents.has(selection.component),
-    ),
+  const selections = (input.previous?.selections ?? []).filter((selection) =>
+    retainedComponents.has(selection.component),
   );
   return { files, selections };
 }

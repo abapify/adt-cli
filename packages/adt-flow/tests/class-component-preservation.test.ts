@@ -210,12 +210,16 @@ describe('class component preservation in an existing repository', () => {
           (file: { role: string }) => file.role === 'source',
         ),
       ).toHaveLength(5);
-      if (!indexed)
-        expect(
-          descriptor.selections.map(
-            (entry: { component: string }) => entry.component,
-          ),
-        ).toEqual(['main']);
+      expect(descriptor.selections).toEqual(
+        expect.arrayContaining(
+          (indexed ? components : ['main']).map((component) => ({
+            component,
+            versionId: component === 'main' ? '00003' : '00002',
+            sourceUri: `/fixture/${component}/${component === 'main' ? '00003' : '00002'}`,
+          })),
+        ),
+      );
+      expect(descriptor.selections).toHaveLength(indexed ? 5 : 1);
     },
   );
 
