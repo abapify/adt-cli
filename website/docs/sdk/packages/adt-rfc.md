@@ -42,7 +42,7 @@ import { createRfcClient } from '@abapify/adt-rfc';
 const adt = createAdtClient({
   baseUrl: 'https://my.sap.example.com',
   username: 'DEVELOPER',
-  password: '…',
+  password: process.env.SAP_PASSWORD,
   client: '100',
 });
 
