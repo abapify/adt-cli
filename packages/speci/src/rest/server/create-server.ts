@@ -234,10 +234,6 @@ function matchRoute(
 export function createServer<T extends Record<string, any>>(
   contract: T,
 ): ServerRoutes {
-<<<<<<< HEAD
-  const routes: RouteDefinition[] = walkContract(contract, []).map(
-    routeFromEndpoint,
-=======
   const endpoints = walkContract(contract, []);
 
   const routes: RouteDefinition[] = endpoints.map(
@@ -274,15 +270,10 @@ export function createServer<T extends Record<string, any>>(
         _regex: regex,
       } as RouteDefinition & { _regex: RegExp };
     },
->>>>>>> 2280508b (fix(sonar): address security, bugs, and code smells)
   );
 
   return {
     routes,
-<<<<<<< HEAD
-    match: (method, url, basePath = '') =>
-      matchRoute(routes, method, url, basePath),
-=======
 
     match(
       method: string,
@@ -312,6 +303,5 @@ export function createServer<T extends Record<string, any>>(
 
       return null;
     },
->>>>>>> 2280508b (fix(sonar): address security, bugs, and code smells)
   };
 }
