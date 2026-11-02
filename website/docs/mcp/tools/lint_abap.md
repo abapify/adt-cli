@@ -14,18 +14,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/lint-abap.ts`](https://github.com/ab
 
 ## Input schema
 
-| Parameter       | Type                                       | Required | Description                                                             |
-| --------------- | ------------------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`       | `string`                                   | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`        | `string`                                   | no       | SAP client number                                                       |
-| `username`      | `string`                                   | no       | Username for basic auth                                                 |
-| `password`      | `string`                                   | no       | Password for basic auth                                                 |
-| `systemId`      | `string`                                   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `action`        | `"lint" \| "lint_and_fix" \| "list_rules"` | no       | Default: `"lint"`.                                                      |
-| `source`        | `string`                                   | no       | ABAP source code to lint                                                |
-| `objectName`    | `string`                                   | no       | Optional object name used for issue filename context                    |
-| `lintPreset`    | `"btp" \| "onpremise"`                     | no       | Lint preset to apply (defaults to onpremise)                            |
-| `ruleOverrides` | `object`                                   | no       | Optional per-rule override config passed to abaplint                    |
+| Parameter       | Type                                           | Required | Description                                                             |
+| --------------- | ---------------------------------------------- | -------- | ----------------------------------------------------------------------- |
+| `baseUrl`       | `string`                                       | no       | SAP system base URL (e.g. https://host:8000)                            |
+| `client`        | `string`                                       | no       | SAP client number                                                       |
+| `username`      | `string`                                       | no       | Username for basic auth                                                 |
+| `password`      | `string`                                       | no       | Password for basic auth                                                 |
+| `systemId`      | `string`                                       | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
+| `action`        | `"lint"` \| `"lint_and_fix"` \| `"list_rules"` | no       | Default: `"lint"`.                                                      |
+| `source`        | `string`                                       | no       | ABAP source code to lint                                                |
+| `objectName`    | `string`                                       | no       | Optional object name used for issue filename context                    |
+| `lintPreset`    | `"btp"` \| `"onpremise"`                       | no       | Lint preset to apply (defaults to onpremise)                            |
+| `ruleOverrides` | `object`                                       | no       | Optional per-rule override config passed to abaplint                    |
 
 ## Output
 

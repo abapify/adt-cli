@@ -14,16 +14,16 @@ Defined in [`packages/adt-mcp/src/lib/tools/atc-run.ts`](https://github.com/abap
 
 ## Input schema
 
-| Parameter   | Type                         | Required | Description                                                             |
-| ----------- | ---------------------------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`   | `string`                     | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`    | `string`                     | no       | SAP client number                                                       |
-| `username`  | `string`                     | no       | Username for basic auth                                                 |
-| `password`  | `string`                     | no       | Password for basic auth                                                 |
-| `systemId`  | `string`                     | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `scope`     | `object \| object \| object` | yes      | Canonical target scope; never an ADT URI                                |
-| `variant`   | `string`                     | no       |                                                                         |
-| `objectUri` | `unknown`                    | no       |                                                                         |
+| Parameter   | Type                             | Required | Description                                                             |
+| ----------- | -------------------------------- | -------- | ----------------------------------------------------------------------- |
+| `baseUrl`   | `string`                         | no       | SAP system base URL (e.g. https://host:8000)                            |
+| `client`    | `string`                         | no       | SAP client number                                                       |
+| `username`  | `string`                         | no       | Username for basic auth                                                 |
+| `password`  | `string`                         | no       | Password for basic auth                                                 |
+| `systemId`  | `string`                         | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
+| `scope`     | `object` \| `object` \| `object` | yes      | Canonical target scope; never an ADT URI                                |
+| `variant`   | `string`                         | no       |                                                                         |
+| `objectUri` | `unknown`                        | no       |                                                                         |
 
 ## Output
 

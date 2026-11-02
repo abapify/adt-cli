@@ -14,17 +14,17 @@ Defined in [`packages/adt-mcp/src/lib/tools/gcts-tools.ts`](https://github.com/a
 
 ## Input schema
 
-| Parameter  | Type                                  | Required | Description                                                             |
-| ---------- | ------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`  | `string`                              | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`   | `string`                              | no       | SAP client number                                                       |
-| `username` | `string`                              | no       | Username for basic auth                                                 |
-| `password` | `string`                              | no       | Password for basic auth                                                 |
-| `systemId` | `string`                              | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `rid`      | `string`                              | yes      | Repository ID                                                           |
-| `action`   | `"get" \| "set" \| "unset" \| "list"` | yes      | Operation to perform                                                    |
-| `key`      | `string`                              | no       | Config key (for get/set/unset)                                          |
-| `value`    | `string`                              | no       | Config value (for set)                                                  |
+| Parameter  | Type                                        | Required | Description                                                             |
+| ---------- | ------------------------------------------- | -------- | ----------------------------------------------------------------------- |
+| `baseUrl`  | `string`                                    | no       | SAP system base URL (e.g. https://host:8000)                            |
+| `client`   | `string`                                    | no       | SAP client number                                                       |
+| `username` | `string`                                    | no       | Username for basic auth                                                 |
+| `password` | `string`                                    | no       | Password for basic auth                                                 |
+| `systemId` | `string`                                    | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
+| `rid`      | `string`                                    | yes      | Repository ID                                                           |
+| `action`   | `"get"` \| `"set"` \| `"unset"` \| `"list"` | yes      | Operation to perform                                                    |
+| `key`      | `string`                                    | no       | Config key (for get/set/unset)                                          |
+| `value`    | `string`                                    | no       | Config value (for set)                                                  |
 
 ## Output
 

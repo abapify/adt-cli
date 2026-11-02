@@ -41,7 +41,7 @@ adt import object [options] <objectName> [targetFolder]
 
 | Option                        | Description                                                                | Default   |
 | ----------------------------- | -------------------------------------------------------------------------- | --------- |
-| `-o, --output <path>`         | Output directory (overrides targetFolder)                                  | ``        |
+| `-o, --output <path>`         | Output directory (overrides targetFolder)                                  |           |
 | `--format <format>`           | Output format: abapgit \| @abapify/adt-plugin-abapgit                      | `abapgit` |
 | `--format-option <key=value>` | Format-specific option (repeatable), e.g. --format-option folderLogic=full | `[]`      |
 | `-t, --object-type <type>`    | Exact ABAP object type for same-named objects, e.g. DDLX                   |           |
@@ -66,7 +66,7 @@ adt import package [options] <packageName> [targetFolder]
 
 | Option                       | Description                                                                           | Default   |
 | ---------------------------- | ------------------------------------------------------------------------------------- | --------- |
-| `-o, --output <path>`        | Output directory (overrides targetFolder)                                             | ``        |
+| `-o, --output <path>`        | Output directory (overrides targetFolder)                                             |           |
 | `-t, --object-types <types>` | Comma-separated object types (e.g., CLAS,INTF,DDLS). Default: all supported by format |           |
 | `--no-sub-packages`          | Exclude subpackages (by default subpackages are included)                             |           |
 | `--format <format>`          | Output format: abapgit \| @abapify/adt-plugin-abapgit                                 | `abapgit` |
@@ -91,7 +91,7 @@ adt import transport [options] <transports> [targetFolder]
 
 | Option                        | Description                                                                                                            | Default   |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------- |
-| `-o, --output <path>`         | Output directory (overrides targetFolder)                                                                              | ``        |
+| `-o, --output <path>`         | Output directory (overrides targetFolder)                                                                              |           |
 | `-t, --object-types <types>`  | Comma-separated object types (e.g., CLAS,INTF,DDLS). Default: all supported by format                                  |           |
 | `--format <format>`           | Output format: abapgit \| @abapify/adt-plugin-abapgit                                                                  | `abapgit` |
 | `--format-option <key=value>` | Format-specific option (repeatable), e.g. --format-option folderLogic=full                                             | `[]`      |

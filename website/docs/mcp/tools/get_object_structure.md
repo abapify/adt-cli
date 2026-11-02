@@ -14,16 +14,16 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-object-structure.ts`](https://gi
 
 ## Input schema
 
-| Parameter    | Type                     | Required | Description                                                             |
-| ------------ | ------------------------ | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`    | `string`                 | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`     | `string`                 | no       | SAP client number                                                       |
-| `username`   | `string`                 | no       | Username for basic auth                                                 |
-| `password`   | `string`                 | no       | Password for basic auth                                                 |
-| `systemId`   | `string`                 | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `objectName` | `string`                 | yes      | ABAP object name                                                        |
-| `objectType` | `string`                 | yes      | Object type (e.g. CLAS, PROG, INTF, FUGR)                               |
-| `version`    | `"active" \| "inactive"` | no       | Object version to inspect (default: active)                             |
+| Parameter    | Type                       | Required | Description                                                             |
+| ------------ | -------------------------- | -------- | ----------------------------------------------------------------------- |
+| `baseUrl`    | `string`                   | no       | SAP system base URL (e.g. https://host:8000)                            |
+| `client`     | `string`                   | no       | SAP client number                                                       |
+| `username`   | `string`                   | no       | Username for basic auth                                                 |
+| `password`   | `string`                   | no       | Password for basic auth                                                 |
+| `systemId`   | `string`                   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
+| `objectName` | `string`                   | yes      | ABAP object name                                                        |
+| `objectType` | `string`                   | yes      | Object type (e.g. CLAS, PROG, INTF, FUGR)                               |
+| `version`    | `"active"` \| `"inactive"` | no       | Object version to inspect (default: active)                             |
 
 ## Output
 

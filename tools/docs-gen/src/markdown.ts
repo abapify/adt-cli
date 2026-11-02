@@ -1,24 +1,37 @@
+function escapeAngles(text: string): string {
+  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 /** Escape text for use in MDX prose (keeps line breaks). */
 export function escapeText(text: string): string {
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}');
+  return escapeAngles(text.replace(/[\\{}]/g, '\\$&'));
 }
 
 /** Escape text for use in a single Markdown table cell. */
 export function escapeCell(text: string): string {
-  return escapeText(text)
-    .replace(/\|/g, '\\|')
-    .replace(/\s*\r?\n\s*/g, ' ');
+  return escapeAngles(text.replace(/[\\{}|]/g, '\\$&')).replace(
+    /\s*\r?\n\s*/g,
+    ' ',
+  );
 }
 
-/** Inline code span that is safe inside a table cell. */
-export function code(text: string): string {
+function codeSpan(text: string): string {
   const fence = text.includes('`') ? '``' : '`';
-  return `${fence}${text.replace(/\|/g, '\\|')}${fence}`;
+  return `${fence}${text}${fence}`;
+}
+
+/**
+ * Inline code that is safe inside a table cell. A `|` cannot be escaped
+ * inside a code span without also mangling backslashes, so each side of
+ * a `|` gets its own span: `"a" | "b"` becomes `"a"` \| `"b"`.
+ */
+export function code(text: string): string {
+  return text
+    .split('|')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map(codeSpan)
+    .join(' \\| ');
 }
 
 export function table(headers: string[], rows: string[][]): string {

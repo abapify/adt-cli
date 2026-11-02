@@ -14,18 +14,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/create-function-module.ts`](https://
 
 ## Input schema
 
-| Parameter        | Type                                                | Required | Description                                                             |
-| ---------------- | --------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`        | `string`                                            | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`         | `string`                                            | no       | SAP client number                                                       |
-| `username`       | `string`                                            | no       | Username for basic auth                                                 |
-| `password`       | `string`                                            | no       | Password for basic auth                                                 |
-| `systemId`       | `string`                                            | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `groupName`      | `string`                                            | yes      | Parent function group name (e.g. ZFG_UTIL)                              |
-| `functionName`   | `string`                                            | yes      | Function module name (e.g. Z_MY_FM)                                     |
-| `description`    | `string`                                            | yes      | Short description                                                       |
-| `processingType` | `"normal" \| "rfc" \| "update" \| "backgroundTask"` | no       | Processing type (default: normal)                                       |
-| `transport`      | `string`                                            | no       | Transport request number (for transportable objects)                    |
+| Parameter        | Type                                                      | Required | Description                                                             |
+| ---------------- | --------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
+| `baseUrl`        | `string`                                                  | no       | SAP system base URL (e.g. https://host:8000)                            |
+| `client`         | `string`                                                  | no       | SAP client number                                                       |
+| `username`       | `string`                                                  | no       | Username for basic auth                                                 |
+| `password`       | `string`                                                  | no       | Password for basic auth                                                 |
+| `systemId`       | `string`                                                  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
+| `groupName`      | `string`                                                  | yes      | Parent function group name (e.g. ZFG_UTIL)                              |
+| `functionName`   | `string`                                                  | yes      | Function module name (e.g. Z_MY_FM)                                     |
+| `description`    | `string`                                                  | yes      | Short description                                                       |
+| `processingType` | `"normal"` \| `"rfc"` \| `"update"` \| `"backgroundTask"` | no       | Processing type (default: normal)                                       |
+| `transport`      | `string`                                                  | no       | Transport request number (for transportable objects)                    |
 
 ## Output
 
