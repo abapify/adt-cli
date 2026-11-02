@@ -1,8 +1,3 @@
----
-title: ABAP Development Kit (ADK)
-sidebar_position: 3
----
-
 # ABAP Development Kit (ADK)
 
 `@abapify/adk` is the write-oriented layer on top of typed contracts. It
@@ -103,21 +98,21 @@ the pre-bump ETag → `412 Precondition Failed`.
 ## Lock architecture
 
 All lock operations go through `@abapify/adt-locks`'
-[`LockService`](../sdk/packages/adt-locks) — ADK never implements its
+[`LockService`](../../packages/adt-locks) — ADK never implements its
 own locking. If `ctx.lockService` isn't provided (e.g. by
 `initializeAdk()`), `lock()` throws:
 
 > `Lock not available: no lockService in context. Did you call initializeAdk()?`
 
 Locks are bound to the **security session**. The session is established
-by `adt-client` (see the [Contracts pipeline](./contracts-pipeline)) and
+by `adt-client` (see the [Contracts pipeline](./contracts-pipeline.md)) and
 lives in the `AdtClient` instance. A CSRF token obtained _without_ the
 3-step security-session flow is **not valid** for lock/unlock, which is
 why the client, lock service and ADK are coupled through a shared client
 instance.
 
 For multi-object saves (`checkin`, package export → import), see
-[batch-lock-session](./checkin-batch-lock).
+[batch-lock-session](./checkin-batch-lock.md).
 
 ## Wrapper keys and object specs
 
@@ -168,9 +163,9 @@ repository object (discovery, search, ATC runs, …).
 
 ## See also
 
-- [Architecture overview](./overview)
-- [Contracts pipeline](./contracts-pipeline)
-- [Checkin batch lock](./checkin-batch-lock)
-- [SDK → adk](../sdk/packages/adk)
-- [SDK → adt-locks](../sdk/packages/adt-locks)
+- [Architecture overview](./overview.md)
+- [Contracts pipeline](./contracts-pipeline.md)
+- [Checkin batch lock](./checkin-batch-lock.md)
+- [SDK → adk](../../packages/adk)
+- [SDK → adt-locks](../../packages/adt-locks)
 - [`packages/adk/AGENTS.md`](https://github.com/abapify/adt-cli/blob/main/packages/adk/AGENTS.md)

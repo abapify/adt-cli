@@ -1,8 +1,3 @@
----
-title: Checkin & Batch Lock Session
-sidebar_position: 8
----
-
 # Checkin & Batch Lock Session
 
 `adt checkin <dir>` is the inverse of `adt import package`: it pushes a
@@ -80,7 +75,7 @@ Why the double-lock?
 
 When ADK exposes a way to **thread pre-acquired lock handles** into
 `save()`, the two cycles can collapse into one. That's a known
-follow-up (see [Roadmap → Future](../project-roadmap/future)).
+follow-up (see [Roadmap → Future](../roadmap/future.md)).
 
 ## Dependency-tier ordering
 
@@ -117,7 +112,7 @@ to do so, and a naive "PUT the old content back" would either fail
 - **No per-field diff (yet).** `diffObject()` today treats "remote
   exists + local had pending sources" as `update` and "remote 404" as
   `create`. True file-level diffs will come when `FormatPlugin.diff()`
-  lands (E05 follow-up — see [Format Plugins](./format-plugins)).
+  lands (E05 follow-up — see [Format Plugins](./format-plugins.md)).
 - **Double lock cycle.** See "Pre-flight validation" above.
 - **No `.gitignore`-style excludes.** `checkin` processes every
   serialised object in the directory.
@@ -127,9 +122,9 @@ to do so, and a naive "PUT the old content back" would either fail
 
 ## See also
 
-- [CLI → checkin](../cli/checkin)
-- [MCP → checkin](../mcp/tools/checkin)
-- [Architecture → ADK](./adk)
-- [Architecture → Format plugins](./format-plugins)
-- [SDK → adt-locks](../sdk/packages/adt-locks)
-- [Roadmap → Future](../project-roadmap/future)
+- [CLI → checkin](https://adt-cli.netlify.app/cli/checkin)
+- [MCP → checkin](https://adt-cli.netlify.app/mcp/tools/checkin)
+- [Architecture → ADK](./adk.md)
+- [Architecture → Format plugins](./format-plugins.md)
+- [SDK → adt-locks](../../packages/adt-locks)
+- [Roadmap → Future](../roadmap/future.md)

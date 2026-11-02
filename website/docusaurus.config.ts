@@ -59,12 +59,6 @@ const config: Config = {
         { to: '/sdk/packages/overview', label: 'SDK', position: 'left' },
         { to: '/plugins/overview', label: 'Plugins', position: 'left' },
         {
-          to: '/architecture/overview',
-          label: 'Architecture',
-          position: 'left',
-        },
-        { to: '/contributing/overview', label: 'Roadmap', position: 'left' },
-        {
           href: 'https://github.com/abapify/adt-cli',
           label: 'GitHub',
           position: 'right',
@@ -96,8 +90,14 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            { label: 'Architecture', to: '/architecture/overview' },
-            { label: 'Contributing', to: '/contributing/overview' },
+            {
+              label: 'About the project',
+              href: 'https://github.com/abapify/adt-cli#readme',
+            },
+            {
+              label: 'Contributing',
+              href: 'https://github.com/abapify/adt-cli/blob/main/CONTRIBUTING.md',
+            },
             {
               label: 'GitHub',
               href: 'https://github.com/abapify/adt-cli',

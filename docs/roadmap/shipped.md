@@ -1,24 +1,13 @@
----
-title: Roadmap — What Shipped
-sidebar_position: 1
----
-
 # Roadmap — What Shipped
 
 The v2 rewrite of `adt-cli` was planned as a sequence of self-contained
 **epics**, each scoped small enough for a fresh Devin session to land in
 one pass. This page narrates what each wave delivered; the next page
-([Future](./future)) collects the open questions and follow-ups that
+([Future](./future.md)) collects the open questions and follow-ups that
 remain.
 
-:::note Where are the raw epic files?
-The underlying OpenSpec-style briefs live in the repository at
-[`docs/roadmap/epics/`](https://github.com/abapify/adt-cli/tree/main/docs/roadmap/epics)
-and are intentionally **excluded** from the public documentation site.
-They contain internal scope negotiations and evolving acceptance criteria
-and are kept as the source of truth for maintainers. This page is the
-user-facing summary.
-:::
+> [!NOTE]
+> The raw OpenSpec-style briefs for each epic live in [`epics/`](./epics) — they carry the scope negotiations and acceptance criteria. This page is the summary.
 
 ## Wave 1 — Independent object surfaces
 
@@ -36,21 +25,21 @@ Small, parallelisable epics closing legacy gaps vs. `sapcli`.
 
 ## Wave 2 — Format-plugin foundation
 
-| Epic | Title                        | Outcome                                                                                                                                   |
-| ---- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| E05  | Format-plugin API foundation | `FormatPlugin` interface + global registry. Single side-effect import bootstraps abapGit. [Architecture](../architecture/format-plugins). |
-| E06  | gCTS as format plugin        | `@abapify/adt-plugin-gcts` — id `gcts` (alias `aff`). Full round-trip with `manifest.yml`.                                                |
-| E07  | gCTS as command plugin       | `@abapify/adt-plugin-gcts-cli` — `adt gcts repo/branch/commit/pull/…` (12 subcommands).                                                   |
-| E08  | Checkin (push to SAP)        | `adt checkin`, batch-lock-session validation, dependency-tier apply. [Architecture](../architecture/checkin-batch-lock).                  |
+| Epic | Title                        | Outcome                                                                                                                                      |
+| ---- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| E05  | Format-plugin API foundation | `FormatPlugin` interface + global registry. Single side-effect import bootstraps abapGit. [Architecture](../architecture/format-plugins.md). |
+| E06  | gCTS as format plugin        | `@abapify/adt-plugin-gcts` — id `gcts` (alias `aff`). Full round-trip with `manifest.yml`.                                                   |
+| E07  | gCTS as command plugin       | `@abapify/adt-plugin-gcts-cli` — `adt gcts repo/branch/commit/pull/…` (12 subcommands).                                                      |
+| E08  | Checkin (push to SAP)        | `adt checkin`, batch-lock-session validation, dependency-tier apply. [Architecture](../architecture/checkin-batch-lock.md).                  |
 
 ## Wave 3 — ABAP CDS & RAP
 
-| Epic | Title                | Outcome                                                                                        |
-| ---- | -------------------- | ---------------------------------------------------------------------------------------------- |
-| E09  | Extend `acds` parser | Phase-1 grammar for TABL / structure / DRTY / SRVD / DDLX. [SDK → acds](../sdk/packages/acds). |
-| E10  | RAP BDEF             | `adt rap bdef …` + `create_bdef` / `get_bdef` / `delete_bdef`.                                 |
-| E11  | RAP SRVD             | `adt rap srvd …` + `create_srvd` / `get_srvd` / `delete_srvd`.                                 |
-| E12  | RAP SRVB             | `adt rap srvb …` + `create_srvb` / `get_srvb` / `delete_srvb` / `publish_service_binding`.     |
+| Epic | Title                | Outcome                                                                                       |
+| ---- | -------------------- | --------------------------------------------------------------------------------------------- |
+| E09  | Extend `acds` parser | Phase-1 grammar for TABL / structure / DRTY / SRVD / DDLX. [SDK → acds](../../packages/acds). |
+| E10  | RAP BDEF             | `adt rap bdef …` + `create_bdef` / `get_bdef` / `delete_bdef`.                                |
+| E11  | RAP SRVD             | `adt rap srvd …` + `create_srvd` / `get_srvd` / `delete_srvd`.                                |
+| E12  | RAP SRVB             | `adt rap srvb …` + `create_srvb` / `get_srvb` / `delete_srvb` / `publish_service_binding`.    |
 
 ## QC waves
 
@@ -59,10 +48,10 @@ Alongside the feature epics, three "QC" passes shipped:
 - **QC1 — Fixture backfill.** Real-SAP captures for every endpoint
   where TRL allowed it. `where-used`, FLP, RFC-SOAP, discovery, core
   http, classes/interfaces, CTS, activation, search. Yielded the
-  results table in [Architecture → Real-SAP e2e](../architecture/real-e2e).
+  results table in [Architecture → Real-SAP e2e](../architecture/real-e2e.md).
 - **QC2 — Unified mock server.** Consolidated the MCP integration
   mock and the CLI e2e mock into `@abapify/adt-fixtures`'s
-  `createMockAdtServer()`. See [Architecture → Mock server](../architecture/mock-server).
+  `createMockAdtServer()`. See [Architecture → Mock server](../architecture/mock-server.md).
 - **QC3 — Documentation sweep (D2a – D2f).** This site.
 
 ## Dependency graph
@@ -97,6 +86,6 @@ Alongside the feature epics, three "QC" passes shipped:
 
 ## See also
 
-- [Roadmap → Future work & open questions](./future)
-- [Architecture overview](../architecture/overview)
+- [Roadmap → Future work & open questions](./future.md)
+- [Architecture overview](../architecture/overview.md)
 - [Changelogs (repository)](https://github.com/abapify/adt-cli/tree/main/docs/changelogs)

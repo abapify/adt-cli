@@ -1,12 +1,7 @@
----
-title: Real-SAP E2E Harness
-sidebar_position: 6
----
-
 # Real-SAP E2E Harness
 
 Most of the repository's tests run against the [mock ADT
-server](./mock-server). A separate, opt-in suite runs against a **real**
+server](./mock-server.md). A separate, opt-in suite runs against a **real**
 SAP system so we can:
 
 - Keep our synthetic XSD/XML fixtures honest against the SAP contract.
@@ -92,7 +87,7 @@ npx vitest run --config ./vitest.real.config.ts tests/real-e2e/smoke.real.test.t
 2. **Writes are explicit.** `describeReal.write(...)` blocks are
    skipped unless `ADT_REAL_E2E_WRITE=1` is set — even if a session is
    present.
-3. **Unique names.** Because of [BTP stale CTS locks](./adk#object-type-quirks-worth-knowing),
+3. **Unique names.** Because of [BTP stale CTS locks](./adk.md#object-type-quirks-worth-knowing),
    write tests that create/delete objects use unique names per run
    (timestamp or UUID suffix).
 
@@ -103,24 +98,24 @@ endpoints where the CLI / MCP surface ships but the tenant does not
 implement the call. The contracts and synthetic fixtures remain
 correct; we simply could not promote them to real captures from TRL.
 
-| Area                                                                            | Endpoint                                            | Result on TRL                                 | Action                                                                |
+| Area | Endpoint | Result on TRL | Action |
 | ------------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------- | -------------- | ------------------------------------------------------ |
-| STRUST cert management (E04)                                                    | `/sap/bc/adt/system/security/pses`                  | **404 Not Found**                             | Synthetic fixtures only; needs on-prem.                               |
-| gCTS plugin (E07)                                                               | `/sap/bc/cts_abapvcs/repository`, `/…/config`       | **403 Forbidden (UC gate)**                   | gCTS disabled on BTP Trial; on-prem/S4HC needed.                      |
-| BAdI / Enhancements (E03)                                                       | `/sap/bc/adt/enhancements/*`                        | **403 "No authorization"**                    | Synthetic `enhancements/enhoxhh/single.xml` — awaits on-prem capture. |
-| Workbench navigation: callers / callees (E15)                                   | `/informationsystem/callers                         | callees`, `/abapsource/callers                | callees`                                                              | **404** on TRL | Surface retained for on-prem; synthetic fixtures only. |
-| Workbench navigation: "go to definition" (E15)                                  | `/sap/bc/adt/navigation/target` (POST)              | **400 "I::000"**                              | Body shape undocumented; stub only.                                   |
-| Where-used (E15)                                                                | `/informationsystem/usageReferences/{scope,search}` | **PASS** (187 hits for `CL_ABAP_UNIT_ASSERT`) | Real fixtures captured, legacy `/usages` MCP tool retired.            |
-| Fiori Launchpad (E14)                                                           | `/sap/bc/adt/flp/*`                                 | **PASS**                                      | Real fixtures in the registry.                                        |
-| RFC over SOAP (E13)                                                             | `/sap/bc/soap/rfc`                                  | **PASS**                                      | Real round-trip tested.                                               |
-| Core: discovery, info, search, fetch, ls, packages, CTS, activation, aUnit, ATC | various                                             | **PASS**                                      | Stable since the initial v2 migration.                                |
+| STRUST cert management (E04) | `/sap/bc/adt/system/security/pses` | **404 Not Found** | Synthetic fixtures only; needs on-prem. |
+| gCTS plugin (E07) | `/sap/bc/cts_abapvcs/repository`, `/…/config` | **403 Forbidden (UC gate)** | gCTS disabled on BTP Trial; on-prem/S4HC needed. |
+| BAdI / Enhancements (E03) | `/sap/bc/adt/enhancements/*` | **403 "No authorization"** | Synthetic `enhancements/enhoxhh/single.xml` — awaits on-prem capture. |
+| Workbench navigation: callers / callees (E15) | `/informationsystem/callers                         | callees`, `/abapsource/callers                | callees` | **404** on TRL | Surface retained for on-prem; synthetic fixtures only. |
+| Workbench navigation: "go to definition" (E15) | `/sap/bc/adt/navigation/target` (POST) | **400 "I::000"** | Body shape undocumented; stub only. |
+| Where-used (E15) | `/informationsystem/usageReferences/{scope,search}` | **PASS** (187 hits for `CL_ABAP_UNIT_ASSERT`) | Real fixtures captured, legacy `/usages` MCP tool retired. |
+| Fiori Launchpad (E14) | `/sap/bc/adt/flp/*` | **PASS** | Real fixtures in the registry. |
+| RFC over SOAP (E13) | `/sap/bc/soap/rfc` | **PASS** | Real round-trip tested. |
+| Core: discovery, info, search, fetch, ls, packages, CTS, activation, aUnit, ATC | various | **PASS** | Stable since the initial v2 migration. |
 
 These results are mirrored per-epic inside the repository's
 `docs/roadmap/epics/*.md` files (under "Real-SAP verification" /
-"Open questions" sections) — see [Roadmap](../project-roadmap/overview).
+"Open questions" sections) — see [Roadmap](../roadmap/shipped.md).
 
 ## See also
 
-- [Architecture → Mock server](./mock-server)
-- [Architecture → Contracts pipeline](./contracts-pipeline)
+- [Architecture → Mock server](./mock-server.md)
+- [Architecture → Contracts pipeline](./contracts-pipeline.md)
 - [`tests/real-e2e/README.md`](https://github.com/abapify/adt-cli/blob/main/packages/adt-cli/tests/real-e2e/README.md)

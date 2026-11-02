@@ -327,33 +327,6 @@ const sidebars: SidebarsConfig = {
         },
       ],
     },
-    {
-      type: 'category',
-      label: 'Architecture',
-      link: { type: 'doc', id: 'architecture/overview' },
-      items: [
-        'architecture/overview',
-        'architecture/contracts-pipeline',
-        'architecture/adk',
-        'architecture/format-plugins',
-        'architecture/mock-server',
-        'architecture/real-e2e',
-        'architecture/coverage',
-        'architecture/checkin-batch-lock',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Roadmap',
-      link: { type: 'doc', id: 'project-roadmap/overview' },
-      items: ['project-roadmap/overview', 'project-roadmap/future'],
-    },
-    {
-      type: 'category',
-      label: 'Contributing',
-      link: { type: 'generated-index' },
-      items: ['contributing/overview'],
-    },
   ],
 };
 

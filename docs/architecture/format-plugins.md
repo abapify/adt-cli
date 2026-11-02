@@ -1,16 +1,11 @@
----
-title: Format Plugins
-sidebar_position: 4
----
-
 # Format Plugins
 
 _Status_: accepted (E05). Implemented in `@abapify/adt-plugin-abapgit`
 (reference) and `@abapify/adt-plugin-gcts`. See also:
-[Plugins → Overview](../plugins/overview),
-[SDK → adt-plugin](../sdk/packages/adt-plugin),
-[SDK → adt-plugin-abapgit](../sdk/packages/adt-plugin-abapgit),
-[SDK → adt-plugin-gcts](../sdk/packages/adt-plugin-gcts).
+[Plugins → Overview](https://adt-cli.netlify.app/plugins/overview),
+[SDK → adt-plugin](../../packages/adt-plugin),
+[SDK → adt-plugin-abapgit](../../packages/adt-plugin-abapgit),
+[SDK → adt-plugin-gcts](../../packages/adt-plugin-gcts).
 
 ## Problem
 

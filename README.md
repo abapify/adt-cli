@@ -1,250 +1,121 @@
-# abapify — ADT CLI & SDK for SAP
+# abapify
+
+**Open, typed tooling for SAP ABAP Development Tools (ADT) — for the terminal, for CI, and for AI agents.**
 
 [![CI](https://github.com/abapify/adt-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/abapify/adt-cli/actions/workflows/ci.yml)
-[![adt-cli on npm](https://img.shields.io/npm/v/%40abapify%2Fadt-cli.svg?label=%40abapify%2Fadt-cli)](https://www.npmjs.com/package/@abapify/adt-cli)
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-cli.svg?label=%40abapify%2Fadt-cli)](https://www.npmjs.com/package/@abapify/adt-cli)
+[![Docs](https://img.shields.io/badge/docs-adt--cli.netlify.app-0b7285)](https://adt-cli.netlify.app)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-**abapify** is a TypeScript monorepo that talks to [SAP ABAP Development
-Tools (ADT)](https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec8641126391014adc9fffe4e204223.html).
-It ships a CLI (`adt`), a typed SDK for programmatic use, an MCP server
-that exposes ADT to AI assistants, and a handful of CLI plugins for
-common workflows (ATC, abapGit, gCTS, unit tests, diff, export).
+> **Using abapify?** Head to the user documentation at **[adt-cli.netlify.app](https://adt-cli.netlify.app)** — installation, authentication, guides, and the full CLI / MCP / SDK reference.
+>
+> This README is about the **project**: what it is, why it exists, and how it is built.
 
-Why it exists: SAP ADT is a rich REST surface, but there's no
-first-class CLI or npm SDK for it. `abapify` gives you one — typed,
-scriptable, CI-friendly, without leaving the JS ecosystem.
+## What it is
 
-## Quick start
+abapify is a TypeScript monorepo that speaks the same HTTP protocol Eclipse ADT uses to talk to an ABAP system, and turns it into four things you can actually build on:
 
-### CLI
+| Surface            | Package                                                                                               | For                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **`adt` CLI**      | [`@abapify/adt-cli`](./packages/adt-cli) (or the single-file bundle [`@abapify/adt`](./packages/adt)) | Developers in a terminal, scripts, CI pipelines                    |
+| **MCP server**     | [`@abapify/adt-mcp`](./packages/adt-mcp)                                                              | AI assistants and agents (Claude, Copilot, Cursor, Windsurf, …)    |
+| **ADT sidecar**    | [`@abapify/adt-server`](./packages/adt-server)                                                        | Shared deployments that must keep SAP credentials away from agents |
+| **TypeScript SDK** | [`@abapify/adt-client`](./packages/adt-client), [`@abapify/adk`](./packages/adk), …                   | Tool builders who want typed access to ADT from their own code     |
+
+All four sit on the same typed contract stack, so a fix in one place reaches every surface.
+
+## Why it exists
+
+ADT is the most complete remote API an ABAP system has — it is what powers Eclipse-based ABAP development. But it is an XML-over-HTTP protocol with a security-session handshake, CSRF tokens, lock handles and ETags, and almost no public documentation. Outside Eclipse there was no first-class, scriptable way to use it.
+
+That gap matters more every year:
+
+- **ABAP teams want modern workflows** — git, code review, pull requests, CI quality gates — without leaving their system of record.
+- **CI/CD needs headless access** — run ATC and ABAP Unit, publish SARIF / JUnit / coverage, move transports, all from a pipeline.
+- **AI agents need safe, structured tools** — not screen-scraping or raw HTTP, but typed operations with the locking and activation rules SAP expects.
+
+abapify closes that gap in the JavaScript ecosystem: `npm i` and go, no SAP GUI, no Eclipse, no system-side installation.
+
+## How it works
+
+```mermaid
+flowchart TD
+    XSD["SAP XSD schemas<br/>(downloaded + hand-authored)"] --> TSXSD["ts-xsd<br/>parse · build · infer types"]
+    TSXSD --> SCHEMAS["adt-schemas<br/>typed schema objects"]
+    SCHEMAS --> CONTRACTS["adt-contracts<br/>endpoint descriptors (speci)"]
+    CONTRACTS --> CLIENT["adt-client<br/>security session · CSRF · parsing"]
+    AUTH["adt-auth<br/>basic · service key · browser SSO"] --> CLIENT
+    CLIENT --> ADK["adk<br/>typed ABAP objects · save · lock · ETag"]
+    CLIENT --> SERVICES["adt-services<br/>shared operations"]
+    ADK --> SERVICES
+    SERVICES --> CLI["adt-cli<br/>adt …"]
+    SERVICES --> MCP["adt-mcp<br/>MCP tools"]
+    MCP --> SERVER["adt-server<br/>sidecar gateway"]
+    PLUGINS["plugins<br/>abapGit · gCTS · ATC · AUnit · export · diff"] --> CLI
+```
+
+The design rests on a few deliberate choices:
+
+1. **Contract-first, schema-driven.** Every XML endpoint has an XSD → typed schema → `speci` contract chain. Request and response types are inferred end-to-end; there is no hand-written XML parsing in application code. Fix a schema once and the CLI, MCP tools and SDK all pick it up.
+2. **One service layer, two front ends.** CLI commands and MCP tools call the same transport-agnostic operations in `adt-services`, so the two surfaces stay at parity instead of drifting apart.
+3. **Writes go through the ADK.** Lock → write → activate → unlock, ETag refresh and batch lock sessions live in one place (`adk` + `adt-locks`), so callers cannot get the SAP protocol subtly wrong.
+4. **Plugins instead of a monolith.** Serialization formats (abapGit, gCTS) and command groups (ATC, AUnit, export, diff, gCTS) are plugins behind small interfaces in `adt-plugin`; core packages never import a concrete plugin.
+5. **Credentials stay at the edge.** Authentication is pluggable (`adt-auth` + browser adapters). For shared and agent deployments, `adt-server` holds destinations and credentials and exposes only scoped MCP / REST access.
+6. **Tested without SAP, verified against SAP.** An in-process mock ADT server backed by real recorded responses drives unit and e2e tests; a separate opt-in suite runs against a real system.
+
+The deep dives live in [`docs/architecture/`](./docs/architecture/overview.md).
+
+## A quick taste
 
 ```bash
-# Install
 npm i -g @abapify/adt-cli
-# or, run it one-shot
-npx @abapify/adt-cli --help
-
-# Configure a connection
-adt login --url https://your-sap-system.example.com
-
-# Do things
-adt search "Z*" --type class
-adt get class ZCL_MY_CLASS
-adt atc run --package ZMYPKG --output sarif
-adt export push ./src        # deploy local source to SAP
-adt abapgit push              # serialize & push via abapGit
+adt auth login                     # interactive: basic, service key, or browser SSO
+adt search "ZCL_*"                 # find objects
+adt source get ZCL_MY_CLASS        # read source to stdout
+adt checkout package ZMY_PKG ./src # abapGit-compatible files on disk
+adt checkin ./src                  # push local changes back to SAP
 ```
 
-See the [CLI reference](https://adt-cli.netlify.app/cli/overview) for
-every command and flag.
+Hooking an AI assistant up is one entry in its MCP config (`npx @abapify/adt-mcp`). Everything else — commands, MCP tools, SDK usage, CI recipes — is in the **[user documentation](https://adt-cli.netlify.app)**.
 
-### SDK
+## Project map
 
-```bash
-npm i @abapify/adt-client @abapify/adt-auth
-```
+All packages live in [`packages/`](./packages) and are published to npm under [`@abapify/*`](https://www.npmjs.com/search?q=%40abapify) (except `adt-fixtures`, which is test-only).
 
-```ts
-import { createAdtClient } from '@abapify/adt-client';
-import { basicAuth } from '@abapify/adt-auth';
+| Layer                       | Packages                                                                                                                                                                                                                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Applications**            | [`adt-cli`](./packages/adt-cli) · [`adt`](./packages/adt) · [`adt-mcp`](./packages/adt-mcp) · [`adt-server`](./packages/adt-server) · [`adt-server-client`](./packages/adt-server-client) · [`adt-pilot`](./packages/adt-pilot) · [`adt-proxy`](./packages/adt-proxy) · [`adt-tui`](./packages/adt-tui) |
+| **CLI plugins**             | [`adt-atc`](./packages/adt-atc) · [`adt-aunit`](./packages/adt-aunit) · [`adt-diff`](./packages/adt-diff) · [`adt-export`](./packages/adt-export) · [`adt-flow`](./packages/adt-flow) · [`adt-plugin-gcts-cli`](./packages/adt-plugin-gcts-cli)                                                         |
+| **Format plugins**          | [`adt-plugin`](./packages/adt-plugin) · [`adt-plugin-abapgit`](./packages/adt-plugin-abapgit) · [`adt-plugin-gcts`](./packages/adt-plugin-gcts)                                                                                                                                                         |
+| **Object model & services** | [`adk`](./packages/adk) · [`adt-services`](./packages/adt-services) · [`adt-locks`](./packages/adt-locks) · [`adt-lint`](./packages/adt-lint) · [`adt-codegen`](./packages/adt-codegen)                                                                                                                 |
+| **Protocol**                | [`adt-client`](./packages/adt-client) · [`adt-contracts`](./packages/adt-contracts) · [`adt-schemas`](./packages/adt-schemas) · [`adt-rfc`](./packages/adt-rfc) · [`speci`](./packages/speci) · [`ts-xsd`](./packages/ts-xsd)                                                                           |
+| **Auth & config**           | [`adt-auth`](./packages/adt-auth) · [`browser-auth`](./packages/browser-auth) · [`adt-playwright`](./packages/adt-playwright) · [`adt-puppeteer`](./packages/adt-puppeteer) · [`adt-config`](./packages/adt-config)                                                                                     |
+| **ABAP language tooling**   | [`aclass`](./packages/aclass) · [`acds`](./packages/acds) · [`abap-ast`](./packages/abap-ast) · [`asjson-parser`](./packages/asjson-parser) · [`openai-codegen`](./packages/openai-codegen)                                                                                                             |
+| **Shared & test**           | [`logger`](./packages/logger) · [`adt-fixtures`](./packages/adt-fixtures) _(private)_                                                                                                                                                                                                                   |
 
-const client = createAdtClient({
-  baseUrl: 'https://your-sap-system.example.com',
-  auth: basicAuth({ user: 'DEVELOPER', password: process.env.SAP_PASSWORD! }),
-});
+Every package has its own README (what you see on npm) and a reference page on the [docs site](https://adt-cli.netlify.app/sdk/packages/overview).
 
-const classes = await client.repository.nodeContents({
-  parent_type: 'DEVC/K',
-  parent_name: 'ZMYPKG',
-});
-```
+## Status
 
-### MCP server (for AI assistants)
+abapify is **pre-1.0** and moving fast: all packages are released together from `main` with a single version. The CLI and MCP server cover the day-to-day ADT surface — repository search and navigation, source read/write, DDIC, CDS, RAP (BDEF / SRVD / SRVB), function modules, BAdIs, transports, ATC, ABAP Unit with coverage, abapGit and gCTS round-trips, RFC, STRUST and Fiori Launchpad inventory. Expect breaking changes between minor versions until 1.0.
 
-```bash
-# stdio transport
-npx @abapify/adt-mcp
+- What shipped and why: [`docs/roadmap/shipped.md`](./docs/roadmap/shipped.md)
+- Open questions and next steps: [`docs/roadmap/future.md`](./docs/roadmap/future.md)
+- Changes: [`CHANGELOG.md`](./CHANGELOG.md)
 
-# or HTTP transport
-docker run --rm -p 3000:3000 ghcr.io/abapify/adt-mcp:latest
-```
+## Documentation map
 
-Every CLI command has a parity MCP tool — see the [MCP
-docs](https://adt-cli.netlify.app/mcp/overview).
-
-## Documentation
-
-Full documentation lives at **[adt-cli.netlify.app](https://adt-cli.netlify.app)**:
-
-- [Getting started](https://adt-cli.netlify.app/getting-started/installation) — install, authenticate, first commands
-- [CLI reference](https://adt-cli.netlify.app/cli/overview) — every command and flag
-- [SDK guide](https://adt-cli.netlify.app/sdk/packages/overview) — programmatic use from TypeScript
-- [MCP server](https://adt-cli.netlify.app/mcp/overview) — expose ADT to AI assistants
-- [Plugins](https://adt-cli.netlify.app/plugins/overview) — abapGit, gCTS, writing your own
-- [Architecture](https://adt-cli.netlify.app/architecture/overview) — how the pieces fit together
-
-Sources:
-
-- Public docs — [`website/docs/`](./website/docs), rendered to the site above.
-- Maintainer docs — [`docs/`](./docs), not rendered (design notes, planning, history).
-
-## Packages
-
-All published packages are released to **[npmjs.org under `@abapify/*`](https://www.npmjs.com/search?q=%40abapify)**; internal/Development-only packages are not published.
-Published entries below include an npm badge; the first column links to the source in this monorepo.
-
-### CLI & plugins (user-facing)
-
-| Package                                                   | npm                                                                                                                                     | Description                                                |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **[adt-cli](./packages/adt-cli)**                         | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-cli.svg)](https://www.npmjs.com/package/@abapify/adt-cli)                         | `adt` command-line interface                               |
-| **[adt-mcp](./packages/adt-mcp)**                         | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-mcp.svg)](https://www.npmjs.com/package/@abapify/adt-mcp)                         | MCP server — exposes ADT tools to AI assistants            |
-| **[adt-atc](./packages/adt-atc)**                         | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-atc.svg)](https://www.npmjs.com/package/@abapify/adt-atc)                         | ATC plugin — runs ABAP Test Cockpit, emits SARIF / GL CQ   |
-| **[adt-aunit](./packages/adt-aunit)**                     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-aunit.svg)](https://www.npmjs.com/package/@abapify/adt-aunit)                     | ABAP Unit Test plugin, JUnit XML output for CI             |
-| **[adt-diff](./packages/adt-diff)**                       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-diff.svg)](https://www.npmjs.com/package/@abapify/adt-diff)                       | Diff plugin — compare local serialized files vs SAP        |
-| **[adt-export](./packages/adt-export)**                   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-export.svg)](https://www.npmjs.com/package/@abapify/adt-export)                   | Export plugin — deploy local sources to SAP                |
-| **[adt-plugin-abapgit](./packages/adt-plugin-abapgit)**   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin-abapgit.svg)](https://www.npmjs.com/package/@abapify/adt-plugin-abapgit)   | abapGit serialization format plugin                        |
-| **[adt-plugin-gcts](./packages/adt-plugin-gcts)**         | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin-gcts.svg)](https://www.npmjs.com/package/@abapify/adt-plugin-gcts)         | gCTS (git-enabled CTS) plugin                              |
-| **[adt-plugin-gcts-cli](./packages/adt-plugin-gcts-cli)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin-gcts-cli.svg)](https://www.npmjs.com/package/@abapify/adt-plugin-gcts-cli) | `adt gcts` command wrapper over gCTS REST                  |
-| **[adt-tui](./packages/adt-tui)**                         | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-tui.svg)](https://www.npmjs.com/package/@abapify/adt-tui)                         | Ink-based terminal UI primitives                           |
-| **[adt-pilot](./packages/adt-pilot)**                     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-pilot.svg)](https://www.npmjs.com/package/@abapify/adt-pilot)                     | abapify Pilot — Mastra AI agent for ABAP code review       |
-| **[adt-server](./packages/adt-server)**                   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-server.svg)](https://www.npmjs.com/package/@abapify/adt-server)                   | Destination-aware ADT sidecar for MCP and safe REST access |
-
-### SDK & core libraries
-
-| Package                                               | npm                                                                                                                                 | Description                                                  |
-| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **[adt-client](./packages/adt-client)**               | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-client.svg)](https://www.npmjs.com/package/@abapify/adt-client)               | Contract-driven HTTP client for ADT REST APIs                |
-| **[adt-contracts](./packages/adt-contracts)**         | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-contracts.svg)](https://www.npmjs.com/package/@abapify/adt-contracts)         | Typed ADT REST API contract definitions                      |
-| **[adt-schemas](./packages/adt-schemas)**             | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-schemas.svg)](https://www.npmjs.com/package/@abapify/adt-schemas)             | SAP ADT XML schemas generated from XSD                       |
-| **[adk](./packages/adk)**                             | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadk.svg)](https://www.npmjs.com/package/@abapify/adk)                             | ABAP Development Kit — object construction and serialization |
-| **[adt-auth](./packages/adt-auth)**                   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-auth.svg)](https://www.npmjs.com/package/@abapify/adt-auth)                   | Auth: Basic, SLC, OAuth, browser SSO                         |
-| **[adt-config](./packages/adt-config)**               | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-config.svg)](https://www.npmjs.com/package/@abapify/adt-config)               | Config loader for `adt.config.ts` / `.json`                  |
-| **[adt-locks](./packages/adt-locks)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-locks.svg)](https://www.npmjs.com/package/@abapify/adt-locks)                 | Lock/unlock service for ADT objects                          |
-| **[adt-plugin](./packages/adt-plugin)**               | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-plugin.svg)](https://www.npmjs.com/package/@abapify/adt-plugin)               | Plugin interface contract                                    |
-| **[adt-rfc](./packages/adt-rfc)**                     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-rfc.svg)](https://www.npmjs.com/package/@abapify/adt-rfc)                     | RFC transport over SOAP-over-HTTP (`/sap/bc/soap/rfc`)       |
-| **[adt-lint](./packages/adt-lint)**                   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-lint.svg)](https://www.npmjs.com/package/@abapify/adt-lint)                   | Shared ABAP lint and source-shaping utilities                |
-| **[adt-proxy](./packages/adt-proxy)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-proxy.svg)](https://www.npmjs.com/package/@abapify/adt-proxy)                 | ADT proxy server with JSON↔XML conversion                    |
-| **[adt-server-client](./packages/adt-server-client)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-server-client.svg)](https://www.npmjs.com/package/@abapify/adt-server-client) | Generated client for @abapify/adt-server                     |
-
-### Authentication adapters
-
-| Package                                         | npm                                                                                                                           | Description              |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| **[browser-auth](./packages/browser-auth)**     | [![npm](https://img.shields.io/npm/v/%40abapify%2Fbrowser-auth.svg)](https://www.npmjs.com/package/@abapify/browser-auth)     | Shared browser SSO logic |
-| **[adt-playwright](./packages/adt-playwright)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-playwright.svg)](https://www.npmjs.com/package/@abapify/adt-playwright) | Playwright SSO adapter   |
-| **[adt-puppeteer](./packages/adt-puppeteer)**   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-puppeteer.svg)](https://www.npmjs.com/package/@abapify/adt-puppeteer)   | Puppeteer SSO adapter    |
-
-### Foundation libraries
-
-| Package                                         | npm                                                                                                                           | Description                                            |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| **[abap-ast](./packages/abap-ast)**             | [![npm](https://img.shields.io/npm/v/%40abapify%2Fabap-ast.svg)](https://www.npmjs.com/package/@abapify/abap-ast)             | Typed AST and pretty-printer for ABAP source code      |
-| **[acds](./packages/acds)**                     | [![npm](https://img.shields.io/npm/v/%40abapify%2Facds.svg)](https://www.npmjs.com/package/@abapify/acds)                     | ABAP CDS parser — tokenizer + AST                      |
-| **[adt-codegen](./packages/adt-codegen)**       | [![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-codegen.svg)](https://www.npmjs.com/package/@abapify/adt-codegen)       | Hook-based code generation toolkit                     |
-| **[asjson-parser](./packages/asjson-parser)**   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fasjson-parser.svg)](https://www.npmjs.com/package/@abapify/asjson-parser)   | ABAP asJSON canonical format parser                    |
-| **[logger](./packages/logger)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Flogger.svg)](https://www.npmjs.com/package/@abapify/logger)                 | Shared logger interface                                |
-| **[openai-codegen](./packages/openai-codegen)** | [![npm](https://img.shields.io/npm/v/%40abapify%2Fopenai-codegen.svg)](https://www.npmjs.com/package/@abapify/openai-codegen) | OpenAPI → ABAP client code generator                   |
-| **[speci](./packages/speci)**                   | [![npm](https://img.shields.io/npm/v/%40abapify%2Fspeci.svg)](https://www.npmjs.com/package/@abapify/speci)                   | Arrow-function REST contract specification             |
-| **[ts-xsd](./packages/ts-xsd)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Fts-xsd.svg)](https://www.npmjs.com/package/@abapify/ts-xsd)                 | XSD parser, builder, TypeScript type inference         |
-| **[aclass](./packages/aclass)**                 | [![npm](https://img.shields.io/npm/v/%40abapify%2Faclass.svg)](https://www.npmjs.com/package/@abapify/aclass)                 | ABAP OO source parser — CLASS / INTERFACE declarations |
-
-### Development-only
-
-These packages are internal to the workspace and are not published to npm.
-
-| Package                                     | npm | Description                                          |
-| ------------------------------------------- | --- | ---------------------------------------------------- |
-| **[adt-fixtures](./packages/adt-fixtures)** | —   | SAP ADT XML fixtures for testing across the monorepo |
-
-## Architecture
-
-```
-adt-cli  (Commander.js CLI, plugin loader)
-  │
-  ├── adt-client  (HTTP client, auth interceptor)
-  │     ├── adt-contracts  (speci endpoint definitions)
-  │     └── adt-schemas    (XSD-derived TypeScript types)
-  │
-  ├── adk  (ABAP object construction: parse ADT XML → domain objects)
-  │
-  ├── adt-locks  (lock/unlock service shared with adk, adt-export)
-  │
-  ├── adt-auth  (session management: basic / SLC / OAuth / browser SSO)
-  │     ├── adt-playwright  (Playwright browser adapter)
-  │     └── adt-puppeteer   (Puppeteer browser adapter)
-  │
-  └── plugins  (opt-in command extensions)
-        ├── adt-atc          (ATC runs → SARIF / GitLab Code Quality)
-        ├── adt-aunit        (ABAP Unit → JUnit XML)
-        ├── adt-diff         (local vs SAP diff)
-        ├── adt-export       (file system → SAP deploy)
-        ├── adt-plugin-abapgit  (abapGit format serialization)
-        └── adt-plugin-gcts-cli (gCTS command wrapper)
-```
-
-**Type flow:** SAP XSD definitions → `ts-xsd` generates schema literals
-→ `adt-schemas` exports them → `adt-contracts` wraps them in `speci`
-endpoint descriptors → `adt-client` executes with full type inference
-at the call site. This means the CLI, the SDK, and the MCP tools all
-share the same type contract — fix a schema once, every caller picks it
-up.
-
-## Local development
-
-Requirements: [Bun](https://bun.sh/) (not npm, pnpm, or yarn — the repo
-uses bun workspaces and `workspace:*` protocol).
-
-```bash
-git clone https://github.com/abapify/adt-cli.git
-cd adt-cli
-bun install
-
-# Common tasks (all nx-driven)
-bunx nx build                 # build every package
-bunx nx test                  # run every test
-bunx nx typecheck             # type-check every package
-bunx nx lint                  # lint + auto-fix
-bunx nx run adt-cli:test      # single-package
-```
-
-### Repository layout
-
-```
-adt-cli/
-├── packages/        # Every @abapify/* package lives here
-├── samples/         # Example consumer projects
-├── tools/           # Internal tooling (nx-npm-trust plugin, p2-cli, release helpers)
-├── docs/            # Maintainer docs (not rendered on the site)
-├── website/         # Docusaurus site (→ adt-cli.netlify.app)
-├── openspec/        # Specs + proposals for in-flight changes
-└── tmp/             # Scratch — gitignored
-```
-
-### Release workflow
-
-The npm side uses **OIDC trusted publishing** — no `NPM_TOKEN` secret
-lives anywhere. `tools/nx-npm-trust` is the internal plugin that
-registered the trusted publishers (see its
-[README](./tools/nx-npm-trust/README.md) for the setup / bootstrap
-flow). To cut a release, maintainers trigger the `Release` workflow on
-GitHub Actions; it computes the next version from conventional commits,
-tags, pushes, and dispatches `publish.yml`, which in turn publishes all
-30 packages through OIDC.
+| Where                                                              | Audience    | What                                                         |
+| ------------------------------------------------------------------ | ----------- | ------------------------------------------------------------ |
+| [adt-cli.netlify.app](https://adt-cli.netlify.app)                 | Users       | Getting started, guides, CLI / MCP / SDK reference           |
+| Package READMEs ([npm](https://www.npmjs.com/search?q=%40abapify)) | Users       | What each package does, install, a minimal example           |
+| [`docs/`](./docs)                                                  | Maintainers | Architecture deep dives, roadmap, deployment, design history |
+| [`openspec/`](./openspec)                                          | Maintainers | Behaviour specs and in-flight change proposals               |
+| [`AGENTS.md`](./AGENTS.md) and [`.agents/`](./.agents)             | AI agents   | Repository rules, skills, and workflows for coding agents    |
 
 ## Contributing
 
-```bash
-git checkout -b feat/my-change
-# make changes
-bunx nx affected -t build test typecheck lint
-git push origin feat/my-change
-# open a pull request against main
-```
-
-Conventions used by AI coding agents are documented in
-[AGENTS.md](./AGENTS.md). Per-package AGENTS.md files extend those rules
-with package-specific invariants.
+Contributions are welcome — bug reports, endpoint coverage, plugins, docs. Start with [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the development setup, conventions and release process. Security issues: see [`SECURITY.md`](./SECURITY.md).
 
 ## License
 
