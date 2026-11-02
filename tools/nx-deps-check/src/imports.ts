@@ -50,22 +50,23 @@ export const NODE_BUILTINS = new Set([
   'bun:test',
 ]);
 
+// Skipped at any depth — caches and VCS internals.
 const SKIP_DIRS = new Set([
   'node_modules',
   'dist',
   '.nx',
   '.git',
-  'coverage',
   '.xsd',
   '.turbo',
-  'out',
   '.next',
   '.docusaurus',
-  'build',
   '.beads',
-  'tmp',
 ]);
-const SCAN_EXT = new Map<string, ts.ScriptKind>([
+// Generated-output names — skipped at the project root only; real source
+// can legitimately live in identically named deeper dirs (e.g.
+// src/adt/runtime/traces/coverage/).
+const ROOT_SKIP_DIRS = new Set(['coverage', 'out', 'build', 'tmp']);
+export const SCAN_EXT = new Map<string, ts.ScriptKind>([
   ['.ts', ts.ScriptKind.TS],
   ['.mts', ts.ScriptKind.TS],
   ['.cts', ts.ScriptKind.TS],
@@ -86,11 +87,12 @@ export function toPackageName(spec: string): string | null {
     : parts[0];
 }
 
-export function* scanFiles(dir: string): Generator<string> {
+export function* scanFiles(dir: string, root = dir): Generator<string> {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (!SKIP_DIRS.has(entry.name)) yield* scanFiles(full);
+      const rootOnly = dir === root && ROOT_SKIP_DIRS.has(entry.name);
+      if (!SKIP_DIRS.has(entry.name) && !rootOnly) yield* scanFiles(full, root);
     } else if (SCAN_EXT.has(entry.name.slice(entry.name.lastIndexOf('.')))) {
       yield full;
     }

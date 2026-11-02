@@ -110,7 +110,7 @@ jobs:
         # re-validated anyway. Self-installs when the gated setup steps
         # were skipped (docs-only changes).
         run: |
-          [ -d node_modules ] || bun install --frozen-lockfile
+          [ -d node_modules ] || bun install --frozen-lockfile --ignore-scripts
           ./node_modules/.bin/nx run-many -t deps-check --verbose=false --parallel=6
       - run: ./node_modules/.bin/nx-cloud fix-ci
         if: always() && env.NX_CLOUD_ACCESS_TOKEN != '' && steps.changes.outputs.has-code-changes == 'true'

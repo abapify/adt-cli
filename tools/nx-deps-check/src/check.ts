@@ -29,6 +29,7 @@ import ts from 'typescript';
 import {
   NODE_BUILTINS,
   importSpecs,
+  SCAN_EXT,
   scanFiles,
   toPackageName,
 } from './imports.js';
@@ -123,11 +124,7 @@ for (const file of scanFiles(projectRoot)) {
     content,
     ts.ScriptTarget.Latest,
     true,
-    ext === '.tsx' || ext === '.jsx'
-      ? ts.ScriptKind.JSX
-      : ext === '.ts' || ext === '.mts' || ext === '.cts'
-        ? ts.ScriptKind.TS
-        : ts.ScriptKind.JS,
+    SCAN_EXT.get(ext) ?? ts.ScriptKind.JS,
   );
   const rel = file.slice(projectRoot.length + 1);
   const fileDev = DEV_DIR.test(rel) || DEV_SUFFIX.test(rel);
