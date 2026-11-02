@@ -20,7 +20,7 @@ const proxy = createAdtProxy({
   targetUrl: 'https://sap.example.com',
   auth: {
     username: 'DEVELOPER',
-    password: process.env.SAP_PASSWORD!,
+    password,
     client: '100',
   },
 });

@@ -250,7 +250,7 @@ export default defineConfig({
     DEV: basic({
       url: 'https://dev.example.com',
       username: 'developer',
-      password: process.env.SAP_PASSWORD,
+      password,
     }),
     // Playwright for production (SSO)
     PROD: playwright({

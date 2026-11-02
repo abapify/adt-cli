@@ -22,7 +22,7 @@ const session = await auth.login('DEV', {
   options: {
     url: 'https://sap.example.com',
     username: 'DEVELOPER',
-    password: process.env.SAP_PASSWORD,
+    password,
   },
 });
 ```

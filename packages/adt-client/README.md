@@ -19,7 +19,7 @@ import { createAdtClient } from '@abapify/adt-client';
 const client = createAdtClient({
   baseUrl: 'https://sap.example.com',
   username: 'DEVELOPER',
-  password: process.env.SAP_PASSWORD,
+  password,
   client: '100',
 });
 
