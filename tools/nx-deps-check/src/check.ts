@@ -253,8 +253,9 @@ function* importSpecs(
 // package name -> list of "file:line"
 const violations = new Map<string, string[]>();
 
-const DEV_FILE =
-  /(^|\/)(tests?|__tests__|e2e|fixtures?|scripts?|generators?|config)\/|\.(test|spec|config)\.[a-z]+$|\.config\.[a-z]+$/i;
+const DEV_DIR =
+  /(^|\/)(tests?|__tests__|e2e|fixtures?|scripts?|generators?|config)\//i;
+const DEV_SUFFIX = /\.(test|spec|config)\.[a-z]+$/i;
 
 for (const file of scanFiles(projectRoot)) {
   const ext = file.slice(file.lastIndexOf('.'));
@@ -272,7 +273,7 @@ for (const file of scanFiles(projectRoot)) {
     SCAN_EXT.get(ext)!,
   );
   const rel = file.slice(projectRoot.length + 1);
-  const fileDev = DEV_FILE.test(rel);
+  const fileDev = DEV_DIR.test(rel) || DEV_SUFFIX.test(rel);
   // Private projects never ship, so their files may lean on devDeps —
   // but the root workspace-link allowance stays gated on dev files so a
   // private project's prod file can't silently pull a sibling package.
@@ -314,7 +315,9 @@ console.error(
     "Every external import must be declared in this package's package.json " +
     '(or exist in root devDependencies for shared tooling).\n',
 );
-for (const [pkg, files] of [...violations].sort()) {
+for (const [pkg, files] of [...violations].sort((a, b) =>
+  a[0].localeCompare(b[0]),
+)) {
   console.error(`  ${pkg}`);
   for (const f of files) console.error(`    ${f}`);
 }
