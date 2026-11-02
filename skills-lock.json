@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "herdr": {
+      "source": "herdrdev/herdr",
+      "sourceType": "github",
+      "skillPath": "skills/herdr/SKILL.md",
+      "computedHash": "72177e911f55467de8737174072ec6bb08e30bbf62bceabcb69678e944398b18"
+    },
+    "herdr-pre-release-audit": {
+      "source": "herdrdev/herdr",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/herdr-pre-release-audit/SKILL.md",
+      "computedHash": "4f3f7a8874f5c2625dee7c0b74b02e4b3f6492a47f15cc99b4fe6d801ef6068b"
+    },
+    "herdr-throwaway-repro": {
+      "source": "herdrdev/herdr",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/herdr-throwaway-repro/SKILL.md",
+      "computedHash": "7cff831bca080d7acca578f5b21b344090b687f87b40017c88f3460c76554a71"
+    },
+    "triage": {
+      "source": "herdrdev/herdr",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/triage/SKILL.md",
+      "computedHash": "18a52ea4f4d24f4f7d0390c88badaa5ef0db46ea86efdbd2c1b4d5b0d871af1c"
+    }
+  }
+}

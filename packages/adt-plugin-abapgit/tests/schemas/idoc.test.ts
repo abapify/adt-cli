@@ -49,3 +49,11 @@ const scenario: SchemaScenario<IdocSchema> = {
 };
 
 runSchemaTests(scenario);
+
+import { it } from 'node:test';
+import assert from 'node:assert';
+
+it('idoc schema scenario is configured', () => {
+  assert.strictEqual(scenario.name, 'IDOC');
+  assert.ok(scenario.fixtures.length > 0);
+});

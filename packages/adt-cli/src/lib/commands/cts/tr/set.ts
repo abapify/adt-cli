@@ -89,8 +89,6 @@ export const ctsSetCommand = new Command('set')
             {
               transport,
               status: 'updated',
-              description: tr.description,
-              target: tr.target,
             },
             null,
             2,
@@ -98,12 +96,6 @@ export const ctsSetCommand = new Command('set')
         );
       } else {
         console.log(`✅ Transport ${transport} updated successfully`);
-        if (updateOptions.description) {
-          console.log(`   Description: "${updateOptions.description}"`);
-        }
-        if (updateOptions.target) {
-          console.log(`   Target: ${updateOptions.target}`);
-        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

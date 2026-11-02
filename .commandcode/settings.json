@@ -1,0 +1,8 @@
+{
+  "tasteLearning": false,
+  "permissions": {
+    "allow": ["Shell(herdr:*)", "Shell(git:*)"],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

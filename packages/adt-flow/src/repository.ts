@@ -368,7 +368,7 @@ export async function planRepositoryChanges(
   const removes: string[] = [];
   for (const path of [...ownedPaths]
     .filter((item) => !desiredByPath.has(item))
-    .sort()) {
+    .sort((a, b) => compareStrings(a, b))) {
     if (await fileExists(root, path)) removes.push(path);
   }
   const removedByHash = new Map<string, string[]>();
@@ -391,7 +391,7 @@ export async function planRepositoryChanges(
     }
   }
 
-  return { writes, removes, unchanged: unchanged.sort(), moved };
+  return { writes, removes, unchanged: unchanged.sort(compareStrings), moved };
 }
 
 async function ensureParentDirectories(

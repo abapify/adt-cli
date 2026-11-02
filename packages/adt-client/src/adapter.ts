@@ -428,7 +428,9 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
       // Make request
       logger?.debug(`HTTP ${options.method} ${url.toString()}`);
       {
-        const headerNames = Object.keys(headers).sort();
+        const headerNames = Object.keys(headers).sort((a, b) =>
+          a.localeCompare(b),
+        );
         logger?.debug(
           'Request headers (names only): ' + JSON.stringify(headerNames),
         );

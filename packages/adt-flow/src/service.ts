@@ -77,7 +77,7 @@ function normalizeTransports(values: readonly string[]): string[] {
     ...new Set(values.map((value) => value.trim().toUpperCase())),
   ]
     .filter(Boolean)
-    .sort();
+    .sort((a, b) => compareStrings(a, b));
   if (
     normalized.length === 0 ||
     normalized.some((value) => !TRANSPORT.test(value))
@@ -1002,7 +1002,9 @@ function createFlowContext(
     formatDigest: digest({
       id: dependencies.format.id,
       options: config.format.options ?? {},
-      supportedTypes: [...dependencies.format.supportedTypes].sort(),
+      supportedTypes: [...dependencies.format.supportedTypes].sort((a, b) =>
+        compareStrings(a, b),
+      ),
     }),
     dependencies,
     calls: { manifest: 0, metadata: 0, source: 0 },
@@ -1638,13 +1640,13 @@ function buildCheckoutResult(
     scopeTransports: manifest.scopeTransports,
     changed: [...plan.writes.keys()]
       .filter((path) => !descriptorSet.has(path) && !movedTo.has(path))
-      .sort(),
+      .sort((a, b) => compareStrings(a, b)),
     moved: sourceMoves,
     removed: plan.removes
       .filter((path) => !path.startsWith('.adt/') && !movedFrom.has(path))
-      .sort(),
+      .sort((a, b) => compareStrings(a, b)),
     unchanged: plan.unchanged.filter((path) => !descriptorSet.has(path)),
-    descriptors: [...descriptorSet].sort(),
+    descriptors: [...descriptorSet].sort((a, b) => compareStrings(a, b)),
     skipped,
     inventory: manifest.inventory,
     inventoryResolutions: manifest.inventoryResolutions,

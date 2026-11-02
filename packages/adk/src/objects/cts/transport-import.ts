@@ -472,7 +472,7 @@ export class AdkTransport {
    */
   getObjectTypes(): string[] {
     const types = new Set(this.objects.map((obj) => obj.type));
-    return Array.from(types).sort();
+    return Array.from(types).sort((a, b) => a.localeCompare(b));
   }
 
   /**

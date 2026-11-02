@@ -32,8 +32,12 @@ const jsonSchemaExports = allExports.filter(([_, value]) => {
 });
 
 // Get schema names and sort alphabetically
-const xmlSchemaNames = xmlSchemaExports.map(([name]) => name).sort();
-const jsonSchemaNames = jsonSchemaExports.map(([name]) => name).sort();
+const xmlSchemaNames = xmlSchemaExports
+  .map(([name]) => name)
+  .sort((a, b) => a.localeCompare(b));
+const jsonSchemaNames = jsonSchemaExports
+  .map(([name]) => name)
+  .sort((a, b) => a.localeCompare(b));
 
 // Generate the file content
 const output = `/**

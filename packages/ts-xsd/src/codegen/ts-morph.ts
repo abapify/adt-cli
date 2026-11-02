@@ -449,7 +449,7 @@ export function expandTypeToString(
   const textRepr = type.getText();
   if (textRepr.includes('import(')) {
     // Extract the type name from import("...").TypeName
-    const match = textRepr.match(/import\([^)]+\)\.(\w+)/);
+    const match = /import\([^)]+\)\.(\w+)/.exec(textRepr);
     if (match) {
       const typeName = match[1];
       // Look up the type alias in all source files in the project
@@ -632,7 +632,7 @@ function addImportStatements(ctx: GeneratorContext): void {
   for (const [schemaName, types] of importsBySchema) {
     ctx.sourceFile.addImportDeclaration({
       moduleSpecifier: `./${schemaName}.types`,
-      namedImports: Array.from(types).sort(),
+      namedImports: Array.from(types).sort((a, b) => a.localeCompare(b)),
     });
   }
 }

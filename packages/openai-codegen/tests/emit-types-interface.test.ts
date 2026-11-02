@@ -333,6 +333,7 @@ describe('emitTypesInterface abaplint parse', () => {
         i.getKey() === 'parser_error' ||
         i.getKey() === 'statement_parser_error',
     );
+    expect(parserErrors).toEqual([]);
     if (parserErrors.length > 0) {
       const detail = parserErrors
         .slice(0, 5)

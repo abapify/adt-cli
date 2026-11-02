@@ -43,8 +43,8 @@ const NAME_PATTERN = /adtcore:name="([^"]+)"/;
 export function parseXmlIdentity(
   xml: string,
 ): { type: string; name: string } | undefined {
-  const typeMatch = xml.match(TYPE_PATTERN);
-  const nameMatch = xml.match(NAME_PATTERN);
+  const typeMatch = TYPE_PATTERN.exec(xml);
+  const nameMatch = NAME_PATTERN.exec(xml);
 
   if (typeMatch && nameMatch) {
     return {

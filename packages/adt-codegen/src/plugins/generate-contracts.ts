@@ -501,7 +501,7 @@ function generateContractFile(
   const availableSchemas = new Set(Object.values(contentTypeMapping.mapping));
   const schemaImports = Array.from(schemas)
     .filter((s) => availableSchemas.has(s))
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
 
   const contractName = relativePath.split('/').pop() || 'contract';
 
@@ -631,7 +631,9 @@ function generateIndexFile(
     }
   }
 
-  for (const [dir, items] of Array.from(byDir.entries()).sort()) {
+  for (const [dir, items] of Array.from(byDir.entries()).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  )) {
     code += '// ' + dir + '\n';
     for (const item of items.sort((a, b) =>
       a.contractName.localeCompare(b.contractName),
@@ -702,7 +704,9 @@ function generateUnsupportedEndpointsDoc(
     }
   }
 
-  for (const [area, endpoints] of Array.from(byArea.entries()).sort()) {
+  for (const [area, endpoints] of Array.from(byArea.entries()).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  )) {
     doc += '### ' + area + ' (' + endpoints.length + ' endpoints)\n\n';
     doc += '<details>\n<summary>Click to expand</summary>\n\n';
     doc += '| Endpoint | Title |\n';
