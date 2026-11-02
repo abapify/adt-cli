@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "@abapify/logger": "0.4.33",
+    "open": "^11.0.4",
     "proxy-agent": "^6.4.0"
   },
   "keywords": [
