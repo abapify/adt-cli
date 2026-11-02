@@ -844,6 +844,14 @@ function isClassComponentAbsence(ctx: ProcessGroupContext): boolean {
   );
 }
 
+function hasPresentClassOwner(ctx: ProcessGroupContext): boolean {
+  if (ctx.pending.previous?.state === 'present') return true;
+  return ctx.pending.ownedPaths.some((path) => {
+    const parsed = ctx.dependencies.format.parseFilename?.(basename(path));
+    return parsed?.extension === 'abap';
+  });
+}
+
 async function buildClassComponentAbsenceResult(
   ctx: ProcessGroupContext,
 ): Promise<GroupResult> {
@@ -888,7 +896,7 @@ async function handleEmptyGroup(
 ): Promise<GroupResult> {
   const appComponentResult = await maybeSkipByAppComponent(ctx);
   if (appComponentResult) return appComponentResult;
-  if (isClassComponentAbsence(ctx)) {
+  if (isClassComponentAbsence(ctx) && hasPresentClassOwner(ctx)) {
     return buildClassComponentAbsenceResult(ctx);
   }
 

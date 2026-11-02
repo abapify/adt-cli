@@ -77,3 +77,15 @@ legacy preserved files SHALL NOT receive invented SAP versions.
 - **WHEN** baseline checkout selects a companion added by the requested transport
 - **THEN** that companion is absent from the baseline, with the other components unchanged
 - **THEN** the class remains present for the subsequent head checkout
+
+#### Scenario: Companion deletion does not recreate an absent class
+
+- **GIVEN** the workspace has no present class descriptor or owned class source
+- **WHEN** head checkout selects only a companion deletion
+- **THEN** it retains the deleted/absent owner boundary rather than creating a present metadata-only class
+
+#### Scenario: Case-variant legacy companions collide
+
+- **GIVEN** two owned source files differ only in companion suffix case
+- **WHEN** checkout plans preservation of their shared component
+- **THEN** the repository collision check rejects the plan before writes

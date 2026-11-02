@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   mkdir,
   mkdtemp,
@@ -354,6 +355,58 @@ describe('class component preservation in an existing repository', () => {
       readFile(f.file('implementations', 'new')),
     ).rejects.toMatchObject({ code: 'ENOENT' });
   });
+
+  it.each([false, true])(
+    'rejects case-variant duplicate companions before writes (indexed=%s)',
+    async (indexed) => {
+      const f = await fixture();
+      await f.seed(indexed);
+      const relative = 'src/zcl_demo.clas.LOCALS_DEF.abap';
+      const duplicate = join(f.root, relative);
+      const bytes = '* conflicting definition\n';
+      await writeFile(duplicate, bytes);
+      if (indexed) {
+        const path = join(f.root, '.adt/objects/CLAS/zcl_demo.clas.adt.json');
+        const descriptor = JSON.parse(await readFile(path, 'utf8'));
+        descriptor.ownedFiles.push({
+          path: relative,
+          hash: createHash('sha256').update(bytes).digest('hex'),
+          role: 'source',
+          sourceComponent: 'definitions',
+        });
+        await writeFile(path, JSON.stringify(descriptor));
+      }
+      await expect(f.checkout()).rejects.toMatchObject({
+        code: 'path_collision',
+      });
+      expect(await readFile(f.file('main'), 'utf8')).toBe(f.main(false));
+      expect(await readFile(f.file('definitions'), 'utf8')).toBe(
+        f.oldSources['definitions'],
+      );
+      expect(await readFile(duplicate, 'utf8')).toBe(bytes);
+    },
+  );
+
+  it.each([false, true])(
+    'does not create a metadata-only class for a companion deletion without a present owner (tombstoned=%s)',
+    async (tombstoned) => {
+      const f = await fixture();
+      if (tombstoned) {
+        await f.seed(false);
+        await f.checkout(['main'], ['main']);
+      }
+      const result = await f.checkout(['implementations'], ['implementations']);
+      const path = result.descriptors.find((path) =>
+        path.endsWith('.clas.adt.json'),
+      )!;
+      const descriptor = JSON.parse(await readFile(join(f.root, path), 'utf8'));
+      expect(descriptor.state).toBe('deleted');
+      expect(descriptor.ownedFiles).toEqual([]);
+      await expect(
+        readFile(join(f.root, 'src/zcl_demo.clas.xml')),
+      ).rejects.toMatchObject({ code: 'ENOENT' });
+    },
+  );
 
   it('refuses ambiguous duplicate legacy components before changing source', async () => {
     const f = await fixture();
