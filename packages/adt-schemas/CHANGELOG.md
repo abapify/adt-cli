@@ -1,3 +1,14 @@
+## 0.4.33 (2026-11-02)
+
+### 🩹 Fixes
+
+- **deps:** raise zod floor to ^4.6.7 in ts-xsd and adt-schemas (GHSA-mrhx-c7xc-m3w5) ([#280](https://github.com/abapify/adt-cli/pull/280))
+
+### ❤️ Thank You
+
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.32 (2026-11-02)
 
 This was a version bump only for adt-schemas to align it with other projects, there were no code changes.
