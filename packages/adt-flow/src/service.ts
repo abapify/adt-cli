@@ -833,6 +833,31 @@ async function handleBaseEmptyGroup(
   return buildTombstoneResult(ctx, identity, descriptorPath);
 }
 
+function isClassComponentDeletion(ctx: ProcessGroupContext): boolean {
+  return (
+    ctx.group.identity.type === 'CLAS' &&
+    ctx.group.entries.every(
+      (entry) =>
+        entry.component.id !== 'main' && entry.changeKind === 'deleted',
+    )
+  );
+}
+
+async function buildClassComponentDeletionResult(
+  ctx: ProcessGroupContext,
+): Promise<GroupResult> {
+  const model = await ctx.limiters.metadata.run(() =>
+    ctx.dependencies.loadObject(ctx.group.identity),
+  );
+  ctx.calls.metadata += model.metadataCalls ?? 1;
+  return buildMaterializedResult(ctx, {
+    model,
+    sources: {},
+    presentSelections: [],
+    reusedIndexedSource: false,
+  });
+}
+
 async function resolveEmptyGroup(
   ctx: ProcessGroupContext,
   identity: FlowObjectIdentity,
@@ -862,6 +887,9 @@ async function handleEmptyGroup(
 ): Promise<GroupResult> {
   const appComponentResult = await maybeSkipByAppComponent(ctx);
   if (appComponentResult) return appComponentResult;
+  if (ctx.mode === 'head' && isClassComponentDeletion(ctx)) {
+    return buildClassComponentDeletionResult(ctx);
+  }
 
   return resolveEmptyGroup(
     ctx,

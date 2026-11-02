@@ -1,7 +1,7 @@
 import { basename, dirname, posix } from 'node:path';
 import type { FormatPlugin, MaterializedFormatFile } from '@abapify/adt-plugin';
 import type { ObjectDescriptor } from './schemas';
-import { readText } from './repository';
+import { readRegularText } from './repository';
 import { AdtFlowError, type FlowObjectIdentity } from './types';
 
 interface PreservationInput {
@@ -26,9 +26,8 @@ function unselectedComponent(input: PreservationInput, path: string) {
   const parsed = classFilename(input, path);
   if (parsed?.extension !== 'abap') return undefined;
   const sourceKeys = input.format.getHandler('CLAS')?.suffixToSourceKey;
-  const component = parsed.suffix
-    ? (sourceKeys?.[parsed.suffix] ?? parsed.suffix)
-    : 'main';
+  const suffix = parsed.suffix?.toLowerCase();
+  const component = suffix ? (sourceKeys?.[suffix] ?? suffix) : 'main';
   return input.selectedComponents.has(component) ? undefined : component;
 }
 
@@ -38,7 +37,7 @@ async function retainedSource(
   targetPath: string,
   component: string,
 ): Promise<MaterializedFormatFile> {
-  const content = await readText(input.root, path);
+  const content = await readRegularText(input.root, path);
   if (content === undefined) {
     throw new AdtFlowError(
       'working_tree_diverged',
@@ -52,6 +51,16 @@ async function retainedSource(
     role: 'source',
     sourceComponent: component,
   };
+}
+
+function retainedSelections(
+  input: PreservationInput,
+  components: ReadonlySet<string>,
+) {
+  // Legacy files have no invented SAP version. Indexed parts keep their own version.
+  return (input.previous?.selections ?? []).filter((selection) =>
+    components.has(selection.component),
+  );
 }
 
 /** Keep baseline class parts which this transport did not select or delete. */
@@ -85,10 +94,5 @@ export async function preserveUnselectedClassComponents(
     retainedPaths.add(targetPath);
     retainedComponents.add(component);
   }
-  // A preserved legacy file has no invented SAP version. Previously indexed
-  // components keep their original selection, never the selected main version.
-  const selections = (input.previous?.selections ?? []).filter((selection) =>
-    retainedComponents.has(selection.component),
-  );
-  return { files, selections };
+  return { files, selections: retainedSelections(input, retainedComponents) };
 }

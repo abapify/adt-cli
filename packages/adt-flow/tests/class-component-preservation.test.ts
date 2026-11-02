@@ -1,5 +1,13 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  rename,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -73,7 +81,7 @@ async function fixture(name = 'ZCL_DEMO') {
         pgmid: 'R3TR',
         type: 'CLAS',
         name,
-        objFunc: selected.every((c) => deleted.includes(c)) ? 'D' : '',
+        objFunc: deleted.includes('main') ? 'D' : '',
         sourceTransport: transport,
       },
     ];
@@ -252,6 +260,57 @@ describe('class component preservation in an existing repository', () => {
       expect(await readFile(f.file(component), 'utf8')).toBe(
         f.oldSources[component],
       );
+  });
+
+  it.each([false, true])(
+    'deletes only a selected companion when no component is present (indexed=%s)',
+    async (indexed) => {
+      const f = await fixture();
+      await f.seed(indexed);
+      const result = await f.checkout(['implementations'], ['implementations']);
+      expect(result.removed).toEqual(['src/zcl_demo.clas.locals_imp.abap']);
+      await expect(readFile(f.file('implementations'))).rejects.toMatchObject({
+        code: 'ENOENT',
+      });
+      for (const component of ['main', 'definitions', 'macros', 'testclasses'])
+        expect(await readFile(f.file(component), 'utf8')).toBe(
+          f.oldSources[component],
+        );
+    },
+  );
+
+  it('does not preserve a selected deletion with an uppercase legacy suffix', async () => {
+    const f = await fixture();
+    await f.seed(false);
+    const uppercase = f
+      .file('implementations')
+      .replace('locals_imp', 'LOCALS_IMP');
+    await rename(f.file('implementations'), uppercase);
+    await f.checkout(['main', 'implementations'], ['implementations']);
+    await expect(readFile(uppercase)).rejects.toMatchObject({ code: 'ENOENT' });
+    expect(await readFile(f.file('main'), 'utf8')).toBe(f.main(true));
+    expect(await readFile(f.file('definitions'), 'utf8')).toBe(
+      f.oldSources['definitions'],
+    );
+  });
+
+  it('rejects an indexed symlink before copying its target into a relocated class', async () => {
+    const f = await fixture();
+    await f.seed(true);
+    const secret = join(f.root, 'sensitive-input.txt');
+    await writeFile(secret, f.oldSources['implementations']);
+    await rm(f.file('implementations'));
+    await symlink('../sensitive-input.txt', f.file('implementations'));
+    await expect(f.checkout(['main'], [], true)).rejects.toMatchObject({
+      code: 'path_invalid',
+    });
+    expect(await readFile(secret, 'utf8')).toBe(
+      f.oldSources['implementations'],
+    );
+    expect(await readFile(f.file('main'), 'utf8')).toBe(f.main(false));
+    await expect(
+      readFile(f.file('implementations', 'new')),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
   it('refuses ambiguous duplicate legacy components before changing source', async () => {
