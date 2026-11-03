@@ -47,3 +47,37 @@ export type {
 
 - `ink`, `react`
 - Consumed by: [`adt-cli`](./adt-cli).
+
+## Usage
+
+Boot the TUI from a CLI command, passing in an initial fetch function
+(typically backed by the ADT client) and a start URI:
+
+```ts
+import { run } from '@abapify/adt-tui';
+
+await run({
+  fetch: (uri) => client.request(uri),
+  startUrl: '/sap/bc/adt/repository/nodestructure',
+});
+```
+
+Or compose the primitives directly inside your own Ink app:
+
+```tsx
+import { App, Navigator, NavigationProvider } from '@abapify/adt-tui';
+import { render } from 'ink';
+
+render(
+  <NavigationProvider>
+    <App
+      fetch={fetchFn}
+      startUrl="/sap/bc/adt/discovery"
+    />
+  </NavigationProvider>,
+);
+```
+
+Custom pages implement the `PageComponent` contract and return a
+`PageResult` describing which link to follow next; the framework takes
+care of history, rendering, and back-navigation.

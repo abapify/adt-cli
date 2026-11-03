@@ -1,348 +1,38 @@
 # @abapify/adt-playwright
 
-[![version](https://img.shields.io/github/package-json/v/abapify/adt-cli?filename=packages/adt-playwright/package.json)](https://github.com/abapify/adt-cli/pkgs/npm/%40abapify%2Fadt-playwright)
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-playwright)](https://www.npmjs.com/package/@abapify/adt-playwright)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-Playwright-based SSO authentication plugin for SAP ADT systems. Modern alternative to Puppeteer with better API and maintenance.
+Playwright-based SSO authentication plugin for ADT client.
 
-## Features
-
-- 🔐 **SSO/IDP Support** - Works with Okta, Azure AD, and other identity providers
-- 💾 **Session Persistence** - Reuse Okta tokens across runs
-- 🎭 **Playwright-powered** - Modern, reliable browser automation
-- ⚡ **Fast** - Skip login when session is still valid
-- 🔄 **AuthManager Integration** - Works seamlessly with ADT CLI
-
-## Installation
+## Install
 
 ```bash
-npm install @abapify/adt-playwright playwright
+npm install @abapify/adt-playwright
 ```
 
-## Quick Start
+## Usage
 
-```typescript
+```ts
 // adt.config.ts
 import { defineConfig } from '@abapify/adt-config';
 import { withPlaywright } from '@abapify/adt-playwright';
 
 export default withPlaywright(
-  defineConfig({
-    destinations: {
-      DEV: 'https://sap-dev.example.com',
-      PROD: 'https://sap-prod.example.com',
-    },
-  }),
-  {
-    userDataDir: true, // Enable session persistence
-    headless: false, // Show browser window for SSO
-    ignoreHTTPSErrors: true, // Ignore self-signed certificates
-    requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'],
-  },
+  defineConfig({ destinations: { DEV: 'https://sap-dev.example.com' } }),
 );
 ```
 
-## Direct API Usage
+## Features
 
-```typescript
-import { playwrightAuth, toCookieHeader } from '@abapify/adt-playwright';
+- Browser-based SSO login (SAML / IdP) with Playwright
+- Session cookie persistence and reuse
+- Drop-in wrapper for `adt.config.ts`
 
-// Authenticate - opens browser for SSO login
-const credentials = await playwrightAuth.authenticate({
-  url: 'https://sap-system.example.com',
-  userDataDir: true,
-  headless: false,
-  requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'],
-});
+## Documentation
 
-// Convert to Cookie header for HTTP requests
-const cookieHeader = toCookieHeader(credentials);
+**[adt-cli.netlify.app/sdk/packages/adt-playwright](https://adt-cli.netlify.app/sdk/packages/adt-playwright)**
 
-// Test if session is still valid
-const result = await playwrightAuth.test(credentials);
-console.log(result.valid); // true/false
-```
+---
 
-## How It Works
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Authentication Flow                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. Launch Browser ──► 2. Navigate to SAP ──► 3. SSO Redirect  │
-│         │                                           │           │
-│         ▼                                           ▼           │
-│  [Persistent Profile]                    [User completes login] │
-│         │                                           │           │
-│         ▼                                           ▼           │
-│  4. Check Session ◄─────────────────────── 5. Capture Cookies  │
-│         │                                           │           │
-│         ▼                                           ▼           │
-│  [Valid? Skip login]                      [Return credentials]  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-1. **Launch Browser** - Opens Chromium with optional persistent profile
-2. **Navigate to SAP** - Goes to ADT discovery endpoint
-3. **SSO Redirect** - Browser redirects to Okta/IDP
-4. **User Login** - User completes 2FA/SSO in browser
-5. **Capture Cookies** - Waits for required cookies, extracts session
-
-## Options
-
-```typescript
-interface PlaywrightAuthOptions {
-  /** SAP system URL (required) */
-  url: string;
-
-  /** Hide browser window (default: false) */
-  headless?: boolean;
-
-  /** Login timeout in ms (default: 300000 = 5 minutes) */
-  timeout?: number;
-
-  /** Custom user agent */
-  userAgent?: string;
-
-  /**
-   * Cookie patterns to wait for before completing auth.
-   * Supports wildcards: 'SAP_SESSIONID_*'
-   * @example ['SAP_SESSIONID_*', 'sap-usercontext']
-   */
-  requiredCookies?: string[];
-
-  /**
-   * Session persistence directory.
-   * - true: Use default (~/.adt/browser-profile)
-   * - string: Custom path
-   * - false/undefined: No persistence
-   */
-  userDataDir?: string | boolean;
-
-  /** Ignore HTTPS errors (default: true) */
-  ignoreHTTPSErrors?: boolean;
-}
-```
-
-## Session Persistence
-
-Enable `userDataDir` to persist browser state across runs:
-
-```typescript
-// Use default profile directory (~/.adt/browser-profile)
-{
-  userDataDir: true;
-}
-
-// Use custom directory
-{
-  userDataDir: '/path/to/profile';
-}
-
-// No persistence (fresh session each time)
-{
-  userDataDir: false;
-}
-```
-
-### Benefits
-
-- **Skip repeated logins** - Okta tokens persist across runs
-- **Faster authentication** - Only refresh SAP cookies when needed
-- **Better UX** - Same experience as using a regular browser
-
-### How It Works
-
-1. **First run**: User completes full SSO login → profile saved
-2. **Subsequent runs**:
-   - ✅ **Okta valid**: Auto-authenticates, extracts SAP cookies
-   - ❌ **Okta expired**: Prompts for re-login
-
-### Clearing Sessions
-
-```bash
-# Remove default profile
-rm -rf ~/.adt/browser-profile
-
-# Or remove custom profile
-rm -rf /path/to/custom/profile
-```
-
-## Configuration Patterns
-
-### Pattern 1: All Destinations with Playwright
-
-```typescript
-import { defineConfig } from '@abapify/adt-config';
-import { withPlaywright } from '@abapify/adt-playwright';
-
-export default withPlaywright(
-  defineConfig({
-    destinations: {
-      DEV: 'https://sap-dev.example.com',
-      QAS: 'https://sap-qas.example.com',
-      PROD: 'https://sap-prod.example.com',
-    },
-  }),
-  {
-    userDataDir: true,
-    headless: false,
-    requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'],
-  },
-);
-```
-
-### Pattern 2: Per-Destination Options
-
-```typescript
-import { defineConfig } from '@abapify/adt-config';
-import { playwright } from '@abapify/adt-playwright';
-
-export default defineConfig({
-  destinations: {
-    DEV: playwright({
-      url: 'https://sap-dev.example.com',
-      timeout: 60000,
-    }),
-    PROD: playwright({
-      url: 'https://sap-prod.example.com',
-      requiredCookies: ['SAP_SESSIONID_*', 'MYSAPSSO2'],
-    }),
-  },
-});
-```
-
-### Pattern 3: Mixed Auth Types
-
-```typescript
-import { defineConfig } from '@abapify/adt-config';
-import { basic } from '@abapify/adt-auth/plugins/basic';
-import { playwright } from '@abapify/adt-playwright';
-
-export default defineConfig({
-  destinations: {
-    // Basic auth for dev
-    DEV: basic({
-      url: 'https://dev.example.com',
-      username: 'developer',
-      password: process.env.SAP_PASSWORD,
-    }),
-    // Playwright for production (SSO)
-    PROD: playwright({
-      url: 'https://prod.example.com',
-      userDataDir: true,
-    }),
-  },
-});
-```
-
-## CLI Usage
-
-```bash
-# Login to a system
-npx adt auth login --sid DEV
-
-# Login with specific destination
-npx adt auth login --sid PROD
-
-# Check session status
-npx adt auth status
-
-# Logout
-npx adt auth logout --sid DEV
-```
-
-## Architecture
-
-This package is a thin wrapper around `@abapify/browser-auth`:
-
-```
-@abapify/browser-auth (core logic)
-├── Event-driven auth flow
-├── Cookie utilities
-└── Pattern matching
-    ↑
-@abapify/adt-playwright (this package)
-├── adapter.ts      - Playwright BrowserAdapter implementation
-├── playwright-auth.ts - Wrapper around browser-auth
-├── auth-plugin.ts  - AuthManager compatibility
-└── index.ts        - Public exports
-```
-
-## Exports
-
-```typescript
-// Main auth object
-export { playwrightAuth, playwright } from '@abapify/adt-playwright';
-
-// Config helper
-export { withPlaywright } from '@abapify/adt-playwright';
-
-// Utilities
-export { toCookieHeader, toHeaders } from '@abapify/adt-playwright';
-
-// AuthManager plugin (default export)
-import authPlugin from '@abapify/adt-playwright';
-
-// Types
-export type {
-  PlaywrightCredentials,
-  PlaywrightAuthOptions,
-  PlaywrightPluginOptions,
-  CookieData,
-} from '@abapify/adt-playwright';
-```
-
-## Troubleshooting
-
-### Browser doesn't open
-
-Ensure `headless: false` is set:
-
-```typescript
-{
-  headless: false;
-}
-```
-
-### Cookies not captured
-
-Specify the required cookies explicitly:
-
-```typescript
-{
-  requiredCookies: ['SAP_SESSIONID_*', 'sap-usercontext'];
-}
-```
-
-### SSL Certificate errors
-
-Enable `ignoreHTTPSErrors` (default is true):
-
-```typescript
-{
-  ignoreHTTPSErrors: true;
-}
-```
-
-### Session not persisting
-
-Check that `userDataDir` is enabled and the directory is writable:
-
-```typescript
-{
-  userDataDir: true;
-}
-// or
-{
-  userDataDir: '/writable/path';
-}
-```
-
-## Related Packages
-
-- [`@abapify/browser-auth`](../browser-auth) - Core authentication logic
-- [`@abapify/adt-puppeteer`](../adt-puppeteer) - Puppeteer alternative
-- [`@abapify/adt-auth`](../adt-auth) - Authentication manager
-- [`@abapify/adt-config`](../adt-config) - Configuration utilities
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.
