@@ -11,8 +11,10 @@ Development Tools (ADT). Commands are thin wrappers around typed contracts from
 [`@abapify/adt-client`](../sdk/packages/overview.md) and business services from
 [`@abapify/adk`](../sdk/packages/overview.md).
 
-Run `adt --help` or `adt <command> --help` to see the live help text; this
-section documents each command group in depth.
+Run `adt --help` or `adt <command> --help` to see the live help text. The
+[command reference](./reference/index.md) lists every command, argument and
+option, generated from the CLI itself; the pages in this section explain each
+command group in depth.
 
 ## Global options
 

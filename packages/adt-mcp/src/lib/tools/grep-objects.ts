@@ -32,7 +32,7 @@ export function registerGrepObjectsTool(
             objectType: z.string().describe('Object type (e.g. CLAS, PROG)'),
           }),
         )
-        .optional()
+        .min(1, 'Provide at least one object')
         .describe('Objects to search within (resolved to URIs automatically)'),
       maxResults: z
         .number()

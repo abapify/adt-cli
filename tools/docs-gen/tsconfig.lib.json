@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "emitDeclarationOnly": false,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    {
+      "path": "../../packages/adt-mcp"
+    },
+    {
+      "path": "../../packages/adt-flow/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/adt-export"
+    },
+    {
+      "path": "../../packages/adt-diff"
+    },
+    {
+      "path": "../../packages/adt-codegen"
+    },
+    {
+      "path": "../../packages/adt-cli/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/adt-aunit"
+    },
+    {
+      "path": "../../packages/adt-atc"
+    }
+  ]
+}

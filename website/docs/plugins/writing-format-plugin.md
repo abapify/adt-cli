@@ -42,16 +42,14 @@ export const myFormat = createPlugin({
       // ctx.resolvePackagePath(name) — walk the package hierarchy
       return {
         success: true,
-        filesCreated: [
-          /* relative paths */
-        ],
+        filesCreated: [/* relative paths */],
       };
     },
 
     // files on disk → ADK objects (optional)
     export: async function* (fileTree /* FileTree */) {
       for (const path of await fileTree.glob('**/*.myformat.json')) {
-        yield /* AdkObject */;
+        yield /* AdkObject */ {};
       }
     },
   },

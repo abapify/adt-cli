@@ -125,6 +125,12 @@
     },
     {
       "path": "./packages/adt-tui"
+    },
+    {
+      "path": "./tools/nx-deps-check"
+    },
+    {
+      "path": "./tools/docs-gen"
     }
   ],
   "compilerOptions": {}
