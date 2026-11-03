@@ -32,6 +32,15 @@ interface JsonSchema {
   items?: JsonSchema;
   properties?: Record<string, JsonSchema>;
   required?: string[];
+  minimum?: number;
+  maximum?: number;
+  exclusiveMinimum?: number;
+  exclusiveMaximum?: number;
+  minLength?: number;
+  maxLength?: number;
+  minItems?: number;
+  maxItems?: number;
+  pattern?: string;
 }
 
 export interface McpPage {
@@ -143,13 +152,35 @@ function typeLabel(s: JsonSchema): string {
   return Array.isArray(s.type) ? s.type.join(' | ') : (s.type ?? 'unknown');
 }
 
+function constraintNotes(s: JsonSchema): string[] {
+  const out: string[] = [];
+  const lo = s.minimum ?? s.exclusiveMinimum;
+  const hi = s.maximum ?? s.exclusiveMaximum;
+  if (lo !== undefined || hi !== undefined) {
+    const open = s.exclusiveMinimum !== undefined ? '(' : '[';
+    const close = s.exclusiveMaximum !== undefined ? ')' : ']';
+    out.push(`Range: ${open}${lo ?? '-∞'}, ${hi ?? '+∞'}${close}.`);
+  }
+  if (s.minLength !== undefined || s.maxLength !== undefined) {
+    out.push(`Length: ${s.minLength ?? 0}–${s.maxLength ?? '∞'}.`);
+  }
+  if (s.minItems !== undefined || s.maxItems !== undefined) {
+    out.push(`Items: ${s.minItems ?? 0}–${s.maxItems ?? '∞'}.`);
+  }
+  if (s.pattern !== undefined) out.push(`Pattern: \`${s.pattern}\`.`);
+  return out;
+}
+
 function parameterRow(
   name: string,
   prop: JsonSchema,
   required: boolean,
 ): string[] {
-  const notes = [prop.description];
-  if (prop.default !== undefined) {
+  const notes = [prop.description, ...constraintNotes(prop)];
+  if (
+    prop.default !== undefined &&
+    !/\bdefault\b/i.test(String(prop.description ?? ''))
+  ) {
     notes.push(`Default: \`${JSON.stringify(prop.default)}\`.`);
   }
   return [
@@ -162,7 +193,24 @@ function parameterRow(
 
 /** Rows for nested object fields (`a.b`) and array item fields (`a[].b`). */
 function nestedRows(prop: JsonSchema, name: string, depth: number): string[][] {
-  if (depth >= 2) return [];
+  if (depth >= 2) {
+    const deeper =
+      prop.properties ||
+      prop.items?.properties ||
+      (prop.anyOf ?? prop.oneOf)?.some(
+        (v) => v.properties || v.anyOf || v.oneOf,
+      );
+    return deeper
+      ? [
+          [
+            code(`${name}.…`),
+            '',
+            '',
+            escapeCell('Further nested fields omitted (depth limit).'),
+          ],
+        ]
+      : [];
+  }
   const own = prop.properties ? parameterRows(prop, `${name}.`, depth + 1) : [];
   const items = prop.items?.properties
     ? parameterRows(prop.items, `${name}[].`, depth + 1)
@@ -253,6 +301,14 @@ function inputSchemaSection(tool: ToolInfo): string {
     );
   }
   const rows = parameterRows(jsonSchema);
+  rows.push([
+    code('destination'),
+    code('string'),
+    'destination mode',
+    escapeCell(
+      'Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]{1,62}$`.',
+    ),
+  ]);
   const body =
     rows.length > 0
       ? table(['Parameter', 'Type', 'Required', 'Description'], rows)

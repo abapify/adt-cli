@@ -14,18 +14,19 @@ Defined in [`packages/adt-mcp/src/lib/tools/import-package.ts`](https://github.c
 
 ## Input schema
 
-| Parameter     | Type       | Required | Description                                                             |
-| ------------- | ---------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`     | `string`   | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`      | `string`   | no       | SAP client number                                                       |
-| `username`    | `string`   | no       | Username for basic auth                                                 |
-| `password`    | `string`   | no       | Password for basic auth                                                 |
-| `systemId`    | `string`   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `packageName` | `string`   | yes      | ABAP package name (e.g. Z_MY_PACKAGE)                                   |
-| `outputDir`   | `string`   | no       | Target directory (default: ./imported)                                  |
-| `recursive`   | `boolean`  | no       | Include subpackages (default: true)                                     |
-| `format`      | `string`   | no       | Format plugin name, default 'abapgit'                                   |
-| `objectTypes` | `string[]` | no       | Optional list of object types to filter (e.g. ["CLAS","INTF"])          |
+| Parameter     | Type       | Required         | Description                                                                                                    |
+| ------------- | ---------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string`   | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`      | `string`   | no               | SAP client number                                                                                              |
+| `username`    | `string`   | no               | Username for basic auth                                                                                        |
+| `password`    | `string`   | no               | Password for basic auth                                                                                        |
+| `systemId`    | `string`   | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `packageName` | `string`   | yes              | ABAP package name (e.g. Z_MY_PACKAGE)                                                                          |
+| `outputDir`   | `string`   | no               | Target directory (default: ./imported)                                                                         |
+| `recursive`   | `boolean`  | no               | Include subpackages (default: true)                                                                            |
+| `format`      | `string`   | no               | Format plugin name, default 'abapgit'                                                                          |
+| `objectTypes` | `string[]` | no               | Optional list of object types to filter (e.g. ["CLAS","INTF"])                                                 |
+| `destination` | `string`   | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

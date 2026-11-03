@@ -14,18 +14,19 @@ Defined in [`packages/adt-mcp/src/lib/tools/create-object.ts`](https://github.co
 
 ## Input schema
 
-| Parameter     | Type     | Required | Description                                                                                 |
-| ------------- | -------- | -------- | ------------------------------------------------------------------------------------------- |
-| `baseUrl`     | `string` | no       | SAP system base URL (e.g. https://host:8000)                                                |
-| `client`      | `string` | no       | SAP client number                                                                           |
-| `username`    | `string` | no       | Username for basic auth                                                                     |
-| `password`    | `string` | no       | Password for basic auth                                                                     |
-| `systemId`    | `string` | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)                     |
-| `objectName`  | `string` | yes      | Name of the new object (uppercase, e.g. ZCL_MY_CLASS, ZPACKAGE)                             |
-| `objectType`  | `string` | yes      | Object type: PROG, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF, SRVD |
-| `description` | `string` | yes      | Short description of the object                                                             |
-| `packageName` | `string` | no       | Package to assign the object to (required for non-local objects)                            |
-| `transport`   | `string` | no       | Transport request number (required for transportable objects)                               |
+| Parameter     | Type     | Required         | Description                                                                                                    |
+| ------------- | -------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string` | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`      | `string` | no               | SAP client number                                                                                              |
+| `username`    | `string` | no               | Username for basic auth                                                                                        |
+| `password`    | `string` | no               | Password for basic auth                                                                                        |
+| `systemId`    | `string` | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `objectName`  | `string` | yes              | Name of the new object (uppercase, e.g. ZCL_MY_CLASS, ZPACKAGE)                                                |
+| `objectType`  | `string` | yes              | Object type: PROG, CLAS, INTF, FUGR, DEVC, DOMA, DTEL, TABL, STRUCT, DDLS, DCLS, BDEF, SRVD                    |
+| `description` | `string` | yes              | Short description of the object                                                                                |
+| `packageName` | `string` | no               | Package to assign the object to (required for non-local objects)                                               |
+| `transport`   | `string` | no               | Transport request number (required for transportable objects)                                                  |
+| `destination` | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

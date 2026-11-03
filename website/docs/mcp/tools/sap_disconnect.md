@@ -14,7 +14,9 @@ Defined in [`packages/adt-mcp/src/lib/tools/sap-disconnect.ts`](https://github.c
 
 ## Input schema
 
-This tool takes no arguments.
+| Parameter     | Type     | Required         | Description                                                                                                    |
+| ------------- | -------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `destination` | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

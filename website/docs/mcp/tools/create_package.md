@@ -14,18 +14,19 @@ Defined in [`packages/adt-mcp/src/lib/tools/create-package.ts`](https://github.c
 
 ## Input schema
 
-| Parameter       | Type                                         | Required | Description                                                                           |
-| --------------- | -------------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `baseUrl`       | `string`                                     | no       | SAP system base URL (e.g. https://host:8000)                                          |
-| `client`        | `string`                                     | no       | SAP client number                                                                     |
-| `username`      | `string`                                     | no       | Username for basic auth                                                               |
-| `password`      | `string`                                     | no       | Password for basic auth                                                               |
-| `systemId`      | `string`                                     | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)               |
-| `packageName`   | `string`                                     | yes      | Package name (e.g. ZPACKAGE, $TMP_TEST)                                               |
-| `description`   | `string`                                     | yes      | Short description of the package                                                      |
-| `parentPackage` | `string`                                     | no       | Parent package name (e.g. ZROOT). If omitted the package is created at the top level. |
-| `packageType`   | `"development"` \| `"structure"` \| `"main"` | no       | Package type (default: development)                                                   |
-| `transport`     | `string`                                     | no       | Transport request number. Omit for local packages (e.g. $-prefixed names).            |
+| Parameter       | Type                                         | Required         | Description                                                                                                    |
+| --------------- | -------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`       | `string`                                     | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`        | `string`                                     | no               | SAP client number                                                                                              |
+| `username`      | `string`                                     | no               | Username for basic auth                                                                                        |
+| `password`      | `string`                                     | no               | Password for basic auth                                                                                        |
+| `systemId`      | `string`                                     | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `packageName`   | `string`                                     | yes              | Package name (e.g. ZPACKAGE, $TMP_TEST)                                                                        |
+| `description`   | `string`                                     | yes              | Short description of the package                                                                               |
+| `parentPackage` | `string`                                     | no               | Parent package name (e.g. ZROOT). If omitted the package is created at the top level.                          |
+| `packageType`   | `"development"` \| `"structure"` \| `"main"` | no               | Package type (default: development)                                                                            |
+| `transport`     | `string`                                     | no               | Transport request number. Omit for local packages (e.g. $-prefixed names).                                     |
+| `destination`   | `string`                                     | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

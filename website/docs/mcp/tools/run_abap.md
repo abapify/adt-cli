@@ -14,18 +14,19 @@ Defined in [`packages/adt-mcp/src/lib/tools/run-abap.ts`](https://github.com/aba
 
 ## Input schema
 
-| Parameter     | Type      | Required | Description                                                             |
-| ------------- | --------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`     | `string`  | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`      | `string`  | no       | SAP client number                                                       |
-| `username`    | `string`  | no       | Username for basic auth                                                 |
-| `password`    | `string`  | no       | Password for basic auth                                                 |
-| `systemId`    | `string`  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `source`      | `string`  | yes      | ABAP source — either a bare method body or a full CLASS definition      |
-| `className`   | `string`  | no       | Temp class name (default: ZCL_ADTCLI_RUN)                               |
-| `packageName` | `string`  | no       | Package for temp class (default: $TMP)                                  |
-| `transport`   | `string`  | no       | Transport request (not needed for $TMP)                                 |
-| `keepClass`   | `boolean` | no       | If true, do not delete the temp class after execution                   |
+| Parameter     | Type      | Required         | Description                                                                                                    |
+| ------------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string`  | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`      | `string`  | no               | SAP client number                                                                                              |
+| `username`    | `string`  | no               | Username for basic auth                                                                                        |
+| `password`    | `string`  | no               | Password for basic auth                                                                                        |
+| `systemId`    | `string`  | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `source`      | `string`  | yes              | ABAP source — either a bare method body or a full CLASS definition                                             |
+| `className`   | `string`  | no               | Temp class name (default: ZCL_ADTCLI_RUN)                                                                      |
+| `packageName` | `string`  | no               | Package for temp class (default: $TMP)                                                                         |
+| `transport`   | `string`  | no               | Transport request (not needed for $TMP)                                                                        |
+| `keepClass`   | `boolean` | no               | If true, do not delete the temp class after execution                                                          |
+| `destination` | `string`  | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

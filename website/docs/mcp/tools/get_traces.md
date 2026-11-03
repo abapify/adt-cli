@@ -14,15 +14,16 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-traces.ts`](https://github.com/a
 
 ## Input schema
 
-| Parameter  | Type                                      | Required | Description                                                             |
-| ---------- | ----------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`  | `string`                                  | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`   | `string`                                  | no       | SAP client number                                                       |
-| `username` | `string`                                  | no       | Username for basic auth                                                 |
-| `password` | `string`                                  | no       | Password for basic auth                                                 |
-| `systemId` | `string`                                  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `action`   | `"list"` \| `"hitlist"` \| `"dbAccesses"` | no       | Trace operation to execute Default: `"list"`.                           |
-| `id`       | `string`                                  | no       | Trace id for hitlist/dbAccesses actions                                 |
+| Parameter     | Type                                      | Required         | Description                                                                                                    |
+| ------------- | ----------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string`                                  | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`      | `string`                                  | no               | SAP client number                                                                                              |
+| `username`    | `string`                                  | no               | Username for basic auth                                                                                        |
+| `password`    | `string`                                  | no               | Password for basic auth                                                                                        |
+| `systemId`    | `string`                                  | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `action`      | `"list"` \| `"hitlist"` \| `"dbAccesses"` | no               | Trace operation to execute Default: `"list"`.                                                                  |
+| `id`          | `string`                                  | no               | Trace id for hitlist/dbAccesses actions                                                                        |
+| `destination` | `string`                                  | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

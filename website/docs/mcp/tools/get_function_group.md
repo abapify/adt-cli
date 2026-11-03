@@ -14,15 +14,16 @@ Defined in [`packages/adt-mcp/src/lib/tools/function-tools.ts`](https://github.c
 
 ## Input schema
 
-| Parameter       | Type      | Required | Description                                                             |
-| --------------- | --------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`       | `string`  | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`        | `string`  | no       | SAP client number                                                       |
-| `username`      | `string`  | no       | Username for basic auth                                                 |
-| `password`      | `string`  | no       | Password for basic auth                                                 |
-| `systemId`      | `string`  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `groupName`     | `string`  | yes      | Function group name (e.g. ZFUGR_UTIL)                                   |
-| `includeSource` | `boolean` | no       | Whether to also return the main include source code (default: false)    |
+| Parameter       | Type      | Required         | Description                                                                                                    |
+| --------------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`       | `string`  | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`        | `string`  | no               | SAP client number                                                                                              |
+| `username`      | `string`  | no               | Username for basic auth                                                                                        |
+| `password`      | `string`  | no               | Password for basic auth                                                                                        |
+| `systemId`      | `string`  | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `groupName`     | `string`  | yes              | Function group name (e.g. ZFUGR_UTIL)                                                                          |
+| `includeSource` | `boolean` | no               | Whether to also return the main include source code (default: false)                                           |
+| `destination`   | `string`  | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

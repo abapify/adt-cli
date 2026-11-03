@@ -14,22 +14,23 @@ Defined in [`packages/adt-mcp/src/lib/tools/checkin.ts`](https://github.com/abap
 
 ## Input schema
 
-| Parameter             | Type       | Required | Description                                                                |
-| --------------------- | ---------- | -------- | -------------------------------------------------------------------------- |
-| `baseUrl`             | `string`   | no       | SAP system base URL (e.g. https://host:8000)                               |
-| `client`              | `string`   | no       | SAP client number                                                          |
-| `username`            | `string`   | no       | Username for basic auth                                                    |
-| `password`            | `string`   | no       | Password for basic auth                                                    |
-| `systemId`            | `string`   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)    |
-| `sourceDir`           | `string`   | yes      | Local directory containing serialised files                                |
-| `format`              | `string`   | no       | Format id — e.g. 'abapgit' (default) or 'gcts'                             |
-| `rootPackage`         | `string`   | no       | Target root SAP package (required for PREFIX folder logic)                 |
-| `transport`           | `string`   | no       | Transport request (e.g. DEVK900001)                                        |
-| `objectTypes`         | `string[]` | no       | Filter to these ABAP types (e.g. ["CLAS","INTF"])                          |
-| `dryRun`              | `boolean`  | no       | If true, build the plan but do not modify SAP                              |
-| `activate`            | `boolean`  | no       | Activate saved objects after apply (default true)                          |
-| `unlock`              | `boolean`  | no       | Release objects only when this CLI previously persisted their lock handles |
-| `abapLanguageVersion` | `string`   | no       | ABAP language version — e.g. '5' for Cloud                                 |
+| Parameter             | Type       | Required         | Description                                                                                                    |
+| --------------------- | ---------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`             | `string`   | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`              | `string`   | no               | SAP client number                                                                                              |
+| `username`            | `string`   | no               | Username for basic auth                                                                                        |
+| `password`            | `string`   | no               | Password for basic auth                                                                                        |
+| `systemId`            | `string`   | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `sourceDir`           | `string`   | yes              | Local directory containing serialised files                                                                    |
+| `format`              | `string`   | no               | Format id — e.g. 'abapgit' (default) or 'gcts'                                                                 |
+| `rootPackage`         | `string`   | no               | Target root SAP package (required for PREFIX folder logic)                                                     |
+| `transport`           | `string`   | no               | Transport request (e.g. DEVK900001)                                                                            |
+| `objectTypes`         | `string[]` | no               | Filter to these ABAP types (e.g. ["CLAS","INTF"])                                                              |
+| `dryRun`              | `boolean`  | no               | If true, build the plan but do not modify SAP                                                                  |
+| `activate`            | `boolean`  | no               | Activate saved objects after apply (default true)                                                              |
+| `unlock`              | `boolean`  | no               | Release objects only when this CLI previously persisted their lock handles                                     |
+| `abapLanguageVersion` | `string`   | no               | ABAP language version — e.g. '5' for Cloud                                                                     |
+| `destination`         | `string`   | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

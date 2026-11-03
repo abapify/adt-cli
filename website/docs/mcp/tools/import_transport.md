@@ -14,20 +14,21 @@ Defined in [`packages/adt-mcp/src/lib/tools/import-transport.ts`](https://github
 
 ## Input schema
 
-| Parameter              | Type       | Required | Description                                                                                                               |
-| ---------------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`              | `string`   | no       | SAP system base URL (e.g. https://host:8000)                                                                              |
-| `client`               | `string`   | no       | SAP client number                                                                                                         |
-| `username`             | `string`   | no       | Username for basic auth                                                                                                   |
-| `password`             | `string`   | no       | Password for basic auth                                                                                                   |
-| `systemId`             | `string`   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)                                                   |
-| `transportNumber`      | `string`   | yes      | Transport request number(s), comma-separated for multiple (e.g. "DEVK900001" or "DEVK900001,DEVK900002")                  |
-| `outputDir`            | `string`   | no       | Target directory (default: ./imported)                                                                                    |
-| `format`               | `string`   | no       | Format plugin name, default 'abapgit'                                                                                     |
-| `objectTypes`          | `string[]` | no       | Optional list of object types to filter (e.g. ["CLAS","INTF"])                                                            |
-| `applyDeletions`       | `boolean`  | no       | Whether to remove local files for objects marked with obj_func=D and pgmid=R3TR (default: true)                           |
-| `saveTrMetadata`       | `boolean`  | no       | Write a JSON sidecar for each transport to &lt;outputDir&gt;/.adt/tr/&lt;TRKORR&gt;.json (default: false)                 |
-| `removeMissingObjects` | `boolean`  | no       | Remove local files only for confirmed HTTP 404/not-found objects; other read errors fail without cleanup (default: false) |
+| Parameter              | Type       | Required         | Description                                                                                                               |
+| ---------------------- | ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`              | `string`   | no               | SAP system base URL (e.g. https://host:8000)                                                                              |
+| `client`               | `string`   | no               | SAP client number                                                                                                         |
+| `username`             | `string`   | no               | Username for basic auth                                                                                                   |
+| `password`             | `string`   | no               | Password for basic auth                                                                                                   |
+| `systemId`             | `string`   | no               | Logical system id (resolved via the server multi-system configuration)                                                    |
+| `transportNumber`      | `string`   | yes              | Transport request number(s), comma-separated for multiple (e.g. "DEVK900001" or "DEVK900001,DEVK900002")                  |
+| `outputDir`            | `string`   | no               | Target directory (default: ./imported)                                                                                    |
+| `format`               | `string`   | no               | Format plugin name, default 'abapgit'                                                                                     |
+| `objectTypes`          | `string[]` | no               | Optional list of object types to filter (e.g. ["CLAS","INTF"])                                                            |
+| `applyDeletions`       | `boolean`  | no               | Whether to remove local files for objects marked with obj_func=D and pgmid=R3TR (default: true)                           |
+| `saveTrMetadata`       | `boolean`  | no               | Write a JSON sidecar for each transport to &lt;outputDir&gt;/.adt/tr/&lt;TRKORR&gt;.json (default: false)                 |
+| `removeMissingObjects` | `boolean`  | no               | Remove local files only for confirmed HTTP 404/not-found objects; other read errors fail without cleanup (default: false) |
+| `destination`          | `string`   | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`.            |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

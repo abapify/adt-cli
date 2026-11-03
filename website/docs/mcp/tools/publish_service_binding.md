@@ -14,15 +14,16 @@ Defined in [`packages/adt-mcp/src/lib/tools/publish-service-binding.ts`](https:/
 
 ## Input schema
 
-| Parameter     | Type      | Required | Description                                                                     |
-| ------------- | --------- | -------- | ------------------------------------------------------------------------------- |
-| `baseUrl`     | `string`  | no       | SAP system base URL (e.g. https://host:8000)                                    |
-| `client`      | `string`  | no       | SAP client number                                                               |
-| `username`    | `string`  | no       | Username for basic auth                                                         |
-| `password`    | `string`  | no       | Password for basic auth                                                         |
-| `systemId`    | `string`  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)         |
-| `bindingName` | `string`  | yes      | Service binding name (e.g. ZUI_MYAPP_O4)                                        |
-| `unpublish`   | `boolean` | no       | If true, unpublishes (deactivates) the service binding instead (default: false) |
+| Parameter     | Type      | Required         | Description                                                                                                    |
+| ------------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string`  | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`      | `string`  | no               | SAP client number                                                                                              |
+| `username`    | `string`  | no               | Username for basic auth                                                                                        |
+| `password`    | `string`  | no               | Password for basic auth                                                                                        |
+| `systemId`    | `string`  | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `bindingName` | `string`  | yes              | Service binding name (e.g. ZUI_MYAPP_O4)                                                                       |
+| `unpublish`   | `boolean` | no               | If true, unpublishes (deactivates) the service binding instead (default: false)                                |
+| `destination` | `string`  | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

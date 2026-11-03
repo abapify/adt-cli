@@ -14,18 +14,19 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-completions.ts`](https://github.
 
 ## Input schema
 
-| Parameter    | Type      | Required | Description                                                             |
-| ------------ | --------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`    | `string`  | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`     | `string`  | no       | SAP client number                                                       |
-| `username`   | `string`  | no       | Username for basic auth                                                 |
-| `password`   | `string`  | no       | Password for basic auth                                                 |
-| `systemId`   | `string`  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `objectName` | `string`  | yes      | ABAP object name                                                        |
-| `objectType` | `string`  | yes      | ABAP object type (e.g. CLAS, PROG)                                      |
-| `line`       | `integer` | yes      | 1-based cursor line                                                     |
-| `column`     | `integer` | yes      | 1-based cursor column                                                   |
-| `sourceCode` | `string`  | no       | Optional source override; fetched from SAP if omitted                   |
+| Parameter     | Type      | Required         | Description                                                                                                    |
+| ------------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string`  | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`      | `string`  | no               | SAP client number                                                                                              |
+| `username`    | `string`  | no               | Username for basic auth                                                                                        |
+| `password`    | `string`  | no               | Password for basic auth                                                                                        |
+| `systemId`    | `string`  | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `objectName`  | `string`  | yes              | ABAP object name                                                                                               |
+| `objectType`  | `string`  | yes              | ABAP object type (e.g. CLAS, PROG)                                                                             |
+| `line`        | `integer` | yes              | 1-based cursor line Range: [1, 9007199254740991].                                                              |
+| `column`      | `integer` | yes              | 1-based cursor column Range: [1, 9007199254740991].                                                            |
+| `sourceCode`  | `string`  | no               | Optional source override; fetched from SAP if omitted                                                          |
+| `destination` | `string`  | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

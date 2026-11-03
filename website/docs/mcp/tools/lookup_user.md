@@ -14,15 +14,16 @@ Defined in [`packages/adt-mcp/src/lib/tools/lookup-user.ts`](https://github.com/
 
 ## Input schema
 
-| Parameter    | Type      | Required | Description                                                                      |
-| ------------ | --------- | -------- | -------------------------------------------------------------------------------- |
-| `baseUrl`    | `string`  | no       | SAP system base URL (e.g. https://host:8000)                                     |
-| `client`     | `string`  | no       | SAP client number                                                                |
-| `username`   | `string`  | no       | Username for basic auth                                                          |
-| `password`   | `string`  | no       | Password for basic auth                                                          |
-| `systemId`   | `string`  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)          |
-| `query`      | `string`  | no       | Username (exact) or wildcard search (e.g. DEV*). Empty returns the current user. |
-| `maxResults` | `integer` | no       | Max results for wildcard searches (default: 50).                                 |
+| Parameter     | Type      | Required         | Description                                                                                                    |
+| ------------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string`  | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`      | `string`  | no               | SAP client number                                                                                              |
+| `username`    | `string`  | no               | Username for basic auth                                                                                        |
+| `password`    | `string`  | no               | Password for basic auth                                                                                        |
+| `systemId`    | `string`  | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `query`       | `string`  | no               | Username (exact) or wildcard search (e.g. DEV*). Empty returns the current user.                               |
+| `maxResults`  | `integer` | no               | Max results for wildcard searches (default: 50). Range: (0, 9007199254740991].                                 |
+| `destination` | `string`  | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

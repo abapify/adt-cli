@@ -49,7 +49,7 @@ export const myFormat = createPlugin({
     // files on disk → ADK objects (optional)
     export: async function* (fileTree /* FileTree */) {
       for (const path of await fileTree.glob('**/*.myformat.json')) {
-        yield; /* AdkObject */
+        yield /* AdkObject */ {};
       }
     },
   },

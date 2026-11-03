@@ -53,8 +53,18 @@ export function frontmatter(fields: Record<string, string>): string {
 /** First sentence of a description, for frontmatter `description`. */
 export function summary(text: string | undefined): string {
   const line = (text ?? '').trim().split(/\r?\n/)[0] ?? '';
-  const sentence = line.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? line;
-  return sentence.trim();
+  // Sentence end: [.!?] followed by whitespace/EOL, but never inside a
+  // letter-dot-letter abbreviation like "e.g." or "i.e.".
+  let idx = 0;
+  for (;;) {
+    const hit = line.slice(idx).search(/[.!?](?=\s|$)/);
+    if (hit === -1) return line.trim();
+    const pos = idx + hit;
+    if (!/[a-zA-Z]\.[a-zA-Z]$/.test(line.slice(0, pos))) {
+      return line.slice(0, pos + 1).trim();
+    }
+    idx = pos + 1;
+  }
 }
 
 export function generatedNote(source: string): string {

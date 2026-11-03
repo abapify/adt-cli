@@ -14,17 +14,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/flow-checkout-tr.ts`](https://github
 
 ## Input schema
 
-| Parameter         | Type       | Required | Description                                                             |
-| ----------------- | ---------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`         | `string`   | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`          | `string`   | no       | SAP client number                                                       |
-| `username`        | `string`   | no       | Username for basic auth                                                 |
-| `password`        | `string`   | no       | Password for basic auth                                                 |
-| `systemId`        | `string`   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `transports`      | `string[]` | yes      |                                                                         |
-| `base`            | `boolean`  | no       |                                                                         |
-| `verifyInventory` | `boolean`  | no       | Recompute transport inventory instead of reusing an exact-head index    |
-| `workspaceRoot`   | `string`   | yes      | Absolute target directory within a server-owned root                    |
+| Parameter         | Type       | Required         | Description                                                                                                    |
+| ----------------- | ---------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`         | `string`   | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`          | `string`   | no               | SAP client number                                                                                              |
+| `username`        | `string`   | no               | Username for basic auth                                                                                        |
+| `password`        | `string`   | no               | Password for basic auth                                                                                        |
+| `systemId`        | `string`   | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `transports`      | `string[]` | yes              | Items: 1–∞.                                                                                                    |
+| `base`            | `boolean`  | no               |                                                                                                                |
+| `verifyInventory` | `boolean`  | no               | Recompute transport inventory instead of reusing an exact-head index                                           |
+| `workspaceRoot`   | `string`   | yes              | Absolute target directory within a server-owned root Length: 1–∞.                                              |
+| `destination`     | `string`   | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

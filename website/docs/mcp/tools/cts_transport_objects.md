@@ -14,18 +14,19 @@ Defined in [`packages/adt-mcp/src/lib/tools/cts-transport-objects.ts`](https://g
 
 ## Input schema
 
-| Parameter        | Type       | Required | Description                                                                                  |
-| ---------------- | ---------- | -------- | -------------------------------------------------------------------------------------------- |
-| `baseUrl`        | `string`   | no       | SAP system base URL (e.g. https://host:8000)                                                 |
-| `client`         | `string`   | no       | SAP client number                                                                            |
-| `username`       | `string`   | no       | Username for basic auth                                                                      |
-| `password`       | `string`   | no       | Password for basic auth                                                                      |
-| `systemId`       | `string`   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)                      |
-| `transport`      | `string`   | yes      | Transport number (e.g. DEVK900001)                                                           |
-| `objFunc`        | `string`   | no       | Filter by object function code (comma-separated). 'D' = deletions only, '*' = any non-empty. |
-| `pgmid`          | `string`   | no       | Filter by program ID (comma-separated, e.g. 'R3TR' or 'R3TR,LIMU'). '*' = any.               |
-| `type`           | `string`   | no       | Filter by object type (comma-separated, e.g. 'CLAS,TABL'). '*' = any.                        |
-| `alsoTransports` | `string[]` | no       | Additional transport numbers to merge (deduplicated by pgmid/type/name)                      |
+| Parameter        | Type       | Required         | Description                                                                                                    |
+| ---------------- | ---------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`        | `string`   | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`         | `string`   | no               | SAP client number                                                                                              |
+| `username`       | `string`   | no               | Username for basic auth                                                                                        |
+| `password`       | `string`   | no               | Password for basic auth                                                                                        |
+| `systemId`       | `string`   | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `transport`      | `string`   | yes              | Transport number (e.g. DEVK900001)                                                                             |
+| `objFunc`        | `string`   | no               | Filter by object function code (comma-separated). 'D' = deletions only, '*' = any non-empty.                   |
+| `pgmid`          | `string`   | no               | Filter by program ID (comma-separated, e.g. 'R3TR' or 'R3TR,LIMU'). '*' = any.                                 |
+| `type`           | `string`   | no               | Filter by object type (comma-separated, e.g. 'CLAS,TABL'). '*' = any.                                          |
+| `alsoTransports` | `string[]` | no               | Additional transport numbers to merge (deduplicated by pgmid/type/name)                                        |
+| `destination`    | `string`   | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

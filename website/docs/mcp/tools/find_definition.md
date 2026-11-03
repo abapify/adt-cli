@@ -14,17 +14,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/find-definition.ts`](https://github.
 
 ## Input schema
 
-| Parameter          | Type     | Required | Description                                                                                           |
-| ------------------ | -------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `baseUrl`          | `string` | no       | SAP system base URL (e.g. https://host:8000)                                                          |
-| `client`           | `string` | no       | SAP client number                                                                                     |
-| `username`         | `string` | no       | Username for basic auth                                                                               |
-| `password`         | `string` | no       | Password for basic auth                                                                               |
-| `systemId`         | `string` | no       | Logical system id (resolved via multi-system config or ~/.adt sessions)                               |
-| `objectName`       | `string` | yes      | Name of the symbol or object to resolve                                                               |
-| `objectType`       | `string` | no       | Object type to narrow the search (e.g. CLAS, PROG, DTEL, TABL)                                        |
-| `parentObjectName` | `string` | no       | Parent object name (e.g. class name when looking for a method) — currently used as a hint for scoping |
-| `parentObjectType` | `string` | no       | Parent object type (e.g. CLAS)                                                                        |
+| Parameter          | Type     | Required         | Description                                                                                                    |
+| ------------------ | -------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`          | `string` | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
+| `client`           | `string` | no               | SAP client number                                                                                              |
+| `username`         | `string` | no               | Username for basic auth                                                                                        |
+| `password`         | `string` | no               | Password for basic auth                                                                                        |
+| `systemId`         | `string` | no               | Logical system id (resolved via the server multi-system configuration)                                         |
+| `objectName`       | `string` | yes              | Name of the symbol or object to resolve                                                                        |
+| `objectType`       | `string` | no               | Object type to narrow the search (e.g. CLAS, PROG, DTEL, TABL)                                                 |
+| `parentObjectName` | `string` | no               | Parent object name (e.g. class name when looking for a method) — currently used as a hint for scoping          |
+| `parentObjectType` | `string` | no               | Parent object type (e.g. CLAS)                                                                                 |
+| `destination`      | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 
