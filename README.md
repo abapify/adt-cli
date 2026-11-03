@@ -93,11 +93,11 @@ All packages live in [`packages/`](./packages) and are published to npm under [`
 | **ABAP language tooling**   | [`aclass`](./packages/aclass) · [`acds`](./packages/acds) · [`abap-ast`](./packages/abap-ast) · [`asjson-parser`](./packages/asjson-parser) · [`openai-codegen`](./packages/openai-codegen)                                                                                                             |
 | **Shared & test**           | [`logger`](./packages/logger) · [`adt-fixtures`](./packages/adt-fixtures) _(private)_                                                                                                                                                                                                                   |
 
-Package READMEs and reference pages are available individually in the package directories and on the [docs site](https://adt-cli.netlify.app/sdk/packages/overview).
+Package READMEs (where present) live in the package directories, and every package has a reference page on the [docs site](https://adt-cli.netlify.app/sdk/packages/overview).
 
 ## Status
 
-abapify is **pre-1.0** and moving fast: all packages are released together from `main` with a single version. The CLI and MCP server cover the day-to-day ADT surface — repository search and navigation, source read/write, DDIC, CDS, RAP (BDEF / SRVD / SRVB), function modules, BAdIs, transports, ATC, ABAP Unit with coverage, abapGit and gCTS round-trips, RFC, STRUST and Fiori Launchpad inventory. Expect breaking changes between minor versions until 1.0.
+abapify is **pre-1.0** and moving fast: all packages share a single version cut from `main`, though the default release run publishes only affected packages (run `publish.yml` with `affected_only=false` to publish everything). The CLI and MCP server cover the day-to-day ADT surface — repository search and navigation, source read/write, DDIC, CDS, RAP (BDEF / SRVD / SRVB), function modules, BAdIs, transports, ATC, ABAP Unit with coverage, abapGit and gCTS round-trips, RFC, STRUST and Fiori Launchpad inventory. Expect breaking changes between minor versions until 1.0.
 
 - What shipped and why: [`docs/roadmap/shipped.md`](./docs/roadmap/shipped.md)
 - Open questions and next steps: [`docs/roadmap/future.md`](./docs/roadmap/future.md)
