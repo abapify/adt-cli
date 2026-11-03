@@ -21,7 +21,7 @@ adt proxy [options]
 | `-p, --port <port>`       | Port to listen on (default: random available port)     |             |
 | `-H, --host <host>`       | Host to bind to (default: 127.0.0.1)                   | `127.0.0.1` |
 | `-t, --target <url>`      | Target SAP system URL (overrides current auth session) |             |
-| `-b, --base-path <path>`  | Base path prefix to strip from incoming requests       |             |
+| `-b, --base-path <path>`  | Base path prefix to strip from incoming requests       | ``          |
 | `--no-convert`            | Disable JSON↔XML conversion (forward requests as-is)   |             |
 | `--no-forward-unknown`    | Return 404 for unmatched routes instead of forwarding  |             |
 | `--max-body-size <bytes>` | Maximum request body size in bytes (default: 10485760) |             |

@@ -25,6 +25,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/list-package-objects.ts`](https://gi
 | `objectType`  | `string` | no       | Filter by object type (e.g. CLAS, PROG, INTF)                           |
 | `maxResults`  | `number` | no       | Maximum number of results (default: 200) Default: `200`.                |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

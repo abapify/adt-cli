@@ -14,17 +14,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/call-hierarchy.ts`](https://github.c
 
 ## Input schema
 
-| Parameter    | Type      | Required | Description                                                             |
-| ------------ | --------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`    | `string`  | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`     | `string`  | no       | SAP client number                                                       |
-| `username`   | `string`  | no       | Username for basic auth                                                 |
-| `password`   | `string`  | no       | Password for basic auth                                                 |
-| `systemId`   | `string`  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `objectName` | `string`  | yes      | Name of the ABAP object (class, function group, program)                |
-| `objectType` | `string`  | no       | Object type (e.g. CLAS, FUGR, PROG)                                     |
-| `objectUri`  | `unknown` | no       |                                                                         |
-| `maxResults` | `number`  | no       | Maximum number of results (default: 50)                                 |
+| Parameter    | Type     | Required | Description                                                             |
+| ------------ | -------- | -------- | ----------------------------------------------------------------------- |
+| `baseUrl`    | `string` | no       | SAP system base URL (e.g. https://host:8000)                            |
+| `client`     | `string` | no       | SAP client number                                                       |
+| `username`   | `string` | no       | Username for basic auth                                                 |
+| `password`   | `string` | no       | Password for basic auth                                                 |
+| `systemId`   | `string` | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
+| `objectName` | `string` | yes      | Name of the ABAP object (class, function group, program)                |
+| `objectType` | `string` | no       | Object type (e.g. CLAS, FUGR, PROG)                                     |
+| `maxResults` | `number` | no       | Maximum number of results (default: 50)                                 |
+
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 
 ## Output
 

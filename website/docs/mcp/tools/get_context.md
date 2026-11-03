@@ -26,6 +26,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-context.ts`](https://github.com/
 | `depth`      | `integer` | no       | Dependency traversal depth (1..3) Default: `1`.                         |
 | `maxDeps`    | `integer` | no       | Maximum dependencies to include Default: `20`.                          |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

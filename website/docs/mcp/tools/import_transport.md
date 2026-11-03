@@ -29,6 +29,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/import-transport.ts`](https://github
 | `saveTrMetadata`       | `boolean`  | no       | Write a JSON sidecar for each transport to &lt;outputDir&gt;/.adt/tr/&lt;TRKORR&gt;.json (default: false)                 |
 | `removeMissingObjects` | `boolean`  | no       | Remove local files only for confirmed HTTP 404/not-found objects; other read errors fail without cleanup (default: false) |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

@@ -27,6 +27,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/cts-transport-objects.ts`](https://g
 | `type`           | `string`   | no       | Filter by object type (comma-separated, e.g. 'CLAS,TABL'). '*' = any.                        |
 | `alsoTransports` | `string[]` | no       | Additional transport numbers to merge (deduplicated by pgmid/type/name)                      |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

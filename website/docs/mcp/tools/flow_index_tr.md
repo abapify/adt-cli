@@ -24,6 +24,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/flow-index-tr.ts`](https://github.co
 | `transports`    | `string[]` | yes      |                                                                         |
 | `workspaceRoot` | `string`   | yes      | Absolute target directory within a server-owned root                    |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 **Annotations**
 
 - `readOnlyHint`: `false`

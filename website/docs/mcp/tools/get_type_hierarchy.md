@@ -25,6 +25,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-type-hierarchy.ts`](https://gith
 | `objectType`      | `"CLAS"` \| `"INTF"` | no       | Object type: CLAS (class) or INTF (interface). Auto-detected if omitted.              |
 | `includeSubTypes` | `boolean`            | no       | Whether to include sub-types (subclasses/implementors) in the result (default: false) |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

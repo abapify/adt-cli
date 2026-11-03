@@ -24,6 +24,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-traces.ts`](https://github.com/a
 | `action`   | `"list"` \| `"hitlist"` \| `"dbAccesses"` | no       | Trace operation to execute Default: `"list"`.                           |
 | `id`       | `string`                                  | no       | Trace id for hitlist/dbAccesses actions                                 |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

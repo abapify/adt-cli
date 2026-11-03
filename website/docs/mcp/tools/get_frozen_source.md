@@ -19,6 +19,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-frozen-source.ts`](https://githu
 | `canonicalKey` | `string` | yes      | Canonical object key from the accepted Review scope       |
 | `componentId`  | `string` | yes      | Immutable source component from the accepted Review scope |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Requirements
 
 - `get_frozen_source` is only available when the MCP server is running in shared-service/destination mode.

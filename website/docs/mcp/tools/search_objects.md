@@ -24,6 +24,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/search-objects.ts`](https://github.c
 | `query`      | `string` | yes      | Search query (supports wildcards like *)                                |
 | `maxResults` | `number` | no       | Maximum number of results (default: 50)                                 |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

@@ -15,7 +15,9 @@ bunx nx run docs-gen:docs:check   # what CI runs; fails if pages are stale
 ```
 
 CLI reference pages are fully generated. MCP tool pages are generated up to
-and including `## Input schema`; everything after that heading (output,
-examples, see also) is hand-written and preserved on regeneration. To change a
-description, option or parameter, edit the command or tool in code and rerun
-`docs:gen`.
+and including `## Input schema` and the generated annotations that follow it;
+hand-written sections beginning at the next `## ` heading after the schema
+table (output, examples, see also) are preserved on regeneration — unheaded
+content in that region is discarded. To change a description, option or
+parameter, edit the command or tool in code and rerun
+`bunx nx run docs-gen:docs:gen`.

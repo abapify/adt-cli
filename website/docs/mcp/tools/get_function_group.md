@@ -24,6 +24,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/function-tools.ts`](https://github.c
 | `groupName`     | `string`  | yes      | Function group name (e.g. ZFUGR_UTIL)                                   |
 | `includeSource` | `boolean` | no       | Whether to also return the main include source code (default: false)    |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

@@ -27,6 +27,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/lint-abap.ts`](https://github.com/ab
 | `lintPreset`    | `"btp"` \| `"onpremise"`                       | no       | Lint preset to apply (defaults to onpremise)                            |
 | `ruleOverrides` | `object`                                       | no       | Optional per-rule override config passed to abaplint                    |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

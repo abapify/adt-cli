@@ -14,17 +14,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/find-references.ts`](https://github.
 
 ## Input schema
 
-| Parameter    | Type      | Required | Description                                                             |
-| ------------ | --------- | -------- | ----------------------------------------------------------------------- |
-| `baseUrl`    | `string`  | no       | SAP system base URL (e.g. https://host:8000)                            |
-| `client`     | `string`  | no       | SAP client number                                                       |
-| `username`   | `string`  | no       | Username for basic auth                                                 |
-| `password`   | `string`  | no       | Password for basic auth                                                 |
-| `systemId`   | `string`  | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
-| `objectName` | `string`  | yes      | Name of the ABAP object to find references for                          |
-| `objectType` | `string`  | no       | Object type (e.g. CLAS, PROG, DTEL, TABL)                               |
-| `objectUri`  | `unknown` | no       |                                                                         |
-| `maxResults` | `number`  | no       | Maximum number of results (default: 100)                                |
+| Parameter    | Type     | Required | Description                                                             |
+| ------------ | -------- | -------- | ----------------------------------------------------------------------- |
+| `baseUrl`    | `string` | no       | SAP system base URL (e.g. https://host:8000)                            |
+| `client`     | `string` | no       | SAP client number                                                       |
+| `username`   | `string` | no       | Username for basic auth                                                 |
+| `password`   | `string` | no       | Password for basic auth                                                 |
+| `systemId`   | `string` | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
+| `objectName` | `string` | yes      | Name of the ABAP object to find references for                          |
+| `objectType` | `string` | no       | Object type (e.g. CLAS, PROG, DTEL, TABL)                               |
+| `maxResults` | `number` | no       | Maximum number of results (default: 100)                                |
+
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 
 ## Output
 

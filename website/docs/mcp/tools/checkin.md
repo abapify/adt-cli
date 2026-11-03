@@ -31,6 +31,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/checkin.ts`](https://github.com/abap
 | `unlock`              | `boolean`  | no       | Release objects only when this CLI previously persisted their lock handles |
 | `abapLanguageVersion` | `string`   | no       | ABAP language version — e.g. '5' for Cloud                                 |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

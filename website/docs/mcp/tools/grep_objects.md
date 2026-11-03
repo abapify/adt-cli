@@ -22,11 +22,12 @@ Defined in [`packages/adt-mcp/src/lib/tools/grep-objects.ts`](https://github.com
 | `password`             | `string`   | no       | Password for basic auth                                                 |
 | `systemId`             | `string`   | no       | Logical system id (resolved via multi-system config or ~/.adt sessions) |
 | `pattern`              | `string`   | yes      | Search pattern (regex or literal string)                                |
-| `objectUris`           | `unknown`  | no       |                                                                         |
 | `objects`              | `object[]` | no       | Objects to search within (resolved to URIs automatically)               |
 | `objects[].objectName` | `string`   | yes      | ABAP object name                                                        |
 | `objects[].objectType` | `string`   | yes      | Object type (e.g. CLAS, PROG)                                           |
 | `maxResults`           | `number`   | no       | Maximum number of results (default: 50)                                 |
+
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 
 ## Output
 

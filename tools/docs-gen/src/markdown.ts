@@ -16,7 +16,9 @@ export function escapeCell(text: string): string {
 }
 
 function codeSpan(text: string): string {
-  const fence = text.includes('`') ? '``' : '`';
+  const fence = '`'.repeat(
+    Math.max(1, ...(text.match(/`+/g) ?? []).map((run) => run.length + 1)),
+  );
   return `${fence}${text}${fence}`;
 }
 
@@ -29,7 +31,6 @@ export function code(text: string): string {
   return text
     .split('|')
     .map((part) => part.trim())
-    .filter(Boolean)
     .map(codeSpan)
     .join(' \\| ');
 }

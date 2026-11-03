@@ -26,6 +26,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/flow-checkout-tr.ts`](https://github
 | `verifyInventory` | `boolean`  | no       | Recompute transport inventory instead of reusing an exact-head index    |
 | `workspaceRoot`   | `string`   | yes      | Absolute target directory within a server-owned root                    |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 **Annotations**
 
 - `readOnlyHint`: `false`

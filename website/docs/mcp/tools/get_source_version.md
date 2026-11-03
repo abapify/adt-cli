@@ -25,6 +25,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-source-version.ts`](https://gith
 | `uri`              | `string`  | no       | Direct server-relative ADT URI (must start with /sap/bc/adt/); prefer sourceCapability |
 | `maxBytes`         | `integer` | no       | Maximum UTF-8 response size in bytes (default 1048576, hard cap 2097152)               |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

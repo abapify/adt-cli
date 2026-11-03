@@ -27,6 +27,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/run-unit-tests.ts`](https://github.c
 | `coverage`       | `boolean`                       | no       | Alias for withCoverage. If true, returns coverage report XML alongside the results. |
 | `coverageFormat` | `"jacoco"` \| `"sonar-generic"` | no       | Coverage report format when coverage is enabled Default: `"jacoco"`.                |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.

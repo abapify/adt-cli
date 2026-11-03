@@ -59,7 +59,8 @@ function parseToolArgs(name: string, rest: unknown[]): ToolInfo {
   const args = rest.slice(0, -1);
   const info: ToolInfo = { name };
   if (typeof args[0] === 'string') info.description = args.shift() as string;
-  if (isRawShape(args[0])) info.inputSchema = args.shift();
+  if (isRawShape(args[0]) || isZodSchema(args[0]))
+    info.inputSchema = args.shift();
   if (typeof args[0] === 'object' && args[0] !== null) {
     info.annotations = args.shift() as Record<string, unknown>;
   }
@@ -97,6 +98,32 @@ function toJsonSchema(input: unknown): JsonSchema {
     io: 'input',
     unrepresentable: 'any',
   }) as JsonSchema;
+}
+
+/** True when a Zod field resolves to `z.never()` through optional wrappers. */
+function isNeverSchema(value: unknown): boolean {
+  let cur = value;
+  while (typeof cur === 'object' && cur !== null && '_zod' in cur) {
+    const def = (
+      cur as { _zod: { def: { type?: string; innerType?: unknown } } }
+    )._zod.def;
+    if (def.type === 'never') return true;
+    if (def.innerType === undefined) return false;
+    cur = def.innerType;
+  }
+  return false;
+}
+
+/** Field names the schema rejects outright (`z.never()`); documented nowhere. */
+function forbiddenKeys(input: unknown): Set<string> {
+  const shape = isZodSchema(input)
+    ? ((input as { shape?: z.ZodRawShape }).shape ?? {})
+    : ((input as z.ZodRawShape | undefined) ?? {});
+  const out = new Set<string>();
+  for (const [key, field] of Object.entries(shape)) {
+    if (isNeverSchema(field)) out.add(key);
+  }
+  return out;
 }
 
 function arrayLabel(s: JsonSchema): string {
@@ -137,7 +164,11 @@ function nestedRows(prop: JsonSchema, name: string, depth: number): string[][] {
   const items = prop.items?.properties
     ? parameterRows(prop.items, `${name}[].`, depth + 1)
     : [];
-  return [...own, ...items];
+  const variants = prop.anyOf ?? prop.oneOf ?? [];
+  const union = variants.flatMap((v) =>
+    parameterRows(v, `${name}.`, depth + 1),
+  );
+  return [...own, ...items, ...union];
 }
 
 function parameterRows(schema: JsonSchema, prefix = '', depth = 0): string[][] {
@@ -189,10 +220,12 @@ function handwrittenTail(existing: string | undefined): string {
   if (existing === undefined) return DEFAULT_TAIL;
   const lines = existing.split('\n');
   const schemaAt = lines.findIndex((l) => INPUT_SCHEMA_HEADING.test(l));
+  // No generated anchor — nothing safe to preserve, regenerate the stub.
+  if (schemaAt === -1) return DEFAULT_TAIL;
   const tailAt = lines.findIndex(
     (l, i) => i > schemaAt && /^## /.test(l) && !INPUT_SCHEMA_HEADING.test(l),
   );
-  return tailAt === -1 ? '' : lines.slice(tailAt).join('\n').trim();
+  return tailAt === -1 ? DEFAULT_TAIL : lines.slice(tailAt).join('\n').trim();
 }
 
 function sourceLine(rootDir: string, source: string | undefined): string {
@@ -201,13 +234,27 @@ function sourceLine(rootDir: string, source: string | undefined): string {
   return `Defined in [\`${rel}\`](${GITHUB_BLOB}${rel}).`;
 }
 
+const DESTINATION_MODE_NOTE =
+  '_In destination mode every call additionally requires a `destination` key ' +
+  'and rejects the connection fields (`baseUrl`, `client`, `username`, ' +
+  '`password`, `systemId`)._';
+
 function inputSchemaSection(tool: ToolInfo): string {
-  const rows = parameterRows(toJsonSchema(tool.inputSchema));
+  const jsonSchema = toJsonSchema(tool.inputSchema);
+  const forbidden = forbiddenKeys(tool.inputSchema);
+  if (forbidden.size > 0 && jsonSchema.properties) {
+    jsonSchema.properties = Object.fromEntries(
+      Object.entries(jsonSchema.properties).filter(
+        ([key]) => !forbidden.has(key),
+      ),
+    );
+  }
+  const rows = parameterRows(jsonSchema);
   const body =
     rows.length > 0
       ? table(['Parameter', 'Type', 'Required', 'Description'], rows)
       : 'This tool takes no arguments.';
-  return `## Input schema\n\n${body}`;
+  return `## Input schema\n\n${body}\n\n${DESTINATION_MODE_NOTE}`;
 }
 
 function annotationsSection(tool: ToolInfo): string {

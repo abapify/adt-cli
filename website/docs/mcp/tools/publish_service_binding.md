@@ -24,6 +24,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/publish-service-binding.ts`](https:/
 | `bindingName` | `string`  | yes      | Service binding name (e.g. ZUI_MYAPP_O4)                                        |
 | `unpublish`   | `boolean` | no       | If true, unpublishes (deactivates) the service binding instead (default: false) |
 
+_In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
+
 ## Output
 
 The tool returns a single text content item whose body is a JSON-serialised object (`content[0].text`). On error, the response has `isError: true` and a human-readable message.
