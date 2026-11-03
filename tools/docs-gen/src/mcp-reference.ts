@@ -191,35 +191,40 @@ function parameterRow(
   ];
 }
 
+function hasNestedFields(prop: JsonSchema): boolean {
+  if (prop.properties || prop.items?.properties) return true;
+  return Boolean(
+    (prop.anyOf ?? prop.oneOf)?.some((v) => v.properties || v.anyOf || v.oneOf),
+  );
+}
+
+function truncationMarker(name: string): string[][] {
+  return [
+    [
+      code(`${name}.…`),
+      '',
+      '',
+      escapeCell('Further nested fields omitted (depth limit).'),
+    ],
+  ];
+}
+
 /** Rows for nested object fields (`a.b`) and array item fields (`a[].b`). */
 function nestedRows(prop: JsonSchema, name: string, depth: number): string[][] {
   if (depth >= 2) {
-    const deeper =
-      prop.properties ||
-      prop.items?.properties ||
-      (prop.anyOf ?? prop.oneOf)?.some(
-        (v) => v.properties || v.anyOf || v.oneOf,
-      );
-    return deeper
-      ? [
-          [
-            code(`${name}.…`),
-            '',
-            '',
-            escapeCell('Further nested fields omitted (depth limit).'),
-          ],
-        ]
-      : [];
+    return hasNestedFields(prop) ? truncationMarker(name) : [];
   }
-  const own = prop.properties ? parameterRows(prop, `${name}.`, depth + 1) : [];
-  const items = prop.items?.properties
-    ? parameterRows(prop.items, `${name}[].`, depth + 1)
-    : [];
+  const rows = [
+    ...(prop.properties ? parameterRows(prop, `${name}.`, depth + 1) : []),
+    ...(prop.items?.properties
+      ? parameterRows(prop.items, `${name}[].`, depth + 1)
+      : []),
+  ];
   const variants = prop.anyOf ?? prop.oneOf ?? [];
-  const union = variants.flatMap((v) =>
-    parameterRows(v, `${name}.`, depth + 1),
-  );
-  return [...own, ...items, ...union];
+  return [
+    ...rows,
+    ...variants.flatMap((v) => parameterRows(v, `${name}.`, depth + 1)),
+  ];
 }
 
 function parameterRows(schema: JsonSchema, prefix = '', depth = 0): string[][] {
