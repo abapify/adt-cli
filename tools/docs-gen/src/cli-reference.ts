@@ -28,19 +28,27 @@ const PLUGIN_MODULES = [
 
 const NOTE = generatedNote('the Commander command tree');
 
+/** Plugins statically embedded in the `@abapify/adt` bundle (adt-all.ts). */
+const BUNDLED_PLUGINS = new Set(['atc', 'codegen', 'diff', 'export', 'flow']);
+
+function pluginNote(cmdName: string, plugins: CliCommandPlugin[]): string {
+  const plugin = plugins.find((p) => p.name === cmdName);
+  if (!plugin) return '';
+  const pkg =
+    PLUGIN_MODULES.find((s) => s.endsWith(`/commands/${cmdName}`))?.split(
+      '/commands/',
+    )[0] ?? '@abapify/adt-cli';
+  const bundled = BUNDLED_PLUGINS.has(cmdName);
+  const how = bundled
+    ? 'included in the `@abapify/adt` bundle; in a regular `adt-cli` install enable it via the `commands` array in `adt.config.ts`'
+    : 'not included in the `@abapify/adt` bundle — enable it via the `commands` array in `adt.config.ts`';
+  return `_Provided by the \`${pkg}\` command plugin (${how})._`;
+}
+
 export interface CliPage {
   /** Doc id relative to `website/docs`, e.g. `cli/reference/auth`. */
   id: string;
   content: string;
-}
-
-async function loadProgram(): Promise<Command> {
-  const plugins: CliCommandPlugin[] = [];
-  for (const spec of PLUGIN_MODULES) {
-    const mod = (await import(spec)) as { default: CliCommandPlugin };
-    plugins.push(mod.default);
-  }
-  return createCLI({ preloadedPlugins: plugins });
 }
 
 function isHidden(cmd: Command): boolean {
@@ -134,8 +142,18 @@ function renderCommand(cmd: Command, path: string[], level: number): string[] {
   return out;
 }
 
+async function loadPlugins(): Promise<CliCommandPlugin[]> {
+  const plugins: CliCommandPlugin[] = [];
+  for (const spec of PLUGIN_MODULES) {
+    const mod = (await import(spec)) as { default: CliCommandPlugin };
+    plugins.push(mod.default);
+  }
+  return plugins;
+}
+
 export async function generateCliPages(): Promise<CliPage[]> {
-  const program = await loadProgram();
+  const plugins = await loadPlugins();
+  const program = await createCLI({ preloadedPlugins: plugins });
   const commands = visibleCommands(program).sort((a, b) =>
     a.name().localeCompare(b.name()),
   );
@@ -149,9 +167,12 @@ export async function generateCliPages(): Promise<CliPage[]> {
         description: summary(cmd.description()) || `adt ${cmd.name()}`,
       }),
       NOTE,
+      pluginNote(cmd.name(), plugins),
       ...renderCommand(cmd, [cmd.name()], 1),
       'Global options (`--sid`, `--config`, `--verbose`, …) are accepted by every command — see the [command reference index](./index.md#global-options).',
-    ].join('\n\n'),
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
   }));
 
   pages.unshift({

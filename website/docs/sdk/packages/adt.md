@@ -25,8 +25,10 @@ Requires Node.js 18 or later.
   flow, abapGit and gCTS.
 - `yoga.wasm`, the terminal UI layout engine, shipped next to the bundle.
 
-Command plugins you install separately still load: `adt` resolves them from
-the global `node_modules`.
+The bundle carries a fixed set of built-in command plugins. Additional
+plugins registered via `adt.config.ts` only load in a regular
+[`@abapify/adt-cli`](./adt-cli.md) install — the bundle cannot resolve
+runtime plugin imports.
 
 ## When to use `@abapify/adt-cli` instead
 
