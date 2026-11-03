@@ -16,17 +16,17 @@ Defined in [`packages/adt-mcp/src/lib/tools/cts-transport-source-manifest.ts`](h
 
 | Parameter          | Type                   | Required         | Description                                                                                                    |
 | ------------------ | ---------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`          | `string`               | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
-| `client`           | `string`               | no               | SAP client number                                                                                              |
-| `username`         | `string`               | no               | Username for basic auth                                                                                        |
-| `password`         | `string`               | no               | Password for basic auth                                                                                        |
-| `systemId`         | `string`               | no               | Logical system id (resolved via the server multi-system configuration)                                         |
-| `transports`       | `string[]`             | yes              | Non-empty ordered list of CTS request or task numbers Items: 1–∞.                                              |
-| `selector`         | `object`               | no               | Optional CTS object selector; dimensions are ANDed                                                             |
-| `selector.objFunc` | `string` \| `string[]` | no               | CTS object-function filter                                                                                     |
-| `selector.pgmid`   | `string` \| `string[]` | no               | CTS program-id filter                                                                                          |
-| `selector.type`    | `string` \| `string[]` | no               | ABAP object-type filter                                                                                        |
-| `concurrency`      | `integer`              | no               | Maximum concurrent metadata/feed requests (hard cap 32) Range: (0, 32].                                        |
+| `baseUrl`          | `string`               | no               | SAP system base URL (e.g. https://host:8000) Length: 0–∞. Items: 0–∞.                                          |
+| `client`           | `string`               | no               | SAP client number Length: 0–∞. Items: 0–∞.                                                                     |
+| `username`         | `string`               | no               | Username for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `password`         | `string`               | no               | Password for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `systemId`         | `string`               | no               | Logical system id (resolved via the server multi-system configuration) Length: 0–∞. Items: 0–∞.                |
+| `transports`       | `string[]`             | yes              | Non-empty ordered list of CTS request or task numbers Length: 0–∞. Items: 1–∞.                                 |
+| `selector`         | `object`               | no               | Optional CTS object selector; dimensions are ANDed Length: 0–∞. Items: 0–∞.                                    |
+| `selector.objFunc` | `string` \| `string[]` | no               | CTS object-function filter Length: 0–∞. Items: 0–∞.                                                            |
+| `selector.pgmid`   | `string` \| `string[]` | no               | CTS program-id filter Length: 0–∞. Items: 0–∞.                                                                 |
+| `selector.type`    | `string` \| `string[]` | no               | ABAP object-type filter Length: 0–∞. Items: 0–∞.                                                               |
+| `concurrency`      | `integer`              | no               | Maximum concurrent metadata/feed requests (hard cap 32) Range: 0–32. Length: 0–∞. Items: 0–∞.                  |
 | `destination`      | `string`               | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._

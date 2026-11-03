@@ -14,18 +14,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/cts-search-transports.ts`](https://g
 
 ## Input schema
 
-| Parameter     | Type     | Required         | Description                                                                                                    |
-| ------------- | -------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`     | `string` | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
-| `client`      | `string` | no               | SAP client number                                                                                              |
-| `username`    | `string` | no               | Username for basic auth                                                                                        |
-| `password`    | `string` | no               | Password for basic auth                                                                                        |
-| `systemId`    | `string` | no               | Logical system id (resolved via the server multi-system configuration)                                         |
-| `user`        | `string` | no               | Owner filter – username or * for all (default: *)                                                              |
-| `trfunction`  | `string` | no               | Transport function filter – K=workbench, W=customizing, T=copies, * for all (default: *)                       |
-| `status`      | `string` | no               | Optional client-side filter on TRSTATUS (e.g. D=Modifiable, R=Released)                                        |
-| `maxResults`  | `number` | no               | Maximum number of results (default: 50)                                                                        |
-| `destination` | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
+| Parameter     | Type     | Required         | Description                                                                                                       |
+| ------------- | -------- | ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`     | `string` | no               | SAP system base URL (e.g. https://host:8000) Length: 0–∞. Items: 0–∞.                                             |
+| `client`      | `string` | no               | SAP client number Length: 0–∞. Items: 0–∞.                                                                        |
+| `username`    | `string` | no               | Username for basic auth Length: 0–∞. Items: 0–∞.                                                                  |
+| `password`    | `string` | no               | Password for basic auth Length: 0–∞. Items: 0–∞.                                                                  |
+| `systemId`    | `string` | no               | Logical system id (resolved via the server multi-system configuration) Length: 0–∞. Items: 0–∞.                   |
+| `user`        | `string` | no               | Owner filter – username or * for all (default: *) Length: 0–∞. Items: 0–∞.                                        |
+| `trfunction`  | `string` | no               | Transport function filter – K=workbench, W=customizing, T=copies, * for all (default: *) Length: 0–∞. Items: 0–∞. |
+| `status`      | `string` | no               | Optional client-side filter on TRSTATUS (e.g. D=Modifiable, R=Released) Length: 0–∞. Items: 0–∞.                  |
+| `maxResults`  | `number` | no               | Maximum number of results (default: 50) Length: 0–∞. Items: 0–∞.                                                  |
+| `destination` | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`.    |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

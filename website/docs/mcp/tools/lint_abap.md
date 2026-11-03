@@ -16,16 +16,16 @@ Defined in [`packages/adt-mcp/src/lib/tools/lint-abap.ts`](https://github.com/ab
 
 | Parameter       | Type                                           | Required         | Description                                                                                                    |
 | --------------- | ---------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`       | `string`                                       | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
-| `client`        | `string`                                       | no               | SAP client number                                                                                              |
-| `username`      | `string`                                       | no               | Username for basic auth                                                                                        |
-| `password`      | `string`                                       | no               | Password for basic auth                                                                                        |
-| `systemId`      | `string`                                       | no               | Logical system id (resolved via the server multi-system configuration)                                         |
-| `action`        | `"lint"` \| `"lint_and_fix"` \| `"list_rules"` | no               | Default: `"lint"`.                                                                                             |
-| `source`        | `string`                                       | no               | ABAP source code to lint                                                                                       |
-| `objectName`    | `string`                                       | no               | Optional object name used for issue filename context                                                           |
-| `lintPreset`    | `"btp"` \| `"onpremise"`                       | no               | Lint preset to apply (defaults to onpremise)                                                                   |
-| `ruleOverrides` | `object`                                       | no               | Optional per-rule override config passed to abaplint                                                           |
+| `baseUrl`       | `string`                                       | no               | SAP system base URL (e.g. https://host:8000) Length: 0–∞. Items: 0–∞.                                          |
+| `client`        | `string`                                       | no               | SAP client number Length: 0–∞. Items: 0–∞.                                                                     |
+| `username`      | `string`                                       | no               | Username for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `password`      | `string`                                       | no               | Password for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `systemId`      | `string`                                       | no               | Logical system id (resolved via the server multi-system configuration) Length: 0–∞. Items: 0–∞.                |
+| `action`        | `"lint"` \| `"lint_and_fix"` \| `"list_rules"` | no               | Length: 0–∞. Items: 0–∞. Default: `"lint"`.                                                                    |
+| `source`        | `string`                                       | no               | ABAP source code to lint Length: 0–∞. Items: 0–∞.                                                              |
+| `objectName`    | `string`                                       | no               | Optional object name used for issue filename context Length: 0–∞. Items: 0–∞.                                  |
+| `lintPreset`    | `"btp"` \| `"onpremise"`                       | no               | Lint preset to apply (defaults to onpremise) Length: 0–∞. Items: 0–∞.                                          |
+| `ruleOverrides` | `object`                                       | no               | Optional per-rule override config passed to abaplint Length: 0–∞. Items: 0–∞.                                  |
 | `destination`   | `string`                                       | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._

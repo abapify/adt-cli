@@ -16,17 +16,17 @@ Defined in [`packages/adt-mcp/src/lib/tools/clone-object.ts`](https://github.com
 
 | Parameter           | Type     | Required         | Description                                                                                                    |
 | ------------------- | -------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`           | `string` | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
-| `client`            | `string` | no               | SAP client number                                                                                              |
-| `username`          | `string` | no               | Username for basic auth                                                                                        |
-| `password`          | `string` | no               | Password for basic auth                                                                                        |
-| `systemId`          | `string` | no               | Logical system id (resolved via the server multi-system configuration)                                         |
-| `sourceObjectName`  | `string` | yes              | Name of the source object to copy                                                                              |
-| `sourceObjectType`  | `string` | yes              | Object type of the source: PROG, CLAS, or INTF                                                                 |
-| `targetObjectName`  | `string` | yes              | Name for the new (cloned) object                                                                               |
-| `targetDescription` | `string` | no               | Description for the clone (defaults to source description with "Copy of" prefix)                               |
-| `targetPackage`     | `string` | no               | Package for the clone                                                                                          |
-| `transport`         | `string` | no               | Transport request number for the clone                                                                         |
+| `baseUrl`           | `string` | no               | SAP system base URL (e.g. https://host:8000) Length: 0–∞. Items: 0–∞.                                          |
+| `client`            | `string` | no               | SAP client number Length: 0–∞. Items: 0–∞.                                                                     |
+| `username`          | `string` | no               | Username for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `password`          | `string` | no               | Password for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `systemId`          | `string` | no               | Logical system id (resolved via the server multi-system configuration) Length: 0–∞. Items: 0–∞.                |
+| `sourceObjectName`  | `string` | yes              | Name of the source object to copy Length: 0–∞. Items: 0–∞.                                                     |
+| `sourceObjectType`  | `string` | yes              | Object type of the source: PROG, CLAS, or INTF Length: 0–∞. Items: 0–∞.                                        |
+| `targetObjectName`  | `string` | yes              | Name for the new (cloned) object Length: 0–∞. Items: 0–∞.                                                      |
+| `targetDescription` | `string` | no               | Description for the clone (defaults to source description with "Copy of" prefix) Length: 0–∞. Items: 0–∞.      |
+| `targetPackage`     | `string` | no               | Package for the clone Length: 0–∞. Items: 0–∞.                                                                 |
+| `transport`         | `string` | no               | Transport request number for the clone Length: 0–∞. Items: 0–∞.                                                |
 | `destination`       | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._

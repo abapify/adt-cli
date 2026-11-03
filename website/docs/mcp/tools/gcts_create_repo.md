@@ -16,18 +16,18 @@ Defined in [`packages/adt-mcp/src/lib/tools/gcts-tools.ts`](https://github.com/a
 
 | Parameter        | Type                     | Required         | Description                                                                                                    |
 | ---------------- | ------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`        | `string`                 | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
-| `client`         | `string`                 | no               | SAP client number                                                                                              |
-| `username`       | `string`                 | no               | Username for basic auth                                                                                        |
-| `password`       | `string`                 | no               | Password for basic auth                                                                                        |
-| `systemId`       | `string`                 | no               | Logical system id (resolved via the server multi-system configuration)                                         |
-| `rid`            | `string`                 | yes              | Repository ID                                                                                                  |
-| `url`            | `string`                 | yes              | Git URL (https://...)                                                                                          |
-| `vsid`           | `string`                 | no               | Virtual system ID (default: 6IT)                                                                               |
-| `role`           | `"SOURCE"` \| `"TARGET"` | no               | Repository role (default: SOURCE)                                                                              |
-| `type`           | `"GITHUB"` \| `"GIT"`    | no               | Repository type (default: GITHUB)                                                                              |
-| `startingFolder` | `string`                 | no               | Repository start directory (default: src/)                                                                     |
-| `vcsToken`       | `string`                 | no               | VCS authentication token (if required)                                                                         |
+| `baseUrl`        | `string`                 | no               | SAP system base URL (e.g. https://host:8000) Length: 0–∞. Items: 0–∞.                                          |
+| `client`         | `string`                 | no               | SAP client number Length: 0–∞. Items: 0–∞.                                                                     |
+| `username`       | `string`                 | no               | Username for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `password`       | `string`                 | no               | Password for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `systemId`       | `string`                 | no               | Logical system id (resolved via the server multi-system configuration) Length: 0–∞. Items: 0–∞.                |
+| `rid`            | `string`                 | yes              | Repository ID Length: 0–∞. Items: 0–∞.                                                                         |
+| `url`            | `string`                 | yes              | Git URL (https://...) Length: 0–∞. Items: 0–∞.                                                                 |
+| `vsid`           | `string`                 | no               | Virtual system ID (default: 6IT) Length: 0–∞. Items: 0–∞.                                                      |
+| `role`           | `"SOURCE"` \| `"TARGET"` | no               | Repository role (default: SOURCE) Length: 0–∞. Items: 0–∞.                                                     |
+| `type`           | `"GITHUB"` \| `"GIT"`    | no               | Repository type (default: GITHUB) Length: 0–∞. Items: 0–∞.                                                     |
+| `startingFolder` | `string`                 | no               | Repository start directory (default: src/) Length: 0–∞. Items: 0–∞.                                            |
+| `vcsToken`       | `string`                 | no               | VCS authentication token (if required) Length: 0–∞. Items: 0–∞.                                                |
 | `destination`    | `string`                 | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._

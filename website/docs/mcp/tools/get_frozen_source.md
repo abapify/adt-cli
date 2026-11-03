@@ -14,11 +14,11 @@ Defined in [`packages/adt-mcp/src/lib/tools/get-frozen-source.ts`](https://githu
 
 ## Input schema
 
-| Parameter      | Type     | Required         | Description                                                                                                                         |
-| -------------- | -------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `canonicalKey` | `string` | yes              | Canonical object key from the accepted Review scope Pattern: `^[A-Z0-9_]+:.+$`.                                                     |
-| `componentId`  | `string` | yes              | Immutable source component from the accepted Review scope Length: 1–512. Pattern: `^[^\\s\\u0000-\\u0008\\u000e-\\u001f\\u007f]+$`. |
-| `destination`  | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`.                      |
+| Parameter      | Type     | Required         | Description                                                                                                                                     |
+| -------------- | -------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `canonicalKey` | `string` | yes              | Canonical object key from the accepted Review scope Length: 0–∞. Items: 0–∞. Pattern: `^[A-Z0-9_]+:.+$`.                                        |
+| `componentId`  | `string` | yes              | Immutable source component from the accepted Review scope Length: 1–512. Items: 0–∞. Pattern: `^[^\\s\\u0000-\\u0008\\u000e-\\u001f\\u007f]+$`. |
+| `destination`  | `string` | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`.                                  |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
 

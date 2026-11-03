@@ -153,22 +153,16 @@ function typeLabel(s: JsonSchema): string {
 }
 
 function constraintNotes(s: JsonSchema): string[] {
-  const out: string[] = [];
-  const lo = s.minimum ?? s.exclusiveMinimum;
-  const hi = s.maximum ?? s.exclusiveMaximum;
-  if (lo !== undefined || hi !== undefined) {
-    const open = s.exclusiveMinimum !== undefined ? '(' : '[';
-    const close = s.exclusiveMaximum !== undefined ? ')' : ']';
-    out.push(`Range: ${open}${lo ?? '-∞'}, ${hi ?? '+∞'}${close}.`);
-  }
-  if (s.minLength !== undefined || s.maxLength !== undefined) {
-    out.push(`Length: ${s.minLength ?? 0}–${s.maxLength ?? '∞'}.`);
-  }
-  if (s.minItems !== undefined || s.maxItems !== undefined) {
-    out.push(`Items: ${s.minItems ?? 0}–${s.maxItems ?? '∞'}.`);
-  }
-  if (s.pattern !== undefined) out.push(`Pattern: \`${s.pattern}\`.`);
-  return out;
+  const ranges: [string, number | undefined, number | undefined][] = [
+    ['Range', s.minimum ?? s.exclusiveMinimum, s.maximum ?? s.exclusiveMaximum],
+    ['Length', s.minLength ?? 0, s.maxLength],
+    ['Items', s.minItems ?? 0, s.maxItems],
+  ];
+  const notes = ranges
+    .filter(([, lo, hi]) => lo !== undefined || hi !== undefined)
+    .map(([label, lo, hi]) => `${label}: ${lo ?? '∞'}–${hi ?? '∞'}.`);
+  if (s.pattern !== undefined) notes.push(`Pattern: \`${s.pattern}\`.`);
+  return notes;
 }
 
 function parameterRow(

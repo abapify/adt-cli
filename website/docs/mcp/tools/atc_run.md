@@ -16,21 +16,21 @@ Defined in [`packages/adt-mcp/src/lib/tools/atc-run.ts`](https://github.com/abap
 
 | Parameter                    | Type                             | Required         | Description                                                                                                    |
 | ---------------------------- | -------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`                    | `string`                         | no               | SAP system base URL (e.g. https://host:8000)                                                                   |
-| `client`                     | `string`                         | no               | SAP client number                                                                                              |
-| `username`                   | `string`                         | no               | Username for basic auth                                                                                        |
-| `password`                   | `string`                         | no               | Password for basic auth                                                                                        |
-| `systemId`                   | `string`                         | no               | Logical system id (resolved via the server multi-system configuration)                                         |
-| `scope`                      | `object` \| `object` \| `object` | yes              | Canonical target scope; never an ADT URI                                                                       |
-| `scope.kind`                 | `"package"`                      | yes              |                                                                                                                |
-| `scope.packageName`          | `string`                         | yes              | Length: 1–128. Pattern: `^[A-Za-z0-9_/$-]+$`.                                                                  |
-| `scope.kind`                 | `"transport_request"`            | yes              |                                                                                                                |
-| `scope.trkorr`               | `string`                         | yes              | Length: 1–64. Pattern: `^[A-Za-z0-9_-]+$`.                                                                     |
-| `scope.kind`                 | `"objects"`                      | yes              |                                                                                                                |
-| `scope.objects`              | `object[]`                       | yes              | Items: 1–1024.                                                                                                 |
-| `scope.objects[].objectType` | `string`                         | yes              | Length: 1–128.                                                                                                 |
-| `scope.objects[].objectName` | `string`                         | yes              | Length: 1–256.                                                                                                 |
-| `variant`                    | `string`                         | no               | Length: 1–256.                                                                                                 |
+| `baseUrl`                    | `string`                         | no               | SAP system base URL (e.g. https://host:8000) Length: 0–∞. Items: 0–∞.                                          |
+| `client`                     | `string`                         | no               | SAP client number Length: 0–∞. Items: 0–∞.                                                                     |
+| `username`                   | `string`                         | no               | Username for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `password`                   | `string`                         | no               | Password for basic auth Length: 0–∞. Items: 0–∞.                                                               |
+| `systemId`                   | `string`                         | no               | Logical system id (resolved via the server multi-system configuration) Length: 0–∞. Items: 0–∞.                |
+| `scope`                      | `object` \| `object` \| `object` | yes              | Canonical target scope; never an ADT URI Length: 0–∞. Items: 0–∞.                                              |
+| `scope.kind`                 | `"package"`                      | yes              | Length: 0–∞. Items: 0–∞.                                                                                       |
+| `scope.packageName`          | `string`                         | yes              | Length: 1–128. Items: 0–∞. Pattern: `^[A-Za-z0-9_/$-]+$`.                                                      |
+| `scope.kind`                 | `"transport_request"`            | yes              | Length: 0–∞. Items: 0–∞.                                                                                       |
+| `scope.trkorr`               | `string`                         | yes              | Length: 1–64. Items: 0–∞. Pattern: `^[A-Za-z0-9_-]+$`.                                                         |
+| `scope.kind`                 | `"objects"`                      | yes              | Length: 0–∞. Items: 0–∞.                                                                                       |
+| `scope.objects`              | `object[]`                       | yes              | Length: 0–∞. Items: 1–1024.                                                                                    |
+| `scope.objects[].objectType` | `string`                         | yes              | Length: 1–128. Items: 0–∞.                                                                                     |
+| `scope.objects[].objectName` | `string`                         | yes              | Length: 1–256. Items: 0–∞.                                                                                     |
+| `variant`                    | `string`                         | no               | Length: 1–256. Items: 0–∞.                                                                                     |
 | `destination`                | `string`                         | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |
 
 _In destination mode every call additionally requires a `destination` key and rejects the connection fields (`baseUrl`, `client`, `username`, `password`, `systemId`)._
