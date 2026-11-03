@@ -79,7 +79,7 @@ export default {
 
 See [`@abapify/adt-config`](../sdk/packages/adt-config) for the full config
 schema (logging, output, extension-specific options) and [architecture
-overview](../architecture/overview) for how plugins slot into the overall
+overview](https://github.com/abapify/adt-cli/blob/main/docs/architecture/overview.md) for how plugins slot into the overall
 stack.
 
 ## Writing your own

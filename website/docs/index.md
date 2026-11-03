@@ -23,7 +23,6 @@ SAP ABAP Development Tools (ADT) brought to the command line, to MCP clients, an
 - **[MCP Server](/mcp/overview)** — Tool catalog and client integration.
 - **[SDK](/sdk/packages/overview)** — Package guides and the full ADT contract catalog.
 - **[Plugins](/plugins/overview)** — abapGit, gCTS, AUnit, ATC, and writing your own.
-- **[Architecture](/architecture/overview)** — How the pieces fit together.
 
 ## Get started in 30 seconds
 

@@ -1,8 +1,3 @@
----
-title: ABAP Unit Coverage Pipeline
-sidebar_position: 7
----
-
 # ABAP Unit Coverage Pipeline
 
 `adt aunit` (from `@abapify/adt-aunit`) runs ABAP Unit tests and can
@@ -107,11 +102,11 @@ is also supported and uses the same filename mapping.
 ## MCP equivalent
 
 The `run_unit_tests` MCP tool calls the same contracts + formatters.
-See [MCP → run_unit_tests](../mcp/tools/run_unit_tests).
+See [MCP → run_unit_tests](https://adt-cli.netlify.app/mcp/tools/run_unit_tests).
 
 ## See also
 
-- [CLI → aunit](../cli/aunit)
-- [MCP → run_unit_tests](../mcp/tools/run_unit_tests)
-- [SDK → adt-aunit](../sdk/packages/adt-aunit)
-- [SDK → contracts → runtime-traces](../sdk/contracts/runtime-traces)
+- [CLI → aunit](https://adt-cli.netlify.app/cli/aunit)
+- [MCP → run_unit_tests](https://adt-cli.netlify.app/mcp/tools/run_unit_tests)
+- [SDK → adt-aunit](../../packages/adt-aunit)
+- [SDK → contracts → runtime-traces](https://adt-cli.netlify.app/sdk/contracts/runtime-traces)

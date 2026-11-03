@@ -1,8 +1,3 @@
----
-title: Contracts Pipeline
-sidebar_position: 2
----
-
 # Contracts Pipeline
 
 Every call from `adt-cli` (or the MCP server, or an ADK save) into SAP goes
@@ -65,7 +60,7 @@ critical for cross-schema resolution:
 
 ### Stage 3 — adt-schemas
 
-[`@abapify/adt-schemas`](../sdk/packages/adt-schemas) re-exports every
+[`@abapify/adt-schemas`](../../packages/adt-schemas) re-exports every
 generated schema wrapped in `typed<Interface>(literal)`. Additionally,
 each schema is adapted for `speci` consumption (the REST contract
 library) with a thin `toSpeciSchema()` bridge — this is what lets a
@@ -163,7 +158,7 @@ The end-to-end "upload source" flow for an ABAP class:
    return type — this fails at `tsc` time if inference breaks.
 8. **Fixture + mock route.** Drop a sanitised real response into
    `packages/adt-fixtures/src/fixtures/<path>/` and add a route in
-   [`mock-server/routes.ts`](./mock-server).
+   [`mock-server/routes.ts`](../../packages/adt-fixtures/src/mock-server/routes.ts).
 9. **Consumer.** Expose via ADK / CLI command / MCP tool as appropriate.
 10. **Verify.**
     ```bash
@@ -174,8 +169,8 @@ The end-to-end "upload source" flow for an ABAP class:
 
 ## See also
 
-- [SDK → adt-contracts](../sdk/packages/adt-contracts)
-- [SDK → adt-client](../sdk/packages/adt-client)
-- [SDK → adt-schemas](../sdk/packages/adt-schemas)
-- [SDK → ts-xsd](../sdk/packages/ts-xsd)
-- [Architecture → ADK](./adk)
+- [SDK → adt-contracts](../../packages/adt-contracts)
+- [SDK → adt-client](../../packages/adt-client)
+- [SDK → adt-schemas](../../packages/adt-schemas)
+- [SDK → ts-xsd](../../packages/ts-xsd)
+- [Architecture → ADK](./adk.md)

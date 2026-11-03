@@ -1,8 +1,3 @@
----
-title: Mock ADT Server
-sidebar_position: 5
----
-
 # Mock ADT Server
 
 `@abapify/adt-fixtures` ships a small in-process HTTP server that emulates
@@ -144,7 +139,7 @@ reproduce the real Eclipse ADT protocol.
 
 The real-SAP flavour of the CLI e2e tests — a separate harness that
 does **not** touch the mock — is documented on
-[real-e2e](./real-e2e).
+[real-e2e](./real-e2e.md).
 
 ## Adding a new route
 
@@ -160,7 +155,7 @@ does **not** touch the mock — is documented on
 
 ## See also
 
-- [Architecture → Real SAP e2e](./real-e2e)
-- [SDK → adt-fixtures](../sdk/packages/adt-fixtures)
+- [Architecture → Real SAP e2e](./real-e2e.md)
+- [SDK → adt-fixtures](../../packages/adt-fixtures)
 - [`adt-fixtures` AGENTS.md](https://github.com/abapify/adt-cli/blob/main/packages/adt-fixtures/AGENTS.md)
-- [MCP server](../mcp/overview)
+- [MCP server](https://adt-cli.netlify.app/mcp/overview)

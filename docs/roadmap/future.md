@@ -1,8 +1,3 @@
----
-title: Future Work & Open Questions
-sidebar_position: 2
----
-
 # Future Work & Open Questions
 
 Collected from the "Open questions" / "Follow-ups discovered during
@@ -27,7 +22,7 @@ can run against a suitable system:
   body shape is undocumented; all attempted payloads return 400
   "I::000". Stub remains until a real capture surfaces.
 
-See [Architecture → Real-SAP e2e](../architecture/real-e2e) for the
+See [Architecture → Real-SAP e2e](../architecture/real-e2e.md) for the
 full findings table.
 
 ## Format plugins
@@ -121,6 +116,6 @@ delete-credentials`, `gcts system config` — not in the 12-subcommand
 
 ## See also
 
-- [Roadmap → What shipped](./overview)
-- [Architecture overview](../architecture/overview)
+- [Roadmap → What shipped](./shipped.md)
+- [Architecture overview](../architecture/overview.md)
 - Raw epic files (internal, maintainers only): [`docs/roadmap/epics/`](https://github.com/abapify/adt-cli/tree/main/docs/roadmap/epics)
