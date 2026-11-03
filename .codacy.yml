@@ -15,6 +15,10 @@ exclude_paths:
   # honoured by Codacy's bundled pipeline, hence path exclusion.
   - 'packages/adt-plugin-gcts/scripts/aff-coverage.ts'
   - 'packages/adt-plugin-gcts/scripts/generate-aff-schemas.ts'
+  # Dev-only docs generator: it writes Markdown (not HTML) to fixed,
+  # repo-derived paths and imports a constant list of plugin modules, so the
+  # non-literal-fs, HTML-context and dynamic-import rules are false positives.
+  - 'tools/docs-gen/src/**'
 engines:
   csslint:
     exclude_paths:

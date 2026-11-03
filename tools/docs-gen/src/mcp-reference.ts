@@ -206,7 +206,7 @@ function findSource(
   const preferred = matches.find(
     ([file]) => basename(file, '.ts') === name.replace(/_/g, '-'),
   );
-  return (preferred ?? matches[0])?.[0];
+  return (preferred ?? matches.at(0))?.[0];
 }
 
 const DEFAULT_TAIL = [
