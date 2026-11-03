@@ -8,6 +8,7 @@ import {
   getAuthManager,
 } from '../../utils/auth';
 import { handleCommandError } from '../../utils/command-helpers';
+import { verifyBasicAuth } from '../../utils/verify-basic-auth';
 import {
   CALLBACK_SERVER_PORT,
   OAUTH_REDIRECT_URI,
@@ -44,6 +45,10 @@ export const loginCommand = new Command('login')
   .option(
     '--insecure',
     'Allow insecure SSL connections (ignore certificate errors)',
+  )
+  .option(
+    '--skip-verify',
+    'Skip credential verification against the SAP system (offline logins)',
   )
   .action(async function (this: Command, options) {
     try {
@@ -141,6 +146,11 @@ export const loginCommand = new Command('login')
             destOptions,
             globalRedirectUri,
           );
+          await verifyBasicCredentials(
+            dest.type,
+            resolvedDestOptions,
+            options.skipVerify === true,
+          );
           const session = await authManager.login(sid, {
             type: dest.type,
             options: resolvedDestOptions,
@@ -207,6 +217,11 @@ export const loginCommand = new Command('login')
             destOptions,
             globalRedirectUri,
           );
+          await verifyBasicCredentials(
+            selected.destination.type,
+            resolvedDestOptions,
+            options.skipVerify === true,
+          );
           const session = await authManager.login(sid, {
             type: selected.destination.type,
             options: resolvedDestOptions,
@@ -242,6 +257,11 @@ export const loginCommand = new Command('login')
       // Authenticate via AuthManager (always uses built-in basic auth for manual flow)
       console.log(`\n📋 Authenticating to ${sid}...\n`);
       const authManager = getAuthManager();
+      await verifyBasicCredentials(
+        manualConfig.pluginType,
+        pluginOptions,
+        options.skipVerify === true,
+      );
       const session = await authManager.login(sid, {
         type: manualConfig.pluginType,
         options: pluginOptions,
@@ -271,6 +291,45 @@ export const loginCommand = new Command('login')
       handleCommandError(error, 'Login');
     }
   });
+
+const BASIC_AUTH_PLUGIN = '@abapify/adt-auth/plugins/basic';
+
+/**
+ * Verify basic-auth credentials against the SAP system before the session
+ * is persisted. The basic plugin itself never contacts SAP, so without
+ * this check login would report success for wrong credentials (#289).
+ */
+async function verifyBasicCredentials(
+  pluginType: string,
+  destOptions: DestinationOptions,
+  skipVerify: boolean,
+): Promise<void> {
+  if (pluginType !== BASIC_AUTH_PLUGIN) {
+    return; // cookie/SSO plugins already authenticate interactively
+  }
+
+  if (skipVerify) {
+    console.log('⚠️  Skipping credential verification (--skip-verify)');
+    return;
+  }
+
+  if (!destOptions.username || !destOptions.password) {
+    console.log(
+      '⚠️  No stored credentials for this destination — skipping verification',
+    );
+    return;
+  }
+
+  console.log('🔑 Verifying credentials against the SAP system...');
+  await verifyBasicAuth({
+    url: destOptions.url,
+    client:
+      typeof destOptions.client === 'string' ? destOptions.client : undefined,
+    username: String(destOptions.username ?? ''),
+    password: String(destOptions.password ?? ''),
+  });
+  console.log('✅ Credentials accepted');
+}
 
 async function promptForSid(): Promise<string> {
   const sid = await input({
