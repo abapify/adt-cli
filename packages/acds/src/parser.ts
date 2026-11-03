@@ -756,16 +756,18 @@ export class CdsParser extends CstParser {
 
   /**
    * `( <param> : <value> , … )` — parameter bindings of a data source.
-   * At least one binding is required; `source()` is rejected.
+   * Empty parameter list `()` is allowed for table functions with no parameters.
    */
   private readonly dataSourceParameters = this.RULE(
     'dataSourceParameters',
     () => {
       this.CONSUME(LParen);
-      this.SUBRULE(this.dataSourceParameter);
-      this.MANY(() => {
-        this.CONSUME(Comma);
-        this.SUBRULE2(this.dataSourceParameter);
+      this.OPTION(() => {
+        this.SUBRULE(this.dataSourceParameter);
+        this.MANY(() => {
+          this.CONSUME(Comma);
+          this.SUBRULE2(this.dataSourceParameter);
+        });
       });
       this.CONSUME(RParen);
     },
