@@ -757,6 +757,7 @@ export class CdsParser extends CstParser {
   /**
    * `( <param> : <value> , … )` — parameter bindings of a data source.
    * Empty parameter list `()` is allowed for table functions with no parameters.
+   * Allow empty () for table function sources.
    */
   private readonly dataSourceParameters = this.RULE(
     'dataSourceParameters',
