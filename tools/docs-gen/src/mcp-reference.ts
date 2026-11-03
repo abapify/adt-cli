@@ -100,16 +100,19 @@ function toJsonSchema(input: unknown): JsonSchema {
   }) as JsonSchema;
 }
 
+type ZodDef = { type?: string; innerType?: unknown };
+
+function zodDef(value: unknown): ZodDef | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  return '_zod' in value
+    ? (value as { _zod: { def: ZodDef } })._zod.def
+    : undefined;
+}
+
 /** True when a Zod field resolves to `z.never()` through optional wrappers. */
 function isNeverSchema(value: unknown): boolean {
-  let cur = value;
-  while (typeof cur === 'object' && cur !== null && '_zod' in cur) {
-    const def = (
-      cur as { _zod: { def: { type?: string; innerType?: unknown } } }
-    )._zod.def;
+  for (let def = zodDef(value); def; def = zodDef(def.innerType)) {
     if (def.type === 'never') return true;
-    if (def.innerType === undefined) return false;
-    cur = def.innerType;
   }
   return false;
 }
