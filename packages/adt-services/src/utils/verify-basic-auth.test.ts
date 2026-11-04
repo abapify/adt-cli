@@ -1,12 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import http from 'node:http';
+import { randomUUID } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
 import {
   BasicAuthVerificationError,
   verifyBasicAuth,
 } from './verify-basic-auth';
 
-const VALID_PASSWORD = 'secretP@ss!';
+const VALID_PASSWORD = randomUUID();
 let server: http.Server;
 let baseUrl: string;
 
@@ -29,6 +30,15 @@ beforeAll(async () => {
 afterAll(async () => {
   await new Promise<void>((resolve) => server.close(() => resolve()));
 });
+
+/** A port guaranteed to have no listener: bind, read the port, close. */
+async function closedPort(): Promise<number> {
+  const probe = http.createServer();
+  await new Promise<void>((resolve) => probe.listen(0, '127.0.0.1', resolve));
+  const { port } = probe.address() as AddressInfo;
+  await new Promise<void>((resolve) => probe.close(() => resolve()));
+  return port;
+}
 
 describe('verifyBasicAuth', () => {
   it('resolves and sends the correct Basic header and sap-client on 200', async () => {
@@ -94,9 +104,28 @@ describe('verifyBasicAuth', () => {
     expect(verificationError.message).toContain('503');
   });
 
-  it('wraps network failures with the underlying cause', async () => {
+  it('rejects a 200 HTML login page (SSO/SAML system)', async () => {
+    respond = (_req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' });
+      res.end('<html><body><form>Sign on</form></body></html>');
+    };
+
     const error = await verifyBasicAuth({
-      url: 'http://127.0.0.1:1', // nothing listens here
+      url: baseUrl,
+      username: 'sapuser1',
+      password: VALID_PASSWORD,
+    }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(BasicAuthVerificationError);
+    expect((error as BasicAuthVerificationError).message).toMatch(
+      /HTML login page|SSO|SAML/i,
+    );
+  });
+
+  it('wraps network failures with the underlying cause', async () => {
+    const deadPort = await closedPort();
+    const error = await verifyBasicAuth({
+      url: `http://127.0.0.1:${deadPort}`, // bound then closed — refuses connections
       username: 'sapuser1',
       password: VALID_PASSWORD,
     }).catch((e: unknown) => e);

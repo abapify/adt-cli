@@ -131,8 +131,8 @@ export const loginCommand = new Command('login')
           // For basic auth without credentials, prompt for username/password
           const destOptions = dest.options as DestinationOptions;
           if (
-            dest.type === '@abapify/adt-auth/plugins/basic' &&
-            !destOptions.username
+            isBasicAuthPlugin(dest.type) &&
+            (!destOptions.username || !destOptions.password)
           ) {
             const credentials = await promptForBasicAuthCredentials(
               destOptions.url,
@@ -146,11 +146,10 @@ export const loginCommand = new Command('login')
             destOptions,
             globalRedirectUri,
           );
-          await verifyBasicCredentials(
-            dest.type,
-            resolvedDestOptions,
-            options.skipVerify === true,
-          );
+          await verifyBasicCredentials(dest.type, resolvedDestOptions, {
+            skipVerify: options.skipVerify === true,
+            insecure: options.insecure === true,
+          });
           const session = await authManager.login(sid, {
             type: dest.type,
             options: resolvedDestOptions,
@@ -213,6 +212,16 @@ export const loginCommand = new Command('login')
           const authManager = getAuthManager();
           const destOptions = selected.destination
             .options as DestinationOptions;
+          if (
+            isBasicAuthPlugin(selected.destination.type) &&
+            (!destOptions.username || !destOptions.password)
+          ) {
+            const credentials = await promptForBasicAuthCredentials(
+              destOptions.url,
+              options,
+            );
+            Object.assign(destOptions, credentials);
+          }
           const resolvedDestOptions = withGlobalRedirectUri(
             destOptions,
             globalRedirectUri,
@@ -220,7 +229,10 @@ export const loginCommand = new Command('login')
           await verifyBasicCredentials(
             selected.destination.type,
             resolvedDestOptions,
-            options.skipVerify === true,
+            {
+              skipVerify: options.skipVerify === true,
+              insecure: options.insecure === true,
+            },
           );
           const session = await authManager.login(sid, {
             type: selected.destination.type,
@@ -257,11 +269,10 @@ export const loginCommand = new Command('login')
       // Authenticate via AuthManager (always uses built-in basic auth for manual flow)
       console.log(`\n📋 Authenticating to ${sid}...\n`);
       const authManager = getAuthManager();
-      await verifyBasicCredentials(
-        manualConfig.pluginType,
-        pluginOptions,
-        options.skipVerify === true,
-      );
+      await verifyBasicCredentials(manualConfig.pluginType, pluginOptions, {
+        skipVerify: options.skipVerify === true,
+        insecure: options.insecure === true,
+      });
       const session = await authManager.login(sid, {
         type: manualConfig.pluginType,
         options: pluginOptions,
@@ -292,7 +303,15 @@ export const loginCommand = new Command('login')
     }
   });
 
-const BASIC_AUTH_PLUGIN = '@abapify/adt-auth/plugins/basic';
+/** Plugin ids that perform basic auth (canonical path and export alias). */
+const BASIC_AUTH_PLUGINS = new Set([
+  '@abapify/adt-auth/plugins/basic',
+  '@abapify/adt-auth/basic',
+]);
+
+function isBasicAuthPlugin(pluginType: string): boolean {
+  return BASIC_AUTH_PLUGINS.has(pluginType);
+}
 
 /**
  * Verify basic-auth credentials against the SAP system before the session
@@ -302,31 +321,40 @@ const BASIC_AUTH_PLUGIN = '@abapify/adt-auth/plugins/basic';
 async function verifyBasicCredentials(
   pluginType: string,
   destOptions: DestinationOptions,
-  skipVerify: boolean,
+  verifyOptions: { skipVerify: boolean; insecure: boolean },
 ): Promise<void> {
-  if (pluginType !== BASIC_AUTH_PLUGIN) {
+  if (!isBasicAuthPlugin(pluginType)) {
     return; // cookie/SSO plugins already authenticate interactively
   }
 
-  if (skipVerify) {
+  if (verifyOptions.skipVerify) {
     console.log('⚠️  Skipping credential verification (--skip-verify)');
     return;
   }
 
   if (!destOptions.username || !destOptions.password) {
-    console.log(
-      '⚠️  No stored credentials for this destination — skipping verification',
+    throw new Error(
+      'Basic-auth destination is missing username or password. ' +
+        'Update the destination configuration or use --skip-verify to bypass.',
     );
-    return;
+  }
+
+  if (destOptions.url.startsWith('http://')) {
+    console.log(
+      '⚠️  Destination uses plain HTTP — credentials are sent unencrypted.',
+    );
   }
 
   console.log('🔑 Verifying credentials against the SAP system...');
   await verifyBasicAuth({
     url: destOptions.url,
     client:
-      typeof destOptions.client === 'string' ? destOptions.client : undefined,
-    username: String(destOptions.username ?? ''),
-    password: String(destOptions.password ?? ''),
+      destOptions.client === undefined || destOptions.client === null
+        ? undefined
+        : String(destOptions.client),
+    username: String(destOptions.username),
+    password: String(destOptions.password),
+    insecure: verifyOptions.insecure,
   });
   console.log('✅ Credentials accepted');
 }

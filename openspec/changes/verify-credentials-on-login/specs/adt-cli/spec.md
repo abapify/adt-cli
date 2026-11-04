@@ -37,6 +37,26 @@ and reporting success.
 - **THEN** the command stores the session without contacting SAP and
   reports that credentials were not verified
 
+#### Scenario: Basic-auth plugin alias is verified
+
+- **WHEN** a destination uses the `@abapify/adt-auth/basic` export alias
+- **THEN** it is treated as a basic-auth login and its credentials are
+  verified like the canonical `@abapify/adt-auth/plugins/basic` plugin
+
+#### Scenario: Basic-auth destination missing credentials
+
+- **WHEN** a basic-auth destination lacks a username or password
+- **THEN** the command prompts for the missing credentials, or fails
+  naming the missing credential, and no session is persisted until
+  credentials are complete (unless `--skip-verify` is used)
+
+#### Scenario: Insecure logins verify with the same TLS policy
+
+- **WHEN** login runs with `--insecure` against a system with an
+  untrusted certificate
+- **THEN** the verification request uses the same relaxed TLS policy so
+  verification behaves like the rest of the session
+
 ### Requirement: Cookie-auth logins are not re-verified
 
 Basic-auth verification MUST apply only to basic-auth logins. Cookie /
