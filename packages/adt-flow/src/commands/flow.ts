@@ -429,14 +429,41 @@ function checkoutTrCommand(
                     false,
                     '--partial-report',
                   );
-                if (coverageReport)
-                  await writePartialReport(
-                    coverageReport,
-                    realRoot,
-                    checkoutResult,
-                    true,
-                    '--report',
-                  );
+                if (coverageReport) {
+                  try {
+                    await writePartialReport(
+                      coverageReport,
+                      realRoot,
+                      checkoutResult,
+                      true,
+                      '--report',
+                    );
+                  } catch (error) {
+                    // Sources have already been reconciled. A diagnostic storage failure
+                    // must not turn that successful checkout into a failed import.
+                    // Unsafe paths and programming errors retain their existing failure semantics.
+                    const recoverable =
+                      error instanceof Error &&
+                      'code' in error &&
+                      [
+                        'EACCES',
+                        'EPERM',
+                        'ENOSPC',
+                        'EDQUOT',
+                        'EIO',
+                        'EROFS',
+                        'ENOTDIR',
+                        'EEXIST',
+                        'ENOENT',
+                        'EMFILE',
+                        'ENFILE',
+                      ].includes(String(error.code));
+                    if (!recoverable) throw error;
+                    ctx.logger.warn(
+                      'INVENTORY_REPORT_UNAVAILABLE: checkout succeeded; completeness is unknown because the diagnostic report could not be stored.',
+                    );
+                  }
+                }
               },
             })
           : await service.checkout(checkoutInput);

@@ -192,13 +192,31 @@ describe('legacy ImportService generic transport acquisition', () => {
         deleted: number;
       };
     };
-    expect(metadata.import).toEqual({
+    expect(metadata.import).toMatchObject({
       format: 'abapgit',
       success: 2,
       skipped: 0,
       failed: 2,
       deleted: 0,
     });
+    const diagnostics = {
+      schemaVersion: 1,
+      omissions: [
+        {
+          object: { pgmid: 'R3TR', type: 'PDTS', name: '91000229' },
+          diagnostic: 'SOURCE_UNAVAILABLE_UNLOADED_GENERIC',
+        },
+        {
+          object: { pgmid: 'R3TR', type: 'TOBJ', name: 'ZVIM_DI3_CHKBLNKS' },
+          diagnostic: 'SOURCE_UNAVAILABLE_UNLOADED_GENERIC',
+        },
+      ],
+    };
+    expect(metadata.import).toHaveProperty(
+      'acquisitionDiagnostics',
+      diagnostics,
+    );
+    expect(result).toHaveProperty('acquisitionDiagnostics', diagnostics);
   });
 
   it('allows a populated generic fallback object to reach the real serializer', async () => {
@@ -234,6 +252,7 @@ describe('legacy ImportService generic transport acquisition', () => {
       deleted: 0,
     });
     expect(mockPlugin.instance.format.import).toHaveBeenCalledTimes(1);
+    expect(result).not.toHaveProperty('acquisitionDiagnostics');
     const serialized = await readFile(
       join(outputPath, 'src', 'zvim_di3_chkblnks.tobj.xml'),
       'utf8',

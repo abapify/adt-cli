@@ -56,6 +56,24 @@ The reverse direction (`adt-services` → `adt-cli`/`adt-mcp`) is forbidden.
 `@abapify/adt-cli` re-exports these services from its own `index.ts` for
 backwards compatibility.
 
+## Transport acquisition diagnostics
+
+`ImportService.importTransport()` may return optional `acquisitionDiagnostics`
+and include the same object under `import.acquisitionDiagnostics` in metadata
+sidecars when `saveTrMetadata` is enabled. Version 1 contains `schemaVersion: 1`
+and an `omissions` array with CTS object identity (`pgmid`, `type`, `name`) and
+`diagnostic: SOURCE_UNAVAILABLE_UNLOADED_GENERIC`.
+
+This diagnostic means the ADK fallback has no loaded data. It must not be
+serialized as a default-only object or treated as a proved deletion. Original
+`results.failed` statistics are preserved. A caller may continue available-code
+review when every failed object is explained by this versioned, scope-bound
+contract; missing, unknown or unmatched diagnostics do not classify other
+failures. Authentication, unsafe paths and unrelated errors are not converted
+into this acquisition omission. Loaded generic objects and registered typed
+objects retain their existing serializer behavior. CLI and MCP use this shared
+service contract; no new command flags are required.
+
 ## Source
 
 - Source: [`packages/adt-services`](https://github.com/abapify/adt-cli/blob/main/packages/adt-services)
