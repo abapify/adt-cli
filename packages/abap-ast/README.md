@@ -1,46 +1,25 @@
 # @abapify/abap-ast
 
-**Zero-dependency typed AST and deterministic pretty-printer for ABAP source code.**
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fabap-ast)](https://www.npmjs.com/package/@abapify/abap-ast)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-## Overview
+Zero-dependency typed AST and pretty-printer for ABAP source code (classes, interfaces, types, statements).
 
-`@abapify/abap-ast` is the `ts.factory` of ABAP. It provides a typed node
-model for ABAP classes, interfaces, types, statements, and expressions, plus
-a single `print()` entry point that serialises any node to valid ABAP source.
-
-There is **no parser (yet)** — this package is emit-only. A future `.aclass`
-parser (e.g. Chevrotain-based) will produce the same AST, so code built on
-top of this package stays forward-compatible.
-
-Primary consumer: [`@abapify/openai-codegen`](../openai-codegen).
-
-### What it gives you
-
-- Typed factory functions for every node kind (classes, interfaces,
-  methods, types, statements, expressions).
-- A deterministic printer: identical input produces byte-identical output,
-  across runs, platforms, and Node versions.
-- Configurable keyword case, indent, and line ending.
-- No runtime dependencies.
-
-## Installation
+## Install
 
 ```bash
-bun add @abapify/abap-ast
+npm install @abapify/abap-ast
 ```
 
-## Quick Start
+## Usage
 
-```typescript
+```ts
 import {
   print,
   classDef,
   section,
-  typeDef,
   methodDef,
   methodImpl,
-  methodParam,
-  builtinType,
   returnStmt,
 } from '@abapify/abap-ast';
 
@@ -50,171 +29,25 @@ const cls = classDef({
   sections: [
     section({
       visibility: 'public',
-      members: [
-        typeDef({ name: 'ty_name', type: builtinType({ name: 'string' }) }),
-        methodDef({
-          name: 'greet',
-          visibility: 'public',
-          params: [
-            methodParam({
-              paramKind: 'importing',
-              name: 'iv_name',
-              typeRef: builtinType({ name: 'string' }),
-            }),
-            methodParam({
-              paramKind: 'returning',
-              name: 'rv_msg',
-              typeRef: builtinType({ name: 'string' }),
-            }),
-          ],
-        }),
-      ],
+      members: [methodDef({ name: 'greet', visibility: 'public' })],
     }),
   ],
   implementations: [methodImpl({ name: 'greet', body: [returnStmt()] })],
 });
 
-console.log(print(cls));
+console.log(print(cls)); // CLASS zcl_greeter DEFINITION PUBLIC FINAL ...
 ```
 
-emits:
+## Features
 
-```abap
-CLASS zcl_greeter DEFINITION PUBLIC FINAL CREATE PUBLIC.
-  PUBLIC SECTION.
-    TYPES ty_name TYPE string.
-    METHODS greet
-      IMPORTING iv_name TYPE string
-      RETURNING VALUE(rv_msg) TYPE string.
-ENDCLASS.
+- Typed node factories for classes, interfaces, types, and statements
+- Deterministic pretty-printer with ABAPDoc support
+- Zero runtime dependencies
 
-CLASS zcl_greeter IMPLEMENTATION.
-  METHOD greet.
-    RETURN.
-  ENDMETHOD.
-ENDCLASS.
-```
+## Documentation
 
-## Node kinds
+**[adt-cli.netlify.app/sdk/packages/abap-ast](https://adt-cli.netlify.app/sdk/packages/abap-ast)**
 
-Every node has a `kind: NodeKind` PascalCase discriminant. Nodes are grouped
-by topic under `src/nodes/`; each module exports interfaces plus matching
-factory functions. You rarely need the raw interfaces — the factories are
-the public surface.
+---
 
-| Module           | Factories                                                                                                                                |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `base.ts`        | `comment` (plus shared types: `NodeKind`, `Visibility`, `Identifier`)                                                                    |
-| `types.ts`       | `builtinType`, `namedTypeRef`, `tableType`, `structureType`, `enumType`, `typeDef`                                                       |
-| `data.ts`        | `dataDecl`, `constantDecl`, `fieldSymbolDecl`                                                                                            |
-| `expressions.ts` | `literal`, `identifierExpr`, `constructorExpr`, `methodCallExpr`, `binOp`, `stringTemplate`, `cast`                                      |
-| `statements.ts`  | `assign`, `call`, `raise`, `ifStmt`, `loop`, `returnStmt`, `tryStmt`, `append`, `insert`, `read`, `clear`, `exit`, `continueStmt`, `raw` |
-| `members.ts`     | `methodParam`, `methodDef`, `methodImpl`, `eventDef`, `attributeDef`                                                                     |
-| `class.ts`       | `section`, `classDef`, `localClassDef`                                                                                                   |
-| `interface.ts`   | `interfaceDef`                                                                                                                           |
-
-See [`src/nodes/`](src/nodes) for the full signatures — each factory is a
-one-argument function taking a named-input object and returning a frozen
-AST node.
-
-`raw({ source })` is an escape hatch for ABAP fragments that are not yet
-representable in the AST. Consumers should prefer structured nodes and
-confine `raw` to known-safe cases.
-
-## ABAPDoc comments
-
-Declaration nodes (`TypeDef`, `MethodDef`, `AttributeDef`, `InterfaceDef`,
-`ClassDef`) accept an optional `abapDoc: readonly string[]` field. The
-printer emits each line verbatim prefixed with `"!` at the declaration's
-own indentation, immediately above it. This is the standard ABAP way to
-attach structured metadata to a declaration (ABAPDoc / Knowledge Transfer
-comments).
-
-```typescript
-import { print, methodDef, methodParam, builtinType } from '@abapify/abap-ast';
-
-const m = methodDef({
-  name: 'get_foo',
-  visibility: 'public',
-  abapDoc: [
-    '@openapi-operation getFoo',
-    '@openapi-path GET /foo/{id}',
-    'Return a foo by id.',
-  ],
-  params: [
-    methodParam({
-      paramKind: 'importing',
-      name: 'id',
-      typeRef: builtinType({ name: 'string' }),
-    }),
-  ],
-});
-
-console.log(print(m));
-```
-
-emits:
-
-```abap
-"! @openapi-operation getFoo
-"! @openapi-path GET /foo/{id}
-"! Return a foo by id.
-METHODS get_foo
-  IMPORTING id TYPE string.
-```
-
-Lines are written verbatim: no automatic wrapping, no escaping, no tag
-rewriting. Consumers own their tag conventions.
-
-## Printer
-
-```typescript
-import { print, type PrintOptions } from '@abapify/abap-ast';
-
-const source: string = print(node, options?);
-```
-
-| Option        | Type                 | Default   | Notes                                       |
-| ------------- | -------------------- | --------- | ------------------------------------------- |
-| `indent`      | `number`             | `2`       | Spaces per indentation level.               |
-| `keywordCase` | `'upper' \| 'lower'` | `'upper'` | Case of ABAP keywords (`CLASS`, `METHODS`). |
-| `eol`         | `string`             | `'\n'`    | Line ending (`'\r\n'` for CRLF output).     |
-
-**Determinism guarantee.** For a given input tree and resolved options,
-`print()` always returns the same string. The printer does no implicit
-sorting, random id generation, or environment lookup. Snapshot-testing the
-output is safe and is how this package is validated (see
-`tests/printer.test.ts`).
-
-The printer accepts most nodes at the top level, but a few internal nodes
-(`Section`, `MethodParam`, and bare `TableType`/`StructureType` etc.) throw
-if passed directly — wrap them in their enclosing node (`ClassDef`,
-`MethodDef`, `TypeDef`) first.
-
-## Design
-
-This package deliberately mirrors the `ts.factory` pattern from the
-TypeScript compiler API:
-
-- The AST is the single source of truth for ABAP structure.
-- Factories validate required fields at construction time and freeze the
-  returned node.
-- The printer is a pure function of the tree.
-- No string concatenation leaks into consumer code — they always go through
-  a typed factory.
-
-A future `.aclass` Chevrotain parser will populate the same AST, at which
-point `print(parse(src)) ≈ src` becomes the round-trip contract.
-
-## Consumers
-
-- [`@abapify/openai-codegen`](../openai-codegen) — OpenAPI → ABAP client
-  generator. Builds two `InterfaceDef`s, one `ClassDef` for the
-  implementation, and one `ClassDef` for the exception. Uses the
-  `abapDoc` field to attach round-trip `@openapi-*` markers on every
-  generated type and operation, and relies on the printer's determinism
-  guarantee for reproducible artefacts.
-
-## License
-
-MIT
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.

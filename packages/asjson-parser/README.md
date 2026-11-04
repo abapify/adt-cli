@@ -1,105 +1,33 @@
 # @abapify/asjson-parser
 
-[![version](https://img.shields.io/github/package-json/v/abapify/adt-cli?filename=packages/asjson-parser/package.json)](https://github.com/abapify/adt-cli/pkgs/npm/%40abapify%2Fasjson-parser)
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fasjson-parser)](https://www.npmjs.com/package/@abapify/asjson-parser)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-ABAP asJSON (canonical JSON representation) parser.
+Parser for SAP ABAP asJSON canonical format — maps ABAP asJSON payloads to/from plain JavaScript objects.
 
-[asJSON](https://help.sap.com/doc/abapdocu_latest_index_htm/latest/en-US/index.htm?file=abenabap_asjson.htm) - Canonical JSON Representation
+## Install
 
-General asJSON format is based on `%heap` object delivering values and type metadata
-
-So when we have a code like this:
-
-```abap
-REPORT ZTEST_HEAP.
-
-start-of-selection.
-
-types:
-  begin of payload_ts,
-    i type i,
-    i_ref type ref to i,
-  end of payload_ts.
-
-
-  data(payload) = value payload_ts(
-    i = 123
-    i_ref = new #( 123 )
-  ).
-
-  data(json) = cl_sxml_string_writer=>create( if_sxml=>co_xt_json ).
-
-  call transformation id
-  source data = payload
-        result xml json.
-
-  cl_demo_output=>display_json( json = json->get_output( ) ).
-```
-
-the output it generates will be:
-
-```json
-{
- "DATA":
- {
-  "I":123,
-  "I_REF":
-  {
-   "%ref":"#d1"
-  }
- },
- "%heap":
- {
-  "d1":
-  {
-   "%type":"xsd:int",
-   "%val":123
-  }
- }
-```
-
-The following library allows us to parse this payload as if we would deal with a regular ABAP object without data references
-
-The code below
-
-```ts
-import { parse } from '@abapify/asjson-parser';
-const parser;
-console.log(parse(json));
-```
-
-would print the object like this:
-
-```json
-{
- "DATA":
- {
-  "I":123,
-  "I_REF": 123
- }
+```bash
+npm install @abapify/asjson-parser
 ```
 
 ## Usage
 
-- as a parser
-
 ```ts
 import { parse } from '@abapify/asjson-parser';
-console.log(parse(json));
+
+const data = parse(asjsonPayload); // ABAP asJSON → plain JS object
 ```
 
-- as a transformer
+## Features
 
-```ts
-import { transform } from '@abapify/asjson-parser';
-const object = JSON.parse(json);
-console.log(transform(object));
-```
+- Parses SAP asJSON canonical format (including references and heap)
+- Maps ABAP payloads to plain JavaScript objects
 
-- as a proxy (returns a proxied object)
+## Documentation
 
-```ts
-import { proxy } from '@abapify/asjson-parser';
-const object = JSON.parse(json);
-console.log(proxy(object));
-```
+**[adt-cli.netlify.app/sdk/packages/asjson-parser](https://adt-cli.netlify.app/sdk/packages/asjson-parser)**
+
+---
+
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.

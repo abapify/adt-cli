@@ -12,7 +12,7 @@
  *      (except the root `index.md`, which is the generated-index landing page)
  *   4. Every sidebar entry resolves to an existing doc file
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,7 +49,12 @@ function walk(p: string, acc: string[] = []): string[] {
 }
 
 // --- Parse sidebars.ts: collect every quoted doc id ---
-const sidebarText = readFileSync(sidebarFile, 'utf8');
+// sidebars.generated.ts holds the CLI/MCP reference ids written by docs-gen.
+const generatedSidebarFile = join(websiteDir, 'sidebars.generated.ts');
+const sidebarText = [sidebarFile, generatedSidebarFile]
+  .filter((f) => existsSync(f))
+  .map((f) => readFileSync(f, 'utf8'))
+  .join('\n');
 const sidebarIds = new Set<string>();
 for (const m of sidebarText.matchAll(/['"`]([a-z0-9][a-z0-9/_-]*?)['"`]/gi)) {
   const id = m[1];

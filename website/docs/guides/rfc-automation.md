@@ -46,9 +46,7 @@ Expected output (pretty JSON, default):
 {
   "ECHOTEXT": "ping",
   "RESPTEXT": "SAP System ... — User PPLENKOV",
-  "RFCSI": {
-    /* ... */
-  }
+  "RFCSI": {/* ... */}
 }
 ```
 

@@ -178,12 +178,21 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
     plugins = [],
     onSessionExpired,
     headersTimeoutMs,
+    connectTimeoutMs,
+    insecure,
   } = config;
 
   const dispatcher =
-    headersTimeoutMs === undefined
+    headersTimeoutMs === undefined &&
+    connectTimeoutMs === undefined &&
+    insecure !== true
       ? undefined
-      : new Agent({ headersTimeout: headersTimeoutMs });
+      : new Agent({
+          headersTimeout: headersTimeoutMs,
+          connectTimeout: connectTimeoutMs,
+          // nosemgrep — opt-in --insecure flag; TLS verification is on by default
+          connect: insecure ? { rejectUnauthorized: false } : undefined,
+        });
 
   /** Merge the optional Undici dispatcher into a fetch RequestInit. */
   function withDispatcher<T extends RequestInit>(

@@ -1,3 +1,16 @@
+## 0.4.34 (2026-11-02)
+
+### 🩹 Fixes
+
+- **sonar:** address security, bugs, and code smells ([839ff1d3](https://github.com/abapify/adt-cli/commit/839ff1d3))
+- **speci:** resolve leftover merge conflict markers in create-server ([#288](https://github.com/abapify/adt-cli/pull/288))
+
+### ❤️ Thank You
+
+- CommandCodeBot
+- Devin @devin-ai-integration[bot]
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.33 (2026-11-02)
 
 ### 🩹 Fixes

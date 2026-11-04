@@ -147,13 +147,13 @@ sap-ci:
 
 ## Troubleshooting
 
-| Error                         | Cause                                                   | Fix                                                                             |
+| Error | Cause | Fix |
 | ----------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------ |
-| `Not authenticated` at step 1 | Auth file not rendered or wrong SID                     | `cat ~/.adt/auth.json                                                           | jq .default`and compare to`$SAP_SID` |
-| `ECONNREFUSED` / timeouts     | Runner can't reach SAP host                             | Use a self-hosted runner inside the corporate network, or add a tunnel step     |
-| Random 500 from SAP           | Security-session slot exhausted (SAP allows 1 per user) | Add `adt auth logout --sid $SAP_SID` at job end, or use a dedicated CI user     |
-| `Too many redirects`          | SSL proxy stripped `Set-Cookie`                         | Talk to network team; last resort `--insecure` on `auth login`                  |
-| Coverage report empty         | AUnit step failed before coverage flush                 | Check `aunit.xml` for errors first; coverage only emits on successful test runs |
+| `Not authenticated` at step 1 | Auth file not rendered or wrong SID | `cat ~/.adt/auth.json                                                           | jq .default`and compare to`$SAP_SID` |
+| `ECONNREFUSED` / timeouts | Runner can't reach SAP host | Use a self-hosted runner inside the corporate network, or add a tunnel step |
+| Random 500 from SAP | Security-session slot exhausted (SAP allows 1 per user) | Add `adt auth logout --sid $SAP_SID` at job end, or use a dedicated CI user |
+| `Too many redirects` | SSL proxy stripped `Set-Cookie` | Talk to network team; last resort `--insecure` on `auth login` |
+| Coverage report empty | AUnit step failed before coverage flush | Check `aunit.xml` for errors first; coverage only emits on successful test runs |
 
 ## See also
 

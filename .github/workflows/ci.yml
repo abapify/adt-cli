@@ -67,8 +67,8 @@ jobs:
         if: steps.changes.outputs.has-code-changes == 'true'
         with:
           node-version: lts/*
+      # Ungated: the deps-check step below runs on docs-only changes too.
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
-        if: steps.changes.outputs.has-code-changes == 'true'
         with:
           bun-version: 1.4.2
       - name: Cache bun dependencies
@@ -104,6 +104,12 @@ jobs:
         run: ./node_modules/.bin/nx affected -t lint test build e2e-ci --verbose=false --parallel=3
       - run: ./node_modules/.bin/nx affected -t lint test build e2e-ci --verbose=false --parallel=3 --no-cloud
         if: ${{ env.NX_CLOUD_ACCESS_TOKEN == '' && steps.changes.outputs.has-code-changes == 'true' }}
+      - name: Check generated CLI/MCP reference docs are up to date
+        # Ungated: a docs-only change that hand-edits a generated page must
+        # fail too. Fix locally with `bunx nx run docs-gen:docs:gen`.
+        run: |
+          [ -d node_modules ] || bun install --frozen-lockfile --ignore-scripts
+          ./node_modules/.bin/nx run docs-gen:docs:check --verbose=false
       - name: Run deps-check workspace-wide
         # Always full sweep, ungated — the change detector excludes
         # website/ paths, and checker-only changes need every project

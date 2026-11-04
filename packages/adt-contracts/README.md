@@ -1,115 +1,35 @@
 # @abapify/adt-contracts
 
-[![version](https://img.shields.io/github/package-json/v/abapify/adt-cli?filename=packages/adt-contracts/package.json)](https://github.com/abapify/adt-cli/pkgs/npm/%40abapify%2Fadt-contracts)
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-contracts)](https://www.npmjs.com/package/@abapify/adt-contracts)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-**SAP ADT REST API contracts** — typed endpoint definitions using `speci` + `ts-xsd` schemas.
+SAP ADT REST API contracts using speci + ts-xsd.
 
-Part of the [abapify monorepo](../../README.md).
-
-## What is it?
-
-This package is the **contract layer** between `adt-client` and `adt-schemas`. It provides declarative REST API contracts for SAP ADT (ABAP Development Tools) endpoints.
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      adt-client                               │
-│              (HTTP Client + Request Execution)                   │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      adt-contracts (this package)                │
-│         (REST API Contracts using speci + ts-xsd)                │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     adt-schemas                              │
-│        (TypeScript schemas from SAP XSD definitions)             │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-Contracts are pure data structures that define:
-
-- **Endpoint URLs** - REST paths
-- **HTTP methods** - GET, POST, PUT, DELETE
-- **Request/Response schemas** - Using `ts-xsd` generated from SAP XSD definitions
-- **Content-Types** - SAP vendor-specific media types
-
-## Installation
+## Install
 
 ```bash
-bun add adt-contracts
+npm install @abapify/adt-contracts
 ```
 
 ## Usage
 
-### With speci client
+```ts
+import { adtContract } from '@abapify/adt-contracts';
+import { createClient } from '@abapify/speci/rest';
 
-```typescript
-import { adtContract } from 'adt-contracts';
-import { createClient } from 'speci/rest';
-
-const client = createClient(adtContract, {
-  baseUrl: 'https://sap-server.example.com/sap/bc/adt',
-  adapter: myAdapter,
-});
-
-// Full type inference from XSD schemas!
-const transport = await client.cts.getTransportRequests();
-const classInfo = await client.oo.getClass('ZCL_MY_CLASS');
+const client = createClient(adtContract, { baseUrl, adapter });
 ```
 
-### Individual contracts
+## Features
 
-```typescript
-import { ctsContract, atcContract, ooContract } from 'adt-contracts';
+- Typed ADT REST contracts built with `speci` + `ts-xsd`
+- Request / response types inferred from SAP XSD schemas
+- Single source for the client, mock server, and proxy
 
-// Use specific contracts
-const cts = createClient(ctsContract, config);
-const atc = createClient(atcContract, config);
-```
+## Documentation
 
-## Available Contracts
+**[adt-cli.netlify.app/sdk/packages/adt-contracts](https://adt-cli.netlify.app/sdk/packages/adt-contracts)**
 
-| Contract       | Description                           |
-| -------------- | ------------------------------------- |
-| `coreContract` | Core ADT object operations            |
-| `ctsContract`  | Change and Transport System           |
-| `atcContract`  | ABAP Test Cockpit                     |
-| `ooContract`   | Object-Oriented (classes, interfaces) |
+---
 
-## Architecture
-
-```
-adt-contracts (this package)
-    ├── speci contracts (endpoint definitions)
-    └── adt-schemas (ts-xsd schemas)
-            └── ts-xsd (XSD → TypeScript)
-```
-
-**Contracts are pure data** - no HTTP client, no business logic. Use with any `speci`-compatible adapter.
-
-## Adding New Contracts
-
-1. Ensure schema exists in `adt-schemas`
-2. Create contract file in `src/adt/<feature>/index.ts`
-3. Define endpoints using `adtHttp.get/post/put/delete`
-4. Export from `src/adt/index.ts`
-
-```typescript
-import { adtHttp } from '../../base';
-import { mySchema } from 'adt-schemas';
-
-export const myContract = {
-  getResource: (id: string) =>
-    adtHttp.get(`/my/endpoint/${id}`, {
-      responses: { 200: mySchema },
-      headers: { Accept: 'application/vnd.sap.adt.my.v1+xml' },
-    }),
-};
-```
-
-## License
-
-MIT
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.
