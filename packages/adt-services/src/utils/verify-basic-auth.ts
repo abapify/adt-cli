@@ -163,7 +163,9 @@ export async function verifyBasicAuth(
 
   try {
     const data = await adtClient.fetch(SESSIONS_PATH, {
-      headers: { Accept: 'application/xml' },
+      // Match SessionManager: endpoints requiring the sessions media type
+      // reject generic XML with HTTP 406.
+      headers: { Accept: 'application/vnd.sap.adt.core.http.session.v3+xml' },
     });
     // The adapter throws for non-2xx, but an SSO/SAML system can answer a
     // basic-auth probe with a 200 HTML login page — that is not a sessions

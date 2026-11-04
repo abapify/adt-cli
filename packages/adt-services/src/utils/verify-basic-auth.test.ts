@@ -41,6 +41,28 @@ async function closedPort(): Promise<number> {
 }
 
 describe('verifyBasicAuth', () => {
+  it('negotiates the ADT sessions media type on systems that reject generic XML', async () => {
+    let seenAccept: string | undefined;
+    respond = (req, res) => {
+      seenAccept = req.headers.accept;
+      if (seenAccept !== 'application/vnd.sap.adt.core.http.session.v3+xml') {
+        res.writeHead(406, { 'content-type': 'text/plain' });
+        res.end('Not Acceptable');
+        return;
+      }
+      res.writeHead(200, { 'content-type': seenAccept });
+      res.end('<sessions/>');
+    };
+    await expect(
+      verifyBasicAuth({
+        url: baseUrl,
+        username: 'sapuser1',
+        password: VALID_PASSWORD,
+      }),
+    ).resolves.toBeUndefined();
+    expect(seenAccept).toBe('application/vnd.sap.adt.core.http.session.v3+xml');
+  });
+
   it('resolves and sends the correct Basic header and sap-client on 200', async () => {
     let seenAuth: string | undefined;
     let seenUrl: string | undefined;
