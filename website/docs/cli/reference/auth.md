@@ -35,11 +35,12 @@ adt auth login [options]
 
 **Options**
 
-| Option                 | Description                                                | Default |
-| ---------------------- | ---------------------------------------------------------- | ------- |
-| `--service-key <path>` | Path to a BTP service key JSON file for service-key login  |         |
-| `--redirect-uri <uri>` | OAuth callback redirect URI (e.g. Codespaces/tunnel URL)   |         |
-| `--insecure`           | Allow insecure SSL connections (ignore certificate errors) |         |
+| Option                 | Description                                                          | Default |
+| ---------------------- | -------------------------------------------------------------------- | ------- |
+| `--service-key <path>` | Path to a BTP service key JSON file for service-key login            |         |
+| `--redirect-uri <uri>` | OAuth callback redirect URI (e.g. Codespaces/tunnel URL)             |         |
+| `--insecure`           | Allow insecure SSL connections (ignore certificate errors)           |         |
+| `--skip-verify`        | Skip credential verification against the SAP system (offline logins) |         |
 
 ## `adt auth logout`
 
