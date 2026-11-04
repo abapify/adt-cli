@@ -85,6 +85,60 @@ function causeText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+/** A 200 response that is an HTML login page, not an ADT sessions payload. */
+function isHtmlLoginPage(data: unknown): boolean {
+  return typeof data === 'string' && /<html[\s>]|SAMLRequest/i.test(data);
+}
+
+/** Map a fetch failure to a user-actionable verification error. */
+function toVerificationError(
+  error: unknown,
+  origin: string,
+  timeoutMs: number,
+): BasicAuthVerificationError {
+  const status = errorStatus(error);
+  const cause = causeText(error);
+
+  if (status === 401) {
+    return new BasicAuthVerificationError(
+      'SAP rejected the credentials (HTTP 401). Check the username, password and client — ' +
+        'and note that systems configured for SNC/SSO-only logon (or proxies that strip ' +
+        'Authorization headers) reject basic auth regardless of correct credentials.',
+      { status, cause: error },
+    );
+  }
+
+  if (status !== undefined) {
+    return new BasicAuthVerificationError(
+      `Credential verification failed: HTTP ${status} from ${origin}${SESSIONS_PATH}. Cause: ${cause}`,
+      { status, cause: error },
+    );
+  }
+
+  // The adapter reports a SAML/SSO login page as a generic session-expired
+  // error — that is an auth-mode mismatch, not a connectivity problem.
+  if (/saml|session expired/i.test(cause)) {
+    return new BasicAuthVerificationError(
+      `${origin} redirected to an SSO/SAML login during credential verification. ` +
+        'This system likely does not accept basic-auth logins.',
+      { cause: error },
+    );
+  }
+
+  if (isTimeoutError(error)) {
+    return new BasicAuthVerificationError(
+      `Credential verification timed out after ${timeoutMs} ms contacting ${origin}. ` +
+        'Check the URL, network and VPN.',
+      { cause: error },
+    );
+  }
+
+  return new BasicAuthVerificationError(
+    `Could not reach ${origin} to verify credentials. Check the URL, network and VPN. Cause: ${cause}`,
+    { cause: error },
+  );
+}
+
 /**
  * Verify basic-auth credentials against the SAP system.
  *
@@ -114,7 +168,7 @@ export async function verifyBasicAuth(
     // The adapter throws for non-2xx, but an SSO/SAML system can answer a
     // basic-auth probe with a 200 HTML login page — that is not a sessions
     // response, so the credentials were not actually accepted.
-    if (typeof data === 'string' && /<html[\s>]|SAMLRequest/i.test(data)) {
+    if (isHtmlLoginPage(data)) {
       throw new BasicAuthVerificationError(
         `${safeOrigin(input.url)} answered with an HTML login page instead of an ADT sessions response. ` +
           'The system likely requires SSO/SAML (or SNC) logon and does not accept basic-auth credentials.',
@@ -124,47 +178,6 @@ export async function verifyBasicAuth(
     if (error instanceof BasicAuthVerificationError) {
       throw error;
     }
-    const status = errorStatus(error);
-    const origin = safeOrigin(input.url);
-    const cause = causeText(error);
-
-    if (status === 401) {
-      throw new BasicAuthVerificationError(
-        'SAP rejected the credentials (HTTP 401). Check the username, password and client — ' +
-          'and note that systems configured for SNC/SSO-only logon (or proxies that strip ' +
-          'Authorization headers) reject basic auth regardless of correct credentials.',
-        { status, cause: error },
-      );
-    }
-
-    if (status !== undefined) {
-      throw new BasicAuthVerificationError(
-        `Credential verification failed: HTTP ${status} from ${origin}${SESSIONS_PATH}. Cause: ${cause}`,
-        { status, cause: error },
-      );
-    }
-
-    // The adapter reports a SAML/SSO login page as a generic session-expired
-    // error — that is an auth-mode mismatch, not a connectivity problem.
-    if (/saml|session expired/i.test(cause)) {
-      throw new BasicAuthVerificationError(
-        `${origin} redirected to an SSO/SAML login during credential verification. ` +
-          'This system likely does not accept basic-auth logins.',
-        { cause: error },
-      );
-    }
-
-    if (isTimeoutError(error)) {
-      throw new BasicAuthVerificationError(
-        `Credential verification timed out after ${timeoutMs} ms contacting ${origin}. ` +
-          'Check the URL, network and VPN.',
-        { cause: error },
-      );
-    }
-
-    throw new BasicAuthVerificationError(
-      `Could not reach ${origin} to verify credentials. Check the URL, network and VPN. Cause: ${cause}`,
-      { cause: error },
-    );
+    throw toVerificationError(error, safeOrigin(input.url), timeoutMs);
   }
 }

@@ -190,6 +190,7 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
       : new Agent({
           headersTimeout: headersTimeoutMs,
           connectTimeout: connectTimeoutMs,
+          // nosemgrep — opt-in --insecure flag; TLS verification is on by default
           connect: insecure ? { rejectUnauthorized: false } : undefined,
         });
 
