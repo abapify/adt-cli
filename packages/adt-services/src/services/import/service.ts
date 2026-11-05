@@ -294,6 +294,22 @@ export interface ImportAcquisitionDiagnostics {
   }>;
 }
 
+function recordUnloadedGenericOmissions(
+  omissions: ImportAcquisitionDiagnostics['omissions'],
+  objects: AdkTransportObjectRef[],
+): void {
+  for (const object of objects) {
+    omissions.push({
+      object: {
+        pgmid: object.pgmid,
+        type: object.type,
+        name: object.name,
+      },
+      diagnostic: 'SOURCE_UNAVAILABLE_UNLOADED_GENERIC',
+    });
+  }
+}
+
 export interface ImportResult {
   /** Transport number (for transport imports) */
   transportNumber?: string;
@@ -567,16 +583,7 @@ export class ImportService {
           // Count it as failed and never serialize its default-only fields.
           if (adkObject instanceof AdkGenericObject && !adkObject.isLoaded) {
             results.failed += batchObjects.length;
-            for (const object of batchObjects) {
-              acquisitionOmissions.push({
-                object: {
-                  pgmid: object.pgmid,
-                  type: object.type,
-                  name: object.name,
-                },
-                diagnostic: 'SOURCE_UNAVAILABLE_UNLOADED_GENERIC',
-              });
-            }
+            recordUnloadedGenericOmissions(acquisitionOmissions, batchObjects);
             batchObjects.forEach((object) =>
               console.log(
                 `  ❌ ${object.type} ${object.name}: ADK returned an unloaded generic object`,
