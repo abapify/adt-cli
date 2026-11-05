@@ -10,23 +10,25 @@ Incremental transport source-tree materialization for ADT
 ## Install
 
 ```bash
-bun add @abapify/adt-flow
+bun add @abapify/adt-flow @abapify/adt-plugin @abapify/adt-plugin-abapgit
 ```
 
 ## Transport source checkout
 
-If diagnostic report storage fails after a successful checkout, the CLI warns
+If diagnostic report storage fails after checkout or an index-only fallback, the CLI warns
 with `INVENTORY_REPORT_UNAVAILABLE` and keeps the available sources. Consumers
 must treat the missing fresh report as unknown completeness. This does not
 suppress checkout failures, unsafe report paths, or the existing required
-`--partial-report` contract.
+`--partial-report` contract. An index-only fallback is reported explicitly as
+inventory indexing without source materialization, including when report storage fails.
 
 Class components with ADT subtypes `CLAS/OC`, `CLAS/OSU`, `CLAS/OM` resolve to
 their full `R3TR CLAS` owner and use ordinary class source/abapGit materialization.
 
 To persist only transport inventory and unresolved-boundary descriptors under
-`.adt`, without reading or materializing source files, use the explicit
-index-only command:
+`.adt`, without fetching or materializing source, use the explicit index-only
+command. Validation of existing ownership may read local source files and reject
+modified or unreadable files:
 
 ```text
 adt flow index tr DEVK900001,DEVK900002
@@ -34,9 +36,12 @@ adt flow index tr DEVK900001,DEVK900002
 
 `checkout` remains strict: if any versioned component has no exact source
 boundary, it fails without changing the workspace. `checkout --partial` is a
-separate explicit opt-in that materializes only exact objects. `index` never
-materializes source; it retains the complete transport inventory and records
-every unresolved component as an `omitted` descriptor for a later retry.
+separate explicit opt-in that materializes only exact components. `index` never
+materializes source; it retains the complete transport inventory. In head mode,
+unresolved objects receive one `omitted` descriptor per object identity for a
+later retry, unless a prior non-omitted descriptor is preserved and its ownership
+validated. Partial checkout can create a `present` descriptor for exact
+selections while reporting other components of that object as omitted.
 
 Automation that must preserve an inexact transport for a later retry can opt
 into `adt flow checkout tr <transport> --index-on-inexact`. Only the typed
@@ -49,8 +54,10 @@ import {
   createAdtFlowDependencies,
 } from '@abapify/adt-flow';
 import { getFormatPlugin } from '@abapify/adt-plugin';
+import '@abapify/adt-plugin-abapgit';
 
-// Use the format plugin already registered by @abapify/adt-plugin-abapgit
+// client is an already authenticated ADT client.
+// Importing @abapify/adt-plugin-abapgit registers its format plugin.
 const registeredFormatPlugin = getFormatPlugin('abapgit');
 if (!registeredFormatPlugin) {
   throw new Error('abapGit format plugin is not registered.');
@@ -82,7 +89,9 @@ await flow.index({
 
 The service invokes no Git command. It reconciles format-owned files and
 deterministic descriptors under `.adt`, rejects unowned collisions or modified
-indexed files before mutation, and rolls back a failed multi-file apply.
+indexed files before mutation, and attempts rollback after a failed multi-file apply.
+Rollback can also fail, leaving a partially changed workspace; the error reports
+that the complete previous tree could not be restored.
 Branches, commits, routing, and merge requests remain the caller's concern.
 
 `.adt/tr/<transport>.json` is emitted for every request/task discovered during

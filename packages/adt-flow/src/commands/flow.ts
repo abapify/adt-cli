@@ -459,8 +459,11 @@ function checkoutTrCommand(
                         'ENFILE',
                       ].includes(String(error.code));
                     if (!recoverable) throw error;
+                    const outcome = checkoutResult.indexedOnly
+                      ? 'index-only succeeded; no sources were materialized'
+                      : 'checkout succeeded';
                     ctx.logger.warn(
-                      'INVENTORY_REPORT_UNAVAILABLE: checkout succeeded; completeness is unknown because the diagnostic report could not be stored.',
+                      `INVENTORY_REPORT_UNAVAILABLE: ${outcome}; completeness is unknown because the diagnostic report could not be stored.`,
                     );
                   }
                 }
@@ -468,9 +471,11 @@ function checkoutTrCommand(
             })
           : await service.checkout(checkoutInput);
       ctx.logger.info(
-        `Checked out ${result.mode} for ${result.requestedTransports.join(', ')}: ` +
-          `${result.changed.length} changed, ${result.moved.length} moved, ` +
-          `${result.removed.length} removed, ${result.unchanged.length} unchanged.`,
+        result.indexedOnly
+          ? `Indexed inventory for ${result.requestedTransports.join(', ')}; no sources were materialized.`
+          : `Checked out ${result.mode} for ${result.requestedTransports.join(', ')}: ` +
+              `${result.changed.length} changed, ${result.moved.length} moved, ` +
+              `${result.removed.length} removed, ${result.unchanged.length} unchanged.`,
       );
       for (const skipped of result.skipped) {
         ctx.logger.warn(

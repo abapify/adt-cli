@@ -724,6 +724,7 @@ export class ImportService {
           fetchedAt: new Date().toISOString(),
           import: {
             format: options.format,
+            transports: allTransportNumbers,
             success: results.success,
             skipped: results.skipped,
             failed: results.failed,

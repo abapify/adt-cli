@@ -74,6 +74,56 @@ describe('legacy ImportService generic transport acquisition', () => {
     vi.restoreAllMocks();
   });
 
+  it('names the aggregate transport scope in every sidecar for a bulk import', async () => {
+    const scope = ['S0DK958192', 'S0DK958193'];
+    const ref = new AdkTransportObjectRef({ client: { adt: {} } } as never, {
+      pgmid: 'R3TR',
+      type: 'TOBJ',
+      name: 'ZUNAVAILABLE',
+      obj_func: '',
+    });
+    mockTransportGet.mockImplementation(async (number: string) => ({
+      number,
+      owner: 'DEV',
+      description: 'Synthetic scope',
+      status: 'D',
+      statusText: 'Modifiable',
+      target: 'PRD',
+      tasks: [],
+      objects: number === scope[1] ? [ref] : [],
+    }));
+    const { ImportService } =
+      await import('../../../src/services/import/service');
+    const result = await new ImportService().importTransport({
+      transportNumber: 's0dk958192, S0DK958193, s0dk958192',
+      outputPath,
+      format: 'abapgit',
+      saveTrMetadata: true,
+    });
+    expect(result.results.failed).toBe(1);
+    for (const number of scope) {
+      const metadata = JSON.parse(
+        await readFile(
+          join(outputPath, '.adt', 'tr', `${number}.json`),
+          'utf8',
+        ),
+      );
+      expect(metadata.import).toMatchObject({
+        transports: scope,
+        failed: 1,
+        acquisitionDiagnostics: {
+          schemaVersion: 1,
+          omissions: [
+            {
+              object: { pgmid: 'R3TR', type: 'TOBJ', name: 'ZUNAVAILABLE' },
+              diagnostic: 'SOURCE_UNAVAILABLE_UNLOADED_GENERIC',
+            },
+          ],
+        },
+      });
+    }
+  });
+
   it('fails unloaded saved TOBJ and PDTS entries while importing the typed CLAS method owner', async () => {
     const className = 'ZCL_VIM_DI3_UTILS';
     const classSource =
@@ -194,6 +244,7 @@ describe('legacy ImportService generic transport acquisition', () => {
     };
     expect(metadata.import).toMatchObject({
       format: 'abapgit',
+      transports: ['S0DK958193'],
       success: 2,
       skipped: 0,
       failed: 2,
