@@ -50,7 +50,9 @@ describe('verifyBasicAuth', () => {
         res.end('Not Acceptable');
         return;
       }
-      res.writeHead(200, { 'content-type': seenAccept });
+      res.writeHead(200, {
+        'content-type': 'application/vnd.sap.adt.core.http.session.v3+xml',
+      });
       res.end('<sessions/>');
     };
     await expect(
