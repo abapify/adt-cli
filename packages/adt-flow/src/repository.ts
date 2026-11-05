@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import type { Stats } from 'node:fs';
+import { constants, type Stats } from 'node:fs';
 
 import {
   lstat,
@@ -223,6 +223,37 @@ export async function readText(
     root,
     path,
     (absolute) => readFile(absolute, 'utf8'),
+    undefined,
+  );
+}
+
+/** Read preserved source bytes without following a repository-relative symlink. */
+export async function readRegularText(
+  root: string,
+  path: string,
+): Promise<string | undefined> {
+  return withValidatedPath(
+    root,
+    path,
+    async (absolute) => {
+      const expected = resolve(await realpath(root), safeRelativePath(path));
+      if ((await realpath(absolute)) !== expected) {
+        throw new AdtFlowError(
+          'path_invalid',
+          'Flow cannot preserve a symlinked source path.',
+          { path },
+        );
+      }
+      const handle = await open(
+        absolute,
+        constants.O_RDONLY | constants.O_NOFOLLOW,
+      );
+      try {
+        return await handle.readFile('utf8');
+      } finally {
+        await handle.close();
+      }
+    },
     undefined,
   );
 }

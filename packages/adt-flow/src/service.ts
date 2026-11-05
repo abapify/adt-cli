@@ -7,6 +7,7 @@ import type {
 import type { SourceVersionRef } from '@abapify/adt-client';
 import type { FormatPlugin, MaterializedFormatFile } from '@abapify/adt-plugin';
 import { compareStrings, digest, sha256, stableJson } from './deterministic';
+import { preserveUnselectedClassComponents } from './class-component-preservation';
 import {
   objectDescriptorPath,
   objectIdentity,
@@ -729,7 +730,18 @@ async function buildMaterializedResult(
     sources,
     formatOptions: config.format.options,
   });
-  const files = materialized.files.sort((left, right) =>
+  const preserved = await preserveUnselectedClassComponents({
+    root: ctx.root,
+    identity,
+    format: ctx.dependencies.format,
+    selectedComponents: new Set(
+      group.entries.map((entry) => entry.component.id),
+    ),
+    existingPaths: pending.ownedPaths,
+    files: materialized.files,
+    previous: pending.previous,
+  });
+  const files = preserved.files.sort((left, right) =>
     compareStrings(left.path, right.path),
   );
   const desired: DesiredFile[] = files.map((file) => ({
@@ -750,13 +762,14 @@ async function buildMaterializedResult(
     },
     state: 'present',
     packagePath: model.packagePath,
-    selections: presentSelections
-      .map(({ entry, version }) => ({
+    selections: [
+      ...presentSelections.map(({ entry, version }) => ({
         component: entry.component.id,
         versionId: version.id,
         sourceUri: version.sourceUri,
-      }))
-      .sort((left, right) => compareStrings(left.component, right.component)),
+      })),
+      ...preserved.selections,
+    ].sort((left, right) => compareStrings(left.component, right.component)),
     ownedFiles,
     configDigest,
     formatDigest,
@@ -820,6 +833,40 @@ async function handleBaseEmptyGroup(
   return buildTombstoneResult(ctx, identity, descriptorPath);
 }
 
+function isClassComponentAbsence(ctx: ProcessGroupContext): boolean {
+  const absentKind = ctx.mode === 'head' ? 'deleted' : 'added';
+  return (
+    ctx.group.identity.type === 'CLAS' &&
+    ctx.group.entries.every(
+      (entry) =>
+        entry.component.id !== 'main' && entry.changeKind === absentKind,
+    )
+  );
+}
+
+function hasPresentClassOwner(ctx: ProcessGroupContext): boolean {
+  if (ctx.pending.previous?.state === 'present') return true;
+  return ctx.pending.ownedPaths.some((path) => {
+    const parsed = ctx.dependencies.format.parseFilename?.(basename(path));
+    return parsed?.extension === 'abap';
+  });
+}
+
+async function buildClassComponentAbsenceResult(
+  ctx: ProcessGroupContext,
+): Promise<GroupResult> {
+  const model = await ctx.limiters.metadata.run(() =>
+    ctx.dependencies.loadObject(ctx.group.identity),
+  );
+  ctx.calls.metadata += model.metadataCalls ?? 1;
+  return buildMaterializedResult(ctx, {
+    model,
+    sources: {},
+    presentSelections: [],
+    reusedIndexedSource: false,
+  });
+}
+
 async function resolveEmptyGroup(
   ctx: ProcessGroupContext,
   identity: FlowObjectIdentity,
@@ -849,6 +896,9 @@ async function handleEmptyGroup(
 ): Promise<GroupResult> {
   const appComponentResult = await maybeSkipByAppComponent(ctx);
   if (appComponentResult) return appComponentResult;
+  if (isClassComponentAbsence(ctx) && hasPresentClassOwner(ctx)) {
+    return buildClassComponentAbsenceResult(ctx);
+  }
 
   return resolveEmptyGroup(
     ctx,
