@@ -29,6 +29,12 @@ const result = await getSource(client, {
 - Source, check-in, CTS, changesets, BAdIs, and more
 - Destination and auth resolution helpers
 
+## Import diagnostics
+
+Transport imports expose optional, versioned acquisition omissions while
+preserving failed counters. CLI and MCP share the same service contract; see the
+SDK reference for the schema and error boundaries.
+
 ## Documentation
 
 **[adt-cli.netlify.app/sdk/packages/adt-services](https://adt-cli.netlify.app/sdk/packages/adt-services)**
