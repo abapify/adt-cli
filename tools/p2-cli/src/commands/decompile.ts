@@ -1,5 +1,6 @@
 import { basename } from 'node:path';
-import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { ensureDir, findFiles } from '../lib/utils';
 
 interface DecompileOptions {
@@ -9,27 +10,47 @@ interface DecompileOptions {
   verbose?: boolean;
 }
 
+/** Command as an argument vector — never interpolated through a shell. */
+interface Command {
+  file: string;
+  args: string[];
+}
+
 const DECOMPILERS = {
   cfr: {
     name: 'CFR',
-    check: 'which cfr-decompiler',
-    command: (input: string, output: string) =>
-      `cfr-decompiler "${input}" --outputdir "${output}"`,
+    check: (): void => {
+      execFileSync('which', ['cfr-decompiler'], { stdio: 'ignore' });
+    },
+    command: (input: string, output: string): Command => ({
+      file: 'cfr-decompiler',
+      args: [input, '--outputdir', output],
+    }),
     install:
       'brew install cfr-decompiler (macOS/Linux) or download from https://www.benf.org/other/cfr/',
   },
   procyon: {
     name: 'Procyon',
-    check: 'which procyon',
-    command: (input: string, output: string) =>
-      `procyon -o "${output}" "${input}"`,
+    check: (): void => {
+      execFileSync('which', ['procyon'], { stdio: 'ignore' });
+    },
+    command: (input: string, output: string): Command => ({
+      file: 'procyon',
+      args: ['-o', output, input],
+    }),
     install: 'Download from https://github.com/mstrobel/procyon',
   },
   fernflower: {
     name: 'Fernflower',
-    check: 'test -f fernflower.jar',
-    command: (input: string, output: string) =>
-      `java -jar fernflower.jar "${input}" "${output}"`,
+    check: (): void => {
+      if (!existsSync('fernflower.jar')) {
+        throw new Error('fernflower.jar not found');
+      }
+    },
+    command: (input: string, output: string): Command => ({
+      file: 'java',
+      args: ['-jar', 'fernflower.jar', input, output],
+    }),
     install:
       'Find in IntelliJ IDEA: plugins/java-decompiler/lib/java-decompiler.jar',
   },
@@ -40,7 +61,7 @@ const DECOMPILERS = {
  */
 function isDecompilerAvailable(decompiler: keyof typeof DECOMPILERS): boolean {
   try {
-    execSync(DECOMPILERS[decompiler].check, { stdio: 'ignore' });
+    DECOMPILERS[decompiler].check();
     return true;
   } catch {
     return false;
@@ -141,8 +162,8 @@ export async function decompile(
       );
 
       try {
-        const cmd = config.command(jar, output);
-        execSync(cmd, { stdio: 'ignore' });
+        const { file, args } = config.command(jar, output);
+        execFileSync(file, args, { stdio: 'ignore' });
         success++;
       } catch {
         if (verbose) {
@@ -182,8 +203,8 @@ export async function decompile(
       }
 
       try {
-        const cmd = config.command(classFile, output);
-        execSync(cmd, { stdio: 'ignore' });
+        const { file, args } = config.command(classFile, output);
+        execFileSync(file, args, { stdio: 'ignore' });
         success++;
       } catch {
         failed++;

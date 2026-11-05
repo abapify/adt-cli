@@ -101,22 +101,22 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Print Environment Info
-        run: npx nx report
+        run: ./node_modules/.bin/nx report
         shell: bash
 
       - name: Version, changelog & tag (dry run)
         if: ${{ inputs.dry_run }}
-        run: npx nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --dry-run ${{ inputs.first_release && '--first-release' || '' }}
+        run: ./node_modules/.bin/nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --dry-run ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Version, changelog & tag
         if: ${{ !inputs.dry_run }}
-        run: npx nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --skip-publish ${{ inputs.first_release && '--first-release' || '' }}
+        run: ./node_modules/.bin/nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --skip-publish ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -158,7 +158,7 @@ jobs:
         run: |
           IFS=',' read -ra TAGS <<< "${{ steps.get_tags.outputs.tags }}"
           for tag in "${TAGS[@]}"; do
-            npx tsx tools/enrich-release-notes.ts "$tag" || true
+            ./node_modules/.bin/tsx tools/enrich-release-notes.ts "$tag" || true
           done
 
       - name: Dispatch publish workflow

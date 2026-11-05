@@ -41,6 +41,12 @@ export async function resolveFlowWorkspaceRoot(
   if (normalize(requestedPath).split(sep).includes('..')) {
     throw new Error('workspaceRoot must not contain path traversal sequences.');
   }
+  // Lexical containment first, so no filesystem call ever touches a path
+  // that is outside every allowed root even before realpath() hardening.
+  const lexicalRoots = allowedRoots.map((root) => resolve(root));
+  if (!lexicalRoots.some((root) => isWithin(root, requestedPath))) {
+    throw new Error('workspaceRoot is outside the server-owned roots.');
+  }
   const requestedStats = await lstat(requestedPath);
   if (!requestedStats.isDirectory() || requestedStats.isSymbolicLink()) {
     throw new Error('workspaceRoot must be a real directory (no symlinks).');

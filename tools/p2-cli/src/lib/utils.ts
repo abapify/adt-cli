@@ -1,28 +1,16 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * Execute shell command
+ * Execute a command with an argument vector (no shell interpolation) and
+ * return its stdout. Callers pass already-validated arguments.
  */
-export function exec(
-  cmd: string,
-  options?: { silent?: boolean; maxBuffer?: number },
-): string {
-  return execSync(cmd, {
-    encoding: 'utf-8',
-    maxBuffer: options?.maxBuffer ?? 50 * 1024 * 1024,
-    stdio: options?.silent ? 'pipe' : 'inherit',
-  });
-}
-
-/**
- * Execute shell command and return output
- */
-export function execOutput(cmd: string): string {
-  return execSync(cmd, {
+export function execOutput(cmd: string, args: string[]): string {
+  return execFileSync(cmd, args, {
     encoding: 'utf-8',
     maxBuffer: 50 * 1024 * 1024,
+    stdio: ['ignore', 'pipe', 'ignore'],
   });
 }
 
