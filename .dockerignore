@@ -33,7 +33,9 @@ pnpm-lock.yaml
 *.log
 .prettierrc
 .prettierignore
-.nxignore
+# Keep Nx dependency-analysis exclusions in container builds. Without this,
+# tsdown config imports become source edges and can create a false task cycle.
+!.nxignore
 eslint.config.mjs
 jest.config.ts
 jest.preset.js

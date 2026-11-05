@@ -28,6 +28,12 @@ export default {
 - Concurrency-controlled metadata and source fetching
 - Pluggable output format (abapGit, gCTS)
 
+## Import diagnostics
+
+Optional diagnostic-report storage failures preserve acquired sources and report
+unknown completeness. See the SDK reference for strict checkout and partial-report
+boundaries.
+
 ## Documentation
 
 **[adt-cli.netlify.app/sdk/packages/adt-flow](https://adt-cli.netlify.app/sdk/packages/adt-flow)**
