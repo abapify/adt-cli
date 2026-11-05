@@ -429,21 +429,53 @@ function checkoutTrCommand(
                     false,
                     '--partial-report',
                   );
-                if (coverageReport)
-                  await writePartialReport(
-                    coverageReport,
-                    realRoot,
-                    checkoutResult,
-                    true,
-                    '--report',
-                  );
+                if (coverageReport) {
+                  try {
+                    await writePartialReport(
+                      coverageReport,
+                      realRoot,
+                      checkoutResult,
+                      true,
+                      '--report',
+                    );
+                  } catch (error) {
+                    // Sources have already been reconciled. A diagnostic storage failure
+                    // must not turn that successful checkout into a failed import.
+                    // Unsafe paths and programming errors retain their existing failure semantics.
+                    const recoverable =
+                      error instanceof Error &&
+                      'code' in error &&
+                      [
+                        'EACCES',
+                        'EPERM',
+                        'ENOSPC',
+                        'EDQUOT',
+                        'EIO',
+                        'EROFS',
+                        'ENOTDIR',
+                        'EEXIST',
+                        'ENOENT',
+                        'EMFILE',
+                        'ENFILE',
+                      ].includes(String(error.code));
+                    if (!recoverable) throw error;
+                    const outcome = checkoutResult.indexedOnly
+                      ? 'index-only succeeded; no sources were materialized'
+                      : 'checkout succeeded';
+                    ctx.logger.warn(
+                      `INVENTORY_REPORT_UNAVAILABLE: ${outcome}; completeness is unknown because the diagnostic report could not be stored.`,
+                    );
+                  }
+                }
               },
             })
           : await service.checkout(checkoutInput);
       ctx.logger.info(
-        `Checked out ${result.mode} for ${result.requestedTransports.join(', ')}: ` +
-          `${result.changed.length} changed, ${result.moved.length} moved, ` +
-          `${result.removed.length} removed, ${result.unchanged.length} unchanged.`,
+        result.indexedOnly
+          ? `Indexed inventory for ${result.requestedTransports.join(', ')}; no sources were materialized.`
+          : `Checked out ${result.mode} for ${result.requestedTransports.join(', ')}: ` +
+              `${result.changed.length} changed, ${result.moved.length} moved, ` +
+              `${result.removed.length} removed, ${result.unchanged.length} unchanged.`,
       );
       for (const skipped of result.skipped) {
         ctx.logger.warn(

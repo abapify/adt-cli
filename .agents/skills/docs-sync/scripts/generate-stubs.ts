@@ -581,9 +581,22 @@ function main() {
   }
   if (missingTools.length) {
     const ids = missingTools.map((t) => `mcp/tools/${t.name}`);
-    const res = patchSidebarArray(sidebar, 'mcpTools', ids);
-    sidebar = res.src;
-    for (const id of res.added) console.log(`sidebar += ${id}`);
+    try {
+      const res = patchSidebarArray(sidebar, 'mcpTools', ids);
+      sidebar = res.src;
+      for (const id of res.added) console.log(`sidebar += ${id}`);
+    } catch {
+      // `mcpTools` aliases the generated sidebars.generated.ts list —
+      // patch that array; docs:gen rewrites the file deterministically.
+      const genFile = sidebarFile.replace(
+        'sidebars.ts',
+        'sidebars.generated.ts',
+      );
+      const gen = readFileSync(genFile, 'utf8');
+      const res = patchSidebarArray(gen, 'mcpToolDocs', ids);
+      writeFileSync(genFile, res.src);
+      for (const id of res.added) console.log(`sidebars.generated += ${id}`);
+    }
   }
   writeFileSync(sidebarFile, sidebar);
   console.log(`patched ${relative(rootDir, sidebarFile)}`);

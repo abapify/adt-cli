@@ -38,8 +38,7 @@ export const optionalConnectionShape = {
 
 /**
  * Like `connectionShape`, but additionally accepts a logical `systemId`
- * that can be resolved via the multi-system config or the CLI's
- * `~/.adt/sessions/<sid>.json` auth store. Intended for tools that want
+ * that can be resolved via the server's multi-system configuration. Intended for tools that want
  * to support both explicit credentials and session-scoped resolution in
  * a single call (e.g. `sap_connect`).
  */
@@ -49,6 +48,6 @@ export const sessionOrConnectionShape = {
     .string()
     .optional()
     .describe(
-      'Logical system id (resolved via multi-system config or ~/.adt sessions)',
+      'Logical system id (resolved via the server multi-system configuration)',
     ),
 };

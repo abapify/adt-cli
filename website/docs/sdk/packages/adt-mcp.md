@@ -28,9 +28,7 @@ export { registerTools } from '@abapify/adt-mcp';
 
 ```ts
 import { createMcpServer } from '@abapify/adt-mcp';
-const server = createMcpServer({
-  /* options */
-});
+const server = createMcpServer({/* options */});
 await server.start();
 ```
 

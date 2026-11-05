@@ -1,21 +1,11 @@
 # @abapify/adk
 
-[![version](https://img.shields.io/github/package-json/v/abapify/adt-cli?filename=packages/adk/package.json)](https://github.com/abapify/adt-cli/pkgs/npm/%40abapify%2Fadk)
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadk)](https://www.npmjs.com/package/@abapify/adk)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-ABAP Development Kit — schema-driven construction and serialization of ABAP objects.
+ABAP Development Kit — typed object model for ABAP Repository objects (classes, interfaces, programs, tables, …) with ADT XML serialization.
 
-## Overview
-
-ADK provides typed representations of ABAP objects (classes, interfaces, packages, etc.) built from ADT XML responses. It handles parsing, construction, and lazy loading of source includes — no HTTP calls inside ADK itself.
-
-Key properties:
-
-- **Schema-first**: types derived from `@abapify/adt-schemas` (XSD-generated)
-- **Pure construction**: no network calls, no side effects
-- **Lazy source loading**: includes fetched on demand via an injected fetcher
-- **Immutable snapshots**: objects represent a point-in-time state
-
-## Installation
+## Install
 
 ```bash
 npm install @abapify/adk
@@ -23,58 +13,27 @@ npm install @abapify/adk
 
 ## Usage
 
-```typescript
-import { AdkFactory } from '@abapify/adk';
+```ts
+import { createAdtClient } from '@abapify/adt-client';
+import { createAdk } from '@abapify/adk';
 
-const factory = new AdkFactory();
+const client = createAdtClient({ baseUrl, username, password, client: '100' });
+const adk = createAdk(client);
 
-// Parse ADT XML response into a typed object
-const classObj = factory.fromAdtXml('CLAS/OC', xmlString);
-
-console.log(classObj.kind); // 'CLAS/OC'
-console.log(classObj.name); // 'ZCL_MY_CLASS'
-
-// Lazy-load source (requires a fetcher injected via the CLI or client)
-const source = await classObj.getSource();
-const includes = await classObj.getIncludes();
+const klass = await adk.getClass('ZCL_DEMO');
+await klass.save({ transport: 'DEVK900001' });
 ```
 
-## Architecture
+## Features
 
-```
-adt-schemas  (XSD-derived TypeScript types)
-      ↓
-adk  (parse ADT XML → domain objects)   ← this package
-      ↓
-adt-cli  (orchestrate: fetch → parse → serialize)
-```
+- Typed object model for classes, interfaces, programs, DDIC, packages, …
+- Lock-aware save / upsert orchestration
+- ADT XML (de)serialization via `@abapify/adt-schemas`
 
-ADK sits between the HTTP layer (`adt-client`) and the serialization layer (`adt-plugin-*`). The CLI passes raw ADT XML to ADK, receives typed objects, and hands them to format plugins.
+## Documentation
 
-## Supported Object Types
+**[adt-cli.netlify.app/sdk/packages/adk](https://adt-cli.netlify.app/sdk/packages/adk)**
 
-| ABAP Type | Description    |
-| --------- | -------------- |
-| `CLAS/OC` | ABAP class     |
-| `INTF/OI` | ABAP interface |
-| `DEVC/K`  | Package        |
+---
 
-## Bridge Pattern (CLI Integration)
-
-The CLI registers object handlers using ADK adapters:
-
-```typescript
-this.handlers.set(
-  'CLAS',
-  (client) =>
-    new AdkObjectHandler(
-      client,
-      (xml) => ClassAdtAdapter.fromAdtXML(xml),
-      (name) => `/sap/bc/adt/oo/classes/${name.toLowerCase()}`,
-    ),
-);
-```
-
-## License
-
-MIT
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.

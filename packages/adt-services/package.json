@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-services",
-  "version": "0.4.33",
+  "version": "0.4.34",
   "description": "Transport-agnostic ADT service layer shared by adt-cli and adt-mcp",
   "license": "MIT",
   "type": "module",
@@ -10,20 +10,20 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/adk": "0.4.33",
-    "@abapify/adt-auth": "0.4.33",
-    "@abapify/adt-client": "0.4.33",
-    "@abapify/adt-config": "0.4.33",
-    "@abapify/adt-contracts": "0.4.33",
-    "@abapify/adt-lint": "0.4.33",
-    "@abapify/adt-locks": "0.4.33",
-    "@abapify/adt-plugin": "0.4.33",
-    "@abapify/adt-schemas": "0.4.33",
-    "@abapify/logger": "0.4.33",
+    "@abapify/adk": "0.4.34",
+    "@abapify/adt-auth": "0.4.34",
+    "@abapify/adt-client": "0.4.34",
+    "@abapify/adt-config": "0.4.34",
+    "@abapify/adt-contracts": "0.4.34",
+    "@abapify/adt-lint": "0.4.34",
+    "@abapify/adt-locks": "0.4.34",
+    "@abapify/adt-plugin": "0.4.34",
+    "@abapify/adt-schemas": "0.4.34",
+    "@abapify/logger": "0.4.34",
     "@xmldom/xmldom": "^0.9.12",
     "chalk": "^5.6.2",
-    "@abapify/adt-plugin-abapgit": "0.4.33",
-    "@abapify/adt-plugin-gcts": "0.4.33"
+    "@abapify/adt-plugin-abapgit": "0.4.34",
+    "@abapify/adt-plugin-gcts": "0.4.34"
   },
   "publishConfig": {
     "access": "public"

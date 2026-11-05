@@ -88,6 +88,82 @@ async function withTempRoot<T>(fn: (root: string) => Promise<T>): Promise<T> {
 }
 
 describe('flow CLI command', () => {
+  it('reports an index-only outcome when optional report storage fails', async () => {
+    await withTempRoot(async (root) => {
+      await mkdir(join(root, 'src'));
+      await writeFile(join(root, 'src/previous.abap'), 'previous source');
+      const ctx = makeContext(root);
+      const result = {
+        ...emptyCheckoutResult,
+        indexedOnly: true,
+        sapCalls: { manifest: 1, metadata: 0, source: 0 },
+      };
+      const checkout = vi.fn<AdtFlowService['checkout']>(
+        async (_input, hooks) => {
+          await hooks?.beforeCheckout?.();
+          await writeFile(join(root, 'report-parent'), 'storage unavailable');
+          await hooks?.afterCheckout?.(result);
+          return result;
+        },
+      );
+      await leaf(makeCommand(checkout)).execute?.(
+        {
+          transport: 'DEVK900001',
+          indexOnInexact: true,
+          report: 'report-parent/coverage.json',
+        },
+        ctx,
+      );
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'INVENTORY_REPORT_UNAVAILABLE: index-only succeeded; no sources were materialized',
+        ),
+      );
+      expect(ctx.logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Indexed inventory for DEVK900001; no sources were materialized',
+        ),
+      );
+      expect(ctx.logger.info).not.toHaveBeenCalledWith(
+        expect.stringContaining('Checked out'),
+      );
+      expect(await readFile(join(root, 'src/previous.abap'), 'utf8')).toBe(
+        'previous source',
+      );
+    });
+  });
+
+  it('keeps available sources when diagnostic report storage fails after checkout', async () => {
+    await withTempRoot(async (root) => {
+      const ctx = makeContext(root);
+      const checkout = vi.fn<AdtFlowService['checkout']>(
+        async (_input, hooks) => {
+          await hooks?.beforeCheckout?.();
+          await mkdir(join(root, 'src'));
+          await writeFile(
+            join(root, 'src/available.abap'),
+            'REPORT available.',
+          );
+          await writeFile(join(root, 'report-parent'), 'storage unavailable');
+          await hooks?.afterCheckout?.(emptyCheckoutResult);
+          return emptyCheckoutResult;
+        },
+      );
+      await leaf(makeCommand(checkout)).execute?.(
+        { transport: 'DEVK900001', report: 'report-parent/coverage.json' },
+        ctx,
+      );
+      expect(await readFile(join(root, 'src/available.abap'), 'utf8')).toBe(
+        'REPORT available.',
+      );
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('INVENTORY_REPORT_UNAVAILABLE'),
+      );
+      await expect(
+        readFile(join(root, 'report-parent/coverage.json'), 'utf8'),
+      ).rejects.toMatchObject({ code: 'ENOTDIR' });
+    });
+  });
   it('exposes an explicit source-free flow index tr hierarchy', async () => {
     const index = makeIndex();
     const command = createFlowCommand({

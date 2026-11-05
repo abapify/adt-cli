@@ -14,7 +14,7 @@ The server is a **thin MCP adapter**. All business logic lives in `@abapify/adt-
 
 - **Agentic ABAP workflows.** An AI assistant can search objects, read source, run syntax checks, execute ATC, create transports, and commit to gCTS — all inside the same conversation.
 - **Type safety end-to-end.** Every tool is backed by a typed contract; responses are parsed against the schemas in `@abapify/adt-schemas`.
-- **Same guarantees as the CLI.** CSRF sessions, lock protocol, ETag refresh, and security session semantics are handled by `@abapify/adt-client` — see [adt-client architecture](../architecture/overview.md).
+- **Same guarantees as the CLI.** CSRF sessions and security-session semantics are handled by `@abapify/adt-client`; lock protocol and ETag refresh are handled by `@abapify/adk` and `@abapify/adt-locks` — see [`@abapify/adt-client`](../sdk/packages/adt-client.md).
 
 ## Installing and running
 
@@ -258,4 +258,3 @@ All 96 registered tools grouped by category. Each page documents the input schem
 
 - [adt-mcp package AGENTS guide](https://github.com/abapify/adt-cli/blob/main/packages/adt-mcp/AGENTS.md) — internal conventions
 - [CLI overview](../cli/overview.md) — same contracts, CLI surface
-- [Architecture](../architecture/overview.md) — session & lock protocol

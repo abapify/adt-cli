@@ -1,25 +1,34 @@
 # @abapify/adt
 
-Standalone bundle of the [ADT CLI](https://github.com/abapify/adt-cli) — a
-single minified ESM file with **zero runtime dependencies**.
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt)](https://www.npmjs.com/package/@abapify/adt)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
+
+Standalone single-file bundle of the ADT CLI — all runtime dependencies embedded.
+
+## Install
 
 ```bash
 npm install -g @abapify/adt
-adt --help
 ```
 
-Requires Node.js ≥ 18. Everything else — the ADT client, schemas, plugins,
-UI — is embedded in the bundle, so the install is ~12 MB instead of ~100 MB
-of `node_modules`.
+## Usage
 
-## What's inside
+```bash
+npm install -g @abapify/adt
+adt auth login
+adt search "ZCL_*"
+```
 
-- The full `adt` CLI built from `adt-cli/src/bin/adt-all.ts` (built-in
-  plugins: codegen, ATC, export, diff, flow, abapGit, gCTS)
-- `yoga.wasm` — layout engine asset, shipped next to the bundle
+## Features
 
-Externally-installed command plugins still work: dynamic `import()` calls
-resolve upward from the installed package into the global `node_modules`.
+- Single-file bundle of `@abapify/adt-cli` with all runtime dependencies embedded
+- Same `adt` commands and plugins as `@abapify/adt-cli`
+- Fast install, no dependency tree — ideal for CI images
 
-For the unbundled variant (per-package installs, programmatic use of
-`@abapify/adt-cli` services), use `@abapify/adt-cli`.
+## Documentation
+
+**[adt-cli.netlify.app/sdk/packages/adt-cli](https://adt-cli.netlify.app/sdk/packages/adt-cli)**
+
+---
+
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.

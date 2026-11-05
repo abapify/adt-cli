@@ -14,7 +14,7 @@ RUN --mount=type=secret,id=adt-server-build-ca,required=false \
         && update-ca-certificates; \
     fi
 WORKDIR /build
-COPY package.json bun.lock nx.json tsconfig.base.json tsconfig.json tsdown.config.ts ./
+COPY package.json bun.lock nx.json .nxignore tsconfig.base.json tsconfig.json tsdown.config.ts ./
 COPY packages/ ./packages/
 COPY tools/ ./tools/
 COPY samples/ ./samples/

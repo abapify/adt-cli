@@ -1,0 +1,27 @@
+{
+  "name": "docs-gen",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/docs-gen/src",
+  "projectType": "application",
+  "targets": {
+    "docs:gen": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "cache": false,
+      "options": {
+        "command": "bun src/main.ts",
+        "cwd": "tools/docs-gen"
+      }
+    },
+    "docs:check": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "cache": false,
+      "options": {
+        "command": "bun src/main.ts --check",
+        "cwd": "tools/docs-gen"
+      }
+    }
+  },
+  "tags": []
+}

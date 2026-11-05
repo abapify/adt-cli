@@ -286,6 +286,30 @@ export interface PackageImportOptions {
 /**
  * Result of an import operation
  */
+export interface ImportAcquisitionDiagnostics {
+  schemaVersion: 1;
+  omissions: Array<{
+    object: { pgmid: string; type: string; name: string };
+    diagnostic: 'SOURCE_UNAVAILABLE_UNLOADED_GENERIC';
+  }>;
+}
+
+function recordUnloadedGenericOmissions(
+  omissions: ImportAcquisitionDiagnostics['omissions'],
+  objects: AdkTransportObjectRef[],
+): void {
+  for (const object of objects) {
+    omissions.push({
+      object: {
+        pgmid: object.pgmid,
+        type: object.type,
+        name: object.name,
+      },
+      diagnostic: 'SOURCE_UNAVAILABLE_UNLOADED_GENERIC',
+    });
+  }
+}
+
 export interface ImportResult {
   /** Transport number (for transport imports) */
   transportNumber?: string;
@@ -315,6 +339,8 @@ export interface ImportResult {
   filesRemoved?: string[];
   /** Metadata sidecar files written (when saveTrMetadata is true) */
   metadataFiles?: string[];
+  /** Known acquisition omissions; failure statistics retain their original meaning. */
+  acquisitionDiagnostics?: ImportAcquisitionDiagnostics;
 }
 
 /**
@@ -461,6 +487,7 @@ export class ImportService {
 
     // Track results
     const results = { success: 0, skipped: 0, failed: 0, deleted: 0 };
+    const acquisitionOmissions: ImportAcquisitionDiagnostics['omissions'] = [];
     const objectsByType: Record<string, number> = {};
     const filesRemoved: string[] = [];
     const total = objectsToImport.length;
@@ -556,6 +583,7 @@ export class ImportService {
           // Count it as failed and never serialize its default-only fields.
           if (adkObject instanceof AdkGenericObject && !adkObject.isLoaded) {
             results.failed += batchObjects.length;
+            recordUnloadedGenericOmissions(acquisitionOmissions, batchObjects);
             batchObjects.forEach((object) =>
               console.log(
                 `  ❌ ${object.type} ${object.name}: ADK returned an unloaded generic object`,
@@ -654,6 +682,19 @@ export class ImportService {
     }
 
     // Write transport metadata sidecars if requested
+    const acquisitionDiagnostics: ImportAcquisitionDiagnostics | undefined =
+      acquisitionOmissions.length
+        ? {
+            schemaVersion: 1,
+            omissions: acquisitionOmissions.sort((a, b) =>
+              [a.object.pgmid, a.object.type, a.object.name]
+                .join('/')
+                .localeCompare(
+                  [b.object.pgmid, b.object.type, b.object.name].join('/'),
+                ),
+            ),
+          }
+        : undefined;
     const metadataFiles: string[] = [];
     if (options.saveTrMetadata) {
       const metadataDir = join(options.outputPath, '.adt', 'tr');
@@ -683,10 +724,12 @@ export class ImportService {
           fetchedAt: new Date().toISOString(),
           import: {
             format: options.format,
+            transports: allTransportNumbers,
             success: results.success,
             skipped: results.skipped,
             failed: results.failed,
             deleted: results.deleted,
+            ...(acquisitionDiagnostics ? { acquisitionDiagnostics } : {}),
           },
         };
 
@@ -712,6 +755,7 @@ export class ImportService {
       outputPath: options.outputPath,
       filesRemoved: filesRemoved.length > 0 ? filesRemoved : undefined,
       metadataFiles: metadataFiles.length > 0 ? metadataFiles : undefined,
+      ...(acquisitionDiagnostics ? { acquisitionDiagnostics } : {}),
     };
   }
 

@@ -17,6 +17,10 @@ export interface AdtConnectionConfig {
   logger?: Logger;
   /** Override Undici's response-header timeout for long-running SAP requests. */
   headersTimeoutMs?: number;
+  /** TCP/TLS connect timeout for the undici dispatcher (default undici 10s). */
+  connectTimeoutMs?: number;
+  /** Skip TLS certificate verification (self-signed SAP systems). */
+  insecure?: boolean;
 }
 
 // Note: Class/Interface types are available from adt-schemas via InferXsd

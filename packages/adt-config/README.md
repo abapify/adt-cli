@@ -1,10 +1,11 @@
 # @abapify/adt-config
 
-[![version](https://img.shields.io/github/package-json/v/abapify/adt-cli?filename=packages/adt-config/package.json)](https://github.com/abapify/adt-cli/pkgs/npm/%40abapify%2Fadt-config)
+[![npm](https://img.shields.io/npm/v/%40abapify%2Fadt-config)](https://www.npmjs.com/package/@abapify/adt-config)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/abapify/adt-cli/blob/main/LICENSE)
 
-Configuration loader for ADT CLI. Loads destinations from `adt.config.ts/json` files.
+Configuration loader for ADT CLI.
 
-## Installation
+## Install
 
 ```bash
 npm install @abapify/adt-config
@@ -12,73 +13,27 @@ npm install @abapify/adt-config
 
 ## Usage
 
-### Configuration File
-
-Create `adt.config.ts` in your project root:
-
-```typescript
+```ts
+// adt.config.ts
 import { defineConfig } from '@abapify/adt-config';
 
 export default defineConfig({
   destinations: {
-    DEV: {
-      type: 'puppeteer',
-      options: {
-        url: 'https://dev.sap.example.com',
-        client: '100',
-      },
-    },
-    QAS: {
-      type: 'basic',
-      options: {
-        url: 'https://qas.sap.example.com',
-        client: '100',
-      },
-    },
+    DEV: 'https://sap-dev.example.com',
   },
 });
 ```
 
-### Loading Config
+## Features
 
-```typescript
-import { loadConfig } from '@abapify/adt-config';
+- Typed `defineConfig` for destinations, plugins, and commands
+- Config discovery and precedence (project → user → env)
+- Shared by the CLI, MCP server, and SDK
 
-const config = await loadConfig();
+## Documentation
 
-// Get specific destination
-const dest = config.getDestination('DEV');
+**[adt-cli.netlify.app/sdk/packages/adt-config](https://adt-cli.netlify.app/sdk/packages/adt-config)**
 
-// List all destination names
-const names = config.listDestinations(); // ['DEV', 'QAS']
+---
 
-// Check if destination exists
-if (config.hasDestination('DEV')) {
-  // ...
-}
-
-// Access raw config (for future extensions)
-console.log(config.raw);
-```
-
-## Architecture
-
-```
-CLI (adt-cli)
-    │
-    ├── @abapify/adt-config (this package)
-    │   └── loads destinations from adt.config.ts/json
-    │
-    ├── @abapify/adt-auth
-    │   ├── auth methods (basic, slc, oauth, puppeteer)
-    │   └── session management (~/.adt/sessions/)
-    │
-    └── @abapify/adt-client
-        └── HTTP client (receives session at runtime)
-```
-
-## Config Precedence
-
-1. `adt.config.ts` (project - TypeScript)
-2. `adt.config.json` (project - JSON)
-3. `~/.adt/config.json` (global defaults)
+Part of [**abapify**](https://github.com/abapify/adt-cli) — open, typed tooling for SAP ABAP Development Tools (ADT): CLI, MCP server, and SDK.
