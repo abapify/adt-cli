@@ -9,7 +9,7 @@ RUN npm install -g bun@1.3.14
 WORKDIR /build
 
 # Copy workspace manifests first for better layer caching
-COPY package.json bun.lock nx.json tsconfig.base.json tsconfig.json tsdown.config.ts ./
+COPY package.json bun.lock nx.json .nxignore tsconfig.base.json tsconfig.json tsdown.config.ts ./
 
 # Copy all workspace members required for the build
 COPY packages/ ./packages/
