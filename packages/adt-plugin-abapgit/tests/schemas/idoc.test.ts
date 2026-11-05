@@ -5,6 +5,7 @@
  */
 
 import assert from 'node:assert';
+import { it } from 'node:test';
 import {
   runSchemaTests,
   createTypedSchema,
