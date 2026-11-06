@@ -103,15 +103,15 @@ export function testDestinationRegistry(createClient?: () => Promise<never>): {
   const stats = { leases: 0, contexts: 0 };
   const registry = createDestinationContextRegistry({
     leaseProvider: {
-      async acquire({ destination }) {
+      acquire({ destination }) {
         stats.leases++;
-        return {
+        return Promise.resolve({
           destination,
           expiresAt: Date.now() + 60_000,
           version: 1,
           material: {},
-          release: async () => undefined,
-        };
+          release: () => Promise.resolve(undefined),
+        });
       },
     },
     contextFactory: {
@@ -119,7 +119,7 @@ export function testDestinationRegistry(createClient?: () => Promise<never>): {
         stats.contexts++;
         return {
           client: createClient ? await createClient() : ({} as never),
-          close: async () => undefined,
+          close: () => Promise.resolve(undefined),
         };
       },
     },

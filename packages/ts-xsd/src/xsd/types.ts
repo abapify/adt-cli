@@ -231,7 +231,7 @@ export interface LocalElement extends Annotated {
   readonly ref?: string;
   readonly type?: string;
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
   readonly default?: string;
   readonly fixed?: string;
   readonly nillable?: boolean;
@@ -490,7 +490,7 @@ export interface SimpleContentExtension extends Annotated {
  */
 export interface ExplicitGroup extends Annotated {
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
 
   readonly element?: LocalElement[];
   readonly group?: GroupRef[];
@@ -531,7 +531,7 @@ export interface NamedGroup extends Annotated {
 export interface GroupRef extends Annotated {
   readonly ref: string;
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
 }
 
 /**
@@ -557,7 +557,7 @@ export interface AttributeGroupRef extends Annotated {
 
 export interface Any extends Annotated {
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
   readonly namespace?: string;
   readonly processContents?: 'skip' | 'lax' | 'strict';
   readonly notNamespace?: string;

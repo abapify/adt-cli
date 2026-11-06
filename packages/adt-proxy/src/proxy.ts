@@ -66,8 +66,11 @@ const FORWARDABLE_RESPONSE_HEADERS = [
   'location',
 ];
 
+/** Value of a single forwarded/observed HTTP header. */
+type HeaderValue = string | string[] | undefined;
+
 function forwardHeaders(
-  source: Record<string, string | string[] | undefined>,
+  source: Record<string, HeaderValue>,
   target: Record<string, string | string[]>,
   keys: string[],
 ): void {
@@ -187,7 +190,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
   let server: Server | undefined;
 
   function buildDownstreamHeaders(
-    incomingHeaders: Record<string, string | string[] | undefined>,
+    incomingHeaders: Record<string, HeaderValue>,
     contractHeaders?: Record<string, string>,
   ): Record<string, string> {
     const headers: Record<string, string> = {
@@ -211,7 +214,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
   }
 
   function getContentType(
-    headers: Record<string, string | string[] | undefined>,
+    headers: Record<string, HeaderValue>,
   ): string | undefined {
     const ct = headers['content-type'];
     return Array.isArray(ct) ? ct[0] : ct;
@@ -221,7 +224,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
     method: string,
     url: string,
     requestBody: string,
-    incomingHeaders: Record<string, string | string[] | undefined>,
+    incomingHeaders: Record<string, HeaderValue>,
     route: RouteDefinition,
   ): Promise<ProxyResult> {
     logger.info(`Matched route: ${route.method} ${route.pathTemplate}`);
@@ -272,7 +275,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
     method: string,
     url: string,
     requestBody: string,
-    incomingHeaders: Record<string, string | string[] | undefined>,
+    incomingHeaders: Record<string, HeaderValue>,
   ): Promise<ProxyResult> {
     logger.debug(`No route match for ${method} ${url} - forwarding as-is`);
 
@@ -369,7 +372,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
     req: {
       method?: string;
       url?: string;
-      headers: Record<string, string | string[] | undefined>;
+      headers: Record<string, HeaderValue>;
       on: (event: string, cb: (chunk: any) => void) => void;
     },
     res: {

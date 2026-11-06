@@ -52,7 +52,7 @@ const DEFAULT_SOURCE_HISTORY_DEPENDENCIES: SourceHistoryCommandDependencies = {
   getClient: getAdtClientV2,
   createService: (client) => new ExactSourceHistoryService(client),
   writeStdout: (content) => process.stdout.write(content),
-  writeFile: async (path, content) => writeFile(path, content, 'utf8'),
+  writeFile: (path, content) => writeFile(path, content, 'utf8'),
   writeLine: (content) => console.log(content),
   writeError: (content) => console.error(content),
   setExitCode: (code) => {

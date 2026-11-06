@@ -383,12 +383,13 @@ async function handleMcp(
   await ctx.mcpHandler.handle(request, response);
 }
 
-async function handleHealth(
+function handleHealth(
   _ctx: RequestHandlerContext,
   _request: http.IncomingMessage,
   response: http.ServerResponse,
 ): Promise<void> {
   sendJson(response, { status: 'ok' });
+  return Promise.resolve();
 }
 
 async function handleReady(

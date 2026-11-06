@@ -38,15 +38,14 @@ interface SapConnectArgs {
   systemId?: string;
 }
 
-async function resolveAdtClient(
+function resolveAdtClient(
   ctx: ToolContext,
   args: SapConnectArgs,
 ): Promise<{ client: AdtClient; systemId?: string; source: string }> {
   return resolveConnectionClient(args, {
     createClient: (params) => ctx.getClient(params),
     resolveSystem: ctx.resolveSystem,
-    resolveFromAuthStore: async (systemId) =>
-      getAdtClientV2Safe({ sid: systemId }),
+    resolveFromAuthStore: (systemId) => getAdtClientV2Safe({ sid: systemId }),
   });
 }
 

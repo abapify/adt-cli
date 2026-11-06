@@ -97,10 +97,7 @@ export function createAdtClient(config: AdtAdapterConfig): AdtClientReturn {
   });
 
   // Create fetch function for raw HTTP access
-  const fetchFn = async (
-    url: string,
-    options?: FetchOptions,
-  ): Promise<unknown> => {
+  const fetchFn = (url: string, options?: FetchOptions): Promise<unknown> => {
     const method = options?.method || 'GET';
     const headers = options?.headers || {};
     const body = options?.body;

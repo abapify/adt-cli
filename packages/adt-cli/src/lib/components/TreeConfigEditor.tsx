@@ -39,6 +39,9 @@ type FocusField =
   | 'fromDate'
   | 'toDate';
 
+/** Fields edited through the free-text editor */
+type TextEditField = 'userName' | 'fromDate' | 'toDate';
+
 const FIELD_ORDER: FocusField[] = [
   'userName',
   'customizingRequests',
@@ -66,11 +69,11 @@ function Checkbox({
   checked,
   label,
   focused,
-}: {
+}: Readonly<{
   checked: boolean;
   label: string;
   focused: boolean;
-}) {
+}>) {
   return (
     <Box>
       <Text
@@ -92,14 +95,14 @@ function TextField({
   editing,
   editBuffer,
   width = 30,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   focused: boolean;
   editing?: boolean;
   editBuffer?: string;
   width?: number;
-}) {
+}>) {
   // When editing, show the buffer; otherwise show the value
   const displayText = editing ? (editBuffer ?? '') : value;
   const displayValue = displayText.padEnd(width, ' ').slice(0, width);
@@ -129,14 +132,14 @@ function SelectField({
   focused,
   expanded,
   highlightedIndex,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   options: { value: string; label: string }[];
   focused: boolean;
   expanded?: boolean;
   highlightedIndex?: number;
-}) {
+}>) {
   const selectedOption = options.find((o) => o.value === value);
   const displayLabel = selectedOption?.label || 'Select a date';
 
@@ -196,7 +199,7 @@ function SelectField({
 }
 
 // Section header
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({ title }: Readonly<{ title: string }>) {
   return (
     <Box
       marginTop={1}
@@ -216,7 +219,7 @@ export function TreeConfigEditor({
   initialConfig,
   onSave,
   onCancel,
-}: TreeConfigEditorProps): React.ReactNode {
+}: Readonly<TreeConfigEditorProps>): React.ReactNode {
   const { exit } = useApp();
   const [config, setConfig] = useState<TreeConfigState>(initialConfig);
   const [focusIndex, setFocusIndex] = useState(0);
@@ -263,7 +266,7 @@ export function TreeConfigEditor({
   );
 
   const startTextEdit = useCallback(
-    (field: 'userName' | 'fromDate' | 'toDate') => {
+    (field: TextEditField) => {
       setEditingText(true);
       setTextBuffer(config[field]);
     },
@@ -271,7 +274,7 @@ export function TreeConfigEditor({
   );
 
   const finishTextEdit = useCallback(
-    (field: 'userName' | 'fromDate' | 'toDate') => {
+    (field: TextEditField) => {
       setConfig((prev: TreeConfigState) => ({
         ...prev,
         [field]: textBuffer,
@@ -349,7 +352,7 @@ export function TreeConfigEditor({
       // Handle text editing mode
       if (editingText) {
         if (key.return) {
-          finishTextEdit(currentField as 'userName' | 'fromDate' | 'toDate');
+          finishTextEdit(currentField as TextEditField);
         } else if (key.escape) {
           cancelTextEdit();
         } else if (key.backspace || key.delete) {

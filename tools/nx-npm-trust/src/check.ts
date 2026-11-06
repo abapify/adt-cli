@@ -281,7 +281,7 @@ const draft: Pkg = { ...pkg };
 // publishConfig.access must be "public" for scoped packages.
 if (draft.publishConfig?.access !== 'public') {
   if (fix) {
-    draft.publishConfig = { ...(draft.publishConfig ?? {}), access: 'public' };
+    draft.publishConfig = { ...draft.publishConfig, access: 'public' };
     report.fixes.push('set publishConfig.access=public');
     report.access = 'public';
     manifestDirty = true;

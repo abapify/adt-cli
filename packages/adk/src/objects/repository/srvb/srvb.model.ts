@@ -56,13 +56,13 @@ export class AdkServiceBinding {
    * Fetch the binding metadata document. SRVB has no source text;
    * `getSource()` returns an empty string for uniform CLI parity.
    */
-  async getMetadata(): Promise<unknown> {
+  getMetadata(): Promise<unknown> {
     return this.contract.get(this.name);
   }
 
-  async getSource(): Promise<string> {
+  getSource(): Promise<string> {
     // Metadata-only object — no source code.
-    return '';
+    return Promise.resolve('');
   }
 
   async load(): Promise<this> {
@@ -72,11 +72,13 @@ export class AdkServiceBinding {
 
   // ─── Lock / Unlock ─────────────────────────────────────────────────────────
 
-  async lock(transport?: string): Promise<{ handle: string }> {
+  lock(transport?: string): Promise<{ handle: string }> {
     const lockService = this.ctx.lockService;
     if (!lockService) {
-      throw new Error(
-        'Lock not available: no lockService in context. Did you call initializeAdk()?',
+      return Promise.reject(
+        new Error(
+          'Lock not available: no lockService in context. Did you call initializeAdk()?',
+        ),
       );
     }
     return lockService.lock(this.objectUri, {

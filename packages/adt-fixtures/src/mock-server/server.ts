@@ -88,7 +88,7 @@ export function createMockAdtServer(
               res.writeHead(route.status, {
                 'Content-Type': route.contentType,
                 ...csrfHeaders,
-                ...(route.headers ?? {}),
+                ...route.headers,
               });
               res.end(route.body);
               return;

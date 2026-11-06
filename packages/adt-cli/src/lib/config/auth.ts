@@ -78,12 +78,14 @@ export class BasicAuthProvider implements AuthProvider {
 
   constructor(private readonly config: BasicAuthConfig) {}
 
-  async createClient(): Promise<AdtClient> {
-    return createAdtClient({
-      baseUrl: this.config.host,
-      username: this.config.username,
-      password: this.config.password,
-    });
+  createClient(): Promise<AdtClient> {
+    return Promise.resolve(
+      createAdtClient({
+        baseUrl: this.config.host,
+        username: this.config.username,
+        password: this.config.password,
+      }),
+    );
   }
 
   validateConfig(config: BasicAuthConfig): ConfigValidationResult {
@@ -119,18 +121,20 @@ export class MockAuthProvider implements AuthProvider {
 
   constructor(private readonly config: MockAuthConfig) {}
 
-  async createClient(): Promise<AdtClient> {
+  createClient(): Promise<AdtClient> {
     // Return a mock client for testing
     // Use config.enabled to potentially customize mock behavior
     const baseUrl = this.config.enabled
       ? 'https://mock-sap-system.local'
       : 'https://disabled-mock.local';
 
-    return createAdtClient({
-      baseUrl,
-      username: 'mock-user',
-      password: 'mock-password',
-    });
+    return Promise.resolve(
+      createAdtClient({
+        baseUrl,
+        username: 'mock-user',
+        password: 'mock-password',
+      }),
+    );
   }
 
   validateConfig(config: MockAuthConfig): ConfigValidationResult {

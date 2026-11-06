@@ -356,7 +356,7 @@ export async function main(options?: {
   const program = await createCLI(options);
 
   // Add a hook to set up logger before command execution
-  program.hook('preAction', async (thisCommand, actionCommand) => {
+  program.hook('preAction', (thisCommand, actionCommand) => {
     // Set CLI mode for ADT client logger to enable pretty formatting
     process.env.ADT_CLI_MODE = 'true';
 

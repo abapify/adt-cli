@@ -1586,8 +1586,8 @@ function postFormForJson<T>(
             response.statusCode < 300,
           status: response.statusCode ?? 0,
           statusText: response.statusMessage ?? '',
-          async json() {
-            return JSON.parse(text) as T;
+          json() {
+            return Promise.resolve(JSON.parse(text) as T);
           },
         });
       });
@@ -1690,7 +1690,7 @@ export function createHttpDestinationContexts(options: HttpBrokerOptions): {
           client: await clientFromConnection(
             lease.material as BrokerConnection,
           ),
-          close: async () => undefined,
+          close: () => Promise.resolve(undefined),
         };
       },
     },

@@ -46,13 +46,13 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
   // Lazy segments - source code
 
   async getMainSource(): Promise<string> {
-    return this.lazy('source:main', async () => {
+    return this.lazy('source:main', () => {
       return this.crudContract.source.main.get(this.name);
     });
   }
 
   async getIncludeSource(includeType: ClassIncludeType): Promise<string> {
-    return this.lazy(`source:${includeType}`, async () => {
+    return this.lazy(`source:${includeType}`, () => {
       if (includeType === 'main') {
         return this.crudContract.source.main.get(this.name);
       }

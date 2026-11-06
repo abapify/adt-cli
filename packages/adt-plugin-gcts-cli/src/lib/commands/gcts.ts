@@ -575,10 +575,7 @@ export const gctsCommand: CliCommandPlugin = {
     objectsCmd,
     configCmd,
   ],
-  async execute(
-    _args: Record<string, unknown>,
-    ctx: CliContext,
-  ): Promise<void> {
+  execute(_args: Record<string, unknown>, ctx: CliContext): Promise<void> {
     // Surfaces help when called without a subcommand.
     ctx.logger.info(
       'Usage: adt gcts <repo|branch|commit|log|objects|config> [...]',
@@ -586,6 +583,7 @@ export const gctsCommand: CliCommandPlugin = {
     ctx.logger.info(
       'Run `adt gcts <subcommand> --help` for subcommand-specific options.',
     );
+    return Promise.resolve();
   },
 };
 

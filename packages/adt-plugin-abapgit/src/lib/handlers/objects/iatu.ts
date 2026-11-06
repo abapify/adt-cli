@@ -37,7 +37,7 @@ export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
     };
   },
 
-  serialize: async (raw, ctx) => {
+  serialize: (raw, ctx) => {
     const obj = unwrapData<IatuLike>(raw);
     const objectName = ctx.getObjectName(obj);
     const files = [
@@ -49,7 +49,7 @@ export const iatuHandler = createHandler<IatuLike, typeof iatu>('IATU', {
     if (obj.html) {
       files.push(ctx.createFile(`${objectName}.iatu.html`, obj.html));
     }
-    return files;
+    return Promise.resolve(files);
   },
 
   // {name}.iatu.html is collected as a binary source during

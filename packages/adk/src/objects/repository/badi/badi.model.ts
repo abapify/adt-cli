@@ -90,11 +90,13 @@ export class AdkBadi {
 
   // ─── Lock / Unlock ─────────────────────────────────────────────────────────
 
-  async lock(transport?: string): Promise<{ handle: string }> {
+  lock(transport?: string): Promise<{ handle: string }> {
     const lockService = this.ctx.lockService;
     if (!lockService) {
-      throw new Error(
-        'Lock not available: no lockService in context. Did you call initializeAdk()?',
+      return Promise.reject(
+        new Error(
+          'Lock not available: no lockService in context. Did you call initializeAdk()?',
+        ),
       );
     }
     return lockService.lock(this.objectUri, {

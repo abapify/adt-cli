@@ -748,7 +748,7 @@ export function stripNsPrefix(name: string): string {
 /**
  * Check if element/group has maxOccurs > 1 (is array)
  */
-function isArray(item: { maxOccurs?: number | string | 'unbounded' }): boolean {
+function isArray(item: { maxOccurs?: number | string }): boolean {
   if (item.maxOccurs === 'unbounded') return true;
   if (typeof item.maxOccurs === 'number') return item.maxOccurs > 1;
   if (typeof item.maxOccurs === 'string') {

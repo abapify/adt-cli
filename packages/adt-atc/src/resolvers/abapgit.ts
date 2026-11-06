@@ -322,7 +322,7 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
   }
 
   return {
-    async resolve(
+    resolve(
       objectType: string,
       objectName: string,
       atcLine: number,
@@ -337,16 +337,16 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
         `${objectName.toLowerCase()}.${objectType.toLowerCase()}.abap`;
       const candidateSegments = candidatePath.split('/');
       const expectedFilename = candidateSegments.at(-1);
-      if (!expectedFilename) return null;
+      if (!expectedFilename) return Promise.resolve(null);
       const resolvedPath = lookup.get(expectedFilename.toLowerCase());
 
-      if (!resolvedPath) return null;
+      if (!resolvedPath) return Promise.resolve(null);
 
       const fileLine = convertLine(atcLine, methodName, resolvedPath);
       const gitPath = toPosix(relative(repository.root, resolvedPath));
-      if (!gitPath || gitPath.startsWith('../')) return null;
+      if (!gitPath || gitPath.startsWith('../')) return Promise.resolve(null);
 
-      return { path: gitPath, line: fileLine };
+      return Promise.resolve({ path: gitPath, line: fileLine });
     },
   };
 }

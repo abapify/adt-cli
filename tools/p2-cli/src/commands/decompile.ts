@@ -106,7 +106,7 @@ function matchesGlob(name: string, pattern: string): boolean {
 /**
  * Decompile Java class files or JAR files
  */
-export async function decompile(
+export function decompile(
   input: string,
   options: DecompileOptions,
 ): Promise<void> {
@@ -201,7 +201,7 @@ export async function decompile(
 
     if (classFiles.length === 0) {
       console.log('❌ No JAR or class files found');
-      return;
+      return Promise.resolve();
     }
 
     console.log(`🔍 Found ${classFiles.length} class files`);
@@ -234,4 +234,5 @@ export async function decompile(
     console.log(`   Failed: ${failed}`);
     console.log(`   Output: ${output}`);
   }
+  return Promise.resolve();
 }

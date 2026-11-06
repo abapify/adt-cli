@@ -30,8 +30,10 @@ export class AdkScalarFunctionImplementation {
     return this.ctx.client.adt.ddic.dsfi as unknown as AdkCdsSourceContract;
   }
 
-  async getSource(): Promise<unknown> {
-    return this.definition ?? this.contract.source.main.get(this.name);
+  getSource(): Promise<unknown> {
+    return Promise.resolve(
+      this.definition ?? this.contract.source.main.get(this.name),
+    );
   }
 
   async load(): Promise<this> {

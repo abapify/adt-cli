@@ -86,7 +86,7 @@ export const serviceBindingHandler = createHandler<SrvbLike, typeof srvb>(
     },
 
     // Metadata-only: emit either .xml (legacy) or .json (AFF) depending on format option.
-    async serialize(
+    serialize(
       object,
       ctx,
       options?: FormatSerializeOptions,
@@ -118,19 +118,19 @@ export const serviceBindingHandler = createHandler<SrvbLike, typeof srvb>(
             },
           },
         );
-        return [
+        return Promise.resolve([
           ctx.createFile(
             `${objectName}.${ctx.fileExtension}.json`,
             jsonContent,
           ),
-        ];
+        ]);
       }
 
       // Default: legacy XML format
       const xmlContent = ctx.toAbapGitXml(object);
-      return [
+      return Promise.resolve([
         ctx.createFile(`${objectName}.${ctx.fileExtension}.xml`, xmlContent),
-      ];
+      ]);
     },
   },
 );

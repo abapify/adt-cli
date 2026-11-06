@@ -28,7 +28,7 @@ export function App({
   fetch,
   router: _router,
   systemName,
-}: AppProps): React.ReactNode {
+}: Readonly<AppProps>): React.ReactNode {
   const [_resizeKey, setResizeKey] = useState(0);
 
   // Handle terminal resize - just trigger re-render, don't clear

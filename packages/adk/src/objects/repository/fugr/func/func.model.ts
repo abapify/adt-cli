@@ -420,7 +420,7 @@ export class AdkFunctionModule extends AdkObject<
   // ============================================
 
   async getSource(): Promise<string> {
-    return this.lazy('source', async () => {
+    return this.lazy('source', () => {
       return this.ctx.client.adt.functions.groups.fmodules.source.main.get(
         this.groupName,
         this.name,

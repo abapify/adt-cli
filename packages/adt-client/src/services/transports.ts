@@ -141,12 +141,14 @@ export class TransportService {
    * For now, this is a placeholder that throws a helpful error.
    * Use ADK's AdkTransportRequest.create() for full functionality.
    */
-  async create(_options: CreateTransportOptions): Promise<Transport> {
+  create(_options: CreateTransportOptions): Promise<Transport> {
     // NOTE: XML body building for transport creation not yet implemented
     // The contract exists but we need to build the request XML
-    throw new Error(
-      'Transport creation via service layer not yet implemented. ' +
-        "Use ADK's AdkTransportRequest.create() for now.",
+    return Promise.reject(
+      new Error(
+        'Transport creation via service layer not yet implemented. ' +
+          "Use ADK's AdkTransportRequest.create() for now.",
+      ),
     );
   }
 
@@ -163,9 +165,11 @@ export class TransportService {
    * Note: Release requires POST with specific action parameter.
    * This is a placeholder for the full implementation.
    */
-  async release(_trkorr: string): Promise<void> {
+  release(_trkorr: string): Promise<void> {
     // NOTE: Release action not yet implemented via service layer
-    throw new Error('Transport release via service layer not yet implemented.');
+    return Promise.reject(
+      new Error('Transport release via service layer not yet implemented.'),
+    );
   }
 
   /**

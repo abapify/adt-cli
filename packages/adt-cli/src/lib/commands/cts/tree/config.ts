@@ -148,7 +148,7 @@ async function launchEditor(
   return new Promise((resolve, reject) => {
     let savedConfig: TreeConfigState | null = null;
 
-    const handleSave = async (config: TreeConfigState) => {
+    const handleSave = (config: TreeConfigState) => {
       savedConfig = config;
     };
 

@@ -90,7 +90,7 @@ export function extractCollections(
         }));
       },
 
-      async collection(coll) {
+      collection(coll) {
         // Store collection info in workspace data
         if (!coll.workspace.data.collectionDetails) {
           coll.workspace.data.collectionDetails = [];

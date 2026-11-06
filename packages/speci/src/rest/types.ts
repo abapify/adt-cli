@@ -8,13 +8,7 @@ import type { OperationDescriptor, Schema } from '../core/types';
  * HTTP methods for REST APIs
  */
 export type RestMethod =
-  | 'GET'
-  | 'POST'
-  | 'PUT'
-  | 'PATCH'
-  | 'DELETE'
-  | 'HEAD'
-  | 'OPTIONS';
+  'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 
 /**
  * Inferrable schema interface (explicit _infer property)
@@ -200,20 +194,11 @@ export type ExtractResponse<
 export type InferSuccessResponse<T extends RestEndpointDescriptor> = Exclude<
   {
     [K in keyof T['responses']]: K extends
-      | 200
-      | 201
-      | 202
-      | 203
-      | 204
-      | 205
-      | 206
-      | 207
-      | 208
-      | 226
+      200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226
       ? InferSchema<T['responses'][K]>
       : never;
   }[keyof T['responses']],
-  never | undefined
+  undefined
 >;
 
 /**
@@ -223,18 +208,9 @@ export type InferSuccessResponse<T extends RestEndpointDescriptor> = Exclude<
 export type InferErrorResponse<T extends RestEndpointDescriptor> = Exclude<
   {
     [K in keyof T['responses']]: K extends
-      | 200
-      | 201
-      | 202
-      | 203
-      | 204
-      | 205
-      | 206
-      | 207
-      | 208
-      | 226
+      200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226
       ? never
       : T['responses'][K];
   }[keyof T['responses']],
-  never | undefined
+  undefined
 >;

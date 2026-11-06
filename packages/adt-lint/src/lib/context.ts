@@ -1,6 +1,6 @@
 import type { MethodBoundary, StripResult } from './types';
 
-type SourceObjectType = 'CLAS' | 'INTF' | 'FUNC' | 'DDLS' | 'PROG' | string;
+type SourceObjectType = string;
 
 function stripClassSource(source: string): StripResult {
   const lines = source.split(/\r?\n/);

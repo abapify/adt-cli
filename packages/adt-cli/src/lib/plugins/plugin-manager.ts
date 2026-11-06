@@ -234,12 +234,14 @@ export class PluginManager {
    * Load built-in plugin
    * NOTE: FormatRegistry was removed - needs ADK migration
    */
-  private async loadBuiltinPlugin(
+  private loadBuiltinPlugin(
     pluginName: string,
     _options?: Record<string, any>,
   ): Promise<BaseFormat> {
-    throw new Error(
-      `Built-in plugin '${pluginName}' not available - FormatRegistry needs ADK migration`,
+    return Promise.reject(
+      new Error(
+        `Built-in plugin '${pluginName}' not available - FormatRegistry needs ADK migration`,
+      ),
     );
   }
 

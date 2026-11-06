@@ -116,8 +116,8 @@ export function createPuppeteerAdapter(): BrowserAdapter {
       }
     },
 
-    async getUserAgent(): Promise<string> {
-      if (!page) throw new Error('Page not created');
+    getUserAgent(): Promise<string> {
+      if (!page) return Promise.reject(new Error('Page not created'));
       return page.evaluate(() => navigator.userAgent);
     },
 

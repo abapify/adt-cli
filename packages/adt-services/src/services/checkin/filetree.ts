@@ -31,7 +31,7 @@ class FsFileTree implements FileTree {
     return content.codePointAt(0) === 0xfeff ? content.slice(1) : content;
   }
 
-  async readBuffer(path: string): Promise<Buffer> {
+  readBuffer(path: string): Promise<Buffer> {
     return readFile(join(this.root, path));
   }
 
@@ -44,7 +44,7 @@ class FsFileTree implements FileTree {
     }
   }
 
-  async readdir(path: string): Promise<string[]> {
+  readdir(path: string): Promise<string[]> {
     return readdir(path ? join(this.root, path) : this.root);
   }
 }

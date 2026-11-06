@@ -43,7 +43,7 @@ export const mimeObjectHandler = createHandler<MimeObjectLike, typeof smim>(
       },
     }),
 
-    serialize: async (obj, ctx) => {
+    serialize: (obj, ctx) => {
       const objectName = ctx.getObjectName(obj);
       const files = [
         ctx.createFile(
@@ -60,7 +60,7 @@ export const mimeObjectHandler = createHandler<MimeObjectLike, typeof smim>(
           ),
         );
       }
-      return files;
+      return Promise.resolve(files);
     },
 
     // Binary companion {name}.smim.{filename} is collected as a source
