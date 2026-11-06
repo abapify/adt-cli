@@ -28,6 +28,67 @@ export class CodegenFramework {
   }
 
   /**
+   * Run the workspace hook and the collection/templateLink hooks for one
+   * filtered workspace.
+   */
+  private async processWorkspaceContent(
+    ws: any,
+    wsCtx: WorkspaceContext,
+    hooks: {
+      hasWorkspaceHook: boolean;
+      hasCollectionHook: boolean;
+      hasTemplateLinkHook: boolean;
+    },
+  ): Promise<void> {
+    // Call workspace hooks
+    if (hooks.hasWorkspaceHook) {
+      await this.callHook('workspace', wsCtx);
+    }
+
+    // Process collections if collection hook exists
+    if (hooks.hasCollectionHook || hooks.hasTemplateLinkHook) {
+      await this.processCollections(ws, wsCtx, hooks);
+    }
+  }
+
+  /**
+   * Run collection + templateLink hooks for every filtered collection of a
+   * workspace.
+   */
+  private async processCollections(
+    ws: any,
+    wsCtx: WorkspaceContext,
+    hooks: {
+      hasCollectionHook: boolean;
+      hasTemplateLinkHook: boolean;
+    },
+  ): Promise<void> {
+    const collections = this.extractCollections(ws);
+
+    for (const coll of collections) {
+      // Apply collection filter
+      if (!matchesFilter(coll, this.config.filters, 'collection')) {
+        continue;
+      }
+
+      const collCtx = this.createCollectionContext(coll, wsCtx);
+
+      // Call collection hooks
+      if (hooks.hasCollectionHook) {
+        await this.callHook('collection', collCtx);
+      }
+
+      // Process template links if hook exists
+      if (hooks.hasTemplateLinkHook && collCtx.templateLinks.length > 0) {
+        for (const link of collCtx.templateLinks) {
+          const linkCtx = this.createTemplateLinkContext(link, collCtx);
+          await this.callHook('templateLink', linkCtx);
+        }
+      }
+    }
+  }
+
+  /**
    * Run the codegen framework
    */
   async run(): Promise<void> {
@@ -93,37 +154,11 @@ export class CodegenFramework {
         const wsCtx = await this.createWorkspaceContext(ws);
         workspaceContexts.push(wsCtx);
 
-        // Call workspace hooks
-        if (hasWorkspaceHook) {
-          await this.callHook('workspace', wsCtx);
-        }
-
-        // Process collections if collection hook exists
-        if (hasCollectionHook || hasTemplateLinkHook) {
-          const collections = this.extractCollections(ws);
-
-          for (const coll of collections) {
-            // Apply collection filter
-            if (!matchesFilter(coll, this.config.filters, 'collection')) {
-              continue;
-            }
-
-            const collCtx = this.createCollectionContext(coll, wsCtx);
-
-            // Call collection hooks
-            if (hasCollectionHook) {
-              await this.callHook('collection', collCtx);
-            }
-
-            // Process template links if hook exists
-            if (hasTemplateLinkHook && collCtx.templateLinks.length > 0) {
-              for (const link of collCtx.templateLinks) {
-                const linkCtx = this.createTemplateLinkContext(link, collCtx);
-                await this.callHook('templateLink', linkCtx);
-              }
-            }
-          }
-        }
+        await this.processWorkspaceContent(ws, wsCtx, {
+          hasWorkspaceHook,
+          hasCollectionHook,
+          hasTemplateLinkHook,
+        });
 
         // Write accumulated artifacts
         await this.writeArtifacts(wsCtx);

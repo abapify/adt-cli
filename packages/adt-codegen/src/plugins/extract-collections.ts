@@ -59,6 +59,90 @@ export interface ExtractCollectionsOptions {
   unique?: boolean;
 }
 
+/** Assert that `filePath` was not used before and record it. */
+function ensureUniquePath(
+  filePath: string,
+  seenPaths: Set<string>,
+  coll: CollectionData,
+): void {
+  if (seenPaths.has(filePath)) {
+    throw new Error(
+      `Duplicate output path detected: "${filePath}"\n` +
+        `Collection: ${coll.title} (${coll.href})\n` +
+        `Enable unique: true requires each collection to have a unique output path.`,
+    );
+  }
+  seenPaths.add(filePath);
+}
+
+/** Write one collection to its own output file. */
+async function writeCollectionFile(
+  ws: any,
+  coll: CollectionData,
+  output: string | ((collection: CollectionData) => string),
+  seenPaths: Set<string>,
+  unique: boolean,
+): Promise<void> {
+  const filePath =
+    typeof output === 'function'
+      ? // Call function with collection data
+        output(coll)
+      : // Replace placeholders
+        output
+          .replaceAll('{href}', sanitizePath(coll.href || 'unknown'))
+          .replaceAll('{title}', sanitizePath(coll.title || 'unknown'))
+          .replaceAll(
+            '{category}',
+            sanitizePath(coll.category?.term || 'unknown'),
+          );
+
+  // Check uniqueness if enabled
+  if (unique) {
+    ensureUniquePath(filePath, seenPaths, coll);
+  }
+
+  await ws.writeFile(filePath, JSON.stringify(coll, null, 2));
+}
+
+/** Write one JSON file per collection, enforcing path uniqueness. */
+async function writeCollectionFiles(
+  ctx: any,
+  output: string | ((collection: CollectionData) => string),
+  unique: boolean,
+): Promise<void> {
+  // Track file paths for uniqueness check
+  const seenPaths = new Set<string>();
+
+  // Write individual files per collection
+  for (const ws of ctx.workspaces) {
+    if (ws.data.collectionDetails) {
+      for (const coll of ws.data.collectionDetails) {
+        await writeCollectionFile(ws, coll, output, seenPaths, unique);
+      }
+
+      ctx.logger.success(
+        `Wrote ${ws.data.collectionDetails.length} collection files for ${ws.folderName}`,
+      );
+    }
+  }
+}
+
+/** Write a single `collections.json` per workspace. */
+async function writeCollectionsJson(ctx: any, output: string): Promise<void> {
+  for (const ws of ctx.workspaces) {
+    if (ws.data.collectionDetails) {
+      await ws.writeFile(
+        output,
+        JSON.stringify(ws.data.collectionDetails, null, 2),
+      );
+
+      ctx.logger.success(
+        `Wrote ${ws.folderName}/${output} (${ws.data.collectionDetails.length} collections)`,
+      );
+    }
+  }
+}
+
 /**
  * Factory function to create extract collections plugin
  */
@@ -106,70 +190,13 @@ export function extractCollections(
       },
 
       async finalize(ctx) {
-        const isFunction = typeof output === 'function';
         const isTemplate = typeof output === 'string' && output.includes('{');
 
-        if (isFunction || isTemplate) {
-          // Track file paths for uniqueness check
-          const seenPaths = new Set<string>();
-
-          // Write individual files per collection
-          for (const ws of ctx.workspaces) {
-            if (ws.data.collectionDetails) {
-              for (const coll of ws.data.collectionDetails) {
-                let filePath: string;
-
-                if (isFunction) {
-                  // Call function with collection data
-                  filePath = output(coll);
-                } else {
-                  // Replace placeholders
-                  filePath = output
-                    .replaceAll('{href}', sanitizePath(coll.href || 'unknown'))
-                    .replaceAll(
-                      '{title}',
-                      sanitizePath(coll.title || 'unknown'),
-                    )
-                    .replaceAll(
-                      '{category}',
-                      sanitizePath(coll.category?.term || 'unknown'),
-                    );
-                }
-
-                // Check uniqueness if enabled
-                if (unique) {
-                  if (seenPaths.has(filePath)) {
-                    throw new Error(
-                      `Duplicate output path detected: "${filePath}"\n` +
-                        `Collection: ${coll.title} (${coll.href})\n` +
-                        `Enable unique: true requires each collection to have a unique output path.`,
-                    );
-                  }
-                  seenPaths.add(filePath);
-                }
-
-                await ws.writeFile(filePath, JSON.stringify(coll, null, 2));
-              }
-
-              ctx.logger.success(
-                `Wrote ${ws.data.collectionDetails.length} collection files for ${ws.folderName}`,
-              );
-            }
-          }
+        if (typeof output === 'function' || isTemplate) {
+          await writeCollectionFiles(ctx, output, unique);
         } else {
           // Write single collections.json per workspace
-          for (const ws of ctx.workspaces) {
-            if (ws.data.collectionDetails) {
-              await ws.writeFile(
-                output as string,
-                JSON.stringify(ws.data.collectionDetails, null, 2),
-              );
-
-              ctx.logger.success(
-                `Wrote ${ws.folderName}/${output} (${ws.data.collectionDetails.length} collections)`,
-              );
-            }
-          }
+          await writeCollectionsJson(ctx, output as string);
         }
       },
     },

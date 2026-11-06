@@ -103,6 +103,85 @@ function generateXmlSchemaTemplate(contentType: string): string {
 </xs:schema>`;
 }
 
+/** Resolved output template (string or function form). */
+type SchemaOutput = NonNullable<BootstrapSchemasOptions['output']>;
+
+/**
+ * Register every schema-bearing content type (`+json` / `+xml`) of one
+ * collection.
+ */
+function collectCollectionSchemas(
+  coll: any,
+  schemas: Map<string, SchemaInfo>,
+): void {
+  if (!coll.accepts || !Array.isArray(coll.accepts)) return;
+  for (const contentType of coll.accepts) {
+    // Check if it's a schema type (+json or +xml)
+    const format: SchemaInfo['format'] | undefined = contentType.includes(
+      '+json',
+    )
+      ? 'json'
+      : contentType.includes('+xml')
+        ? 'xml'
+        : undefined;
+    if (format) {
+      schemas.set(contentType, {
+        contentType,
+        format,
+        schemaPath: contentTypeToPath(contentType, format),
+      });
+    }
+  }
+}
+
+/** Collect all schemas from workspace collections. */
+function collectSchemas(ctx: any): Map<string, SchemaInfo> {
+  const schemas = new Map<string, SchemaInfo>();
+  for (const ws of ctx.workspaces) {
+    if (ws.data.collectionDetails) {
+      for (const coll of ws.data.collectionDetails) {
+        collectCollectionSchemas(coll, schemas);
+      }
+    }
+  }
+  return schemas;
+}
+
+/**
+ * Resolve the output path for one schema (function or template form) and,
+ * when `unique` is enforced, verify it has not been used before. Returns
+ * `false` when the output function skips this schema.
+ */
+function resolveSchemaOutputPath(
+  output: SchemaOutput,
+  isFunction: boolean,
+  info: SchemaInfo,
+  seenPaths: Set<string>,
+  unique: boolean,
+): string | false {
+  const filePath: string | false = isFunction
+    ? output(info)
+    : output
+        .replaceAll('{contentType}', info.contentType)
+        .replaceAll('{format}', info.format)
+        .replaceAll('{schemaPath}', info.schemaPath);
+
+  if (filePath === false) return false; // Skip this schema
+
+  // Check uniqueness if enabled
+  if (unique && filePath) {
+    if (seenPaths.has(filePath)) {
+      throw new Error(
+        `Duplicate schema path detected: "${filePath}"\n` +
+          `Content type: ${info.contentType}\n` +
+          `Enable unique: true requires each schema to have a unique output path.`,
+      );
+    }
+    seenPaths.add(filePath);
+  }
+  return filePath;
+}
+
 /**
  * Factory function to create bootstrap schemas plugin
  */
@@ -118,63 +197,20 @@ export function bootstrapSchemas(
       async finalize(ctx) {
         const isFunction = typeof output === 'function';
         const seenPaths = new Set<string>();
-        const schemas = new Map<string, SchemaInfo>();
-
-        // Collect all schemas from collections
-        for (const ws of ctx.workspaces) {
-          if (ws.data.collectionDetails) {
-            for (const coll of ws.data.collectionDetails) {
-              if (coll.accepts && Array.isArray(coll.accepts)) {
-                for (const contentType of coll.accepts) {
-                  // Check if it's a schema type (+json or +xml)
-                  if (contentType.includes('+json')) {
-                    const schemaPath = contentTypeToPath(contentType, 'json');
-                    schemas.set(contentType, {
-                      contentType,
-                      format: 'json',
-                      schemaPath,
-                    });
-                  } else if (contentType.includes('+xml')) {
-                    const schemaPath = contentTypeToPath(contentType, 'xml');
-                    schemas.set(contentType, {
-                      contentType,
-                      format: 'xml',
-                      schemaPath,
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
+        const schemas = collectSchemas(ctx);
 
         // Generate schema files
         let generatedCount = 0;
 
         for (const info of schemas.values()) {
-          let filePath: string | false;
-
-          if (isFunction) {
-            filePath = output(info);
-            if (filePath === false) continue; // Skip this schema
-          } else {
-            filePath = output
-              .replaceAll('{contentType}', info.contentType)
-              .replaceAll('{format}', info.format)
-              .replaceAll('{schemaPath}', info.schemaPath);
-          }
-
-          // Check uniqueness if enabled
-          if (unique && filePath) {
-            if (seenPaths.has(filePath)) {
-              throw new Error(
-                `Duplicate schema path detected: "${filePath}"\n` +
-                  `Content type: ${info.contentType}\n` +
-                  `Enable unique: true requires each schema to have a unique output path.`,
-              );
-            }
-            seenPaths.add(filePath);
-          }
+          const filePath = resolveSchemaOutputPath(
+            output,
+            isFunction,
+            info,
+            seenPaths,
+            unique,
+          );
+          if (filePath === false) continue; // Skip this schema
 
           // Generate template content
           const content =
