@@ -13,6 +13,76 @@ import { Command } from 'commander';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
 import { resolveObjectUri, getLockService } from '../utils/lock-helpers';
 
+type LockService = ReturnType<typeof getLockService>;
+type LockHandle = Awaited<ReturnType<LockService['lock']>>;
+
+/** Print the handle and optional transport of an acquired lock. */
+function printLockHandle(handle: LockHandle): void {
+  console.log(`   🔑 Handle: ${handle.handle}`);
+  if (handle.correlationNumber) {
+    console.log(`   📦 Transport: ${handle.correlationNumber}`);
+  }
+}
+
+/** Lock a single URI directly (the `--uri` path) and print the result. */
+async function lockUriDirectly(
+  locks: LockService,
+  uri: string,
+  transport: string | undefined,
+): Promise<void> {
+  const label = uri.split('/').pop() || uri;
+  console.log(`\n🔒 Locking: ${label} (via --uri)`);
+
+  const handle = await locks.lock(uri, {
+    objectName: label,
+    transport,
+  });
+
+  console.log(`✅ Locked`);
+  printLockHandle(handle);
+}
+
+/** Lock each object name in turn; returns the number of failures. */
+async function lockObjects(
+  client: Awaited<ReturnType<typeof getAdtClientV2>>,
+  locks: LockService,
+  objectNames: string[],
+  options: { type?: string; uri?: string; transport?: string },
+): Promise<number> {
+  let failed = 0;
+
+  for (const objectName of objectNames) {
+    console.log(`\n🔒 Locking: ${objectName}`);
+
+    try {
+      const { uri, display } = await resolveObjectUri(
+        client,
+        objectName,
+        'lock',
+        options.type,
+        objectNames.length === 1 ? options.uri : undefined,
+      );
+      console.log(`   📍 ${display}`);
+
+      const handle = await locks.lock(uri, {
+        objectName,
+        objectType: options.type,
+        transport: options.transport,
+      });
+
+      console.log(`✅ ${objectName} locked`);
+      printLockHandle(handle);
+    } catch (err) {
+      console.error(
+        `   ❌ ${err instanceof Error ? err.message : String(err)}`,
+      );
+      failed++;
+    }
+  }
+
+  return failed;
+}
+
 export const lockCommand = new Command('lock')
   .description('Lock a SAP object (persists handle for later unlock)')
   .argument(
@@ -36,19 +106,7 @@ export const lockCommand = new Command('lock')
 
         // --uri without object names: lock the URI directly
         if (options.uri && objectNames.length === 0) {
-          const label = options.uri.split('/').pop() || options.uri;
-          console.log(`\n🔒 Locking: ${label} (via --uri)`);
-
-          const handle = await locks.lock(options.uri, {
-            objectName: label,
-            transport: options.transport,
-          });
-
-          console.log(`✅ Locked`);
-          console.log(`   🔑 Handle: ${handle.handle}`);
-          if (handle.correlationNumber) {
-            console.log(`   📦 Transport: ${handle.correlationNumber}`);
-          }
+          await lockUriDirectly(locks, options.uri, options.transport);
           return;
         }
 
@@ -59,39 +117,7 @@ export const lockCommand = new Command('lock')
           process.exit(1);
         }
 
-        let failed = 0;
-
-        for (const objectName of objectNames) {
-          console.log(`\n🔒 Locking: ${objectName}`);
-
-          try {
-            const { uri, display } = await resolveObjectUri(
-              client,
-              objectName,
-              'lock',
-              options.type,
-              objectNames.length === 1 ? options.uri : undefined,
-            );
-            console.log(`   📍 ${display}`);
-
-            const handle = await locks.lock(uri, {
-              objectName,
-              objectType: options.type,
-              transport: options.transport,
-            });
-
-            console.log(`✅ ${objectName} locked`);
-            console.log(`   🔑 Handle: ${handle.handle}`);
-            if (handle.correlationNumber) {
-              console.log(`   📦 Transport: ${handle.correlationNumber}`);
-            }
-          } catch (err) {
-            console.error(
-              `   ❌ ${err instanceof Error ? err.message : String(err)}`,
-            );
-            failed++;
-          }
-        }
+        const failed = await lockObjects(client, locks, objectNames, options);
 
         if (failed > 0) {
           console.log(`\n⚠️  ${failed}/${objectNames.length} lock(s) failed`);

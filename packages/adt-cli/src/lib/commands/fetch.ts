@@ -111,6 +111,25 @@ function describeCause(cause: unknown): string | undefined {
   return code ? `${message} (${asText(code)})` : message;
 }
 
+/** Parse repeated -H/--header values and the --accept shorthand into a map. */
+function buildRequestHeaders(
+  headers: string[],
+  accept: string | undefined,
+): Record<string, string> {
+  const customHeaders: Record<string, string> = {};
+  for (const header of headers) {
+    const [key, ...valueParts] = header.split(':');
+    if (key && valueParts.length > 0) {
+      customHeaders[key.trim()] = valueParts.join(':').trim();
+    }
+  }
+  // Add Accept header if specified
+  if (accept) {
+    customHeaders['Accept'] = accept;
+  }
+  return customHeaders;
+}
+
 /**
  * Formats a fetch failure without exposing credentials or unbounded response data.
  * A missing HTTP response is meaningful: it distinguishes a network/proxy/TLS
@@ -174,19 +193,8 @@ export const fetchCommand = new Command('fetch')
         writeMetadata: true, // Always write metadata for debugging
       });
 
-      // Parse custom headers
-      const customHeaders: Record<string, string> = {};
-      for (const header of options.header) {
-        const [key, ...valueParts] = header.split(':');
-        if (key && valueParts.length > 0) {
-          customHeaders[key.trim()] = valueParts.join(':').trim();
-        }
-      }
-
-      // Add Accept header if specified
-      if (options.accept) {
-        customHeaders['Accept'] = options.accept;
-      }
+      // Parse custom headers (incl. the --accept shorthand)
+      const customHeaders = buildRequestHeaders(options.header, options.accept);
 
       const method = options.method.toUpperCase() as
         'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';

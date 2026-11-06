@@ -7,6 +7,44 @@
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../../utils/adt-client-v2';
 
+/** One row of `client.services.transports.list()`. */
+type TransportRow = Awaited<
+  ReturnType<
+    Awaited<ReturnType<typeof getAdtClientV2>>['services']['transports']['list']
+  >
+>[number];
+
+/** Print the human-readable transport list. */
+function printTransportList(
+  transports: TransportRow[],
+  displayTransports: TransportRow[],
+  maxResults: number,
+): void {
+  // Clear the loading line
+  process.stdout.write('\r\x1b[K');
+
+  if (transports.length === 0) {
+    console.log('📭 No transports found');
+    return;
+  }
+
+  console.log(`📋 Found ${transports.length} transports`);
+
+  for (const tr of displayTransports) {
+    const status = tr.status === 'D' ? '📂' : '📁';
+    console.log(`${status} ${tr.number} - ${tr.desc || '(no description)'}`);
+    console.log(
+      `   Owner: ${tr.owner || 'unknown'} | Status: ${tr.status || 'unknown'}`,
+    );
+  }
+
+  if (transports.length > maxResults) {
+    console.log(
+      `\n💡 Showing ${maxResults} of ${transports.length} (use --max to see more)`,
+    );
+  }
+}
+
 export const ctsListCommand = new Command('list')
   .description('List transport requests')
   .option('-m, --max <number>', 'Maximum results', '50')
@@ -28,30 +66,7 @@ export const ctsListCommand = new Command('list')
         process.stdout.write('\r\x1b[K');
         console.log(JSON.stringify(displayTransports, null, 2));
       } else {
-        // Clear the loading line
-        process.stdout.write('\r\x1b[K');
-
-        if (transports.length === 0) {
-          console.log('📭 No transports found');
-        } else {
-          console.log(`📋 Found ${transports.length} transports`);
-
-          for (const tr of displayTransports) {
-            const status = tr.status === 'D' ? '📂' : '📁';
-            console.log(
-              `${status} ${tr.number} - ${tr.desc || '(no description)'}`,
-            );
-            console.log(
-              `   Owner: ${tr.owner || 'unknown'} | Status: ${tr.status || 'unknown'}`,
-            );
-          }
-
-          if (transports.length > maxResults) {
-            console.log(
-              `\n💡 Showing ${maxResults} of ${transports.length} (use --max to see more)`,
-            );
-          }
-        }
+        printTransportList(transports, displayTransports, maxResults);
       }
     } catch (error) {
       console.error(

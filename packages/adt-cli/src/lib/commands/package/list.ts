@@ -17,6 +17,110 @@ import { asText } from '../../utils/text';
 import { AdkPackage } from '@abapify/adk';
 import type { AbapObject } from '@abapify/adk';
 
+// Stringify an unknown field safely (avoids "[object Object]").
+// JSON.stringify can throw on circular refs / BigInt — fall back to
+// plain String coercion so `package list` never crashes on output.
+function asStr(v: unknown, fallback = ''): string {
+  if (v === undefined || v === null) return fallback;
+  if (typeof v === 'object') {
+    try {
+      return JSON.stringify(v);
+    } catch {
+      return asText(v);
+    }
+  }
+  return asText(v);
+}
+
+// Recursively collect all descendant packages (breadth-first).
+async function collectAllSubpackages(pkg: AbapObject): Promise<AbapObject[]> {
+  const allSubPkgs: AbapObject[] = [];
+  const queue: AbapObject[] = [pkg];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const children = (await current.getSubpackages()) as AbapObject[];
+    allSubPkgs.push(...children);
+    queue.push(...children);
+  }
+  return allSubPkgs;
+}
+
+// Print the subpackage list section.
+function printSubpackages(subpackages: AbapObject[], long: boolean): void {
+  if (subpackages.length === 0) return;
+  console.log(chalk.underline(`\n▼ Subpackages (${subpackages.length})`));
+  for (const sp of subpackages) {
+    const spObj = sp as unknown as Record<string, unknown>;
+    if (long) {
+      console.log(
+        `  ${chalk.cyan(asStr(spObj.name))}  ${chalk.dim(asStr(spObj.description))}`,
+      );
+    } else {
+      console.log(`  ${asStr(spObj.name)}`);
+    }
+  }
+}
+
+// Print the object list section, grouped by type in long mode.
+function printObjects(
+  objects: AbapObject[],
+  opts: { long: boolean; recursive: boolean; pkgName: string },
+): void {
+  console.log(chalk.underline(`\n▼ Objects (${objects.length})`));
+  if (!opts.long) {
+    for (const obj of objects) {
+      console.log(
+        `  ${asStr((obj as unknown as Record<string, unknown>).name)}`,
+      );
+    }
+    return;
+  }
+  // Group by type
+  const byType = new Map<string, AbapObject[]>();
+  for (const obj of objects) {
+    const type = asStr((obj as unknown as Record<string, unknown>).type);
+    const list = byType.get(type) ?? [];
+    list.push(obj);
+    byType.set(type, list);
+  }
+  for (const [type, list] of [...byType.entries()].sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  )) {
+    console.log(chalk.dim(`  ${type} (${list.length})`));
+    for (const obj of list) {
+      const o = obj as unknown as Record<string, unknown>;
+      const objPkg = asStr(o.package);
+      const pkgNote =
+        opts.recursive && objPkg !== opts.pkgName
+          ? chalk.dim(` [${objPkg}]`)
+          : '';
+      console.log(
+        `    ${chalk.green(asStr(o.name))}${pkgNote}  ${chalk.dim(asStr(o.description))}`,
+      );
+    }
+  }
+}
+
+// Print the human-readable package listing.
+function printPackageListing(
+  subpackages: AbapObject[],
+  objects: AbapObject[],
+  opts: { recursive: boolean; long: boolean; subpackagesOnly: boolean },
+  pkgName: string,
+): void {
+  printSubpackages(subpackages, opts.long);
+  if (opts.subpackagesOnly) return;
+  if (objects.length > 0) {
+    printObjects(objects, {
+      long: opts.long,
+      recursive: opts.recursive,
+      pkgName,
+    });
+  } else if (subpackages.length === 0) {
+    console.log(chalk.dim('  (empty)'));
+  }
+}
+
 export const packageListCommand = new Command('list')
   .description('List objects and subpackages in an ABAP package')
   .argument('<name>', 'Package name (e.g., ZMYPKG)')
@@ -54,24 +158,10 @@ export const packageListCommand = new Command('list')
       progress.done();
 
       // Load subpackages
-      let subpackages: AbapObject[] = [];
       progress.step('📦 Loading subpackages...');
-      if (options.recursive) {
-        // Recursively collect all descendant packages
-        const allSubPkgs: AbapObject[] = [];
-        const queue = [pkg];
-        while (queue.length > 0) {
-          const current = queue.shift()!;
-          const children = (await current.getSubpackages()) as AbapObject[];
-          allSubPkgs.push(...children);
-          for (const child of children) {
-            queue.push(child as typeof pkg);
-          }
-        }
-        subpackages = allSubPkgs;
-      } else {
-        subpackages = (await pkg.getSubpackages()) as AbapObject[];
-      }
+      const subpackages: AbapObject[] = options.recursive
+        ? await collectAllSubpackages(pkg)
+        : ((await pkg.getSubpackages()) as AbapObject[]);
       progress.done();
 
       // Load objects (if not --subpackages-only)
@@ -89,79 +179,7 @@ export const packageListCommand = new Command('list')
         return;
       }
 
-      // Stringify an unknown field safely (avoids "[object Object]").
-      // JSON.stringify can throw on circular refs / BigInt — fall back to
-      // plain String coercion so `package list` never crashes on output.
-      const asStr = (v: unknown, fallback = ''): string => {
-        if (v === undefined || v === null) return fallback;
-        if (typeof v === 'object') {
-          try {
-            return JSON.stringify(v);
-          } catch {
-            return asText(v);
-          }
-        }
-        return asText(v);
-      };
-
-      // Display subpackages
-      if (subpackages.length > 0) {
-        console.log(chalk.underline(`\n▼ Subpackages (${subpackages.length})`));
-        for (const sp of subpackages) {
-          const spObj = sp as unknown as Record<string, unknown>;
-          if (options.long) {
-            console.log(
-              `  ${chalk.cyan(asStr(spObj.name))}  ${chalk.dim(asStr(spObj.description))}`,
-            );
-          } else {
-            console.log(`  ${asStr(spObj.name)}`);
-          }
-        }
-      }
-
-      // Display objects
-      if (!options.subpackagesOnly) {
-        if (objects.length > 0) {
-          console.log(chalk.underline(`\n▼ Objects (${objects.length})`));
-
-          if (options.long) {
-            // Group by type
-            const byType = new Map<string, AbapObject[]>();
-            for (const obj of objects) {
-              const type = asStr(
-                (obj as unknown as Record<string, unknown>).type,
-              );
-              const list = byType.get(type) ?? [];
-              list.push(obj);
-              byType.set(type, list);
-            }
-            for (const [type, list] of [...byType.entries()].sort((a, b) =>
-              a[0].localeCompare(b[0]),
-            )) {
-              console.log(chalk.dim(`  ${type} (${list.length})`));
-              for (const obj of list) {
-                const o = obj as unknown as Record<string, unknown>;
-                const objPkg = asStr(o.package);
-                const pkgNote =
-                  options.recursive && objPkg !== pkgName
-                    ? chalk.dim(` [${objPkg}]`)
-                    : '';
-                console.log(
-                  `    ${chalk.green(asStr(o.name))}${pkgNote}  ${chalk.dim(asStr(o.description))}`,
-                );
-              }
-            }
-          } else {
-            for (const obj of objects) {
-              console.log(
-                `  ${asStr((obj as unknown as Record<string, unknown>).name)}`,
-              );
-            }
-          }
-        } else if (subpackages.length === 0) {
-          console.log(chalk.dim('  (empty)'));
-        }
-      }
+      printPackageListing(subpackages, objects, options, pkgName);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('❌ List failed:', message);

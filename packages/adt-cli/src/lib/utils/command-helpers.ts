@@ -45,39 +45,46 @@ export function handleCommandError(error: unknown, operation: string): never {
   process.exit(1);
 }
 
+/** Stringify an unknown error field safely (avoids "[object Object]"). */
+function toStr(v: unknown): string {
+  if (v === undefined || v === null) return '';
+  if (typeof v === 'object') {
+    try {
+      return JSON.stringify(v);
+    } catch {
+      // Error objects occasionally have circular refs; don't let
+      // the import error handler itself crash while formatting.
+      return asText(v);
+    }
+  }
+  return asText(v);
+}
+
+/** Read a named optional property from an Error-like value. */
+function errorField(error: unknown, field: string): unknown {
+  return error instanceof Error && field in error
+    ? (error as Record<string, unknown>)[field]
+    : undefined;
+}
+
+/** Format the "Cause: …" line for a non-null cause value. */
+function formatCauseLine(cause: unknown): string {
+  const causeMsg = cause instanceof Error ? cause.message : toStr(cause);
+  const causeCode = errorField(cause, 'code');
+  const causeSuffix = causeCode ? ` (${toStr(causeCode)})` : '';
+  return `   Cause: ${causeMsg}${causeSuffix}`;
+}
+
 /**
  * Detailed error handler for import commands (transport / package).
  * Prints error message, code, HTTP status, and cause then exits.
  * Stack traces are only shown when --debug is enabled.
  */
 export function handleImportError(error: unknown, debug = false): never {
-  const toStr = (v: unknown): string => {
-    if (v === undefined || v === null) return '';
-    if (typeof v === 'object') {
-      try {
-        return JSON.stringify(v);
-      } catch {
-        // Error objects occasionally have circular refs; don't let
-        // the import error handler itself crash while formatting.
-        return asText(v);
-      }
-    }
-    return asText(v);
-  };
-
   const errorMsg = error instanceof Error ? error.message : String(error);
-  const errorCode =
-    error instanceof Error && 'code' in error
-      ? (error as { code: unknown }).code
-      : 'UNKNOWN';
-  const errorStatus =
-    error instanceof Error && 'status' in error
-      ? (error as { status: unknown }).status
-      : '';
-  const cause =
-    error instanceof Error && 'cause' in error
-      ? (error as { cause: unknown }).cause
-      : null;
+  const errorCode = errorField(error, 'code') ?? 'UNKNOWN';
+  const errorStatus = errorField(error, 'status');
+  const cause = errorField(error, 'cause');
 
   console.error(`❌ Import failed: ${errorMsg}`);
   if (errorCode && errorCode !== 'UNKNOWN') {
@@ -87,13 +94,7 @@ export function handleImportError(error: unknown, debug = false): never {
     console.error(`   HTTP status: ${toStr(errorStatus)}`);
   }
   if (cause) {
-    const causeMsg = cause instanceof Error ? cause.message : toStr(cause);
-    const causeCode =
-      cause instanceof Error && 'code' in cause
-        ? (cause as { code: unknown }).code
-        : '';
-    const causeSuffix = causeCode ? ` (${toStr(causeCode)})` : '';
-    console.error(`   Cause: ${causeMsg}${causeSuffix}`);
+    console.error(formatCauseLine(cause));
   }
   if (debug && error instanceof Error && error.stack) {
     console.error(`   Stack: ${error.stack}`);
