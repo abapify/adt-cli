@@ -56,6 +56,95 @@ interface MissingObjectCleanupContext {
   debug?: boolean;
 }
 
+type MissingDeleteObject = { pgmid: string; type: string; name: string };
+
+type LoadedAdkObject = NonNullable<
+  Awaited<ReturnType<AdkTransportObjectRef['load']>>
+>;
+
+/** Delete one missing object and account the outcome on `result`. */
+async function removeMissingObject(
+  context: MissingObjectCleanupContext,
+  deleteObject: MissingDeleteObject,
+  deleteReason: string,
+  representedObjectCount: number,
+  result: MissingObjectCleanupResult,
+): Promise<void> {
+  const deleteRef = {
+    pgmid: deleteObject.pgmid,
+    type: deleteObject.type,
+    name: deleteObject.name,
+  };
+  console.log(
+    `  🗑️  [${context.firstProgress}/${context.total}] ${deleteRef.type} ${deleteRef.name}: ${deleteReason}`,
+  );
+  let delResult: DeleteResult | undefined;
+  try {
+    delResult = await context.deleteFn(
+      deleteRef,
+      context.outputPath,
+      context.importContext,
+    );
+  } catch (error: unknown) {
+    result.failed += representedObjectCount;
+    console.log(`  ❌ ${deleteRef.type} ${deleteRef.name}: cleanup failed`);
+    if (context.debug) {
+      console.log(
+        `  ⚠️  ${deleteRef.type} ${deleteRef.name}: delete failed — ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    return;
+  }
+
+  result.filesRemoved.push(...(delResult?.filesRemoved ?? []));
+  if (!delResult?.success) {
+    result.failed += representedObjectCount;
+    console.log(`  ❌ ${deleteRef.type} ${deleteRef.name}: cleanup failed`);
+    return;
+  }
+  if (context.batch.classOwnerName && delResult.filesRemoved.length === 0) {
+    result.skipped += representedObjectCount;
+    return;
+  }
+
+  result.deleted += representedObjectCount;
+}
+
+async function cleanupMissingObjectBatch(
+  context: MissingObjectCleanupContext,
+): Promise<MissingObjectCleanupResult> {
+  const { batch, fallbackObject } = context;
+  // AdkTransportObjectRef.load() maps confirmed HTTP 404 responses to undefined.
+  // Transient read errors propagate so ImportService records a failed acquisition.
+  const deleteObjects: MissingDeleteObject[] = batch.classOwnerName
+    ? [{ pgmid: 'R3TR', type: 'CLAS', name: batch.classOwnerName }]
+    : [fallbackObject];
+  const representedObjectCount = batch.classOwnerName
+    ? batch.objects.length
+    : 1;
+  const result: MissingObjectCleanupResult = {
+    deleted: 0,
+    skipped: 0,
+    failed: 0,
+    filesRemoved: [],
+  };
+
+  for (const deleteObject of deleteObjects) {
+    const deleteReason = batch.classOwnerName
+      ? 'class owner metadata confirmed not found in SAP'
+      : 'not found in SAP';
+    await removeMissingObject(
+      context,
+      deleteObject,
+      deleteReason,
+      representedObjectCount,
+      result,
+    );
+  }
+
+  return result;
+}
+
 function isRepositoryClassOwner(object: AdkTransportObjectRef): boolean {
   return (
     object.pgmid.trim().toUpperCase() === 'R3TR' &&
@@ -101,74 +190,6 @@ function groupImportObjectsByClassOwner(
   }
 
   return batches;
-}
-
-async function cleanupMissingObjectBatch({
-  batch,
-  fallbackObject,
-  deleteFn,
-  outputPath,
-  importContext,
-  firstProgress,
-  total,
-  debug,
-}: MissingObjectCleanupContext): Promise<MissingObjectCleanupResult> {
-  // AdkTransportObjectRef.load() maps confirmed HTTP 404 responses to undefined.
-  // Transient read errors propagate so ImportService records a failed acquisition.
-  const deleteObjects = batch.classOwnerName
-    ? [{ pgmid: 'R3TR', type: 'CLAS', name: batch.classOwnerName }]
-    : [fallbackObject];
-  const representedObjectCount = batch.classOwnerName
-    ? batch.objects.length
-    : 1;
-  const result: MissingObjectCleanupResult = {
-    deleted: 0,
-    skipped: 0,
-    failed: 0,
-    filesRemoved: [],
-  };
-
-  for (const deleteObject of deleteObjects) {
-    const deleteRef = {
-      pgmid: deleteObject.pgmid,
-      type: deleteObject.type,
-      name: deleteObject.name,
-    };
-    const deleteReason = batch.classOwnerName
-      ? 'class owner metadata confirmed not found in SAP'
-      : 'not found in SAP';
-    console.log(
-      `  🗑️  [${firstProgress}/${total}] ${deleteRef.type} ${deleteRef.name}: ${deleteReason}`,
-    );
-    let delResult: DeleteResult | undefined;
-    try {
-      delResult = await deleteFn(deleteRef, outputPath, importContext);
-    } catch (error: unknown) {
-      result.failed += representedObjectCount;
-      console.log(`  ❌ ${deleteRef.type} ${deleteRef.name}: cleanup failed`);
-      if (debug) {
-        console.log(
-          `  ⚠️  ${deleteRef.type} ${deleteRef.name}: delete failed — ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
-      continue;
-    }
-
-    result.filesRemoved.push(...(delResult?.filesRemoved ?? []));
-    if (!delResult?.success) {
-      result.failed += representedObjectCount;
-      console.log(`  ❌ ${deleteRef.type} ${deleteRef.name}: cleanup failed`);
-      continue;
-    }
-    if (batch.classOwnerName && delResult.filesRemoved.length === 0) {
-      result.skipped += representedObjectCount;
-      continue;
-    }
-
-    result.deleted += representedObjectCount;
-  }
-
-  return result;
 }
 
 /**
@@ -343,6 +364,179 @@ export interface ImportResult {
   acquisitionDiagnostics?: ImportAcquisitionDiagnostics;
 }
 
+// -----------------------------------------------------------------------------
+// Transport import helpers
+// -----------------------------------------------------------------------------
+
+interface LoadedTransports {
+  allObjects: AdkTransportObjectRef[];
+  transportDescription: string;
+  loadedTransports: AdkTransport[];
+}
+
+/** Resolve transport objects (single transport or merged view). */
+async function loadTransportObjects(
+  allTransportNumbers: string[],
+): Promise<LoadedTransports> {
+  // Keep individual transport instances for metadata writing
+  const loadedTransports: AdkTransport[] = [];
+  if (allTransportNumbers.length === 1) {
+    const transport = await AdkTransport.get(allTransportNumbers[0]);
+    loadedTransports.push(transport);
+    return {
+      allObjects: transport.objects,
+      transportDescription: transport.description,
+      loadedTransports,
+    };
+  }
+  const transports = await Promise.all(
+    allTransportNumbers.map((n) => AdkTransport.get(n)),
+  );
+  loadedTransports.push(...transports);
+  const merged = new MergedTransportView(transports);
+  return {
+    allObjects: merged.objects,
+    transportDescription:
+      transports.find((tr) => tr.description?.trim())?.description ??
+      `${allTransportNumbers[0]} (+${allTransportNumbers.length - 1} more)`,
+    loadedTransports,
+  };
+}
+
+/** Split deletion candidates (obj_func === 'D', pgmid === 'R3TR') from the
+ *  objects to import. */
+function splitDeletionObjects(
+  allObjects: AdkTransportObjectRef[],
+  applyDeletions: boolean,
+): {
+  deletionObjects: AdkTransportObjectRef[];
+  activeObjects: AdkTransportObjectRef[];
+} {
+  if (!applyDeletions) {
+    return { deletionObjects: [], activeObjects: allObjects };
+  }
+  const deletionObjects: AdkTransportObjectRef[] = [];
+  const activeObjects: AdkTransportObjectRef[] = [];
+  for (const object of allObjects) {
+    if (matchesSelector(object, { objFunc: 'D', pgmid: 'R3TR' })) {
+      deletionObjects.push(object);
+    } else {
+      activeObjects.push(object);
+    }
+  }
+  return { deletionObjects, activeObjects };
+}
+
+/** Apply object type filter to active objects. */
+function filterActiveObjects(
+  activeObjects: AdkTransportObjectRef[],
+  options: TransportImportOptions,
+): AdkTransportObjectRef[] {
+  if (!options.objectTypes || options.objectTypes.length === 0) {
+    return activeObjects;
+  }
+  const types = options.objectTypes.map((t) => t.toUpperCase());
+  const objectsToImport = activeObjects.filter(
+    (o) =>
+      types.includes(o.type.toUpperCase()) ||
+      (getClassOwnerName(o) !== undefined && types.includes('CLAS')),
+  );
+  if (options.debug) {
+    console.log(
+      `🔍 Filtered to ${objectsToImport.length} active objects by type: ${types.join(', ')}`,
+    );
+  }
+  return objectsToImport;
+}
+
+/** Write transport metadata sidecars. Returns the written file paths. */
+async function writeTransportMetadata(
+  options: TransportImportOptions,
+  allTransportNumbers: string[],
+  loadedTransports: AdkTransport[],
+  results: ImportResult['results'],
+  acquisitionDiagnostics: ImportAcquisitionDiagnostics | undefined,
+): Promise<string[]> {
+  const metadataDir = join(options.outputPath, '.adt', 'tr');
+  await mkdir(metadataDir, { recursive: true });
+
+  const pendingMetadata = loadedTransports.map((tr) => {
+    const metadata = {
+      number: tr.number,
+      owner: tr.owner,
+      desc: tr.description,
+      status: tr.status,
+      statusText: tr.statusText,
+      target: tr.target,
+      tasks: tr.tasks.map((task) => ({
+        number: task.number,
+        owner: task.owner,
+        desc: task.description,
+        status: task.status,
+        objects: task.objects.map((obj) => ({
+          pgmid: obj.pgmid,
+          type: obj.type,
+          name: obj.name,
+          obj_func: obj.objFunc,
+          uri: obj.uri,
+        })),
+      })),
+      fetchedAt: new Date().toISOString(),
+      import: {
+        format: options.format,
+        transports: allTransportNumbers,
+        success: results.success,
+        skipped: results.skipped,
+        failed: results.failed,
+        deleted: results.deleted,
+        ...(acquisitionDiagnostics ? { acquisitionDiagnostics } : {}),
+      },
+    };
+    return {
+      metadataPath: join(metadataDir, `${tr.number}.json`),
+      body: JSON.stringify(metadata, null, 2),
+    };
+  });
+  const metadataWrites = await Promise.all(
+    pendingMetadata.map((entry) =>
+      writeFile(entry.metadataPath, entry.body, 'utf-8').then(
+        () => entry,
+        (error: unknown) => ({ ...entry, error }),
+      ),
+    ),
+  );
+  const metadataFiles: string[] = [];
+  for (const entry of metadataWrites) {
+    if ('error' in entry) throw entry.error;
+    metadataFiles.push(entry.metadataPath);
+    if (options.debug) {
+      console.log(`📄 Wrote transport metadata: ${entry.metadataPath}`);
+    }
+  }
+  return metadataFiles;
+}
+
+/** Handle different response shapes from quickSearch. */
+function extractSearchObjects(searchResult: unknown): SearchObject[] {
+  const resultsAny = searchResult as Record<string, unknown>;
+  let rawObjects: SearchObject | SearchObject[] | undefined;
+  if ('objectReference' in resultsAny && resultsAny.objectReference) {
+    rawObjects = resultsAny.objectReference as SearchObject | SearchObject[];
+  } else if ('objectReferences' in resultsAny && resultsAny.objectReferences) {
+    const refs = resultsAny.objectReferences as {
+      objectReference?: SearchObject | SearchObject[];
+    };
+    rawObjects = refs.objectReference;
+  } else if ('mainObject' in resultsAny && resultsAny.mainObject) {
+    const main = resultsAny.mainObject as {
+      objectReference?: SearchObject | SearchObject[];
+    };
+    rawObjects = main.objectReference;
+  }
+  const singleObject = rawObjects ? [rawObjects] : [];
+  return Array.isArray(rawObjects) ? rawObjects : singleObject;
+}
+
 /**
  * Import Service - uses ADK architecture
  *
@@ -428,62 +622,19 @@ export class ImportService {
     }
 
     // Resolve transport objects (single or merged)
-    let allObjects: AdkTransportObjectRef[];
-    let transportDescription: string;
-    // Keep individual transport instances for metadata writing
-    const loadedTransports: AdkTransport[] = [];
-
-    if (allTransportNumbers.length === 1) {
-      const transport = await AdkTransport.get(allTransportNumbers[0]);
-      loadedTransports.push(transport);
-      allObjects = transport.objects;
-      transportDescription = transport.description;
-    } else {
-      const transports = await Promise.all(
-        allTransportNumbers.map((n) => AdkTransport.get(n)),
-      );
-      loadedTransports.push(...transports);
-      const merged = new MergedTransportView(transports);
-      allObjects = merged.objects;
-      transportDescription =
-        transports.find((tr) => tr.description?.trim())?.description ??
-        `${allTransportNumbers[0]} (+${allTransportNumbers.length - 1} more)`;
-    }
+    const { allObjects, transportDescription, loadedTransports } =
+      await loadTransportObjects(allTransportNumbers);
 
     // Fixed deletion selector: obj_func === 'D' and pgmid === 'R3TR'
     // These are not configurable in v1 (CORR/release-note entries are skipped via pgmid filter)
     const applyDeletions = options.applyDeletions !== false; // default: true
-    let deletionObjects: typeof allObjects = [];
-    let activeObjects: typeof allObjects = allObjects;
-
-    if (applyDeletions) {
-      deletionObjects = [];
-      activeObjects = [];
-
-      for (const object of allObjects) {
-        if (matchesSelector(object, { objFunc: 'D', pgmid: 'R3TR' })) {
-          deletionObjects.push(object);
-        } else {
-          activeObjects.push(object);
-        }
-      }
-    }
+    const { deletionObjects, activeObjects } = splitDeletionObjects(
+      allObjects,
+      applyDeletions,
+    );
 
     // Apply object type filter to active objects
-    let objectsToImport = activeObjects;
-    if (options.objectTypes && options.objectTypes.length > 0) {
-      const types = options.objectTypes.map((t) => t.toUpperCase());
-      objectsToImport = activeObjects.filter(
-        (o) =>
-          types.includes(o.type.toUpperCase()) ||
-          (getClassOwnerName(o) !== undefined && types.includes('CLAS')),
-      );
-      if (options.debug) {
-        console.log(
-          `🔍 Filtered to ${objectsToImport.length} active objects by type: ${types.join(', ')}`,
-        );
-      }
-    }
+    const objectsToImport = filterActiveObjects(activeObjects, options);
 
     // Track results
     const results = { success: 0, skipped: 0, failed: 0, deleted: 0 };
@@ -503,130 +654,139 @@ export class ImportService {
       configFormatOptions,
     };
 
+    const skipUnsupportedBatch = (
+      batchObjects: AdkTransportObjectRef[],
+      firstProgress: number,
+    ): void => {
+      results.skipped += batchObjects.length;
+      if (options.debug)
+        batchObjects.forEach((object, index) =>
+          console.log(
+            `  ⏭️ [${firstProgress + index}/${total}] ${object.type} ${object.name}: type not supported`,
+          ),
+        );
+    };
+
+    const handleMissingBatch = async (
+      batch: ImportObjectBatch,
+      objRef: AdkTransportObjectRef,
+      firstProgress: number,
+    ): Promise<void> => {
+      const deleteFn = plugin.instance.format.delete;
+      if (options.removeMissingObjects && typeof deleteFn === 'function') {
+        const cleanup = await cleanupMissingObjectBatch({
+          batch,
+          fallbackObject: objRef,
+          deleteFn,
+          outputPath: options.outputPath,
+          importContext,
+          firstProgress,
+          total,
+          debug: options.debug,
+        });
+        results.deleted += cleanup.deleted;
+        results.skipped += cleanup.skipped;
+        results.failed += cleanup.failed;
+        filesRemoved.push(...cleanup.filesRemoved);
+        return;
+      }
+      results.skipped += batch.objects.length;
+      if (options.debug) {
+        batch.objects.forEach((object) =>
+          console.log(
+            `  ⏭️ ${object.type} ${object.name}: not found in SAP (skipped)`,
+          ),
+        );
+      }
+    };
+
+    const importLoadedBatch = async (
+      adkObject: LoadedAdkObject,
+      batchObjects: AdkTransportObjectRef[],
+    ): Promise<void> => {
+      const result = await plugin.instance.format.import(
+        adkObject as any, // ADK object type
+        options.outputPath,
+        importContext,
+      );
+
+      if (result.success) {
+        for (const object of batchObjects) {
+          objectsByType[object.type] = (objectsByType[object.type] || 0) + 1;
+        }
+        results.success += batchObjects.length;
+        return;
+      }
+      results.failed += batchObjects.length;
+      batchObjects.forEach((object) =>
+        console.log(
+          `  ❌ ${object.type} ${object.name}: ${result.errors?.join(', ') || 'unknown error'}`,
+        ),
+      );
+    };
+
+    const processBatch = async (batch: ImportObjectBatch): Promise<void> => {
+      const { objects: batchObjects, pluginObjectType, loadRef } = batch;
+      const firstProgress = processed + 1;
+      processed += batchObjects.length;
+      const objRef = loadRef ?? batchObjects[0];
+      if (!objRef) return;
+
+      try {
+        // Check if plugin supports this object type
+        if (!plugin.instance.registry.isSupported(pluginObjectType)) {
+          skipUnsupportedBatch(batchObjects, firstProgress);
+          return;
+        }
+
+        batchObjects.forEach((object, index) =>
+          console.log(
+            `  🔄 [${firstProgress + index}/${total}] ${object.type} ${object.name}`,
+          ),
+        );
+
+        // Class-component refs share the complete CLAS repository object.
+        // Prefer its explicit R3TR ref when present and report each leaf.
+        const adkObject = await objRef.load();
+
+        if (!adkObject) {
+          await handleMissingBatch(batch, objRef, firstProgress);
+          return;
+        }
+
+        // An unloaded generic fallback proves neither acquisition nor absence.
+        // Count it as failed and never serialize its default-only fields.
+        if (adkObject instanceof AdkGenericObject && !adkObject.isLoaded) {
+          results.failed += batchObjects.length;
+          recordUnloadedGenericOmissions(acquisitionOmissions, batchObjects);
+          batchObjects.forEach((object) =>
+            console.log(
+              `  ❌ ${object.type} ${object.name}: ADK returned an unloaded generic object`,
+            ),
+          );
+          return;
+        }
+
+        // Delegate serialization once for the complete object owner.
+        await importLoadedBatch(adkObject, batchObjects);
+      } catch (error) {
+        results.failed += batchObjects.length;
+        batchObjects.forEach((object) =>
+          console.log(
+            `  ❌ ${object.type} ${object.name}: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+        );
+      }
+    };
+
     console.log(`📦 Processing ${total} active objects...`);
 
     // Process active objects in parallel
-    await Readable.from(importBatches).forEach(
-      async ({
-        objects: batchObjects,
-        pluginObjectType,
-        classOwnerName,
-        loadRef,
-      }: ImportObjectBatch) => {
-        const firstProgress = processed + 1;
-        processed += batchObjects.length;
-        const objRef = loadRef ?? batchObjects[0];
-        if (!objRef) return;
+    await Readable.from(importBatches).forEach(processBatch, {
+      concurrency: IMPORT_CONCURRENCY,
+    });
 
-        try {
-          // Check if plugin supports this object type
-          if (!plugin.instance.registry.isSupported(pluginObjectType)) {
-            results.skipped += batchObjects.length;
-            if (options.debug)
-              batchObjects.forEach((object, index) =>
-                console.log(
-                  `  ⏭️ [${firstProgress + index}/${total}] ${object.type} ${object.name}: type not supported`,
-                ),
-              );
-            return;
-          }
-
-          batchObjects.forEach((object, index) =>
-            console.log(
-              `  🔄 [${firstProgress + index}/${total}] ${object.type} ${object.name}`,
-            ),
-          );
-
-          // Class-component refs share the complete CLAS repository object.
-          // Prefer its explicit R3TR ref when present and report each leaf.
-          const adkObject = await objRef.load();
-
-          if (!adkObject) {
-            const deleteFn = plugin.instance.format.delete;
-            if (
-              options.removeMissingObjects &&
-              typeof deleteFn === 'function'
-            ) {
-              const cleanup = await cleanupMissingObjectBatch({
-                batch: {
-                  objects: batchObjects,
-                  pluginObjectType,
-                  classOwnerName,
-                  loadRef,
-                },
-                fallbackObject: objRef,
-                deleteFn,
-                outputPath: options.outputPath,
-                importContext,
-                firstProgress,
-                total,
-                debug: options.debug,
-              });
-              results.deleted += cleanup.deleted;
-              results.skipped += cleanup.skipped;
-              results.failed += cleanup.failed;
-              filesRemoved.push(...cleanup.filesRemoved);
-            } else {
-              results.skipped += batchObjects.length;
-              if (options.debug) {
-                batchObjects.forEach((object) =>
-                  console.log(
-                    `  ⏭️ ${object.type} ${object.name}: not found in SAP (skipped)`,
-                  ),
-                );
-              }
-            }
-            return;
-          }
-
-          // An unloaded generic fallback proves neither acquisition nor absence.
-          // Count it as failed and never serialize its default-only fields.
-          if (adkObject instanceof AdkGenericObject && !adkObject.isLoaded) {
-            results.failed += batchObjects.length;
-            recordUnloadedGenericOmissions(acquisitionOmissions, batchObjects);
-            batchObjects.forEach((object) =>
-              console.log(
-                `  ❌ ${object.type} ${object.name}: ADK returned an unloaded generic object`,
-              ),
-            );
-            return;
-          }
-
-          // Delegate serialization once for the complete object owner.
-          const result = await plugin.instance.format.import(
-            adkObject as any, // ADK object type
-            options.outputPath,
-            importContext,
-          );
-
-          if (result.success) {
-            for (const object of batchObjects) {
-              objectsByType[object.type] =
-                (objectsByType[object.type] || 0) + 1;
-            }
-            results.success += batchObjects.length;
-          } else {
-            results.failed += batchObjects.length;
-            batchObjects.forEach((object) =>
-              console.log(
-                `  ❌ ${object.type} ${object.name}: ${result.errors?.join(', ') || 'unknown error'}`,
-              ),
-            );
-          }
-        } catch (error) {
-          results.failed += batchObjects.length;
-          batchObjects.forEach((object) =>
-            console.log(
-              `  ❌ ${object.type} ${object.name}: ${error instanceof Error ? error.message : String(error)}`,
-            ),
-          );
-        }
-      },
-      { concurrency: IMPORT_CONCURRENCY },
-    );
-
-    // Deletion pass - remove local files for deleted objects
-    if (applyDeletions && deletionObjects.length > 0) {
+    const processDeletionPass = async (): Promise<void> => {
       console.log(`🗑️  Processing ${deletionObjects.length} deletion(s)...`);
 
       const deleteSupported =
@@ -674,6 +834,11 @@ export class ImportService {
           { concurrency: IMPORT_CONCURRENCY },
         );
       }
+    };
+
+    // Deletion pass - remove local files for deleted objects
+    if (applyDeletions && deletionObjects.length > 0) {
+      await processDeletionPass();
     }
 
     // Call afterImport hook if available
@@ -696,64 +861,15 @@ export class ImportService {
             omissions: acquisitionOmissions,
           }
         : undefined;
-    const metadataFiles: string[] = [];
-    if (options.saveTrMetadata) {
-      const metadataDir = join(options.outputPath, '.adt', 'tr');
-      await mkdir(metadataDir, { recursive: true });
-
-      const pendingMetadata = loadedTransports.map((tr) => {
-        const metadata = {
-          number: tr.number,
-          owner: tr.owner,
-          desc: tr.description,
-          status: tr.status,
-          statusText: tr.statusText,
-          target: tr.target,
-          tasks: tr.tasks.map((task) => ({
-            number: task.number,
-            owner: task.owner,
-            desc: task.description,
-            status: task.status,
-            objects: task.objects.map((obj) => ({
-              pgmid: obj.pgmid,
-              type: obj.type,
-              name: obj.name,
-              obj_func: obj.objFunc,
-              uri: obj.uri,
-            })),
-          })),
-          fetchedAt: new Date().toISOString(),
-          import: {
-            format: options.format,
-            transports: allTransportNumbers,
-            success: results.success,
-            skipped: results.skipped,
-            failed: results.failed,
-            deleted: results.deleted,
-            ...(acquisitionDiagnostics ? { acquisitionDiagnostics } : {}),
-          },
-        };
-        return {
-          metadataPath: join(metadataDir, `${tr.number}.json`),
-          body: JSON.stringify(metadata, null, 2),
-        };
-      });
-      const metadataWrites = await Promise.all(
-        pendingMetadata.map((entry) =>
-          writeFile(entry.metadataPath, entry.body, 'utf-8').then(
-            () => entry,
-            (error: unknown) => ({ ...entry, error }),
-          ),
-        ),
-      );
-      for (const entry of metadataWrites) {
-        if ('error' in entry) throw entry.error;
-        metadataFiles.push(entry.metadataPath);
-        if (options.debug) {
-          console.log(`📄 Wrote transport metadata: ${entry.metadataPath}`);
-        }
-      }
-    }
+    const metadataFiles = options.saveTrMetadata
+      ? await writeTransportMetadata(
+          options,
+          allTransportNumbers,
+          loadedTransports,
+          results,
+          acquisitionDiagnostics,
+        )
+      : [];
 
     return {
       transportNumber: allTransportNumbers[0],
@@ -944,27 +1060,7 @@ export class ImportService {
         `🔎 Raw search result keys: ${Object.keys(resultsAny).join(', ')}`,
       );
     }
-    let rawObjects: SearchObject | SearchObject[] | undefined;
-    if ('objectReference' in resultsAny && resultsAny.objectReference) {
-      rawObjects = resultsAny.objectReference as SearchObject | SearchObject[];
-    } else if (
-      'objectReferences' in resultsAny &&
-      resultsAny.objectReferences
-    ) {
-      const refs = resultsAny.objectReferences as {
-        objectReference?: SearchObject | SearchObject[];
-      };
-      rawObjects = refs.objectReference;
-    } else if ('mainObject' in resultsAny && resultsAny.mainObject) {
-      const main = resultsAny.mainObject as {
-        objectReference?: SearchObject | SearchObject[];
-      };
-      rawObjects = main.objectReference;
-    }
-    const singleObject = rawObjects ? [rawObjects] : [];
-    const objects: SearchObject[] = Array.isArray(rawObjects)
-      ? rawObjects
-      : singleObject;
+    const objects: SearchObject[] = extractSearchObjects(searchResult);
 
     // Step 2: Resolve the exact match. Object names are not globally unique
     // across ABAP object types, so a caller can select the intended type.

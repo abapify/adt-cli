@@ -286,6 +286,153 @@ async function tryAutoRefreshSafe(
   }
 }
 
+// =============================================================================
+// Shared building blocks used by BOTH getAdtClientV2 and getAdtClientV2Safe —
+// the two entry points stay behaviourally identical outside error handling.
+// =============================================================================
+
+/** Merge explicit options with the global CLI context (options take precedence). */
+function buildEffectiveOptions(options?: AdtClientV2Options) {
+  const ctx = getCliContext();
+  return {
+    sid: options?.sid ?? ctx.sid,
+    logger: options?.logger ?? ctx.logger,
+    logResponseFiles: options?.logResponseFiles ?? ctx.logResponseFiles,
+    logOutput: options?.logOutput ?? ctx.logOutput ?? './tmp/logs',
+    enableLogging: options?.enableLogging,
+    writeMetadata: options?.writeMetadata ?? false,
+    capture: options?.capture ?? false,
+    plugins: options?.plugins ?? [],
+    autoReauth: options?.autoReauth ?? true, // Enable auto-reauth by default
+    verbose: options?.verbose ?? ctx.verbose,
+  };
+}
+
+type EffectiveAdtOptions = ReturnType<typeof buildEffectiveOptions>;
+
+/** Priority: 1) user-provided logger, 2) global CLI logger, 3) console if enableLogging, 4) silent */
+function resolveLogger(options: EffectiveAdtOptions): Logger {
+  return (
+    options.logger ?? (options.enableLogging ? consoleLogger : silentLogger)
+  );
+}
+
+const AUTH_PREFIX = 'Authorization: ';
+
+function splitCookieAuth(rawCookies: string): {
+  cookieHeader: string | undefined;
+  authorizationHeader: string | undefined;
+} {
+  if (rawCookies.startsWith(AUTH_PREFIX)) {
+    // Bearer token from OAuth (e.g., BTP service key auth) — pass as
+    // Authorization header, not as a Cookie
+    return {
+      cookieHeader: undefined,
+      authorizationHeader: rawCookies.substring(AUTH_PREFIX.length),
+    };
+  }
+  return { cookieHeader: rawCookies, authorizationHeader: undefined };
+}
+
+interface SessionCredentials {
+  username: string | undefined;
+  password: string | undefined;
+  cookieHeader: string | undefined;
+  authorizationHeader: string | undefined;
+}
+
+/**
+ * Extract credentials based on auth method, refreshing an expired cookie
+ * session first. Returns the (possibly refreshed) session alongside the
+ * credentials — the refreshed session must be adopted by the caller, while
+ * `baseUrl` / `client` stay bound to the originally loaded session.
+ */
+async function extractSessionCredentials(
+  session: AuthSession,
+  refreshExpired: (session: AuthSession) => Promise<AuthSession>,
+  onUnsupportedMethod: (method: string) => never,
+): Promise<{ session: AuthSession; credentials: SessionCredentials }> {
+  if (session.auth.method === 'basic') {
+    const creds = session.auth.credentials as BasicCredentials;
+    return {
+      session,
+      credentials: {
+        username: creds.username,
+        password: creds.password,
+        cookieHeader: undefined,
+        authorizationHeader: undefined,
+      },
+    };
+  }
+  if (session.auth.method === 'cookie') {
+    // Check if session is expired - try auto-refresh first
+    if (isExpired(session)) {
+      session = await refreshExpired(session);
+    }
+    const creds = session.auth.credentials as CookieCredentials;
+    // Decode URL-encoded cookie values (e.g., %3d -> =)
+    const rawCookies = decodeURIComponent(creds.cookies);
+    return {
+      session,
+      credentials: {
+        username: undefined,
+        password: undefined,
+        ...splitCookieAuth(rawCookies),
+      },
+    };
+  }
+  return onUnsupportedMethod(session.auth.method);
+}
+
+/** Build plugin list: built-in plugins first, then user plugins. */
+function buildPluginList(
+  options: EffectiveAdtOptions,
+  logger: Logger,
+): AdtAdapterConfig['plugins'] {
+  const plugins: AdtAdapterConfig['plugins'] = [];
+
+  // Add capture plugin if enabled (must be first to capture before other plugins)
+  if (options.capture) {
+    resetCaptured();
+    plugins.push({
+      name: 'capture',
+      process: (context: ResponseContext) => {
+        setCaptured({
+          xml: context.rawText,
+          json: context.parsedData,
+        });
+        return context.parsedData;
+      },
+    });
+  }
+
+  // Add file logging plugin if enabled
+  if (options.logResponseFiles) {
+    plugins.push(
+      new FileLoggingPlugin({
+        outputDir: options.logOutput,
+        writeMetadata: options.writeMetadata,
+        logger,
+      }),
+    );
+  }
+
+  // Add console logging plugin if enabled
+  if (options.enableLogging) {
+    plugins.push(
+      new LoggingPlugin((msg, data) => {
+        const dataSuffix = data ? ` ${JSON.stringify(data)}` : '';
+        logger.info(`${msg}${dataSuffix}`);
+      }),
+    );
+  }
+
+  // Add user-provided plugins last
+  plugins.push(...options.plugins);
+
+  return plugins;
+}
+
 /**
  * Get authenticated ADT v2 client
  *
@@ -329,24 +476,10 @@ export async function getAdtClientV2(
   const headersTimeoutMs = resolveAdtHeadersTimeoutMs();
 
   // Merge with global CLI context (explicit options take precedence)
-  const ctx = getCliContext();
-  const effectiveOptions = {
-    sid: options?.sid ?? ctx.sid,
-    logger: options?.logger ?? ctx.logger,
-    logResponseFiles: options?.logResponseFiles ?? ctx.logResponseFiles,
-    logOutput: options?.logOutput ?? ctx.logOutput ?? './tmp/logs',
-    enableLogging: options?.enableLogging,
-    writeMetadata: options?.writeMetadata ?? false,
-    capture: options?.capture ?? false,
-    plugins: options?.plugins ?? [],
-    autoReauth: options?.autoReauth ?? true, // Enable auto-reauth by default
-    verbose: options?.verbose ?? ctx.verbose,
-  };
+  const effectiveOptions = buildEffectiveOptions(options);
 
   // Priority: 1) user-provided logger, 2) global CLI logger, 3) console if enableLogging, 4) silent
-  const logger =
-    effectiveOptions.logger ??
-    (effectiveOptions.enableLogging ? consoleLogger : silentLogger);
+  const logger = resolveLogger(effectiveOptions);
   const progress = createProgressReporter({
     compact: !effectiveOptions.verbose,
     logger,
@@ -363,78 +496,17 @@ export async function getAdtClientV2(
   // Extract credentials based on auth method
   const baseUrl = session.host;
   const client = session.client;
-  let username: string | undefined;
-  let password: string | undefined;
-  let cookieHeader: string | undefined;
-  let authorizationHeader: string | undefined;
-
-  if (session.auth.method === 'basic') {
-    const creds = session.auth.credentials as BasicCredentials;
-    username = creds.username;
-    password = creds.password;
-  } else if (session.auth.method === 'cookie') {
-    // Check if session is expired - try auto-refresh first
-    if (isExpired(session)) {
-      session = await tryAutoRefresh(session, effectiveOptions.sid, progress);
-    }
-
-    const creds = session.auth.credentials as CookieCredentials;
-    // Decode URL-encoded cookie values (e.g., %3d -> =)
-    const rawCookies = decodeURIComponent(creds.cookies);
-
-    const AUTH_PREFIX = 'Authorization: ';
-    if (rawCookies.startsWith(AUTH_PREFIX)) {
-      // Bearer token from OAuth (e.g., BTP service key auth) — pass as
-      // Authorization header, not as a Cookie
-      authorizationHeader = rawCookies.substring(AUTH_PREFIX.length);
-    } else {
-      cookieHeader = rawCookies;
-    }
-  } else {
-    reportUnsupportedAuthAndExit(session.auth.method);
-  }
+  const extracted = await extractSessionCredentials(
+    session,
+    (s) => tryAutoRefresh(s, effectiveOptions.sid, progress),
+    reportUnsupportedAuthAndExit,
+  );
+  session = extracted.session;
+  const { username, password, cookieHeader, authorizationHeader } =
+    extracted.credentials;
 
   // Build plugin list: built-in plugins first, then user plugins
-  const plugins: AdtAdapterConfig['plugins'] = [];
-
-  // Add capture plugin if enabled (must be first to capture before other plugins)
-  if (effectiveOptions.capture) {
-    resetCaptured();
-    plugins.push({
-      name: 'capture',
-      process: (context: ResponseContext) => {
-        setCaptured({
-          xml: context.rawText,
-          json: context.parsedData,
-        });
-        return context.parsedData;
-      },
-    });
-  }
-
-  // Add file logging plugin if enabled
-  if (effectiveOptions.logResponseFiles) {
-    plugins.push(
-      new FileLoggingPlugin({
-        outputDir: effectiveOptions.logOutput,
-        writeMetadata: effectiveOptions.writeMetadata,
-        logger,
-      }),
-    );
-  }
-
-  // Add console logging plugin if enabled
-  if (effectiveOptions.enableLogging) {
-    plugins.push(
-      new LoggingPlugin((msg, data) => {
-        const dataSuffix = data ? ` ${JSON.stringify(data)}` : '';
-        logger.info(`${msg}${dataSuffix}`);
-      }),
-    );
-  }
-
-  // Add user-provided plugins last
-  plugins.push(...effectiveOptions.plugins);
+  const plugins = buildPluginList(effectiveOptions, logger);
 
   // Create onSessionExpired callback for automatic SAML re-authentication
   // Only applicable for cookie-based auth with a plugin that can refresh
@@ -559,23 +631,9 @@ export async function getAdtClientV2Safe(
   // any expired-session refresh or authentication work can send a request.
   const adtHeadersTimeout = resolveAdtHeadersTimeoutMs();
 
-  const ctx = getCliContext();
-  const effectiveOptions = {
-    sid: options?.sid ?? ctx.sid,
-    logger: options?.logger ?? ctx.logger,
-    logResponseFiles: options?.logResponseFiles ?? ctx.logResponseFiles,
-    logOutput: options?.logOutput ?? ctx.logOutput ?? './tmp/logs',
-    enableLogging: options?.enableLogging,
-    writeMetadata: options?.writeMetadata ?? false,
-    capture: options?.capture ?? false,
-    plugins: options?.plugins ?? [],
-    autoReauth: options?.autoReauth ?? true,
-    verbose: options?.verbose ?? ctx.verbose,
-  };
+  const effectiveOptions = buildEffectiveOptions(options);
 
-  const logger =
-    effectiveOptions.logger ??
-    (effectiveOptions.enableLogging ? consoleLogger : silentLogger);
+  const logger = resolveLogger(effectiveOptions);
 
   let session = loadAuthSession(effectiveOptions.sid);
 
@@ -597,74 +655,23 @@ export async function getAdtClientV2Safe(
 
   const baseUrl = session.host;
   const client = session.client;
-  let username: string | undefined;
-  let password: string | undefined;
-  let cookieHeader: string | undefined;
-  let authorizationHeader: string | undefined;
-
-  if (session.auth.method === 'basic') {
-    const creds = session.auth.credentials as BasicCredentials;
-    username = creds.username;
-    password = creds.password;
-  } else if (session.auth.method === 'cookie') {
-    if (isExpired(session)) {
-      session = await tryAutoRefreshSafe(session, effectiveOptions.sid);
-    }
-
-    const creds = session.auth.credentials as CookieCredentials;
-    const rawCookies = decodeURIComponent(creds.cookies);
-
-    const AUTH_PREFIX = 'Authorization: ';
-    if (rawCookies.startsWith(AUTH_PREFIX)) {
-      authorizationHeader = rawCookies.substring(AUTH_PREFIX.length);
-    } else {
-      cookieHeader = rawCookies;
-    }
-  } else {
-    throw new AdtAuthError(
-      'UNSUPPORTED_AUTH_METHOD',
-      `Unsupported auth method: ${session.auth.method}`,
-      effectiveOptions.sid,
-    );
-  }
+  const extracted = await extractSessionCredentials(
+    session,
+    (s) => tryAutoRefreshSafe(s, effectiveOptions.sid),
+    (method) => {
+      throw new AdtAuthError(
+        'UNSUPPORTED_AUTH_METHOD',
+        `Unsupported auth method: ${method}`,
+        effectiveOptions.sid,
+      );
+    },
+  );
+  session = extracted.session;
+  const { username, password, cookieHeader, authorizationHeader } =
+    extracted.credentials;
 
   // Plugin list — identical to getAdtClientV2
-  const plugins: AdtAdapterConfig['plugins'] = [];
-
-  if (effectiveOptions.capture) {
-    resetCaptured();
-    plugins.push({
-      name: 'capture',
-      process: (context: ResponseContext) => {
-        setCaptured({
-          xml: context.rawText,
-          json: context.parsedData,
-        });
-        return context.parsedData;
-      },
-    });
-  }
-
-  if (effectiveOptions.logResponseFiles) {
-    plugins.push(
-      new FileLoggingPlugin({
-        outputDir: effectiveOptions.logOutput,
-        writeMetadata: effectiveOptions.writeMetadata,
-        logger,
-      }),
-    );
-  }
-
-  if (effectiveOptions.enableLogging) {
-    plugins.push(
-      new LoggingPlugin((msg, data) => {
-        const dataSuffix = data ? ` ${JSON.stringify(data)}` : '';
-        logger.info(`${msg}${dataSuffix}`);
-      }),
-    );
-  }
-
-  plugins.push(...effectiveOptions.plugins);
+  const plugins = buildPluginList(effectiveOptions, logger);
 
   // onSessionExpired callback — throws AdtAuthError, no console.error
   let onSessionExpired: (() => Promise<string>) | undefined;
