@@ -1,4 +1,4 @@
-import type { AbapNode, Comment, Identifier } from './base';
+import type { AbapNode, Comment } from './base';
 import { AbapAstError } from './errors';
 import type { Expression, NamedArg } from './expressions';
 import type { TypeRef } from './types';
@@ -52,14 +52,14 @@ export function assign(input: {
 export interface Call extends AbapNode {
   readonly kind: 'Call';
   readonly receiver: Expression | undefined;
-  readonly method: Identifier;
+  readonly method: string;
   readonly callKind: 'static' | 'instance';
   readonly args: readonly NamedArg[];
 }
 
 export function call(input: {
   receiver?: Expression;
-  method: Identifier;
+  method: string;
   callKind: 'static' | 'instance';
   args?: readonly NamedArg[];
 }): Call {
@@ -149,8 +149,8 @@ export interface Loop extends AbapNode {
   readonly kind: 'Loop';
   readonly table: Expression;
   readonly binding:
-    | { readonly bindKind: 'into'; readonly target: Identifier }
-    | { readonly bindKind: 'assigning'; readonly fieldSymbol: Identifier };
+    | { readonly bindKind: 'into'; readonly target: string }
+    | { readonly bindKind: 'assigning'; readonly fieldSymbol: string };
   readonly body: readonly Statement[];
 }
 
@@ -217,7 +217,7 @@ export function returnStmt(input?: {
 /** CATCH clause inside a TRY. */
 export interface CatchClause {
   readonly exceptionTypes: readonly TypeRef[];
-  readonly into?: Identifier;
+  readonly into?: string;
   readonly body: readonly Statement[];
 }
 
@@ -316,8 +316,8 @@ export interface Read extends AbapNode {
   readonly kind: 'Read';
   readonly table: Expression;
   readonly binding:
-    | { readonly bindKind: 'into'; readonly target: Identifier }
-    | { readonly bindKind: 'assigning'; readonly fieldSymbol: Identifier };
+    | { readonly bindKind: 'into'; readonly target: string }
+    | { readonly bindKind: 'assigning'; readonly fieldSymbol: string };
   readonly withKey?: readonly NamedArg[];
   readonly index?: Expression;
 }

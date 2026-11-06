@@ -114,47 +114,45 @@ export const ctsSearchCommand = new Command('search')
 
       if (options.json) {
         console.log(JSON.stringify(transports, null, 2));
+      } else if (transports.length === 0) {
+        console.log('\n📭 No transports found matching the criteria');
       } else {
-        if (transports.length === 0) {
-          console.log('\n📭 No transports found matching the criteria');
-        } else {
-          // Group by status for display
-          const modifiable = displayTransports.filter(
-            (t: CtsReqHeader) => t.TRSTATUS === 'D',
+        // Group by status for display
+        const modifiable = displayTransports.filter(
+          (t: CtsReqHeader) => t.TRSTATUS === 'D',
+        );
+        const released = displayTransports.filter(
+          (t: CtsReqHeader) => t.TRSTATUS === 'R',
+        );
+        const other = displayTransports.filter(
+          (t: CtsReqHeader) => t.TRSTATUS !== 'D' && t.TRSTATUS !== 'R',
+        );
+
+        if (modifiable.length > 0) {
+          console.log(`\n📂 Modifiable (${modifiable.length})`);
+          modifiable.forEach((tr: CtsReqHeader, i: number) =>
+            formatTransport(tr, i, modifiable.length),
           );
-          const released = displayTransports.filter(
-            (t: CtsReqHeader) => t.TRSTATUS === 'R',
+        }
+
+        if (released.length > 0) {
+          console.log(`\n📁 Released (${released.length})`);
+          released.forEach((tr: CtsReqHeader, i: number) =>
+            formatTransport(tr, i, released.length),
           );
-          const other = displayTransports.filter(
-            (t: CtsReqHeader) => t.TRSTATUS !== 'D' && t.TRSTATUS !== 'R',
+        }
+
+        if (other.length > 0) {
+          console.log(`\n📋 Other (${other.length})`);
+          other.forEach((tr: CtsReqHeader, i: number) =>
+            formatTransport(tr, i, other.length),
           );
+        }
 
-          if (modifiable.length > 0) {
-            console.log(`\n📂 Modifiable (${modifiable.length})`);
-            modifiable.forEach((tr: CtsReqHeader, i: number) =>
-              formatTransport(tr, i, modifiable.length),
-            );
-          }
-
-          if (released.length > 0) {
-            console.log(`\n📁 Released (${released.length})`);
-            released.forEach((tr: CtsReqHeader, i: number) =>
-              formatTransport(tr, i, released.length),
-            );
-          }
-
-          if (other.length > 0) {
-            console.log(`\n📋 Other (${other.length})`);
-            other.forEach((tr: CtsReqHeader, i: number) =>
-              formatTransport(tr, i, other.length),
-            );
-          }
-
-          if (transports.length > maxResults) {
-            console.log(
-              `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`,
-            );
-          }
+        if (transports.length > maxResults) {
+          console.log(
+            `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`,
+          );
         }
       }
 

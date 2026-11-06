@@ -233,12 +233,12 @@ function groupEntries(entries: readonly TransportSourceManifestEntry[]): Array<{
     grouped.set(identity.canonical, group);
   }
   return [...grouped.values()]
-    .map((group) => ({
-      ...group,
-      entries: group.entries.sort((left, right) =>
+    .map((group) => {
+      group.entries.sort((left, right) =>
         compareStrings(left.component.id, right.component.id),
-      ),
-    }))
+      );
+      return { ...group, entries: group.entries };
+    })
     .sort((left, right) =>
       compareStrings(left.identity.canonical, right.identity.canonical),
     );
@@ -399,9 +399,10 @@ async function exactHeadFastPath(
     }
     ownedPaths.push(...descriptor.ownedFiles.map((file) => file.path));
   }
+  ownedPaths.sort(compareStrings);
   return {
     descriptorPaths: [...transportPaths, ...objectPaths].sort(compareStrings),
-    ownedPaths: ownedPaths.sort(compareStrings),
+    ownedPaths,
     scopeTransports,
   };
 }
@@ -739,9 +740,8 @@ async function buildMaterializedResult(
     files: materialized.files,
     previous: pending.previous,
   });
-  const files = preserved.files.sort((left, right) =>
-    compareStrings(left.path, right.path),
-  );
+  preserved.files.sort((left, right) => compareStrings(left.path, right.path));
+  const files = preserved.files;
   const desired: DesiredFile[] = files.map((file) => ({
     ...file,
     owner: identity.canonical,
@@ -1159,6 +1159,17 @@ function inexactEntries(
   return inexact;
 }
 
+function toSkipped(entry: TransportSourceManifestEntry): FlowSkippedObject {
+  return {
+    object: `${entry.object.type}/${entry.object.name}`,
+    component: entry.component.id,
+    diagnostic: omissionDiagnostic(entry),
+    ...(entry.sourceTransport
+      ? { sourceTransport: entry.sourceTransport }
+      : {}),
+  };
+}
+
 async function filterSkippedByApplicationComponent(
   entries: readonly TransportSourceManifestEntry[],
   ctx: FlowContext,
@@ -1224,16 +1235,6 @@ async function skippedInexactEntries(
   limiter: Limiter,
   hasApplicationComponentFilter: boolean,
 ): Promise<FlowCheckoutResult['skipped']> {
-  const toSkipped = (
-    entry: TransportSourceManifestEntry,
-  ): FlowSkippedObject => ({
-    object: `${entry.object.type}/${entry.object.name}`,
-    component: entry.component.id,
-    diagnostic: omissionDiagnostic(entry),
-    ...(entry.sourceTransport
-      ? { sourceTransport: entry.sourceTransport }
-      : {}),
-  });
   if (!hasApplicationComponentFilter) {
     return entries.map(toSkipped);
   }
@@ -1247,16 +1248,6 @@ async function unsupportedEntries(
   hasApplicationComponentFilter: boolean,
 ): Promise<FlowCheckoutResult['skipped']> {
   const unsupported = entries.filter(isUnsupportedEntry);
-  const toSkipped = (
-    entry: TransportSourceManifestEntry,
-  ): FlowSkippedObject => ({
-    object: `${entry.object.type}/${entry.object.name}`,
-    component: entry.component.id,
-    diagnostic: omissionDiagnostic(entry),
-    ...(entry.sourceTransport
-      ? { sourceTransport: entry.sourceTransport }
-      : {}),
-  });
   if (!hasApplicationComponentFilter) {
     return unsupported.map(toSkipped);
   }

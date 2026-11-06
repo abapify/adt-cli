@@ -256,13 +256,14 @@ type ViewJson = {
   error?: { code?: string };
 };
 
+const fixMode = fix ? 'fix' : 'check';
 const report: Report = {
   name,
   version: pkg.version,
   access: pkg.publishConfig?.access ?? null,
   registry,
   scope,
-  mode: prepare ? 'prepare' : fix ? 'fix' : 'check',
+  mode: prepare ? 'prepare' : fixMode,
   checks: {},
   fixes: [],
   readyForCi: false,
@@ -359,13 +360,15 @@ if (report.checks.exists === true && name) {
 
   // --fix: flip visibility to public if npm reports it as private.
   if (fix) {
+    const stringStatus =
+      typeof report.checks.accessStatus === 'string'
+        ? report.checks.accessStatus
+        : undefined;
     const currentStatus =
       typeof report.checks.accessStatus === 'object' &&
       report.checks.accessStatus !== null
         ? (report.checks.accessStatus as Record<string, string>)[name]
-        : typeof report.checks.accessStatus === 'string'
-          ? report.checks.accessStatus
-          : undefined;
+        : stringStatus;
     if (currentStatus && currentStatus !== 'public') {
       const setPub = npm(['access', 'set', 'status=public', name]);
       if (setPub.code === 0) {
@@ -510,35 +513,33 @@ if (prepare && name) {
 
     // 6b. register the trusted publisher.
     // `npm trust` does NOT accept `--json`, so disable it for these calls.
-    const trustArgs =
-      trustProvider === 'github'
-        ? [
-            'trust',
-            'github',
-            name,
-            '--file',
-            trustWorkflow,
-            '--repo',
-            trustRepo,
-            '--allow-publish',
-            '--yes',
-          ]
-        : trustProvider === 'gitlab'
-          ? [
-              'trust',
-              'gitlab',
-              name,
-              '--file',
-              trustWorkflow,
-              // `npm trust gitlab` takes a single --project=<namespace>/<project>
-              // identifier; it does NOT accept separate --namespace + --project.
-              '--project',
-              trustNamespace && trustProject
-                ? `${trustNamespace}/${trustProject}`
-                : trustProject,
-              '--yes',
-            ]
-          : null;
+    const githubTrustArgs = [
+      'trust',
+      'github',
+      name,
+      '--file',
+      trustWorkflow,
+      '--repo',
+      trustRepo,
+      '--allow-publish',
+      '--yes',
+    ];
+    const gitlabTrustArgs = [
+      'trust',
+      'gitlab',
+      name,
+      '--file',
+      trustWorkflow,
+      // `npm trust gitlab` takes a single --project=<namespace>/<project>
+      // identifier; it does NOT accept separate --namespace + --project.
+      '--project',
+      trustNamespace && trustProject
+        ? `${trustNamespace}/${trustProject}`
+        : trustProject,
+      '--yes',
+    ];
+    const gitlabArgs = trustProvider === 'gitlab' ? gitlabTrustArgs : null;
+    const trustArgs = trustProvider === 'github' ? githubTrustArgs : gitlabArgs;
 
     if (!trustArgs) {
       report.problems.push(
@@ -587,12 +588,12 @@ report.readyForCi = Boolean(
 // Human summary
 const hasProblems = report.problems.length > 0;
 const symbol = hasProblems ? '✗' : '✓';
+const missingTag =
+  report.checks.exists === false ? 'not on npm' : 'state unknown';
 const existsTag =
   report.checks.exists === true
     ? `on npm @ ${report.checks.latestVersion as string}`
-    : report.checks.exists === false
-      ? 'not on npm'
-      : 'state unknown';
+    : missingTag;
 const fixesSummary =
   report.fixes.length > 0 ? `  + ${report.fixes.join(', ')}` : '';
 const problemsSummary =

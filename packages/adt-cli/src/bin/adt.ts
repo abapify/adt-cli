@@ -5,7 +5,9 @@ process.env.ADT_CLI_MODE = 'true';
 
 import { main } from '../lib/cli';
 
-main().catch((error) => {
-  console.error('❌ CLI Error:', error.message);
+try {
+  await main();
+} catch (error) {
+  console.error('❌ CLI Error:', (error as Error).message);
   process.exit(1);
-});
+}

@@ -1500,14 +1500,22 @@ function addAttr(
   }
 }
 
+function addPlainAttr(
+  attrs: string[],
+  name: string,
+  value: boolean | number | string | undefined,
+): void {
+  if (value !== undefined) {
+    attrs.push(`${name}="${value}"`);
+  }
+}
+
 function addBoolAttr(
   attrs: string[],
   name: string,
   value: boolean | undefined,
 ): void {
-  if (value !== undefined) {
-    attrs.push(`${name}="${value}"`);
-  }
+  addPlainAttr(attrs, name, value);
 }
 
 function addOccursAttr(
@@ -1515,9 +1523,7 @@ function addOccursAttr(
   name: string,
   value: number | string | undefined,
 ): void {
-  if (value !== undefined) {
-    attrs.push(`${name}="${value}"`);
-  }
+  addPlainAttr(attrs, name, value);
 }
 
 function escapeXml(str: string): string {

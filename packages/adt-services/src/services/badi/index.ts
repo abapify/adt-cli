@@ -211,13 +211,13 @@ function extractSearchObjects(results: unknown): Array<{
 
   if (record.objectReferences && typeof record.objectReferences === 'object') {
     const refs = record.objectReferences as {
-      objectReference?: typeof raw;
+      objectReference: typeof raw;
     };
     raw = refs.objectReference;
   } else if (record.objectReference) {
     raw = record.objectReference as typeof raw;
   } else if (record.mainObject && typeof record.mainObject === 'object') {
-    const main = record.mainObject as { objectReference?: typeof raw };
+    const main = record.mainObject as { objectReference: typeof raw };
     raw = main.objectReference;
   }
 

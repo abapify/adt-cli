@@ -181,9 +181,7 @@ function statementLine(entry: StatementEntry): number | null {
 
 // ─── Mapping: (class_name, method_name) → lines ───────────────────────
 
-type MethodKey = string;
-
-function methodKey(cls: string, method: string): MethodKey {
+function methodKey(cls: string, method: string): string {
   return `${cls}.${method}`;
 }
 
@@ -194,8 +192,8 @@ interface LineHit {
 
 function buildMethodLinesMapping(
   statements: AcoverageStatementsSchema | undefined,
-): Map<MethodKey, LineHit[]> {
-  const result = new Map<MethodKey, LineHit[]>();
+): Map<string, LineHit[]> {
+  const result = new Map<string, LineHit[]>();
   const responses: StatementResponse[] =
     (statements?.statementsBulkResponse
       ?.statementsResponse as unknown as StatementResponse[]) ?? [];
@@ -255,7 +253,7 @@ function sourcefilePathFor(
 function emitClass(
   classNode: CoverageNode,
   sourcePath: string,
-  lineMap: Map<MethodKey, LineHit[]>,
+  lineMap: Map<string, LineHit[]>,
   indentLevel: number,
   out: string[],
 ): void {
@@ -309,7 +307,7 @@ function emitClass(
 
 function emitPackage(
   packageNode: CoverageNode,
-  lineMap: Map<MethodKey, LineHit[]>,
+  lineMap: Map<string, LineHit[]>,
   resolver: CoverageSourcePathResolver | undefined,
   indentLevel: number,
   out: string[],

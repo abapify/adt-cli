@@ -47,7 +47,8 @@ function normalizeStartingFolder(value: string | undefined): string {
   const normalized = (value || 'src')
     .trim()
     .replaceAll('\\', '/')
-    .replace(/^\/+|\/+$/g, '');
+    .replace(/^\/+/, '')
+    .replace(/(?<!\/)\/+$/, '');
   return normalized || 'src';
 }
 
@@ -71,10 +72,10 @@ function parseAbapGitMetadata(root: string): AbapGitMetadata | undefined {
     const xml = readFileSync(metadataPath, 'utf8');
     return {
       folderLogic: parseFolderLogic(
-        xml.match(/<FOLDER_LOGIC>\s*([^<]+?)\s*<\/FOLDER_LOGIC>/i)?.[1],
+        xml.match(/<FOLDER_LOGIC>([^<]*)<\/FOLDER_LOGIC>/i)?.[1],
       ),
       startingFolder: normalizeStartingFolder(
-        xml.match(/<STARTING_FOLDER>\s*([^<]+?)\s*<\/STARTING_FOLDER>/i)?.[1],
+        xml.match(/<STARTING_FOLDER>([^<]*)<\/STARTING_FOLDER>/i)?.[1],
       ),
     };
   } catch {

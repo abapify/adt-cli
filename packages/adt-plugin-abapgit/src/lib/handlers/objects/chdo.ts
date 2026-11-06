@@ -45,6 +45,17 @@ export const changeDocumentObjectHandler = createHandler<
 
   toAbapGit: (obj) => {
     const name = String(obj.name ?? '').toUpperCase();
+    const objectTextFallback = obj.description
+      ? {
+          TCDOBTS: [
+            {
+              SPRAS: isoToSapLang(obj.masterLanguage || obj.language),
+              OBJECT: name,
+              OBTEXT: obj.description,
+            },
+          ],
+        }
+      : undefined;
     return {
       CHDO: {
         REPORTS_GENERATED: obj.generatedReports?.length
@@ -78,17 +89,7 @@ export const changeDocumentObjectHandler = createHandler<
                 OBTEXT: t.text,
               })),
             }
-          : obj.description
-            ? {
-                TCDOBTS: [
-                  {
-                    SPRAS: isoToSapLang(obj.masterLanguage || obj.language),
-                    OBJECT: name,
-                    OBTEXT: obj.description,
-                  },
-                ],
-              }
-            : undefined,
+          : objectTextFallback,
       },
     };
   },

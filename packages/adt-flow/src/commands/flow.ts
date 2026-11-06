@@ -179,7 +179,9 @@ function partialReportPath(
         // lstat failed — path doesn't exist at all, continue walking up.
       }
       try {
-        realParent = resolve(realpathSync(current), ...segments.reverse());
+        const realCurrent = realpathSync(current);
+        segments.reverse();
+        realParent = resolve(realCurrent, ...segments);
         break;
       } catch {
         segments.push(basename(current));

@@ -231,4 +231,4 @@ async function demo() {
 }
 
 // Run the demo (commented out - this is just an example)
-void demo();
+await demo();

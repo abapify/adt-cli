@@ -682,17 +682,18 @@ export class ImportService {
     }
 
     // Write transport metadata sidecars if requested
+    acquisitionOmissions.sort((a, b) =>
+      [a.object.pgmid, a.object.type, a.object.name]
+        .join('/')
+        .localeCompare(
+          [b.object.pgmid, b.object.type, b.object.name].join('/'),
+        ),
+    );
     const acquisitionDiagnostics: ImportAcquisitionDiagnostics | undefined =
       acquisitionOmissions.length
         ? {
             schemaVersion: 1,
-            omissions: acquisitionOmissions.sort((a, b) =>
-              [a.object.pgmid, a.object.type, a.object.name]
-                .join('/')
-                .localeCompare(
-                  [b.object.pgmid, b.object.type, b.object.name].join('/'),
-                ),
-            ),
+            omissions: acquisitionOmissions,
           }
         : undefined;
     const metadataFiles: string[] = [];
@@ -960,11 +961,10 @@ export class ImportService {
       };
       rawObjects = main.objectReference;
     }
-    const objects: SearchObject[] = rawObjects
-      ? Array.isArray(rawObjects)
-        ? rawObjects
-        : [rawObjects]
-      : [];
+    const singleObject = rawObjects ? [rawObjects] : [];
+    const objects: SearchObject[] = Array.isArray(rawObjects)
+      ? rawObjects
+      : singleObject;
 
     // Step 2: Resolve the exact match. Object names are not globally unique
     // across ABAP object types, so a caller can select the intended type.

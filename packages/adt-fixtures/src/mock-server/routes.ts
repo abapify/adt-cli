@@ -1067,9 +1067,7 @@ export function matchRoute(
   // Endpoint: /sap/bc/adt/vit/wb/object_type/{type}/object_name/{name}
   if (
     m === 'GET' &&
-    /^\/sap\/bc\/adt\/vit\/wb\/object_type\/sxsdxd\/object_name\//.test(
-      pathname,
-    )
+    pathname.startsWith('/sap/bc/adt/vit/wb/object_type/sxsdxd/object_name/')
   ) {
     return {
       status: 200,
@@ -1079,9 +1077,7 @@ export function matchRoute(
   }
   if (
     m === 'GET' &&
-    /^\/sap\/bc\/adt\/vit\/wb\/object_type\/sxcixi\/object_name\//.test(
-      pathname,
-    )
+    pathname.startsWith('/sap/bc/adt/vit/wb/object_type/sxcixi/object_name/')
   ) {
     const body = pathname.includes('ze_mock_classic_badi_impl_b')
       ? f.vitWbSxcixiSingleB
@@ -1483,12 +1479,11 @@ export function matchRoute(
       f.transportCreate,
       'number',
     );
-    const body =
-      requested === requestNumber
-        ? f.transportSingle
-        : requested === createdRequestNumber
-          ? f.transportCreate
-          : f.transportTaskResponses.get(requested);
+    const createdBody =
+      requested === createdRequestNumber
+        ? f.transportCreate
+        : f.transportTaskResponses.get(requested);
+    const body = requested === requestNumber ? f.transportSingle : createdBody;
     if (!body) return { status: 404, body: '', contentType: 'text/plain' };
     return {
       status: 200,

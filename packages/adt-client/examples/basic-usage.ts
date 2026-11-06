@@ -75,7 +75,11 @@ async function demo() {
 
 // Run demo if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  demo().catch(console.error);
+  try {
+    await demo();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export { demo };

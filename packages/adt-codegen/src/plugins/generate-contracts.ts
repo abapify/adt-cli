@@ -215,7 +215,7 @@ function parseTemplate(template: string): {
 
   const path = template.replace(/\{\?[^}]+\}/, '');
 
-  const pathMatches = path.matchAll(/\{([^}]+)\}/g);
+  const pathMatches = path.matchAll(/(?<!\{)\{([^}]+)\}/g);
   for (const match of pathMatches) {
     pathParams.push(sanitizeParamName(match[1]));
   }
@@ -364,7 +364,7 @@ function generateMethodCode(method: EndpointMethod, indent: string): string {
     pathExpr =
       '`' +
       path.replaceAll(
-        /\{([^}]+)\}/g,
+        /(?<!\{)\{([^}]+)\}/g,
         (_, p) => '${' + sanitizeParamName(p) + '}',
       ) +
       '`';
@@ -635,9 +635,8 @@ function generateIndexFile(
     a[0].localeCompare(b[0]),
   )) {
     code += '// ' + dir + '\n';
-    for (const item of items.sort((a, b) =>
-      a.contractName.localeCompare(b.contractName),
-    )) {
+    items.sort((a, b) => a.contractName.localeCompare(b.contractName));
+    for (const item of items) {
       if (item.exportName === item.contractName + 'Contract') {
         code +=
           'export { ' +
@@ -676,7 +675,8 @@ function generateUnsupportedEndpointsDoc(
     'These endpoints have generated contracts in `src/generated/adt/`:\n\n';
   doc += '| Endpoint | Title | Category |\n';
   doc += '|----------|-------|----------|\n';
-  for (const e of enabled.sort((a, b) => a.href.localeCompare(b.href))) {
+  enabled.sort((a, b) => a.href.localeCompare(b.href));
+  for (const e of enabled) {
     doc += '| `' + e.href + '` | ' + e.title + ' | ' + e.category + ' |\n';
   }
 
@@ -711,7 +711,8 @@ function generateUnsupportedEndpointsDoc(
     doc += '<details>\n<summary>Click to expand</summary>\n\n';
     doc += '| Endpoint | Title |\n';
     doc += '|----------|-------|\n';
-    for (const e of endpoints.sort((a, b) => a.href.localeCompare(b.href))) {
+    endpoints.sort((a, b) => a.href.localeCompare(b.href));
+    for (const e of endpoints) {
       doc += '| `' + e.href + '` | ' + e.title + ' |\n';
     }
     doc += '\n</details>\n\n';

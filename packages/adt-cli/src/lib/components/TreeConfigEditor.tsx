@@ -106,6 +106,10 @@ function TextField({
   // When editing, show the buffer; otherwise show the value
   const displayText = editing ? (editBuffer ?? '') : value;
   const displayValue = displayText.padEnd(width, ' ').slice(0, width);
+  const focusBackground = focused ? 'blue' : 'gray';
+  const backgroundColor = editing ? 'yellow' : focusBackground;
+  const focusColor = focused ? 'white' : 'black';
+  const color = editing ? 'black' : focusColor;
   return (
     <Box>
       <Text color={focused ? 'cyan' : 'gray'}>
@@ -113,8 +117,8 @@ function TextField({
         {label}:{' '}
       </Text>
       <Text
-        backgroundColor={editing ? 'yellow' : focused ? 'blue' : 'gray'}
-        color={editing ? 'black' : focused ? 'white' : 'black'}
+        backgroundColor={backgroundColor}
+        color={color}
       >
         {displayValue}
       </Text>
@@ -122,6 +126,12 @@ function TextField({
       {focused && !editing && <Text color="gray"> [Enter to edit]</Text>}
     </Box>
   );
+}
+
+/** Color for a dropdown option row: highlighted, selected or default. */
+function optionColor(isHighlighted: boolean, isSelected: boolean): string {
+  if (isHighlighted) return 'white';
+  return isSelected ? 'cyan' : 'gray';
 }
 
 // Select field component with dropdown support
@@ -142,6 +152,10 @@ function SelectField({
 }>) {
   const selectedOption = options.find((o) => o.value === value);
   const displayLabel = selectedOption?.label || 'Select a date';
+  const focusBackground = focused ? 'blue' : 'gray';
+  const fieldBackground = expanded ? 'yellow' : focusBackground;
+  const focusColor = focused ? 'white' : 'black';
+  const fieldColor = expanded ? 'black' : focusColor;
 
   return (
     <Box flexDirection="column">
@@ -151,8 +165,8 @@ function SelectField({
           {label}:{' '}
         </Text>
         <Text
-          backgroundColor={expanded ? 'yellow' : focused ? 'blue' : 'gray'}
-          color={expanded ? 'black' : focused ? 'white' : 'black'}
+          backgroundColor={fieldBackground}
+          color={fieldColor}
         >
           {' '}
           {displayLabel.padEnd(20, ' ')}{' '}
@@ -169,13 +183,10 @@ function SelectField({
             <Box key={opt.value}>
               <Text
                 backgroundColor={idx === highlightedIndex ? 'blue' : undefined}
-                color={
-                  idx === highlightedIndex
-                    ? 'white'
-                    : opt.value === value
-                      ? 'cyan'
-                      : 'gray'
-                }
+                color={optionColor(
+                  idx === highlightedIndex,
+                  opt.value === value,
+                )}
                 bold={opt.value === value}
               >
                 {idx === highlightedIndex ? '▶ ' : '  '}

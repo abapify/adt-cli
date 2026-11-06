@@ -33,6 +33,16 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
 
       const name = String(obj.name ?? '').toUpperCase();
       const lang = isoToSapLang(obj.masterLanguage || obj.language);
+      const handlerClassFallback = obj.handlerClass
+        ? {
+            UCONSERVHANDLER: {
+              ID: name,
+              VERSION: 'A',
+              SERVICEORDER: obj.serviceOrder ?? '01',
+              SERVICEHANDLER: obj.handlerClass,
+            },
+          }
+        : undefined;
       return {
         HTTPID: name,
         HTTPTEXT: {
@@ -50,26 +60,14 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
                 SERVICEHANDLER: h.handler,
               })),
             }
-          : obj.handlerClass
-            ? {
-                UCONSERVHANDLER: {
-                  ID: name,
-                  VERSION: 'A',
-                  SERVICEORDER: obj.serviceOrder ?? '01',
-                  SERVICEHANDLER: obj.handlerClass,
-                },
-              }
-            : undefined,
+          : handlerClassFallback,
       };
     },
 
     fromAbapGit: ({ HTTPID, HTTPTEXT, HTTPHDL }) => {
       const handler = HTTPHDL?.UCONSERVHANDLER;
-      const items = handler
-        ? Array.isArray(handler)
-          ? handler
-          : [handler]
-        : [];
+      const handlerList = Array.isArray(handler) ? handler : [handler];
+      const items = handler ? handlerList : [];
       const firstHandler = items[0];
       return {
         name: (HTTPID ?? HTTPTEXT?.ID ?? '').toUpperCase(),

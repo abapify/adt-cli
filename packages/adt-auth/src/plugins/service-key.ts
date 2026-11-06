@@ -23,16 +23,18 @@ const MAX_PORT_RETRIES = 5; // Try up to 5 consecutive ports on EADDRINUSE
  * Tries platform-appropriate commands: pbcopy (macOS), clip.exe (WSL), xclip/xsel (Linux).
  */
 async function copyToClipboard(text: string): Promise<void> {
-  const candidates =
-    process.platform === 'darwin'
-      ? [['pbcopy']]
-      : process.platform === 'win32'
-        ? [['clip']]
-        : [
-            ['clip.exe'],
-            ['xclip', '-selection', 'clipboard'],
-            ['xsel', '--clipboard'],
-          ];
+  let candidates: string[][];
+  if (process.platform === 'darwin') {
+    candidates = [['pbcopy']];
+  } else if (process.platform === 'win32') {
+    candidates = [['clip']];
+  } else {
+    candidates = [
+      ['clip.exe'],
+      ['xclip', '-selection', 'clipboard'],
+      ['xsel', '--clipboard'],
+    ];
+  }
 
   for (const [cmd, ...args] of candidates) {
     try {

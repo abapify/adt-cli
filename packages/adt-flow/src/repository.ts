@@ -459,7 +459,8 @@ export async function planRepositoryChanges(
     }
   }
 
-  return { writes, removes, unchanged: unchanged.sort(compareStrings), moved };
+  unchanged.sort(compareStrings);
+  return { writes, removes, unchanged, moved };
 }
 
 async function ensureParentDirectories(

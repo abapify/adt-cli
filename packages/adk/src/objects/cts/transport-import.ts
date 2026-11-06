@@ -749,9 +749,6 @@ export class MergedTransportView {
     numbers: string[],
     ctx?: AdkContext,
   ): Promise<MergedTransportView> {
-    const transports = await Promise.all(
-      numbers.map((n) => AdkTransport.get(n, ctx)),
-    );
-    return new MergedTransportView(transports);
+    return AdkTransport.merge(numbers, ctx);
   }
 }

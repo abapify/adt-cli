@@ -33,8 +33,6 @@ const VALID_CLASS_INCLUDES = new Set([
 ]);
 
 // ReDoS-mitigation: reject patterns likely to cause catastrophic backtracking.
-const NESTED_QUANTIFIER_GROUP =
-  /\((?:\?:)?(?:[^()[\]\\]|\\.|\[[^\]]*\])*[*+{](?:[^()[\]\\]|\\.|\[[^\]]*\])*\)\s*(?:[*+?]|\{\d)/;
 const BACKREFERENCE = /\\[1-9]/;
 const LOOKAROUND = /\(\?(?:[=!]|<[=!])/;
 
@@ -46,6 +44,61 @@ function isRegexQuantifierAt(pattern: string, index: number): boolean {
   const char = pattern[index];
   if (char === '{') return /^\{\d+(?:,\d*)?\}/.test(pattern.slice(index));
   return char === '+' || char === '*' || char === '?';
+}
+
+/**
+ * Detect a quantified group that itself contains a quantifier, e.g. `(a*)*`
+ * followed by `*`, `+`, `?` or `{<digit>` — the classic catastrophic
+ * backtracking shape. Hand-written scanner mirroring
+ * `/\((?:\?:)?(?:[^()[\]\\]|\\.|\[[^\]]*\])*[*+{](?:[^()[\]\\]|\\.|\[[^\]]*\])*\)\s*(?:[*+?]|\{\d)/`;
+ * the equivalent regex is itself flagged as super-linear (S8786).
+ */
+function hasNestedQuantifierGroup(pattern: string): boolean {
+  for (let start = 0; start < pattern.length; start += 1) {
+    if (pattern[start] !== '(') continue;
+    let hasQuantifier = false;
+    let closed = -1;
+    let i = start + 1;
+    // Parse the group content as regex atoms: `\x` escape pairs, `[…]`
+    // character classes, or single characters. Raw `(`, `)`, `[`, `]` and
+    // `\` cannot be plain atoms, so they end the parse.
+    while (i < pattern.length) {
+      const ch = pattern[i];
+      if (ch === '\\') {
+        if (i + 1 < pattern.length && pattern[i + 1] !== '\n') {
+          i += 2;
+          continue;
+        }
+        break;
+      }
+      if (ch === '[') {
+        const end = pattern.indexOf(']', i + 1);
+        if (end === -1) break;
+        i = end + 1;
+        continue;
+      }
+      if (ch === ')' || ch === '(' || ch === ']') {
+        if (ch === ')') closed = i;
+        break;
+      }
+      if (ch === '*' || ch === '+' || ch === '{') hasQuantifier = true;
+      i += 1;
+    }
+    if (closed === -1 || !hasQuantifier) continue;
+    // The closing parenthesis must be followed by a quantifier.
+    let j = closed + 1;
+    while (j < pattern.length && /\s/.test(pattern[j])) j += 1;
+    const next = pattern[j];
+    if (next === '*' || next === '+' || next === '?') return true;
+    if (
+      next === '{' &&
+      j + 1 < pattern.length &&
+      /[0-9]/.test(pattern[j + 1])
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function hasQuantifiedAlternationGroup(pattern: string): boolean {
@@ -176,7 +229,7 @@ export type GetSourceResult =
   | GetSourceStructuredResult;
 
 const CLASS_START =
-  /^CLASS\s+(\S+)\s+(DEFINITION|IMPLEMENTATION)(?:\s+.*)?\s*\.\s*$/i;
+  /^CLASS\s+(\S+)\s+(DEFINITION|IMPLEMENTATION)(?:\s.*)?\.\s*$/i;
 const INTERFACE_START = /^INTERFACE\s+(\S+)(?:\s+DEFINITION)?\s*\.\s*$/i;
 const METHOD_START = /^METHOD\s+(\S+)\s*\.\s*$/i;
 
@@ -397,7 +450,7 @@ function unsafePatternReason(pattern: string): string | undefined {
   if (BACKREFERENCE.test(pattern)) {
     return 'backreferences are not allowed for server-side grep';
   }
-  if (NESTED_QUANTIFIER_GROUP.test(pattern)) {
+  if (hasNestedQuantifierGroup(pattern)) {
     return 'nested quantified groups are not allowed for server-side grep';
   }
   if (hasQuantifiedAlternationGroup(pattern)) {

@@ -350,7 +350,8 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   /** Last modification timestamp (adtcore:changedAt) */
   get changedAt(): Date {
     const val = this.coreData.changedAt;
-    return val instanceof Date ? val : val ? new Date(val) : new Date(0);
+    if (val instanceof Date) return val;
+    return val ? new Date(val) : new Date(0);
   }
 
   /** User who created (adtcore:createdBy) */
@@ -361,7 +362,8 @@ export abstract class AdkObject<K extends AdkKind = AdkKind, D = any> {
   /** Creation timestamp (adtcore:createdAt) */
   get createdAt(): Date {
     const val = this.coreData.createdAt;
-    return val instanceof Date ? val : val ? new Date(val) : new Date(0);
+    if (val instanceof Date) return val;
+    return val ? new Date(val) : new Date(0);
   }
 
   // ============================================

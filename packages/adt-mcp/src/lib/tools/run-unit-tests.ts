@@ -202,11 +202,8 @@ function coverageMeasurementCount(value: unknown): number {
   const nodes = record.nodes;
   if (!nodes || typeof nodes !== 'object' || Array.isArray(nodes)) return 0;
   const rawChildren = (nodes as Record<string, unknown>).node;
-  const children = Array.isArray(rawChildren)
-    ? rawChildren
-    : rawChildren
-      ? [rawChildren]
-      : [];
+  const singleChild = rawChildren ? [rawChildren] : [];
+  const children = Array.isArray(rawChildren) ? rawChildren : singleChild;
   return children.reduce(
     (total, child) => total + 1 + coverageMeasurementCount(child),
     0,

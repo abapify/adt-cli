@@ -47,10 +47,12 @@ export const diagnoseTracesCommand = new Command('traces')
         error instanceof Error &&
         'status' in error &&
         (error as { status?: number }).status === 404;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       console.error(
         is404
           ? '❌ Traces endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/traces)'
-          : `❌ Diagnose traces failed: ${error instanceof Error ? error.message : String(error)}`,
+          : `❌ Diagnose traces failed: ${errorMessage}`,
       );
       process.exit(1);
     }

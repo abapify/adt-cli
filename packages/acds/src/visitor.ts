@@ -1528,10 +1528,14 @@ export class CdsVisitor extends BaseCstVisitor {
     return { key, value };
   }
 
-  dottedName(ctx: Ctx): string {
+  private joinNameSegments(ctx: Ctx): string {
     return asNodes(ctx.cdsName)
       .map((node) => this.visit(node) as string)
       .join('.');
+  }
+
+  dottedName(ctx: Ctx): string {
+    return this.joinNameSegments(ctx);
   }
 
   annotationValue(ctx: Ctx): AnnotationValue {
@@ -1715,9 +1719,7 @@ export class CdsVisitor extends BaseCstVisitor {
   }
 
   qualifiedName(ctx: Ctx): string {
-    return asNodes(ctx.cdsName)
-      .map((node) => this.visit(node) as string)
-      .join('.');
+    return this.joinNameSegments(ctx);
   }
 }
 

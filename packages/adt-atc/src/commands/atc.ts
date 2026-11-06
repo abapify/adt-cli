@@ -212,8 +212,9 @@ function displayAtcResults(result: AtcResult, systemName?: string): void {
   if (result.findings && result.findings.length > 0) {
     console.log(`\n📄 Findings:`);
     result.findings.slice(0, 5).forEach((finding) => {
-      const priorityIcon =
-        finding.priority === 1 ? '❌' : finding.priority === 2 ? '⚠️' : 'ℹ️';
+      let priorityIcon = 'ℹ️';
+      if (finding.priority === 1) priorityIcon = '❌';
+      else if (finding.priority === 2) priorityIcon = '⚠️';
       const objectLink = finding.location
         ? adtLink(finding.objectName, finding.location, systemName)
         : finding.objectName;

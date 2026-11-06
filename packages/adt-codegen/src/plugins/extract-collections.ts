@@ -25,7 +25,7 @@ function sanitizePath(path: string): string {
 
   return cleanPath
     .replace(/^\/+/, '') // Remove leading slashes
-    .replace(/\/+$/, '') // Remove trailing slashes
+    .replace(/(?<!\/)\/+$/, '') // Remove trailing slashes
     .replaceAll(/[<>:"|?*]/g, '-') // Replace invalid chars
     .replaceAll(/\s+/g, '-'); // Replace spaces with dashes
 }

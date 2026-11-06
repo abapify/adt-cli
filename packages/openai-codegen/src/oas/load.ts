@@ -458,7 +458,7 @@ function normalizeResponses(raw: unknown): NormalizedResponse[] {
     const isSuccess =
       /^2\d\d$/.test(statusCode) || (statusCode === 'default' && !has2xx);
     const isError =
-      /^(4|5)\d\d$/.test(statusCode) || (statusCode === 'default' && has2xx);
+      /^[45]\d\d$/.test(statusCode) || (statusCode === 'default' && has2xx);
 
     const content: NormalizedResponse['content'] = {};
     if (isRecord(respRaw.content)) {

@@ -305,13 +305,11 @@ function buildElement(
   const consumed = new Set<string>();
   buildAttributes(node, data, typeDef, schema, rootSchema, consumed);
   buildDeclaredElements(
-    doc,
+    { doc, rootSchema, prefix },
     node,
     data,
     typeDef,
     schema,
-    rootSchema,
-    prefix,
     consumed,
   );
 
@@ -371,20 +369,36 @@ function buildAttributes(
   }
 }
 
+/** Shared environment threaded through the recursive XML builders. */
+interface XmlBuildEnv {
+  doc: XmlDocument;
+  rootSchema: SchemaLike;
+  prefix: string | undefined;
+}
+
+/** Everything that varies per built field/tag. */
+interface FieldSpec {
+  value: unknown;
+  tagName: string;
+  typeName: string | undefined;
+  inlineComplexType: ComplexTypeLike | undefined;
+  elementSchema: SchemaLike;
+  elementForm: string | undefined;
+}
+
 /**
  * Build declared child elements via the walker (handles inheritance,
  * groups, refs, substitution). Adds each declared key to `consumed`.
  */
 function buildDeclaredElements(
-  doc: XmlDocument,
+  env: XmlBuildEnv,
   node: XmlElement,
   data: Record<string, unknown>,
   typeDef: ComplexTypeLike,
   schema: SchemaLike,
-  rootSchema: SchemaLike,
-  prefix: string | undefined,
   consumed: Set<string>,
 ): void {
+  const { doc, rootSchema, prefix } = env;
   // The walker returns schema per element so we can resolve the correct
   // namespace prefix for elements inherited from imported schemas
   // (e.g., packageRef from adtcore)
@@ -417,18 +431,14 @@ function buildDeclaredElements(
 
     const value = data[resolved.dataKey];
     if (value != null) {
-      buildFieldWithTagName(
-        doc,
-        node,
+      buildFieldWithTagName(env, node, {
         value,
-        resolved.tagName,
-        resolved.typeName,
-        resolved.inlineComplexType,
-        resolved.elementSchema,
-        rootSchema,
-        prefix,
-        resolved.form,
-      );
+        tagName: resolved.tagName,
+        typeName: resolved.typeName,
+        inlineComplexType: resolved.inlineComplexType,
+        elementSchema: resolved.elementSchema,
+        elementForm: resolved.form,
+      });
     }
   }
 }
@@ -459,14 +469,12 @@ function buildSubstituteElements(
         ? stripNsPrefix(substitute.element.type)
         : undefined;
       buildField(
-        doc,
+        { doc, rootSchema, prefix },
         node,
         value,
         subName,
         typeName,
         substitute.schema,
-        rootSchema,
-        prefix,
       );
     }
   }
@@ -591,15 +599,14 @@ function resolveElementInfo(
  * - "unqualified" (default): local elements do NOT get namespace prefix
  */
 function buildField(
-  doc: XmlDocument,
+  env: XmlBuildEnv,
   parent: XmlElement,
   value: unknown,
   elementName: string,
   typeName: string | undefined,
   schema: SchemaLike,
-  rootSchema: SchemaLike,
-  prefix: string | undefined,
 ): void {
+  const { doc, rootSchema, prefix } = env;
   // Search for nested complexType
   const nestedType = typeName ? findComplexType(typeName, schema) : undefined;
 
@@ -660,17 +667,19 @@ function buildField(
  * 3. Direct elements - apply elementFormDefault logic
  */
 function buildFieldWithTagName(
-  doc: XmlDocument,
+  env: XmlBuildEnv,
   parent: XmlElement,
-  value: unknown,
-  tagName: string,
-  typeName: string | undefined,
-  inlineComplexType: ComplexTypeLike | undefined,
-  elementSchema: SchemaLike,
-  rootSchema: SchemaLike,
-  prefix: string | undefined,
-  elementForm: string | undefined,
+  spec: FieldSpec,
 ): void {
+  const { doc, rootSchema, prefix } = env;
+  const {
+    value,
+    tagName,
+    typeName,
+    inlineComplexType,
+    elementSchema,
+    elementForm,
+  } = spec;
   // First check for inline complexType, then search for named type
   let nestedType: { ct: ComplexTypeLike; schema: SchemaLike } | undefined;
   if (inlineComplexType) {

@@ -191,10 +191,13 @@ export async function generateCliPages(): Promise<CliPage[]> {
       '## Commands',
       table(
         ['Command', 'Description'],
-        commands.map((c) => [
-          `[${code(`adt ${c.name()}`)}](./${c.name()}.md)`,
-          escapeCell(summary(c.description())),
-        ]),
+        commands.map((c) => {
+          const label = `adt ${c.name()}`;
+          return [
+            `[${code(label)}](./${c.name()}.md)`,
+            escapeCell(summary(c.description())),
+          ];
+        }),
       ),
     ].join('\n\n'),
   });

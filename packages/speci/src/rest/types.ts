@@ -72,19 +72,13 @@ export type InferSchema<T> = T extends { _infer?: infer U }
   : T;
 
 /**
- * Schema-like object - can be any schema library (Zod, JSON Schema, custom, etc.)
- * Adapters interpret these based on their capabilities.
- */
-export type SchemaLike = unknown;
-
-/**
  * Helper to wrap a schema with type information
  * Use this if your schema doesn't implement Inferrable
  *
  * @example
  * responses: { 200: schema(UserSchema, {} as User) }
  */
-export function schema<T>(schemaObject: SchemaLike, _type: T): Inferrable<T> {
+export function schema<T>(schemaObject: unknown, _type: T): Inferrable<T> {
   return schemaObject as Inferrable<T>;
 }
 
@@ -97,7 +91,7 @@ export function schema<T>(schemaObject: SchemaLike, _type: T): Inferrable<T> {
  * - Schema with type: `MySchema as SchemaWithType<MyType>`
  * - The adapter will interpret them appropriately
  */
-export type ResponseMap = Record<number, SchemaLike>;
+export type ResponseMap = Record<number, unknown>;
 
 /**
  * REST endpoint descriptor

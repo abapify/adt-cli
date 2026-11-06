@@ -1,4 +1,4 @@
-import type { AbapDoc, AbapNode, Identifier, Visibility } from './base';
+import type { AbapDoc, AbapNode, Visibility } from './base';
 import { AbapAstError } from './errors';
 import type { TypeDef } from './types';
 import type { ConstantDecl } from './data';
@@ -6,11 +6,7 @@ import type { AttributeDef, EventDef, MethodDef, MethodImpl } from './members';
 
 /** A member that may appear inside a class section. */
 export type SectionMember =
-  | TypeDef
-  | AttributeDef
-  | MethodDef
-  | ConstantDecl
-  | EventDef;
+  TypeDef | AttributeDef | MethodDef | ConstantDecl | EventDef;
 
 /** A visibility section of a class definition. */
 export interface Section extends AbapNode {
@@ -44,9 +40,9 @@ export function section(input: {
 /** Top-level global class (`CLASS ... DEFINITION` + `IMPLEMENTATION`). */
 export interface ClassDef extends AbapNode {
   readonly kind: 'ClassDef';
-  readonly name: Identifier;
-  readonly superclass?: Identifier;
-  readonly interfaces: readonly Identifier[];
+  readonly name: string;
+  readonly superclass?: string;
+  readonly interfaces: readonly string[];
   readonly isFinal?: boolean;
   readonly isAbstract?: boolean;
   readonly isForTesting?: boolean;
@@ -56,9 +52,9 @@ export interface ClassDef extends AbapNode {
 }
 
 export function classDef(input: {
-  name: Identifier;
-  superclass?: Identifier;
-  interfaces?: readonly Identifier[];
+  name: string;
+  superclass?: string;
+  interfaces?: readonly string[];
   isFinal?: boolean;
   isAbstract?: boolean;
   isForTesting?: boolean;
@@ -91,9 +87,9 @@ export function classDef(input: {
 /** A local class inside a CLAS-POOL (same shape as ClassDef, flagged local). */
 export interface LocalClassDef extends AbapNode {
   readonly kind: 'LocalClassDef';
-  readonly name: Identifier;
-  readonly superclass?: Identifier;
-  readonly interfaces: readonly Identifier[];
+  readonly name: string;
+  readonly superclass?: string;
+  readonly interfaces: readonly string[];
   readonly isFinal?: boolean;
   readonly isAbstract?: boolean;
   readonly isForTesting?: boolean;
@@ -103,9 +99,9 @@ export interface LocalClassDef extends AbapNode {
 }
 
 export function localClassDef(input: {
-  name: Identifier;
-  superclass?: Identifier;
-  interfaces?: readonly Identifier[];
+  name: string;
+  superclass?: string;
+  interfaces?: readonly string[];
   isFinal?: boolean;
   isAbstract?: boolean;
   isForTesting?: boolean;

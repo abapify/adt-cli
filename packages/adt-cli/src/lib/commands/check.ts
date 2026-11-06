@@ -128,8 +128,9 @@ function displayResults(
     for (const msg of messages) {
       totalMessages++;
       const sev = typeof msg.type === 'string' ? msg.type : msg.category;
-      const icon =
-        sev === 'E' || sev === 'A' ? '❌' : sev === 'W' ? '⚠️' : 'ℹ️';
+      let icon = 'ℹ️';
+      if (sev === 'E' || sev === 'A') icon = '❌';
+      else if (sev === 'W') icon = '⚠️';
       writeLine(
         `   ${icon} ${objName}: ${msg.shortText ?? msg.code ?? 'unknown message'}`,
       );

@@ -38,6 +38,10 @@ export interface SealedCapabilityServiceOptions {
 export const REST_CAPABILITY_DEFAULT_TTL_MS = 5 * 60_000;
 export const REST_CAPABILITY_DEFAULT_MAX_LENGTH = 8 * 1_024;
 
+function isBase64UrlSafe(value: string): boolean {
+  return /^[A-Za-z0-9_-]+$/u.test(value);
+}
+
 function throwInvalidTtl(maxTtlMs: number): never {
   throw new Error(`Capability TTL must be between 1ms and ${maxTtlMs}ms.`);
 }
@@ -105,10 +109,6 @@ export function createSealedCapabilityService(
     const record = parsed as Record<string, unknown>;
     if (!isSealedCapabilityPayload(record)) return undefined;
     return record;
-  }
-
-  function isBase64UrlSafe(value: string): boolean {
-    return /^[A-Za-z0-9_-]+$/u.test(value);
   }
 
   function parseCapabilityParts(capability: string):

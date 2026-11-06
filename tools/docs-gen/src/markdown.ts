@@ -10,7 +10,7 @@ export function escapeText(text: string): string {
 /** Escape text for use in a single Markdown table cell. */
 export function escapeCell(text: string): string {
   return escapeAngles(text.replace(/[\\{}|]/g, String.raw`\$&`)).replace(
-    /\s*\r?\n\s*/g,
+    /(?<![^\S\n])[^\S\n]*(?:\n[^\S\n]*)+/g,
     ' ',
   );
 }

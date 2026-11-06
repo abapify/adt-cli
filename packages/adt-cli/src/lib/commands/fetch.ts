@@ -13,33 +13,95 @@ type FetchFailure = Error & {
   cause?: unknown;
 };
 
-// Sensitive key fragments are inlined into each regex literal below (rather
-// than interpolated via new RegExp) to satisfy Codacy's non-literal-RegExp
-// rule. Keep the lists in sync when adding new sensitive key names.
+// The sensitive-name fragments appear once in the SENSITIVE_NAME pattern
+// below (kept as a regex literal rather than interpolated via new RegExp to
+// satisfy Codacy's non-literal-RegExp rule). The redaction patterns match the
+// surrounding shape and defer the sensitive-name test to the captured key, so
+// each regex stays within the complexity budget (S5843) without changing what
+// is redacted.
+
+/** Sensitive key/name fragments whose values must be redacted. */
+const SENSITIVE_NAME =
+  /token|password|passwd|secret|api[_-]?key|access[_-]?key|samlrequest|relaystate|authorization|cookie|set-cookie/i;
+
+/** `"key": "value` shape; the sensitive-name check runs on group 3. */
+const JSON_KEY_VALUE =
+  /((["'])([a-z0-9_-]+)(["']\s*:\s*["']))(?:[^"'\\]|\\.)*/giy;
+
+/** `<tag key="value" …>…</…>` shape; the name check runs on the tag body. */
+const XML_KEY_ATTR =
+  /(<\w+\b[^>]*\bkey=["']([a-z0-9_-]+)["'][^>]*>)[\s\S]*?(<\/[^>]+>)/giy;
+
+/** `[?&]key=value` shape; the sensitive-name check runs on group 3. */
+const QUERY_PARAM = /(([?&])([a-z0-9_-]+)(=))[^&\s]*/giy;
+
+/**
+ * Replace leftmost non-overlapping matches of `candidate` whose `isSensitive`
+ * test passes, mirroring `String#replace` semantics of the full sensitive-name
+ * patterns while keeping those names out of the per-shape regexes.
+ */
+function replaceSensitiveMatches(
+  text: string,
+  candidate: RegExp,
+  isSensitive: (match: RegExpExecArray) => boolean,
+  replacement: (match: RegExpExecArray) => string,
+): string {
+  let out = '';
+  let pos = 0;
+  let i = 0;
+  while (i < text.length) {
+    candidate.lastIndex = i;
+    const match = candidate.exec(text);
+    if (match && match[0].length > 0 && isSensitive(match)) {
+      out += text.slice(pos, i) + replacement(match);
+      pos = i + match[0].length;
+      i = pos;
+    } else {
+      i += 1;
+    }
+  }
+  return out + text.slice(pos);
+}
+
+/** True when the tag body has a `key="…"` attribute with a sensitive name. */
+function hasSensitiveAttrKey(tagInner: string): boolean {
+  const wordRun = /^\w+/.exec(tagInner)?.[0] ?? '';
+  for (const m of tagInner.matchAll(/\bkey=["']([a-z0-9_-]*)["']/g)) {
+    if (m.index < wordRun.length) continue;
+    if (SENSITIVE_NAME.test(m[1])) return true;
+  }
+  return false;
+}
 
 function redactDiagnostic(value: string): string {
-  return value
+  const headers = value
     .replace(
       /((?:(?:proxy-)?authorization|x-api-key|x-apikey|api-key|x-auth-token):\s*)[^\r\n]*/gi,
       '$1[REDACTED]',
     )
-    .replace(/(?:set-)?cookie:\s*[^\r\n]*/gi, 'Cookie: [REDACTED]')
-    .replace(
-      /(["'](?:[a-z0-9_-]*?(?:token|password|passwd|secret|api[_-]?key|access[_-]?key|samlrequest|relaystate|authorization|cookie|set-cookie)[a-z0-9_-]*)["']\s*:\s*["'])(?:[^"'\\]|\\.)*/gi,
-      '$1[REDACTED]',
-    )
-    .replace(
-      /(<(?:token|password|passwd|secret|api[_-]?key|access[_-]?key|samlrequest|relaystate|authorization|cookie|set-cookie)\b[^>]*>)[\s\S]*?(<\/[^>]+>)/gi,
-      '$1[REDACTED]$2',
-    )
-    .replace(
-      /(<\w+\b[^>]*\bkey=["'](?:[a-z0-9_-]*?(?:token|password|passwd|secret|api[_-]?key|access[_-]?key|samlrequest|relaystate|authorization|cookie|set-cookie)[a-z0-9_-]*)["'][^>]*>)[\s\S]*?(<\/[^>]+>)/gi,
-      '$1[REDACTED]$2',
-    )
-    .replace(
-      /([?&](?:[a-z0-9_-]*?(?:token|password|passwd|secret|api[_-]?key|access[_-]?key|samlrequest|relaystate|authorization|cookie|set-cookie)[a-z0-9_-]*)=)[^&\s]*/gi,
-      '$1[REDACTED]',
-    );
+    .replace(/(?:set-)?cookie:\s*[^\r\n]*/gi, 'Cookie: [REDACTED]');
+  const jsonPairs = replaceSensitiveMatches(
+    headers,
+    JSON_KEY_VALUE,
+    (m) => SENSITIVE_NAME.test(m[3]),
+    (m) => `${m[1]}[REDACTED]`,
+  );
+  const xmlTags = jsonPairs.replace(
+    /(<(?:token|password|passwd|secret|(?:api|access)[_-]?key|samlrequest|relaystate|authorization|cookie|set-cookie)\b[^>]*>)[\s\S]*?(<\/[^>]+>)/gi,
+    '$1[REDACTED]$2',
+  );
+  const xmlAttrs = replaceSensitiveMatches(
+    xmlTags,
+    XML_KEY_ATTR,
+    (m) => hasSensitiveAttrKey(m[0].slice(1, m[0].indexOf('>'))),
+    (m) => `${m[1]}[REDACTED]${m[3]}`,
+  );
+  return replaceSensitiveMatches(
+    xmlAttrs,
+    QUERY_PARAM,
+    (m) => SENSITIVE_NAME.test(m[3]),
+    (m) => `${m[1]}[REDACTED]`,
+  );
 }
 
 function describeCause(cause: unknown): string | undefined {
@@ -146,13 +208,11 @@ export const fetchCommand = new Command('fetch')
             : JSON.stringify(response, null, 2);
         writeFileSync(options.output, content);
         console.log(`💾 Response saved to: ${options.output}`);
-      } else {
+      } else if (typeof response === 'string') {
         // Display response (string or formatted JSON)
-        if (typeof response === 'string') {
-          console.log(response);
-        } else {
-          console.log(JSON.stringify(response, null, 2));
-        }
+        console.log(response);
+      } else {
+        console.log(JSON.stringify(response, null, 2));
       }
 
       console.log('\n✅ Done!');

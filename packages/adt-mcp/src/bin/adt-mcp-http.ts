@@ -73,7 +73,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       }
       case '--allowed-host': {
         const v = next();
-        if (v) (out.allowedHosts ??= []).push(v);
+        if (v) {
+          out.allowedHosts ??= [];
+          out.allowedHosts.push(v);
+        }
         break;
       }
       case '--auth-token': {
@@ -104,7 +107,8 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--oauth-audience': {
         const v = next();
         if (v) {
-          (out.oauthAudience ??= []).push(
+          out.oauthAudience ??= [];
+          out.oauthAudience.push(
             ...v
               .split(',')
               .map((s) => s.trim())
@@ -121,7 +125,8 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--oauth-required-scope': {
         const v = next();
         if (v) {
-          (out.oauthRequiredScopes ??= []).push(
+          out.oauthRequiredScopes ??= [];
+          out.oauthRequiredScopes.push(
             ...v
               .split(',')
               .map((s) => s.trim())
@@ -137,7 +142,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       }
       case '--cors-origin': {
         const v = next();
-        if (v) (out.allowedOrigins ??= []).push(v);
+        if (v) {
+          out.allowedOrigins ??= [];
+          out.allowedOrigins.push(v);
+        }
         break;
       }
       case '--adt-config': {
@@ -248,14 +256,12 @@ async function main(): Promise<void> {
 
   let oauthOptions: OAuthOptions | undefined;
   if (authMode === 'oauth' && oauthIssuer) {
+    const singleAudience =
+      oauthAudience?.length === 1 ? oauthAudience[0] : oauthAudience;
     oauthOptions = {
       issuer: oauthIssuer,
       audience:
-        oauthAudience && oauthAudience.length > 0
-          ? oauthAudience.length === 1
-            ? oauthAudience[0]
-            : oauthAudience
-          : undefined,
+        oauthAudience && oauthAudience.length > 0 ? singleAudience : undefined,
       jwksUri: oauthJwksUri,
       requiredScopes:
         oauthRequiredScopes && oauthRequiredScopes.length > 0
@@ -333,9 +339,11 @@ async function main(): Promise<void> {
   process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
 
-main().catch((err) => {
+try {
+  await main();
+} catch (err) {
   process.stderr.write(
     `[adt-mcp-http] fatal: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}\n`,
   );
   process.exit(1);
-});
+}

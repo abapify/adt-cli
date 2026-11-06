@@ -46,15 +46,13 @@ describe('ADT CLI', () => {
     expect(consoleError).not.toHaveBeenCalled();
   });
 
-  it('should register the built-in gcts command', () => {
-    const commandNames = program.commands.map((c) => c.name());
-    expect(commandNames).toContain('gcts');
-  });
-
-  it('should register user command', () => {
-    const commandNames = program.commands.map((c) => c.name());
-    expect(commandNames).toContain('user');
-  });
+  it.each(['gcts', 'user', 'interface', 'program'])(
+    'should register the %s command',
+    (commandName) => {
+      const commandNames = program.commands.map((c) => c.name());
+      expect(commandNames).toContain(commandName);
+    },
+  );
 
   it('should register package command with subcommands', () => {
     const commandNames = program.commands.map((c) => c.name());
@@ -77,16 +75,6 @@ describe('ADT CLI', () => {
     expect(subNames).toContain('write');
     expect(subNames).toContain('activate');
     expect(subNames).toContain('delete');
-  });
-
-  it('should register interface command', () => {
-    const commandNames = program.commands.map((c) => c.name());
-    expect(commandNames).toContain('interface');
-  });
-
-  it('should register program command', () => {
-    const commandNames = program.commands.map((c) => c.name());
-    expect(commandNames).toContain('program');
   });
 
   it('should register ddic commands (domain, dataelement, table, structure)', () => {

@@ -1160,12 +1160,10 @@ export function createHttpBrokerOperations(
     } catch (error) {
       operationError = error;
     } finally {
-      const errorCode =
-        outcome === 'failed'
-          ? clientCreated
-            ? 'operation_failed'
-            : 'client_creation_failed'
-          : undefined;
+      const failureCode = clientCreated
+        ? 'operation_failed'
+        : 'client_creation_failed';
+      const errorCode = outcome === 'failed' ? failureCode : undefined;
       try {
         await releaseLease(
           lease,

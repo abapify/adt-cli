@@ -21,9 +21,11 @@ export const diagnoseDumpsCommand = new Command('dumps')
         if (options.user) params.set('user', options.user);
         if (options.max) params.set('maxResults', options.max);
 
+        const query = params.toString();
+        const querySuffix = query ? `?${query}` : '';
         const path = options.id
           ? `/sap/bc/adt/runtime/dumps/${encodeURIComponent(options.id)}`
-          : `/sap/bc/adt/runtime/dumps${params.toString() ? `?${params.toString()}` : ''}`;
+          : `/sap/bc/adt/runtime/dumps${querySuffix}`;
 
         const result = await client.fetch(path, {
           method: 'GET',
@@ -50,10 +52,12 @@ export const diagnoseDumpsCommand = new Command('dumps')
           error instanceof Error &&
           'status' in error &&
           (error as { status?: number }).status === 404;
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         console.error(
           is404
             ? '❌ Short dumps endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/dumps)'
-            : `❌ Diagnose dumps failed: ${error instanceof Error ? error.message : String(error)}`,
+            : `❌ Diagnose dumps failed: ${errorMessage}`,
         );
         process.exit(1);
       }

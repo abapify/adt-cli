@@ -37,11 +37,8 @@ export const getCommand = new Command('get')
       // Handle union type - objectReference may be array or single object
       const rawObjects =
         'objectReference' in searchResult ? searchResult.objectReference : [];
-      const objects = Array.isArray(rawObjects)
-        ? rawObjects
-        : rawObjects
-          ? [rawObjects]
-          : [];
+      const singleObject = rawObjects ? [rawObjects] : [];
+      const objects = Array.isArray(rawObjects) ? rawObjects : singleObject;
 
       // Define object type for type safety
       type SearchObject = {

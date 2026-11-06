@@ -21,7 +21,7 @@ import { matchesFilter } from './filters';
 
 export class CodegenFramework {
   private readonly logger = new ConsoleLogger();
-  private plugins: CodegenPlugin[] = [];
+  private readonly plugins: CodegenPlugin[] = [];
 
   constructor(private readonly config: CodegenConfig) {
     this.plugins = config.plugins;
@@ -234,19 +234,16 @@ export class CodegenFramework {
     workspace: WorkspaceContext,
   ): CollectionContext {
     const accepts = collection['app:accept'];
-    const acceptsArray = accepts
-      ? Array.isArray(accepts)
-        ? accepts
-        : [accepts]
-      : [];
+    const acceptsList = Array.isArray(accepts) ? accepts : [accepts];
+    const acceptsArray = accepts ? acceptsList : [];
 
     const templateLinksXml =
       collection['adtcomp:templateLinks']?.['adtcomp:templateLink'];
+    const templateLinksList = Array.isArray(templateLinksXml)
+      ? templateLinksXml
+      : [templateLinksXml];
     const templateLinks: TemplateLink[] = templateLinksXml
-      ? (Array.isArray(templateLinksXml)
-          ? templateLinksXml
-          : [templateLinksXml]
-        ).map((link: any) => ({
+      ? templateLinksList.map((link: any) => ({
           rel: link['@_rel'],
           template: link['@_template'],
         }))
@@ -300,6 +297,7 @@ export class CodegenFramework {
     return title
       .toLowerCase()
       .replaceAll(/[^a-z0-9]+/g, '-')
-      .replaceAll(/^-+|-+$/g, '');
+      .replace(/^-+/, '')
+      .replace(/(?<!-)-+$/, '');
   }
 }

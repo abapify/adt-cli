@@ -82,11 +82,12 @@ export const contractsCommand: CliCommandPlugin = {
     }
 
     // Discovery path from CLI or config
+    const configDiscovery = contractsConfig.discovery
+      ? resolve(ctx.cwd, contractsConfig.discovery)
+      : resolve(ctx.cwd, 'tmp/discovery/discovery.xml');
     const discoveryPath = args.discovery
       ? resolve(ctx.cwd, args.discovery as string)
-      : contractsConfig.discovery
-        ? resolve(ctx.cwd, contractsConfig.discovery)
-        : resolve(ctx.cwd, 'tmp/discovery/discovery.xml');
+      : configDiscovery;
 
     // Check if we need to fetch discovery
     const forceFetch = args.fetch === true;
@@ -135,11 +136,12 @@ export const contractsCommand: CliCommandPlugin = {
     }
 
     // Output paths from config or CLI override
+    const configOutputDir = contractsConfig.output
+      ? resolve(ctx.cwd, contractsConfig.output)
+      : null;
     const outputDir = args.output
       ? resolve(ctx.cwd, args.output as string)
-      : contractsConfig.output
-        ? resolve(ctx.cwd, contractsConfig.output)
-        : null;
+      : configOutputDir;
 
     if (!outputDir) {
       ctx.logger.error(
@@ -148,11 +150,12 @@ export const contractsCommand: CliCommandPlugin = {
       process.exit(1);
     }
 
+    const configDocsDir = contractsConfig.docs
+      ? resolve(ctx.cwd, contractsConfig.docs)
+      : null;
     const docsDir = args.docs
       ? resolve(ctx.cwd, args.docs as string)
-      : contractsConfig.docs
-        ? resolve(ctx.cwd, contractsConfig.docs)
-        : null;
+      : configDocsDir;
 
     if (!docsDir) {
       ctx.logger.error(

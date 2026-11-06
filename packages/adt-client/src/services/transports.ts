@@ -125,11 +125,10 @@ export class TransportService {
       // Only patch when selected came from the task sibling list. Normalize a
       // single task node to an array so the fallback also applies to
       // single-object task responses.
+      const singleTaskNode = data?.task ? [data.task] : [];
       const taskNodes = Array.isArray(data?.task)
         ? (data.task as unknown[])
-        : data?.task
-          ? [data.task]
-          : [];
+        : singleTaskNode;
       const fromTaskList = taskNodes.includes(selected);
       if (fromTaskList && !hasParent && siblingRequestNumber) {
         sel.parent = siblingRequestNumber;

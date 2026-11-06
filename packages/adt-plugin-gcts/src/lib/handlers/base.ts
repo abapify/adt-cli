@@ -19,8 +19,6 @@ import { gctsFilename, splitSourceKey } from '../format/filename';
 import { payloadOf } from '../aff/generic';
 import type { GctsMetadata } from '../format/types';
 
-export type AbapObjectType = string;
-
 export type AdkObjectClass<T extends AdkObject = AdkObject> = {
   new (...args: any[]): T;
   readonly kind: AdkKind;
@@ -96,7 +94,7 @@ export interface GctsHandlerDefinition<
 export interface GctsHandler<
   T extends AdkObject = AdkObject,
 > extends FormatHandler {
-  readonly type: AbapObjectType;
+  readonly type: string;
   readonly fileExtension: string;
   readonly schema: {
     parse(raw: string): unknown;
@@ -107,20 +105,20 @@ export interface GctsHandler<
   setSources?(object: T, sources: Record<string, string>): void;
 }
 
-const handlerRegistry = new Map<AbapObjectType, GctsHandler>();
+const handlerRegistry = new Map<string, GctsHandler>();
 
 /** Look up a handler (full-type first, then main-type fallback). */
-export function getHandler(type: AbapObjectType): GctsHandler | undefined {
+export function getHandler(type: string): GctsHandler | undefined {
   return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
 /** `true` iff the given object type has a registered handler. */
-export function isSupported(type: AbapObjectType): boolean {
+export function isSupported(type: string): boolean {
   return handlerRegistry.has(type) || handlerRegistry.has(getMainType(type));
 }
 
 /** Snapshot of all registered object types. */
-export function getSupportedTypes(): AbapObjectType[] {
+export function getSupportedTypes(): string[] {
   return [...handlerRegistry.keys()];
 }
 
@@ -244,6 +242,12 @@ function companionFiles(
  * the static `kind`) or an explicit type string (for types without an ADK
  * class, e.g. DOMA/DTEL).
  */
+async function resolveSource(entry: GctsSourceEntry): Promise<string> {
+  const raw =
+    typeof entry.content === 'function' ? entry.content() : entry.content;
+  return await raw;
+}
+
 export function createHandler<
   T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
@@ -254,18 +258,15 @@ export function createHandler<
 export function createHandler<
   T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
->(
-  type: AbapObjectType,
-  definition: GctsHandlerDefinition<T, M>,
-): GctsHandler<T>;
+>(type: string, definition: GctsHandlerDefinition<T, M>): GctsHandler<T>;
 export function createHandler<
   T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
 >(
-  adkClassOrType: AdkObjectClass<T> | AbapObjectType,
+  adkClassOrType: AdkObjectClass<T> | string,
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T> {
-  let type: AbapObjectType;
+  let type: string;
   if (typeof adkClassOrType === 'string') {
     type = adkClassOrType;
   } else {
@@ -280,12 +281,6 @@ export function createHandler<
   }
 
   const fileExtension = getMainType(type).toLowerCase();
-
-  async function resolveSource(entry: GctsSourceEntry): Promise<string> {
-    const raw =
-      typeof entry.content === 'function' ? entry.content() : entry.content;
-    return await raw;
-  }
 
   const handler: GctsHandler<T> = {
     type,

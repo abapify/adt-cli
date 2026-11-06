@@ -44,11 +44,10 @@ export const searchCommand = new Command('search')
         };
         rawObjects = main.objectReference;
       }
-      const objects: SearchObject[] = rawObjects
-        ? Array.isArray(rawObjects)
-          ? rawObjects
-          : [rawObjects]
-        : [];
+      const singleObject = rawObjects ? [rawObjects] : [];
+      const objects: SearchObject[] = Array.isArray(rawObjects)
+        ? rawObjects
+        : singleObject;
 
       if (objects.length === 0) {
         console.log('No objects found matching your query.');

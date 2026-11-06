@@ -95,12 +95,12 @@ function pluginToCommand(
   if (plugin.options) {
     for (const opt of plugin.options) {
       // Commander expects string | boolean | string[] for defaults
+      const normalizedDefault =
+        typeof opt.default === 'number'
+          ? String(opt.default)
+          : (opt.default as string | boolean);
       const defaultValue =
-        opt.default !== undefined
-          ? typeof opt.default === 'number'
-            ? String(opt.default)
-            : (opt.default as string | boolean)
-          : undefined;
+        opt.default !== undefined ? normalizedDefault : undefined;
 
       if (opt.required) {
         cmd.requiredOption(opt.flags, opt.description, defaultValue);

@@ -40,11 +40,10 @@ export const ctsObjectsCommand = new Command('objects')
       await getAdtClientV2();
 
       const alsoTrParsed = parseFilterOption(options.alsoTransport, true);
+      const alsoTrSingle: string[] = alsoTrParsed ? [alsoTrParsed] : [];
       const alsoTrArray: string[] = Array.isArray(alsoTrParsed)
         ? alsoTrParsed
-        : alsoTrParsed
-          ? [alsoTrParsed]
-          : [];
+        : alsoTrSingle;
       const allTransportNumbers = [transport, ...alsoTrArray];
 
       // Build selector from CLI flags using the parseFilter helper

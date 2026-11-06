@@ -491,9 +491,10 @@ const putSourceCommand = new Command('put')
             ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),
           );
           if (blocking.length > 0) {
-            throw new Error(
-              `Lint blocked write:\n${blocking.map((d) => `${d.key}: ${d.message}`).join('\n')}`,
-            );
+            const blockedLines = blocking
+              .map((d) => `${d.key}: ${d.message}`)
+              .join('\n');
+            throw new Error(`Lint blocked write:\n${blockedLines}`);
           }
         }
 

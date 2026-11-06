@@ -978,10 +978,11 @@ export const diffCommand: CliCommandPlugin = {
           r.identicalCount > 0
             ? ` (${r.identicalCount} file(s) identical)`
             : '';
+        const coloredSuffix =
+          r.identicalCount > 0 ? chalk.dim(identicalSuffix) : '';
         console.log(
           useColor
-            ? chalk.red('Differences found.') +
-                (r.identicalCount > 0 ? chalk.dim(identicalSuffix) : '')
+            ? chalk.red('Differences found.') + coloredSuffix
             : `Differences found.${identicalSuffix}`,
         );
         process.exit(1);

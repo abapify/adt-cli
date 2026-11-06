@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 
 export function compareStrings(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
+  if (left < right) return -1;
+  return left > right ? 1 : 0;
 }
 
 const NO_TO_JSON = Symbol('no toJSON');

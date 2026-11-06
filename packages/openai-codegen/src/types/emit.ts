@@ -9,8 +9,7 @@ export function emitTypeSection(
   _profile: TargetProfile,
 ): TypeDef[] {
   // Profile is accepted for forward-compat (e.g. per-profile type substitutions)
-  // but currently does not alter emission. Silence unused-var lint.
-  void _profile;
+  // but currently does not alter emission.
   const out: TypeDef[] = [];
   for (const entry of plan.entries) {
     const { typeDef } = mapSchemaToTypeDef(entry, plan);

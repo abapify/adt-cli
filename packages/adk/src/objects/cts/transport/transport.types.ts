@@ -58,13 +58,6 @@ export type TransportStatus = 'D' | 'R' | 'N'; // D=Modifiable, R=Released, N=No
 /** Transport type */
 export type TransportType = 'K' | 'W' | 'T' | 'C'; // K=Workbench, W=Customizing, T=ToC, C=Copy
 
-// ============================================
-// Re-export for convenience (inferred from schema)
-// ============================================
-
-export type TransportTask = TransportTaskData;
-export type TransportObject = TransportObjectData;
-
 /**
  * Lock handle for transport operations
  */

@@ -145,7 +145,6 @@ export function planTypes(
   const used = new Set<string>();
   const alloc = makeNameAllocator(used);
   const entries: MutableEntry[] = [];
-  const byId = new Map<string, MutableEntry>();
   const plannedIds = new Set<string>();
   const schemaToId = new Map<object, string>();
   const queue: Array<{
@@ -186,7 +185,6 @@ export function planTypes(
       source: item.source,
     };
     entries.push(entry);
-    byId.set(item.id, entry);
 
     const deps = collectFromSchema(
       item.id,
@@ -222,7 +220,6 @@ export function planTypes(
       source: 'auxiliary',
     };
     entries.push(kvEntry);
-    byId.set(kvId, kvEntry);
   }
 
   // 4) Topological sort with self-reference tolerance.

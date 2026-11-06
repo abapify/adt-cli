@@ -149,10 +149,10 @@ type ReportExecutionOutcome = NonNullable<
   ToolContext['reportExecutionOutcome']
 >;
 
-function createHttpAuthorizationConsumer(
+function createHttpAuthorizationHook(
   url: string,
-  fetchImpl: typeof globalThis.fetch = globalThis.fetch,
-): ConsumeExecutionAuthorization {
+  fetchImpl: typeof globalThis.fetch,
+): (input: { authorizationToken: string }) => Promise<boolean> {
   const endpoint = new URL(url).toString();
   return async (input) => {
     const response = await fetchImpl(endpoint, {
@@ -167,22 +167,18 @@ function createHttpAuthorizationConsumer(
   };
 }
 
+function createHttpAuthorizationConsumer(
+  url: string,
+  fetchImpl: typeof globalThis.fetch = globalThis.fetch,
+): ConsumeExecutionAuthorization {
+  return createHttpAuthorizationHook(url, fetchImpl);
+}
+
 function createHttpOutcomeReporter(
   url: string,
   fetchImpl: typeof globalThis.fetch = globalThis.fetch,
 ): ReportExecutionOutcome {
-  const endpoint = new URL(url).toString();
-  return async (input) => {
-    const response = await fetchImpl(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${input.authorizationToken}`,
-      },
-      body: JSON.stringify(input),
-    });
-    return response.ok;
-  };
+  return createHttpAuthorizationHook(url, fetchImpl);
 }
 
 function safeExecuteHooksFromEnv(
