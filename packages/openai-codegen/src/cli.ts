@@ -175,20 +175,30 @@ export function buildProgram(): Command {
         format: SupportedFormat;
         result: GenerateResult;
       }> = [];
-      for (const format of runOptions.formats) {
-        const formatOutDir =
-          runOptions.formats.length === 1
-            ? baseOutDir
-            : resolvePath(baseOutDir, format);
-        const genOpts: PipelineGenerateOptions = {
-          input: runOptions.input,
-          outDir: formatOutDir,
-          format,
-          target: runOptions.target,
-          names: runOptions.namesConfig,
-          description: runOptions.description,
-        };
-        const result = await generate(genOpts);
+      const generated = await Promise.all(
+        runOptions.formats.map(async (format) => {
+          const formatOutDir =
+            runOptions.formats.length === 1
+              ? baseOutDir
+              : resolvePath(baseOutDir, format);
+          const genOpts: PipelineGenerateOptions = {
+            input: runOptions.input,
+            outDir: formatOutDir,
+            format,
+            target: runOptions.target,
+            names: runOptions.namesConfig,
+            description: runOptions.description,
+          };
+          try {
+            return { format, formatOutDir, result: await generate(genOpts) };
+          } catch (error: unknown) {
+            return { format, formatOutDir, error };
+          }
+        }),
+      );
+      for (const entry of generated) {
+        if ('error' in entry) throw entry.error;
+        const { format, formatOutDir, result } = entry;
         results.push({ format, result });
         process.stdout.write(
           `[openai-codegen] ${format}: wrote ${result.files.length} files ` +

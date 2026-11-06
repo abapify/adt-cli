@@ -113,17 +113,20 @@ const adtSchemaMap: Record<
  * Passes through literal filenames unchanged.
  */
 async function expandGlobs(patterns: string[], cwd: string): Promise<string[]> {
-  const results: string[] = [];
-  for (const pattern of patterns) {
-    if (/[*?[\]{}]/.test(pattern)) {
-      for await (const match of nativeGlob(pattern, { cwd })) {
-        results.push(match);
+  const perPattern = await Promise.all(
+    patterns.map(async (pattern) => {
+      const matches: string[] = [];
+      if (/[*?[\]{}]/.test(pattern)) {
+        for await (const match of nativeGlob(pattern, { cwd })) {
+          matches.push(match);
+        }
+      } else {
+        matches.push(pattern);
       }
-    } else {
-      results.push(pattern);
-    }
-  }
-  return results;
+      return matches;
+    }),
+  );
+  return perPattern.flat();
 }
 
 /**

@@ -700,7 +700,7 @@ export class ImportService {
       const metadataDir = join(options.outputPath, '.adt', 'tr');
       await mkdir(metadataDir, { recursive: true });
 
-      for (const tr of loadedTransports) {
+      const pendingMetadata = loadedTransports.map((tr) => {
         const metadata = {
           number: tr.number,
           owner: tr.owner,
@@ -732,16 +732,24 @@ export class ImportService {
             ...(acquisitionDiagnostics ? { acquisitionDiagnostics } : {}),
           },
         };
-
-        const metadataPath = join(metadataDir, `${tr.number}.json`);
-        await writeFile(
-          metadataPath,
-          JSON.stringify(metadata, null, 2),
-          'utf-8',
-        );
-        metadataFiles.push(metadataPath);
+        return {
+          metadataPath: join(metadataDir, `${tr.number}.json`),
+          body: JSON.stringify(metadata, null, 2),
+        };
+      });
+      const metadataWrites = await Promise.all(
+        pendingMetadata.map((entry) =>
+          writeFile(entry.metadataPath, entry.body, 'utf-8').then(
+            () => entry,
+            (error: unknown) => ({ ...entry, error }),
+          ),
+        ),
+      );
+      for (const entry of metadataWrites) {
+        if ('error' in entry) throw entry.error;
+        metadataFiles.push(entry.metadataPath);
         if (options.debug) {
-          console.log(`📄 Wrote transport metadata: ${metadataPath}`);
+          console.log(`📄 Wrote transport metadata: ${entry.metadataPath}`);
         }
       }
     }

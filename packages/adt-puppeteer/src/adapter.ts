@@ -108,12 +108,14 @@ export function createPuppeteerAdapter(): BrowserAdapter {
           c.domain.includes(domain) ||
           domain.includes(c.domain.replace(/^\./, '')),
       );
-      for (const cookie of toRemove) {
-        await client.send('Network.deleteCookies', {
-          name: cookie.name,
-          domain: cookie.domain,
-        });
-      }
+      await Promise.all(
+        toRemove.map((cookie) =>
+          client.send('Network.deleteCookies', {
+            name: cookie.name,
+            domain: cookie.domain,
+          }),
+        ),
+      );
     },
 
     getUserAgent(): Promise<string> {

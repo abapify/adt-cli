@@ -98,12 +98,15 @@ export function createPlaywrightAdapter(): BrowserAdapter {
           domain.includes(c.domain.replace(/^\./, '')),
       );
       // Clear each matching cookie individually
-      for (const cookie of toRemove) {
-        await context.clearCookies({
-          name: cookie.name,
-          domain: cookie.domain,
-        });
-      }
+      const browserContext = context;
+      await Promise.all(
+        toRemove.map((cookie) =>
+          browserContext.clearCookies({
+            name: cookie.name,
+            domain: cookie.domain,
+          }),
+        ),
+      );
     },
 
     async getUserAgent() {

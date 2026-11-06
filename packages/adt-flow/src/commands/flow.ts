@@ -416,9 +416,7 @@ function checkoutTrCommand(
         reportTargets.length > 0
           ? await service.checkout(checkoutInput, {
               beforeCheckout: async () => {
-                for (const target of reportTargets) {
-                  await removeStaleReport(target);
-                }
+                await Promise.all(reportTargets.map(removeStaleReport));
               },
               afterCheckout: async (checkoutResult) => {
                 if (report)
