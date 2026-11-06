@@ -26,14 +26,14 @@ const SENSITIVE_NAME =
 
 /** `"key": "value` shape; the sensitive-name check runs on group 3. */
 const JSON_KEY_VALUE =
-  /((["'])([a-z0-9_-]+)(["']\s*:\s*["']))(?:[^"'\\]|\\.)*/giy;
+  /((["'])([a-z0-9_-]+)(["']\s*:\s*["']))(?:[^"'\\]|\\.)*/iy;
 
 /** `<tag key="value" …>…</…>` shape; the name check runs on the tag body. */
 const XML_KEY_ATTR =
-  /(<\w+\b[^>]*\bkey=["']([a-z0-9_-]+)["'][^>]*>)[\s\S]*?(<\/[^>]+>)/giy;
+  /(<\w+\b[^>]*\bkey=["']([a-z0-9_-]+)["'][^>]*>)[\s\S]*?(<\/[^>]+>)/iy;
 
 /** `[?&]key=value` shape; the sensitive-name check runs on group 3. */
-const QUERY_PARAM = /(([?&])([a-z0-9_-]+)(=))[^&\s]*/giy;
+const QUERY_PARAM = /(([?&])([a-z0-9_-]+)(=))[^&\s]*/iy;
 
 /**
  * Replace leftmost non-overlapping matches of `candidate` whose `isSensitive`

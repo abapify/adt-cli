@@ -1,6 +1,6 @@
 import { existsSync, rmSync } from 'node:fs';
 import { basename } from 'node:path';
-import { execOutput, ensureDir, findFiles } from '../lib/utils';
+import { execOutput, ensureDir, findFiles, pathArg } from '../lib/utils';
 
 interface ExtractOptions {
   output: string;
@@ -57,7 +57,14 @@ export function extractJars(
 
     try {
       // Just unzip, preserving directory structure
-      execOutput('unzip', ['-o', '-q', jar, ...fileArgs, '-d', output]);
+      execOutput('unzip', [
+        '-o',
+        '-q',
+        pathArg(jar),
+        ...fileArgs,
+        '-d',
+        pathArg(output),
+      ]);
     } catch {
       // unzip returns non-zero if no matches, that's ok
     }

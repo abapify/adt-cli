@@ -1,7 +1,7 @@
 import { basename } from 'node:path';
 import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { ensureDir, findFiles } from '../lib/utils';
+import { ensureDir, findFiles, pathArg } from '../lib/utils';
 
 interface DecompileOptions {
   output: string;
@@ -24,7 +24,7 @@ const DECOMPILERS = {
     },
     command: (input: string, output: string): Command => ({
       file: 'cfr-decompiler',
-      args: [input, '--outputdir', output],
+      args: [pathArg(input), '--outputdir', pathArg(output)],
     }),
     install:
       'brew install cfr-decompiler (macOS/Linux) or download from https://www.benf.org/other/cfr/',
@@ -36,7 +36,7 @@ const DECOMPILERS = {
     },
     command: (input: string, output: string): Command => ({
       file: 'procyon',
-      args: ['-o', output, input],
+      args: ['-o', pathArg(output), pathArg(input)],
     }),
     install: 'Download from https://github.com/mstrobel/procyon',
   },
@@ -55,7 +55,7 @@ const DECOMPILERS = {
     },
     command: (input: string, output: string): Command => ({
       file: 'java',
-      args: ['-jar', DECOMPILERS.fernflower.jar(), input, output],
+      args: ['-jar', DECOMPILERS.fernflower.jar(), pathArg(input), pathArg(output)],
     }),
     install:
       'Find in IntelliJ IDEA: plugins/java-decompiler/lib/java-decompiler.jar',
