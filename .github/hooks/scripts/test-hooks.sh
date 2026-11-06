@@ -38,7 +38,7 @@ LOGFILE="$WORKDIR/tmp/tool-calls.jsonl"
 
 # ── Test 1: bash tool call is logged ───────────────────────────────────────
 run_log '{"toolName":"bash","toolArgs":"{\"command\":\"echo hello\"}"}'
-if [ -f "$LOGFILE" ]; then
+if [[ -f "$LOGFILE" ]]; then
   ok "bash tool call: log file created"
 else
   fail "bash tool call: log file not created"
@@ -60,7 +60,7 @@ fi
 run_log '{"toolName":"report_progress","toolArgs":"{\"commitMessage\":\"test push\",\"prDescription\":\"- [x] push\"}"}'
 
 PUSH_LINE=$(grep '"toolName":"report_progress"' "$LOGFILE" || true)
-if [ -n "$PUSH_LINE" ]; then
+if [[ -n "$PUSH_LINE" ]]; then
   ok "push tool call: report_progress entry logged"
 else
   fail "push tool call: report_progress entry not found in log"
@@ -82,7 +82,7 @@ fi
 LINE_COUNT_BEFORE=$(wc -l < "$LOGFILE")
 if (cd "$WORKDIR" && echo "NOT_JSON" | bash "$LOG_SCRIPT" 2>/dev/null); then true; fi
 LINE_COUNT_AFTER=$(wc -l < "$LOGFILE")
-if [ "$LINE_COUNT_AFTER" -eq "$LINE_COUNT_BEFORE" ]; then
+if [[ "$LINE_COUNT_AFTER" -eq "$LINE_COUNT_BEFORE" ]]; then
   ok "invalid JSON: no extra line appended"
 else
   fail "invalid JSON: spurious line appended to log"
@@ -98,7 +98,7 @@ fi
 
 # ── Test 5: JSON array length matches logged entries (2 valid calls) ────────
 COUNT=$(echo "$OUTPUT" | jq 'length')
-if [ "$COUNT" -eq 2 ]; then
+if [[ "$COUNT" -eq 2 ]]; then
   ok "print-tool-log: array contains 2 entries (matching logged calls)"
 else
   fail "print-tool-log: expected 2 entries, got $COUNT"
@@ -113,7 +113,7 @@ fi
 
 # ── Test 7: print-tool-log.sh emits empty array when no log file exists ────
 OUTPUT_EMPTY=$(cd "$WORKDIR" && rm -f tmp/tool-calls.jsonl && echo "" | bash "$PRINT_SCRIPT")
-if [ "$OUTPUT_EMPTY" = "[]" ]; then
+if [[ "$OUTPUT_EMPTY" = "[]" ]]; then
   ok "print-tool-log: returns [] when log file absent"
 else
   fail "print-tool-log: expected '[]' when no log file, got: $OUTPUT_EMPTY"
@@ -168,7 +168,7 @@ run_approve() {
 # ── Test 8: regular tool call — approve-workflows exits cleanly ─────────────
 APPROVE_OUT=$(run_approve '{"toolName":"bash","toolArgs":"{}"}')
 APPROVE_EC=$?
-if [ "$APPROVE_EC" -eq 0 ]; then
+if [[ "$APPROVE_EC" -eq 0 ]]; then
   ok "approve-workflows: exits 0 for regular tool call"
 else
   fail "approve-workflows: non-zero exit for regular tool call (got $APPROVE_EC)"
@@ -185,7 +185,7 @@ fi
 # RETRY_DELAY_SEC=0 speeds up the test; RETRY_COUNT defaults to 5.
 APPROVE_OUT=$(run_approve '{"toolName":"report_progress","toolArgs":"{}"}' RETRY_DELAY_SEC=0)
 APPROVE_EC=$?
-if [ "$APPROVE_EC" -eq 0 ]; then
+if [[ "$APPROVE_EC" -eq 0 ]]; then
   ok "approve-workflows: exits 0 for report_progress tool call"
 else
   fail "approve-workflows: non-zero exit for report_progress tool call (got $APPROVE_EC)"
@@ -201,7 +201,7 @@ fi
 # ── Test 10: sessionStart (empty stdin) — exits cleanly ────────────────────
 APPROVE_OUT=$(run_approve "")
 APPROVE_EC=$?
-if [ "$APPROVE_EC" -eq 0 ]; then
+if [[ "$APPROVE_EC" -eq 0 ]]; then
   ok "approve-workflows: exits 0 for empty stdin (sessionStart)"
 else
   fail "approve-workflows: non-zero exit for empty stdin (got $APPROVE_EC)"
@@ -217,6 +217,6 @@ fi
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 
-if [ "$FAIL" -gt 0 ]; then
+if [[ "$FAIL" -gt 0 ]]; then
   exit 1
 fi

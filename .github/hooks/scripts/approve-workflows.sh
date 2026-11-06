@@ -19,7 +19,7 @@ command -v jq >/dev/null 2>&1 || exit 0
 
 # Get current branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-if [ -z "$BRANCH" ] || [ "$BRANCH" = "HEAD" ]; then
+if [[ -z "$BRANCH" ]] || [[ "$BRANCH" = "HEAD" ]]; then
   exit 0
 fi
 
@@ -40,7 +40,7 @@ approve_pending() {
   local found=1
   for STATUS in action_required waiting; do
     while IFS= read -r run_id; do
-      [ -z "$run_id" ] && continue
+      [[ -z "$run_id" ]] && continue
       if gh api -X POST "/repos/${REPO}/actions/runs/${run_id}/approve" 2>/dev/null; then
         echo "approve-workflows: approved run ${run_id} (status=${STATUS})" >&2
         found=0
@@ -58,10 +58,10 @@ approve_pending() {
 : "${RETRY_COUNT:=5}"
 : "${RETRY_DELAY_SEC:=5}"
 
-if [ "$TOOL_NAME" = "report_progress" ]; then
+if [[ "$TOOL_NAME" = "report_progress" ]]; then
   for attempt in $(seq 1 "$RETRY_COUNT"); do
     approve_pending && break
-    if [ "$attempt" -lt "$RETRY_COUNT" ]; then
+    if [[ "$attempt" -lt "$RETRY_COUNT" ]]; then
       echo "approve-workflows: no pending runs yet (attempt ${attempt}/${RETRY_COUNT}), retrying in ${RETRY_DELAY_SEC}s..." >&2
       sleep "$RETRY_DELAY_SEC"
     fi
