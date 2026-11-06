@@ -243,80 +243,96 @@ export function linkSchema(schema: Schema, options: LinkOptions): Schema {
 
     // Recursively link the loaded schema
     const newBasePath = dirname(fullPath);
-    linkSchemaInternal(loadedSchema, newBasePath);
+    linkSchemaInternal(loadedSchema, newBasePath, loadAndLink);
 
     inProgress.delete(fullPath);
     return loadedSchema;
   };
 
   // Internal linking function
-  const linkSchemaInternal = (s: Schema, currentBasePath: string): void => {
-    const imports: Schema[] = [];
-    const includes: Schema[] = [];
-
-    // Process xs:import elements
-    if (s.import) {
-      for (const imp of s.import) {
-        if (imp.schemaLocation) {
-          const linked = loadAndLink(imp.schemaLocation, currentBasePath);
-          if (linked) {
-            imports.push(linked);
-          }
-        }
-      }
-    }
-
-    // Process xs:include elements
-    if (s.include) {
-      for (const inc of s.include) {
-        if (inc.schemaLocation) {
-          const linked = loadAndLink(inc.schemaLocation, currentBasePath);
-          if (linked) {
-            includes.push(linked);
-          }
-        }
-      }
-    }
-
-    // Process xs:redefine elements - load base schema and attach to redefine.$schema
-    if (s.redefine) {
-      for (const redef of s.redefine) {
-        if (redef.schemaLocation) {
-          const linked = loadAndLink(redef.schemaLocation, currentBasePath);
-          if (linked) {
-            // Attach base schema directly to redefine element
-            Object.assign(redef, { $schema: linked });
-          }
-        }
-      }
-    }
-
-    // Process xs:override elements - load base schema and attach to override.$schema
-    if (s.override) {
-      for (const ovr of s.override) {
-        if (ovr.schemaLocation) {
-          const linked = loadAndLink(ovr.schemaLocation, currentBasePath);
-          if (linked) {
-            // Attach base schema directly to override element
-            Object.assign(ovr, { $schema: linked });
-          }
-        }
-      }
-    }
-
-    // Set $imports and $includes
-    if (imports.length > 0) {
-      Object.assign(s, { $imports: imports });
-    }
-    if (includes.length > 0) {
-      Object.assign(s, { $includes: includes });
-    }
-  };
-
-  // Start linking from the root schema
-  linkSchemaInternal(schema, basePath);
+  linkSchemaInternal(schema, basePath, loadAndLink);
 
   return schema;
+}
+
+// =============================================================================
+// Internal linking helpers
+// =============================================================================
+
+/** Function to load and link a schema by schemaLocation */
+type LoadAndLink = (
+  schemaLocation: string,
+  currentBasePath: string,
+) => Schema | null;
+
+/** A schema reference with a resolvable schemaLocation */
+interface SchemaLocationRef {
+  readonly schemaLocation?: string;
+}
+
+/** Process imports/includes/redefines/overrides and link their schemas. */
+function linkSchemaInternal(
+  s: Schema,
+  currentBasePath: string,
+  loadAndLink: LoadAndLink,
+): void {
+  // Process xs:import elements
+  const imports = loadLinkedSchemas(s.import, currentBasePath, loadAndLink);
+
+  // Process xs:include elements
+  const includes = loadLinkedSchemas(s.include, currentBasePath, loadAndLink);
+
+  // Process xs:redefine elements - load base schema and attach to redefine.$schema
+  attachBaseSchemas(s.redefine, currentBasePath, loadAndLink);
+
+  // Process xs:override elements - load base schema and attach to override.$schema
+  attachBaseSchemas(s.override, currentBasePath, loadAndLink);
+
+  // Set $imports and $includes
+  if (imports.length > 0) {
+    Object.assign(s, { $imports: imports });
+  }
+  if (includes.length > 0) {
+    Object.assign(s, { $includes: includes });
+  }
+}
+
+/** Load and link every referenced schema, skipping missing ones. */
+function loadLinkedSchemas(
+  refs: readonly SchemaLocationRef[] | undefined,
+  currentBasePath: string,
+  loadAndLink: LoadAndLink,
+): Schema[] {
+  const linkedSchemas: Schema[] = [];
+  for (const ref of refs ?? []) {
+    if (ref.schemaLocation) {
+      const linked = loadAndLink(ref.schemaLocation, currentBasePath);
+      if (linked) {
+        linkedSchemas.push(linked);
+      }
+    }
+  }
+  return linkedSchemas;
+}
+
+/**
+ * Load the base schema of each redefine/override element
+ * and attach it to the element as `$schema`.
+ */
+function attachBaseSchemas(
+  refs: readonly SchemaLocationRef[] | undefined,
+  currentBasePath: string,
+  loadAndLink: LoadAndLink,
+): void {
+  for (const ref of refs ?? []) {
+    if (ref.schemaLocation) {
+      const linked = loadAndLink(ref.schemaLocation, currentBasePath);
+      if (linked) {
+        // Attach base schema directly to redefine/override element
+        Object.assign(ref, { $schema: linked });
+      }
+    }
+  }
 }
 
 /**
