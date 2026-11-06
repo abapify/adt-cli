@@ -93,9 +93,9 @@ function parseConfiguredFormat(root: string): {
     join(root, 'adt.config.mjs'),
   ].filter((value): value is string => Boolean(value));
 
-  for (const configPath of [
-    ...new Set(configPaths.map((value) => resolvePath(value))),
-  ]) {
+  for (const configPath of new Set(
+    configPaths.map((value) => resolvePath(value)),
+  )) {
     if (!existsSync(configPath)) continue;
     try {
       const config = readFileSync(configPath, 'utf8');

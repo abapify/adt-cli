@@ -341,21 +341,28 @@ function buildOutputSchema(
   return result;
 }
 
+const DEFAULT_SCHEMA_IMPORT_OPTIONS: {
+  $imports?: boolean;
+  $includes?: boolean;
+} = {
+  $imports: true,
+  $includes: true,
+};
+
 function getSchemaImports(
   schema: Record<string, unknown>,
   resolveImport: (schemaLocation: string) => string | null,
-  options: { $imports?: boolean; $includes?: boolean } = {
-    $imports: true,
-    $includes: true,
-  },
+  options: {
+    $imports?: boolean;
+    $includes?: boolean;
+  } = DEFAULT_SCHEMA_IMPORT_OPTIONS,
 ): Array<{ name: string; path: string }> {
   const imports: Array<{ name: string; path: string }> = [];
 
   // Handle xs:import (only if $imports is enabled)
   if (options.$imports) {
     const xsdImports = schema.import as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     if (xsdImports) {
       for (const imp of xsdImports) {
         if (imp.schemaLocation) {
@@ -374,8 +381,7 @@ function getSchemaImports(
   // Handle xs:include (only if $includes is enabled)
   if (options.$includes) {
     const xsdIncludes = schema.include as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     if (xsdIncludes) {
       for (const inc of xsdIncludes) {
         if (inc.schemaLocation) {
@@ -407,8 +413,8 @@ class SchemaRef {
 function toSingleQuoteLiteral(jsonStr: string): string {
   const inner = jsonStr
     .slice(1, -1)
-    .replaceAll('\\"', '"')
-    .replaceAll("'", "\\'");
+    .replaceAll(String.raw`\"`, '"')
+    .replaceAll("'", String.raw`\'`);
   return `'${inner}'`;
 }
 

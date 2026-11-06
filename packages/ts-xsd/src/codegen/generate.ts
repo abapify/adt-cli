@@ -316,8 +316,8 @@ function schemaToLiteral(
 function toSingleQuoteLiteral(jsonStr: string): string {
   const inner = jsonStr
     .slice(1, -1)
-    .replaceAll('\\"', '"')
-    .replaceAll("'", "\\'");
+    .replaceAll(String.raw`\"`, '"')
+    .replaceAll("'", String.raw`\'`);
   return `'${inner}'`;
 }
 

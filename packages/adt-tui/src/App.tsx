@@ -29,7 +29,7 @@ export function App({
   router: _router,
   systemName,
 }: AppProps): React.ReactNode {
-  const [, setResizeKey] = useState(0);
+  const [_resizeKey, setResizeKey] = useState(0);
 
   // Handle terminal resize - just trigger re-render, don't clear
   useEffect(() => {
@@ -44,6 +44,10 @@ export function App({
   }, []);
 
   return (
-    <Navigator startUrl={startUrl} fetch={fetch} systemName={systemName} />
+    <Navigator
+      startUrl={startUrl}
+      fetch={fetch}
+      systemName={systemName}
+    />
   );
 }

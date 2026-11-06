@@ -105,7 +105,9 @@ async function normalizeXml(xml: string): Promise<string> {
 
     return normalized;
   } catch (_err) {
-    // If parsing fails, return trimmed original
+    // The exception is ignored on purpose: normalizeXml runs on round-trip
+    // input that may legitimately be malformed or non-XML, and falling back
+    // to the trimmed original is the desired outcome in that case.
     return xml.trim();
   }
 }

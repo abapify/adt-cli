@@ -126,7 +126,7 @@ function buildPathInfo(resolvedPath: string): {
   );
 
   // Build regex by replacing sentinels with capture groups
-  const escaped = resolvedPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = resolvedPath.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
   const regexStr = escaped.split(PARAM_MARKER).join('([^/]+)');
 
   // Build template by replacing sentinels with ${paramName} syntax

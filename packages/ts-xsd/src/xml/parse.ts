@@ -317,9 +317,7 @@ function parseWildcardChildren(
  */
 function parseAnyValue(node: XmlElement): unknown {
   const result: Record<string, unknown> = {};
-  // NamedNodeMap is not iterable in xmldom — use index-based access
-  for (let i = 0; i < node.attributes.length; i++) {
-    const attr = node.attributes[i];
+  for (const attr of node.attributes) {
     result[`@${attr.name}`] = attr.value;
   }
 

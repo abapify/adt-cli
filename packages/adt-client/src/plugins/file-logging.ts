@@ -76,7 +76,7 @@ export class FileLoggingPlugin implements ResponsePlugin {
 
     // Parse segments
     const [basePath] = path.split('?');
-    const segments = basePath.split('/').filter((s) => s);
+    const segments = basePath.split('/').filter(Boolean);
 
     // Check if source endpoint (no extension)
     const sourceTypes = [

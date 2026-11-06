@@ -105,7 +105,7 @@ function deriveFromBase(base: string): {
     );
   }
   // Permit letters/digits/underscore in the base; we'll uppercase it.
-  if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(trimmed)) {
+  if (!/^[A-Za-z]\w*$/.test(trimmed)) {
     throw new NamesConfigError(
       `Invalid "base" name: "${base}" must start with a letter and contain only letters, digits, and underscores.`,
     );

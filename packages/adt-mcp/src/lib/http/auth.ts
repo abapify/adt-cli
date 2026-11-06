@@ -119,7 +119,7 @@ function extractBearer(req: http.IncomingMessage): string | undefined {
   // Skip a single required whitespace char, then any leading whitespace.
   const rest = trimmed.slice(6);
   if (rest.length === 0) return undefined;
-  const first = rest.charCodeAt(0);
+  const first = rest.codePointAt(0);
   // ASCII whitespace: space, tab, LF, CR, VT, FF.
   const isWs =
     first === 0x20 ||

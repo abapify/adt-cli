@@ -92,7 +92,7 @@ export const infoCommand = new Command('info')
           displayProperty('sapRelease', 'SAP Release');
 
           // Display any other properties
-          const knownKeys = [
+          const knownKeys = new Set([
             'systemID',
             'client',
             'userName',
@@ -100,9 +100,9 @@ export const infoCommand = new Command('info')
             'language',
             'release',
             'sapRelease',
-          ];
+          ]);
           const otherKeys = Object.keys(systemData).filter(
-            (k) => !knownKeys.includes(k),
+            (k) => !knownKeys.has(k),
           );
           if (otherKeys.length > 0) {
             console.log('\n  Additional properties:');

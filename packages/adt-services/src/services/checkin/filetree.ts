@@ -28,7 +28,7 @@ class FsFileTree implements FileTree {
 
   async read(path: string): Promise<string> {
     const content = await readFile(join(this.root, path), 'utf-8');
-    return content.charCodeAt(0) === 0xfeff ? content.slice(1) : content;
+    return content.codePointAt(0) === 0xfeff ? content.slice(1) : content;
   }
 
   async readBuffer(path: string): Promise<Buffer> {

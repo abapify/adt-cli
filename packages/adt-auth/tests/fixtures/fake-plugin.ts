@@ -24,13 +24,11 @@ declare global {
 }
 
 function state(): FakePluginState {
-  if (!globalThis.__FAKE_PLUGIN) {
-    globalThis.__FAKE_PLUGIN = {
-      authenticateCalls: 0,
-      refreshCalls: 0,
-      hasRefresh: true,
-    };
-  }
+  globalThis.__FAKE_PLUGIN ??= {
+    authenticateCalls: 0,
+    refreshCalls: 0,
+    hasRefresh: true,
+  };
   return globalThis.__FAKE_PLUGIN;
 }
 
@@ -43,7 +41,7 @@ const plugin: AuthPlugin = {
       method: 'cookie',
       credentials: {
         cookies: `SAP_SESSIONID=fake-${s.authenticateCalls}`,
-        expiresAt: new Date(Date.now() + 3600_000),
+        expiresAt: new Date(Date.now() + 3_600_000),
       },
     };
   },
@@ -62,7 +60,7 @@ Object.defineProperty(plugin, 'refresh', {
         method: 'cookie',
         credentials: {
           cookies: `SAP_SESSIONID=refreshed-${s.refreshCalls}`,
-          expiresAt: new Date(Date.now() + 3600_000),
+          expiresAt: new Date(Date.now() + 3_600_000),
         },
       };
     };

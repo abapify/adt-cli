@@ -2,10 +2,7 @@ import { Config } from '@abaplint/core';
 import type { LintSystemType } from './types';
 
 function cloneDefaultConfig(): Record<string, unknown> {
-  return JSON.parse(JSON.stringify(Config.getDefault().get())) as Record<
-    string,
-    unknown
-  >;
+  return structuredClone(Config.getDefault().get()) as Record<string, unknown>;
 }
 
 export function buildPreset(

@@ -215,8 +215,8 @@ export const lsCommand = new Command('ls')
 
     // Filter by type if specified
     if (options.type) {
-      const types = options.type.toUpperCase().split(',');
-      objects = objects.filter((obj) => types.includes(obj.type));
+      const types = new Set(options.type.toUpperCase().split(','));
+      objects = objects.filter((obj) => types.has(obj.type));
     }
 
     // Sort by name

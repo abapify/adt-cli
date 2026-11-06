@@ -16,7 +16,7 @@ import type { AdkContext } from '../../base/context';
 import { getGlobalContext } from '../../base/global-context';
 import { getRegisteredTypes } from '../../base/registry';
 import { resolveClassComponentOwnerName } from './transport-object-owner';
-import type { TransportGetResponse } from '../../base/adt';
+export type { TransportGetResponse as TransportResponse } from '../../base/adt';
 import type { TransportData } from './transport/transport.types';
 
 function isNotFoundError(error: unknown): boolean {
@@ -80,9 +80,6 @@ interface TransportTaskData {
   target?: string;
   abap_object?: TransportObjectData | TransportObjectData[];
 }
-
-// Re-export the response type for consumers
-export type { TransportGetResponse as TransportResponse };
 
 /**
  * Helper to normalize array/single value to array
@@ -389,9 +386,7 @@ export class AdkTransport {
    * - all_objects container (if present)
    */
   get objects(): AdkTransportObjectRef[] {
-    if (!this._objects) {
-      this._objects = this.collectObjects();
-    }
+    this._objects ??= this.collectObjects();
     return this._objects;
   }
 

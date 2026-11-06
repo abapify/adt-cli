@@ -144,7 +144,7 @@ const isBun = (globalThis as { Bun?: unknown }).Bun !== undefined;
 export function trustTestCa(cert: string): void {
   if (isBun) return;
   if (typeof tls.setDefaultCACertificates !== 'function') {
-    throw new Error(
+    throw new TypeError(
       'trustTestCa requires Node >= 22.19 / >= 24.5 ' +
         '(tls.setDefaultCACertificates) or Bun',
     );

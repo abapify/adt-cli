@@ -520,7 +520,7 @@ export function emitOperationsInterface(
           paramKind: 'importing',
           name: bodyName,
           typeRef: ref,
-          optional: op.requestBody?.required === false ? true : false,
+          optional: op.requestBody?.required === false,
         }),
       );
     }

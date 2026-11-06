@@ -342,7 +342,7 @@ export const atcCommand: CliCommandPlugin = {
 
     if (options.fromFile) {
       // Read URIs from file
-      const { readFileSync } = await import('fs');
+      const { readFileSync } = await import('node:fs');
       const fileContent = readFileSync(options.fromFile, 'utf-8');
       targetUris = fileContent
         .split('\n')

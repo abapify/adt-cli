@@ -73,7 +73,10 @@ function Checkbox({
 }) {
   return (
     <Box>
-      <Text color={focused ? 'cyan' : undefined} bold={focused}>
+      <Text
+        color={focused ? 'cyan' : undefined}
+        bold={focused}
+      >
         {focused ? '▶ ' : '  '}
         {checked ? '☑' : '☐'} {label}
       </Text>
@@ -155,7 +158,10 @@ function SelectField({
         {focused && !expanded && <Text color="gray"> [Enter to open]</Text>}
       </Box>
       {expanded && (
-        <Box flexDirection="column" marginLeft={label.length + 4}>
+        <Box
+          flexDirection="column"
+          marginLeft={label.length + 4}
+        >
           {options.map((opt, idx) => (
             <Box key={opt.value}>
               <Text
@@ -176,7 +182,10 @@ function SelectField({
             </Box>
           ))}
           <Box marginTop={0}>
-            <Text color="gray" dimColor>
+            <Text
+              color="gray"
+              dimColor
+            >
               ↑↓ Select | Enter Confirm | Esc Cancel
             </Text>
           </Box>
@@ -189,8 +198,14 @@ function SelectField({
 // Section header
 function SectionHeader({ title }: { title: string }) {
   return (
-    <Box marginTop={1} marginBottom={0}>
-      <Text color="yellow" bold>
+    <Box
+      marginTop={1}
+      marginBottom={0}
+    >
+      <Text
+        color="yellow"
+        bold
+      >
         ─ {title} ─
       </Text>
     </Box>
@@ -277,7 +292,7 @@ export function TreeConfigEditor({
     const currentIndex = DATE_FILTER_OPTIONS.findIndex(
       (o) => o.value === config.releasedDateFilter,
     );
-    setDropdownIndex(currentIndex >= 0 ? currentIndex : 0);
+    setDropdownIndex(Math.max(currentIndex, 0));
     setDropdownOpen(true);
   }, [config.releasedDateFilter]);
 
@@ -392,7 +407,10 @@ export function TreeConfigEditor({
   const showDateFields = config.released && config.releasedDateFilter === '4';
 
   return (
-    <Box flexDirection="column" padding={1}>
+    <Box
+      flexDirection="column"
+      padding={1}
+    >
       {/* Title */}
       <Box
         borderStyle="single"
@@ -400,7 +418,10 @@ export function TreeConfigEditor({
         paddingX={1}
         marginBottom={1}
       >
-        <Text bold color="cyan">
+        <Text
+          bold
+          color="cyan"
+        >
           Configure Transport Organizer Tree
         </Text>
       </Box>
@@ -447,7 +468,10 @@ export function TreeConfigEditor({
 
       {/* Date filter - only show when Released is checked */}
       {config.released && (
-        <Box marginLeft={4} flexDirection="column">
+        <Box
+          marginLeft={4}
+          flexDirection="column"
+        >
           <SelectField
             label="Date Filter"
             value={config.releasedDateFilter}
@@ -482,7 +506,12 @@ export function TreeConfigEditor({
       )}
 
       {/* Help text */}
-      <Box marginTop={1} borderStyle="single" borderColor="gray" paddingX={1}>
+      <Box
+        marginTop={1}
+        borderStyle="single"
+        borderColor="gray"
+        paddingX={1}
+      >
         <Text color="gray">
           ↑↓ Navigate | Space/Enter Toggle/Edit | ←→ Change selection | Ctrl+S
           Save | Esc Cancel

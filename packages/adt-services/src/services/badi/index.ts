@@ -147,7 +147,7 @@ export async function getBadiInfo({
   );
 
   if (typeof response !== 'string') {
-    throw new Error('Unexpected non-XML response from ENHO endpoint');
+    throw new TypeError('Unexpected non-XML response from ENHO endpoint');
   }
 
   return parseEnhancementImplementation(response);

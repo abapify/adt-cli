@@ -588,10 +588,7 @@ function indexedPackageMatches(
   previous: ObjectDescriptor,
   group: ProcessGroupContext['group'],
 ): boolean {
-  const previousPackage = previous.packagePath
-    .at(previous.packagePath.length - 1)
-    ?.trim()
-    .toUpperCase();
+  const previousPackage = previous.packagePath.at(-1)?.trim().toUpperCase();
   if (!previousPackage) return true;
   return group.entries.every(({ object }) => {
     const packageName = object.packageName?.trim().toUpperCase();

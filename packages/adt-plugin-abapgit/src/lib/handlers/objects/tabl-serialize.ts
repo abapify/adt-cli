@@ -31,8 +31,8 @@ const XML_NAMED_ENTITIES: Record<string, string> = {
 
 function decodeNumericCode(decimal?: string, hex?: string): string {
   const base = decimal !== undefined ? 10 : 16;
-  const value = decimal !== undefined ? decimal : (hex ?? '');
-  return String.fromCharCode(parseInt(value, base));
+  const value = decimal ?? hex ?? '';
+  return String.fromCodePoint(Number.parseInt(value, base));
 }
 
 function decodeXmlEntities(text: string): string {

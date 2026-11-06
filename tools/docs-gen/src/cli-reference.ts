@@ -32,8 +32,8 @@ const NOTE = generatedNote('the Commander command tree');
 const BUNDLED_PLUGINS = new Set(['atc', 'codegen', 'diff', 'export', 'flow']);
 
 function pluginNote(cmdName: string, plugins: CliCommandPlugin[]): string {
-  const plugin = plugins.find((p) => p.name === cmdName);
-  if (!plugin) return '';
+  const hasPlugin = plugins.some((p) => p.name === cmdName);
+  if (!hasPlugin) return '';
   const pkg =
     PLUGIN_MODULES.find((s) => s.endsWith(`/commands/${cmdName}`))?.split(
       '/commands/',
@@ -51,8 +51,8 @@ export interface CliPage {
   content: string;
 }
 
-function isHidden(cmd: Command): boolean {
-  return Boolean((cmd as unknown as { _hidden?: boolean })._hidden);
+function isHidden(cmd: unknown): cmd is { _hidden?: boolean } {
+  return Boolean((cmd as { _hidden?: boolean })._hidden);
 }
 
 function visibleCommands(cmd: Command): Command[] {

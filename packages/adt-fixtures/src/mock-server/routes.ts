@@ -1345,7 +1345,7 @@ export function matchRoute(
           value: 'Released',
         });
       }
-      for (const [taskNumber, response] of [...f.transportTaskResponses]) {
+      for (const [taskNumber, response] of f.transportTaskResponses) {
         let updated = replaceRequestAttribute(response, {
           name: 'status',
           value: 'R',
@@ -1511,7 +1511,7 @@ export function matchRoute(
     /\/sap\/bc\/adt\/cts\/transportrequests\/\w+/.test(pathname)
   ) {
     const targetUser = extractTargetUser(requestBody);
-    const requested = pathname.split('/').filter(Boolean).at(-1) ?? '';
+    const requested = pathname.split('/').findLast(Boolean) ?? '';
     if (targetUser) {
       const requestNumber = extractRequestAttribute(
         f.transportSingle,
@@ -1544,7 +1544,7 @@ export function matchRoute(
             value: targetUser,
           });
         }
-        for (const [taskNumber, response] of [...f.transportTaskResponses]) {
+        for (const [taskNumber, response] of f.transportTaskResponses) {
           let updated = replaceRequestAttribute(response, {
             name: 'owner',
             value: targetUser,

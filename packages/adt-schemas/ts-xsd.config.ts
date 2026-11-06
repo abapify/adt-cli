@@ -311,7 +311,7 @@ export default defineConfig({
       '',
     ];
     // Find the index of '// SAP schemas' and insert before it
-    const sapIndex = typedLines.findIndex((line) => line === '// SAP schemas');
+    const sapIndex = typedLines.indexOf('// SAP schemas');
     typedLines.splice(sapIndex, 0, ...typeImportLines);
 
     const typedIndex = typedLines.join('\n');

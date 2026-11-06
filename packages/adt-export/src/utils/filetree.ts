@@ -31,7 +31,7 @@ export class FsFileTree implements FileTree {
     const fullPath = join(this.root, path);
     const content = await readFile(fullPath, 'utf-8');
     // Strip UTF-8 BOM if present
-    return content.charCodeAt(0) === 0xfeff ? content.slice(1) : content;
+    return content.codePointAt(0) === 0xfeff ? content.slice(1) : content;
   }
 
   async readBuffer(path: string): Promise<Buffer> {
@@ -74,7 +74,7 @@ export class MemoryFileTree implements FileTree {
     //         wildcard expansions (e.g. '**' -> '.*' -> '\\.\\*').
     // Step 2: expand '**' then '*' using a placeholder that contains no
     //         regex metacharacters, so later passes leave it alone.
-    const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
+    const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, String.raw`\$&`);
     const body = escaped
       .replaceAll('**', '\x00DOUBLESTAR\x00')
       .replaceAll('*', '[^/]*')

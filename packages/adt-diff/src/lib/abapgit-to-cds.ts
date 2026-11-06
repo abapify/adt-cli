@@ -290,8 +290,7 @@ function buildFieldInfos(
 ): MemberInfo[] {
   const result: MemberInfo[] = [];
 
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
+  for (const entry of entries) {
     const fieldName = entry.FIELDNAME ?? '';
 
     // .INCLU-<SUFFIX> entries → include with suffix

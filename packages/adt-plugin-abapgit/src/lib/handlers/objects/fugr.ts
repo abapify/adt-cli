@@ -150,12 +150,11 @@ async function buildFunctionModuleFiles(
     }
     try {
       const source =
-        suppliedFmSource !== undefined
-          ? suppliedFmSource
-          : await obj.client.adt.functions.groups.fmodules.source.main.get(
-              obj.name,
-              fm.name,
-            );
+        suppliedFmSource ??
+        (await obj.client.adt.functions.groups.fmodules.source.main.get(
+          obj.name,
+          fm.name,
+        ));
       if (shouldIncludeSource(source, suppliedFmSource)) {
         files.push(
           ctx.createFile(

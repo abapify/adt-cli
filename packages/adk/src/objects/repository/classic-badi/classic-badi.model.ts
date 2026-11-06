@@ -37,7 +37,7 @@ abstract class AdkClassicBadiBase {
   abstract getMetadata(): Promise<BasicObjectPropertiesResponse>;
 
   static async get<T extends AdkClassicBadiBase>(
-    this: { new (input: { ctx: AdkContext; name: string }): T },
+    this: new (input: { ctx: AdkContext; name: string }) => T,
     input: ClassicBadiInput,
   ): Promise<T> {
     const context = input.ctx ?? getGlobalContext();
@@ -47,7 +47,7 @@ abstract class AdkClassicBadiBase {
   }
 
   static async exists<T extends AdkClassicBadiBase>(
-    this: { new (input: { ctx: AdkContext; name: string }): T },
+    this: new (input: { ctx: AdkContext; name: string }) => T,
     input: ClassicBadiInput,
   ): Promise<boolean> {
     try {

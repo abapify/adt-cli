@@ -712,7 +712,7 @@ export const aunitCommand: CliCommandPlugin = {
     // Exit with non-zero code equal to number of failures+errors (sapcli convention)
     const failures = result.failCount + result.errorCount;
     if (failures > 0) {
-      process.exit(failures > 125 ? 125 : failures);
+      process.exit(Math.min(failures, 125));
     }
   },
 };

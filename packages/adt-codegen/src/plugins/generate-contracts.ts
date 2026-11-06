@@ -29,7 +29,7 @@ interface ContentTypeMapping {
   fallbacks: Record<string, string>;
 }
 
-/** @deprecated Use EndpointDefinition[] instead */
+/** Legacy { enabled: string[] } config format, superseded by EndpointDefinition[]. */
 interface LegacyEnabledEndpoints {
   enabled: string[];
   notes?: Record<string, string>;
@@ -228,9 +228,9 @@ function sanitizeParamName(name: string): string {
   // Remove leading special characters like & or *
   let sanitized = name.replace(/^[&*]+/, '');
   // Replace any remaining invalid characters with underscore
-  sanitized = sanitized.replaceAll(/[^a-zA-Z0-9_]/g, '_');
+  sanitized = sanitized.replaceAll(/\W/g, '_');
   // Ensure it starts with a letter or underscore
-  if (/^[0-9]/.test(sanitized)) {
+  if (/^\d/.test(sanitized)) {
     sanitized = '_' + sanitized;
   }
   return sanitized || 'param';

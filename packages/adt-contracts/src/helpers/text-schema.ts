@@ -17,7 +17,7 @@ import type { Serializable } from '@abapify/speci/rest';
  * to decide whether the descriptor carries a body schema.
  */
 export const textPlain = {
-  parse: (x: unknown) => String(x),
+  parse: String,
   build: (x: string) => x,
   _infer: undefined as unknown as string,
 } satisfies Serializable<string>;

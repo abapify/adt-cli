@@ -323,7 +323,7 @@ export function formatXml(xml: string): string {
   const parts: string[] = [];
   let pos = 0;
   while (pos < xml.length) {
-    if (xml.charCodeAt(pos) === 60 /* '<' */) {
+    if (xml.codePointAt(pos) === 60 /* '<' */) {
       const end = xml.indexOf('>', pos + 1);
       if (end === -1) {
         parts.push(xml.slice(pos));
