@@ -518,6 +518,105 @@ async function resolveTargets(options: {
 /**
  * AUnit Command Plugin
  */
+/** CLI options parsed for the `aunit` command. */
+interface AunitCliOptions {
+  package?: string;
+  object?: string;
+  class?: string;
+  transport?: string;
+  fromFile?: string;
+  format?: OutputFormat;
+  output?: string;
+  coverage?: boolean;
+  coverageOutput?: string;
+  coverageFormat?: 'jacoco' | 'sonar-generic';
+}
+
+/** Emit the result in the requested output format. */
+async function outputResults(
+  result: AunitResult,
+  options: Pick<AunitCliOptions, 'format' | 'output'>,
+  ctx: CliContext,
+): Promise<void> {
+  if (options.format === 'json') {
+    console.log(JSON.stringify(result, null, 2));
+  } else if (options.format === 'junit' && options.output) {
+    await outputJunitReport(result, options.output);
+    // Also print summary to console
+    displayResults(result, ctx.adtSystemName);
+  } else if (options.format === 'sonar' && options.output) {
+    outputSonarReport(result, options.output);
+    // Also print summary to console
+    displayResults(result, ctx.adtSystemName);
+  } else {
+    displayResults(result, ctx.adtSystemName);
+  }
+}
+
+/**
+ * Coverage reporting — fetch the measurement, render it in the requested
+ * format, and write it to `--coverage-output` (or stdout).
+ */
+async function reportCoverage(
+  response: RunResultResponse,
+  client: AdtClient,
+  targetUris: string[],
+  options: Pick<AunitCliOptions, 'coverageFormat' | 'coverageOutput'>,
+  ctx: CliContext,
+): Promise<void> {
+  const measurementId = extractCoverageMeasurementId(response);
+  if (!measurementId) {
+    ctx.logger.warn?.(
+      '⚠️  Coverage requested but SAP returned no measurement link. ' +
+        'The system may not have coverage collection enabled for this user/package, ' +
+        'or additional system configuration is required.',
+    );
+    return;
+  }
+  if (!client.adt.runtime) {
+    ctx.logger.warn?.(
+      '⚠️  Coverage link present but the runtime/traces contract is not available on this client.',
+    );
+    return;
+  }
+
+  try {
+    const cov = client.adt.runtime.traces.coverage;
+    const { measurements, statements } = await fetchCoverageData(
+      cov,
+      measurementId,
+      targetUris,
+    );
+    const format = options.coverageFormat ?? 'jacoco';
+    const sourcePathResolver = createAbapGitCoverageSourceResolver();
+    const xml =
+      format === 'sonar-generic'
+        ? toSonarGenericCoverageXml({
+            measurements,
+            statements,
+            sourcePathResolver,
+          })
+        : toJacocoXml({
+            measurements,
+            statements,
+            sourcePathResolver,
+          });
+    if (options.coverageOutput) {
+      const { writeFileSync } = await import('node:fs');
+      writeFileSync(options.coverageOutput, xml, 'utf-8');
+      ctx.logger.info(
+        `📊 Coverage report (${format}) written to ${options.coverageOutput}`,
+      );
+    } else {
+      console.log(xml);
+    }
+  } catch (err) {
+    ctx.logger.error(
+      `❌ Coverage collection failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
 export const aunitCommand: CliCommandPlugin = {
   name: 'aunit',
   description: 'Run ABAP Unit tests',
@@ -572,18 +671,7 @@ export const aunitCommand: CliCommandPlugin = {
   ],
 
   async execute(args, ctx: CliContext) {
-    const options = args as {
-      package?: string;
-      object?: string;
-      class?: string;
-      transport?: string;
-      fromFile?: string;
-      format?: OutputFormat;
-      output?: string;
-      coverage?: boolean;
-      coverageOutput?: string;
-      coverageFormat?: 'jacoco' | 'sonar-generic';
-    };
+    const options = args as AunitCliOptions;
 
     // Validate: at least one target
     const targetCount = [
@@ -643,70 +731,11 @@ export const aunitCommand: CliCommandPlugin = {
     const result = convertResponse(response);
 
     // Output
-    if (options.format === 'json') {
-      console.log(JSON.stringify(result, null, 2));
-    } else if (options.format === 'junit' && options.output) {
-      await outputJunitReport(result, options.output);
-      // Also print summary to console
-      displayResults(result, ctx.adtSystemName);
-    } else if (options.format === 'sonar' && options.output) {
-      outputSonarReport(result, options.output);
-      // Also print summary to console
-      displayResults(result, ctx.adtSystemName);
-    } else {
-      displayResults(result, ctx.adtSystemName);
-    }
+    await outputResults(result, options, ctx);
 
     // Coverage reporting – only if the user explicitly asked for it.
     if (options.coverage) {
-      const measurementId = extractCoverageMeasurementId(response);
-      if (!measurementId) {
-        ctx.logger.warn?.(
-          '⚠️  Coverage requested but SAP returned no measurement link. ' +
-            'The system may not have coverage collection enabled for this user/package, ' +
-            'or additional system configuration is required.',
-        );
-      } else if (!client.adt.runtime) {
-        ctx.logger.warn?.(
-          '⚠️  Coverage link present but the runtime/traces contract is not available on this client.',
-        );
-      } else {
-        try {
-          const cov = client.adt.runtime.traces.coverage;
-          const { measurements, statements } = await fetchCoverageData(
-            cov,
-            measurementId,
-            targetUris,
-          );
-          const format = options.coverageFormat ?? 'jacoco';
-          const sourcePathResolver = createAbapGitCoverageSourceResolver();
-          const xml =
-            format === 'sonar-generic'
-              ? toSonarGenericCoverageXml({
-                  measurements,
-                  statements,
-                  sourcePathResolver,
-                })
-              : toJacocoXml({
-                  measurements,
-                  statements,
-                  sourcePathResolver,
-                });
-          if (options.coverageOutput) {
-            const { writeFileSync } = await import('node:fs');
-            writeFileSync(options.coverageOutput, xml, 'utf-8');
-            ctx.logger.info(
-              `📊 Coverage report (${format}) written to ${options.coverageOutput}`,
-            );
-          } else {
-            console.log(xml);
-          }
-        } catch (err) {
-          ctx.logger.error(
-            `❌ Coverage collection failed: ${err instanceof Error ? err.message : String(err)}`,
-          );
-        }
-      }
+      await reportCoverage(response, client, targetUris, options, ctx);
     }
 
     // Exit with non-zero code equal to number of failures+errors (sapcli convention)
