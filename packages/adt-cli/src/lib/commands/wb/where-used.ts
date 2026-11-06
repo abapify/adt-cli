@@ -82,6 +82,32 @@ function parseUsages(
   return { numberOfResults, description, usages };
 }
 
+/** Print where-used results as a human-readable list. */
+function printWhereUsedResult(
+  objectName: string,
+  objectUri: string,
+  parsed: ReturnType<typeof parseUsages>,
+): void {
+  console.log(`🔍 Where-used: ${objectName}`);
+  console.log(`   URI: ${objectUri}`);
+  if (parsed.description) console.log(`   ${parsed.description}`);
+  if (parsed.usages.length === 0) {
+    console.log('\nNo references found.');
+    return;
+  }
+  const totalSuffix = parsed.numberOfResults
+    ? ` of ${parsed.numberOfResults}`
+    : '';
+  console.log(`\nFound ${parsed.usages.length}${totalSuffix} reference(s):`);
+  for (const u of parsed.usages) {
+    const typeSuffix = u.type ? ` (${u.type})` : '';
+    const head = `  • ${u.name ?? '(unnamed)'}${typeSuffix}`;
+    console.log(head);
+    if (u.uri) console.log(`      ${u.uri}`);
+    if (u.packageName) console.log(`      package: ${u.packageName}`);
+  }
+}
+
 export const whereUsedCommand = new Command('where-used')
   .description('Find all usages (where-used) of an ABAP object or symbol')
   .argument('<object>', 'Object name to search references for')
@@ -123,26 +149,7 @@ export const whereUsedCommand = new Command('where-used')
         return;
       }
 
-      console.log(`🔍 Where-used: ${objectName}`);
-      console.log(`   URI: ${objectUri}`);
-      if (parsed.description) console.log(`   ${parsed.description}`);
-      if (parsed.usages.length === 0) {
-        console.log('\nNo references found.');
-        return;
-      }
-      const totalSuffix = parsed.numberOfResults
-        ? ` of ${parsed.numberOfResults}`
-        : '';
-      console.log(
-        `\nFound ${parsed.usages.length}${totalSuffix} reference(s):`,
-      );
-      for (const u of parsed.usages) {
-        const typeSuffix = u.type ? ` (${u.type})` : '';
-        const head = `  • ${u.name ?? '(unnamed)'}${typeSuffix}`;
-        console.log(head);
-        if (u.uri) console.log(`      ${u.uri}`);
-        if (u.packageName) console.log(`      package: ${u.packageName}`);
-      }
+      printWhereUsedResult(objectName, objectUri, parsed);
     } catch (error) {
       console.error(
         '❌ Where-used failed:',
