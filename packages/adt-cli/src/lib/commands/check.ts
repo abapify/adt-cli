@@ -142,6 +142,16 @@ function displayResults(
 
 type CheckServiceLike = Pick<CheckService, 'run'>;
 
+type CheckObjectRef = { uri: string; type: string; name: string };
+
+type CheckCommandOptions = {
+  package?: string;
+  transport?: string;
+  type?: string;
+  sourceVersion?: CheckSourceVersion;
+  json?: boolean;
+};
+
 export interface CheckCommandDependencies {
   getClient(): Promise<AdtClient>;
   createService(client: AdtClient): CheckServiceLike;
@@ -159,6 +169,160 @@ const defaultDependencies: CheckCommandDependencies = {
     process.exit(code);
   },
 };
+
+/**
+ * Collect abap_object entries from a typed transport response.
+ * Schema shape (see transportmanagment.types.ts): deeply nested
+ * workbench/customizing → target → status → request[] → { task[]?,
+ * abap_object[]? } with `abap_object.uri`.
+ */
+function collectTransportAbapObjects(
+  node: unknown,
+  collected: Map<string, { type: string; name: string }>,
+): void {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) {
+    for (const item of node) collectTransportAbapObjects(item, collected);
+    return;
+  }
+  const rec = node as Record<string, unknown>;
+  const uri = rec.uri;
+  const type = rec.type;
+  const name = rec.name;
+  // abap_object entries have pgmid/type/name/uri
+  if (
+    typeof uri === 'string' &&
+    typeof rec.pgmid === 'string' &&
+    typeof name === 'string'
+  ) {
+    collected.set(uri, {
+      type: typeof type === 'string' ? type : 'UNKNOWN',
+      name,
+    });
+  }
+  for (const v of Object.values(rec)) collectTransportAbapObjects(v, collected);
+}
+
+// Mode 1: resolve all objects in a package.
+// Returns false (after reporting + setting the exit code) when empty.
+async function collectPackageTargets(
+  client: AdtClient,
+  packageName: string,
+  options: CheckCommandOptions,
+  deps: CheckCommandDependencies,
+  checkObjects: CheckObjectRef[],
+): Promise<boolean> {
+  if (!options.json) {
+    deps.writeLine(`🔍 Resolving objects in package ${packageName}...`);
+  }
+  const pkgObjects = await resolvePackageObjects(client, packageName);
+  if (pkgObjects.length === 0) {
+    deps.writeError(`⚠️ No objects found in package ${packageName}`);
+    deps.setExitCode(1);
+    return false;
+  }
+  checkObjects.push(...pkgObjects);
+  if (!options.json) {
+    deps.writeLine(`   Found ${checkObjects.length} object(s)`);
+  }
+  return true;
+}
+
+// Mode 2: fetch objects from transport tasks.
+// Returns false (after reporting + setting the exit code) when empty.
+async function collectTransportTargets(
+  client: AdtClient,
+  transport: string,
+  options: CheckCommandOptions,
+  deps: CheckCommandDependencies,
+  checkObjects: CheckObjectRef[],
+): Promise<boolean> {
+  if (!options.json) {
+    deps.writeLine(`🔍 Resolving objects in transport ${transport}...`);
+  }
+  const trResponse = await client.services.transports.get(transport);
+  const collected = new Map<string, { type: string; name: string }>();
+  collectTransportAbapObjects(trResponse, collected);
+  for (const [uri, meta] of collected) {
+    checkObjects.push({ uri, type: meta.type, name: meta.name });
+  }
+  if (checkObjects.length === 0) {
+    deps.writeError(`⚠️ No objects found in transport ${transport}`);
+    deps.setExitCode(1);
+    return false;
+  }
+  if (!options.json) {
+    deps.writeLine(`   Found ${checkObjects.length} object(s)`);
+  }
+  return true;
+}
+
+// Mode 3: resolve individual object names. Resolve failures set the exit
+// code but do not abort — successfully resolved objects are still checked.
+async function collectNamedTargets(
+  client: AdtClient,
+  objects: string[],
+  options: CheckCommandOptions,
+  deps: CheckCommandDependencies,
+  checkObjects: CheckObjectRef[],
+): Promise<boolean> {
+  if (!options.json) {
+    deps.writeLine(`🔍 Resolving ${objects.length} object(s)...`);
+  }
+  let hasResolveErrors = false;
+  for (const objectName of objects) {
+    try {
+      const resolved = await resolveObjectUri(client, objectName, options.type);
+      checkObjects.push(resolved);
+      if (!options.json) {
+        deps.writeLine(
+          `   📄 ${resolved.name} (${resolved.type}) → ${resolved.uri}`,
+        );
+      }
+    } catch (err) {
+      hasResolveErrors = true;
+      deps.writeError(
+        `   ❌ ${objectName}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+  if (hasResolveErrors) {
+    deps.setExitCode(1);
+  }
+  return true;
+}
+
+/** Print check results (JSON or human-readable) and set the exit code. */
+function outputCheckResults(
+  reports: CheckReport[],
+  result: { hasErrors: boolean; hasWarnings: boolean },
+  checkCount: number,
+  options: CheckCommandOptions,
+  deps: CheckCommandDependencies,
+): void {
+  if (options.json) {
+    deps.writeLine(JSON.stringify(reports, null, 2));
+    if (result.hasErrors) deps.setExitCode(1);
+    return;
+  }
+
+  deps.writeLine(`\n📋 Check Results:`);
+  const totalMessages = displayResults(reports, deps.writeLine);
+
+  if (totalMessages === 0) {
+    deps.writeLine(`\n✅ All ${checkCount} object(s) passed syntax check`);
+    return;
+  }
+
+  deps.writeLine(`\n📊 ${totalMessages} message(s) found`);
+  if (result.hasErrors) {
+    deps.writeLine('❌ Errors detected');
+    deps.setExitCode(1);
+  }
+  if (result.hasWarnings) {
+    deps.writeLine('⚠️ Warnings detected');
+  }
+}
 
 export function createCheckCommand(
   overrides: Partial<CheckCommandDependencies> = {},
@@ -203,131 +367,41 @@ export function createCheckCommand(
       ) => {
         try {
           const client = await dependencies.getClient();
-          const checkObjects: Array<{
-            uri: string;
-            type: string;
-            name: string;
-          }> = [];
+          const checkObjects: CheckObjectRef[] = [];
 
-          // Mode 1: Package
+          // Mode 1: Package / Mode 2: Transport / Mode 3: Individual objects
+          let resolved = false;
           if (options.package) {
-            if (!options.json) {
-              dependencies.writeLine(
-                `🔍 Resolving objects in package ${options.package}...`,
-              );
-            }
-            const pkgObjects = await resolvePackageObjects(
+            resolved = await collectPackageTargets(
               client,
               options.package,
+              options,
+              dependencies,
+              checkObjects,
             );
-            if (pkgObjects.length === 0) {
-              dependencies.writeError(
-                `⚠️ No objects found in package ${options.package}`,
-              );
-              dependencies.setExitCode(1);
-              return;
-            }
-            checkObjects.push(...pkgObjects);
-            if (!options.json) {
-              dependencies.writeLine(
-                `   Found ${checkObjects.length} object(s)`,
-              );
-            }
-          }
-          // Mode 2: Transport (fetch objects from transport tasks)
-          else if (options.transport) {
-            if (!options.json) {
-              dependencies.writeLine(
-                `🔍 Resolving objects in transport ${options.transport}...`,
-              );
-            }
-            const trResponse = await client.services.transports.get(
+          } else if (options.transport) {
+            resolved = await collectTransportTargets(
+              client,
               options.transport,
+              options,
+              dependencies,
+              checkObjects,
             );
-            // Walk the typed transport response to collect abap_object URIs.
-            // Schema shape (see transportmanagment.types.ts): deeply nested
-            // workbench/customizing → target → status → request[] → { task[]?,
-            // abap_object[]? } with `abap_object.uri`.
-            const collected = new Map<string, { type: string; name: string }>();
-            const visit = (node: unknown): void => {
-              if (!node || typeof node !== 'object') return;
-              if (Array.isArray(node)) {
-                for (const item of node) visit(item);
-                return;
-              }
-              const rec = node as Record<string, unknown>;
-              const uri = rec.uri;
-              const type = rec.type;
-              const name = rec.name;
-              // abap_object entries have pgmid/type/name/uri
-              if (
-                typeof uri === 'string' &&
-                typeof rec.pgmid === 'string' &&
-                typeof name === 'string'
-              ) {
-                collected.set(uri, {
-                  type: typeof type === 'string' ? type : 'UNKNOWN',
-                  name,
-                });
-              }
-              for (const v of Object.values(rec)) visit(v);
-            };
-            visit(trResponse);
-
-            for (const [uri, meta] of collected) {
-              checkObjects.push({ uri, type: meta.type, name: meta.name });
-            }
-            if (checkObjects.length === 0) {
-              dependencies.writeError(
-                `⚠️ No objects found in transport ${options.transport}`,
-              );
-              dependencies.setExitCode(1);
-              return;
-            }
-            if (!options.json) {
-              dependencies.writeLine(
-                `   Found ${checkObjects.length} object(s)`,
-              );
-            }
-          }
-          // Mode 3: Individual objects
-          else if (objects.length > 0) {
-            if (!options.json) {
-              dependencies.writeLine(
-                `🔍 Resolving ${objects.length} object(s)...`,
-              );
-            }
-            let hasResolveErrors = false;
-            for (const objectName of objects) {
-              try {
-                const resolved = await resolveObjectUri(
-                  client,
-                  objectName,
-                  options.type,
-                );
-                checkObjects.push(resolved);
-                if (!options.json) {
-                  dependencies.writeLine(
-                    `   📄 ${resolved.name} (${resolved.type}) → ${resolved.uri}`,
-                  );
-                }
-              } catch (err) {
-                hasResolveErrors = true;
-                dependencies.writeError(
-                  `   ❌ ${objectName}: ${err instanceof Error ? err.message : String(err)}`,
-                );
-              }
-            }
-            if (hasResolveErrors) {
-              dependencies.setExitCode(1);
-            }
+          } else if (objects.length > 0) {
+            resolved = await collectNamedTargets(
+              client,
+              objects,
+              options,
+              dependencies,
+              checkObjects,
+            );
           } else {
             dependencies.writeError(
               '❌ Specify object name(s), --package, or --transport',
             );
             dependencies.setExitCode(1);
-            return;
           }
+          if (!resolved) return;
 
           if (checkObjects.length === 0) {
             dependencies.writeError('❌ No objects to check');
@@ -348,31 +422,13 @@ export function createCheckCommand(
               sourceVersion: options.sourceVersion,
             });
 
-          if (options.json) {
-            dependencies.writeLine(JSON.stringify(reports, null, 2));
-            if (hasErrors) dependencies.setExitCode(1);
-          } else {
-            dependencies.writeLine(`\n📋 Check Results:`);
-            const totalMessages = displayResults(
-              reports,
-              dependencies.writeLine,
-            );
-
-            if (totalMessages === 0) {
-              dependencies.writeLine(
-                `\n✅ All ${checkObjects.length} object(s) passed syntax check`,
-              );
-            } else {
-              dependencies.writeLine(`\n📊 ${totalMessages} message(s) found`);
-              if (hasErrors) {
-                dependencies.writeLine('❌ Errors detected');
-                dependencies.setExitCode(1);
-              }
-              if (hasWarnings) {
-                dependencies.writeLine('⚠️ Warnings detected');
-              }
-            }
-          }
+          outputCheckResults(
+            reports,
+            { hasErrors, hasWarnings },
+            checkObjects.length,
+            options,
+            dependencies,
+          );
         } catch (error) {
           dependencies.writeError(
             `❌ Check failed: ${error instanceof Error ? error.message : String(error)}`,

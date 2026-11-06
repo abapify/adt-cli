@@ -36,6 +36,62 @@ function displayUsers(users: UserInfo[]): void {
   }
 }
 
+type UserService = ReturnType<typeof createUserService>;
+
+/** No query: fetch and display the current user. */
+async function runCurrentUser(
+  userService: UserService,
+  options: { json?: boolean },
+): Promise<void> {
+  if (!options.json) console.log('🔄 Fetching current user...\n');
+  const info = await userService.getCurrentUser();
+  if (options.json) {
+    displayCurrentUserJson(info);
+  } else {
+    displayCurrentUser(info);
+  }
+}
+
+/** Exact name (no wildcards): look up a single user. */
+async function runUserLookup(
+  userService: UserService,
+  query: string,
+  options: { json?: boolean; max?: string },
+): Promise<void> {
+  if (!options.json)
+    console.log(`🔍 Looking up user: ${query.toUpperCase()}...\n`);
+  const users = await userService.getUserByName(query);
+  if (options.json) {
+    displayUsersJson(users);
+  } else if (users.length === 0) {
+    console.log('No user found.');
+  } else {
+    displayUsers(users);
+  }
+}
+
+/** Wildcard query: search users with a result limit. */
+async function runUserSearch(
+  userService: UserService,
+  query: string,
+  options: { json?: boolean; max?: string },
+): Promise<void> {
+  const maxcount = Number.parseInt(options.max ?? '', 10);
+  if (!Number.isInteger(maxcount) || maxcount <= 0) {
+    throw new Error('--max must be a positive integer');
+  }
+  if (!options.json)
+    console.log(`🔍 Searching users: "${query}" (max: ${maxcount})...\n`);
+  const users = await userService.searchUsers(query, maxcount);
+  if (options.json) {
+    displayUsersJson(users);
+  } else if (users.length === 0) {
+    console.log('No users found matching your query.');
+  } else {
+    displayUsers(users);
+  }
+}
+
 export const userCommand = new Command('user')
   .description('Look up SAP system users')
   .argument('[query]', 'Username or search query (supports wildcards like *)')
@@ -47,39 +103,11 @@ export const userCommand = new Command('user')
       const userService = createUserService(adtClient.adt);
 
       if (!query) {
-        if (!options.json) console.log('🔄 Fetching current user...\n');
-        const info = await userService.getCurrentUser();
-        if (options.json) {
-          displayCurrentUserJson(info);
-        } else {
-          displayCurrentUser(info);
-        }
+        await runCurrentUser(userService, options);
       } else if (!query.includes('*') && !query.includes('?')) {
-        if (!options.json)
-          console.log(`🔍 Looking up user: ${query.toUpperCase()}...\n`);
-        const users = await userService.getUserByName(query);
-        if (options.json) {
-          displayUsersJson(users);
-        } else if (users.length === 0) {
-          console.log('No user found.');
-        } else {
-          displayUsers(users);
-        }
+        await runUserLookup(userService, query, options);
       } else {
-        const maxcount = Number.parseInt(options.max, 10);
-        if (!Number.isInteger(maxcount) || maxcount <= 0) {
-          throw new Error('--max must be a positive integer');
-        }
-        if (!options.json)
-          console.log(`🔍 Searching users: "${query}" (max: ${maxcount})...\n`);
-        const users = await userService.searchUsers(query, maxcount);
-        if (options.json) {
-          displayUsersJson(users);
-        } else if (users.length === 0) {
-          console.log('No users found matching your query.');
-        } else {
-          displayUsers(users);
-        }
+        await runUserSearch(userService, query, options);
       }
 
       if (!options.json) console.log('\n✅ Done!');
