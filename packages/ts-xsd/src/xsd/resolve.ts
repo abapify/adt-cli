@@ -164,25 +164,7 @@ export function resolveSchema(
   });
 
   // Determine which elements to include
-  let elements: TopLevelElement[];
-  if (filterToRootElements) {
-    // Filter to only root elements (not abstract, not referenced)
-    const referencedElements = new Set<string>();
-    for (const el of collector.elements.values()) {
-      collectElementRefs(el, referencedElements);
-    }
-    for (const ct of collector.complexTypes.values()) {
-      collectElementRefsFromType(ct, referencedElements);
-    }
-    elements = Array.from(collector.elements.values()).filter((el) => {
-      if ((el as Record<string, unknown>).abstract === true) return false;
-      if (referencedElements.has(el.name)) return false;
-      return true;
-    });
-  } else {
-    // Keep ALL elements (including abstract and referenced)
-    elements = Array.from(collector.elements.values());
-  }
+  const elements = selectElements(collector, filterToRootElements);
 
   // Expand extensions if requested
   let resolvedComplexTypes = Array.from(collector.complexTypes.values());
@@ -239,6 +221,41 @@ export function resolveSchema(
   return resolved as Schema;
 }
 
+/**
+ * Determine which elements to include in the resolved schema.
+ */
+function selectElements(
+  collector: SchemaCollector,
+  filterToRootElements: boolean,
+): TopLevelElement[] {
+  if (!filterToRootElements) {
+    // Keep ALL elements (including abstract and referenced)
+    return Array.from(collector.elements.values());
+  }
+
+  // Filter to only root elements (not abstract, not referenced)
+  const referencedElements = new Set<string>();
+  for (const el of collector.elements.values()) {
+    collectElementRefs(el, referencedElements);
+  }
+  for (const ct of collector.complexTypes.values()) {
+    collectElementRefsFromType(ct, referencedElements);
+  }
+  return Array.from(collector.elements.values()).filter((el) =>
+    isRootElement(el, referencedElements),
+  );
+}
+
+/** An element is a root element when it is not abstract and not referenced. */
+function isRootElement(
+  el: TopLevelElement,
+  referencedElements: Set<string>,
+): boolean {
+  if ((el as Record<string, unknown>).abstract === true) return false;
+  if (referencedElements.has(el.name)) return false;
+  return true;
+}
+
 // =============================================================================
 // Extension Expansion
 // =============================================================================
@@ -270,21 +287,14 @@ function expandComplexTypeExtension(
   const baseName = stripNsPrefix(extension.base);
   const baseType = allTypes.get(baseName);
   if (baseType && !visited.has(baseName)) {
-    // Recursively expand base type first
-    const expandedBase = expandComplexTypeExtension(
+    mergeBaseTypeContent(
       baseType,
       allTypes,
       visited,
+      mergedElements,
+      mergedAnys,
+      mergedAttributes,
     );
-
-    // Collect elements from base
-    collectElementsFromType(expandedBase, mergedElements);
-    collectAnysFromType(expandedBase, mergedAnys);
-
-    // Collect attributes from base
-    if (expandedBase.attribute) {
-      mergedAttributes.push(...expandedBase.attribute);
-    }
   }
 
   // Add extension elements
@@ -300,16 +310,51 @@ function expandComplexTypeExtension(
     mergedAttributes.push(...extension.attribute);
   }
 
+  return buildFlattenedType(ct, mergedElements, mergedAnys, mergedAttributes);
+}
+
+/**
+ * Recursively expand the base type and merge its content into the accumulators.
+ */
+function mergeBaseTypeContent(
+  baseType: TopLevelComplexType,
+  allTypes: Map<string, TopLevelComplexType>,
+  visited: Set<string>,
+  mergedElements: LocalElement[],
+  mergedAnys: Any[],
+  mergedAttributes: LocalAttribute[],
+): void {
+  // Recursively expand base type first
+  const expandedBase = expandComplexTypeExtension(baseType, allTypes, visited);
+
+  // Collect elements from base
+  collectElementsFromType(expandedBase, mergedElements);
+  collectAnysFromType(expandedBase, mergedAnys);
+
+  // Collect attributes from base
+  if (expandedBase.attribute) {
+    mergedAttributes.push(...expandedBase.attribute);
+  }
+}
+
+/**
+ * Build the flattened complex type from the merged content,
+ * copying over all other properties of the original type.
+ */
+function buildFlattenedType(
+  ct: TopLevelComplexType,
+  mergedElements: LocalElement[],
+  mergedAnys: Any[],
+  mergedAttributes: LocalAttribute[],
+): TopLevelComplexType {
   // Build flattened type
   const flattened: Record<string, unknown> = {
     name: ct.name,
   };
 
-  if (mergedElements.length > 0 || mergedAnys.length > 0) {
-    flattened.all = {
-      ...(mergedElements.length > 0 ? { element: mergedElements } : {}),
-      ...(mergedAnys.length > 0 ? { any: mergedAnys } : {}),
-    };
+  const all = buildFlattenedAll(mergedElements, mergedAnys);
+  if (all) {
+    flattened.all = all;
   }
 
   if (mergedAttributes.length > 0) {
@@ -333,6 +378,23 @@ function expandComplexTypeExtension(
   }
 
   return flattened as TopLevelComplexType;
+}
+
+/**
+ * Build the flattened `all` content model, or undefined when there is no content.
+ */
+function buildFlattenedAll(
+  mergedElements: LocalElement[],
+  mergedAnys: Any[],
+): Record<string, unknown> | undefined {
+  const all: Record<string, unknown> = {};
+  if (mergedElements.length > 0) {
+    all.element = mergedElements;
+  }
+  if (mergedAnys.length > 0) {
+    all.any = mergedAnys;
+  }
+  return Object.keys(all).length > 0 ? all : undefined;
 }
 
 /**
@@ -459,32 +521,19 @@ function expandSubstitutionGroupsInGroup(
   let hasChanges = false;
 
   for (const el of group.element) {
-    // Check if this is a ref to an abstract element
-    if (el.ref) {
-      const refName = stripNsPrefix(el.ref);
-      const refElement = allElements.get(refName);
-
-      if (refElement?.abstract) {
-        // This is an abstract element - expand to substitutes
-        const substitutes = substitutionGroups.get(refName);
-        if (substitutes && substitutes.length > 0) {
-          // Add each substitute as a separate optional element
-          for (const sub of substitutes) {
-            expandedElements.push({
-              name: sub.name,
-              type: sub.type,
-              minOccurs: el.minOccurs ?? 0,
-              maxOccurs: el.maxOccurs,
-            });
-          }
-          hasChanges = true;
-          continue;
-        }
-      }
+    const substitutes = expandAbstractElementRef(
+      el,
+      allElements,
+      substitutionGroups,
+    );
+    if (substitutes) {
+      // Add each substitute as a separate optional element
+      expandedElements.push(...substitutes);
+      hasChanges = true;
+    } else {
+      // Keep original element
+      expandedElements.push(el);
     }
-
-    // Keep original element
-    expandedElements.push(el);
   }
 
   if (!hasChanges) return group;
@@ -493,6 +542,34 @@ function expandSubstitutionGroupsInGroup(
     ...group,
     element: expandedElements,
   };
+}
+
+/**
+ * Expand a ref to an abstract element into its substitutes,
+ * or return undefined when the element needs no expansion.
+ */
+function expandAbstractElementRef(
+  el: LocalElement,
+  allElements: Map<string, TopLevelElement>,
+  substitutionGroups: Map<string, TopLevelElement[]>,
+): LocalElement[] | undefined {
+  // Check if this is a ref to an abstract element
+  if (!el.ref) return undefined;
+
+  const refName = stripNsPrefix(el.ref);
+  const refElement = allElements.get(refName);
+  if (!refElement?.abstract) return undefined;
+
+  const substitutes = substitutionGroups.get(refName);
+  if (!substitutes?.length) return undefined;
+
+  // Expand to substitutes: each substitute becomes a separate optional element
+  return substitutes.map((sub) => ({
+    name: sub.name,
+    type: sub.type,
+    minOccurs: el.minOccurs ?? 0,
+    maxOccurs: el.maxOccurs,
+  }));
 }
 
 // =============================================================================
@@ -534,29 +611,36 @@ function collectElementRefsFromType(
   for (const groupKey of ['sequence', 'all', 'choice']) {
     const group = record[groupKey] as Record<string, unknown> | undefined;
     if (group?.element) {
-      const elements = group.element as Array<Record<string, unknown>>;
-      for (const el of elements) {
-        if (el.ref) {
-          // Strip namespace prefix and add to refs
-          const refName = stripNsPrefix(el.ref as string);
-          refs.add(refName);
-        }
-        // Recurse into nested complexType
-        if (el.complexType) {
-          collectElementRefsFromType(
-            el.complexType as TopLevelComplexType,
-            refs,
-          );
-        }
-      }
+      collectElementRefsFromElements(
+        group.element as Array<Record<string, unknown>>,
+        refs,
+      );
     }
   }
 
   // Check complexContent/extension
-  if (record.complexContent) {
-    const cc = record.complexContent as Record<string, unknown>;
-    if (cc.extension) {
-      collectElementRefsFromType(cc.extension as TopLevelComplexType, refs);
+  const cc = record.complexContent as Record<string, unknown> | undefined;
+  if (cc?.extension) {
+    collectElementRefsFromType(cc.extension as TopLevelComplexType, refs);
+  }
+}
+
+/**
+ * Recursively collect element refs from a list of elements
+ */
+function collectElementRefsFromElements(
+  elements: Array<Record<string, unknown>>,
+  refs: Set<string>,
+): void {
+  for (const el of elements) {
+    if (el.ref) {
+      // Strip namespace prefix and add to refs
+      const refName = stripNsPrefix(el.ref as string);
+      refs.add(refName);
+    }
+    // Recurse into nested complexType
+    if (el.complexType) {
+      collectElementRefsFromType(el.complexType as TopLevelComplexType, refs);
     }
   }
 }
