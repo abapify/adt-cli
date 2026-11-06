@@ -187,6 +187,100 @@ export async function checkContractOperation(
   }
 }
 
+/** Register the `it()` for the optional `headers` check. */
+function registerHeaderCheck(
+  op: ContractOperation,
+  contract: RestEndpointDescriptor,
+): void {
+  const { headers } = op;
+  if (!headers) return;
+
+  it('has correct headers', () => {
+    checkHeaders(headers, contract);
+  });
+}
+
+/** Register the `it()` for the optional `query` check. */
+function registerQueryCheck(
+  op: ContractOperation,
+  contract: RestEndpointDescriptor,
+): void {
+  const { query } = op;
+  if (!query) return;
+
+  it('has correct query params', () => {
+    checkQuery(query, contract);
+  });
+}
+
+/** Register the `it()` cases for the optional `body` checks. */
+function registerBodyChecks(
+  op: ContractOperation,
+  contract: RestEndpointDescriptor,
+): void {
+  const { body } = op;
+  if (!body) return;
+
+  it('has body schema', () => {
+    checkBodySchema(body.schema, contract);
+  });
+
+  const bodyFixture = body.fixture;
+  if (!bodyFixture) return;
+
+  it('body schema parses fixture', async () => {
+    await checkBodyFixtureParses(body.schema as BodySchema, bodyFixture);
+  });
+
+  it('body schema round-trips', async () => {
+    await checkBodyFixtureRoundTrips(body.schema as BodySchema, bodyFixture);
+  });
+}
+
+/** Register the `it()` cases for the optional `response` checks. */
+function registerResponseChecks(
+  op: ContractOperation,
+  contract: RestEndpointDescriptor,
+): void {
+  const { response } = op;
+  if (!response) return;
+
+  const responseStatus = response.status;
+  it(`has response schema for ${responseStatus}`, () => {
+    checkResponseSchema(response, contract);
+  });
+
+  const responseFixture = response.fixture;
+  if (!responseFixture) return;
+
+  it('response schema parses fixture', async () => {
+    await checkResponseFixtureParses(
+      response.schema as ResponseSchema,
+      responseFixture,
+    );
+  });
+}
+
+/** Register the `it()` cases for one operation, in `checkContractOperation` order. */
+function registerOperationTests(op: ContractOperation): void {
+  describe(op.name, () => {
+    const contract = op.contract();
+
+    it('has correct method', () => {
+      checkMethod(op.method, contract);
+    });
+
+    it('has correct path', () => {
+      checkPath(op.path, contract);
+    });
+
+    registerHeaderCheck(op, contract);
+    registerQueryCheck(op, contract);
+    registerBodyChecks(op, contract);
+    registerResponseChecks(op, contract);
+  });
+}
+
 /**
  * Run a contract scenario as a standalone test suite.
  * Call this from each *.test.ts file.
@@ -194,67 +288,7 @@ export async function checkContractOperation(
 export function runScenario(scenario: ContractScenario): void {
   describe(scenario.name, () => {
     for (const op of scenario.operations) {
-      describe(op.name, () => {
-        const contract = op.contract();
-
-        it('has correct method', () => {
-          checkMethod(op.method, contract);
-        });
-
-        it('has correct path', () => {
-          checkPath(op.path, contract);
-        });
-
-        // Capture values to avoid non-null assertions in callbacks
-        const { headers, query, body, response } = op;
-
-        if (headers) {
-          it('has correct headers', () => {
-            checkHeaders(headers, contract);
-          });
-        }
-
-        if (query) {
-          it('has correct query params', () => {
-            checkQuery(query, contract);
-          });
-        }
-
-        if (body) {
-          const bodySchema = body.schema as BodySchema;
-          const bodyFixture = body.fixture;
-
-          it('has body schema', () => {
-            checkBodySchema(body.schema, contract);
-          });
-
-          if (bodyFixture) {
-            it('body schema parses fixture', async () => {
-              await checkBodyFixtureParses(bodySchema, bodyFixture);
-            });
-
-            it('body schema round-trips', async () => {
-              await checkBodyFixtureRoundTrips(bodySchema, bodyFixture);
-            });
-          }
-        }
-
-        if (response) {
-          const responseSchema = response.schema as ResponseSchema;
-          const responseFixture = response.fixture;
-          const responseStatus = response.status;
-
-          it(`has response schema for ${responseStatus}`, () => {
-            checkResponseSchema(response, contract);
-          });
-
-          if (responseFixture) {
-            it('response schema parses fixture', async () => {
-              await checkResponseFixtureParses(responseSchema, responseFixture);
-            });
-          }
-        }
-      });
+      registerOperationTests(op);
     }
   });
 }
