@@ -354,6 +354,42 @@ export async function verifyOwnedHashes(
   return (await findDivergedOwnedPath(root, files)) === undefined;
 }
 
+/**
+ * Decide what to do with one desired file — write, keep as unchanged, or
+ * throw on a collision. Validation errors keep their exact type/message.
+ */
+function classifyDesiredFile(
+  file: DesiredFile,
+  current: string | undefined,
+  portableCollision: string | undefined,
+  ownedPaths: ReadonlySet<string>,
+  isSymlink: boolean,
+): 'write' | 'unchanged' {
+  if (portableCollision && portableCollision !== file.path) {
+    throw new AdtFlowError(
+      'path_collision',
+      'A desired path collides with an existing path on a case-insensitive filesystem.',
+      { path: file.path, existingPath: portableCollision },
+    );
+  }
+  if (current === undefined) return 'write';
+  if (!ownedPaths.has(file.path)) {
+    throw new AdtFlowError(
+      'path_collision',
+      'A desired path is occupied by an unowned file.',
+      { path: file.path },
+    );
+  }
+  if (isSymlink) {
+    throw new AdtFlowError(
+      'path_invalid',
+      'Flow cannot write through an owned symlink.',
+      { path: file.path },
+    );
+  }
+  return current === file.content ? 'unchanged' : 'write';
+}
+
 export async function planRepositoryChanges(
   root: string,
   desired: readonly DesiredFile[],
@@ -392,33 +428,17 @@ export async function planRepositoryChanges(
   );
 
   for (const file of desired) {
-    const portableCollision = existingByFoldedPath.get(file.path.toLowerCase());
-    if (portableCollision && portableCollision !== file.path) {
-      throw new AdtFlowError(
-        'path_collision',
-        'A desired path collides with an existing path on a case-insensitive filesystem.',
-        { path: file.path, existingPath: portableCollision },
-      );
-    }
-    const current = currentByPath.get(file.path);
-    if (current === undefined) {
+    const action = classifyDesiredFile(
+      file,
+      currentByPath.get(file.path),
+      existingByFoldedPath.get(file.path.toLowerCase()),
+      ownedPaths,
+      symlinkByPath.get(file.path) ?? false,
+    );
+    if (action === 'write') {
       writes.set(file.path, file.content);
-    } else if (!ownedPaths.has(file.path)) {
-      throw new AdtFlowError(
-        'path_collision',
-        'A desired path is occupied by an unowned file.',
-        { path: file.path },
-      );
-    } else if (symlinkByPath.get(file.path)) {
-      throw new AdtFlowError(
-        'path_invalid',
-        'Flow cannot write through an owned symlink.',
-        { path: file.path },
-      );
-    } else if (current === file.content) {
-      unchanged.push(file.path);
     } else {
-      writes.set(file.path, file.content);
+      unchanged.push(file.path);
     }
   }
 
