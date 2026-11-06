@@ -342,10 +342,7 @@ function objectToLiteral(
 
   if (typeof value === 'string') {
     const json = JSON.stringify(value);
-    if (singleQuote) {
-      return toSingleQuoteLiteral(json);
-    }
-    return json;
+    return singleQuote ? toSingleQuoteLiteral(json) : json;
   }
 
   if (typeof value === 'number' || typeof value === 'boolean') {
@@ -353,61 +350,94 @@ function objectToLiteral(
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return '[]';
-    }
-
-    const items = value.map((item) =>
-      objectToLiteral(item, pretty, indent, depth + 1, singleQuote),
-    );
-
-    if (pretty) {
-      const itemIndent = indent.repeat(depth + 1);
-      const closeIndent = indent.repeat(depth);
-      return `[\n${items
-        .map((item) => `${itemIndent}${item}`)
-        .join(',\n')},\n${closeIndent}]`;
-    }
-
-    return `[${items.join(', ')}]`;
+    return arrayToLiteral(value, pretty, indent, depth, singleQuote);
   }
 
   if (typeof value === 'object') {
-    const obj = value as Record<string, unknown>;
-    const entries = Object.entries(obj).filter(([, v]) => v !== undefined);
-
-    if (entries.length === 0) {
-      return '{}';
-    }
-
-    const props = entries.map(([key, val]) => {
-      let keyStr = key;
-      if (!isValidIdentifier(key)) {
-        const json = JSON.stringify(key);
-        keyStr = singleQuote ? toSingleQuoteLiteral(json) : json;
-      }
-      const valStr = objectToLiteral(
-        val,
-        pretty,
-        indent,
-        depth + 1,
-        singleQuote,
-      );
-      return `${keyStr}: ${valStr}`;
-    });
-
-    if (pretty) {
-      const propIndent = indent.repeat(depth + 1);
-      const closeIndent = indent.repeat(depth);
-      return `{\n${props
-        .map((prop) => `${propIndent}${prop}`)
-        .join(',\n')},\n${closeIndent}}`;
-    }
-
-    return `{ ${props.join(', ')} }`;
+    return recordToLiteral(
+      value as Record<string, unknown>,
+      pretty,
+      indent,
+      depth,
+      singleQuote,
+    );
   }
 
   return 'undefined';
+}
+
+/** Render an array literal. */
+function arrayToLiteral(
+  value: unknown[],
+  pretty: boolean,
+  indent: string,
+  depth: number,
+  singleQuote: boolean,
+): string {
+  if (value.length === 0) {
+    return '[]';
+  }
+
+  const items = value.map((item) =>
+    objectToLiteral(item, pretty, indent, depth + 1, singleQuote),
+  );
+
+  if (pretty) {
+    const itemIndent = indent.repeat(depth + 1);
+    const closeIndent = indent.repeat(depth);
+    return `[\n${items
+      .map((item) => `${itemIndent}${item}`)
+      .join(',\n')},\n${closeIndent}]`;
+  }
+
+  return `[${items.join(', ')}]`;
+}
+
+/** Render an object literal from record entries. */
+function recordToLiteral(
+  obj: Record<string, unknown>,
+  pretty: boolean,
+  indent: string,
+  depth: number,
+  singleQuote: boolean,
+): string {
+  const entries = Object.entries(obj).filter(([, v]) => v !== undefined);
+
+  if (entries.length === 0) {
+    return '{}';
+  }
+
+  const props = entries.map(([key, val]) =>
+    propertyToLiteral(key, val, pretty, indent, depth, singleQuote),
+  );
+
+  if (pretty) {
+    const propIndent = indent.repeat(depth + 1);
+    const closeIndent = indent.repeat(depth);
+    return `{\n${props
+      .map((prop) => `${propIndent}${prop}`)
+      .join(',\n')},\n${closeIndent}}`;
+  }
+
+  return `{ ${props.join(', ')} }`;
+}
+
+/** Render one `key: value` object property. */
+function propertyToLiteral(
+  key: string,
+  val: unknown,
+  pretty: boolean,
+  indent: string,
+  depth: number,
+  singleQuote: boolean,
+): string {
+  let keyStr = key;
+  if (!isValidIdentifier(key)) {
+    const json = JSON.stringify(key);
+    keyStr = singleQuote ? toSingleQuoteLiteral(json) : json;
+  }
+  const valStr = objectToLiteral(val, pretty, indent, depth + 1, singleQuote);
+  return `${keyStr}: ${valStr}`;
 }
 
 /**
