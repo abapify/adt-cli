@@ -180,11 +180,11 @@
         "ink": "5.1.0",
         "ink-select-input": "^6.0.0",
         "ink-text-input": "^6.0.0",
-        "js-yaml": "^4.1.0",
         "open": "^11.0.4",
         "pino": "^8.17.2",
         "proxy-agent": "^6.4.0",
         "react": "18.3.1",
+        "yaml": "2.9.1",
       },
       "devDependencies": {
         "@abapify/adt-fixtures": "0.4.34",
