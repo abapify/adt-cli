@@ -107,54 +107,78 @@ export function* walkComplexTypes(
   options: WalkOptions = {},
 ): Generator<ComplexTypeEntry> {
   // Current schema's complexTypes
-  const complexTypes = schema.complexType;
-  if (complexTypes) {
-    if (Array.isArray(complexTypes)) {
-      for (const ct of complexTypes) {
-        yield { ct, schema };
-      }
-    } else {
-      // Object format: { TypeName: { ... } }
-      for (const [name, ct] of Object.entries(complexTypes)) {
-        yield { ct: { ...ct, name } as ComplexTypeLike, schema };
-      }
-    }
-  }
+  yield* ownComplexTypes(schema);
 
   // Yield complexTypes from redefine blocks (these override types from included schemas)
   // Redefine types are yielded FIRST so findComplexType finds them before the original
-  if (schema.redefine) {
-    for (const redef of schema.redefine) {
-      if (redef.complexType) {
-        for (const ct of redef.complexType) {
-          yield { ct, schema };
-        }
-      }
-    }
-  }
+  yield* redefineComplexTypes(schema);
 
   // Yield complexTypes from override blocks (XSD 1.1)
-  if (schema.override) {
-    for (const ovr of schema.override) {
-      if (ovr.complexType) {
-        for (const ct of ovr.complexType) {
-          yield { ct, schema };
-        }
-      }
+  yield* overrideComplexTypes(schema);
+
+  // Recurse into $includes (same namespace - content is merged),
+  // then into $imports (different namespace)
+  yield* walkNestedSchemas(schema, options, walkComplexTypes);
+}
+
+/** Yield complexTypes declared directly in the schema. */
+function* ownComplexTypes(schema: SchemaLike): Generator<ComplexTypeEntry> {
+  const complexTypes = schema.complexType;
+  if (!complexTypes) return;
+
+  if (Array.isArray(complexTypes)) {
+    for (const ct of complexTypes) {
+      yield { ct, schema };
+    }
+  } else {
+    // Object format: { TypeName: { ... } }
+    for (const [name, ct] of Object.entries(complexTypes)) {
+      yield { ct: { ...ct, name } as ComplexTypeLike, schema };
     }
   }
+}
 
+/** Yield complexTypes from redefine blocks. */
+function* redefineComplexTypes(
+  schema: SchemaLike,
+): Generator<ComplexTypeEntry> {
+  for (const redef of schema.redefine ?? []) {
+    for (const ct of redef.complexType ?? []) {
+      yield { ct, schema };
+    }
+  }
+}
+
+/** Yield complexTypes from override blocks (XSD 1.1). */
+function* overrideComplexTypes(
+  schema: SchemaLike,
+): Generator<ComplexTypeEntry> {
+  for (const ovr of schema.override ?? []) {
+    for (const ct of ovr.complexType ?? []) {
+      yield { ct, schema };
+    }
+  }
+}
+
+/**
+ * Recurse into $includes (same namespace), then $imports (different namespace).
+ */
+function* walkNestedSchemas<T>(
+  schema: SchemaLike,
+  options: WalkOptions,
+  walker: (schema: SchemaLike, options: WalkOptions) => Generator<T>,
+): Generator<T> {
   // Recurse into $includes (same namespace - content is merged)
   if (schema.$includes) {
     for (const included of schema.$includes) {
-      yield* walkComplexTypes(included, options);
+      yield* walker(included, options);
     }
   }
 
   // Recurse into $imports (different namespace) - skip if includesOnly
   if (!options.includesOnly && schema.$imports) {
     for (const imported of schema.$imports) {
-      yield* walkComplexTypes(imported, options);
+      yield* walker(imported, options);
     }
   }
 }
@@ -166,52 +190,49 @@ export function* walkSimpleTypes(
   schema: SchemaLike,
   options: WalkOptions = {},
 ): Generator<SimpleTypeEntry> {
-  const simpleTypes = schema.simpleType;
-  if (simpleTypes) {
-    if (Array.isArray(simpleTypes)) {
-      for (const st of simpleTypes) {
-        yield { st, schema };
-      }
-    } else {
-      for (const [name, st] of Object.entries(simpleTypes)) {
-        yield { st: { ...st, name } as SimpleTypeLike, schema };
-      }
-    }
-  }
+  // Current schema's simpleTypes
+  yield* ownSimpleTypes(schema);
 
   // Yield simpleTypes from redefine blocks (these override types from included schemas)
-  if (schema.redefine) {
-    for (const redef of schema.redefine) {
-      if (redef.simpleType) {
-        for (const st of redef.simpleType) {
-          yield { st, schema };
-        }
-      }
-    }
-  }
+  yield* redefineSimpleTypes(schema);
 
   // Yield simpleTypes from override blocks (XSD 1.1)
-  if (schema.override) {
-    for (const ovr of schema.override) {
-      if (ovr.simpleType) {
-        for (const st of ovr.simpleType) {
-          yield { st, schema };
-        }
-      }
+  yield* overrideSimpleTypes(schema);
+
+  // Recurse into $includes (same namespace), then $imports (different namespace)
+  yield* walkNestedSchemas(schema, options, walkSimpleTypes);
+}
+
+/** Yield simpleTypes declared directly in the schema. */
+function* ownSimpleTypes(schema: SchemaLike): Generator<SimpleTypeEntry> {
+  const simpleTypes = schema.simpleType;
+  if (!simpleTypes) return;
+
+  if (Array.isArray(simpleTypes)) {
+    for (const st of simpleTypes) {
+      yield { st, schema };
+    }
+  } else {
+    for (const [name, st] of Object.entries(simpleTypes)) {
+      yield { st: { ...st, name } as SimpleTypeLike, schema };
     }
   }
+}
 
-  // Recurse into $includes (same namespace)
-  if (schema.$includes) {
-    for (const included of schema.$includes) {
-      yield* walkSimpleTypes(included, options);
+/** Yield simpleTypes from redefine blocks. */
+function* redefineSimpleTypes(schema: SchemaLike): Generator<SimpleTypeEntry> {
+  for (const redef of schema.redefine ?? []) {
+    for (const st of redef.simpleType ?? []) {
+      yield { st, schema };
     }
   }
+}
 
-  // Recurse into $imports (different namespace) - skip if includesOnly
-  if (!options.includesOnly && schema.$imports) {
-    for (const imported of schema.$imports) {
-      yield* walkSimpleTypes(imported, options);
+/** Yield simpleTypes from override blocks (XSD 1.1). */
+function* overrideSimpleTypes(schema: SchemaLike): Generator<SimpleTypeEntry> {
+  for (const ovr of schema.override ?? []) {
+    for (const st of ovr.simpleType ?? []) {
+      yield { st, schema };
     }
   }
 }
@@ -383,76 +404,92 @@ function* walkGroup(
   const choiceOptional = source === 'choice';
 
   // Yield direct elements
-  if (group.element) {
-    for (const element of group.element) {
-      const optional =
-        choiceOptional ||
-        groupOptional ||
-        element.minOccurs === 0 ||
-        element.minOccurs === '0';
-      const array = groupArray || isArray(element);
-
-      // Handle element reference to abstract element with substitution group
-      if (element.ref) {
-        const refName = stripNsPrefix(element.ref);
-        const refEntry = findElement(refName, schema);
-
-        if (refEntry && isAbstractElement(refEntry.element)) {
-          // Abstract element - yield substitutes if found in this schema
-          const substitutes = findSubstitutes(refName, schema);
-          if (substitutes.length > 0) {
-            for (const sub of substitutes) {
-              yield { element: sub, optional, array, source, schema };
-            }
-            continue;
-          }
-          // No substitutes found in this schema - yield the original element
-          // so the parser can handle substitution using the root schema
-        }
-      }
-
-      yield { element, optional, array, source, schema };
-    }
+  for (const element of group.element ?? []) {
+    const optional =
+      choiceOptional ||
+      groupOptional ||
+      element.minOccurs === 0 ||
+      element.minOccurs === '0';
+    const array = groupArray || isArray(element);
+    yield* elementEntries(element, optional, array, source, schema);
   }
 
   // Recurse into nested sequences
-  if (group.sequence) {
-    const sequences = Array.isArray(group.sequence)
-      ? group.sequence
-      : [group.sequence];
-    for (const nested of sequences) {
-      yield* walkGroup(nested, 'sequence', schema, groupOptional, groupArray);
-    }
+  for (const nested of asGroupArray(group.sequence)) {
+    yield* walkGroup(nested, 'sequence', schema, groupOptional, groupArray);
   }
 
   // Recurse into nested choices (elements become optional)
-  if (group.choice) {
-    const choices = Array.isArray(group.choice) ? group.choice : [group.choice];
-    for (const nested of choices) {
-      yield* walkGroup(
-        nested,
-        'choice',
-        schema,
-        true,
-        groupArray || isArray(nested),
-      );
-    }
+  for (const nested of asGroupArray(group.choice)) {
+    yield* walkGroup(
+      nested,
+      'choice',
+      schema,
+      true,
+      groupArray || isArray(nested),
+    );
   }
 
   // Handle group references within the group
-  if (group.group) {
-    const refs = Array.isArray(group.group) ? group.group : [group.group];
-    for (const ref of refs) {
-      if (ref.ref) {
-        yield* walkGroupRef(
-          ref.ref,
-          schema,
-          groupOptional || choiceOptional,
-          groupArray || isArray(ref),
-        );
-      }
+  for (const ref of asGroupArray(group.group)) {
+    if (ref.ref) {
+      yield* walkGroupRef(
+        ref.ref,
+        schema,
+        groupOptional || choiceOptional,
+        groupArray || isArray(ref),
+      );
     }
   }
+}
+
+/** Normalize a possibly single group value to an array. */
+function asGroupArray<T>(value: T | readonly T[] | undefined): readonly T[] {
+  if (value == null) return [];
+  return Array.isArray(value) ? (value as readonly T[]) : [value as T];
+}
+
+/**
+ * Yield the entries for one direct group element: substitutes of an abstract
+ * element ref when present, otherwise the element itself.
+ */
+function* elementEntries(
+  element: ElementLike,
+  optional: boolean,
+  array: boolean,
+  source: 'sequence' | 'choice' | 'all' | 'extension',
+  schema: SchemaLike,
+): Generator<ElementEntry> {
+  // Handle element reference to abstract element with substitution group
+  const substitutes = abstractSubstitutes(element, schema);
+  if (substitutes) {
+    // Abstract element - yield substitutes found in this schema
+    for (const sub of substitutes) {
+      yield { element: sub, optional, array, source, schema };
+    }
+    return;
+  }
+
+  yield { element, optional, array, source, schema };
+}
+
+/**
+ * Substitutes for an element ref to an abstract element, or undefined when
+ * the element needs no substitution handling. No substitutes in this schema
+ * yields undefined so the parser can handle substitution via the root schema.
+ */
+function abstractSubstitutes(
+  element: ElementLike,
+  schema: SchemaLike,
+): ElementLike[] | undefined {
+  if (!element.ref) return undefined;
+
+  const refName = stripNsPrefix(element.ref);
+  const refEntry = findElement(refName, schema);
+  if (!refEntry || !isAbstractElement(refEntry.element)) return undefined;
+
+  const substitutes = findSubstitutes(refName, schema);
+  return substitutes.length > 0 ? substitutes : undefined;
 }
 
 /**
@@ -504,27 +541,10 @@ export function* walkAttributes(
     const ext = ct.complexContent.extension;
 
     // Inherited attributes from base
-    if (ext.base) {
-      const baseName = stripNsPrefix(ext.base);
-      const baseEntry = findComplexType(baseName, schema);
-      if (baseEntry) {
-        yield* walkAttributes(baseEntry.ct, baseEntry.schema);
-      }
-    }
+    yield* walkBaseAttributes(ext.base, schema);
 
     // Extension's own attributes (resolve refs)
-    if (ext.attribute) {
-      for (const attr of ext.attribute) {
-        const resolved = resolveAttribute(attr, schema);
-        if (resolved) {
-          yield {
-            attribute: resolved,
-            required: resolved.use === 'required',
-            schema,
-          };
-        }
-      }
-    }
+    yield* resolvedAttributes(ext.attribute, schema);
 
     // AttributeGroup references
     yield* walkAttributeGroupRefs(ext.attributeGroup, schema);
@@ -534,38 +554,50 @@ export function* walkAttributes(
   // Handle simpleContent/extension
   if (ct.simpleContent?.extension) {
     const ext = ct.simpleContent.extension;
-    if (ext.attribute) {
-      for (const attr of ext.attribute) {
-        const resolved = resolveAttribute(attr, schema);
-        if (resolved) {
-          yield {
-            attribute: resolved,
-            required: resolved.use === 'required',
-            schema,
-          };
-        }
-      }
-    }
+
+    // Extension's own attributes (resolve refs)
+    yield* resolvedAttributes(ext.attribute, schema);
+
     yield* walkAttributeGroupRefs(ext.attributeGroup, schema);
     return;
   }
 
   // Direct attributes (resolve refs)
-  if (ct.attribute) {
-    for (const attr of ct.attribute) {
-      const resolved = resolveAttribute(attr, schema);
-      if (resolved) {
-        yield {
-          attribute: resolved,
-          required: resolved.use === 'required',
-          schema,
-        };
-      }
-    }
-  }
+  yield* resolvedAttributes(ct.attribute, schema);
 
   // AttributeGroup references
   yield* walkAttributeGroupRefs(ct.attributeGroup, schema);
+}
+
+/** Yield attributes inherited from the base type of an extension. */
+function* walkBaseAttributes(
+  base: string | undefined,
+  schema: SchemaLike,
+): Generator<AttributeEntry> {
+  if (!base) return;
+
+  const baseName = stripNsPrefix(base);
+  const baseEntry = findComplexType(baseName, schema);
+  if (baseEntry) {
+    yield* walkAttributes(baseEntry.ct, baseEntry.schema);
+  }
+}
+
+/** Yield declared attributes with attribute refs resolved. */
+function* resolvedAttributes(
+  attributes: readonly AttributeLike[] | undefined,
+  schema: SchemaLike,
+): Generator<AttributeEntry> {
+  for (const attr of attributes ?? []) {
+    const resolved = resolveAttribute(attr, schema);
+    if (resolved) {
+      yield {
+        attribute: resolved,
+        required: resolved.use === 'required',
+        schema,
+      };
+    }
+  }
 }
 
 /**
@@ -596,40 +628,53 @@ function* walkAttributeGroupRefs(
 // =============================================================================
 
 /**
+ * Search a name in the current schema's declarations, then in $includes
+ * (same namespace) and $imports (different namespace), depth-first.
+ */
+function findInSchemas<T>(
+  name: string,
+  schema: SchemaLike,
+  searchOwn: (name: string, schema: SchemaLike) => T | undefined,
+): T | undefined {
+  // Search in current schema
+  const found = searchOwn(name, schema);
+  if (found) return found;
+
+  // Search in $includes (same namespace), then $imports (different namespace)
+  const linkedSchemas: SchemaLike[] = [];
+  if (schema.$includes) linkedSchemas.push(...schema.$includes);
+  if (schema.$imports) linkedSchemas.push(...schema.$imports);
+  for (const linked of linkedSchemas) {
+    const result = findInSchemas(name, linked, searchOwn);
+    if (result) return result;
+  }
+
+  return undefined;
+}
+
+/**
  * Find a named group (xs:group) by name.
  */
 function findGroup(
   name: string,
   schema: SchemaLike,
 ): { sequence?: GroupLike; choice?: GroupLike; all?: GroupLike } | undefined {
-  // Search in current schema
-  if (schema.group) {
-    for (const g of schema.group as Array<{
-      name?: string;
-      sequence?: GroupLike;
-      choice?: GroupLike;
-      all?: GroupLike;
-    }>) {
-      if (g.name === name) return g;
-    }
-  }
+  return findInSchemas(name, schema, findGroupInSchema);
+}
 
-  // Search in $includes (same namespace)
-  if (schema.$includes) {
-    for (const included of schema.$includes) {
-      const found = findGroup(name, included);
-      if (found) return found;
-    }
+/** Search a named group in a single schema's declarations. */
+function findGroupInSchema(
+  name: string,
+  schema: SchemaLike,
+): { sequence?: GroupLike; choice?: GroupLike; all?: GroupLike } | undefined {
+  for (const g of (schema.group ?? []) as Array<{
+    name?: string;
+    sequence?: GroupLike;
+    choice?: GroupLike;
+    all?: GroupLike;
+  }>) {
+    if (g.name === name) return g;
   }
-
-  // Search in $imports (different namespace)
-  if (schema.$imports) {
-    for (const imported of schema.$imports) {
-      const found = findGroup(name, imported);
-      if (found) return found;
-    }
-  }
-
   return undefined;
 }
 
@@ -641,30 +686,19 @@ function findAttribute(
   name: string,
   schema: SchemaLike,
 ): AttributeLike | undefined {
+  return findInSchemas(name, schema, findAttributeInSchema);
+}
+
+/** Search a top-level attribute in a single schema's declarations. */
+function findAttributeInSchema(
+  name: string,
+  schema: SchemaLike,
+): AttributeLike | undefined {
   // Search in current schema's top-level attributes
   const schemaWithAttrs = schema as { attribute?: readonly AttributeLike[] };
-  if (schemaWithAttrs.attribute) {
-    for (const attr of schemaWithAttrs.attribute) {
-      if (attr.name === name) return attr;
-    }
+  for (const attr of schemaWithAttrs.attribute ?? []) {
+    if (attr.name === name) return attr;
   }
-
-  // Search in $includes (same namespace)
-  if (schema.$includes) {
-    for (const included of schema.$includes) {
-      const found = findAttribute(name, included);
-      if (found) return found;
-    }
-  }
-
-  // Search in $imports (different namespace)
-  if (schema.$imports) {
-    for (const imported of schema.$imports) {
-      const found = findAttribute(name, imported);
-      if (found) return found;
-    }
-  }
-
   return undefined;
 }
 
@@ -705,31 +739,20 @@ function findAttributeGroup(
   name: string,
   schema: SchemaLike,
 ): { attribute?: readonly AttributeLike[] } | undefined {
-  if (schema.attributeGroup) {
-    for (const g of schema.attributeGroup as Array<{
-      name?: string;
-      attribute?: readonly AttributeLike[];
-    }>) {
-      if (g.name === name) return g;
-    }
-  }
+  return findInSchemas(name, schema, findAttributeGroupInSchema);
+}
 
-  // Search in $includes (same namespace)
-  if (schema.$includes) {
-    for (const included of schema.$includes) {
-      const found = findAttributeGroup(name, included);
-      if (found) return found;
-    }
+/** Search an attributeGroup in a single schema's declarations. */
+function findAttributeGroupInSchema(
+  name: string,
+  schema: SchemaLike,
+): { attribute?: readonly AttributeLike[] } | undefined {
+  for (const g of (schema.attributeGroup ?? []) as Array<{
+    name?: string;
+    attribute?: readonly AttributeLike[];
+  }>) {
+    if (g.name === name) return g;
   }
-
-  // Search in $imports (different namespace)
-  if (schema.$imports) {
-    for (const imported of schema.$imports) {
-      const found = findAttributeGroup(name, imported);
-      if (found) return found;
-    }
-  }
-
   return undefined;
 }
 
