@@ -554,36 +554,10 @@ export function isMcpToolListed(
   name: string,
 ): boolean {
   const entry = MCP_TOOL_SCOPE_CATALOGUE[name];
-  if (
-    !entry ||
-    !access ||
-    !Array.isArray(access.classes) ||
-    !access.classes.every(isMcpOperationClass) ||
-    !Array.isArray(access.destinationKeys) ||
-    access.destinationKeys.length === 0 ||
-    !access.destinationKeys.every(isMcpDestinationKey)
-  ) {
-    return false;
-  }
+  if (!entry || !isUsableAccess(access)) return false;
   if (access.frozenSource) return name === 'get_frozen_source';
   if (access.scoped) {
-    const operationClass =
-      'actionClasses' in entry ? undefined : entry.operationClass;
-    if (
-      operationClass !== access.scoped.operationClass &&
-      !(
-        (name === 'atc_run' || name === 'run_unit_tests') &&
-        access.scoped.operationClass === 'safe_execute' &&
-        access.classes.includes('safe_execute')
-      )
-    ) {
-      return false;
-    }
-    if (!access.scoped.toolNames.includes(name)) return false;
-    if (operationClass === 'read' && access.scoped.resourceKeys.length === 0) {
-      return false;
-    }
-    return true;
+    return isScopedToolListed(entry, name, access.scoped, access.classes);
   }
   if (name === 'get_frozen_source') return false;
   const classes =
@@ -593,4 +567,43 @@ export function isMcpToolListed(
   return classes.some((operationClass) =>
     access.classes.includes(operationClass),
   );
+}
+
+/** Structural sanity check before the access record may drive listing. */
+function isUsableAccess(
+  access: McpRequestAccess | undefined,
+): access is McpRequestAccess {
+  return (
+    !!access &&
+    Array.isArray(access.classes) &&
+    access.classes.every(isMcpOperationClass) &&
+    Array.isArray(access.destinationKeys) &&
+    access.destinationKeys.length > 0 &&
+    access.destinationKeys.every(isMcpDestinationKey)
+  );
+}
+
+function isScopedToolListed(
+  entry: McpToolScope,
+  name: string,
+  scoped: McpScopedAccess,
+  classes: readonly McpOperationClass[],
+): boolean {
+  const operationClass =
+    'actionClasses' in entry ? undefined : entry.operationClass;
+  if (
+    operationClass !== scoped.operationClass &&
+    !(
+      (name === 'atc_run' || name === 'run_unit_tests') &&
+      scoped.operationClass === 'safe_execute' &&
+      classes.includes('safe_execute')
+    )
+  ) {
+    return false;
+  }
+  if (!scoped.toolNames.includes(name)) return false;
+  if (operationClass === 'read' && scoped.resourceKeys.length === 0) {
+    return false;
+  }
+  return true;
 }

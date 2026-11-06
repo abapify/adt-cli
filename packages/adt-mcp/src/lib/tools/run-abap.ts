@@ -24,6 +24,9 @@ import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
 
+type AdtClient = ReturnType<ToolContext['getClient']>;
+type LockService = ReturnType<typeof createLockService>;
+
 function buildClassTemplate(className: string, body: string): string {
   const lower = className.toLowerCase();
   return `CLASS ${lower} DEFINITION PUBLIC FINAL CREATE PUBLIC.
@@ -45,6 +48,115 @@ function buildClassSource(rawSource: string, className: string): string {
   const upper = rawSource.trimStart().toUpperCase();
   if (upper.startsWith('CLASS ')) return rawSource;
   return buildClassTemplate(className, rawSource);
+}
+
+/** 1. Create temp class (POST skeleton). Returns true when freshly created. */
+async function createTempClass(
+  client: AdtClient,
+  className: string,
+  packageName: string,
+  transport: string | undefined,
+): Promise<boolean> {
+  try {
+    await client.adt.oo.classes.post(transport ? { corrNr: transport } : {}, {
+      abapClass: {
+        name: className,
+        type: 'CLAS/OC',
+        description: 'Temporary ADT MCP runner class',
+        language: 'EN',
+        masterLanguage: 'EN',
+        packageRef: {
+          uri: `/sap/bc/adt/packages/${packageName}`,
+          name: packageName,
+          type: 'DEVC/K',
+        },
+      },
+    } as any);
+    return true;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!msg.includes('already exists') && !msg.includes('422')) {
+      throw err;
+    }
+    // class from a previous run — reuse
+    return false;
+  }
+}
+
+/** 2–4. Lock → write source → unlock → activate → execute. */
+async function executeClassRun(
+  client: AdtClient,
+  lockService: LockService,
+  classUri: string,
+  className: string,
+  classSource: string,
+  transport: string | undefined,
+): Promise<string> {
+  // 2. Lock → write source → unlock
+  const lock = await lockService.lock(classUri, {
+    transport,
+    objectName: className,
+    objectType: 'CLAS',
+  });
+  let lockHandle: string | undefined = lock.handle;
+  try {
+    const effectiveTransport = resolveLockCorrelation(lock, transport);
+
+    const params = new URLSearchParams();
+    params.set('lockHandle', lockHandle);
+    if (effectiveTransport) params.set('corrNr', effectiveTransport);
+
+    await client.fetch(`${classUri}/source/main?${params.toString()}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'text/plain' },
+      body: classSource,
+    });
+
+    await lockService.unlock(classUri, { lockHandle });
+    lockHandle = undefined;
+
+    // 3. Activate
+    await client.adt.activation.activate.post({}, {
+      objectReferences: {
+        objectReference: [{ uri: classUri, name: className }],
+      },
+    } as any);
+
+    // 4. Execute
+    const result = await client.adt.oo.classrun.post(className);
+    return typeof result === 'string' ? result : String(result ?? '');
+  } catch (err) {
+    // Best-effort unlock if still held
+    if (lockHandle) {
+      try {
+        await lockService.unlock(classUri, { lockHandle });
+      } catch {
+        /* ignore */
+      }
+    }
+    throw err;
+  }
+}
+
+/** 5. Cleanup — always try to delete unless keepClass is set. */
+async function cleanupTempClass(
+  client: AdtClient,
+  className: string,
+  transport: string | undefined,
+  created: boolean,
+  keepClass: boolean,
+): Promise<boolean> {
+  if (!created || keepClass) return false;
+  try {
+    await client.adt.oo.classes.delete(
+      className.toLowerCase(),
+      transport ? { corrNr: transport } : {},
+    );
+    return true;
+  } catch {
+    /* ignore cleanup failure */
+    return false;
+  }
 }
 
 export function registerRunAbapTool(server: McpServer, ctx: ToolContext): void {
@@ -76,7 +188,7 @@ export function registerRunAbapTool(server: McpServer, ctx: ToolContext): void {
         .describe('If true, do not delete the temp class after execution'),
     },
     async (args, extra) => {
-      let client;
+      let client: AdtClient;
       try {
         ({ client } = await resolveClient(ctx, args, extra ?? {}));
       } catch (error) {
@@ -101,96 +213,36 @@ export function registerRunAbapTool(server: McpServer, ctx: ToolContext): void {
       const classSource = buildClassSource(args.source, className);
 
       const lockService = createLockService(client);
-      let lockHandle: string | undefined;
       let output = '';
       let executionError: Error | undefined;
       let created = false;
       let classDeleted = false;
 
       try {
-        // 1. Create temp class (POST skeleton)
-        try {
-          await client.adt.oo.classes.post(
-            transport ? { corrNr: transport } : {},
-            {
-              abapClass: {
-                name: className,
-                type: 'CLAS/OC',
-                description: 'Temporary ADT MCP runner class',
-                language: 'EN',
-                masterLanguage: 'EN',
-                packageRef: {
-                  uri: `/sap/bc/adt/packages/${packageName}`,
-                  name: packageName,
-                  type: 'DEVC/K',
-                },
-              },
-            } as any,
-          );
-          created = true;
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
-          if (!msg.includes('already exists') && !msg.includes('422')) {
-            throw err;
-          }
-          // class from a previous run — reuse
-        }
-
-        // 2. Lock → write source → unlock
-        const lock = await lockService.lock(classUri, {
+        created = await createTempClass(
+          client,
+          className,
+          packageName,
           transport,
-          objectName: className,
-          objectType: 'CLAS',
-        });
-        lockHandle = lock.handle;
-        const effectiveTransport = resolveLockCorrelation(lock, transport);
-
-        const params = new URLSearchParams();
-        params.set('lockHandle', lockHandle);
-        if (effectiveTransport) params.set('corrNr', effectiveTransport);
-
-        await client.fetch(`${classUri}/source/main?${params.toString()}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'text/plain' },
-          body: classSource,
-        });
-
-        await lockService.unlock(classUri, { lockHandle });
-        lockHandle = undefined;
-
-        // 3. Activate
-        await client.adt.activation.activate.post({}, {
-          objectReferences: {
-            objectReference: [{ uri: classUri, name: className }],
-          },
-        } as any);
-
-        // 4. Execute
-        const result = await client.adt.oo.classrun.post(className);
-        output = typeof result === 'string' ? result : String(result ?? '');
+        );
+        output = await executeClassRun(
+          client,
+          lockService,
+          classUri,
+          className,
+          classSource,
+          transport,
+        );
       } catch (err) {
         executionError = err instanceof Error ? err : new Error(String(err));
-        // Best-effort unlock if still held
-        if (lockHandle) {
-          try {
-            await lockService.unlock(classUri, { lockHandle });
-          } catch {
-            /* ignore */
-          }
-        }
       } finally {
-        // 5. Cleanup — always try to delete unless keepClass is set
-        if (created && !keepClass) {
-          try {
-            await client.adt.oo.classes.delete(
-              className.toLowerCase(),
-              transport ? { corrNr: transport } : {},
-            );
-            classDeleted = true;
-          } catch {
-            /* ignore cleanup failure */
-          }
-        }
+        classDeleted = await cleanupTempClass(
+          client,
+          className,
+          transport,
+          created,
+          keepClass,
+        );
       }
 
       if (executionError) {

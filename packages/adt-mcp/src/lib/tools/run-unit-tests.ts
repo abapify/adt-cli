@@ -117,6 +117,45 @@ function buildRunConfiguration(
   };
 }
 
+type AunitTestClassNode = NonNullable<AunitProgram['testClasses']>['testClass'];
+type AunitTestClassItem =
+  AunitTestClassNode extends ReadonlyArray<infer T> ? T : AunitTestClassNode;
+type AunitTestMethodNode = NonNullable<
+  NonNullable<AunitTestClassItem['testMethods']>['testMethod']
+>;
+type AunitTestMethodItem =
+  AunitTestMethodNode extends ReadonlyArray<infer T> ? T : AunitTestMethodNode;
+
+function toArray<T>(value: T | readonly T[]): T[] {
+  return Array.isArray(value) ? [...value] : [value as T];
+}
+
+interface TestTally {
+  totalTests: number;
+  passCount: number;
+  failCount: number;
+  errorCount: number;
+}
+
+function tallyMethod(tm: AunitTestMethodItem, tally: TestTally): void {
+  tally.totalTests++;
+  const alerts = tm?.alerts?.alert ?? [];
+  const alertArr = toArray(alerts);
+  if (alertArr.length === 0) {
+    tally.passCount++;
+    return;
+  }
+  const hasFail = alertArr.some(
+    (a) => a?.kind === 'failedAssertion' || a?.severity === 'critical',
+  );
+  const hasError = alertArr.some(
+    (a) => a?.kind === 'error' || a?.severity === 'fatal',
+  );
+  if (hasError) tally.errorCount++;
+  else if (hasFail) tally.failCount++;
+  else tally.passCount++;
+}
+
 /** Normalize AUnit response into a simple summary using proper schema types */
 function normalizeResult(response: AunitResultData): {
   totalTests: number;
@@ -126,37 +165,24 @@ function normalizeResult(response: AunitResultData): {
   programs: AunitProgram[];
 } {
   const programs = response.runResult.program ?? [];
-  let totalTests = 0;
-  let passCount = 0;
-  let failCount = 0;
-  let errorCount = 0;
+  const tally: TestTally = {
+    totalTests: 0,
+    passCount: 0,
+    failCount: 0,
+    errorCount: 0,
+  };
 
   for (const prog of programs) {
     const testClasses = prog.testClasses?.testClass ?? [];
-    for (const tc of Array.isArray(testClasses) ? testClasses : [testClasses]) {
+    for (const tc of toArray(testClasses)) {
       const methods = tc?.testMethods?.testMethod ?? [];
-      for (const tm of Array.isArray(methods) ? methods : [methods]) {
-        totalTests++;
-        const alerts = tm?.alerts?.alert ?? [];
-        const alertArr = Array.isArray(alerts) ? alerts : [alerts];
-        if (alertArr.length === 0) {
-          passCount++;
-        } else {
-          const hasFail = alertArr.some(
-            (a) => a?.kind === 'failedAssertion' || a?.severity === 'critical',
-          );
-          const hasError = alertArr.some(
-            (a) => a?.kind === 'error' || a?.severity === 'fatal',
-          );
-          if (hasError) errorCount++;
-          else if (hasFail) failCount++;
-          else passCount++;
-        }
+      for (const tm of toArray(methods)) {
+        tallyMethod(tm, tally);
       }
     }
   }
 
-  return { totalTests, passCount, failCount, errorCount, programs };
+  return { ...tally, programs };
 }
 
 function alertCount(rawAlerts: unknown): number {
