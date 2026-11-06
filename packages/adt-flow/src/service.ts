@@ -476,8 +476,11 @@ async function reuseIndexedGroup(
   previous: ObjectDescriptor,
 ): Promise<DesiredFile[]> {
   const desired: DesiredFile[] = [];
-  for (const file of previous.ownedFiles) {
-    const content = await readText(root, file.path);
+  const contents = await Promise.all(
+    previous.ownedFiles.map((file) => readText(root, file.path)),
+  );
+  for (const [index, file] of previous.ownedFiles.entries()) {
+    const content = contents[index];
     if (content === undefined) {
       throw new AdtFlowError(
         'working_tree_diverged',
@@ -1483,18 +1486,27 @@ async function addTransportDescriptors(
   const relevantObjectDescriptors = [...new Set(descriptorPaths)].sort(
     compareStrings,
   );
+  const existingByTransport = new Map<string, TransportDescriptor | undefined>(
+    await Promise.all(
+      manifest.scopeTransports.map(async (transport) => {
+        try {
+          return [
+            transport,
+            await readDescriptor(
+              ctx.root,
+              transportDescriptorPath(transport),
+              transportDescriptorSchema,
+            ),
+          ] as const;
+        } catch {
+          return [transport, undefined] as const;
+        }
+      }),
+    ),
+  );
   for (const transport of manifest.scopeTransports) {
     const path = transportDescriptorPath(transport);
-    let existing: TransportDescriptor | undefined;
-    try {
-      existing = await readDescriptor(
-        ctx.root,
-        path,
-        transportDescriptorSchema,
-      );
-    } catch {
-      existing = undefined;
-    }
+    const existing = existingByTransport.get(transport);
     const matchesCurrentCheckout =
       existing !== undefined &&
       stableJson(existing.requestedTransports) === stableJson(ctx.requested) &&

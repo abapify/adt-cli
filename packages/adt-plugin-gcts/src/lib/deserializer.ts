@@ -155,8 +155,10 @@ export async function* deserialize(
   }
 
   // Collect every source file (.abap/.asddls/.asdcls) and group by name:type.
-  for (const ext of SOURCE_EXTENSIONS) {
-    const paths = await fileTree.glob(`**/*.${ext}`);
+  const pathsByExtension = await Promise.all(
+    Array.from(SOURCE_EXTENSIONS).map((ext) => fileTree.glob(`**/*.${ext}`)),
+  );
+  for (const paths of pathsByExtension) {
     for (const path of paths) {
       const filename = path.split('/').pop()!;
       const parsed = parseGctsFilename(filename);

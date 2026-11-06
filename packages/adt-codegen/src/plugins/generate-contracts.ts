@@ -721,22 +721,21 @@ function generateUnsupportedEndpointsDoc(
 }
 
 async function findJsonFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-
-  async function walk(currentDir: string) {
+  async function walk(currentDir: string): Promise<string[]> {
     const entries = await readdir(currentDir, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = join(currentDir, entry.name);
-      if (entry.isDirectory()) {
-        await walk(fullPath);
-      } else if (entry.name.endsWith('.json')) {
-        files.push(fullPath);
-      }
-    }
+    const perEntry = await Promise.all(
+      entries.map(async (entry) => {
+        const fullPath = join(currentDir, entry.name);
+        if (entry.isDirectory()) {
+          return walk(fullPath);
+        }
+        return entry.name.endsWith('.json') ? [fullPath] : [];
+      }),
+    );
+    return perEntry.flat();
   }
 
-  await walk(dir);
-  return files;
+  return walk(dir);
 }
 
 /**
@@ -806,10 +805,22 @@ export async function generateContracts(
   }> = [];
   let totalMethods = 0;
 
-  for (const jsonFile of jsonFiles) {
+  const readResults: Array<
+    { jsonFile: string; content: string } | { jsonFile: string; error: unknown }
+  > = await Promise.all(
+    jsonFiles.map((jsonFile) =>
+      readFile(jsonFile, 'utf-8').then(
+        (content) => ({ jsonFile, content }),
+        (error: unknown) => ({ jsonFile, error }),
+      ),
+    ),
+  );
+
+  for (const result of readResults) {
+    const { jsonFile } = result;
     try {
-      const content = await readFile(jsonFile, 'utf-8');
-      const coll: CollectionJson = JSON.parse(content);
+      if ('error' in result) throw result.error;
+      const coll: CollectionJson = JSON.parse(result.content);
 
       const endpointInfo = {
         href: coll.href,

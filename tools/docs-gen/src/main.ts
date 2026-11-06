@@ -65,8 +65,12 @@ outputs.set(
 );
 
 const changed: string[] = [];
-for (const [file, raw] of outputs) {
-  const content = await format(file, raw);
+const formatted = await Promise.all(
+  [...outputs].map(
+    async ([file, raw]) => [file, await format(file, raw)] as const,
+  ),
+);
+for (const [file, content] of formatted) {
   if (read(file) === content) continue;
   changed.push(relative(ROOT, file));
   if (!check) {

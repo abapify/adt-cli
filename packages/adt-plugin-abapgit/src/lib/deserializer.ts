@@ -347,15 +347,21 @@ export async function* deserialize(
       const { values, isAffJson } = meta;
 
       // Read source files
+      const contents = await Promise.all(
+        objFiles.sourceFiles.map(({ path, binary }) =>
+          binary
+            ? fileTree
+                .readBuffer(path)
+                .then((buffer) => buffer.toString('base64'))
+            : fileTree.read(path),
+        ),
+      );
       const sources: Record<string, string> = {};
-      for (const { path, suffix, binary } of objFiles.sourceFiles) {
-        const content = binary
-          ? (await fileTree.readBuffer(path)).toString('base64')
-          : await fileTree.read(path);
+      for (const [index, { suffix }] of objFiles.sourceFiles.entries()) {
         const sourceKey = suffix
           ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
           : 'main';
-        sources[sourceKey] = content;
+        sources[sourceKey] = contents[index];
       }
 
       const payload = buildPayload(handler, values, isAffJson, objFiles);

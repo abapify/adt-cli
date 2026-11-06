@@ -182,8 +182,11 @@ export const loginCommand = new Command('login')
       if (configuredDestinations.length > 0) {
         const destinationChoices: DestinationChoice[] = [];
 
-        for (const destName of configuredDestinations) {
-          const dest = await getDestination(destName);
+        const destinations = await Promise.all(
+          configuredDestinations.map((destName) => getDestination(destName)),
+        );
+        for (const [index, destName] of configuredDestinations.entries()) {
+          const dest = destinations[index];
           if (dest) {
             const opts = dest.options as DestinationOptions;
             destinationChoices.push({

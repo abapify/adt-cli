@@ -207,8 +207,10 @@ export async function loadCommandPlugins(
     return;
   }
 
-  for (const modulePath of config.commands) {
-    const plugin = await loadCommandPlugin(modulePath, cwd);
+  const plugins = await Promise.all(
+    config.commands.map((modulePath) => loadCommandPlugin(modulePath, cwd)),
+  );
+  for (const plugin of plugins) {
     if (plugin) {
       const cmd = pluginToCommand(plugin, config);
       program.addCommand(cmd);

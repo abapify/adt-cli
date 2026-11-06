@@ -143,12 +143,10 @@ function renderCommand(cmd: Command, path: string[], level: number): string[] {
 }
 
 async function loadPlugins(): Promise<CliCommandPlugin[]> {
-  const plugins: CliCommandPlugin[] = [];
-  for (const spec of PLUGIN_MODULES) {
-    const mod = (await import(spec)) as { default: CliCommandPlugin };
-    plugins.push(mod.default);
-  }
-  return plugins;
+  const mods = (await Promise.all(
+    PLUGIN_MODULES.map((spec) => import(spec)),
+  )) as Array<{ default: CliCommandPlugin }>;
+  return mods.map((mod) => mod.default);
 }
 
 export async function generateCliPages(): Promise<CliPage[]> {

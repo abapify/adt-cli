@@ -98,36 +98,41 @@ async function scanAbapgitFormat(dir: string): Promise<AbapObject[]> {
     return objects;
   }
 
-  async function scanDirectory(currentDir: string): Promise<void> {
+  async function scanDirectory(currentDir: string): Promise<AbapObject[]> {
     const entries = await readdir(currentDir, { withFileTypes: true });
 
-    for (const entry of entries) {
-      const fullPath = join(currentDir, entry.name);
+    const perEntry = await Promise.all(
+      entries.map(async (entry) => {
+        const found: AbapObject[] = [];
+        const fullPath = join(currentDir, entry.name);
 
-      if (entry.isDirectory()) {
-        await scanDirectory(fullPath);
-      } else if (entry.isFile() && entry.name.endsWith('.abap')) {
-        // Parse filename: <name>.<type>.abap
-        const parts = entry.name.split('.');
-        if (parts.length >= 3) {
-          const type = parts[parts.length - 2].toLowerCase();
-          const name = parts.slice(0, -2).join('.').toUpperCase();
+        if (entry.isDirectory()) {
+          found.push(...(await scanDirectory(fullPath)));
+        } else if (entry.isFile() && entry.name.endsWith('.abap')) {
+          // Parse filename: <name>.<type>.abap
+          const parts = entry.name.split('.');
+          if (parts.length >= 3) {
+            const type = parts[parts.length - 2].toLowerCase();
+            const name = parts.slice(0, -2).join('.').toUpperCase();
 
-          const uriPath = TYPE_TO_URI_PATH[type];
-          if (uriPath) {
-            objects.push({
-              uri: `${uriPath}/${name.toLowerCase()}`,
-              type: type.toUpperCase(),
-              name,
-              path: fullPath.replace(dir + '/', ''),
-            });
+            const uriPath = TYPE_TO_URI_PATH[type];
+            if (uriPath) {
+              found.push({
+                uri: `${uriPath}/${name.toLowerCase()}`,
+                type: type.toUpperCase(),
+                name,
+                path: fullPath.replace(dir + '/', ''),
+              });
+            }
           }
         }
-      }
-    }
+        return found;
+      }),
+    );
+    return perEntry.flat();
   }
 
-  await scanDirectory(srcDir);
+  objects.push(...(await scanDirectory(srcDir)));
   return objects;
 }
 
@@ -143,36 +148,41 @@ async function scanAffFormat(dir: string): Promise<AbapObject[]> {
     return objects;
   }
 
-  async function scanDirectory(currentDir: string): Promise<void> {
+  async function scanDirectory(currentDir: string): Promise<AbapObject[]> {
     const entries = await readdir(currentDir, { withFileTypes: true });
 
-    for (const entry of entries) {
-      const fullPath = join(currentDir, entry.name);
+    const perEntry = await Promise.all(
+      entries.map(async (entry) => {
+        const found: AbapObject[] = [];
+        const fullPath = join(currentDir, entry.name);
 
-      if (entry.isDirectory()) {
-        await scanDirectory(fullPath);
-      } else if (entry.isFile() && entry.name.endsWith('.json')) {
-        // Parse filename: <name>.<type>.json
-        const parts = entry.name.split('.');
-        if (parts.length >= 3 && parts[parts.length - 1] === 'json') {
-          const type = parts[parts.length - 2].toLowerCase();
-          const name = parts.slice(0, -2).join('.').toUpperCase();
+        if (entry.isDirectory()) {
+          found.push(...(await scanDirectory(fullPath)));
+        } else if (entry.isFile() && entry.name.endsWith('.json')) {
+          // Parse filename: <name>.<type>.json
+          const parts = entry.name.split('.');
+          if (parts.length >= 3 && parts[parts.length - 1] === 'json') {
+            const type = parts[parts.length - 2].toLowerCase();
+            const name = parts.slice(0, -2).join('.').toUpperCase();
 
-          const uriPath = TYPE_TO_URI_PATH[type];
-          if (uriPath) {
-            objects.push({
-              uri: `${uriPath}/${name.toLowerCase()}`,
-              type: type.toUpperCase(),
-              name,
-              path: fullPath.replace(dir + '/', ''),
-            });
+            const uriPath = TYPE_TO_URI_PATH[type];
+            if (uriPath) {
+              found.push({
+                uri: `${uriPath}/${name.toLowerCase()}`,
+                type: type.toUpperCase(),
+                name,
+                path: fullPath.replace(dir + '/', ''),
+              });
+            }
           }
         }
-      }
-    }
+        return found;
+      }),
+    );
+    return perEntry.flat();
   }
 
-  await scanDirectory(srcDir);
+  objects.push(...(await scanDirectory(srcDir)));
   return objects;
 }
 
