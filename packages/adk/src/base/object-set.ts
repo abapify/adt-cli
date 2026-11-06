@@ -289,6 +289,59 @@ export class AdkObjectSet {
   }
 
   /**
+   * Step 2b: Retry deferred sources after activation.
+   *
+   * Some includes (e.g., testclasses) may not exist until activation creates
+   * them. Failures are folded back into `saveResult` counts.
+   */
+  private async retryDeferredSources(
+    r: BulkSaveResult['results'][number],
+    saveResult: BulkSaveResult,
+    transport: string | undefined,
+  ): Promise<void> {
+    const obj = r.object as any;
+    const deferred = obj._deferredSources as [string, string][] | undefined;
+    if (deferred && deferred.length > 0) {
+      try {
+        // Re-lock for deferred source saves
+        const lock = await r.object.lock(transport);
+        const effectiveTransport = resolveLockCorrelation(lock, transport);
+        for (const [key, source] of deferred) {
+          await obj.saveIncludeSource(key, source, {
+            lockHandle: lock.handle,
+            transport: effectiveTransport,
+          });
+        }
+        // Re-activate after saving deferred sources
+        const deferredSet = new AdkObjectSet(this.ctx);
+        deferredSet.add(r.object);
+        const deferredActivation = await deferredSet.activateAll();
+        if (deferredActivation.failed > 0) {
+          throw new Error(
+            `Deferred activation failed: ${
+              deferredActivation.messages.join('; ') || 'unknown error'
+            }`,
+          );
+        }
+        delete obj._deferredSources;
+      } catch (error) {
+        r.success = false;
+        r.error = `Deferred source deployment failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`;
+        saveResult.success--;
+        saveResult.failed++;
+      } finally {
+        try {
+          await r.object.unlock();
+        } catch {
+          // Ignore unlock failures
+        }
+      }
+    }
+  }
+
+  /**
    * Save all objects as inactive, then bulk activate, then unlock
    *
    * This is the recommended pattern for deploying multiple objects:
@@ -326,54 +379,9 @@ export class AdkObjectSet {
 
         activationResult = await savedSet.activateAll();
 
-        // Step 2b: Retry deferred sources after activation
-        // Some includes (e.g., testclasses) may not exist until activation creates them
         for (const r of saveResult.results) {
           if (!r.success) continue;
-          const obj = r.object as any;
-          const deferred = obj._deferredSources as
-            [string, string][] | undefined;
-          if (deferred && deferred.length > 0) {
-            try {
-              // Re-lock for deferred source saves
-              const lock = await r.object.lock(saveOptions.transport);
-              const effectiveTransport = resolveLockCorrelation(
-                lock,
-                saveOptions.transport,
-              );
-              for (const [key, source] of deferred) {
-                await obj.saveIncludeSource(key, source, {
-                  lockHandle: lock.handle,
-                  transport: effectiveTransport,
-                });
-              }
-              // Re-activate after saving deferred sources
-              const deferredSet = new AdkObjectSet(this.ctx);
-              deferredSet.add(r.object);
-              const deferredActivation = await deferredSet.activateAll();
-              if (deferredActivation.failed > 0) {
-                throw new Error(
-                  `Deferred activation failed: ${
-                    deferredActivation.messages.join('; ') || 'unknown error'
-                  }`,
-                );
-              }
-              delete obj._deferredSources;
-            } catch (error) {
-              r.success = false;
-              r.error = `Deferred source deployment failed: ${
-                error instanceof Error ? error.message : String(error)
-              }`;
-              saveResult.success--;
-              saveResult.failed++;
-            } finally {
-              try {
-                await r.object.unlock();
-              } catch {
-                // Ignore unlock failures
-              }
-            }
-          }
+          await this.retryDeferredSources(r, saveResult, saveOptions.transport);
         }
       }
 
