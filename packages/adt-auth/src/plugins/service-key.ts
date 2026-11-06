@@ -262,6 +262,59 @@ async function performPkceFlow(
   });
 }
 
+/**
+ * Resolve the browser opener: use the provided callback, or dynamically
+ * import the `open` package. Throws when neither is available.
+ */
+async function resolveBrowserOpener(
+  openBrowser: ((url: string) => Promise<void>) | undefined,
+): Promise<(url: string) => Promise<void>> {
+  if (openBrowser) {
+    return openBrowser;
+  }
+  try {
+    const openModule = await import('open');
+    const openFn = openModule.default;
+    return async (url: string) => {
+      await openFn(url);
+    };
+  } catch {
+    throw new Error(
+      'No openBrowser callback provided and "open" package not available. ' +
+        'Install "open" or pass an openBrowser function in plugin options.',
+    );
+  }
+}
+
+/**
+ * Classify a failed PKCE attempt. EADDRINUSE is retried on the next port;
+ * when an explicit redirectUri is set, retrying on a different port is
+ * pointless because the OAuth callback will still go to the original port
+ * encoded in the redirect URI — so that combination is fatal. Everything
+ * else is rethrown unchanged.
+ */
+function classifyAttemptError(
+  err: unknown,
+  port: number,
+  hasExplicitRedirect: boolean,
+  log: (msg: string) => void,
+): void {
+  const isAddrInUse =
+    err instanceof Error &&
+    'code' in err &&
+    (err as NodeJS.ErrnoException).code === 'EADDRINUSE';
+  if (!isAddrInUse) {
+    throw err; // Non-port error — rethrow immediately
+  }
+  if (hasExplicitRedirect) {
+    throw new Error(
+      `Port ${port} is in use and redirectUri is explicitly set — cannot retry on a different port`,
+      { cause: err },
+    );
+  }
+  log(`⚠️  Port ${port} in use, trying ${port + 1}...`);
+}
+
 const authPlugin: AuthPlugin = {
   async authenticate(options: AuthPluginOptions): Promise<CookieAuthResult> {
     const { serviceKey, openBrowser, callbackPort, timeoutMs, redirectUri } =
@@ -274,24 +327,7 @@ const authPlugin: AuthPlugin = {
     const parsed = ServiceKeyParser.parse(serviceKey);
 
     // Resolve openBrowser: use provided callback, or dynamically import 'open'
-    let browserOpener: (url: string) => Promise<void>;
-    if (openBrowser) {
-      browserOpener = openBrowser;
-    } else {
-      // Fallback: try dynamic import of 'open' package
-      try {
-        const openModule = await import('open');
-        const openFn = openModule.default;
-        browserOpener = async (url: string) => {
-          await openFn(url);
-        };
-      } catch {
-        throw new Error(
-          'No openBrowser callback provided and "open" package not available. ' +
-            'Install "open" or pass an openBrowser function in plugin options.',
-        );
-      }
-    }
+    const browserOpener = await resolveBrowserOpener(openBrowser);
 
     const startPort =
       typeof callbackPort === 'number' ? callbackPort : DEFAULT_PORT;
@@ -345,25 +381,9 @@ const authPlugin: AuthPlugin = {
           },
         };
       } catch (err) {
-        if (
-          err instanceof Error &&
-          'code' in err &&
-          (err as NodeJS.ErrnoException).code === 'EADDRINUSE'
-        ) {
-          // When an explicit redirectUri is set, retrying on a different port
-          // is pointless because the OAuth callback will still go to the
-          // original port encoded in the redirect URI.
-          if (hasExplicitRedirect) {
-            throw new Error(
-              `Port ${port} is in use and redirectUri is explicitly set — cannot retry on a different port`,
-              { cause: err },
-            );
-          }
-          lastError = err;
-          log(`⚠️  Port ${port} in use, trying ${port + 1}...`);
-          continue;
-        }
-        throw err; // Non-port error — rethrow immediately
+        classifyAttemptError(err, port, hasExplicitRedirect, log);
+        lastError = err;
+        continue;
       }
     }
 

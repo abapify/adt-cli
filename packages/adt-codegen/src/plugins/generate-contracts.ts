@@ -739,6 +739,79 @@ async function findJsonFiles(dir: string): Promise<string[]> {
   return walk(dir);
 }
 
+/** Load content type mapping — either from file or use object directly. */
+async function loadContentTypeMapping(
+  mapping: string | ContentTypeMapping,
+): Promise<void> {
+  if (typeof mapping === 'string') {
+    if (!existsSync(mapping)) {
+      throw new Error('Mapping file not found: ' + mapping);
+    }
+    await loadMapping(mapping);
+  } else {
+    contentTypeMapping = mapping;
+  }
+}
+
+/** Load enabled endpoints — either from file or use object directly. */
+async function loadEnabledEndpointsConfig(
+  endpoints: string | EnabledEndpoints,
+): Promise<void> {
+  if (typeof endpoints === 'string') {
+    if (!existsSync(endpoints)) {
+      throw new Error('Enabled endpoints file not found: ' + endpoints);
+    }
+    await loadEnabledEndpoints(endpoints);
+  } else {
+    enabledEndpointsList = normalizeEnabledEndpoints(endpoints);
+  }
+}
+
+/**
+ * Generate + write one contract file. Returns the method count, or `null`
+ * when the endpoint produced no methods after filtering (nothing written).
+ */
+async function emitContractFile(
+  collJson: CollectionJson,
+  dirPath: string,
+  outputDir: string,
+  importResolver: ResolveImportsHook,
+): Promise<number | null> {
+  // Get endpoint config to check for CRUD mode
+  const endpointConfig = getEndpointConfig(collJson.href);
+  const imports = importResolver(dirPath, outputDir);
+
+  let code: string;
+  let methodCount: number;
+
+  if (endpointConfig?.crud) {
+    // Generate CRUD contract using crud() helper
+    code = generateCrudContractFile(collJson, dirPath, imports, endpointConfig);
+    methodCount = 4; // get, post, put, delete
+    console.log('  + ' + dirPath + '.ts (CRUD: get, post, put, delete)');
+  } else {
+    // Generate standard contract with individual methods
+    const methods = processCollection(collJson);
+
+    // Skip endpoints with no methods (e.g., method filter excluded all)
+    if (methods.length === 0) {
+      console.log(
+        '  - ' + dirPath + '.ts (skipped: no methods after filtering)',
+      );
+      return null;
+    }
+
+    code = generateContractFile(collJson, methods, dirPath, imports);
+    methodCount = methods.length;
+    console.log('  + ' + dirPath + '.ts (' + methods.length + ' methods)');
+  }
+
+  const outputPath = join(outputDir, dirPath + '.ts');
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, code, 'utf-8');
+  return methodCount;
+}
+
 /**
  * Generate contracts from discovery collections
  */
@@ -761,26 +834,10 @@ export async function generateContracts(
   }
 
   // Load content type mapping - either from file or use object directly
-  if (typeof options.contentTypeMapping === 'string') {
-    if (!existsSync(options.contentTypeMapping)) {
-      throw new Error('Mapping file not found: ' + options.contentTypeMapping);
-    }
-    await loadMapping(options.contentTypeMapping);
-  } else {
-    contentTypeMapping = options.contentTypeMapping;
-  }
+  await loadContentTypeMapping(options.contentTypeMapping);
 
   // Load enabled endpoints - either from file or use object directly
-  if (typeof options.enabledEndpoints === 'string') {
-    if (!existsSync(options.enabledEndpoints)) {
-      throw new Error(
-        'Enabled endpoints file not found: ' + options.enabledEndpoints,
-      );
-    }
-    await loadEnabledEndpoints(options.enabledEndpoints);
-  } else {
-    enabledEndpointsList = normalizeEnabledEndpoints(options.enabledEndpoints);
-  }
+  await loadEnabledEndpointsConfig(options.enabledEndpoints);
   console.log('Enabled patterns: ' + enabledEndpointsList.length);
 
   if (!existsSync(collectionsDir)) {
@@ -840,41 +897,15 @@ export async function generateContracts(
       const dirPath = dirname(relPath);
       const contractName = dirPath.split('/').pop() || 'contract';
 
-      // Get endpoint config to check for CRUD mode
-      const endpointConfig = getEndpointConfig(coll.href);
-      const imports = importResolver(dirPath, outputDir);
-
-      let code: string;
-      let methodCount: number;
-
-      if (endpointConfig?.crud) {
-        // Generate CRUD contract using crud() helper
-        code = generateCrudContractFile(coll, dirPath, imports, endpointConfig);
-        methodCount = 4; // get, post, put, delete
-        console.log('  + ' + dirPath + '.ts (CRUD: get, post, put, delete)');
-      } else {
-        // Generate standard contract with individual methods
-        const methods = processCollection(coll);
-
-        // Skip endpoints with no methods (e.g., method filter excluded all)
-        if (methods.length === 0) {
-          console.log(
-            '  - ' + dirPath + '.ts (skipped: no methods after filtering)',
-          );
-          continue;
-        }
-
-        code = generateContractFile(coll, methods, dirPath, imports);
-        methodCount = methods.length;
-        console.log('  + ' + dirPath + '.ts (' + methods.length + ' methods)');
-      }
+      const methodCount = await emitContractFile(
+        coll,
+        dirPath,
+        outputDir,
+        importResolver,
+      );
+      if (methodCount === null) continue;
 
       totalMethods += methodCount;
-
-      const outputPath = join(outputDir, dirPath + '.ts');
-      await mkdir(dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, code, 'utf-8');
-
       generatedContracts.push({ relativePath: dirPath, contractName });
     } catch (err) {
       console.error('  Error: ' + jsonFile + ':', err);
@@ -967,26 +998,10 @@ export async function generateContractsFromDiscovery(
   console.log('Found ' + collections.length + ' collections in discovery\n');
 
   // Load content type mapping
-  if (typeof options.contentTypeMapping === 'string') {
-    if (!existsSync(options.contentTypeMapping)) {
-      throw new Error('Mapping file not found: ' + options.contentTypeMapping);
-    }
-    await loadMapping(options.contentTypeMapping);
-  } else {
-    contentTypeMapping = options.contentTypeMapping;
-  }
+  await loadContentTypeMapping(options.contentTypeMapping);
 
   // Load enabled endpoints
-  if (typeof options.enabledEndpoints === 'string') {
-    if (!existsSync(options.enabledEndpoints)) {
-      throw new Error(
-        'Enabled endpoints file not found: ' + options.enabledEndpoints,
-      );
-    }
-    await loadEnabledEndpoints(options.enabledEndpoints);
-  } else {
-    enabledEndpointsList = normalizeEnabledEndpoints(options.enabledEndpoints);
-  }
+  await loadEnabledEndpointsConfig(options.enabledEndpoints);
   console.log('Enabled patterns: ' + enabledEndpointsList.length);
 
   const generatedContracts: Array<{
@@ -1032,46 +1047,15 @@ export async function generateContractsFromDiscovery(
     const dirPath = coll.href.replace(/^\//, '');
     const contractName = dirPath.split('/').pop() || 'contract';
 
-    // Get endpoint config to check for CRUD mode
-    const endpointConfig = getEndpointConfig(coll.href);
-    const imports = importResolver(dirPath, outputDir);
-
-    let code: string;
-    let methodCount: number;
-
-    if (endpointConfig?.crud) {
-      // Generate CRUD contract using crud() helper
-      code = generateCrudContractFile(
-        collJson,
-        dirPath,
-        imports,
-        endpointConfig,
-      );
-      methodCount = 4; // get, post, put, delete
-      console.log('  + ' + dirPath + '.ts (CRUD: get, post, put, delete)');
-    } else {
-      // Generate standard contract with individual methods
-      const methods = processCollection(collJson);
-
-      // Skip endpoints with no methods (e.g., method filter excluded all)
-      if (methods.length === 0) {
-        console.log(
-          '  - ' + dirPath + '.ts (skipped: no methods after filtering)',
-        );
-        continue;
-      }
-
-      code = generateContractFile(collJson, methods, dirPath, imports);
-      methodCount = methods.length;
-      console.log('  + ' + dirPath + '.ts (' + methods.length + ' methods)');
-    }
+    const methodCount = await emitContractFile(
+      collJson,
+      dirPath,
+      outputDir,
+      importResolver,
+    );
+    if (methodCount === null) continue;
 
     totalMethods += methodCount;
-
-    const outputPath = join(outputDir, dirPath + '.ts');
-    await mkdir(dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, code, 'utf-8');
-
     generatedContracts.push({ relativePath: dirPath, contractName });
   }
 
