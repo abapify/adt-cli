@@ -8,6 +8,7 @@
 
 import { view } from '../../../schemas/generated';
 import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
+import type { InferValuesType } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type ViewLike = {
@@ -176,19 +177,7 @@ function parseViewFromAbapGit({
   DD26V_TABLE,
   DD27P_TABLE,
   DD28V_TABLE,
-}: {
-  DD25V?: {
-    VIEWNAME?: string;
-    DDTEXT?: string;
-    DDLANGUAGE?: string;
-    VIEWCLASS?: string;
-    ROOTTAB?: string;
-    ROOTFIELD?: string;
-  };
-  DD26V_TABLE?: { item?: unknown };
-  DD27P_TABLE?: { item?: unknown };
-  DD28V_TABLE?: { item?: unknown };
-}): { name: string } & Record<string, unknown> {
+}: InferValuesType<typeof view>): { name: string } & Record<string, unknown> {
   const tableItems = normalizeItems(DD26V_TABLE?.item);
   const fieldItems = normalizeItems(DD27P_TABLE?.item);
   const condItems = normalizeItems(DD28V_TABLE?.item);

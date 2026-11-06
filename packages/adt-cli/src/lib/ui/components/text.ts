@@ -8,13 +8,7 @@ import chalk from 'chalk';
 import type { Component } from '../types';
 
 type TextStyle =
-  | 'bold'
-  | 'dim'
-  | 'italic'
-  | 'underline'
-  | 'success'
-  | 'error'
-  | 'warning';
+  'bold' | 'dim' | 'italic' | 'underline' | 'success' | 'error' | 'warning';
 
 export default function Text(content: string, style?: TextStyle): Component {
   let styled = content;

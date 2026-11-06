@@ -127,18 +127,7 @@ export function methodCallExpr(input: {
 
 /** Comparison / arithmetic operators. */
 export type BinOperator =
-  | '='
-  | '<>'
-  | '<'
-  | '<='
-  | '>'
-  | '>='
-  | '+'
-  | '-'
-  | '*'
-  | '/'
-  | 'AND'
-  | 'OR';
+  '=' | '<>' | '<' | '<=' | '>' | '>=' | '+' | '-' | '*' | '/' | 'AND' | 'OR';
 
 export interface BinOp extends AbapNode {
   readonly kind: 'BinOp';

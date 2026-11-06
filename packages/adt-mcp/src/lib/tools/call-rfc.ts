@@ -29,7 +29,7 @@ export function registerCallRfcTool(server: McpServer, ctx: ToolContext): void {
           'RFC function module name (case-insensitive, e.g. "STFC_CONNECTION")',
         ),
       parameters: z
-        .record(z.unknown())
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
           'Flat key/value map of RFC parameters. Scalars as strings; structures as objects; tables as arrays of objects.',

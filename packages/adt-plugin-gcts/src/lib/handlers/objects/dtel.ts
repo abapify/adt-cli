@@ -13,6 +13,7 @@
 
 import { AdkDataElement } from '@abapify/adk';
 import { createHandler } from '../base';
+import { affDataType } from './ddic-data-type';
 import type { DtelAff } from '../../../schemas/generated';
 
 // TODO: Replace Record<string, unknown> with generated ADK DTEL types once
@@ -21,16 +22,22 @@ import type { DtelAff } from '../../../schemas/generated';
 // Cleanup issue: https://github.com/abapify/adt-cli/issues/195
 function buildDataTypeInformation(
   data: Record<string, unknown>,
-): Record<string, unknown> {
-  const typeKind = data.typeKind as string | undefined;
-  if (typeKind === 'domain' && data.typeName) {
+): DtelAff['dataTypeInformation'] {
+  const typeKind = data.typeKind;
+  if (
+    typeKind === 'domain' &&
+    typeof data.typeName === 'string' &&
+    data.typeName
+  ) {
     return { domainName: data.typeName };
   }
   if (data.dataType) {
-    const predefinedType: Record<string, unknown> = { dataType: data.dataType };
-    if (typeof data.dataTypeLength === 'number') {
-      predefinedType.length = data.dataTypeLength;
+    if (typeof data.dataTypeLength !== 'number') {
+      throw new Error('AFF predefined DDIC type requires a length');
     }
+    const predefinedType: NonNullable<
+      DtelAff['dataTypeInformation']['predefinedType']
+    > = { dataType: affDataType(data.dataType), length: data.dataTypeLength };
     if (typeof data.dataTypeDecimals === 'number') {
       predefinedType.decimals = data.dataTypeDecimals;
     }
@@ -42,19 +49,21 @@ function buildDataTypeInformation(
 // TODO: Same as above — replace with typed access once ADK exports DTEL types.
 function buildFieldLabels(
   data: Record<string, unknown>,
-): Record<string, unknown> {
-  const labels: Record<string, unknown> = {};
-  const fields: [string, string, string][] = [
+): NonNullable<DtelAff['fieldLabels']> {
+  const labels: NonNullable<DtelAff['fieldLabels']> = {};
+  const fields: [string, 'short' | 'medium' | 'long' | 'heading', string][] = [
     ['shortFieldLabel', 'short', 'shortFieldLength'],
     ['mediumFieldLabel', 'medium', 'mediumFieldLength'],
     ['longFieldLabel', 'long', 'longFieldLength'],
     ['headingFieldLabel', 'heading', 'headingFieldLength'],
   ];
   for (const [src, dst, lenKey] of fields) {
-    if (data[src]) {
-      labels[dst] = data[src];
-      if (typeof data[lenKey] === 'number') {
-        labels[`${dst}Length`] = data[lenKey];
+    const label = data[src];
+    const length = data[lenKey];
+    if (typeof label === 'string' && label) {
+      labels[dst] = label;
+      if (typeof length === 'number') {
+        labels[`${dst}Length`] = length;
       }
     }
   }
@@ -70,7 +79,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
       ''
     ).toLowerCase();
 
-    const result: Record<string, unknown> = {
+    const result: DtelAff = {
       formatVersion: '1',
       header: {
         description: dtel.description ?? '',
@@ -84,7 +93,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
       result.fieldLabels = fieldLabels;
     }
 
-    return result as DtelAff;
+    return result;
   },
 
   fromMetadata: (meta: DtelAff) => {

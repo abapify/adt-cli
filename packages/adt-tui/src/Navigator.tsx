@@ -130,7 +130,10 @@ function NavigatorInner({ systemName }: { systemName?: string }) {
 
   if (error) {
     return (
-      <Box padding={1} flexDirection="column">
+      <Box
+        padding={1}
+        flexDirection="column"
+      >
         <Text color="red">❌ Error: {error}</Text>
         <Text dimColor>Press Ctrl+C to exit</Text>
       </Box>
@@ -191,13 +194,23 @@ function UrlPrompt({ onSubmit }: { onSubmit: (url: string) => void }) {
   };
 
   return (
-    <Box flexDirection="column" padding={1}>
-      <Text color="cyan" bold>
+    <Box
+      flexDirection="column"
+      padding={1}
+    >
+      <Text
+        color="cyan"
+        bold
+      >
         ADT TUI - Hypermedia Navigator
       </Text>
       <Box marginTop={1}>
         <Text>Enter URL: </Text>
-        <TextInput value={url} onChange={setUrl} onSubmit={handleSubmit} />
+        <TextInput
+          value={url}
+          onChange={setUrl}
+          onSubmit={handleSubmit}
+        />
       </Box>
       <Box marginTop={1}>
         <Text dimColor>

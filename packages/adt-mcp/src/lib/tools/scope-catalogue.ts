@@ -426,8 +426,9 @@ function validateAtcScope(
 }
 
 function collectAtcObjectKeys(
-  objects: unknown[],
+  objects: unknown,
 ): { keys: string[]; packageCount: number } | undefined {
+  if (!Array.isArray(objects)) return undefined;
   const keys: string[] = [];
   let packageCount = 0;
   for (const object of objects) {

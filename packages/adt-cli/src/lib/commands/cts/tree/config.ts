@@ -58,8 +58,7 @@ function propertiesToMap(config: unknown): Record<string, string> {
 
   const configObj = config as Record<string, unknown>;
   const properties = configObj.properties as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
 
   if (!properties) return result;
 
@@ -211,8 +210,7 @@ export const treeConfigCommand = new Command('config')
       // Response has 'configurations' property (plural) containing config array
       const configsData = configsResponse as { configurations?: unknown };
       const configs = configsData?.configurations as
-        | Array<{ link?: { href?: string } }>
-        | undefined;
+        Array<{ link?: { href?: string } }> | undefined;
       if (!configs) {
         console.log('\n📭 No search configuration found');
         return;

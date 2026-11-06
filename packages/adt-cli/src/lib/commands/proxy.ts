@@ -55,8 +55,7 @@ export const proxyCommand = new Command('proxy')
       // Determine target URL and auth
       let targetUrl: string | undefined = options.target;
       let auth:
-        | { username: string; password: string; client?: string }
-        | undefined;
+        { username: string; password: string; client?: string } | undefined;
       const defaultHeaders: Record<string, string> = {};
 
       if (!targetUrl) {

@@ -128,14 +128,20 @@ export function transportPage({
       )}
       {transport.tasks.length > 0 && (
         <Box marginTop={1}>
-          <Text bold color="yellow">
+          <Text
+            bold
+            color="yellow"
+          >
             📋 Tasks ({transport.tasks.length}):
           </Text>
         </Box>
       )}
       {transport.objects.length > 0 && (
         <Box marginTop={1}>
-          <Text bold color="cyan">
+          <Text
+            bold
+            color="cyan"
+          >
             📦 Objects ({transport.objects.length}):
           </Text>
         </Box>

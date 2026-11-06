@@ -23,7 +23,14 @@ import { formatAbapGitXml } from './xml-format';
  * This allows us to infer the payload type from the ADK class itself
  */
 export type InferAdkData<T> =
-  T extends AdkObject<infer _K, infer D> ? D : never;
+  T extends AdkObject<infer _K, infer D>
+    ? D
+    : keyof T extends keyof HandlerObject
+      ? Record<string, unknown>
+      : T;
+
+/** Identity shared by ADK instances and string-type handler facades. */
+export type HandlerObject = Pick<AdkObject, 'name'>;
 
 /**
  * ADK object class type
@@ -66,7 +73,7 @@ export interface SerializedFile {
  * @typeParam TSchema - AbapGit schema type (provides type-safe values)
  */
 export interface ObjectHandler<
-  T extends AdkObject = AdkObject,
+  T extends HandlerObject = AdkObject,
   TSchema extends AbapGitSchema<unknown, unknown> = AbapGitSchema<
     unknown,
     unknown
@@ -124,7 +131,7 @@ export type {
 // Global Handler Registry
 // ============================================
 
-const handlerRegistry = new Map<AbapObjectType, ObjectHandler>();
+const handlerRegistry = new Map<AbapObjectType, ObjectHandler<HandlerObject>>();
 
 /**
  * Get handler for object type
@@ -133,7 +140,9 @@ const handlerRegistry = new Map<AbapObjectType, ObjectHandler>();
  * main type (e.g., 'CLAS/OC' → 'CLAS'). This matches ADK's resolveType()
  * behaviour and handles quickSearch results that return subtypes.
  */
-export function getHandler(type: AbapObjectType): ObjectHandler | undefined {
+export function getHandler(
+  type: AbapObjectType,
+): ObjectHandler<HandlerObject> | undefined {
   return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
@@ -183,7 +192,7 @@ export interface ObjectPayload {
  * @typeParam TSchema - The AbapGit schema (provides both full type and values type)
  */
 export interface HandlerDefinition<
-  T extends AdkObject,
+  T extends HandlerObject,
   TSchema extends AbapGitSchema<unknown, unknown> = AbapGitSchema<
     unknown,
     unknown
@@ -310,7 +319,7 @@ export interface HandlerDefinition<
 /**
  * Context passed to serialize function with helper utilities
  */
-export interface HandlerContext<T extends AdkObject, _TData = unknown> {
+export interface HandlerContext<T extends HandlerObject, _TData = unknown> {
   /** ABAP object type */
   readonly type: AbapObjectType;
   /** File extension (lowercase type) */
@@ -319,7 +328,7 @@ export interface HandlerContext<T extends AdkObject, _TData = unknown> {
   /** Get object name in lowercase */
   getObjectName(object: T): string;
   /** Get object data synchronously */
-  getData(object: T): Record<string, unknown>;
+  getData(object: T & { readonly dataSync: unknown }): Record<string, unknown>;
   /** Resolve lazy content */
   resolveContent(content: unknown): Promise<string>;
 
@@ -395,14 +404,14 @@ export function createHandler<
 >(
   adkClass: AdkObjectClass<T>,
   definition: HandlerDefinition<T, TSchema>,
-): ObjectHandler<T>;
+): ObjectHandler<T, TSchema>;
 
 /**
  * Create an object handler from ABAP type string
  * Use this for object types without ADK class (e.g., DTEL, DOMA)
  */
 export function createHandler<
-  T extends AdkObject = AdkObject,
+  T extends HandlerObject = AdkObject,
   TSchema extends AbapGitSchema<unknown, unknown> = AbapGitSchema<
     unknown,
     unknown
@@ -410,7 +419,7 @@ export function createHandler<
 >(
   type: AbapObjectType,
   definition: HandlerDefinition<T, TSchema>,
-): ObjectHandler<T>;
+): ObjectHandler<T, TSchema>;
 
 /**
  * Create an object handler
@@ -430,15 +439,15 @@ export function createHandler<
  * ```
  */
 export function createHandler<
-  T extends AdkObject,
+  T extends HandlerObject,
   TSchema extends AbapGitSchema<unknown, unknown> = AbapGitSchema<
     unknown,
     unknown
   >,
 >(
-  adkClassOrType: AdkObjectClass<T> | AbapObjectType,
+  adkClassOrType: AdkObjectClass | AbapObjectType,
   definition: HandlerDefinition<T, TSchema>,
-): ObjectHandler<T> {
+): ObjectHandler<T, TSchema> {
   // Determine ABAP type
   let type: AbapObjectType;
 
@@ -468,7 +477,9 @@ export function createHandler<
       return object.name.toLowerCase();
     },
 
-    getData(object: T): Record<string, unknown> {
+    getData(
+      object: T & { readonly dataSync: unknown },
+    ): Record<string, unknown> {
       return object.dataSync as Record<string, unknown>;
     },
 
@@ -673,8 +684,7 @@ export function createHandler<
     setSources: definition.setSources,
   };
 
-  // Auto-register (cast to base type for registry storage)
-  handlerRegistry.set(type, handler as ObjectHandler);
+  handlerRegistry.set(type, handler);
 
   return handler;
 }

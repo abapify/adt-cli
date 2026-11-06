@@ -22,14 +22,7 @@ export function isRef(x: unknown): x is JsonSchemaRef {
 }
 
 export type HttpMethod =
-  | 'get'
-  | 'post'
-  | 'put'
-  | 'patch'
-  | 'delete'
-  | 'head'
-  | 'options'
-  | 'trace';
+  'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options' | 'trace';
 
 export type ParameterLocation = 'path' | 'query' | 'header' | 'cookie';
 

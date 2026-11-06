@@ -6,11 +6,7 @@ import type { AttributeDef, EventDef, MethodDef, MethodImpl } from './members';
 
 /** A member that may appear inside a class section. */
 export type SectionMember =
-  | TypeDef
-  | AttributeDef
-  | MethodDef
-  | ConstantDecl
-  | EventDef;
+  TypeDef | AttributeDef | MethodDef | ConstantDecl | EventDef;
 
 /** A visibility section of a class definition. */
 export interface Section extends AbapNode {

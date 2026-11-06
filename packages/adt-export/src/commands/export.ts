@@ -84,8 +84,7 @@ async function verifyPackageAssignments(
 
   for (const obj of objectSet) {
     const targetPkg = (obj as any)._data?.packageRef?.name as
-      | string
-      | undefined;
+      string | undefined;
     if (!targetPkg) continue;
 
     verification.total++;
@@ -430,8 +429,7 @@ export const exportCommand: CliCommandPlugin = {
         // Find root from objects that already have packageRef
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
-            | string
-            | undefined;
+            string | undefined;
           if (
             pkgName &&
             (!effectiveRootPackage ||
@@ -447,8 +445,7 @@ export const exportCommand: CliCommandPlugin = {
         const pkgMap = new Map<string, string[]>();
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
-            | string
-            | undefined;
+            string | undefined;
           if (pkgName) {
             if (!pkgMap.has(pkgName)) pkgMap.set(pkgName, []);
             pkgMap.get(pkgName)!.push(obj.name);
@@ -495,8 +492,7 @@ export const exportCommand: CliCommandPlugin = {
         const leafPackages = new Set<string>();
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
-            | string
-            | undefined;
+            string | undefined;
           if (pkgName && pkgName !== effectiveRootPackage) {
             leafPackages.add(pkgName);
           }
@@ -718,9 +714,7 @@ export const exportCommand: CliCommandPlugin = {
                     ...(options.abapLanguageVersion
                       ? {
                           languageVersion: options.abapLanguageVersion as
-                            | ''
-                            | '2'
-                            | '5',
+                            '' | '2' | '5',
                         }
                       : {}),
                   },
@@ -808,8 +802,7 @@ export const exportCommand: CliCommandPlugin = {
         const objectsByPkg = new Map<string, any[]>();
         for (const obj of objectSet) {
           const pkgName = (obj as any)._data?.packageRef?.name as
-            | string
-            | undefined;
+            string | undefined;
           if (pkgName && pkgName !== effectiveRootPackage) {
             if (!objectsByPkg.has(pkgName)) objectsByPkg.set(pkgName, []);
             objectsByPkg.get(pkgName)!.push(obj);
@@ -828,8 +821,7 @@ export const exportCommand: CliCommandPlugin = {
           const removedNames = new Set<string>();
           for (const obj of [...objectSet]) {
             const pkgName = (obj as any)._data?.packageRef?.name as
-              | string
-              | undefined;
+              string | undefined;
             if (pkgName && unavailablePackages.has(pkgName)) {
               objectSet.remove(obj);
               removedObjects.push(`${(obj as any).kind} ${obj.name}`);
@@ -879,8 +871,7 @@ export const exportCommand: CliCommandPlugin = {
         let deletedForReassign = 0;
         for (const obj of objectSet) {
           const targetPkg = (obj as any)._data?.packageRef?.name as
-            | string
-            | undefined;
+            string | undefined;
           if (!targetPkg) continue;
 
           try {

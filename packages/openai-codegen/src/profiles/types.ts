@@ -1,7 +1,5 @@
 export type TargetProfileId =
-  | 'on-prem-classic'
-  | 's4-onprem-modern'
-  | 's4-cloud';
+  'on-prem-classic' | 's4-onprem-modern' | 's4-cloud';
 
 export interface HttpClientStrategy {
   kind: 'if_http_client' | 'if_web_http_client';

@@ -99,10 +99,16 @@ export function latestAffVersion(ref: AffRef): number | undefined {
   return affVersions(ref)[0];
 }
 
+interface AffSchemaProperty {
+  const?: string;
+  type?: string;
+  properties?: Record<string, AffSchemaProperty>;
+}
+
 interface AffSchema {
   title: string;
   type: string;
-  properties: Record<string, { const?: string; type?: string }>;
+  properties: Record<string, AffSchemaProperty>;
   required?: string[];
   [key: string]: unknown;
 }

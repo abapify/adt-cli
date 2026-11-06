@@ -341,7 +341,7 @@ async function discoverFunctionModules(
     const responseStr = String(response);
     const fmNames: FmDescriptor[] = [];
     const regex = /type="FUGR\/FF"[^>]*adtcore:name="([^"]+)"/g;
-    let match;
+    let match: RegExpExecArray | null;
     while ((match = regex.exec(responseStr)) !== null) {
       fmNames.push({ name: match[1] });
     }
@@ -349,8 +349,9 @@ async function discoverFunctionModules(
     // Also try alternate attribute order
     const regex2 = /adtcore:name="([^"]+)"[^>]*type="FUGR\/FF"/g;
     while ((match = regex2.exec(responseStr)) !== null) {
-      if (match?.[1] && !fmNames.some((f) => f.name === match[1])) {
-        fmNames.push({ name: match[1] });
+      const name = match[1];
+      if (name && !fmNames.some((f) => f.name === name)) {
+        fmNames.push({ name });
       }
     }
 

@@ -15,7 +15,9 @@ import { createHandler } from '../base';
 import type { ProgAff } from '../../../schemas/generated';
 
 /** ADK sourceObjectStatus → AFF programStatus */
-const STATUS_TO_AFF: Record<string, string> = {
+type GeneralInformation = NonNullable<ProgAff['generalInformation']>;
+
+const STATUS_TO_AFF: Record<string, GeneralInformation['programStatus']> = {
   SAPStandardProduction: 'sapProductionProgram',
   customerProduction: 'customerProductionProgram',
   system: 'systemProgram',
@@ -30,11 +32,11 @@ export const programHandler = createHandler(AdkProgram, {
   toMetadata(prog): ProgAff {
     const data = prog.dataSync;
     const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();
-    const generalInformation: Record<string, unknown> = {
+    const generalInformation: GeneralInformation = {
       programType: (data.programType ??
-        'executableProgram') as ProgAff['generalInformation']['programType'],
+        'executableProgram') as GeneralInformation['programType'],
       programStatus: (STATUS_TO_AFF[data.sourceObjectStatus ?? ''] ??
-        'systemProgram') as ProgAff['generalInformation']['programStatus'],
+        'systemProgram') as GeneralInformation['programStatus'],
     };
     if (typeof data.fixPointArithmetic === 'boolean') {
       generalInformation.fixPointArithmetic = data.fixPointArithmetic;
@@ -51,7 +53,7 @@ export const programHandler = createHandler(AdkProgram, {
             }
           : {}),
       },
-      generalInformation: generalInformation as ProgAff['generalInformation'],
+      generalInformation,
     };
   },
 

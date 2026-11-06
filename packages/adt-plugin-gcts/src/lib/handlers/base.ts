@@ -20,6 +20,7 @@ import { payloadOf } from '../aff/generic';
 import type { GctsMetadata } from '../format/types';
 
 export type AbapObjectType = string;
+type HandlerObject = Pick<AdkObject, 'name'>;
 
 export type AdkObjectClass<T extends AdkObject = AdkObject> = {
   new (...args: any[]): T;
@@ -62,7 +63,7 @@ export interface GctsExtraFile {
  * ADK object to the JSON metadata shape for the target type.
  */
 export interface GctsHandlerDefinition<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata = GctsMetadata,
 > {
   /** Map ADK object → JSON metadata payload (including the required `header`). */
@@ -94,7 +95,7 @@ export interface GctsHandlerDefinition<
 
 /** Runtime shape of a gCTS handler after `createHandler` processing. */
 export interface GctsHandler<
-  T extends AdkObject = AdkObject,
+  T extends HandlerObject = AdkObject,
 > extends FormatHandler {
   readonly type: AbapObjectType;
   readonly fileExtension: string;
@@ -107,7 +108,7 @@ export interface GctsHandler<
   setSources?(object: T, sources: Record<string, string>): void;
 }
 
-const handlerRegistry = new Map<AbapObjectType, GctsHandler>();
+const handlerRegistry = new Map<AbapObjectType, GctsHandler<HandlerObject>>();
 
 /** Look up a handler (full-type first, then main-type fallback). */
 export function getHandler(type: AbapObjectType): GctsHandler | undefined {
@@ -252,17 +253,17 @@ export function createHandler<
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T>;
 export function createHandler<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata = GctsMetadata,
 >(
   type: AbapObjectType,
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T>;
 export function createHandler<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata = GctsMetadata,
 >(
-  adkClassOrType: AdkObjectClass<T> | AbapObjectType,
+  adkClassOrType: AdkObjectClass | AbapObjectType,
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T> {
   let type: AbapObjectType;
@@ -370,7 +371,7 @@ export function createHandler<
     setSources: definition.setSources,
   };
 
-  handlerRegistry.set(type, handler as GctsHandler);
+  handlerRegistry.set(type, handler);
   return handler;
 }
 

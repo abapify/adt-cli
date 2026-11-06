@@ -393,9 +393,7 @@ export const classHandler = createHandler(AdkClass, {
   serializer_version: 'v1.0.0',
 
   toAbapGit: (obj) => ({
-    VSEOCLASS: {
-      /* ... */
-    },
+    VSEOCLASS: {/* ... */},
   }),
 
   getSources: (cls) =>

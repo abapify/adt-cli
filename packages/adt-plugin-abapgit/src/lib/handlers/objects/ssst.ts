@@ -4,15 +4,18 @@
 
 import { ssst } from '../../../schemas/generated';
 import { createHandler, unwrapData } from '../base';
+import type { InferValuesType } from '../base';
 import { sapLangToIso, isoToSapLang } from '../lang';
+
+type SmartFormStyleValues = InferValuesType<typeof ssst>;
 
 type SmartFormStyleLike = {
   name: string;
   masterLanguage?: string;
   fontFamily?: string;
-  ssfparas?: unknown;
-  ssfstrings?: unknown;
-  stxstab?: unknown;
+  ssfparas?: SmartFormStyleValues['SSFPARAS'];
+  ssfstrings?: SmartFormStyleValues['SSFSTRINGS'];
+  stxstab?: SmartFormStyleValues['STXSTAB'];
 };
 
 export const smartFormStyleHandler = createHandler<

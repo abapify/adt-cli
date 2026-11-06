@@ -28,9 +28,7 @@ import {
 } from './format/index';
 
 export type GenerateTarget =
-  | 's4-cloud'
-  | 's4-onprem-modern'
-  | 'on-prem-classic';
+  's4-cloud' | 's4-onprem-modern' | 'on-prem-classic';
 
 export interface GenerateOptions {
   /** Path to the OpenAPI spec file, a URL, or a pre-parsed spec object. */

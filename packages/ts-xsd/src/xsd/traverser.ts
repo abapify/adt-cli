@@ -40,11 +40,7 @@ import type {
 
 /** Source of a node in the schema hierarchy */
 export type NodeSource =
-  | 'direct'
-  | 'redefine'
-  | 'override'
-  | 'include'
-  | 'import';
+  'direct' | 'redefine' | 'override' | 'include' | 'import';
 
 /** Traversal options */
 export interface TraverseOptions {

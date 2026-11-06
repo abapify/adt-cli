@@ -7,13 +7,14 @@ describe('DDLX AFF handler', () => {
   it('writes the official .ddlx.json and .ddlx.acds layout', async () => {
     const handler = getHandler('DDLX');
     assert.ok(handler);
-    const files = await handler.serialize({
+    const object = {
       name: 'Z_AFF_DDLX',
       description: 'Metadata extension for tests',
       originalLanguage: 'EN',
       getSource: async () =>
         '@Metadata.layer: #CORE\nannotate view ZI_ACR with { }',
-    });
+    };
+    const files = await handler.serialize(object);
 
     assert.deepEqual(files.map((file) => file.path).sort(), [
       'z_aff_ddlx.ddlx.acds',

@@ -658,12 +658,8 @@ function parseMethodDecl(
   let isForTesting = false;
 
   let section:
-    | 'none'
-    | 'importing'
-    | 'exporting'
-    | 'changing'
-    | 'returning'
-    | 'raising' = 'none';
+    'none' | 'importing' | 'exporting' | 'changing' | 'returning' | 'raising' =
+    'none';
 
   let i = qual.lastIdx + 1;
   while (i < toks.length) {

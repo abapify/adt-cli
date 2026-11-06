@@ -40,13 +40,17 @@ const scopedReadTools = new Set(['get_object', 'get_object_structure']);
 
 export type McpTrustedOperationClass = 'server' | 'read' | 'safe_execute';
 
+interface McpInvocationJsonObject {
+  readonly [key: string]: McpInvocationJsonValue;
+}
+
 export type McpInvocationJsonValue =
   | boolean
   | number
   | string
   | null
   | readonly McpInvocationJsonValue[]
-  | Readonly<Record<string, McpInvocationJsonValue>>;
+  | McpInvocationJsonObject;
 
 /** Claims proved by a verified, ADT-issued invocation credential. */
 export interface TrustedMcpInvocationClaims {
@@ -61,8 +65,8 @@ export interface TrustedMcpInvocationClaims {
   readonly classes: readonly McpTrustedOperationClass[];
   readonly destinationKeys: readonly string[];
   readonly correlationId: string;
-  readonly constraint: Readonly<Record<string, McpInvocationJsonValue>>;
-  readonly limits: Readonly<Record<string, McpInvocationJsonValue>>;
+  readonly constraint: McpInvocationJsonObject;
+  readonly limits: McpInvocationJsonObject;
 }
 
 /**
@@ -892,7 +896,7 @@ function cloneJsonScalar(value: unknown): McpInvocationJsonValue | undefined {
 function cloneJsonArray(
   value: unknown[],
   depth: number,
-): McpInvocationJsonValue[] | undefined {
+): readonly McpInvocationJsonValue[] | undefined {
   const cloned: McpInvocationJsonValue[] = [];
   for (const item of value) {
     const clonedItem = cloneJsonValue(item, depth + 1);

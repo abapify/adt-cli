@@ -6,6 +6,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { deserialize } from '../../src/lib/deserializer.ts';
+import { unwrapData } from '../../src/lib/handlers/base.ts';
 import type { FileTree } from '@abapify/adt-plugin';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -89,7 +90,7 @@ describe('companion file deserialization', () => {
     );
 
     assert.strictEqual(objects.length, 1);
-    const data = (objects[0] as { data?: Record<string, unknown> }).data ?? {};
+    const data = unwrapData<Record<string, unknown>>(objects[0]);
     assert.strictEqual(objects[0].name, 'ZTEST_FORM');
     assert.ok(data.tdlines);
     const tdlines = data.tdlines as Record<
@@ -109,7 +110,7 @@ describe('companion file deserialization', () => {
     );
 
     assert.strictEqual(objects.length, 1);
-    const data = (objects[0] as { data?: Record<string, unknown> }).data ?? {};
+    const data = unwrapData<Record<string, unknown>>(objects[0]);
     assert.strictEqual(data.fileName, 'ztest_mime.png');
     assert.strictEqual(typeof data.content, 'string');
     assert.ok(Buffer.from(data.content as string, 'base64').length > 0);
@@ -121,7 +122,7 @@ describe('companion file deserialization', () => {
     );
 
     assert.strictEqual(objects.length, 1);
-    const data = (objects[0] as { data?: Record<string, unknown> }).data ?? {};
+    const data = unwrapData<Record<string, unknown>>(objects[0]);
     assert.strictEqual(objects[0].name, 'ZTEST_TPL');
     assert.ok((data.html as string).includes('<h1>Test template</h1>'));
   });

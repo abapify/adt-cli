@@ -14,7 +14,7 @@ import { createAdtFlowDependencies } from '../adt-client-adapter';
 import { compareStrings } from '../deterministic';
 import { createAdtFlowService, type AdtFlowService } from '../service';
 import { flowConfigSchema } from '../schemas';
-import { AdtFlowError } from '../types';
+import { AdtFlowError, type FlowCheckoutInput } from '../types';
 
 export interface FlowCommandDependencies {
   getFormat(id: string): FormatPlugin | undefined;
@@ -402,7 +402,7 @@ function checkoutTrCommand(
       const reportTargets = [report, coverageReport].filter(
         (path): path is string => path !== undefined,
       );
-      const checkoutInput = {
+      const checkoutInput: FlowCheckoutInput = {
         root: ctx.cwd,
         transports: transports(args['transport']),
         mode: args['base'] === true ? 'base' : 'head',

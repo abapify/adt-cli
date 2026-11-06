@@ -68,11 +68,9 @@ export type SchemaLike = SchemaExtensions & {
   // W3C XSD Schema children
   readonly element?: readonly ElementLike[];
   readonly complexType?:
-    | readonly ComplexTypeLike[]
-    | { readonly [name: string]: ComplexTypeLike };
+    readonly ComplexTypeLike[] | { readonly [name: string]: ComplexTypeLike };
   readonly simpleType?:
-    | readonly SimpleTypeLike[]
-    | { readonly [name: string]: SimpleTypeLike };
+    readonly SimpleTypeLike[] | { readonly [name: string]: SimpleTypeLike };
   readonly group?: readonly unknown[];
   readonly attributeGroup?: readonly unknown[];
   readonly notation?: readonly unknown[];

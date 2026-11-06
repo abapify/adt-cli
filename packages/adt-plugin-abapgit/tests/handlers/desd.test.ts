@@ -7,11 +7,12 @@ describe('DESD AFF handler', () => {
   it('writes the official JSON-only external schema layout', async () => {
     const handler = getHandler('DESD');
     assert.ok(handler);
-    const files = await handler.serialize({
+    const object = {
       name: 'Z_AFF_DESD',
       description: 'External schema',
       originalLanguage: 'EN',
-    });
+    };
+    const files = await handler.serialize(object);
     assert.deepEqual(
       files.map((file) => file.path),
       ['z_aff_desd.desd.json'],

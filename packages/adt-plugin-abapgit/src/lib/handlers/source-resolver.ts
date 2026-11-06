@@ -57,14 +57,14 @@ export function buildAffJson(
  * Create the source file for an AFF handler if the source should be
  * included. Returns an empty array if the source is absent or empty.
  */
-export function createAffSourceFile(
+export function createAffSourceFile<T>(
   ctx: {
-    getObjectName: (obj: unknown) => string;
+    getObjectName: (obj: T) => string;
     fileExtension: string;
     createFile: (path: string, content: string) => SerializedFile;
   },
   params: {
-    object: unknown;
+    object: T;
     source: string | undefined;
     suppliedSource: string | undefined;
     sourceExt: string;
@@ -91,15 +91,17 @@ export function createAffSourceFile(
  * `extra` is merged into the JSON body for handler-specific fields
  * (e.g. SRVD's `generalInformation`, DDLS's `sourceOrigin`).
  */
-export async function serializeAffSource(
-  object: SourceObject & {
+export async function serializeAffSource<
+  T extends SourceObject & {
     name: string;
     description?: string;
     originalLanguage?: string;
     abapLanguageVersion?: string;
   },
+>(
+  object: T,
   ctx: {
-    getObjectName: (obj: unknown) => string;
+    getObjectName: (obj: T) => string;
     fileExtension: string;
     createFile: (path: string, content: string) => SerializedFile;
   },
@@ -202,18 +204,20 @@ export function affFromAffJson(
  * `format === 'aff'`), delegates to `serializeAffSource` to produce the AFF
  * JSON sidecar plus source.
  */
-export async function serializeDualFormat(
-  object: SourceObject & {
+export async function serializeDualFormat<
+  T extends SourceObject & {
     name: string;
     description?: string;
     originalLanguage?: string;
     abapLanguageVersion?: string;
   },
+>(
+  object: T,
   ctx: {
-    getObjectName: (obj: unknown) => string;
+    getObjectName: (obj: T) => string;
     fileExtension: string;
     createFile: (path: string, content: string) => SerializedFile;
-    toAbapGitXml: (obj: unknown) => string;
+    toAbapGitXml: (obj: T) => string;
   },
   options: import('@abapify/adt-plugin').FormatSerializeOptions | undefined,
   config: {

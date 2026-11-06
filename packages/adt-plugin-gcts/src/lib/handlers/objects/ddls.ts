@@ -20,16 +20,16 @@ type DdlsLike = {
   name: string;
   description?: string;
   originalLanguage?: string;
-  abapLanguageVersion?: string;
-  sourceOrigin?: string;
-  sourceType?: string;
+  abapLanguageVersion?: DdlsAff['header']['abapLanguageVersion'];
+  sourceOrigin?: DdlsAff['sourceOrigin'];
+  sourceType?: DdlsAff['sourceType'];
   getSource?: () => Promise<string> | string;
 };
 
 export const ddlSourceHandler = createHandler('DDLS', {
   toMetadata(obj: DdlsLike): DdlsAff {
     const lang = (obj.originalLanguage ?? '').toLowerCase();
-    const meta: Record<string, unknown> = {
+    const meta: DdlsAff = {
       formatVersion: '1',
       header: {
         description: obj.description ?? obj.name ?? '',
@@ -41,7 +41,7 @@ export const ddlSourceHandler = createHandler('DDLS', {
       sourceOrigin: obj.sourceOrigin ?? 'abapDevelopmentTools',
       sourceType: obj.sourceType ?? 'unknown',
     };
-    return meta as DdlsAff;
+    return meta;
   },
 
   getSource: (obj: DdlsLike) =>

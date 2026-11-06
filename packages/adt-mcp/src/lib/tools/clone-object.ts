@@ -14,19 +14,20 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createLockService, resolveLockCorrelation } from '@abapify/adt-locks';
 import type { ToolContext } from '../types';
-import {
-  createAdtObject,
-  isSourceBackedObjectType,
-  SOURCE_BACKED_OBJECT_TYPES,
-  type SourceBackedObjectType,
-} from './object-creation';
+import { createAdtObject } from './object-creation';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
 import { resolveObjectUri, resolveObjectUriFromType } from './utils';
 
+type CloneSourceType = 'PROG' | 'CLAS' | 'INTF';
+
+function isCloneSourceType(type: string): type is CloneSourceType {
+  return type === 'PROG' || type === 'CLAS' || type === 'INTF';
+}
+
 async function getSourceCode(
   client: ReturnType<ToolContext['getClient']>,
-  objectType: SourceBackedObjectType,
+  objectType: CloneSourceType,
   objectName: string,
 ): Promise<string> {
   const name = objectName.toLowerCase();
@@ -44,7 +45,7 @@ async function getSourceCode(
 
 async function resolveCloneDescription(
   client: ReturnType<ToolContext['getClient']>,
-  sourceType: SourceBackedObjectType,
+  sourceType: CloneSourceType,
   sourceName: string,
   targetDescription?: string,
 ): Promise<string> {
@@ -81,7 +82,7 @@ async function copySourceToClone(
   resolvedTargetUri: string,
   sourceCode: string,
   targetName: string,
-  sourceType: SourceBackedObjectType,
+  sourceType: CloneSourceType,
   transport?: string,
 ): Promise<void> {
   const lockService = createLockService(client);
@@ -150,22 +151,23 @@ export function registerCloneObjectTool(
     },
     async (args, extra) => {
       try {
-        const { client } = await resolveClient(ctx, args, extra ?? {});
         const sourceType = args.sourceObjectType.toUpperCase().split('/')[0];
         const sourceName = args.sourceObjectName.toUpperCase();
         const targetName = args.targetObjectName.toUpperCase();
 
-        if (!isSourceBackedObjectType(sourceType)) {
+        if (!isCloneSourceType(sourceType)) {
           return {
             isError: true,
             content: [
               {
                 type: 'text' as const,
-                text: `Object type '${sourceType}' is not supported for cloning. Supported types: ${SOURCE_BACKED_OBJECT_TYPES.join(', ')}`,
+                text: `Object type '${sourceType}' is not supported for cloning. Supported types: PROG, CLAS, INTF`,
               },
             ],
           };
         }
+
+        const { client } = await resolveClient(ctx, args, extra ?? {});
 
         const description = await resolveCloneDescription(
           client,

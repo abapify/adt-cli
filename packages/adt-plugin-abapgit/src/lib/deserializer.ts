@@ -11,6 +11,7 @@ import type { FileTree, ExportOptions } from '@abapify/adt-plugin';
 import type { AdkObject } from '@abapify/adk';
 import { createAdk, type AdtClient } from '@abapify/adk';
 import { getHandler, getSupportedTypes } from './handlers';
+import type { ObjectPayload } from './handlers/base';
 import {
   parseAbapGitMetadata,
   resolvePackageFromDir,
@@ -408,7 +409,7 @@ export async function* deserialize(
  */
 async function* yieldFugrChildren(
   adk: ReturnType<typeof createAdk>,
-  payload: { _functions?: unknown },
+  payload: ObjectPayload,
   parentName: string,
   options: ExportOptions | undefined,
   parentObject: AdkObject,

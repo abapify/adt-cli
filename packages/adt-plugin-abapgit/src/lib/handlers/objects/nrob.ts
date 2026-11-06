@@ -25,8 +25,6 @@ type NumberRangeObjectLike = {
   gap?: string;
   rollNr?: string;
   yearly?: string;
-  nrLvl?: string;
-  procInd?: string;
 };
 
 export const numberRangeObjectHandler = createHandler<
@@ -52,8 +50,6 @@ export const numberRangeObjectHandler = createHandler<
         GAP: obj.gap,
         ROLLNR: obj.rollNr,
         YEARLY: obj.yearly,
-        NRLVL: obj.nrLvl,
-        PROCIND: obj.procInd,
       },
       TEXT: {
         LANGU: isoToSapLang(obj.masterLanguage || obj.language),
@@ -79,7 +75,5 @@ export const numberRangeObjectHandler = createHandler<
     gap: ATTRIBUTES?.GAP,
     rollNr: ATTRIBUTES?.ROLLNR,
     yearly: ATTRIBUTES?.YEARLY,
-    nrLvl: ATTRIBUTES?.NRLVL,
-    procInd: ATTRIBUTES?.PROCIND,
   }),
 });

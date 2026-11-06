@@ -18,10 +18,7 @@ export type Visibility = 'public' | 'protected' | 'private';
 // Type references — `source` is the authoritative verbatim slice.
 
 export type TypeRef =
-  | BuiltinTypeRef
-  | NamedTypeRef
-  | RefToTypeRef
-  | TableTypeRef;
+  BuiltinTypeRef | NamedTypeRef | RefToTypeRef | TableTypeRef;
 
 export interface BuiltinTypeRef {
   readonly kind: 'BuiltinTypeRef';

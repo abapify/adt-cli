@@ -134,11 +134,9 @@ export async function runCodegen(
   ): void {
     // Get includes and redefines from schema
     const includes = schema.include as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     const redefines = schema.redefine as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     const refs = [...(includes ?? []), ...(redefines ?? [])];
 
     for (const ref of refs) {
@@ -529,8 +527,7 @@ function extractSchemaLocations(
 
   // xs:import
   const imports = schema.import as
-    | Array<{ schemaLocation?: string }>
-    | undefined;
+    Array<{ schemaLocation?: string }> | undefined;
   if (imports) {
     for (const imp of imports) {
       if (imp.schemaLocation) {
@@ -542,8 +539,7 @@ function extractSchemaLocations(
 
   // xs:include
   const includes = schema.include as
-    | Array<{ schemaLocation?: string }>
-    | undefined;
+    Array<{ schemaLocation?: string }> | undefined;
   if (includes) {
     for (const inc of includes) {
       if (inc.schemaLocation) {
@@ -555,8 +551,7 @@ function extractSchemaLocations(
 
   // xs:redefine
   const redefines = schema.redefine as
-    | Array<{ schemaLocation?: string }>
-    | undefined;
+    Array<{ schemaLocation?: string }> | undefined;
   if (redefines) {
     for (const red of redefines) {
       if (red.schemaLocation) {

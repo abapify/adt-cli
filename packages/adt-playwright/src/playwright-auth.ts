@@ -42,8 +42,7 @@ export const playwrightAuth = {
     auth?: { pluginOptions?: { log?: (message: string) => void } };
   }): Promise<PlaywrightCredentials | null> {
     const log = session?.auth?.pluginOptions?.log as
-      | ((message: string) => void)
-      | undefined;
+      ((message: string) => void) | undefined;
     (log ?? console.log)(
       '🔄 Session expired, will trigger full re-authentication...',
     );

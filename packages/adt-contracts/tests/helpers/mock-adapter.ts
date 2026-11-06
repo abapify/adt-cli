@@ -71,8 +71,7 @@ export function createMockAdapter(mockResponse: MockResponse): {
       // Get response schema for the status code
       const status = mockResponse.status ?? 200;
       const responseSchema = options.responses?.[status] as
-        | { parse: (xml: string) => TResponse }
-        | undefined;
+        { parse: (xml: string) => TResponse } | undefined;
 
       if (!responseSchema) {
         throw new Error(`No response schema for status ${status}`);
