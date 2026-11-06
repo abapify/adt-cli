@@ -338,7 +338,12 @@ export class SourceHistoryService {
   }
 
   readVersionSource(sourceUri: string): Promise<string> {
-    assertAdtUri(sourceUri);
+    try {
+      assertAdtUri(sourceUri);
+    } catch (error) {
+      // Keep rejection semantics: callers await this contract uniformly.
+      return Promise.reject(error);
+    }
     return this.adt.repository.sourceversions.get({ sourceUri });
   }
 
