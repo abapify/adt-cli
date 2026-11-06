@@ -57,25 +57,54 @@ function literal(value: unknown): string {
   return 'unknown';
 }
 
+/** `Array.isArray(value)` guard with an empty-array fallback. */
+function arrayOrEmpty(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+/** Collect the (string) entries of the schema `type` field. */
+function schemaTypeList(schema: OpenApiRecord): string[] {
+  const candidates = Array.isArray(schema.type) ? schema.type : [schema.type];
+  return candidates.filter(
+    (candidate): candidate is string => typeof candidate === 'string',
+  );
+}
+
+/** Render an object-schema body (properties + additionalProperties). */
+function renderObjectSchema(schema: OpenApiRecord): string {
+  const properties = optionalRecord(schema.properties) ?? {};
+  const required = new Set(
+    arrayOrEmpty(schema.required).filter(
+      (entry): entry is string => typeof entry === 'string',
+    ),
+  );
+  const fields = Object.entries(properties).map(
+    ([property, propertySchema]) =>
+      `${key(property)}${required.has(property) ? '' : '?'}: ${schemaToType(propertySchema)};`,
+  );
+  if (schema.additionalProperties === true)
+    fields.push('[key: string]: unknown;');
+  else if (optionalRecord(schema.additionalProperties)) {
+    fields.push(`[key: string]: ${schemaToType(schema.additionalProperties)};`);
+  }
+  return fields.length > 0
+    ? `{ ${fields.join(' ')} }`
+    : 'Record<string, never>';
+}
+
 function schemaToType(value: unknown): string {
-  // NOSONAR - recursive JSON Schema to TS conversion is branch-heavy; will be refactored in follow-up
+  // Recursive JSON Schema to TS conversion.
   const schema = optionalRecord(value);
   if (!schema) return 'unknown';
   if ('const' in schema) return literal(schema.const);
   if (Array.isArray(schema.enum)) return schema.enum.map(literal).join(' | ');
   const variants = [
-    ...(Array.isArray(schema.anyOf) ? schema.anyOf : []),
-    ...(Array.isArray(schema.oneOf) ? schema.oneOf : []),
+    ...arrayOrEmpty(schema.anyOf),
+    ...arrayOrEmpty(schema.oneOf),
   ];
   if (variants.length > 0) return variants.map(schemaToType).join(' | ');
 
-  const type = Array.isArray(schema.type)
-    ? schema.type.filter(
-        (candidate): candidate is string => typeof candidate === 'string',
-      )
-    : [schema.type].filter(
-        (candidate): candidate is string => typeof candidate === 'string',
-      );
+  const type = schemaTypeList(schema);
   const nullable = type.includes('null');
   const baseType = type.find((candidate) => candidate !== 'null');
   if (!baseType && nullable) return 'null';
@@ -88,27 +117,7 @@ function schemaToType(value: unknown): string {
     schema.properties ||
     schema.additionalProperties
   ) {
-    const properties = optionalRecord(schema.properties) ?? {};
-    const required = new Set(
-      Array.isArray(schema.required)
-        ? schema.required.filter(
-            (entry): entry is string => typeof entry === 'string',
-          )
-        : [],
-    );
-    const fields = Object.entries(properties).map(
-      ([property, propertySchema]) =>
-        `${key(property)}${required.has(property) ? '' : '?'}: ${schemaToType(propertySchema)};`,
-    );
-    if (schema.additionalProperties === true)
-      fields.push('[key: string]: unknown;');
-    else if (optionalRecord(schema.additionalProperties)) {
-      fields.push(
-        `[key: string]: ${schemaToType(schema.additionalProperties)};`,
-      );
-    }
-    rendered =
-      fields.length > 0 ? `{ ${fields.join(' ')} }` : 'Record<string, never>';
+    rendered = renderObjectSchema(schema);
   } else if (baseType === 'string') rendered = 'string';
   else if (baseType === 'number' || baseType === 'integer') rendered = 'number';
   else if (baseType === 'boolean') rendered = 'boolean';
@@ -140,60 +149,66 @@ function jsonSchema(content: unknown): unknown {
   return optionalRecord(optionalRecord(content)?.['application/json'])?.schema;
 }
 
+/** Build one `GeneratedOperation` from an OpenAPI operation object. */
+function buildOperation(
+  path: string,
+  method: string,
+  operationInput: unknown,
+  document: OpenApiRecord,
+): GeneratedOperation {
+  const operation = record(operationInput);
+  const id = stringValue(operation.operationId);
+  if (!id)
+    throw new Error(
+      `OpenAPI operation ${method.toUpperCase()} ${path} has no operationId.`,
+    );
+  const parameters = arrayOrEmpty(operation.parameters)
+    .map((parameter) => resolveParameter(parameter, document))
+    .filter((parameter) =>
+      ['path', 'query'].includes(stringValue(parameter.in) ?? ''),
+    );
+  const parameterFields = parameters.map((parameter) => {
+    const name = stringValue(parameter.name);
+    if (!name)
+      throw new Error(`OpenAPI operation ${id} has an unnamed parameter.`);
+    return `${key(name)}${parameter.required === true ? '' : '?'}: ${schemaToType(parameter.schema)};`;
+  });
+  const requestBody = optionalRecord(operation.requestBody);
+  const bodySchema = requestBody ? jsonSchema(requestBody.content) : undefined;
+  if (bodySchema)
+    parameterFields.push(
+      `body${requestBody.required === true ? '' : '?'}: ${schemaToType(bodySchema)};`,
+    );
+  const success = optionalRecord(record(operation.responses)['200']);
+  const responseSchema = success ? jsonSchema(success.content) : undefined;
+  return {
+    id,
+    method: method.toUpperCase(),
+    path,
+    pathParameters: parameters
+      .filter((parameter) => parameter.in === 'path')
+      .map((parameter) => stringValue(parameter.name)!),
+    queryParameters: parameters
+      .filter((parameter) => parameter.in === 'query')
+      .map((parameter) => stringValue(parameter.name)!),
+    paramsType:
+      parameterFields.length > 0
+        ? `{ ${parameterFields.join(' ')} }`
+        : 'Record<string, never>',
+    responseType: schemaToType(responseSchema),
+    hasInput: parameterFields.length > 0,
+  };
+}
+
 function collectOperations(documentInput: unknown): GeneratedOperation[] {
-  // NOSONAR - OpenAPI operation collection is branch-heavy; will be refactored in follow-up
+  // OpenAPI operation collection.
   const document = record(documentInput);
   const paths = record(document.paths);
   const operations: GeneratedOperation[] = [];
   for (const [path, pathItem] of Object.entries(paths)) {
     for (const [method, operationInput] of Object.entries(record(pathItem))) {
       if (!HTTP_METHODS.has(method)) continue;
-      const operation = record(operationInput);
-      const id = stringValue(operation.operationId);
-      if (!id)
-        throw new Error(
-          `OpenAPI operation ${method.toUpperCase()} ${path} has no operationId.`,
-        );
-      const parameters = (
-        Array.isArray(operation.parameters) ? operation.parameters : []
-      )
-        .map((parameter) => resolveParameter(parameter, document))
-        .filter((parameter) =>
-          ['path', 'query'].includes(stringValue(parameter.in) ?? ''),
-        );
-      const parameterFields = parameters.map((parameter) => {
-        const name = stringValue(parameter.name);
-        if (!name)
-          throw new Error(`OpenAPI operation ${id} has an unnamed parameter.`);
-        return `${key(name)}${parameter.required === true ? '' : '?'}: ${schemaToType(parameter.schema)};`;
-      });
-      const requestBody = optionalRecord(operation.requestBody);
-      const bodySchema = requestBody
-        ? jsonSchema(requestBody.content)
-        : undefined;
-      if (bodySchema)
-        parameterFields.push(
-          `body${requestBody.required === true ? '' : '?'}: ${schemaToType(bodySchema)};`,
-        );
-      const success = optionalRecord(record(operation.responses)['200']);
-      const responseSchema = success ? jsonSchema(success.content) : undefined;
-      operations.push({
-        id,
-        method: method.toUpperCase(),
-        path,
-        pathParameters: parameters
-          .filter((parameter) => parameter.in === 'path')
-          .map((parameter) => stringValue(parameter.name)!),
-        queryParameters: parameters
-          .filter((parameter) => parameter.in === 'query')
-          .map((parameter) => stringValue(parameter.name)!),
-        paramsType:
-          parameterFields.length > 0
-            ? `{ ${parameterFields.join(' ')} }`
-            : 'Record<string, never>',
-        responseType: schemaToType(responseSchema),
-        hasInput: parameterFields.length > 0,
-      });
+      operations.push(buildOperation(path, method, operationInput, document));
     }
   }
   return operations.sort((left, right) => left.id.localeCompare(right.id));

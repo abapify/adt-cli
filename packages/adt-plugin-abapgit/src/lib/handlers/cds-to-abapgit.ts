@@ -326,108 +326,162 @@ function computeIntlen(builtin: BuiltinType, length?: number): number {
   return 0;
 }
 
+/** DD03P type columns computed from a field's type reference. */
+interface FieldColumns {
+  rollname?: string;
+  comptype?: string;
+  inttype?: string;
+  intlen?: string;
+  datatype?: string;
+  leng?: string;
+  decimals?: string;
+  mask?: string;
+  shlporigin?: string;
+  reftable?: string;
+  reffield?: string;
+}
+
+/** Type columns derived from a builtin CDS type reference. */
+function builtinFieldColumns(
+  bt: BuiltinTypeRef,
+  field: FieldDefinition,
+  tableName: string,
+): FieldColumns {
+  const typeInfo = BUILTIN_TYPES[bt.name];
+  if (!typeInfo) return {};
+
+  const out: FieldColumns = {};
+
+  // Use explicit CDS length, or fall back to fixed DDIC length
+  const length = bt.length ?? typeInfo.length;
+  out.inttype = typeInfo.inttype;
+  out.intlen = zeroPad(computeIntlen(typeInfo, length), 6);
+  out.datatype = typeInfo.datatype;
+
+  // LENG: skip for variable-length types (string, xstring, rawstring)
+  if (!typeInfo.noLeng && length !== undefined) {
+    out.leng = zeroPad(length, 6);
+  }
+
+  // DECIMALS: use explicit CDS decimals, or fixed DDIC decimals
+  const dec = bt.decimals ?? typeInfo.decimals;
+  if (dec !== undefined) out.decimals = zeroPad(dec, 6);
+
+  // MASK: all builtin types get "  DATATYPE"
+  out.mask = `  ${typeInfo.datatype}`;
+
+  // SHLPORIGIN (date/time types)
+  if (typeInfo.shlporigin) out.shlporigin = typeInfo.shlporigin;
+
+  // REFTABLE/REFFIELD for currency and quantity fields
+  // These come from CDS annotations on the field
+  // Annotation value is 'tablename.fieldname' — we only need the field part
+  if (bt.name === 'curr' || bt.name === 'quan') {
+    const refAnnotation = getAnnotation(
+      field.annotations,
+      bt.name === 'curr'
+        ? 'Semantics.amount.currencyCode'
+        : 'Semantics.quantity.unitOfMeasure',
+    );
+    if (refAnnotation) {
+      out.reftable = tableName;
+      // Strip table prefix if present (e.g. 'ztest.currency_code' → 'CURRENCY_CODE')
+      const parts = refAnnotation.split('.');
+      out.reffield = parts.at(-1)!.toUpperCase();
+    }
+  }
+
+  return out;
+}
+
+/** Type columns derived from a named type reference (resolved via ADT). */
+async function namedFieldColumns(
+  field: FieldDefinition,
+  resolver: TypeResolver | undefined,
+): Promise<FieldColumns> {
+  // Named type reference — resolve via ADT if available
+  const out: FieldColumns = {
+    rollname: field.type.name.toUpperCase(),
+    comptype: 'E', // Default: data element
+  };
+  if (resolver) {
+    const resolved = await resolver.resolve(field.type.name);
+    out.comptype = resolved.comptype;
+    if (resolved.shlporigin) out.shlporigin = resolved.shlporigin;
+    if (resolved.comptype === 'S') {
+      out.datatype = 'STRU';
+      out.mask = '  STRUS';
+    }
+  }
+  return out;
+}
+
+/**
+ * Assemble the DD03P entry in standard abapGit DD03P field order.
+ *
+ * NOTE: POSITION is a real DD03P database value. abapGit emits it
+ * inconsistently (only for some transparent tables). We omit it to
+ * avoid roundtrip mismatches — SAP auto-computes it on import.
+ */
+function assembleDD03P(field: FieldDefinition, col: FieldColumns): DD03PData {
+  const result: DD03PData = {};
+  result.FIELDNAME = field.name.toUpperCase();
+  if (field.isKey) result.KEYFLAG = 'X';
+  if (col.rollname) result.ROLLNAME = col.rollname;
+  result.ADMINFIELD = '0';
+  if (col.inttype) result.INTTYPE = col.inttype;
+  if (col.intlen) result.INTLEN = col.intlen;
+  if (field.notNull) result.NOTNULL = 'X';
+  if (col.datatype) result.DATATYPE = col.datatype;
+  if (col.leng) result.LENG = col.leng;
+  if (col.decimals) result.DECIMALS = col.decimals;
+  if (col.shlporigin) result.SHLPORIGIN = col.shlporigin;
+  if (col.reftable) result.REFTABLE = col.reftable;
+  if (col.reffield) result.REFFIELD = col.reffield;
+  if (col.mask) result.MASK = col.mask;
+  if (col.comptype) result.COMPTYPE = col.comptype;
+  return result;
+}
+
 /** Build a DD03P entry from a single field definition */
 async function buildFieldDD03P(
   field: FieldDefinition,
   tableName: string,
   resolver?: TypeResolver,
 ): Promise<DD03PData> {
-  // Compute all values first
-  const isKey = field.isKey;
-  const notNull = field.notNull;
-  let rollname: string | undefined;
-  let comptype: string | undefined;
-  let inttype: string | undefined;
-  let intlen: string | undefined;
-  let datatype: string | undefined;
-  let leng: string | undefined;
-  let decimals: string | undefined;
-  let mask: string | undefined;
-  let shlporigin: string | undefined;
-  let reftable: string | undefined;
-  let reffield: string | undefined;
+  // Compute all type columns first
+  const col: FieldColumns =
+    field.type.kind === 'builtin'
+      ? builtinFieldColumns(field.type as BuiltinTypeRef, field, tableName)
+      : await namedFieldColumns(field, resolver);
 
-  if (field.type.kind === 'builtin') {
-    const bt = field.type as BuiltinTypeRef;
-    const typeInfo = BUILTIN_TYPES[bt.name];
-    if (typeInfo) {
-      // Use explicit CDS length, or fall back to fixed DDIC length
-      const length = bt.length ?? typeInfo.length;
-      inttype = typeInfo.inttype;
-      intlen = zeroPad(computeIntlen(typeInfo, length), 6);
-      datatype = typeInfo.datatype;
+  return assembleDD03P(field, col);
+}
 
-      // LENG: skip for variable-length types (string, xstring, rawstring)
-      if (!typeInfo.noLeng && length !== undefined) {
-        leng = zeroPad(length, 6);
-      }
+/** Build the DD03P entry for an INCLUDE directive (with or without suffix). */
+async function buildIncludeDD03P(
+  inc: IncludeDirective,
+  resolver?: TypeResolver,
+): Promise<DD03PData> {
+  const includeName = inc.name.toUpperCase();
 
-      // DECIMALS: use explicit CDS decimals, or fixed DDIC decimals
-      const dec = bt.decimals ?? typeInfo.decimals;
-      if (dec !== undefined) decimals = zeroPad(dec, 6);
-
-      // MASK: all builtin types get "  DATATYPE"
-      mask = `  ${typeInfo.datatype}`;
-
-      // SHLPORIGIN (date/time types)
-      if (typeInfo.shlporigin) shlporigin = typeInfo.shlporigin;
-
-      // REFTABLE/REFFIELD for currency and quantity fields
-      // These come from CDS annotations on the field
-      // Annotation value is 'tablename.fieldname' — we only need the field part
-      if (bt.name === 'curr' || bt.name === 'quan') {
-        const refAnnotation = getAnnotation(
-          field.annotations,
-          bt.name === 'curr'
-            ? 'Semantics.amount.currencyCode'
-            : 'Semantics.quantity.unitOfMeasure',
-        );
-        if (refAnnotation) {
-          reftable = tableName;
-          // Strip table prefix if present (e.g. 'ztest.currency_code' → 'CURRENCY_CODE')
-          const parts = refAnnotation.split('.');
-          reffield = parts.at(-1)!.toUpperCase();
-        }
-      }
-    }
-  } else {
-    // Named type reference — resolve via ADT if available
-    rollname = field.type.name.toUpperCase();
-    comptype = 'E'; // Default: data element
-    if (resolver) {
-      const resolved = await resolver.resolve(field.type.name);
-      comptype = resolved.comptype;
-      if (resolved.shlporigin) shlporigin = resolved.shlporigin;
-      if (resolved.comptype === 'S') {
-        datatype = 'STRU';
-        mask = '  STRUS';
-      }
-    }
+  // Resolve include description via ADT if available
+  let ddtext: string | undefined;
+  if (resolver) {
+    const resolved = await resolver.resolve(inc.name);
+    ddtext = resolved.description;
   }
 
-  // Build in standard abapGit DD03P field order
-  //
-  // NOTE: POSITION is a real DD03P database value. abapGit emits it
-  // inconsistently (only for some transparent tables). We omit it to
-  // avoid roundtrip mismatches — SAP auto-computes it on import.
-  const result: DD03PData = {};
-  result.FIELDNAME = field.name.toUpperCase();
-  if (isKey) result.KEYFLAG = 'X';
-  if (rollname) result.ROLLNAME = rollname;
-  result.ADMINFIELD = '0';
-  if (inttype) result.INTTYPE = inttype;
-  if (intlen) result.INTLEN = intlen;
-  if (notNull) result.NOTNULL = 'X';
-  if (datatype) result.DATATYPE = datatype;
-  if (leng) result.LENG = leng;
-  if (decimals) result.DECIMALS = decimals;
-  if (shlporigin) result.SHLPORIGIN = shlporigin;
-  if (reftable) result.REFTABLE = reftable;
-  if (reffield) result.REFFIELD = reffield;
-  if (mask) result.MASK = mask;
-  if (comptype) result.COMPTYPE = comptype;
-
-  return result;
+  // Include with suffix → .INCLU-<SUFFIX> entry, plain include → .INCLUDE
+  const entry: DD03PData = {
+    FIELDNAME: inc.suffix ? `.INCLU-${inc.suffix.toUpperCase()}` : '.INCLUDE',
+    ADMINFIELD: '0',
+    PRECFIELD: includeName,
+    MASK: '      S',
+    COMPTYPE: 'S',
+  };
+  if (ddtext) entry.DDTEXT = ddtext;
+  return entry;
 }
 
 /**
@@ -442,43 +496,14 @@ export async function buildDD03P(
 
   for (const member of members) {
     if ('kind' in member && member.kind === 'include') {
-      const inc = member as IncludeDirective;
-      const includeName = inc.name.toUpperCase();
-
-      // Resolve include description via ADT if available
-      let ddtext: string | undefined;
-      if (resolver) {
-        const resolved = await resolver.resolve(inc.name);
-        ddtext = resolved.description;
-      }
-
-      if (inc.suffix) {
-        // Include with suffix → .INCLU-<SUFFIX> entry
-        const entry: DD03PData = {
-          FIELDNAME: `.INCLU-${inc.suffix.toUpperCase()}`,
-          ADMINFIELD: '0',
-          PRECFIELD: includeName,
-          MASK: '      S',
-          COMPTYPE: 'S',
-        };
-        if (ddtext) entry.DDTEXT = ddtext;
-        entries.push(entry);
-      } else {
-        // Plain include → .INCLUDE entry
-        const entry: DD03PData = {
-          FIELDNAME: '.INCLUDE',
-          ADMINFIELD: '0',
-          PRECFIELD: includeName,
-          MASK: '      S',
-          COMPTYPE: 'S',
-        };
-        if (ddtext) entry.DDTEXT = ddtext;
-        entries.push(entry);
-      }
+      entries.push(
+        await buildIncludeDD03P(member as IncludeDirective, resolver),
+      );
     } else {
       // Regular field definition
-      const field = member as FieldDefinition;
-      entries.push(await buildFieldDD03P(field, tableName, resolver));
+      entries.push(
+        await buildFieldDD03P(member as FieldDefinition, tableName, resolver),
+      );
     }
   }
 
