@@ -264,7 +264,7 @@ export interface LoadedFixtures {
   // Coverage — sourced from jfilak/sapcli
   coverageMeasurements: string;
   coverageStatements: string;
-  // STRUST / system security — TODO-synthetic fixtures
+  // STRUST / system security — synthetic (fabricated) fixtures
   strustPseList: string;
   strustCertList: string;
   strustCert: string;

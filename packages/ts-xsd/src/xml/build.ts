@@ -27,6 +27,11 @@ import {
   formatXml,
 } from './build-utils';
 
+/** Explicit `String()` coercion for untyped values. */
+function asText(value: unknown): string {
+  return String(value);
+}
+
 /**
  * Collect all namespace prefixes from a schema and its $imports chain
  */
@@ -495,16 +500,16 @@ function buildAnyField(
       if (key.startsWith('@')) {
         // Captured attribute (e.g. "@xmlns:asx") — restore as attribute
         if (nested !== undefined && nested !== null) {
-          el.setAttribute(key.slice(1), String(nested));
+          el.setAttribute(key.slice(1), asText(nested));
         }
       } else if (key === '_text') {
-        el.textContent = String(nested ?? '');
+        el.textContent = asText(nested ?? '');
       } else {
         buildAnyField(doc, el, key, nested);
       }
     }
   } else {
-    el.textContent = String(value);
+    el.textContent = asText(value);
   }
   parent.appendChild(el);
 }

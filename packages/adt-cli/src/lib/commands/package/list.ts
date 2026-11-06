@@ -13,6 +13,7 @@ import chalk from 'chalk';
 import { getAdtClientV2, getCliContext } from '../../utils/adt-client-v2';
 import { createProgressReporter } from '../../utils/progress-reporter';
 import { createCliLogger } from '../../utils/logger-config';
+import { asText } from '../../utils/text';
 import { AdkPackage } from '@abapify/adk';
 import type { AbapObject } from '@abapify/adk';
 
@@ -97,10 +98,10 @@ export const packageListCommand = new Command('list')
           try {
             return JSON.stringify(v);
           } catch {
-            return String(v);
+            return asText(v);
           }
         }
-        return String(v);
+        return asText(v);
       };
 
       // Display subpackages

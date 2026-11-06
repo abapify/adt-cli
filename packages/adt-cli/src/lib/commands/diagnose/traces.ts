@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
+import { asText } from '../../utils/text';
 
 export const diagnoseTracesCommand = new Command('traces')
   .description('List ABAP traces or inspect trace hitlist/DB accesses')
@@ -34,7 +35,7 @@ export const diagnoseTracesCommand = new Command('traces')
         if (Array.isArray(traces) && traces.length > 0) {
           for (const trace of traces) {
             process.stdout.write(
-              `${String(trace.id ?? '?')}\t${String(trace.user ?? '?')}\t${String(trace.program ?? '?')}\n`,
+              `${asText(trace.id ?? '?')}\t${asText(trace.user ?? '?')}\t${asText(trace.program ?? '?')}\n`,
             );
           }
         } else {

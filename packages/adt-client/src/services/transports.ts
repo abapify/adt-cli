@@ -10,6 +10,11 @@
 
 import type { AdtClientType, TransportResponse } from '@abapify/adt-contracts';
 
+/** Explicit `String()` coercion for untyped node values. */
+function asText(value: unknown): string {
+  return String(value);
+}
+
 /**
  * Transport data structure (simplified for service consumers)
  */
@@ -100,7 +105,7 @@ export class TransportService {
         ? (data.request as Record<string, unknown>[])[0]
         : (data?.request as Record<string, unknown> | undefined)) ?? undefined;
     const siblingRequestNumber = siblingRequest
-      ? String(siblingRequest.number ?? '').toUpperCase()
+      ? asText(siblingRequest.number ?? '').toUpperCase()
       : '';
 
     const selected =
@@ -184,7 +189,7 @@ export class TransportService {
     const arr = Array.isArray(node) ? node : [node];
     return arr.find((item) => {
       const u = item as Record<string, unknown>;
-      return String(u?.trkorr ?? u?.number ?? '').toUpperCase() === wanted;
+      return asText(u?.trkorr ?? u?.number ?? '').toUpperCase() === wanted;
     }) as Record<string, unknown> | undefined;
   }
 

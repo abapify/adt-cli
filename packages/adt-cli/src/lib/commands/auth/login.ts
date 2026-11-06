@@ -8,6 +8,7 @@ import {
   getAuthManager,
 } from '../../utils/auth';
 import { handleCommandError } from '../../utils/command-helpers';
+import { asText } from '../../utils/text';
 import { verifyBasicAuth } from '../../utils/verify-basic-auth';
 import {
   CALLBACK_SERVER_PORT,
@@ -351,9 +352,9 @@ async function verifyBasicCredentials(
     client:
       destOptions.client === undefined || destOptions.client === null
         ? undefined
-        : String(destOptions.client),
-    username: String(destOptions.username),
-    password: String(destOptions.password),
+        : asText(destOptions.client),
+    username: asText(destOptions.username),
+    password: asText(destOptions.password),
     insecure: verifyOptions.insecure,
   });
   console.log('✅ Credentials accepted');

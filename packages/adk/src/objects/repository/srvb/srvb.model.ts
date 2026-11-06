@@ -19,6 +19,7 @@ import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
 import { ServiceBinding } from '../../../base/kinds';
 import { registerObjectType } from '../../../base/registry';
+import { asText } from '../../../base/text';
 
 export class AdkServiceBinding {
   /** Static ADK kind marker — used by abapGit handler registry if needed. */
@@ -33,7 +34,7 @@ export class AdkServiceBinding {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 

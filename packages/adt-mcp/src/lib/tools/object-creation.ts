@@ -12,9 +12,9 @@
  * that needs it — which gets us most of the way to parity without the
  * mock churn.
  *
- * TODO: migrate to AdkClass.create / AdkProgram.create / AdkInterface.create
- *       / AdkPackage.create once the mock server gains coverage for the
- *       full ADK save flow (see packages/adk/AGENTS.md).
+ * Migrating to AdkClass.create / AdkProgram.create / AdkInterface.create
+ * / AdkPackage.create is blocked until the mock server gains coverage for
+ * the full ADK save flow (see packages/adk/AGENTS.md).
  */
 
 import type { ToolContext } from '../types';

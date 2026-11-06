@@ -18,6 +18,7 @@
 import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
 import { toText } from '../../../base/fetch-utils';
+import { asText } from '../../../base/text';
 
 export class AdkBadi {
   /** Static ADK kind marker. */
@@ -34,7 +35,7 @@ export class AdkBadi {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 

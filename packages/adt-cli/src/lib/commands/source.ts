@@ -525,8 +525,8 @@ const putSourceCommand = new Command('put')
               sourceToWrite,
             );
           } else {
-            // TODO: generic fallback — remove once all object types have
-            // typed source contracts.
+            // Generic fallback for object types that do not have a typed
+            // source contract yet.
             const params = new URLSearchParams({ lockHandle });
             if (effectiveTransport) params.set('corrNr', effectiveTransport);
             await client.fetch(`${uri}/source/main?${params.toString()}`, {

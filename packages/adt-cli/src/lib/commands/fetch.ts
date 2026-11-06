@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { writeFileSync } from 'node:fs';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
+import { asText } from '../utils/text';
 
 const MAX_RESPONSE_DIAGNOSTIC_CHARS = 4_000;
 
@@ -45,7 +46,7 @@ function describeCause(cause: unknown): string | undefined {
   if (!(cause instanceof Error)) return undefined;
   const code = 'code' in cause ? (cause as { code?: unknown }).code : undefined;
   const message = redactDiagnostic(cause.message ?? '');
-  return code ? `${message} (${String(code)})` : message;
+  return code ? `${message} (${asText(code)})` : message;
 }
 
 /**

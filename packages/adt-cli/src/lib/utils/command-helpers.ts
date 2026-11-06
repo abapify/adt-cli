@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { createCliLogger } from './logger-config';
 import type { Logger } from '@abapify/logger';
 import { IconRegistry } from './icon-registry';
+import { asText } from './text';
 
 /**
  * Extract global options from a command by traversing up to the root
@@ -58,10 +59,10 @@ export function handleImportError(error: unknown, debug = false): never {
       } catch {
         // Error objects occasionally have circular refs; don't let
         // the import error handler itself crash while formatting.
-        return String(v);
+        return asText(v);
       }
     }
-    return String(v);
+    return asText(v);
   };
 
   const errorMsg = error instanceof Error ? error.message : String(error);

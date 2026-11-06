@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  TODO-synthetic: fabricated response for GET /sap/bc/adt/system/security/pses.
+  Synthetic: fabricated response for GET /sap/bc/adt/system/security/pses.
 
   sapcli (jfilak/sapcli) drives STRUST via SAP RFC function modules
   (see sap/rfc/strust.py), not through ADT. No real ADT capture was

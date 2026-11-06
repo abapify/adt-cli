@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
+import { asText } from '../../utils/text';
 
 export const diagnoseDumpsCommand = new Command('dumps')
   .description('List ABAP runtime short dumps or inspect a single dump')
@@ -37,7 +38,7 @@ export const diagnoseDumpsCommand = new Command('dumps')
           if (Array.isArray(entries) && entries.length > 0) {
             for (const entry of entries) {
               process.stdout.write(
-                `${String(entry.id ?? '?')}\t${String(entry.type ?? '?')}\t${String(entry.program ?? '?')}\t${String(entry.user ?? '?')}\n`,
+                `${asText(entry.id ?? '?')}\t${asText(entry.type ?? '?')}\t${asText(entry.program ?? '?')}\t${asText(entry.user ?? '?')}\n`,
               );
             }
           } else {

@@ -1,6 +1,7 @@
 import { getGlobalContext } from '../../base/global-context';
 import type { AdkContext } from '../../base/context';
 import { toText } from '../../base/fetch-utils';
+import { asText } from '../../base/text';
 import {
   loadCdsMetadataAndSource,
   type AdkCrudSourceContract,
@@ -29,7 +30,7 @@ export abstract class AdkCrudSourceObject<TMetadata = Record<string, unknown>> {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 

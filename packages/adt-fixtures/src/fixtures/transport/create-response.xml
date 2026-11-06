@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  TODO-synthetic: Minimal transport-create response for the mock server.
+  Synthetic: Minimal transport-create response for the mock server.
   Real SAP returns the full transport (same shape as /cts/transportrequests/{id}).
   Only a stable number is required for ADK's AdkTransportRequest.create() to
   succeed (looks up `root.request.number`). Mock transport number (MOCK_NEW).

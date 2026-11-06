@@ -1,4 +1,5 @@
 import type { AdkContext } from '../../base/context';
+import { asText } from '../../base/text';
 
 /**
  * CDS source object without a metadata schema in the connected ABAP release.
@@ -19,7 +20,7 @@ export abstract class AdkSourceOnlyCdsObject {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 

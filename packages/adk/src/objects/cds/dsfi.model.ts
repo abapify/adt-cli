@@ -1,6 +1,7 @@
 import type { AdkContext } from '../../base/context';
 import { ScalarFunctionImplementation } from '../../base/kinds';
 import { registerObjectType } from '../../base/registry';
+import { asText } from '../../base/text';
 import {
   loadCdsMetadataAndSource,
   type AdkCdsSourceContract,
@@ -18,7 +19,7 @@ export class AdkScalarFunctionImplementation {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 

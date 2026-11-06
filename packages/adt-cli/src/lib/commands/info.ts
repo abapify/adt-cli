@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { writeFileSync } from 'node:fs';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
+import { asText } from '../utils/text';
 
 export const infoCommand = new Command('info')
   .description('Get SAP system and session information')
@@ -80,7 +81,7 @@ export const infoCommand = new Command('info')
             const value = systemData[key];
             if (!value) return;
             const text =
-              typeof value === 'object' ? safeStringify(value) : String(value);
+              typeof value === 'object' ? safeStringify(value) : asText(value);
             console.log(`  • ${label}: ${text}`);
           };
 
