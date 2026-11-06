@@ -263,7 +263,6 @@ function parseSchemaInfo(
       source.xsdDir,
       xsdPath,
       sourceName,
-      new Set(),
       globalAllSchemas,
       log,
     );
@@ -289,6 +288,8 @@ function parseSchemaInfo(
  * @param xsdDir - The root XSD directory (e.g., '.xsd')
  * @param currentXsdPath - The path of the current XSD file (for resolving relative paths)
  * @param sourceName - The source name for logging
+ * @param globalAllSchemas - Global map of all parsed schemas
+ * @param log - Logger
  * @param discovered - Set of already discovered schema names
  */
 function discoverReferencedSchemas(
@@ -296,9 +297,9 @@ function discoverReferencedSchemas(
   xsdDir: string,
   currentXsdPath: string,
   sourceName: string,
+  globalAllSchemas: Map<string, SchemaInfo>,
+  log: (...args: unknown[]) => void,
   discovered: Set<string> = new Set(),
-  globalAllSchemas: Map<string, SchemaInfo> = new Map(),
-  log: (...args: unknown[]) => void = () => {},
 ): void {
   // Get includes and redefines from schema
   const includes = schema.include as
@@ -384,9 +385,9 @@ function loadReferencedSchema(
       xsdDir,
       refXsdPath,
       sourceName,
-      discovered,
       globalAllSchemas,
       log,
+      discovered,
     );
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
