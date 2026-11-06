@@ -4,11 +4,16 @@
  * Classes and Interfaces CRUD operations.
  */
 
+import { describe, it } from 'vitest';
 import {
   classes as classesSchema,
   interfaces as interfacesSchema,
 } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { ooContract } from '../../src/adt/oo';
 import { fixtures } from '@abapify/adt-fixtures';
 
@@ -210,7 +215,40 @@ class ClassRunScenario extends ContractScenario {
 }
 
 // Run scenarios
-runScenario(new ClassesScenario());
-runScenario(new ClassSourceScenario());
-runScenario(new InterfacesScenario());
-runScenario(new ClassRunScenario());
+describe('OO (Object-Oriented) Contract Scenarios', () => {
+  describe('OO Classes', () => {
+    const scenario = new ClassesScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('OO Class Source', () => {
+    const scenario = new ClassSourceScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('OO Interfaces', () => {
+    const scenario = new InterfacesScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('OO Class Run', () => {
+    const scenario = new ClassRunScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

@@ -1,6 +1,10 @@
-import { expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
-import { Scenario, runScenario, type SchemaType } from './base/scenario';
+import {
+  Scenario,
+  checkScenarioFixture,
+  type SchemaType,
+} from './base/scenario';
 import { packagesV1 } from '../../src/schemas/index';
 
 /**
@@ -72,4 +76,11 @@ class PackagesScenario extends Scenario<typeof packagesV1> {
 }
 
 // Run the scenario
-runScenario(new PackagesScenario());
+describe('PackagesScenario', () => {
+  const scenario = new PackagesScenario();
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path.replace('.xml', ''), async () => {
+      await checkScenarioFixture(scenario, fixture);
+    });
+  }
+});

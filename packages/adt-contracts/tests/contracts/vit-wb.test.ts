@@ -5,9 +5,14 @@
  * Accept: application/vnd.sap.adt.basic.object.properties+xml
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { adtcore } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import {
   BASIC_OBJECT_PROPERTIES_MIME,
   vitWbObjectPropertiesContract,
@@ -48,4 +53,13 @@ class VitWbScenario extends ContractScenario {
   ];
 }
 
-runScenario(new VitWbScenario());
+describe('vit/wb Basic Object Properties contract scenarios', () => {
+  describe('vit/wb Basic Object Properties (classic BAdI)', () => {
+    const scenario = new VitWbScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

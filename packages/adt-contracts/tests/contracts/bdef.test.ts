@@ -5,9 +5,14 @@
  * Content-Type: application/vnd.sap.adt.blues.v1+xml
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { blueSource } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { behaviordefinitionsContract } from '../../src/adt/bo/behaviordefinitions';
 
 class BdefScenario extends ContractScenario {
@@ -80,4 +85,13 @@ class BdefScenario extends ContractScenario {
   ];
 }
 
-runScenario(new BdefScenario());
+describe('Behavior Definition (BDEF) contract scenarios', () => {
+  describe('BO Behavior Definitions', () => {
+    const scenario = new BdefScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

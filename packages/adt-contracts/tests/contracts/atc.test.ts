@@ -8,9 +8,14 @@
  * 2. Client Call Tests - test FULLY TYPED client calls with mock adapter
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { atcworklist, chkvFormTemplate } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 
 // Import GENERATED contracts
 import { worklistsContract } from '../../src/generated/adt/sap/bc/adt/atc/worklists';
@@ -147,6 +152,31 @@ class AtcCheckvariantsScenario extends ContractScenario {
   ];
 }
 
-runScenario(new AtcWorklistsScenario());
-runScenario(new AtcResultsScenario());
-runScenario(new AtcCheckvariantsScenario());
+describe('ATC (ABAP Test Cockpit) Contract Tests', () => {
+  describe('ATC Worklists (Generated)', () => {
+    const scenario = new AtcWorklistsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('ATC Results (Generated)', () => {
+    const scenario = new AtcResultsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('ATC Check Variants (Manual)', () => {
+    const scenario = new AtcCheckvariantsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

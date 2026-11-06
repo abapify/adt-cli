@@ -175,14 +175,16 @@ describe('AdkObject lock/unlock store integration', () => {
       client: createMockClient() as any,
       // lockStore intentionally omitted
     };
+    expect(ctx.lockStore).toBeUndefined();
 
-    // Should not throw
-    ctx.lockStore?.register({
+    // Should not throw, and the optional call must short-circuit to undefined
+    const result = ctx.lockStore?.register({
       objectUri: '/test',
       objectName: 'TEST',
       lockHandle: 'H1',
       lockedAt: new Date().toISOString(),
     });
+    expect(result).toBeUndefined();
   });
 
   it('uses the authoritative LOCK correlation in setSource()', async () => {

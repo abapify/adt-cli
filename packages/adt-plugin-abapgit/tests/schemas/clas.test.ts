@@ -5,8 +5,9 @@
  */
 
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import {
-  runSchemaTests,
+  checkSchemaFixture,
   createTypedSchema,
   type SchemaScenario,
 } from './base/scenario.ts';
@@ -49,4 +50,11 @@ const scenario: SchemaScenario<ClasSchema> = {
   ],
 };
 
-runSchemaTests(scenario);
+// Declare fixture tests literally so static test discovery sees them
+describe('CLAS Schema', () => {
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path, (t) => {
+      checkSchemaFixture(scenario, fixture, t);
+    });
+  }
+});

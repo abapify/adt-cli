@@ -6,6 +6,7 @@
  * verify the structure is correct.
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import {
   transportmanagmentSingle,
@@ -13,7 +14,11 @@ import {
   transportfind,
   transportmanagment,
 } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { transports, TransportFunction } from '../../src/adt/cts/transports';
 import { transportrequests } from '../../src/adt/cts/transportrequests';
 
@@ -136,5 +141,22 @@ class TransportRequestsScenario extends ContractScenario {
 }
 
 // Run scenarios
-runScenario(new TransportsScenario());
-runScenario(new TransportRequestsScenario());
+describe('CTS (Change and Transport System) Contract Scenarios', () => {
+  describe('CTS Transports', () => {
+    const scenario = new TransportsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('CTS Transport Requests', () => {
+    const scenario = new TransportRequestsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

@@ -5,9 +5,14 @@
  * Content-Type: application/vnd.sap.adt.enhancements.enhoxhh.v1+xml
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { badi } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { enhoxhhContract } from '../../src/adt/enhancements/enhoxhh';
 
 class BadiScenario extends ContractScenario {
@@ -76,4 +81,13 @@ class BadiScenario extends ContractScenario {
   ];
 }
 
-runScenario(new BadiScenario());
+describe('BAdI / Enhancement Implementation (ENHO/XHH) contract scenarios', () => {
+  describe('BAdI / ENHO Enhancement Implementations', () => {
+    const scenario = new BadiScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

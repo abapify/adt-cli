@@ -5,8 +5,9 @@
  */
 
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import {
-  runSchemaTests,
+  checkSchemaFixture,
   createTypedSchema,
   extractAbapGitRoot,
   type SchemaScenario,
@@ -46,4 +47,11 @@ const scenario: SchemaScenario<IntfSchema> = {
   ],
 };
 
-runSchemaTests(scenario);
+// Declare fixture tests literally so static test discovery sees them
+describe('INTF Schema', () => {
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path, (t) => {
+      checkSchemaFixture(scenario, fixture, t);
+    });
+  }
+});

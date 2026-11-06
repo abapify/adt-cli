@@ -7,8 +7,13 @@
  * without an OData XML parser.
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { catalogs } from '../../src/adt/uifsa/catalogs';
 import { groups } from '../../src/adt/uifsa/groups';
 import { tiles } from '../../src/adt/uifsa/tiles';
@@ -141,6 +146,31 @@ class FlpTilesScenario extends ContractScenario {
   ];
 }
 
-runScenario(new FlpCatalogsScenario());
-runScenario(new FlpGroupsScenario());
-runScenario(new FlpTilesScenario());
+describe('FLP (Fiori Launchpad) contract scenarios', () => {
+  describe('FLP Catalogs', () => {
+    const scenario = new FlpCatalogsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('FLP Groups', () => {
+    const scenario = new FlpGroupsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('FLP Tiles', () => {
+    const scenario = new FlpTilesScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

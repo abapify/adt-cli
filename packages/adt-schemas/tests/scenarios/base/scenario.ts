@@ -31,6 +31,71 @@ export abstract class Scenario<S extends TestableSchema = TestableSchema> {
 }
 
 /**
+ * Load, parse and build one fixture for a scenario.
+ */
+async function prepareFixture<S extends TestableSchema>(
+  scenario: Scenario<S>,
+  fixture: FixtureHandle,
+): Promise<{ parsed: SchemaType<S>; built: string }> {
+  const xml = await fixture.load();
+  const parsed = scenario.schema.parse(xml) as SchemaType<S>;
+  const built = scenario.schema.build!(parsed);
+  return { parsed, built };
+}
+
+function assertParsedDefined(parsed: unknown): void {
+  expect(parsed).toBeDefined();
+}
+
+function assertValidatesParsed<S extends TestableSchema>(
+  scenario: Scenario<S>,
+  parsed: SchemaType<S>,
+): void {
+  scenario.validateParsed(parsed);
+}
+
+function assertBuiltXml(built: string): void {
+  expect(built).toContain('<?xml');
+}
+
+function assertValidatesBuilt<S extends TestableSchema>(
+  scenario: Scenario<S>,
+  built: string,
+): void {
+  scenario.validateBuilt?.(built);
+}
+
+function assertRoundTrips<S extends TestableSchema>(
+  scenario: Scenario<S>,
+  built: string,
+): void {
+  const parsed2 = scenario.schema.parse(built);
+  const built2 = scenario.schema.build!(parsed2 as SchemaType<S>);
+  expect(built).toBe(built2);
+}
+
+/**
+ * Run every check for one scenario fixture: parse, parsed-content
+ * validation, build, built-XML validation and round-trip stability.
+ *
+ * This runs exactly the assertions `runScenario` applies to one fixture.
+ * Test files can declare their own `it()` cases around it, which keeps the
+ * test declarations statically visible to test discovery tooling.
+ */
+export async function checkScenarioFixture<S extends TestableSchema>(
+  scenario: Scenario<S>,
+  fixture: FixtureHandle,
+): Promise<void> {
+  const { parsed, built } = await prepareFixture(scenario, fixture);
+
+  assertParsedDefined(parsed);
+  assertValidatesParsed(scenario, parsed);
+  assertBuiltXml(built);
+  assertValidatesBuilt(scenario, built);
+  assertRoundTrips(scenario, built);
+}
+
+/**
  * Run a scenario as a standalone test suite.
  * Call this from each *.test.ts file.
  *
@@ -50,41 +115,37 @@ export function runScenario<S extends TestableSchema>(
       describe(fixture.path.replace('.xml', ''), () => {
         // State shared between tests
         const state: {
-          xml: string;
           parsed: SchemaType<S> | null;
           built: string;
         } = {
-          xml: '',
           parsed: null,
           built: '',
         };
 
         beforeAll(async () => {
-          state.xml = await fixture.load();
-          state.parsed = scenario.schema.parse(state.xml) as SchemaType<S>;
-          state.built = scenario.schema.build!(state.parsed);
+          const prepared = await prepareFixture(scenario, fixture);
+          state.parsed = prepared.parsed;
+          state.built = prepared.built;
         });
 
         it('parses', () => {
-          expect(state.parsed).toBeDefined();
+          assertParsedDefined(state.parsed);
         });
 
         it('validates parsed', () => {
-          scenario.validateParsed(state.parsed!);
+          assertValidatesParsed(scenario, state.parsed!);
         });
 
         it('builds', () => {
-          expect(state.built).toContain('<?xml');
+          assertBuiltXml(state.built);
         });
 
         it('validates built', () => {
-          scenario.validateBuilt?.(state.built);
+          assertValidatesBuilt(scenario, state.built);
         });
 
         it('round-trips', () => {
-          const parsed2 = scenario.schema.parse(state.built);
-          const built2 = scenario.schema.build!(parsed2 as SchemaType<S>);
-          expect(state.built).toBe(built2);
+          assertRoundTrips(scenario, state.built);
         });
       });
     }

@@ -8,9 +8,14 @@
  * The contract adds publish/unpublish to the base CRUD surface.
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { servicebinding } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { bindingsContract } from '../../src/adt/businessservices/bindings';
 
 class SrvbScenario extends ContractScenario {
@@ -95,4 +100,13 @@ class SrvbScenario extends ContractScenario {
   ];
 }
 
-runScenario(new SrvbScenario());
+describe('Service Binding (SRVB) contract scenarios', () => {
+  describe('Business Services Bindings (SRVB)', () => {
+    const scenario = new SrvbScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});
