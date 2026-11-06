@@ -280,14 +280,11 @@ export default defineConfig({
       );
       typedLines.push(
         `import ${importName} from './schemas/sap/${schemaName}';`,
-      );
-      typedLines.push(
         `export const ${exportName}: TypedSchema<${rootTypeName}> = typedSchema<${rootTypeName}>(${importName});`,
       );
     }
 
-    typedLines.push('');
-    typedLines.push('// Custom schemas');
+    typedLines.push('', '// Custom schemas');
 
     // Generate typed exports for TARGET custom schemas only
     for (const schemaName of targetCustomSchemas) {
@@ -300,8 +297,6 @@ export default defineConfig({
       );
       typedLines.push(
         `import ${importName} from './schemas/custom/${schemaName}';`,
-      );
-      typedLines.push(
         `export const ${exportName}: TypedSchema<${rootTypeName}> = typedSchema<${rootTypeName}>(${importName});`,
       );
     }

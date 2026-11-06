@@ -134,11 +134,9 @@ export async function runCodegen(
   ): void {
     // Get includes and redefines from schema
     const includes = schema.include as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     const redefines = schema.redefine as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     const refs = [...(includes ?? []), ...(redefines ?? [])];
 
     for (const ref of refs) {
@@ -404,7 +402,7 @@ function createImportResolver(
     // e.g., if current is "custom/discovery" and schemaLocation is "../sap/atom.xsd" -> "sap/atom"
     const resolvedPath =
       currentSchemaDir !== '.'
-        ? join(currentSchemaDir, schemaPath).replaceAll(/\\/g, '/')
+        ? join(currentSchemaDir, schemaPath).replaceAll('\\', '/')
         : schemaPath;
 
     // Normalize the path (handle ../ etc.)
@@ -425,7 +423,7 @@ function createImportResolver(
       const relImport =
         fromDir === dirname(toPath)
           ? `./${basename(toPath)}${ext}`
-          : relative(fromDir || '.', toPath).replaceAll(/\\/g, '/') ||
+          : relative(fromDir || '.', toPath).replaceAll('\\', '/') ||
             `./${basename(toPath)}`;
       return relImport.startsWith('.')
         ? `${relImport}${ext}`
@@ -446,15 +444,15 @@ function createImportResolver(
 
       if (source.schemas.includes(normalizedPath)) {
         const relPath = relative(currentSource.outputDir, source.outputDir);
-        return `${relPath}/${normalizedPath}${ext}`.replaceAll(/\\/g, '/');
+        return `${relPath}/${normalizedPath}${ext}`.replaceAll('\\', '/');
       }
       if (source.schemas.includes(schemaPath)) {
         const relPath = relative(currentSource.outputDir, source.outputDir);
-        return `${relPath}/${schemaPath}${ext}`.replaceAll(/\\/g, '/');
+        return `${relPath}/${schemaPath}${ext}`.replaceAll('\\', '/');
       }
       if (source.schemas.includes(schemaBaseName)) {
         const relPath = relative(currentSource.outputDir, source.outputDir);
-        return `${relPath}/${schemaBaseName}${ext}`.replaceAll(/\\/g, '/');
+        return `${relPath}/${schemaBaseName}${ext}`.replaceAll('\\', '/');
       }
     }
 
@@ -529,8 +527,7 @@ function extractSchemaLocations(
 
   // xs:import
   const imports = schema.import as
-    | Array<{ schemaLocation?: string }>
-    | undefined;
+    Array<{ schemaLocation?: string }> | undefined;
   if (imports) {
     for (const imp of imports) {
       if (imp.schemaLocation) {
@@ -542,8 +539,7 @@ function extractSchemaLocations(
 
   // xs:include
   const includes = schema.include as
-    | Array<{ schemaLocation?: string }>
-    | undefined;
+    Array<{ schemaLocation?: string }> | undefined;
   if (includes) {
     for (const inc of includes) {
       if (inc.schemaLocation) {
@@ -555,8 +551,7 @@ function extractSchemaLocations(
 
   // xs:redefine
   const redefines = schema.redefine as
-    | Array<{ schemaLocation?: string }>
-    | undefined;
+    Array<{ schemaLocation?: string }> | undefined;
   if (redefines) {
     for (const red of redefines) {
       if (red.schemaLocation) {

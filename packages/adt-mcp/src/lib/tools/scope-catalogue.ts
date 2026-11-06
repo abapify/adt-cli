@@ -396,8 +396,7 @@ function validateAtcScope(
     }
   | undefined {
   if (
-    !policy ||
-    policy.operationId !== 'atc_run' ||
+    policy?.operationId !== 'atc_run' ||
     policy.check !== 'atc' ||
     !scope ||
     typeof scope !== 'object' ||
@@ -473,8 +472,7 @@ function isScopedUnitTestResourceAllowed(
   const key = canonicalObjectKey(arguments_.objectType, arguments_.objectName);
   const normalized = normalizeUnitTestOptions(arguments_);
   if (
-    !policy ||
-    policy.operationId !== 'run_unit_tests' ||
+    policy?.operationId !== 'run_unit_tests' ||
     !key ||
     !normalized ||
     policy.maxObjects < 1 ||

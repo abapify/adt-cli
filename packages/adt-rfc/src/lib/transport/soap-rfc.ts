@@ -35,9 +35,9 @@ export const SOAP_ENV_NS = 'http://schemas.xmlsoap.org/soap/envelope/';
 
 function escapeXml(value: string): string {
   return value
-    .replaceAll(/&/g, '&amp;')
-    .replaceAll(/</g, '&lt;')
-    .replaceAll(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 
 function renderScalar(value: RfcScalar): string {
@@ -176,11 +176,11 @@ function localName(qname: string): string {
 
 function unescapeXml(s: string): string {
   return s
-    .replaceAll(/&lt;/g, '<')
-    .replaceAll(/&gt;/g, '>')
-    .replaceAll(/&quot;/g, '"')
-    .replaceAll(/&apos;/g, "'")
-    .replaceAll(/&amp;/g, '&');
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&apos;', "'")
+    .replaceAll('&amp;', '&');
 }
 
 interface ParsedNode {

@@ -51,7 +51,7 @@ export const ctsDeleteCommand = new Command('delete')
       // The service returns a normalized Transport with `number`, `desc`,
       // `owner`, `status`, `tasks`. A missing/empty number indicates the
       // transport was not found.
-      if (!transportInfo || !transportInfo.number) {
+      if (!transportInfo?.number) {
         console.error(`❌ Transport ${transport} not found`);
         process.exit(1);
       }

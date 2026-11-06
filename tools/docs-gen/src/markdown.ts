@@ -1,5 +1,5 @@
 function escapeAngles(text: string): string {
-  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
 /** Escape text for use in MDX prose (keeps line breaks). */

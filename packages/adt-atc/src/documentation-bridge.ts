@@ -40,9 +40,10 @@ export interface DocumentationReadingClient {
 export function parseCheckClassFromDocumentation(
   html: string,
 ): string | undefined {
-  const match = html.match(
-    /Check\s*Class[^<]{0,80}<\/h3>\s*<p>\s*[^/<]{0,120}\/\s*((?:\/[A-Za-z0-9_]{1,8}\/)?[A-Za-z][A-Za-z0-9_]*)\s*\//u,
-  );
+  const match =
+    /Check\s*Class[^<]{0,80}<\/h3>\s*<p>\s*[^/<]{0,120}\/\s*((?:\/[A-Za-z0-9_]{1,8}\/)?[A-Za-z][A-Za-z0-9_]*)\s*\//u.exec(
+      html,
+    );
   return match?.[1];
 }
 

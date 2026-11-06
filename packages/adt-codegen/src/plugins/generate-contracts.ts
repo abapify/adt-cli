@@ -208,7 +208,7 @@ function parseTemplate(template: string): {
   const pathParams: string[] = [];
   const queryParams: string[] = [];
 
-  const queryMatch = template.match(/\{\?([^}]+)\}/);
+  const queryMatch = /\{\?([^}]+)\}/.exec(template);
   if (queryMatch) {
     queryParams.push(...queryMatch[1].split(',').map(sanitizeParamName));
   }
@@ -251,7 +251,7 @@ function methodNameFromRel(
   existingNames: Set<string>,
 ): string {
   const parts = rel.split('/').filter(Boolean);
-  let name = parts[parts.length - 1] ?? httpMethod.toLowerCase();
+  let name = parts.at(-1) ?? httpMethod.toLowerCase();
 
   name = name
     .replace(/^relations?$/, '')

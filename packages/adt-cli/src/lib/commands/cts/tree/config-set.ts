@@ -18,7 +18,7 @@ import { getAdtClientV2 } from '../../../utils/adt-client-v2';
  */
 function extractConfigId(uri: string): string {
   const parts = uri.split('/');
-  return parts[parts.length - 1];
+  return parts.at(-1)!;
 }
 
 /**
@@ -128,8 +128,7 @@ export const treeConfigSetCommand = new Command('set')
       // Response has 'configurations' property (plural) containing config array
       const configsData = configsResponse as { configurations?: unknown };
       const configs = configsData?.configurations as
-        | Array<{ link?: { href?: string } }>
-        | undefined;
+        Array<{ link?: { href?: string } }> | undefined;
       if (!configs) {
         console.log('\n❌ No search configuration found');
         return;

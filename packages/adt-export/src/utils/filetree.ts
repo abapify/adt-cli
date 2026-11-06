@@ -76,10 +76,9 @@ export class MemoryFileTree implements FileTree {
     //         regex metacharacters, so later passes leave it alone.
     const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
     const body = escaped
-      .replaceAll(/\*\*/g, '\x00DOUBLESTAR\x00')
-      .replaceAll(/\*/g, '[^/]*')
-      .split('\x00DOUBLESTAR\x00')
-      .join('.*');
+      .replaceAll('**', '\x00DOUBLESTAR\x00')
+      .replaceAll('*', '[^/]*')
+      .replaceAll('\x00DOUBLESTAR\x00', '.*');
     const regex = new RegExp('^' + body + '$');
     return Array.from(this.files.keys()).filter((p) => regex.test(p));
   }

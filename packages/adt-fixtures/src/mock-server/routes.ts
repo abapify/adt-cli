@@ -134,9 +134,7 @@ function nextTransportTaskNumber(xml: string, parent: string): string {
   const { prefix, digits } = parentSplit;
   const numbers = Array.from(xml.matchAll(/\btm:number=["']([^"']+)["']/g))
     .map((match) => splitTrailingDigits(match[1]))
-    .filter((split): split is SplitDigits =>
-      Boolean(split && split.prefix === prefix),
-    )
+    .filter((split): split is SplitDigits => Boolean(split?.prefix === prefix))
     .map((split) => Number.parseInt(split.digits, 10));
   const next = Math.max(Number.parseInt(digits, 10), ...numbers) + 1;
   return `${prefix}${String(next).padStart(digits.length, '0')}`;

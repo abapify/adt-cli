@@ -251,7 +251,7 @@ function findSource(
     quoted.some((literal) => text.includes(literal)),
   );
   const preferred = matches.find(
-    ([file]) => basename(file, '.ts') === name.replace(/_/g, '-'),
+    ([file]) => basename(file, '.ts') === name.replaceAll('_', '-'),
   );
   return (preferred ?? matches.at(0))?.[0];
 }

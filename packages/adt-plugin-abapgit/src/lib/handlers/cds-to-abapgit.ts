@@ -386,7 +386,7 @@ async function buildFieldDD03P(
           reftable = tableName;
           // Strip table prefix if present (e.g. 'ztest.currency_code' → 'CURRENCY_CODE')
           const parts = refAnnotation.split('.');
-          reffield = parts[parts.length - 1].toUpperCase();
+          reffield = parts.at(-1)!.toUpperCase();
         }
       }
     }

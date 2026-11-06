@@ -8,8 +8,7 @@
  */
 
 import type { FileTree, ExportOptions } from '@abapify/adt-plugin';
-import type { AdkObject } from '@abapify/adk';
-import { createAdk, type AdtClient } from '@abapify/adk';
+import { createAdk, type AdtClient, type AdkObject } from '@abapify/adk';
 import { getHandler, getSupportedTypes } from './handlers';
 import {
   parseAbapGitMetadata,
@@ -157,7 +156,7 @@ function collectBinaryCompanions(
 ): void {
   for (const sourcePath of allFiles) {
     const filename = sourcePath.slice(sourcePath.lastIndexOf('/') + 1);
-    const match = filename.match(/^([^.]+)\.([^.]+)\..+$/);
+    const match = /^([^.]+)\.([^.]+)\..+$/.exec(filename);
     if (!match) continue;
     const key = `${match[1].toUpperCase()}:${match[2].toUpperCase()}`;
     const obj = objectMap.get(key);

@@ -163,7 +163,7 @@ export class CsrfTokenManager {
     const decodedToken = decodeURIComponent(cookieValue);
 
     // Extract just the token part (before timestamp if present)
-    const tokenMatch = decodedToken.match(/^([A-Za-z0-9+/_-]+=*)/);
+    const tokenMatch = /^([A-Za-z0-9+/_-]+=*)/.exec(decodedToken);
     const actualToken = tokenMatch ? tokenMatch[1] : decodedToken;
 
     // Validate token (ignore placeholder values)
@@ -438,7 +438,7 @@ export class SessionManager {
     baseUrl: string;
     body: string;
   }): string | undefined {
-    const match = body.match(/href="([^"]*\/sessions\/[^"]*)"/);
+    const match = /href="([^"]*\/sessions\/[^"]*)"/.exec(body);
     const sessionPath = match?.[1];
     if (!sessionPath || !this.isTrustedSessionPath({ baseUrl, sessionPath })) {
       this.logger?.warn(

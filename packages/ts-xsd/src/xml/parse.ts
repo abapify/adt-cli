@@ -274,7 +274,7 @@ function parseSubstitutionChildren(
   for (const child of getAllChildElements(node)) {
     const childName = getLocalName(child);
     const substitute = substitutes.find((s) => s.element.name === childName);
-    if (substitute && substitute.element.name) {
+    if (substitute?.element.name) {
       const subTypeName = substitute.element.type
         ? stripNsPrefix(substitute.element.type)
         : undefined;

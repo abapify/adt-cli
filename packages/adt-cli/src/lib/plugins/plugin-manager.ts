@@ -185,7 +185,7 @@ export class PluginManager {
     if (pluginName.startsWith('@')) {
       // For external packages like @company/plugin, use the plugin part
       const parts = pluginName.split('/');
-      return parts[parts.length - 1];
+      return parts.at(-1)!;
     }
     return pluginName;
   }

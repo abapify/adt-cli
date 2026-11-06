@@ -77,8 +77,7 @@ export function emitTypesInterface(
     }
     const aux = ctx.mapAux.get(entry.id);
     if (aux) {
-      typeDefs.push(aux.entryTypeDef);
-      typeDefs.push(aux.mapTypeDef);
+      typeDefs.push(aux.entryTypeDef, aux.mapTypeDef);
     }
     typeDefs.push(buildEntryTypeDef(entry, ctx));
   }
@@ -160,7 +159,7 @@ function v2Name(
   raw: string,
   allocator: ReturnType<typeof makeNameAllocator>,
 ): string {
-  const pre = raw.replaceAll(/\$/g, '_');
+  const pre = raw.replaceAll('$', '_');
   return allocator(pre, 'type');
 }
 
@@ -392,7 +391,7 @@ function buildStructureFields(
 
   const addField = (rawName: string, rawType: TypeRef, src: JsonSchema) => {
     const type = asFieldTypeRef(rawType);
-    const fieldName = sanitizeIdent(rawName.replaceAll(/\$/g, '_'), 'param');
+    const fieldName = sanitizeIdent(rawName.replaceAll('$', '_'), 'param');
     const prev = seen.get(fieldName);
     if (prev !== undefined) {
       if (!typeRefEqual(prev, type)) {

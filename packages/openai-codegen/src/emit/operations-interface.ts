@@ -428,8 +428,10 @@ function buildMethodAbapDoc(
   cookieSkipped: readonly NormalizedParameter[],
 ): string[] {
   const lines: string[] = [];
-  lines.push(`@openapi-operation ${op.operationId}`);
-  lines.push(`@openapi-path ${op.method.toUpperCase()} ${op.path}`);
+  lines.push(
+    `@openapi-operation ${op.operationId}`,
+    `@openapi-path ${op.method.toUpperCase()} ${op.path}`,
+  );
   if (op.summary) {
     for (const l of op.summary.split(/\r?\n/)) {
       if (l.trim().length > 0) lines.push(l.trim());

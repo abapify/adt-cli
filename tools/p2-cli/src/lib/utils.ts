@@ -28,7 +28,7 @@ export function findFiles(dir: string, pattern: string): string[] {
   // pattern can't introduce regex syntax. Then expand the wildcards.
   const escaped = pattern.replaceAll(/[.+^${}()|[\]\\/]/g, '\\$&');
   const regex = new RegExp(
-    '^' + escaped.replaceAll(/\*/g, '.*').replaceAll(/\?/g, '.') + '$',
+    '^' + escaped.replaceAll('*', '.*').replaceAll('?', '.') + '$',
   );
 
   for (const entry of entries) {

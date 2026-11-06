@@ -318,8 +318,7 @@ async function exactHeadFastPath(
   if (
     requestedDescriptors.some(
       (descriptor) =>
-        !descriptor ||
-        descriptor.configDigest !== configDigest ||
+        descriptor?.configDigest !== configDigest ||
         descriptor.formatDigest !== formatDigest ||
         // A descriptor without inventory cannot prove its objects'
         // source transports still match — the fast path must skip it
@@ -378,8 +377,7 @@ async function exactHeadFastPath(
   for (const path of objectPaths) {
     const descriptor = await readDescriptor(root, path, objectDescriptorSchema);
     if (
-      !descriptor ||
-      descriptor.configDigest !== configDigest ||
+      descriptor?.configDigest !== configDigest ||
       descriptor.formatDigest !== formatDigest ||
       descriptor.selections.some((selection) =>
         isMutableVersion(selection.versionId),

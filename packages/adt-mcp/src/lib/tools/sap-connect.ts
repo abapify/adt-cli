@@ -23,8 +23,8 @@ import {
   getAdtClientV2Safe,
   AdtAuthError,
   resolveConnectionClient,
+  ChangesetService,
 } from '@abapify/adt-services';
-import { ChangesetService } from '@abapify/adt-services';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveDestinationClient } from './session-helpers';
@@ -257,7 +257,7 @@ export function registerSapConnectTool(
           // failure here must not prevent session teardown.
           const session = sessionRef.value;
           const cs = session?.changeset;
-          if (cs && cs.status === 'open' && session) {
+          if (cs?.status === 'open' && session) {
             try {
               const service = new ChangesetService(session.client);
               await service.rollback(cs);

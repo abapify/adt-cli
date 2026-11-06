@@ -88,14 +88,14 @@ export class AdtLockHandleUnavailableError extends Error {
  * ```
  */
 export function parseLockResponse(xml: string): LockHandle {
-  const handleMatch = xml.match(/<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/);
+  const handleMatch = /<LOCK_HANDLE>([^<]+)<\/LOCK_HANDLE>/.exec(xml);
   if (!handleMatch) {
     throw new Error(
       'Failed to parse lock handle from SAP response. The response format may have changed.',
     );
   }
-  const corrNrMatch = xml.match(/<CORRNR>([^<]+)<\/CORRNR>/);
-  const corrUserMatch = xml.match(/<CORRUSER>([^<]+)<\/CORRUSER>/);
+  const corrNrMatch = /<CORRNR>([^<]+)<\/CORRNR>/.exec(xml);
+  const corrUserMatch = /<CORRUSER>([^<]+)<\/CORRUSER>/.exec(xml);
 
   return {
     handle: handleMatch[1],

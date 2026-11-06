@@ -13,8 +13,8 @@ import {
   createClient,
   createFetchAdapter,
   type Inferrable,
+  type RestContract,
 } from '../src/rest';
-import type { RestContract } from '../src/rest';
 
 // ============================================================================
 // Example 1: Zod-like schema library

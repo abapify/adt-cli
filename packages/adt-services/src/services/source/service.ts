@@ -71,7 +71,7 @@ function hasQuantifiedAlternationGroup(pattern: string): boolean {
       continue;
     }
     if (char === '|') {
-      const top = stack[stack.length - 1];
+      const top = stack.at(-1);
       if (top) top.hasAlternation = true;
       continue;
     }
@@ -81,7 +81,7 @@ function hasQuantifiedAlternationGroup(pattern: string): boolean {
       if (frame.hasAlternation && isRegexQuantifierAt(pattern, i + 1)) {
         return true;
       }
-      const parent = stack[stack.length - 1];
+      const parent = stack.at(-1);
       if (parent && frame.hasAlternation) parent.hasAlternation = true;
     }
   }
@@ -230,14 +230,14 @@ function openBlock(
 
   const methodMatch = METHOD_START.exec(line);
   if (methodMatch) {
-    const top = state.stack[state.stack.length - 1];
+    const top = state.stack.at(-1);
     // Only record method implementations, not METHODS: declarations.
     if (top && top.kind !== 'method') {
       state.stack.push({
         kind: 'method',
         name: methodMatch[1]!.toUpperCase(),
         startLine: lineNumber,
-        owner: state.ownerStack[state.ownerStack.length - 1],
+        owner: state.ownerStack.at(-1),
       });
     }
     return true;
@@ -252,7 +252,7 @@ function closeOpenMethods(
   all: boolean,
 ): void {
   do {
-    const top = state.stack[state.stack.length - 1];
+    const top = state.stack.at(-1);
     if (top?.kind !== 'method') return;
     state.methods.push({
       name: top.name,
@@ -272,7 +272,7 @@ function closeContainer(
   // Close any unclosed methods first (best-effort for malformed source).
   closeOpenMethods(state, endLine, true);
 
-  const top = state.stack[state.stack.length - 1];
+  const top = state.stack.at(-1);
   const expected = keyword === 'ENDCLASS.' ? 'class' : 'interface';
   if (top?.kind !== expected) return;
 

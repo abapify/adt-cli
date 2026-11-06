@@ -155,7 +155,7 @@ class Cursor {
     return {
       tokens: collected,
       startOffset: start,
-      endOffset: collected[collected.length - 1]?.endOffset ?? start,
+      endOffset: collected.at(-1)?.endOffset ?? start,
     };
   }
 
@@ -250,7 +250,7 @@ function parseClassOrImpl(
     return null;
   }
   const nameTok = tokens[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected class name after CLASS', nameTok ?? classTok);
     return null;
   }
@@ -497,7 +497,7 @@ function parseInterface(
     return null;
   }
   const nameTok = tokens[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected interface name after INTERFACE', nameTok ?? ifaceTok);
     return null;
   }
@@ -549,9 +549,7 @@ function parseSection(c: Cursor): Section | null {
     else break;
   }
   const end =
-    members.length > 0
-      ? members[members.length - 1].span.endOffset
-      : header.endOffset;
+    members.length > 0 ? members.at(-1)!.span.endOffset : header.endOffset;
   return {
     kind: 'Section',
     visibility,
@@ -658,12 +656,8 @@ function parseMethodDecl(
   let isForTesting = false;
 
   let section:
-    | 'none'
-    | 'importing'
-    | 'exporting'
-    | 'changing'
-    | 'returning'
-    | 'raising' = 'none';
+    'none' | 'importing' | 'exporting' | 'changing' | 'returning' | 'raising' =
+    'none';
 
   let i = qual.lastIdx + 1;
   while (i < toks.length) {
@@ -896,7 +890,7 @@ function parseNameTypeStatement(
   const toks = stmt.tokens;
   // toks[0] = head keyword (already validated by the caller dispatching on it)
   const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report(`expected ${expectation.name}`, nameTok ?? head);
     return null;
   }
@@ -986,7 +980,7 @@ function parseStructureTypes(
   const toks = stmt.tokens;
   // [Types, Colon, Begin, Of, Ident, Comma, <field>, Comma, <field>, Comma, End, Of, Ident]
   const nameTok = toks[4];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected struct name in BEGIN OF', nameTok ?? head);
     return null;
   }
@@ -1075,7 +1069,7 @@ function parseConstantDecl(
   const toks = stmt.tokens;
   // [Constants, Ident, Type, <type>, Value, <value tokens>]
   const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected constant name', nameTok ?? head);
     return null;
   }
@@ -1098,7 +1092,7 @@ function parseConstantDecl(
   const typeRes = consumeTypeRef(toks, 3, c, vIdx);
   if (!typeRes) return null;
   const valueStart = toks[vIdx + 1]?.startOffset ?? 0;
-  const valueEnd = toks[toks.length - 1]?.endOffset ?? valueStart;
+  const valueEnd = toks.at(-1)?.endOffset ?? valueStart;
   const value = c['sliceSource'](valueStart, valueEnd);
   return {
     kind: 'ConstantDecl',
@@ -1155,7 +1149,7 @@ function parseInterfaceStmt(
   const head = c.current();
   const stmt = c.collectStatement();
   const nameTok = stmt.tokens[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected interface name after INTERFACES', nameTok ?? head);
     return null;
   }
@@ -1177,7 +1171,7 @@ function parseAliasDecl(
   const stmt = c.collectStatement();
   const toks = stmt.tokens;
   const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected alias name', nameTok ?? head);
     return null;
   }
@@ -1186,7 +1180,7 @@ function parseAliasDecl(
     return null;
   }
   const targetStart = toks[3]?.startOffset ?? 0;
-  const targetEnd = toks[toks.length - 1]?.endOffset ?? targetStart;
+  const targetEnd = toks.at(-1)?.endOffset ?? targetStart;
   const target = c['sliceSource'](targetStart, targetEnd);
   return {
     kind: 'AliasDecl',
@@ -1321,8 +1315,8 @@ function consumeTableTypeRef(
     keyTokens.length > 0
       ? c['sliceSource'](
           keyTokens[0].startOffset,
-          (keyTokens[keyTokens.length - 1].endOffset ??
-            keyTokens[keyTokens.length - 1].startOffset) as number,
+          (keyTokens.at(-1)!.endOffset ??
+            keyTokens.at(-1)!.startOffset) as number,
         )
       : '';
   const startTok = toks[start];

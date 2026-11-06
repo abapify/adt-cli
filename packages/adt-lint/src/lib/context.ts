@@ -209,7 +209,7 @@ export function normalizeMethodBody(
 
   const target = methodName.trim().toUpperCase();
   const firstName = extractMethodNameFromHeader(lines[0] ?? '');
-  const last = (lines[lines.length - 1] ?? '').trim().toUpperCase();
+  const last = (lines.at(-1) ?? '').trim().toUpperCase();
 
   if (firstName === target && last === 'ENDMETHOD.') {
     return lines.slice(1, -1).join('\n').trimEnd();

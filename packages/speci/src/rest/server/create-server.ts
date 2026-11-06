@@ -194,8 +194,8 @@ function matchRoute(
   const targetMethod = method.toUpperCase();
   for (const route of routes) {
     if (route.method !== targetMethod) continue;
-    const match = relativePath.match(
-      (route as RouteDefinition & { _regex: RegExp })._regex,
+    const match = (route as RouteDefinition & { _regex: RegExp })._regex.exec(
+      relativePath,
     );
     if (match) {
       const params: Record<string, string> = {};

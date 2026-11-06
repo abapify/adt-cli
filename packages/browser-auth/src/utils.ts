@@ -35,7 +35,7 @@ export function matchesCookiePattern(
   if (!pattern.includes('*')) {
     return cookieName === pattern;
   }
-  const regexPattern = pattern.replaceAll(/\*/g, '.*');
+  const regexPattern = pattern.replaceAll('*', '.*');
   return new RegExp(`^${regexPattern}$`).test(cookieName);
 }
 

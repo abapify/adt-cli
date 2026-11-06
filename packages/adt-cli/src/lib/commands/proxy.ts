@@ -55,14 +55,13 @@ export const proxyCommand = new Command('proxy')
       // Determine target URL and auth
       let targetUrl: string | undefined = options.target;
       let auth:
-        | { username: string; password: string; client?: string }
-        | undefined;
+        { username: string; password: string; client?: string } | undefined;
       const defaultHeaders: Record<string, string> = {};
 
       if (!targetUrl) {
         // Use current auth session
         const session = loadAuthSession(options.sid);
-        if (!session || !session.auth) {
+        if (!session?.auth) {
           console.error('❌ Not authenticated and no --target specified');
           console.error(
             '💡 Run "bunx adt auth login" or provide --target <url>',

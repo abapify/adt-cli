@@ -232,7 +232,7 @@ function parseMethodRanges(lines: string[]): MethodRange[] {
   let methodStart = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    const match = lines[i].match(/^\s*METHOD\s+(\w+)/i);
+    const match = /^\s*METHOD\s+(\w+)/i.exec(lines[i]);
     if (match) {
       currentMethod = match[1].toLowerCase();
       methodStart = i + 1;
@@ -336,7 +336,7 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
         canonicalPath ??
         `${objectName.toLowerCase()}.${objectType.toLowerCase()}.abap`;
       const candidateSegments = candidatePath.split('/');
-      const expectedFilename = candidateSegments[candidateSegments.length - 1];
+      const expectedFilename = candidateSegments.at(-1);
       if (!expectedFilename) return null;
       const resolvedPath = lookup.get(expectedFilename.toLowerCase());
 

@@ -397,7 +397,7 @@ export const atcCommand: CliCommandPlugin = {
     let worklistId: string;
     if (typeof worklistCreateResponse === 'string') {
       // Plain string response - extract ID from XML or use as-is
-      const idMatch = worklistCreateResponse.match(/id="([^"]+)"/);
+      const idMatch = /id="([^"]+)"/.exec(worklistCreateResponse);
       worklistId = idMatch ? idMatch[1] : worklistCreateResponse.trim();
     } else if (
       'worklist' in worklistCreateResponse &&

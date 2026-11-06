@@ -80,7 +80,7 @@ export function buildUsageReferenceRequestXml(scopeResultXml: string): string {
     }
   }
   const scopeElement = noProlog.replaceAll(
-    /usagereferences:usageScopeResult/g,
+    'usagereferences:usageScopeResult',
     'usagereferences:scope',
   );
 

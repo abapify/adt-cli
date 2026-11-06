@@ -109,7 +109,7 @@ function resolveReferencedType(xml: string, comptype: 'E' | 'S'): ResolvedType {
   ) {
     result.shlporigin = 'D';
   }
-  const descMatch = xml.match(/adtcore:description="([^"]+)"/);
+  const descMatch = /adtcore:description="([^"]+)"/.exec(xml);
   if (descMatch) result.description = decodeXmlEntities(descMatch[1]);
   return result;
 }

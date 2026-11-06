@@ -125,13 +125,13 @@ export function extractCollections(
                 } else {
                   // Replace placeholders
                   filePath = output
-                    .replaceAll(/{href}/g, sanitizePath(coll.href || 'unknown'))
+                    .replaceAll('{href}', sanitizePath(coll.href || 'unknown'))
                     .replaceAll(
-                      /{title}/g,
+                      '{title}',
                       sanitizePath(coll.title || 'unknown'),
                     )
                     .replaceAll(
-                      /{category}/g,
+                      '{category}',
                       sanitizePath(coll.category?.term || 'unknown'),
                     );
                 }

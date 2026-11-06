@@ -18,8 +18,8 @@ import {
   type Logger,
   type ResponseContext,
   type AdtClient,
+  type AdtAdapterConfig,
 } from '@abapify/adt-client';
-import type { AdtAdapterConfig } from '@abapify/adt-client';
 import { initializeAdk, isAdkInitialized } from '@abapify/adk';
 import { FileLockStore } from '@abapify/adt-locks';
 import {
@@ -119,12 +119,12 @@ export function __setTestAdtClient(client: AdtClient | null): () => void {
  */
 export function __getTestAdtClient(): AdtClient | null {
   return __testAdtClientOverrides.length > 0
-    ? __testAdtClientOverrides[__testAdtClientOverrides.length - 1]
+    ? __testAdtClientOverrides.at(-1)!
     : null;
 }
 
 function __getActiveTestAdtClient(): AdtClient | undefined {
-  return __testAdtClientOverrides[__testAdtClientOverrides.length - 1];
+  return __testAdtClientOverrides.at(-1);
 }
 
 // =============================================================================

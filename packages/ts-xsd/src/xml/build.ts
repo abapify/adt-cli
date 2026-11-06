@@ -18,6 +18,7 @@ import {
 import {
   type XmlDocument,
   type XmlElement,
+  type BuildOptions,
   getSchemaPrefix,
   createXmlDocument,
   createRootElement,
@@ -80,8 +81,6 @@ function getPrefixForSchema(
 
 export type { BuildOptions } from './build-utils';
 export { type XmlDocument, type XmlElement } from './build-utils';
-
-import type { BuildOptions } from './build-utils';
 
 /**
  * Build XML string from typed object using schema definition
@@ -393,7 +392,7 @@ function buildDeclaredElements(
       const refName = stripNsPrefix(element.ref);
       const refElement = findElement(refName, elementDefSchema);
 
-      if (refElement && refElement.element.abstract) {
+      if (refElement?.element.abstract) {
         buildSubstituteElements(
           doc,
           node,

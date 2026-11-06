@@ -279,7 +279,7 @@ let manifestDirty = false;
 const draft: Pkg = { ...pkg };
 
 // publishConfig.access must be "public" for scoped packages.
-if (!draft.publishConfig || draft.publishConfig.access !== 'public') {
+if (draft.publishConfig?.access !== 'public') {
   if (fix) {
     draft.publishConfig = { ...(draft.publishConfig ?? {}), access: 'public' };
     report.fixes.push('set publishConfig.access=public');
@@ -472,7 +472,7 @@ if (prepare && name) {
     if (report.checks.exists === false) {
       const tmpDir = join(
         tmpdir(),
-        `npm-prepare-${Date.now()}-${name.replaceAll(/\//g, '__')}`,
+        `npm-prepare-${Date.now()}-${name.replaceAll('/', '__')}`,
       );
       mkdirSync(tmpDir, { recursive: true });
       writeFileSync(

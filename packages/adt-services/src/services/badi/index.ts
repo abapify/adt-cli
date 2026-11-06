@@ -258,7 +258,7 @@ function searchQueriesForDefinition({ name }: { name: string }): string[] {
   const normalized = name.trim().toUpperCase();
   const queries = new Set<string>([
     `*${normalized}*`,
-    `*${normalized.replace(/_/g, '*')}*`,
+    `*${normalized.replaceAll('_', '*')}*`,
   ]);
   const parts = normalized.split('_').filter(Boolean);
   if (parts.length >= 2) {
@@ -515,8 +515,6 @@ async function listImplementations(
         query,
         seen,
       })),
-    );
-    all.push(
       ...(await collectSearchCandidates({
         client: ctx.client,
         normalized: ctx.normalized,

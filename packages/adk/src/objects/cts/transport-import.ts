@@ -569,7 +569,7 @@ function addResolvedObject(
   sourceTransportMap: Map<string, string>,
   seenKeys?: Set<string>,
 ): void {
-  if (seenKeys && seenKeys.has(object.key)) return;
+  if (seenKeys?.has(object.key)) return;
   if (seenKeys) seenKeys.add(object.key);
   objects.push(object);
   sourceTransportMap.set(object.key, sourceTransport);

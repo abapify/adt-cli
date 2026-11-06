@@ -37,6 +37,7 @@ export {
 import {
   createClient as speciCreateClient,
   type HttpAdapter,
+  type RestClient,
 } from '@abapify/speci/rest';
 
 // Import contract and type for client creation
@@ -68,9 +69,6 @@ export type {
   ExtractResponse,
   InferSuccessResponse,
 } from '@abapify/speci/rest';
-
-// Import RestClient for use in return type
-import type { RestClient } from '@abapify/speci/rest';
 
 /**
  * Identity function for contract definitions.

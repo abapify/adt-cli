@@ -78,8 +78,10 @@ export function buildXsd(schema: Schema, options: BuildOptions = {}): string {
   };
 
   const lines: string[] = [];
-  lines.push('<?xml version="1.0" encoding="UTF-8"?>');
-  lines.push(buildSchema(schema, ctx));
+  lines.push(
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    buildSchema(schema, ctx),
+  );
 
   return lines.join(pretty ? '\n' : '');
 }
@@ -1520,7 +1522,7 @@ function addOccursAttr(
 
 function escapeXml(str: string): string {
   return str
-    .replaceAll(/&/g, '&amp;')
+    .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
