@@ -401,6 +401,149 @@ export function createSourceVersionCommand(
     .addCommand(getVersionCommand);
 }
 
+/** Replace a single method body in the current source (--method mode). */
+async function applyMethodReplacement(
+  client: AdtClient,
+  uri: string,
+  objectName: string,
+  methodName: string,
+  sourceCode: string,
+): Promise<string> {
+  if (!uri.includes('/oo/classes/') && !uri.includes('/oo/interfaces/')) {
+    throw new Error(
+      `--method is only supported for classes and interfaces, but '${objectName}' resolved to ${uri}`,
+    );
+  }
+
+  const currentSource = String(
+    await client.fetch(`${uri}/source/main`, {
+      method: 'GET',
+      headers: { Accept: 'text/plain' },
+    }),
+  );
+  const boundary = detectMethodBoundary(currentSource, methodName);
+  if (!boundary) {
+    throw new Error(`Method ${methodName} not found in ${objectName}`);
+  }
+
+  const lines = currentSource.split(/\r?\n/);
+  const methodBody = normalizeMethodBody(sourceCode, methodName);
+  const methodBlock = [
+    `METHOD ${methodName.toUpperCase()}.`,
+    methodBody,
+    'ENDMETHOD.',
+  ].join('\n');
+  lines.splice(
+    boundary.startLine - 1,
+    boundary.endLine - boundary.startLine + 1,
+    methodBlock,
+  );
+  return lines.join('\n');
+}
+
+/** Run the local lint gate; throws with the blocking diagnostics, if any. */
+function lintGate(
+  sourceToWrite: string,
+  objectName: string,
+  lintPreset: 'btp' | 'onpremise' | undefined,
+): void {
+  const diagnostics = lintSource(sourceToWrite, {
+    filename: `${objectName.toLowerCase()}.abap`,
+    systemType: lintPreset,
+  });
+  const blocking = diagnostics.filter((d) =>
+    ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),
+  );
+  if (blocking.length > 0) {
+    const blockedLines = blocking
+      .map((d) => `${d.key}: ${d.message}`)
+      .join('\n');
+    throw new Error(`Lint blocked write:\n${blockedLines}`);
+  }
+}
+
+/** Write the source through the typed contract or the generic fallback. */
+async function writeSourceContent(
+  client: AdtClient,
+  uri: string,
+  sourceToWrite: string,
+  lockHandle: string,
+  effectiveTransport: string | undefined,
+): Promise<void> {
+  const contract = pickSourceContract(client, uri);
+  if (contract) {
+    await contract.op.put(
+      contract.objectName,
+      {
+        lockHandle,
+        ...(effectiveTransport ? { corrNr: effectiveTransport } : {}),
+      },
+      sourceToWrite,
+    );
+  } else {
+    // Generic fallback for object types that do not have a typed
+    // source contract yet.
+    const params = new URLSearchParams({ lockHandle });
+    if (effectiveTransport) params.set('corrNr', effectiveTransport);
+    await client.fetch(`${uri}/source/main?${params.toString()}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'text/plain' },
+      body: sourceToWrite,
+    });
+  }
+}
+
+// Lock, write and unlock the object; best-effort unlock on write failure.
+async function writeWithLock(
+  client: AdtClient,
+  lockService: ReturnType<typeof createLockService>,
+  uri: string,
+  objectName: string,
+  sourceToWrite: string,
+  options: { transport?: string; json?: boolean },
+): Promise<void> {
+  if (!options.json) console.log(`🔄 Locking ${objectName}...`);
+  const lock = await lockService.lock(uri, {
+    transport: options.transport,
+    objectName,
+  });
+  let lockHandle: string | undefined = lock.handle;
+  const effectiveTransport = resolveLockCorrelation(lock, options.transport);
+
+  try {
+    if (!options.json) console.log(`🔄 Writing source to ${uri}...`);
+
+    await writeSourceContent(
+      client,
+      uri,
+      sourceToWrite,
+      lockHandle,
+      effectiveTransport,
+    );
+
+    await lockService.unlock(uri, { lockHandle });
+    lockHandle = undefined;
+
+    if (options.json) {
+      console.log(
+        JSON.stringify({ objectName, uri, status: 'written' }, null, 2),
+      );
+    } else {
+      console.log(`✅ Source written and lock released for ${objectName}`);
+    }
+  } catch (err) {
+    // Best-effort unlock (only if not already unlocked)
+    if (lockHandle) {
+      try {
+        await lockService.unlock(uri, { lockHandle });
+      } catch {
+        // ignore
+      }
+    }
+    throw err;
+  }
+}
+
 const putSourceCommand = new Command('put')
   .description('Write ABAP source code from a file to an existing object')
   .argument('<objectName>', 'ABAP object name')
@@ -445,121 +588,28 @@ const putSourceCommand = new Command('put')
         let sourceToWrite = sourceCode;
 
         if (options.method) {
-          if (
-            !uri.includes('/oo/classes/') &&
-            !uri.includes('/oo/interfaces/')
-          ) {
-            throw new Error(
-              `--method is only supported for classes and interfaces, but '${objectName}' resolved to ${uri}`,
-            );
-          }
-
-          const currentSource = String(
-            await client.fetch(`${uri}/source/main`, {
-              method: 'GET',
-              headers: { Accept: 'text/plain' },
-            }),
+          sourceToWrite = await applyMethodReplacement(
+            client,
+            uri,
+            objectName,
+            options.method,
+            sourceCode,
           );
-          const boundary = detectMethodBoundary(currentSource, options.method);
-          if (!boundary) {
-            throw new Error(
-              `Method ${options.method} not found in ${objectName}`,
-            );
-          }
-
-          const lines = currentSource.split(/\r?\n/);
-          const methodBody = normalizeMethodBody(sourceCode, options.method);
-          const methodBlock = [
-            `METHOD ${options.method.toUpperCase()}.`,
-            methodBody,
-            'ENDMETHOD.',
-          ].join('\n');
-          lines.splice(
-            boundary.startLine - 1,
-            boundary.endLine - boundary.startLine + 1,
-            methodBlock,
-          );
-          sourceToWrite = lines.join('\n');
         }
 
         if (options.lintBeforeWrite) {
-          const diagnostics = lintSource(sourceToWrite, {
-            filename: `${objectName.toLowerCase()}.abap`,
-            systemType: options.lintPreset,
-          });
-          const blocking = diagnostics.filter((d) =>
-            ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),
-          );
-          if (blocking.length > 0) {
-            const blockedLines = blocking
-              .map((d) => `${d.key}: ${d.message}`)
-              .join('\n');
-            throw new Error(`Lint blocked write:\n${blockedLines}`);
-          }
+          lintGate(sourceToWrite, objectName, options.lintPreset);
         }
 
         const lockService = createLockService(client);
-        let lockHandle: string | undefined;
-
-        if (!options.json) console.log(`🔄 Locking ${objectName}...`);
-        const lock = await lockService.lock(uri, {
-          transport: options.transport,
+        await writeWithLock(
+          client,
+          lockService,
+          uri,
           objectName,
-        });
-        lockHandle = lock.handle;
-        const effectiveTransport = resolveLockCorrelation(
-          lock,
-          options.transport,
+          sourceToWrite,
+          options,
         );
-
-        try {
-          if (!options.json) console.log(`🔄 Writing source to ${uri}...`);
-
-          const contract = pickSourceContract(client, uri);
-          if (contract) {
-            await contract.op.put(
-              contract.objectName,
-              {
-                lockHandle,
-                ...(effectiveTransport ? { corrNr: effectiveTransport } : {}),
-              },
-              sourceToWrite,
-            );
-          } else {
-            // Generic fallback for object types that do not have a typed
-            // source contract yet.
-            const params = new URLSearchParams({ lockHandle });
-            if (effectiveTransport) params.set('corrNr', effectiveTransport);
-            await client.fetch(`${uri}/source/main?${params.toString()}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'text/plain' },
-              body: sourceToWrite,
-            });
-          }
-
-          await lockService.unlock(uri, { lockHandle });
-          lockHandle = undefined;
-
-          if (options.json) {
-            console.log(
-              JSON.stringify({ objectName, uri, status: 'written' }, null, 2),
-            );
-          } else {
-            console.log(
-              `✅ Source written and lock released for ${objectName}`,
-            );
-          }
-        } catch (err) {
-          // Best-effort unlock (only if not already unlocked)
-          if (lockHandle) {
-            try {
-              await lockService.unlock(uri, { lockHandle });
-            } catch {
-              // ignore
-            }
-          }
-          throw err;
-        }
       } catch (error) {
         console.error(
           '❌ Put source failed:',

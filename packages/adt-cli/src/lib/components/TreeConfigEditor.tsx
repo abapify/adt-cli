@@ -42,6 +42,22 @@ type FocusField =
 /** Fields edited through the free-text editor */
 type TextEditField = 'userName' | 'fromDate' | 'toDate';
 
+/** Key state passed to the Ink input handler. */
+type EditorKey = {
+  return?: boolean;
+  escape?: boolean;
+  backspace?: boolean;
+  delete?: boolean;
+  ctrl?: boolean;
+  meta?: boolean;
+  upArrow?: boolean;
+  downArrow?: boolean;
+  leftArrow?: boolean;
+  rightArrow?: boolean;
+  tab?: boolean;
+  shift?: boolean;
+};
+
 const FIELD_ORDER: FocusField[] = [
   'userName',
   'customizingRequests',
@@ -324,98 +340,103 @@ export function TreeConfigEditor({
     setDropdownOpen(false);
   }, []);
 
-  useInput(
-    (
-      input: string,
-      key: {
-        return?: boolean;
-        escape?: boolean;
-        backspace?: boolean;
-        delete?: boolean;
-        ctrl?: boolean;
-        meta?: boolean;
-        upArrow?: boolean;
-        downArrow?: boolean;
-        leftArrow?: boolean;
-        rightArrow?: boolean;
-        tab?: boolean;
-        shift?: boolean;
-      },
-    ) => {
-      // Handle dropdown mode
-      if (dropdownOpen) {
-        if (key.upArrow) {
-          setDropdownIndex((prev: number) =>
-            prev > 0 ? prev - 1 : DATE_FILTER_OPTIONS.length - 1,
-          );
-        } else if (key.downArrow) {
-          setDropdownIndex((prev: number) =>
-            prev < DATE_FILTER_OPTIONS.length - 1 ? prev + 1 : 0,
-          );
-        } else if (key.return || input === ' ') {
-          selectDropdownOption(dropdownIndex);
-        } else if (key.escape) {
-          closeDropdown();
-        }
-        return;
-      }
+  // Handle key input while the date-filter dropdown is open.
+  const handleDropdownKey = (input: string, key: EditorKey): void => {
+    if (key.upArrow) {
+      setDropdownIndex((prev: number) =>
+        prev > 0 ? prev - 1 : DATE_FILTER_OPTIONS.length - 1,
+      );
+    } else if (key.downArrow) {
+      setDropdownIndex((prev: number) =>
+        prev < DATE_FILTER_OPTIONS.length - 1 ? prev + 1 : 0,
+      );
+    } else if (key.return || input === ' ') {
+      selectDropdownOption(dropdownIndex);
+    } else if (key.escape) {
+      closeDropdown();
+    }
+  };
 
-      // Handle text editing mode
-      if (editingText) {
-        if (key.return) {
-          finishTextEdit(currentField as TextEditField);
-        } else if (key.escape) {
-          cancelTextEdit();
-        } else if (key.backspace || key.delete) {
-          setTextBuffer((prev: string) => prev.slice(0, -1));
-        } else if (input && !key.ctrl && !key.meta) {
-          setTextBuffer((prev: string) => prev + input);
-        }
-        return;
-      }
+  // Handle key input while a text field is being edited.
+  const handleTextEditingKey = (input: string, key: EditorKey): void => {
+    if (key.return) {
+      finishTextEdit(currentField as TextEditField);
+    } else if (key.escape) {
+      cancelTextEdit();
+    } else if (key.backspace || key.delete) {
+      setTextBuffer((prev: string) => prev.slice(0, -1));
+    } else if (input && !key.ctrl && !key.meta) {
+      setTextBuffer((prev: string) => prev + input);
+    }
+  };
 
-      // Navigation
-      if (key.upArrow || (key.shift && key.tab)) {
-        moveFocus(-1);
-      } else if (key.downArrow || key.tab) {
-        moveFocus(1);
-      } else if (key.leftArrow) {
-        if (currentField === 'releasedDateFilter') {
-          cycleSelect('releasedDateFilter', -1);
-        }
-      } else if (key.rightArrow) {
-        if (currentField === 'releasedDateFilter') {
-          cycleSelect('releasedDateFilter', 1);
-        }
-      } else if (key.return || input === ' ') {
-        // Handle field activation
-        switch (currentField) {
-          case 'releasedDateFilter':
-            openDropdown();
-            break;
-          case 'userName':
-          case 'fromDate':
-          case 'toDate':
-            startTextEdit(currentField);
-            break;
-          case 'customizingRequests':
-          case 'workbenchRequests':
-          case 'transportOfCopies':
-          case 'modifiable':
-          case 'released':
-            toggleCheckbox(currentField);
-            break;
-        }
-      } else if (key.escape) {
-        onCancel();
-        exit();
-      } else if (key.ctrl && input === 's') {
-        // Ctrl+S to save
-        onSave(config);
-        exit();
-      }
-    },
-  );
+  // Cycle the date-filter preset (only meaningful on that field).
+  const cycleDateFilter = (delta: number): void => {
+    if (currentField === 'releasedDateFilter') {
+      cycleSelect('releasedDateFilter', delta);
+    }
+  };
+
+  // Activate the focused field (Return / Space).
+  const activateField = (): void => {
+    switch (currentField) {
+      case 'releasedDateFilter':
+        openDropdown();
+        break;
+      case 'userName':
+      case 'fromDate':
+      case 'toDate':
+        startTextEdit(currentField);
+        break;
+      case 'customizingRequests':
+      case 'workbenchRequests':
+      case 'transportOfCopies':
+      case 'modifiable':
+      case 'released':
+        toggleCheckbox(currentField);
+        break;
+    }
+  };
+
+  // Handle key input in normal (navigation) mode.
+  const handleNavigationKey = (input: string, key: EditorKey): void => {
+    if (key.upArrow || (key.shift && key.tab)) {
+      moveFocus(-1);
+    } else if (key.downArrow || key.tab) {
+      moveFocus(1);
+    } else if (key.leftArrow) {
+      cycleDateFilter(-1);
+    } else if (key.rightArrow) {
+      cycleDateFilter(1);
+    } else if (key.return || input === ' ') {
+      // Handle field activation
+      activateField();
+    } else if (key.escape) {
+      onCancel();
+      exit();
+    } else if (key.ctrl && input === 's') {
+      // Ctrl+S to save
+      onSave(config);
+      exit();
+    }
+  };
+
+  useInput((input: string, key: EditorKey) => {
+    // Handle dropdown mode
+    if (dropdownOpen) {
+      handleDropdownKey(input, key);
+      return;
+    }
+
+    // Handle text editing mode
+    if (editingText) {
+      handleTextEditingKey(input, key);
+      return;
+    }
+
+    // Navigation
+    handleNavigationKey(input, key);
+  });
 
   // Check if date fields should be shown (only when Released is checked and Custom date filter)
   const showDateFields = config.released && config.releasedDateFilter === '4';
