@@ -216,7 +216,7 @@ export function registerRunAbapTool(server: McpServer, ctx: ToolContext): void {
       let output = '';
       let executionError: Error | undefined;
       let created = false;
-      let classDeleted = false;
+      let classDeleted: boolean;
 
       try {
         created = await createTempClass(
