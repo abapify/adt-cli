@@ -138,6 +138,161 @@ function configStateToConfigurationData(config: TreeConfigState) {
   };
 }
 
+type AdtClientV2 = Awaited<ReturnType<typeof getAdtClientV2>>;
+
+/** Configuration details shape (matches ConfigurationSchema). */
+type ConfigDetails = {
+  configuration?: {
+    properties?: {
+      property?: Array<{
+        key?: string;
+        $value?: string;
+        isMandatory?: boolean;
+      }>;
+    };
+    createdBy?: string;
+    createdAt?: string;
+    changedBy?: string;
+    changedAt?: string;
+  };
+};
+
+type ConfigDetailsInfo = ConfigDetails['configuration'];
+
+type FirstConfigLookup =
+  | { status: 'ok'; configUri: string; configId: string }
+  | { status: 'empty' }
+  | { status: 'no-uri' };
+
+/** Resolve the first search configuration entry from the configurations list. */
+async function lookupFirstConfig(
+  client: AdtClientV2,
+): Promise<FirstConfigLookup> {
+  // Get configurations list (typed)
+  const configsResponse =
+    await client.adt.cts.transportrequests.searchconfiguration.configurations.get();
+
+  // Response has 'configurations' property (plural) containing config array
+  const configsData = configsResponse as { configurations?: unknown };
+  const configs = configsData?.configurations as
+    Array<{ link?: { href?: string } }> | undefined;
+  if (!configs) return { status: 'empty' };
+
+  const configArray = Array.isArray(configs) ? configs : [configs];
+  if (configArray.length === 0) return { status: 'empty' };
+
+  const configUri = configArray[0]?.link?.href;
+  if (!configUri) return { status: 'no-uri' };
+
+  return { status: 'ok', configUri, configId: extractConfigId(configUri) };
+}
+
+/** Launch the interactive editor and persist changes via the typed PUT. */
+async function runConfigEditor(
+  client: AdtClientV2,
+  configId: string,
+  properties: Record<string, string>,
+  configDetails: ConfigDetailsInfo | undefined,
+): Promise<void> {
+  const initialConfig = propertiesToConfigState(properties, configDetails);
+
+  // Save handler - updates the configuration on the server using typed contract
+  const handleSave = async (newConfig: TreeConfigState) => {
+    console.log('\n🔄 Saving configuration...');
+
+    // Convert config to schema-compatible format
+    const configData = configStateToConfigurationData(newConfig);
+
+    // PUT the configuration back using the typed contract.
+    // Note: CSRF token is auto-initialized by the adapter before writes.
+    await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
+      configId,
+      configData,
+    );
+  };
+
+  await launchEditor(initialConfig, handleSave);
+}
+
+/** Print the configuration as JSON. */
+function printConfigJson(
+  configUri: string,
+  configId: string,
+  configDetails: ConfigDetailsInfo | undefined,
+  properties: Record<string, string>,
+): void {
+  const jsonOutput = {
+    uri: configUri,
+    configId,
+    createdBy: configDetails?.createdBy,
+    createdAt: configDetails?.createdAt,
+    changedBy: configDetails?.changedBy,
+    changedAt: configDetails?.changedAt,
+    properties,
+  };
+  console.log(JSON.stringify(jsonOutput, null, 2));
+}
+
+/** Print the human-readable configuration listing. */
+function printConfigText(
+  configDetails: ConfigDetailsInfo | undefined,
+  properties: Record<string, string>,
+): void {
+  console.log('\n📋 Search Configuration');
+  console.log('═'.repeat(50));
+
+  // Metadata
+  if (configDetails?.changedBy) {
+    console.log(`\n📝 Last modified by: ${configDetails.changedBy}`);
+  }
+  if (configDetails?.changedAt) {
+    console.log(`   Last modified at: ${configDetails.changedAt}`);
+  }
+
+  // Request Types
+  console.log('\n📦 Request Types:');
+  const requestTypes = [
+    { key: 'WorkbenchRequests', label: 'Workbench' },
+    { key: 'CustomizingRequests', label: 'Customizing' },
+    { key: 'TransportOfCopies', label: 'Transport of Copies' },
+  ];
+  for (const rt of requestTypes) {
+    const enabled = properties[rt.key] === 'true';
+    console.log(`   ${enabled ? '✅' : '⬜'} ${rt.label}`);
+  }
+
+  // Status Filters
+  console.log('\n📊 Status Filters:');
+  const statuses = [
+    { key: 'Modifiable', label: 'Modifiable' },
+    { key: 'Released', label: 'Released' },
+  ];
+  for (const s of statuses) {
+    const enabled = properties[s.key] === 'true';
+    console.log(`   ${enabled ? '✅' : '⬜'} ${s.label}`);
+  }
+
+  // Owner
+  console.log('\n👤 Owner Filter:');
+  console.log(`   ${properties.User || '*'}`);
+
+  // Date Range
+  console.log('\n📅 Date Range:');
+  const datePreset = DATE_FILTER_PRESETS[properties.DateFilter] || 'Unknown';
+  console.log(`   Preset: ${datePreset}`);
+  if (properties.FromDate) {
+    console.log(`   From: ${formatDate(properties.FromDate)}`);
+  }
+  if (properties.ToDate) {
+    console.log(`   To: ${formatDate(properties.ToDate)}`);
+  }
+
+  console.log('\n' + '═'.repeat(50));
+  console.log(
+    '💡 Configure in ADT Eclipse: Transport Organizer → Configure Tree',
+  );
+}
+
 /**
  * Launch the interactive Ink-based editor
  */
@@ -203,35 +358,18 @@ export const treeConfigCommand = new Command('config')
         console.log('🔍 Fetching search configuration...');
       }
 
-      // Get configurations list (typed)
-      const configsResponse =
-        await client.adt.cts.transportrequests.searchconfiguration.configurations.get();
-
-      // Response has 'configurations' property (plural) containing config array
-      const configsData = configsResponse as { configurations?: unknown };
-      const configs = configsData?.configurations as
-        Array<{ link?: { href?: string } }> | undefined;
-      if (!configs) {
+      const lookup = await lookupFirstConfig(client);
+      if (lookup.status === 'empty') {
         console.log('\n📭 No search configuration found');
         return;
       }
-
-      const configArray = Array.isArray(configs) ? configs : [configs];
-      if (configArray.length === 0) {
-        console.log('\n📭 No search configuration found');
-        return;
-      }
-
-      const firstConfig = configArray[0];
-      const configUri = firstConfig?.link?.href;
-
-      if (!configUri) {
+      if (lookup.status === 'no-uri') {
         console.log('\n❌ No configuration URI found');
         return;
       }
+      const { configUri, configId } = lookup;
 
-      // Extract config ID and fetch details using typed contract
-      const configId = extractConfigId(configUri);
+      // Extract config details using typed contract
       const configDetailsRaw =
         await client.adt.cts.transportrequests.searchconfiguration.configurations.getById(
           configId,
@@ -239,21 +377,6 @@ export const treeConfigCommand = new Command('config')
 
       // Response has nested structure - extract configuration object
       // Cast to expected shape for property access (matches ConfigurationSchema)
-      type ConfigDetails = {
-        configuration?: {
-          properties?: {
-            property?: Array<{
-              key?: string;
-              $value?: string;
-              isMandatory?: boolean;
-            }>;
-          };
-          createdBy?: string;
-          createdAt?: string;
-          changedBy?: string;
-          changedAt?: string;
-        };
-      };
       const configDetails = (configDetailsRaw as ConfigDetails)?.configuration;
 
       // Convert properties to map for easy access
@@ -263,96 +386,14 @@ export const treeConfigCommand = new Command('config')
 
       // Edit mode - launch interactive editor
       if (options.edit) {
-        const initialConfig = propertiesToConfigState(
-          properties,
-          configDetails,
-        );
-
-        // Save handler - updates the configuration on the server using typed contract
-        const handleSave = async (newConfig: TreeConfigState) => {
-          console.log('\n🔄 Saving configuration...');
-
-          // Convert config to schema-compatible format
-          const configData = configStateToConfigurationData(newConfig);
-
-          // PUT the configuration back using the typed contract.
-          // Note: CSRF token is auto-initialized by the adapter before writes.
-          await client.adt.cts.transportrequests.searchconfiguration.configurations.put(
-            configId,
-            configData,
-          );
-        };
-
-        await launchEditor(initialConfig, handleSave);
+        await runConfigEditor(client, configId, properties, configDetails);
         return;
       }
 
       if (options.json) {
-        const jsonOutput = {
-          uri: configUri,
-          configId,
-          createdBy: configDetails?.createdBy,
-          createdAt: configDetails?.createdAt,
-          changedBy: configDetails?.changedBy,
-          changedAt: configDetails?.changedAt,
-          properties,
-        };
-        console.log(JSON.stringify(jsonOutput, null, 2));
+        printConfigJson(configUri, configId, configDetails, properties);
       } else {
-        console.log('\n📋 Search Configuration');
-        console.log('═'.repeat(50));
-
-        // Metadata
-        if (configDetails?.changedBy) {
-          console.log(`\n📝 Last modified by: ${configDetails.changedBy}`);
-        }
-        if (configDetails?.changedAt) {
-          console.log(`   Last modified at: ${configDetails.changedAt}`);
-        }
-
-        // Request Types
-        console.log('\n📦 Request Types:');
-        const requestTypes = [
-          { key: 'WorkbenchRequests', label: 'Workbench' },
-          { key: 'CustomizingRequests', label: 'Customizing' },
-          { key: 'TransportOfCopies', label: 'Transport of Copies' },
-        ];
-        for (const rt of requestTypes) {
-          const enabled = properties[rt.key] === 'true';
-          console.log(`   ${enabled ? '✅' : '⬜'} ${rt.label}`);
-        }
-
-        // Status Filters
-        console.log('\n📊 Status Filters:');
-        const statuses = [
-          { key: 'Modifiable', label: 'Modifiable' },
-          { key: 'Released', label: 'Released' },
-        ];
-        for (const s of statuses) {
-          const enabled = properties[s.key] === 'true';
-          console.log(`   ${enabled ? '✅' : '⬜'} ${s.label}`);
-        }
-
-        // Owner
-        console.log('\n👤 Owner Filter:');
-        console.log(`   ${properties.User || '*'}`);
-
-        // Date Range
-        console.log('\n📅 Date Range:');
-        const datePreset =
-          DATE_FILTER_PRESETS[properties.DateFilter] || 'Unknown';
-        console.log(`   Preset: ${datePreset}`);
-        if (properties.FromDate) {
-          console.log(`   From: ${formatDate(properties.FromDate)}`);
-        }
-        if (properties.ToDate) {
-          console.log(`   To: ${formatDate(properties.ToDate)}`);
-        }
-
-        console.log('\n' + '═'.repeat(50));
-        console.log(
-          '💡 Configure in ADT Eclipse: Transport Organizer → Configure Tree',
-        );
+        printConfigText(configDetails, properties);
       }
     } catch (error) {
       console.error(
