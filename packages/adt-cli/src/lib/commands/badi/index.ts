@@ -21,6 +21,62 @@ import {
 } from '../../services/badi';
 import { buildObjectCrudCommands } from '../object/builder';
 
+type BadiInfo = Awaited<ReturnType<typeof getBadiInfo>>;
+
+/** Print the detailed implementation list (--implementations mode). */
+function printBadiImplementations(
+  impls: BadiInfo['badiImplementations'],
+): void {
+  console.log(`   BAdI implementations (${impls.length}):`);
+  for (const impl of impls) {
+    const flags = [
+      impl.active ? 'active' : 'inactive',
+      impl.default ? 'default' : '',
+      impl.example ? 'example' : '',
+    ]
+      .filter(Boolean)
+      .join(', ');
+    console.log(`     • ${impl.name} [${flags}]`);
+    console.log(`       Implementing class: ${impl.implementingClass}`);
+    console.log(`       BAdI definition: ${impl.badiDefinition}`);
+    console.log(`       Enhancement spot: ${impl.enhancementSpot}`);
+    if (impl.shortText) {
+      console.log(`       Description: ${impl.shortText}`);
+    }
+  }
+}
+
+/** Print BAdI metadata and implementations as human-readable text. */
+function printBadiInfo(
+  info: BadiInfo,
+  options: { implementations?: boolean },
+): void {
+  console.log(`📦 BAdI / Enhancement Implementation: ${info.name}`);
+  if (info.description) {
+    console.log(`   Description: ${info.description}`);
+  }
+  if (info.package) {
+    console.log(`   Package: ${info.package}`);
+  }
+  if (info.type) {
+    console.log(`   Type: ${info.type}`);
+  }
+  if (info.technology) {
+    console.log(`   Technology: ${info.technology}`);
+  }
+  console.log(`   Switch Supported: ${info.switchSupported ? 'Yes' : 'No'}`);
+
+  if (info.badiImplementations.length === 0) {
+    console.log('   BAdI implementations: none');
+  } else if (options.implementations) {
+    printBadiImplementations(info.badiImplementations);
+  } else {
+    console.log(
+      `   BAdI implementations: ${info.badiImplementations.length} (use --implementations to list)`,
+    );
+  }
+}
+
 const badiCommand = buildObjectCrudCommands({
   label: 'BAdI / enhancement implementation',
   command: 'badi',
@@ -65,50 +121,7 @@ badiCommand
           return;
         }
 
-        console.log(`📦 BAdI / Enhancement Implementation: ${info.name}`);
-        if (info.description) {
-          console.log(`   Description: ${info.description}`);
-        }
-        if (info.package) {
-          console.log(`   Package: ${info.package}`);
-        }
-        if (info.type) {
-          console.log(`   Type: ${info.type}`);
-        }
-        if (info.technology) {
-          console.log(`   Technology: ${info.technology}`);
-        }
-        console.log(
-          `   Switch Supported: ${info.switchSupported ? 'Yes' : 'No'}`,
-        );
-
-        if (info.badiImplementations.length === 0) {
-          console.log('   BAdI implementations: none');
-        } else if (options.implementations) {
-          console.log(
-            `   BAdI implementations (${info.badiImplementations.length}):`,
-          );
-          for (const impl of info.badiImplementations) {
-            const flags = [
-              impl.active ? 'active' : 'inactive',
-              impl.default ? 'default' : '',
-              impl.example ? 'example' : '',
-            ]
-              .filter(Boolean)
-              .join(', ');
-            console.log(`     • ${impl.name} [${flags}]`);
-            console.log(`       Implementing class: ${impl.implementingClass}`);
-            console.log(`       BAdI definition: ${impl.badiDefinition}`);
-            console.log(`       Enhancement spot: ${impl.enhancementSpot}`);
-            if (impl.shortText) {
-              console.log(`       Description: ${impl.shortText}`);
-            }
-          }
-        } else {
-          console.log(
-            `   BAdI implementations: ${info.badiImplementations.length} (use --implementations to list)`,
-          );
-        }
+        printBadiInfo(info, options);
       } catch (error) {
         console.error(
           '❌ Command failed:',

@@ -32,6 +32,107 @@ async function resolveUri(
   return match.uri;
 }
 
+type DependencyEntry = {
+  name: string;
+  type?: string;
+  uri?: string;
+  source: string;
+  fallback: boolean;
+};
+
+type FetchedDependency = {
+  entry: DependencyEntry;
+  /** Full (non-stripped) source — input for further dependency extraction. */
+  fullSource: string;
+};
+
+/** Resolve one dependency name: search → fetch source → strip to public API. */
+async function fetchDependencyEntry(
+  client: AdtClient,
+  name: string,
+): Promise<FetchedDependency | undefined> {
+  const searchResult =
+    await client.adt.repository.informationsystem.search.quickSearch({
+      query: name,
+      maxResults: 10,
+    });
+  const objects = normalizeSearchResults(
+    searchResult as Record<string, unknown>,
+  );
+  const match = objects.find((item) => item.name?.toUpperCase() === name);
+  if (!match?.uri) return undefined;
+
+  const fullSource = String(
+    await client.fetch(`${match.uri}/source/main`, {
+      method: 'GET',
+      headers: { Accept: 'text/plain' },
+    }),
+  );
+  const stripped = stripToPublicApi(fullSource, match.type ?? 'CLAS');
+
+  return {
+    entry: {
+      name,
+      type: match.type,
+      uri: match.uri,
+      source: stripped.source,
+      fallback: stripped.fallback,
+    },
+    fullSource,
+  };
+}
+
+/** Enqueue dependency names that have not been seen yet. */
+function enqueueUnseen(
+  queue: Array<{ name: string; level: number }>,
+  seen: Set<string>,
+  names: string[],
+  level: number,
+): void {
+  for (const next of names) {
+    if (!seen.has(next)) queue.push({ name: next, level });
+  }
+}
+
+// Breadth-first collection of public-API dependency sources, up to `depth`
+// levels and `maxDeps` entries.
+async function collectDependencies(
+  client: AdtClient,
+  rootSource: string,
+  depth: number,
+  maxDeps: number,
+): Promise<DependencyEntry[]> {
+  const queue = extractDependencies(rootSource).map((name) => ({
+    name,
+    level: 1,
+  }));
+  const seen = new Set<string>();
+  const dependencies: DependencyEntry[] = [];
+
+  while (queue.length > 0 && dependencies.length < maxDeps) {
+    const current = queue.shift();
+    if (!current) break;
+    if (seen.has(current.name)) continue;
+    seen.add(current.name);
+
+    const fetched = await fetchDependencyEntry(client, current.name);
+    if (!fetched) continue;
+
+    dependencies.push(fetched.entry);
+
+    if (current.level < depth) {
+      enqueueUnseen(
+        queue,
+        seen,
+        extractDependencies(fetched.fullSource),
+        current.level + 1,
+      );
+    }
+  }
+
+  return dependencies;
+}
+
 export const contextCommand = new Command('context')
   .description('Get compressed dependency context for an ABAP object')
   .argument('<objectName>', 'ABAP object name')
@@ -62,61 +163,12 @@ export const contextCommand = new Command('context')
           }),
         );
 
-        const queue = extractDependencies(source).map((name) => ({
-          name,
-          level: 1,
-        }));
-        const seen = new Set<string>();
-        const dependencies: Array<{
-          name: string;
-          type?: string;
-          uri?: string;
-          source: string;
-          fallback: boolean;
-        }> = [];
-
-        while (queue.length > 0 && dependencies.length < maxDeps) {
-          const current = queue.shift();
-          if (!current) break;
-          if (seen.has(current.name)) continue;
-          seen.add(current.name);
-
-          const searchResult =
-            await client.adt.repository.informationsystem.search.quickSearch({
-              query: current.name,
-              maxResults: 10,
-            });
-          const objects = normalizeSearchResults(
-            searchResult as Record<string, unknown>,
-          );
-          const match = objects.find(
-            (item) => item.name?.toUpperCase() === current.name,
-          );
-          if (!match?.uri) continue;
-
-          const depSource = String(
-            await client.fetch(`${match.uri}/source/main`, {
-              method: 'GET',
-              headers: { Accept: 'text/plain' },
-            }),
-          );
-          const stripped = stripToPublicApi(depSource, match.type ?? 'CLAS');
-
-          dependencies.push({
-            name: current.name,
-            type: match.type,
-            uri: match.uri,
-            source: stripped.source,
-            fallback: stripped.fallback,
-          });
-
-          if (current.level < depth) {
-            for (const next of extractDependencies(depSource)) {
-              if (!seen.has(next))
-                queue.push({ name: next, level: current.level + 1 });
-            }
-          }
-        }
+        const dependencies = await collectDependencies(
+          client,
+          source,
+          depth,
+          maxDeps,
+        );
 
         const result = {
           object: { name: objectName, type: options.type, uri },
