@@ -375,335 +375,309 @@ interface DiffResult {
   error?: string;
 }
 
-/**
- * Diff a single abapGit XML file against SAP remote.
- * Returns a result object indicating whether differences were found.
- */
-async function diffSingleFile(
-  filePath: string,
-  ctx: CliContext,
-  adk: AdkFactory,
-  options: {
-    contextLines: number;
-    useColor: boolean;
-    source: boolean;
-    raw: boolean;
-    summary?: boolean;
-  },
-): Promise<DiffResult> {
-  const { contextLines, useColor, source, raw, summary } = options;
-  const fullPath = resolve(ctx.cwd, filePath);
+/** Options driving one single-file diff. */
+interface DiffModeOptions {
+  contextLines: number;
+  useColor: boolean;
+  source: boolean;
+  raw: boolean;
+  summary?: boolean;
+}
 
-  if (!existsSync(fullPath)) {
-    return {
-      objectName: filePath,
-      objectType: '?',
-      hasDifferences: false,
-      fileCount: 0,
-      identicalCount: 0,
-      error: `File not found: ${fullPath}`,
-    };
-  }
+/** Build an error DiffResult. */
+function errorResult(
+  parsed: { name: string; type: string },
+  error: string,
+  fileCount = 0,
+): DiffResult {
+  return {
+    objectName: parsed.name,
+    objectType: parsed.type,
+    hasDifferences: false,
+    fileCount,
+    identicalCount: 0,
+    error,
+  };
+}
 
-  // Parse filename to detect type
-  const filename = basename(fullPath);
-  const parsed = parseAbapGitFilename(filename);
-  if (!parsed) {
-    return {
-      objectName: filename,
-      objectType: '?',
-      hasDifferences: false,
-      fileCount: 0,
-      identicalCount: 0,
-      error: `Cannot parse filename: ${filename}. Expected abapGit format: name.type.xml`,
-    };
-  }
+/** Result for a single compared file in source/raw mode. */
+function modeResult(
+  parsed: { name: string; type: string },
+  diffFound: boolean,
+): DiffResult {
+  return {
+    objectName: parsed.name,
+    objectType: parsed.type,
+    hasDifferences: diffFound,
+    fileCount: 1,
+    identicalCount: diffFound ? 0 : 1,
+  };
+}
 
-  if (parsed.extension !== 'xml') {
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: false,
-      fileCount: 0,
-      identicalCount: 0,
-      error: `Expected .xml metadata file, got .${parsed.extension}. Pass the .xml file, not .abap.`,
-    };
-  }
-
+/** Error message when the --source/--raw mode options are invalid. */
+function modeOptionsError(
+  parsed: { name: string; type: string },
+  source: boolean,
+  raw: boolean,
+): string | undefined {
   // Validate --source option
   if (source && parsed.type !== 'TABL') {
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: false,
-      fileCount: 0,
-      identicalCount: 0,
-      error: `Source format is only supported for TABL objects. Got: ${parsed.type}`,
-    };
+    return `Source format is only supported for TABL objects. Got: ${parsed.type}`;
   }
 
   // Validate mutual exclusion of --source and --raw
   if (source && raw) {
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: false,
-      fileCount: 0,
-      identicalCount: 0,
-      error: '--source and --raw are mutually exclusive',
-    };
+    return '--source and --raw are mutually exclusive';
   }
 
-  // Look up handler from abapGit registry
-  const handler = getHandler(parsed.type);
-  if (!handler) {
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: false,
-      fileCount: 0,
-      identicalCount: 0,
-      error: `Unsupported object type: ${parsed.type}. Supported: ${getSupportedTypes().join(', ')}`,
-    };
-  }
+  return undefined;
+}
 
-  // Collect local files for this object
-  const objectName = parsed.name.toLowerCase();
-  const localFiles = collectLocalFiles(
-    fullPath,
-    objectName,
-    handler.fileExtension,
+/** Derive the ADK type from the local XML via fromAbapGit (fallback: filename). */
+function resolveAdkType(
+  handler: ReturnType<typeof getHandler>,
+  localXml: string,
+  fallback: string,
+): string {
+  if (!handler.fromAbapGit) return fallback;
+  try {
+    const parsedXml = handler.schema.parse(localXml);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const values = (parsedXml as any)?.abapGit?.abap?.values ?? {};
+    const payload = handler.fromAbapGit(values);
+    if (typeof payload.type === 'string') {
+      return payload.type;
+    }
+  } catch {
+    // Fall through — use filename-derived type
+  }
+  return fallback;
+}
+
+/** Announce the object being diffed. */
+function printDiffBanner(
+  parsed: { name: string; type: string },
+  fileCount: number,
+  useColor: boolean,
+): void {
+  console.log(
+    `\n${useColor ? chalk.bold('Diff:') : 'Diff:'} ${parsed.name} (${parsed.type}) — ${fileCount} file(s)`,
   );
+}
 
-  if (!summary) {
-    console.log(
-      `\n${useColor ? chalk.bold('Diff:') : 'Diff:'} ${parsed.name} (${parsed.type}) — ${localFiles.size} file(s)`,
+/** Announce the remote fetch. */
+function printFetchBanner(
+  parsed: { name: string; type: string },
+  adkType: string,
+  useColor: boolean,
+): void {
+  console.log(
+    `${useColor ? chalk.dim('Fetching') : 'Fetching'} ${parsed.name} (${adkType}) from SAP...`,
+  );
+}
+
+/** Announce a path that exists on only one side. */
+function printOnlyIn(
+  side: 'local' | 'remote',
+  path: string,
+  useColor: boolean,
+  summary?: boolean,
+): void {
+  if (summary) return;
+  const line = `\n  ${side === 'local' ? '+' : '-'} Only in ${side}: ${path}`;
+  console.log(useColor ? chalk.yellow(line) : line);
+}
+
+/** Compare one local/remote content pair (XML pairs are normalized first). */
+function diffOnePair(
+  localPath: string,
+  localContent: string,
+  remoteContent: string,
+  handler: ReturnType<typeof getHandler>,
+  options: DiffModeOptions,
+): boolean {
+  // For XML files: normalize both through schema, projecting remote
+  // onto local's field set to strip serializer-added extras
+  const isXml = localPath.endsWith('.xml');
+  let diffLocal = localContent;
+  let diffRemote = remoteContent;
+  if (isXml) {
+    [diffLocal, diffRemote] = normalizeXmlPair(
+      localContent,
+      remoteContent,
+      handler,
     );
   }
 
-  // Parse local XML to extract ADK type info via fromAbapGit
-  const localXml = readFileSync(fullPath, 'utf-8');
-  let adkType = parsed.type;
+  return printDiff(
+    localPath,
+    localPath,
+    diffLocal,
+    diffRemote,
+    options.contextLines,
+    options.useColor,
+    options.summary,
+  );
+}
 
+/** Source format: compare ADK source (e.g. CDS DDL). */
+async function diffSourceMode(
+  parsed: { name: string; type: string },
+  localXml: string,
+  objectName: string,
+  remoteObj: AdkObject,
+  options: DiffModeOptions,
+): Promise<DiffResult> {
+  const { contextLines, useColor, summary } = options;
+  const localSource = tablXmlToCdsDdl(localXml);
+
+  let remoteSource: string;
+  try {
+    remoteSource = await (
+      remoteObj as unknown as { getSource(): Promise<string> }
+    ).getSource();
+  } catch (error) {
+    return errorResult(
+      parsed,
+      `Failed to fetch remote source: ${error instanceof Error ? error.message : String(error)}`,
+      1,
+    );
+  }
+
+  // Project remote onto local's annotation set — same principle as XML path.
+  // If local XML doesn't have a field (e.g. MATEFLAG), strip the
+  // corresponding annotation from remote so it doesn't appear as a diff.
+  const localAnnotations = new Set(
+    localSource
+      .split('\n')
+      .filter((l) => l.startsWith('@'))
+      .map((l) => l.split(':')[0].trim()),
+  );
+  remoteSource = remoteSource
+    .split('\n')
+    .filter((l) => {
+      if (!l.startsWith('@')) return true;
+      const name = l.split(':')[0].trim();
+      return localAnnotations.has(name);
+    })
+    .join('\n');
+
+  const sourceFile = `${objectName}.tabl.acds`;
+  const diffFound = printDiff(
+    sourceFile,
+    sourceFile,
+    localSource,
+    remoteSource,
+    contextLines,
+    useColor,
+    summary,
+  );
+
+  return modeResult(parsed, diffFound);
+}
+
+/** Raw mode: compare ADT-level XML payloads. */
+async function diffRawMode(
+  parsed: { name: string; type: string },
+  localXml: string,
+  objectName: string,
+  handler: ReturnType<typeof getHandler>,
+  remoteObj: AdkObject,
+  options: DiffModeOptions,
+): Promise<DiffResult> {
+  const { contextLines, useColor, summary } = options;
+  const adtSchema = adtSchemaMap[parsed.type];
+  if (!adtSchema) {
+    return errorResult(
+      parsed,
+      `Raw mode not supported for ${parsed.type}: no ADT schema mapping. Supported: ${Object.keys(adtSchemaMap).join(', ')}`,
+      1,
+    );
+  }
+
+  const { schema: rawSchema, wrapperKey } = adtSchema;
+
+  // Build remote ADT XML from loaded data
+  let remoteAdtXml: string;
+  try {
+    const remoteData = await remoteObj.data();
+    remoteAdtXml = rawSchema.build(
+      { [wrapperKey]: remoteData },
+      { pretty: true },
+    );
+  } catch (e) {
+    return errorResult(
+      parsed,
+      `Failed to build remote ADT XML: ${e instanceof Error ? e.message : String(e)}`,
+      1,
+    );
+  }
+
+  // Parse local abapGit XML → fromAbapGit() → local ADK data
+  let localAdtXml: string | undefined;
   if (handler.fromAbapGit) {
     try {
       const parsedXml = handler.schema.parse(localXml);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values = (parsedXml as any)?.abapGit?.abap?.values ?? {};
-      const payload = handler.fromAbapGit(values);
-      if (typeof payload.type === 'string') {
-        adkType = payload.type;
-      }
-    } catch {
-      // Fall through — use filename-derived type
-    }
-  }
+      const localPayload = handler.fromAbapGit(values);
 
-  // Fetch remote ADK object
-  if (!summary) {
-    console.log(
-      `${useColor ? chalk.dim('Fetching') : 'Fetching'} ${parsed.name} (${adkType}) from SAP...`,
-    );
-  }
-
-  const remoteObjRaw = adk.get(parsed.name, adkType);
-
-  // Narrow to AdkObject (excludes AdkGenericObject for unregistered types)
-  if (!(remoteObjRaw instanceof AdkObject)) {
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: false,
-      fileCount: localFiles.size,
-      identicalCount: 0,
-      error: `Unsupported ADK type: ${adkType} (no registered handler)`,
-    };
-  }
-  const remoteObj = remoteObjRaw;
-
-  try {
-    await remoteObj.load();
-  } catch (error) {
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: false,
-      fileCount: localFiles.size,
-      identicalCount: 0,
-      error: `Failed to load remote object: ${error instanceof Error ? error.message : String(error)}`,
-    };
-  }
-
-  // ========================================
-  // Source format: compare ADK source (e.g. CDS DDL)
-  // ========================================
-  if (source) {
-    const localSource = tablXmlToCdsDdl(localXml);
-
-    let remoteSource: string;
-    try {
-      remoteSource = await (
-        remoteObj as unknown as { getSource(): Promise<string> }
-      ).getSource();
-    } catch (error) {
-      return {
-        objectName: parsed.name,
-        objectType: parsed.type,
-        hasDifferences: false,
-        fileCount: 1,
-        identicalCount: 0,
-        error: `Failed to fetch remote source: ${error instanceof Error ? error.message : String(error)}`,
-      };
-    }
-
-    // Project remote onto local's annotation set — same principle as XML path.
-    // If local XML doesn't have a field (e.g. MATEFLAG), strip the
-    // corresponding annotation from remote so it doesn't appear as a diff.
-    const localAnnotations = new Set(
-      localSource
-        .split('\n')
-        .filter((l) => l.startsWith('@'))
-        .map((l) => l.split(':')[0].trim()),
-    );
-    remoteSource = remoteSource
-      .split('\n')
-      .filter((l) => {
-        if (!l.startsWith('@')) return true;
-        const name = l.split(':')[0].trim();
-        return localAnnotations.has(name);
-      })
-      .join('\n');
-
-    const sourceFile = `${objectName}.tabl.acds`;
-    const diffFound = printDiff(
-      sourceFile,
-      sourceFile,
-      localSource,
-      remoteSource,
-      contextLines,
-      useColor,
-      summary,
-    );
-
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: diffFound,
-      fileCount: 1,
-      identicalCount: diffFound ? 0 : 1,
-    };
-  }
-
-  // ========================================
-  // Raw mode: compare ADT-level XML payloads
-  // ========================================
-  if (raw) {
-    const adtSchema = adtSchemaMap[parsed.type];
-    if (!adtSchema) {
-      return {
-        objectName: parsed.name,
-        objectType: parsed.type,
-        hasDifferences: false,
-        fileCount: 1,
-        identicalCount: 0,
-        error: `Raw mode not supported for ${parsed.type}: no ADT schema mapping. Supported: ${Object.keys(adtSchemaMap).join(', ')}`,
-      };
-    }
-
-    const { schema: rawSchema, wrapperKey } = adtSchema;
-
-    // Build remote ADT XML from loaded data
-    let remoteAdtXml: string;
-    try {
+      // Merge local overrides onto remote's full data (remote is template)
       const remoteData = await remoteObj.data();
-      remoteAdtXml = rawSchema.build(
-        { [wrapperKey]: remoteData },
-        { pretty: true },
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const merged = { ...(remoteData as any), ...localPayload };
+      localAdtXml = rawSchema.build({ [wrapperKey]: merged }, { pretty: true });
     } catch (e) {
-      return {
-        objectName: parsed.name,
-        objectType: parsed.type,
-        hasDifferences: false,
-        fileCount: 1,
-        identicalCount: 0,
-        error: `Failed to build remote ADT XML: ${e instanceof Error ? e.message : String(e)}`,
-      };
+      return errorResult(
+        parsed,
+        `Failed to build local ADT XML: ${e instanceof Error ? e.message : String(e)}`,
+        1,
+      );
     }
-
-    // Parse local abapGit XML → fromAbapGit() → local ADK data
-    let localAdtXml: string | undefined;
-    if (handler.fromAbapGit) {
-      try {
-        const parsedXml = handler.schema.parse(localXml);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const values = (parsedXml as any)?.abapGit?.abap?.values ?? {};
-        const localPayload = handler.fromAbapGit(values);
-
-        // Merge local overrides onto remote's full data (remote is template)
-        const remoteData = await remoteObj.data();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const merged = { ...(remoteData as any), ...localPayload };
-        localAdtXml = rawSchema.build(
-          { [wrapperKey]: merged },
-          { pretty: true },
-        );
-      } catch (e) {
-        return {
-          objectName: parsed.name,
-          objectType: parsed.type,
-          hasDifferences: false,
-          fileCount: 1,
-          identicalCount: 0,
-          error: `Failed to build local ADT XML: ${e instanceof Error ? e.message : String(e)}`,
-        };
-      }
-    }
-
-    if (!localAdtXml) {
-      return {
-        objectName: parsed.name,
-        objectType: parsed.type,
-        hasDifferences: false,
-        fileCount: 1,
-        identicalCount: 0,
-        error: `Raw mode not supported for ${parsed.type}: no fromAbapGit() mapping`,
-      };
-    }
-
-    const xmlFile = `${objectName}.${parsed.type.toLowerCase()}.adt.xml`;
-    const diffFound = printDiff(
-      xmlFile,
-      xmlFile,
-      localAdtXml,
-      remoteAdtXml,
-      contextLines,
-      useColor,
-      summary,
-    );
-
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: diffFound,
-      fileCount: 1,
-      identicalCount: diffFound ? 0 : 1,
-    };
   }
+
+  if (!localAdtXml) {
+    return errorResult(
+      parsed,
+      `Raw mode not supported for ${parsed.type}: no fromAbapGit() mapping`,
+      1,
+    );
+  }
+
+  const xmlFile = `${objectName}.${parsed.type.toLowerCase()}.adt.xml`;
+  const diffFound = printDiff(
+    xmlFile,
+    xmlFile,
+    localAdtXml,
+    remoteAdtXml,
+    contextLines,
+    useColor,
+    summary,
+  );
+
+  return modeResult(parsed, diffFound);
+}
+
+/** Serialize remote with the handler and diff it file-by-file. */
+async function diffFilesMode(
+  parsed: { name: string; type: string },
+  localFiles: Map<string, string>,
+  handler: ReturnType<typeof getHandler>,
+  remoteObj: AdkObject,
+  options: DiffModeOptions,
+): Promise<DiffResult> {
+  const { contextLines, useColor, summary } = options;
 
   // Serialize remote using the same handler → produces SerializedFile[]
   let remoteFiles;
   try {
     remoteFiles = await handler.serialize(remoteObj);
   } catch (error) {
-    return {
-      objectName: parsed.name,
-      objectType: parsed.type,
-      hasDifferences: false,
-      fileCount: localFiles.size,
-      identicalCount: 0,
-      error: `Failed to serialize remote object: ${error instanceof Error ? error.message : String(error)}`,
-    };
+    return errorResult(
+      parsed,
+      `Failed to serialize remote object: ${error instanceof Error ? error.message : String(error)}`,
+      localFiles.size,
+    );
   }
 
   // Build remote file map (lowercase path → content)
@@ -719,38 +693,21 @@ async function diffSingleFile(
   for (const [localPath, localContent] of localFiles) {
     const remoteContent = remoteMap.get(localPath);
     if (remoteContent === undefined) {
-      if (!summary) {
-        console.log(
-          useColor
-            ? chalk.yellow(`\n  + Only in local: ${localPath}`)
-            : `\n  + Only in local: ${localPath}`,
-        );
-      }
+      printOnlyIn('local', localPath, useColor, summary);
       hasDifferences = true;
       continue;
     }
 
-    // For XML files: normalize both through schema, projecting remote
-    // onto local's field set to strip serializer-added extras
-    const isXml = localPath.endsWith('.xml');
-    let diffLocal = localContent;
-    let diffRemote = remoteContent;
-    if (isXml) {
-      [diffLocal, diffRemote] = normalizeXmlPair(
-        localContent,
-        remoteContent,
-        handler,
-      );
-    }
-
-    const diffFound = printDiff(
+    const diffFound = diffOnePair(
       localPath,
-      localPath,
-      diffLocal,
-      diffRemote,
-      contextLines,
-      useColor,
-      summary,
+      localContent,
+      remoteContent,
+      handler,
+      {
+        contextLines,
+        useColor,
+        summary,
+      },
     );
     if (diffFound) {
       hasDifferences = true;
@@ -762,13 +719,7 @@ async function diffSingleFile(
   // Files present in remote but not locally
   for (const [remotePath] of remoteMap) {
     if (!localFiles.has(remotePath)) {
-      if (!summary) {
-        console.log(
-          useColor
-            ? chalk.yellow(`\n  - Only in remote: ${remotePath}`)
-            : `\n  - Only in remote: ${remotePath}`,
-        );
-      }
+      printOnlyIn('remote', remotePath, useColor, summary);
       hasDifferences = true;
     }
   }
@@ -780,6 +731,284 @@ async function diffSingleFile(
     fileCount: localFiles.size,
     identicalCount,
   };
+}
+
+/**
+ * Diff a single abapGit XML file against SAP remote.
+ * Returns a result object indicating whether differences were found.
+ */
+async function diffSingleFile(
+  filePath: string,
+  ctx: CliContext,
+  adk: AdkFactory,
+  options: DiffModeOptions,
+): Promise<DiffResult> {
+  const { source, raw, summary, useColor } = options;
+  const fullPath = resolve(ctx.cwd, filePath);
+
+  if (!existsSync(fullPath)) {
+    return errorResult(
+      { name: filePath, type: '?' },
+      `File not found: ${fullPath}`,
+    );
+  }
+
+  // Parse filename to detect type
+  const filename = basename(fullPath);
+  const parsed = parseAbapGitFilename(filename);
+  if (!parsed) {
+    return errorResult(
+      { name: filename, type: '?' },
+      `Cannot parse filename: ${filename}. Expected abapGit format: name.type.xml`,
+    );
+  }
+
+  if (parsed.extension !== 'xml') {
+    return errorResult(
+      parsed,
+      `Expected .xml metadata file, got .${parsed.extension}. Pass the .xml file, not .abap.`,
+    );
+  }
+
+  const modeError = modeOptionsError(parsed, source, raw);
+  if (modeError) {
+    return errorResult(parsed, modeError);
+  }
+
+  // Look up handler from abapGit registry
+  const handler = getHandler(parsed.type);
+  if (!handler) {
+    return errorResult(
+      parsed,
+      `Unsupported object type: ${parsed.type}. Supported: ${getSupportedTypes().join(', ')}`,
+    );
+  }
+
+  // Collect local files for this object
+  const objectName = parsed.name.toLowerCase();
+  const localFiles = collectLocalFiles(
+    fullPath,
+    objectName,
+    handler.fileExtension,
+  );
+
+  if (!summary) {
+    printDiffBanner(parsed, localFiles.size, useColor);
+  }
+
+  // Parse local XML to extract ADK type info via fromAbapGit
+  const localXml = readFileSync(fullPath, 'utf-8');
+  const adkType = resolveAdkType(handler, localXml, parsed.type);
+
+  // Fetch remote ADK object
+  if (!summary) {
+    printFetchBanner(parsed, adkType, useColor);
+  }
+
+  const remoteObjRaw = adk.get(parsed.name, adkType);
+
+  // Narrow to AdkObject (excludes AdkGenericObject for unregistered types)
+  if (!(remoteObjRaw instanceof AdkObject)) {
+    return errorResult(
+      parsed,
+      `Unsupported ADK type: ${adkType} (no registered handler)`,
+      localFiles.size,
+    );
+  }
+  const remoteObj = remoteObjRaw;
+
+  try {
+    await remoteObj.load();
+  } catch (error) {
+    return errorResult(
+      parsed,
+      `Failed to load remote object: ${error instanceof Error ? error.message : String(error)}`,
+      localFiles.size,
+    );
+  }
+
+  // ========================================
+  // Source format: compare ADK source (e.g. CDS DDL)
+  // ========================================
+  if (source) {
+    return diffSourceMode(parsed, localXml, objectName, remoteObj, options);
+  }
+
+  // ========================================
+  // Raw mode: compare ADT-level XML payloads
+  // ========================================
+  if (raw) {
+    return diffRawMode(
+      parsed,
+      localXml,
+      objectName,
+      handler,
+      remoteObj,
+      options,
+    );
+  }
+
+  return diffFilesMode(parsed, localFiles, handler, remoteObj, options);
+}
+
+/** Expand explicit globs, or scan the abapGit repo when no files are given. */
+async function resolveDiffFiles(
+  filePatterns: string[],
+  ctx: CliContext,
+  packageName: string | undefined,
+): Promise<{ files: string[]; scanMode: boolean }> {
+  if (filePatterns.length > 0) {
+    // Explicit files/globs — expand as before
+    const files = await expandGlobs(filePatterns, ctx.cwd);
+    if (files.length === 0) {
+      ctx.logger.error('No files matched the given pattern(s).');
+      process.exit(1);
+    }
+    return { files, scanMode: false };
+  }
+
+  // No files given — scan mode.
+  // If --package given, or auto-detect abapGit repo root from cwd.
+  const repoRoot = findAbapGitRoot(ctx.cwd);
+  if (!repoRoot) {
+    ctx.logger.error(
+      packageName
+        ? 'No .abapgit.xml found in current directory or parents.'
+        : 'No files specified and no .abapgit.xml found. Usage: adt diff <file...> or run from an abapGit repo directory.',
+    );
+    process.exit(1);
+  }
+
+  const scannedFiles = await scanAbapGitFiles(repoRoot);
+  if (scannedFiles.length === 0) {
+    ctx.logger.error('No supported abapGit objects found in repository.');
+    process.exit(1);
+  }
+
+  // Convert to paths relative to cwd
+  const files = scannedFiles.map((f) => relative(ctx.cwd, join(repoRoot, f)));
+
+  const pkgSuffix = packageName ? ` (package: ${packageName})` : '';
+  ctx.logger.info(
+    `📦 Scanning ${scannedFiles.length} object(s) in ${repoRoot}${pkgSuffix}...`,
+  );
+  return { files, scanMode: true };
+}
+
+/** Per-object status table for scan mode. */
+function printScanTable(results: DiffResult[], useColor: boolean): void {
+  for (const r of results) {
+    let icon: string;
+    let line: string;
+    if (r.error) {
+      icon = '⚠️';
+      line = `${r.objectType} ${r.objectName}: ${r.error}`;
+    } else if (r.hasDifferences) {
+      icon = '❌';
+      line = `${r.objectType} ${r.objectName}`;
+    } else {
+      icon = '✅';
+      line = `${r.objectType} ${r.objectName}`;
+    }
+
+    if (useColor) {
+      if (r.error) {
+        console.log(chalk.yellow(`   ${icon} ${line}`));
+      } else if (r.hasDifferences) {
+        console.log(chalk.red(`   ${icon} ${line}`));
+      } else {
+        console.log(chalk.green(`   ${icon} ${line}`));
+      }
+    } else {
+      console.log(`   ${icon} ${line}`);
+    }
+  }
+}
+
+/** Scan-mode summary line; exits 1 when anything changed or failed. */
+function printScanSummary(
+  totalFiles: number,
+  identical: number,
+  withDiffs: number,
+  withErrors: number,
+  useColor: boolean,
+): void {
+  console.log('');
+  const summaryParts: string[] = [
+    `${totalFiles} object(s)`,
+    `${identical} identical`,
+  ];
+  if (withDiffs > 0) summaryParts.push(`${withDiffs} changed`);
+  if (withErrors > 0) summaryParts.push(`${withErrors} errors`);
+  const summaryLine = summaryParts.join(', ');
+
+  if (withDiffs > 0 || withErrors > 0) {
+    console.log(
+      useColor ? chalk.red(`📋 ${summaryLine}`) : `📋 ${summaryLine}`,
+    );
+    process.exit(1);
+  }
+  console.log(
+    useColor ? chalk.green(`📋 ${summaryLine}`) : `📋 ${summaryLine}`,
+  );
+}
+
+/** Single-file mode: keep original concise output. Exits 1 on diff/error. */
+function printSingleFileOutcome(r: DiffResult, useColor: boolean): void {
+  if (r.error) {
+    // Error already printed above
+    process.exit(1);
+  }
+  if (r.hasDifferences) {
+    const identicalSuffix =
+      r.identicalCount > 0 ? ` (${r.identicalCount} file(s) identical)` : '';
+    const coloredSuffix =
+      r.identicalCount > 0 ? chalk.dim(identicalSuffix) : '';
+    console.log(
+      useColor
+        ? chalk.red('Differences found.') + coloredSuffix
+        : `Differences found.${identicalSuffix}`,
+    );
+    process.exit(1);
+  }
+  console.log(
+    useColor
+      ? chalk.green(
+          `No differences found. (${r.identicalCount} file(s) identical)`,
+        )
+      : `No differences found. (${r.identicalCount} file(s) identical)`,
+  );
+}
+
+/** Multi-file summary (explicit glob, not scan mode). Exits 1 on diff/error. */
+function printMultiFileOutcome(
+  totalFiles: number,
+  identical: number,
+  withDiffs: number,
+  withErrors: number,
+  useColor: boolean,
+): void {
+  const parts: string[] = [
+    `${totalFiles} object(s) checked`,
+    `${identical} identical`,
+  ];
+  if (withDiffs > 0) parts.push(`${withDiffs} with differences`);
+  if (withErrors > 0) parts.push(`${withErrors} with errors`);
+  const summaryText = parts.join(', ');
+
+  if (withDiffs > 0 || withErrors > 0) {
+    console.log(
+      useColor
+        ? chalk.red(`Diff summary: ${summaryText}`)
+        : `Diff summary: ${summaryText}`,
+    );
+    process.exit(1);
+  }
+  console.log(
+    useColor
+      ? chalk.green(`Diff summary: ${summaryText}`)
+      : `Diff summary: ${summaryText}`,
+  );
 }
 
 export const diffCommand: CliCommandPlugin = {
@@ -837,45 +1066,11 @@ export const diffCommand: CliCommandPlugin = {
     const packageName = args.package as string | undefined;
     const fullDiffs = args.full === true;
 
-    let files: string[];
-    let scanMode = false;
-    let repoRoot: string | undefined;
-
-    if (filePatterns.length > 0) {
-      // Explicit files/globs — expand as before
-      files = await expandGlobs(filePatterns, ctx.cwd);
-      if (files.length === 0) {
-        ctx.logger.error('No files matched the given pattern(s).');
-        process.exit(1);
-      }
-    } else {
-      // No files given — scan mode.
-      // If --package given, or auto-detect abapGit repo root from cwd.
-      repoRoot = findAbapGitRoot(ctx.cwd);
-      if (!repoRoot) {
-        ctx.logger.error(
-          packageName
-            ? 'No .abapgit.xml found in current directory or parents.'
-            : 'No files specified and no .abapgit.xml found. Usage: adt diff <file...> or run from an abapGit repo directory.',
-        );
-        process.exit(1);
-      }
-
-      scanMode = true;
-      const scannedFiles = await scanAbapGitFiles(repoRoot);
-      if (scannedFiles.length === 0) {
-        ctx.logger.error('No supported abapGit objects found in repository.');
-        process.exit(1);
-      }
-
-      // Convert to paths relative to cwd
-      files = scannedFiles.map((f) => relative(ctx.cwd, join(repoRoot!, f)));
-
-      const pkgSuffix = packageName ? ` (package: ${packageName})` : '';
-      ctx.logger.info(
-        `📦 Scanning ${scannedFiles.length} object(s) in ${repoRoot}${pkgSuffix}...`,
-      );
-    }
+    const { files, scanMode } = await resolveDiffFiles(
+      filePatterns,
+      ctx,
+      packageName,
+    );
 
     // In scan mode default to summary (suppress diffs), unless --full
     const summaryMode = scanMode && !fullDiffs;
@@ -918,106 +1113,24 @@ export const diffCommand: CliCommandPlugin = {
 
     if (scanMode) {
       // Package/scan mode: always show per-object status table
-      for (const r of results) {
-        let icon: string;
-        let line: string;
-        if (r.error) {
-          icon = '⚠️';
-          line = `${r.objectType} ${r.objectName}: ${r.error}`;
-        } else if (r.hasDifferences) {
-          icon = '❌';
-          line = `${r.objectType} ${r.objectName}`;
-        } else {
-          icon = '✅';
-          line = `${r.objectType} ${r.objectName}`;
-        }
-
-        if (useColor) {
-          if (r.error) {
-            console.log(chalk.yellow(`   ${icon} ${line}`));
-          } else if (r.hasDifferences) {
-            console.log(chalk.red(`   ${icon} ${line}`));
-          } else {
-            console.log(chalk.green(`   ${icon} ${line}`));
-          }
-        } else {
-          console.log(`   ${icon} ${line}`);
-        }
-      }
-
-      console.log('');
-      const summaryParts: string[] = [
-        `${totalFiles} object(s)`,
-        `${identical} identical`,
-      ];
-      if (withDiffs > 0) summaryParts.push(`${withDiffs} changed`);
-      if (withErrors > 0) summaryParts.push(`${withErrors} errors`);
-      const summaryLine = summaryParts.join(', ');
-
-      if (withDiffs > 0 || withErrors > 0) {
-        console.log(
-          useColor ? chalk.red(`📋 ${summaryLine}`) : `📋 ${summaryLine}`,
-        );
-        process.exit(1);
-      }
-      console.log(
-        useColor ? chalk.green(`📋 ${summaryLine}`) : `📋 ${summaryLine}`,
-      );
+      printScanTable(results, useColor);
+      printScanSummary(totalFiles, identical, withDiffs, withErrors, useColor);
       return;
     }
 
     if (totalFiles === 1) {
       // Single-file mode: keep original concise output
-      const r = results[0];
-      if (r.error) {
-        // Error already printed above
-        process.exit(1);
-      }
-      if (r.hasDifferences) {
-        const identicalSuffix =
-          r.identicalCount > 0
-            ? ` (${r.identicalCount} file(s) identical)`
-            : '';
-        const coloredSuffix =
-          r.identicalCount > 0 ? chalk.dim(identicalSuffix) : '';
-        console.log(
-          useColor
-            ? chalk.red('Differences found.') + coloredSuffix
-            : `Differences found.${identicalSuffix}`,
-        );
-        process.exit(1);
-      }
-      console.log(
-        useColor
-          ? chalk.green(
-              `No differences found. (${r.identicalCount} file(s) identical)`,
-            )
-          : `No differences found. (${r.identicalCount} file(s) identical)`,
-      );
+      printSingleFileOutcome(results[0], useColor);
       return;
     }
 
     // Multi-file summary (explicit glob, not scan mode)
-    const parts: string[] = [
-      `${totalFiles} object(s) checked`,
-      `${identical} identical`,
-    ];
-    if (withDiffs > 0) parts.push(`${withDiffs} with differences`);
-    if (withErrors > 0) parts.push(`${withErrors} with errors`);
-    const summaryText = parts.join(', ');
-
-    if (withDiffs > 0 || withErrors > 0) {
-      console.log(
-        useColor
-          ? chalk.red(`Diff summary: ${summaryText}`)
-          : `Diff summary: ${summaryText}`,
-      );
-      process.exit(1);
-    }
-    console.log(
-      useColor
-        ? chalk.green(`Diff summary: ${summaryText}`)
-        : `Diff summary: ${summaryText}`,
+    printMultiFileOutcome(
+      totalFiles,
+      identical,
+      withDiffs,
+      withErrors,
+      useColor,
     );
   },
 };
