@@ -63,28 +63,47 @@ export class CodegenFramework {
       hasTemplateLinkHook: boolean;
     },
   ): Promise<void> {
-    const collections = this.extractCollections(ws);
-
-    for (const coll of collections) {
+    for (const coll of this.extractCollections(ws)) {
       // Apply collection filter
       if (!matchesFilter(coll, this.config.filters, 'collection')) {
         continue;
       }
 
-      const collCtx = this.createCollectionContext(coll, wsCtx);
+      await this.processCollection(coll, wsCtx, hooks);
+    }
+  }
 
-      // Call collection hooks
-      if (hooks.hasCollectionHook) {
-        await this.callHook('collection', collCtx);
-      }
+  /**
+   * Run the collection hook and the templateLink hooks for one collection.
+   */
+  private async processCollection(
+    coll: any,
+    wsCtx: WorkspaceContext,
+    hooks: {
+      hasCollectionHook: boolean;
+      hasTemplateLinkHook: boolean;
+    },
+  ): Promise<void> {
+    const collCtx = this.createCollectionContext(coll, wsCtx);
 
-      // Process template links if hook exists
-      if (hooks.hasTemplateLinkHook && collCtx.templateLinks.length > 0) {
-        for (const link of collCtx.templateLinks) {
-          const linkCtx = this.createTemplateLinkContext(link, collCtx);
-          await this.callHook('templateLink', linkCtx);
-        }
-      }
+    if (hooks.hasCollectionHook) {
+      await this.callHook('collection', collCtx);
+    }
+
+    if (hooks.hasTemplateLinkHook) {
+      await this.processTemplateLinks(collCtx);
+    }
+  }
+
+  /**
+   * Run the templateLink hook for every template link of a collection.
+   */
+  private async processTemplateLinks(
+    collCtx: CollectionContext,
+  ): Promise<void> {
+    for (const link of collCtx.templateLinks) {
+      const linkCtx = this.createTemplateLinkContext(link, collCtx);
+      await this.callHook('templateLink', linkCtx);
     }
   }
 

@@ -164,12 +164,13 @@ function decompileJars(
 
     if (decompileOne(config, jar, output)) {
       success++;
-    } else {
-      if (verbose) {
-        console.error(`\n   ❌ Failed: ${jarName}`);
-      }
-      failed++;
+      continue;
     }
+
+    if (verbose) {
+      console.error(`\n   ❌ Failed: ${jarName}`);
+    }
+    failed++;
   }
 
   reportDecompilation(success, failed, output);

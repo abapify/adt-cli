@@ -1,6 +1,7 @@
 import type {
   JsonSchema,
   NormalizedOperation,
+  NormalizedResponse,
   NormalizedSpec,
 } from './types.js';
 
@@ -73,18 +74,24 @@ function visitOperationSchemas(
   for (const p of op.parameters) {
     visit(p.schema, [...base, 'parameters', `${p.in}:${p.name}`]);
   }
-  if (op.requestBody !== undefined) {
-    for (const [mt, mtObj] of Object.entries(op.requestBody.content)) {
-      visit(mtObj.schema, [...base, 'requestBody', mt]);
-    }
+  for (const [mt, mtObj] of Object.entries(op.requestBody?.content ?? {})) {
+    visit(mtObj.schema, [...base, 'requestBody', mt]);
   }
   for (const resp of op.responses) {
-    for (const [mt, mtObj] of Object.entries(resp.content)) {
-      visit(mtObj.schema, [...base, 'responses', resp.statusCode, mt]);
-    }
-    for (const [hn, h] of Object.entries(resp.headers)) {
-      visit(h.schema, [...base, 'responses', resp.statusCode, 'headers', hn]);
-    }
+    visitResponseSchemas(resp, base, visit);
+  }
+}
+
+function visitResponseSchemas(
+  resp: NormalizedResponse,
+  base: string[],
+  visit: (schema: unknown, path: string[]) => void,
+): void {
+  for (const [mt, mtObj] of Object.entries(resp.content)) {
+    visit(mtObj.schema, [...base, 'responses', resp.statusCode, mt]);
+  }
+  for (const [hn, h] of Object.entries(resp.headers)) {
+    visit(h.schema, [...base, 'responses', resp.statusCode, 'headers', hn]);
   }
 }
 

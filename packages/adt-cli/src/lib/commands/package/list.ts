@@ -61,21 +61,15 @@ function printSubpackages(subpackages: AbapObject[], long: boolean): void {
   }
 }
 
-// Print the object list section, grouped by type in long mode.
-function printObjects(
-  objects: AbapObject[],
-  opts: { long: boolean; recursive: boolean; pkgName: string },
-): void {
-  console.log(chalk.underline(`\n▼ Objects (${objects.length})`));
-  if (!opts.long) {
-    for (const obj of objects) {
-      console.log(
-        `  ${asStr((obj as unknown as Record<string, unknown>).name)}`,
-      );
-    }
-    return;
+// Print the flat object name list (short mode).
+function printObjectNames(objects: AbapObject[]): void {
+  for (const obj of objects) {
+    console.log(`  ${asStr((obj as unknown as Record<string, unknown>).name)}`);
   }
-  // Group by type
+}
+
+// Group objects by type (insertion order preserved).
+function groupObjectsByType(objects: AbapObject[]): Map<string, AbapObject[]> {
   const byType = new Map<string, AbapObject[]>();
   for (const obj of objects) {
     const type = asStr((obj as unknown as Record<string, unknown>).type);
@@ -83,21 +77,51 @@ function printObjects(
     list.push(obj);
     byType.set(type, list);
   }
+  return byType;
+}
+
+// Print one object row in long mode.
+function printObjectRow(
+  obj: AbapObject,
+  opts: { recursive: boolean; pkgName: string },
+): void {
+  const o = obj as unknown as Record<string, unknown>;
+  const objPkg = asStr(o.package);
+  const pkgNote =
+    opts.recursive && objPkg !== opts.pkgName ? chalk.dim(` [${objPkg}]`) : '';
+  console.log(
+    `    ${chalk.green(asStr(o.name))}${pkgNote}  ${chalk.dim(asStr(o.description))}`,
+  );
+}
+
+// Print one type group of the long-mode object list.
+function printTypeGroup(
+  type: string,
+  list: AbapObject[],
+  opts: { recursive: boolean; pkgName: string },
+): void {
+  console.log(chalk.dim(`  ${type} (${list.length})`));
+  for (const obj of list) {
+    printObjectRow(obj, opts);
+  }
+}
+
+// Print the object list section, grouped by type in long mode.
+function printObjects(
+  objects: AbapObject[],
+  opts: { long: boolean; recursive: boolean; pkgName: string },
+): void {
+  console.log(chalk.underline(`\n▼ Objects (${objects.length})`));
+  if (!opts.long) {
+    printObjectNames(objects);
+    return;
+  }
+  // Group by type
+  const byType = groupObjectsByType(objects);
   for (const [type, list] of [...byType.entries()].sort((a, b) =>
     a[0].localeCompare(b[0]),
   )) {
-    console.log(chalk.dim(`  ${type} (${list.length})`));
-    for (const obj of list) {
-      const o = obj as unknown as Record<string, unknown>;
-      const objPkg = asStr(o.package);
-      const pkgNote =
-        opts.recursive && objPkg !== opts.pkgName
-          ? chalk.dim(` [${objPkg}]`)
-          : '';
-      console.log(
-        `    ${chalk.green(asStr(o.name))}${pkgNote}  ${chalk.dim(asStr(o.description))}`,
-      );
-    }
+    printTypeGroup(type, list, opts);
   }
 }
 

@@ -187,6 +187,28 @@ interface ExportCliOptions {
 /** The ADT client as handed over by the CLI context (ADK-compatible). */
 type ExportClient = AdkContext['client'];
 
+/** Shared client + context threading through the export pre-deploy helpers. */
+interface ExportContext {
+  client: ExportClient;
+  adkContext: AdkContext;
+  ctx: CliContext;
+}
+
+/** Inputs for creating one missing subpackage under its expected super. */
+interface SubpackagePlan {
+  pkgName: string;
+  expectedSuper: string;
+  /** Root package read from SAP — source of responsible / transport inheritance. */
+  rootPkg: Awaited<ReturnType<typeof AdkPackage.get>> | undefined;
+  /** Transport config inherited from the root package (SAP needs both fields). */
+  transportConfig:
+    | {
+        softwareComponent: { name: string };
+        transportLayer: { name: string };
+      }
+    | undefined;
+}
+
 /**
  * Early check: PREFIX folder logic requires an explicit --package flag.
  * Fail before scanning files / loading plugins / authenticating with SAP.
@@ -255,11 +277,10 @@ function rewriteSuperPackageTag(xml: string, expectedSuper: string): string {
 async function fixSuperPackage(
   pkgName: string,
   expectedSuper: string,
-  client: ExportClient,
-  adkContext: AdkContext,
+  context: ExportContext,
   options: ExportCliOptions,
-  ctx: CliContext,
 ): Promise<void> {
+  const { client, adkContext, ctx } = context;
   const pkgUri = `/sap/bc/adt/packages/${encodeURIComponent(pkgName)}`;
   const acceptHeader =
     'application/vnd.sap.adt.packages.v2+xml, application/vnd.sap.adt.packages.v1+xml';
@@ -327,23 +348,15 @@ async function fixSuperPackage(
 /**
  * Create a missing subpackage under `expectedSuper`, inheriting software
  * component / transport layer / responsible from the root package.
+ * Returns true when the package is known to exist afterwards.
  */
 async function createSubpackage(
-  pkgName: string,
-  expectedSuper: string,
-  rootPkg: Awaited<ReturnType<typeof AdkPackage.get>> | undefined,
-  transportConfig:
-    | {
-        softwareComponent: { name: string };
-        transportLayer: { name: string };
-      }
-    | undefined,
-  client: ExportClient,
+  plan: SubpackagePlan,
+  context: ExportContext,
   options: ExportCliOptions,
-  adkContext: AdkContext,
-  knownPackages: Set<string>,
-  ctx: CliContext,
-): Promise<void> {
+): Promise<boolean> {
+  const { client, adkContext, ctx } = context;
+  const { pkgName, expectedSuper, rootPkg, transportConfig } = plan;
   ctx.logger.info(
     `   📦 Creating subpackage ${pkgName} (in ${expectedSuper})...`,
   );
@@ -375,38 +388,38 @@ async function createSubpackage(
       { transport: options.transport },
       adkContext,
     );
-    knownPackages.add(pkgName);
     ctx.logger.info(`   ✅ Created ${pkgName}`);
+    return true;
   } catch (createErr) {
     const errMsg =
       createErr instanceof Error ? createErr.message : String(createErr);
     // Check if the package actually exists now (race condition or partial success)
     const existsNow = await AdkPackage.exists(pkgName, adkContext);
     if (existsNow) {
-      knownPackages.add(pkgName);
       ctx.logger.info(`   ✅ ${pkgName} already exists`);
-    } else if (
+      return true;
+    }
+    ctx.logger.warn(`   ⚠️ Failed to create ${pkgName}: ${errMsg}`);
+    if (
       // Provide actionable guidance for common failures
       errMsg.includes('409') ||
       errMsg.includes('change request') ||
       errMsg.includes('authorization')
     ) {
-      ctx.logger.warn(`   ⚠️ Failed to create ${pkgName}: ${errMsg}`);
       ctx.logger.warn(
         `      💡 Hint: Use -t <transport> for non-local packages, or -p '$TMP' for local development`,
       );
-    } else {
-      ctx.logger.warn(`   ⚠️ Failed to create ${pkgName}: ${errMsg}`);
     }
+    return false;
   }
 }
 
 /** Activate fixed packages so changes move from inactive → active. */
 async function activateFixedPackages(
   fixedPackages: string[],
-  client: ExportClient,
-  ctx: CliContext,
+  context: ExportContext,
 ): Promise<void> {
+  const { client, ctx } = context;
   const refs = fixedPackages
     .map(
       (p) =>
@@ -490,11 +503,10 @@ function resolveExpectedSuper(
 async function verifyAndFixSuperPackage(
   pkgName: string,
   expectedSuper: string,
-  client: ExportClient,
-  adkContext: AdkContext,
+  context: ExportContext,
   options: ExportCliOptions,
-  ctx: CliContext,
 ): Promise<boolean> {
+  const { adkContext, ctx } = context;
   try {
     const pkg = await AdkPackage.get(pkgName, adkContext);
     const currentSuper = pkg.superPackage?.name ?? '';
@@ -502,14 +514,7 @@ async function verifyAndFixSuperPackage(
       ctx.logger.info(
         `   📦 Fixing ${pkgName}: ${currentSuper} → ${expectedSuper}`,
       );
-      await fixSuperPackage(
-        pkgName,
-        expectedSuper,
-        client,
-        adkContext,
-        options,
-        ctx,
-      );
+      await fixSuperPackage(pkgName, expectedSuper, context, options);
       return true;
     }
   } catch (fixErr) {
@@ -531,11 +536,10 @@ async function verifyAndFixSuperPackage(
 async function ensureSubpackages(
   objectSet: AdkObjectSet,
   effectiveRootPackage: string,
-  client: ExportClient,
-  adkContext: AdkContext,
+  context: ExportContext,
   options: ExportCliOptions,
-  ctx: CliContext,
 ): Promise<void> {
+  const { adkContext, ctx } = context;
   // Collect unique subpackage names from object targets
   const leafPackages = new Set<string>();
   for (const obj of objectSet) {
@@ -589,31 +593,24 @@ async function ensureSubpackages(
       const fixed = await verifyAndFixSuperPackage(
         pkgName,
         expectedSuper,
-        client,
-        adkContext,
+        context,
         options,
-        ctx,
       );
       if (fixed) fixedPackages.push(pkgName);
       continue;
     }
 
-    await createSubpackage(
-      pkgName,
-      expectedSuper,
-      rootPkg,
-      transportConfig,
-      client,
+    const created = await createSubpackage(
+      { pkgName, expectedSuper, rootPkg, transportConfig },
+      context,
       options,
-      adkContext,
-      knownPackages,
-      ctx,
     );
+    if (created) knownPackages.add(pkgName);
   }
 
   // Step 5: Activate fixed packages so changes move from inactive → active
   if (fixedPackages.length > 0) {
-    await activateFixedPackages(fixedPackages, client, ctx);
+    await activateFixedPackages(fixedPackages, context);
   }
 }
 
@@ -685,9 +682,9 @@ function logSkippedObjects(
 async function skipObjectsInUnavailablePackages(
   objectSet: AdkObjectSet,
   effectiveRootPackage: string,
-  adkContext: AdkContext,
-  ctx: CliContext,
+  context: ExportContext,
 ): Promise<void> {
+  const { adkContext, ctx } = context;
   // Check which sub-packages actually exist on SAP; skip objects
   // targeting unavailable ones to prevent cascade failures.
   const objectsByPkg = groupObjectsByPackage(objectSet, effectiveRootPackage);
@@ -797,9 +794,9 @@ async function deleteObjectsInWrongPackage(
 /** Pre-deploy: recover persisted object locks (--unlock). */
 async function recoverPersistedLocks(
   objectSet: AdkObjectSet,
-  adkContext: AdkContext,
-  ctx: CliContext,
+  context: ExportContext,
 ): Promise<void> {
+  const { adkContext, ctx } = context;
   ctx.logger.info(
     `\n🔓 --unlock: Recovering persisted locks for ${objectSet.size} objects...`,
   );
@@ -889,9 +886,9 @@ function resolveEffectiveRootPackage(
 /** Pre-deploy: validate the root package exists on SAP. */
 async function ensureRootPackageExists(
   effectiveRootPackage: string,
-  adkContext: AdkContext,
-  ctx: CliContext,
+  context: ExportContext,
 ): Promise<void> {
+  const { adkContext, ctx } = context;
   const rootExists = await AdkPackage.exists(effectiveRootPackage, adkContext);
   if (rootExists) return;
 
@@ -919,10 +916,14 @@ interface ExportRuntime {
 async function collectExportObjects(
   fileTree: ReturnType<typeof createFileTree>,
   options: ExportCliOptions,
-  objectTypes: string[] | undefined,
   result: ExportResult,
   ctx: CliContext,
 ): Promise<ExportRuntime | null> {
+  // Parse object types filter
+  const objectTypes = options.types
+    ? options.types.split(',').map((t) => t.trim().toUpperCase())
+    : undefined;
+
   // Load format plugin
   ctx.logger.info(`📦 Loading format plugin: ${options.format}...`);
   const plugin = await loadFormatPlugin(options.format);
@@ -1169,25 +1170,23 @@ async function runPreDeploySteps(
   options: ExportCliOptions,
   ctx: CliContext,
 ): Promise<void> {
-  const { client, adkContext, objectSet } = runtime;
+  const { objectSet } = runtime;
+  const context: ExportContext = {
+    client: runtime.client,
+    adkContext: runtime.adkContext,
+    ctx,
+  };
 
   // ============================================
   // Pre-deploy: validate root package exists on SAP
   // ============================================
   if (effectiveRootPackage && !options.dryRun) {
-    await ensureRootPackageExists(effectiveRootPackage, adkContext, ctx);
+    await ensureRootPackageExists(effectiveRootPackage, context);
 
     // ============================================
     // Pre-deploy: ensure subpackages exist
     // ============================================
-    await ensureSubpackages(
-      objectSet,
-      effectiveRootPackage,
-      client,
-      adkContext,
-      options,
-      ctx,
-    );
+    await ensureSubpackages(objectSet, effectiveRootPackage, context, options);
 
     // ============================================
     // Pre-deploy: remove objects targeting unavailable packages
@@ -1195,8 +1194,7 @@ async function runPreDeploySteps(
     await skipObjectsInUnavailablePackages(
       objectSet,
       effectiveRootPackage,
-      adkContext,
-      ctx,
+      context,
     );
 
     // ============================================
@@ -1209,7 +1207,7 @@ async function runPreDeploySteps(
   // Pre-deploy: recover persisted object locks (--unlock)
   // ============================================
   if (options.unlock && !options.dryRun) {
-    await recoverPersistedLocks(objectSet, adkContext, ctx);
+    await recoverPersistedLocks(objectSet, context);
   }
 }
 
@@ -1298,11 +1296,6 @@ export const exportCommand: CliCommandPlugin = {
     // Resolve source path, run early checks and build the file tree
     const { fileTree } = await prepareExportFiles(options, ctx);
 
-    // Parse object types filter
-    const objectTypes = options.types
-      ? options.types.split(',').map((t) => t.trim().toUpperCase())
-      : undefined;
-
     const result: ExportResult = {
       discovered: 0,
       saved: 0,
@@ -1316,7 +1309,6 @@ export const exportCommand: CliCommandPlugin = {
       const runtime = await collectExportObjects(
         fileTree,
         options,
-        objectTypes,
         result,
         ctx,
       );
