@@ -248,6 +248,71 @@ async function resolveSource(entry: GctsSourceEntry): Promise<string> {
   return await raw;
 }
 
+/** Resolve the metadata file name for an object (custom hook or default). */
+function resolveMetadataFileName<T extends AdkObject, M extends GctsMetadata>(
+  definition: GctsHandlerDefinition<T, M>,
+  object: T,
+  objectName: string,
+  type: string,
+): string {
+  if (typeof definition.metadataFileName === 'function') {
+    return definition.metadataFileName(object);
+  }
+  return (
+    definition.metadataFileName ?? gctsFilename(objectName, type, 'metadata')
+  );
+}
+
+/**
+ * Definition source entries → serialized files. Skips empty sources;
+ * entries are resolved through the lazy `GctsSourceEntry` contract.
+ */
+async function serializeSourceFiles<
+  T extends AdkObject,
+  M extends GctsMetadata,
+>(
+  object: T,
+  definition: GctsHandlerDefinition<T, M>,
+  type: string,
+  objectName: string,
+): Promise<SerializedFile[]> {
+  const files: SerializedFile[] = [];
+  if (definition.getSources) {
+    for (const entry of definition.getSources(object)) {
+      const content = await resolveSource(entry);
+      if (!content) continue;
+      files.push({
+        path: gctsFilename(objectName, type, 'source', entry.suffix, entry.ext),
+        content,
+      });
+    }
+  } else if (definition.getSource) {
+    const content = await definition.getSource(object);
+    if (content) {
+      files.push({
+        path: gctsFilename(objectName, type, 'source'),
+        content,
+      });
+    }
+  }
+  return files;
+}
+
+/** Extra files (e.g. FUGR per-function-module files) → serialized files. */
+async function serializeExtraFiles<T extends AdkObject, M extends GctsMetadata>(
+  object: T,
+  definition: GctsHandlerDefinition<T, M>,
+): Promise<SerializedFile[]> {
+  if (!definition.getExtraFiles) return [];
+  const files: SerializedFile[] = [];
+  for (const extra of await definition.getExtraFiles(object)) {
+    const content = await resolveSource(extra);
+    if (!content) continue;
+    files.push({ path: extra.path, content });
+  }
+  return files;
+}
+
 export function createHandler<
   T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
@@ -292,56 +357,25 @@ export function createHandler<
     },
     suffixToSourceKey: definition.suffixToSourceKey,
     async serialize(object: T): Promise<SerializedFile[]> {
-      const files: SerializedFile[] = [];
       const objectName = (object.name ?? '').toLowerCase();
 
       // Source files.
-      if (definition.getSources) {
-        for (const entry of definition.getSources(object)) {
-          const content = await resolveSource(entry);
-          if (!content) continue;
-          files.push({
-            path: gctsFilename(
-              objectName,
-              type,
-              'source',
-              entry.suffix,
-              entry.ext,
-            ),
-            content,
-          });
-        }
-      } else if (definition.getSource) {
-        const content = await definition.getSource(object);
-        if (content) {
-          files.push({
-            path: gctsFilename(objectName, type, 'source'),
-            content,
-          });
-        }
-      }
+      const files: SerializedFile[] = await serializeSourceFiles(
+        object,
+        definition,
+        type,
+        objectName,
+      );
 
       // Metadata file.
       const metadata = definition.toMetadata(object);
-      const metadataFile =
-        typeof definition.metadataFileName === 'function'
-          ? definition.metadataFileName(object)
-          : (definition.metadataFileName ??
-            gctsFilename(objectName, type, 'metadata'));
       files.push({
-        path: metadataFile,
+        path: resolveMetadataFileName(definition, object, objectName, type),
         content: buildMetadataFile(metadata),
       });
 
       // Extra files (e.g. FUGR per-function-module .func.json + .func.abap).
-      if (definition.getExtraFiles) {
-        const extras = await definition.getExtraFiles(object);
-        for (const extra of extras) {
-          const content = await resolveSource(extra);
-          if (!content) continue;
-          files.push({ path: extra.path, content });
-        }
-      }
+      files.push(...(await serializeExtraFiles(object, definition)));
 
       files.push(
         ...companionFiles(

@@ -19,6 +19,15 @@ export type SessionFetchFn = (
 ) => Promise<Response>;
 
 /**
+ * Push `current` onto `cookies` when it carries a non-empty name=value pair.
+ */
+function pushCookieIfNonEmpty(cookies: string[], current: string): void {
+  if (current.trim()) {
+    cookies.push(current.trim());
+  }
+}
+
+/**
  * Cookie Store - Manages HTTP cookies for stateful sessions
  */
 export class CookieStore {
@@ -60,9 +69,7 @@ export class CookieStore {
       const char = setCookieHeader[i];
 
       if (char === ',' && !inExpires) {
-        if (current.trim()) {
-          cookies.push(current.trim());
-        }
+        pushCookieIfNonEmpty(cookies, current);
         current = '';
       } else {
         current += char;
@@ -79,9 +86,7 @@ export class CookieStore {
       }
     }
 
-    if (current.trim()) {
-      cookies.push(current.trim());
-    }
+    pushCookieIfNonEmpty(cookies, current);
 
     return cookies;
   }

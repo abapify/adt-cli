@@ -124,6 +124,42 @@ export class AdtError extends Error {
 }
 
 /**
+ * Map a parsed schema exception to the flat AdtExceptionData shape.
+ * Note: ts-xsd uses $value for simpleContent text values.
+ */
+function mapExceptionData(
+  exc: NonNullable<ExceptionSchema['exception']>,
+): AdtExceptionData {
+  const result: AdtExceptionData = {};
+
+  if (exc.namespace?.id) {
+    result.namespace = exc.namespace.id;
+  }
+  if (exc.type?.id) {
+    result.type = exc.type.id;
+  }
+  if (exc.message?.$value) {
+    result.message = exc.message.$value;
+  }
+  if (exc.localizedMessage?.$value) {
+    result.localizedMessage = exc.localizedMessage.$value;
+  }
+  if (exc.properties?.entry) {
+    result.properties = {};
+    const entries = Array.isArray(exc.properties.entry)
+      ? exc.properties.entry
+      : [exc.properties.entry];
+    for (const entry of entries) {
+      if (entry.key && entry.$value) {
+        result.properties[entry.key] = entry.$value;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Parse ADT exception XML into structured data
  *
  * Uses the generated exception schema from @abapify/adt-schemas for type-safe parsing.
@@ -151,33 +187,7 @@ export function parseAdtException(xml: string): AdtExceptionData | undefined {
       return undefined;
     }
 
-    const result: AdtExceptionData = {};
-
-    // Map parsed schema to our interface
-    // Note: ts-xsd uses $value for simpleContent text values
-    if (exc.namespace?.id) {
-      result.namespace = exc.namespace.id;
-    }
-    if (exc.type?.id) {
-      result.type = exc.type.id;
-    }
-    if (exc.message?.$value) {
-      result.message = exc.message.$value;
-    }
-    if (exc.localizedMessage?.$value) {
-      result.localizedMessage = exc.localizedMessage.$value;
-    }
-    if (exc.properties?.entry) {
-      result.properties = {};
-      const entries = Array.isArray(exc.properties.entry)
-        ? exc.properties.entry
-        : [exc.properties.entry];
-      for (const entry of entries) {
-        if (entry.key && entry.$value) {
-          result.properties[entry.key] = entry.$value;
-        }
-      }
-    }
+    const result = mapExceptionData(exc);
 
     // Return undefined if we didn't find any meaningful data
     if (

@@ -68,6 +68,33 @@ export interface BatchLockSession {
 }
 
 /**
+ * Best-effort release of every handle already acquired in this session,
+ * draining `acquired` in reverse order. Per-object unlock failures are
+ * swallowed — the primary failure is the real signal.
+ */
+async function releaseAllQuietly(
+  lockService: Pick<LockService, 'unlock'>,
+  acquired: BatchLockAcquisition[],
+): Promise<void> {
+  for (const a of acquired.splice(0).reverse()) {
+    try {
+      await lockService.unlock(a.target.objectUri, {
+        lockHandle: a.handle.handle,
+      });
+    } catch {
+      /* swallow — primary failure is the real signal */
+    }
+  }
+}
+
+/** Wrap a non-Error lock failure with the batch context. */
+function batchLockError(err: unknown): Error {
+  return err instanceof Error
+    ? err
+    : new Error(`Batch lock failed: ${String(err)}`);
+}
+
+/**
  * Create a batch lock session over a set of targets.
  *
  * The session does NOT auto-begin; callers drive the lifecycle explicitly so
@@ -101,21 +128,11 @@ export function createBatchLockSession(
         } catch (err) {
           if (rollback) {
             // Best-effort: release what we already have, then propagate.
-            for (const a of acquired.splice(0).reverse()) {
-              try {
-                await lockService.unlock(a.target.objectUri, {
-                  lockHandle: a.handle.handle,
-                });
-              } catch {
-                /* swallow — primary failure is the real signal */
-              }
-            }
+            await releaseAllQuietly(lockService, acquired);
             // Session is done — no further release() work possible.
             released = true;
           }
-          throw err instanceof Error
-            ? err
-            : new Error(`Batch lock failed: ${String(err)}`);
+          throw batchLockError(err);
         }
       }
       return [...acquired];
