@@ -292,6 +292,114 @@ function setAbapLanguageVersion(
   }
 }
 
+/** Resolved `.abapgit.xml` folder configuration (see `resolveFolderConfig`). */
+type FolderConfig = Awaited<ReturnType<typeof resolveFolderConfig>>;
+
+/**
+ * Read all source files of an object into a source-key → content map.
+ * Binary companions travel base64-encoded.
+ */
+async function loadObjectSources(
+  fileTree: FileTree,
+  objFiles: ObjectFiles,
+  handler: ReturnType<typeof getHandler>,
+): Promise<Record<string, string>> {
+  const contents = await Promise.all(
+    objFiles.sourceFiles.map(({ path, binary }) =>
+      binary
+        ? fileTree.readBuffer(path).then((buffer) => buffer.toString('base64'))
+        : fileTree.read(path),
+    ),
+  );
+  const sources: Record<string, string> = {};
+  for (const [index, { suffix }] of objFiles.sourceFiles.entries()) {
+    const sourceKey = suffix
+      ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
+      : 'main';
+    sources[sourceKey] = contents[index];
+  }
+  return sources;
+}
+
+/**
+ * Compute the relative directory for package resolution and attach the
+ * folder-logic hints to the ADK object.
+ */
+function applyFolderInfo(
+  adkObject: AdkObject,
+  objFiles: ObjectFiles,
+  folderConfig: FolderConfig,
+): void {
+  if (!folderConfig.hasAbapGitXml) return;
+  const metadataFile = objFiles.xmlFile ?? objFiles.jsonFile ?? '';
+  const sourceDir = metadataFile.split('/').slice(0, -1).join('/');
+  const relDir = sourceDir.startsWith(folderConfig.startDir)
+    ? sourceDir.slice(folderConfig.startDir.length).replace(/^\/+/, '')
+    : sourceDir;
+  (adkObject as any)._relDir = relDir;
+  (adkObject as any)._folderLogic = folderConfig.folderLogic;
+}
+
+/**
+ * Build one object (plus its FUGR children) from a metadata/source file
+ * group. A failure inside one object is logged and swallowed, mirroring
+ * the abapGit log-and-continue rule.
+ */
+async function* buildObject(
+  fileTree: FileTree,
+  adk: ReturnType<typeof createAdk>,
+  objFiles: ObjectFiles,
+  handler: ReturnType<typeof getHandler>,
+  options: ExportOptions | undefined,
+  folderConfig: FolderConfig,
+): AsyncGenerator<AdkObject> {
+  try {
+    const meta = await parseMetadata(fileTree, objFiles, handler);
+    if (!meta) return;
+    const { values, isAffJson } = meta;
+
+    // Read source files
+    const sources = await loadObjectSources(fileTree, objFiles, handler);
+
+    const payload = buildPayload(handler, values, isAffJson, objFiles);
+    const objectName = payload.name || objFiles.name;
+    const adkType =
+      typeof payload.type === 'string' ? payload.type : objFiles.type;
+    const adkObject = adk.getWithData(
+      { ...payload, name: objectName },
+      adkType,
+    ) as AdkObject;
+
+    setObjectSources(handler, adkObject, sources);
+
+    if (payload.description) {
+      (adkObject as any)._pendingDescription = payload.description;
+    }
+
+    applyFolderInfo(adkObject, objFiles, folderConfig);
+
+    resolvePackageRef(
+      adkObject,
+      options,
+      folderConfig.hasAbapGitXml,
+      folderConfig.folderLogic,
+    );
+    setAbapLanguageVersion(adkObject, options);
+
+    yield adkObject;
+
+    // For compound objects (FUGR), yield child objects (function modules)
+    if (objFiles.type === 'FUGR' && payload._functions) {
+      yield* yieldFugrChildren(adk, payload, objectName, options, adkObject);
+    }
+  } catch (error) {
+    console.error(
+      `Failed to deserialize ${objFiles.type} ${objFiles.name}:`,
+      error,
+    );
+  }
+}
+
 /**
  * Deserialize abapGit files to ADK objects
  *
@@ -341,70 +449,11 @@ export async function* deserialize(
     const handler = getHandler(objFiles.type);
     if (!handler) continue;
 
-    try {
-      const meta = await parseMetadata(fileTree, objFiles, handler);
-      if (!meta) continue;
-      const { values, isAffJson } = meta;
-
-      // Read source files
-      const contents = await Promise.all(
-        objFiles.sourceFiles.map(({ path, binary }) =>
-          binary
-            ? fileTree
-                .readBuffer(path)
-                .then((buffer) => buffer.toString('base64'))
-            : fileTree.read(path),
-        ),
-      );
-      const sources: Record<string, string> = {};
-      for (const [index, { suffix }] of objFiles.sourceFiles.entries()) {
-        const sourceKey = suffix
-          ? (handler.suffixToSourceKey?.[suffix] ?? suffix)
-          : 'main';
-        sources[sourceKey] = contents[index];
-      }
-
-      const payload = buildPayload(handler, values, isAffJson, objFiles);
-      const objectName = payload.name || objFiles.name;
-      const adkType =
-        typeof payload.type === 'string' ? payload.type : objFiles.type;
-      const adkObject = adk.getWithData(
-        { ...payload, name: objectName },
-        adkType,
-      ) as AdkObject;
-
-      setObjectSources(handler, adkObject, sources);
-
-      if (payload.description) {
-        (adkObject as any)._pendingDescription = payload.description;
-      }
-
-      // Compute relative directory for package resolution
-      if (hasAbapGitXml) {
-        const metadataFile = objFiles.xmlFile ?? objFiles.jsonFile ?? '';
-        const sourceDir = metadataFile.split('/').slice(0, -1).join('/');
-        const relDir = sourceDir.startsWith(startDir)
-          ? sourceDir.slice(startDir.length).replace(/^\/+/, '')
-          : sourceDir;
-        (adkObject as any)._relDir = relDir;
-        (adkObject as any)._folderLogic = folderLogic;
-      }
-
-      resolvePackageRef(adkObject, options, hasAbapGitXml, folderLogic);
-      setAbapLanguageVersion(adkObject, options);
-
-      yield adkObject;
-
-      // For compound objects (FUGR), yield child objects (function modules)
-      if (objFiles.type === 'FUGR' && payload._functions) {
-        yield* yieldFugrChildren(adk, payload, objectName, options, adkObject);
-      }
-    } catch (error) {
-      console.error(
-        `Failed to deserialize ${objFiles.type} ${objFiles.name}:`,
-        error,
-      );
-    }
+    yield* buildObject(fileTree, adk, objFiles, handler, options, {
+      hasAbapGitXml,
+      startDir,
+      folderLogic,
+    });
   }
 }
 

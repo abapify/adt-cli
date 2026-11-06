@@ -103,6 +103,104 @@ function matchesGlob(name: string, pattern: string): boolean {
   return false;
 }
 
+ * Keep only JARs whose basename matches one of the comma-separated glob
+ * patterns in `filter`.
+ */
+function filterJars(jarFiles: string[], filter: string): string[] {
+  const patterns = filter.split(',').map((p) => p.trim());
+  return jarFiles.filter((jar) => {
+    const jarName = basename(jar);
+    return patterns.some((pattern) => matchesGlob(jarName, pattern));
+  });
+}
+
+type DecompilerConfig = (typeof DECOMPILERS)[keyof typeof DECOMPILERS];
+
+/** Run the decompiler on one input; `true` when it succeeded. */
+function decompileOne(
+  config: DecompilerConfig,
+  input: string,
+  output: string,
+): boolean {
+  try {
+    const { file, args } = config.command(input, output);
+    execFileSync(file, args, { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Print the shared "Decompilation complete" summary. */
+function reportDecompilation(
+  success: number,
+  failed: number,
+  output: string,
+): void {
+  console.log('\n');
+  console.log('✅ Decompilation complete!');
+  console.log(`   Success: ${success}`);
+  console.log(`   Failed: ${failed}`);
+  console.log(`   Output: ${output}`);
+}
+
+/** Decompile JAR files directly (much faster). */
+function decompileJars(
+  jarFiles: string[],
+  config: DecompilerConfig,
+  output: string,
+  verbose: boolean,
+): void {
+  let success = 0;
+  let failed = 0;
+
+  for (let i = 0; i < jarFiles.length; i++) {
+    const jar = jarFiles[i];
+    const jarName = basename(jar, '.jar');
+
+    process.stdout.write(
+      `\r   Decompiling ${i + 1}/${jarFiles.length}: ${jarName.slice(0, 50).padEnd(50)}`,
+    );
+
+    if (decompileOne(config, jar, output)) {
+      success++;
+    } else {
+      if (verbose) {
+        console.error(`\n   ❌ Failed: ${jarName}`);
+      }
+      failed++;
+    }
+  }
+
+  reportDecompilation(success, failed, output);
+}
+
+/** Decompile individual class files. */
+function decompileClasses(
+  classFiles: string[],
+  config: DecompilerConfig,
+  output: string,
+  verbose: boolean,
+): void {
+  let success = 0;
+  let failed = 0;
+
+  for (let i = 0; i < classFiles.length; i++) {
+    const classFile = classFiles[i];
+
+    if (verbose) {
+      process.stdout.write(
+        `\r   Decompiling ${i + 1}/${classFiles.length}: ${basename(classFile).slice(0, 50).padEnd(50)}`,
+      );
+    }
+
+    if (decompileOne(config, classFile, output)) success++;
+    else failed++;
+  }
+
+  reportDecompilation(success, failed, output);
+}
+
 /**
  * Decompile Java class files or JAR files
  */
@@ -154,47 +252,14 @@ export function decompile(
 
   // Apply filter if specified
   if (filter && jarFiles.length > 0) {
-    const patterns = filter.split(',').map((p) => p.trim());
-    jarFiles = jarFiles.filter((jar) => {
-      const jarName = basename(jar);
-      return patterns.some((pattern) => matchesGlob(jarName, pattern));
-    });
+    jarFiles = filterJars(jarFiles, filter);
     console.log(`🎯 Filtered to ${jarFiles.length} JARs matching: ${filter}`);
   }
 
   if (jarFiles.length > 0) {
-    // Decompile JAR files directly (much faster)
     console.log(`🔍 Found ${jarFiles.length} JAR files`);
     console.log('');
-
-    let success = 0;
-    let failed = 0;
-
-    for (let i = 0; i < jarFiles.length; i++) {
-      const jar = jarFiles[i];
-      const jarName = basename(jar, '.jar');
-
-      process.stdout.write(
-        `\r   Decompiling ${i + 1}/${jarFiles.length}: ${jarName.slice(0, 50).padEnd(50)}`,
-      );
-
-      try {
-        const { file, args } = config.command(jar, output);
-        execFileSync(file, args, { stdio: 'ignore' });
-        success++;
-      } catch {
-        if (verbose) {
-          console.error(`\n   ❌ Failed: ${jarName}`);
-        }
-        failed++;
-      }
-    }
-
-    console.log('\n');
-    console.log('✅ Decompilation complete!');
-    console.log(`   Success: ${success}`);
-    console.log(`   Failed: ${failed}`);
-    console.log(`   Output: ${output}`);
+    decompileJars(jarFiles, config, output, verbose);
   } else {
     // Decompile individual class files
     const classFiles = findFiles(input, '*.class');
@@ -206,33 +271,7 @@ export function decompile(
 
     console.log(`🔍 Found ${classFiles.length} class files`);
     console.log('');
-
-    let success = 0;
-    let failed = 0;
-
-    for (let i = 0; i < classFiles.length; i++) {
-      const classFile = classFiles[i];
-
-      if (verbose) {
-        process.stdout.write(
-          `\r   Decompiling ${i + 1}/${classFiles.length}: ${basename(classFile).slice(0, 50).padEnd(50)}`,
-        );
-      }
-
-      try {
-        const { file, args } = config.command(classFile, output);
-        execFileSync(file, args, { stdio: 'ignore' });
-        success++;
-      } catch {
-        failed++;
-      }
-    }
-
-    console.log('\n');
-    console.log('✅ Decompilation complete!');
-    console.log(`   Success: ${success}`);
-    console.log(`   Failed: ${failed}`);
-    console.log(`   Output: ${output}`);
+    decompileClasses(classFiles, config, output, verbose);
   }
   return Promise.resolve();
 }
