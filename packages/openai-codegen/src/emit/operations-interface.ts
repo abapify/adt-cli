@@ -468,132 +468,16 @@ export function emitOperationsInterface(
 
   for (const op of spec.operations) {
     const methodName = allocMethod(op.operationId, 'method');
-    const { emitted, cookieSkipped } = orderParams(op.parameters);
-
-    // Per-method param-name allocator (avoid clashing with `body`, returning).
-    const usedParamNames = new Set<string>();
-    const allocParam = makeNameAllocator(usedParamNames);
-
-    const abapParams: MethodParam[] = [];
-    const paramMappings: OperationParamMapping[] = [];
-
-    for (const p of emitted) {
-      const abapName = allocParam(p.name, 'param');
-      const ref = schemaToTypeRef(
-        p.schema,
-        compIndex,
-        opts.typesInterfaceName,
-        opsInterfaceName,
-        tableAliases,
-      );
-      abapParams.push(
-        methodParam({
-          paramKind: 'importing',
-          name: abapName,
-          typeRef: ref,
-          optional: !p.required,
-        }),
-      );
-      paramMappings.push({
-        name: abapName,
-        openapiName: p.name,
-        location: p.in as 'path' | 'query' | 'header',
-        required: p.required,
-        typeRefSource: renderTypeRefSource(ref),
-        isTable: pluckType(p.schema) === 'array',
-      });
-    }
-
-    const bodySchema = pickRequestBodySchema(op);
-    const hasBody = bodySchema !== undefined;
-    if (hasBody) {
-      const bodyName = allocParam('body', 'param');
-      const ref = schemaToTypeRef(
-        bodySchema,
-        compIndex,
-        opts.typesInterfaceName,
-        opsInterfaceName,
-        tableAliases,
-      );
-      abapParams.push(
-        methodParam({
-          paramKind: 'importing',
-          name: bodyName,
-          typeRef: ref,
-          optional: op.requestBody?.required === false,
-        }),
-      );
-    }
-
-    // Returning.
-    const success = pickSuccess(op);
-    let successStatus: number | 'default';
-    let successIsEmptyBody: boolean;
-    let returningName: string;
-    let returningRef: TypeRef;
-
-    if (!success) {
-      successStatus = 200;
-      successIsEmptyBody = true;
-      returningName = allocParam('success', 'param');
-      returningRef = builtinType({ name: 'abap_bool' });
-    } else if (success.schema === undefined) {
-      successStatus = success.status;
-      successIsEmptyBody = true;
-      returningName = allocParam('success', 'param');
-      returningRef = builtinType({ name: 'abap_bool' });
-    } else {
-      successStatus = success.status;
-      successIsEmptyBody = false;
-      const derived = deriveReturningName(success.schema, compIndex);
-      returningName = allocParam(derived, 'param');
-      returningRef = schemaToTypeRef(
-        success.schema,
-        compIndex,
-        opts.typesInterfaceName,
-        opsInterfaceName,
-        tableAliases,
-      );
-    }
-
-    abapParams.push(
-      methodParam({
-        paramKind: 'returning',
-        name: returningName,
-        typeRef: returningRef,
-      }),
-    );
-
-    // Error responses.
-    const errorResponses: Record<string, { description?: string }> = {};
-    for (const r of op.responses) {
-      if (!r.isError) continue;
-      errorResponses[r.statusCode] = r.description
-        ? { description: r.description }
-        : {};
-    }
-
-    const method = methodDef({
-      name: methodName,
-      visibility: 'public',
-      params: abapParams,
-      raising: [namedTypeRef({ name: opts.exceptionClassName.toLowerCase() })],
-      abapDoc: buildMethodAbapDoc(op, cookieSkipped),
-    });
-    methods.push(method);
-
-    mappings.push({
-      operationId: op.operationId,
+    const { method, mapping } = buildOperationMethod(
+      op,
       methodName,
-      method: op.method.toUpperCase(),
-      path: op.path,
-      params: paramMappings,
-      hasBody,
-      successStatus,
-      successIsEmptyBody,
-      errorResponses,
-      returningName,
-    });
+      compIndex,
+      opts,
+      opsInterfaceName,
+      tableAliases,
+    );
+    methods.push(method);
+    mappings.push(mapping);
   }
 
   const aliasTypeDefs = buildAliasTypeDefs(tableAliases);
@@ -604,6 +488,143 @@ export function emitOperationsInterface(
   });
 
   return { interface: iface, operations: mappings };
+}
+
+function buildOperationMethod(
+  op: NormalizedOperation,
+  methodName: string,
+  compIndex: ComponentIndex,
+  opts: EmitOperationsInterfaceOptions,
+  opsInterfaceName: string,
+  tableAliases: TableAliasRegistry,
+): { method: ReturnType<typeof methodDef>; mapping: OperationMapping } {
+  const { emitted, cookieSkipped } = orderParams(op.parameters);
+
+  // Per-method param-name allocator (avoid clashing with `body`, returning).
+  const usedParamNames = new Set<string>();
+  const allocParam = makeNameAllocator(usedParamNames);
+
+  const abapParams: MethodParam[] = [];
+  const paramMappings: OperationParamMapping[] = [];
+
+  for (const p of emitted) {
+    const abapName = allocParam(p.name, 'param');
+    const ref = schemaToTypeRef(
+      p.schema,
+      compIndex,
+      opts.typesInterfaceName,
+      opsInterfaceName,
+      tableAliases,
+    );
+    abapParams.push(
+      methodParam({
+        paramKind: 'importing',
+        name: abapName,
+        typeRef: ref,
+        optional: !p.required,
+      }),
+    );
+    paramMappings.push({
+      name: abapName,
+      openapiName: p.name,
+      location: p.in as 'path' | 'query' | 'header',
+      required: p.required,
+      typeRefSource: renderTypeRefSource(ref),
+      isTable: pluckType(p.schema) === 'array',
+    });
+  }
+
+  const bodySchema = pickRequestBodySchema(op);
+  const hasBody = bodySchema !== undefined;
+  if (hasBody) {
+    const bodyName = allocParam('body', 'param');
+    const ref = schemaToTypeRef(
+      bodySchema,
+      compIndex,
+      opts.typesInterfaceName,
+      opsInterfaceName,
+      tableAliases,
+    );
+    abapParams.push(
+      methodParam({
+        paramKind: 'importing',
+        name: bodyName,
+        typeRef: ref,
+        optional: op.requestBody?.required === false,
+      }),
+    );
+  }
+
+  // Returning.
+  const success = pickSuccess(op);
+  let successStatus: number | 'default';
+  let successIsEmptyBody: boolean;
+  let returningName: string;
+  let returningRef: TypeRef;
+
+  if (!success) {
+    successStatus = 200;
+    successIsEmptyBody = true;
+    returningName = allocParam('success', 'param');
+    returningRef = builtinType({ name: 'abap_bool' });
+  } else if (success.schema === undefined) {
+    successStatus = success.status;
+    successIsEmptyBody = true;
+    returningName = allocParam('success', 'param');
+    returningRef = builtinType({ name: 'abap_bool' });
+  } else {
+    successStatus = success.status;
+    successIsEmptyBody = false;
+    const derived = deriveReturningName(success.schema, compIndex);
+    returningName = allocParam(derived, 'param');
+    returningRef = schemaToTypeRef(
+      success.schema,
+      compIndex,
+      opts.typesInterfaceName,
+      opsInterfaceName,
+      tableAliases,
+    );
+  }
+
+  abapParams.push(
+    methodParam({
+      paramKind: 'returning',
+      name: returningName,
+      typeRef: returningRef,
+    }),
+  );
+
+  // Error responses.
+  const errorResponses: Record<string, { description?: string }> = {};
+  for (const r of op.responses) {
+    if (!r.isError) continue;
+    errorResponses[r.statusCode] = r.description
+      ? { description: r.description }
+      : {};
+  }
+
+  const method = methodDef({
+    name: methodName,
+    visibility: 'public',
+    params: abapParams,
+    raising: [namedTypeRef({ name: opts.exceptionClassName.toLowerCase() })],
+    abapDoc: buildMethodAbapDoc(op, cookieSkipped),
+  });
+
+  const mapping: OperationMapping = {
+    operationId: op.operationId,
+    methodName,
+    method: op.method.toUpperCase(),
+    path: op.path,
+    params: paramMappings,
+    hasBody,
+    successStatus,
+    successIsEmptyBody,
+    errorResponses,
+    returningName,
+  };
+
+  return { method, mapping };
 }
 
 function renderTypeRefSource(ref: TypeRef): string {

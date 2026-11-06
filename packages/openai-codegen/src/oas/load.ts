@@ -4,12 +4,14 @@ import YAML from 'yaml';
 import type {
   HttpMethod,
   JsonSchema,
+  NormalizedMediaType,
   NormalizedOperation,
   NormalizedParameter,
   NormalizedRequestBody,
   NormalizedResponse,
   NormalizedServer,
   NormalizedSpec,
+  OAuthFlow,
   SecurityRequirement,
   SecurityScheme,
   SpecInfo,
@@ -237,89 +239,112 @@ function normalizeSecuritySchemes(
   if (!isRecord(raw)) return out;
   for (const [name, schemeRaw] of Object.entries(raw)) {
     if (!isRecord(schemeRaw)) continue;
-    const type = asString(schemeRaw.type);
-    const description = asString(schemeRaw.description);
-    switch (type) {
-      case 'apiKey': {
-        const inLoc = asString(schemeRaw.in);
-        if (inLoc !== 'header' && inLoc !== 'query' && inLoc !== 'cookie')
-          continue;
-        const scheme: SecurityScheme = {
-          type: 'apiKey',
-          name: asString(schemeRaw.name) ?? name,
-          in: inLoc,
-        };
-        if (description !== undefined) scheme.description = description;
-        out[name] = scheme;
-        break;
-      }
-      case 'http': {
-        const scheme: SecurityScheme = {
-          type: 'http',
-          scheme: asString(schemeRaw.scheme) ?? 'bearer',
-        };
-        const bf = asString(schemeRaw.bearerFormat);
-        if (bf !== undefined) scheme.bearerFormat = bf;
-        if (description !== undefined) scheme.description = description;
-        out[name] = scheme;
-        break;
-      }
-      case 'oauth2': {
-        const flowsRaw = isRecord(schemeRaw.flows) ? schemeRaw.flows : {};
-        const scheme: SecurityScheme = {
-          type: 'oauth2',
-          flows: {},
-        };
-        for (const flowName of [
-          'implicit',
-          'password',
-          'clientCredentials',
-          'authorizationCode',
-        ] as const) {
-          const f = flowsRaw[flowName];
-          if (!isRecord(f)) continue;
-          const flow: {
-            authorizationUrl?: string;
-            tokenUrl?: string;
-            refreshUrl?: string;
-            scopes: Record<string, string>;
-          } = {
-            scopes: {},
-          };
-          if (isRecord(f.scopes)) {
-            for (const [k, v] of Object.entries(f.scopes)) {
-              if (typeof v === 'string') flow.scopes[k] = v;
-            }
-          }
-          const au = asString(f.authorizationUrl);
-          if (au !== undefined) flow.authorizationUrl = au;
-          const tu = asString(f.tokenUrl);
-          if (tu !== undefined) flow.tokenUrl = tu;
-          const ru = asString(f.refreshUrl);
-          if (ru !== undefined) flow.refreshUrl = ru;
-          scheme.flows[flowName] = flow;
-        }
-        if (description !== undefined) scheme.description = description;
-        out[name] = scheme;
-        break;
-      }
-      case 'openIdConnect': {
-        const url = asString(schemeRaw.openIdConnectUrl);
-        if (url === undefined) continue;
-        const scheme: SecurityScheme = {
-          type: 'openIdConnect',
-          openIdConnectUrl: url,
-        };
-        if (description !== undefined) scheme.description = description;
-        out[name] = scheme;
-        break;
-      }
-      default:
-        // Unsupported security scheme type — skip.
-        break;
-    }
+    const scheme = normalizeSecurityScheme(name, schemeRaw);
+    if (scheme !== undefined) out[name] = scheme;
   }
   return out;
+}
+
+function normalizeSecurityScheme(
+  name: string,
+  schemeRaw: UnknownRecord,
+): SecurityScheme | undefined {
+  const type = asString(schemeRaw.type);
+  let scheme: SecurityScheme | undefined;
+  switch (type) {
+    case 'apiKey':
+      scheme = normalizeApiKeyScheme(name, schemeRaw);
+      break;
+    case 'http':
+      scheme = normalizeHttpScheme(schemeRaw);
+      break;
+    case 'oauth2':
+      scheme = normalizeOAuth2Scheme(schemeRaw);
+      break;
+    case 'openIdConnect':
+      scheme = normalizeOpenIdConnectScheme(schemeRaw);
+      break;
+    default:
+      // Unsupported security scheme type — skip.
+      scheme = undefined;
+  }
+  if (scheme === undefined) return undefined;
+  const description = asString(schemeRaw.description);
+  if (description !== undefined) scheme.description = description;
+  return scheme;
+}
+
+function normalizeApiKeyScheme(
+  name: string,
+  raw: UnknownRecord,
+): SecurityScheme | undefined {
+  const inLoc = asString(raw.in);
+  if (inLoc !== 'header' && inLoc !== 'query' && inLoc !== 'cookie') {
+    return undefined;
+  }
+  return {
+    type: 'apiKey',
+    name: asString(raw.name) ?? name,
+    in: inLoc,
+  };
+}
+
+function normalizeHttpScheme(raw: UnknownRecord): SecurityScheme {
+  const scheme: SecurityScheme = {
+    type: 'http',
+    scheme: asString(raw.scheme) ?? 'bearer',
+  };
+  const bf = asString(raw.bearerFormat);
+  if (bf !== undefined) scheme.bearerFormat = bf;
+  return scheme;
+}
+
+function normalizeOAuth2Scheme(raw: UnknownRecord): SecurityScheme {
+  const flowsRaw = isRecord(raw.flows) ? raw.flows : {};
+  const scheme: SecurityScheme = {
+    type: 'oauth2',
+    flows: {},
+  };
+  for (const flowName of [
+    'implicit',
+    'password',
+    'clientCredentials',
+    'authorizationCode',
+  ] as const) {
+    const f = flowsRaw[flowName];
+    if (!isRecord(f)) continue;
+    scheme.flows[flowName] = normalizeOAuth2Flow(f);
+  }
+  return scheme;
+}
+
+function normalizeOAuth2Flow(f: UnknownRecord): OAuthFlow {
+  const flow: OAuthFlow = {
+    scopes: {},
+  };
+  if (isRecord(f.scopes)) {
+    for (const [k, v] of Object.entries(f.scopes)) {
+      if (typeof v === 'string') flow.scopes[k] = v;
+    }
+  }
+  const au = asString(f.authorizationUrl);
+  if (au !== undefined) flow.authorizationUrl = au;
+  const tu = asString(f.tokenUrl);
+  if (tu !== undefined) flow.tokenUrl = tu;
+  const ru = asString(f.refreshUrl);
+  if (ru !== undefined) flow.refreshUrl = ru;
+  return flow;
+}
+
+function normalizeOpenIdConnectScheme(
+  raw: UnknownRecord,
+): SecurityScheme | undefined {
+  const url = asString(raw.openIdConnectUrl);
+  if (url === undefined) return undefined;
+  return {
+    type: 'openIdConnect',
+    openIdConnectUrl: url,
+  };
 }
 
 function normalizeSecurityRequirements(raw: unknown): SecurityRequirement[] {
@@ -350,38 +375,50 @@ function normalizeOperations(
       const opRaw = pathItemRaw[method];
       if (!isRecord(opRaw)) continue;
 
-      const opParams = normalizeParameters(opRaw.parameters);
-      const parameters = mergeParameters(pathLevelParams, opParams);
-
-      const operationId =
-        asString(opRaw.operationId) ?? synthesizeOperationId(method, path);
-
-      const op: NormalizedOperation = {
-        operationId,
-        method,
-        path,
-        tags: asStringArray(opRaw.tags),
-        deprecated: asBool(opRaw.deprecated, false),
-        parameters,
-        responses: normalizeResponses(opRaw.responses),
-        security:
-          opRaw.security === undefined
-            ? topLevelSecurity
-            : normalizeSecurityRequirements(opRaw.security),
-      };
-
-      const summary = asString(opRaw.summary);
-      if (summary !== undefined) op.summary = summary;
-      const description = asString(opRaw.description);
-      if (description !== undefined) op.description = description;
-
-      const requestBody = normalizeRequestBody(opRaw.requestBody);
-      if (requestBody !== undefined) op.requestBody = requestBody;
-
-      ops.push(op);
+      ops.push(
+        buildOperation(method, path, opRaw, pathLevelParams, topLevelSecurity),
+      );
     }
   }
   return ops;
+}
+
+function buildOperation(
+  method: HttpMethod,
+  path: string,
+  opRaw: UnknownRecord,
+  pathLevelParams: NormalizedParameter[],
+  topLevelSecurity: SecurityRequirement[],
+): NormalizedOperation {
+  const opParams = normalizeParameters(opRaw.parameters);
+  const parameters = mergeParameters(pathLevelParams, opParams);
+
+  const operationId =
+    asString(opRaw.operationId) ?? synthesizeOperationId(method, path);
+
+  const op: NormalizedOperation = {
+    operationId,
+    method,
+    path,
+    tags: asStringArray(opRaw.tags),
+    deprecated: asBool(opRaw.deprecated, false),
+    parameters,
+    responses: normalizeResponses(opRaw.responses),
+    security:
+      opRaw.security === undefined
+        ? topLevelSecurity
+        : normalizeSecurityRequirements(opRaw.security),
+  };
+
+  const summary = asString(opRaw.summary);
+  if (summary !== undefined) op.summary = summary;
+  const description = asString(opRaw.description);
+  if (description !== undefined) op.description = description;
+
+  const requestBody = normalizeRequestBody(opRaw.requestBody);
+  if (requestBody !== undefined) op.requestBody = requestBody;
+
+  return op;
 }
 
 function normalizeParameters(raw: unknown): NormalizedParameter[] {
@@ -428,20 +465,26 @@ function mergeParameters(
   return [...merged.values()];
 }
 
-function normalizeRequestBody(raw: unknown): NormalizedRequestBody | undefined {
-  if (!isRecord(raw)) return undefined;
-  const content: NormalizedRequestBody['content'] = {};
-  if (isRecord(raw.content)) {
-    for (const [mt, mtRaw] of Object.entries(raw.content)) {
+function normalizeContentMap(
+  raw: unknown,
+): Record<string, NormalizedMediaType> {
+  const content: Record<string, NormalizedMediaType> = {};
+  if (isRecord(raw)) {
+    for (const [mt, mtRaw] of Object.entries(raw)) {
       if (!isRecord(mtRaw)) continue;
       content[mt] = {
         schema: isRecord(mtRaw.schema) ? (mtRaw.schema as JsonSchema) : {},
       };
     }
   }
+  return content;
+}
+
+function normalizeRequestBody(raw: unknown): NormalizedRequestBody | undefined {
+  if (!isRecord(raw)) return undefined;
   const body: NormalizedRequestBody = {
     required: asBool(raw.required, false),
-    content,
+    content: normalizeContentMap(raw.content),
   };
   const desc = asString(raw.description);
   if (desc !== undefined) body.description = desc;
@@ -454,54 +497,68 @@ function normalizeResponses(raw: unknown): NormalizedResponse[] {
     (entry): entry is [string, UnknownRecord] => isRecord(entry[1]),
   );
   const has2xx = entries.some(([code]) => /^2\d\d$/.test(code));
-  return entries.map(([statusCode, respRaw]) => {
-    const isSuccess =
-      /^2\d\d$/.test(statusCode) || (statusCode === 'default' && !has2xx);
-    const isError =
-      /^[45]\d\d$/.test(statusCode) || (statusCode === 'default' && has2xx);
-
-    const content: NormalizedResponse['content'] = {};
-    if (isRecord(respRaw.content)) {
-      for (const [mt, mtRaw] of Object.entries(respRaw.content)) {
-        if (!isRecord(mtRaw)) continue;
-        content[mt] = {
-          schema: isRecord(mtRaw.schema) ? (mtRaw.schema as JsonSchema) : {},
-        };
-      }
-    }
-
-    const headers: NormalizedResponse['headers'] = {};
-    if (isRecord(respRaw.headers)) {
-      for (const [hn, hRaw] of Object.entries(respRaw.headers)) {
-        if (!isRecord(hRaw)) continue;
-        const header: NormalizedResponse['headers'][string] = {
-          schema: isRecord(hRaw.schema) ? (hRaw.schema as JsonSchema) : {},
-        };
-        const desc = asString(hRaw.description);
-        if (desc !== undefined) header.description = desc;
-        if (typeof hRaw.required === 'boolean') header.required = hRaw.required;
-        if (typeof hRaw.deprecated === 'boolean')
-          header.deprecated = hRaw.deprecated;
-        headers[hn] = header;
-      }
-    }
-
-    const resp: NormalizedResponse = {
-      statusCode,
-      isSuccess,
-      isError,
-      content,
-      headers,
-    };
-    const desc = asString(respRaw.description);
-    if (desc !== undefined) resp.description = desc;
-    return resp;
-  });
+  return entries.map(([statusCode, respRaw]) =>
+    normalizeResponse(statusCode, respRaw, has2xx),
+  );
 }
 
-function synthesizeOperationId(method: HttpMethod, path: string): string {
-  // Explicit character-by-character sanitization avoids super-linear regex
-  // backtracking risks (Sonar `typescript:S5852`).
+function normalizeResponse(
+  statusCode: string,
+  respRaw: UnknownRecord,
+  has2xx: boolean,
+): NormalizedResponse {
+  const isSuccess =
+    /^2\d\d$/.test(statusCode) || (statusCode === 'default' && !has2xx);
+  const isError =
+    /^[45]\d\d$/.test(statusCode) || (statusCode === 'default' && has2xx);
+
+  const resp: NormalizedResponse = {
+    statusCode,
+    isSuccess,
+    isError,
+    content: normalizeContentMap(respRaw.content),
+    headers: normalizeResponseHeaders(respRaw.headers),
+  };
+  const desc = asString(respRaw.description);
+  if (desc !== undefined) resp.description = desc;
+  return resp;
+}
+
+function normalizeResponseHeaders(
+  raw: unknown,
+): Record<string, NormalizedResponse['headers'][string]> {
+  const headers: Record<string, NormalizedResponse['headers'][string]> = {};
+  if (isRecord(raw)) {
+    for (const [hn, hRaw] of Object.entries(raw)) {
+      if (!isRecord(hRaw)) continue;
+      headers[hn] = normalizeHeader(hRaw);
+    }
+  }
+  return headers;
+}
+
+function normalizeHeader(
+  hRaw: UnknownRecord,
+): NormalizedResponse['headers'][string] {
+  const header: NormalizedResponse['headers'][string] = {
+    schema: isRecord(hRaw.schema) ? (hRaw.schema as JsonSchema) : {},
+  };
+  const desc = asString(hRaw.description);
+  if (desc !== undefined) header.description = desc;
+  if (typeof hRaw.required === 'boolean') header.required = hRaw.required;
+  if (typeof hRaw.deprecated === 'boolean') header.deprecated = hRaw.deprecated;
+  return header;
+}
+
+function isAlnumChar(ch: string): boolean {
+  return (
+    (ch >= 'A' && ch <= 'Z') ||
+    (ch >= 'a' && ch <= 'z') ||
+    (ch >= '0' && ch <= '9')
+  );
+}
+
+function sanitizePathChars(path: string): string[] {
   const out: string[] = [];
   let underscore = false;
   let braceDepth = 0;
@@ -514,11 +571,7 @@ function synthesizeOperationId(method: HttpMethod, path: string): string {
       if (braceDepth > 0) braceDepth -= 1;
       continue;
     }
-    const isAlnum =
-      (ch >= 'A' && ch <= 'Z') ||
-      (ch >= 'a' && ch <= 'z') ||
-      (ch >= '0' && ch <= '9');
-    if (isAlnum) {
+    if (isAlnumChar(ch)) {
       out.push(ch);
       underscore = false;
     } else if (!underscore) {
@@ -526,6 +579,13 @@ function synthesizeOperationId(method: HttpMethod, path: string): string {
       underscore = true;
     }
   }
+  return out;
+}
+
+function synthesizeOperationId(method: HttpMethod, path: string): string {
+  // Explicit character-by-character sanitization avoids super-linear regex
+  // backtracking risks (Sonar `typescript:S5852`).
+  const out = sanitizePathChars(path);
   // Trim leading/trailing underscores.
   let start = 0;
   let end = out.length;

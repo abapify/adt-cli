@@ -83,15 +83,7 @@ export function mapSchemaToTypeRef(
   plan: TypePlan,
   ctx: { entryId?: string } = {},
 ): TypeRef {
-  if (isRef(schema)) {
-    const entry = refToEntry(schema.$ref, plan);
-    if (!entry) {
-      throw new UnsupportedSchemaError(
-        `mapSchemaToTypeRef: unresolved $ref "${schema.$ref}"`,
-      );
-    }
-    return namedTypeRef({ name: entry.abapName });
-  }
+  if (isRef(schema)) return refTypeRef(schema.$ref, plan);
   const type = pluckType(schema);
   // enum on string-like scalar → points to named entry when one exists; otherwise base string.
   if (type === 'array') {
@@ -106,29 +98,55 @@ export function mapSchemaToTypeRef(
     type === 'object' ||
     isRecord((schema as { properties?: unknown }).properties)
   ) {
-    // Prefer a planned entry for this exact schema if one exists.
-    const matched = findPlannedEntryBySchema(schema, plan, ctx.entryId);
-    if (matched) return namedTypeRef({ name: matched.abapName });
-    // Inline structure as fallback.
-    const fields = buildStructureFields(schema, plan, ctx);
-    if (fields.length === 0) {
-      return builtinType({ name: 'string' });
-    }
-    return structureType({ fields });
+    return objectTypeRef(schema, plan, ctx);
   }
   if (type === undefined) {
-    // Untyped schema — unless combinator present.
-    for (const c of ['allOf', 'oneOf', 'anyOf'] as const) {
-      if (Array.isArray((schema as Record<string, unknown>)[c])) {
-        // Treat as object; let typedef emission handle full shape.
-        const matched = findPlannedEntryBySchema(schema, plan, ctx.entryId);
-        if (matched) return namedTypeRef({ name: matched.abapName });
-        return builtinType({ name: 'string' });
-      }
-    }
-    return builtinType({ name: 'string' });
+    return untypedTypeRef(schema, plan, ctx);
   }
   return builtinType({ name: mapPrimitive(schema) });
+}
+
+function refTypeRef(ref: string, plan: TypePlan): TypeRef {
+  const entry = refToEntry(ref, plan);
+  if (!entry) {
+    throw new UnsupportedSchemaError(
+      `mapSchemaToTypeRef: unresolved $ref "${ref}"`,
+    );
+  }
+  return namedTypeRef({ name: entry.abapName });
+}
+
+function objectTypeRef(
+  schema: JsonSchema,
+  plan: TypePlan,
+  ctx: { entryId?: string },
+): TypeRef {
+  // Prefer a planned entry for this exact schema if one exists.
+  const matched = findPlannedEntryBySchema(schema, plan, ctx.entryId);
+  if (matched) return namedTypeRef({ name: matched.abapName });
+  // Inline structure as fallback.
+  const fields = buildStructureFields(schema, plan, ctx);
+  if (fields.length === 0) {
+    return builtinType({ name: 'string' });
+  }
+  return structureType({ fields });
+}
+
+function untypedTypeRef(
+  schema: JsonSchema,
+  plan: TypePlan,
+  ctx: { entryId?: string },
+): TypeRef {
+  // Untyped schema — unless combinator present.
+  for (const c of ['allOf', 'oneOf', 'anyOf'] as const) {
+    if (Array.isArray((schema as Record<string, unknown>)[c])) {
+      // Treat as object; let typedef emission handle full shape.
+      const matched = findPlannedEntryBySchema(schema, plan, ctx.entryId);
+      if (matched) return namedTypeRef({ name: matched.abapName });
+      return builtinType({ name: 'string' });
+    }
+  }
+  return builtinType({ name: 'string' });
 }
 
 /** If a schema is identical-by-reference to a planned entry, return it. */
@@ -167,69 +185,108 @@ function buildStructureFields(
   const fields: StructureField[] = [];
   const seen = new Map<string, TypeRef>();
 
-  const addField = (name: string, type: TypeRef, src: JsonSchema) => {
-    const sanitized = sanitizeIdent(name, 'param');
-    const prev = seen.get(sanitized);
-    if (prev) {
-      // Only allow dedupe if structurally identical (by reference or same kind+name).
-      if (prev === type || shallowTypeRefEqual(prev, type)) return;
-      throw new CollisionError(
-        `buildStructureFields: duplicate field "${sanitized}" with conflicting types`,
-      );
-    }
-    seen.set(sanitized, type);
-    fields.push({ name: sanitized, type });
-    if (isNullable(src)) {
-      const flagName = sanitizeIdent(`${name}_is_null`, 'param');
-      if (!seen.has(flagName)) {
-        const flagType = builtinType({ name: 'abap_bool' });
-        seen.set(flagName, flagType);
-        fields.push({ name: flagName, type: flagType });
-      }
-    }
-  };
-
   // 1) allOf merging.
-  const allOf = (schema as { allOf?: unknown }).allOf;
-  if (Array.isArray(allOf)) {
-    for (const sub of allOf) {
-      if (!isRecord(sub)) continue;
-      const subSchema = sub as JsonSchema;
-      const subProps = isRef(subSchema)
-        ? ((): Record<string, unknown> | undefined => {
-            const entry = refToEntry(subSchema.$ref, plan);
-            if (!entry) return undefined;
-            return (entry.schema as { properties?: Record<string, unknown> })
-              .properties;
-          })()
-        : (subSchema as { properties?: Record<string, unknown> }).properties;
-      if (isRecord(subProps)) {
-        for (const [name, propSchema] of Object.entries(subProps)) {
-          if (!isRecord(propSchema)) continue;
-          addField(
-            name,
-            mapSchemaToTypeRef(propSchema as JsonSchema, plan, ctx),
-            propSchema as JsonSchema,
-          );
-        }
-      }
-    }
-  }
+  addAllOfFields(schema, plan, ctx, fields, seen);
 
   // 2) Own properties.
-  const props = (schema as { properties?: unknown }).properties;
-  if (isRecord(props)) {
-    for (const [name, propSchema] of Object.entries(props)) {
-      if (!isRecord(propSchema)) continue;
-      addField(
-        name,
-        mapSchemaToTypeRef(propSchema as JsonSchema, plan, ctx),
-        propSchema as JsonSchema,
-      );
-    }
-  }
+  addPropertyFields(
+    (schema as { properties?: unknown }).properties,
+    plan,
+    ctx,
+    fields,
+    seen,
+  );
 
   // 3) oneOf / anyOf.
+  addUnionFields(schema, plan, ctx, fields, seen);
+
+  // 4) additionalProperties escape hatch.
+  addExtraField(schema, plan, fields, seen);
+
+  return fields;
+}
+
+function addStructureField(
+  fields: StructureField[],
+  seen: Map<string, TypeRef>,
+  name: string,
+  type: TypeRef,
+  src: JsonSchema,
+): void {
+  const sanitized = sanitizeIdent(name, 'param');
+  const prev = seen.get(sanitized);
+  if (prev) {
+    // Only allow dedupe if structurally identical (by reference or same kind+name).
+    if (prev === type || shallowTypeRefEqual(prev, type)) return;
+    throw new CollisionError(
+      `buildStructureFields: duplicate field "${sanitized}" with conflicting types`,
+    );
+  }
+  seen.set(sanitized, type);
+  fields.push({ name: sanitized, type });
+  if (isNullable(src)) {
+    const flagName = sanitizeIdent(`${name}_is_null`, 'param');
+    if (!seen.has(flagName)) {
+      const flagType = builtinType({ name: 'abap_bool' });
+      seen.set(flagName, flagType);
+      fields.push({ name: flagName, type: flagType });
+    }
+  }
+}
+
+function addPropertyFields(
+  props: unknown,
+  plan: TypePlan,
+  ctx: { entryId?: string },
+  fields: StructureField[],
+  seen: Map<string, TypeRef>,
+): void {
+  if (!isRecord(props)) return;
+  for (const [name, propSchema] of Object.entries(props)) {
+    if (!isRecord(propSchema)) continue;
+    addStructureField(
+      fields,
+      seen,
+      name,
+      mapSchemaToTypeRef(propSchema as JsonSchema, plan, ctx),
+      propSchema as JsonSchema,
+    );
+  }
+}
+
+function addAllOfFields(
+  schema: JsonSchema,
+  plan: TypePlan,
+  ctx: { entryId?: string },
+  fields: StructureField[],
+  seen: Map<string, TypeRef>,
+): void {
+  const allOf = (schema as { allOf?: unknown }).allOf;
+  if (!Array.isArray(allOf)) return;
+  for (const sub of allOf) {
+    if (!isRecord(sub)) continue;
+    const subProps = resolvedProperties(sub as JsonSchema, plan);
+    if (isRecord(subProps))
+      addPropertyFields(subProps, plan, ctx, fields, seen);
+  }
+}
+
+function resolvedProperties(subSchema: JsonSchema, plan: TypePlan): unknown {
+  if (!isRef(subSchema)) {
+    return (subSchema as { properties?: Record<string, unknown> }).properties;
+  }
+  const entry = refToEntry(subSchema.$ref, plan);
+  if (!entry) return undefined;
+  return (entry.schema as { properties?: Record<string, unknown> }).properties;
+}
+
+function addUnionFields(
+  schema: JsonSchema,
+  plan: TypePlan,
+  ctx: { entryId?: string },
+  fields: StructureField[],
+  seen: Map<string, TypeRef>,
+): void {
   for (const combinator of ['oneOf', 'anyOf'] as const) {
     const arr = (schema as Record<string, unknown>)[combinator];
     if (!Array.isArray(arr)) continue;
@@ -276,28 +333,30 @@ function buildStructureFields(
       });
     }
   }
+}
 
-  // 4) additionalProperties escape hatch.
+function addExtraField(
+  schema: JsonSchema,
+  plan: TypePlan,
+  fields: StructureField[],
+  seen: Map<string, TypeRef>,
+): void {
   const ap = (schema as { additionalProperties?: unknown })
     .additionalProperties;
-  if (ap === true || isRecord(ap)) {
-    const kvEntry = plan.byId.get('aux.kv');
-    if (kvEntry) {
-      addFieldRaw(
-        fields,
-        seen,
-        '_extra',
-        tableType({
-          rowType: namedTypeRef({ name: kvEntry.abapName }),
-          tableKind: 'hashed',
-          uniqueness: 'unique',
-          keyFields: ['key'],
-        }),
-      );
-    }
-  }
-
-  return fields;
+  if (ap !== true && !isRecord(ap)) return;
+  const kvEntry = plan.byId.get('aux.kv');
+  if (!kvEntry) return;
+  addFieldRaw(
+    fields,
+    seen,
+    '_extra',
+    tableType({
+      rowType: namedTypeRef({ name: kvEntry.abapName }),
+      tableKind: 'hashed',
+      uniqueness: 'unique',
+      keyFields: ['key'],
+    }),
+  );
 }
 
 function addFieldRaw(

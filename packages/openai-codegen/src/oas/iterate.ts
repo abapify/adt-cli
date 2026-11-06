@@ -61,22 +61,29 @@ export function walkSchemas(spec: NormalizedSpec, cb: SchemaVisitor): void {
   }
 
   for (const op of spec.operations) {
-    const base = ['operations', operationKey(op)];
-    for (const p of op.parameters) {
-      visit(p.schema, [...base, 'parameters', `${p.in}:${p.name}`]);
+    visitOperationSchemas(op, visit);
+  }
+}
+
+function visitOperationSchemas(
+  op: NormalizedOperation,
+  visit: (schema: unknown, path: string[]) => void,
+): void {
+  const base = ['operations', operationKey(op)];
+  for (const p of op.parameters) {
+    visit(p.schema, [...base, 'parameters', `${p.in}:${p.name}`]);
+  }
+  if (op.requestBody !== undefined) {
+    for (const [mt, mtObj] of Object.entries(op.requestBody.content)) {
+      visit(mtObj.schema, [...base, 'requestBody', mt]);
     }
-    if (op.requestBody !== undefined) {
-      for (const [mt, mtObj] of Object.entries(op.requestBody.content)) {
-        visit(mtObj.schema, [...base, 'requestBody', mt]);
-      }
+  }
+  for (const resp of op.responses) {
+    for (const [mt, mtObj] of Object.entries(resp.content)) {
+      visit(mtObj.schema, [...base, 'responses', resp.statusCode, mt]);
     }
-    for (const resp of op.responses) {
-      for (const [mt, mtObj] of Object.entries(resp.content)) {
-        visit(mtObj.schema, [...base, 'responses', resp.statusCode, mt]);
-      }
-      for (const [hn, h] of Object.entries(resp.headers)) {
-        visit(h.schema, [...base, 'responses', resp.statusCode, 'headers', hn]);
-      }
+    for (const [hn, h] of Object.entries(resp.headers)) {
+      visit(h.schema, [...base, 'responses', resp.statusCode, 'headers', hn]);
     }
   }
 }
