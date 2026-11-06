@@ -83,6 +83,41 @@ export function genericPage({ url, response }: PageProps): PageResult {
 }
 
 /**
+ * Collect one interesting `@_` attribute into the summary (dedup + allow-list).
+ */
+function collectSummaryAttr(
+  summary: SummaryItem[],
+  seen: Set<string>,
+  key: string,
+  value: unknown,
+): void {
+  const isStringAttr = key.startsWith('@_') && typeof value === 'string';
+  if (!isStringAttr && typeof value !== 'number') return;
+
+  const cleanKey = key.replace('@_', '').replace(/^\w+:/, '');
+  // Skip duplicates and uninteresting fields
+  if (seen.has(cleanKey) || cleanKey === 'version' || cleanKey === 'encoding')
+    return;
+  seen.add(cleanKey);
+
+  // Limit to important fields
+  const important = [
+    'number',
+    'owner',
+    'desc',
+    'status',
+    'status_text',
+    'type',
+    'target',
+    'name',
+    'uri',
+  ];
+  if (important.some((f) => cleanKey.includes(f))) {
+    summary.push({ key: cleanKey, value: String(value) });
+  }
+}
+
+/**
  * Extract key fields for summary display
  */
 function extractSummary(data: Record<string, unknown>): SummaryItem[] {
@@ -102,36 +137,7 @@ function extractSummary(data: Record<string, unknown>): SummaryItem[] {
       if (key.includes('link') || key === '?xml') continue;
 
       // Extract interesting attributes (those starting with @_)
-      if (
-        (key.startsWith('@_') && typeof value === 'string') ||
-        typeof value === 'number'
-      ) {
-        const cleanKey = key.replace('@_', '').replace(/^\w+:/, '');
-        // Skip duplicates and uninteresting fields
-        if (
-          seen.has(cleanKey) ||
-          cleanKey === 'version' ||
-          cleanKey === 'encoding'
-        )
-          continue;
-        seen.add(cleanKey);
-
-        // Limit to important fields
-        const important = [
-          'number',
-          'owner',
-          'desc',
-          'status',
-          'status_text',
-          'type',
-          'target',
-          'name',
-          'uri',
-        ];
-        if (important.some((f) => cleanKey.includes(f))) {
-          summary.push({ key: cleanKey, value: String(value) });
-        }
-      }
+      collectSummaryAttr(summary, seen, key, value);
 
       // Recurse into nested objects
       if (typeof value === 'object') {

@@ -481,6 +481,80 @@ const objectsCmd: CliCommandPlugin = {
   },
 };
 
+// ── config subcommand helpers ──────────────────────────────────────────────
+
+type GctsClient = Awaited<ReturnType<typeof getGctsClient>>;
+type CliArgs = Parameters<CliCommandPlugin['execute']>[0];
+
+/** `config list` — print the full repository configuration. */
+async function configList(
+  client: GctsClient,
+  rid: string,
+  args: CliArgs,
+): Promise<void> {
+  const repo = await client.adt.gcts.repository.get(rid);
+  const cfg = repo.result?.config ?? [];
+  if (args.json) {
+    console.log(json(cfg));
+    return;
+  }
+  for (const c of cfg) {
+    console.log(`${c.key}=${c.value ?? ''}`);
+  }
+}
+
+/** `config get` — print a single config entry. */
+async function configGet(
+  client: GctsClient,
+  rid: string,
+  key: string,
+  args: CliArgs,
+): Promise<void> {
+  const res = await client.adt.gcts.config.get(rid, key);
+  if (args.json) {
+    console.log(json(res));
+    return;
+  }
+  console.log(`${res.result?.key ?? key}=${res.result?.value ?? ''}`);
+}
+
+/** `config set` — write a config entry. */
+async function configSet(
+  client: GctsClient,
+  rid: string,
+  key: string,
+  args: CliArgs,
+  ctx: CliContext,
+): Promise<void> {
+  const value = str(args.value);
+  if (!value) {
+    ctx.logger.error('❌ "set" requires a value argument.');
+    process.exit(1);
+  }
+  const res = await client.adt.gcts.config.set(rid, { key, value });
+  if (args.json) {
+    console.log(json(res));
+    return;
+  }
+  ctx.logger.info(`✅ ${key}=${value}`);
+}
+
+/** `config unset` / `config delete` — remove a config entry. */
+async function configUnset(
+  client: GctsClient,
+  rid: string,
+  key: string,
+  args: CliArgs,
+  ctx: CliContext,
+): Promise<void> {
+  const res = await client.adt.gcts.config.delete(rid, key);
+  if (args.json) {
+    console.log(json(res));
+    return;
+  }
+  ctx.logger.info(`🗑  unset ${key}`);
+}
+
 const configCmd: CliCommandPlugin = {
   name: 'config',
   description:
@@ -503,15 +577,7 @@ const configCmd: CliCommandPlugin = {
     const key = str(args.key);
 
     if (action === 'list') {
-      const repo = await client.adt.gcts.repository.get(rid);
-      const cfg = repo.result?.config ?? [];
-      if (args.json) {
-        console.log(json(cfg));
-        return;
-      }
-      for (const c of cfg) {
-        console.log(`${c.key}=${c.value ?? ''}`);
-      }
+      await configList(client, rid, args);
       return;
     }
 
@@ -521,37 +587,17 @@ const configCmd: CliCommandPlugin = {
     }
 
     if (action === 'get') {
-      const res = await client.adt.gcts.config.get(rid, key);
-      if (args.json) {
-        console.log(json(res));
-        return;
-      }
-      console.log(`${res.result?.key ?? key}=${res.result?.value ?? ''}`);
+      await configGet(client, rid, key, args);
       return;
     }
 
     if (action === 'set') {
-      const value = str(args.value);
-      if (!value) {
-        ctx.logger.error('❌ "set" requires a value argument.');
-        process.exit(1);
-      }
-      const res = await client.adt.gcts.config.set(rid, { key, value });
-      if (args.json) {
-        console.log(json(res));
-        return;
-      }
-      ctx.logger.info(`✅ ${key}=${value}`);
+      await configSet(client, rid, key, args, ctx);
       return;
     }
 
     if (action === 'unset' || action === 'delete') {
-      const res = await client.adt.gcts.config.delete(rid, key);
-      if (args.json) {
-        console.log(json(res));
-        return;
-      }
-      ctx.logger.info(`🗑  unset ${key}`);
+      await configUnset(client, rid, key, args, ctx);
       return;
     }
 

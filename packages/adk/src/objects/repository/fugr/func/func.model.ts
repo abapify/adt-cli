@@ -34,6 +34,16 @@ export type FunctionModuleXml = FunctionModuleResponse['abapFunctionModule'];
  * - Overrides lock/unlock/load/save to pass groupName to contract calls
  * - No packageRef (lives within parent function group's package)
  */
+/** `true` for a `*"----` comment-block delimiter line. */
+function isCommentDashesLine(trimmed: string): boolean {
+  return trimmed.startsWith('*"') && trimmed.includes('---');
+}
+
+/** `true` for a `*"` comment line (accepts `undefined` for end-of-source). */
+function isCommentLine(line: string | undefined): boolean {
+  return Boolean(line?.startsWith('*"'));
+}
+
 export class AdkFunctionModule extends AdkObject<
   typeof FunctionModuleKind,
   FunctionModuleXml
@@ -270,21 +280,22 @@ export class AdkFunctionModule extends AdkObject<
     for (let i = 0; i < lines.length; i++) {
       const trimmed = lines[i].trimEnd();
 
-      if (!inBlock && trimmed.startsWith('*"') && trimmed.includes('---')) {
+      if (!inBlock) {
         // Start of comment block — check if next line is Local Interface
-        if (i + 1 < lines.length && lines[i + 1].trimEnd().startsWith('*"')) {
+        if (
+          isCommentDashesLine(trimmed) &&
+          isCommentLine(lines[i + 1]?.trimEnd())
+        ) {
           inBlock = true;
           continue;
         }
-      }
-
-      if (inBlock) {
-        if (trimmed.startsWith('*"') && trimmed.includes('---')) {
+      } else {
+        if (isCommentDashesLine(trimmed)) {
           // End of comment block
           inBlock = false;
           continue;
         }
-        if (trimmed.startsWith('*"')) {
+        if (isCommentLine(trimmed)) {
           // Inside the comment block — skip
           continue;
         }
