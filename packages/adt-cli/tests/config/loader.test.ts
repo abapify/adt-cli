@@ -82,6 +82,21 @@ describe('YAML configuration loading', () => {
   });
 
   it.each([
+    { environment: '', expected: '' },
+    { environment: undefined, expected: '${ADT_CONFIG_TEST_OUTPUT}' },
+    { environment: './generated', expected: './generated' },
+  ])(
+    'preserves an environment value of $environment',
+    async ({ environment, expected }) => {
+      vi.stubEnv('ADT_CONFIG_TEST_OUTPUT', environment);
+      const config = await load(
+        'defaults:\n  outputPath: ${ADT_CONFIG_TEST_OUTPUT}\n',
+      );
+      expect(config.defaults?.outputPath).toBe(expected);
+    },
+  );
+
+  it.each([
     '!!js/function function(){}',
     '!!js/regexp /x/',
     '!!js/undefined value',

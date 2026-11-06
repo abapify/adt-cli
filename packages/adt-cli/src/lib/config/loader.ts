@@ -241,7 +241,7 @@ export class ConfigLoader implements IConfigLoader {
         value.endsWith('}')
       ) {
         const envVar = value.slice(2, -1);
-        return process.env[envVar] || value;
+        return process.env[envVar] ?? value;
       } else if (typeof value === 'object' && value !== null) {
         if (ancestors.has(value)) {
           throw new Error('Cyclic configuration values are not supported');
