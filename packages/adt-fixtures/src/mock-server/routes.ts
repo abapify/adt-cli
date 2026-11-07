@@ -738,7 +738,7 @@ export function matchRoute(
     url.startsWith('/sap/bc/adt/repository/informationsystem/search')
   ) {
     const query =
-      new URL(url, 'http://mock').searchParams.get('query')?.toUpperCase() ??
+      new URL(url, 'https://mock').searchParams.get('query')?.toUpperCase() ??
       '';
     if (
       query.includes('MOCK_CTS') ||

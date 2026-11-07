@@ -45,8 +45,8 @@ export async function extractJars(
   }
   ensureDir(output);
 
-  // Build unzip command - no patterns = extract everything
-  const patternArgs = patterns ? patterns.map((p) => `"${p}"`).join(' ') : '';
+  // Files to extract - no patterns = extract everything
+  const fileArgs = patterns ?? [];
 
   for (const jar of jars) {
     const jarName = basename(jar);
@@ -57,9 +57,7 @@ export async function extractJars(
 
     try {
       // Just unzip, preserving directory structure
-      execOutput(
-        `unzip -o -q "${jar}" ${patternArgs} -d "${output}" 2>/dev/null || true`,
-      );
+      execOutput('unzip', ['-o', '-q', jar, ...fileArgs, '-d', output]);
     } catch {
       // unzip returns non-zero if no matches, that's ok
     }

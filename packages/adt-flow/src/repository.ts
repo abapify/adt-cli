@@ -31,12 +31,14 @@ export interface RepositoryPlan {
   moved: Array<{ from: string; to: string }>;
 }
 
-// Empty string, exactly '.', NUL, or backslash make a path unsafe as input.
-const INVALID_RELATIVE_PATH = /^(?:$|\.$)|[\0\\]/;
+// NUL or backslash anywhere in the path make it unsafe as input.
+const UNSAFE_PATH_CHARS = /[\0\\]/;
 
 function isValidRelativeInput(path: string): boolean {
   return (
-    !INVALID_RELATIVE_PATH.test(path) &&
+    path !== '' &&
+    path !== '.' &&
+    !UNSAFE_PATH_CHARS.test(path) &&
     !isAbsolute(path) &&
     !posix.isAbsolute(path)
   );

@@ -82,7 +82,7 @@ jobs:
       # This line enables distribution
       # The "--stop-agents-after" is optional, but allows idle agents to shut down once the "e2e-ci" targets have been requested
       # - run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
-      - run: bun install
+      - run: bun install --frozen-lockfile --ignore-scripts
         if: steps.changes.outputs.has-code-changes == 'true'
 
       - uses: nrwl/nx-set-shas@afb73a62d26e41464e9254689e1fd6122ee683c1 # v5

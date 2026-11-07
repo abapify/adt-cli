@@ -128,14 +128,20 @@ export function transportPage({
       )}
       {transport.tasks.length > 0 && (
         <Box marginTop={1}>
-          <Text bold color="yellow">
+          <Text
+            bold
+            color="yellow"
+          >
             📋 Tasks ({transport.tasks.length}):
           </Text>
         </Box>
       )}
       {transport.objects.length > 0 && (
         <Box marginTop={1}>
-          <Text bold color="cyan">
+          <Text
+            bold
+            color="cyan"
+          >
             📦 Objects ({transport.objects.length}):
           </Text>
         </Box>
@@ -146,7 +152,7 @@ export function transportPage({
   const isTask = transport.isTask;
   return {
     title: `${isTask ? 'Task' : 'Transport Request'}: ${transport.number}`,
-    icon: isTask ? '�' : '�',
+    icon: isTask ? '📋' : '📦',
     color: isTask ? 'yellow' : 'cyan',
     subtitle:
       isTask && transport.parent ? `Parent: ${transport.parent}` : undefined,

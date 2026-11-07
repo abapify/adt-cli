@@ -3,8 +3,11 @@
 # Nothing is downloaded from the npm registry for @abapify/* packages.
 FROM node:24-bookworm AS builder
 
-# Install bun (matches the version used in CI)
-RUN npm install -g bun@1.3.14
+# Install bun (matches the version used in CI). npm lifecycle scripts are
+# suppressed except bun's own install step, which only places its pinned
+# platform binary — nothing else gets to run code at install time.
+RUN npm install -g --ignore-scripts bun@1.3.14 \
+ && (cd "$(npm root -g)/bun" && node install.js)
 
 WORKDIR /build
 
@@ -20,7 +23,7 @@ COPY samples/  ./samples/
 COPY website/package.json ./website/package.json
 
 # Install all dependencies (including dev deps needed for the build)
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Disable the Nx daemon and TUI (not needed / unsupported in Docker builds)
 ENV NX_DAEMON=false
@@ -28,7 +31,7 @@ ENV NX_TUI=false
 
 # Build every publishable package (docs site is excluded — its sources are
 # intentionally not copied into the image).
-RUN npx nx run-many -t build --parallel=2 --exclude=adt-cli-docs
+RUN ./node_modules/.bin/nx run-many -t build --parallel=2 --exclude=adt-cli-docs
 
 # ── Stage 2: runner ──────────────────────────────────────────────────────────
 # Lean image that ships only the built artifacts and their runtime deps.
@@ -60,7 +63,14 @@ ENV PATH="/app/node_modules/.bin:$PATH"
 RUN smoke_dir="$(mktemp -d)" \
  && trap 'rm -rf "$smoke_dir"' EXIT \
  && printf '%s\n' 'export default { commands: ["@abapify/adt-flow/commands/flow"] };' > "$smoke_dir/adt.config.mjs" \
- && ADT_FLOW_SMOKE_CLI="$(command -v adt)" node -e "const load = require(\"node:module\").createRequire(require(\"node:fs\").realpathSync(process.env.ADT_FLOW_SMOKE_CLI)); if (!load(\"@abapify/adt-cli/package.json\").dependencies?.[\"@abapify/adt-flow\"]) throw new Error(\"CLI does not declare its flow runtime dependency\");" \
+ && printf '%s\n' \
+      'const load = require("node:module").createRequire(' \
+      '  require("node:fs").realpathSync(process.env.ADT_FLOW_SMOKE_CLI));' \
+      'const deps = load("@abapify/adt-cli/package.json").dependencies;' \
+      'if (!deps?.["@abapify/adt-flow"]) {' \
+      '  throw new Error("CLI does not declare its flow runtime dependency");' \
+      '}' > "$smoke_dir/flow-dep-check.cjs" \
+ && ADT_FLOW_SMOKE_CLI="$(command -v adt)" node "$smoke_dir/flow-dep-check.cjs" \
  && adt --config "$smoke_dir/adt.config.mjs" flow checkout tr --help > "$smoke_dir/flow-help.txt" \
  && grep -Eq -- '(^|[[:space:],])--partial([[:space:],]|$)' "$smoke_dir/flow-help.txt" \
  && grep -q -- '--report <file>' "$smoke_dir/flow-help.txt"

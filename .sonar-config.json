@@ -1,0 +1,8 @@
+{
+  "project": {
+    "projectKey": "abapify_adt-cli",
+    "path": ".",
+    "region": "eu",
+    "organization": "theplenkov"
+  }
+}

@@ -69,7 +69,7 @@ jobs:
           bun-version: 1.4.2
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Override @abapify scope registry for npmjs publishing
         # The repo-level .npmrc is shaped for CI CONSUMERS of the package
@@ -279,6 +279,9 @@ jobs:
         # see adt-schemas using `.loose()` while gcts-cli pinned zod 3,
         # which crashed `adt` on startup in 0.4.4/0.4.5. Install the
         # just-published packages in isolation and execute them.
+        env:
+          PUBLISH_AFFECTED: ${{ steps.pub.outputs.affected }}
+          WORKSPACE_DIR: ${{ github.workspace }}
         run: |
           set -e
           # Packages released in this run must reach their disk version on
@@ -286,15 +289,16 @@ jobs:
           # minutes; the v0.4.7 smoke resolved a stale adt-mcp@0.4.6).
           # Packages NOT in the release keep their latest published
           # version — resolving latest for them is correct, not stale.
-          AFFECTED=",${{ steps.pub.outputs.affected }},"
-          in_set() { case "$AFFECTED" in *",$1,"*) return 0;; *) return 1;; esac; }
-          disk_ver() { node -p "require('${{ github.workspace }}/packages/$1/package.json').version"; }
+          AFFECTED=",$PUBLISH_AFFECTED,"
+          in_set() { local item="$1"; case "$AFFECTED" in *",$item,"*) return 0;; *) return 1;; esac; }
+          disk_ver() { local project="$1"; node -p "require('$WORKSPACE_DIR/packages/$project/package.json').version"; }
           want_ver() {
             # $1=nx project name $2=npm package name
-            if in_set "$1"; then
-              disk_ver "$1"
+            local project="$1" package="$2"
+            if in_set "$project"; then
+              disk_ver "$project"
             else
-              npm view "$2" version --loglevel=error
+              npm view "$package" version --loglevel=error
             fi
           }
           mkdir -p /tmp/adt-smoke && cd /tmp/adt-smoke
