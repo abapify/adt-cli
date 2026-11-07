@@ -24,6 +24,7 @@ import {
   type AdtClient,
   createAdk,
 } from '@abapify/adk';
+import type { FileTree } from '@abapify/adt-plugin';
 import {
   createFileTree,
   FilteredFileTree,
@@ -539,7 +540,7 @@ export const roundtripCommand: CliCommandPlugin = {
   ],
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
-    const options = args as RoundtripCliOptions;
+    const options = args as unknown as RoundtripCliOptions;
 
     if (!ctx.getAdtClient) {
       ctx.logger.error('❌ ADT client not available. Run: adt auth login');

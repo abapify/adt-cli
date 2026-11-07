@@ -154,17 +154,17 @@ function collectSchemas(ctx: any): Map<string, SchemaInfo> {
  */
 function resolveSchemaOutputPath(
   output: SchemaOutput,
-  isFunction: boolean,
   info: SchemaInfo,
   seenPaths: Set<string>,
   unique: boolean,
 ): string | false {
-  const filePath: string | false = isFunction
-    ? output(info)
-    : output
-        .replaceAll('{contentType}', info.contentType)
-        .replaceAll('{format}', info.format)
-        .replaceAll('{schemaPath}', info.schemaPath);
+  const filePath: string | false =
+    typeof output === 'function'
+      ? output(info)
+      : output
+          .replaceAll('{contentType}', info.contentType)
+          .replaceAll('{format}', info.format)
+          .replaceAll('{schemaPath}', info.schemaPath);
 
   if (filePath === false) return false; // Skip this schema
 
@@ -195,7 +195,6 @@ export function bootstrapSchemas(
 
     hooks: {
       async finalize(ctx) {
-        const isFunction = typeof output === 'function';
         const seenPaths = new Set<string>();
         const schemas = collectSchemas(ctx);
 
@@ -205,7 +204,6 @@ export function bootstrapSchemas(
         for (const info of schemas.values()) {
           const filePath = resolveSchemaOutputPath(
             output,
-            isFunction,
             info,
             seenPaths,
             unique,

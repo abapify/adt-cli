@@ -101,7 +101,7 @@ export const exportCommand: CliCommandPlugin = {
   ],
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
-    const options = args as ExportCliOptions;
+    const options = args as unknown as ExportCliOptions;
 
     // Transport is optional:
     // - Objects in $TMP or local packages don't need TR

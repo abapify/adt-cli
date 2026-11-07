@@ -253,7 +253,7 @@ export const activateCommand: CliCommandPlugin = {
   ],
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
-    const options = args as ActivateCliOptions;
+    const options = args as unknown as ActivateCliOptions;
 
     if (!ctx.getAdtClient) {
       ctx.logger.error('❌ ADT client not available. Run: adt auth login');

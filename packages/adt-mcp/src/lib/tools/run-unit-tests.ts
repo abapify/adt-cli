@@ -44,6 +44,21 @@ type AunitProgram = NonNullable<
   AunitResultData['runResult']['program']
 >[number];
 
+/** Structural view of the raw AUnit XML shapes the tally traversal needs. */
+interface AunitAlertLike {
+  kind?: string;
+  severity?: string;
+}
+interface AunitTestMethodLike {
+  alerts?: { alert?: AunitAlertLike | AunitAlertLike[] };
+}
+interface AunitTestClassLike {
+  testMethods?: { testMethod?: AunitTestMethodLike | AunitTestMethodLike[] };
+}
+interface AunitProgramLike {
+  testClasses?: { testClass?: AunitTestClassLike | AunitTestClassLike[] };
+}
+
 /**
  * Full run-configuration body type including objectReferences.
  *
@@ -117,14 +132,7 @@ function buildRunConfiguration(
   };
 }
 
-type AunitTestClassNode = NonNullable<AunitProgram['testClasses']>['testClass'];
-type AunitTestClassItem =
-  AunitTestClassNode extends ReadonlyArray<infer T> ? T : AunitTestClassNode;
-type AunitTestMethodNode = NonNullable<
-  NonNullable<AunitTestClassItem['testMethods']>['testMethod']
->;
-type AunitTestMethodItem =
-  AunitTestMethodNode extends ReadonlyArray<infer T> ? T : AunitTestMethodNode;
+type AunitTestMethodItem = AunitTestMethodLike;
 
 function toArray<T>(value: T | readonly T[]): T[] {
   return Array.isArray(value) ? [...value] : [value as T];
@@ -172,7 +180,7 @@ function normalizeResult(response: AunitResultData): {
     errorCount: 0,
   };
 
-  for (const prog of programs) {
+  for (const prog of programs as AunitProgramLike[]) {
     const testClasses = prog.testClasses?.testClass ?? [];
     for (const tc of toArray(testClasses)) {
       const methods = tc?.testMethods?.testMethod ?? [];
