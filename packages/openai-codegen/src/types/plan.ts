@@ -110,7 +110,7 @@ function classifyVisit(
   atRoot: boolean,
   ctx: CollectContext,
 ): boolean {
-  const { rootId, deps, plannedIds, enqueueInline, schemaToId } = ctx;
+  const { rootId, deps, schemaToId } = ctx;
   if (isRef(schema)) {
     const name = componentNameFromRef(schema.$ref);
     if (name) {
