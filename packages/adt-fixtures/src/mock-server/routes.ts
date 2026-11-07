@@ -1527,7 +1527,9 @@ function releaseRequestWithTasks(f: LoadedFixtures): void {
       value: 'Released',
     });
   }
-  for (const [taskNumber, response] of f.transportTaskResponses) {
+  // Snapshot before mutating the map in the loop body: entries updated via
+  // .set() must not affect the traversal (cf. release handler below).
+  for (const [taskNumber, response] of [...f.transportTaskResponses]) {
     let updated = replaceRequestAttribute(response, {
       name: 'status',
       value: 'R',
@@ -1793,7 +1795,8 @@ function applyTransportOwnerUpdate(
         value: targetUser,
       });
     }
-    for (const [taskNumber, response] of f.transportTaskResponses) {
+    // Snapshot before mutating the map in the loop body.
+    for (const [taskNumber, response] of [...f.transportTaskResponses]) {
       let updated = replaceRequestAttribute(response, {
         name: 'owner',
         value: targetUser,
