@@ -7,6 +7,7 @@ import type { CliContext, ExportOptions } from '@abapify/adt-plugin';
 import {
   AdkObjectSet,
   type AdkContext,
+  type AdkObject,
   tryGetGlobalContext,
 } from '@abapify/adk';
 import { createLockService, FileLockStore } from '@abapify/adt-locks';
@@ -19,6 +20,11 @@ import {
 } from '../utils/filetree';
 import { loadFormatPlugin } from '../utils/format-plugin';
 import type { ExportCliOptions, ExportClient } from './export-types';
+
+/** Target package of an object, as assigned by the format plugin. */
+export function getTargetPackageName(obj: AdkObject): string | undefined {
+  return (obj as any)._data?.packageRef?.name as string | undefined;
+}
 
 /**
  * Early check: PREFIX folder logic requires an explicit --package flag.
@@ -47,20 +53,31 @@ async function checkPrefixFolderLogic(
   }
 }
 
+/** Group object names by their target package. */
+function groupObjectNamesByPackage(
+  objectSet: AdkObjectSet,
+): Map<string, string[]> {
+  const pkgMap = new Map<string, string[]>();
+  for (const obj of objectSet) {
+    const pkgName = getTargetPackageName(obj);
+    if (!pkgName) continue;
+    const names = pkgMap.get(pkgName);
+    if (names) {
+      names.push(obj.name);
+    } else {
+      pkgMap.set(pkgName, [obj.name]);
+    }
+  }
+  return pkgMap;
+}
+
 /** Log package assignments (resolved by the format plugin). */
 function logPackageAssignments(
   objectSet: AdkObjectSet,
   effectiveRootPackage: string,
   ctx: CliContext,
 ): void {
-  const pkgMap = new Map<string, string[]>();
-  for (const obj of objectSet) {
-    const pkgName = (obj as any)._data?.packageRef?.name as string | undefined;
-    if (pkgName) {
-      if (!pkgMap.has(pkgName)) pkgMap.set(pkgName, []);
-      pkgMap.get(pkgName)!.push(obj.name);
-    }
-  }
+  const pkgMap = groupObjectNamesByPackage(objectSet);
   if (pkgMap.size > 0) {
     ctx.logger.info(`📦 Package resolution: ${effectiveRootPackage}`);
     for (const [pkg, objects] of pkgMap) {
@@ -79,26 +96,34 @@ function logPackageAssignments(
  * When omitted, we look at objects that already have packageRef from the
  * format plugin and pick the shortest (= root-most) one.
  */
+/** True when `pkgName` sits closer to the root than `current` (shorter name). */
+function isRootMostPackage(
+  current: string | undefined,
+  pkgName: string,
+): boolean {
+  return !current || pkgName.length < current.length;
+}
+
+/** Root-most (shortest) package name referenced by the object set. */
+function findRootMostPackage(objectSet: AdkObjectSet): string | undefined {
+  let rootMost: string | undefined;
+  for (const obj of objectSet) {
+    const pkgName = getTargetPackageName(obj);
+    if (pkgName && isRootMostPackage(rootMost, pkgName)) {
+      rootMost = pkgName;
+    }
+  }
+  return rootMost;
+}
+
 export function resolveEffectiveRootPackage(
   objectSet: AdkObjectSet,
   options: ExportCliOptions,
   ctx: CliContext,
 ): string | undefined {
-  let effectiveRootPackage = options.package;
-
-  if (!effectiveRootPackage) {
-    // Find root from objects that already have packageRef
-    for (const obj of objectSet) {
-      const pkgName = (obj as any)._data?.packageRef?.name as
-        string | undefined;
-      if (
-        pkgName &&
-        (!effectiveRootPackage || pkgName.length < effectiveRootPackage.length)
-      ) {
-        effectiveRootPackage = pkgName;
-      }
-    }
-  }
+  // Find root from objects that already have packageRef
+  const effectiveRootPackage =
+    options.package || findRootMostPackage(objectSet);
 
   // Log package assignments (resolved by format plugin)
   if (effectiveRootPackage) {
@@ -115,6 +140,53 @@ export interface ExportRuntime {
   objectSet: AdkObjectSet;
 }
 
+/** Parse the comma-separated --types filter into normalized type names. */
+function parseObjectTypesFilter(
+  types: string | undefined,
+): string[] | undefined {
+  return types
+    ? types.split(',').map((t) => t.trim().toUpperCase())
+    : undefined;
+}
+
+/** Build the ADK context, reusing the global lock service when available. */
+function createAdkContext(client: ExportClient): AdkContext {
+  // Reuse global context's lock service if available, otherwise create one
+  const globalCtx = tryGetGlobalContext();
+  const lockStore = globalCtx?.lockStore ?? new FileLockStore();
+  const lockService =
+    globalCtx?.lockService ??
+    createLockService(client as any, { store: lockStore });
+  return { client: client as any, lockStore, lockService };
+}
+
+/** Match full type (CLAS/OC) or prefix (CLAS). */
+function matchesObjectType(objType: string, objectTypes: string[]): boolean {
+  const upper = objType.toUpperCase();
+  const prefix = upper.split('/')[0];
+  return objectTypes.includes(upper) || objectTypes.includes(prefix);
+}
+
+/** Build the --types filter callback for AdkObjectSet.fromGenerator. */
+function createTypeFilter(
+  objectTypes: string[] | undefined,
+  result: ExportResult,
+): ((obj: AdkObject) => boolean) | undefined {
+  if (!objectTypes) return undefined;
+  return (obj) => {
+    const included = matchesObjectType(obj.type, objectTypes);
+    if (!included) {
+      result.skipped++;
+      result.objects.push({
+        type: obj.type,
+        name: obj.name,
+        status: 'skipped',
+      });
+    }
+    return included;
+  };
+}
+
 /**
  * Load the format plugin, scan the file tree and collect the export
  * objects into an AdkObjectSet (applying the optional type filter).
@@ -127,9 +199,7 @@ export async function collectExportObjects(
   ctx: CliContext,
 ): Promise<ExportRuntime | null> {
   // Parse object types filter
-  const objectTypes = options.types
-    ? options.types.split(',').map((t) => t.trim().toUpperCase())
-    : undefined;
+  const objectTypes = parseObjectTypesFilter(options.types);
 
   // Load format plugin
   ctx.logger.info(`📦 Loading format plugin: ${options.format}...`);
@@ -147,17 +217,7 @@ export async function collectExportObjects(
   // Get ADT client and create ADK context
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = (await ctx.getAdtClient!()) as any;
-  // Reuse global context's lock service if available, otherwise create one
-  const globalCtx = tryGetGlobalContext();
-  const lockStore = globalCtx?.lockStore ?? new FileLockStore();
-  const lockService =
-    globalCtx?.lockService ??
-    createLockService(client as any, { store: lockStore });
-  const adkContext: AdkContext = {
-    client: client as any,
-    lockStore,
-    lockService,
-  };
+  const adkContext = createAdkContext(client);
 
   ctx.logger.info('🔍 Scanning files and building object tree...');
 
@@ -172,24 +232,7 @@ export async function collectExportObjects(
     plugin.format.export(fileTree, client, exportOptions),
     adkContext,
     {
-      filter: objectTypes
-        ? (obj) => {
-            // Match full type (CLAS/OC) or prefix (CLAS)
-            const objType = obj.type.toUpperCase();
-            const objPrefix = objType.split('/')[0];
-            const included =
-              objectTypes.includes(objType) || objectTypes.includes(objPrefix);
-            if (!included) {
-              result.skipped++;
-              result.objects.push({
-                type: obj.type,
-                name: obj.name,
-                status: 'skipped',
-              });
-            }
-            return included;
-          }
-        : undefined,
+      filter: createTypeFilter(objectTypes, result),
       onObject: (obj) => {
         result.discovered++;
         ctx.logger.info(`   📄 ${obj.kind} ${obj.name}`);

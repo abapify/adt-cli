@@ -4,12 +4,21 @@
  */
 
 import { AdkPackage, type AdkObjectSet } from '@abapify/adk';
-import type { ExportCliOptions, ExportContext } from './export-types';
+import { getTargetPackageName } from './export-collect';
+import type {
+  ExportCliOptions,
+  ExportClient,
+  ExportContext,
+} from './export-types';
 
-/** Inputs for creating one missing subpackage under its expected super. */
-interface SubpackagePlan {
+/** A subpackage and the super package it must hang under. */
+interface PackageAssignment {
   pkgName: string;
   expectedSuper: string;
+}
+
+/** Inputs for creating one missing subpackage under its expected super. */
+interface SubpackagePlan extends PackageAssignment {
   /** Root package read from SAP — source of responsible / transport inheritance. */
   rootPkg: Awaited<ReturnType<typeof AdkPackage.get>> | undefined;
   /** Transport config inherited from the root package (SAP needs both fields). */
@@ -60,12 +69,12 @@ function rewriteSuperPackageTag(xml: string, expectedSuper: string): string {
  * 4. UNLOCK ?lockHandle=...
  */
 async function fixSuperPackage(
-  pkgName: string,
-  expectedSuper: string,
+  plan: PackageAssignment,
   context: ExportContext,
   options: ExportCliOptions,
 ): Promise<void> {
   const { client, adkContext, ctx } = context;
+  const { pkgName, expectedSuper } = plan;
   const pkgUri = `/sap/bc/adt/packages/${encodeURIComponent(pkgName)}`;
   const acceptHeader =
     'application/vnd.sap.adt.packages.v2+xml, application/vnd.sap.adt.packages.v1+xml';
@@ -130,6 +139,60 @@ async function fixSuperPackage(
   }
 }
 
+/** Responsible inherited from the root package ('' when none). */
+function inheritedResponsible(rootPkg: SubpackagePlan['rootPkg']): string {
+  return rootPkg?.dataSync?.responsible ?? '';
+}
+
+/** The authenticated user, upper-cased (SAP's responsible format). */
+function authenticatedUser(client: ExportClient): string {
+  return (client as any).username?.toUpperCase?.() ?? '';
+}
+
+/**
+ * Use root package's responsible, but fall back to the
+ * authenticated user when root is a system package like $TMP
+ * (whose responsible is 'SAP', which SAP rejects on creation).
+ */
+function resolveResponsible(
+  rootPkg: SubpackagePlan['rootPkg'],
+  client: ExportClient,
+): string {
+  const responsible = inheritedResponsible(rootPkg);
+  const usable = responsible !== '' && responsible.toUpperCase() !== 'SAP';
+  return usable ? responsible : authenticatedUser(client);
+}
+
+/** True for common create failures where the hint below is actionable. */
+function isActionableCreateError(errMsg: string): boolean {
+  const hints = ['409', 'change request', 'authorization'];
+  return hints.some((hint) => errMsg.includes(hint));
+}
+
+/** Log a failed AdkPackage.create; true when the package exists after all. */
+async function handleCreateFailure(
+  pkgName: string,
+  createErr: unknown,
+  context: ExportContext,
+): Promise<boolean> {
+  const { adkContext, ctx } = context;
+  const errMsg =
+    createErr instanceof Error ? createErr.message : String(createErr);
+  // Check if the package actually exists now (race condition or partial success)
+  const existsNow = await AdkPackage.exists(pkgName, adkContext);
+  if (existsNow) {
+    ctx.logger.info(`   ✅ ${pkgName} already exists`);
+    return true;
+  }
+  ctx.logger.warn(`   ⚠️ Failed to create ${pkgName}: ${errMsg}`);
+  if (isActionableCreateError(errMsg)) {
+    ctx.logger.warn(
+      `      💡 Hint: Use -t <transport> for non-local packages, or -p '$TMP' for local development`,
+    );
+  }
+  return false;
+}
+
 /**
  * Create a missing subpackage under `expectedSuper`, inheriting software
  * component / transport layer / responsible from the root package.
@@ -146,19 +209,11 @@ async function createSubpackage(
     `   📦 Creating subpackage ${pkgName} (in ${expectedSuper})...`,
   );
   try {
-    // Use root package's responsible, but fall back to the
-    // authenticated user when root is a system package like $TMP
-    // (whose responsible is 'SAP', which SAP rejects on creation).
-    let responsible = rootPkg?.dataSync?.responsible ?? '';
-    if (!responsible || responsible.toUpperCase() === 'SAP') {
-      responsible = (client as any).username?.toUpperCase?.() ?? '';
-    }
-
     await AdkPackage.create(
       pkgName,
       {
         description: pkgName,
-        responsible,
+        responsible: resolveResponsible(rootPkg, client),
         superPackage: { name: expectedSuper },
         attributes: {
           packageType: 'development',
@@ -176,26 +231,7 @@ async function createSubpackage(
     ctx.logger.info(`   ✅ Created ${pkgName}`);
     return true;
   } catch (createErr) {
-    const errMsg =
-      createErr instanceof Error ? createErr.message : String(createErr);
-    // Check if the package actually exists now (race condition or partial success)
-    const existsNow = await AdkPackage.exists(pkgName, adkContext);
-    if (existsNow) {
-      ctx.logger.info(`   ✅ ${pkgName} already exists`);
-      return true;
-    }
-    ctx.logger.warn(`   ⚠️ Failed to create ${pkgName}: ${errMsg}`);
-    if (
-      // Provide actionable guidance for common failures
-      errMsg.includes('409') ||
-      errMsg.includes('change request') ||
-      errMsg.includes('authorization')
-    ) {
-      ctx.logger.warn(
-        `      💡 Hint: Use -t <transport> for non-local packages, or -p '$TMP' for local development`,
-      );
-    }
-    return false;
+    return handleCreateFailure(pkgName, createErr, context);
   }
 }
 
@@ -286,12 +322,12 @@ function resolveExpectedSuper(
  * (e.g. from a prior buggy deploy). Returns true when it was fixed.
  */
 async function verifyAndFixSuperPackage(
-  pkgName: string,
-  expectedSuper: string,
+  plan: PackageAssignment,
   context: ExportContext,
   options: ExportCliOptions,
 ): Promise<boolean> {
   const { adkContext, ctx } = context;
+  const { pkgName, expectedSuper } = plan;
   try {
     const pkg = await AdkPackage.get(pkgName, adkContext);
     const currentSuper = pkg.superPackage?.name ?? '';
@@ -299,7 +335,7 @@ async function verifyAndFixSuperPackage(
       ctx.logger.info(
         `   📦 Fixing ${pkgName}: ${currentSuper} → ${expectedSuper}`,
       );
-      await fixSuperPackage(pkgName, expectedSuper, context, options);
+      await fixSuperPackage(plan, context, options);
       return true;
     }
   } catch (fixErr) {
@@ -308,6 +344,45 @@ async function verifyAndFixSuperPackage(
     );
   }
   return false;
+}
+
+/** Unique target subpackage names from object targets (root excluded). */
+function collectLeafPackages(
+  objectSet: AdkObjectSet,
+  effectiveRootPackage: string,
+): Set<string> {
+  const leafPackages = new Set<string>();
+  for (const obj of objectSet) {
+    const pkgName = getTargetPackageName(obj);
+    if (pkgName && pkgName !== effectiveRootPackage) {
+      leafPackages.add(pkgName);
+    }
+  }
+  return leafPackages;
+}
+
+/** Software component / transport layer names inherited from the root package. */
+function inheritedTransportNames(rootPkg: SubpackagePlan['rootPkg']): {
+  swComp: string;
+  trLayer: string;
+} {
+  const transport = rootPkg?.transport;
+  return {
+    swComp: transport?.softwareComponent?.name ?? '',
+    trLayer: transport?.transportLayer?.name ?? '',
+  };
+}
+
+/** Build the transport config for AdkPackage.create (SAP needs both fields). */
+function buildTransportConfig(
+  rootPkg: SubpackagePlan['rootPkg'],
+): SubpackagePlan['transportConfig'] {
+  const { swComp, trLayer } = inheritedTransportNames(rootPkg);
+  if (!swComp && !trLayer) return undefined;
+  return {
+    softwareComponent: { name: swComp },
+    transportLayer: { name: trLayer },
+  };
 }
 
 /**
@@ -326,13 +401,7 @@ export async function ensureSubpackages(
 ): Promise<void> {
   const { adkContext, ctx } = context;
   // Collect unique subpackage names from object targets
-  const leafPackages = new Set<string>();
-  for (const obj of objectSet) {
-    const pkgName = (obj as any)._data?.packageRef?.name as string | undefined;
-    if (pkgName && pkgName !== effectiveRootPackage) {
-      leafPackages.add(pkgName);
-    }
-  }
+  const leafPackages = collectLeafPackages(objectSet, effectiveRootPackage);
   if (leafPackages.size === 0) return;
 
   const sortedPkgs = expandSubpackageHierarchy(
@@ -347,15 +416,7 @@ export async function ensureSubpackages(
 
   // Build transport config once — SAP requires both softwareComponent
   // and transportLayer when transport element is present
-  const swComp = rootPkg?.transport?.softwareComponent?.name;
-  const trLayer = rootPkg?.transport?.transportLayer?.name;
-  const transportConfig =
-    swComp || trLayer
-      ? {
-          softwareComponent: { name: swComp ?? '' },
-          transportLayer: { name: trLayer ?? '' },
-        }
-      : undefined;
+  const transportConfig = buildTransportConfig(rootPkg);
 
   // Track known packages for super-package resolution
   const knownPackages = new Set<string>([effectiveRootPackage]);
@@ -364,11 +425,14 @@ export async function ensureSubpackages(
   for (const pkgName of sortedPkgs) {
     // Resolve expected super package: longest known package
     // that is a proper prefix of this one (with '_' separator).
-    const expectedSuper = resolveExpectedSuper(
-      knownPackages,
+    const assignment: PackageAssignment = {
       pkgName,
-      effectiveRootPackage,
-    );
+      expectedSuper: resolveExpectedSuper(
+        knownPackages,
+        pkgName,
+        effectiveRootPackage,
+      ),
+    };
 
     const exists = await AdkPackage.exists(pkgName, adkContext);
     if (exists) {
@@ -376,8 +440,7 @@ export async function ensureSubpackages(
 
       // Verify super package — fix if wrong (e.g. from a prior buggy deploy)
       const fixed = await verifyAndFixSuperPackage(
-        pkgName,
-        expectedSuper,
+        assignment,
         context,
         options,
       );
@@ -386,7 +449,7 @@ export async function ensureSubpackages(
     }
 
     const created = await createSubpackage(
-      { pkgName, expectedSuper, rootPkg, transportConfig },
+      { ...assignment, rootPkg, transportConfig },
       context,
       options,
     );
