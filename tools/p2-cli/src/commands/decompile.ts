@@ -138,7 +138,7 @@ export async function decompile(
         // Escape regex metacharacters in user input before expanding the
         // glob wildcard, to prevent regex-injection.
         const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
-        const regex = new RegExp(escaped.replaceAll(/\*/g, '.*'));
+        const regex = new RegExp('^' + escaped.replaceAll(/\*/g, '.*') + '$');
         return regex.test(jarName);
       });
     });

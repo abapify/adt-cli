@@ -2,24 +2,13 @@ import { lstat, realpath } from 'node:fs/promises';
 import { isAbsolute, normalize, relative, resolve, sep } from 'node:path';
 
 function isWithin(root: string, candidate: string): boolean {
-  const normalizedRoot = normalize(root);
-  const normalizedCandidate = normalize(candidate);
-  if (normalizedCandidate === normalizedRoot) {
-    return true;
-  }
-  if (!normalizedCandidate.startsWith(normalizedRoot + sep)) {
-    // Also handle case where root might not end with separator in comparison
-    // but ensure we don't have partial matches
-    const rel = relative(normalizedRoot, normalizedCandidate);
-    if (rel.startsWith('..') || isAbsolute(rel)) {
-      return false;
-    }
-    return !rel.split(sep).includes('..');
-  }
-  const path = relative(normalizedRoot, normalizedCandidate);
+  const rel = relative(normalize(root), normalize(candidate));
+  // '' means candidate is root itself; anything that escapes the root starts
+  // with '..' or is absolute. Names that merely start with '..' (e.g. '..foo')
+  // are legitimate and must stay inside.
   return (
-    path === '' ||
-    (!isAbsolute(path) && !path.split(sep).filter(Boolean).includes('..'))
+    rel === '' ||
+    (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
   );
 }
 
