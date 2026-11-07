@@ -114,6 +114,8 @@ async function checkBodyFixtureRoundTrips(
 ): Promise<void> {
   const xml = await fixture.load();
   const parsed = schema.parse(xml);
+  // Intentional skip: `build` is optional in the schema contract, so a schema
+  // without a builder is parse-checked only (same as before this extraction).
   if (schema.build) {
     const rebuilt = schema.build(parsed);
     expect(rebuilt).toContain('<?xml');

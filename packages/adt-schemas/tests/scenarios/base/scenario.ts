@@ -32,14 +32,18 @@ export abstract class Scenario<S extends TestableSchema = TestableSchema> {
 
 /**
  * Load, parse and build one fixture for a scenario.
+ *
+ * `build` is optional in `TypedSchema`; when a schema exposes none, the
+ * fixture is parsed only and `built` stays undefined — the build-dependent
+ * checks are skipped rather than crashing on the missing method.
  */
 async function prepareFixture<S extends TestableSchema>(
   scenario: Scenario<S>,
   fixture: FixtureHandle,
-): Promise<{ parsed: SchemaType<S>; built: string }> {
+): Promise<{ parsed: SchemaType<S>; built?: string }> {
   const xml = await fixture.load();
   const parsed = scenario.schema.parse(xml) as SchemaType<S>;
-  const built = scenario.schema.build!(parsed);
+  const built = scenario.schema.build?.(parsed);
   return { parsed, built };
 }
 
@@ -70,7 +74,9 @@ function assertRoundTrips<S extends TestableSchema>(
   built: string,
 ): void {
   const parsed2 = scenario.schema.parse(built);
-  const built2 = scenario.schema.build!(parsed2 as SchemaType<S>);
+  const build = scenario.schema.build;
+  if (!build) return; // parse-only schema: nothing to re-build
+  const built2 = build.call(scenario.schema, parsed2 as SchemaType<S>);
   expect(built).toBe(built2);
 }
 
@@ -90,9 +96,13 @@ export async function checkScenarioFixture<S extends TestableSchema>(
 
   assertParsedDefined(parsed);
   assertValidatesParsed(scenario, parsed);
-  assertBuiltXml(built);
-  assertValidatesBuilt(scenario, built);
-  assertRoundTrips(scenario, built);
+  // Build-dependent checks run only for schemas that expose a build method;
+  // parse-only schemas keep their parse/content assertions.
+  if (built !== undefined) {
+    assertBuiltXml(built);
+    assertValidatesBuilt(scenario, built);
+    assertRoundTrips(scenario, built);
+  }
 }
 
 /**
@@ -116,10 +126,9 @@ export function runScenario<S extends TestableSchema>(
         // State shared between tests
         const state: {
           parsed: SchemaType<S> | null;
-          built: string;
+          built?: string;
         } = {
           parsed: null,
-          built: '',
         };
 
         beforeAll(async () => {
