@@ -123,11 +123,14 @@ export const getCommand = new Command('get')
       // Handle union type - objectReference may be array or single object
       const rawObjects =
         'objectReference' in searchResult ? searchResult.objectReference : [];
-      const objects = Array.isArray(rawObjects)
-        ? rawObjects
-        : rawObjects
-          ? [rawObjects]
-          : [];
+      let objects: SearchObject[];
+      if (Array.isArray(rawObjects)) {
+        objects = rawObjects;
+      } else if (rawObjects) {
+        objects = [rawObjects];
+      } else {
+        objects = [];
+      }
 
       // Find exact match (also try normalized names, e.g., strip SAPL for FUGR)
       const candidates = normalizeObjectName(objectName);

@@ -14,6 +14,7 @@ import type {
   CliCommandPlugin,
   CliContext,
   ExportOptions,
+  FileTree,
   ImportContext,
 } from '@abapify/adt-plugin';
 import {
@@ -24,7 +25,6 @@ import {
   type AdtClient,
   createAdk,
 } from '@abapify/adk';
-import type { FileTree } from '@abapify/adt-plugin';
 import {
   createFileTree,
   FilteredFileTree,
@@ -105,7 +105,7 @@ async function normalizeXml(xml: string): Promise<string> {
     normalized = formatXmlAttributes(normalized);
 
     return normalized;
-  } catch (_err) {
+  } catch {
     // The exception is ignored on purpose: normalizeXml runs on round-trip
     // input that may legitimately be malformed or non-XML, and falling back
     // to the trimmed original is the desired outcome in that case.

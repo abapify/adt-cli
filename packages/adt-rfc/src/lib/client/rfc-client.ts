@@ -20,9 +20,7 @@ import {
 } from '../transport/types';
 
 /** Explicit `String()` coercion for untyped values. */
-function asText(value: unknown): string {
-  return String(value);
-}
+const asText: (value: unknown) => string = String;
 
 /**
  * Raw fetcher signature the RFC client depends on.

@@ -11,9 +11,7 @@
 import type { AdtClientType, TransportResponse } from '@abapify/adt-contracts';
 
 /** Explicit `String()` coercion for untyped node values. */
-function asText(value: unknown): string {
-  return String(value);
-}
+const asText: (value: unknown) => string = String;
 
 /**
  * Transport data structure (simplified for service consumers)

@@ -93,7 +93,7 @@ export async function runCodegen(
   );
 
   // Second pass: run transforms with global schema map
-  await runTransforms(
+  await runTransforms({
     config,
     sources,
     processedSchemas,
@@ -102,7 +102,7 @@ export async function runCodegen(
     dryRun,
     result,
     log,
-  );
+  });
 
   // Run finalize for all generators
   await runFinalize(
@@ -258,14 +258,13 @@ function parseSchemaInfo(
     globalAllSchemas.set(schemaName, schemaInfo);
 
     // Auto-discover schemas referenced via xs:include or xs:redefine
-    discoverReferencedSchemas(
-      schema as Record<string, unknown>,
-      source.xsdDir,
-      xsdPath,
+    discoverReferencedSchemas(schema as Record<string, unknown>, xsdPath, {
+      xsdDir: source.xsdDir,
       sourceName,
+      discovered: new Set(),
       globalAllSchemas,
       log,
-    );
+    });
 
     return schemaInfo;
   } catch (error) {
@@ -280,27 +279,29 @@ function parseSchemaInfo(
   }
 }
 
+/** Discovery state shared across the recursive schema walk. */
+interface DiscoveryContext {
+  xsdDir: string;
+  sourceName: string;
+  discovered: Set<string>;
+  globalAllSchemas: Map<string, SchemaInfo>;
+  log: (...args: unknown[]) => void;
+}
+
 /**
  * Recursively discover and parse schemas referenced via xs:include or xs:redefine.
  * This ensures schemas like types/devc.xsd are in globalAllSchemas when devc.xsd references them.
  *
  * @param schema - The parsed schema object
- * @param xsdDir - The root XSD directory (e.g., '.xsd')
  * @param currentXsdPath - The path of the current XSD file (for resolving relative paths)
- * @param sourceName - The source name for logging
- * @param globalAllSchemas - Global map of all parsed schemas
- * @param log - Logger
- * @param discovered - Set of already discovered schema names
+ * @param discovery - Shared discovery state (source, registries, logger)
  */
 function discoverReferencedSchemas(
   schema: Record<string, unknown>,
-  xsdDir: string,
   currentXsdPath: string,
-  sourceName: string,
-  globalAllSchemas: Map<string, SchemaInfo>,
-  log: (...args: unknown[]) => void,
-  discovered: Set<string> = new Set(),
+  discovery: DiscoveryContext,
 ): void {
+  const { discovered, globalAllSchemas, log } = discovery;
   // Get includes and redefines from schema
   const includes = schema.include as
     Array<{ schemaLocation?: string }> | undefined;
@@ -337,11 +338,7 @@ function discoverReferencedSchemas(
       ref.schemaLocation,
       refXsdPath,
       schemaNameWithPath,
-      xsdDir,
-      sourceName,
-      discovered,
-      globalAllSchemas,
-      log,
+      discovery,
     );
   }
 }
@@ -354,12 +351,9 @@ function loadReferencedSchema(
   schemaLocation: string,
   refXsdPath: string,
   schemaNameWithPath: string,
-  xsdDir: string,
-  sourceName: string,
-  discovered: Set<string>,
-  globalAllSchemas: Map<string, SchemaInfo>,
-  log: (...args: unknown[]) => void,
+  discovery: DiscoveryContext,
 ): void {
+  const { sourceName, globalAllSchemas, log } = discovery;
   try {
     const refXsdContent = readFileSync(refXsdPath, 'utf-8');
     const refSchema = parseXsd(refXsdContent);
@@ -382,12 +376,8 @@ function loadReferencedSchema(
     // Recursively discover schemas referenced by this one
     discoverReferencedSchemas(
       refSchema as Record<string, unknown>,
-      xsdDir,
       refXsdPath,
-      sourceName,
-      globalAllSchemas,
-      log,
-      discovered,
+      discovery,
     );
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
@@ -397,17 +387,30 @@ function loadReferencedSchema(
   }
 }
 
+/** Inputs and run settings for the second (transform) pass. */
+interface TransformPassContext {
+  config: CodegenConfig;
+  sources: Record<string, SourceInfo>;
+  processedSchemas: Map<string, SchemaInfo[]>;
+  globalAllSchemas: Map<string, SchemaInfo>;
+  rootDir: string;
+  dryRun: boolean;
+  result: RunnerResult;
+  log: (...args: unknown[]) => void;
+}
+
 /** Second pass: run transforms with the global schema map. */
-async function runTransforms(
-  config: CodegenConfig,
-  sources: Record<string, SourceInfo>,
-  processedSchemas: Map<string, SchemaInfo[]>,
-  globalAllSchemas: Map<string, SchemaInfo>,
-  rootDir: string,
-  dryRun: boolean,
-  result: RunnerResult,
-  log: (...args: unknown[]) => void,
-): Promise<void> {
+async function runTransforms(ctx: TransformPassContext): Promise<void> {
+  const {
+    config,
+    sources,
+    processedSchemas,
+    globalAllSchemas,
+    rootDir,
+    dryRun,
+    result,
+    log,
+  } = ctx;
   for (const [sourceName, source] of Object.entries(sources)) {
     const schemaInfos = processedSchemas.get(sourceName) ?? [];
 

@@ -128,7 +128,7 @@ function pathToRoute(filePath: string): RouteInfo | null {
   }
 
   const pattern = '/' + patternBody;
-  const regexPattern = '^\\/' + regexBody + '$';
+  const regexPattern = String.raw`^\/` + regexBody + '$';
 
   const isDynamic = routePath.includes('[');
 

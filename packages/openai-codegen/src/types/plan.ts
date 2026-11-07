@@ -73,19 +73,17 @@ function collectFromSchema(
   schemaToId: Map<object, string>,
 ): string[] {
   const deps = new Set<string>();
+  const ctx: CollectContext = {
+    rootId,
+    deps,
+    plannedIds,
+    enqueueInline,
+    schemaToId,
+  };
 
   const visit = (schema: unknown, path: string[], atRoot: boolean): void => {
     if (!isRecord(schema)) return;
-    const stop = classifyVisit(
-      schema,
-      path,
-      atRoot,
-      rootId,
-      deps,
-      plannedIds,
-      enqueueInline,
-      schemaToId,
-    );
+    const stop = classifyVisit(schema, path, atRoot, ctx);
     if (stop) return;
     // Otherwise, keep descending to find refs / nested inline types.
     descendSchema(schema, path, visit);
@@ -95,18 +93,24 @@ function collectFromSchema(
   return [...deps];
 }
 
+/** Shared state threaded through dependency collection. */
+interface CollectContext {
+  rootId: string;
+  deps: Set<string>;
+  plannedIds: Set<string>;
+  enqueueInline: (id: string, schema: JsonSchema) => void;
+  schemaToId: Map<object, string>;
+}
+
 /** Classify a non-trivial schema node: register a dep (or inline entry) and
  *  report whether descent should stop. */
 function classifyVisit(
   schema: Record<string, unknown>,
   path: string[],
   atRoot: boolean,
-  rootId: string,
-  deps: Set<string>,
-  plannedIds: Set<string>,
-  enqueueInline: (id: string, schema: JsonSchema) => void,
-  schemaToId: Map<object, string>,
+  ctx: CollectContext,
 ): boolean {
+  const { rootId, deps, plannedIds, enqueueInline, schemaToId } = ctx;
   if (isRef(schema)) {
     const name = componentNameFromRef(schema.$ref);
     if (name) {
@@ -131,16 +135,7 @@ function classifyVisit(
     }
     // Non-root, non-ref, non-trivial object → allocate a dedicated inline entry.
     if (isNonTrivialInline(schema as JsonSchema)) {
-      deps.add(
-        registerInlineEntry(
-          schema,
-          path,
-          rootId,
-          plannedIds,
-          enqueueInline,
-          schemaToId,
-        ),
-      );
+      deps.add(registerInlineEntry(schema, path, ctx));
       return true;
     }
   }
@@ -150,11 +145,9 @@ function classifyVisit(
 function registerInlineEntry(
   schema: Record<string, unknown>,
   path: string[],
-  rootId: string,
-  plannedIds: Set<string>,
-  enqueueInline: (id: string, schema: JsonSchema) => void,
-  schemaToId: Map<object, string>,
+  ctx: CollectContext,
 ): string {
+  const { rootId, plannedIds, enqueueInline, schemaToId } = ctx;
   const id = `${rootId}.${path.join('.')}`;
   if (!plannedIds.has(id)) {
     enqueueInline(id, schema as JsonSchema);

@@ -97,7 +97,7 @@ function isQuantifierAfter(pattern: string, index: number): boolean {
   while (j < pattern.length && /\s/.test(pattern[j])) j += 1;
   const next = pattern[j];
   if (next === '*' || next === '+' || next === '?') return true;
-  return next === '{' && j + 1 < pattern.length && /[0-9]/.test(pattern[j + 1]);
+  return next === '{' && j + 1 < pattern.length && /\d/.test(pattern[j + 1]);
 }
 
 /**
