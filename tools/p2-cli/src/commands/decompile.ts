@@ -42,14 +42,20 @@ const DECOMPILERS = {
   },
   fernflower: {
     name: 'Fernflower',
-    check: (): void => {
-      if (!existsSync('fernflower.jar')) {
-        throw new Error('fernflower.jar not found');
+    // The IntelliJ plugin ships it as java-decompiler.jar; accepting both
+    // names matches the install guidance shown below.
+    jar: (): string => {
+      for (const candidate of ['fernflower.jar', 'java-decompiler.jar']) {
+        if (existsSync(candidate)) return candidate;
       }
+      throw new Error('fernflower.jar not found');
+    },
+    check: (): void => {
+      DECOMPILERS.fernflower.jar();
     },
     command: (input: string, output: string): Command => ({
       file: 'java',
-      args: ['-jar', 'fernflower.jar', input, output],
+      args: ['-jar', DECOMPILERS.fernflower.jar(), input, output],
     }),
     install:
       'Find in IntelliJ IDEA: plugins/java-decompiler/lib/java-decompiler.jar',
