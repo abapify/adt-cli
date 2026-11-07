@@ -11,6 +11,7 @@ import { parseDocument, stringify } from 'yaml';
 
 export class ConfigLoader implements IConfigLoader {
   private static readonly cache = new Map<string, CliConfig>();
+  private static readonly maxConfigValues = 100_000;
   private readonly authRegistry = new AuthRegistry();
 
   /**
@@ -234,7 +235,18 @@ export class ConfigLoader implements IConfigLoader {
    */
   private processEnvironmentVariables(config: CliConfig): CliConfig {
     const ancestors = new WeakSet<object>();
+    // YAML aliases are materialised as shared references, but each occurrence
+    // is copied below. Bound the total work so nested aliases (including ones
+    // rooted in an empty collection, which YAML's alias limit does not count)
+    // cannot expand exponentially.
+    let visited = 0;
     const processValue = (value: unknown): unknown => {
+      visited += 1;
+      if (visited > ConfigLoader.maxConfigValues) {
+        throw new Error(
+          `Configuration exceeds the supported size of ${ConfigLoader.maxConfigValues} values`,
+        );
+      }
       if (
         typeof value === 'string' &&
         value.startsWith('${') &&

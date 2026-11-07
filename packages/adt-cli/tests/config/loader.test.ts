@@ -61,6 +61,46 @@ describe('YAML configuration loading', () => {
     ).rejects.toThrow(/alias count|resource exhaustion/i);
   });
 
+  // Each level references the previous anchor twice. Aliases rooted in an empty
+  // collection have zero YAML alias weight, so only the loader's own bound
+  // stops the doubling. 18 levels is ~500k copies without that bound: small
+  // enough to finish quickly if the bound regresses, large enough to fail.
+  function nestedAliases(levels: number): string {
+    const lines = ['extra:', '  level0: &level0 []'];
+    for (let level = 1; level <= levels; level++) {
+      const previous = `*level${level - 1}`;
+      lines.push(`  level${level}: &level${level} [${previous}, ${previous}]`);
+    }
+    return `${lines.join('\n')}\n`;
+  }
+
+  it('bounds nested aliases rooted in an empty collection', async () => {
+    await expect(load(nestedAliases(18))).rejects.toThrow(
+      /exceeds the supported size/,
+    );
+  });
+
+  function doubled(depth: number): unknown[] {
+    let value: unknown[] = [];
+    for (let level = 0; level < depth; level += 1) {
+      value = [value, value];
+    }
+    return value;
+  }
+
+  it('still loads modest nested aliases', async () => {
+    const config = await load(nestedAliases(4));
+    expect(config).toMatchObject({
+      extra: {
+        level0: doubled(0),
+        level1: doubled(1),
+        level2: doubled(2),
+        level3: doubled(3),
+        level4: doubled(4),
+      },
+    });
+  });
+
   it('preserves plain date-like strings', async () => {
     const config = await load('extra: { date: 2026-11-06 }\n');
     expect((config as unknown as { extra: unknown }).extra).toEqual({

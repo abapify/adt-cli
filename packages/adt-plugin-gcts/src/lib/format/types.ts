@@ -27,13 +27,22 @@ export interface GctsHeader {
  * Top-level shape of an AFF/gCTS metadata JSON file.
  *
  * Concrete handlers tighten this with per-type payload shapes.
+ *
+ * A format version is mandatory: either the current top-level `formatVersion`
+ * or the legacy `header.formatVersion`.
  */
-export interface GctsMetadata<_TPayload extends object = object> {
-  /** Current AFF format version; concrete schema types make it mandatory. */
-  formatVersion?: string;
-  /** Format header (mandatory on every file). */
-  header: GctsHeader;
-}
+export type GctsMetadata<_TPayload extends object = object> =
+  | {
+      /** Current AFF format version. */
+      formatVersion: string;
+      /** Format header (mandatory on every file). */
+      header: GctsHeader;
+    }
+  | {
+      formatVersion?: string;
+      /** Legacy form: the version lives in the header. */
+      header: GctsHeader & { formatVersion: string };
+    };
 
 /** Convenience helper for concrete metadata shapes. */
 export type WithHeader<TPayload extends object> = {
