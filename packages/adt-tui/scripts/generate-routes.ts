@@ -128,7 +128,7 @@ function pathToRoute(filePath: string): RouteInfo | null {
   }
 
   const pattern = '/' + patternBody;
-  const regexPattern = '^/' + regexBody + '$';
+  const regexPattern = '^\\/' + regexBody + '$';
 
   const isDynamic = routePath.includes('[');
 
@@ -154,14 +154,14 @@ function generateRoutesFile(routes: RouteInfo[]): string {
   });
 
   const imports = routes
-    .map((r, i) => `import { default as Page${i} } from '${r.importPath}';`)
+    .map((r, i) => `import Page${i} from '${r.importPath}';`)
     .join('\n');
 
   const routeEntries = routes
     .map(
       (r, i) => `  {
     pattern: '${r.pattern}',
-    regex: new RegExp('${r.regex}'),
+    regex: /${r.regex}/,
     page: Page${i},
   }`,
     )

@@ -101,9 +101,11 @@ function renderErrorBranch(
 ): string[] {
   const responseVar = opts.responseVarName ?? 'response';
   const lines: string[] = [];
-  lines.push(`  WHEN ${statusCode}.`);
-  lines.push(`    RAISE EXCEPTION NEW ${opts.exceptionClassName}(`);
-  lines.push(`      status      = ${statusCode}`);
+  lines.push(
+    `  WHEN ${statusCode}.`,
+    `    RAISE EXCEPTION NEW ${opts.exceptionClassName}(`,
+    `      status      = ${statusCode}`,
+  );
   if (description !== undefined && description.length > 0) {
     lines.push(`      description = '${escapeAbapLiteral(description)}'`);
   }
@@ -117,9 +119,11 @@ function renderOthersBranch(
 ): string[] {
   const responseVar = opts.responseVarName ?? 'response';
   const lines: string[] = [];
-  lines.push(`  WHEN OTHERS.`);
-  lines.push(`    RAISE EXCEPTION NEW ${opts.exceptionClassName}(`);
-  lines.push(`      status      = ${responseVar}->status( )`);
+  lines.push(
+    `  WHEN OTHERS.`,
+    `    RAISE EXCEPTION NEW ${opts.exceptionClassName}(`,
+    `      status      = ${responseVar}->status( )`,
+  );
   if (description !== undefined && description.length > 0) {
     lines.push(`      description = '${escapeAbapLiteral(description)}'`);
   }
@@ -137,15 +141,16 @@ export function mapResponseHandling(
 
   const success = pickSuccessStatus(operation.responses);
 
-  const successConsumedOthers =
-    success !== undefined && success.whenLabel === 'OTHERS';
+  const successConsumedOthers = success?.whenLabel === 'OTHERS';
 
   // Emit the explicit success WHEN first unless `default` itself is the
   // success (WHEN OTHERS), in which case we must defer it so it remains
   // the *last* branch — ABAP forbids any WHEN after OTHERS.
   if (success !== undefined && !successConsumedOthers) {
-    lines.push(`  WHEN ${success.whenLabel}.`);
-    lines.push(`    ${renderSuccessBody(opts)}`);
+    lines.push(
+      `  WHEN ${success.whenLabel}.`,
+      `    ${renderSuccessBody(opts)}`,
+    );
   }
 
   // Error branches: every isError response with a numeric status code gets
@@ -165,16 +170,14 @@ export function mapResponseHandling(
   //   - Else, emit a generic error fallback, using `default`'s description
   //     when it exists and is an error.
   if (successConsumedOthers) {
-    lines.push(`  WHEN OTHERS.`);
-    lines.push(`    ${renderSuccessBody(opts)}`);
+    lines.push(`  WHEN OTHERS.`, `    ${renderSuccessBody(opts)}`);
   } else {
     const defaultResp = operation.responses.find(
       (r) => r.statusCode === 'default',
     );
-    const description =
-      defaultResp !== undefined && defaultResp.isError
-        ? defaultResp.description
-        : undefined;
+    const description = defaultResp?.isError
+      ? defaultResp.description
+      : undefined;
     lines.push(...renderOthersBranch(description, opts));
   }
 

@@ -47,8 +47,7 @@ RUN apt-get update && apt-get install -y \
 # RUN npm install -g npm@latest
 
 USER node
-# Install uv Python package manager
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-# Install bun
-RUN curl -fsSL https://bun.sh/install | bash
+# Install uv Python package manager and bun
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+ && curl -fsSL https://bun.sh/install | bash
 

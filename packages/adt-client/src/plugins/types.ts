@@ -34,5 +34,5 @@ export interface ResponsePlugin {
    * @param context - Response context with raw and parsed data
    * @returns Modified data or original data
    */
-  process(context: ResponseContext): Promise<unknown> | unknown;
+  process(context: ResponseContext): unknown;
 }

@@ -10,8 +10,8 @@
  *     - adt cts tr list               - List transports
  *     - adt cts tr get <TR>           - Get transport details
  *     - adt cts tr create             - Create new transport
- *     - adt cts tr release <TR>       - Release transport (TODO)
- *     - adt cts tr check <TR>         - Pre-release validation (TODO)
+ *     - adt cts tr release <TR>       - Release transport
+ *     - adt cts tr check <TR>         - Pre-release validation (not yet implemented)
  */
 
 import { Command } from 'commander';

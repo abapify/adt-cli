@@ -134,9 +134,7 @@ function nextTransportTaskNumber(xml: string, parent: string): string {
   const { prefix, digits } = parentSplit;
   const numbers = Array.from(xml.matchAll(/\btm:number=["']([^"']+)["']/g))
     .map((match) => splitTrailingDigits(match[1]))
-    .filter((split): split is SplitDigits =>
-      Boolean(split && split.prefix === prefix),
-    )
+    .filter((split): split is SplitDigits => Boolean(split?.prefix === prefix))
     .map((split) => Number.parseInt(split.digits, 10));
   const next = Math.max(Number.parseInt(digits, 10), ...numbers) + 1;
   return `${prefix}${String(next).padStart(digits.length, '0')}`;
@@ -266,7 +264,7 @@ export interface LoadedFixtures {
   // Coverage — sourced from jfilak/sapcli
   coverageMeasurements: string;
   coverageStatements: string;
-  // STRUST / system security — TODO-synthetic fixtures
+  // STRUST / system security — synthetic (fabricated) fixtures
   strustPseList: string;
   strustCertList: string;
   strustCert: string;
@@ -698,6 +696,59 @@ export function matchRoute(
   const coverageRoute = matchCoverageRoute(m, pathname, requestBody, f);
   if (coverageRoute) return coverageRoute;
 
+  return (
+    matchCoreHttpRoutes(m, url, f) ??
+    matchInformationSystemRoutes(m, url, f) ??
+    matchUsageReferenceRoutes(m, url, f) ??
+    matchPreviewAndDdicTableRoutes(m, url, f) ??
+    matchDdicDomainsRoutes(m, url, pathname, f) ??
+    matchDdicDataElementsRoutes(m, url, pathname, f) ??
+    matchDdicStructuresRoutes(m, url, pathname, f) ??
+    matchCdsDdlSourcesRoutes(m, url, pathname, f) ??
+    matchCdsDclSourcesRoutes(m, url, pathname, f) ??
+    matchBdefRoutes(m, url, pathname, f) ??
+    matchBadiEnhancementImplementationMetadataRoutes(m, pathname, f) ??
+    matchBadiEnhancementImplementationRoutes(m, url, pathname, f) ??
+    matchVitWbBasicObjectRoutes(m, pathname, f) ??
+    matchSrvdRoutes(m, url, pathname, f) ??
+    matchSrvbRoutes(m, url, pathname, f) ??
+    matchCdsRapSourceTypesRoutes(m, pathname, f) ??
+    matchDsfiRoutes(m, pathname, f) ??
+    matchDesdRoutes(m, pathname, f) ??
+    // Source-only CDS types (DRAS, DRTY, DTDC, DTIX, DTSC) have no metadata
+    // endpoint; load() only calls getSource() which hits
+    // /sap/bc/adt/ddic/<type>/sources/<name>/source/main. The generic
+    // /source/main catch-all below already serves text/plain for any GET
+    // .../source/main request, so no dedicated routes are needed.
+    matchClassrunAndCtsSetupRoutes(m, url, pathname, f) ??
+    matchCtsReleaseRoutes(m, pathname, f) ??
+    matchCtsTaskRoutes(m, url, pathname, requestBody, f) ??
+    matchCtsReadRoutes(m, url, pathname, f) ??
+    matchCtsUpdateAndPackageRoutes(m, url, pathname, requestBody, f) ??
+    matchStrustRoutes(m, pathname, f) ??
+    matchUsersAndSessionRoutes(m, url, pathname, f) ??
+    matchAtcRoutes(m, url, pathname, f) ??
+    matchSourceAndLockRoutes(m, url, f, locks) ??
+    matchObjectMetadataRoutes(m, url, pathname, f) ??
+    matchActivationAndLifecycleRoutes(m, url, f) ??
+    matchFunctionGroupRoutes(m, url, f) ??
+    matchMiscToolRoutes(m, url, f) ??
+    matchGctsRoutes(m, url, pathname, f) ??
+    matchFlpEntityRoutes(m, url, f) ??
+    matchFlpListRoutes(m, url, f) ??
+    matchAbapGitExportAndCsrfRoutes(m, url, f) ??
+    matchSoapRfcRoutes(m, pathname) ??
+    undefined
+  );
+}
+
+/** Route matcher: matchAdtSecuritySessionEndpointsRoutes */
+/** Core HTTP/session + discovery + system information routes. */
+function matchCoreHttpRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── ADT security session endpoints (strict-protocol aware) ─────────────
   // When called with x-sap-security-session: create, return an atom feed
   // containing the session link href. Otherwise fall through to the generic
@@ -723,6 +774,24 @@ export function matchRoute(
     return { status: 200, body: f.systeminfo, contentType: 'application/json' };
   }
 
+  return undefined;
+}
+
+/** True for quick-search queries that should hit the BAdI implementation fixture. */
+function isBadiSearchQuery(query: string): boolean {
+  return (
+    query.includes('MOCK_CTS') ||
+    query.includes('CTS_REQUEST') ||
+    query.includes('REQUEST_CHECK')
+  );
+}
+
+/** Information search / where-used / callers-callees routes. */
+function matchInformationSystemRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // Grep / content search (must come before general search)
   if (
     m === 'GET' &&
@@ -740,11 +809,7 @@ export function matchRoute(
     const query =
       new URL(url, 'https://mock').searchParams.get('query')?.toUpperCase() ??
       '';
-    if (
-      query.includes('MOCK_CTS') ||
-      query.includes('CTS_REQUEST') ||
-      query.includes('REQUEST_CHECK')
-    ) {
+    if (isBadiSearchQuery(query)) {
       return {
         status: 200,
         body: f.badiImplementationsSearch,
@@ -762,6 +827,15 @@ export function matchRoute(
     return { status: 200, body: f.usages, contentType: 'application/json' };
   }
 
+  return undefined;
+}
+
+/** Callers / callees and where-used 2-step POST flow. */
+function matchUsageReferenceRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // Where-used 2-step POST flow
   // Step 1: scope
   if (
@@ -804,6 +878,15 @@ export function matchRoute(
     return { status: 200, body: f.callees, contentType: 'application/json' };
   }
 
+  return undefined;
+}
+
+/** Navigation target, data preview and DDIC table routes. */
+function matchPreviewAndDdicTableRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // Navigation target
   if (m === 'GET' && url.startsWith('/sap/bc/adt/navigation/target')) {
     return {
@@ -831,6 +914,16 @@ export function matchRoute(
     };
   }
 
+  return undefined;
+}
+
+/** Route matcher: matchDdicDomainsRoutes */
+function matchDdicDomainsRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── DDIC Domains ───────────────────────────────────────────────
   if (m === 'GET' && /^\/sap\/bc\/adt\/ddic\/domains\/[^/?]+/.test(pathname)) {
     return {
@@ -852,7 +945,15 @@ export function matchRoute(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/domains/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchDdicDataElementsRoutes */
+function matchDdicDataElementsRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── DDIC Data Elements ─────────────────────────────────────────
   if (
     m === 'GET' &&
@@ -877,7 +978,15 @@ export function matchRoute(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/dataelements/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchDdicStructuresRoutes */
+function matchDdicStructuresRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── DDIC Structures ────────────────────────────────────────────
   if (
     m === 'GET' &&
@@ -919,7 +1028,15 @@ export function matchRoute(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/tables/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchCdsDdlSourcesRoutes */
+function matchCdsDdlSourcesRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── CDS DDL Sources ────────────────────────────────────────────
   if (
     m === 'GET' &&
@@ -950,7 +1067,15 @@ export function matchRoute(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/ddl/sources/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchCdsDclSourcesRoutes */
+function matchCdsDclSourcesRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── CDS DCL Sources (endpoint is /acm/dcl/sources) ─────────────
   if (
     m === 'GET' &&
@@ -981,7 +1106,15 @@ export function matchRoute(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/acm/dcl/sources/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchBdefRoutes */
+function matchBdefRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── BDEF (RAP behavior definition) ─────────────────────────────
   // Endpoint: /sap/bc/adt/bo/behaviordefinitions/{name}
   //           /sap/bc/adt/bo/behaviordefinitions/{name}/source/main
@@ -1016,7 +1149,14 @@ export function matchRoute(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/bo/behaviordefinitions/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchBadiEnhancementImplementationMetadataRoutes */
+function matchBadiEnhancementImplementationMetadataRoutes(
+  m: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── BAdI / Enhancement Implementation metadata (ENHO/XHB) ──────
   // Endpoint: /sap/bc/adt/enhancements/enhoxhb/{name}
   if (
@@ -1029,7 +1169,15 @@ export function matchRoute(
       contentType: 'application/vnd.sap.adt.enh.enhoxhb.v4+xml',
     };
   }
+}
 
+/** Route matcher: matchBadiEnhancementImplementationRoutes */
+function matchBadiEnhancementImplementationRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── BAdI / Enhancement Implementation (ENHO/XHH) ───────────────
   // Endpoint: /sap/bc/adt/enhancements/enhoxhh/{name}
   //           /sap/bc/adt/enhancements/enhoxhh/{name}/source/main
@@ -1064,14 +1212,19 @@ export function matchRoute(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/enhancements/enhoxhh/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchVitWbBasicObjectRoutes */
+function matchVitWbBasicObjectRoutes(
+  m: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── vit/wb Basic Object Properties (classic BAdI SXSD/SXCI) ─────
   // Endpoint: /sap/bc/adt/vit/wb/object_type/{type}/object_name/{name}
   if (
     m === 'GET' &&
-    /^\/sap\/bc\/adt\/vit\/wb\/object_type\/sxsdxd\/object_name\//.test(
-      pathname,
-    )
+    pathname.startsWith('/sap/bc/adt/vit/wb/object_type/sxsdxd/object_name/')
   ) {
     return {
       status: 200,
@@ -1081,9 +1234,7 @@ export function matchRoute(
   }
   if (
     m === 'GET' &&
-    /^\/sap\/bc\/adt\/vit\/wb\/object_type\/sxcixi\/object_name\//.test(
-      pathname,
-    )
+    pathname.startsWith('/sap/bc/adt/vit/wb/object_type/sxcixi/object_name/')
   ) {
     const body = pathname.includes('ze_mock_classic_badi_impl_b')
       ? f.vitWbSxcixiSingleB
@@ -1094,7 +1245,15 @@ export function matchRoute(
       contentType: 'application/vnd.sap.adt.basic.object.properties+xml',
     };
   }
+}
 
+/** Route matcher: matchSrvdRoutes */
+function matchSrvdRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── SRVD (RAP service definition) ──────────────────────────────
   // Endpoint: /sap/bc/adt/ddic/srvd/sources/{name}
   //           /sap/bc/adt/ddic/srvd/sources/{name}/source/main
@@ -1127,7 +1286,15 @@ export function matchRoute(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/srvd/sources/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchSrvbRoutes */
+function matchSrvbRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── SRVB (RAP service binding) ─────────────────────────────────
   // Endpoint: /sap/bc/adt/businessservices/bindings/{name}
   //           /sap/bc/adt/businessservices/bindings/{name}/publishedstates
@@ -1180,7 +1347,14 @@ export function matchRoute(
   ) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+}
 
+/** Route matcher: matchCdsRapSourceTypesRoutes */
+function matchCdsRapSourceTypesRoutes(
+  m: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── CDS/RAP source types (DDLX, DSFD, DTEB) ───────────────────
   // These share the blueSource / ddlxSource metadata envelope and a
   // text/plain source/main endpoint. The generic /source/main catch-all
@@ -1220,7 +1394,14 @@ export function matchRoute(
       contentType: 'application/vnd.sap.adt.blues.v1+xml',
     };
   }
+}
 
+/** Route matcher: matchDsfiRoutes */
+function matchDsfiRoutes(
+  m: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── DSFI (scalar function implementation) ─────────────────────
   // Endpoint: /sap/bc/adt/ddic/dsfi/{name}           — metadata (blueSource XML)
   //           /sap/bc/adt/ddic/dsfi/{name}/source/main — JSON definition
@@ -1243,7 +1424,14 @@ export function matchRoute(
       contentType: 'application/vnd.sap.adt.blues.v1+xml',
     };
   }
+}
 
+/** Route matcher: matchDesdRoutes */
+function matchDesdRoutes(
+  m: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── DESD (external schema definition) ─────────────────────────
   // Endpoint: GET /sap/bc/adt/ddic/desd/{name} — returns XML directly
   if (m === 'GET' && /^\/sap\/bc\/adt\/ddic\/desd\/[^/?]+/.test(pathname)) {
@@ -1253,13 +1441,15 @@ export function matchRoute(
       contentType: 'application/xml',
     };
   }
+}
 
-  // ── Source-only CDS types (DRAS, DRTY, DTDC, DTIX, DTSC) ──────
-  // These objects have no metadata endpoint; load() only calls
-  // getSource() which hits /sap/bc/adt/ddic/<type>/sources/<name>/source/main.
-  // The generic /source/main catch-all below already serves text/plain
-  // for any GET .../source/main request, so no dedicated routes are needed.
-
+/** OO classrun + CTS search/create setup routes. */
+function matchClassrunAndCtsSetupRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── OO Classrun (execute console class) ────────────────────────
   if (m === 'POST' && url.startsWith('/sap/bc/adt/oo/classrun/')) {
     return {
@@ -1311,8 +1501,98 @@ export function matchRoute(
     };
   }
 
-  // CTS release — SAP starts a release job without a request body. Keep the
-  // fixture stateful so the lifecycle service's read-back can verify status R.
+  return undefined;
+}
+
+/** Release a transport request and all its tasks (status → R). */
+function releaseRequestWithTasks(f: LoadedFixtures): void {
+  f.transportSingle = replaceRequestAttribute(f.transportSingle, {
+    name: 'status',
+    value: 'R',
+  });
+  f.transportSingle = replaceRequestAttribute(f.transportSingle, {
+    name: 'status_text',
+    value: 'Released',
+  });
+  const taskNumbers = [...f.transportTaskResponses.keys()];
+  for (const taskNumber of taskNumbers) {
+    f.transportSingle = replaceTaskAttribute(f.transportSingle, {
+      taskNumber,
+      name: 'status',
+      value: 'R',
+    });
+    f.transportSingle = replaceTaskAttribute(f.transportSingle, {
+      taskNumber,
+      name: 'status_text',
+      value: 'Released',
+    });
+  }
+  // Snapshot before mutating the map in the loop body: entries updated via
+  // .set() must not affect the traversal (cf. release handler below).
+  for (const [taskNumber, response] of [...f.transportTaskResponses]) {
+    let updated = replaceRequestAttribute(response, {
+      name: 'status',
+      value: 'R',
+    });
+    updated = replaceRequestAttribute(updated, {
+      name: 'status_text',
+      value: 'Released',
+    });
+    updated = replaceTaskAttribute(updated, {
+      taskNumber,
+      name: 'status',
+      value: 'R',
+    });
+    updated = replaceTaskAttribute(updated, {
+      taskNumber,
+      name: 'status_text',
+      value: 'Released',
+    });
+    f.transportTaskResponses.set(taskNumber, updated);
+  }
+}
+
+/** Release a single child task (status → R). */
+function releaseSingleTask(f: LoadedFixtures, taskNumber: string): void {
+  f.transportSingle = replaceTaskAttribute(
+    replaceTaskAttribute(f.transportSingle, {
+      taskNumber,
+      name: 'status',
+      value: 'R',
+    }),
+    {
+      taskNumber,
+      name: 'status_text',
+      value: 'Released',
+    },
+  );
+  const response = f.transportTaskResponses.get(taskNumber)!;
+  f.transportTaskResponses.set(
+    taskNumber,
+    replaceTaskAttribute(
+      replaceTaskAttribute(response, {
+        taskNumber,
+        name: 'status',
+        value: 'R',
+      }),
+      {
+        taskNumber,
+        name: 'status_text',
+        value: 'Released',
+      },
+    ),
+  );
+}
+
+/**
+ * CTS release — SAP starts a release job without a request body. Keep the
+ * fixture stateful so the lifecycle service's read-back can verify status R.
+ */
+function matchCtsReleaseRoutes(
+  m: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   if (
     m === 'POST' &&
     /\/sap\/bc\/adt\/cts\/transportrequests\/([^/]+)\/newreleasejobs$/.test(
@@ -1326,77 +1606,9 @@ export function matchRoute(
     );
     const requestNumber = extractRequestAttribute(f.transportSingle, 'number');
     if (requested === requestNumber) {
-      f.transportSingle = replaceRequestAttribute(f.transportSingle, {
-        name: 'status',
-        value: 'R',
-      });
-      f.transportSingle = replaceRequestAttribute(f.transportSingle, {
-        name: 'status_text',
-        value: 'Released',
-      });
-      const taskNumbers = [...f.transportTaskResponses.keys()];
-      for (const taskNumber of taskNumbers) {
-        f.transportSingle = replaceTaskAttribute(f.transportSingle, {
-          taskNumber,
-          name: 'status',
-          value: 'R',
-        });
-        f.transportSingle = replaceTaskAttribute(f.transportSingle, {
-          taskNumber,
-          name: 'status_text',
-          value: 'Released',
-        });
-      }
-      for (const [taskNumber, response] of [...f.transportTaskResponses]) {
-        let updated = replaceRequestAttribute(response, {
-          name: 'status',
-          value: 'R',
-        });
-        updated = replaceRequestAttribute(updated, {
-          name: 'status_text',
-          value: 'Released',
-        });
-        updated = replaceTaskAttribute(updated, {
-          taskNumber,
-          name: 'status',
-          value: 'R',
-        });
-        updated = replaceTaskAttribute(updated, {
-          taskNumber,
-          name: 'status_text',
-          value: 'Released',
-        });
-        f.transportTaskResponses.set(taskNumber, updated);
-      }
+      releaseRequestWithTasks(f);
     } else if (f.transportTaskResponses.has(requested)) {
-      f.transportSingle = replaceTaskAttribute(
-        replaceTaskAttribute(f.transportSingle, {
-          taskNumber: requested,
-          name: 'status',
-          value: 'R',
-        }),
-        {
-          taskNumber: requested,
-          name: 'status_text',
-          value: 'Released',
-        },
-      );
-      const response = f.transportTaskResponses.get(requested)!;
-      f.transportTaskResponses.set(
-        requested,
-        replaceTaskAttribute(
-          replaceTaskAttribute(response, {
-            taskNumber: requested,
-            name: 'status',
-            value: 'R',
-          }),
-          {
-            taskNumber: requested,
-            name: 'status_text',
-            value: 'Released',
-          },
-        ),
-      );
+      releaseSingleTask(f, requested);
     } else {
       return { status: 404, body: '', contentType: 'text/plain' };
     }
@@ -1407,45 +1619,68 @@ export function matchRoute(
     };
   }
 
-  // CTS new task — POST the hypermedia /{request}/tasks relation, then expose
-  // the new modifiable task through the parent request read-back.
+  return undefined;
+}
+
+/** Create a child task under a modifiable transport request. */
+function createTransportTask(
+  f: LoadedFixtures,
+  parent: string,
+  requestBody: string,
+): RouteResult {
+  const requestNumber = extractRequestAttribute(f.transportSingle, 'number');
+  const requestStatus = extractRequestAttribute(f.transportSingle, 'status');
+  if (parent !== requestNumber || requestStatus !== 'D') {
+    return { status: 409, body: '', contentType: 'text/plain' };
+  }
+
+  const owner = extractTargetUser(requestBody);
+  if (!owner) {
+    return { status: 400, body: '', contentType: 'text/plain' };
+  }
+  const task = nextTransportTaskNumber(f.transportSingle, parent);
+  if (f.taskCreationMode === 'create') {
+    f.transportSingle = appendTransportTask(f.transportSingle, {
+      parent,
+      number: task,
+      owner,
+    });
+    f.transportTaskResponses.set(
+      task,
+      createDirectTaskResponse({
+        template: f.transportSingleTask,
+        parentResponse: f.transportSingle,
+        taskNumber: task,
+      }),
+    );
+  }
+  return {
+    status: 200,
+    body: f.transportTaskCreate
+      .replaceAll('DEVK900004', task)
+      .replaceAll('NEWOWNER', owner),
+    contentType: 'application/vnd.sap.adt.transportorganizer.v1+xml',
+  };
+}
+
+/**
+ * CTS new task — POST the hypermedia /{request}/tasks relation, then expose
+ * the new modifiable task through the parent request read-back. Also handles
+ * the legacy CTS action POST on a transport request (lock/unlock actions are
+ * handled further below by the generic _action handler).
+ */
+function matchCtsTaskRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  requestBody: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   const taskCreateMatch =
     /^\/sap\/bc\/adt\/cts\/transportrequests\/([^/]+)\/tasks$/.exec(pathname);
   if (m === 'POST' && taskCreateMatch) {
     const parent = decodeURIComponent(taskCreateMatch[1]);
-    const requestNumber = extractRequestAttribute(f.transportSingle, 'number');
-    const requestStatus = extractRequestAttribute(f.transportSingle, 'status');
-    if (parent !== requestNumber || requestStatus !== 'D') {
-      return { status: 409, body: '', contentType: 'text/plain' };
-    }
-
-    const owner = extractTargetUser(requestBody);
-    if (!owner) {
-      return { status: 400, body: '', contentType: 'text/plain' };
-    }
-    const task = nextTransportTaskNumber(f.transportSingle, parent);
-    if (f.taskCreationMode === 'create') {
-      f.transportSingle = appendTransportTask(f.transportSingle, {
-        parent,
-        number: task,
-        owner,
-      });
-      f.transportTaskResponses.set(
-        task,
-        createDirectTaskResponse({
-          template: f.transportSingleTask,
-          parentResponse: f.transportSingle,
-          taskNumber: task,
-        }),
-      );
-    }
-    return {
-      status: 200,
-      body: f.transportTaskCreate
-        .replaceAll('DEVK900004', task)
-        .replaceAll('NEWOWNER', owner),
-      contentType: 'application/vnd.sap.adt.transportorganizer.v1+xml',
-    };
+    return createTransportTask(f, parent, requestBody);
   }
 
   // Legacy CTS action — POST on a transport request.
@@ -1462,6 +1697,16 @@ export function matchRoute(
     };
   }
 
+  return undefined;
+}
+
+/** CTS list/get/delete for requests and tasks. */
+function matchCtsReadRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // CTS list
   if (
     m === 'GET' &&
@@ -1485,12 +1730,11 @@ export function matchRoute(
       f.transportCreate,
       'number',
     );
-    const body =
-      requested === requestNumber
-        ? f.transportSingle
-        : requested === createdRequestNumber
-          ? f.transportCreate
-          : f.transportTaskResponses.get(requested);
+    const createdBody =
+      requested === createdRequestNumber
+        ? f.transportCreate
+        : f.transportTaskResponses.get(requested);
+    const body = requested === requestNumber ? f.transportSingle : createdBody;
     if (!body) return { status: 404, body: '', contentType: 'text/plain' };
     return {
       status: 200,
@@ -1507,60 +1751,87 @@ export function matchRoute(
     return { status: 204, body: '', contentType: 'text/plain' };
   }
 
+  return undefined;
+}
+
+/**
+ * Apply a transport owner update to a request or task. Returns the 404
+ * failure result when the target is neither a known task nor the request.
+ */
+function applyTransportOwnerUpdate(
+  f: LoadedFixtures,
+  requested: string,
+  targetUser: string,
+): RouteResult | undefined {
+  const requestNumber = extractRequestAttribute(f.transportSingle, 'number');
+
+  if (requested && f.transportTaskResponses.has(requested)) {
+    f.transportSingle = replaceTaskAttribute(f.transportSingle, {
+      taskNumber: requested,
+      name: 'owner',
+      value: targetUser,
+    });
+    f.transportTaskResponses.set(
+      requested,
+      replaceTaskAttribute(f.transportTaskResponses.get(requested)!, {
+        taskNumber: requested,
+        name: 'owner',
+        value: targetUser,
+      }),
+    );
+    return undefined;
+  }
+
+  if (requested === requestNumber) {
+    f.transportSingle = replaceRequestAttribute(f.transportSingle, {
+      name: 'owner',
+      value: targetUser,
+    });
+    const taskNumbers = [...f.transportTaskResponses.keys()];
+    for (const taskNumber of taskNumbers) {
+      f.transportSingle = replaceTaskAttribute(f.transportSingle, {
+        taskNumber,
+        name: 'owner',
+        value: targetUser,
+      });
+    }
+    // Snapshot before mutating the map in the loop body.
+    for (const [taskNumber, response] of [...f.transportTaskResponses]) {
+      let updated = replaceRequestAttribute(response, {
+        name: 'owner',
+        value: targetUser,
+      });
+      updated = replaceTaskAttribute(updated, {
+        taskNumber,
+        name: 'owner',
+        value: targetUser,
+      });
+      f.transportTaskResponses.set(taskNumber, updated);
+    }
+    return undefined;
+  }
+
+  return { status: 404, body: '', contentType: 'text/plain' };
+}
+
+/** CTS update (PUT) + package metadata routes. */
+function matchCtsUpdateAndPackageRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  requestBody: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // CTS update (PUT on a transport request)
   if (
     m === 'PUT' &&
     /\/sap\/bc\/adt\/cts\/transportrequests\/\w+/.test(pathname)
   ) {
     const targetUser = extractTargetUser(requestBody);
-    const requested = pathname.split('/').filter(Boolean).at(-1) ?? '';
+    const requested = pathname.split('/').findLast(Boolean) ?? '';
     if (targetUser) {
-      const requestNumber = extractRequestAttribute(
-        f.transportSingle,
-        'number',
-      );
-      if (requested && f.transportTaskResponses.has(requested)) {
-        f.transportSingle = replaceTaskAttribute(f.transportSingle, {
-          taskNumber: requested,
-          name: 'owner',
-          value: targetUser,
-        });
-        f.transportTaskResponses.set(
-          requested,
-          replaceTaskAttribute(f.transportTaskResponses.get(requested)!, {
-            taskNumber: requested,
-            name: 'owner',
-            value: targetUser,
-          }),
-        );
-      } else if (requested === requestNumber) {
-        f.transportSingle = replaceRequestAttribute(f.transportSingle, {
-          name: 'owner',
-          value: targetUser,
-        });
-        const taskNumbers = [...f.transportTaskResponses.keys()];
-        for (const taskNumber of taskNumbers) {
-          f.transportSingle = replaceTaskAttribute(f.transportSingle, {
-            taskNumber,
-            name: 'owner',
-            value: targetUser,
-          });
-        }
-        for (const [taskNumber, response] of [...f.transportTaskResponses]) {
-          let updated = replaceRequestAttribute(response, {
-            name: 'owner',
-            value: targetUser,
-          });
-          updated = replaceTaskAttribute(updated, {
-            taskNumber,
-            name: 'owner',
-            value: targetUser,
-          });
-          f.transportTaskResponses.set(taskNumber, updated);
-        }
-      } else {
-        return { status: 404, body: '', contentType: 'text/plain' };
-      }
+      const failure = applyTransportOwnerUpdate(f, requested, targetUser);
+      if (failure) return failure;
     }
     return {
       status: 200,
@@ -1578,6 +1849,15 @@ export function matchRoute(
     };
   }
 
+  return undefined;
+}
+
+/** STRUST certificate and PSE routes. */
+function matchStrustRoutes(
+  m: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── STRUST / system security ───────────────────────────────────
   // Certificate list under a PSE:
   //   GET  /sap/bc/adt/system/security/pses/{ctx}/{applic}/certificates
@@ -1651,6 +1931,16 @@ export function matchRoute(
     };
   }
 
+  return undefined;
+}
+
+/** System user lookup/search and session info routes. */
+function matchUsersAndSessionRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // System users – exact lookup: GET /sap/bc/adt/system/users/{username}
   if (m === 'GET' && /^\/sap\/bc\/adt\/system\/users\/[^/]+$/.test(pathname)) {
     return {
@@ -1674,6 +1964,16 @@ export function matchRoute(
     return { status: 200, body: f.session, contentType: 'application/json' };
   }
 
+  return undefined;
+}
+
+/** ATC worklist/run/check-catalog/documentation routes. */
+function matchAtcRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ATC worklist creation must precede a run in the production protocol.
   if (m === 'POST' && pathname === '/sap/bc/adt/atc/worklists') {
     return { status: 200, body: f.atcRun, contentType: 'application/json' };
@@ -1719,6 +2019,55 @@ export function matchRoute(
     };
   }
 
+  return undefined;
+}
+
+/** Acquire a mock lock on an object URI. */
+function handleLock(
+  f: LoadedFixtures,
+  url: string,
+  locks: LockRegistry,
+): RouteResult {
+  const objectUri = extractObjectUri(url);
+  if (locks.get(objectUri)) {
+    return {
+      status: 409,
+      body: `Object ${objectUri} is already locked in request MOCKK900001`,
+      contentType: 'text/plain',
+    };
+  }
+  const entry = locks.lock(objectUri);
+  // Replace the handle placeholder in the fixture XML with the real handle
+  const body = f.lockResponse.replace(
+    /<LOCK_HANDLE>[^<]*<\/LOCK_HANDLE>/,
+    `<LOCK_HANDLE>${entry.handle}</LOCK_HANDLE>`,
+  );
+  return { status: 200, body, contentType: 'application/xml' };
+}
+
+/** Release a mock lock; fails on handle mismatch. */
+function handleUnlock(url: string, locks: LockRegistry): RouteResult {
+  const objectUri = extractObjectUri(url);
+  const handleMatch = /[?&]lockHandle=([^&]+)/.exec(url);
+  const handle = handleMatch ? decodeURIComponent(handleMatch[1]) : undefined;
+  const ok = locks.unlock(objectUri, handle);
+  if (!ok) {
+    return {
+      status: 400,
+      body: 'Lock handle mismatch',
+      contentType: 'text/plain',
+    };
+  }
+  return { status: 200, body: '', contentType: 'text/plain' };
+}
+
+/** Test-classes include, source read/write and lock/unlock routes. */
+function matchSourceAndLockRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+  locks: LockRegistry,
+): RouteResult | undefined {
   // Test classes include
   if (m === 'GET' && url.includes('/includes/testclasses')) {
     return {
@@ -1739,37 +2088,12 @@ export function matchRoute(
 
   // Lock — POST ?_action=LOCK
   if (m === 'POST' && url.includes('_action=LOCK')) {
-    const objectUri = extractObjectUri(url);
-    if (locks.get(objectUri)) {
-      return {
-        status: 409,
-        body: `Object ${objectUri} is already locked in request MOCKK900001`,
-        contentType: 'text/plain',
-      };
-    }
-    const entry = locks.lock(objectUri);
-    // Replace the handle placeholder in the fixture XML with the real handle
-    const body = f.lockResponse.replace(
-      /<LOCK_HANDLE>[^<]*<\/LOCK_HANDLE>/,
-      `<LOCK_HANDLE>${entry.handle}</LOCK_HANDLE>`,
-    );
-    return { status: 200, body, contentType: 'application/xml' };
+    return handleLock(f, url, locks);
   }
 
   // Unlock — POST ?_action=UNLOCK
   if (m === 'POST' && url.includes('_action=UNLOCK')) {
-    const objectUri = extractObjectUri(url);
-    const handleMatch = /[?&]lockHandle=([^&]+)/.exec(url);
-    const handle = handleMatch ? decodeURIComponent(handleMatch[1]) : undefined;
-    const ok = locks.unlock(objectUri, handle);
-    if (!ok) {
-      return {
-        status: 400,
-        body: 'Lock handle mismatch',
-        contentType: 'text/plain',
-      };
-    }
-    return { status: 200, body: '', contentType: 'text/plain' };
+    return handleUnlock(url, locks);
   }
 
   // Source write — PUT .../source/main
@@ -1777,6 +2101,16 @@ export function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  return undefined;
+}
+
+/** Object-root metadata GET/PUT routes (CLAS / INTF / PROG / FUGR). */
+function matchObjectMetadataRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // ── Object-root GET (CLAS / INTF / PROG / FUGR) ──────────────
   // Serve the object metadata XML. Must come AFTER the source/main GET
   // branch (so that `/source/main` is not swallowed) and after all
@@ -1831,6 +2165,15 @@ export function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  return undefined;
+}
+
+/** Activation and object lifecycle (create/delete/check) routes. */
+function matchActivationAndLifecycleRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // Inactive objects
   if (
     m === 'GET' &&
@@ -1892,6 +2235,15 @@ export function matchRoute(
     return { status: 200, body: f.aunit, contentType: 'application/json' };
   }
 
+  return undefined;
+}
+
+/** Function module / function group routes. */
+function matchFunctionGroupRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // Function module source
   if (
     m === 'GET' &&
@@ -1934,6 +2286,15 @@ export function matchRoute(
     };
   }
 
+  return undefined;
+}
+
+/** Object structure, type info, pretty printer and misc tool routes. */
+function matchMiscToolRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // Object structure
   if (m === 'GET' && url.includes('/objectstructure')) {
     return {
@@ -1987,127 +2348,228 @@ export function matchRoute(
     };
   }
 
-  // ── gCTS (/sap/bc/cts_abapvcs/) — E07 ──────────────────────────────
-  // Order matters: more-specific paths first.
-  if (url.startsWith('/sap/bc/cts_abapvcs/repository')) {
-    const gctsPath = pathname.replace(
-      /^\/sap\/bc\/cts_abapvcs\/repository/,
-      '',
-    );
-    const json = (body: string) =>
-      ({ status: 200, body, contentType: 'application/json' }) as RouteResult;
+  return undefined;
+}
 
-    // /repository (list + create)
-    if (gctsPath === '' || gctsPath === '/') {
-      if (m === 'GET') return json(f.gctsRepositories);
-      if (m === 'POST')
-        return {
-          status: 201,
-          body: f.gctsCreateResponse,
-          contentType: 'application/json',
-        };
-    }
+/** JSON route result (gCTS/FLP fixtures are all JSON). */
+function jsonResult(body: string): RouteResult {
+  return { status: 200, body, contentType: 'application/json' };
+}
 
-    // /repository/<rid>/...
-    const subMatch = /^\/([^/]+)(\/.*)?$/.exec(gctsPath);
-    if (subMatch) {
-      const sub = subMatch[2] ?? '';
+/** gCTS repository root: list + create (`/repository`). */
+function matchGctsRepositoryRootRoutes(
+  m: string,
+  gctsPath: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (gctsPath === '' || gctsPath === '/') {
+    if (m === 'GET') return jsonResult(f.gctsRepositories);
+    if (m === 'POST')
+      return {
+        status: 201,
+        body: f.gctsCreateResponse,
+        contentType: 'application/json',
+      };
+  }
+  return undefined;
+}
 
-      // Branches: switch (GET /<current>/switch?branch=X)
-      if (/^\/branches\/[^/]+\/switch$/.test(sub) && m === 'GET') {
-        return json('{"result":"switched"}');
-      }
-      // Branches: delete / list / create
-      if (sub === '/branches') {
-        if (m === 'GET') return json(f.gctsBranches);
-        if (m === 'POST') return json(f.gctsCreateBranch);
-      }
-      if (/^\/branches\/[^/]+$/.test(sub) && m === 'DELETE') {
-        return json('{}');
-      }
+/** gCTS branch routes (switch / delete / list / create). */
+function matchGctsBranchRoutes(
+  m: string,
+  sub: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  // Branches: switch (GET /<current>/switch?branch=X)
+  if (/^\/branches\/[^/]+\/switch$/.test(sub) && m === 'GET') {
+    return jsonResult('{"result":"switched"}');
+  }
+  // Branches: delete / list / create
+  if (sub === '/branches') {
+    if (m === 'GET') return jsonResult(f.gctsBranches);
+    if (m === 'POST') return jsonResult(f.gctsCreateBranch);
+  }
+  if (/^\/branches\/[^/]+$/.test(sub) && m === 'DELETE') {
+    return jsonResult('{}');
+  }
+  return undefined;
+}
 
-      // Config: single key get/delete
-      if (/^\/config\/[^/]+$/.test(sub)) {
-        if (m === 'GET') return json(f.gctsConfig);
-        if (m === 'DELETE') return json('{}');
-      }
-      if (sub === '/config' && m === 'POST') {
-        return json('{"result":{"key":"VCS_TARGET_DIR","value":"src/"}}');
-      }
+/** gCTS config routes (single key get/delete + set). */
+function matchGctsConfigRoutes(
+  m: string,
+  sub: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  // Config: single key get/delete
+  if (/^\/config\/[^/]+$/.test(sub)) {
+    if (m === 'GET') return jsonResult(f.gctsConfig);
+    if (m === 'DELETE') return jsonResult('{}');
+  }
+  if (sub === '/config' && m === 'POST') {
+    return jsonResult('{"result":{"key":"VCS_TARGET_DIR","value":"src/"}}');
+  }
+  return undefined;
+}
 
-      if (sub === '/clone' && m === 'POST') return json(f.gctsRepository);
-      if (sub === '/pullByCommit' && m === 'GET') return json(f.gctsPull);
-      if (sub === '/push' && m === 'GET') return json('{}');
-      if (sub === '/getCommit' && m === 'GET') return json(f.gctsLog);
-      if (sub === '/getObjects' && m === 'GET') return json(f.gctsObjects);
-      if (sub === '/commit' && m === 'POST') return json(f.gctsCommitResponse);
+/** gCTS repository action routes (clone/pull/push/log/objects/commit). */
+function matchGctsRepoActionRoutes(
+  m: string,
+  sub: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (sub === '/clone' && m === 'POST') return jsonResult(f.gctsRepository);
+  if (sub === '/pullByCommit' && m === 'GET') return jsonResult(f.gctsPull);
+  if (sub === '/push' && m === 'GET') return jsonResult('{}');
+  if (sub === '/getCommit' && m === 'GET') return jsonResult(f.gctsLog);
+  if (sub === '/getObjects' && m === 'GET') return jsonResult(f.gctsObjects);
+  if (sub === '/commit' && m === 'POST')
+    return jsonResult(f.gctsCommitResponse);
+  return undefined;
+}
 
-      // /<rid> — GET (fetch) / POST (setItem) / DELETE
-      if (sub === '') {
-        if (m === 'GET') return json(f.gctsRepository);
-        if (m === 'POST') return json('{}');
-        if (m === 'DELETE') return json('{}');
-      }
-    }
+/** gCTS repository item routes (`/<rid>` — GET / setItem / DELETE). */
+function matchGctsRepoItemRoutes(
+  m: string,
+  sub: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (sub === '') {
+    if (m === 'GET') return jsonResult(f.gctsRepository);
+    if (m === 'POST') return jsonResult('{}');
+    if (m === 'DELETE') return jsonResult('{}');
+  }
+  return undefined;
+}
+
+/**
+ * gCTS (/sap/bc/cts_abapvcs/) — E07.
+ * Order matters: more-specific paths first.
+ */
+function matchGctsRoutes(
+  m: string,
+  url: string,
+  pathname: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (!url.startsWith('/sap/bc/cts_abapvcs/repository')) return undefined;
+
+  const gctsPath = pathname.replace(/^\/sap\/bc\/cts_abapvcs\/repository/, '');
+
+  // /repository (list + create)
+  const rootResult = matchGctsRepositoryRootRoutes(m, gctsPath, f);
+  if (rootResult) return rootResult;
+
+  // /repository/<rid>/...
+  const subMatch = /^\/([^/]+)(\/.*)?$/.exec(gctsPath);
+  if (!subMatch) return undefined;
+
+  const sub = subMatch[2] ?? '';
+  return (
+    matchGctsBranchRoutes(m, sub, f) ??
+    matchGctsConfigRoutes(m, sub, f) ??
+    matchGctsRepoActionRoutes(m, sub, f) ??
+    matchGctsRepoItemRoutes(m, sub, f)
+  );
+}
+
+/** True when `path` ends with an entity key like `/Chips('some-id')`. */
+function flpHasEntityKey(path: string, segment: string): boolean {
+  const idx = path.indexOf(`/${segment}('`);
+  if (idx === -1) return false;
+  const afterOpen = idx + segment.length + 3; // after "/<segment>('"
+  const closeIdx = path.indexOf("')", afterOpen);
+  if (closeIdx === -1) return false;
+  // Nothing (except maybe a trailing sub-path) should follow — here we
+  // require the key to terminate the path for single-entity endpoints.
+  return closeIdx + 2 === path.length;
+}
+
+/** True when `path` ends with an entity key plus a `/<sub>` sub-path. */
+function flpHasEntityKeySubpath(
+  path: string,
+  segment: string,
+  sub: string,
+): boolean {
+  const idx = path.indexOf(`/${segment}('`);
+  if (idx === -1) return false;
+  const afterOpen = idx + segment.length + 3;
+  const closeIdx = path.indexOf("')", afterOpen);
+  if (closeIdx === -1) return false;
+  return path.slice(closeIdx + 2) === `/${sub}`;
+}
+
+/**
+ * FLP single-entity routes — /sap/opu/odata/UI2/PAGE_BUILDER_PERS/ — E14.
+ * Order matters: specific entity paths first, then entity-set lists.
+ */
+function matchFlpEntityRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (!url.startsWith('/sap/opu/odata/UI2/PAGE_BUILDER_PERS/')) {
+    return undefined;
   }
 
-  // ── FLP — /sap/opu/odata/UI2/PAGE_BUILDER_PERS/ — E14 ──────────────────
-  // Order matters: specific entity paths first, then entity-set lists.
-  if (url.startsWith('/sap/opu/odata/UI2/PAGE_BUILDER_PERS/')) {
-    const json = (body: string) =>
-      ({ status: 200, body, contentType: 'application/json' }) as RouteResult;
+  // Strip query string so we can use simple endsWith/includes checks
+  // (avoids backtracking-prone regexes).
+  const path = url.split('?', 1)[0];
 
-    // Strip query string so we can use simple endsWith/includes checks
-    // (avoids backtracking-prone regexes).
-    const path = url.split('?', 1)[0];
-    // An entity key like ('some-id') has no '/' inside and is at end.
-    const hasEntityKey = (segment: string): boolean => {
-      const idx = path.indexOf(`/${segment}('`);
-      if (idx === -1) return false;
-      const afterOpen = idx + segment.length + 3; // after "/<segment>('"
-      const closeIdx = path.indexOf("')", afterOpen);
-      if (closeIdx === -1) return false;
-      // Nothing (except maybe a trailing sub-path) should follow — here we
-      // require the key to terminate the path for single-entity endpoints.
-      return closeIdx + 2 === path.length;
-    };
-    const hasEntityKeySubpath = (segment: string, sub: string): boolean => {
-      const idx = path.indexOf(`/${segment}('`);
-      if (idx === -1) return false;
-      const afterOpen = idx + segment.length + 3;
-      const closeIdx = path.indexOf("')", afterOpen);
-      if (closeIdx === -1) return false;
-      return path.slice(closeIdx + 2) === `/${sub}`;
-    };
-
-    // /Chips('<id>') — single tile
-    if (m === 'GET' && hasEntityKey('Chips')) {
-      return json(f.flpTileSingle);
-    }
-    // /Catalogs('<id>')/Chips — tiles in a catalog
-    if (m === 'GET' && hasEntityKeySubpath('Catalogs', 'Chips')) {
-      return json(f.flpTileList);
-    }
-    // /Catalogs('<id>') — single catalog
-    if (m === 'GET' && hasEntityKey('Catalogs')) {
-      return json(f.flpCatalogSingle);
-    }
-    // /Pages('<id>') — single page / group (reuse list fixture's first item)
-    if (m === 'GET' && hasEntityKey('Pages')) {
-      return json(f.flpGroupList);
-    }
-    // Entity-set lists
-    if (m === 'GET' && path.endsWith('/Catalogs')) {
-      return json(f.flpCatalogList);
-    }
-    if (m === 'GET' && path.endsWith('/Pages')) {
-      return json(f.flpGroupList);
-    }
-    if (m === 'GET' && path.endsWith('/Chips')) {
-      return json(f.flpTileList);
-    }
+  // /Chips('<id>') — single tile
+  if (m === 'GET' && flpHasEntityKey(path, 'Chips')) {
+    return jsonResult(f.flpTileSingle);
+  }
+  // /Catalogs('<id>')/Chips — tiles in a catalog
+  if (m === 'GET' && flpHasEntityKeySubpath(path, 'Catalogs', 'Chips')) {
+    return jsonResult(f.flpTileList);
+  }
+  // /Catalogs('<id>') — single catalog
+  if (m === 'GET' && flpHasEntityKey(path, 'Catalogs')) {
+    return jsonResult(f.flpCatalogSingle);
+  }
+  // /Pages('<id>') — single page / group (reuse list fixture's first item)
+  if (m === 'GET' && flpHasEntityKey(path, 'Pages')) {
+    return jsonResult(f.flpGroupList);
   }
 
+  return undefined;
+}
+
+/** FLP entity-set list routes (Catalogs / Pages / Chips). */
+function matchFlpListRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
+  if (!url.startsWith('/sap/opu/odata/UI2/PAGE_BUILDER_PERS/')) {
+    return undefined;
+  }
+
+  // Strip query string so we can use simple endsWith/includes checks
+  // (avoids backtracking-prone regexes).
+  const path = url.split('?', 1)[0];
+
+  // Entity-set lists
+  if (m === 'GET' && path.endsWith('/Catalogs')) {
+    return jsonResult(f.flpCatalogList);
+  }
+  if (m === 'GET' && path.endsWith('/Pages')) {
+    return jsonResult(f.flpGroupList);
+  }
+  if (m === 'GET' && path.endsWith('/Chips')) {
+    return jsonResult(f.flpTileList);
+  }
+
+  return undefined;
+}
+
+/** abapGit export and CSRF token routes. */
+function matchAbapGitExportAndCsrfRoutes(
+  m: string,
+  url: string,
+  f: LoadedFixtures,
+): RouteResult | undefined {
   // abapGit export
   if (
     m === 'GET' &&
@@ -2126,6 +2588,14 @@ export function matchRoute(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  return undefined;
+}
+
+/** Route matcher: matchSoapRfcRoutes */
+function matchSoapRfcRoutes(
+  m: string,
+  pathname: string,
+): RouteResult | undefined {
   // ── SOAP-RFC (E13) ─────────────────────────────────────────────────────
   // POST /sap/bc/soap/rfc?sap-client=<n> → returns a synthetic
   // STFC_CONNECTION.Response that echoes REQUTEXT=hello (the only
@@ -2146,6 +2616,4 @@ export function matchRoute(
         `</soap-env:Envelope>`,
     };
   }
-
-  return undefined;
 }

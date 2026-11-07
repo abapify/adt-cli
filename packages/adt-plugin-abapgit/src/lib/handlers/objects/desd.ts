@@ -22,17 +22,17 @@ export const externalSchemaHandler = createHandler<DesdLike, typeof bdef>(
       };
     },
     fromAffJson: (json) => affFromAffJson(json, ''),
-    async serialize(object, ctx): Promise<SerializedFile[]> {
+    serialize(object, ctx): Promise<SerializedFile[]> {
       const header = {
         description: object.description || String(object.name ?? ''),
         originalLanguage: (object.originalLanguage ?? 'en').toLowerCase(),
       };
-      return [
+      return Promise.resolve([
         ctx.createFile(
           `${ctx.getObjectName(object)}.desd.json`,
           `${JSON.stringify({ formatVersion: '1', header }, null, 2)}\n`,
         ),
-      ];
+      ]);
     },
   },
 );

@@ -21,10 +21,90 @@ import { matchesFilter } from './filters';
 
 export class CodegenFramework {
   private readonly logger = new ConsoleLogger();
-  private plugins: CodegenPlugin[] = [];
+  private readonly plugins: CodegenPlugin[] = [];
 
   constructor(private readonly config: CodegenConfig) {
     this.plugins = config.plugins;
+  }
+
+  /**
+   * Run the workspace hook and the collection/templateLink hooks for one
+   * filtered workspace.
+   */
+  private async processWorkspaceContent(
+    ws: any,
+    wsCtx: WorkspaceContext,
+    hooks: {
+      hasWorkspaceHook: boolean;
+      hasCollectionHook: boolean;
+      hasTemplateLinkHook: boolean;
+    },
+  ): Promise<void> {
+    // Call workspace hooks
+    if (hooks.hasWorkspaceHook) {
+      await this.callHook('workspace', wsCtx);
+    }
+
+    // Process collections if collection hook exists
+    if (hooks.hasCollectionHook || hooks.hasTemplateLinkHook) {
+      await this.processCollections(ws, wsCtx, hooks);
+    }
+  }
+
+  /**
+   * Run collection + templateLink hooks for every filtered collection of a
+   * workspace.
+   */
+  private async processCollections(
+    ws: any,
+    wsCtx: WorkspaceContext,
+    hooks: {
+      hasCollectionHook: boolean;
+      hasTemplateLinkHook: boolean;
+    },
+  ): Promise<void> {
+    for (const coll of this.extractCollections(ws)) {
+      // Apply collection filter
+      if (!matchesFilter(coll, this.config.filters, 'collection')) {
+        continue;
+      }
+
+      await this.processCollection(coll, wsCtx, hooks);
+    }
+  }
+
+  /**
+   * Run the collection hook and the templateLink hooks for one collection.
+   */
+  private async processCollection(
+    coll: any,
+    wsCtx: WorkspaceContext,
+    hooks: {
+      hasCollectionHook: boolean;
+      hasTemplateLinkHook: boolean;
+    },
+  ): Promise<void> {
+    const collCtx = this.createCollectionContext(coll, wsCtx);
+
+    if (hooks.hasCollectionHook) {
+      await this.callHook('collection', collCtx);
+    }
+
+    if (hooks.hasTemplateLinkHook) {
+      await this.processTemplateLinks(collCtx);
+    }
+  }
+
+  /**
+   * Run the templateLink hook for every template link of a collection.
+   */
+  private async processTemplateLinks(
+    collCtx: CollectionContext,
+  ): Promise<void> {
+    for (const link of collCtx.templateLinks) {
+      const linkCtx = this.createTemplateLinkContext(link, collCtx);
+      await this.callHook('templateLink', linkCtx);
+    }
   }
 
   /**
@@ -93,37 +173,11 @@ export class CodegenFramework {
         const wsCtx = await this.createWorkspaceContext(ws);
         workspaceContexts.push(wsCtx);
 
-        // Call workspace hooks
-        if (hasWorkspaceHook) {
-          await this.callHook('workspace', wsCtx);
-        }
-
-        // Process collections if collection hook exists
-        if (hasCollectionHook || hasTemplateLinkHook) {
-          const collections = this.extractCollections(ws);
-
-          for (const coll of collections) {
-            // Apply collection filter
-            if (!matchesFilter(coll, this.config.filters, 'collection')) {
-              continue;
-            }
-
-            const collCtx = this.createCollectionContext(coll, wsCtx);
-
-            // Call collection hooks
-            if (hasCollectionHook) {
-              await this.callHook('collection', collCtx);
-            }
-
-            // Process template links if hook exists
-            if (hasTemplateLinkHook && collCtx.templateLinks.length > 0) {
-              for (const link of collCtx.templateLinks) {
-                const linkCtx = this.createTemplateLinkContext(link, collCtx);
-                await this.callHook('templateLink', linkCtx);
-              }
-            }
-          }
-        }
+        await this.processWorkspaceContent(ws, wsCtx, {
+          hasWorkspaceHook,
+          hasCollectionHook,
+          hasTemplateLinkHook,
+        });
 
         // Write accumulated artifacts
         await this.writeArtifacts(wsCtx);
@@ -234,19 +288,16 @@ export class CodegenFramework {
     workspace: WorkspaceContext,
   ): CollectionContext {
     const accepts = collection['app:accept'];
-    const acceptsArray = accepts
-      ? Array.isArray(accepts)
-        ? accepts
-        : [accepts]
-      : [];
+    const acceptsList = Array.isArray(accepts) ? accepts : [accepts];
+    const acceptsArray = accepts ? acceptsList : [];
 
     const templateLinksXml =
       collection['adtcomp:templateLinks']?.['adtcomp:templateLink'];
+    const templateLinksList = Array.isArray(templateLinksXml)
+      ? templateLinksXml
+      : [templateLinksXml];
     const templateLinks: TemplateLink[] = templateLinksXml
-      ? (Array.isArray(templateLinksXml)
-          ? templateLinksXml
-          : [templateLinksXml]
-        ).map((link: any) => ({
+      ? templateLinksList.map((link: any) => ({
           rel: link['@_rel'],
           template: link['@_template'],
         }))
@@ -300,6 +351,7 @@ export class CodegenFramework {
     return title
       .toLowerCase()
       .replaceAll(/[^a-z0-9]+/g, '-')
-      .replaceAll(/^-+|-+$/g, '');
+      .replace(/^-+/, '')
+      .replace(/(?<!-)-+$/, '');
   }
 }

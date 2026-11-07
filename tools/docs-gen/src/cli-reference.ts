@@ -32,8 +32,8 @@ const NOTE = generatedNote('the Commander command tree');
 const BUNDLED_PLUGINS = new Set(['atc', 'codegen', 'diff', 'export', 'flow']);
 
 function pluginNote(cmdName: string, plugins: CliCommandPlugin[]): string {
-  const plugin = plugins.find((p) => p.name === cmdName);
-  if (!plugin) return '';
+  const hasPlugin = plugins.some((p) => p.name === cmdName);
+  if (!hasPlugin) return '';
   const pkg =
     PLUGIN_MODULES.find((s) => s.endsWith(`/commands/${cmdName}`))?.split(
       '/commands/',
@@ -51,8 +51,8 @@ export interface CliPage {
   content: string;
 }
 
-function isHidden(cmd: Command): boolean {
-  return Boolean((cmd as unknown as { _hidden?: boolean })._hidden);
+function isHidden(cmd: unknown): cmd is { _hidden?: boolean } {
+  return Boolean((cmd as { _hidden?: boolean })._hidden);
 }
 
 function visibleCommands(cmd: Command): Command[] {
@@ -143,12 +143,10 @@ function renderCommand(cmd: Command, path: string[], level: number): string[] {
 }
 
 async function loadPlugins(): Promise<CliCommandPlugin[]> {
-  const plugins: CliCommandPlugin[] = [];
-  for (const spec of PLUGIN_MODULES) {
-    const mod = (await import(spec)) as { default: CliCommandPlugin };
-    plugins.push(mod.default);
-  }
-  return plugins;
+  const mods = (await Promise.all(
+    PLUGIN_MODULES.map((spec) => import(spec)),
+  )) as Array<{ default: CliCommandPlugin }>;
+  return mods.map((mod) => mod.default);
 }
 
 export async function generateCliPages(): Promise<CliPage[]> {
@@ -193,10 +191,13 @@ export async function generateCliPages(): Promise<CliPage[]> {
       '## Commands',
       table(
         ['Command', 'Description'],
-        commands.map((c) => [
-          `[${code(`adt ${c.name()}`)}](./${c.name()}.md)`,
-          escapeCell(summary(c.description())),
-        ]),
+        commands.map((c) => {
+          const label = `adt ${c.name()}`;
+          return [
+            `[${code(label)}](./${c.name()}.md)`,
+            escapeCell(summary(c.description())),
+          ];
+        }),
       ),
     ].join('\n\n'),
   });

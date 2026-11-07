@@ -8,6 +8,7 @@ import {
   getAuthManager,
 } from '../../utils/auth';
 import { handleCommandError } from '../../utils/command-helpers';
+import { asText } from '../../utils/text';
 import { verifyBasicAuth } from '../../utils/verify-basic-auth';
 import {
   CALLBACK_SERVER_PORT,
@@ -30,6 +31,258 @@ interface DestinationChoice {
   name: string;
   value: { sid: string; destination: Destination | null };
   description: string;
+}
+
+type LoginCommandOptions = {
+  serviceKey?: string;
+  redirectUri?: string;
+  insecure?: boolean;
+  skipVerify?: boolean;
+  sid?: string;
+};
+
+type LoginSession = Awaited<
+  ReturnType<ReturnType<typeof getAuthManager>['login']>
+>;
+
+/** Pick the effective global redirect URI from the loaded config. */
+function resolveGlobalRedirectUri(config: {
+  raw: { redirectUri?: unknown };
+}): string | undefined {
+  const value = config.raw.redirectUri;
+  return typeof value === 'string' && value.trim().length > 0
+    ? value
+    : undefined;
+}
+
+/** Handle login failure; user cancellation exits quietly with code 1. */
+function reportLoginFailure(error: unknown): never {
+  // Handle user cancellation (Ctrl+C)
+  if ((error as any).name === 'ExitPromptError') {
+    console.log('\n❌ Login cancelled');
+    process.exit(1);
+  }
+  handleCommandError(error, 'Login');
+}
+
+/** Print the login success banner and the default-SID note. */
+function printLoginSuccess(session: LoginSession, sid: string): void {
+  console.log(`\n✅ Successfully logged in!`);
+  console.log(`   System: ${session.sid}`);
+  console.log(`   Host: ${session.host}`);
+  console.log(`   Method: ${session.auth.method}`);
+  console.log(`   💡 ${sid} set as default system`);
+}
+
+/** Service-key login flow (--service-key). */
+async function loginWithServiceKey(
+  serviceKeyPath: string,
+  sidArg: string,
+  options: LoginCommandOptions,
+  globalRedirectUri: string | undefined,
+): Promise<void> {
+  const serviceKey = readServiceKey(serviceKeyPath);
+  if (!serviceKey.systemid && !sidArg) {
+    throw new Error(
+      'Service key does not contain a systemid. Use --sid to specify the system ID.',
+    );
+  }
+
+  const sid = sidArg || serviceKey.systemid.toUpperCase();
+  const authManager = getAuthManager();
+  const openModule = await import('open');
+  const openFn = openModule.default;
+
+  const session = await authManager.login(sid, {
+    type: '@abapify/adt-auth/plugins/service-key',
+    options: {
+      url: serviceKey.url,
+      serviceKey,
+      openBrowser: async (url: string) => {
+        try {
+          console.log('🌐 Opening browser for authentication...');
+          await openFn(url);
+        } catch {
+          console.log('🌐 Open this URL in your browser to authenticate:');
+          console.log(url);
+        }
+      },
+      callbackPort: CALLBACK_SERVER_PORT,
+      redirectUri:
+        (options.redirectUri as string | undefined) ??
+        globalRedirectUri ??
+        OAUTH_REDIRECT_URI,
+      timeoutMs: OAUTH_TIMEOUT_MS,
+    },
+  });
+
+  setDefaultSid(sid);
+  printLoginSuccess(session, sid);
+}
+
+/**
+ * Configured-destination login flow (--sid matching a destination).
+ * Prompts for credentials when a basic-auth destination lacks them.
+ */
+async function loginWithDestination(
+  sid: string,
+  dest: Destination,
+  options: LoginCommandOptions,
+  globalRedirectUri: string | undefined,
+): Promise<void> {
+  console.log(`📋 Authenticating to ${sid}...\n`);
+
+  // For basic auth without credentials, prompt for username/password
+  const destOptions = dest.options as DestinationOptions;
+  if (
+    isBasicAuthPlugin(dest.type) &&
+    (!destOptions.username || !destOptions.password)
+  ) {
+    const credentials = await promptForBasicAuthCredentials(
+      destOptions.url,
+      options,
+    );
+    Object.assign(destOptions, credentials);
+  }
+
+  const authManager = getAuthManager();
+  const resolvedDestOptions = withGlobalRedirectUri(
+    destOptions,
+    globalRedirectUri,
+  );
+  await verifyBasicCredentials(dest.type, resolvedDestOptions, {
+    skipVerify: options.skipVerify === true,
+    insecure: options.insecure === true,
+  });
+  const session = await authManager.login(sid, {
+    type: dest.type,
+    options: resolvedDestOptions,
+  });
+
+  // Set as default
+  setDefaultSid(sid);
+  printLoginSuccess(session, sid);
+}
+
+/**
+ * Interactive destination selection flow (no --sid).
+ * Returns true when a destination was selected and the login completed;
+ * false when the user chose manual configuration.
+ */
+async function loginViaDestinationSelection(
+  configuredDestinations: string[],
+  options: LoginCommandOptions,
+  globalRedirectUri: string | undefined,
+): Promise<boolean> {
+  const destinationChoices: DestinationChoice[] = [];
+
+  const destinations = await Promise.all(
+    configuredDestinations.map((destName) => getDestination(destName)),
+  );
+  for (const [index, destName] of configuredDestinations.entries()) {
+    const dest = destinations[index];
+    if (dest) {
+      const opts = dest.options as DestinationOptions;
+      destinationChoices.push({
+        name: `${destName} (${opts.url}) [${dest.type}]`,
+        value: { sid: destName, destination: dest },
+        description: `${dest.type} authentication`,
+      });
+    }
+  }
+
+  // Add manual option
+  destinationChoices.push({
+    name: '➕ Manual configuration...',
+    value: { sid: '', destination: null as unknown as Destination },
+    description: 'Enter URL and auth method manually',
+  });
+
+  const selected = await select({
+    message: 'Select destination',
+    choices: destinationChoices,
+  });
+
+  if (!selected.destination) return false;
+
+  const sid = selected.sid;
+  console.log(`\n📋 Authenticating to ${sid}...\n`);
+
+  const authManager = getAuthManager();
+  const destOptions = selected.destination.options as DestinationOptions;
+  if (
+    isBasicAuthPlugin(selected.destination.type) &&
+    (!destOptions.username || !destOptions.password)
+  ) {
+    const credentials = await promptForBasicAuthCredentials(
+      destOptions.url,
+      options,
+    );
+    Object.assign(destOptions, credentials);
+  }
+  const resolvedDestOptions = withGlobalRedirectUri(
+    destOptions,
+    globalRedirectUri,
+  );
+  await verifyBasicCredentials(selected.destination.type, resolvedDestOptions, {
+    skipVerify: options.skipVerify === true,
+    insecure: options.insecure === true,
+  });
+  const session = await authManager.login(sid, {
+    type: selected.destination.type,
+    options: resolvedDestOptions,
+  });
+
+  // Set as default
+  setDefaultSid(sid);
+  printLoginSuccess(session, sid);
+  return true;
+}
+
+/** Manual configuration flow (built-in basic auth only). */
+async function loginManually(
+  initialSid: string,
+  options: LoginCommandOptions,
+): Promise<void> {
+  // Manual flow: collect URL and credentials (built-in basic auth only)
+  const manualConfig = await promptManualConfig();
+
+  // Get or prompt for SID
+  let sid = initialSid;
+  if (!sid) {
+    sid = options.sid?.toUpperCase() || (await promptForSid());
+  }
+
+  // Collect credentials for basic auth
+  const pluginOptions = await collectPluginOptions(manualConfig.url, options);
+
+  // Authenticate via AuthManager (always uses built-in basic auth for manual flow)
+  console.log(`\n📋 Authenticating to ${sid}...\n`);
+  const authManager = getAuthManager();
+  await verifyBasicCredentials(manualConfig.pluginType, pluginOptions, {
+    skipVerify: options.skipVerify === true,
+    insecure: options.insecure === true,
+  });
+  const session = await authManager.login(sid, {
+    type: manualConfig.pluginType,
+    options: pluginOptions,
+  });
+
+  console.log(`\n✅ Successfully logged in!`);
+  console.log(`   System: ${session.sid}`);
+  console.log(`   Host: ${session.host}`);
+  console.log(`   Method: ${session.auth.method}`);
+
+  // Set as default if it's the first system
+  const availableSids = listAvailableSids();
+  if (availableSids.length === 1 || !getDefaultSid()) {
+    setDefaultSid(sid);
+    console.log(`💡 ${sid} set as default system`);
+  } else {
+    console.log(
+      `\n💡 Run "npx adt auth set-default ${sid}" to make it the default system`,
+    );
+  }
 }
 
 export const loginCommand = new Command('login')
@@ -56,67 +309,24 @@ export const loginCommand = new Command('login')
       const globalOpts = this.optsWithGlobals();
       const sidArg = globalOpts.sid?.toUpperCase() || '';
       const config = await getConfig();
-      const globalRedirectUri =
-        typeof config.raw.redirectUri === 'string' &&
-        config.raw.redirectUri.trim().length > 0
-          ? config.raw.redirectUri
-          : undefined;
+      const globalRedirectUri = resolveGlobalRedirectUri(config);
 
       console.log('🔐 ADT Login\n');
 
       if (options.serviceKey) {
-        const serviceKey = readServiceKey(options.serviceKey as string);
-        if (!serviceKey.systemid && !sidArg) {
-          throw new Error(
-            'Service key does not contain a systemid. Use --sid to specify the system ID.',
-          );
-        }
-
-        const sid = sidArg || serviceKey.systemid.toUpperCase();
-        const authManager = getAuthManager();
-        const openModule = await import('open');
-        const openFn = openModule.default;
-
-        const session = await authManager.login(sid, {
-          type: '@abapify/adt-auth/plugins/service-key',
-          options: {
-            url: serviceKey.url,
-            serviceKey,
-            openBrowser: async (url: string) => {
-              try {
-                console.log('🌐 Opening browser for authentication...');
-                await openFn(url);
-              } catch {
-                console.log(
-                  '🌐 Open this URL in your browser to authenticate:',
-                );
-                console.log(url);
-              }
-            },
-            callbackPort: CALLBACK_SERVER_PORT,
-            redirectUri:
-              (options.redirectUri as string | undefined) ??
-              globalRedirectUri ??
-              OAUTH_REDIRECT_URI,
-            timeoutMs: OAUTH_TIMEOUT_MS,
-          },
-        });
-
-        setDefaultSid(sid);
-
-        console.log(`\n✅ Successfully logged in!`);
-        console.log(`   System: ${session.sid}`);
-        console.log(`   Host: ${session.host}`);
-        console.log(`   Method: ${session.auth.method}`);
-        console.log(`   💡 ${sid} set as default system`);
-
+        await loginWithServiceKey(
+          options.serviceKey as string,
+          sidArg,
+          options,
+          globalRedirectUri,
+        );
         return;
       }
 
       // Check if we have configured destinations
       const configuredDestinations = await listDestinations();
 
-      let sid: string = sidArg;
+      const sid: string = sidArg;
 
       // If --sid provided and destination exists in config, use it directly
       // Case-insensitive match
@@ -126,44 +336,7 @@ export const loginCommand = new Command('login')
       if (sid && matchedSid) {
         const dest = await getDestination(matchedSid);
         if (dest) {
-          console.log(`📋 Authenticating to ${sid}...\n`);
-
-          // For basic auth without credentials, prompt for username/password
-          const destOptions = dest.options as DestinationOptions;
-          if (
-            isBasicAuthPlugin(dest.type) &&
-            (!destOptions.username || !destOptions.password)
-          ) {
-            const credentials = await promptForBasicAuthCredentials(
-              destOptions.url,
-              options,
-            );
-            Object.assign(destOptions, credentials);
-          }
-
-          const authManager = getAuthManager();
-          const resolvedDestOptions = withGlobalRedirectUri(
-            destOptions,
-            globalRedirectUri,
-          );
-          await verifyBasicCredentials(dest.type, resolvedDestOptions, {
-            skipVerify: options.skipVerify === true,
-            insecure: options.insecure === true,
-          });
-          const session = await authManager.login(sid, {
-            type: dest.type,
-            options: resolvedDestOptions,
-          });
-
-          // Set as default
-          setDefaultSid(sid);
-
-          console.log(`\n✅ Successfully logged in!`);
-          console.log(`   System: ${session.sid}`);
-          console.log(`   Host: ${session.host}`);
-          console.log(`   Method: ${session.auth.method}`);
-          console.log(`   💡 ${sid} set as default system`);
-
+          await loginWithDestination(sid, dest, options, globalRedirectUri);
           return;
         }
       }
@@ -179,127 +352,18 @@ export const loginCommand = new Command('login')
 
       // If destinations configured but no --sid, show selection
       if (configuredDestinations.length > 0) {
-        const destinationChoices: DestinationChoice[] = [];
-
-        for (const destName of configuredDestinations) {
-          const dest = await getDestination(destName);
-          if (dest) {
-            const opts = dest.options as DestinationOptions;
-            destinationChoices.push({
-              name: `${destName} (${opts.url}) [${dest.type}]`,
-              value: { sid: destName, destination: dest },
-              description: `${dest.type} authentication`,
-            });
-          }
-        }
-
-        // Add manual option
-        destinationChoices.push({
-          name: '➕ Manual configuration...',
-          value: { sid: '', destination: null as unknown as Destination },
-          description: 'Enter URL and auth method manually',
-        });
-
-        const selected = await select({
-          message: 'Select destination',
-          choices: destinationChoices,
-        });
-
-        if (selected.destination) {
-          sid = selected.sid;
-          console.log(`\n📋 Authenticating to ${sid}...\n`);
-
-          const authManager = getAuthManager();
-          const destOptions = selected.destination
-            .options as DestinationOptions;
-          if (
-            isBasicAuthPlugin(selected.destination.type) &&
-            (!destOptions.username || !destOptions.password)
-          ) {
-            const credentials = await promptForBasicAuthCredentials(
-              destOptions.url,
-              options,
-            );
-            Object.assign(destOptions, credentials);
-          }
-          const resolvedDestOptions = withGlobalRedirectUri(
-            destOptions,
-            globalRedirectUri,
-          );
-          await verifyBasicCredentials(
-            selected.destination.type,
-            resolvedDestOptions,
-            {
-              skipVerify: options.skipVerify === true,
-              insecure: options.insecure === true,
-            },
-          );
-          const session = await authManager.login(sid, {
-            type: selected.destination.type,
-            options: resolvedDestOptions,
-          });
-
-          // Set as default
-          setDefaultSid(sid);
-
-          console.log(`\n✅ Successfully logged in!`);
-          console.log(`   System: ${session.sid}`);
-          console.log(`   Host: ${session.host}`);
-          console.log(`   Method: ${session.auth.method}`);
-          console.log(`   💡 ${sid} set as default system`);
-
-          return;
-        }
-      }
-
-      // Manual flow: collect URL and credentials (built-in basic auth only)
-      const manualConfig = await promptManualConfig();
-
-      // Get or prompt for SID
-      if (!sid) {
-        sid = options.sid?.toUpperCase() || (await promptForSid());
-      }
-
-      // Collect credentials for basic auth
-      const pluginOptions = await collectPluginOptions(
-        manualConfig.url,
-        options,
-      );
-
-      // Authenticate via AuthManager (always uses built-in basic auth for manual flow)
-      console.log(`\n📋 Authenticating to ${sid}...\n`);
-      const authManager = getAuthManager();
-      await verifyBasicCredentials(manualConfig.pluginType, pluginOptions, {
-        skipVerify: options.skipVerify === true,
-        insecure: options.insecure === true,
-      });
-      const session = await authManager.login(sid, {
-        type: manualConfig.pluginType,
-        options: pluginOptions,
-      });
-
-      console.log(`\n✅ Successfully logged in!`);
-      console.log(`   System: ${session.sid}`);
-      console.log(`   Host: ${session.host}`);
-      console.log(`   Method: ${session.auth.method}`);
-
-      // Set as default if it's the first system
-      const availableSids = listAvailableSids();
-      if (availableSids.length === 1 || !getDefaultSid()) {
-        setDefaultSid(sid);
-        console.log(`💡 ${sid} set as default system`);
-      } else {
-        console.log(
-          `\n💡 Run "npx adt auth set-default ${sid}" to make it the default system`,
+        const handled = await loginViaDestinationSelection(
+          configuredDestinations,
+          options,
+          globalRedirectUri,
         );
+        if (handled) return;
       }
+
+      // Manual flow
+      await loginManually(sid, options);
     } catch (error) {
-      // Handle user cancellation (Ctrl+C)
-      if ((error as any).name === 'ExitPromptError') {
-        console.log('\n❌ Login cancelled');
-        process.exit(1);
-      }
-      handleCommandError(error, 'Login');
+      reportLoginFailure(error);
     }
   });
 
@@ -351,9 +415,9 @@ async function verifyBasicCredentials(
     client:
       destOptions.client === undefined || destOptions.client === null
         ? undefined
-        : String(destOptions.client),
-    username: String(destOptions.username),
-    password: String(destOptions.password),
+        : asText(destOptions.client),
+    username: asText(destOptions.username),
+    password: asText(destOptions.password),
     insecure: verifyOptions.insecure,
   });
   console.log('✅ Credentials accepted');

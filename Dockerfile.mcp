@@ -73,13 +73,12 @@ WORKDIR /app
 
 # ca-certificates is required so the server can validate upstream TLS
 # endpoints (e.g. OIDC JWKS) and so the healthcheck has a base CA bundle.
+# The unprivileged appuser (uid/gid 10001) is outside the usual ranges and is
+# a common convention for container app users.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create an unprivileged user. uid/gid 10001 is outside the usual ranges
-# and is a common convention for container app users.
-RUN groupadd --system --gid 10001 appuser \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 10001 appuser \
     && useradd  --system --uid 10001 --gid appuser --home-dir /app appuser
 
 # Copy the built workspace packages and the workspace node_modules so the

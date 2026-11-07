@@ -15,7 +15,7 @@ export const addTaskBodySchema: Serializable<AddTaskBody> = {
   parse: (raw: string): AddTaskBody => {
     const parsed = transportmanagment.parse(raw);
     const root = parsed?.root;
-    if (!root || !root.targetuser) {
+    if (!root?.targetuser) {
       throw new Error('Invalid CTS add-task body');
     }
     return { root: { targetuser: root.targetuser } };

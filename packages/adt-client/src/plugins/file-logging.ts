@@ -76,7 +76,7 @@ export class FileLoggingPlugin implements ResponsePlugin {
 
     // Parse segments
     const [basePath] = path.split('?');
-    const segments = basePath.split('/').filter((s) => s);
+    const segments = basePath.split('/').filter(Boolean);
 
     // Check if source endpoint (no extension)
     const sourceTypes = [
@@ -117,10 +117,10 @@ export class FileLoggingPlugin implements ResponsePlugin {
    * Get metadata file path for a response file
    */
   private getMetadataPath(responsePath: string): string {
-    if (/-response\.xml$/.test(responsePath)) {
+    if (responsePath.endsWith('-response.xml')) {
       return responsePath.replace(/-response\.xml$/, '-metadata.json');
     }
-    if (/\.xml$/.test(responsePath)) {
+    if (responsePath.endsWith('.xml')) {
       return responsePath.replace(/\.xml$/, '.metadata.json');
     }
     return `${responsePath}.metadata.json`;

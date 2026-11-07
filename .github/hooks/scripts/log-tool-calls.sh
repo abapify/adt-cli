@@ -21,6 +21,7 @@ command -v jq >/dev/null 2>&1 || exit 0
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ" 2>/dev/null)
 case "$TIMESTAMP" in
   *%*) TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ") ;;
+  *) ;;
 esac
 if ! echo "$INPUT" | jq -c --arg ts "$TIMESTAMP" '. + {logged_at: $ts}' >> "$LOG_FILE" 2>/dev/null; then
   echo "log-tool-calls: failed to parse tool call JSON (skipping entry)" >&2

@@ -34,6 +34,30 @@ export type ClassXml = ClassResponse['abapClass'];
  * - data.sharedMemoryEnabled, data.modeled, data.fixPointArithmetic
  * - data.superClassRef, data.messageClassRef, data.include
  */
+/** Outcome of saving one pending source entry. */
+type PendingSaveOutcome = 'conflict' | 'deferred' | 'failed';
+
+/**
+ * Classify a failed pending-source save:
+ * - 409 Conflict means the include is already locked in the transport.
+ * - A missing inactive version means the include doesn't exist yet — defer
+ *   for retry after activation. This happens on BTP when
+ *   testclasses/localtypes includes don't exist yet.
+ */
+function classifyPendingSaveError(e: unknown): PendingSaveOutcome {
+  const errorMsg = e instanceof Error ? e.message : String(e);
+  if (errorMsg.includes('409') || errorMsg.includes('Conflict')) {
+    return 'conflict';
+  }
+  if (
+    errorMsg.includes('does not have any inactive version') ||
+    errorMsg.includes('ResourceNotFound')
+  ) {
+    return 'deferred';
+  }
+  return 'failed';
+}
+
 export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
   static readonly kind = ClassKind;
   readonly kind = AdkClass.kind;
@@ -46,13 +70,13 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
   // Lazy segments - source code
 
   async getMainSource(): Promise<string> {
-    return this.lazy('source:main', async () => {
+    return this.lazy('source:main', () => {
       return this.crudContract.source.main.get(this.name);
     });
   }
 
   async getIncludeSource(includeType: ClassIncludeType): Promise<string> {
-    return this.lazy(`source:${includeType}`, async () => {
+    return this.lazy(`source:${includeType}`, () => {
       if (includeType === 'main') {
         return this.crudContract.source.main.get(this.name);
       }
@@ -129,6 +153,19 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
 
   // normalizeSource() inherited from base class
 
+  /** Save one pending source entry (main source or an include). */
+  private async savePendingEntry(
+    key: string,
+    source: string,
+    options?: { lockHandle?: string; transport?: string },
+  ): Promise<void> {
+    if (key === 'main') {
+      await this.saveMainSource(source, options);
+    } else {
+      await this.saveIncludeSource(key as ClassIncludeType, source, options);
+    }
+  }
+
   /**
    * Save all pending sources (set via _pendingSources)
    * Used by export workflow after deserialization from abapGit
@@ -152,27 +189,13 @@ export class AdkClass extends AdkMainObject<typeof ClassKind, ClassXml> {
 
     for (const [key, source] of Object.entries(pendingSources)) {
       try {
-        if (key === 'main') {
-          await this.saveMainSource(source, options);
-        } else {
-          await this.saveIncludeSource(
-            key as ClassIncludeType,
-            source,
-            options,
-          );
-        }
+        await this.savePendingEntry(key, source, options);
       } catch (e) {
-        const errorMsg = e instanceof Error ? e.message : String(e);
-        // 409 Conflict means the include is already locked in the transport
-        if (errorMsg.includes('409') || errorMsg.includes('Conflict')) {
+        const outcome = classifyPendingSaveError(e);
+        if (outcome === 'conflict') {
           continue;
         }
-        // Include doesn't have an inactive version — defer for retry after activation
-        // This happens on BTP when testclasses/localtypes includes don't exist yet
-        if (
-          errorMsg.includes('does not have any inactive version') ||
-          errorMsg.includes('ResourceNotFound')
-        ) {
+        if (outcome === 'deferred') {
           deferred.push([key, source]);
           continue;
         }

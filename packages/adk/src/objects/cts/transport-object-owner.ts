@@ -52,7 +52,7 @@ function hasMatchingWorkbenchType(
 function classNameFromUri(uri: string | undefined): string | undefined {
   if (!uri) return undefined;
   const path = uri.split(/[?#]/, 1)[0];
-  const encodedName = path.match(/\/oo\/classes\/([^/]+)/i)?.[1];
+  const encodedName = /\/oo\/classes\/([^/]+)/i.exec(path)?.[1];
   if (!encodedName) return undefined;
 
   try {

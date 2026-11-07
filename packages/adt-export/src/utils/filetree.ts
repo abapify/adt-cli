@@ -31,10 +31,10 @@ export class FsFileTree implements FileTree {
     const fullPath = join(this.root, path);
     const content = await readFile(fullPath, 'utf-8');
     // Strip UTF-8 BOM if present
-    return content.charCodeAt(0) === 0xfeff ? content.slice(1) : content;
+    return content.codePointAt(0) === 0xfeff ? content.slice(1) : content;
   }
 
-  async readBuffer(path: string): Promise<Buffer> {
+  readBuffer(path: string): Promise<Buffer> {
     const fullPath = join(this.root, path);
     return readFile(fullPath);
   }
@@ -49,7 +49,7 @@ export class FsFileTree implements FileTree {
     }
   }
 
-  async readdir(path: string): Promise<string[]> {
+  readdir(path: string): Promise<string[]> {
     const fullPath = path ? join(this.root, path) : this.root;
     return readdir(fullPath);
   }
@@ -64,7 +64,7 @@ export class MemoryFileTree implements FileTree {
     private readonly files: Map<string, string | Buffer>,
   ) {}
 
-  async glob(pattern: string): Promise<string[]> {
+  glob(pattern: string): Promise<string[]> {
     // Simple glob matching for testing.
     // Step 1: escape ALL regex metacharacters except '*' (our glob syntax).
     //         This prevents metachars like '+', '(' in the pattern from
@@ -74,37 +74,42 @@ export class MemoryFileTree implements FileTree {
     //         wildcard expansions (e.g. '**' -> '.*' -> '\\.\\*').
     // Step 2: expand '**' then '*' using a placeholder that contains no
     //         regex metacharacters, so later passes leave it alone.
-    const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
+    const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, String.raw`\$&`);
     const body = escaped
-      .replaceAll(/\*\*/g, '\x00DOUBLESTAR\x00')
-      .replaceAll(/\*/g, '[^/]*')
-      .split('\x00DOUBLESTAR\x00')
-      .join('.*');
+      .replaceAll('**', '\x00DOUBLESTAR\x00')
+      .replaceAll('*', '[^/]*')
+      .replaceAll('\x00DOUBLESTAR\x00', '.*');
     const regex = new RegExp('^' + body + '$');
-    return Array.from(this.files.keys()).filter((p) => regex.test(p));
+    return Promise.resolve(
+      Array.from(this.files.keys()).filter((p) => regex.test(p)),
+    );
   }
 
-  async read(path: string): Promise<string> {
+  read(path: string): Promise<string> {
     const content = this.files.get(path);
     if (content === undefined) {
-      throw new Error(`File not found: ${path}`);
+      return Promise.reject(new Error(`File not found: ${path}`));
     }
-    return typeof content === 'string' ? content : content.toString('utf-8');
+    return Promise.resolve(
+      typeof content === 'string' ? content : content.toString('utf-8'),
+    );
   }
 
-  async readBuffer(path: string): Promise<Buffer> {
+  readBuffer(path: string): Promise<Buffer> {
     const content = this.files.get(path);
     if (content === undefined) {
-      throw new Error(`File not found: ${path}`);
+      return Promise.reject(new Error(`File not found: ${path}`));
     }
-    return typeof content === 'string' ? Buffer.from(content) : content;
+    return Promise.resolve(
+      typeof content === 'string' ? Buffer.from(content) : content,
+    );
   }
 
-  async exists(path: string): Promise<boolean> {
-    return this.files.has(path);
+  exists(path: string): Promise<boolean> {
+    return Promise.resolve(this.files.has(path));
   }
 
-  async readdir(path: string): Promise<string[]> {
+  readdir(path: string): Promise<string[]> {
     const prefix = path ? path + '/' : '';
     const entries = new Set<string>();
 
@@ -116,7 +121,7 @@ export class MemoryFileTree implements FileTree {
       }
     }
 
-    return Array.from(entries);
+    return Promise.resolve(Array.from(entries));
   }
 }
 

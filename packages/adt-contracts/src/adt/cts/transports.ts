@@ -75,7 +75,7 @@ export interface TransportFindParams {
   /** Owner filter - username or '*' for all */
   user: string;
   /** Transport function filter - use TransportFunction enum or '*' */
-  trfunction: TransportFunctionCode | string;
+  trfunction: string;
 }
 
 // ============================================================================

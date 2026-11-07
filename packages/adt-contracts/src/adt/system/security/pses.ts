@@ -7,9 +7,9 @@
  * NOTE: sapcli (jfilak/sapcli) drives STRUST via RFC function modules
  * (`sap/rfc/strust.py`), not ADT. The paths below follow the
  * `/sap/bc/adt/system/...` convention used elsewhere in the SAP ADT
- * REST surface (see `system/users`). See the accompanying TODO-synthetic
- * fixtures in `@abapify/adt-fixtures` — replace with real captures when
- * available.
+ * REST surface (see `system/users`). See the accompanying synthetic
+ * fixtures in `@abapify/adt-fixtures` — fabricated stand-ins that await
+ * real captures.
  */
 
 import { http } from '../../../base';

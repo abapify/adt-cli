@@ -56,7 +56,8 @@ export function normalizeSearchResults(
     raw = main.objectReference;
   }
 
-  return raw ? (Array.isArray(raw) ? raw : [raw]) : [];
+  const single = raw ? [raw] : [];
+  return Array.isArray(raw) ? raw : single;
 }
 
 /** Shared lock store instance */

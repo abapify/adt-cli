@@ -211,8 +211,10 @@ function renderFetchCall(
   type Arg = { readonly key: string; readonly value: string };
   const args: Arg[] = [];
 
-  args.push({ key: 'method', value: `'${mapping.method}'` });
-  args.push({ key: 'path', value: renderPathValue(mapping) });
+  args.push(
+    { key: 'method', value: `'${mapping.method}'` },
+    { key: 'path', value: renderPathValue(mapping) },
+  );
 
   const queryParams = mapping.params.filter((p) => p.location === 'query');
   if (queryParams.length > 0) {

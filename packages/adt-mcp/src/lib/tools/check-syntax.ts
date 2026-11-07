@@ -31,6 +31,48 @@ type CheckMessage = NonNullable<
   NonNullable<CheckReport['checkMessageList']>['checkMessage']
 >[number];
 
+interface CheckSummary {
+  reports: CheckReport[];
+  hasErrors: boolean;
+  hasWarnings: boolean;
+}
+
+function scanReportMessages(report: CheckReport): {
+  hasErrors: boolean;
+  hasWarnings: boolean;
+} {
+  let hasErrors = false;
+  let hasWarnings = false;
+  const msgs = report.checkMessageList?.checkMessage ?? [];
+  const arr = Array.isArray(msgs) ? msgs : [msgs as CheckMessage];
+  for (const msg of arr) {
+    const sev = msg.type ?? msg.category;
+    if (sev === 'E' || sev === 'A') hasErrors = true;
+    if (sev === 'W') hasWarnings = true;
+  }
+  return { hasErrors, hasWarnings };
+}
+
+/** Parse the discriminated union: response is checkRunReports */
+function summarizeCheckResponse(response: CheckrunData): CheckSummary {
+  const reports: CheckReport[] = [];
+  let hasErrors = false;
+  let hasWarnings = false;
+
+  if ('checkRunReports' in response) {
+    const raw = response.checkRunReports.checkReport ?? [];
+    reports.push(...raw);
+
+    for (const report of raw) {
+      const flags = scanReportMessages(report);
+      hasErrors ||= flags.hasErrors;
+      hasWarnings ||= flags.hasWarnings;
+    }
+  }
+
+  return { reports, hasErrors, hasWarnings };
+}
+
 export function registerCheckSyntaxTool(
   server: McpServer,
   ctx: ToolContext,
@@ -89,25 +131,8 @@ export function registerCheckSyntaxTool(
         // and checkrun.parse(responseXml) for the response automatically
         const response = await client.adt.checkruns.checkObjects.post(body);
 
-        // Parse the discriminated union: response is checkRunReports
-        const reports: CheckReport[] = [];
-        let hasErrors = false;
-        let hasWarnings = false;
-
-        if ('checkRunReports' in response) {
-          const raw = response.checkRunReports.checkReport ?? [];
-          reports.push(...raw);
-
-          for (const report of raw) {
-            const msgs = report.checkMessageList?.checkMessage ?? [];
-            const arr = Array.isArray(msgs) ? msgs : [msgs as CheckMessage];
-            for (const msg of arr) {
-              const sev = msg.type ?? msg.category;
-              if (sev === 'E' || sev === 'A') hasErrors = true;
-              if (sev === 'W') hasWarnings = true;
-            }
-          }
-        }
+        const { reports, hasErrors, hasWarnings } =
+          summarizeCheckResponse(response);
 
         return {
           content: [

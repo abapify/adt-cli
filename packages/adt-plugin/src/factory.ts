@@ -50,7 +50,7 @@ export function createPlugin(definition: AdtPluginDefinition): AdtPlugin {
     throw new Error('Plugin format is required');
   }
   if (typeof definition.format.import !== 'function') {
-    throw new Error('Plugin format.import must be a function');
+    throw new TypeError('Plugin format.import must be a function');
   }
 
   // Return validated plugin

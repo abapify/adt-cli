@@ -219,10 +219,11 @@ export function mcpErrorResult(
   notFoundHint?: string,
 ) {
   const status = getErrorStatus(error);
+  const errorMessage = error instanceof Error ? error.message : String(error);
   const message =
     status === 404 && notFoundHint
       ? notFoundHint
-      : `${toolLabel} failed: ${error instanceof Error ? error.message : String(error)}`;
+      : `${toolLabel} failed: ${errorMessage}`;
   return {
     isError: true as const,
     content: [{ type: 'text' as const, text: message }],

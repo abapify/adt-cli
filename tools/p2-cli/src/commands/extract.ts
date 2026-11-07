@@ -1,6 +1,6 @@
 import { existsSync, rmSync } from 'node:fs';
 import { basename } from 'node:path';
-import { execOutput, ensureDir, findFiles } from '../lib/utils';
+import { execOutput, ensureDir, findFiles, pathArg } from '../lib/utils';
 
 interface ExtractOptions {
   output: string;
@@ -11,7 +11,7 @@ interface ExtractOptions {
 /**
  * Extract files from JAR archives - just unzip preserving package structure
  */
-export async function extractJars(
+export function extractJars(
   input: string,
   options: ExtractOptions,
 ): Promise<void> {
@@ -32,7 +32,7 @@ export async function extractJars(
       jars.push(input);
     } else {
       console.log('❌ No JAR files found');
-      return;
+      return Promise.resolve();
     }
   }
 
@@ -57,7 +57,14 @@ export async function extractJars(
 
     try {
       // Just unzip, preserving directory structure
-      execOutput('unzip', ['-o', '-q', jar, ...fileArgs, '-d', output]);
+      execOutput('unzip', [
+        '-o',
+        '-q',
+        pathArg(jar),
+        ...fileArgs,
+        '-d',
+        pathArg(output),
+      ]);
     } catch {
       // unzip returns non-zero if no matches, that's ok
     }
@@ -66,4 +73,5 @@ export async function extractJars(
   console.log('');
   console.log('✅ Extraction complete!');
   console.log(`   Output: ${output}`);
+  return Promise.resolve();
 }

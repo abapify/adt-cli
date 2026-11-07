@@ -91,10 +91,10 @@ export default [
         {
           enforceBuildableLibDependency: true,
           allow: [
-            '^.*/eslint(\\.base)?\\.config\\.[cm]?js$',
-            '^.*/tsdown\\.config\\.(ts|js|mjs)$',
+            String.raw`^.*/eslint(\.base)?\.config\.[cm]?js$`,
+            String.raw`^.*/tsdown\.config\.(ts|js|mjs)$`,
             '^.*/samples/.*',
-            '^.*\\.config\\..*\\.ts$',
+            String.raw`^.*\.config\..*\.ts$`,
           ],
           depConstraints: [
             {

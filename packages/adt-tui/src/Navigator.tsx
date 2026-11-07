@@ -94,7 +94,7 @@ function openInAdt(systemName: string, url: string): void {
 /**
  * Inner component that uses navigation context
  */
-function NavigatorInner({ systemName }: { systemName?: string }) {
+function NavigatorInner({ systemName }: Readonly<{ systemName?: string }>) {
   const { current, loading, error, navigate, back } = useNavigation();
 
   // Get page result
@@ -130,7 +130,10 @@ function NavigatorInner({ systemName }: { systemName?: string }) {
 
   if (error) {
     return (
-      <Box padding={1} flexDirection="column">
+      <Box
+        padding={1}
+        flexDirection="column"
+      >
         <Text color="red">❌ Error: {error}</Text>
         <Text dimColor>Press Ctrl+C to exit</Text>
       </Box>
@@ -166,7 +169,7 @@ export function Navigator({
   startUrl,
   fetch,
   systemName,
-}: NavigatorProps): React.ReactNode {
+}: Readonly<NavigatorProps>): React.ReactNode {
   return (
     <NavigationProvider
       fetch={fetch}
@@ -181,7 +184,9 @@ export function Navigator({
 /**
  * URL input prompt component
  */
-function UrlPrompt({ onSubmit }: { onSubmit: (url: string) => void }) {
+function UrlPrompt({
+  onSubmit,
+}: Readonly<{ onSubmit: (url: string) => void }>) {
   const [url, setUrl] = useState('');
 
   const handleSubmit = () => {
@@ -191,13 +196,23 @@ function UrlPrompt({ onSubmit }: { onSubmit: (url: string) => void }) {
   };
 
   return (
-    <Box flexDirection="column" padding={1}>
-      <Text color="cyan" bold>
+    <Box
+      flexDirection="column"
+      padding={1}
+    >
+      <Text
+        color="cyan"
+        bold
+      >
         ADT TUI - Hypermedia Navigator
       </Text>
       <Box marginTop={1}>
         <Text>Enter URL: </Text>
-        <TextInput value={url} onChange={setUrl} onSubmit={handleSubmit} />
+        <TextInput
+          value={url}
+          onChange={setUrl}
+          onSubmit={handleSubmit}
+        />
       </Box>
       <Box marginTop={1}>
         <Text dimColor>

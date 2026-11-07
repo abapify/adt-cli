@@ -31,8 +31,8 @@ const XML_NAMED_ENTITIES: Record<string, string> = {
 
 function decodeNumericCode(decimal?: string, hex?: string): string {
   const base = decimal !== undefined ? 10 : 16;
-  const value = decimal !== undefined ? decimal : (hex ?? '');
-  return String.fromCharCode(parseInt(value, base));
+  const value = decimal ?? hex ?? '';
+  return String.fromCodePoint(Number.parseInt(value, base));
 }
 
 function decodeXmlEntities(text: string): string {
@@ -109,7 +109,7 @@ function resolveReferencedType(xml: string, comptype: 'E' | 'S'): ResolvedType {
   ) {
     result.shlporigin = 'D';
   }
-  const descMatch = xml.match(/adtcore:description="([^"]+)"/);
+  const descMatch = /adtcore:description="([^"]+)"/.exec(xml);
   if (descMatch) result.description = decodeXmlEntities(descMatch[1]);
   return result;
 }

@@ -11,7 +11,7 @@ import type {
   PageResult,
   MenuItem,
 } from '../../../../../../lib/types';
-import { load } from './[slug].loader';
+import { load, type TransportData } from './[slug].loader';
 
 /**
  * Get status color
@@ -30,21 +30,12 @@ function getStatusColor(status: string): string {
 }
 
 /**
- * Transport Page - returns PageResult for framework rendering
+ * Build the menu: back, parent link, tasks, objects, and link-driven actions.
  */
-export function transportPage({
-  url: _url,
-  response,
-}: PageProps): PageResult | null {
-  // Parse transport data
-  let transport;
-  try {
-    transport = load(response.raw);
-  } catch (_e) {
-    return null;
-  }
-
-  // Build menu items
+function buildTransportMenu(
+  transport: TransportData,
+  response: PageProps['response'],
+): MenuItem[] {
   const menu: MenuItem[] = [
     { key: 'back', label: 'Back', icon: '←', isBack: true },
   ];
@@ -101,6 +92,26 @@ export function transportPage({
       });
     }
   }
+
+  return menu;
+}
+
+/**
+ * Transport Page - returns PageResult for framework rendering
+ */
+export function transportPage({
+  url: _url,
+  response,
+}: PageProps): PageResult | null {
+  // Parse transport data
+  let transport;
+  try {
+    transport = load(response.raw);
+  } catch (_e) {
+    return null;
+  }
+
+  const menu = buildTransportMenu(transport, response);
 
   // Build content
   const content = (

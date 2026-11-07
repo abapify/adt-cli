@@ -33,8 +33,6 @@ const VALID_CLASS_INCLUDES = new Set([
 ]);
 
 // ReDoS-mitigation: reject patterns likely to cause catastrophic backtracking.
-const NESTED_QUANTIFIER_GROUP =
-  /\((?:\?:)?(?:[^()[\]\\]|\\.|\[[^\]]*\])*[*+{](?:[^()[\]\\]|\\.|\[[^\]]*\])*\)\s*(?:[*+?]|\{\d)/;
 const BACKREFERENCE = /\\[1-9]/;
 const LOOKAROUND = /\(\?(?:[=!]|<[=!])/;
 
@@ -46,6 +44,116 @@ function isRegexQuantifierAt(pattern: string, index: number): boolean {
   const char = pattern[index];
   if (char === '{') return /^\{\d+(?:,\d*)?\}/.test(pattern.slice(index));
   return char === '+' || char === '*' || char === '?';
+}
+
+/** Exclusive end index of the atom starting at `i`, or -1 when the parse
+ *  must stop (trailing backslash or unterminated character class). */
+function nextAtomEnd(pattern: string, i: number): number {
+  const ch = pattern[i];
+  if (ch === '\\') {
+    if (i + 1 < pattern.length && pattern[i + 1] !== '\n') return i + 2;
+    return -1;
+  }
+  if (ch === '[') {
+    const end = pattern.indexOf(']', i + 1);
+    return end === -1 ? -1 : end + 1;
+  }
+  return i + 1;
+}
+
+interface GroupScan {
+  /** Index of the group's `)`, or -1 when the parse stopped before it. */
+  closed: number;
+  /** True when the group content contains a quantifier character. */
+  hasQuantifier: boolean;
+}
+
+function scanGroupContent(pattern: string, start: number): GroupScan {
+  let hasQuantifier = false;
+  let closed = -1;
+  let i = start + 1;
+  // Parse the group content as regex atoms: `\x` escape pairs, `[…]`
+  // character classes, or single characters. Raw `(`, `)`, `[`, `]` and
+  // `\` cannot be plain atoms, so they end the parse.
+  while (i < pattern.length) {
+    const ch = pattern[i];
+    if (ch === ')' || ch === '(' || ch === ']') {
+      if (ch === ')') closed = i;
+      break;
+    }
+    const atomEnd = nextAtomEnd(pattern, i);
+    if (atomEnd === -1) break;
+    if (atomEnd === i + 1 && (ch === '*' || ch === '+' || ch === '{')) {
+      hasQuantifier = true;
+    }
+    i = atomEnd;
+  }
+  return { closed, hasQuantifier };
+}
+
+/** Whether the parenthesis closing at `index` is followed by a quantifier. */
+function isQuantifierAfter(pattern: string, index: number): boolean {
+  let j = index + 1;
+  while (j < pattern.length && /\s/.test(pattern[j])) j += 1;
+  const next = pattern[j];
+  if (next === '*' || next === '+' || next === '?') return true;
+  return next === '{' && j + 1 < pattern.length && /[0-9]/.test(pattern[j + 1]);
+}
+
+/**
+ * Detect a quantified group that itself contains a quantifier, e.g. `(a*)*`
+ * followed by `*`, `+`, `?` or `{<digit>` — the classic catastrophic
+ * backtracking shape. Hand-written scanner mirroring
+ * `/\((?:\?:)?(?:[^()[\]\\]|\\.|\[[^\]]*\])*[*+{](?:[^()[\]\\]|\\.|\[[^\]]*\])*\)\s*(?:[*+?]|\{\d)/`;
+ * the equivalent regex is itself flagged as super-linear (S8786).
+ */
+function hasNestedQuantifierGroup(pattern: string): boolean {
+  for (let start = 0; start < pattern.length; start += 1) {
+    if (pattern[start] !== '(') continue;
+    const { closed, hasQuantifier } = scanGroupContent(pattern, start);
+    if (closed === -1 || !hasQuantifier) continue;
+    // The closing parenthesis must be followed by a quantifier.
+    if (isQuantifierAfter(pattern, closed)) return true;
+  }
+  return false;
+}
+
+/** Handle one group-structure char (`(`, `|`, `)`); true when a quantified
+ *  alternation group closes at `index`. */
+function handleGroupChar(
+  stack: RegexGroupFrame[],
+  pattern: string,
+  index: number,
+  char: string,
+): boolean {
+  if (char === '(') {
+    stack.push({ hasAlternation: false });
+    return false;
+  }
+  if (char === '|') {
+    const top = stack.at(-1);
+    if (top) top.hasAlternation = true;
+    return false;
+  }
+  if (char === ')') {
+    return closeGroup(stack, pattern, index);
+  }
+  return false;
+}
+
+function closeGroup(
+  stack: RegexGroupFrame[],
+  pattern: string,
+  index: number,
+): boolean {
+  const frame = stack.pop();
+  if (!frame) return false;
+  if (frame.hasAlternation && isRegexQuantifierAt(pattern, index + 1)) {
+    return true;
+  }
+  const parent = stack.at(-1);
+  if (parent && frame.hasAlternation) parent.hasAlternation = true;
+  return false;
 }
 
 function hasQuantifiedAlternationGroup(pattern: string): boolean {
@@ -66,24 +174,7 @@ function hasQuantifiedAlternationGroup(pattern: string): boolean {
       inCharClass = true;
       continue;
     }
-    if (char === '(') {
-      stack.push({ hasAlternation: false });
-      continue;
-    }
-    if (char === '|') {
-      const top = stack[stack.length - 1];
-      if (top) top.hasAlternation = true;
-      continue;
-    }
-    if (char === ')') {
-      const frame = stack.pop();
-      if (!frame) continue;
-      if (frame.hasAlternation && isRegexQuantifierAt(pattern, i + 1)) {
-        return true;
-      }
-      const parent = stack[stack.length - 1];
-      if (parent && frame.hasAlternation) parent.hasAlternation = true;
-    }
+    if (handleGroupChar(stack, pattern, i, char)) return true;
   }
 
   return false;
@@ -176,7 +267,7 @@ export type GetSourceResult =
   | GetSourceStructuredResult;
 
 const CLASS_START =
-  /^CLASS\s+(\S+)\s+(DEFINITION|IMPLEMENTATION)(?:\s+.*)?\s*\.\s*$/i;
+  /^CLASS\s+(\S+)\s+(DEFINITION|IMPLEMENTATION)(?:\s.*)?\.\s*$/i;
 const INTERFACE_START = /^INTERFACE\s+(\S+)(?:\s+DEFINITION)?\s*\.\s*$/i;
 const METHOD_START = /^METHOD\s+(\S+)\s*\.\s*$/i;
 
@@ -230,14 +321,14 @@ function openBlock(
 
   const methodMatch = METHOD_START.exec(line);
   if (methodMatch) {
-    const top = state.stack[state.stack.length - 1];
+    const top = state.stack.at(-1);
     // Only record method implementations, not METHODS: declarations.
     if (top && top.kind !== 'method') {
       state.stack.push({
         kind: 'method',
         name: methodMatch[1]!.toUpperCase(),
         startLine: lineNumber,
-        owner: state.ownerStack[state.ownerStack.length - 1],
+        owner: state.ownerStack.at(-1),
       });
     }
     return true;
@@ -252,7 +343,7 @@ function closeOpenMethods(
   all: boolean,
 ): void {
   do {
-    const top = state.stack[state.stack.length - 1];
+    const top = state.stack.at(-1);
     if (top?.kind !== 'method') return;
     state.methods.push({
       name: top.name,
@@ -272,7 +363,7 @@ function closeContainer(
   // Close any unclosed methods first (best-effort for malformed source).
   closeOpenMethods(state, endLine, true);
 
-  const top = state.stack[state.stack.length - 1];
+  const top = state.stack.at(-1);
   const expected = keyword === 'ENDCLASS.' ? 'class' : 'interface';
   if (top?.kind !== expected) return;
 
@@ -397,7 +488,7 @@ function unsafePatternReason(pattern: string): string | undefined {
   if (BACKREFERENCE.test(pattern)) {
     return 'backreferences are not allowed for server-side grep';
   }
-  if (NESTED_QUANTIFIER_GROUP.test(pattern)) {
+  if (hasNestedQuantifierGroup(pattern)) {
     return 'nested quantified groups are not allowed for server-side grep';
   }
   if (hasQuantifiedAlternationGroup(pattern)) {

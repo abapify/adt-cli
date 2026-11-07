@@ -83,9 +83,11 @@ export interface DestinationModeOptions {
   requestAccess?: (extra: {
     sessionId?: string;
   }) => McpRequestAccess | undefined;
-  consumeExecutionAuthorization?: ToolContext['consumeExecutionAuthorization'];
-  reportExecutionOutcome?: ToolContext['reportExecutionOutcome'];
-  executeWithDeadline?: ToolContext['executeWithDeadline'];
+  consumeExecutionAuthorization?: NonNullable<
+    ToolContext['consumeExecutionAuthorization']
+  >;
+  reportExecutionOutcome?: NonNullable<ToolContext['reportExecutionOutcome']>;
+  executeWithDeadline?: NonNullable<ToolContext['executeWithDeadline']>;
 }
 
 type DestinationToolListEntry = {

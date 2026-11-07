@@ -2,7 +2,7 @@
 <!--
   Fixture: GET /sap/bc/adt/vit/wb/object_type/sxsdxd/object_name/mock_cts_request_check
 
-  TODO-synthetic mock fixture per packages/adt-fixtures/AGENTS.md sanitization rules.
+  Synthetic mock fixture per packages/adt-fixtures/AGENTS.md sanitization rules.
 -->
 <adtcore:mainObject
   xmlns:adtcore="http://www.sap.com/adt/core"

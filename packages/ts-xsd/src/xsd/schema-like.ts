@@ -68,11 +68,9 @@ export type SchemaLike = SchemaExtensions & {
   // W3C XSD Schema children
   readonly element?: readonly ElementLike[];
   readonly complexType?:
-    | readonly ComplexTypeLike[]
-    | { readonly [name: string]: ComplexTypeLike };
+    readonly ComplexTypeLike[] | { readonly [name: string]: ComplexTypeLike };
   readonly simpleType?:
-    | readonly SimpleTypeLike[]
-    | { readonly [name: string]: SimpleTypeLike };
+    readonly SimpleTypeLike[] | { readonly [name: string]: SimpleTypeLike };
   readonly group?: readonly unknown[];
   readonly attributeGroup?: readonly unknown[];
   readonly notation?: readonly unknown[];
@@ -102,7 +100,7 @@ export type ElementLike = {
   readonly ref?: string;
   readonly type?: string;
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
   readonly default?: string;
   readonly fixed?: string;
   readonly id?: string;
@@ -151,7 +149,7 @@ export type ComplexTypeLike = {
 
 export type GroupLike = {
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
   readonly element?: readonly ElementLike[];
   readonly choice?: readonly GroupLike[];
   readonly sequence?: readonly GroupLike[];
@@ -163,7 +161,7 @@ export type GroupLike = {
 export type GroupRefLike = {
   readonly ref?: string;
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
 };
 
 // =============================================================================

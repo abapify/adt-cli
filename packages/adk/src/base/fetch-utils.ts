@@ -6,6 +6,8 @@
  * normalises both cases so ADK objects work with both client versions.
  */
 
+import { asText } from './text';
+
 /**
  * Convert a fetch result to a text string.
  *
@@ -29,8 +31,8 @@ export async function toText(result: unknown): Promise<string> {
     } catch {
       // JSON.stringify throws on circular refs / BigInt — fall back to the
       // default string coercion rather than propagating an unrelated error.
-      return String(result);
+      return asText(result);
     }
   }
-  return String(result);
+  return asText(result);
 }

@@ -18,6 +18,7 @@
 import { getGlobalContext } from '../../../base/global-context';
 import type { AdkContext } from '../../../base/context';
 import { toText } from '../../../base/fetch-utils';
+import { asText } from '../../../base/text';
 
 export class AdkBadi {
   /** Static ADK kind marker. */
@@ -34,7 +35,7 @@ export class AdkBadi {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 
@@ -90,11 +91,13 @@ export class AdkBadi {
 
   // ─── Lock / Unlock ─────────────────────────────────────────────────────────
 
-  async lock(transport?: string): Promise<{ handle: string }> {
+  lock(transport?: string): Promise<{ handle: string }> {
     const lockService = this.ctx.lockService;
     if (!lockService) {
-      throw new Error(
-        'Lock not available: no lockService in context. Did you call initializeAdk()?',
+      return Promise.reject(
+        new Error(
+          'Lock not available: no lockService in context. Did you call initializeAdk()?',
+        ),
       );
     }
     return lockService.lock(this.objectUri, {

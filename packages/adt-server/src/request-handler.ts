@@ -155,7 +155,9 @@ function validateObjectSource(
   maxBytes: number,
 ): void {
   if (typeof result.source !== 'string') {
-    throw new Error('Bounded object source operation returned an invalid body');
+    throw new TypeError(
+      'Bounded object source operation returned an invalid body',
+    );
   }
   if (result.bytes !== Buffer.byteLength(result.source, 'utf8')) {
     throw new Error('Bounded object source operation returned an invalid body');
@@ -170,7 +172,7 @@ function validateSourceVersionResult(
   maxBytes: number,
 ): void {
   if (typeof result.source !== 'string') {
-    throw new Error('Bounded source operation returned an invalid body');
+    throw new TypeError('Bounded source operation returned an invalid body');
   }
   if (result.bytes !== Buffer.byteLength(result.source, 'utf8')) {
     throw new Error('Bounded source operation returned an invalid body');
@@ -185,7 +187,7 @@ function validateAtcDocumentationResult(
   maxBytes: number,
 ): void {
   if (typeof result.html !== 'string') {
-    throw new Error(
+    throw new TypeError(
       'Bounded ATC documentation operation returned an invalid body',
     );
   }
@@ -381,12 +383,13 @@ async function handleMcp(
   await ctx.mcpHandler.handle(request, response);
 }
 
-async function handleHealth(
+function handleHealth(
   _ctx: RequestHandlerContext,
   _request: http.IncomingMessage,
   response: http.ServerResponse,
 ): Promise<void> {
   sendJson(response, { status: 'ok' });
+  return Promise.resolve();
 }
 
 async function handleReady(

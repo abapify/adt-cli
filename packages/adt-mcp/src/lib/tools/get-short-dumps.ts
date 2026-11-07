@@ -28,18 +28,18 @@ export function registerGetShortDumpsTool(
       try {
         const { client } = await resolveClient(ctx, args, extra ?? {});
 
+        const queryParams: Record<string, string> = {};
+        if (args.user) queryParams.user = args.user;
+        if (args.maxResults != null) {
+          queryParams.maxResults = String(args.maxResults);
+        }
+        const query =
+          args.user || args.maxResults != null
+            ? `?${new URLSearchParams(queryParams).toString()}`
+            : '';
         const path = args.id
           ? `/sap/bc/adt/runtime/dumps/${encodeURIComponent(args.id)}`
-          : `/sap/bc/adt/runtime/dumps${
-              args.user || args.maxResults != null
-                ? `?${new URLSearchParams({
-                    ...(args.user ? { user: args.user } : {}),
-                    ...(args.maxResults != null
-                      ? { maxResults: String(args.maxResults) }
-                      : {}),
-                  }).toString()}`
-                : ''
-            }`;
+          : `/sap/bc/adt/runtime/dumps${query}`;
 
         const result = await client.fetch(path, {
           method: 'GET',

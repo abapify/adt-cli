@@ -1160,12 +1160,10 @@ export function createHttpBrokerOperations(
     } catch (error) {
       operationError = error;
     } finally {
-      const errorCode =
-        outcome === 'failed'
-          ? clientCreated
-            ? 'operation_failed'
-            : 'client_creation_failed'
-          : undefined;
+      const failureCode = clientCreated
+        ? 'operation_failed'
+        : 'client_creation_failed';
+      const errorCode = outcome === 'failed' ? failureCode : undefined;
       try {
         await releaseLease(
           lease,
@@ -1586,8 +1584,8 @@ function postFormForJson<T>(
             response.statusCode < 300,
           status: response.statusCode ?? 0,
           statusText: response.statusMessage ?? '',
-          async json() {
-            return JSON.parse(text) as T;
+          json() {
+            return Promise.resolve(JSON.parse(text) as T);
           },
         });
       });
@@ -1690,7 +1688,7 @@ export function createHttpDestinationContexts(options: HttpBrokerOptions): {
           client: await clientFromConnection(
             lease.material as BrokerConnection,
           ),
-          close: async () => undefined,
+          close: () => Promise.resolve(undefined),
         };
       },
     },

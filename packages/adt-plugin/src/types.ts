@@ -11,10 +11,6 @@ import type { AdkObject } from '@abapify/adk';
 // ============================================
 
 /**
- * ABAP object type code (e.g., 'CLAS', 'INTF', 'DOMA')
- */
-export type AbapObjectType = string;
-/**
  * Primitive value accepted for format/plugin options.
  */
 export type FormatOptionValue = string | number | boolean;
@@ -179,12 +175,12 @@ export interface AdtPlugin {
     /**
      * Check if object type is supported by this plugin
      */
-    isSupported(type: AbapObjectType): boolean;
+    isSupported(type: string): boolean;
 
     /**
      * Get all supported object types
      */
-    getSupportedTypes(): AbapObjectType[];
+    getSupportedTypes(): string[];
   };
 
   /** Format service - import/export operations */

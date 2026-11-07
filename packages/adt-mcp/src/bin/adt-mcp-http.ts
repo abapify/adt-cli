@@ -49,134 +49,120 @@ interface ParsedArgs {
   tlsKey?: string;
 }
 
+type FlagHandler = (out: ParsedArgs, next: () => string) => void;
+
+function setNumber(key: 'port' | 'ttlMs'): FlagHandler {
+  return (out, next) => {
+    const v = Number(next());
+    if (Number.isFinite(v)) out[key] = v;
+  };
+}
+
+function setString(
+  key:
+    | 'oauthIssuer'
+    | 'oauthJwksUri'
+    | 'oauthUserClaim'
+    | 'adtConfigFile'
+    | 'tlsCert'
+    | 'tlsKey',
+): FlagHandler {
+  return (out, next) => {
+    const v = next();
+    if (v) out[key] = v;
+  };
+}
+
+function appendValue(key: 'allowedHosts' | 'allowedOrigins'): FlagHandler {
+  return (out, next) => {
+    const v = next();
+    if (v) {
+      const list = (out[key] ??= []);
+      list.push(v);
+    }
+  };
+}
+
+function appendCsv(key: 'oauthAudience' | 'oauthRequiredScopes'): FlagHandler {
+  return (out, next) => {
+    const v = next();
+    if (v) {
+      const list = (out[key] ??= []);
+      list.push(...parseCsvEnv(v));
+    }
+  };
+}
+
+function printUsage(): void {
+  process.stdout.write(
+    'Usage: adt-mcp-http [--port N] [--host HOST] [--ttl MS]\n' +
+      '                    [--allowed-host H ...]\n' +
+      '                    [--auth-token TOKEN | --auth-mode MODE]\n' +
+      '                    [--trust-forwarded-auth]\n' +
+      '                    [--oauth-issuer URL] [--oauth-audience VAL]\n' +
+      '                    [--oauth-jwks-uri URL]\n' +
+      '                    [--oauth-required-scope SCOPE]\n' +
+      '                    [--oauth-user-claim NAME]\n' +
+      '                    [--cors-origin ORIGIN ...]\n' +
+      '                    [--adt-config PATH]\n' +
+      '                    [--tls-cert PATH] [--tls-key PATH]\n',
+  );
+  process.exit(0);
+}
+
+const FLAG_HANDLERS = new Map<string, FlagHandler>([
+  ['--port', setNumber('port')],
+  ['-p', setNumber('port')],
+  ['--host', (out, next) => void (out.host = next())],
+  ['-H', (out, next) => void (out.host = next())],
+  ['--ttl', setNumber('ttlMs')],
+  ['--allowed-host', appendValue('allowedHosts')],
+  [
+    '--auth-token',
+    (out, next) => {
+      const v = next();
+      if (v) {
+        out.authToken = v;
+        out.authMode = 'bearer';
+      }
+    },
+  ],
+  [
+    '--auth-mode',
+    (out, next) => {
+      const v = next();
+      if (v === 'none' || v === 'bearer' || v === 'proxy' || v === 'oauth') {
+        out.authMode = v;
+      }
+    },
+  ],
+  [
+    '--trust-forwarded-auth',
+    (out) => {
+      out.trustForwardedAuth = true;
+      out.authMode = 'proxy';
+    },
+  ],
+  ['--oauth-issuer', setString('oauthIssuer')],
+  ['--oauth-audience', appendCsv('oauthAudience')],
+  ['--oauth-jwks-uri', setString('oauthJwksUri')],
+  ['--oauth-required-scope', appendCsv('oauthRequiredScopes')],
+  ['--oauth-user-claim', setString('oauthUserClaim')],
+  ['--cors-origin', appendValue('allowedOrigins')],
+  ['--adt-config', setString('adtConfigFile')],
+  ['--tls-cert', setString('tlsCert')],
+  ['--tls-key', setString('tlsKey')],
+  ['--help', printUsage],
+  ['-h', printUsage],
+]);
+
 function parseArgs(argv: string[]): ParsedArgs {
   const out: ParsedArgs = {};
   for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    const next = () => argv[++i];
-    switch (a) {
-      case '--port':
-      case '-p': {
-        const v = Number(next());
-        if (Number.isFinite(v)) out.port = v;
-        break;
-      }
-      case '--host':
-      case '-H': {
-        out.host = next();
-        break;
-      }
-      case '--ttl': {
-        const v = Number(next());
-        if (Number.isFinite(v)) out.ttlMs = v;
-        break;
-      }
-      case '--allowed-host': {
-        const v = next();
-        if (v) (out.allowedHosts ??= []).push(v);
-        break;
-      }
-      case '--auth-token': {
-        const v = next();
-        if (v) {
-          out.authToken = v;
-          out.authMode = 'bearer';
-        }
-        break;
-      }
-      case '--auth-mode': {
-        const v = next();
-        if (v === 'none' || v === 'bearer' || v === 'proxy' || v === 'oauth') {
-          out.authMode = v;
-        }
-        break;
-      }
-      case '--trust-forwarded-auth': {
-        out.trustForwardedAuth = true;
-        out.authMode = 'proxy';
-        break;
-      }
-      case '--oauth-issuer': {
-        const v = next();
-        if (v) out.oauthIssuer = v;
-        break;
-      }
-      case '--oauth-audience': {
-        const v = next();
-        if (v) {
-          (out.oauthAudience ??= []).push(
-            ...v
-              .split(',')
-              .map((s) => s.trim())
-              .filter((s) => s.length > 0),
-          );
-        }
-        break;
-      }
-      case '--oauth-jwks-uri': {
-        const v = next();
-        if (v) out.oauthJwksUri = v;
-        break;
-      }
-      case '--oauth-required-scope': {
-        const v = next();
-        if (v) {
-          (out.oauthRequiredScopes ??= []).push(
-            ...v
-              .split(',')
-              .map((s) => s.trim())
-              .filter((s) => s.length > 0),
-          );
-        }
-        break;
-      }
-      case '--oauth-user-claim': {
-        const v = next();
-        if (v) out.oauthUserClaim = v;
-        break;
-      }
-      case '--cors-origin': {
-        const v = next();
-        if (v) (out.allowedOrigins ??= []).push(v);
-        break;
-      }
-      case '--adt-config': {
-        const v = next();
-        if (v) out.adtConfigFile = v;
-        break;
-      }
-      case '--tls-cert': {
-        const v = next();
-        if (v) out.tlsCert = v;
-        break;
-      }
-      case '--tls-key': {
-        const v = next();
-        if (v) out.tlsKey = v;
-        break;
-      }
-      case '--help':
-      case '-h': {
-        process.stdout.write(
-          'Usage: adt-mcp-http [--port N] [--host HOST] [--ttl MS]\n' +
-            '                    [--allowed-host H ...]\n' +
-            '                    [--auth-token TOKEN | --auth-mode MODE]\n' +
-            '                    [--trust-forwarded-auth]\n' +
-            '                    [--oauth-issuer URL] [--oauth-audience VAL]\n' +
-            '                    [--oauth-jwks-uri URL]\n' +
-            '                    [--oauth-required-scope SCOPE]\n' +
-            '                    [--oauth-user-claim NAME]\n' +
-            '                    [--cors-origin ORIGIN ...]\n' +
-            '                    [--adt-config PATH]\n' +
-            '                    [--tls-cert PATH] [--tls-key PATH]\n',
-        );
-        process.exit(0);
-      }
-      // eslint-disable-next-line no-fallthrough
-      default:
-        // Unknown flag — ignore for forward compatibility.
-        break;
-    }
+    const handler = FLAG_HANDLERS.get(argv[i]);
+    // Unknown flag — ignore for forward compatibility.
+    if (handler === undefined) continue;
+    handler(out, () => argv[++i]);
   }
   return out;
 }
@@ -194,15 +180,32 @@ function parseCsvEnv(v: string | undefined): string[] {
     .filter((s) => s.length > 0);
 }
 
-async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2));
-  const envAllowed = parseCsvEnv(process.env.MCP_ALLOWED_HOSTS);
-  const envCorsOrigins = parseCsvEnv(process.env.MCP_CORS_ORIGIN);
-  const envTrustForwarded = isTruthyEnv(process.env.TRUST_FORWARDED_AUTH);
+interface OAuthSettings {
+  readonly issuer: string | undefined;
+  readonly audience: string[] | undefined;
+  readonly jwksUri: string | undefined;
+  readonly requiredScopes: string[] | undefined;
+  readonly userClaim: string | undefined;
+}
 
-  // CLI flag takes precedence over env. Env MCP_AUTH_TOKEN is used when
-  // the flag is absent.
-  const authToken = args.authToken ?? process.env.MCP_AUTH_TOKEN;
+// OAuth config — CLI wins, env fills the gaps.
+function resolveOAuthSettings(args: ParsedArgs): OAuthSettings {
+  return {
+    issuer: args.oauthIssuer ?? process.env.OAUTH_ISSUER,
+    audience: args.oauthAudience ?? parseCsvEnv(process.env.OAUTH_AUDIENCE),
+    jwksUri: args.oauthJwksUri ?? process.env.OAUTH_JWKS_URI,
+    requiredScopes:
+      args.oauthRequiredScopes ??
+      parseCsvEnv(process.env.OAUTH_REQUIRED_SCOPES),
+    userClaim: args.oauthUserClaim ?? process.env.OAUTH_USER_CLAIM,
+  };
+}
+
+function computeAuthMode(
+  args: ParsedArgs,
+  authToken: string | undefined,
+  envTrustForwarded: boolean,
+): AuthMode {
   let authMode: AuthMode = args.authMode ?? 'none';
   if (authToken && authMode === 'none') authMode = 'bearer';
   // TRUST_FORWARDED_AUTH (env or flag) may only promote a still-unset
@@ -214,22 +217,14 @@ async function main(): Promise<void> {
   if ((args.trustForwardedAuth || envTrustForwarded) && authMode === 'none') {
     authMode = 'proxy';
   }
+  return authMode;
+}
 
-  // OAuth config — CLI wins, env fills the gaps.
-  const oauthIssuer = args.oauthIssuer ?? process.env.OAUTH_ISSUER;
-  const oauthAudience =
-    args.oauthAudience ?? parseCsvEnv(process.env.OAUTH_AUDIENCE);
-  const oauthJwksUri = args.oauthJwksUri ?? process.env.OAUTH_JWKS_URI;
-  const oauthRequiredScopes =
-    args.oauthRequiredScopes ?? parseCsvEnv(process.env.OAUTH_REQUIRED_SCOPES);
-  const oauthUserClaim = args.oauthUserClaim ?? process.env.OAUTH_USER_CLAIM;
-
-  if (authMode === 'none' && oauthIssuer) {
-    // If user supplied OAuth config without explicit --auth-mode, assume
-    // they meant oauth. Explicit --auth-mode always wins.
-    authMode = 'oauth';
-  }
-
+function assertAuthConfig(
+  authMode: AuthMode,
+  authToken: string | undefined,
+  oauthIssuer: string | undefined,
+): void {
   // Startup sanity check: bearer mode without a token cannot work.
   if (authMode === 'bearer' && (!authToken || authToken.length === 0)) {
     process.stderr.write(
@@ -245,30 +240,27 @@ async function main(): Promise<void> {
     );
     process.exit(1);
   }
+}
 
-  let oauthOptions: OAuthOptions | undefined;
-  if (authMode === 'oauth' && oauthIssuer) {
-    oauthOptions = {
-      issuer: oauthIssuer,
-      audience:
-        oauthAudience && oauthAudience.length > 0
-          ? oauthAudience.length === 1
-            ? oauthAudience[0]
-            : oauthAudience
-          : undefined,
-      jwksUri: oauthJwksUri,
-      requiredScopes:
-        oauthRequiredScopes && oauthRequiredScopes.length > 0
-          ? oauthRequiredScopes
-          : undefined,
-      userClaim: oauthUserClaim,
-    };
-  }
+function buildOAuthOptions(oauth: OAuthSettings): OAuthOptions {
+  const singleAudience =
+    oauth.audience?.length === 1 ? oauth.audience[0] : oauth.audience;
+  return {
+    issuer: oauth.issuer as string,
+    audience:
+      oauth.audience && oauth.audience.length > 0 ? singleAudience : undefined,
+    jwksUri: oauth.jwksUri,
+    requiredScopes:
+      oauth.requiredScopes && oauth.requiredScopes.length > 0
+        ? oauth.requiredScopes
+        : undefined,
+    userClaim: oauth.userClaim,
+  };
+}
 
-  const host = args.host ?? process.env.MCP_HOST ?? '127.0.0.1';
+function warnInsecureBinding(authMode: AuthMode, host: string): void {
   const isLoopback =
     host === '127.0.0.1' || host === 'localhost' || host === '::1';
-
   if (authMode === 'none' && !isLoopback) {
     process.stderr.write(
       `[adt-mcp-http] WARN: auth disabled and bound to non-loopback host '${host}' — ` +
@@ -283,6 +275,45 @@ async function main(): Promise<void> {
         'Only use this mode behind a reverse proxy that strips these headers from untrusted input.\n',
     );
   }
+}
+
+function logOAuthEnabled(oauthOptions: OAuthOptions): void {
+  const audDisplay = Array.isArray(oauthOptions.audience)
+    ? oauthOptions.audience.join(',')
+    : (oauthOptions.audience ?? '<any>');
+  const scopesDisplay = oauthOptions.requiredScopes?.length
+    ? oauthOptions.requiredScopes.join(',')
+    : '<none>';
+  process.stderr.write(
+    `[adt-mcp-http] OAuth validation enabled: issuer=${oauthOptions.issuer} audience=${audDisplay} scopes=${scopesDisplay}\n`,
+  );
+}
+
+async function main(): Promise<void> {
+  const args = parseArgs(process.argv.slice(2));
+  const envAllowed = parseCsvEnv(process.env.MCP_ALLOWED_HOSTS);
+  const envCorsOrigins = parseCsvEnv(process.env.MCP_CORS_ORIGIN);
+  const envTrustForwarded = isTruthyEnv(process.env.TRUST_FORWARDED_AUTH);
+
+  // CLI flag takes precedence over env. Env MCP_AUTH_TOKEN is used when
+  // the flag is absent.
+  const authToken = args.authToken ?? process.env.MCP_AUTH_TOKEN;
+
+  const oauth = resolveOAuthSettings(args);
+  let authMode = computeAuthMode(args, authToken, envTrustForwarded);
+  if (authMode === 'none' && oauth.issuer) {
+    // If user supplied OAuth config without explicit --auth-mode, assume
+    // they meant oauth. Explicit --auth-mode always wins.
+    authMode = 'oauth';
+  }
+
+  assertAuthConfig(authMode, authToken, oauth.issuer);
+
+  const oauthOptions =
+    authMode === 'oauth' && oauth.issuer ? buildOAuthOptions(oauth) : undefined;
+
+  const host = args.host ?? process.env.MCP_HOST ?? '127.0.0.1';
+  warnInsecureBinding(authMode, host);
 
   const adtConfigFile = args.adtConfigFile ?? process.env.ADT_CONFIG_FILE;
   let multiSystem: MultiSystemConfig | undefined;
@@ -309,15 +340,7 @@ async function main(): Promise<void> {
   });
 
   if (authMode === 'oauth' && oauthOptions) {
-    const audDisplay = Array.isArray(oauthOptions.audience)
-      ? oauthOptions.audience.join(',')
-      : (oauthOptions.audience ?? '<any>');
-    const scopesDisplay = oauthOptions.requiredScopes?.length
-      ? oauthOptions.requiredScopes.join(',')
-      : '<none>';
-    process.stderr.write(
-      `[adt-mcp-http] OAuth validation enabled: issuer=${oauthOptions.issuer} audience=${audDisplay} scopes=${scopesDisplay}\n`,
-    );
+    logOAuthEnabled(oauthOptions);
   }
 
   const shutdown = async (signal: string): Promise<void> => {
@@ -333,9 +356,11 @@ async function main(): Promise<void> {
   process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
 
-main().catch((err) => {
+try {
+  await main();
+} catch (err) {
   process.stderr.write(
     `[adt-mcp-http] fatal: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}\n`,
   );
   process.exit(1);
-});
+}

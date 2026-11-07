@@ -26,15 +26,17 @@ import { flowCommand } from '@abapify/adt-flow/commands/flow';
 
 import { main } from '../lib/cli';
 
-main({
-  preloadedPlugins: [
-    codegenCommand,
-    atcCommand,
-    exportCommand,
-    diffCommand,
-    flowCommand,
-  ],
-}).catch((error) => {
-  console.error('❌ CLI Error:', error.message);
+try {
+  await main({
+    preloadedPlugins: [
+      codegenCommand,
+      atcCommand,
+      exportCommand,
+      diffCommand,
+      flowCommand,
+    ],
+  });
+} catch (error) {
+  console.error('❌ CLI Error:', (error as Error).message);
   process.exit(1);
-});
+}

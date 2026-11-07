@@ -183,7 +183,7 @@ export function affHeaderProps(ref: AffRef): string[] {
       return [];
     throw error;
   }
-  const header = (schema.properties ?? {}).header;
+  const header = schema.properties?.header;
   return Object.keys(
     header && typeof header === 'object' && header.properties
       ? header.properties

@@ -7,6 +7,12 @@
 import { writeFile } from 'node:fs/promises';
 import type { AtcResult, AtcFinding } from '../types';
 
+function sarifLevel(priority: number): 'error' | 'warning' | 'note' {
+  if (priority === 1) return 'error';
+  if (priority === 2) return 'warning';
+  return 'note';
+}
+
 export async function outputSarifReport(
   result: AtcResult,
   outputFile: string,
@@ -23,12 +29,7 @@ export async function outputSarifReport(
           shortDescription: { text: f.checkTitle || f.checkId },
           fullDescription: { text: f.checkTitle || f.checkId },
           defaultConfiguration: {
-            level:
-              f.priority === 1
-                ? 'error'
-                : f.priority === 2
-                  ? 'warning'
-                  : 'note',
+            level: sarifLevel(f.priority),
           },
           properties: {
             tags: ['abap', 'code-quality'],
@@ -49,12 +50,7 @@ export async function outputSarifReport(
 
     return {
       ruleId: finding.checkId,
-      level:
-        finding.priority === 1
-          ? 'error'
-          : finding.priority === 2
-            ? 'warning'
-            : 'note',
+      level: sarifLevel(finding.priority),
       message: { text: finding.messageText },
       locations: [
         {

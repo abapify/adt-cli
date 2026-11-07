@@ -40,7 +40,6 @@ export type {
   RestContract,
   ExtractResponse,
   InferSuccessResponse,
-  SchemaLike,
   Inferrable,
   Serializable,
   InferSchema,

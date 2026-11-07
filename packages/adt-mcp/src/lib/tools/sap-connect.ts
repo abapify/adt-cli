@@ -23,8 +23,8 @@ import {
   getAdtClientV2Safe,
   AdtAuthError,
   resolveConnectionClient,
+  ChangesetService,
 } from '@abapify/adt-services';
-import { ChangesetService } from '@abapify/adt-services';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveDestinationClient } from './session-helpers';
@@ -38,16 +38,151 @@ interface SapConnectArgs {
   systemId?: string;
 }
 
-async function resolveAdtClient(
+function resolveAdtClient(
   ctx: ToolContext,
   args: SapConnectArgs,
 ): Promise<{ client: AdtClient; systemId?: string; source: string }> {
   return resolveConnectionClient(args, {
     createClient: (params) => ctx.getClient(params),
     resolveSystem: ctx.resolveSystem,
-    resolveFromAuthStore: async (systemId) =>
-      getAdtClientV2Safe({ sid: systemId }),
+    resolveFromAuthStore: (systemId) => getAdtClientV2Safe({ sid: systemId }),
   });
+}
+
+interface VerifiedClient {
+  ok: true;
+  resolved: { client: AdtClient; systemId?: string; source: string };
+  serverInfo: unknown;
+}
+
+interface VerificationFailed {
+  ok: false;
+  text: string;
+}
+
+/** Resolve a legacy client, then smoke-test it (discovery — GET, no side
+ *  effects) so credentials are verified before registering. */
+async function resolveVerifiedClient(
+  ctx: ToolContext,
+  args: SapConnectArgs,
+): Promise<VerifiedClient | VerificationFailed> {
+  let resolved: { client: AdtClient; systemId?: string; source: string };
+  try {
+    resolved = await resolveAdtClient(ctx, args);
+  } catch (error) {
+    const prefix =
+      error instanceof AdtAuthError
+        ? `sap_connect auth failure (${error.code})`
+        : 'sap_connect failed to resolve a client';
+    return {
+      ok: false,
+      text: `${prefix}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+
+  try {
+    const serverInfo = await resolved.client.adt.discovery.getDiscovery();
+    return { ok: true, resolved, serverInfo };
+  } catch (error) {
+    return {
+      ok: false,
+      text: `sap_connect verification call failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+/** Result for a re-connect while this MCP session is already bound. */
+function existingSessionResult(
+  existing: { systemId?: string },
+  systemId: string | undefined,
+  mcpSessionId: string,
+) {
+  // Idempotent when the caller re-requests the SAME system (or makes
+  // a bare re-connect with no target). Reject a mismatching systemId
+  // explicitly — silently binding the caller's PROD request to an
+  // already-open DEV session would risk writing to the wrong SAP.
+  // baseUrl-vs-systemId mismatch is harder to detect here since the
+  // SapSessionContext doesn't record baseUrl; relying on systemId is
+  // enough for the multi-system config case that motivates this rule.
+  if (
+    systemId !== undefined &&
+    existing.systemId !== undefined &&
+    systemId !== existing.systemId
+  ) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text' as const,
+          text:
+            `sap_connect: this MCP session is already bound to ` +
+            `systemId=${existing.systemId}; refusing to rebind to ` +
+            `${systemId}. Call sap_disconnect first, then reconnect.`,
+        },
+      ],
+    };
+  }
+  return {
+    content: [
+      {
+        type: 'text' as const,
+        text: JSON.stringify(
+          {
+            ok: true,
+            alreadyConnected: true,
+            systemId: existing.systemId,
+            mcpSessionId,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
+  };
+}
+
+/** Shared ADT Server mode prewarm: resolve one destination context. */
+async function connectDestination(
+  ctx: ToolContext,
+  sharedArgs: SapConnectArgs,
+  extra: { sessionId?: string },
+) {
+  try {
+    const destination = await resolveDestinationClient(ctx, sharedArgs, extra);
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: JSON.stringify(
+            {
+              ok: true,
+              alreadyConnected: destination.alreadyConnected,
+              destination: destination.destination,
+              mcpSessionId: destination.mcpSessionId,
+            },
+            null,
+            2,
+          ),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text' as const,
+          text: `sap_connect requires HTTP shared-service mode: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        },
+      ],
+    };
+  }
 }
 
 export function registerSapConnectTool(
@@ -67,42 +202,7 @@ export function registerSapConnectTool(
       // connect is merely an explicit prewarm of one destination context;
       // all other tools may resolve the same context lazily.
       if (sharedArgs.destination !== undefined) {
-        try {
-          const destination = await resolveDestinationClient(
-            ctx,
-            sharedArgs,
-            extra ?? {},
-          );
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: JSON.stringify(
-                  {
-                    ok: true,
-                    alreadyConnected: destination.alreadyConnected,
-                    destination: destination.destination,
-                    mcpSessionId: destination.mcpSessionId,
-                  },
-                  null,
-                  2,
-                ),
-              },
-            ],
-          };
-        } catch (error) {
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text' as const,
-                text: `sap_connect requires HTTP shared-service mode: ${
-                  error instanceof Error ? error.message : String(error)
-                }`,
-              },
-            ],
-          };
-        }
+        return connectDestination(ctx, sharedArgs, extra ?? {});
       }
 
       // Reject ambiguous input up-front. baseUrl and systemId select
@@ -151,94 +251,25 @@ export function registerSapConnectTool(
       }
 
       // Idempotent when the caller re-requests the SAME system (or makes
-      // a bare re-connect with no target). Reject a mismatching systemId
-      // explicitly — silently binding the caller's PROD request to an
-      // already-open DEV session would risk writing to the wrong SAP.
-      // baseUrl-vs-systemId mismatch is harder to detect here since the
-      // SapSessionContext doesn't record baseUrl; relying on systemId is
-      // enough for the multi-system config case that motivates this rule.
+      // a bare re-connect with no target).
       const existing = ctx.registry.get(mcpSessionId);
       if (existing) {
-        if (
-          args.systemId !== undefined &&
-          existing.systemId !== undefined &&
-          args.systemId !== existing.systemId
-        ) {
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text' as const,
-                text:
-                  `sap_connect: this MCP session is already bound to ` +
-                  `systemId=${existing.systemId}; refusing to rebind to ` +
-                  `${args.systemId}. Call sap_disconnect first, then reconnect.`,
-              },
-            ],
-          };
-        }
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  ok: true,
-                  alreadyConnected: true,
-                  systemId: existing.systemId,
-                  mcpSessionId,
-                },
-                null,
-                2,
-              ),
-            },
-          ],
-        };
+        return existingSessionResult(existing, args.systemId, mcpSessionId);
       }
 
-      let resolved: {
-        client: AdtClient;
-        systemId?: string;
-        source: string;
-      };
-      try {
-        resolved = await resolveAdtClient(ctx, args);
-      } catch (error) {
-        const prefix =
-          error instanceof AdtAuthError
-            ? `sap_connect auth failure (${error.code})`
-            : 'sap_connect failed to resolve a client';
+      const verification = await resolveVerifiedClient(ctx, args);
+      if (!verification.ok) {
         return {
           isError: true,
           content: [
             {
               type: 'text' as const,
-              text: `${prefix}: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
+              text: verification.text,
             },
           ],
         };
       }
-
-      // Smoke-test the client before registering — ensures credentials
-      // are actually valid. We use discovery (GET, no side effects).
-      let serverInfo: unknown;
-      try {
-        serverInfo = await resolved.client.adt.discovery.getDiscovery();
-      } catch (error) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `sap_connect verification call failed: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
-            },
-          ],
-        };
-      }
+      const { resolved, serverInfo } = verification;
 
       // Capture the session via a forward-ref so the close handler can
       // look at the current changeset state *after* registry.delete()
@@ -257,7 +288,7 @@ export function registerSapConnectTool(
           // failure here must not prevent session teardown.
           const session = sessionRef.value;
           const cs = session?.changeset;
-          if (cs && cs.status === 'open' && session) {
+          if (cs?.status === 'open' && session) {
             try {
               const service = new ChangesetService(session.client);
               await service.rollback(cs);

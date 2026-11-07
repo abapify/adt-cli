@@ -95,47 +95,45 @@ export const treeListCommand = new Command('list')
           objects: t.objects.length,
         }));
         console.log(JSON.stringify(jsonData, null, 2));
+      } else if (transports.length === 0) {
+        console.log('\n📭 No transports found');
       } else {
-        if (transports.length === 0) {
-          console.log('\n📭 No transports found');
-        } else {
-          // Group by status for display
-          const modifiable = displayTransports.filter(
-            (t: AdkTransportRequest) => t.status === 'D',
+        // Group by status for display
+        const modifiable = displayTransports.filter(
+          (t: AdkTransportRequest) => t.status === 'D',
+        );
+        const released = displayTransports.filter(
+          (t: AdkTransportRequest) => t.status === 'R',
+        );
+        const other = displayTransports.filter(
+          (t: AdkTransportRequest) => t.status !== 'D' && t.status !== 'R',
+        );
+
+        if (modifiable.length > 0) {
+          console.log(`\n📂 Modifiable (${modifiable.length})`);
+          modifiable.forEach((tr: AdkTransportRequest, i: number) =>
+            formatTransport(tr, i, modifiable.length),
           );
-          const released = displayTransports.filter(
-            (t: AdkTransportRequest) => t.status === 'R',
+        }
+
+        if (released.length > 0) {
+          console.log(`\n📁 Released (${released.length})`);
+          released.forEach((tr: AdkTransportRequest, i: number) =>
+            formatTransport(tr, i, released.length),
           );
-          const other = displayTransports.filter(
-            (t: AdkTransportRequest) => t.status !== 'D' && t.status !== 'R',
+        }
+
+        if (other.length > 0) {
+          console.log(`\n📋 Other (${other.length})`);
+          other.forEach((tr: AdkTransportRequest, i: number) =>
+            formatTransport(tr, i, other.length),
           );
+        }
 
-          if (modifiable.length > 0) {
-            console.log(`\n📂 Modifiable (${modifiable.length})`);
-            modifiable.forEach((tr: AdkTransportRequest, i: number) =>
-              formatTransport(tr, i, modifiable.length),
-            );
-          }
-
-          if (released.length > 0) {
-            console.log(`\n📁 Released (${released.length})`);
-            released.forEach((tr: AdkTransportRequest, i: number) =>
-              formatTransport(tr, i, released.length),
-            );
-          }
-
-          if (other.length > 0) {
-            console.log(`\n📋 Other (${other.length})`);
-            other.forEach((tr: AdkTransportRequest, i: number) =>
-              formatTransport(tr, i, other.length),
-            );
-          }
-
-          if (transports.length > maxResults) {
-            console.log(
-              `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`,
-            );
-          }
+        if (transports.length > maxResults) {
+          console.log(
+            `\n💡 Showing ${maxResults} of ${transports.length} transports (use --max to see more)`,
+          );
         }
       }
 

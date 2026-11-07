@@ -9,7 +9,7 @@
   Sanitized: all IDs replaced with mock values per
   adt-fixtures/AGENTS.md rules.
 
-  TODO-synthetic: Replace with a real sanitized SAP response captured
+  Synthetic: to be replaced with a real sanitized SAP response captured
   from `adt fetch` when a public S/4HANA sample becomes available.
   Shape mirrors the official servicebinding.xsd.
 -->

@@ -1,6 +1,7 @@
 import type { AdkContext } from '../../base/context';
 import { ExternalSchema } from '../../base/kinds';
 import { registerObjectType } from '../../base/registry';
+import { asText } from '../../base/text';
 
 export class AdkExternalSchema {
   static readonly kind = ExternalSchema;
@@ -12,7 +13,7 @@ export class AdkExternalSchema {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
   get objectUri(): string {

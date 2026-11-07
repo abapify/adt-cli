@@ -3,7 +3,7 @@
   Fixture: GET /sap/bc/adt/enhancements/enhoxhh/{name}
 
   Mocks an Enhancement Implementation (ENHO/XHH) carrying BAdI
-  implementations. TODO-synthetic — the BTP Trial system used for
+  implementations. Synthetic — the BTP Trial system used for
   real-e2e probing does not grant authorisation for the enhancements
   namespace (HTTP 403 on GET), so we cannot yet capture a real
   response. Structure derived from SAP XSD

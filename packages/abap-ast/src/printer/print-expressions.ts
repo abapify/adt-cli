@@ -64,7 +64,7 @@ function printLiteral(
 ): string {
   switch (kind) {
     case 'string':
-      return `'${String(value).replaceAll("'", `''`)}'`;
+      return `'${String(value).replaceAll("'", "''")}'`;
     case 'int':
       return String(value);
     case 'bool':

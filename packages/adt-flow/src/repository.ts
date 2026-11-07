@@ -282,16 +282,18 @@ export async function walkFiles(
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
     throw error;
   }
-  const files: string[] = [];
-  for (const entry of entries.sort((left, right) =>
-    compareStrings(left.name, right.name),
-  )) {
-    const child = posix.join(relativeDir, entry.name);
-    if (entry.isSymbolicLink()) continue;
-    if (entry.isDirectory()) files.push(...(await walkFiles(root, child)));
-    else if (entry.isFile()) files.push(child);
-  }
-  return files;
+  const perEntry = await Promise.all(
+    entries
+      .sort((left, right) => compareStrings(left.name, right.name))
+      .map(async (entry) => {
+        const child = posix.join(relativeDir, entry.name);
+        if (entry.isSymbolicLink()) return [];
+        if (entry.isDirectory()) return walkFiles(root, child);
+        if (entry.isFile()) return [child];
+        return [];
+      }),
+  );
+  return perEntry.flat();
 }
 
 export function validateDesiredFiles(files: readonly DesiredFile[]): void {
@@ -352,6 +354,42 @@ export async function verifyOwnedHashes(
   return (await findDivergedOwnedPath(root, files)) === undefined;
 }
 
+/**
+ * Decide what to do with one desired file — write, keep as unchanged, or
+ * throw on a collision. Validation errors keep their exact type/message.
+ */
+function classifyDesiredFile(
+  file: DesiredFile,
+  current: string | undefined,
+  portableCollision: string | undefined,
+  ownedPaths: ReadonlySet<string>,
+  isSymlink: boolean,
+): 'write' | 'unchanged' {
+  if (portableCollision && portableCollision !== file.path) {
+    throw new AdtFlowError(
+      'path_collision',
+      'A desired path collides with an existing path on a case-insensitive filesystem.',
+      { path: file.path, existingPath: portableCollision },
+    );
+  }
+  if (current === undefined) return 'write';
+  if (!ownedPaths.has(file.path)) {
+    throw new AdtFlowError(
+      'path_collision',
+      'A desired path is occupied by an unowned file.',
+      { path: file.path },
+    );
+  }
+  if (isSymlink) {
+    throw new AdtFlowError(
+      'path_invalid',
+      'Flow cannot write through an owned symlink.',
+      { path: file.path },
+    );
+  }
+  return current === file.content ? 'unchanged' : 'write';
+}
+
 export async function planRepositoryChanges(
   root: string,
   desired: readonly DesiredFile[],
@@ -367,46 +405,63 @@ export async function planRepositoryChanges(
   const writes = new Map<string, string>();
   const unchanged: string[] = [];
 
+  const currentByPath = new Map<string, string | undefined>(
+    await Promise.all(
+      desired.map(
+        async (file) => [file.path, await readText(root, file.path)] as const,
+      ),
+    ),
+  );
+  const symlinkByPath = new Map<string, boolean>(
+    await Promise.all(
+      desired
+        .filter(
+          (file) =>
+            currentByPath.get(file.path) !== undefined &&
+            ownedPaths.has(file.path),
+        )
+        .map(
+          async (file) =>
+            [file.path, await isOwnedSymlink(root, file.path)] as const,
+        ),
+    ),
+  );
+
   for (const file of desired) {
-    const portableCollision = existingByFoldedPath.get(file.path.toLowerCase());
-    if (portableCollision && portableCollision !== file.path) {
-      throw new AdtFlowError(
-        'path_collision',
-        'A desired path collides with an existing path on a case-insensitive filesystem.',
-        { path: file.path, existingPath: portableCollision },
-      );
-    }
-    const current = await readText(root, file.path);
-    if (current === undefined) {
+    const action = classifyDesiredFile(
+      file,
+      currentByPath.get(file.path),
+      existingByFoldedPath.get(file.path.toLowerCase()),
+      ownedPaths,
+      symlinkByPath.get(file.path) ?? false,
+    );
+    if (action === 'write') {
       writes.set(file.path, file.content);
-    } else if (!ownedPaths.has(file.path)) {
-      throw new AdtFlowError(
-        'path_collision',
-        'A desired path is occupied by an unowned file.',
-        { path: file.path },
-      );
-    } else if (await isOwnedSymlink(root, file.path)) {
-      throw new AdtFlowError(
-        'path_invalid',
-        'Flow cannot write through an owned symlink.',
-        { path: file.path },
-      );
-    } else if (current === file.content) {
-      unchanged.push(file.path);
     } else {
-      writes.set(file.path, file.content);
+      unchanged.push(file.path);
     }
   }
 
-  const removes: string[] = [];
-  for (const path of [...ownedPaths]
+  const removeCandidates = [...ownedPaths]
     .filter((item) => !desiredByPath.has(item))
-    .sort((a, b) => compareStrings(a, b))) {
-    if (await fileExists(root, path)) removes.push(path);
+    .sort((a, b) => compareStrings(a, b));
+  const existsByPath = new Map<string, boolean>(
+    await Promise.all(
+      removeCandidates.map(
+        async (path) => [path, await fileExists(root, path)] as const,
+      ),
+    ),
+  );
+  const removes: string[] = [];
+  for (const path of removeCandidates) {
+    if (existsByPath.get(path)) removes.push(path);
   }
   const removedByHash = new Map<string, string[]>();
-  for (const path of removes) {
-    const content = await readText(root, path);
+  const removedContents = await Promise.all(
+    removes.map((path) => readText(root, path)),
+  );
+  for (const [index, path] of removes.entries()) {
+    const content = removedContents[index];
     if (content === undefined) continue;
     const hash = sha256(content);
     removedByHash.set(hash, [...(removedByHash.get(hash) ?? []), path]);
@@ -424,7 +479,8 @@ export async function planRepositoryChanges(
     }
   }
 
-  return { writes, removes, unchanged: unchanged.sort(compareStrings), moved };
+  unchanged.sort(compareStrings);
+  return { writes, removes, unchanged, moved };
 }
 
 async function ensureParentDirectories(
@@ -506,25 +562,23 @@ async function captureSnapshots(
   root: string,
   paths: Iterable<string>,
 ): Promise<Map<string, Snapshot>> {
-  const snapshots = new Map<string, Snapshot>();
-  for (const path of paths) {
-    const absolute = absolutePath(root, path);
-    const stats = await lstatSafe(absolute);
-    if (!stats) {
-      snapshots.set(path, { kind: 'missing' });
-    } else if (stats.isSymbolicLink()) {
-      snapshots.set(path, {
-        kind: 'symlink',
-        target: await readlink(absolute),
-      });
-    } else if (stats.isFile()) {
-      snapshots.set(path, { kind: 'file', content: await readFile(absolute) });
-    } else {
+  const captured = await Promise.all(
+    [...paths].map(async (path): Promise<[string, Snapshot]> => {
+      const absolute = absolutePath(root, path);
+      const stats = await lstatSafe(absolute);
+      if (!stats) {
+        return [path, { kind: 'missing' }];
+      } else if (stats.isSymbolicLink()) {
+        return [path, { kind: 'symlink', target: await readlink(absolute) }];
+      } else if (stats.isFile()) {
+        return [path, { kind: 'file', content: await readFile(absolute) }];
+      }
       // Directories or other non-file entries cannot be restored; record as
       // missing so rollback does not try to recreate them.
-      snapshots.set(path, { kind: 'missing' });
-    }
-  }
+      return [path, { kind: 'missing' }];
+    }),
+  );
+  const snapshots = new Map<string, Snapshot>(captured);
   return snapshots;
 }
 

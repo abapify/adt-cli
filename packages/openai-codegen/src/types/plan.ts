@@ -76,65 +76,121 @@ function collectFromSchema(
 
   const visit = (schema: unknown, path: string[], atRoot: boolean): void => {
     if (!isRecord(schema)) return;
-    if (isRef(schema)) {
-      const name = componentNameFromRef(schema.$ref);
-      if (name) {
-        const depId = `components.schemas.${name}`;
-        deps.add(depId);
-      }
-      return;
-    }
-    // Non-root: if this schema object IS one of the planned component schemas
-    // (same reference — common after $ref dereferencing), treat as a dep and
-    // stop descent.
-    if (!atRoot) {
-      const hitId = schemaToId.get(schema);
-      if (hitId && hitId !== rootId) {
-        deps.add(hitId);
-        return;
-      }
-      if (hitId === rootId) {
-        // Self-reference via identity.
-        deps.add(rootId);
-        return;
-      }
-    }
-    // Non-root, non-ref, non-trivial object → allocate a dedicated inline entry.
-    if (!atRoot && isNonTrivialInline(schema as JsonSchema)) {
-      const id = `${rootId}.${path.join('.')}`;
-      if (!plannedIds.has(id)) {
-        enqueueInline(id, schema as JsonSchema);
-        schemaToId.set(schema, id);
-      }
-      deps.add(id);
-      return;
-    }
-
+    const stop = classifyVisit(
+      schema,
+      path,
+      atRoot,
+      rootId,
+      deps,
+      plannedIds,
+      enqueueInline,
+      schemaToId,
+    );
+    if (stop) return;
     // Otherwise, keep descending to find refs / nested inline types.
-    const rec = schema;
-    if (isRecord(rec.properties)) {
-      for (const [name, sub] of Object.entries(rec.properties)) {
-        visit(sub, [...path, 'properties', name], false);
-      }
-    }
-    if (rec.items !== undefined) {
-      visit(rec.items, [...path, 'items'], false);
-    }
-    if (isRecord(rec.additionalProperties)) {
-      visit(rec.additionalProperties, [...path, 'additionalProperties'], false);
-    }
-    for (const c of ['allOf', 'anyOf', 'oneOf'] as const) {
-      const arr = rec[c];
-      if (Array.isArray(arr)) {
-        arr.forEach((sub, idx) => {
-          visit(sub, [...path, c, String(idx)], false);
-        });
-      }
-    }
+    descendSchema(schema, path, visit);
   };
 
   visit(rootSchema, [], true);
   return [...deps];
+}
+
+/** Classify a non-trivial schema node: register a dep (or inline entry) and
+ *  report whether descent should stop. */
+function classifyVisit(
+  schema: Record<string, unknown>,
+  path: string[],
+  atRoot: boolean,
+  rootId: string,
+  deps: Set<string>,
+  plannedIds: Set<string>,
+  enqueueInline: (id: string, schema: JsonSchema) => void,
+  schemaToId: Map<object, string>,
+): boolean {
+  if (isRef(schema)) {
+    const name = componentNameFromRef(schema.$ref);
+    if (name) {
+      const depId = `components.schemas.${name}`;
+      deps.add(depId);
+    }
+    return true;
+  }
+  // Non-root: if this schema object IS one of the planned component schemas
+  // (same reference — common after $ref dereferencing), treat as a dep and
+  // stop descent.
+  if (!atRoot) {
+    const hitId = schemaToId.get(schema);
+    if (hitId && hitId !== rootId) {
+      deps.add(hitId);
+      return true;
+    }
+    if (hitId === rootId) {
+      // Self-reference via identity.
+      deps.add(rootId);
+      return true;
+    }
+    // Non-root, non-ref, non-trivial object → allocate a dedicated inline entry.
+    if (isNonTrivialInline(schema as JsonSchema)) {
+      deps.add(
+        registerInlineEntry(
+          schema,
+          path,
+          rootId,
+          plannedIds,
+          enqueueInline,
+          schemaToId,
+        ),
+      );
+      return true;
+    }
+  }
+  return false;
+}
+
+function registerInlineEntry(
+  schema: Record<string, unknown>,
+  path: string[],
+  rootId: string,
+  plannedIds: Set<string>,
+  enqueueInline: (id: string, schema: JsonSchema) => void,
+  schemaToId: Map<object, string>,
+): string {
+  const id = `${rootId}.${path.join('.')}`;
+  if (!plannedIds.has(id)) {
+    enqueueInline(id, schema as JsonSchema);
+    schemaToId.set(schema, id);
+  }
+  return id;
+}
+
+function descendSchema(
+  schema: Record<string, unknown>,
+  path: string[],
+  visit: (schema: unknown, path: string[], atRoot: boolean) => void,
+): void {
+  if (isRecord(schema.properties)) {
+    for (const [name, sub] of Object.entries(schema.properties)) {
+      visit(sub, [...path, 'properties', name], false);
+    }
+  }
+  if (schema.items !== undefined) {
+    visit(schema.items, [...path, 'items'], false);
+  }
+  if (isRecord(schema.additionalProperties)) {
+    visit(
+      schema.additionalProperties,
+      [...path, 'additionalProperties'],
+      false,
+    );
+  }
+  for (const c of ['allOf', 'anyOf', 'oneOf'] as const) {
+    const arr = schema[c];
+    if (Array.isArray(arr)) {
+      arr.forEach((sub, idx) => {
+        visit(sub, [...path, c, String(idx)], false);
+      });
+    }
+  }
 }
 
 /** Plan the ABAP type universe for a normalized spec. */
@@ -145,7 +201,6 @@ export function planTypes(
   const used = new Set<string>();
   const alloc = makeNameAllocator(used);
   const entries: MutableEntry[] = [];
-  const byId = new Map<string, MutableEntry>();
   const plannedIds = new Set<string>();
   const schemaToId = new Map<object, string>();
   const queue: Array<{
@@ -186,7 +241,6 @@ export function planTypes(
       source: item.source,
     };
     entries.push(entry);
-    byId.set(item.id, entry);
 
     const deps = collectFromSchema(
       item.id,
@@ -222,7 +276,6 @@ export function planTypes(
       source: 'auxiliary',
     };
     entries.push(kvEntry);
-    byId.set(kvId, kvEntry);
   }
 
   // 4) Topological sort with self-reference tolerance.
@@ -284,20 +337,7 @@ function topoSort(entries: MutableEntry[]): MutableEntry[] {
     const entry = byId.get(id);
     if (!entry) return; // dependency points outside the plan (shouldn't happen)
     if (s === 'gray') {
-      // Mark participants as self-referential.
-      const cycleStart = stack.indexOf(id);
-      const cycle = cycleStart >= 0 ? stack.slice(cycleStart) : [id];
-      if (cycle.length === 1) {
-        // simple self-reference — allow.
-        entry.selfReferential = true;
-        return;
-      }
-      // Mark all participants as self-referential (indirect cycle) and allow
-      // — the emitter will insert a TYPE REF TO indirection for the back edge.
-      for (const pid of cycle) {
-        const ent = byId.get(pid);
-        if (ent) ent.selfReferential = true;
-      }
+      markCycleParticipants(id, stack, byId, entry);
       return;
     }
     state.set(id, 'gray');
@@ -308,15 +348,9 @@ function topoSort(entries: MutableEntry[]): MutableEntry[] {
         continue;
       }
       if (!byId.has(dep)) continue;
-      const depState = state.get(dep);
-      if (depState === 'gray') {
+      if (state.get(dep) === 'gray') {
         // back-edge → mark cycle participants.
-        const cycleStart = stack.indexOf(dep);
-        const cycle = cycleStart >= 0 ? stack.slice(cycleStart) : [dep];
-        for (const pid of [...cycle, id]) {
-          const ent = byId.get(pid);
-          if (ent) ent.selfReferential = true;
-        }
+        markBackEdgeCycle(dep, id, stack, byId);
         continue;
       }
       visit(dep, stack);
@@ -334,4 +368,42 @@ function topoSort(entries: MutableEntry[]): MutableEntry[] {
     );
   }
   return out;
+}
+
+/** Mark the participants of a cycle discovered on a gray node and allow the
+ *  traversal to continue — the emitter will insert a TYPE REF TO indirection
+ *  for the back edge. */
+function markCycleParticipants(
+  id: string,
+  stack: string[],
+  byId: Map<string, MutableEntry>,
+  entry: MutableEntry,
+): void {
+  const cycleStart = stack.indexOf(id);
+  const cycle = cycleStart >= 0 ? stack.slice(cycleStart) : [id];
+  if (cycle.length === 1) {
+    // simple self-reference — allow.
+    entry.selfReferential = true;
+    return;
+  }
+  // Mark all participants as self-referential (indirect cycle) and allow.
+  for (const pid of cycle) {
+    const ent = byId.get(pid);
+    if (ent) ent.selfReferential = true;
+  }
+}
+
+/** Mark participants of a back-edge cycle (dep already on the gray stack). */
+function markBackEdgeCycle(
+  dep: string,
+  id: string,
+  stack: string[],
+  byId: Map<string, MutableEntry>,
+): void {
+  const cycleStart = stack.indexOf(dep);
+  const cycle = cycleStart >= 0 ? stack.slice(cycleStart) : [dep];
+  for (const pid of [...cycle, id]) {
+    const ent = byId.get(pid);
+    if (ent) ent.selfReferential = true;
+  }
 }

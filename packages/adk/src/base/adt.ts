@@ -60,6 +60,7 @@ export type {
 } from '@abapify/adt-client';
 
 import type {
+  AdtClient,
   ClassResponse as _ClassResponse,
   InterfaceResponse as _InterfaceResponse,
   PackageResponse as _PackageResponse,
@@ -115,8 +116,6 @@ export type FunctionModuleResponse = _FunctionModuleResponse;
 // ADK Contract Proxy
 // Wraps adt-client contract with ADK-specific interface
 // ============================================
-
-import type { AdtClient } from '@abapify/adt-client';
 
 /**
  * ADT REST contracts accessible via client.adt.*

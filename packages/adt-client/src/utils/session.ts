@@ -19,6 +19,15 @@ export type SessionFetchFn = (
 ) => Promise<Response>;
 
 /**
+ * Push `current` onto `cookies` when it carries a non-empty name=value pair.
+ */
+function pushCookieIfNonEmpty(cookies: string[], current: string): void {
+  if (current.trim()) {
+    cookies.push(current.trim());
+  }
+}
+
+/**
  * Cookie Store - Manages HTTP cookies for stateful sessions
  */
 export class CookieStore {
@@ -60,9 +69,7 @@ export class CookieStore {
       const char = setCookieHeader[i];
 
       if (char === ',' && !inExpires) {
-        if (current.trim()) {
-          cookies.push(current.trim());
-        }
+        pushCookieIfNonEmpty(cookies, current);
         current = '';
       } else {
         current += char;
@@ -79,9 +86,7 @@ export class CookieStore {
       }
     }
 
-    if (current.trim()) {
-      cookies.push(current.trim());
-    }
+    pushCookieIfNonEmpty(cookies, current);
 
     return cookies;
   }
@@ -163,7 +168,7 @@ export class CsrfTokenManager {
     const decodedToken = decodeURIComponent(cookieValue);
 
     // Extract just the token part (before timestamp if present)
-    const tokenMatch = decodedToken.match(/^([A-Za-z0-9+/_-]+=*)/);
+    const tokenMatch = /^([A-Za-z0-9+/_-]+=*)/.exec(decodedToken);
     const actualToken = tokenMatch ? tokenMatch[1] : decodedToken;
 
     // Validate token (ignore placeholder values)
@@ -438,7 +443,7 @@ export class SessionManager {
     baseUrl: string;
     body: string;
   }): string | undefined {
-    const match = body.match(/href="([^"]*\/sessions\/[^"]*)"/);
+    const match = /href="([^"]*\/sessions\/[^"]*)"/.exec(body);
     const sessionPath = match?.[1];
     if (!sessionPath || !this.isTrustedSessionPath({ baseUrl, sessionPath })) {
       this.logger?.warn(

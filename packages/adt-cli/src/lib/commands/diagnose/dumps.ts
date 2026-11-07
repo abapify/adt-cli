@@ -1,5 +1,39 @@
 import { Command } from 'commander';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
+import { asText } from '../../utils/text';
+
+/** Print dump entries as tab-separated rows (or raw JSON when shape differs). */
+function printDumpsText(result: unknown): void {
+  const entries = (result as { dumps?: Array<Record<string, unknown>> }).dumps;
+  if (Array.isArray(entries) && entries.length > 0) {
+    for (const entry of entries) {
+      process.stdout.write(
+        `${asText(entry.id ?? '?')}\t${asText(entry.type ?? '?')}\t${asText(entry.program ?? '?')}\t${asText(entry.user ?? '?')}\n`,
+      );
+    }
+  } else {
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  }
+}
+
+/** Report a diagnose failure, distinguishing a missing endpoint (404). */
+function reportDiagnoseFailure(
+  error: unknown,
+  label: string,
+  endpointName: string,
+): void {
+  const is404 =
+    error instanceof Error &&
+    'status' in error &&
+    (error as { status?: number }).status === 404;
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  console.error(
+    is404
+      ? `❌ ${label} endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/${endpointName})`
+      : `❌ Diagnose ${endpointName} failed: ${errorMessage}`,
+  );
+  process.exit(1);
+}
 
 export const diagnoseDumpsCommand = new Command('dumps')
   .description('List ABAP runtime short dumps or inspect a single dump')
@@ -20,9 +54,11 @@ export const diagnoseDumpsCommand = new Command('dumps')
         if (options.user) params.set('user', options.user);
         if (options.max) params.set('maxResults', options.max);
 
+        const query = params.toString();
+        const querySuffix = query ? `?${query}` : '';
         const path = options.id
           ? `/sap/bc/adt/runtime/dumps/${encodeURIComponent(options.id)}`
-          : `/sap/bc/adt/runtime/dumps${params.toString() ? `?${params.toString()}` : ''}`;
+          : `/sap/bc/adt/runtime/dumps${querySuffix}`;
 
         const result = await client.fetch(path, {
           method: 'GET',
@@ -32,29 +68,10 @@ export const diagnoseDumpsCommand = new Command('dumps')
         if (options.json) {
           console.log(JSON.stringify(result, null, 2));
         } else {
-          const entries = (result as { dumps?: Array<Record<string, unknown>> })
-            .dumps;
-          if (Array.isArray(entries) && entries.length > 0) {
-            for (const entry of entries) {
-              process.stdout.write(
-                `${String(entry.id ?? '?')}\t${String(entry.type ?? '?')}\t${String(entry.program ?? '?')}\t${String(entry.user ?? '?')}\n`,
-              );
-            }
-          } else {
-            process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
-          }
+          printDumpsText(result);
         }
       } catch (error) {
-        const is404 =
-          error instanceof Error &&
-          'status' in error &&
-          (error as { status?: number }).status === 404;
-        console.error(
-          is404
-            ? '❌ Short dumps endpoint is not available on this system (BTP systems may not support /sap/bc/adt/runtime/dumps)'
-            : `❌ Diagnose dumps failed: ${error instanceof Error ? error.message : String(error)}`,
-        );
-        process.exit(1);
+        reportDiagnoseFailure(error, 'Short dumps', 'dumps');
       }
     },
   );

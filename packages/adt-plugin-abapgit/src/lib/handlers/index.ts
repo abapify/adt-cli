@@ -10,7 +10,6 @@ export { createHandler } from './base';
 export type {
   SerializedFile,
   ObjectHandler,
-  AbapObjectType,
   HandlerDefinition,
   HandlerContext,
   ObjectPayload,

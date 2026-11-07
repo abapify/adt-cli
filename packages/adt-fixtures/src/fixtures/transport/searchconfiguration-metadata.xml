@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  TODO-synthetic: Fabricated minimal configuration fixture for
+  Synthetic: Fabricated minimal configuration fixture for
   GET /sap/bc/adt/cts/transportrequests/searchconfiguration/metadata.
   Used by AdkTransportRequest.getCurrentUser() to detect the current
   SAP user in tests. User value is mocked (DEVELOPER).

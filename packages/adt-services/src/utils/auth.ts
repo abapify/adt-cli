@@ -84,7 +84,7 @@ export function isExpired(
 /**
  * Refresh credentials using auth plugin
  */
-export async function refreshCredentials(
+export function refreshCredentials(
   session: Parameters<typeof authManager.refreshCredentials>[0],
   options?: Parameters<typeof authManager.refreshCredentials>[1],
 ) {

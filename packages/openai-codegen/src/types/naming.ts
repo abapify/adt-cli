@@ -55,7 +55,7 @@ export function sanitizeIdent(
     base = kind === 'class' ? 'X' : 'x';
   }
   // Identifiers cannot start with a digit.
-  if (/^[0-9]/.test(base)) {
+  if (/^\d/.test(base)) {
     base = (kind === 'class' ? 'N_' : 'n_') + base;
   }
   let full = prefix + base;

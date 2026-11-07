@@ -25,6 +25,51 @@ export interface CoverageLinkSource {
   [key: string]: unknown;
 }
 
+/** Normalize a node's `link` property into a candidate list. */
+function linkCandidates(links: unknown): CoverageLinkCandidate[] {
+  if (Array.isArray(links)) return links as CoverageLinkCandidate[];
+  if (links && typeof links === 'object')
+    return [links as CoverageLinkCandidate];
+  return [];
+}
+
+/** The measurement ID encoded in a coverage URI, if any. */
+function measurementIdFrom(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const match = COVERAGE_MEASUREMENT_URI_RE.exec(value);
+  return match ? match[1] : undefined;
+}
+
+/**
+ * Search one node's atom:link candidates (or its `uri` attribute) for a
+ * coverage measurement URI. Returns the measurement ID when found.
+ */
+function matchNode(obj: Record<string, unknown>): string | undefined {
+  for (const link of linkCandidates(obj.link)) {
+    const href =
+      link && typeof link === 'object'
+        ? ((link as CoverageLinkCandidate).href ?? undefined)
+        : undefined;
+    const id = measurementIdFrom(href);
+    if (id) return id;
+  }
+  return measurementIdFrom(typeof obj.uri === 'string' ? obj.uri : undefined);
+}
+
+/** Push nested object/array values onto the BFS queue (bounded by `seen`). */
+function enqueueChildValues(
+  obj: Record<string, unknown>,
+  queue: unknown[],
+): void {
+  for (const value of Object.values(obj)) {
+    if (Array.isArray(value)) {
+      for (const v of value) queue.push(v);
+    } else if (value && typeof value === 'object') {
+      queue.push(value);
+    }
+  }
+}
+
 /**
  * Walk the given node (and, shallowly, its top-level children) searching
  * for an atom:link whose href points to a coverage measurement. Returns
@@ -43,41 +88,11 @@ export function extractCoverageMeasurementId(
     if (!current || typeof current !== 'object' || seen.has(current)) continue;
     seen.add(current);
 
-    const obj = current as Record<string, unknown>;
-    const links = obj.link;
-    let linkList: CoverageLinkCandidate[];
-    if (Array.isArray(links)) {
-      linkList = links as CoverageLinkCandidate[];
-    } else if (links && typeof links === 'object') {
-      linkList = [links as CoverageLinkCandidate];
-    } else {
-      linkList = [];
-    }
-
-    for (const link of linkList) {
-      const href =
-        link && typeof link === 'object'
-          ? ((link as CoverageLinkCandidate).href ?? undefined)
-          : undefined;
-      if (!href) continue;
-      const match = COVERAGE_MEASUREMENT_URI_RE.exec(href);
-      if (match) return match[1];
-    }
-
-    const uri = typeof obj.uri === 'string' ? obj.uri : undefined;
-    if (uri) {
-      const match = COVERAGE_MEASUREMENT_URI_RE.exec(uri);
-      if (match) return match[1];
-    }
+    const id = matchNode(current as Record<string, unknown>);
+    if (id) return id;
 
     // Recurse into nested object/array values (bounded by `seen`).
-    for (const value of Object.values(obj)) {
-      if (Array.isArray(value)) {
-        for (const v of value) queue.push(v);
-      } else if (value && typeof value === 'object') {
-        queue.push(value);
-      }
-    }
+    enqueueChildValues(current as Record<string, unknown>, queue);
   }
 
   return undefined;

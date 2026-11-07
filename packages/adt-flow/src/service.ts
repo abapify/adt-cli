@@ -233,12 +233,12 @@ function groupEntries(entries: readonly TransportSourceManifestEntry[]): Array<{
     grouped.set(identity.canonical, group);
   }
   return [...grouped.values()]
-    .map((group) => ({
-      ...group,
-      entries: group.entries.sort((left, right) =>
+    .map((group) => {
+      group.entries.sort((left, right) =>
         compareStrings(left.component.id, right.component.id),
-      ),
-    }))
+      );
+      return { ...group, entries: group.entries };
+    })
     .sort((left, right) =>
       compareStrings(left.identity.canonical, right.identity.canonical),
     );
@@ -318,8 +318,7 @@ async function exactHeadFastPath(
   if (
     requestedDescriptors.some(
       (descriptor) =>
-        !descriptor ||
-        descriptor.configDigest !== configDigest ||
+        descriptor?.configDigest !== configDigest ||
         descriptor.formatDigest !== formatDigest ||
         // A descriptor without inventory cannot prove its objects'
         // source transports still match — the fast path must skip it
@@ -378,8 +377,7 @@ async function exactHeadFastPath(
   for (const path of objectPaths) {
     const descriptor = await readDescriptor(root, path, objectDescriptorSchema);
     if (
-      !descriptor ||
-      descriptor.configDigest !== configDigest ||
+      descriptor?.configDigest !== configDigest ||
       descriptor.formatDigest !== formatDigest ||
       descriptor.selections.some((selection) =>
         isMutableVersion(selection.versionId),
@@ -401,9 +399,10 @@ async function exactHeadFastPath(
     }
     ownedPaths.push(...descriptor.ownedFiles.map((file) => file.path));
   }
+  ownedPaths.sort(compareStrings);
   return {
     descriptorPaths: [...transportPaths, ...objectPaths].sort(compareStrings),
-    ownedPaths: ownedPaths.sort(compareStrings),
+    ownedPaths,
     scopeTransports,
   };
 }
@@ -478,8 +477,11 @@ async function reuseIndexedGroup(
   previous: ObjectDescriptor,
 ): Promise<DesiredFile[]> {
   const desired: DesiredFile[] = [];
-  for (const file of previous.ownedFiles) {
-    const content = await readText(root, file.path);
+  const contents = await Promise.all(
+    previous.ownedFiles.map((file) => readText(root, file.path)),
+  );
+  for (const [index, file] of previous.ownedFiles.entries()) {
+    const content = contents[index];
     if (content === undefined) {
       throw new AdtFlowError(
         'working_tree_diverged',
@@ -590,10 +592,7 @@ function indexedPackageMatches(
   previous: ObjectDescriptor,
   group: ProcessGroupContext['group'],
 ): boolean {
-  const previousPackage = previous.packagePath
-    .at(previous.packagePath.length - 1)
-    ?.trim()
-    .toUpperCase();
+  const previousPackage = previous.packagePath.at(-1)?.trim().toUpperCase();
   if (!previousPackage) return true;
   return group.entries.every(({ object }) => {
     const packageName = object.packageName?.trim().toUpperCase();
@@ -741,9 +740,8 @@ async function buildMaterializedResult(
     files: materialized.files,
     previous: pending.previous,
   });
-  const files = preserved.files.sort((left, right) =>
-    compareStrings(left.path, right.path),
-  );
+  preserved.files.sort((left, right) => compareStrings(left.path, right.path));
+  const files = preserved.files;
   const desired: DesiredFile[] = files.map((file) => ({
     ...file,
     owner: identity.canonical,
@@ -1161,6 +1159,17 @@ function inexactEntries(
   return inexact;
 }
 
+function toSkipped(entry: TransportSourceManifestEntry): FlowSkippedObject {
+  return {
+    object: `${entry.object.type}/${entry.object.name}`,
+    component: entry.component.id,
+    diagnostic: omissionDiagnostic(entry),
+    ...(entry.sourceTransport
+      ? { sourceTransport: entry.sourceTransport }
+      : {}),
+  };
+}
+
 async function filterSkippedByApplicationComponent(
   entries: readonly TransportSourceManifestEntry[],
   ctx: FlowContext,
@@ -1226,16 +1235,6 @@ async function skippedInexactEntries(
   limiter: Limiter,
   hasApplicationComponentFilter: boolean,
 ): Promise<FlowCheckoutResult['skipped']> {
-  const toSkipped = (
-    entry: TransportSourceManifestEntry,
-  ): FlowSkippedObject => ({
-    object: `${entry.object.type}/${entry.object.name}`,
-    component: entry.component.id,
-    diagnostic: omissionDiagnostic(entry),
-    ...(entry.sourceTransport
-      ? { sourceTransport: entry.sourceTransport }
-      : {}),
-  });
   if (!hasApplicationComponentFilter) {
     return entries.map(toSkipped);
   }
@@ -1249,16 +1248,6 @@ async function unsupportedEntries(
   hasApplicationComponentFilter: boolean,
 ): Promise<FlowCheckoutResult['skipped']> {
   const unsupported = entries.filter(isUnsupportedEntry);
-  const toSkipped = (
-    entry: TransportSourceManifestEntry,
-  ): FlowSkippedObject => ({
-    object: `${entry.object.type}/${entry.object.name}`,
-    component: entry.component.id,
-    diagnostic: omissionDiagnostic(entry),
-    ...(entry.sourceTransport
-      ? { sourceTransport: entry.sourceTransport }
-      : {}),
-  });
   if (!hasApplicationComponentFilter) {
     return unsupported.map(toSkipped);
   }
@@ -1488,18 +1477,27 @@ async function addTransportDescriptors(
   const relevantObjectDescriptors = [...new Set(descriptorPaths)].sort(
     compareStrings,
   );
+  const existingByTransport = new Map<string, TransportDescriptor | undefined>(
+    await Promise.all(
+      manifest.scopeTransports.map(async (transport) => {
+        try {
+          return [
+            transport,
+            await readDescriptor(
+              ctx.root,
+              transportDescriptorPath(transport),
+              transportDescriptorSchema,
+            ),
+          ] as const;
+        } catch {
+          return [transport, undefined] as const;
+        }
+      }),
+    ),
+  );
   for (const transport of manifest.scopeTransports) {
     const path = transportDescriptorPath(transport);
-    let existing: TransportDescriptor | undefined;
-    try {
-      existing = await readDescriptor(
-        ctx.root,
-        path,
-        transportDescriptorSchema,
-      );
-    } catch {
-      existing = undefined;
-    }
+    const existing = existingByTransport.get(transport);
     const matchesCurrentCheckout =
       existing !== undefined &&
       stableJson(existing.requestedTransports) === stableJson(ctx.requested) &&

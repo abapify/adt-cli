@@ -2,6 +2,7 @@ import type { AdkContext } from '../../base/context';
 import { toText } from '../../base/fetch-utils';
 import { DdlExtension } from '../../base/kinds';
 import { registerObjectType } from '../../base/registry';
+import { asText } from '../../base/text';
 import {
   loadCdsMetadataAndSource,
   type AdkCdsSourceContract,
@@ -25,7 +26,7 @@ export class AdkDdlExtension {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
   get objectUri() {

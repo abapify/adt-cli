@@ -1,6 +1,15 @@
 import type { MethodBoundary, StripResult } from './types';
 
-type SourceObjectType = 'CLAS' | 'INTF' | 'FUNC' | 'DDLS' | 'PROG' | string;
+type SourceObjectType = string;
+
+/** `true` for a `CLASS … DEFINITION …` header line (already upper-cased). */
+function isClassDefinitionLine(upper: string): boolean {
+  return (
+    upper.startsWith('CLASS ') &&
+    upper.includes(' DEFINITION') &&
+    upper.endsWith('.')
+  );
+}
 
 function stripClassSource(source: string): StripResult {
   const lines = source.split(/\r?\n/);
@@ -14,11 +23,7 @@ function stripClassSource(source: string): StripResult {
     const upper = line.trim().toUpperCase();
 
     if (!inDefinition) {
-      if (
-        upper.startsWith('CLASS ') &&
-        upper.includes(' DEFINITION') &&
-        upper.endsWith('.')
-      ) {
+      if (isClassDefinitionLine(upper)) {
         inDefinition = true;
         foundDefinition = true;
         output.push(line);
@@ -114,6 +119,73 @@ function isCustomName(token: string | undefined): token is string {
   return Boolean(token && /^[ZY][A-Z0-9_]*$/i.test(token));
 }
 
+/**
+ * Match a dependency name from the multi-token keyword clauses at position
+ * `i` (`TYPE REF TO`, `INHERITING FROM`, `CALL FUNCTION`). Returns
+ * `undefined` when no clause matches or the name is not a custom object.
+ */
+function matchClauseDependency(
+  tokens: string[],
+  i: number,
+): string | undefined {
+  const t0 = normalizeToken(tokens[i]);
+  const t1 = normalizeToken(tokens[i + 1] ?? '');
+  const t2 = normalizeToken(tokens[i + 2] ?? '');
+  const t3 = normalizeToken(tokens[i + 3] ?? '');
+
+  if (t0 === 'TYPE' && t1 === 'REF' && t2 === 'TO' && isCustomName(t3)) {
+    return t3;
+  }
+  if (t0 === 'INHERITING' && t1 === 'FROM' && isCustomName(t2)) {
+    return t2;
+  }
+  if (t0 === 'CALL' && t1 === 'FUNCTION') {
+    const fn = normalizeToken(tokens[i + 2] ?? '');
+    return isCustomName(fn) ? fn : undefined;
+  }
+  return undefined;
+}
+
+/**
+ * Match a dependency name from the short keyword patterns at position `i`
+ * (`NEW`/`CAST`, `RAISING`/`CATCH`, static-`=>` access).
+ */
+function matchKeywordDependency(
+  tokens: string[],
+  i: number,
+): string | undefined {
+  const t0 = normalizeToken(tokens[i]);
+  const t1 = normalizeToken(tokens[i + 1] ?? '');
+
+  if ((t0 === 'NEW' || t0 === 'CAST') && isCustomName(t1)) {
+    return t1;
+  }
+  if ((t0 === 'RAISING' || t0 === 'CATCH') && isCustomName(t1)) {
+    return t1;
+  }
+  if (tokens[i + 1] === '=>' && isCustomName(t0)) {
+    return t0;
+  }
+  return undefined;
+}
+
+/** Collect `INTERFACES a, b, c.` names starting at token `start`. */
+function collectInterfaceNames(
+  tokens: string[],
+  start: number,
+  out: Set<string>,
+): void {
+  for (let j = start; j < tokens.length; j += 1) {
+    const next = normalizeToken(tokens[j]);
+    if (next === '.') {
+      break;
+    }
+    if (next !== ',' && isCustomName(next)) {
+      out.add(next);
+    }
+  }
+}
+
 export function extractDependencies(source: string): string[] {
   const dependencies = new Set<string>();
   const sanitized = source
@@ -126,54 +198,15 @@ export function extractDependencies(source: string): string[] {
   const tokens = sanitized.match(/=>|[A-Z_][A-Z0-9_]*|'[^']*'|[.,]/gi) ?? [];
 
   for (let i = 0; i < tokens.length; i += 1) {
-    const t0 = normalizeToken(tokens[i]);
-    const t1 = normalizeToken(tokens[i + 1] ?? '');
-    const t2 = normalizeToken(tokens[i + 2] ?? '');
-    const t3 = normalizeToken(tokens[i + 3] ?? '');
-
-    if (t0 === 'TYPE' && t1 === 'REF' && t2 === 'TO' && isCustomName(t3)) {
-      dependencies.add(t3);
+    const name =
+      matchClauseDependency(tokens, i) ?? matchKeywordDependency(tokens, i);
+    if (name) {
+      dependencies.add(name);
       continue;
     }
 
-    if ((t0 === 'NEW' || t0 === 'CAST') && isCustomName(t1)) {
-      dependencies.add(t1);
-      continue;
-    }
-
-    if (t0 === 'INHERITING' && t1 === 'FROM' && isCustomName(t2)) {
-      dependencies.add(t2);
-      continue;
-    }
-
-    if (t0 === 'CALL' && t1 === 'FUNCTION') {
-      const fn = normalizeToken(tokens[i + 2] ?? '');
-      if (isCustomName(fn)) {
-        dependencies.add(fn);
-      }
-      continue;
-    }
-
-    if ((t0 === 'RAISING' || t0 === 'CATCH') && isCustomName(t1)) {
-      dependencies.add(t1);
-      continue;
-    }
-
-    if (tokens[i + 1] === '=>' && isCustomName(t0)) {
-      dependencies.add(t0);
-      continue;
-    }
-
-    if (t0 === 'INTERFACES') {
-      for (let j = i + 1; j < tokens.length; j += 1) {
-        const next = normalizeToken(tokens[j]);
-        if (next === '.') {
-          break;
-        }
-        if (next !== ',' && isCustomName(next)) {
-          dependencies.add(next);
-        }
-      }
+    if (normalizeToken(tokens[i]) === 'INTERFACES') {
+      collectInterfaceNames(tokens, i + 1, dependencies);
     }
   }
 
@@ -209,7 +242,7 @@ export function normalizeMethodBody(
 
   const target = methodName.trim().toUpperCase();
   const firstName = extractMethodNameFromHeader(lines[0] ?? '');
-  const last = (lines[lines.length - 1] ?? '').trim().toUpperCase();
+  const last = (lines.at(-1) ?? '').trim().toUpperCase();
 
   if (firstName === target && last === 'ENDMETHOD.') {
     return lines.slice(1, -1).join('\n').trimEnd();

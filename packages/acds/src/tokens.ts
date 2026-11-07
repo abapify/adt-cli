@@ -58,7 +58,7 @@ export const NumberLiteral = createToken({
 /** Hash-prefixed enum value: #TRANSPARENT, #NOT_EXTENSIBLE */
 export const EnumLiteral = createToken({
   name: 'EnumLiteral',
-  pattern: /#[A-Za-z_][A-Za-z0-9_]*/,
+  pattern: /#[A-Za-z_]\w*/,
 });
 
 // ============================================
@@ -67,7 +67,7 @@ export const EnumLiteral = createToken({
 
 export const Identifier = createToken({
   name: 'Identifier',
-  pattern: /[A-Za-z_][A-Za-z0-9_]*/,
+  pattern: /[A-Za-z_]\w*/,
 });
 
 /**

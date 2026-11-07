@@ -45,7 +45,7 @@ export class AdkFunctionGroup extends AdkMainObject<
   // Lazy segments - source code
 
   async getSource(): Promise<string> {
-    return this.lazy('source', async () => {
+    return this.lazy('source', () => {
       return this.ctx.client.adt.functions.groups.source.main.get(this.name);
     });
   }

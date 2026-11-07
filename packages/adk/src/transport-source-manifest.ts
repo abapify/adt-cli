@@ -793,11 +793,8 @@ function resolveLimuReference(
   // CLAS/OC, CLAS/OSU and CLAS/OM describe CTS leaves, not separate
   // repository objects. Resolve their owner consistently with legacy imports.
   const classOwnerName = resolveClassComponentOwnerName(reference);
-  const ownerType = classOwnerName
-    ? 'CLAS'
-    : wbtype?.split('/')[0] === 'CLAS'
-      ? 'CLAS'
-      : wbtype;
+  const isClasWbType = wbtype?.split('/')[0] === 'CLAS';
+  const ownerType = classOwnerName || isClasWbType ? 'CLAS' : wbtype;
   const ownerName =
     classOwnerName ??
     (ownerType ? repositoryNameFromUri(reference.uri, ownerType) : undefined);

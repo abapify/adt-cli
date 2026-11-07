@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  TODO-synthetic: fabricated response for
+  Synthetic: fabricated response for
   GET /sap/bc/adt/system/security/pses/{context}/{applic}/certificates.
 
   Each certificate in the PSE is emitted as an atom:entry whose id is a

@@ -10,7 +10,7 @@ const FIXTURES_ROOT = join(__dirname, 'fixtures');
  * @param path - Relative path from fixtures/ directory (e.g., 'transport/single.xml')
  * @returns Promise resolving to file contents as string
  */
-export async function load(path: string): Promise<string> {
+export function load(path: string): Promise<string> {
   const fullPath = join(FIXTURES_ROOT, path);
   return readFile(fullPath, 'utf-8');
 }

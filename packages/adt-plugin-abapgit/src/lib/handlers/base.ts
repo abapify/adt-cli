@@ -43,11 +43,6 @@ export type AdkObjectClass<T extends AdkObject = AdkObject> = {
 // ============================================
 
 /**
- * ABAP object type code (e.g., 'CLAS', 'INTF', 'DOMA')
- */
-export type AbapObjectType = string;
-
-/**
  * Result of serializing a single file
  */
 export interface SerializedFile {
@@ -73,7 +68,7 @@ export interface ObjectHandler<
   >,
 > {
   /** ABAP object type (e.g., 'CLAS', 'INTF') */
-  readonly type: AbapObjectType;
+  readonly type: string;
   /** File extension for this type (e.g., 'clas', 'intf') */
   readonly fileExtension: string;
   /** Schema for parsing/building XML */
@@ -124,7 +119,7 @@ export type {
 // Global Handler Registry
 // ============================================
 
-const handlerRegistry = new Map<AbapObjectType, ObjectHandler>();
+const handlerRegistry = new Map<string, ObjectHandler>();
 
 /**
  * Get handler for object type
@@ -133,7 +128,7 @@ const handlerRegistry = new Map<AbapObjectType, ObjectHandler>();
  * main type (e.g., 'CLAS/OC' → 'CLAS'). This matches ADK's resolveType()
  * behaviour and handles quickSearch results that return subtypes.
  */
-export function getHandler(type: AbapObjectType): ObjectHandler | undefined {
+export function getHandler(type: string): ObjectHandler | undefined {
   return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
@@ -142,14 +137,14 @@ export function getHandler(type: AbapObjectType): ObjectHandler | undefined {
  *
  * Tries the full type first, then falls back to the main type.
  */
-export function isSupported(type: AbapObjectType): boolean {
+export function isSupported(type: string): boolean {
   return handlerRegistry.has(type) || handlerRegistry.has(getMainType(type));
 }
 
 /**
  * Get all supported object types
  */
-export function getSupportedTypes(): AbapObjectType[] {
+export function getSupportedTypes(): string[] {
   return [...handlerRegistry.keys()];
 }
 
@@ -312,7 +307,7 @@ export interface HandlerDefinition<
  */
 export interface HandlerContext<T extends AdkObject, _TData = unknown> {
   /** ABAP object type */
-  readonly type: AbapObjectType;
+  readonly type: string;
   /** File extension (lowercase type) */
   readonly fileExtension: string;
 
@@ -407,10 +402,7 @@ export function createHandler<
     unknown,
     unknown
   >,
->(
-  type: AbapObjectType,
-  definition: HandlerDefinition<T, TSchema>,
-): ObjectHandler<T>;
+>(type: string, definition: HandlerDefinition<T, TSchema>): ObjectHandler<T>;
 
 /**
  * Create an object handler
@@ -436,11 +428,11 @@ export function createHandler<
     unknown
   >,
 >(
-  adkClassOrType: AdkObjectClass<T> | AbapObjectType,
+  adkClassOrType: AdkObjectClass<T> | string,
   definition: HandlerDefinition<T, TSchema>,
 ): ObjectHandler<T> {
   // Determine ABAP type
-  let type: AbapObjectType;
+  let type: string;
 
   if (typeof adkClassOrType === 'string') {
     // Direct ABAP type string
@@ -576,9 +568,8 @@ export function createHandler<
     ]);
     const objectName = ctx.getObjectName(object);
     const files: SerializedFile[] = [];
-    for (const sourceKey of sourceKeys.sort((left, right) =>
-      left.localeCompare(right, 'en-US'),
-    )) {
+    sourceKeys.sort((left, right) => left.localeCompare(right, 'en-US'));
+    for (const sourceKey of sourceKeys) {
       const file = createExplicitSourceFile(
         sourceKey,
         sources[sourceKey],

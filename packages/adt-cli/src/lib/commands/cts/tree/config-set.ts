@@ -18,7 +18,7 @@ import { getAdtClientV2 } from '../../../utils/adt-client-v2';
  */
 function extractConfigId(uri: string): string {
   const parts = uri.split('/');
-  return parts[parts.length - 1];
+  return parts.at(-1)!;
 }
 
 /**
@@ -72,6 +72,67 @@ function buildConfigurationData(properties: Record<string, string>) {
       },
     },
   };
+}
+
+type ConfigSetOptions = {
+  user?: string;
+  workbench?: string | boolean;
+  customizing?: string | boolean;
+  copies?: string | boolean;
+  modifiable?: string | boolean;
+  released?: string | boolean;
+  dateFilter?: string | number;
+  fromDate?: string;
+  toDate?: string;
+};
+
+// Boolean CLI options → target property key. Iteration order matches the
+// change-log sequence: user first, then the booleans, then the dates.
+const BOOL_OPTION_TARGETS: Array<{
+  option: 'workbench' | 'customizing' | 'copies' | 'modifiable' | 'released';
+  key: string;
+}> = [
+  { option: 'workbench', key: 'WorkbenchRequests' },
+  { option: 'customizing', key: 'CustomizingRequests' },
+  { option: 'copies', key: 'TransportOfCopies' },
+  { option: 'modifiable', key: 'Modifiable' },
+  { option: 'released', key: 'Released' },
+];
+
+/** Normalize a boolean CLI option to 'true'/'false'. */
+function boolFlag(value: string | boolean): string {
+  return value === 'true' || value === true ? 'true' : 'false';
+}
+
+/** Apply only the options explicitly provided on the CLI; log each change. */
+function applyOptionChanges(
+  newProps: Record<string, string>,
+  options: ConfigSetOptions,
+): void {
+  if (options.user !== undefined) {
+    newProps.User = options.user;
+    console.log(`  📝 User: ${options.user}`);
+  }
+  for (const { option, key } of BOOL_OPTION_TARGETS) {
+    const value = options[option];
+    if (value === undefined) continue;
+    newProps[key] = boolFlag(value);
+    console.log(`  📝 ${key}: ${newProps[key]}`);
+  }
+  if (options.dateFilter !== undefined) {
+    newProps.DateFilter = String(options.dateFilter);
+    console.log(`  📝 DateFilter: ${newProps.DateFilter}`);
+  }
+  if (options.fromDate !== undefined) {
+    // Normalize date format to YYYYMMDD
+    newProps.FromDate = options.fromDate.replaceAll('-', '');
+    console.log(`  📝 FromDate: ${newProps.FromDate}`);
+  }
+  if (options.toDate !== undefined) {
+    // Normalize date format to YYYYMMDD
+    newProps.ToDate = options.toDate.replaceAll('-', '');
+    console.log(`  📝 ToDate: ${newProps.ToDate}`);
+  }
 }
 
 export const treeConfigSetCommand = new Command('set')
@@ -128,8 +189,7 @@ export const treeConfigSetCommand = new Command('set')
       // Response has 'configurations' property (plural) containing config array
       const configsData = configsResponse as { configurations?: unknown };
       const configs = configsData?.configurations as
-        | Array<{ link?: { href?: string } }>
-        | undefined;
+        Array<{ link?: { href?: string } }> | undefined;
       if (!configs) {
         console.log('\n❌ No search configuration found');
         return;
@@ -159,62 +219,7 @@ export const treeConfigSetCommand = new Command('set')
 
       // Apply changes - only update what was specified
       const newProps = { ...currentProps };
-
-      if (options.user !== undefined) {
-        newProps.User = options.user;
-        console.log(`  📝 User: ${options.user}`);
-      }
-      if (options.workbench !== undefined) {
-        newProps.WorkbenchRequests =
-          options.workbench === 'true' || options.workbench === true
-            ? 'true'
-            : 'false';
-        console.log(`  📝 WorkbenchRequests: ${newProps.WorkbenchRequests}`);
-      }
-      if (options.customizing !== undefined) {
-        newProps.CustomizingRequests =
-          options.customizing === 'true' || options.customizing === true
-            ? 'true'
-            : 'false';
-        console.log(
-          `  📝 CustomizingRequests: ${newProps.CustomizingRequests}`,
-        );
-      }
-      if (options.copies !== undefined) {
-        newProps.TransportOfCopies =
-          options.copies === 'true' || options.copies === true
-            ? 'true'
-            : 'false';
-        console.log(`  📝 TransportOfCopies: ${newProps.TransportOfCopies}`);
-      }
-      if (options.modifiable !== undefined) {
-        newProps.Modifiable =
-          options.modifiable === 'true' || options.modifiable === true
-            ? 'true'
-            : 'false';
-        console.log(`  📝 Modifiable: ${newProps.Modifiable}`);
-      }
-      if (options.released !== undefined) {
-        newProps.Released =
-          options.released === 'true' || options.released === true
-            ? 'true'
-            : 'false';
-        console.log(`  📝 Released: ${newProps.Released}`);
-      }
-      if (options.dateFilter !== undefined) {
-        newProps.DateFilter = String(options.dateFilter);
-        console.log(`  📝 DateFilter: ${newProps.DateFilter}`);
-      }
-      if (options.fromDate !== undefined) {
-        // Normalize date format to YYYYMMDD
-        newProps.FromDate = options.fromDate.replaceAll('-', '');
-        console.log(`  📝 FromDate: ${newProps.FromDate}`);
-      }
-      if (options.toDate !== undefined) {
-        // Normalize date format to YYYYMMDD
-        newProps.ToDate = options.toDate.replaceAll('-', '');
-        console.log(`  📝 ToDate: ${newProps.ToDate}`);
-      }
+      applyOptionChanges(newProps, options);
 
       // Save configuration
       console.log('\n🔄 Saving configuration...');

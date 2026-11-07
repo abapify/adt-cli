@@ -205,52 +205,10 @@ function parseElement(
   }
 
   // Parse attributes using walker (handles inheritance)
-  for (const { attribute } of walkAttributes(typeDef, schema)) {
-    if (!attribute.name) continue;
-    const value = getAttributeValue(node, attribute.name);
-    if (value !== null) {
-      result[attribute.name] = convertValue(value, attribute.type || 'string');
-    } else if (attribute.default !== undefined) {
-      result[attribute.name] = convertValue(
-        String(attribute.default),
-        attribute.type || 'string',
-      );
-    }
-  }
+  parseAttributes(node, typeDef, schema, result);
 
   // Parse child elements using walker (handles inheritance, groups, refs)
-  for (const { element, array } of walkElements(typeDef, schema)) {
-    const resolved = resolveElementInfo(element, schema);
-    if (!resolved) continue;
-
-    // Check if this is a reference to an abstract element (substitution group head)
-    // Use rootSchema for substitution lookups since substitutes can be in any imported schema
-    const isAbstract = isAbstractElement(resolved.name, rootSchema);
-    if (isAbstract) {
-      parseSubstitutionChildren(node, resolved.name, rootSchema, result);
-    } else {
-      // Normal element handling
-      const children = getChildElements(node, resolved.name);
-
-      if (array || children.length > 1) {
-        // Array element
-        const values = children.map((child) =>
-          parseChildValue(child, resolved.typeName, schema, rootSchema),
-        );
-        if (values.length > 0) {
-          result[resolved.name] = values;
-        }
-      } else if (children.length === 1) {
-        // Single element
-        result[resolved.name] = parseChildValue(
-          children[0],
-          resolved.typeName,
-          schema,
-          rootSchema,
-        );
-      }
-    }
-  }
+  parseChildElements(node, typeDef, schema, rootSchema, result);
 
   // Capture wildcard (xs:any) children not covered by declared elements
   if (hasWildcard(typeDef, schema)) {
@@ -258,6 +216,91 @@ function parseElement(
   }
 
   return result;
+}
+
+/**
+ * Parse declared attributes of an element into the result object.
+ */
+function parseAttributes(
+  node: XmlElement,
+  typeDef: ComplexTypeLike,
+  schema: SchemaLike,
+  result: Record<string, unknown>,
+): void {
+  for (const { attribute } of walkAttributes(typeDef, schema)) {
+    if (!attribute.name) continue;
+
+    const type = attribute.type || 'string';
+    const value = getAttributeValue(node, attribute.name);
+    if (value !== null) {
+      result[attribute.name] = convertValue(value, type);
+      continue;
+    }
+    if (attribute.default !== undefined) {
+      result[attribute.name] = convertValue(String(attribute.default), type);
+    }
+  }
+}
+
+/**
+ * Parse declared child elements of an element into the result object.
+ */
+function parseChildElements(
+  node: XmlElement,
+  typeDef: ComplexTypeLike,
+  schema: SchemaLike,
+  rootSchema: SchemaLike,
+  result: Record<string, unknown>,
+): void {
+  for (const { element, array } of walkElements(typeDef, schema)) {
+    const resolved = resolveElementInfo(element, schema);
+    if (!resolved) continue;
+
+    // Check if this is a reference to an abstract element (substitution group head)
+    // Use rootSchema for substitution lookups since substitutes can be in any imported schema
+    if (isAbstractElement(resolved.name, rootSchema)) {
+      parseSubstitutionChildren(node, resolved.name, rootSchema, result);
+      continue;
+    }
+
+    // Normal element handling
+    parseRegularChildren(node, resolved, array, schema, rootSchema, result);
+  }
+}
+
+/**
+ * Parse non-abstract declared children: arrays and single elements.
+ */
+function parseRegularChildren(
+  node: XmlElement,
+  resolved: { name: string; typeName: string | undefined },
+  array: boolean,
+  schema: SchemaLike,
+  rootSchema: SchemaLike,
+  result: Record<string, unknown>,
+): void {
+  const children = getChildElements(node, resolved.name);
+
+  if (array || children.length > 1) {
+    // Array element
+    const values = children.map((child) =>
+      parseChildValue(child, resolved.typeName, schema, rootSchema),
+    );
+    if (values.length > 0) {
+      result[resolved.name] = values;
+    }
+    return;
+  }
+
+  if (children.length === 1) {
+    // Single element
+    result[resolved.name] = parseChildValue(
+      children[0],
+      resolved.typeName,
+      schema,
+      rootSchema,
+    );
+  }
 }
 
 /**
@@ -274,7 +317,7 @@ function parseSubstitutionChildren(
   for (const child of getAllChildElements(node)) {
     const childName = getLocalName(child);
     const substitute = substitutes.find((s) => s.element.name === childName);
-    if (substitute && substitute.element.name) {
+    if (substitute?.element.name) {
       const subTypeName = substitute.element.type
         ? stripNsPrefix(substitute.element.type)
         : undefined;
@@ -317,9 +360,7 @@ function parseWildcardChildren(
  */
 function parseAnyValue(node: XmlElement): unknown {
   const result: Record<string, unknown> = {};
-  // NamedNodeMap is not iterable in xmldom — use index-based access
-  for (let i = 0; i < node.attributes.length; i++) {
-    const attr = node.attributes[i];
+  for (const attr of node.attributes) {
     result[`@${attr.name}`] = attr.value;
   }
 

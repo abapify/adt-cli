@@ -16,6 +16,31 @@ const parser = new XMLParser({
 });
 
 /**
+ * Push all `atom:link` entries from a single link element (or array of them)
+ * onto `links`.
+ */
+function pushLinkEntries(linkData: unknown, links: HypermediaLink[]): void {
+  const linkArray = Array.isArray(linkData) ? linkData : [linkData];
+
+  for (const link of linkArray) {
+    if (link && typeof link === 'object') {
+      const linkObj = link as Record<string, unknown>;
+      const href = linkObj['@_href'] as string;
+      const rel = linkObj['@_rel'] as string;
+
+      if (href && rel) {
+        links.push({
+          href,
+          rel,
+          type: linkObj['@_type'] as string | undefined,
+          title: linkObj['@_title'] as string | undefined,
+        });
+      }
+    }
+  }
+}
+
+/**
  * Extract all atom:link elements from parsed XML object
  */
 function extractLinks(
@@ -36,25 +61,7 @@ function extractLinks(
     );
 
     if (linkKey) {
-      const linkData = record[linkKey];
-      const linkArray = Array.isArray(linkData) ? linkData : [linkData];
-
-      for (const link of linkArray) {
-        if (link && typeof link === 'object') {
-          const linkObj = link as Record<string, unknown>;
-          const href = linkObj['@_href'] as string;
-          const rel = linkObj['@_rel'] as string;
-
-          if (href && rel) {
-            links.push({
-              href,
-              rel,
-              type: linkObj['@_type'] as string | undefined,
-              title: linkObj['@_title'] as string | undefined,
-            });
-          }
-        }
-      }
+      pushLinkEntries(record[linkKey], links);
     }
 
     for (const key of Object.keys(record)) {

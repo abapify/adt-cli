@@ -108,30 +108,12 @@ export function rawSchema(options: RawSchemaOptions = {}): GeneratorPlugin {
 
       // Schema is already linked by runner.ts
       // Apply schema resolution if enabled
-      let schemaToProcess = schema.schema as Record<string, unknown>;
-      if (options.resolve) {
-        const resolveOpts: ResolveOptions =
-          options.resolve === true ? {} : options.resolve;
-        schemaToProcess = resolveSchema(schema.schema, resolveOpts) as Record<
-          string,
-          unknown
-        >;
-      }
-
-      // Resolve ALL - merge both $includes AND $imports into a single schema
-      // This creates a fully self-contained schema with all elements and types
-      if (resolveAll) {
-        schemaToProcess = resolveSchema(schema.schema, {
-          filterToRootElements: true,
-        }) as Record<string, unknown>;
-      }
-      // Resolve includes only - merge included schema content recursively
-      else if (resolveIncludes) {
-        schemaToProcess = resolveSchema(schema.schema, {
-          resolveImports: false,
-          keepImportsRef: true,
-        }) as Record<string, unknown>;
-      }
+      const schemaToProcess = resolveSchemaToProcess(
+        schema.schema,
+        options.resolve,
+        resolveIncludes,
+        resolveAll,
+      );
 
       // When resolving all, disable both $includes and $imports in output
       const disableRefs = resolveAll || resolveIncludes;
@@ -177,19 +159,7 @@ export function rawSchema(options: RawSchemaOptions = {}): GeneratorPlugin {
           $imports,
           $includes,
         });
-        if (imports.length > 0) {
-          for (const imp of imports) {
-            // For isolatedDeclarations, import the named 'schema' export and alias it
-            // This is required because default exports can't be inferred with --isolatedDeclarations
-            if (isolatedDeclarations) {
-              lines.push(
-                `import { schema as ${imp.name} } from '${imp.path}';`,
-              );
-            } else {
-              lines.push(`import ${imp.name} from '${imp.path}';`);
-            }
-          }
-        }
+        appendImportLines(lines, imports, isolatedDeclarations);
       }
 
       // Add blank line after imports if any were added
@@ -207,22 +177,13 @@ export function rawSchema(options: RawSchemaOptions = {}): GeneratorPlugin {
       // Schema literal
       const literal = objectToLiteral(outputSchema, true, '  ', 0, singleQuote);
 
-      // For isolatedDeclarations, use named export with `as const satisfies Schema`
-      // This is required because default exports can't be inferred with --isolatedDeclarations
-      if (isolatedDeclarations) {
-        const exportName = namedExport ?? 'schema';
-        lines.push(
-          `export const ${exportName} = ${literal} as const satisfies Schema;`,
-        );
-        // Also add default export pointing to the named export
-        if (defaultExport && !namedExport) {
-          lines.push(`export default ${exportName};`);
-        }
-      } else if (namedExport) {
-        lines.push(`export const ${namedExport} = ${literal} as const;`);
-      } else if (defaultExport) {
-        lines.push(`export default ${literal} as const;`);
-      }
+      appendExportLines(
+        lines,
+        literal,
+        isolatedDeclarations,
+        namedExport,
+        defaultExport,
+      );
 
       lines.push('');
 
@@ -234,6 +195,93 @@ export function rawSchema(options: RawSchemaOptions = {}): GeneratorPlugin {
       ];
     },
   };
+}
+
+/**
+ * Apply schema resolution according to the resolve/resolveAll/resolveIncludes options.
+ */
+function resolveSchemaToProcess(
+  schema: Parameters<typeof resolveSchema>[0],
+  resolveOption: boolean | ResolveOptions | undefined,
+  resolveIncludes: boolean,
+  resolveAll: boolean,
+): Record<string, unknown> {
+  let schemaToProcess = schema as Record<string, unknown>;
+
+  if (resolveOption) {
+    const resolveOpts: ResolveOptions =
+      resolveOption === true ? {} : resolveOption;
+    schemaToProcess = resolveSchema(schema, resolveOpts) as Record<
+      string,
+      unknown
+    >;
+  }
+
+  // Resolve ALL - merge both $includes AND $imports into a single schema
+  // This creates a fully self-contained schema with all elements and types
+  if (resolveAll) {
+    schemaToProcess = resolveSchema(schema, {
+      filterToRootElements: true,
+    }) as Record<string, unknown>;
+  }
+  // Resolve includes only - merge included schema content recursively
+  else if (resolveIncludes) {
+    schemaToProcess = resolveSchema(schema, {
+      resolveImports: false,
+      keepImportsRef: true,
+    }) as Record<string, unknown>;
+  }
+
+  return schemaToProcess;
+}
+
+/** Append one import statement per schema import. */
+function appendImportLines(
+  lines: string[],
+  imports: Array<{ name: string; path: string }>,
+  isolatedDeclarations: boolean,
+): void {
+  for (const imp of imports) {
+    // For isolatedDeclarations, import the named 'schema' export and alias it
+    // This is required because default exports can't be inferred with --isolatedDeclarations
+    if (isolatedDeclarations) {
+      lines.push(`import { schema as ${imp.name} } from '${imp.path}';`);
+    } else {
+      lines.push(`import ${imp.name} from '${imp.path}';`);
+    }
+  }
+}
+
+/** Append the export statement(s) for the schema literal. */
+function appendExportLines(
+  lines: string[],
+  literal: string,
+  isolatedDeclarations: boolean,
+  namedExport: string | undefined,
+  defaultExport: boolean,
+): void {
+  // For isolatedDeclarations, use named export with `as const satisfies Schema`
+  // This is required because default exports can't be inferred with --isolatedDeclarations
+  if (isolatedDeclarations) {
+    const exportName = namedExport ?? 'schema';
+    lines.push(
+      `export const ${exportName} = ${literal} as const satisfies Schema;`,
+    );
+    // Also add default export pointing to the named export
+    if (defaultExport && !namedExport) {
+      lines.push(`export default ${exportName};`);
+    }
+    return;
+  }
+
+  if (namedExport) {
+    lines.push(`export const ${namedExport} = ${literal} as const;`);
+    return;
+  }
+
+  if (defaultExport) {
+    lines.push(`export default ${literal} as const;`);
+  }
 }
 
 // ============================================================================
@@ -264,22 +312,11 @@ function buildOutputSchema(
 
   // Add $imports if enabled (from xs:import - different namespace)
   if (options.$imports && schema.import) {
-    const importRefs: SchemaRef[] = [];
-    const imports = schema.import as Array<{ schemaLocation?: string }>;
-    for (const imp of imports) {
-      if (imp.schemaLocation) {
-        const resolved = options.resolveImport(imp.schemaLocation);
-        if (!resolved) {
-          throw new Error(
-            `Cannot resolve xs:import schemaLocation: ${imp.schemaLocation} (in ${options.schemaName}.xsd)`,
-          );
-        }
-        const name = imp.schemaLocation
-          .replace(/\.xsd$/, '')
-          .replace(/^.*\//, '');
-        importRefs.push(new SchemaRef(name));
-      }
-    }
+    const importRefs = buildSchemaRefs(
+      schema.import as Array<{ schemaLocation?: string }>,
+      'xs:import',
+      options,
+    );
     if (importRefs.length > 0) {
       result.$imports = importRefs;
     }
@@ -287,23 +324,11 @@ function buildOutputSchema(
 
   // Add $includes if enabled (from xs:include - same namespace)
   if (options.$includes && schema.include) {
-    const includeRefs: SchemaRef[] = [];
-    const includes = schema.include as Array<{ schemaLocation?: string }>;
-    for (const inc of includes) {
-      if (inc.schemaLocation) {
-        const resolved = options.resolveImport(inc.schemaLocation);
-        if (!resolved) {
-          throw new Error(
-            `Cannot resolve xs:include schemaLocation: ${inc.schemaLocation} (in ${options.schemaName}.xsd)`,
-          );
-        }
-        // Use base name for valid JS identifier
-        const name = inc.schemaLocation
-          .replace(/\.xsd$/, '')
-          .replace(/^.*\//, '');
-        includeRefs.push(new SchemaRef(name));
-      }
-    }
+    const includeRefs = buildSchemaRefs(
+      schema.include as Array<{ schemaLocation?: string }>,
+      'xs:include',
+      options,
+    );
     if (includeRefs.length > 0) {
       result.$includes = includeRefs;
     }
@@ -315,83 +340,138 @@ function buildOutputSchema(
   }
 
   // Copy remaining properties (excluding handled ones)
-  for (const [key, value] of Object.entries(schema)) {
-    // Skip extension properties
-    if (
-      key === '$xmlns' ||
-      key === '$imports' ||
-      key === '$includes' ||
-      key === '$filename'
-    ) {
-      continue;
-    }
-    // Skip 'import' if $imports is enabled (we output $imports instead)
-    if (key === 'import' && options.$imports) {
-      continue;
-    }
-    // Skip 'include' if $includes is enabled (we output $includes instead)
-    if (key === 'include' && options.$includes) {
-      continue;
-    }
-    if (!excludeSet.has(key)) {
-      result[key] = filterDeep(value, excludeSet);
-    }
-  }
+  copyRemainingProperties(schema, result, options, excludeSet);
 
   return result;
 }
 
+/**
+ * Build $imports/$includes refs from xs:import/xs:include schemaLocation
+ * entries. Unresolvable locations throw.
+ */
+function buildSchemaRefs(
+  refs: ReadonlyArray<{ schemaLocation?: string }>,
+  kind: 'xs:import' | 'xs:include',
+  options: BuildOptions,
+): SchemaRef[] {
+  const schemaRefs: SchemaRef[] = [];
+  for (const ref of refs) {
+    if (ref.schemaLocation) {
+      const resolved = options.resolveImport(ref.schemaLocation);
+      if (!resolved) {
+        throw new Error(
+          `Cannot resolve ${kind} schemaLocation: ${ref.schemaLocation} (in ${options.schemaName}.xsd)`,
+        );
+      }
+      // Use base name for valid JS identifier
+      const name = ref.schemaLocation
+        .replace(/\.xsd$/, '')
+        .replace(/^.*\//, '');
+      schemaRefs.push(new SchemaRef(name));
+    }
+  }
+  return schemaRefs;
+}
+
+/**
+ * Copy schema properties that are not handled elsewhere,
+ * deep-filtering excluded keys.
+ */
+function copyRemainingProperties(
+  schema: Record<string, unknown>,
+  result: Record<string, unknown>,
+  options: BuildOptions,
+  excludeSet: Set<string>,
+): void {
+  for (const [key, value] of Object.entries(schema)) {
+    if (shouldSkipProperty(key, options)) continue;
+    if (!excludeSet.has(key)) {
+      result[key] = filterDeep(value, excludeSet);
+    }
+  }
+}
+
+/** Whether a schema property is handled elsewhere and must not be copied. */
+function shouldSkipProperty(key: string, options: BuildOptions): boolean {
+  // Skip extension properties
+  if (
+    key === '$xmlns' ||
+    key === '$imports' ||
+    key === '$includes' ||
+    key === '$filename'
+  ) {
+    return true;
+  }
+  // Skip 'import' if $imports is enabled (we output $imports instead)
+  if (key === 'import' && options.$imports) {
+    return true;
+  }
+  // Skip 'include' if $includes is enabled (we output $includes instead)
+  return key === 'include' && options.$includes;
+}
+
+const DEFAULT_SCHEMA_IMPORT_OPTIONS: {
+  $imports?: boolean;
+  $includes?: boolean;
+} = {
+  $imports: true,
+  $includes: true,
+};
+
 function getSchemaImports(
   schema: Record<string, unknown>,
   resolveImport: (schemaLocation: string) => string | null,
-  options: { $imports?: boolean; $includes?: boolean } = {
-    $imports: true,
-    $includes: true,
-  },
+  options: {
+    $imports?: boolean;
+    $includes?: boolean;
+  } = DEFAULT_SCHEMA_IMPORT_OPTIONS,
 ): Array<{ name: string; path: string }> {
   const imports: Array<{ name: string; path: string }> = [];
 
   // Handle xs:import (only if $imports is enabled)
   if (options.$imports) {
-    const xsdImports = schema.import as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
-    if (xsdImports) {
-      for (const imp of xsdImports) {
-        if (imp.schemaLocation) {
-          const modulePath = resolveImport(imp.schemaLocation);
-          if (modulePath) {
-            const name = imp.schemaLocation
-              .replace(/\.xsd$/, '')
-              .replace(/^.*\//, '');
-            imports.push({ name, path: modulePath });
-          }
-        }
-      }
-    }
+    imports.push(
+      ...collectSchemaImports(
+        schema.import as Array<{ schemaLocation?: string }> | undefined,
+        resolveImport,
+      ),
+    );
   }
 
   // Handle xs:include (only if $includes is enabled)
   if (options.$includes) {
-    const xsdIncludes = schema.include as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
-    if (xsdIncludes) {
-      for (const inc of xsdIncludes) {
-        if (inc.schemaLocation) {
-          const modulePath = resolveImport(inc.schemaLocation);
-          if (modulePath) {
-            // Use base name for valid JS identifier
-            const name = inc.schemaLocation
-              .replace(/\.xsd$/, '')
-              .replace(/^.*\//, '');
-            imports.push({ name, path: modulePath });
-          }
-        }
+    imports.push(
+      ...collectSchemaImports(
+        schema.include as Array<{ schemaLocation?: string }> | undefined,
+        resolveImport,
+      ),
+    );
+  }
+
+  return imports;
+}
+
+/**
+ * Resolve module imports from schemaLocation entries;
+ * unresolvable entries are skipped.
+ */
+function collectSchemaImports(
+  refs: ReadonlyArray<{ schemaLocation?: string }> | undefined,
+  resolveImport: (schemaLocation: string) => string | null,
+): Array<{ name: string; path: string }> {
+  const imports: Array<{ name: string; path: string }> = [];
+  for (const ref of refs ?? []) {
+    if (ref.schemaLocation) {
+      const modulePath = resolveImport(ref.schemaLocation);
+      if (modulePath) {
+        // Use base name for valid JS identifier
+        const name = ref.schemaLocation
+          .replace(/\.xsd$/, '')
+          .replace(/^.*\//, '');
+        imports.push({ name, path: modulePath });
       }
     }
   }
-
   return imports;
 }
 
@@ -407,8 +487,8 @@ class SchemaRef {
 function toSingleQuoteLiteral(jsonStr: string): string {
   const inner = jsonStr
     .slice(1, -1)
-    .replaceAll('\\"', '"')
-    .replaceAll("'", "\\'");
+    .replaceAll(String.raw`\"`, '"')
+    .replaceAll("'", String.raw`\'`);
   return `'${inner}'`;
 }
 
@@ -451,10 +531,7 @@ function objectToLiteral(
 
   if (typeof value === 'string') {
     const json = JSON.stringify(value);
-    if (singleQuote) {
-      return toSingleQuoteLiteral(json);
-    }
-    return json;
+    return singleQuote ? toSingleQuoteLiteral(json) : json;
   }
 
   if (typeof value === 'number' || typeof value === 'boolean') {
@@ -462,57 +539,90 @@ function objectToLiteral(
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) return '[]';
-
-    const items = value.map((item) =>
-      objectToLiteral(item, pretty, indent, depth + 1, singleQuote),
-    );
-
-    if (pretty) {
-      const itemIndent = indent.repeat(depth + 1);
-      const closeIndent = indent.repeat(depth);
-      return `[\n${items
-        .map((item) => `${itemIndent}${item}`)
-        .join(',\n')},\n${closeIndent}]`;
-    }
-
-    return `[${items.join(', ')}]`;
+    return arrayToLiteral(value, pretty, indent, depth, singleQuote);
   }
 
   if (typeof value === 'object') {
-    const obj = value as Record<string, unknown>;
-    const entries = Object.entries(obj).filter(([, v]) => v !== undefined);
-
-    if (entries.length === 0) return '{}';
-
-    const props = entries.map(([key, val]) => {
-      let keyStr = key;
-      if (!isValidIdentifier(key)) {
-        const json = JSON.stringify(key);
-        keyStr = singleQuote ? toSingleQuoteLiteral(json) : json;
-      }
-      const valStr = objectToLiteral(
-        val,
-        pretty,
-        indent,
-        depth + 1,
-        singleQuote,
-      );
-      return `${keyStr}: ${valStr}`;
-    });
-
-    if (pretty) {
-      const propIndent = indent.repeat(depth + 1);
-      const closeIndent = indent.repeat(depth);
-      return `{\n${props
-        .map((prop) => `${propIndent}${prop}`)
-        .join(',\n')},\n${closeIndent}}`;
-    }
-
-    return `{ ${props.join(', ')} }`;
+    return recordToLiteral(
+      value as Record<string, unknown>,
+      pretty,
+      indent,
+      depth,
+      singleQuote,
+    );
   }
 
   return 'undefined';
+}
+
+/** Render an array literal. */
+function arrayToLiteral(
+  value: unknown[],
+  pretty: boolean,
+  indent: string,
+  depth: number,
+  singleQuote: boolean,
+): string {
+  if (value.length === 0) return '[]';
+
+  const items = value.map((item) =>
+    objectToLiteral(item, pretty, indent, depth + 1, singleQuote),
+  );
+
+  if (pretty) {
+    const itemIndent = indent.repeat(depth + 1);
+    const closeIndent = indent.repeat(depth);
+    return `[\n${items
+      .map((item) => `${itemIndent}${item}`)
+      .join(',\n')},\n${closeIndent}]`;
+  }
+
+  return `[${items.join(', ')}]`;
+}
+
+/** Render an object literal from record entries. */
+function recordToLiteral(
+  obj: Record<string, unknown>,
+  pretty: boolean,
+  indent: string,
+  depth: number,
+  singleQuote: boolean,
+): string {
+  const entries = Object.entries(obj).filter(([, v]) => v !== undefined);
+
+  if (entries.length === 0) return '{}';
+
+  const props = entries.map(([key, val]) =>
+    propertyToLiteral(key, val, pretty, indent, depth, singleQuote),
+  );
+
+  if (pretty) {
+    const propIndent = indent.repeat(depth + 1);
+    const closeIndent = indent.repeat(depth);
+    return `{\n${props
+      .map((prop) => `${propIndent}${prop}`)
+      .join(',\n')},\n${closeIndent}}`;
+  }
+
+  return `{ ${props.join(', ')} }`;
+}
+
+/** Render one `key: value` object property. */
+function propertyToLiteral(
+  key: string,
+  val: unknown,
+  pretty: boolean,
+  indent: string,
+  depth: number,
+  singleQuote: boolean,
+): string {
+  let keyStr = key;
+  if (!isValidIdentifier(key)) {
+    const json = JSON.stringify(key);
+    keyStr = singleQuote ? toSingleQuoteLiteral(json) : json;
+  }
+  const valStr = objectToLiteral(val, pretty, indent, depth + 1, singleQuote);
+  return `${keyStr}: ${valStr}`;
 }
 
 const RESERVED_WORDS = new Set([
