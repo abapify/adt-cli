@@ -136,6 +136,41 @@ async function checkResponseFixtureParses(
   expect(parsed).toBeDefined();
 }
 
+/** Check the optional `body` part of an operation. */
+async function checkBodyPart(
+  op: ContractOperation,
+  contract: RestEndpointDescriptor,
+): Promise<void> {
+  const { body } = op;
+  if (!body) return;
+
+  const bodySchema = body.schema as BodySchema;
+  checkBodySchema(body.schema, contract);
+
+  const bodyFixture = body.fixture;
+  if (!bodyFixture) return;
+
+  await checkBodyFixtureParses(bodySchema, bodyFixture);
+  await checkBodyFixtureRoundTrips(bodySchema, bodyFixture);
+}
+
+/** Check the optional `response` part of an operation. */
+async function checkResponsePart(
+  op: ContractOperation,
+  contract: RestEndpointDescriptor,
+): Promise<void> {
+  const { response } = op;
+  if (!response) return;
+
+  const responseSchema = response.schema as ResponseSchema;
+  checkResponseSchema(response, contract);
+
+  const responseFixture = response.fixture;
+  if (!responseFixture) return;
+
+  await checkResponseFixtureParses(responseSchema, responseFixture);
+}
+
 /**
  * Check a single contract operation: method, path, headers, query, body
  * schema (parse + round-trip) and response schema.
@@ -153,7 +188,7 @@ export async function checkContractOperation(
   checkPath(op.path, contract);
 
   // Capture values to avoid non-null assertions in callbacks
-  const { headers, query, body, response } = op;
+  const { headers, query } = op;
 
   if (headers) {
     checkHeaders(headers, contract);
@@ -163,28 +198,8 @@ export async function checkContractOperation(
     checkQuery(query, contract);
   }
 
-  if (body) {
-    const bodySchema = body.schema as BodySchema;
-    const bodyFixture = body.fixture;
-
-    checkBodySchema(body.schema, contract);
-
-    if (bodyFixture) {
-      await checkBodyFixtureParses(bodySchema, bodyFixture);
-      await checkBodyFixtureRoundTrips(bodySchema, bodyFixture);
-    }
-  }
-
-  if (response) {
-    const responseSchema = response.schema as ResponseSchema;
-    const responseFixture = response.fixture;
-
-    checkResponseSchema(response, contract);
-
-    if (responseFixture) {
-      await checkResponseFixtureParses(responseSchema, responseFixture);
-    }
-  }
+  await checkBodyPart(op, contract);
+  await checkResponsePart(op, contract);
 }
 
 /** Register the `it()` for the optional `headers` check. */
