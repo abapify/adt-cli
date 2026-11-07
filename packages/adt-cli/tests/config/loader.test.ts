@@ -13,6 +13,8 @@ let loader: ConfigLoader;
 
 async function load(extra: string) {
   const file = path.join(directory, 'adt.config.yaml');
+  // Fixed fixture name inside the test-owned temporary directory.
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   await fs.writeFile(file, base + extra);
   return loader.load(file);
 }
@@ -20,6 +22,8 @@ async function load(extra: string) {
 beforeEach(async () => {
   ConfigLoader.clearCache();
   loader = new ConfigLoader();
+  // Fixed fixture root resolved relative to this test file.
+  // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
   await fs.mkdir(fixtureRoot, { recursive: true });
   directory = await fs.mkdtemp(path.join(fixtureRoot, 'loader-'));
 });
@@ -169,6 +173,8 @@ describe('YAML configuration loading', () => {
     await loader.save(config, output);
     ConfigLoader.clearCache();
     expect(await new ConfigLoader().load(output)).toEqual(config);
+    // Reads back the fixed fixture file this test just saved.
+    // nosemgrep: javascript_pathtraversal_rule-non-literal-fs-filename
     expect(await fs.readFile(output, 'utf8')).not.toMatch(
       /(?:^|\s)[&*][a-zA-Z0-9_-]+/m,
     );
