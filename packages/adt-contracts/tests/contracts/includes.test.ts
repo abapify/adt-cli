@@ -5,8 +5,13 @@
  * `/sap/bc/adt/programs/includes`.
  */
 
+import { describe, it } from 'vitest';
 import { includes as includesSchema } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import {
   programsModuleContract as programsContract,
   includesContract,
@@ -97,6 +102,31 @@ class IncludesModuleScenario extends ContractScenario {
 }
 
 // Run scenarios
-runScenario(new IncludesScenario());
-runScenario(new IncludeSourceScenario());
-runScenario(new IncludesModuleScenario());
+describe('Includes Contract Scenarios', () => {
+  describe('Program Includes', () => {
+    const scenario = new IncludesScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('Program Include Source', () => {
+    const scenario = new IncludeSourceScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('Programs module – includes wiring', () => {
+    const scenario = new IncludesModuleScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

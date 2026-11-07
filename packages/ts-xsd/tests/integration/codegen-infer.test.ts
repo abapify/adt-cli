@@ -119,7 +119,7 @@ describe('Codegen CLI Integration', () => {
 describe('Type Inference with Generated Schemas', () => {
   it('should infer types from person schema structure', () => {
     // This schema structure matches what codegen produces from person.xsd
-    const _personSchema = {
+    const personSchema = {
       targetNamespace: 'http://example.com/person',
       elementFormDefault: 'qualified',
       element: [{ name: 'Person', type: 'tns:PersonType' }],

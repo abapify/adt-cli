@@ -9,7 +9,7 @@
  * 5. Round-trip: parse built XML and compare
  */
 
-import { describe, it, before } from 'node:test';
+import { describe, it, before, type TestContext } from 'node:test';
 import assert from 'node:assert';
 import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -46,11 +46,18 @@ function isXmllintAvailable(): boolean {
 
 const xmllintAvailable = isXmllintAvailable();
 
+/** Result of validating a fixture against its XSD */
+export interface XsdValidationResult {
+  valid: boolean;
+  error?: string;
+  skipped?: boolean;
+}
+
 /** Validate XML file against XSD using xmllint */
 export function validateXsd(
   fixturePath: string,
   xsdName: string,
-): { valid: boolean; error?: string; skipped?: boolean } {
+): XsdValidationResult {
   if (!xmllintAvailable) {
     return { valid: true, skipped: true, error: 'xmllint not available' };
   }
@@ -111,6 +118,69 @@ export interface SchemaScenario<T> {
   fixtures: FixtureTest<T>[];
 }
 
+function assertXsdValid(xsdValidation: XsdValidationResult): void {
+  assert.ok(
+    xsdValidation.valid,
+    `XSD validation failed: ${xsdValidation.error}`,
+  );
+}
+
+function assertParsedDefined(parsed: unknown): void {
+  assert.ok(parsed !== null && parsed !== undefined);
+}
+
+function assertBuiltXml(built: string): void {
+  assert.ok(built.length > 0);
+  assert.ok(built.includes('<?xml') || built.includes('<'));
+}
+
+function assertRoundTrips<T>(reparsed: T, parsed: T): void {
+  // Compare reparsed with original parsed
+  assert.deepStrictEqual(reparsed, parsed);
+}
+
+/**
+ * Run every check for one schema fixture:
+ * 1. Validate fixture against XSD (xmllint)
+ * 2. Parse fixture XML to typed object
+ * 3. Validate parsed content
+ * 4. Build back to XML
+ * 5. Round-trip: parse built XML and compare
+ *
+ * This runs exactly the assertions `runSchemaTests` applies to one fixture.
+ * Test files can declare their own `it()` cases around it, which keeps the
+ * test declarations statically visible to test discovery tooling.
+ */
+export function checkSchemaFixture<T>(
+  scenario: SchemaScenario<T>,
+  fixture: FixtureTest<T>,
+  t?: Pick<TestContext, 'diagnostic'>,
+): void {
+  // 1. Validate against XSD first
+  const xsdValidation = validateXsd(fixture.path, scenario.xsdName);
+  if (xsdValidation.skipped) {
+    t?.diagnostic('xmllint not available - XSD validation skipped');
+  } else {
+    assertXsdValid(xsdValidation);
+  }
+
+  // 2. Load and parse
+  const xml = loadFixture(fixture.path);
+  const parsed = scenario.schema.parse(xml);
+  assertParsedDefined(parsed);
+
+  // 3. Validate parsed content
+  fixture.validate(parsed);
+
+  // 4. Build back to XML
+  const built = scenario.schema.build(parsed);
+  assertBuiltXml(built);
+
+  // 5. Parse again for round-trip
+  const reparsed = scenario.schema.parse(built);
+  assertRoundTrips(reparsed, parsed);
+}
+
 /**
  * Run fixture-driven schema tests:
  * 1. Validate fixture against XSD (xmllint)
@@ -127,11 +197,7 @@ export function runSchemaTests<T>(scenario: SchemaScenario<T>): void {
         let parsed: T;
         let built: string;
         let reparsed: T;
-        let xsdValidation: {
-          valid: boolean;
-          error?: string;
-          skipped?: boolean;
-        };
+        let xsdValidation: XsdValidationResult;
 
         before(() => {
           // 1. Validate against XSD first
@@ -170,14 +236,11 @@ export function runSchemaTests<T>(scenario: SchemaScenario<T>): void {
             t.skip('xmllint not available');
             return;
           }
-          assert.ok(
-            xsdValidation.valid,
-            `XSD validation failed: ${xsdValidation.error}`,
-          );
+          assertXsdValid(xsdValidation);
         });
 
         it('parses fixture to typed object', () => {
-          assert.ok(parsed !== null && parsed !== undefined);
+          assertParsedDefined(parsed);
         });
 
         it('validates parsed content', () => {
@@ -185,13 +248,11 @@ export function runSchemaTests<T>(scenario: SchemaScenario<T>): void {
         });
 
         it('builds back to XML', () => {
-          assert.ok(built.length > 0);
-          assert.ok(built.includes('<?xml') || built.includes('<'));
+          assertBuiltXml(built);
         });
 
         it('round-trips correctly', () => {
-          // Compare reparsed with original parsed
-          assert.deepStrictEqual(reparsed, parsed);
+          assertRoundTrips(reparsed, parsed);
         });
       });
     }

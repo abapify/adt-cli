@@ -2,9 +2,14 @@
  * Core HTTP Contract Scenarios
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { http as sessions, systeminformation } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { sessionsContract } from '../../src/adt/core/http/sessions';
 import { systeminformationContract } from '../../src/adt/core/http/systeminformation';
 
@@ -53,5 +58,22 @@ class SystemInformationScenario extends ContractScenario {
 }
 
 // Run scenarios
-runScenario(new SessionsScenario());
-runScenario(new SystemInformationScenario());
+describe('Core HTTP Contract Scenarios', () => {
+  describe('Core HTTP Sessions', () => {
+    const scenario = new SessionsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('Core HTTP System Information', () => {
+    const scenario = new SystemInformationScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

@@ -5,9 +5,14 @@
  * Content-Type: application/vnd.sap.adt.ddic.srvd.v1+xml
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { srvdSource } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { srvdSourcesContract } from '../../src/adt/ddic/srvd';
 
 class SrvdScenario extends ContractScenario {
@@ -80,4 +85,13 @@ class SrvdScenario extends ContractScenario {
   ];
 }
 
-runScenario(new SrvdScenario());
+describe('RAP Service Definition (SRVD) contract scenarios', () => {
+  describe('DDIC SRVD Sources', () => {
+    const scenario = new SrvdScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

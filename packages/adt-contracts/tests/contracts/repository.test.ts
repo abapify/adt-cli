@@ -2,9 +2,14 @@
  * Repository Information System Contract Scenarios
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { adtcore } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { searchContract } from '../../src/adt/repository/informationsystem/search';
 
 class SearchScenario extends ContractScenario {
@@ -63,4 +68,13 @@ class SearchScenario extends ContractScenario {
 }
 
 // Run scenario
-runScenario(new SearchScenario());
+describe('Repository Information System Contract Scenarios', () => {
+  describe('Repository Information System - Search', () => {
+    const scenario = new SearchScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});
