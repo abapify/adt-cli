@@ -87,6 +87,23 @@ function findDecompiler(): keyof typeof DECOMPILERS | null {
 }
 
 /**
+ * Match a name against a `*`-glob without building a RegExp: literal segments
+ * must appear in order, with backtracking so a later occurrence can satisfy
+ * the rest of the pattern. Every other character (including `?`) is literal.
+ */
+function matchesGlob(name: string, pattern: string): boolean {
+  const star = pattern.indexOf('*');
+  if (star === -1) return name === pattern;
+  const head = pattern.slice(0, star);
+  const tail = pattern.slice(star + 1);
+  if (!name.startsWith(head)) return false;
+  for (let cut = head.length; cut <= name.length; cut++) {
+    if (matchesGlob(name.slice(cut), tail)) return true;
+  }
+  return false;
+}
+
+/**
  * Decompile Java class files or JAR files
  */
 export async function decompile(
@@ -140,13 +157,7 @@ export async function decompile(
     const patterns = filter.split(',').map((p) => p.trim());
     jarFiles = jarFiles.filter((jar) => {
       const jarName = basename(jar);
-      return patterns.some((pattern) => {
-        // Escape regex metacharacters in user input before expanding the
-        // glob wildcard, to prevent regex-injection.
-        const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
-        const regex = new RegExp('^' + escaped.replaceAll(/\*/g, '.*') + '$');
-        return regex.test(jarName);
-      });
+      return patterns.some((pattern) => matchesGlob(jarName, pattern));
     });
     console.log(`🎯 Filtered to ${jarFiles.length} JARs matching: ${filter}`);
   }
