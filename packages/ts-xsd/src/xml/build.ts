@@ -28,9 +28,7 @@ import {
 } from './build-utils';
 
 /** Explicit `String()` coercion for untyped values. */
-function asText(value: unknown): string {
-  return String(value);
-}
+const asText: (value: unknown) => string = String;
 
 /**
  * Collect all namespace prefixes from a schema and its $imports chain
@@ -677,7 +675,7 @@ function buildField(
   typeName: string | undefined,
   schema: SchemaLike,
 ): void {
-  const { doc, rootSchema, prefix } = env;
+  const { rootSchema, prefix } = env;
   // Search for nested complexType
   const nestedType = typeName ? findComplexType(typeName, schema) : undefined;
 
@@ -688,31 +686,21 @@ function buildField(
   const usePrefix = elementFormDefault === 'qualified' ? prefix : undefined;
   const tagName = usePrefix ? `${usePrefix}:${elementName}` : elementName;
 
-  emitFieldChildren(
-    doc,
-    parent,
-    value,
-    tagName,
-    typeName,
-    nestedType,
-    rootSchema,
-    prefix,
-  );
+  emitFieldChildren(env, parent, value, tagName, typeName, nestedType);
 }
 
 /**
  * Emit the child element(s) of a field value: arrays become repeated siblings.
  */
 function emitFieldChildren(
-  doc: XmlDocument,
+  env: XmlBuildEnv,
   parent: XmlElement,
   value: unknown,
   tagName: string,
   typeName: string | undefined,
   nestedType: { ct: ComplexTypeLike; schema: SchemaLike } | undefined,
-  rootSchema: SchemaLike,
-  prefix: string | undefined,
 ): void {
+  const { doc, rootSchema, prefix } = env;
   const items = Array.isArray(value) ? value : [value];
   for (const item of items) {
     const child = doc.createElement(tagName);
@@ -748,7 +736,7 @@ function buildFieldWithTagName(
   parent: XmlElement,
   spec: FieldSpec,
 ): void {
-  const { doc, rootSchema, prefix } = env;
+  const { rootSchema, prefix } = env;
   const {
     value,
     tagName,
@@ -774,16 +762,7 @@ function buildFieldWithTagName(
     elementForm,
   );
 
-  emitFieldChildren(
-    doc,
-    parent,
-    value,
-    actualTagName,
-    typeName,
-    nestedType,
-    rootSchema,
-    prefix,
-  );
+  emitFieldChildren(env, parent, value, actualTagName, typeName, nestedType);
 }
 
 /**

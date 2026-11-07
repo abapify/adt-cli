@@ -151,6 +151,28 @@ function executionAbortController(): {
   };
 }
 
+/** Parse the response body according to its content type. */
+function parseResponseBody(
+  contentType: string,
+  rawText: string,
+  serializableSchema: { parse: (xml: string) => unknown } | undefined,
+): unknown {
+  // Check for JSON content (including vendor-specific types like application/vnd.sap.*+json)
+  if (
+    contentType.includes('application/json') ||
+    contentType.includes('+json')
+  ) {
+    return JSON.parse(rawText);
+  }
+  if (contentType.includes('text/') || contentType.includes('xml')) {
+    // If serializable schema available (has parse method), use it
+    if (serializableSchema && contentType.includes('xml')) {
+      return serializableSchema.parse(rawText);
+    }
+  }
+  return rawText;
+}
+
 /**
  * Create ADT HTTP adapter with Basic or SAML Authentication and plugin support
  */
@@ -474,28 +496,6 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
     }
 
     throw new Error('Session expired - SAML re-authentication required');
-  }
-
-  /** Parse the response body according to its content type. */
-  function parseResponseBody(
-    contentType: string,
-    rawText: string,
-    serializableSchema: { parse: (xml: string) => unknown } | undefined,
-  ): unknown {
-    // Check for JSON content (including vendor-specific types like application/vnd.sap.*+json)
-    if (
-      contentType.includes('application/json') ||
-      contentType.includes('+json')
-    ) {
-      return JSON.parse(rawText);
-    }
-    if (contentType.includes('text/') || contentType.includes('xml')) {
-      // If serializable schema available (has parse method), use it
-      if (serializableSchema && contentType.includes('xml')) {
-        return serializableSchema.parse(rawText);
-      }
-    }
-    return rawText;
   }
 
   /** Run response plugins in sequence; each may replace the parsed data. */

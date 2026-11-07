@@ -369,20 +369,28 @@ export function createHandler<
 
       // Metadata file.
       const metadata = definition.toMetadata(object);
-      files.push({
+      const metadataFile = {
         path: resolveMetadataFileName(definition, object, objectName, type),
         content: buildMetadataFile(metadata),
-      });
+      };
 
       // Extra files (e.g. FUGR per-function-module .func.json + .func.abap).
-      files.push(...(await serializeExtraFiles(object, definition)));
+      const extraFiles = await serializeExtraFiles(object, definition);
 
+      // Companion files skip anything already emitted above.
+      const emitted = new Set([
+        ...files.map((f) => f.path),
+        metadataFile.path,
+        ...extraFiles.map((f) => f.path),
+      ]);
       files.push(
+        metadataFile,
+        ...extraFiles,
         ...companionFiles(
           object,
           type,
           objectName,
-          new Set(files.map((f) => f.path)),
+          emitted,
           definition.suffixToSourceKey,
         ),
       );

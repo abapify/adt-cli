@@ -73,6 +73,55 @@ function parseType(type?: string): string | undefined {
   return typeMap[type.toLowerCase()] || type.toUpperCase();
 }
 
+/**
+ * Build the parenthesized filter description for the search header
+ */
+function describeFilters(params: TransportFindParams): string {
+  const filterParts: string[] = [];
+  if (params.user !== '*') filterParts.push(`user=${params.user}`);
+  if (params.trfunction !== '*') filterParts.push(`type=${params.trfunction}`);
+  return filterParts.length > 0 ? ` (${filterParts.join(', ')})` : '';
+}
+
+/**
+ * Group the displayed transports by status and print each non-empty group
+ */
+function printTransportGroups(displayTransports: CtsReqHeader[]): void {
+  const groups: Array<{ icon: string; label: string; items: CtsReqHeader[] }> =
+    [
+      {
+        icon: '📂',
+        label: 'Modifiable',
+        items: displayTransports.filter(
+          (t: CtsReqHeader) => t.TRSTATUS === 'D',
+        ),
+      },
+      {
+        icon: '📁',
+        label: 'Released',
+        items: displayTransports.filter(
+          (t: CtsReqHeader) => t.TRSTATUS === 'R',
+        ),
+      },
+      {
+        icon: '📋',
+        label: 'Other',
+        items: displayTransports.filter(
+          (t: CtsReqHeader) => t.TRSTATUS !== 'D' && t.TRSTATUS !== 'R',
+        ),
+      },
+    ];
+
+  for (const { icon, label, items } of groups) {
+    if (items.length > 0) {
+      console.log(`\n${icon} ${label} (${items.length})`);
+      items.forEach((tr: CtsReqHeader, i: number) =>
+        formatTransport(tr, i, items.length),
+      );
+    }
+  }
+}
+
 export const ctsSearchCommand = new Command('search')
   .description('Search transport requests')
   .option('-u, --user <user>', 'Filter by owner (* for all)', '*')
@@ -94,15 +143,7 @@ export const ctsSearchCommand = new Command('search')
         trfunction: parseType(options.type) || '*',
       };
 
-      // Build filter description for output
-      const filterParts: string[] = [];
-      if (params.user !== '*') filterParts.push(`user=${params.user}`);
-      if (params.trfunction !== '*')
-        filterParts.push(`type=${params.trfunction}`);
-
-      const filterDesc =
-        filterParts.length > 0 ? ` (${filterParts.join(', ')})` : '';
-      console.log(`🔍 Searching transports${filterDesc}...`);
+      console.log(`🔍 Searching transports${describeFilters(params)}...`);
 
       // Call the API via adt.cts.transports.find
       const result = await client.adt.cts.transports.find(params);
@@ -118,36 +159,7 @@ export const ctsSearchCommand = new Command('search')
         console.log('\n📭 No transports found matching the criteria');
       } else {
         // Group by status for display
-        const modifiable = displayTransports.filter(
-          (t: CtsReqHeader) => t.TRSTATUS === 'D',
-        );
-        const released = displayTransports.filter(
-          (t: CtsReqHeader) => t.TRSTATUS === 'R',
-        );
-        const other = displayTransports.filter(
-          (t: CtsReqHeader) => t.TRSTATUS !== 'D' && t.TRSTATUS !== 'R',
-        );
-
-        if (modifiable.length > 0) {
-          console.log(`\n📂 Modifiable (${modifiable.length})`);
-          modifiable.forEach((tr: CtsReqHeader, i: number) =>
-            formatTransport(tr, i, modifiable.length),
-          );
-        }
-
-        if (released.length > 0) {
-          console.log(`\n📁 Released (${released.length})`);
-          released.forEach((tr: CtsReqHeader, i: number) =>
-            formatTransport(tr, i, released.length),
-          );
-        }
-
-        if (other.length > 0) {
-          console.log(`\n📋 Other (${other.length})`);
-          other.forEach((tr: CtsReqHeader, i: number) =>
-            formatTransport(tr, i, other.length),
-          );
-        }
+        printTransportGroups(displayTransports);
 
         if (transports.length > maxResults) {
           console.log(

@@ -4,7 +4,7 @@
  * Entry point for the TUI application.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useDebugValue } from 'react';
 import { Navigator } from './Navigator';
 import type { FetchFn } from './lib/types';
 import type { Router } from './lib/router';
@@ -29,7 +29,11 @@ export function App({
   router: _router,
   systemName,
 }: Readonly<AppProps>): React.ReactNode {
-  const [_resizeKey, setResizeKey] = useState(0);
+  // The counter value only exists to force a re-render on resize; reading it
+  // via useDebugValue keeps the state consumed without touching the render
+  // tree (useDebugValue is a no-op outside React DevTools).
+  const [resizeKey, setResizeKey] = useState(0);
+  useDebugValue(resizeKey);
 
   // Handle terminal resize - just trigger re-render, don't clear
   useEffect(() => {

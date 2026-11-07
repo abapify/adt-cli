@@ -1,7 +1,5 @@
 import type { MethodBoundary, StripResult } from './types';
 
-type SourceObjectType = string;
-
 /** `true` for a `CLASS … DEFINITION …` header line (already upper-cased). */
 function isClassDefinitionLine(upper: string): boolean {
   return (
@@ -89,7 +87,7 @@ function stripFunctionSource(source: string): StripResult {
 
 export function stripToPublicApi(
   source: string,
-  objectType: SourceObjectType,
+  objectType: string,
 ): StripResult {
   const normalized = objectType.toUpperCase();
 

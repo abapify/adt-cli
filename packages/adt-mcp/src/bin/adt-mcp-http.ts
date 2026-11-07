@@ -113,8 +113,18 @@ function printUsage(): void {
 const FLAG_HANDLERS = new Map<string, FlagHandler>([
   ['--port', setNumber('port')],
   ['-p', setNumber('port')],
-  ['--host', (out, next) => void (out.host = next())],
-  ['-H', (out, next) => void (out.host = next())],
+  [
+    '--host',
+    (out, next) => {
+      out.host = next();
+    },
+  ],
+  [
+    '-H',
+    (out, next) => {
+      out.host = next();
+    },
+  ],
   ['--ttl', setNumber('ttlMs')],
   ['--allowed-host', appendValue('allowedHosts')],
   [

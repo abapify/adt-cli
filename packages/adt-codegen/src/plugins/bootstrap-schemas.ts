@@ -117,13 +117,12 @@ function collectCollectionSchemas(
   if (!coll.accepts || !Array.isArray(coll.accepts)) return;
   for (const contentType of coll.accepts) {
     // Check if it's a schema type (+json or +xml)
-    const format: SchemaInfo['format'] | undefined = contentType.includes(
-      '+json',
-    )
-      ? 'json'
-      : contentType.includes('+xml')
-        ? 'xml'
-        : undefined;
+    let format: SchemaInfo['format'] | undefined;
+    if (contentType.includes('+json')) {
+      format = 'json';
+    } else if (contentType.includes('+xml')) {
+      format = 'xml';
+    }
     if (format) {
       schemas.set(contentType, {
         contentType,
