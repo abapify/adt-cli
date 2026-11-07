@@ -13,29 +13,36 @@
 
 /** Header common to every AFF/gCTS metadata JSON file. */
 export interface GctsHeader {
-  /** AFF format version (e.g. `1.0`). */
-  formatVersion: string;
+  /** Legacy header version; current AFF schemas put formatVersion at the top level. */
+  formatVersion?: string;
   /** Description of the object. */
   description?: string;
   /** Master language (ISO code, lowercase — e.g. `en`). */
   originalLanguage?: string;
   /** ABAP language version (e.g. `standard`, `cloudDevelopment`). */
   abapLanguageVersion?: string;
-  /** Indicates whether the object source is Unicode. */
-  [key: string]: unknown;
 }
 
 /**
  * Top-level shape of an AFF/gCTS metadata JSON file.
  *
  * Concrete handlers tighten this with per-type payload shapes.
+ *
+ * A format version is mandatory: either the current top-level `formatVersion`
+ * or the legacy `header.formatVersion`.
  */
-export interface GctsMetadata<_TPayload extends object = object> {
-  /** Format header (mandatory on every file). */
-  header: GctsHeader;
-  /** Type-specific payload. Extended per ABAP object type. */
-  [payloadKey: string]: unknown;
-}
+export type GctsMetadata<_TPayload extends object = object> =
+  | {
+      /** Current AFF format version. */
+      formatVersion: string;
+      /** Format header (mandatory on every file). */
+      header: GctsHeader;
+    }
+  | {
+      formatVersion?: string;
+      /** Legacy form: the version lives in the header. */
+      header: GctsHeader & { formatVersion: string };
+    };
 
 /** Convenience helper for concrete metadata shapes. */
 export type WithHeader<TPayload extends object> = {

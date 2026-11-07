@@ -26,8 +26,7 @@ function pickObjectReferences(raw: unknown): ObjRef[] {
   const root =
     (obj.objectReferences as Record<string, unknown> | undefined) ?? obj;
   const list = (root?.objectReference ?? root?.object ?? []) as
-    | Record<string, unknown>
-    | Record<string, unknown>[];
+    Record<string, unknown> | Record<string, unknown>[];
   const arr = Array.isArray(list) ? list : [list];
   return arr.map((r) => ({
     name: r.name as string | undefined,

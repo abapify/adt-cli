@@ -8,6 +8,7 @@
 
 import { enqu } from '../../../schemas/generated';
 import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
+import type { InferValuesType } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type LockObjectLike = {
@@ -131,17 +132,7 @@ function parseLockObjectFromAbapGit({
   DD25V,
   DD26V_TABLE,
   DD27P_TABLE,
-}: {
-  DD25V?: {
-    VIEWNAME?: string;
-    DDTEXT?: string;
-    DDLANGUAGE?: string;
-    ROOTTAB?: string;
-    ROOTFIELD?: string;
-  };
-  DD26V_TABLE?: { item?: unknown };
-  DD27P_TABLE?: { item?: unknown };
-}): { name: string } & Record<string, unknown> {
+}: InferValuesType<typeof enqu>): { name: string } & Record<string, unknown> {
   const tableItems = normalizeItems(DD26V_TABLE?.item);
   const paramItems = normalizeItems(DD27P_TABLE?.item);
   return {

@@ -44,6 +44,10 @@ export function App({
   }, []);
 
   return (
-    <Navigator startUrl={startUrl} fetch={fetch} systemName={systemName} />
+    <Navigator
+      startUrl={startUrl}
+      fetch={fetch}
+      systemName={systemName}
+    />
   );
 }

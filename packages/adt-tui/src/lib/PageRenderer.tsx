@@ -37,7 +37,10 @@ function MenuItemRow({
       {item.icon && `${item.icon} `}
       {item.label}
       {item.status && (
-        <Text color={item.status.color} dimColor={!isSelected}>
+        <Text
+          color={item.status.color}
+          dimColor={!isSelected}
+        >
           {' '}
           [{item.status.text}]
         </Text>
@@ -83,7 +86,10 @@ export function PageRenderer({
   });
 
   return (
-    <Box flexDirection="column" padding={1}>
+    <Box
+      flexDirection="column"
+      padding={1}
+    >
       {/* Header */}
       <Box
         borderStyle="round"
@@ -91,7 +97,10 @@ export function PageRenderer({
         paddingX={2}
         marginBottom={1}
       >
-        <Text bold color={result.color || 'cyan'}>
+        <Text
+          bold
+          color={result.color || 'cyan'}
+        >
           {result.icon && `${result.icon} `}
           {result.title}
         </Text>
@@ -99,7 +108,10 @@ export function PageRenderer({
       </Box>
 
       {/* Content */}
-      <Box flexDirection="column" marginBottom={1}>
+      <Box
+        flexDirection="column"
+        marginBottom={1}
+      >
         {result.content}
       </Box>
 

@@ -66,16 +66,20 @@ export async function resolveDestinationClient(
       'A destination requires HTTP shared-service mode with an MCP session.',
     );
   }
-  const existing = ctx.destinationRegistry.get(mcpSessionId, args.destination);
+  const destinationKey = args.destination;
+  if (typeof destinationKey !== 'string' || !destinationKey) {
+    throw new Error('A destination key is required.');
+  }
+  const existing = ctx.destinationRegistry.get(mcpSessionId, destinationKey);
   const destination = await ctx.destinationRegistry.getOrCreate(
     mcpSessionId,
-    args.destination,
+    destinationKey,
     ctx.requestIdentity?.(extra) ?? { principal: 'unknown' },
   );
   return {
     client: destination.client,
     mcpSessionId,
-    destination: args.destination,
+    destination: destinationKey,
     alreadyConnected: existing !== undefined,
   };
 }

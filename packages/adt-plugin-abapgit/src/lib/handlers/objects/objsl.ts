@@ -39,10 +39,11 @@ type GenericObjslObject = {
   tables?: Record<string, unknown>;
 };
 
-function createGenericObjslHandler<
-  TSchema extends AbapGitSchema<unknown, unknown>,
->(type: string, schema: TSchema) {
-  return createHandler<GenericObjslObject, TSchema>(type, {
+function createGenericObjslHandler(
+  type: string,
+  schema: AbapGitSchema<unknown, Record<string, unknown>>,
+) {
+  return createHandler<GenericObjslObject, typeof schema>(type, {
     schema,
     version: 'v1.0.0',
     serializer: `LCL_OBJECT_${type}`,
@@ -55,7 +56,7 @@ function createGenericObjslHandler<
 
     fromAbapGit: (values) => ({
       name: '',
-      tables: { ...(values as Record<string, unknown>) },
+      tables: { ...values },
     }),
   });
 }

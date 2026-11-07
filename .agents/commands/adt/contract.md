@@ -92,14 +92,15 @@ expect(contract.responses[200]).toBe(mySchema);
    - Request/response content types
 
 **Common patterns:**
-| Operation | Method | Path | Content-Type |
-|-----------|--------|------|--------------|
-| Get single | GET | `/{resource}/{id}` | application/xml |
-| List | GET | `/{resource}` | application/xml |
-| Create | POST | `/{resource}` | application/xml |
-| Update | PUT | `/{resource}/{id}` | application/xml |
-| Delete | DELETE | `/{resource}/{id}` | - |
-| Action | POST | `/{resource}/{id}/{action}` | varies |
+
+| Operation  | Method | Path                        | Content-Type    |
+| ---------- | ------ | --------------------------- | --------------- |
+| Get single | GET    | `/{resource}/{id}`          | application/xml |
+| List       | GET    | `/{resource}`               | application/xml |
+| Create     | POST   | `/{resource}`               | application/xml |
+| Update     | PUT    | `/{resource}/{id}`          | application/xml |
+| Delete     | DELETE | `/{resource}/{id}`          | -               |
+| Action     | POST   | `/{resource}/{id}/{action}` | varies          |
 
 ### Step 2: Create Contract File
 

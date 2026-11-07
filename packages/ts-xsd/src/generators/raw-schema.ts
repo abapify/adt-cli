@@ -354,8 +354,7 @@ function getSchemaImports(
   // Handle xs:import (only if $imports is enabled)
   if (options.$imports) {
     const xsdImports = schema.import as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     if (xsdImports) {
       for (const imp of xsdImports) {
         if (imp.schemaLocation) {
@@ -374,8 +373,7 @@ function getSchemaImports(
   // Handle xs:include (only if $includes is enabled)
   if (options.$includes) {
     const xsdIncludes = schema.include as
-      | Array<{ schemaLocation?: string }>
-      | undefined;
+      Array<{ schemaLocation?: string }> | undefined;
     if (xsdIncludes) {
       for (const inc of xsdIncludes) {
         if (inc.schemaLocation) {

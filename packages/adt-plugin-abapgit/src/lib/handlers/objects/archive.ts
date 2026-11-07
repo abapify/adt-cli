@@ -24,10 +24,11 @@ type ArchiveValues = {
   };
 };
 
-export function createArchiveHandler<
-  TSchema extends AbapGitSchema<unknown, ArchiveValues>,
->(type: string, schema: TSchema) {
-  return createHandler<ArchiveLike, TSchema>(type, {
+export function createArchiveHandler(
+  type: string,
+  schema: AbapGitSchema<unknown, ArchiveValues>,
+) {
+  return createHandler<ArchiveLike, typeof schema>(type, {
     schema,
     version: 'v1.0.0',
     serializer: `LCL_OBJECT_${type}`,

@@ -382,9 +382,7 @@ describe('ClassSpec', () => {
 
 describe('ClassFactory', () => {
   it('should create Class from ADT object', () => {
-    const adtObject = {
-      /* ... */
-    };
+    const adtObject = {/* ... */};
     const classObj = factory.createClass(adtObject);
     expect(classObj.kind).toBe('Class');
     expect(classObj.spec).toBeInstanceOf(ClassSpec);

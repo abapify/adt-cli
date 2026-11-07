@@ -7,7 +7,7 @@
 export function shouldIncludeSource(
   source: string | undefined,
   suppliedSource: string | undefined,
-): boolean {
+): source is string {
   if (source === undefined) return false;
   return suppliedSource !== undefined || source !== '';
 }

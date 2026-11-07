@@ -59,11 +59,7 @@ interface ClassSpec {
 
 interface ClassInclude {
   includeType:
-    | 'definitions'
-    | 'implementations'
-    | 'macros'
-    | 'testclasses'
-    | 'main';
+    'definitions' | 'implementations' | 'macros' | 'testclasses' | 'main';
   sourceUri?: string; // Link to source content
   content?: LazyContent; // Lazy-loaded source
 }

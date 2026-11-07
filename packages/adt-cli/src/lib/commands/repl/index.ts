@@ -19,11 +19,7 @@ async function createFetchFn() {
     options?: { method?: string; headers?: Record<string, string> },
   ): Promise<string> => {
     const method = (options?.method || 'GET') as
-      | 'GET'
-      | 'POST'
-      | 'PUT'
-      | 'PATCH'
-      | 'DELETE';
+      'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     const response = await adtClient.fetch(url, {
       method,
       headers: options?.headers || { Accept: '*/*' },

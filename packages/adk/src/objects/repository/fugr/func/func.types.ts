@@ -16,11 +16,7 @@ export type FunctionModuleProcessingType = 'normal' | 'rfc' | 'update';
  * Function module release state
  */
 export type FunctionModuleReleaseState =
-  | 'notReleased'
-  | 'internal'
-  | 'external'
-  | 'obsolete'
-  | 'markedForRelease';
+  'notReleased' | 'internal' | 'external' | 'obsolete' | 'markedForRelease';
 
 /**
  * ABAP Function Module interface

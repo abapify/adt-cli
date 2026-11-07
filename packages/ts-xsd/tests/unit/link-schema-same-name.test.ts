@@ -29,8 +29,7 @@ function simulateLinkSchemaImports(
   visited.add(schemaKey);
 
   const includes = (schema as Record<string, unknown>).include as
-    | Array<{ schemaLocation?: string }>
-    | undefined;
+    Array<{ schemaLocation?: string }> | undefined;
 
   const result = { ...schema };
 

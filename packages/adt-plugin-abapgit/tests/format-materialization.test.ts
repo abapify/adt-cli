@@ -115,10 +115,11 @@ describe('abapGit format materialization', () => {
     });
 
     assert.deepStrictEqual(
-      result.files.map(({ path, role, sourceComponent }) => ({
-        path,
-        role,
-        sourceComponent,
+      result.files.map((file) => ({
+        path: file.path,
+        role: file.role,
+        sourceComponent:
+          file.role === 'source' ? file.sourceComponent : undefined,
       })),
       [
         {
@@ -167,10 +168,11 @@ describe('abapGit format materialization', () => {
     assert.deepStrictEqual(
       result.files
         .filter(({ path }) => path.includes('.fugr.zfm_'))
-        .map(({ path, sourceComponent, content }) => ({
-          path,
-          sourceComponent,
-          content,
+        .map((file) => ({
+          path: file.path,
+          sourceComponent:
+            file.role === 'source' ? file.sourceComponent : undefined,
+          content: file.content,
         })),
       [
         {
@@ -218,10 +220,11 @@ describe('abapGit format materialization', () => {
     });
 
     assert.deepStrictEqual(
-      result.files.map(({ path, role, sourceComponent }) => ({
-        path,
-        role,
-        sourceComponent,
+      result.files.map((file) => ({
+        path: file.path,
+        role: file.role,
+        sourceComponent:
+          file.role === 'source' ? file.sourceComponent : undefined,
       })),
       [
         {

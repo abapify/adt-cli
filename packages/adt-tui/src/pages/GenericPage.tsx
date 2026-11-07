@@ -55,7 +55,10 @@ export function genericPage({ url, response }: PageProps): PageResult {
   const content = (
     <Box flexDirection="column">
       <Text dimColor>URL: {url}</Text>
-      <Box marginTop={1} flexDirection="column">
+      <Box
+        marginTop={1}
+        flexDirection="column"
+      >
         {summary.length > 0 ? (
           summary.map((item, i) => (
             <Text key={i}>

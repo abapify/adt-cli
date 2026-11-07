@@ -16,10 +16,11 @@ describe('DSFI AFF handler', () => {
       scalarFunctionName: 'Z_AFF_DSFD',
       engine: 'analyticalEngine' as const,
     };
-    const files = await handler.serialize({
+    const object = {
       name: 'Z_AFF_DSFI',
       getSource: async () => definition,
-    });
+    };
+    const files = await handler.serialize(object);
     assert.deepEqual(
       files.map((file) => file.path),
       ['z_aff_dsfi.dsfi.json'],

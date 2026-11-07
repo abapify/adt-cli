@@ -91,7 +91,11 @@ for (const relativeTarget of [false, true]) {
       importTarget,
       context('prefix'),
     );
-    assert.equal(imported.success, true, imported.errors?.join(', '));
+    assert.equal(
+      imported.success,
+      true,
+      imported.errors?.join(', ') ?? 'Import failed',
+    );
     assert.equal(imported.filesCreated.length, 2);
     const removed = await abapGitPlugin.format.delete!(
       owner,
@@ -136,7 +140,11 @@ for (const relativeTarget of [false, true]) {
           importTarget,
           context('prefix'),
         );
-        assert.equal(imported.success, true, imported.errors?.join(', '));
+        assert.equal(
+          imported.success,
+          true,
+          imported.errors?.join(', ') ?? 'Import failed',
+        );
         assert.equal(imported.filesCreated.length, 2);
         importedOwners.push(name);
 

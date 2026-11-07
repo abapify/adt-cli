@@ -99,7 +99,7 @@ export function* walkAnnotations(file: CdsSourceFile): Iterable<Annotation> {
     for (const a of getAnnotations(def)) yield a;
     // Member pools that can carry annotations: fields/members (whichever the
     // definition supports), parameters, and extension-level associations.
-    const pools: ReadonlyArray<readonly unknown[]> = [];
+    const pools: Array<readonly unknown[]> = [];
     if (hasFields(def)) pools.push(def.members);
     if (hasMembers(def)) pools.push(def.members);
     if (def.kind === 'aspect') pools.push(def.members);
@@ -231,7 +231,7 @@ function* walkJoinSource(
   owner: ViewEntityDefinition,
   source: JoinSource,
 ): Iterable<{ owner: ViewEntityDefinition; join: JoinClause }> {
-  if (source.kind !== 'joinGroup') return;
+  if (!('kind' in source) || source.kind !== 'joinGroup') return;
   yield* walkJoinSource(owner, source.source);
   yield* walkJoinChain(owner, source.joins);
 }
