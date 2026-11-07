@@ -99,8 +99,14 @@ function checkBodySchema(
   expect(contract.body).toBe(schema);
 }
 
-async function checkBodyFixtureParses(
-  schema: BodySchema,
+/** Minimal parse surface shared by body and response schemas. */
+interface ParseableSchema {
+  parse: (xml: string) => unknown;
+}
+
+/** Assert that a fixture parses to something (shared by body/response). */
+async function checkFixtureParses(
+  schema: ParseableSchema,
   fixture: FixtureHandle,
 ): Promise<void> {
   const xml = await fixture.load();
@@ -129,15 +135,6 @@ function checkResponseSchema(
   expect(contract.responses[response.status]).toBe(response.schema);
 }
 
-async function checkResponseFixtureParses(
-  schema: ResponseSchema,
-  fixture: FixtureHandle,
-): Promise<void> {
-  const xml = await fixture.load();
-  const parsed = schema.parse(xml);
-  expect(parsed).toBeDefined();
-}
-
 /** Check the optional `body` part of an operation. */
 async function checkBodyPart(
   op: ContractOperation,
@@ -152,7 +149,7 @@ async function checkBodyPart(
   const bodyFixture = body.fixture;
   if (!bodyFixture) return;
 
-  await checkBodyFixtureParses(bodySchema, bodyFixture);
+  await checkFixtureParses(bodySchema, bodyFixture);
   await checkBodyFixtureRoundTrips(bodySchema, bodyFixture);
 }
 
@@ -170,7 +167,7 @@ async function checkResponsePart(
   const responseFixture = response.fixture;
   if (!responseFixture) return;
 
-  await checkResponseFixtureParses(responseSchema, responseFixture);
+  await checkFixtureParses(responseSchema, responseFixture);
 }
 
 /**
@@ -246,7 +243,7 @@ function registerBodyChecks(
   if (!bodyFixture) return;
 
   it('body schema parses fixture', async () => {
-    await checkBodyFixtureParses(body.schema as BodySchema, bodyFixture);
+    await checkFixtureParses(body.schema as BodySchema, bodyFixture);
   });
 
   it('body schema round-trips', async () => {
@@ -271,7 +268,7 @@ function registerResponseChecks(
   if (!responseFixture) return;
 
   it('response schema parses fixture', async () => {
-    await checkResponseFixtureParses(
+    await checkFixtureParses(
       response.schema as ResponseSchema,
       responseFixture,
     );
