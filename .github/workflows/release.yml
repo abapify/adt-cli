@@ -110,14 +110,14 @@ jobs:
 
       - name: Version, changelog & tag (dry run)
         if: ${{ inputs.dry_run }}
-        run: ./node_modules/.bin/nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --no-cloud --dry-run ${{ inputs.first_release && '--first-release' || '' }}
+        run: ./node_modules/.bin/nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --dry-run ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Version, changelog & tag
         if: ${{ !inputs.dry_run }}
-        run: ./node_modules/.bin/nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --no-cloud --skip-publish ${{ inputs.first_release && '--first-release' || '' }}
+        run: ./node_modules/.bin/nx release ${{ inputs.specifier != 'auto' && inputs.specifier || '' }} --verbose --skip-publish ${{ inputs.first_release && '--first-release' || '' }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

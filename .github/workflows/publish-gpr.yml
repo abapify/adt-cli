@@ -44,7 +44,7 @@ jobs:
         run: ./node_modules/.bin/nx run-many --target=build --all --no-cloud
 
       - name: Publish packages
-        run: ./node_modules/.bin/nx release publish --no-cloud
+        run: ./node_modules/.bin/nx release publish
         shell: bash
         env:
           NPM_CONFIG_ACCESS: public
