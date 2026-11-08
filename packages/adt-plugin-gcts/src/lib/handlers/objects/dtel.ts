@@ -34,7 +34,7 @@ function buildDataTypeInformation(
   }
   if (data.dataType) {
     if (typeof data.dataTypeLength !== 'number') {
-      throw new Error('AFF predefined DDIC type requires a length');
+      throw new TypeError('AFF predefined DDIC type requires a length');
     }
     const predefinedType: NonNullable<
       DtelAff['dataTypeInformation']['predefinedType']

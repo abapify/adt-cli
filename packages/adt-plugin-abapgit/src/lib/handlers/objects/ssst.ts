@@ -13,9 +13,9 @@ type SmartFormStyleLike = {
   name: string;
   masterLanguage?: string;
   fontFamily?: string;
-  ssfparas?: SmartFormStyleValues['SSFPARAS'];
-  ssfstrings?: SmartFormStyleValues['SSFSTRINGS'];
-  stxstab?: SmartFormStyleValues['STXSTAB'];
+  ssfparas: SmartFormStyleValues['SSFPARAS'];
+  ssfstrings: SmartFormStyleValues['SSFSTRINGS'];
+  stxstab: SmartFormStyleValues['STXSTAB'];
 };
 
 export const smartFormStyleHandler = createHandler<
