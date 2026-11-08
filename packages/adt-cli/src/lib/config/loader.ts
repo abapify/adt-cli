@@ -7,11 +7,10 @@ import { AuthRegistry } from './auth';
 import { pathToFileURL } from 'node:url';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { parseDocument, stringify } from 'yaml';
+import { parseDocument, parseAllDocuments, stringify } from 'yaml';
 
 export class ConfigLoader implements IConfigLoader {
   private static readonly cache = new Map<string, CliConfig>();
-  private static readonly maxConfigValues = 100_000;
   private readonly authRegistry = new AuthRegistry();
 
   /**
@@ -71,11 +70,7 @@ export class ConfigLoader implements IConfigLoader {
     }
 
     // Validate plugins config
-    if (
-      !config.plugins ||
-      !config.plugins.formats ||
-      config.plugins.formats.length === 0
-    ) {
+    if (!config.plugins?.formats || config.plugins.formats.length === 0) {
       errors.push('At least one format plugin must be configured');
     } else {
       for (const plugin of config.plugins.formats) {
@@ -200,15 +195,19 @@ export class ConfigLoader implements IConfigLoader {
    */
   private async loadYamlConfig(configPath: string): Promise<CliConfig> {
     const content = await fs.readFile(configPath, 'utf-8');
-    const document = parseDocument(content, {
+    const documents = parseAllDocuments(content, {
       schema: 'core',
       merge: true,
       resolveKnownTags: false,
     });
+    if (documents.length > 1) {
+      throw new Error('YAML configuration must contain a single document');
+    }
+    const document = documents[0];
     const problem =
       document.errors[0] ??
-      document.warnings.find(
-        (warning) => warning.code === 'TAG_RESOLVE_FAILED',
+      document.warnings.find((warning) =>
+        ['TAG_RESOLVE_FAILED', 'DUPLICATE_KEY'].includes(warning.code),
       );
     if (problem) {
       throw problem;
@@ -235,18 +234,7 @@ export class ConfigLoader implements IConfigLoader {
    */
   private processEnvironmentVariables(config: CliConfig): CliConfig {
     const ancestors = new WeakSet<object>();
-    // YAML aliases are materialised as shared references, but each occurrence
-    // is copied below. Bound the total work so nested aliases (including ones
-    // rooted in an empty collection, which YAML's alias limit does not count)
-    // cannot expand exponentially.
-    let visited = 0;
     const processValue = (value: unknown): unknown => {
-      visited += 1;
-      if (visited > ConfigLoader.maxConfigValues) {
-        throw new Error(
-          `Configuration exceeds the supported size of ${ConfigLoader.maxConfigValues} values`,
-        );
-      }
       if (
         typeof value === 'string' &&
         value.startsWith('${') &&

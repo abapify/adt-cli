@@ -91,27 +91,40 @@ export function* walkDefinitions(file: CdsSourceFile): Iterable<CdsDefinition> {
 }
 
 /**
+ * Member pools that can carry annotations: fields/members (whichever the
+ * definition supports), parameters, and extension-level associations.
+ */
+function annotationMemberPools(
+  def: CdsDefinition,
+): ReadonlyArray<readonly unknown[]> {
+  const pools: Array<readonly unknown[]> = [];
+  if (hasFields(def)) pools.push(def.members);
+  if (hasMembers(def)) pools.push(def.members);
+  if (def.kind === 'aspect') pools.push(def.members);
+  if (hasParameters(def)) pools.push(def.parameters);
+  if (def.kind === 'extension') pools.push(def.associations);
+  return pools;
+}
+
+/** Yield every annotation carried by a definition's members. */
+function* memberAnnotations(def: CdsDefinition): Iterable<Annotation> {
+  for (const pool of annotationMemberPools(def)) {
+    for (const m of pool) {
+      if (typeof m === 'object' && m !== null && 'annotations' in m) {
+        for (const a of m.annotations as Annotation[]) yield a;
+      }
+    }
+  }
+}
+
+/**
  * Yield every annotation attached anywhere in the AST (definitions,
  * elements/fields, parameters, associations).
  */
 export function* walkAnnotations(file: CdsSourceFile): Iterable<Annotation> {
   for (const def of walkDefinitions(file)) {
     for (const a of getAnnotations(def)) yield a;
-    // Member pools that can carry annotations: fields/members (whichever the
-    // definition supports), parameters, and extension-level associations.
-    const pools: Array<readonly unknown[]> = [];
-    if (hasFields(def)) pools.push(def.members);
-    if (hasMembers(def)) pools.push(def.members);
-    if (def.kind === 'aspect') pools.push(def.members);
-    if (hasParameters(def)) pools.push(def.parameters);
-    if (def.kind === 'extension') pools.push(def.associations);
-    for (const pool of pools) {
-      for (const m of pool) {
-        if (typeof m === 'object' && m !== null && 'annotations' in m) {
-          for (const a of m.annotations as Annotation[]) yield a;
-        }
-      }
-    }
+    yield* memberAnnotations(def);
   }
 }
 
@@ -231,7 +244,7 @@ function* walkJoinSource(
   owner: ViewEntityDefinition,
   source: JoinSource,
 ): Iterable<{ owner: ViewEntityDefinition; join: JoinClause }> {
-  if (!('kind' in source) || source.kind !== 'joinGroup') return;
+  if (source.kind !== 'joinGroup') return;
   yield* walkJoinSource(owner, source.source);
   yield* walkJoinChain(owner, source.joins);
 }

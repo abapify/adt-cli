@@ -29,11 +29,11 @@ type RawXmlObject = {
   raw?: Record<string, unknown>;
 };
 
-function createRawXmlHandler(
+function createRawXmlHandler<TSchema extends AbapGitSchema<unknown, unknown>>(
   type: string,
-  schema: AbapGitSchema<unknown, Record<string, unknown>>,
+  schema: TSchema,
 ) {
-  return createHandler<RawXmlObject, typeof schema>(type, {
+  return createHandler<RawXmlObject, TSchema>(type, {
     schema,
     version: 'v1.0.0',
     serializer: `LCL_OBJECT_${type}`,
@@ -41,27 +41,27 @@ function createRawXmlHandler(
 
     toAbapGit: (raw) => {
       const obj = unwrapData<RawXmlObject>(raw);
-      return { ...(obj.raw ?? {}) };
+      return { ...obj.raw };
     },
 
     fromAbapGit: (values) => ({
       name: '',
-      raw: { ...values },
+      raw: { ...(values as Record<string, unknown>) },
     }),
 
-    serialize: async (obj, ctx) => {
+    serialize: (obj, ctx) => {
       const xml = schema.build({
-        ...(obj.raw ?? {}),
+        ...obj.raw,
         version: 'v1.0.0',
         serializer: `LCL_OBJECT_${type}`,
         serializer_version: 'v1.0.0',
-      });
-      return [
+      } as never);
+      return Promise.resolve([
         ctx.createFile(
           `${ctx.getObjectName(obj)}.${ctx.fileExtension}.xml`,
           formatAbapGitXml(xml),
         ),
-      ];
+      ]);
     },
   });
 }

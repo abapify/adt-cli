@@ -19,9 +19,6 @@ import { gctsFilename, splitSourceKey } from '../format/filename';
 import { payloadOf } from '../aff/generic';
 import type { GctsMetadata } from '../format/types';
 
-export type AbapObjectType = string;
-type HandlerObject = Pick<AdkObject, 'name'>;
-
 export type AdkObjectClass<T extends AdkObject = AdkObject> = {
   new (...args: any[]): T;
   readonly kind: AdkKind;
@@ -63,7 +60,7 @@ export interface GctsExtraFile {
  * ADK object to the JSON metadata shape for the target type.
  */
 export interface GctsHandlerDefinition<
-  T extends HandlerObject,
+  T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
 > {
   /** Map ADK object → JSON metadata payload (including the required `header`). */
@@ -95,9 +92,9 @@ export interface GctsHandlerDefinition<
 
 /** Runtime shape of a gCTS handler after `createHandler` processing. */
 export interface GctsHandler<
-  T extends HandlerObject = AdkObject,
+  T extends AdkObject = AdkObject,
 > extends FormatHandler {
-  readonly type: AbapObjectType;
+  readonly type: string;
   readonly fileExtension: string;
   readonly schema: {
     parse(raw: string): unknown;
@@ -108,20 +105,20 @@ export interface GctsHandler<
   setSources?(object: T, sources: Record<string, string>): void;
 }
 
-const handlerRegistry = new Map<AbapObjectType, GctsHandler<HandlerObject>>();
+const handlerRegistry = new Map<string, GctsHandler>();
 
 /** Look up a handler (full-type first, then main-type fallback). */
-export function getHandler(type: AbapObjectType): GctsHandler | undefined {
+export function getHandler(type: string): GctsHandler | undefined {
   return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
 /** `true` iff the given object type has a registered handler. */
-export function isSupported(type: AbapObjectType): boolean {
+export function isSupported(type: string): boolean {
   return handlerRegistry.has(type) || handlerRegistry.has(getMainType(type));
 }
 
 /** Snapshot of all registered object types. */
-export function getSupportedTypes(): AbapObjectType[] {
+export function getSupportedTypes(): string[] {
   return [...handlerRegistry.keys()];
 }
 
@@ -245,6 +242,77 @@ function companionFiles(
  * the static `kind`) or an explicit type string (for types without an ADK
  * class, e.g. DOMA/DTEL).
  */
+async function resolveSource(entry: GctsSourceEntry): Promise<string> {
+  const raw =
+    typeof entry.content === 'function' ? entry.content() : entry.content;
+  return await raw;
+}
+
+/** Resolve the metadata file name for an object (custom hook or default). */
+function resolveMetadataFileName<T extends AdkObject, M extends GctsMetadata>(
+  definition: GctsHandlerDefinition<T, M>,
+  object: T,
+  objectName: string,
+  type: string,
+): string {
+  if (typeof definition.metadataFileName === 'function') {
+    return definition.metadataFileName(object);
+  }
+  return (
+    definition.metadataFileName ?? gctsFilename(objectName, type, 'metadata')
+  );
+}
+
+/**
+ * Definition source entries → serialized files. Skips empty sources;
+ * entries are resolved through the lazy `GctsSourceEntry` contract.
+ */
+async function serializeSourceFiles<
+  T extends AdkObject,
+  M extends GctsMetadata,
+>(
+  object: T,
+  definition: GctsHandlerDefinition<T, M>,
+  type: string,
+  objectName: string,
+): Promise<SerializedFile[]> {
+  const files: SerializedFile[] = [];
+  if (definition.getSources) {
+    for (const entry of definition.getSources(object)) {
+      const content = await resolveSource(entry);
+      if (!content) continue;
+      files.push({
+        path: gctsFilename(objectName, type, 'source', entry.suffix, entry.ext),
+        content,
+      });
+    }
+  } else if (definition.getSource) {
+    const content = await definition.getSource(object);
+    if (content) {
+      files.push({
+        path: gctsFilename(objectName, type, 'source'),
+        content,
+      });
+    }
+  }
+  return files;
+}
+
+/** Extra files (e.g. FUGR per-function-module files) → serialized files. */
+async function serializeExtraFiles<T extends AdkObject, M extends GctsMetadata>(
+  object: T,
+  definition: GctsHandlerDefinition<T, M>,
+): Promise<SerializedFile[]> {
+  if (!definition.getExtraFiles) return [];
+  const files: SerializedFile[] = [];
+  for (const extra of await definition.getExtraFiles(object)) {
+    const content = await resolveSource(extra);
+    if (!content) continue;
+    files.push({ path: extra.path, content });
+  }
+  return files;
+}
+
 export function createHandler<
   T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
@@ -253,20 +321,17 @@ export function createHandler<
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T>;
 export function createHandler<
-  T extends HandlerObject,
+  T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
->(
-  type: AbapObjectType,
-  definition: GctsHandlerDefinition<T, M>,
-): GctsHandler<T>;
+>(type: string, definition: GctsHandlerDefinition<T, M>): GctsHandler<T>;
 export function createHandler<
-  T extends HandlerObject,
+  T extends AdkObject,
   M extends GctsMetadata = GctsMetadata,
 >(
-  adkClassOrType: AdkObjectClass | AbapObjectType,
+  adkClassOrType: AdkObjectClass<T> | string,
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T> {
-  let type: AbapObjectType;
+  let type: string;
   if (typeof adkClassOrType === 'string') {
     type = adkClassOrType;
   } else {
@@ -282,12 +347,6 @@ export function createHandler<
 
   const fileExtension = getMainType(type).toLowerCase();
 
-  async function resolveSource(entry: GctsSourceEntry): Promise<string> {
-    const raw =
-      typeof entry.content === 'function' ? entry.content() : entry.content;
-    return await raw;
-  }
-
   const handler: GctsHandler<T> = {
     type,
     fileExtension,
@@ -298,63 +357,40 @@ export function createHandler<
     },
     suffixToSourceKey: definition.suffixToSourceKey,
     async serialize(object: T): Promise<SerializedFile[]> {
-      const files: SerializedFile[] = [];
       const objectName = (object.name ?? '').toLowerCase();
 
       // Source files.
-      if (definition.getSources) {
-        for (const entry of definition.getSources(object)) {
-          const content = await resolveSource(entry);
-          if (!content) continue;
-          files.push({
-            path: gctsFilename(
-              objectName,
-              type,
-              'source',
-              entry.suffix,
-              entry.ext,
-            ),
-            content,
-          });
-        }
-      } else if (definition.getSource) {
-        const content = await definition.getSource(object);
-        if (content) {
-          files.push({
-            path: gctsFilename(objectName, type, 'source'),
-            content,
-          });
-        }
-      }
+      const files: SerializedFile[] = await serializeSourceFiles(
+        object,
+        definition,
+        type,
+        objectName,
+      );
 
       // Metadata file.
       const metadata = definition.toMetadata(object);
-      const metadataFile =
-        typeof definition.metadataFileName === 'function'
-          ? definition.metadataFileName(object)
-          : (definition.metadataFileName ??
-            gctsFilename(objectName, type, 'metadata'));
-      files.push({
-        path: metadataFile,
+      const metadataFile = {
+        path: resolveMetadataFileName(definition, object, objectName, type),
         content: buildMetadataFile(metadata),
-      });
+      };
 
       // Extra files (e.g. FUGR per-function-module .func.json + .func.abap).
-      if (definition.getExtraFiles) {
-        const extras = await definition.getExtraFiles(object);
-        for (const extra of extras) {
-          const content = await resolveSource(extra);
-          if (!content) continue;
-          files.push({ path: extra.path, content });
-        }
-      }
+      const extraFiles = await serializeExtraFiles(object, definition);
 
+      // Companion files skip anything already emitted above.
+      const emitted = new Set([
+        ...files.map((f) => f.path),
+        metadataFile.path,
+        ...extraFiles.map((f) => f.path),
+      ]);
       files.push(
+        metadataFile,
+        ...extraFiles,
         ...companionFiles(
           object,
           type,
           objectName,
-          new Set(files.map((f) => f.path)),
+          emitted,
           definition.suffixToSourceKey,
         ),
       );
@@ -371,7 +407,7 @@ export function createHandler<
     setSources: definition.setSources,
   };
 
-  handlerRegistry.set(type, handler);
+  handlerRegistry.set(type, handler as GctsHandler);
   return handler;
 }
 

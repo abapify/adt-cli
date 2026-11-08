@@ -2,6 +2,103 @@ import { Command } from 'commander';
 import { createAdtProxy } from '@abapify/adt-proxy';
 import { loadAuthSession } from '../utils/auth';
 
+type AdtProxy = ReturnType<typeof createAdtProxy>;
+
+type ProxyAuth = { username: string; password: string; client?: string };
+
+type ProxyTarget = {
+  targetUrl: string | undefined;
+  auth?: ProxyAuth;
+  defaultHeaders: Record<string, string>;
+};
+
+/**
+ * Resolve the target URL and credentials from the current auth session.
+ * Exits the process when not authenticated and no --target is given.
+ */
+function resolveTargetFromSession(sid: string | undefined): ProxyTarget {
+  const session = loadAuthSession(sid);
+  if (!session?.auth) {
+    console.error('❌ Not authenticated and no --target specified');
+    console.error('💡 Run "bunx adt auth login" or provide --target <url>');
+    process.exit(1);
+  }
+
+  const defaultHeaders: Record<string, string> = {};
+  let auth: ProxyAuth | undefined;
+
+  if (session.auth.method === 'basic') {
+    const creds = session.auth.credentials as {
+      username: string;
+      password: string;
+    };
+    auth = {
+      username: creds.username,
+      password: creds.password,
+      client: session.client,
+    };
+  } else if (session.auth.method === 'cookie') {
+    const creds = session.auth.credentials as { cookies: string };
+    const rawCookies = decodeURIComponent(creds.cookies);
+    const AUTH_PREFIX = 'Authorization: ';
+    if (rawCookies.startsWith(AUTH_PREFIX)) {
+      defaultHeaders.authorization = rawCookies.substring(AUTH_PREFIX.length);
+    } else {
+      defaultHeaders.cookie = rawCookies;
+    }
+  }
+
+  return { targetUrl: session.host, auth, defaultHeaders };
+}
+
+/** Print the proxy startup banner. */
+function printProxyBanner(
+  options: {
+    port?: number;
+    host?: string;
+    convert?: boolean;
+    forwardUnknown?: boolean;
+  },
+  targetUrl: string,
+): void {
+  console.log('🔄 Starting ADT proxy server...\n');
+  console.log(`   Target: ${targetUrl}`);
+  console.log(`   Port: ${options.port || 'auto'}`);
+  console.log(`   Host: ${options.host}`);
+  console.log(
+    `   JSON↔XML conversion: ${options.convert !== false ? 'enabled' : 'disabled'}`,
+  );
+  console.log(
+    `   Forward unknown routes: ${options.forwardUnknown !== false ? 'yes' : 'no'}`,
+  );
+  console.log('');
+}
+
+/** Print the bound address, first routes, and usage hints after startup. */
+function printProxyStarted(
+  options: { host?: string },
+  port: number,
+  routes: AdtProxy['routes'],
+): void {
+  console.log(`✅ ADT proxy running on http://${options.host}:${port}`);
+  console.log(`\n📋 Available routes (${routes.length} from ADT contracts):`);
+  for (const route of routes.slice(0, 10)) {
+    console.log(`   ${route.method.padEnd(7)} ${route.pathTemplate}`);
+  }
+  if (routes.length > 10) {
+    console.log(`   ... and ${routes.length - 10} more`);
+  }
+  console.log(
+    '\n💡 Send requests to the proxy and they will be forwarded to the target SAP system.',
+  );
+  console.log(
+    '   JSON request bodies are automatically converted to XML for downstream requests.',
+  );
+  console.log(
+    '   XML response bodies are automatically converted to JSON for proxy responses.',
+  );
+}
+
 export const proxyCommand = new Command('proxy')
   .description('Start an ADT proxy server with JSON↔XML conversion')
   .option(
@@ -53,64 +150,18 @@ export const proxyCommand = new Command('proxy')
   .action(async (options, _command) => {
     try {
       // Determine target URL and auth
-      let targetUrl: string | undefined = options.target;
-      let auth:
-        { username: string; password: string; client?: string } | undefined;
-      const defaultHeaders: Record<string, string> = {};
-
-      if (!targetUrl) {
-        // Use current auth session
-        const session = loadAuthSession(options.sid);
-        if (!session || !session.auth) {
-          console.error('❌ Not authenticated and no --target specified');
-          console.error(
-            '💡 Run "bunx adt auth login" or provide --target <url>',
-          );
-          process.exit(1);
-        }
-
-        targetUrl = session.host;
-
-        if (session.auth.method === 'basic') {
-          const creds = session.auth.credentials as {
-            username: string;
-            password: string;
-          };
-          auth = {
-            username: creds.username,
-            password: creds.password,
-            client: session.client,
-          };
-        } else if (session.auth.method === 'cookie') {
-          const creds = session.auth.credentials as { cookies: string };
-          const rawCookies = decodeURIComponent(creds.cookies);
-          const AUTH_PREFIX = 'Authorization: ';
-          if (rawCookies.startsWith(AUTH_PREFIX)) {
-            defaultHeaders.authorization = rawCookies.substring(
-              AUTH_PREFIX.length,
-            );
-          } else {
-            defaultHeaders.cookie = rawCookies;
-          }
-        }
-      }
+      const target: ProxyTarget = options.target
+        ? { targetUrl: options.target, defaultHeaders: {} }
+        : resolveTargetFromSession(options.sid);
+      const { auth, defaultHeaders } = target;
+      const targetUrl = target.targetUrl;
 
       if (!targetUrl) {
         console.error('❌ No target URL specified');
         process.exit(1);
       }
 
-      console.log('🔄 Starting ADT proxy server...\n');
-      console.log(`   Target: ${targetUrl}`);
-      console.log(`   Port: ${options.port || 'auto'}`);
-      console.log(`   Host: ${options.host}`);
-      console.log(
-        `   JSON↔XML conversion: ${options.convert !== false ? 'enabled' : 'disabled'}`,
-      );
-      console.log(
-        `   Forward unknown routes: ${options.forwardUnknown !== false ? 'yes' : 'no'}`,
-      );
-      console.log('');
+      printProxyBanner(options, targetUrl);
 
       const proxy = createAdtProxy({
         targetUrl,
@@ -142,25 +193,7 @@ export const proxyCommand = new Command('proxy')
 
       const { port } = await proxy.start();
 
-      console.log(`✅ ADT proxy running on http://${options.host}:${port}`);
-      console.log(
-        `\n📋 Available routes (${proxy.routes.length} from ADT contracts):`,
-      );
-      for (const route of proxy.routes.slice(0, 10)) {
-        console.log(`   ${route.method.padEnd(7)} ${route.pathTemplate}`);
-      }
-      if (proxy.routes.length > 10) {
-        console.log(`   ... and ${proxy.routes.length - 10} more`);
-      }
-      console.log(
-        '\n💡 Send requests to the proxy and they will be forwarded to the target SAP system.',
-      );
-      console.log(
-        '   JSON request bodies are automatically converted to XML for downstream requests.',
-      );
-      console.log(
-        '   XML response bodies are automatically converted to JSON for proxy responses.',
-      );
+      printProxyStarted(options, port, proxy.routes);
 
       // Handle graceful shutdown
       const shutdown = async () => {
