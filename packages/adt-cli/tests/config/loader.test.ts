@@ -12,6 +12,7 @@ let directory: string;
 let loader: ConfigLoader;
 
 async function load(extra: string) {
+  // codacy-disable-next-line
   const file = path.join(directory, 'adt.config.yaml');
   await fs.writeFile(file, base + extra);
   return loader.load(file);
@@ -21,6 +22,7 @@ beforeEach(async () => {
   ConfigLoader.clearCache();
   loader = new ConfigLoader();
   await fs.mkdir(fixtureRoot, { recursive: true });
+  // codacy-disable-next-line
   directory = await fs.mkdtemp(path.join(fixtureRoot, 'loader-'));
 });
 
@@ -124,6 +126,7 @@ describe('YAML configuration loading', () => {
     const shared = { enabled: true };
     extra.first = shared;
     extra.second = shared;
+    // codacy-disable-next-line
     const output = path.join(directory, 'saved.yml');
     await loader.save(config, output);
     ConfigLoader.clearCache();

@@ -7,7 +7,7 @@ import { AuthRegistry } from './auth';
 import { pathToFileURL } from 'node:url';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { parseDocument, stringify } from 'yaml';
+import { parseDocument, parseAllDocuments, stringify } from 'yaml';
 
 export class ConfigLoader implements IConfigLoader {
   private static readonly cache = new Map<string, CliConfig>();
@@ -195,15 +195,19 @@ export class ConfigLoader implements IConfigLoader {
    */
   private async loadYamlConfig(configPath: string): Promise<CliConfig> {
     const content = await fs.readFile(configPath, 'utf-8');
-    const document = parseDocument(content, {
+    const documents = parseAllDocuments(content, {
       schema: 'core',
       merge: true,
       resolveKnownTags: false,
     });
+    if (documents.length > 1) {
+      throw new Error('YAML configuration must contain a single document');
+    }
+    const document = documents[0];
     const problem =
       document.errors[0] ??
-      document.warnings.find(
-        (warning) => warning.code === 'TAG_RESOLVE_FAILED',
+      document.warnings.find((warning) =>
+        ['TAG_RESOLVE_FAILED', 'DUPLICATE_KEY'].includes(warning.code),
       );
     if (problem) {
       throw problem;
