@@ -33,17 +33,17 @@ export function createAffFirstHandler(type: string, ext: string) {
       SKEY: { TYPE: type, NAME: String(obj?.name ?? '').toUpperCase() },
     }),
     fromAffJson: (json) => affFromAffJson(json, ''),
-    async serialize(object, ctx): Promise<SerializedFile[]> {
+    serialize(object, ctx): Promise<SerializedFile[]> {
       const header = {
         description: object.description || String(object.name ?? ''),
         originalLanguage: (object.originalLanguage ?? 'en').toLowerCase(),
       };
-      return [
+      return Promise.resolve([
         ctx.createFile(
           `${ctx.getObjectName(object)}.${ext}.json`,
           `${JSON.stringify({ formatVersion: '1', header }, null, 2)}\n`,
         ),
-      ];
+      ]);
     },
   });
 }

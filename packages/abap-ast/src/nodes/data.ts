@@ -1,4 +1,4 @@
-import type { AbapNode, Identifier } from './base';
+import type { AbapNode } from './base';
 import { AbapAstError } from './errors';
 import type { TypeRef } from './types';
 import type { Expression } from './expressions';
@@ -6,14 +6,14 @@ import type { Expression } from './expressions';
 /** `DATA lv_x TYPE ... [VALUE ...]`. */
 export interface DataDecl extends AbapNode {
   readonly kind: 'DataDecl';
-  readonly name: Identifier;
+  readonly name: string;
   readonly type: TypeRef;
   readonly initial?: Expression;
   readonly classData?: boolean;
 }
 
 export function dataDecl(input: {
-  name: Identifier;
+  name: string;
   type: TypeRef;
   initial?: Expression;
   classData?: boolean;
@@ -36,14 +36,14 @@ export function dataDecl(input: {
 /** `CONSTANTS c_x TYPE ... VALUE ...`. */
 export interface ConstantDecl extends AbapNode {
   readonly kind: 'ConstantDecl';
-  readonly name: Identifier;
+  readonly name: string;
   readonly type: TypeRef;
   readonly value: Expression;
   readonly classData?: boolean;
 }
 
 export function constantDecl(input: {
-  name: Identifier;
+  name: string;
   type: TypeRef;
   value: Expression;
   classData?: boolean;
@@ -69,12 +69,12 @@ export function constantDecl(input: {
 /** `FIELD-SYMBOLS <fs_x> TYPE ...`. */
 export interface FieldSymbolDecl extends AbapNode {
   readonly kind: 'FieldSymbolDecl';
-  readonly name: Identifier;
+  readonly name: string;
   readonly type: TypeRef;
 }
 
 export function fieldSymbolDecl(input: {
-  name: Identifier;
+  name: string;
   type: TypeRef;
 }): FieldSymbolDecl {
   if (!input.name) {

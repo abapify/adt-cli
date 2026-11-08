@@ -104,17 +104,9 @@ export interface GenericPluginOptions {
 export interface DefaultsConfig {
   format?: string;
   outputPath?: string;
-  objectTypes?: Array<
-    | 'CLAS' // Classes
-    | 'INTF' // Interfaces
-    | 'FUGR' // Function Groups
-    | 'DDLS' // CDS Views
-    | 'TABL' // Tables
-    | 'PROG' // Programs
-    | 'FORM' // Forms
-    | 'DEVC' // Packages
-    | string // Allow custom types
-  >;
+  // 'CLAS' Classes, 'INTF' Interfaces, 'FUGR' Function Groups, 'DDLS' CDS Views,
+  // 'TABL' Tables, 'PROG' Programs, 'FORM' Forms, 'DEVC' Packages — or custom types
+  objectTypes?: Array<string>;
 }
 
 /**

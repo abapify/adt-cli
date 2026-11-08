@@ -2,10 +2,7 @@ import { Config } from '@abaplint/core';
 import type { LintSystemType } from './types';
 
 function cloneDefaultConfig(): Record<string, unknown> {
-  return JSON.parse(JSON.stringify(Config.getDefault().get())) as Record<
-    string,
-    unknown
-  >;
+  return structuredClone(Config.getDefault().get()) as Record<string, unknown>;
 }
 
 export function buildPreset(
@@ -19,17 +16,17 @@ export function buildPreset(
 
   if (systemType === 'btp') {
     config.rules.cloud_types = {
-      ...(config.rules.cloud_types ?? {}),
+      ...config.rules.cloud_types,
       severity: 'Error',
     };
     config.rules.strict_sql = {
-      ...(config.rules.strict_sql ?? {}),
+      ...config.rules.strict_sql,
       severity: 'Error',
     };
   } else {
     delete config.rules.cloud_types;
     config.rules.obsolete_statement = {
-      ...(config.rules.obsolete_statement ?? {}),
+      ...config.rules.obsolete_statement,
       severity: 'Warning',
     };
   }

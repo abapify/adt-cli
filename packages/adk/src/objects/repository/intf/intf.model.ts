@@ -45,7 +45,7 @@ export class AdkInterface extends AdkMainObject<
   // Lazy segments - source code
 
   async getSource(): Promise<string> {
-    return this.lazy('source', async () => {
+    return this.lazy('source', () => {
       return this.ctx.client.adt.oo.interfaces.source.main.get(this.name);
     });
   }

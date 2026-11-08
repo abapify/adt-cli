@@ -258,8 +258,10 @@ export const transportPageDef = definePage<TransportData>({
 
   // ADK global context is auto-initialized by getAdtClientV2()
   // Just use ADK objects directly - no context needed!
-  fetch: async (_client, params) => {
-    if (!params.name) throw new Error('Transport number is required');
+  fetch: (_client, params) => {
+    if (!params.name) {
+      return Promise.reject(new Error('Transport number is required'));
+    }
     // AdkTransportRequest.get() auto-detects if it's a task or request
     // and returns the appropriate type
     return AdkTransportRequest.get(params.name);

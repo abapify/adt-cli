@@ -185,7 +185,7 @@ export class PluginManager {
     if (pluginName.startsWith('@')) {
       // For external packages like @company/plugin, use the plugin part
       const parts = pluginName.split('/');
-      return parts[parts.length - 1];
+      return parts.at(-1)!;
     }
     return pluginName;
   }
@@ -234,12 +234,14 @@ export class PluginManager {
    * Load built-in plugin
    * NOTE: FormatRegistry was removed - needs ADK migration
    */
-  private async loadBuiltinPlugin(
+  private loadBuiltinPlugin(
     pluginName: string,
     _options?: Record<string, any>,
   ): Promise<BaseFormat> {
-    throw new Error(
-      `Built-in plugin '${pluginName}' not available - FormatRegistry needs ADK migration`,
+    return Promise.reject(
+      new Error(
+        `Built-in plugin '${pluginName}' not available - FormatRegistry needs ADK migration`,
+      ),
     );
   }
 

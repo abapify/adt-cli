@@ -1,4 +1,4 @@
-import type { AbapNode, Identifier } from './base';
+import type { AbapNode } from './base';
 import { AbapAstError } from './errors';
 import type { TypeRef } from './types';
 
@@ -53,10 +53,10 @@ export function literal(input: {
 /** A bare identifier used as an expression (variable, constant reference). */
 export interface IdentifierExpr extends AbapNode {
   readonly kind: 'IdentifierExpr';
-  readonly name: Identifier;
+  readonly name: string;
 }
 
-export function identifierExpr(input: { name: Identifier }): IdentifierExpr {
+export function identifierExpr(input: { name: string }): IdentifierExpr {
   if (!input.name) {
     throw new AbapAstError('IdentifierExpr: required field "name" is missing');
   }
@@ -68,7 +68,7 @@ export function identifierExpr(input: { name: Identifier }): IdentifierExpr {
 
 /** Named argument on a method call / constructor. */
 export interface NamedArg {
-  readonly name: Identifier;
+  readonly name: string;
   readonly value: Expression;
 }
 
@@ -97,14 +97,14 @@ export function constructorExpr(input: {
 export interface MethodCallExpr extends AbapNode {
   readonly kind: 'MethodCallExpr';
   readonly receiver: Expression | undefined;
-  readonly method: Identifier;
+  readonly method: string;
   readonly callKind: 'static' | 'instance';
   readonly args: readonly NamedArg[];
 }
 
 export function methodCallExpr(input: {
   receiver?: Expression;
-  method: Identifier;
+  method: string;
   callKind: 'static' | 'instance';
   args?: readonly NamedArg[];
 }): MethodCallExpr {

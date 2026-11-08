@@ -149,7 +149,7 @@ export class ConfigValidator {
 
     // Validate default object types
     if (config.defaults.objectTypes) {
-      const validObjectTypes = [
+      const validObjectTypes = new Set([
         'CLAS',
         'INTF',
         'DOMA',
@@ -157,9 +157,9 @@ export class ConfigValidator {
         'PROG',
         'FUGR',
         'TABL',
-      ];
+      ]);
       for (const objectType of config.defaults.objectTypes) {
-        if (!validObjectTypes.includes(objectType)) {
+        if (!validObjectTypes.has(objectType)) {
           warnings.push(`Unknown object type in defaults: ${objectType}`);
         }
       }

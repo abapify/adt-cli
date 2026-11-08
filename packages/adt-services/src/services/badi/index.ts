@@ -147,7 +147,7 @@ export async function getBadiInfo({
   );
 
   if (typeof response !== 'string') {
-    throw new Error('Unexpected non-XML response from ENHO endpoint');
+    throw new TypeError('Unexpected non-XML response from ENHO endpoint');
   }
 
   return parseEnhancementImplementation(response);
@@ -211,13 +211,13 @@ function extractSearchObjects(results: unknown): Array<{
 
   if (record.objectReferences && typeof record.objectReferences === 'object') {
     const refs = record.objectReferences as {
-      objectReference?: typeof raw;
+      objectReference: typeof raw;
     };
     raw = refs.objectReference;
   } else if (record.objectReference) {
     raw = record.objectReference as typeof raw;
   } else if (record.mainObject && typeof record.mainObject === 'object') {
-    const main = record.mainObject as { objectReference?: typeof raw };
+    const main = record.mainObject as { objectReference: typeof raw };
     raw = main.objectReference;
   }
 
@@ -258,7 +258,7 @@ function searchQueriesForDefinition({ name }: { name: string }): string[] {
   const normalized = name.trim().toUpperCase();
   const queries = new Set<string>([
     `*${normalized}*`,
-    `*${normalized.replace(/_/g, '*')}*`,
+    `*${normalized.replaceAll('_', '*')}*`,
   ]);
   const parts = normalized.split('_').filter(Boolean);
   if (parts.length >= 2) {
@@ -515,8 +515,6 @@ async function listImplementations(
         query,
         seen,
       })),
-    );
-    all.push(
       ...(await collectSearchCandidates({
         client: ctx.client,
         normalized: ctx.normalized,

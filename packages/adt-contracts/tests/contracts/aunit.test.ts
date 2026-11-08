@@ -8,9 +8,14 @@
  * 2. Fixture parsing tests - validate schemas parse real SAP XML
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { aunitRun, aunitResult } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 
 // Import contracts
 import { aunitContract } from '../../src/adt/aunit';
@@ -50,4 +55,13 @@ class AunitTestrunsScenario extends ContractScenario {
 // Run contract definition scenarios
 // =============================================================================
 
-runScenario(new AunitTestrunsScenario());
+describe('AUnit (ABAP Unit) Contract Tests', () => {
+  describe('AUnit Testruns', () => {
+    const scenario = new AunitTestrunsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

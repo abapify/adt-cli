@@ -1,7 +1,6 @@
 // Export interfaces (excluding PluginError which conflicts with errors.ts class)
 export type {
   AdkObject,
-  AbapObjectType,
   SerializedFile,
   DeserializedObject,
   ObjectHandler,

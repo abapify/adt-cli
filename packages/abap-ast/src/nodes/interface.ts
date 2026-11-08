@@ -1,4 +1,4 @@
-import type { AbapDoc, AbapNode, Identifier } from './base';
+import type { AbapDoc, AbapNode } from './base';
 import { AbapAstError } from './errors';
 import type { TypeDef } from './types';
 import type { MethodDef } from './members';
@@ -9,12 +9,12 @@ export type InterfaceMember = TypeDef | MethodDef;
 /** `INTERFACE zif_foo. ... ENDINTERFACE.`. */
 export interface InterfaceDef extends AbapNode {
   readonly kind: 'InterfaceDef';
-  readonly name: Identifier;
+  readonly name: string;
   readonly members: readonly InterfaceMember[];
 }
 
 export function interfaceDef(input: {
-  name: Identifier;
+  name: string;
   members?: readonly InterfaceMember[];
   abapDoc?: AbapDoc;
 }): InterfaceDef {

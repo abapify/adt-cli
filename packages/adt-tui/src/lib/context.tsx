@@ -9,6 +9,7 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 import type { NavigationEntry, ParsedResponse, FetchFn } from './types';
@@ -47,7 +48,7 @@ export function NavigationProvider({
   fetch,
   parseResponse,
   initialUrl,
-}: NavigationProviderProps): React.ReactNode {
+}: Readonly<NavigationProviderProps>): React.ReactNode {
   const [current, setCurrent] = useState<NavigationEntry | null>(null);
   const [history, setHistory] = useState<NavigationEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -101,18 +102,21 @@ export function NavigationProvider({
     }
   }, [initialUrl, current, navigate]);
 
+  const value = useMemo(
+    () => ({
+      current,
+      history,
+      navigate,
+      back,
+      loading,
+      error,
+      fetch,
+    }),
+    [current, history, navigate, back, loading, error, fetch],
+  );
+
   return (
-    <NavigationContext.Provider
-      value={{
-        current,
-        history,
-        navigate,
-        back,
-        loading,
-        error,
-        fetch,
-      }}
-    >
+    <NavigationContext.Provider value={value}>
       {children}
     </NavigationContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { execOutput, ensureDir } from '../lib/utils';
+import { execOutput, ensureDir, pathArg, urlArg } from '../lib/utils';
 import { extractJars } from './extract';
 
 interface Artifact {
@@ -56,14 +56,28 @@ export async function download(
   // Always re-download metadata (small files, may have updates)
   const artifactsJar = join(output, 'artifacts.jar');
   console.log('📥 Downloading artifacts.jar...');
-  execOutput(`wget -q "${repoUrl}/artifacts.jar" -O "${artifactsJar}"`);
+  execOutput('wget', [
+    '-q',
+    urlArg(`${repoUrl}/artifacts.jar`),
+    '-O',
+    pathArg(artifactsJar),
+  ]);
 
   const contentJar = join(output, 'content.jar');
   console.log('📥 Downloading content.jar...');
-  execOutput(`wget -q "${repoUrl}/content.jar" -O "${contentJar}"`);
+  execOutput('wget', [
+    '-q',
+    urlArg(`${repoUrl}/content.jar`),
+    '-O',
+    pathArg(contentJar),
+  ]);
 
   // Parse artifacts
-  const xml = execOutput(`unzip -p "${artifactsJar}" artifacts.xml`);
+  const xml = execOutput('unzip', [
+    '-p',
+    pathArg(artifactsJar),
+    'artifacts.xml',
+  ]);
   const artifacts = parseArtifacts(xml);
   const bundles = artifacts.filter((a) => a.classifier === 'osgi.bundle');
 
@@ -79,8 +93,8 @@ export async function download(
           // Escape regex metacharacters in user-supplied filter before
           // expanding the glob wildcard. Prevents regex-injection when
           // the filter contains characters like '.', '+', '(' etc.
-          const escaped = p.replaceAll(/[.+?^${}()|[\]\\/]/g, '\\$&');
-          const regex = new RegExp('^' + escaped.replaceAll(/\*/g, '.*') + '$');
+          const escaped = p.replaceAll(/[.+?^${}()|[\]\\/]/g, String.raw`\$&`);
+          const regex = new RegExp('^' + escaped.replaceAll('*', '.*') + '$');
           return regex.test(a.id);
         }
         return a.id.startsWith(p);
@@ -119,7 +133,7 @@ export async function download(
 
     const url = `${repoUrl}/plugins/${fileName}`;
     try {
-      execOutput(`wget -q "${url}" -O "${targetPath}"`);
+      execOutput('wget', ['-q', urlArg(url), '-O', pathArg(targetPath)]);
       downloaded++;
     } catch {
       console.error(`\n   ❌ Failed: ${artifact.id}`);

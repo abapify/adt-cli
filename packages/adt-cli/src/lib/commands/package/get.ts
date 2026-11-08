@@ -10,6 +10,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { getAdtClientV2 } from '../../utils/adt-client-v2';
 import { render, router } from '../../ui';
+import { asText } from '../../utils/text';
 import { AdkPackage } from '@abapify/adk';
 import { adtLink, packageLink } from '../../ui/components';
 
@@ -123,10 +124,10 @@ export const packageGetCommand = new Command('package')
             try {
               return JSON.stringify(v);
             } catch {
-              return String(v);
+              return asText(v);
             }
           }
-          return String(v);
+          return asText(v);
         };
         console.log(`📦 Package: ${toDisplay(pkgAny.name, name)}`);
         console.log(`   Type: ${toDisplay(pkgAny.type, 'N/A')}`);

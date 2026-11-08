@@ -10,6 +10,9 @@
 
 import type { AdtClientType, TransportResponse } from '@abapify/adt-contracts';
 
+/** Explicit `String()` coercion for untyped node values. */
+const asText: (value: unknown) => string = String;
+
 /**
  * Transport data structure (simplified for service consumers)
  */
@@ -100,7 +103,7 @@ export class TransportService {
         ? (data.request as Record<string, unknown>[])[0]
         : (data?.request as Record<string, unknown> | undefined)) ?? undefined;
     const siblingRequestNumber = siblingRequest
-      ? String(siblingRequest.number ?? '').toUpperCase()
+      ? asText(siblingRequest.number ?? '').toUpperCase()
       : '';
 
     const selected =
@@ -120,11 +123,10 @@ export class TransportService {
       // Only patch when selected came from the task sibling list. Normalize a
       // single task node to an array so the fallback also applies to
       // single-object task responses.
+      const singleTaskNode = data?.task ? [data.task] : [];
       const taskNodes = Array.isArray(data?.task)
         ? (data.task as unknown[])
-        : data?.task
-          ? [data.task]
-          : [];
+        : singleTaskNode;
       const fromTaskList = taskNodes.includes(selected);
       if (fromTaskList && !hasParent && siblingRequestNumber) {
         sel.parent = siblingRequestNumber;
@@ -141,12 +143,14 @@ export class TransportService {
    * For now, this is a placeholder that throws a helpful error.
    * Use ADK's AdkTransportRequest.create() for full functionality.
    */
-  async create(_options: CreateTransportOptions): Promise<Transport> {
+  create(_options: CreateTransportOptions): Promise<Transport> {
     // NOTE: XML body building for transport creation not yet implemented
     // The contract exists but we need to build the request XML
-    throw new Error(
-      'Transport creation via service layer not yet implemented. ' +
-        "Use ADK's AdkTransportRequest.create() for now.",
+    return Promise.reject(
+      new Error(
+        'Transport creation via service layer not yet implemented. ' +
+          "Use ADK's AdkTransportRequest.create() for now.",
+      ),
     );
   }
 
@@ -163,9 +167,11 @@ export class TransportService {
    * Note: Release requires POST with specific action parameter.
    * This is a placeholder for the full implementation.
    */
-  async release(_trkorr: string): Promise<void> {
+  release(_trkorr: string): Promise<void> {
     // NOTE: Release action not yet implemented via service layer
-    throw new Error('Transport release via service layer not yet implemented.');
+    return Promise.reject(
+      new Error('Transport release via service layer not yet implemented.'),
+    );
   }
 
   /**
@@ -180,7 +186,7 @@ export class TransportService {
     const arr = Array.isArray(node) ? node : [node];
     return arr.find((item) => {
       const u = item as Record<string, unknown>;
-      return String(u?.trkorr ?? u?.number ?? '').toUpperCase() === wanted;
+      return asText(u?.trkorr ?? u?.number ?? '').toUpperCase() === wanted;
     }) as Record<string, unknown> | undefined;
   }
 

@@ -16,10 +16,10 @@ import { resolveClient } from './session-helpers';
 
 function escapeXmlAttr(value: string): string {
   return value
-    .replaceAll(/&/g, '&amp;')
-    .replaceAll(/</g, '&lt;')
-    .replaceAll(/>/g, '&gt;')
-    .replaceAll(/"/g, '&quot;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
 }
 
 export function registerCtsUpdateTransportTool(

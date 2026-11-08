@@ -30,6 +30,78 @@ interface CommandWithLogger extends Command {
   logger?: Logger;
 }
 
+type ProgressReporter = ReturnType<typeof createProgressReporter>;
+type TransportSummary = Awaited<
+  ReturnType<CtsTransportLifecycleService['getTransport']>
+>;
+type ReleaseResult = Awaited<
+  ReturnType<CtsTransportLifecycleService['release']>
+>;
+
+/** Print the transport summary before release. */
+function printTransportInfo(summary: TransportSummary): void {
+  writeLine(`\n📋 Transport: ${summary.transport}`);
+  writeLine(`   Description: ${summary.description || '-'}`);
+  writeLine(`   Owner: ${summary.owner || '-'}`);
+  writeLine(
+    `   Target: ${summary.targetDescription || summary.target || 'LOCAL'}`,
+  );
+  writeLine(`   Status: ${summary.statusText}`);
+  writeLine(`   Tasks: ${summary.taskCount}`);
+  writeLine(`   Objects: ${summary.objectCount}`);
+}
+
+/** Report that the transport is already released. */
+function reportAlreadyReleased(
+  summary: TransportSummary,
+  json: boolean | undefined,
+  progress: ProgressReporter,
+): void {
+  if (json) {
+    progress.clear();
+    writeLine(
+      JSON.stringify(
+        { transport: summary.transport, status: 'already_released' },
+        null,
+        2,
+      ),
+    );
+  } else {
+    writeLine(`ℹ️  Transport ${summary.transport} is already released`);
+  }
+}
+
+/** Prompt for release confirmation; exit if the user declines. */
+async function confirmRelease(
+  transport: TransportSummary['transport'],
+): Promise<void> {
+  const shouldRelease = await confirm({
+    message: `Release transport ${transport}?`,
+    default: true,
+  });
+
+  if (!shouldRelease) {
+    writeLine('\n❌ Release cancelled');
+    process.exit(0);
+  }
+}
+
+/** Print the release result as JSON or a success message. */
+function printReleaseResult(
+  result: ReleaseResult,
+  summary: TransportSummary,
+  json: boolean | undefined,
+): void {
+  if (json) {
+    writeLine(JSON.stringify(result, null, 2));
+  } else {
+    writeLine(`\n✅ Transport ${result.transport} released successfully!`);
+    writeLine(
+      `   Target: ${summary.targetDescription || summary.target || 'LOCAL'}`,
+    );
+  }
+}
+
 export const ctsReleaseCommand = new Command('release')
   .description('Release transport request')
   .argument('<transport>', 'Transport number (e.g., TRLK900123)')
@@ -67,32 +139,13 @@ export const ctsReleaseCommand = new Command('release')
 
       // Check if already released
       if (summary.status === 'R') {
-        if (options.json) {
-          progress.clear();
-          writeLine(
-            JSON.stringify(
-              { transport: summary.transport, status: 'already_released' },
-              null,
-              2,
-            ),
-          );
-        } else {
-          writeLine(`ℹ️  Transport ${summary.transport} is already released`);
-        }
+        reportAlreadyReleased(summary, options.json, progress);
         return;
       }
 
       // Display transport info
       if (!options.json) {
-        writeLine(`\n📋 Transport: ${summary.transport}`);
-        writeLine(`   Description: ${summary.description || '-'}`);
-        writeLine(`   Owner: ${summary.owner || '-'}`);
-        writeLine(
-          `   Target: ${summary.targetDescription || summary.target || 'LOCAL'}`,
-        );
-        writeLine(`   Status: ${summary.statusText}`);
-        writeLine(`   Tasks: ${summary.taskCount}`);
-        writeLine(`   Objects: ${summary.objectCount}`);
+        printTransportInfo(summary);
       }
 
       // Step 2: Pre-release check (not yet implemented - check endpoint not available)
@@ -104,15 +157,7 @@ export const ctsReleaseCommand = new Command('release')
 
       // Step 3: Confirm release
       if (!options.yes && !options.json) {
-        const shouldRelease = await confirm({
-          message: `Release transport ${summary.transport}?`,
-          default: true,
-        });
-
-        if (!shouldRelease) {
-          writeLine('\n❌ Release cancelled');
-          process.exit(0);
-        }
+        await confirmRelease(summary.transport);
       }
 
       progress.step(`🚀 Releasing transport ${summary.transport}...`);
@@ -122,14 +167,7 @@ export const ctsReleaseCommand = new Command('release')
       });
       progress.done();
 
-      if (options.json) {
-        writeLine(JSON.stringify(result, null, 2));
-      } else {
-        writeLine(`\n✅ Transport ${result.transport} released successfully!`);
-        writeLine(
-          `   Target: ${summary.targetDescription || summary.target || 'LOCAL'}`,
-        );
-      }
+      printReleaseResult(result, summary, options.json);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       progress.done();

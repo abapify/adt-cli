@@ -519,7 +519,7 @@ function parseScopedToolNames(
   if (operationClass === 'read') {
     return safeExecutePolicy === undefined ? toolNames : undefined;
   }
-  return safeExecutePolicy && toolNames[0] === safeExecutePolicy.operationId
+  return toolNames[0] === safeExecutePolicy?.operationId
     ? toolNames
     : undefined;
 }

@@ -1,4 +1,4 @@
-import type { AbapDoc, AbapNode, Identifier, Visibility } from './base';
+import type { AbapDoc, AbapNode, Visibility } from './base';
 import { AbapAstError } from './errors';
 import type { TypeRef } from './types';
 import type { Expression } from './expressions';
@@ -10,7 +10,7 @@ export type ParamKind = 'importing' | 'exporting' | 'changing' | 'returning';
 export interface MethodParam extends AbapNode {
   readonly kind: 'MethodParam';
   readonly paramKind: ParamKind;
-  readonly name: Identifier;
+  readonly name: string;
   readonly typeRef: TypeRef;
   readonly optional?: boolean;
   readonly default?: Expression;
@@ -18,7 +18,7 @@ export interface MethodParam extends AbapNode {
 
 export function methodParam(input: {
   paramKind: ParamKind;
-  name: Identifier;
+  name: string;
   typeRef: TypeRef;
   optional?: boolean;
   default?: Expression;
@@ -56,7 +56,7 @@ export function methodParam(input: {
 
 export interface MethodDef extends AbapNode {
   readonly kind: 'MethodDef';
-  readonly name: Identifier;
+  readonly name: string;
   readonly params: readonly MethodParam[];
   readonly raising: readonly TypeRef[];
   readonly visibility: Visibility;
@@ -68,7 +68,7 @@ export interface MethodDef extends AbapNode {
 }
 
 export function methodDef(input: {
-  name: Identifier;
+  name: string;
   params?: readonly MethodParam[];
   raising?: readonly TypeRef[];
   visibility: Visibility;
@@ -121,12 +121,12 @@ export function methodDef(input: {
 /** Body of a method in the IMPLEMENTATION block. */
 export interface MethodImpl extends AbapNode {
   readonly kind: 'MethodImpl';
-  readonly name: Identifier;
+  readonly name: string;
   readonly body: readonly Statement[];
 }
 
 export function methodImpl(input: {
-  name: Identifier;
+  name: string;
   body: readonly Statement[];
 }): MethodImpl {
   if (!input.name) {
@@ -145,13 +145,13 @@ export function methodImpl(input: {
 /** EVENT declaration (stub — body not modelled yet). */
 export interface EventDef extends AbapNode {
   readonly kind: 'EventDef';
-  readonly name: Identifier;
+  readonly name: string;
   readonly visibility: Visibility;
   readonly isClassEvent?: boolean;
 }
 
 export function eventDef(input: {
-  name: Identifier;
+  name: string;
   visibility: Visibility;
   isClassEvent?: boolean;
 }): EventDef {
@@ -172,7 +172,7 @@ export function eventDef(input: {
 /** DATA / CLASS-DATA declaration inside a class section. */
 export interface AttributeDef extends AbapNode {
   readonly kind: 'AttributeDef';
-  readonly name: Identifier;
+  readonly name: string;
   readonly type: TypeRef;
   readonly visibility: Visibility;
   readonly classData?: boolean;
@@ -181,7 +181,7 @@ export interface AttributeDef extends AbapNode {
 }
 
 export function attributeDef(input: {
-  name: Identifier;
+  name: string;
   type: TypeRef;
   visibility: Visibility;
   classData?: boolean;

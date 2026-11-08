@@ -161,6 +161,91 @@ const DATA_MAINTENANCE_REVERSE: Record<string, string> = {
 // ============================================
 
 /**
+ * Push a reverse-mapped header annotation when the DDIC code has a CDS
+ * meaning. `code` is the raw DDIC value (`''` is meaningful for some flags).
+ */
+function pushMappedAnnotation(
+  lines: string[],
+  label: string,
+  code: string | undefined,
+  mapping: Record<string, string>,
+): void {
+  const value = mapping[code ?? ''];
+  if (value) {
+    lines.push(`@${label} : ${value}`);
+  }
+}
+
+/** Push the DD02V-derived header annotations. */
+function pushHeaderAnnotations(
+  lines: string[],
+  dd02v: DD02VData,
+  isStructure: boolean,
+): void {
+  if (dd02v.DDTEXT) {
+    lines.push(
+      `@EndUserText.label : '${escapeAnnotationString(dd02v.DDTEXT)}'`,
+    );
+  }
+
+  pushMappedAnnotation(
+    lines,
+    'AbapCatalog.enhancement.category',
+    dd02v.EXCLASS,
+    ENHANCEMENT_CATEGORY_REVERSE,
+  );
+
+  if (!isStructure) {
+    // Table-specific annotations
+    pushMappedAnnotation(
+      lines,
+      'AbapCatalog.tableCategory',
+      dd02v.TABCLASS,
+      TABLE_CATEGORY_REVERSE,
+    );
+    pushMappedAnnotation(
+      lines,
+      'AbapCatalog.deliveryClass',
+      dd02v.CONTFLAG,
+      DELIVERY_CLASS_REVERSE,
+    );
+    if (dd02v.MATEFLAG !== undefined) {
+      pushMappedAnnotation(
+        lines,
+        'AbapCatalog.dataMaintenance',
+        dd02v.MATEFLAG,
+        DATA_MAINTENANCE_REVERSE,
+      );
+    }
+  }
+}
+
+/** Emit include/field lines, field names aligned to `maxNameWidth`. */
+function pushMemberLines(
+  lines: string[],
+  fieldInfos: MemberInfo[],
+  maxNameWidth: number,
+): void {
+  for (const info of fieldInfos) {
+    if (info.kind === 'include') {
+      if (info.suffix) {
+        lines.push(`  include ${info.name} with suffix ${info.suffix};`);
+      } else {
+        lines.push(`  include ${info.name};`);
+      }
+    } else {
+      // Field annotations (e.g., @Semantics.amount.currencyCode)
+      for (const ann of info.annotations) {
+        lines.push(`  ${ann}`);
+      }
+
+      const paddedPrefix = info.prefix.padEnd(maxNameWidth);
+      lines.push(`  ${paddedPrefix} : ${info.typeStr};`);
+    }
+  }
+}
+
+/**
  * Build CDS DDL source from DD02V header and DD03P field entries.
  *
  * @param dd02v - Table/structure header data
@@ -176,42 +261,7 @@ export function buildCdsDdl(
   const isStructure = dd02v.TABCLASS === 'INTTAB';
 
   // --- Annotations ---
-  if (dd02v.DDTEXT) {
-    lines.push(
-      `@EndUserText.label : '${escapeAnnotationString(dd02v.DDTEXT)}'`,
-    );
-  }
-
-  if (dd02v.EXCLASS) {
-    const cat = ENHANCEMENT_CATEGORY_REVERSE[dd02v.EXCLASS];
-    if (cat) {
-      lines.push(`@AbapCatalog.enhancement.category : ${cat}`);
-    }
-  }
-
-  if (!isStructure) {
-    // Table-specific annotations
-    if (dd02v.TABCLASS) {
-      const cat = TABLE_CATEGORY_REVERSE[dd02v.TABCLASS];
-      if (cat) {
-        lines.push(`@AbapCatalog.tableCategory : ${cat}`);
-      }
-    }
-
-    if (dd02v.CONTFLAG) {
-      const dc = DELIVERY_CLASS_REVERSE[dd02v.CONTFLAG];
-      if (dc) {
-        lines.push(`@AbapCatalog.deliveryClass : ${dc}`);
-      }
-    }
-
-    if (dd02v.MATEFLAG !== undefined) {
-      const dm = DATA_MAINTENANCE_REVERSE[dd02v.MATEFLAG ?? ''];
-      if (dm) {
-        lines.push(`@AbapCatalog.dataMaintenance : ${dm}`);
-      }
-    }
-  }
+  pushHeaderAnnotations(lines, dd02v, isStructure);
 
   // --- Definition header ---
   const keyword = isStructure ? 'define structure' : 'define table';
@@ -235,23 +285,7 @@ export function buildCdsDdl(
   );
 
   // --- Emit fields ---
-  for (const info of fieldInfos) {
-    if (info.kind === 'include') {
-      if (info.suffix) {
-        lines.push(`  include ${info.name} with suffix ${info.suffix};`);
-      } else {
-        lines.push(`  include ${info.name};`);
-      }
-    } else {
-      // Field annotations (e.g., @Semantics.amount.currencyCode)
-      for (const ann of info.annotations) {
-        lines.push(`  ${ann}`);
-      }
-
-      const paddedPrefix = info.prefix.padEnd(maxNameWidth);
-      lines.push(`  ${paddedPrefix} : ${info.typeStr};`);
-    }
-  }
+  pushMemberLines(lines, fieldInfos, maxNameWidth);
 
   lines.push('', '}'); // Blank line before closing brace (SAP format)
 
@@ -282,6 +316,105 @@ interface IncludeInfo {
 type MemberInfo = FieldInfo | IncludeInfo;
 
 /**
+ * Assemble a field info from an already-rendered base type string, adding
+ * the `key` prefix and `not null` suffix.
+ */
+function buildTypedFieldInfo(
+  fieldName: string,
+  typeBase: string,
+  entry: DD03PData,
+  annotations: string[] = [],
+): FieldInfo {
+  const isKey = entry.KEYFLAG === 'X';
+  const notNull = entry.NOTNULL === 'X' || isKey;
+  return {
+    kind: 'field',
+    prefix: isKey ? `key ${fieldName.toLowerCase()}` : fieldName.toLowerCase(),
+    typeStr: notNull ? `${typeBase} not null` : typeBase,
+    annotations,
+  };
+}
+
+/** `@Semantics` annotations for CURR/QUAN fields with a reference table. */
+function semanticsAnnotations(entry: DD03PData, tableName: string): string[] {
+  const annotations: string[] = [];
+
+  // @Semantics annotations for CURR/QUAN fields
+  if (entry.DATATYPE === 'CURR' && entry.REFTABLE && entry.REFFIELD) {
+    const refTable =
+      entry.REFTABLE.toUpperCase() === tableName.toUpperCase()
+        ? tableName.toLowerCase()
+        : entry.REFTABLE.toLowerCase();
+    annotations.push(
+      `@Semantics.amount.currencyCode : '${refTable}.${entry.REFFIELD.toLowerCase()}'`,
+    );
+  } else if (entry.DATATYPE === 'QUAN' && entry.REFTABLE && entry.REFFIELD) {
+    const refTable =
+      entry.REFTABLE.toUpperCase() === tableName.toUpperCase()
+        ? tableName.toLowerCase()
+        : entry.REFTABLE.toLowerCase();
+    annotations.push(
+      `@Semantics.quantity.unitOfMeasure : '${refTable}.${entry.REFFIELD.toLowerCase()}'`,
+    );
+  }
+
+  return annotations;
+}
+
+/** Classify one DD03P entry into a field/include info (or nothing). */
+function buildMemberInfo(
+  entry: DD03PData,
+  tableName: string,
+): MemberInfo | null {
+  const fieldName = entry.FIELDNAME ?? '';
+
+  // .INCLU-<SUFFIX> entries → include with suffix
+  if (fieldName.startsWith('.INCLU-')) {
+    const includeName = entry.PRECFIELD ?? '';
+    if (!includeName) return null;
+    // Extract suffix from .INCLU-<SUFFIX> (e.g., ".INCLU-_XX" → "_xx")
+    const suffix = fieldName.slice('.INCLU-'.length).toLowerCase();
+    return {
+      kind: 'include',
+      name: includeName.toLowerCase(),
+      suffix,
+    };
+  }
+
+  // Include directive → plain include
+  if (fieldName === '.INCLUDE') {
+    const includeName = entry.PRECFIELD ?? '';
+    if (!includeName) return null;
+    return {
+      kind: 'include',
+      name: includeName.toLowerCase(),
+    };
+  }
+
+  // Structure-typed field (COMPTYPE = 'S', not an include)
+  if (entry.COMPTYPE === 'S' && entry.DATATYPE === 'STRU') {
+    const rollname = entry.ROLLNAME ?? fieldName;
+    return buildTypedFieldInfo(fieldName, rollname.toLowerCase(), entry);
+  }
+
+  // Data element reference (COMPTYPE = 'E')
+  if (entry.COMPTYPE === 'E' && entry.ROLLNAME) {
+    return buildTypedFieldInfo(fieldName, entry.ROLLNAME.toLowerCase(), entry);
+  }
+
+  // Built-in type field
+  const cdsType = buildCdsTypeString(entry);
+  if (!cdsType) return null;
+
+  return buildTypedFieldInfo(
+    fieldName,
+    cdsType,
+    entry,
+    semanticsAnnotations(entry, tableName),
+  );
+}
+
+/**
  * Pre-process DD03P entries into structured field info for emission.
  */
 function buildFieldInfos(
@@ -290,121 +423,9 @@ function buildFieldInfos(
 ): MemberInfo[] {
   const result: MemberInfo[] = [];
 
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
-    const fieldName = entry.FIELDNAME ?? '';
-
-    // .INCLU-<SUFFIX> entries → include with suffix
-    if (fieldName.startsWith('.INCLU-')) {
-      const includeName = entry.PRECFIELD ?? '';
-      if (includeName) {
-        // Extract suffix from .INCLU-<SUFFIX> (e.g., ".INCLU-_XX" → "_xx")
-        const suffix = fieldName.slice('.INCLU-'.length).toLowerCase();
-        result.push({
-          kind: 'include',
-          name: includeName.toLowerCase(),
-          suffix,
-        });
-      }
-      continue;
-    }
-
-    // Include directive → plain include
-    if (fieldName === '.INCLUDE') {
-      const includeName = entry.PRECFIELD ?? '';
-      if (includeName) {
-        result.push({
-          kind: 'include',
-          name: includeName.toLowerCase(),
-        });
-      }
-      continue;
-    }
-
-    // Structure-typed field (COMPTYPE = 'S', not an include)
-    if (entry.COMPTYPE === 'S' && entry.DATATYPE === 'STRU') {
-      const isKey = entry.KEYFLAG === 'X';
-      const notNull = entry.NOTNULL === 'X' || isKey;
-      const rollname = entry.ROLLNAME ?? fieldName;
-
-      const prefix = isKey
-        ? `key ${fieldName.toLowerCase()}`
-        : fieldName.toLowerCase();
-
-      const typeStr = notNull
-        ? `${rollname.toLowerCase()} not null`
-        : rollname.toLowerCase();
-
-      result.push({
-        kind: 'field',
-        prefix,
-        typeStr,
-        annotations: [],
-      });
-      continue;
-    }
-
-    // Data element reference (COMPTYPE = 'E')
-    if (entry.COMPTYPE === 'E' && entry.ROLLNAME) {
-      const isKey = entry.KEYFLAG === 'X';
-      const notNull = entry.NOTNULL === 'X' || isKey;
-
-      const prefix = isKey
-        ? `key ${fieldName.toLowerCase()}`
-        : fieldName.toLowerCase();
-
-      const typeStr = notNull
-        ? `${entry.ROLLNAME.toLowerCase()} not null`
-        : entry.ROLLNAME.toLowerCase();
-
-      result.push({
-        kind: 'field',
-        prefix,
-        typeStr,
-        annotations: [],
-      });
-      continue;
-    }
-
-    // Built-in type field
-    const cdsType = buildCdsTypeString(entry);
-    if (!cdsType) continue;
-
-    const isKey = entry.KEYFLAG === 'X';
-    const notNull = entry.NOTNULL === 'X' || isKey;
-    const annotations: string[] = [];
-
-    // @Semantics annotations for CURR/QUAN fields
-    if (entry.DATATYPE === 'CURR' && entry.REFTABLE && entry.REFFIELD) {
-      const refTable =
-        entry.REFTABLE.toUpperCase() === tableName.toUpperCase()
-          ? tableName.toLowerCase()
-          : entry.REFTABLE.toLowerCase();
-      annotations.push(
-        `@Semantics.amount.currencyCode : '${refTable}.${entry.REFFIELD.toLowerCase()}'`,
-      );
-    } else if (entry.DATATYPE === 'QUAN' && entry.REFTABLE && entry.REFFIELD) {
-      const refTable =
-        entry.REFTABLE.toUpperCase() === tableName.toUpperCase()
-          ? tableName.toLowerCase()
-          : entry.REFTABLE.toLowerCase();
-      annotations.push(
-        `@Semantics.quantity.unitOfMeasure : '${refTable}.${entry.REFFIELD.toLowerCase()}'`,
-      );
-    }
-
-    const prefix = isKey
-      ? `key ${fieldName.toLowerCase()}`
-      : fieldName.toLowerCase();
-
-    const typeStr = notNull ? `${cdsType} not null` : cdsType;
-
-    result.push({
-      kind: 'field',
-      prefix,
-      typeStr,
-      annotations,
-    });
+  for (const entry of entries) {
+    const info = buildMemberInfo(entry, tableName);
+    if (info) result.push(info);
   }
 
   return result;

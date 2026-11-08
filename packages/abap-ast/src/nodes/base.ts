@@ -51,26 +51,19 @@ export type NodeKind =
   | 'Comment';
 
 /**
- * A single ABAPDoc comment line. Stored without the leading `"!` prefix.
- * The prefix is added by the printer at emit time.
+ * ABAPDoc metadata attached to a declaration node. Each entry is a single
+ * comment line, stored without the leading `"!` prefix (the prefix is added
+ * by the printer at emit time); printers emit one `"! <line>` per entry
+ * immediately above the declaration, at the same indentation as the
+ * declaration itself.
  */
-export type AbapDocLine = string;
-
-/**
- * ABAPDoc metadata attached to a declaration node. Each entry is a logical
- * line; printers emit one `"! <line>` per entry immediately above the
- * declaration, at the same indentation as the declaration itself.
- */
-export type AbapDoc = readonly AbapDocLine[];
+export type AbapDoc = readonly string[];
 
 /** Base shape for any AST node. */
 export interface AbapNode {
   readonly kind: NodeKind;
   readonly abapDoc?: AbapDoc;
 }
-
-/** An ABAP identifier (not validated beyond presence). */
-export type Identifier = string;
 
 /** An ABAP comment. Star comments begin at column 1; line comments use `"`. */
 export interface Comment extends AbapNode {

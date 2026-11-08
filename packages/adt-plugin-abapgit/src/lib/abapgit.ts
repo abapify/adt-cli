@@ -290,7 +290,7 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
      * PROG deletions without obj_func=D), no files are present and nothing
      * happens. This is expected behavior.
      */
-    async delete(
+    delete(
       objectRef: { pgmid: string; type: string; name: string },
       targetPath: string,
       _context: ImportContext,
@@ -330,24 +330,24 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
           matchedFiles.filter((filePath) => existsSync(filePath)),
         );
 
-        return {
+        return Promise.resolve({
           success: errors.length === 0,
           filesRemoved,
           ...(errors.length > 0 ? { errors } : {}),
-        };
+        });
       } catch (error) {
-        return {
+        return Promise.resolve({
           success: false,
           filesRemoved: [],
           errors: [error instanceof Error ? error.message : String(error)],
-        };
+        });
       }
     },
   },
 
   // Lifecycle hooks
   hooks: {
-    async afterImport(targetPath) {
+    afterImport(targetPath) {
       const target = resolve(targetPath);
       const folderLogic =
         folderLogicByTarget.get(target) ??
@@ -361,6 +361,7 @@ export const abapGitPlugin: AdtPlugin = createPlugin({
         folderLogicByTarget.delete(target);
         srcDirIndexCache.delete(resolve(targetPath, 'src'));
       }
+      return Promise.resolve();
     },
   },
 });

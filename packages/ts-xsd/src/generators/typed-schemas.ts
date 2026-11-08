@@ -103,8 +103,8 @@ export function typedSchemas(
       // Import typedSchema helper and TypedSchema type
       lines.push(
         `import { typedSchema, type TypedSchema } from '${tsXsdPath}';`,
+        '',
       );
-      lines.push('');
 
       // Collect all schemas with their root types
       const schemaExports: Array<{
@@ -160,12 +160,10 @@ export function typedSchemas(
       // Generate typed exports
       lines.push(
         '// ============================================================================',
-      );
-      lines.push('// TYPED SCHEMA EXPORTS');
-      lines.push(
+        '// TYPED SCHEMA EXPORTS',
         '// ============================================================================',
+        '',
       );
-      lines.push('');
 
       for (const { name, rootTypes } of schemaExports) {
         const exportName = toValidIdentifier(name);
@@ -184,16 +182,15 @@ export function typedSchemas(
         }
       }
 
-      lines.push('');
-
       // NOTE: Types are NOT re-exported here to avoid duplicate export conflicts.
       // Types are internal to each schema file and used for typed wrappers.
       // If you need a specific type, import it directly from the types file:
       //   import type { AbapClass } from './types/sap/classes.types';
       lines.push(
+        '',
         '// Types are internal - import directly from types/{source}/{schema}.types if needed',
+        '',
       );
-      lines.push('');
 
       return [
         {

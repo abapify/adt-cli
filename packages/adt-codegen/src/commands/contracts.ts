@@ -12,7 +12,7 @@
  * It does NOT load config itself - that's the CLI's responsibility.
  */
 
-import type { CliCommandPlugin } from '@abapify/adt-plugin';
+import type { CliCommandPlugin, CliContext } from '@abapify/adt-plugin';
 import type { ContractsConfig } from '@abapify/adt-config';
 import { resolve, dirname, join, parse } from 'node:path';
 import { existsSync, mkdirSync } from 'node:fs';
@@ -37,6 +37,47 @@ function findHoistedBin(name: string, startDir: string): string | null {
     if (existsSync(candidate)) return candidate;
     if (dir === root) return null;
     dir = dirname(dir);
+  }
+}
+
+/**
+ * Fetch discovery from SAP via the `adt` CLI and cache it to
+ * `discoveryPath`. Exits the process when the fetch fails.
+ */
+function fetchDiscovery(discoveryPath: string, ctx: CliContext): void {
+  ctx.logger.info('📡 Fetching discovery from SAP...');
+
+  try {
+    // Use adt CLI to fetch discovery - no internal API dependencies.
+    // Resolve an absolute path to the hoisted `node_modules/.bin/adt`
+    // (or `adt.cmd` on Windows) by walking up from `ctx.cwd`. This
+    // handles bun-workspaces hoisting (binaries live at the workspace
+    // root, not necessarily under `ctx.cwd`) and avoids invoking a
+    // PATH-resolved executable (SonarCloud S4036). On Windows the
+    // resolved file is a `.cmd` shim, which cannot be launched by
+    // `execFileSync` without `shell: true` per Node's child_process
+    // docs; the shell flag is enabled only on Windows for that reason.
+    mkdirSync(dirname(discoveryPath), { recursive: true });
+    const adtCliPath = findHoistedBin('adt', ctx.cwd);
+    if (!adtCliPath) {
+      throw new Error(
+        `Could not locate 'node_modules/.bin/adt' walking up from ${ctx.cwd}. ` +
+          `Make sure @abapify/adt-cli is installed as a (dev) dependency.`,
+      );
+    }
+    execFileSync(adtCliPath, ['discovery', '--output', discoveryPath], {
+      stdio: 'inherit',
+      cwd: ctx.cwd,
+      shell: process.platform === 'win32',
+    });
+    ctx.logger.info(`💾 Discovery cached to: ${discoveryPath}`);
+  } catch (error) {
+    ctx.logger.error('❌ Failed to fetch discovery from SAP');
+    ctx.logger.error('   Make sure you are authenticated: npx adt auth login');
+    ctx.logger.error(
+      '   Error: ' + (error instanceof Error ? error.message : String(error)),
+    );
+    process.exit(1);
   }
 }
 
@@ -82,64 +123,30 @@ export const contractsCommand: CliCommandPlugin = {
     }
 
     // Discovery path from CLI or config
+    const configDiscovery = contractsConfig.discovery
+      ? resolve(ctx.cwd, contractsConfig.discovery)
+      : resolve(ctx.cwd, 'tmp/discovery/discovery.xml');
     const discoveryPath = args.discovery
       ? resolve(ctx.cwd, args.discovery as string)
-      : contractsConfig.discovery
-        ? resolve(ctx.cwd, contractsConfig.discovery)
-        : resolve(ctx.cwd, 'tmp/discovery/discovery.xml');
+      : configDiscovery;
 
     // Check if we need to fetch discovery
     const forceFetch = args.fetch === true;
     const needsFetch = forceFetch || !existsSync(discoveryPath);
 
     if (needsFetch) {
-      ctx.logger.info('📡 Fetching discovery from SAP...');
-
-      try {
-        // Use adt CLI to fetch discovery - no internal API dependencies.
-        // Resolve an absolute path to the hoisted `node_modules/.bin/adt`
-        // (or `adt.cmd` on Windows) by walking up from `ctx.cwd`. This
-        // handles bun-workspaces hoisting (binaries live at the workspace
-        // root, not necessarily under `ctx.cwd`) and avoids invoking a
-        // PATH-resolved executable (SonarCloud S4036). On Windows the
-        // resolved file is a `.cmd` shim, which cannot be launched by
-        // `execFileSync` without `shell: true` per Node's child_process
-        // docs; the shell flag is enabled only on Windows for that reason.
-        mkdirSync(dirname(discoveryPath), { recursive: true });
-        const adtCliPath = findHoistedBin('adt', ctx.cwd);
-        if (!adtCliPath) {
-          throw new Error(
-            `Could not locate 'node_modules/.bin/adt' walking up from ${ctx.cwd}. ` +
-              `Make sure @abapify/adt-cli is installed as a (dev) dependency.`,
-          );
-        }
-        execFileSync(adtCliPath, ['discovery', '--output', discoveryPath], {
-          stdio: 'inherit',
-          cwd: ctx.cwd,
-          shell: process.platform === 'win32',
-        });
-        ctx.logger.info(`💾 Discovery cached to: ${discoveryPath}`);
-      } catch (error) {
-        ctx.logger.error('❌ Failed to fetch discovery from SAP');
-        ctx.logger.error(
-          '   Make sure you are authenticated: npx adt auth login',
-        );
-        ctx.logger.error(
-          '   Error: ' +
-            (error instanceof Error ? error.message : String(error)),
-        );
-        process.exit(1);
-      }
+      fetchDiscovery(discoveryPath, ctx);
     } else {
       ctx.logger.info(`📂 Using cached discovery: ${discoveryPath}`);
     }
 
     // Output paths from config or CLI override
+    const configOutputDir = contractsConfig.output
+      ? resolve(ctx.cwd, contractsConfig.output)
+      : null;
     const outputDir = args.output
       ? resolve(ctx.cwd, args.output as string)
-      : contractsConfig.output
-        ? resolve(ctx.cwd, contractsConfig.output)
-        : null;
+      : configOutputDir;
 
     if (!outputDir) {
       ctx.logger.error(
@@ -148,11 +155,12 @@ export const contractsCommand: CliCommandPlugin = {
       process.exit(1);
     }
 
+    const configDocsDir = contractsConfig.docs
+      ? resolve(ctx.cwd, contractsConfig.docs)
+      : null;
     const docsDir = args.docs
       ? resolve(ctx.cwd, args.docs as string)
-      : contractsConfig.docs
-        ? resolve(ctx.cwd, contractsConfig.docs)
-        : null;
+      : configDocsDir;
 
     if (!docsDir) {
       ctx.logger.error(

@@ -1,6 +1,7 @@
 import type { TargetProfile } from './types';
 
-// TODO: flesh out S/4 on-prem modern emitter details (Wave ≥2).
+// Emitter details are minimal; richer S/4 on-prem modern emitter specifics
+// are deferred to Wave ≥2.
 export const s4OnPremModernProfile: TargetProfile = {
   id: 's4-onprem-modern',
   description:

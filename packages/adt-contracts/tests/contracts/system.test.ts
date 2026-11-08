@@ -2,9 +2,14 @@
  * System Users Contract Scenarios
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { atomFeed } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { usersContract } from '../../src/adt/system/users';
 
 class UsersScenario extends ContractScenario {
@@ -44,4 +49,13 @@ class UsersScenario extends ContractScenario {
   ];
 }
 
-runScenario(new UsersScenario());
+describe('System Users Contract Scenarios', () => {
+  describe('System Users', () => {
+    const scenario = new UsersScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

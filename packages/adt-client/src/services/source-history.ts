@@ -337,8 +337,13 @@ export class SourceHistoryService {
     return normalizeSourceVersionFeed(feed, versionsUri);
   }
 
-  async readVersionSource(sourceUri: string): Promise<string> {
-    assertAdtUri(sourceUri);
+  readVersionSource(sourceUri: string): Promise<string> {
+    try {
+      assertAdtUri(sourceUri);
+    } catch (error) {
+      // Keep rejection semantics: callers await this contract uniformly.
+      return Promise.reject(error);
+    }
     return this.adt.repository.sourceversions.get({ sourceUri });
   }
 

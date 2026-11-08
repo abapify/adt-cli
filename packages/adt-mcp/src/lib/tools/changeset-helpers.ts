@@ -64,7 +64,7 @@ export function requireOpenChangeset(
   const sess = requireSession(ctx, extra, toolName);
   if (!sess.ok) return sess;
   const cs = sess.value.changeset;
-  if (!cs || cs.status !== 'open') {
+  if (cs?.status !== 'open') {
     return {
       ok: false,
       error: textError(`No open changeset for ${toolName}.`),

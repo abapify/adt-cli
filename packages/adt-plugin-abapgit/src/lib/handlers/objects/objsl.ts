@@ -51,7 +51,7 @@ function createGenericObjslHandler(
 
     toAbapGit: (raw) => {
       const obj = unwrapData<GenericObjslObject>(raw);
-      return { ...(obj.tables ?? {}) };
+      return { ...obj.tables };
     },
 
     fromAbapGit: (values) => ({

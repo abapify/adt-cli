@@ -33,7 +33,7 @@ export const compositeTemplateHandler = createHandler<
           NAME: String(obj.name ?? '').toUpperCase(),
           DESCRIPTION: obj.description,
         },
-        ...(obj.extra ?? {}),
+        ...obj.extra,
       },
     };
   },

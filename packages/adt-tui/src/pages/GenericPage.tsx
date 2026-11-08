@@ -60,8 +60,8 @@ export function genericPage({ url, response }: PageProps): PageResult {
         flexDirection="column"
       >
         {summary.length > 0 ? (
-          summary.map((item, i) => (
-            <Text key={i}>
+          summary.map((item) => (
+            <Text key={item.key}>
               <Text color="yellow">{item.key}:</Text> {item.value}
             </Text>
           ))
@@ -80,6 +80,41 @@ export function genericPage({ url, response }: PageProps): PageResult {
     menu,
     footer: `[o] XML | [e] Eclipse ADT | ${response.links.length} links`,
   };
+}
+
+/**
+ * Collect one interesting `@_` attribute into the summary (dedup + allow-list).
+ */
+function collectSummaryAttr(
+  summary: SummaryItem[],
+  seen: Set<string>,
+  key: string,
+  value: unknown,
+): void {
+  const isStringAttr = key.startsWith('@_') && typeof value === 'string';
+  if (!isStringAttr && typeof value !== 'number') return;
+
+  const cleanKey = key.replace('@_', '').replace(/^\w+:/, '');
+  // Skip duplicates and uninteresting fields
+  if (seen.has(cleanKey) || cleanKey === 'version' || cleanKey === 'encoding')
+    return;
+  seen.add(cleanKey);
+
+  // Limit to important fields
+  const important = [
+    'number',
+    'owner',
+    'desc',
+    'status',
+    'status_text',
+    'type',
+    'target',
+    'name',
+    'uri',
+  ];
+  if (important.some((f) => cleanKey.includes(f))) {
+    summary.push({ key: cleanKey, value: String(value) });
+  }
 }
 
 /**
@@ -102,36 +137,7 @@ function extractSummary(data: Record<string, unknown>): SummaryItem[] {
       if (key.includes('link') || key === '?xml') continue;
 
       // Extract interesting attributes (those starting with @_)
-      if (
-        (key.startsWith('@_') && typeof value === 'string') ||
-        typeof value === 'number'
-      ) {
-        const cleanKey = key.replace('@_', '').replace(/^\w+:/, '');
-        // Skip duplicates and uninteresting fields
-        if (
-          seen.has(cleanKey) ||
-          cleanKey === 'version' ||
-          cleanKey === 'encoding'
-        )
-          continue;
-        seen.add(cleanKey);
-
-        // Limit to important fields
-        const important = [
-          'number',
-          'owner',
-          'desc',
-          'status',
-          'status_text',
-          'type',
-          'target',
-          'name',
-          'uri',
-        ];
-        if (important.some((f) => cleanKey.includes(f))) {
-          summary.push({ key: cleanKey, value: String(value) });
-        }
-      }
+      collectSummaryAttr(summary, seen, key, value);
 
       // Recurse into nested objects
       if (typeof value === 'object') {

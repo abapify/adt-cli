@@ -33,7 +33,7 @@ export function registerLintAbapTool(
         .optional()
         .describe('Optional per-rule override config passed to abaplint'),
     },
-    async (args) => {
+    (args) => {
       try {
         const options: LintOptions = {
           filename: args.objectName

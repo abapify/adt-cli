@@ -39,6 +39,25 @@ type FocusField =
   | 'fromDate'
   | 'toDate';
 
+/** Fields edited through the free-text editor */
+type TextEditField = 'userName' | 'fromDate' | 'toDate';
+
+/** Key state passed to the Ink input handler. */
+type EditorKey = {
+  return?: boolean;
+  escape?: boolean;
+  backspace?: boolean;
+  delete?: boolean;
+  ctrl?: boolean;
+  meta?: boolean;
+  upArrow?: boolean;
+  downArrow?: boolean;
+  leftArrow?: boolean;
+  rightArrow?: boolean;
+  tab?: boolean;
+  shift?: boolean;
+};
+
 const FIELD_ORDER: FocusField[] = [
   'userName',
   'customizingRequests',
@@ -66,11 +85,11 @@ function Checkbox({
   checked,
   label,
   focused,
-}: {
+}: Readonly<{
   checked: boolean;
   label: string;
   focused: boolean;
-}) {
+}>) {
   return (
     <Box>
       <Text
@@ -92,17 +111,21 @@ function TextField({
   editing,
   editBuffer,
   width = 30,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   focused: boolean;
   editing?: boolean;
   editBuffer?: string;
   width?: number;
-}) {
+}>) {
   // When editing, show the buffer; otherwise show the value
   const displayText = editing ? (editBuffer ?? '') : value;
   const displayValue = displayText.padEnd(width, ' ').slice(0, width);
+  const focusBackground = focused ? 'blue' : 'gray';
+  const backgroundColor = editing ? 'yellow' : focusBackground;
+  const focusColor = focused ? 'white' : 'black';
+  const color = editing ? 'black' : focusColor;
   return (
     <Box>
       <Text color={focused ? 'cyan' : 'gray'}>
@@ -110,8 +133,8 @@ function TextField({
         {label}:{' '}
       </Text>
       <Text
-        backgroundColor={editing ? 'yellow' : focused ? 'blue' : 'gray'}
-        color={editing ? 'black' : focused ? 'white' : 'black'}
+        backgroundColor={backgroundColor}
+        color={color}
       >
         {displayValue}
       </Text>
@@ -119,6 +142,12 @@ function TextField({
       {focused && !editing && <Text color="gray"> [Enter to edit]</Text>}
     </Box>
   );
+}
+
+/** Color for a dropdown option row: highlighted, selected or default. */
+function optionColor(isHighlighted: boolean, isSelected: boolean): string {
+  if (isHighlighted) return 'white';
+  return isSelected ? 'cyan' : 'gray';
 }
 
 // Select field component with dropdown support
@@ -129,16 +158,20 @@ function SelectField({
   focused,
   expanded,
   highlightedIndex,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   options: { value: string; label: string }[];
   focused: boolean;
   expanded?: boolean;
   highlightedIndex?: number;
-}) {
+}>) {
   const selectedOption = options.find((o) => o.value === value);
   const displayLabel = selectedOption?.label || 'Select a date';
+  const focusBackground = focused ? 'blue' : 'gray';
+  const fieldBackground = expanded ? 'yellow' : focusBackground;
+  const focusColor = focused ? 'white' : 'black';
+  const fieldColor = expanded ? 'black' : focusColor;
 
   return (
     <Box flexDirection="column">
@@ -148,8 +181,8 @@ function SelectField({
           {label}:{' '}
         </Text>
         <Text
-          backgroundColor={expanded ? 'yellow' : focused ? 'blue' : 'gray'}
-          color={expanded ? 'black' : focused ? 'white' : 'black'}
+          backgroundColor={fieldBackground}
+          color={fieldColor}
         >
           {' '}
           {displayLabel.padEnd(20, ' ')}{' '}
@@ -166,13 +199,10 @@ function SelectField({
             <Box key={opt.value}>
               <Text
                 backgroundColor={idx === highlightedIndex ? 'blue' : undefined}
-                color={
-                  idx === highlightedIndex
-                    ? 'white'
-                    : opt.value === value
-                      ? 'cyan'
-                      : 'gray'
-                }
+                color={optionColor(
+                  idx === highlightedIndex,
+                  opt.value === value,
+                )}
                 bold={opt.value === value}
               >
                 {idx === highlightedIndex ? '▶ ' : '  '}
@@ -196,7 +226,7 @@ function SelectField({
 }
 
 // Section header
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({ title }: Readonly<{ title: string }>) {
   return (
     <Box
       marginTop={1}
@@ -216,7 +246,7 @@ export function TreeConfigEditor({
   initialConfig,
   onSave,
   onCancel,
-}: TreeConfigEditorProps): React.ReactNode {
+}: Readonly<TreeConfigEditorProps>): React.ReactNode {
   const { exit } = useApp();
   const [config, setConfig] = useState<TreeConfigState>(initialConfig);
   const [focusIndex, setFocusIndex] = useState(0);
@@ -263,7 +293,7 @@ export function TreeConfigEditor({
   );
 
   const startTextEdit = useCallback(
-    (field: 'userName' | 'fromDate' | 'toDate') => {
+    (field: TextEditField) => {
       setEditingText(true);
       setTextBuffer(config[field]);
     },
@@ -271,7 +301,7 @@ export function TreeConfigEditor({
   );
 
   const finishTextEdit = useCallback(
-    (field: 'userName' | 'fromDate' | 'toDate') => {
+    (field: TextEditField) => {
       setConfig((prev: TreeConfigState) => ({
         ...prev,
         [field]: textBuffer,
@@ -292,7 +322,7 @@ export function TreeConfigEditor({
     const currentIndex = DATE_FILTER_OPTIONS.findIndex(
       (o) => o.value === config.releasedDateFilter,
     );
-    setDropdownIndex(currentIndex >= 0 ? currentIndex : 0);
+    setDropdownIndex(Math.max(currentIndex, 0));
     setDropdownOpen(true);
   }, [config.releasedDateFilter]);
 
@@ -310,98 +340,103 @@ export function TreeConfigEditor({
     setDropdownOpen(false);
   }, []);
 
-  useInput(
-    (
-      input: string,
-      key: {
-        return?: boolean;
-        escape?: boolean;
-        backspace?: boolean;
-        delete?: boolean;
-        ctrl?: boolean;
-        meta?: boolean;
-        upArrow?: boolean;
-        downArrow?: boolean;
-        leftArrow?: boolean;
-        rightArrow?: boolean;
-        tab?: boolean;
-        shift?: boolean;
-      },
-    ) => {
-      // Handle dropdown mode
-      if (dropdownOpen) {
-        if (key.upArrow) {
-          setDropdownIndex((prev: number) =>
-            prev > 0 ? prev - 1 : DATE_FILTER_OPTIONS.length - 1,
-          );
-        } else if (key.downArrow) {
-          setDropdownIndex((prev: number) =>
-            prev < DATE_FILTER_OPTIONS.length - 1 ? prev + 1 : 0,
-          );
-        } else if (key.return || input === ' ') {
-          selectDropdownOption(dropdownIndex);
-        } else if (key.escape) {
-          closeDropdown();
-        }
-        return;
-      }
+  // Handle key input while the date-filter dropdown is open.
+  const handleDropdownKey = (input: string, key: EditorKey): void => {
+    if (key.upArrow) {
+      setDropdownIndex((prev: number) =>
+        prev > 0 ? prev - 1 : DATE_FILTER_OPTIONS.length - 1,
+      );
+    } else if (key.downArrow) {
+      setDropdownIndex((prev: number) =>
+        prev < DATE_FILTER_OPTIONS.length - 1 ? prev + 1 : 0,
+      );
+    } else if (key.return || input === ' ') {
+      selectDropdownOption(dropdownIndex);
+    } else if (key.escape) {
+      closeDropdown();
+    }
+  };
 
-      // Handle text editing mode
-      if (editingText) {
-        if (key.return) {
-          finishTextEdit(currentField as 'userName' | 'fromDate' | 'toDate');
-        } else if (key.escape) {
-          cancelTextEdit();
-        } else if (key.backspace || key.delete) {
-          setTextBuffer((prev: string) => prev.slice(0, -1));
-        } else if (input && !key.ctrl && !key.meta) {
-          setTextBuffer((prev: string) => prev + input);
-        }
-        return;
-      }
+  // Handle key input while a text field is being edited.
+  const handleTextEditingKey = (input: string, key: EditorKey): void => {
+    if (key.return) {
+      finishTextEdit(currentField as TextEditField);
+    } else if (key.escape) {
+      cancelTextEdit();
+    } else if (key.backspace || key.delete) {
+      setTextBuffer((prev: string) => prev.slice(0, -1));
+    } else if (input && !key.ctrl && !key.meta) {
+      setTextBuffer((prev: string) => prev + input);
+    }
+  };
 
-      // Navigation
-      if (key.upArrow || (key.shift && key.tab)) {
-        moveFocus(-1);
-      } else if (key.downArrow || key.tab) {
-        moveFocus(1);
-      } else if (key.leftArrow) {
-        if (currentField === 'releasedDateFilter') {
-          cycleSelect('releasedDateFilter', -1);
-        }
-      } else if (key.rightArrow) {
-        if (currentField === 'releasedDateFilter') {
-          cycleSelect('releasedDateFilter', 1);
-        }
-      } else if (key.return || input === ' ') {
-        // Handle field activation
-        switch (currentField) {
-          case 'releasedDateFilter':
-            openDropdown();
-            break;
-          case 'userName':
-          case 'fromDate':
-          case 'toDate':
-            startTextEdit(currentField);
-            break;
-          case 'customizingRequests':
-          case 'workbenchRequests':
-          case 'transportOfCopies':
-          case 'modifiable':
-          case 'released':
-            toggleCheckbox(currentField);
-            break;
-        }
-      } else if (key.escape) {
-        onCancel();
-        exit();
-      } else if (key.ctrl && input === 's') {
-        // Ctrl+S to save
-        onSave(config);
-        exit();
-      }
-    },
-  );
+  // Cycle the date-filter preset (only meaningful on that field).
+  const cycleDateFilter = (delta: number): void => {
+    if (currentField === 'releasedDateFilter') {
+      cycleSelect('releasedDateFilter', delta);
+    }
+  };
+
+  // Activate the focused field (Return / Space).
+  const activateField = (): void => {
+    switch (currentField) {
+      case 'releasedDateFilter':
+        openDropdown();
+        break;
+      case 'userName':
+      case 'fromDate':
+      case 'toDate':
+        startTextEdit(currentField);
+        break;
+      case 'customizingRequests':
+      case 'workbenchRequests':
+      case 'transportOfCopies':
+      case 'modifiable':
+      case 'released':
+        toggleCheckbox(currentField);
+        break;
+    }
+  };
+
+  // Handle key input in normal (navigation) mode.
+  const handleNavigationKey = (input: string, key: EditorKey): void => {
+    if (key.upArrow || (key.shift && key.tab)) {
+      moveFocus(-1);
+    } else if (key.downArrow || key.tab) {
+      moveFocus(1);
+    } else if (key.leftArrow) {
+      cycleDateFilter(-1);
+    } else if (key.rightArrow) {
+      cycleDateFilter(1);
+    } else if (key.return || input === ' ') {
+      // Handle field activation
+      activateField();
+    } else if (key.escape) {
+      onCancel();
+      exit();
+    } else if (key.ctrl && input === 's') {
+      // Ctrl+S to save
+      onSave(config);
+      exit();
+    }
+  };
+
+  useInput((input: string, key: EditorKey) => {
+    // Handle dropdown mode
+    if (dropdownOpen) {
+      handleDropdownKey(input, key);
+      return;
+    }
+
+    // Handle text editing mode
+    if (editingText) {
+      handleTextEditingKey(input, key);
+      return;
+    }
+
+    // Navigation
+    handleNavigationKey(input, key);
+  });
 
   // Check if date fields should be shown (only when Released is checked and Custom date filter)
   const showDateFields = config.released && config.releasedDateFilter === '4';

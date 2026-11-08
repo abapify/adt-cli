@@ -19,6 +19,9 @@ import {
   type RfcResponse,
 } from '../transport/types';
 
+/** Explicit `String()` coercion for untyped values. */
+const asText: (value: unknown) => string = String;
+
 /**
  * Raw fetcher signature the RFC client depends on.
  * Matches `AdtClient.fetch()` — callers pass
@@ -130,10 +133,10 @@ export function createRfcClient(config: RfcClientConfig): RfcClient {
           try {
             return JSON.stringify(value);
           } catch {
-            return String(value);
+            return asText(value);
           }
         }
-        return String(value);
+        return asText(value);
       };
       const xml = coerceToXml(response);
       return parseRfcSoapResponse(xml);

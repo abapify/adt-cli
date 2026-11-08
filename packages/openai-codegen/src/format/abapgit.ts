@@ -58,7 +58,7 @@ function buildClasXml(
 
 function escapeXml(value: string): string {
   return value
-    .replaceAll(/&/g, '&amp;')
+    .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')

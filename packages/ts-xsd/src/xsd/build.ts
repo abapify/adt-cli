@@ -78,8 +78,10 @@ export function buildXsd(schema: Schema, options: BuildOptions = {}): string {
   };
 
   const lines: string[] = [];
-  lines.push('<?xml version="1.0" encoding="UTF-8"?>');
-  lines.push(buildSchema(schema, ctx));
+  lines.push(
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    buildSchema(schema, ctx),
+  );
 
   return lines.join(pretty ? '\n' : '');
 }
@@ -99,15 +101,7 @@ function buildSchema(schema: Schema, ctx: BuildContext): string {
   const attrs: string[] = [];
 
   // XML namespace declarations (only if present in schema)
-  if (schema.$xmlns) {
-    for (const [prefix, uri] of Object.entries(schema.$xmlns)) {
-      if (prefix === '') {
-        attrs.push(`xmlns="${uri}"`);
-      } else {
-        attrs.push(`xmlns:${prefix}="${uri}"`);
-      }
-    }
-  }
+  addXmlnsAttrs(attrs, schema.$xmlns);
 
   // Schema attributes
   addAttr(attrs, 'id', schema.id);
@@ -125,75 +119,43 @@ function buildSchema(schema: Schema, ctx: BuildContext): string {
   const childCtx = { ...ctx, level: ctx.level + 1 };
 
   // Annotations first
-  if (schema.annotation) {
-    for (const ann of schema.annotation) {
-      children.push(buildAnnotation(ann, childCtx));
-    }
-  }
+  appendBuilt(children, schema.annotation, (ann) =>
+    buildAnnotation(ann, childCtx),
+  );
 
   // Imports/includes
-  if (schema.include) {
-    for (const inc of schema.include) {
-      children.push(buildInclude(inc, childCtx));
-    }
-  }
-  if (schema.import) {
-    for (const imp of schema.import) {
-      children.push(buildImport(imp, childCtx));
-    }
-  }
-  if (schema.redefine) {
-    for (const red of schema.redefine) {
-      children.push(buildRedefine(red, childCtx));
-    }
-  }
-  if (schema.override) {
-    for (const ovr of schema.override) {
-      children.push(buildOverride(ovr, childCtx));
-    }
-  }
+  appendBuilt(children, schema.include, (inc) => buildInclude(inc, childCtx));
+  appendBuilt(children, schema.import, (imp) => buildImport(imp, childCtx));
+  appendBuilt(children, schema.redefine, (red) => buildRedefine(red, childCtx));
+  appendBuilt(children, schema.override, (ovr) => buildOverride(ovr, childCtx));
 
   // Default open content
-  if (schema.defaultOpenContent) {
-    children.push(buildDefaultOpenContent(schema.defaultOpenContent, childCtx));
-  }
+  appendBuiltOne(children, schema.defaultOpenContent, (doc) =>
+    buildDefaultOpenContent(doc, childCtx),
+  );
 
   // Top-level declarations
-  if (schema.simpleType && Array.isArray(schema.simpleType)) {
-    for (const st of schema.simpleType) {
-      children.push(buildTopLevelSimpleType(st, childCtx));
-    }
-  }
-  if (schema.complexType && Array.isArray(schema.complexType)) {
-    for (const ct of schema.complexType) {
-      children.push(buildTopLevelComplexType(ct, childCtx));
-    }
-  }
-  if (schema.group) {
-    for (const grp of schema.group) {
-      children.push(buildNamedGroup(grp, childCtx));
-    }
-  }
-  if (schema.attributeGroup) {
-    for (const ag of schema.attributeGroup) {
-      children.push(buildNamedAttributeGroup(ag, childCtx));
-    }
-  }
-  if (schema.element) {
-    for (const el of schema.element) {
-      children.push(buildTopLevelElement(el, childCtx));
-    }
-  }
-  if (schema.attribute) {
-    for (const attr of schema.attribute) {
-      children.push(buildTopLevelAttribute(attr, childCtx));
-    }
-  }
-  if (schema.notation) {
-    for (const not of schema.notation) {
-      children.push(buildNotation(not, childCtx));
-    }
-  }
+  appendBuilt(
+    children,
+    Array.isArray(schema.simpleType) ? schema.simpleType : [],
+    (st) => buildTopLevelSimpleType(st, childCtx),
+  );
+  appendBuilt(
+    children,
+    Array.isArray(schema.complexType) ? schema.complexType : [],
+    (ct) => buildTopLevelComplexType(ct, childCtx),
+  );
+  appendBuilt(children, schema.group, (grp) => buildNamedGroup(grp, childCtx));
+  appendBuilt(children, schema.attributeGroup, (ag) =>
+    buildNamedAttributeGroup(ag, childCtx),
+  );
+  appendBuilt(children, schema.element, (el) =>
+    buildTopLevelElement(el, childCtx),
+  );
+  appendBuilt(children, schema.attribute, (attr) =>
+    buildTopLevelAttribute(attr, childCtx),
+  );
+  appendBuilt(children, schema.notation, (not) => buildNotation(not, childCtx));
 
   return buildElement(`${ctx.prefix}:schema`, attrs, children, ctx);
 }
@@ -329,46 +291,26 @@ function buildOverride(ovr: Override, ctx: BuildContext): string {
   const children: string[] = [];
   const childCtx = { ...ctx, level: ctx.level + 1 };
 
-  if (ovr.annotation) {
-    for (const ann of ovr.annotation) {
-      children.push(buildAnnotation(ann, childCtx));
-    }
-  }
-  if (ovr.simpleType) {
-    for (const st of ovr.simpleType) {
-      children.push(buildTopLevelSimpleType(st, childCtx));
-    }
-  }
-  if (ovr.complexType) {
-    for (const ct of ovr.complexType) {
-      children.push(buildTopLevelComplexType(ct, childCtx));
-    }
-  }
-  if (ovr.group) {
-    for (const grp of ovr.group) {
-      children.push(buildNamedGroup(grp, childCtx));
-    }
-  }
-  if (ovr.attributeGroup) {
-    for (const ag of ovr.attributeGroup) {
-      children.push(buildNamedAttributeGroup(ag, childCtx));
-    }
-  }
-  if (ovr.element) {
-    for (const el of ovr.element) {
-      children.push(buildTopLevelElement(el, childCtx));
-    }
-  }
-  if (ovr.attribute) {
-    for (const attr of ovr.attribute) {
-      children.push(buildTopLevelAttribute(attr, childCtx));
-    }
-  }
-  if (ovr.notation) {
-    for (const not of ovr.notation) {
-      children.push(buildNotation(not, childCtx));
-    }
-  }
+  appendBuilt(children, ovr.annotation, (ann) =>
+    buildAnnotation(ann, childCtx),
+  );
+  appendBuilt(children, ovr.simpleType, (st) =>
+    buildTopLevelSimpleType(st, childCtx),
+  );
+  appendBuilt(children, ovr.complexType, (ct) =>
+    buildTopLevelComplexType(ct, childCtx),
+  );
+  appendBuilt(children, ovr.group, (grp) => buildNamedGroup(grp, childCtx));
+  appendBuilt(children, ovr.attributeGroup, (ag) =>
+    buildNamedAttributeGroup(ag, childCtx),
+  );
+  appendBuilt(children, ovr.element, (el) =>
+    buildTopLevelElement(el, childCtx),
+  );
+  appendBuilt(children, ovr.attribute, (attr) =>
+    buildTopLevelAttribute(attr, childCtx),
+  );
+  appendBuilt(children, ovr.notation, (not) => buildNotation(not, childCtx));
 
   return buildElement(`${ctx.prefix}:override`, attrs, children, ctx);
 }
@@ -571,9 +513,9 @@ function buildComplexTypeContent(
   const children: string[] = [];
   const childCtx = { ...ctx, level: ctx.level + 1 };
 
-  if (ct.annotation) {
-    children.push(buildAnnotation(ct.annotation, childCtx));
-  }
+  appendBuiltOne(children, ct.annotation, (ann) =>
+    buildAnnotation(ann, childCtx),
+  );
 
   // Content model (choice)
   if (ct.simpleContent) {
@@ -582,42 +524,39 @@ function buildComplexTypeContent(
     children.push(buildComplexContent(ct.complexContent, childCtx));
   } else {
     // Short form
-    if (ct.openContent) {
-      children.push(buildOpenContent(ct.openContent, childCtx));
-    }
-    if (ct.group) {
-      children.push(buildGroupRef(ct.group, childCtx));
-    }
-    if (ct.all) {
-      children.push(buildAll(ct.all, childCtx));
-    }
-    if (ct.choice) {
-      children.push(buildExplicitGroup(ct.choice, 'choice', childCtx));
-    }
-    if (ct.sequence) {
-      children.push(buildExplicitGroup(ct.sequence, 'sequence', childCtx));
-    }
-    if (ct.attribute) {
-      for (const attr of ct.attribute) {
-        children.push(buildLocalAttribute(attr, childCtx));
-      }
-    }
-    if (ct.attributeGroup) {
-      for (const ag of ct.attributeGroup) {
-        children.push(buildAttributeGroupRef(ag, childCtx));
-      }
-    }
-    if (ct.anyAttribute) {
-      children.push(buildAnyAttribute(ct.anyAttribute, childCtx));
-    }
-    if (ct.assert) {
-      for (const a of ct.assert) {
-        children.push(buildAssertion(a, childCtx));
-      }
-    }
+    buildComplexTypeShortForm(ct, children, childCtx);
   }
 
   return buildElement(`${ctx.prefix}:complexType`, attrs, children, ctx);
+}
+
+/** Short form: content model and attributes directly on the complexType. */
+function buildComplexTypeShortForm(
+  ct: TopLevelComplexType | LocalComplexType,
+  children: string[],
+  childCtx: BuildContext,
+): void {
+  appendBuiltOne(children, ct.openContent, (oc) =>
+    buildOpenContent(oc, childCtx),
+  );
+  appendBuiltOne(children, ct.group, (grp) => buildGroupRef(grp, childCtx));
+  appendBuiltOne(children, ct.all, (all) => buildAll(all, childCtx));
+  appendBuiltOne(children, ct.choice, (c) =>
+    buildExplicitGroup(c, 'choice', childCtx),
+  );
+  appendBuiltOne(children, ct.sequence, (s) =>
+    buildExplicitGroup(s, 'sequence', childCtx),
+  );
+  appendBuilt(children, ct.attribute, (attr) =>
+    buildLocalAttribute(attr, childCtx),
+  );
+  appendBuilt(children, ct.attributeGroup, (ag) =>
+    buildAttributeGroupRef(ag, childCtx),
+  );
+  appendBuiltOne(children, ct.anyAttribute, (aa) =>
+    buildAnyAttribute(aa, childCtx),
+  );
+  appendBuilt(children, ct.assert, (a) => buildAssertion(a, childCtx));
 }
 
 // =============================================================================
@@ -695,76 +634,36 @@ function buildFacets(
   children: string[],
   ctx: BuildContext,
 ): void {
-  if (r.minExclusive) {
-    for (const f of r.minExclusive) {
-      children.push(buildFacet(f, 'minExclusive', ctx));
-    }
-  }
-  if (r.minInclusive) {
-    for (const f of r.minInclusive) {
-      children.push(buildFacet(f, 'minInclusive', ctx));
-    }
-  }
-  if (r.maxExclusive) {
-    for (const f of r.maxExclusive) {
-      children.push(buildFacet(f, 'maxExclusive', ctx));
-    }
-  }
-  if (r.maxInclusive) {
-    for (const f of r.maxInclusive) {
-      children.push(buildFacet(f, 'maxInclusive', ctx));
-    }
-  }
-  if (r.totalDigits) {
-    for (const f of r.totalDigits) {
-      children.push(buildFacet(f, 'totalDigits', ctx));
-    }
-  }
-  if (r.fractionDigits) {
-    for (const f of r.fractionDigits) {
-      children.push(buildFacet(f, 'fractionDigits', ctx));
-    }
-  }
-  if (r.length) {
-    for (const f of r.length) {
-      children.push(buildFacet(f, 'length', ctx));
-    }
-  }
-  if (r.minLength) {
-    for (const f of r.minLength) {
-      children.push(buildFacet(f, 'minLength', ctx));
-    }
-  }
-  if (r.maxLength) {
-    for (const f of r.maxLength) {
-      children.push(buildFacet(f, 'maxLength', ctx));
-    }
-  }
-  if (r.enumeration) {
-    for (const f of r.enumeration) {
-      children.push(buildFacet(f, 'enumeration', ctx));
-    }
-  }
-  if (r.whiteSpace) {
-    for (const f of r.whiteSpace) {
-      children.push(buildFacet(f, 'whiteSpace', ctx));
-    }
-  }
-  if (r.pattern) {
-    for (const p of r.pattern) {
-      children.push(buildPattern(p, ctx));
-    }
-  }
-  if (r.assertion) {
-    for (const a of r.assertion) {
-      children.push(buildAssertion(a, ctx));
-    }
-  }
-  if (r.explicitTimezone) {
-    for (const f of r.explicitTimezone) {
-      children.push(buildFacet(f, 'explicitTimezone', ctx));
-    }
-  }
+  appendBuilt(children, r.minExclusive, (f) =>
+    buildFacet(f, 'minExclusive', ctx),
+  );
+  appendBuilt(children, r.minInclusive, (f) =>
+    buildFacet(f, 'minInclusive', ctx),
+  );
+  appendBuilt(children, r.maxExclusive, (f) =>
+    buildFacet(f, 'maxExclusive', ctx),
+  );
+  appendBuilt(children, r.maxInclusive, (f) =>
+    buildFacet(f, 'maxInclusive', ctx),
+  );
+  appendBuilt(children, r.totalDigits, (f) =>
+    buildFacet(f, 'totalDigits', ctx),
+  );
+  appendBuilt(children, r.fractionDigits, (f) =>
+    buildFacet(f, 'fractionDigits', ctx),
+  );
+  appendBuilt(children, r.length, (f) => buildFacet(f, 'length', ctx));
+  appendBuilt(children, r.minLength, (f) => buildFacet(f, 'minLength', ctx));
+  appendBuilt(children, r.maxLength, (f) => buildFacet(f, 'maxLength', ctx));
+  appendBuilt(children, r.enumeration, (f) =>
+    buildFacet(f, 'enumeration', ctx),
+  );
+  appendBuilt(children, r.whiteSpace, (f) => buildFacet(f, 'whiteSpace', ctx));
+  appendBuilt(children, r.pattern, (p) => buildPattern(p, ctx));
+  appendBuilt(children, r.assertion, (a) => buildAssertion(a, ctx));
+  appendBuilt(children, r.explicitTimezone, (f) =>
+    buildFacet(f, 'explicitTimezone', ctx),
+  );
 }
 
 function buildFacet(f: Facet, name: string, ctx: BuildContext): string {
@@ -890,42 +789,30 @@ function buildComplexContentRestriction(
   const children: string[] = [];
   const childCtx = { ...ctx, level: ctx.level + 1 };
 
-  if (r.annotation) {
-    children.push(buildAnnotation(r.annotation, childCtx));
-  }
-  if (r.openContent) {
-    children.push(buildOpenContent(r.openContent, childCtx));
-  }
-  if (r.group) {
-    children.push(buildGroupRef(r.group, childCtx));
-  }
-  if (r.all) {
-    children.push(buildAll(r.all, childCtx));
-  }
-  if (r.choice) {
-    children.push(buildExplicitGroup(r.choice, 'choice', childCtx));
-  }
-  if (r.sequence) {
-    children.push(buildExplicitGroup(r.sequence, 'sequence', childCtx));
-  }
-  if (r.attribute) {
-    for (const attr of r.attribute) {
-      children.push(buildLocalAttribute(attr, childCtx));
-    }
-  }
-  if (r.attributeGroup) {
-    for (const ag of r.attributeGroup) {
-      children.push(buildAttributeGroupRef(ag, childCtx));
-    }
-  }
-  if (r.anyAttribute) {
-    children.push(buildAnyAttribute(r.anyAttribute, childCtx));
-  }
-  if (r.assert) {
-    for (const a of r.assert) {
-      children.push(buildAssertion(a, childCtx));
-    }
-  }
+  appendBuiltOne(children, r.annotation, (ann) =>
+    buildAnnotation(ann, childCtx),
+  );
+  appendBuiltOne(children, r.openContent, (oc) =>
+    buildOpenContent(oc, childCtx),
+  );
+  appendBuiltOne(children, r.group, (grp) => buildGroupRef(grp, childCtx));
+  appendBuiltOne(children, r.all, (all) => buildAll(all, childCtx));
+  appendBuiltOne(children, r.choice, (c) =>
+    buildExplicitGroup(c, 'choice', childCtx),
+  );
+  appendBuiltOne(children, r.sequence, (s) =>
+    buildExplicitGroup(s, 'sequence', childCtx),
+  );
+  appendBuilt(children, r.attribute, (attr) =>
+    buildLocalAttribute(attr, childCtx),
+  );
+  appendBuilt(children, r.attributeGroup, (ag) =>
+    buildAttributeGroupRef(ag, childCtx),
+  );
+  appendBuiltOne(children, r.anyAttribute, (aa) =>
+    buildAnyAttribute(aa, childCtx),
+  );
+  appendBuilt(children, r.assert, (a) => buildAssertion(a, childCtx));
 
   return buildElement(`${ctx.prefix}:restriction`, attrs, children, ctx);
 }
@@ -941,42 +828,30 @@ function buildComplexContentExtension(
   const children: string[] = [];
   const childCtx = { ...ctx, level: ctx.level + 1 };
 
-  if (e.annotation) {
-    children.push(buildAnnotation(e.annotation, childCtx));
-  }
-  if (e.openContent) {
-    children.push(buildOpenContent(e.openContent, childCtx));
-  }
-  if (e.group) {
-    children.push(buildGroupRef(e.group, childCtx));
-  }
-  if (e.all) {
-    children.push(buildAll(e.all, childCtx));
-  }
-  if (e.choice) {
-    children.push(buildExplicitGroup(e.choice, 'choice', childCtx));
-  }
-  if (e.sequence) {
-    children.push(buildExplicitGroup(e.sequence, 'sequence', childCtx));
-  }
-  if (e.attribute) {
-    for (const attr of e.attribute) {
-      children.push(buildLocalAttribute(attr, childCtx));
-    }
-  }
-  if (e.attributeGroup) {
-    for (const ag of e.attributeGroup) {
-      children.push(buildAttributeGroupRef(ag, childCtx));
-    }
-  }
-  if (e.anyAttribute) {
-    children.push(buildAnyAttribute(e.anyAttribute, childCtx));
-  }
-  if (e.assert) {
-    for (const a of e.assert) {
-      children.push(buildAssertion(a, childCtx));
-    }
-  }
+  appendBuiltOne(children, e.annotation, (ann) =>
+    buildAnnotation(ann, childCtx),
+  );
+  appendBuiltOne(children, e.openContent, (oc) =>
+    buildOpenContent(oc, childCtx),
+  );
+  appendBuiltOne(children, e.group, (grp) => buildGroupRef(grp, childCtx));
+  appendBuiltOne(children, e.all, (all) => buildAll(all, childCtx));
+  appendBuiltOne(children, e.choice, (c) =>
+    buildExplicitGroup(c, 'choice', childCtx),
+  );
+  appendBuiltOne(children, e.sequence, (s) =>
+    buildExplicitGroup(s, 'sequence', childCtx),
+  );
+  appendBuilt(children, e.attribute, (attr) =>
+    buildLocalAttribute(attr, childCtx),
+  );
+  appendBuilt(children, e.attributeGroup, (ag) =>
+    buildAttributeGroupRef(ag, childCtx),
+  );
+  appendBuiltOne(children, e.anyAttribute, (aa) =>
+    buildAnyAttribute(aa, childCtx),
+  );
+  appendBuilt(children, e.assert, (a) => buildAssertion(a, childCtx));
 
   return buildElement(`${ctx.prefix}:extension`, attrs, children, ctx);
 }
@@ -1078,34 +953,18 @@ function buildExplicitGroup(
   const children: string[] = [];
   const childCtx = { ...ctx, level: ctx.level + 1 };
 
-  if (g.annotation) {
-    children.push(buildAnnotation(g.annotation, childCtx));
-  }
-  if (g.element) {
-    for (const el of g.element) {
-      children.push(buildLocalElement(el, childCtx));
-    }
-  }
-  if (g.group) {
-    for (const grp of g.group) {
-      children.push(buildGroupRef(grp, childCtx));
-    }
-  }
-  if (g.choice) {
-    for (const c of g.choice) {
-      children.push(buildExplicitGroup(c, 'choice', childCtx));
-    }
-  }
-  if (g.sequence) {
-    for (const s of g.sequence) {
-      children.push(buildExplicitGroup(s, 'sequence', childCtx));
-    }
-  }
-  if (g.any) {
-    for (const a of g.any) {
-      children.push(buildAny(a, childCtx));
-    }
-  }
+  appendBuiltOne(children, g.annotation, (ann) =>
+    buildAnnotation(ann, childCtx),
+  );
+  appendBuilt(children, g.element, (el) => buildLocalElement(el, childCtx));
+  appendBuilt(children, g.group, (grp) => buildGroupRef(grp, childCtx));
+  appendBuilt(children, g.choice, (c) =>
+    buildExplicitGroup(c, 'choice', childCtx),
+  );
+  appendBuilt(children, g.sequence, (s) =>
+    buildExplicitGroup(s, 'sequence', childCtx),
+  );
+  appendBuilt(children, g.any, (a) => buildAny(a, childCtx));
 
   return buildElement(`${ctx.prefix}:${name}`, attrs, children, ctx);
 }
@@ -1488,6 +1347,46 @@ function buildNotation(n: Notation, ctx: BuildContext): string {
 // Utility Functions
 // =============================================================================
 
+/** Add xmlns:* namespace declaration attributes. */
+function addXmlnsAttrs(
+  attrs: string[],
+  xmlns: Record<string, string> | undefined,
+): void {
+  if (!xmlns) return;
+
+  for (const [prefix, uri] of Object.entries(xmlns)) {
+    if (prefix === '') {
+      attrs.push(`xmlns="${uri}"`);
+    } else {
+      attrs.push(`xmlns:${prefix}="${uri}"`);
+    }
+  }
+}
+
+/** Append one built child element per item, skipped when `items` is absent. */
+function appendBuilt<T>(
+  children: string[],
+  items: readonly T[] | undefined,
+  build: (item: T) => string,
+): void {
+  if (items) {
+    for (const item of items) {
+      children.push(build(item));
+    }
+  }
+}
+
+/** Append a single built child element when `item` is present. */
+function appendBuiltOne<T>(
+  children: string[],
+  item: T | undefined,
+  build: (item: T) => string,
+): void {
+  if (item) {
+    children.push(build(item));
+  }
+}
+
 function addAttr(
   attrs: string[],
   name: string,
@@ -1498,14 +1397,22 @@ function addAttr(
   }
 }
 
+function addPlainAttr(
+  attrs: string[],
+  name: string,
+  value: boolean | number | string | undefined,
+): void {
+  if (value !== undefined) {
+    attrs.push(`${name}="${value}"`);
+  }
+}
+
 function addBoolAttr(
   attrs: string[],
   name: string,
   value: boolean | undefined,
 ): void {
-  if (value !== undefined) {
-    attrs.push(`${name}="${value}"`);
-  }
+  addPlainAttr(attrs, name, value);
 }
 
 function addOccursAttr(
@@ -1513,14 +1420,12 @@ function addOccursAttr(
   name: string,
   value: number | string | undefined,
 ): void {
-  if (value !== undefined) {
-    attrs.push(`${name}="${value}"`);
-  }
+  addPlainAttr(attrs, name, value);
 }
 
 function escapeXml(str: string): string {
   return str
-    .replaceAll(/&/g, '&amp;')
+    .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')

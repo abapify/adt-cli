@@ -7,17 +7,31 @@ import {
   type LintOptions,
 } from '@abapify/adt-lint';
 
+/**
+ * If a line or block comment starts at `i`, return the index just past it;
+ * otherwise return `i` unchanged.
+ */
+function skipJsonComment(text: string, i: number): number {
+  if (text[i] === '/' && text[i + 1] === '/') {
+    while (i < text.length && text[i] !== '\n') i++;
+    return i;
+  }
+  if (text[i] === '/' && text[i + 1] === '*') {
+    i += 2;
+    while (i < text.length - 1 && !(text[i] === '*' && text[i + 1] === '/'))
+      i++;
+    return i + 2;
+  }
+  return i;
+}
+
 function stripJsonComments(text: string): string {
   let result = '';
   let i = 0;
   while (i < text.length) {
-    if (text[i] === '/' && text[i + 1] === '/') {
-      while (i < text.length && text[i] !== '\n') i++;
-    } else if (text[i] === '/' && text[i + 1] === '*') {
-      i += 2;
-      while (i < text.length - 1 && !(text[i] === '*' && text[i + 1] === '/'))
-        i++;
-      i += 2;
+    const next = skipJsonComment(text, i);
+    if (next !== i) {
+      i = next;
     } else {
       result += text[i];
       i++;
@@ -44,6 +58,67 @@ async function loadRuleOverrides(
       `Invalid JSON/JSONC in ${configPath}: ${e instanceof Error ? e.message : String(e)}`,
       { cause: e },
     );
+  }
+}
+
+/** Print the available abaplint rules as JSON or as a checklist. */
+function printRuleList(
+  lintOptions: LintOptions,
+  json: boolean | undefined,
+): void {
+  const rules = listRules(lintOptions);
+  if (json) {
+    console.log(JSON.stringify({ rules }, null, 2));
+  } else {
+    for (const rule of rules) {
+      console.log(`${rule.enabled ? '✓' : ' '} ${rule.key}`);
+    }
+  }
+}
+
+/** Apply auto-fixes, print the fixed source and exit non-zero on remaining errors. */
+function runFix(
+  source: string,
+  lintOptions: LintOptions,
+  json: boolean | undefined,
+): void {
+  const result = lintAndFix(source, lintOptions);
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    process.stdout.write(result.source);
+    if (result.remaining.length > 0) {
+      console.error(`\n⚠️ Remaining issues: ${result.remaining.length}`);
+    }
+  }
+
+  if (result.remaining.some((issue) => issue.severity === 'error')) {
+    process.exit(1);
+  }
+}
+
+/** Lint source, print issues and exit non-zero on error-severity issues. */
+function runLintReport(
+  source: string,
+  lintOptions: LintOptions,
+  json: boolean | undefined,
+): void {
+  const issues = lintSource(source, lintOptions);
+
+  if (json) {
+    console.log(JSON.stringify({ issues }, null, 2));
+  } else if (issues.length === 0) {
+    console.log('✅ No lint issues');
+  } else {
+    for (const issue of issues) {
+      console.log(
+        `${issue.severity.toUpperCase()} ${issue.filename}:${issue.start.line}:${issue.start.column} ${issue.key} ${issue.message}`,
+      );
+    }
+  }
+
+  if (issues.some((issue) => issue.severity === 'error')) {
+    process.exit(1);
   }
 }
 
@@ -76,14 +151,7 @@ export const lintCommand = new Command('lint')
         };
 
         if (options.listRules) {
-          const rules = listRules(lintOptions);
-          if (options.json) {
-            console.log(JSON.stringify({ rules }, null, 2));
-          } else {
-            for (const rule of rules) {
-              console.log(`${rule.enabled ? '✓' : ' '} ${rule.key}`);
-            }
-          }
+          printRuleList(lintOptions, options.json);
           return;
         }
 
@@ -96,41 +164,11 @@ export const lintCommand = new Command('lint')
         }
 
         if (options.fix) {
-          const result = lintAndFix(source, lintOptions);
-          if (options.json) {
-            console.log(JSON.stringify(result, null, 2));
-          } else {
-            process.stdout.write(result.source);
-            if (result.remaining.length > 0) {
-              console.error(
-                `\n⚠️ Remaining issues: ${result.remaining.length}`,
-              );
-            }
-          }
-
-          if (result.remaining.some((issue) => issue.severity === 'error')) {
-            process.exit(1);
-          }
+          runFix(source, lintOptions, options.json);
           return;
         }
 
-        const issues = lintSource(source, lintOptions);
-
-        if (options.json) {
-          console.log(JSON.stringify({ issues }, null, 2));
-        } else if (issues.length === 0) {
-          console.log('✅ No lint issues');
-        } else {
-          for (const issue of issues) {
-            console.log(
-              `${issue.severity.toUpperCase()} ${issue.filename}:${issue.start.line}:${issue.start.column} ${issue.key} ${issue.message}`,
-            );
-          }
-        }
-
-        if (issues.some((issue) => issue.severity === 'error')) {
-          process.exit(1);
-        }
+        runLintReport(source, lintOptions, options.json);
       } catch (error) {
         console.error(
           '❌ Lint failed:',

@@ -40,11 +40,9 @@ export function createMockAdapter(mockResponse: MockResponse): {
   let lastRequest: CapturedRequest | undefined;
 
   const adapter: HttpAdapter = {
-    request: async <TResponse>(
-      options?: HttpRequestOptions,
-    ): Promise<TResponse> => {
+    request: <TResponse>(options?: HttpRequestOptions): Promise<TResponse> => {
       if (!options) {
-        throw new Error('No request options provided');
+        return Promise.reject(new Error('No request options provided'));
       }
 
       // Capture request details
@@ -74,11 +72,13 @@ export function createMockAdapter(mockResponse: MockResponse): {
         { parse: (xml: string) => TResponse } | undefined;
 
       if (!responseSchema) {
-        throw new Error(`No response schema for status ${status}`);
+        return Promise.reject(
+          new Error(`No response schema for status ${status}`),
+        );
       }
 
       // Parse XML using the contract's response schema
-      return responseSchema.parse(mockResponse.xml);
+      return Promise.resolve(responseSchema.parse(mockResponse.xml));
     },
   };
 

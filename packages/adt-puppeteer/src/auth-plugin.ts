@@ -44,9 +44,9 @@ const authPlugin: AuthPlugin = {
     };
   },
 
-  async refresh(_session: AuthSession): Promise<AuthPluginResult | null> {
+  refresh(_session: AuthSession): Promise<AuthPluginResult | null> {
     // Don't try to refresh - Okta SSO cookies can't be silently refreshed
-    return null;
+    return Promise.resolve(null);
   },
 };
 

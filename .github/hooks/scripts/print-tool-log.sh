@@ -7,7 +7,7 @@ cat > /dev/null
 
 LOG_FILE="tmp/tool-calls.jsonl"
 
-if [ ! -f "$LOG_FILE" ]; then
+if [[ ! -f "$LOG_FILE" ]]; then
   echo "[]"
   exit 0
 fi

@@ -94,7 +94,7 @@ function openInAdt(systemName: string, url: string): void {
 /**
  * Inner component that uses navigation context
  */
-function NavigatorInner({ systemName }: { systemName?: string }) {
+function NavigatorInner({ systemName }: Readonly<{ systemName?: string }>) {
   const { current, loading, error, navigate, back } = useNavigation();
 
   // Get page result
@@ -169,7 +169,7 @@ export function Navigator({
   startUrl,
   fetch,
   systemName,
-}: NavigatorProps): React.ReactNode {
+}: Readonly<NavigatorProps>): React.ReactNode {
   return (
     <NavigationProvider
       fetch={fetch}
@@ -184,7 +184,9 @@ export function Navigator({
 /**
  * URL input prompt component
  */
-function UrlPrompt({ onSubmit }: { onSubmit: (url: string) => void }) {
+function UrlPrompt({
+  onSubmit,
+}: Readonly<{ onSubmit: (url: string) => void }>) {
   const [url, setUrl] = useState('');
 
   const handleSubmit = () => {

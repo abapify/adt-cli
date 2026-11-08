@@ -28,9 +28,10 @@ export function parseAbapGitFilename(filename: string): {
 } | null {
   // Match patterns like: name.type.xml, name.type.json, name.type.suffix.abap,
   // name.type.<suffix>.abdl/.acds/.asrvd source files.
-  const match = filename.match(
-    /^([^.]+)\.([^.]+)(?:\.([^.]+))?\.(xml|json|abap|abdl|acds|asrvd)$/,
-  );
+  const match =
+    /^([^.]+)\.([^.]+)(?:\.([^.]+))?\.(xml|json|abap|abdl|acds|asrvd)$/.exec(
+      filename,
+    );
   if (!match) return null;
 
   const [, name, type, suffixOrExt, extension] = match;

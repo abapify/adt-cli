@@ -150,12 +150,11 @@ async function buildFunctionModuleFiles(
     }
     try {
       const source =
-        suppliedFmSource !== undefined
-          ? suppliedFmSource
-          : await obj.client.adt.functions.groups.fmodules.source.main.get(
-              obj.name,
-              fm.name,
-            );
+        suppliedFmSource ??
+        (await obj.client.adt.functions.groups.fmodules.source.main.get(
+          obj.name,
+          fm.name,
+        ));
       if (shouldIncludeSource(source, suppliedFmSource)) {
         files.push(
           ctx.createFile(
@@ -425,21 +424,17 @@ export function extractFunctionDescriptors(
   if (!functions) return [];
 
   // Handle both { item: [...] } and direct array forms
-  const items = Array.isArray(functions)
-    ? functions
-    : Array.isArray((functions as Record<string, unknown>)?.item)
-      ? ((functions as Record<string, unknown>).item as Record<
-          string,
-          unknown
-        >[])
-      : (functions as Record<string, unknown>)?.item
-        ? [
-            (functions as Record<string, unknown>).item as Record<
-              string,
-              unknown
-            >,
-          ]
-        : [];
+  const functionsRecord = functions as Record<string, unknown> | undefined;
+  let items: Record<string, unknown>[];
+  if (Array.isArray(functions)) {
+    items = functions as Record<string, unknown>[];
+  } else if (Array.isArray(functionsRecord?.item)) {
+    items = functionsRecord.item as Record<string, unknown>[];
+  } else if (functionsRecord?.item) {
+    items = [functionsRecord.item as Record<string, unknown>];
+  } else {
+    items = [];
+  }
 
   return (items as Array<Record<string, unknown>>).map((fm) => ({
     funcName: String((fm.FUNCNAME as string | undefined) ?? ''),

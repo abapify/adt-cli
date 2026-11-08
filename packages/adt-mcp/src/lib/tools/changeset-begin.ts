@@ -42,7 +42,7 @@ export function registerChangesetBeginTool(
       if (!guard.ok) return guard.error;
       const session = guard.value;
 
-      if (session.changeset && session.changeset.status === 'open') {
+      if (session.changeset?.status === 'open') {
         if (!args.force) {
           return textError(
             `A changeset is already open (id=${session.changeset.id}). ` +

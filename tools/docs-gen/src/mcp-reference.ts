@@ -251,7 +251,7 @@ function findSource(
     quoted.some((literal) => text.includes(literal)),
   );
   const preferred = matches.find(
-    ([file]) => basename(file, '.ts') === name.replace(/_/g, '-'),
+    ([file]) => basename(file, '.ts') === name.replaceAll('_', '-'),
   );
   return (preferred ?? matches.at(0))?.[0];
 }
@@ -273,7 +273,8 @@ function handwrittenTail(existing: string | undefined): string {
   // No generated anchor — nothing safe to preserve, regenerate the stub.
   if (schemaAt === -1) return DEFAULT_TAIL;
   const tailAt = lines.findIndex(
-    (l, i) => i > schemaAt && /^## /.test(l) && !INPUT_SCHEMA_HEADING.test(l),
+    (l, i) =>
+      i > schemaAt && l.startsWith('## ') && !INPUT_SCHEMA_HEADING.test(l),
   );
   return tailAt === -1 ? DEFAULT_TAIL : lines.slice(tailAt).join('\n').trim();
 }

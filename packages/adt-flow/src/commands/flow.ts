@@ -119,6 +119,44 @@ function assertParentChainSafe(
   }
 }
 
+/**
+ * Resolve the nearest existing ancestor directory of `parent`, re-appending
+ * the non-existent segments. At each step, check for dangling symlinks
+ * (existing lstat but realpath fails) that point outside the checkout —
+ * mkdir/writeFile would follow them. Returns `parent` itself when no
+ * ancestor resolves.
+ */
+function resolveRealParent(
+  parent: string,
+  realRoot: string,
+  optionName: string,
+): string {
+  let current = parent;
+  const segments: string[] = [];
+  for (;;) {
+    // Check if current is a symlink (including dangling ones) whose
+    // chain escapes the checkout root.
+    try {
+      assertNoSymlinkEscape(current, realRoot, optionName);
+    } catch (error) {
+      if (error instanceof AdtFlowError) throw error;
+      // lstat failed — path doesn't exist at all, continue walking up.
+    }
+    try {
+      const realCurrent = realpathSync(current);
+      segments.reverse();
+      return resolve(realCurrent, ...segments);
+    } catch {
+      segments.push(basename(current));
+      const next = dirname(current);
+      if (next === current) {
+        return parent;
+      }
+      current = next;
+    }
+  }
+}
+
 function partialReportPath(
   value: unknown,
   root: string,
@@ -167,30 +205,7 @@ function partialReportPath(
   } catch {
     // Parent doesn't exist — walk up to the nearest existing ancestor
     // and re-append the non-existent segments.
-    let current = parent;
-    const segments: string[] = [];
-    for (;;) {
-      // Check if current is a symlink (including dangling ones) whose
-      // chain escapes the checkout root.
-      try {
-        assertNoSymlinkEscape(current, realRoot, optionName);
-      } catch (error) {
-        if (error instanceof AdtFlowError) throw error;
-        // lstat failed — path doesn't exist at all, continue walking up.
-      }
-      try {
-        realParent = resolve(realpathSync(current), ...segments.reverse());
-        break;
-      } catch {
-        segments.push(basename(current));
-        const next = dirname(current);
-        if (next === current) {
-          realParent = parent;
-          break;
-        }
-        current = next;
-      }
-    }
+    realParent = resolveRealParent(parent, realRoot, optionName);
   }
   const realTarget = resolve(realParent, base);
   if (escapeRoot(realRoot, realTarget)) {
@@ -416,9 +431,7 @@ function checkoutTrCommand(
         reportTargets.length > 0
           ? await service.checkout(checkoutInput, {
               beforeCheckout: async () => {
-                for (const target of reportTargets) {
-                  await removeStaleReport(target);
-                }
+                await Promise.all(reportTargets.map(removeStaleReport));
               },
               afterCheckout: async (checkoutResult) => {
                 if (report)

@@ -100,7 +100,7 @@ export type ElementLike = {
   readonly ref?: string;
   readonly type?: string;
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
   readonly default?: string;
   readonly fixed?: string;
   readonly id?: string;
@@ -149,7 +149,7 @@ export type ComplexTypeLike = {
 
 export type GroupLike = {
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
   readonly element?: readonly ElementLike[];
   readonly choice?: readonly GroupLike[];
   readonly sequence?: readonly GroupLike[];
@@ -161,7 +161,7 @@ export type GroupLike = {
 export type GroupRefLike = {
   readonly ref?: string;
   readonly minOccurs?: number | string;
-  readonly maxOccurs?: number | string | 'unbounded';
+  readonly maxOccurs?: number | string;
 };
 
 // =============================================================================

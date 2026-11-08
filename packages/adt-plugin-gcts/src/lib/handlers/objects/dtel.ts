@@ -16,10 +16,11 @@ import { createHandler } from '../base';
 import { affDataType } from './ddic-data-type';
 import type { DtelAff } from '../../../schemas/generated';
 
-// TODO: Replace Record<string, unknown> with generated ADK DTEL types once
-// adt-schemas exports a typed DataelementsSchema interface. Dynamic access is
-// required because AdkDataElement.dataSync returns a generic record today.
-// Cleanup issue: https://github.com/abapify/adt-cli/issues/195
+// Dynamic access is required because AdkDataElement.dataSync returns a
+// generic record today; replacing Record<string, unknown> with generated
+// ADK DTEL types is blocked on adt-schemas exporting a typed
+// DataelementsSchema interface. Tracked in
+// https://github.com/abapify/adt-cli/issues/195
 function buildDataTypeInformation(
   data: Record<string, unknown>,
 ): DtelAff['dataTypeInformation'] {
@@ -46,7 +47,8 @@ function buildDataTypeInformation(
   return {};
 }
 
-// TODO: Same as above — replace with typed access once ADK exports DTEL types.
+// Dynamic access for the same reason as above (ADK does not yet export DTEL
+// types).
 function buildFieldLabels(
   data: Record<string, unknown>,
 ): NonNullable<DtelAff['fieldLabels']> {

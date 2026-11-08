@@ -5,7 +5,7 @@ import { handleCommandError } from '../../utils/command-helpers';
 export const statusCommand = new Command('status')
   .description('Check authentication status')
   .option('--sid <sid>', 'System ID to check (defaults to current default)')
-  .action(async (options) => {
+  .action((options) => {
     try {
       const sid = options.sid || getDefaultSid();
 

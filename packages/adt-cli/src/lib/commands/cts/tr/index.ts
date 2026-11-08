@@ -10,7 +10,7 @@
  * - adt cts tr delete <TR>            - Delete transport (with confirmation)
  * - adt cts tr release <TR>           - Release transport
  * - adt cts tr reassign <TR> <owner>  - Change transport owner
- * - adt cts tr check <TR>             - Pre-release validation (TODO)
+ * - adt cts tr check <TR>             - Pre-release validation (not yet implemented)
  */
 
 import { Command } from 'commander';

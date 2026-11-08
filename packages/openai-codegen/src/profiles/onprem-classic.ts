@@ -1,6 +1,7 @@
 import type { TargetProfile } from './types';
 
-// TODO: flesh out on-prem classic emitter details (Wave ≥2).
+// Emitter details are minimal; richer on-prem classic emitter specifics are
+// deferred to Wave ≥2.
 export const onPremClassicProfile: TargetProfile = {
   id: 'on-prem-classic',
   description:

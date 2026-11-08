@@ -165,6 +165,16 @@ describe('W3C XMLSchema.xsd Double Roundtrip', () => {
   it('should build XSD from re-parsed schema (second roundtrip)', () => {
     xsd2 = buildXsd(schema2);
 
+    assert.ok(
+      xsd2.startsWith('<?xml version="1.0"'),
+      'Should start with XML declaration',
+    );
+    assert.ok(xsd2.includes('xs:schema'), 'Should have xs:schema element');
+    assert.ok(
+      xsd2.includes('targetNamespace="http://www.w3.org/2001/XMLSchema"'),
+      'Should preserve targetNamespace',
+    );
+
     console.log(
       `Built XSD2: ${xsd2.length} chars, ${xsd2.split('\n').length} lines`,
     );

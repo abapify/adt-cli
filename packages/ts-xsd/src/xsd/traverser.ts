@@ -187,45 +187,33 @@ export abstract class SchemaTraverser {
 
   private traverseSchemaChildren(schema: Schema): void {
     // ComplexTypes
-    if (schema.complexType) {
-      for (const ct of schema.complexType) {
-        this.onComplexType(ct);
-      }
+    for (const ct of schema.complexType ?? []) {
+      this.onComplexType(ct);
     }
 
     // SimpleTypes
-    if (schema.simpleType) {
-      for (const st of schema.simpleType) {
-        this.onSimpleType(st);
-      }
+    for (const st of schema.simpleType ?? []) {
+      this.onSimpleType(st);
     }
 
     // Elements
-    if (schema.element) {
-      for (const element of schema.element) {
-        this.onElement(element);
-      }
+    for (const element of schema.element ?? []) {
+      this.onElement(element);
     }
 
     // Attributes
-    if (schema.attribute) {
-      for (const attr of schema.attribute) {
-        this.onAttribute(attr);
-      }
+    for (const attr of schema.attribute ?? []) {
+      this.onAttribute(attr);
     }
 
     // Groups
-    if (schema.group) {
-      for (const group of schema.group) {
-        this.onGroup(group);
-      }
+    for (const group of schema.group ?? []) {
+      this.onGroup(group);
     }
 
     // AttributeGroups
-    if (schema.attributeGroup) {
-      for (const group of schema.attributeGroup) {
-        this.onAttributeGroup(group);
-      }
+    for (const group of schema.attributeGroup ?? []) {
+      this.onAttributeGroup(group);
     }
   }
 
@@ -237,30 +225,25 @@ export abstract class SchemaTraverser {
 
     for (const redefine of schema.redefine) {
       this.onRedefine(redefine);
-
-      if (redefine.complexType) {
-        for (const ct of redefine.complexType) {
-          this.onComplexType(ct);
-        }
-      }
-      if (redefine.simpleType) {
-        for (const st of redefine.simpleType) {
-          this.onSimpleType(st);
-        }
-      }
-      if (redefine.group) {
-        for (const group of redefine.group) {
-          this.onGroup(group);
-        }
-      }
-      if (redefine.attributeGroup) {
-        for (const group of redefine.attributeGroup) {
-          this.onAttributeGroup(group);
-        }
-      }
+      this.traverseRedefineChildren(redefine);
     }
 
     this.source = prevSource;
+  }
+
+  private traverseRedefineChildren(redefine: Redefine): void {
+    for (const ct of redefine.complexType ?? []) {
+      this.onComplexType(ct);
+    }
+    for (const st of redefine.simpleType ?? []) {
+      this.onSimpleType(st);
+    }
+    for (const group of redefine.group ?? []) {
+      this.onGroup(group);
+    }
+    for (const group of redefine.attributeGroup ?? []) {
+      this.onAttributeGroup(group);
+    }
   }
 
   private traverseOverrides(schema: Schema): void {
@@ -271,40 +254,31 @@ export abstract class SchemaTraverser {
 
     for (const override of schema.override) {
       this.onOverride(override);
-
-      if (override.complexType) {
-        for (const ct of override.complexType) {
-          this.onComplexType(ct);
-        }
-      }
-      if (override.simpleType) {
-        for (const st of override.simpleType) {
-          this.onSimpleType(st);
-        }
-      }
-      if (override.element) {
-        for (const element of override.element) {
-          this.onElement(element);
-        }
-      }
-      if (override.attribute) {
-        for (const attr of override.attribute) {
-          this.onAttribute(attr);
-        }
-      }
-      if (override.group) {
-        for (const group of override.group) {
-          this.onGroup(group);
-        }
-      }
-      if (override.attributeGroup) {
-        for (const group of override.attributeGroup) {
-          this.onAttributeGroup(group);
-        }
-      }
+      this.traverseOverrideChildren(override);
     }
 
     this.source = prevSource;
+  }
+
+  private traverseOverrideChildren(override: Override): void {
+    for (const ct of override.complexType ?? []) {
+      this.onComplexType(ct);
+    }
+    for (const st of override.simpleType ?? []) {
+      this.onSimpleType(st);
+    }
+    for (const element of override.element ?? []) {
+      this.onElement(element);
+    }
+    for (const attr of override.attribute ?? []) {
+      this.onAttribute(attr);
+    }
+    for (const group of override.group ?? []) {
+      this.onGroup(group);
+    }
+    for (const group of override.attributeGroup ?? []) {
+      this.onAttributeGroup(group);
+    }
   }
 
   private traverseIncludes(schema: Schema, depth: number): void {

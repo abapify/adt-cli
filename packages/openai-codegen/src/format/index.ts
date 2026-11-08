@@ -79,13 +79,17 @@ export async function writeClientBundle(
   outDir: string,
 ): Promise<WriteResult> {
   const all = new Set<string>();
-  for (const artifact of [
-    artifacts.types,
-    artifacts.operations,
-    artifacts.exception,
-    artifacts.implementation,
-  ] as const) {
-    const r = await writeLayout(artifact, format, outDir);
+  const layouts = await Promise.all(
+    (
+      [
+        artifacts.types,
+        artifacts.operations,
+        artifacts.exception,
+        artifacts.implementation,
+      ] as const
+    ).map((artifact) => writeLayout(artifact, format, outDir)),
+  );
+  for (const r of layouts) {
     for (const f of r.files) {
       all.add(f);
     }

@@ -49,11 +49,13 @@ export interface McpServerOptions {
     sessionId?: string;
   }) => McpRequestAccess | undefined;
   /** Deployment-owned atomic authorization hook required by scoped execution. */
-  consumeExecutionAuthorization?: ToolContext['consumeExecutionAuthorization'];
+  consumeExecutionAuthorization?: NonNullable<
+    ToolContext['consumeExecutionAuthorization']
+  >;
   /** Deployment-owned terminal outcome hook required by scoped execution. */
-  reportExecutionOutcome?: ToolContext['reportExecutionOutcome'];
+  reportExecutionOutcome?: NonNullable<ToolContext['reportExecutionOutcome']>;
   /** Hard-cancellable runtime required for scoped execution. */
-  executeWithDeadline?: ToolContext['executeWithDeadline'];
+  executeWithDeadline?: NonNullable<ToolContext['executeWithDeadline']>;
   /** Private ADT broker resolver for signed frozen-source capabilities. */
   resolveFrozenSource?: ToolContext['resolveFrozenSource'];
   /** Filesystem roots available to workspace-mutating flow tools. */

@@ -147,11 +147,22 @@ describe('ts-morph integration', () => {
     });
 
     it('generates base schema interfaces', () => {
-      const { sourceFile } = schemaToSourceFile(adtcoreSchema);
+      const { sourceFile, rootTypeName } = schemaToSourceFile(adtcoreSchema);
       const code = sourceFile.getFullText();
 
       // Write to file for inspection
       writeOutput('adtcore.types.ts', code);
+
+      // Verify the base interface is generated with its properties
+      assert.ok(
+        code.includes('export interface AdtObjectType'),
+        'Should generate AdtObjectType interface',
+      );
+      assert.ok(
+        code.includes('uri: string'),
+        'AdtObjectType should have required uri property',
+      );
+      assert.equal(rootTypeName, 'AdtcoreSchema');
     });
 
     it('flattens class schema with inheritance', () => {

@@ -70,13 +70,13 @@ export interface ClientConfig {
   headers?: Record<string, string>;
 
   /** Request interceptor */
-  onRequest?: (options: any) => any | Promise<any>;
+  onRequest?: (options: any) => any;
 
   /** Response interceptor */
-  onResponse?: (response: any) => any | Promise<any>;
+  onResponse?: (response: any) => any;
 
   /** Error interceptor */
-  onError?: (error: any) => any | Promise<any>;
+  onError?: (error: any) => any;
 }
 
 /**

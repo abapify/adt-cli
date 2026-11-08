@@ -9,7 +9,7 @@ export const logoutCommand = new Command('logout')
     '--sid <sid>',
     'System ID to logout from (defaults to current default)',
   )
-  .action(async (options) => {
+  .action((options) => {
     try {
       const sid = options.sid || getDefaultSid();
 

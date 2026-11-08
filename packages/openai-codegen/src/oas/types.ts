@@ -107,7 +107,7 @@ export interface SecuritySchemeApiKey {
 
 export interface SecuritySchemeHttp {
   type: 'http';
-  scheme: 'bearer' | 'basic' | string;
+  scheme: string;
   bearerFormat?: string;
   description?: string;
 }

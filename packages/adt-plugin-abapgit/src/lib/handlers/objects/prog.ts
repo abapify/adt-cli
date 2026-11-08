@@ -61,15 +61,12 @@ export const programHandler = createHandler<
       activeUnicodeCheck: PROGDIR?.UNICODE === 'X',
     };
     if (subc === 'I') return { ...data, type: 'PROG/I' };
+    const baseProgramType =
+      subc === 'S' ? 'subroutinePool' : 'executableProgram';
     return {
       ...data,
       type: 'PROG/P',
-      programType:
-        subc === 'M'
-          ? 'modulePool'
-          : subc === 'S'
-            ? 'subroutinePool'
-            : 'executableProgram',
+      programType: subc === 'M' ? 'modulePool' : baseProgramType,
     };
   },
 

@@ -1,6 +1,6 @@
-import { expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
-import { Scenario, runScenario } from './base/scenario';
+import { Scenario, checkScenarioFixture } from './base/scenario';
 import { atc, atcworklist, chkvFormTemplate } from '../../src/schemas/index';
 import type { InferTypedSchema } from '@abapify/ts-xsd';
 
@@ -243,6 +243,29 @@ class ChkvFormTemplateScenario extends Scenario<typeof chkvFormTemplate> {
 }
 
 // Run all ATC scenarios
-runScenario(new AtcCustomizingScenario());
-runScenario(new AtcWorklistScenario());
-runScenario(new ChkvFormTemplateScenario());
+describe('AtcCustomizingScenario', () => {
+  const scenario = new AtcCustomizingScenario();
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path.replace('.xml', ''), async () => {
+      await checkScenarioFixture(scenario, fixture);
+    });
+  }
+});
+
+describe('AtcWorklistScenario', () => {
+  const scenario = new AtcWorklistScenario();
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path.replace('.xml', ''), async () => {
+      await checkScenarioFixture(scenario, fixture);
+    });
+  }
+});
+
+describe('ChkvFormTemplateScenario', () => {
+  const scenario = new ChkvFormTemplateScenario();
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path.replace('.xml', ''), async () => {
+      await checkScenarioFixture(scenario, fixture);
+    });
+  }
+});

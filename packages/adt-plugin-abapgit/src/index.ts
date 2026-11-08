@@ -46,7 +46,6 @@ export {
 // Re-export types from @abapify/adt-plugin for convenience
 export type {
   AdtPlugin,
-  AbapObjectType,
   ImportContext,
   ImportResult,
   ExportContext,

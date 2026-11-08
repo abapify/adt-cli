@@ -23,9 +23,7 @@ export const puppeteerAuth = {
   /**
    * Authenticate using Puppeteer browser
    */
-  async authenticate(
-    options: PuppeteerAuthOptions,
-  ): Promise<PuppeteerCredentials> {
+  authenticate(options: PuppeteerAuthOptions): Promise<PuppeteerCredentials> {
     const adapter = createPuppeteerAdapter();
     return authenticate(adapter, options);
   },
@@ -38,7 +36,7 @@ export const puppeteerAuth = {
   /**
    * Refresh is not reliable with Okta SSO - always return null to trigger full re-authentication
    */
-  async refresh(session: {
+  refresh(session: {
     auth?: { pluginOptions?: { log?: (message: string) => void } };
   }): Promise<PuppeteerCredentials | null> {
     const log = session?.auth?.pluginOptions?.log as
@@ -46,7 +44,7 @@ export const puppeteerAuth = {
     (log ?? console.log)(
       '🔄 Session expired, will trigger full re-authentication...',
     );
-    return null;
+    return Promise.resolve(null);
   },
 };
 

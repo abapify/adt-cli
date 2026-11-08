@@ -81,9 +81,9 @@ export function formatXmlAttributes(xml: string): string {
     // No attributes, or special tags (</, <!, <?)
     if (
       spaceIdx === -1 ||
-      tagContent[0] === '/' ||
-      tagContent[0] === '!' ||
-      tagContent[0] === '?'
+      tagContent.startsWith('/') ||
+      tagContent.startsWith('!') ||
+      tagContent.startsWith('?')
     ) {
       result += xml.slice(openBracket, closeBracket + 1);
       pos = closeBracket + 1;

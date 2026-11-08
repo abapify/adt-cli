@@ -7,8 +7,13 @@
  *   - Request-body schemas build valid JSON payloads
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { repository } from '../../src/adt/gcts/repository';
 import { branches } from '../../src/adt/gcts/branches';
 import { commits } from '../../src/adt/gcts/commits';
@@ -230,7 +235,40 @@ class GctsConfigScenario extends ContractScenario {
   ];
 }
 
-runScenario(new GctsRepositoryScenario());
-runScenario(new GctsBranchesScenario());
-runScenario(new GctsCommitsScenario());
-runScenario(new GctsConfigScenario());
+describe('gCTS contract scenarios', () => {
+  describe('gCTS Repository', () => {
+    const scenario = new GctsRepositoryScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('gCTS Branches', () => {
+    const scenario = new GctsBranchesScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('gCTS Commits', () => {
+    const scenario = new GctsCommitsScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('gCTS Config', () => {
+    const scenario = new GctsConfigScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

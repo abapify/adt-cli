@@ -7,8 +7,13 @@
  *  - The request-body schema round-trips raw SQL strings
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { freestyle } from '../../src/adt/datapreview/freestyle';
 import {
   dataPreviewFreestyleRequestSchema,
@@ -52,4 +57,13 @@ class DatapreviewFreestyleScenario extends ContractScenario {
   ];
 }
 
-runScenario(new DatapreviewFreestyleScenario());
+describe('Datapreview Contract Scenarios', () => {
+  describe('Datapreview Freestyle', () => {
+    const scenario = new DatapreviewFreestyleScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

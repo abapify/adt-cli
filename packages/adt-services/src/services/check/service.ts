@@ -101,11 +101,8 @@ function extractReports(response: unknown): CheckResult {
     unknown
   >;
   const rawReports = reportsBlock.checkReport;
-  const reportEntries = Array.isArray(rawReports)
-    ? rawReports
-    : rawReports
-      ? [rawReports]
-      : [];
+  const singleReport = rawReports ? [rawReports] : [];
+  const reportEntries = Array.isArray(rawReports) ? rawReports : singleReport;
 
   const reports = reportEntries.map(normalizeReport);
   return { reports, ...detectSeverities(reports) };

@@ -53,11 +53,10 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
       const obj = unwrapData<IcfServiceLike>(raw);
       const name = String(obj.name ?? '').toUpperCase();
       const lang = isoToSapLang(obj.language);
-      const handlers = obj.handlers?.length
-        ? obj.handlers
-        : obj.handlerClass
-          ? [{ handler: obj.handlerClass }]
-          : [];
+      const fallbackHandlers = obj.handlerClass
+        ? [{ handler: obj.handlerClass }]
+        : [];
+      const handlers = obj.handlers?.length ? obj.handlers : fallbackHandlers;
       return {
         URL: obj.url ?? '',
         ICFSERVICE: {

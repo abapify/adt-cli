@@ -25,10 +25,10 @@ interface PageRendererProps {
 function MenuItemRow({
   item,
   isSelected,
-}: {
+}: Readonly<{
   item: MenuItem;
   isSelected: boolean;
-}) {
+}>) {
   const prefix = isSelected ? '❯ ' : '  ';
 
   return (
@@ -58,7 +58,7 @@ export function PageRenderer({
   onNavigate,
   onBack,
   onAction,
-}: PageRendererProps): React.ReactNode {
+}: Readonly<PageRendererProps>): React.ReactNode {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Handle keyboard input

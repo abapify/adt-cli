@@ -61,11 +61,10 @@ function renderDiscoveryPage(
 
   // Each workspace as a section
   for (const workspace of filteredWorkspaces) {
+    const singleCollection = workspace.collection ? [workspace.collection] : [];
     const collections = Array.isArray(workspace.collection)
       ? workspace.collection
-      : workspace.collection
-        ? [workspace.collection]
-        : [];
+      : singleCollection;
 
     // Build collection items
     const collectionComponents: Component[] = collections.map(
@@ -75,21 +74,19 @@ function renderDiscoveryPage(
         category?: unknown;
         templateLinks?: { templateLink?: unknown };
       }) => {
+        const singleCategory = coll.category ? [coll.category] : [];
         const categories = Array.isArray(coll.category)
           ? coll.category
-          : coll.category
-            ? [coll.category]
-            : [];
+          : singleCategory;
         const categoryTerms = categories
           .map((c: { term?: string }) => c.term)
           .filter(Boolean)
           .join(', ');
 
+        const singleTemplateCount = coll.templateLinks?.templateLink ? 1 : 0;
         const templateCount = Array.isArray(coll.templateLinks?.templateLink)
           ? coll.templateLinks.templateLink.length
-          : coll.templateLinks?.templateLink
-            ? 1
-            : 0;
+          : singleTemplateCount;
 
         const info = [
           categoryTerms ? `[${categoryTerms}]` : '',

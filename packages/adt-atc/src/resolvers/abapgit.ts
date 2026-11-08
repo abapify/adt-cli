@@ -47,7 +47,8 @@ function normalizeStartingFolder(value: string | undefined): string {
   const normalized = (value || 'src')
     .trim()
     .replaceAll('\\', '/')
-    .replace(/^\/+|\/+$/g, '');
+    .replace(/^\/+/, '')
+    .replace(/(?<!\/)\/+$/, '');
   return normalized || 'src';
 }
 
@@ -71,10 +72,10 @@ function parseAbapGitMetadata(root: string): AbapGitMetadata | undefined {
     const xml = readFileSync(metadataPath, 'utf8');
     return {
       folderLogic: parseFolderLogic(
-        xml.match(/<FOLDER_LOGIC>\s*([^<]+?)\s*<\/FOLDER_LOGIC>/i)?.[1],
+        xml.match(/<FOLDER_LOGIC>([^<]*)<\/FOLDER_LOGIC>/i)?.[1],
       ),
       startingFolder: normalizeStartingFolder(
-        xml.match(/<STARTING_FOLDER>\s*([^<]+?)\s*<\/STARTING_FOLDER>/i)?.[1],
+        xml.match(/<STARTING_FOLDER>([^<]*)<\/STARTING_FOLDER>/i)?.[1],
       ),
     };
   } catch {
@@ -93,9 +94,9 @@ function parseConfiguredFormat(root: string): {
     join(root, 'adt.config.mjs'),
   ].filter((value): value is string => Boolean(value));
 
-  for (const configPath of [
-    ...new Set(configPaths.map((value) => resolvePath(value))),
-  ]) {
+  for (const configPath of new Set(
+    configPaths.map((value) => resolvePath(value)),
+  )) {
     if (!existsSync(configPath)) continue;
     try {
       const config = readFileSync(configPath, 'utf8');
@@ -232,7 +233,7 @@ function parseMethodRanges(lines: string[]): MethodRange[] {
   let methodStart = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    const match = lines[i].match(/^\s*METHOD\s+(\w+)/i);
+    const match = /^\s*METHOD\s+(\w+)/i.exec(lines[i]);
     if (match) {
       currentMethod = match[1].toLowerCase();
       methodStart = i + 1;
@@ -322,7 +323,7 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
   }
 
   return {
-    async resolve(
+    resolve(
       objectType: string,
       objectName: string,
       atcLine: number,
@@ -336,17 +337,17 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
         canonicalPath ??
         `${objectName.toLowerCase()}.${objectType.toLowerCase()}.abap`;
       const candidateSegments = candidatePath.split('/');
-      const expectedFilename = candidateSegments[candidateSegments.length - 1];
-      if (!expectedFilename) return null;
+      const expectedFilename = candidateSegments.at(-1);
+      if (!expectedFilename) return Promise.resolve(null);
       const resolvedPath = lookup.get(expectedFilename.toLowerCase());
 
-      if (!resolvedPath) return null;
+      if (!resolvedPath) return Promise.resolve(null);
 
       const fileLine = convertLine(atcLine, methodName, resolvedPath);
       const gitPath = toPosix(relative(repository.root, resolvedPath));
-      if (!gitPath || gitPath.startsWith('../')) return null;
+      if (!gitPath || gitPath.startsWith('../')) return Promise.resolve(null);
 
-      return { path: gitPath, line: fileLine };
+      return Promise.resolve({ path: gitPath, line: fileLine });
     },
   };
 }

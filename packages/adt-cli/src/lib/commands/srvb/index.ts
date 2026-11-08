@@ -27,6 +27,33 @@ async function ensureAdk() {
   return client;
 }
 
+type ActivationResult = { name: string; status: string; error?: string };
+
+// Activate a single service binding; failures are captured, not thrown.
+async function activateOne(name: string): Promise<ActivationResult> {
+  const n = name.toUpperCase();
+  try {
+    const obj = await AdkServiceBinding.get(n);
+    await obj.activate();
+    return { name: n, status: 'activated' };
+  } catch (err) {
+    return {
+      name: n,
+      status: 'failed',
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+// Print activation results; exit 1 when any name failed (human mode).
+function printActivationResults(results: ActivationResult[]): void {
+  for (const r of results) {
+    if (r.status === 'activated') console.log(`✅ Activated: ${r.name}`);
+    else console.error(`❌ ${r.name}: ${r.error}`);
+  }
+  if (results.some((r) => r.status === 'failed')) process.exit(1);
+}
+
 export const srvbCommand = new Command('srvb').description(
   'ABAP service binding (SRVB) operations',
 );
@@ -184,31 +211,14 @@ srvbCommand.addCommand(
     .action(async (names, options) => {
       try {
         await ensureAdk();
-        const results: Array<{ name: string; status: string; error?: string }> =
-          [];
+        const results: ActivationResult[] = [];
         for (const name of names) {
-          const n = name.toUpperCase();
-          try {
-            const obj = await AdkServiceBinding.get(n);
-            await obj.activate();
-            results.push({ name: n, status: 'activated' });
-          } catch (err) {
-            results.push({
-              name: n,
-              status: 'failed',
-              error: err instanceof Error ? err.message : String(err),
-            });
-          }
+          results.push(await activateOne(name));
         }
         if (options.json) {
           console.log(JSON.stringify(results, null, 2));
         } else {
-          for (const r of results) {
-            if (r.status === 'activated')
-              console.log(`✅ Activated: ${r.name}`);
-            else console.error(`❌ ${r.name}: ${r.error}`);
-          }
-          if (results.some((r) => r.status === 'failed')) process.exit(1);
+          printActivationResults(results);
         }
       } catch (error) {
         console.error(
