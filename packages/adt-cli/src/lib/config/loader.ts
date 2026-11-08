@@ -7,7 +7,7 @@ import { AuthRegistry } from './auth';
 import { pathToFileURL } from 'node:url';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { parseDocument, parseAllDocuments, stringify } from 'yaml';
+import { parseAllDocuments, stringify } from 'yaml';
 
 export class ConfigLoader implements IConfigLoader {
   private static readonly cache = new Map<string, CliConfig>();
