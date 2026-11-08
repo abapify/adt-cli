@@ -20,7 +20,7 @@ type DdlsLike = {
   name: string;
   description?: string;
   originalLanguage?: string;
-  abapLanguageVersion?: DdlsAff['header']['abapLanguageVersion'];
+  abapLanguageVersion: DdlsAff['header']['abapLanguageVersion'];
   sourceOrigin: DdlsAff['sourceOrigin'];
   sourceType?: DdlsAff['sourceType'];
   getSource?: () => Promise<string> | string;
