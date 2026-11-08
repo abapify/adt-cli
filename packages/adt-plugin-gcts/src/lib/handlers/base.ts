@@ -110,7 +110,9 @@ export interface GctsHandler<
 const handlerRegistry = new Map<string, GctsHandler<HandlerObject>>();
 
 /** Look up a handler (full-type first, then main-type fallback). */
-export function getHandler(type: string): GctsHandler<HandlerObject> | undefined {
+export function getHandler(
+  type: string,
+): GctsHandler<HandlerObject> | undefined {
   return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
@@ -251,7 +253,10 @@ async function resolveSource(entry: GctsSourceEntry): Promise<string> {
 }
 
 /** Resolve the metadata file name for an object (custom hook or default). */
-function resolveMetadataFileName<T extends HandlerObject, M extends GctsMetadata>(
+function resolveMetadataFileName<
+  T extends HandlerObject,
+  M extends GctsMetadata,
+>(
   definition: GctsHandlerDefinition<T, M>,
   object: T,
   objectName: string,
@@ -301,7 +306,10 @@ async function serializeSourceFiles<
 }
 
 /** Extra files (e.g. FUGR per-function-module files) → serialized files. */
-async function serializeExtraFiles<T extends HandlerObject, M extends GctsMetadata>(
+async function serializeExtraFiles<
+  T extends HandlerObject,
+  M extends GctsMetadata,
+>(
   object: T,
   definition: GctsHandlerDefinition<T, M>,
 ): Promise<SerializedFile[]> {
