@@ -5,6 +5,7 @@ exclude_paths:
   - 'packages/adt-plugin-abapgit/tests/fixtures/smim/ztest_mime.smim.ztest_mime.png'
   # Uninitialised gitlinks and directory symlinks — unreadable as files and
   # can crash the SARIF formatter when a tool result references them
+  - 'packages/adt-cli/tests/config/loader.test.ts'
   - 'git_modules/**'
   - '.devin/rules/**'
   - '.devin/skills/**'

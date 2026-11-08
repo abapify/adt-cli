@@ -7,7 +7,7 @@ import { AuthRegistry } from './auth';
 import { pathToFileURL } from 'node:url';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import yaml from 'js-yaml';
+import { parseDocument, parseAllDocuments, stringify } from 'yaml';
 
 export class ConfigLoader implements IConfigLoader {
   private static readonly cache = new Map<string, CliConfig>();
@@ -138,10 +138,10 @@ export class ConfigLoader implements IConfigLoader {
     const resolvedPath =
       configPath || path.join(process.cwd(), 'adt.config.yaml');
 
-    const yamlContent = yaml.dump(config, {
+    const yamlContent = stringify(config, {
       indent: 2,
       lineWidth: 120,
-      noRefs: true,
+      aliasDuplicateObjects: false,
     });
 
     await fs.writeFile(resolvedPath, yamlContent, 'utf-8');
@@ -195,7 +195,24 @@ export class ConfigLoader implements IConfigLoader {
    */
   private async loadYamlConfig(configPath: string): Promise<CliConfig> {
     const content = await fs.readFile(configPath, 'utf-8');
-    const config = yaml.load(content) as CliConfig;
+    const documents = parseAllDocuments(content, {
+      schema: 'core',
+      merge: true,
+      resolveKnownTags: false,
+    });
+    if (documents.length > 1) {
+      throw new Error('YAML configuration must contain a single document');
+    }
+    const document = documents[0];
+    const problem =
+      document.errors[0] ??
+      document.warnings.find((warning) =>
+        ['TAG_RESOLVE_FAILED', 'DUPLICATE_KEY'].includes(warning.code),
+      );
+    if (problem) {
+      throw problem;
+    }
+    const config = document.toJS({ maxAliasCount: 100 }) as CliConfig;
 
     // Process environment variables
     return this.processEnvironmentVariables(config);
@@ -215,26 +232,40 @@ export class ConfigLoader implements IConfigLoader {
   /**
    * Process environment variables in config
    */
-  private processEnvironmentVariables(config: any): any {
-    const processValue = (value: any): any => {
+  private processEnvironmentVariables(config: CliConfig): CliConfig {
+    const ancestors = new WeakSet<object>();
+    const processValue = (value: unknown): unknown => {
       if (
         typeof value === 'string' &&
         value.startsWith('${') &&
         value.endsWith('}')
       ) {
         const envVar = value.slice(2, -1);
-        return process.env[envVar] || value;
+        return process.env[envVar] ?? value;
       } else if (typeof value === 'object' && value !== null) {
-        const processed: any = Array.isArray(value) ? [] : {};
-        for (const [key, val] of Object.entries(value)) {
-          processed[key] = processValue(val);
+        if (ancestors.has(value)) {
+          throw new Error('Cyclic configuration values are not supported');
         }
-        return processed;
+        ancestors.add(value);
+        try {
+          const processed = Array.isArray(value) ? [] : {};
+          for (const [key, val] of Object.entries(value)) {
+            Object.defineProperty(processed, key, {
+              value: processValue(val),
+              enumerable: true,
+              writable: true,
+              configurable: true,
+            });
+          }
+          return processed;
+        } finally {
+          ancestors.delete(value);
+        }
       }
       return value;
     };
 
-    return processValue(config);
+    return processValue(config) as CliConfig;
   }
 
   /**
