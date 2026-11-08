@@ -20,8 +20,8 @@ type DdlsLike = {
   name: string;
   description?: string;
   originalLanguage?: string;
-  abapLanguageVersion: DdlsAff['header']['abapLanguageVersion'];
-  sourceOrigin: DdlsAff['sourceOrigin'];
+  abapLanguageVersion?: NonNullable<DdlsAff['header']['abapLanguageVersion']>;
+  sourceOrigin?: DdlsAff['sourceOrigin'];
   sourceType?: DdlsAff['sourceType'];
   getSource?: () => Promise<string> | string;
 };
