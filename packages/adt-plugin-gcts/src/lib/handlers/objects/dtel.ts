@@ -73,7 +73,7 @@ function buildFieldLabels(
 }
 
 export const dataElementHandler = createHandler(AdkDataElement, {
-  toMetadata(dtel): DtelAff {
+  toMetadata(dtel: AdkDataElement): DtelAff {
     const data = dtel.dataSync as Record<string, unknown>;
     const lang = (
       (data.language as string) ??

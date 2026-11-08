@@ -18,7 +18,7 @@ import { affDataType } from './ddic-data-type';
 import type { DomaAff } from '../../../schemas/generated';
 
 export const domainHandler = createHandler(AdkDomain, {
-  toMetadata(doma): DomaAff {
+  toMetadata(doma: AdkDomain): DomaAff {
     const data = doma.dataSync;
     const content = data.content;
     const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();

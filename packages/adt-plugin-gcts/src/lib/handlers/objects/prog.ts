@@ -29,7 +29,7 @@ const STATUS_FROM_AFF: Record<string, string> = Object.fromEntries(
 );
 
 export const programHandler = createHandler(AdkProgram, {
-  toMetadata(prog): ProgAff {
+  toMetadata(prog: AdkProgram): ProgAff {
     const data = prog.dataSync;
     const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();
     const generalInformation: GeneralInformation = {
@@ -57,7 +57,7 @@ export const programHandler = createHandler(AdkProgram, {
     };
   },
 
-  getSource: (obj) => obj.getSource(),
+  getSource: (prog: AdkProgram) => prog.getSource(),
 
   fromMetadata: (meta: ProgAff) => ({
     name: '',

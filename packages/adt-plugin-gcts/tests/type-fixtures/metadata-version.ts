@@ -22,7 +22,7 @@ createHandler<Facade, GctsMetadata>('TYPE_FIXTURE', {
 createHandler<Facade, GctsMetadata>('TYPE_FIXTURE', {
   toMetadata: () => ({ header: { formatVersion: '1', description: 'Old' } }),
 });
+// @ts-expect-error Handlers cannot return versionless metadata.
 createHandler<Facade, GctsMetadata>('TYPE_FIXTURE', {
-  // @ts-expect-error Handlers cannot return versionless metadata.
   toMetadata: () => ({ header: { description: 'Versionless' } }),
 });

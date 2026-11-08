@@ -11,8 +11,8 @@ const handler = createHandler<SourceFacade, BdefAff>('BDEF', {
 void handler.serialize({ name: 'ZBEHAVIOR', description: 'Typed source' });
 // @ts-expect-error Object identity remains mandatory.
 void handler.serialize({ description: 'Missing name' });
+// @ts-expect-error Concrete AFF schemas still require their header.
 createHandler<SourceFacade, BdefAff>('BDEF_INVALID', {
-  // @ts-expect-error Concrete AFF schemas still require their header.
   toMetadata: () => ({ formatVersion: '1' }),
 });
 
