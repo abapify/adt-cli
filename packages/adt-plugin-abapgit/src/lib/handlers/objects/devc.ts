@@ -22,7 +22,7 @@ export const packageHandler = createHandler(AdkPackage, {
   xmlFileName: 'package.devc.xml',
 
   // Only return the values - base class wraps in full AbapGitType
-  toAbapGit: (pkg) => ({
+  toAbapGit: (pkg: AdkPackage) => ({
     DEVC: {
       // Note: DEVCLASS is not included in abapGit package.devc.xml files (only CTEXT)
       CTEXT: pkg.description ?? '',

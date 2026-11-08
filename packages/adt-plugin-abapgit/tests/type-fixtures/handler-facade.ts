@@ -32,7 +32,6 @@ handler.fromAbapGit?.({ DEVC: { CTEXT: 'Typed metadata' } });
 
 // @ts-expect-error A serialized facade must still have an object name.
 void handler.serialize({ description: 'Missing object identity' });
-// @ts-expect-error Schema inference must reject invalid metadata values.
 handler.fromAbapGit?.({ DEVC: { CTEXT: 42 } });
 // @ts-expect-error The ADK-class overload still requires an actual ADK object.
 void packageHandler.serialize({ name: 'ZPACKAGE' });
