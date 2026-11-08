@@ -21,7 +21,7 @@ type DdlsLike = {
   description?: string;
   originalLanguage?: string;
   abapLanguageVersion?: DdlsAff['header']['abapLanguageVersion'];
-  sourceOrigin?: DdlsAff['sourceOrigin'];
+  sourceOrigin: DdlsAff['sourceOrigin'];
   sourceType?: DdlsAff['sourceType'];
   getSource?: () => Promise<string> | string;
 };
