@@ -19,10 +19,11 @@ type OdsValues = Record<
   { METADATA?: { NAME?: string; MASTER_LANGUAGE?: string } } | undefined
 >;
 
-export function createOdsHandler<
-  TSchema extends AbapGitSchema<unknown, OdsValues>,
->(type: string, schema: TSchema) {
-  return createHandler<OdsObjectLike, TSchema>(type, {
+export function createOdsHandler(
+  type: string,
+  schema: AbapGitSchema<unknown, OdsValues>,
+) {
+  return createHandler<OdsObjectLike, typeof schema>(type, {
     schema,
     version: 'v1.0.0',
     serializer: `LCL_OBJECT_${type}`,

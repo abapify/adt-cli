@@ -46,9 +46,7 @@ import schema from '../../speci';
 export default schema({
   ns: 'http://www.sap.com/adt/...',
   root: 'MyRoot',
-  elements: {
-    /* ... */
-  },
+  elements: {/* ... */},
 } as const); // as const is REQUIRED for type inference!
 ```
 
@@ -171,9 +169,7 @@ export default schema({
   ns: 'http://www.sap.com/adt/myarea',
   prefix: 'myprefix',
   root: 'MyRootElement',
-  include: [
-    /* imported schemas */
-  ],
+  include: [/* imported schemas */],
   elements: {
     MyRootElement: {
       sequence: [
@@ -183,9 +179,7 @@ export default schema({
       attributes: [{ name: 'attr1', type: 'string' }],
     },
     Child2Type: {
-      sequence: [
-        /* ... */
-      ],
+      sequence: [/* ... */],
     },
   },
 } as const); // CRITICAL: as const for type inference

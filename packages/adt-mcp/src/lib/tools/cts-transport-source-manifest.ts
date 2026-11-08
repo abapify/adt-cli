@@ -5,7 +5,10 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { ExactSourceHistoryService } from '@abapify/adt-services';
+import {
+  ExactSourceHistoryService,
+  type BuildTransportManifestResult,
+} from '@abapify/adt-services';
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
@@ -17,28 +20,10 @@ const selectorValue = z.union([
 
 type SourceCapabilityRegistry = NonNullable<ToolContext['sourceCapabilities']>;
 
-type SourceVersionWithUri = {
-  sourceUri: string;
-  [key: string]: unknown;
-};
-
-type SourceManifestEntry = {
-  component: {
-    sourceUri?: string;
-    versionsUri?: string;
-    [key: string]: unknown;
-  };
-  base?: SourceVersionWithUri;
-  head?: SourceVersionWithUri;
-  [key: string]: unknown;
-};
-
-type SourceManifestWithUris = {
-  requestedTransports: unknown;
-  scopeTransports: unknown;
-  inventory: ReadonlyArray<{ uri?: string; [key: string]: unknown }>;
-  entries: readonly SourceManifestEntry[];
-};
+type SourceManifestWithUris = BuildTransportManifestResult;
+type SourceVersionWithUri = NonNullable<
+  BuildTransportManifestResult['entries'][number]['base']
+>;
 
 function toMcpSourceVersion(
   version: SourceVersionWithUri,
@@ -140,14 +125,10 @@ export function registerCtsTransportSourceManifestTool(
             {
               type: 'text' as const,
               text: JSON.stringify(
-                toMcpTransportSourceManifest(
-                  manifest as SourceManifestWithUris,
-                  ctx.sourceCapabilities,
-                  {
-                    sessionId: extra?.sessionId,
-                    ...(destination !== undefined ? { destination } : {}),
-                  },
-                ),
+                toMcpTransportSourceManifest(manifest, ctx.sourceCapabilities, {
+                  sessionId: extra?.sessionId,
+                  ...(destination !== undefined ? { destination } : {}),
+                }),
                 null,
                 2,
               ),

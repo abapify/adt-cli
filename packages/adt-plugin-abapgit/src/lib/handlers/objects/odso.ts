@@ -7,6 +7,9 @@
 
 import { odso } from '../../../schemas/generated';
 import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
+import type { InferValuesType } from '../base';
+
+type DataStoreValues = InferValuesType<typeof odso>;
 
 type DataStoreObjectLike = {
   name: string;
@@ -26,9 +29,9 @@ type DataStoreObjectLike = {
     version?: string;
     keyflag?: string;
   }>;
-  navigation?: unknown;
-  indexes?: unknown;
-  indexIobj?: unknown;
+  navigation?: DataStoreValues['NAVIGATION'];
+  indexes?: DataStoreValues['INDEXES'];
+  indexIobj?: DataStoreValues['INDEX_IOBJ'];
 };
 
 export const dataStoreObjectHandler = createHandler<

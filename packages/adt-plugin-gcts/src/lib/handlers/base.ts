@@ -19,6 +19,8 @@ import { gctsFilename, splitSourceKey } from '../format/filename';
 import { payloadOf } from '../aff/generic';
 import type { GctsMetadata } from '../format/types';
 
+type HandlerObject = Pick<AdkObject, 'name'>;
+
 export type AdkObjectClass<T extends AdkObject = AdkObject> = {
   new (...args: any[]): T;
   readonly kind: AdkKind;
@@ -60,7 +62,7 @@ export interface GctsExtraFile {
  * ADK object to the JSON metadata shape for the target type.
  */
 export interface GctsHandlerDefinition<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata = GctsMetadata,
 > {
   /** Map ADK object → JSON metadata payload (including the required `header`). */
@@ -92,7 +94,7 @@ export interface GctsHandlerDefinition<
 
 /** Runtime shape of a gCTS handler after `createHandler` processing. */
 export interface GctsHandler<
-  T extends AdkObject = AdkObject,
+  T extends HandlerObject = AdkObject,
 > extends FormatHandler {
   readonly type: string;
   readonly fileExtension: string;
@@ -105,10 +107,12 @@ export interface GctsHandler<
   setSources?(object: T, sources: Record<string, string>): void;
 }
 
-const handlerRegistry = new Map<string, GctsHandler>();
+const handlerRegistry = new Map<string, GctsHandler<HandlerObject>>();
 
 /** Look up a handler (full-type first, then main-type fallback). */
-export function getHandler(type: string): GctsHandler | undefined {
+export function getHandler(
+  type: string,
+): GctsHandler<HandlerObject> | undefined {
   return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
@@ -249,7 +253,10 @@ async function resolveSource(entry: GctsSourceEntry): Promise<string> {
 }
 
 /** Resolve the metadata file name for an object (custom hook or default). */
-function resolveMetadataFileName<T extends AdkObject, M extends GctsMetadata>(
+function resolveMetadataFileName<
+  T extends HandlerObject,
+  M extends GctsMetadata,
+>(
   definition: GctsHandlerDefinition<T, M>,
   object: T,
   objectName: string,
@@ -268,7 +275,7 @@ function resolveMetadataFileName<T extends AdkObject, M extends GctsMetadata>(
  * entries are resolved through the lazy `GctsSourceEntry` contract.
  */
 async function serializeSourceFiles<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata,
 >(
   object: T,
@@ -299,7 +306,10 @@ async function serializeSourceFiles<
 }
 
 /** Extra files (e.g. FUGR per-function-module files) → serialized files. */
-async function serializeExtraFiles<T extends AdkObject, M extends GctsMetadata>(
+async function serializeExtraFiles<
+  T extends HandlerObject,
+  M extends GctsMetadata,
+>(
   object: T,
   definition: GctsHandlerDefinition<T, M>,
 ): Promise<SerializedFile[]> {
@@ -314,21 +324,21 @@ async function serializeExtraFiles<T extends AdkObject, M extends GctsMetadata>(
 }
 
 export function createHandler<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata = GctsMetadata,
 >(
-  adkClass: AdkObjectClass<T>,
+  adkClass: AdkObjectClass,
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T>;
 export function createHandler<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata = GctsMetadata,
 >(type: string, definition: GctsHandlerDefinition<T, M>): GctsHandler<T>;
 export function createHandler<
-  T extends AdkObject,
+  T extends HandlerObject,
   M extends GctsMetadata = GctsMetadata,
 >(
-  adkClassOrType: AdkObjectClass<T> | string,
+  adkClassOrType: AdkObjectClass | string,
   definition: GctsHandlerDefinition<T, M>,
 ): GctsHandler<T> {
   let type: string;
@@ -407,7 +417,7 @@ export function createHandler<
     setSources: definition.setSources,
   };
 
-  handlerRegistry.set(type, handler as GctsHandler);
+  handlerRegistry.set(type, handler);
   return handler;
 }
 

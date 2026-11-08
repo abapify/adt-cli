@@ -6,7 +6,11 @@ import {
   objectIdentity,
   objectDescriptorSchema,
 } from '../src';
-import { planRepositoryChanges, safeRelativePath } from '../src/repository';
+import {
+  findDivergedOwnedPath,
+  planRepositoryChanges,
+  safeRelativePath,
+} from '../src/repository';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 
 import { join } from 'node:path';
@@ -73,6 +77,20 @@ describe('flow contracts', () => {
       expect(
         await readFile(join(root, 'src/ZCL_SAMPLE.clas.abap'), 'utf8'),
       ).toBe('existing');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('reports the first owned path whose recorded content no longer matches', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'adt-flow-contract-'));
+    try {
+      await writeFile(join(root, 'owned.txt'), 'changed');
+      await expect(
+        findDivergedOwnedPath(root, [
+          { path: 'owned.txt', hash: 'recorded-hash' },
+        ]),
+      ).resolves.toBe('owned.txt');
     } finally {
       await rm(root, { recursive: true, force: true });
     }

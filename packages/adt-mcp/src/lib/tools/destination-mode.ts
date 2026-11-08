@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { toJsonSchemaCompat } from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js';
 import type {
   McpServer,
   RegisteredTool,
@@ -123,7 +124,7 @@ function toolListEntry(
   return {
     name,
     ...(tool.description ? { description: tool.description } : {}),
-    inputSchema: z.toJSONSchema(tool.inputSchema) as Record<string, unknown>,
+    inputSchema: toJsonSchemaCompat(tool.inputSchema),
     ...(tool.annotations ? { annotations: tool.annotations } : {}),
   };
 }
@@ -195,7 +196,8 @@ function normalizeToolArgs(args: unknown[]): {
   }
   const handler = args.at(-1);
   const hasDescription = typeof args[1] === 'string' && args.length >= 4;
-  const description = hasDescription ? args[1] : undefined;
+  const description =
+    hasDescription && typeof args[1] === 'string' ? args[1] : undefined;
   const inputSchema = args[hasDescription ? 2 : 1];
   const annotationsIndex = hasDescription ? 3 : 2;
   const annotations =
@@ -427,7 +429,7 @@ function registerDestinationTool(context: {
   wrappedHandler: Handler;
   useRegisterTool: boolean;
   annotations: RegisteredTool['annotations'] | undefined;
-}): unknown {
+}): RegisteredTool {
   const {
     target,
     name,

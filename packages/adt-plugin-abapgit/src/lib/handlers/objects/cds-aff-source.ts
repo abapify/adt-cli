@@ -15,11 +15,12 @@ type CdsAffSourceObject = {
   originalLanguage?: string;
   abapLanguageVersion?: string;
   getSource?: () => Promise<string> | string;
+  [key: string]: unknown;
 };
 
 type CdsAffSourceOptions = {
   /** Override the default bdef schema (for types with their own XSD) */
-  schema?: AbapGitSchema;
+  schema?: AbapGitSchema<unknown, { SKEY?: { TYPE?: string; NAME?: string } }>;
   /** Extra AFF fields to include in fromAffJson (e.g. sourceOrigin, sourceType) */
   fromAffJsonExtra?: (json: Record<string, unknown>) => Record<string, unknown>;
   /** Extra fields to pass to serializeDualFormat, computed from the object */

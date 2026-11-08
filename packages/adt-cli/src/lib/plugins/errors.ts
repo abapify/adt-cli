@@ -6,10 +6,7 @@ export class PluginError extends Error {
     message: string,
     public readonly plugin: string,
     public readonly category:
-      | 'config'
-      | 'serialization'
-      | 'validation'
-      | 'filesystem',
+      'config' | 'serialization' | 'validation' | 'filesystem',
     public readonly context?: Record<string, unknown>,
     public override readonly cause?: Error,
   ) {

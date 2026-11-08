@@ -8,6 +8,7 @@
 
 import { shlp } from '../../../schemas/generated';
 import { createHandler, normalizeItems, mapItems, unwrapData } from '../base';
+import type { InferValuesType } from '../base';
 import { isoToSapLang, sapLangToIso } from '../lang';
 
 type SearchHelpLike = {
@@ -151,23 +152,7 @@ function parseSearchHelpFromAbapGit({
   DD31V,
   DD32P_TABLE,
   DD33V_TABLE,
-}: {
-  DD30V?: {
-    SHLPNAME?: string;
-    DDTEXT?: string;
-    DDLANGUAGE?: string;
-    SHLPTYPE?: string;
-    DIALOGTYPE?: string;
-  };
-  DD31V?: {
-    TABNAME?: string;
-    FIELDNAME?: string;
-    FLDLOCATION?: string;
-    ROLLNAME?: string;
-  };
-  DD32P_TABLE?: { item?: unknown };
-  DD33V_TABLE?: { item?: unknown };
-}): { name: string } & Record<string, unknown> {
+}: InferValuesType<typeof shlp>): { name: string } & Record<string, unknown> {
   const paramItems = normalizeItems(DD32P_TABLE?.item);
   const assignItems = normalizeItems(DD33V_TABLE?.item);
   return {

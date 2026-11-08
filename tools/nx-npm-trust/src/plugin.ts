@@ -137,7 +137,8 @@ export const createNodesV2: CreateNodes<NxNpmTrustOptions> = [
   '**/package.json',
   (configFiles, options = {}) => {
     const targetName = options.targetName ?? 'npm-trust-check';
-    const prepareTargetName = options.prepareTargetName ?? 'prepare-for-publish';
+    const prepareTargetName =
+      options.prepareTargetName ?? 'prepare-for-publish';
     const runtime = options.runtime ?? 'bun';
     const registry = options.registry ?? 'https://registry.npmjs.org/';
     const trustWorkflow = options.trustWorkflow ?? 'publish.yml';

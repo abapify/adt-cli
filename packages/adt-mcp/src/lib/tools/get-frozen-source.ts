@@ -44,6 +44,7 @@ export function registerGetFrozenSourceTool(
           candidate.componentId === args.componentId,
       );
       if (
+        !frozenSource ||
         !source ||
         !ctx.resolveFrozenSource ||
         typeof destination !== 'string'
@@ -67,7 +68,11 @@ export function registerGetFrozenSourceTool(
         ) {
           return scopeDeniedResult();
         }
-        const { client } = await resolveClient(ctx, args, extra ?? {});
+        const { client } = await resolveClient(
+          ctx,
+          { destination },
+          extra ?? {},
+        );
         let text: string;
         try {
           text = await client.readTextBounded(

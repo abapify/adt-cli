@@ -32,11 +32,12 @@ export function registerDiscoveryTool(
         const workspaces = extractDiscoveryWorkspaces(discovery);
 
         // Apply optional filter
-        if (args.filter) {
+        const filter = args.filter;
+        if (filter) {
           const filtered = workspaces.filter((workspace) =>
             String(workspace.title ?? '')
               .toLowerCase()
-              .includes(args.filter.toLowerCase()),
+              .includes(filter.toLowerCase()),
           );
           return {
             content: [

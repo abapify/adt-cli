@@ -11,7 +11,7 @@ import { loadConfig, type FlowConfig } from '@abapify/adt-config';
 import { getFormatPlugin, type FormatPlugin } from '@abapify/adt-plugin';
 import type { AdtClient } from '@abapify/adt-client';
 import type { ToolContext } from '../types';
-import { resolveClient } from './session-helpers';
+import { resolveClient, type LegacyConnectionArgs } from './session-helpers';
 import { resolveFlowWorkspaceRoot } from '../flow-workspace';
 
 export interface FlowMcpDependencies {
@@ -46,7 +46,7 @@ export const DEFAULT_FLOW_MCP_DEPENDENCIES: FlowMcpDependencies = {
     createAdtFlowService(createAdtFlowDependencies(client, format)),
 };
 
-type FlowToolArgs = {
+type FlowToolArgs = LegacyConnectionArgs & {
   transports: string[];
   workspaceRoot: string;
   verifyInventory?: boolean;

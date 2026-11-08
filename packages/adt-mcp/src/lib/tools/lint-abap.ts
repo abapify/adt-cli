@@ -29,7 +29,7 @@ export function registerLintAbapTool(
         .optional()
         .describe('Lint preset to apply (defaults to onpremise)'),
       ruleOverrides: z
-        .record(z.unknown())
+        .record(z.string(), z.unknown())
         .optional()
         .describe('Optional per-rule override config passed to abaplint'),
     },

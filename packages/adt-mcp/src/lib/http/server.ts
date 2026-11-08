@@ -229,7 +229,7 @@ const SYSTEM_SID_REGEX = /^[A-Za-z0-9_-]{1,16}$/u;
 const AUTHORIZATION_TOKEN_REGEX =
   /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/u;
 
-function normalizeAndValidateStrings(values: unknown[]): string[] | undefined {
+function normalizeAndValidateStrings(values: unknown): string[] | undefined {
   if (!Array.isArray(values)) return undefined;
   const result: string[] = [];
   for (const value of values) {

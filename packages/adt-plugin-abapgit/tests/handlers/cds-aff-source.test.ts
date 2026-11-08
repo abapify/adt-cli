@@ -16,12 +16,13 @@ for (const type of [
     it('writes exactly the official source and JSON files', async () => {
       const handler = getHandler(type);
       assert.ok(handler);
-      const files = await handler.serialize({
+      const object = {
         name: `Z_AFF_${type}`,
         description: `${type} fixture`,
         originalLanguage: 'EN',
         getSource: async () => `define ${type.toLowerCase()} Z_AFF_${type}`,
-      });
+      };
+      const files = await handler.serialize(object);
       assert.deepEqual(files.map((file) => file.path).sort(), [
         `z_aff_${type.toLowerCase()}.${type.toLowerCase()}.acds`,
         `z_aff_${type.toLowerCase()}.${type.toLowerCase()}.json`,
