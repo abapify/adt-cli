@@ -55,7 +55,12 @@ const DECOMPILERS = {
     },
     command: (input: string, output: string): Command => ({
       file: 'java',
-      args: ['-jar', DECOMPILERS.fernflower.jar(), pathArg(input), pathArg(output)],
+      args: [
+        '-jar',
+        DECOMPILERS.fernflower.jar(),
+        pathArg(input),
+        pathArg(output),
+      ],
     }),
     install:
       'Find in IntelliJ IDEA: plugins/java-decompiler/lib/java-decompiler.jar',
@@ -103,6 +108,7 @@ function matchesGlob(name: string, pattern: string): boolean {
   return false;
 }
 
+/**
  * Keep only JARs whose basename matches one of the comma-separated glob
  * patterns in `filter`.
  */
