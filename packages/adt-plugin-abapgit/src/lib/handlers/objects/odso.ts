@@ -29,8 +29,8 @@ type DataStoreObjectLike = {
     version?: string;
     keyflag?: string;
   }>;
-  navigation: DataStoreValues["NAVIGATION"];
-  indexes: DataStoreValues["INDEXES"];
+  navigation: DataStoreValues['NAVIGATION'];
+  indexes: DataStoreValues['INDEXES'];
   indexIobj: DataStoreValues['INDEX_IOBJ'];
 };
 
