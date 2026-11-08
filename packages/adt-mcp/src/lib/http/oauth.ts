@@ -138,6 +138,27 @@ function extractScopes(claims: JWTPayload): string[] {
   return parts;
 }
 
+function fallbackUser(record: Record<string, unknown>): string | undefined {
+  for (const c of ['preferred_username', 'email', 'sub']) {
+    const v = record[c];
+    if (typeof v === 'string' && v.length > 0) return v;
+  }
+  return undefined;
+}
+
+function extractGroups(raw: unknown): string[] | undefined {
+  if (Array.isArray(raw)) {
+    return raw.filter((v): v is string => typeof v === 'string');
+  }
+  if (typeof raw === 'string' && raw.length > 0) {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  }
+  return undefined;
+}
+
 function extractUserHint(
   claims: JWTPayload,
   userClaim: string | undefined,
@@ -150,32 +171,13 @@ function extractUserHint(
     const v = record[userClaim];
     if (typeof v === 'string' && v.length > 0) user = v;
   }
-  if (!user) {
-    for (const c of ['preferred_username', 'email', 'sub']) {
-      const v = record[c];
-      if (typeof v === 'string' && v.length > 0) {
-        user = v;
-        break;
-      }
-    }
-  }
+  if (!user) user = fallbackUser(record);
   if (!user) return undefined;
 
   const emailRaw = record[emailClaim];
   const email = typeof emailRaw === 'string' ? emailRaw : undefined;
 
-  const groupsRaw = record[groupsClaim];
-  let groups: string[] | undefined;
-  if (Array.isArray(groupsRaw)) {
-    groups = groupsRaw.filter((v): v is string => typeof v === 'string');
-  } else if (typeof groupsRaw === 'string' && groupsRaw.length > 0) {
-    groups = groupsRaw
-      .split(',')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-  }
-
-  return { user, email, groups };
+  return { user, email, groups: extractGroups(record[groupsClaim]) };
 }
 
 /**

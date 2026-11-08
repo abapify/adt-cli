@@ -69,7 +69,7 @@ export async function loadAdtConfigMultiSystem(
   // supports TypeScript, so this is only a concern for production Node deployments.
   if (
     configPath?.endsWith('.ts') &&
-    typeof (globalThis as Record<string, unknown>).Bun === 'undefined'
+    (globalThis as Record<string, unknown>).Bun === undefined
   ) {
     throw new Error(
       `ADT_CONFIG_FILE '${configPath}' is TypeScript; plain Node.js cannot load .ts configs. ` +

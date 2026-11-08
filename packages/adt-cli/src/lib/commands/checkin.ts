@@ -5,8 +5,84 @@
  * Thin commander wrapper — all orchestration lives in `CheckinService`.
  */
 import { Command } from 'commander';
-import { CheckinService } from '../services/checkin';
+import {
+  CheckinService,
+  type CheckinResult,
+  type CheckinOptions,
+} from '../services/checkin';
 import { getAdtClientV2 } from '../utils/adt-client-v2';
+
+interface CheckinCliOptions {
+  format: string;
+  package?: string;
+  transport?: string;
+  types?: string;
+  dryRun?: boolean;
+  activate?: boolean;
+  unlock?: boolean;
+  abapLanguageVersion?: string;
+  json?: boolean;
+}
+
+/** Log the checkin banner lines (suppressed for JSON output). */
+function printCheckinHeader(
+  directory: string,
+  options: CheckinCliOptions,
+): void {
+  if (options.json) return;
+  console.log(`🚀 Checkin: ${directory}`);
+  console.log(`📦 Format: ${options.format}`);
+  if (options.package) console.log(`📁 Root package: ${options.package}`);
+  if (options.transport) console.log(`🚚 Transport: ${options.transport}`);
+  if (options.dryRun) console.log(`🔍 Dry run (no SAP writes)`);
+}
+
+/** Emit the CheckinResult as JSON or a human summary; exit non-zero on failures. */
+function printCheckinResult(
+  result: CheckinResult,
+  json: boolean | undefined,
+): void {
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(`\n📊 ${result.summary}`);
+  if (result.aborted) {
+    console.error(
+      '⚠️  Checkin aborted before completing all tiers — inspect errors above.',
+    );
+    process.exit(1);
+  }
+  if (result.apply.totals.failed > 0) {
+    process.exit(1);
+  }
+}
+
+/** Build the CheckinService options from CLI arguments and options. */
+function buildCheckinOptions(
+  directory: string,
+  options: CheckinCliOptions,
+  types: string[] | undefined,
+): CheckinOptions {
+  return {
+    sourceDir: directory,
+    format: options.format,
+    rootPackage: options.package,
+    transport: options.transport,
+    objectTypes: types,
+    dryRun: options.dryRun,
+    activate: options.activate,
+    unlock: options.unlock,
+    abapLanguageVersion: options.abapLanguageVersion,
+    onLog: (_level, msg) => {
+      if (!options.json) console.log(`   ${msg}`);
+    },
+    onObject: (obj, status) => {
+      if (!options.json)
+        console.log(`      • ${obj.type} ${obj.name} (${status})`);
+    },
+  };
+}
 
 export const checkinCommand = new Command('checkin')
   .description(
@@ -55,48 +131,13 @@ export const checkinCommand = new Command('checkin')
             .filter(Boolean)
         : undefined;
 
-      if (!options.json) {
-        console.log(`🚀 Checkin: ${directory}`);
-        console.log(`📦 Format: ${options.format}`);
-        if (options.package) console.log(`📁 Root package: ${options.package}`);
-        if (options.transport)
-          console.log(`🚚 Transport: ${options.transport}`);
-        if (options.dryRun) console.log(`🔍 Dry run (no SAP writes)`);
-      }
+      printCheckinHeader(directory, options);
 
-      const result = await service.checkin({
-        sourceDir: directory,
-        format: options.format,
-        rootPackage: options.package,
-        transport: options.transport,
-        objectTypes: types,
-        dryRun: options.dryRun,
-        activate: options.activate,
-        unlock: options.unlock,
-        abapLanguageVersion: options.abapLanguageVersion,
-        onLog: (_level, msg) => {
-          if (!options.json) console.log(`   ${msg}`);
-        },
-        onObject: (obj, status) => {
-          if (!options.json)
-            console.log(`      • ${obj.type} ${obj.name} (${status})`);
-        },
-      });
+      const result = await service.checkin(
+        buildCheckinOptions(directory, options, types),
+      );
 
-      if (options.json) {
-        console.log(JSON.stringify(result, null, 2));
-      } else {
-        console.log(`\n📊 ${result.summary}`);
-        if (result.aborted) {
-          console.error(
-            '⚠️  Checkin aborted before completing all tiers — inspect errors above.',
-          );
-          process.exit(1);
-        }
-        if (result.apply.totals.failed > 0) {
-          process.exit(1);
-        }
-      }
+      printCheckinResult(result, options.json);
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       console.error(`❌ Checkin failed: ${msg}`);

@@ -41,7 +41,11 @@ async function runE2ETest() {
 
 // Run the test
 if (require.main === module) {
-  runE2ETest().catch(console.error);
+  try {
+    await runE2ETest();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export { runE2ETest };

@@ -234,42 +234,26 @@ describe('CLI + MCP parity (objects & packages)', () => {
     expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
   });
 
-  it('parity: list package objects', async () => {
-    const cli = await runCliCommand(harness, ['package', 'list', '$TMP']);
+  // Note: the `get` case uses the top-level `adt get package <name>` path
+  // (legacy alias for package get).
+  it.each([
+    [
+      'parity: list package objects',
+      ['package', 'list', '$TMP'],
+      'list_package_objects',
+    ],
+    ['parity: get package', ['get', 'package', '$TMP'], 'get_package'],
+    ['parity: stat package', ['package', 'stat', '$TMP'], 'stat_package'],
+    [
+      'parity: activate package',
+      ['package', 'activate', '$TMP'],
+      'activate_package',
+    ],
+  ] as const)('%s', async (_name, cliArgs, tool) => {
+    const cli = await runCliCommand(harness, [...cliArgs]);
     expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
 
-    const mcp = await callMcpTool(harness, 'list_package_objects', {
-      packageName: '$TMP',
-    });
-    expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
-  });
-
-  it('parity: get package', async () => {
-    // Top-level path: `adt get package <name>` (legacy alias for package get)
-    const cli = await runCliCommand(harness, ['get', 'package', '$TMP']);
-    expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
-
-    const mcp = await callMcpTool(harness, 'get_package', {
-      packageName: '$TMP',
-    });
-    expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
-  });
-
-  it('parity: stat package', async () => {
-    const cli = await runCliCommand(harness, ['package', 'stat', '$TMP']);
-    expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
-
-    const mcp = await callMcpTool(harness, 'stat_package', {
-      packageName: '$TMP',
-    });
-    expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);
-  });
-
-  it('parity: activate package', async () => {
-    const cli = await runCliCommand(harness, ['package', 'activate', '$TMP']);
-    expect(cli.exitCode, cli.stderr || cli.stdout).toBe(0);
-
-    const mcp = await callMcpTool(harness, 'activate_package', {
+    const mcp = await callMcpTool(harness, tool, {
       packageName: '$TMP',
     });
     expect(mcp.isError, JSON.stringify(mcp.json)).toBe(false);

@@ -78,6 +78,11 @@ export async function preserveUnselectedClassComponents(
   const materializedPaths = new Set(files.map((file) => file.path));
   const retainedPaths = new Set<string>();
   const retainedComponents = new Set<string>();
+  const retained: Array<{
+    path: string;
+    targetPath: string;
+    component: string;
+  }> = [];
   for (const path of input.existingPaths) {
     const component = unselectedComponent(input, path);
     if (component === undefined) continue;
@@ -90,9 +95,16 @@ export async function preserveUnselectedClassComponents(
         { object: input.identity.canonical, path: targetPath },
       );
     }
-    files.push(await retainedSource(input, path, targetPath, component));
+    retained.push({ path, targetPath, component });
     retainedPaths.add(targetPath);
     retainedComponents.add(component);
   }
+  files.push(
+    ...(await Promise.all(
+      retained.map((entry) =>
+        retainedSource(input, entry.path, entry.targetPath, entry.component),
+      ),
+    )),
+  );
   return { files, selections: retainedSelections(input, retainedComponents) };
 }

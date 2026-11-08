@@ -1,5 +1,6 @@
 import type { AdkContext } from '../../base/context';
 import { toText } from '../../base/fetch-utils';
+import { asText } from '../../base/text';
 
 /**
  * Structural type for the ADT source contract used by CDS source objects.
@@ -81,7 +82,7 @@ export abstract class AdkCdsSourceObject {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 

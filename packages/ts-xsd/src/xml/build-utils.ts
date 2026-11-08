@@ -317,13 +317,17 @@ export function formatValue(value: unknown, type: string): string {
  * Only adds newlines for nested elements
  */
 export function formatXml(xml: string): string {
-  let formatted = '';
-  let indent = 0;
-  // Tokenize into tags and text using linear scan (avoids regex backtracking).
+  return renderXmlParts(tokenizeXml(xml)).trim();
+}
+
+/**
+ * Tokenize XML into tags and text using linear scan (avoids regex backtracking).
+ */
+function tokenizeXml(xml: string): string[] {
   const parts: string[] = [];
   let pos = 0;
   while (pos < xml.length) {
-    if (xml.charCodeAt(pos) === 60 /* '<' */) {
+    if (xml.codePointAt(pos) === 60 /* '<' */) {
       const end = xml.indexOf('>', pos + 1);
       if (end === -1) {
         parts.push(xml.slice(pos));
@@ -341,6 +345,15 @@ export function formatXml(xml: string): string {
       pos = next;
     }
   }
+  return parts;
+}
+
+/**
+ * Render tokenized XML parts with indentation.
+ */
+function renderXmlParts(parts: string[]): string {
+  let formatted = '';
+  let indent = 0;
   let lastWasText = false;
 
   for (let i = 0; i < parts.length; i++) {
@@ -352,26 +365,15 @@ export function formatXml(xml: string): string {
       lastWasText = false;
     } else if (part.startsWith('</')) {
       indent = Math.max(0, indent - 1);
-      if (lastWasText) {
-        // Text content before closing tag - keep inline
-        formatted += part + '\n';
-      } else {
-        formatted += '  '.repeat(indent) + part + '\n';
-      }
+      formatted += renderClosingTag(part, indent, lastWasText);
       lastWasText = false;
     } else if (part.startsWith('<') && part.endsWith('/>')) {
       formatted += '  '.repeat(indent) + part + '\n';
       lastWasText = false;
     } else if (part.startsWith('<')) {
-      formatted += '  '.repeat(indent) + part;
+      formatted += renderOpeningTag(part, nextPart, indent);
       if (!part.includes('</')) {
         indent++;
-      }
-      // Check if next part is text content (not a tag)
-      if (nextPart && !nextPart.startsWith('<')) {
-        // Don't add newline - text content follows
-      } else {
-        formatted += '\n';
       }
       lastWasText = false;
     } else {
@@ -384,7 +386,26 @@ export function formatXml(xml: string): string {
     }
   }
 
-  return formatted.trim();
+  return formatted;
+}
+
+/** Render a closing tag, kept inline when text content precedes it. */
+function renderClosingTag(
+  part: string,
+  indent: number,
+  lastWasText: boolean,
+): string {
+  return (lastWasText ? '' : '  '.repeat(indent)) + part + '\n';
+}
+
+/** Render an opening tag; no newline when text content follows. */
+function renderOpeningTag(
+  part: string,
+  nextPart: string | undefined,
+  indent: number,
+): string {
+  const text = '  '.repeat(indent) + part;
+  return nextPart && !nextPart.startsWith('<') ? text : text + '\n';
 }
 
 /**

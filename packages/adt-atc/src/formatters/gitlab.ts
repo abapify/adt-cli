@@ -42,7 +42,7 @@ export interface GitLabFormatterOptions {
 function extractMethodName(location?: string): string | undefined {
   if (!location) return undefined;
   const match =
-    location.match(/\/methods\/(\w+)/i) || location.match(/[;?&]name=(\w+)/i);
+    /\/methods\/(\w+)/i.exec(location) || /[;?&]name=(\w+)/i.exec(location);
   return match ? match[1].toLowerCase() : undefined;
 }
 

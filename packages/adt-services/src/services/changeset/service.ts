@@ -45,8 +45,7 @@ import {
   resolveLockCorrelation,
   type LockService,
 } from '@abapify/adt-locks';
-import type { AdtClient } from '@abapify/adt-client';
-import type { Logger } from '@abapify/adt-client';
+import type { AdtClient, Logger } from '@abapify/adt-client';
 import type { InferTypedSchema } from '@abapify/adt-schemas';
 import { adtcore } from '@abapify/adt-schemas';
 

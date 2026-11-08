@@ -70,11 +70,7 @@ export class ConfigLoader implements IConfigLoader {
     }
 
     // Validate plugins config
-    if (
-      !config.plugins ||
-      !config.plugins.formats ||
-      config.plugins.formats.length === 0
-    ) {
+    if (!config.plugins?.formats || config.plugins.formats.length === 0) {
       errors.push('At least one format plugin must be configured');
     } else {
       for (const plugin of config.plugins.formats) {

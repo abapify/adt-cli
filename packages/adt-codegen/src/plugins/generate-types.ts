@@ -39,7 +39,8 @@ export interface ${typeName}Response {
       // Generate safe filename
       const filename = (coll.category.term || 'collection')
         .replaceAll(/[^a-z0-9]+/gi, '-')
-        .replaceAll(/^-+|-+$/g, '')
+        .replace(/^-+/, '')
+        .replace(/(?<!-)-+$/, '')
         .toLowerCase();
 
       // Add to workspace artifacts
@@ -49,7 +50,7 @@ export interface ${typeName}Response {
       });
     },
 
-    async finalize(ctx) {
+    finalize(ctx) {
       ctx.logger.success(
         `Generated types for ${ctx.workspaces.length} workspaces`,
       );

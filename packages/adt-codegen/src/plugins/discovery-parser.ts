@@ -49,21 +49,19 @@ export function parseDiscoveryXml(xml: string): DiscoveryData {
   const workspaces: WorkspaceData[] = workspacesArray.map(
     (ws: Record<string, any>) => {
       const collectionsRaw = ws['app:collection'];
-      const collectionsArray = collectionsRaw
-        ? Array.isArray(collectionsRaw)
-          ? collectionsRaw
-          : [collectionsRaw]
-        : [];
+      const collectionsList = Array.isArray(collectionsRaw)
+        ? collectionsRaw
+        : [collectionsRaw];
+      const collectionsArray = collectionsRaw ? collectionsList : [];
 
       const collections: CollectionData[] = collectionsArray.map(
         (coll: Record<string, any>) => {
           // Parse accepts
           const acceptsRaw = coll['app:accept'];
-          const accepts = acceptsRaw
-            ? Array.isArray(acceptsRaw)
-              ? acceptsRaw
-              : [acceptsRaw]
-            : [];
+          const acceptsList = Array.isArray(acceptsRaw)
+            ? acceptsRaw
+            : [acceptsRaw];
+          const accepts = acceptsRaw ? acceptsList : [];
 
           // Parse category
           const categoryRaw = coll['atom:category'];
@@ -78,11 +76,11 @@ export function parseDiscoveryXml(xml: string): DiscoveryData {
           const templateLinksContainer = coll['adtcomp:templateLinks'];
           const templateLinksRaw =
             templateLinksContainer?.['adtcomp:templateLink'];
+          const templateLinksList = Array.isArray(templateLinksRaw)
+            ? templateLinksRaw
+            : [templateLinksRaw];
           const templateLinks = templateLinksRaw
-            ? (Array.isArray(templateLinksRaw)
-                ? templateLinksRaw
-                : [templateLinksRaw]
-              )
+            ? templateLinksList
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .map((tl: Record<string, any>) => ({
                   rel: tl['@_rel'] || '',

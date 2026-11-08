@@ -1,4 +1,4 @@
-import type { AbapDoc, AbapNode, Identifier } from './base';
+import type { AbapDoc, AbapNode } from './base';
 import { AbapAstError } from './errors';
 
 /** ABAP builtin type names allowed in the AST. */
@@ -61,10 +61,10 @@ export function builtinType(input: {
 /** Reference to a named type (e.g. `zif_foo=>ty_bar`). */
 export interface NamedTypeRef extends AbapNode {
   readonly kind: 'NamedTypeRef';
-  readonly name: Identifier;
+  readonly name: string;
 }
 
-export function namedTypeRef(input: { name: Identifier }): NamedTypeRef {
+export function namedTypeRef(input: { name: string }): NamedTypeRef {
   if (!input.name) {
     throw new AbapAstError('NamedTypeRef: required field "name" is missing');
   }
@@ -80,14 +80,14 @@ export interface TableType extends AbapNode {
   readonly rowType: TypeRef;
   readonly tableKind: 'standard' | 'sorted' | 'hashed';
   readonly uniqueness?: 'unique' | 'non-unique';
-  readonly keyFields?: readonly Identifier[];
+  readonly keyFields?: readonly string[];
 }
 
 export function tableType(input: {
   rowType: TypeRef;
   tableKind?: 'standard' | 'sorted' | 'hashed';
   uniqueness?: 'unique' | 'non-unique';
-  keyFields?: readonly Identifier[];
+  keyFields?: readonly string[];
 }): TableType {
   if (!input.rowType) {
     throw new AbapAstError('TableType: required field "rowType" is missing');
@@ -105,7 +105,7 @@ export function tableType(input: {
 
 /** Field of a structure type. */
 export interface StructureField {
-  readonly name: Identifier;
+  readonly name: string;
   readonly type: TypeRef;
 }
 
@@ -139,7 +139,7 @@ export function structureType(input: {
 
 /** Enum-like type: a fixed set of name/value pairs with a base type. */
 export interface EnumMember {
-  readonly name: Identifier;
+  readonly name: string;
   readonly value: string | number;
 }
 
@@ -174,12 +174,12 @@ export function enumType(input: {
 /** Top-level `TYPES: <name> TYPE ...` declaration. */
 export interface TypeDef extends AbapNode {
   readonly kind: 'TypeDef';
-  readonly name: Identifier;
+  readonly name: string;
   readonly type: TypeRef | EnumType;
 }
 
 export function typeDef(input: {
-  name: Identifier;
+  name: string;
   type: TypeRef | EnumType;
   abapDoc?: AbapDoc;
 }): TypeDef {

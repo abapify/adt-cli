@@ -2,7 +2,7 @@
 <!--
   MCP mock-server ATC check variant form template.
 
-  TODO-synthetic: minimal fabricated catalog for the mock server's ATC
+  Synthetic: minimal fabricated catalog for the mock server's ATC
   worklist fixture. The worklist's first finding carries a GUID checkId
   (the live worklist shape), so the atc_run tool resolves it through the
   documentation bridge: the mock documentation page (documentation/

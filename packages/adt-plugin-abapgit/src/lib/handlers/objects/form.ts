@@ -111,7 +111,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
     };
   },
 
-  serialize: async (obj, ctx) => {
+  serialize: (obj, ctx) => {
     const objectName = ctx.getObjectName(obj);
     const files = [
       ctx.createFile(
@@ -147,7 +147,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
         ),
       );
     }
-    return files;
+    return Promise.resolve(files);
   },
 
   // Language-specific tdlines companion files ({name}.form.tdlines_{lang}.xml)
@@ -156,7 +156,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
     const data = unwrapData<Record<string, unknown>>(obj);
     const tdlinesData = (data.tdlines ?? {}) as Record<string, TdlineRow[]>;
     for (const [key, content] of Object.entries(sources)) {
-      const match = key.match(/^tdlines_([a-zA-Z0-9]+)$/);
+      const match = /^tdlines_([a-zA-Z0-9]+)$/.exec(key);
       if (!match) continue;
       const parsed = tdlines.parse(content) as {
         abapGit?: { abap?: { values?: { TDLINES?: { item?: unknown } } } };

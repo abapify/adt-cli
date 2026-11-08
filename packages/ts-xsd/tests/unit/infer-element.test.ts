@@ -7,10 +7,12 @@
  * - AbapSourceMainObject extends AdtMainObject (in adtcore)
  * - AdtMainObject extends AdtObject (in adtcore)
  *
- * NOTE: These are compile-time type tests. If this file compiles without errors,
- * the tests pass. The runtime tests are just placeholders.
+ * NOTE: These are primarily compile-time type tests. If this file compiles
+ * without errors, the type-level checks pass. Each case also asserts its
+ * computed type-level flags at runtime so the test runner verifies them too.
  */
 import { describe, test as it } from 'node:test';
+import assert from 'node:assert';
 import type {
   InferElement,
   InferSchema,
@@ -160,6 +162,7 @@ describe('InferElement with multi-level $imports', () => {
       // Should find the element (returns item type for widened arrays)
       type IsNever = [Found] extends [never] ? true : false;
       const _check: IsNever = false; // compile error if Found is never
+      assert.strictEqual(_check, false);
     });
 
     it('should find element by name in widened array', () => {
@@ -170,6 +173,7 @@ describe('InferElement with multi-level $imports', () => {
       // Should still find (returns the item type)
       type IsNever = [Found] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
     });
   });
 
@@ -178,6 +182,7 @@ describe('InferElement with multi-level $imports', () => {
       type Found = FindComplexTypeWithSchema<'MyClass', typeof topSchema>;
       type IsNever = [Found] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
     });
 
     it('should find type in $imports (1 level deep)', () => {
@@ -185,18 +190,21 @@ describe('InferElement with multi-level $imports', () => {
       // Note: With widened $imports, this returns the item type from the widened array
       type IsNever = [Found] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
     });
 
     it('should find type in $imports (2 levels deep)', () => {
       type Found = FindComplexTypeWithSchema<'MainObject', typeof topSchema>;
       type IsNever = [Found] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
     });
 
     it('should find base type in $imports (2 levels deep)', () => {
       type Found = FindComplexTypeWithSchema<'BaseObject', typeof topSchema>;
       type IsNever = [Found] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
     });
   });
 
@@ -205,6 +213,7 @@ describe('InferElement with multi-level $imports', () => {
       type MyClass = InferElement<typeof topSchema, 'myClass'>;
       type IsNever = [MyClass] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
     });
 
     it('should have own attributes', () => {
@@ -216,8 +225,11 @@ describe('InferElement with multi-level $imports', () => {
         ? true
         : false;
       const _f: HasFinal = true;
+      assert.strictEqual(_f, true);
       const _a: HasAbstract = true;
+      assert.strictEqual(_a, true);
       const _v: HasVisibility = true;
+      assert.strictEqual(_v, true);
     });
 
     it('should have inherited attributes from middle layer', () => {
@@ -228,7 +240,9 @@ describe('InferElement with multi-level $imports', () => {
         : false;
       type HasLanguage = MyClass extends { language?: unknown } ? true : false;
       const _s: HasSourceUri = true;
+      assert.strictEqual(_s, true);
       const _l: HasLanguage = true;
+      assert.strictEqual(_l, true);
     });
 
     it('should have inherited attributes from base layer', () => {
@@ -242,9 +256,13 @@ describe('InferElement with multi-level $imports', () => {
       type HasId = MyClass extends { id?: unknown } ? true : false;
       type HasName = MyClass extends { name?: unknown } ? true : false;
       const _ver: HasVersion = true;
+      assert.strictEqual(_ver, true);
       const _desc: HasDescription = true;
+      assert.strictEqual(_desc, true);
       const _id: HasId = true;
+      assert.strictEqual(_id, true);
       const _name: HasName = true;
+      assert.strictEqual(_name, true);
     });
 
     it('should infer simple element without inheritance', () => {
@@ -254,7 +272,9 @@ describe('InferElement with multi-level $imports', () => {
         ? true
         : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
       const _inc: HasIncludeType = true;
+      assert.strictEqual(_inc, true);
     });
 
     it('should infer nested element type from imported schema', () => {
@@ -265,6 +285,7 @@ describe('InferElement with multi-level $imports', () => {
         ? true
         : false;
       const _hasRef: HasPackageRef = true;
+      assert.strictEqual(_hasRef, true);
 
       // The packageRef should have the PackageReference type's attributes
       type PackageRefType = MyClass extends { packageRef?: infer P }
@@ -280,8 +301,11 @@ describe('InferElement with multi-level $imports', () => {
         ? true
         : false;
       const _refHasName: PackageRefHasName = true;
+      assert.strictEqual(_refHasName, true);
       const _refHasUri: PackageRefHasUri = true;
+      assert.strictEqual(_refHasUri, true);
       const _refHasType: PackageRefHasType = true;
+      assert.strictEqual(_refHasType, true);
     });
 
     it('should infer unbounded array element type from imported schema', () => {
@@ -289,11 +313,13 @@ describe('InferElement with multi-level $imports', () => {
       // include is an array (maxOccurs: unbounded) of IncludeItem from baseSchema
       type HasInclude = MyClass extends { include?: unknown } ? true : false;
       const _hasInclude: HasInclude = true;
+      assert.strictEqual(_hasInclude, true);
 
       // include should be an array
       type IncludeType = MyClass extends { include?: infer I } ? I : never;
       type IncludeIsArray = IncludeType extends unknown[] ? true : false;
       const _includeIsArray: IncludeIsArray = true;
+      assert.strictEqual(_includeIsArray, true);
 
       // Array elements should have IncludeItem's attributes
       type IncludeItemType = IncludeType extends (infer Item)[] ? Item : never;
@@ -308,7 +334,9 @@ describe('InferElement with multi-level $imports', () => {
         ? true
         : false;
       const _itemHasIncludeType: IncludeItemHasIncludeType = true;
+      assert.strictEqual(_itemHasIncludeType, true);
       const _itemHasSourceUri: IncludeItemHasSourceUri = true;
+      assert.strictEqual(_itemHasSourceUri, true);
     });
   });
 
@@ -317,6 +345,7 @@ describe('InferElement with multi-level $imports', () => {
       type Schema = InferSchema<typeof topSchema>;
       type IsNever = [Schema] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
     });
   });
 
@@ -407,12 +436,15 @@ describe('InferElement with multi-level $imports', () => {
       type Obj = InferElement<typeof _l4, 'obj'>;
       type IsNever = [Obj] extends [never] ? true : false;
       const _check: IsNever = false;
+      assert.strictEqual(_check, false);
 
       // Should have inherited properties
       type HasId = Obj extends { id?: unknown } ? true : false;
       type HasItems = Obj extends { items?: unknown } ? true : false;
       const _hasId: HasId = true;
+      assert.strictEqual(_hasId, true);
       const _hasItems: HasItems = true;
+      assert.strictEqual(_hasItems, true);
     });
 
     it('should document recursion limit workaround for array access', () => {
@@ -447,6 +479,14 @@ describe('InferElement with multi-level $imports', () => {
       type ItemsType = Obj extends { items?: infer I } ? I : never;
       type ItemsIsArray = ItemsType extends unknown[] ? true : false;
       const _itemsIsArray: ItemsIsArray = true;
+      assert.strictEqual(_itemsIsArray, true);
+
+      // Both workarounds must run correctly at runtime
+      const sample = {
+        items: [{ itemType: 'PROG' }, { itemType: 'FUGR' }],
+      } as unknown as Obj;
+      assert.deepStrictEqual(_testWithUnknown(sample), ['PROG', 'FUGR']);
+      assert.deepStrictEqual(_testWithInterface(sample), ['PROG', 'FUGR']);
     });
   });
 });

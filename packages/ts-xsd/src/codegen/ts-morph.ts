@@ -26,6 +26,8 @@ import type {
   LocalElement,
   LocalAttribute,
   ExplicitGroup,
+  ComplexContentExtension,
+  SimpleContentExtension,
 } from '../xsd/types';
 // =============================================================================
 // Public Types
@@ -124,18 +126,44 @@ export function schemaToSourceFile(
     importedTypes: new Map<string, string>(), // typeName -> importPath
   };
 
+  // Track types from schemaLocation imports and linked $imports
+  trackSchemaImports(schema, options, ctx);
+
+  // Generate interfaces and type aliases for all schema declarations
+  generateSchemaTypes(schema, ctx);
+
+  // Generate root schema type from elements
+  if (rootTypeName) {
+    generateRootType(rootTypeName, ctx);
+  }
+
+  // Add import statements for imported types
+  addImportStatements(ctx);
+
+  sourceFile.formatText();
+
+  return {
+    project,
+    sourceFile,
+    rootTypeName: rootTypeName ?? undefined,
+  };
+}
+
+/** Track types referenced from schemaLocation imports and linked $imports. */
+function trackSchemaImports(
+  schema: Schema,
+  options: SchemaToSourceFileOptions,
+  ctx: GeneratorContext,
+): void {
   // Process schemaLocation imports via resolver
   if (options.schemaLocationResolver && schema.import) {
     for (const imp of schema.import) {
-      if (imp.schemaLocation) {
-        const resolvedSchema = options.schemaLocationResolver(
-          imp.schemaLocation,
-          options.basePath,
-        );
-        if (resolvedSchema) {
-          trackImportedTypes(resolvedSchema, ctx);
-        }
-      }
+      trackSchemaLocationImport(
+        imp,
+        options.schemaLocationResolver,
+        options.basePath,
+        ctx,
+      );
     }
   }
 
@@ -145,7 +173,25 @@ export function schemaToSourceFile(
       trackImportedTypes(importedSchema, ctx);
     }
   }
+}
 
+/** Resolve one schemaLocation import and track its types. */
+function trackSchemaLocationImport(
+  imp: { schemaLocation?: string },
+  resolver: SchemaLocationResolver,
+  basePath: string | undefined,
+  ctx: GeneratorContext,
+): void {
+  if (!imp.schemaLocation) return;
+
+  const resolvedSchema = resolver(imp.schemaLocation, basePath);
+  if (resolvedSchema) {
+    trackImportedTypes(resolvedSchema, ctx);
+  }
+}
+
+/** Generate interfaces and type aliases for all schema declarations. */
+function generateSchemaTypes(schema: Schema, ctx: GeneratorContext): void {
   // Generate interfaces for all complex types
   for (const ct of schema.complexType ?? []) {
     if (ct.name) {
@@ -168,22 +214,6 @@ export function schemaToSourceFile(
       generateSimpleType(st.name, st, ctx);
     }
   }
-
-  // Generate root schema type from elements
-  if (rootTypeName) {
-    generateRootType(rootTypeName, ctx);
-  }
-
-  // Add import statements for imported types
-  addImportStatements(ctx);
-
-  sourceFile.formatText();
-
-  return {
-    project,
-    sourceFile,
-    rootTypeName: rootTypeName ?? undefined,
-  };
 }
 
 // =============================================================================
@@ -384,19 +414,7 @@ export function expandTypeToString(
   }
 
   if (type.isUnion()) {
-    const unionTypes = type.getUnionTypes();
-    if (unionTypes.every((t) => isPrimitiveType(t))) {
-      // All primitives - but check if getText() returns import() reference
-      const textRepr = type.getText();
-      if (textRepr.includes('import(')) {
-        // Expand each union member individually to avoid import() in output
-        return unionTypes.map((t) => t.getText()).join(' | ');
-      }
-      return textRepr;
-    }
-    return unionTypes
-      .map((t) => expandTypeToString(t, checker, context, indent, visited))
-      .join(' | ');
+    return expandUnionType(type, checker, context, indent, visited);
   }
 
   if (type.isIntersection()) {
@@ -409,28 +427,7 @@ export function expandTypeToString(
   // Get properties and expand them
   const props = type.getProperties();
   if (props.length > 0) {
-    // Get a stable type identifier for cycle detection
-    const symbol = type.getSymbol() ?? type.getAliasSymbol();
-    const typeId = symbol?.getName() ?? type.getText();
-
-    // Check for cycles ONLY when we're about to expand properties
-    // This prevents infinite recursion on self-referential types
-    if (visited.has(typeId)) {
-      return 'unknown';
-    }
-
-    // Clone visited set and add current type for this expansion branch
-    const newVisited = new Set(visited);
-    newVisited.add(typeId);
-
-    return expandObjectLiteral(
-      type,
-      props,
-      checker,
-      context,
-      indent,
-      newVisited,
-    );
+    return expandPropsObject(type, props, checker, context, indent, visited);
   }
 
   // Type with only an index signature (no named properties)
@@ -448,61 +445,147 @@ export function expandTypeToString(
   // For types without properties, check if getText() returns an import() - if so, try to expand
   const textRepr = type.getText();
   if (textRepr.includes('import(')) {
-    // Extract the type name from import("...").TypeName
-    const match = /import\([^)]+\)\.(\w+)/.exec(textRepr);
-    if (match) {
-      const typeName = match[1];
-      // Look up the type alias in all source files in the project
-      const project = context.getSourceFile().getProject();
-      for (const sf of project.getSourceFiles()) {
-        const typeAlias = sf.getTypeAlias(typeName);
-        if (typeAlias) {
-          const typeNode = typeAlias.getTypeNode();
-          if (typeNode) {
-            // Return the raw type text (e.g., "'active' | 'inactive' | 'pending'")
-            return typeNode.getText();
-          }
-        }
-        // Also check interfaces
-        const iface = sf.getInterface(typeName);
-        if (iface) {
-          // Check for cycles before expanding interface
-          if (visited.has(typeName)) {
-            return 'unknown';
-          }
-          // For interfaces, expand their properties with cycle tracking
-          const ifaceType = iface.getType();
-          const newVisited = new Set(visited);
-          newVisited.add(typeName);
-          return expandTypeToString(
-            ifaceType,
-            checker,
-            context,
-            indent,
-            newVisited,
-          );
-        }
+    return expandImportType(type, textRepr, checker, context, indent, visited);
+  }
+
+  return textRepr;
+}
+
+/** Expand a union type to a `A | B | ...` string. */
+function expandUnionType(
+  type: Type,
+  checker: TypeChecker,
+  context: Node,
+  indent: string,
+  visited: Set<string>,
+): string {
+  const unionTypes = type.getUnionTypes();
+  if (unionTypes.every((t) => isPrimitiveType(t))) {
+    // All primitives - but check if getText() returns import() reference
+    const textRepr = type.getText();
+    if (textRepr.includes('import(')) {
+      // Expand each union member individually to avoid import() in output
+      return unionTypes.map((t) => t.getText()).join(' | ');
+    }
+    return textRepr;
+  }
+  return unionTypes
+    .map((t) => expandTypeToString(t, checker, context, indent, visited))
+    .join(' | ');
+}
+
+/** Expand a type's properties into an object literal with cycle detection. */
+function expandPropsObject(
+  type: Type,
+  props: TsSymbol[],
+  checker: TypeChecker,
+  context: Node,
+  indent: string,
+  visited: Set<string>,
+): string {
+  // Get a stable type identifier for cycle detection
+  const symbol = type.getSymbol() ?? type.getAliasSymbol();
+  const typeId = symbol?.getName() ?? type.getText();
+
+  // Check for cycles ONLY when we're about to expand properties
+  // This prevents infinite recursion on self-referential types
+  if (visited.has(typeId)) {
+    return 'unknown';
+  }
+
+  // Clone visited set and add current type for this expansion branch
+  const newVisited = new Set(visited);
+  newVisited.add(typeId);
+
+  return expandObjectLiteral(type, props, checker, context, indent, newVisited);
+}
+
+/**
+ * Try to expand a type whose text form is an import() reference:
+ * look up the named type in the project, else expand base types,
+ * else return unknown to avoid import() in output.
+ */
+function expandImportType(
+  type: Type,
+  textRepr: string,
+  checker: TypeChecker,
+  context: Node,
+  indent: string,
+  visited: Set<string>,
+): string {
+  // Extract the type name from import("...").TypeName
+  const match = /import\([^)]+\)\.(\w+)/.exec(textRepr);
+  if (match) {
+    const expanded = expandNamedTypeReference(
+      match[1],
+      checker,
+      context,
+      indent,
+      visited,
+    );
+    if (expanded) return expanded;
+  }
+
+  // Try base types as fallback - but track the type text to prevent cycles
+  const baseTypes = type.getBaseTypes();
+  if (baseTypes.length > 0) {
+    const newVisited = new Set(visited);
+    newVisited.add(textRepr); // Use textRepr as cycle key
+    return expandTypeToString(
+      baseTypes[0],
+      checker,
+      context,
+      indent,
+      newVisited,
+    );
+  }
+  // If still no properties, return unknown to avoid import() in output
+  return 'unknown';
+}
+
+/**
+ * Look up a named type reference in all source files of the project and
+ * expand it, or return undefined when it cannot be found.
+ */
+function expandNamedTypeReference(
+  typeName: string,
+  checker: TypeChecker,
+  context: Node,
+  indent: string,
+  visited: Set<string>,
+): string | undefined {
+  // Look up the type alias in all source files in the project
+  const project = context.getSourceFile().getProject();
+  for (const sf of project.getSourceFiles()) {
+    const typeAlias = sf.getTypeAlias(typeName);
+    if (typeAlias) {
+      const typeNode = typeAlias.getTypeNode();
+      if (typeNode) {
+        // Return the raw type text (e.g., "'active' | 'inactive' | 'pending'")
+        return typeNode.getText();
       }
     }
-
-    // Try base types as fallback - but track the type text to prevent cycles
-    const baseTypes = type.getBaseTypes();
-    if (baseTypes.length > 0) {
+    // Also check interfaces
+    const iface = sf.getInterface(typeName);
+    if (iface) {
+      // Check for cycles before expanding interface
+      if (visited.has(typeName)) {
+        return 'unknown';
+      }
+      // For interfaces, expand their properties with cycle tracking
+      const ifaceType = iface.getType();
       const newVisited = new Set(visited);
-      newVisited.add(textRepr); // Use textRepr as cycle key
+      newVisited.add(typeName);
       return expandTypeToString(
-        baseTypes[0],
+        ifaceType,
         checker,
         context,
         indent,
         newVisited,
       );
     }
-    // If still no properties, return unknown to avoid import() in output
-    return 'unknown';
   }
-
-  return textRepr;
+  return undefined;
 }
 
 // =============================================================================
@@ -694,75 +777,20 @@ function generateInterface(
 
   // Handle complexContent extension (inheritance)
   if (ct.complexContent?.extension?.base) {
-    const baseName = stripNsPrefix(ct.complexContent.extension.base);
-    const baseInterfaceName = toInterfaceName(baseName);
-
-    // Is it an imported type?
-    if (ctx.importedTypes.has(baseName)) {
-      ctx.generatedTypes.add(`import:${baseInterfaceName}`);
-      extendsTypes.push(baseInterfaceName);
-    } else {
-      // Local type - generate it first
-      const baseCt = ctx.schema.complexType?.find((c) => c.name === baseName);
-      if (baseCt) {
-        generateInterface(baseName, baseCt, ctx);
-        extendsTypes.push(baseInterfaceName);
-      }
-    }
-
-    // Collect extension's own properties
-    const ext = ct.complexContent.extension;
-    if (ext.sequence)
-      hasAny = collectFromGroup(ext.sequence, properties, ctx, false) || hasAny;
-    if (ext.choice)
-      hasAny = collectFromGroup(ext.choice, properties, ctx, true) || hasAny;
-    if (ext.all)
-      hasAny = collectFromGroup(ext.all, properties, ctx, false) || hasAny;
-    collectAttributes(ext.attribute, properties, ctx);
+    hasAny = collectExtensionContent(
+      ct.complexContent.extension,
+      properties,
+      extendsTypes,
+      ctx,
+    );
   }
   // Handle simpleContent
   else if (ct.simpleContent?.extension) {
-    const ext = ct.simpleContent.extension;
-    const baseType = ext.base
-      ? (XSD_BUILT_IN_TYPES[stripNsPrefix(ext.base)] ?? 'string')
-      : 'string';
-    properties.push({ name: '$value', type: baseType, hasQuestionToken: true });
-    collectAttributes(ext.attribute, properties, ctx);
+    collectSimpleContent(ct.simpleContent.extension, properties, ctx);
   }
   // Handle direct content (no complexContent/simpleContent)
   else {
-    if (ct.sequence)
-      hasAny = collectFromGroup(ct.sequence, properties, ctx, false) || hasAny;
-    if (ct.choice)
-      hasAny = collectFromGroup(ct.choice, properties, ctx, true) || hasAny;
-    if (ct.all)
-      hasAny = collectFromGroup(ct.all, properties, ctx, false) || hasAny;
-    collectAttributes(ct.attribute, properties, ctx);
-
-    if (ct.mixed) {
-      properties.push({
-        name: '_text',
-        type: 'string',
-        hasQuestionToken: true,
-      });
-    }
-
-    // Handle group reference
-    if (ct.group?.ref) {
-      const groupName = stripNsPrefix(ct.group.ref);
-      const group = ctx.schema.group?.find((g) => g.name === groupName);
-      if (group) {
-        if (group.sequence)
-          hasAny =
-            collectFromGroup(group.sequence, properties, ctx, false) || hasAny;
-        if (group.choice)
-          hasAny =
-            collectFromGroup(group.choice, properties, ctx, true) || hasAny;
-        if (group.all)
-          hasAny =
-            collectFromGroup(group.all, properties, ctx, false) || hasAny;
-      }
-    }
+    hasAny = collectDirectContent(ct, properties, ctx);
   }
 
   const interfaceDecl = ctx.sourceFile.addInterface({
@@ -787,6 +815,111 @@ function generateInterface(
       returnType: 'unknown',
     });
   }
+}
+
+type PropertyList = Array<{
+  name: string;
+  type: string;
+  hasQuestionToken: boolean;
+}>;
+
+/** Collect properties from a complexContent extension (inheritance). */
+function collectExtensionContent(
+  ext: ComplexContentExtension,
+  properties: PropertyList,
+  extendsTypes: string[],
+  ctx: GeneratorContext,
+): boolean {
+  const baseName = stripNsPrefix(ext.base ?? '');
+  const baseInterfaceName = toInterfaceName(baseName);
+
+  // Is it an imported type?
+  if (ctx.importedTypes.has(baseName)) {
+    ctx.generatedTypes.add(`import:${baseInterfaceName}`);
+    extendsTypes.push(baseInterfaceName);
+  } else {
+    // Local type - generate it first
+    const baseCt = ctx.schema.complexType?.find((c) => c.name === baseName);
+    if (baseCt) {
+      generateInterface(baseName, baseCt, ctx);
+      extendsTypes.push(baseInterfaceName);
+    }
+  }
+
+  // Collect extension's own properties
+  let hasAny = false;
+  if (ext.sequence)
+    hasAny = collectFromGroup(ext.sequence, properties, ctx, false) || hasAny;
+  if (ext.choice)
+    hasAny = collectFromGroup(ext.choice, properties, ctx, true) || hasAny;
+  if (ext.all)
+    hasAny = collectFromGroup(ext.all, properties, ctx, false) || hasAny;
+  collectAttributes(ext.attribute, properties, ctx);
+  return hasAny;
+}
+
+/** Collect properties from a simpleContent extension ($value + attributes). */
+function collectSimpleContent(
+  ext: SimpleContentExtension,
+  properties: PropertyList,
+  ctx: GeneratorContext,
+): void {
+  const baseType = ext.base
+    ? (XSD_BUILT_IN_TYPES[stripNsPrefix(ext.base)] ?? 'string')
+    : 'string';
+  properties.push({ name: '$value', type: baseType, hasQuestionToken: true });
+  collectAttributes(ext.attribute, properties, ctx);
+}
+
+/** Collect properties from direct content (no complexContent/simpleContent). */
+function collectDirectContent(
+  ct: TopLevelComplexType | LocalComplexType,
+  properties: PropertyList,
+  ctx: GeneratorContext,
+): boolean {
+  let hasAny = false;
+  if (ct.sequence)
+    hasAny = collectFromGroup(ct.sequence, properties, ctx, false) || hasAny;
+  if (ct.choice)
+    hasAny = collectFromGroup(ct.choice, properties, ctx, true) || hasAny;
+  if (ct.all)
+    hasAny = collectFromGroup(ct.all, properties, ctx, false) || hasAny;
+  collectAttributes(ct.attribute, properties, ctx);
+
+  if (ct.mixed) {
+    properties.push({
+      name: '_text',
+      type: 'string',
+      hasQuestionToken: true,
+    });
+  }
+
+  // Handle group reference
+  if (ct.group?.ref) {
+    hasAny = collectNamedGroupRef(ct.group.ref, properties, ctx) || hasAny;
+  }
+
+  return hasAny;
+}
+
+/** Collect properties from a referenced named group (xs:group ref="..."). */
+function collectNamedGroupRef(
+  ref: string,
+  properties: PropertyList,
+  ctx: GeneratorContext,
+): boolean {
+  const groupName = stripNsPrefix(ref);
+  const group = ctx.schema.group?.find((g) => g.name === groupName);
+  if (!group) return false;
+
+  let hasAny = false;
+  if (group.sequence)
+    hasAny = collectFromGroup(group.sequence, properties, ctx, false) || hasAny;
+  if (group.choice)
+    hasAny = collectFromGroup(group.choice, properties, ctx, true) || hasAny;
+  if (group.all)
+    hasAny = collectFromGroup(group.all, properties, ctx, false) || hasAny;
+  return hasAny;
 }
 
 interface GroupLike {
@@ -818,27 +951,8 @@ function collectFromGroup(
   }
 
   for (const g of group.group ?? []) {
-    if (g.ref) {
-      const groupName = stripNsPrefix(g.ref);
-      const namedGroup = ctx.schema.group?.find((gr) => gr.name === groupName);
-      if (namedGroup) {
-        if (namedGroup.sequence)
-          if (
-            collectFromGroup(
-              namedGroup.sequence,
-              properties,
-              ctx,
-              forceOptional,
-            )
-          )
-            hasAny = true;
-        if (namedGroup.choice)
-          if (collectFromGroup(namedGroup.choice, properties, ctx, true))
-            hasAny = true;
-        if (namedGroup.all)
-          if (collectFromGroup(namedGroup.all, properties, ctx, forceOptional))
-            hasAny = true;
-      }
+    if (g.ref && collectNamedGroup(g.ref, properties, ctx, forceOptional)) {
+      hasAny = true;
     }
   }
 
@@ -847,6 +961,32 @@ function collectFromGroup(
     hasAny = true;
   }
 
+  return hasAny;
+}
+
+/** Collect properties from a named group reference (xs:group ref="..."). */
+function collectNamedGroup(
+  ref: string,
+  properties: Array<{ name: string; type: string; hasQuestionToken: boolean }>,
+  ctx: GeneratorContext,
+  forceOptional: boolean,
+): boolean {
+  const groupName = stripNsPrefix(ref);
+  const namedGroup = ctx.schema.group?.find((gr) => gr.name === groupName);
+  if (!namedGroup) return false;
+
+  let hasAny = false;
+  if (namedGroup.sequence)
+    hasAny =
+      collectFromGroup(namedGroup.sequence, properties, ctx, forceOptional) ||
+      hasAny;
+  if (namedGroup.choice)
+    hasAny =
+      collectFromGroup(namedGroup.choice, properties, ctx, true) || hasAny;
+  if (namedGroup.all)
+    hasAny =
+      collectFromGroup(namedGroup.all, properties, ctx, forceOptional) ||
+      hasAny;
   return hasAny;
 }
 

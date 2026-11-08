@@ -140,6 +140,83 @@ export abstract class TypedContractScenario<
 }
 
 /**
+ * Assert that the scenario's contract descriptor is structurally valid.
+ */
+export function checkTypedDescriptor(descriptor: RestEndpointDescriptor): void {
+  expect(descriptor).toBeDefined();
+  expect(descriptor.method).toBeDefined();
+  expect(descriptor.path).toBeDefined();
+}
+
+/**
+ * Build the typed request from the descriptor and run the scenario's
+ * request assertions.
+ */
+export function checkTypedRequest<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends (...args: any[]) => RestEndpointDescriptor,
+>(scenario: TypedContractScenario<T>): void {
+  const descriptor = scenario.getDescriptor();
+  const request = {
+    method: descriptor.method,
+    path: descriptor.path,
+    headers: descriptor.headers,
+    query: descriptor.query,
+    body: descriptor.body,
+  } as ExtractRequest<T>;
+
+  scenario.assertRequest(request);
+}
+
+/**
+ * Call the scenario's contract through a mock adapter that serves the
+ * fixture, then run the scenario's typed response assertions.
+ */
+export async function checkTypedResponse<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends (...args: any[]) => RestEndpointDescriptor,
+>(scenario: TypedContractScenario<T>): Promise<void> {
+  // Create mock adapter that returns fixture
+  const adapter = createMockAdapter([
+    {
+      response: { status: 200, body: scenario.fixture },
+    },
+  ]);
+
+  // Create client with mock adapter
+  const client = createClient(
+    { operation: scenario.contract },
+    {
+      baseUrl: '',
+      adapter,
+    },
+  );
+
+  // Call the operation
+  const response = await (
+    client.operation as unknown as (...args: unknown[]) => Promise<unknown>
+  )(...scenario.getContractParams());
+
+  // Run typed assertions
+  scenario.assertResponse(response as ExtractResponse<T>);
+}
+
+/**
+ * Run every check for a typed contract scenario: descriptor validity,
+ * typed request assertions and typed response assertions against the
+ * fixture. This runs exactly the assertions `runTypedScenario` applies to
+ * one scenario; test files can declare their own `it()` cases around it.
+ */
+export async function checkTypedScenario<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends (...args: any[]) => RestEndpointDescriptor,
+>(scenario: TypedContractScenario<T>): Promise<void> {
+  checkTypedDescriptor(scenario.getDescriptor());
+  checkTypedRequest(scenario);
+  await checkTypedResponse(scenario);
+}
+
+/**
  * Run a typed contract scenario.
  * Executes request/response assertions with full type safety.
  */
@@ -152,51 +229,17 @@ export function runTypedScenario<
 
     describe('request', () => {
       it('has valid contract descriptor', () => {
-        expect(descriptor).toBeDefined();
-        expect(descriptor.method).toBeDefined();
-        expect(descriptor.path).toBeDefined();
+        checkTypedDescriptor(descriptor);
       });
 
       it('passes request assertions', () => {
-        const request = {
-          method: descriptor.method,
-          path: descriptor.path,
-          headers: descriptor.headers,
-          query: descriptor.query,
-          body: descriptor.body,
-        } as ExtractRequest<T>;
-
-        scenario.assertRequest(request);
+        checkTypedRequest(scenario);
       });
     });
 
     describe('response', () => {
       it('parses fixture and passes response assertions', async () => {
-        // Create mock adapter that returns fixture
-        const adapter = createMockAdapter([
-          {
-            response: { status: 200, body: scenario.fixture },
-          },
-        ]);
-
-        // Create client with mock adapter
-        const client = createClient(
-          { operation: scenario.contract },
-          {
-            baseUrl: '',
-            adapter,
-          },
-        );
-
-        // Call the operation
-        const response = await (
-          client.operation as unknown as (
-            ...args: unknown[]
-          ) => Promise<unknown>
-        )(...scenario.getContractParams());
-
-        // Run typed assertions
-        scenario.assertResponse(response as ExtractResponse<T>);
+        await checkTypedResponse(scenario);
       });
     });
   });

@@ -44,6 +44,63 @@ function parseParams(raw: string[]): RfcParams {
   return out;
 }
 
+/** Merge an additional JSON object into the parsed --param values. */
+function mergeJsonParams(params: RfcParams, jsonText: string): void {
+  let extra: Record<string, unknown>;
+  try {
+    extra = JSON.parse(jsonText);
+  } catch (err) {
+    throw new Error(
+      `--json payload is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
+  }
+  if (typeof extra !== 'object' || extra === null || Array.isArray(extra)) {
+    throw new Error('--json payload must be an object.');
+  }
+  Object.assign(params, extra);
+}
+
+/**
+ * Report an RFC failure. SOAP faults honor --exception-mode; a missing
+ * SOAP-RFC endpoint exits with code 2 (matching sapcli parity).
+ */
+function reportRfcFailure(
+  error: unknown,
+  options: { exceptionMode?: string },
+): never {
+  if (error instanceof RfcSoapFault) {
+    if (options.exceptionMode === 'bapi') {
+      // BAPI-ish: print structured fault info but still exit 1.
+      console.error(
+        JSON.stringify(
+          {
+            faultcode: error.faultcode,
+            faultstring: error.faultstring,
+          },
+          null,
+          2,
+        ),
+      );
+    } else {
+      console.error(`❌ SOAP Fault: ${error.faultcode}: ${error.faultstring}`);
+    }
+    process.exit(1);
+  }
+  if (error instanceof RfcTransportUnavailable) {
+    console.error(
+      `❌ SOAP-RFC endpoint unavailable (HTTP ${error.status}). ` +
+        `Your SAP system may have /sap/bc/soap/rfc disabled.`,
+    );
+    process.exit(2);
+  }
+  console.error(
+    '❌ RFC call failed:',
+    error instanceof Error ? error.message : String(error),
+  );
+  process.exit(1);
+}
+
 export const rfcCommand = new Command('rfc')
   .description(
     'Invoke a classic RFC function module via SOAP-over-HTTP (/sap/bc/soap/rfc)',
@@ -74,23 +131,7 @@ export const rfcCommand = new Command('rfc')
     try {
       const params = parseParams(options.param as string[]);
       if (options.json) {
-        let extra: Record<string, unknown>;
-        try {
-          extra = JSON.parse(options.json);
-        } catch (err) {
-          throw new Error(
-            `--json payload is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
-            { cause: err },
-          );
-        }
-        if (
-          typeof extra !== 'object' ||
-          extra === null ||
-          Array.isArray(extra)
-        ) {
-          throw new Error('--json payload must be an object.');
-        }
-        Object.assign(params, extra);
+        mergeJsonParams(params, options.json);
       }
 
       const adtClient = await getAdtClientV2();
@@ -114,37 +155,6 @@ export const rfcCommand = new Command('rfc')
       }
       console.log('✅ Done!');
     } catch (error) {
-      if (error instanceof RfcSoapFault) {
-        if (options.exceptionMode === 'bapi') {
-          // BAPI-ish: print structured fault info but still exit 1.
-          console.error(
-            JSON.stringify(
-              {
-                faultcode: error.faultcode,
-                faultstring: error.faultstring,
-              },
-              null,
-              2,
-            ),
-          );
-        } else {
-          console.error(
-            `❌ SOAP Fault: ${error.faultcode}: ${error.faultstring}`,
-          );
-        }
-        process.exit(1);
-      }
-      if (error instanceof RfcTransportUnavailable) {
-        console.error(
-          `❌ SOAP-RFC endpoint unavailable (HTTP ${error.status}). ` +
-            `Your SAP system may have /sap/bc/soap/rfc disabled.`,
-        );
-        process.exit(2);
-      }
-      console.error(
-        '❌ RFC call failed:',
-        error instanceof Error ? error.message : String(error),
-      );
-      process.exit(1);
+      reportRfcFailure(error, options);
     }
   });

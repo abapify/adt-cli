@@ -191,10 +191,10 @@ export const registry = {
   /**
    * MCP mock-server fixtures.
    *
-   * TODO-synthetic: Most entries below are *fabricated* minimal shapes used
-   * to exercise MCP tool parsing paths. They should be replaced with real
-   * sanitized SAP responses captured from `adt fetch` per
-   * packages/adt-fixtures/AGENTS.md fixture requirements.
+   * Synthetic: most entries below are *fabricated* minimal shapes used to
+   * exercise MCP tool parsing paths. Replacing them with real sanitized SAP
+   * responses captured from `adt fetch` (per packages/adt-fixtures/AGENTS.md
+   * fixture requirements) is still pending.
    */
   mcp: {
     discovery: 'mcp/discovery/service.xml',
@@ -212,7 +212,7 @@ export const registry = {
       run: 'mcp/atc/run.json',
       worklist: 'mcp/atc/worklist.json',
       // Synthetic minimal catalog + documentation page for the mock worklist
-      // fixture (TODO-synthetic; see file headers for the real sources).
+      // fixture (see file headers for the real sources).
       formtemplate: 'mcp/atc/formtemplate.xml',
       documentation: 'mcp/atc/documentation-amdp-hdb-migration.html',
     },

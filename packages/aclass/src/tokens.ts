@@ -66,13 +66,13 @@ const starCommentPattern: CustomPattern = {
   line_breaks: false,
   exec: (text, offset) => {
     // Only match when at start of line (offset 0 or previous char is \n).
-    if (offset !== 0 && text.charCodeAt(offset - 1) !== 0x0a /* \n */) {
+    if (offset !== 0 && text.codePointAt(offset - 1) !== 0x0a /* \n */) {
       return null;
     }
-    if (text.charCodeAt(offset) !== 0x2a /* * */) return null;
+    if (text.codePointAt(offset) !== 0x2a /* * */) return null;
     let end = offset;
     while (end < text.length) {
-      const c = text.charCodeAt(end);
+      const c = text.codePointAt(end);
       if (c === 0x0a || c === 0x0d) break;
       end++;
     }
@@ -142,7 +142,7 @@ function kw(name: string, word: string) {
   // the keyword lose to `Identifier` when followed by an identifier
   // character, avoiding false positives like `CLASSIFIER` being split
   // into `CLASS IFIER`.
-  const pattern = new RegExp(word.replace(REGEX_META, '\\$&'), 'i');
+  const pattern = new RegExp(word.replace(REGEX_META, String.raw`\$&`), 'i');
   return createToken({ name, pattern, longer_alt: Identifier });
 }
 

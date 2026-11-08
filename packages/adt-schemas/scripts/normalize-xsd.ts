@@ -53,11 +53,8 @@ function flattenModelDir(baseDir: string): number {
     const srcPath = join(modelDir, entry.name);
     const destPath = join(baseDir, entry.name);
 
-    if (entry.isFile()) {
-      renameSync(srcPath, destPath);
-      moved++;
-    } else if (entry.isDirectory()) {
-      // Move subdirectories too (like chkc/, chko/)
+    // Regular files and subdirectories (like chkc/, chko/) move as-is.
+    if (entry.isFile() || entry.isDirectory()) {
       renameSync(srcPath, destPath);
       moved++;
     }

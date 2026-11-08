@@ -25,7 +25,7 @@ import {
   type TypeDef,
   type TypeRef,
 } from '@abapify/abap-ast';
-import type { JsonSchema, NormalizedSpec } from '../oas/types';
+import type { JsonSchema, JsonSchemaRef, NormalizedSpec } from '../oas/types';
 import { isRef } from '../oas/types';
 import type { TypePlan, TypePlanEntry } from '../types/plan';
 import { makeNameAllocator, sanitizeIdent } from '../types/naming';
@@ -77,8 +77,7 @@ export function emitTypesInterface(
     }
     const aux = ctx.mapAux.get(entry.id);
     if (aux) {
-      typeDefs.push(aux.entryTypeDef);
-      typeDefs.push(aux.mapTypeDef);
+      typeDefs.push(aux.entryTypeDef, aux.mapTypeDef);
     }
     typeDefs.push(buildEntryTypeDef(entry, ctx));
   }
@@ -160,7 +159,7 @@ function v2Name(
   raw: string,
   allocator: ReturnType<typeof makeNameAllocator>,
 ): string {
-  const pre = raw.replaceAll(/\$/g, '_');
+  const pre = raw.replaceAll('$', '_');
   return allocator(pre, 'type');
 }
 
@@ -264,59 +263,13 @@ function deriveRawName(entry: TypePlanEntry): string {
 function buildEntryTypeDef(entry: TypePlanEntry, ctx: Ctx): TypeDef {
   const name = ctx.nameOf.get(entry.id)!;
   const schema = entry.schema;
-  const leadingDoc: string[] = [];
-  const original = ctx.originalNameOf.get(entry.id);
-  if (original !== undefined) {
-    leadingDoc.push(`@openapi-schema ${original}`);
-  } else if (entry.source === 'inline') {
-    leadingDoc.push(`@openapi-path ${entry.id}`);
-  }
-  const description = (schema as { description?: unknown }).description;
-  if (typeof description === 'string' && description.trim()) {
-    for (const line of description.split(/\r?\n/)) {
-      leadingDoc.push(`@openapi-description ${line}`);
-    }
-  }
+  const leadingDoc = buildLeadingDoc(entry, ctx);
 
   // Enum shortcut: string with enum values.
-  const enumValues = (schema as { enum?: unknown }).enum;
+  const enumDef = tryEnumTypeDef(entry, name, leadingDoc);
+  if (enumDef !== undefined) return enumDef;
+
   const schemaType = pluckType(schema);
-  if (
-    Array.isArray(enumValues) &&
-    (schemaType === 'string' || schemaType === undefined)
-  ) {
-    const members: { name: string; value: string | number }[] = [];
-    const seen = new Set<string>();
-    for (const v of enumValues) {
-      if (typeof v === 'string') {
-        let nm = sanitizeIdent(v, 'type');
-        let i = 2;
-        while (seen.has(nm)) {
-          nm = `${nm}_${i++}`;
-        }
-        seen.add(nm);
-        members.push({ name: nm, value: v });
-      } else if (typeof v === 'number') {
-        let nm = sanitizeIdent(`v_${v}`, 'type');
-        let i = 2;
-        while (seen.has(nm)) {
-          nm = `${nm}_${i++}`;
-        }
-        seen.add(nm);
-        members.push({ name: nm, value: v });
-      }
-    }
-    if (members.length > 0) {
-      return typeDef({
-        name,
-        type: enumType({
-          baseType: builtinType({ name: 'string' }),
-          members,
-        }),
-        abapDoc: leadingDoc.length > 0 ? leadingDoc : undefined,
-      });
-    }
-  }
 
   // Array alias at top level: `TYPES foo TYPE STANDARD TABLE OF <x> ...`.
   if (schemaType === 'array') {
@@ -368,6 +321,78 @@ function buildEntryTypeDef(entry: TypePlanEntry, ctx: Ctx): TypeDef {
   });
 }
 
+function buildLeadingDoc(entry: TypePlanEntry, ctx: Ctx): string[] {
+  const leadingDoc: string[] = [];
+  const original = ctx.originalNameOf.get(entry.id);
+  if (original !== undefined) {
+    leadingDoc.push(`@openapi-schema ${original}`);
+  } else if (entry.source === 'inline') {
+    leadingDoc.push(`@openapi-path ${entry.id}`);
+  }
+  const description = (entry.schema as { description?: unknown }).description;
+  if (typeof description === 'string' && description.trim()) {
+    for (const line of description.split(/\r?\n/)) {
+      leadingDoc.push(`@openapi-description ${line}`);
+    }
+  }
+  return leadingDoc;
+}
+
+/** Enum shortcut: string with enum values. Returns undefined when the entry
+ *  is not enum-shaped or has no usable members. */
+function tryEnumTypeDef(
+  entry: TypePlanEntry,
+  name: string,
+  leadingDoc: string[],
+): TypeDef | undefined {
+  const schema = entry.schema;
+  const enumValues = (schema as { enum?: unknown }).enum;
+  const schemaType = pluckType(schema);
+  if (!Array.isArray(enumValues)) return undefined;
+  if (schemaType !== 'string' && schemaType !== undefined) return undefined;
+  const members = buildDedupedEnumMembers(enumValues);
+  if (members.length === 0) return undefined;
+  return typeDef({
+    name,
+    type: enumType({
+      baseType: builtinType({ name: 'string' }),
+      members,
+    }),
+    abapDoc: leadingDoc.length > 0 ? leadingDoc : undefined,
+  });
+}
+
+function buildDedupedEnumMembers(
+  enumValues: readonly unknown[],
+): { name: string; value: string | number }[] {
+  const members: { name: string; value: string | number }[] = [];
+  const seen = new Set<string>();
+  for (const v of enumValues) {
+    if (typeof v === 'string') {
+      members.push({
+        name: uniqueEnumName(sanitizeIdent(v, 'type'), seen),
+        value: v,
+      });
+    } else if (typeof v === 'number') {
+      members.push({
+        name: uniqueEnumName(sanitizeIdent(`v_${v}`, 'type'), seen),
+        value: v,
+      });
+    }
+  }
+  return members;
+}
+
+function uniqueEnumName(base: string, seen: Set<string>): string {
+  let nm = base;
+  let i = 2;
+  while (seen.has(nm)) {
+    nm = `${nm}_${i++}`;
+  }
+  seen.add(nm);
+  return nm;
+}
+
 function finaliseDoc(
   base: string[],
   backRefs: readonly string[],
@@ -392,7 +417,7 @@ function buildStructureFields(
 
   const addField = (rawName: string, rawType: TypeRef, src: JsonSchema) => {
     const type = asFieldTypeRef(rawType);
-    const fieldName = sanitizeIdent(rawName.replaceAll(/\$/g, '_'), 'param');
+    const fieldName = sanitizeIdent(rawName.replaceAll('$', '_'), 'param');
     const prev = seen.get(fieldName);
     if (prev !== undefined) {
       if (!typeRefEqual(prev, type)) {
@@ -431,35 +456,18 @@ function buildStructureFields(
   };
 
   // 1) allOf — merged union of properties; conflicting field types throw.
-  const allOf = (schema as { allOf?: unknown }).allOf;
-  if (Array.isArray(allOf)) {
-    for (const sub of allOf) {
-      if (!isRecord(sub)) continue;
-      if (isRef(sub)) {
-        const refEntry = resolveRefEntry(sub.$ref, ctx);
-        if (refEntry !== undefined) mergeProperties(refEntry.schema);
-      } else {
-        mergeProperties(sub as JsonSchema);
-      }
-    }
-  }
+  mergeVariantList((schema as { allOf?: unknown }).allOf, ctx, mergeProperties);
 
   // 2) own properties.
   mergeProperties(schema);
 
   // 3) oneOf / anyOf — union of properties from each variant.
   for (const combinator of ['oneOf', 'anyOf'] as const) {
-    const arr = (schema as Record<string, unknown>)[combinator];
-    if (!Array.isArray(arr)) continue;
-    for (const sub of arr) {
-      if (!isRecord(sub)) continue;
-      if (isRef(sub)) {
-        const refEntry = resolveRefEntry(sub.$ref, ctx);
-        if (refEntry !== undefined) mergeProperties(refEntry.schema);
-      } else {
-        mergeProperties(sub as JsonSchema);
-      }
-    }
+    mergeVariantList(
+      (schema as Record<string, unknown>)[combinator],
+      ctx,
+      mergeProperties,
+    );
   }
 
   // 4) additionalProperties → replace escape-hatch with per-schema map type.
@@ -474,6 +482,29 @@ function buildStructureFields(
   }
 
   return fields;
+}
+
+function mergeVariantList(
+  variants: unknown,
+  ctx: Ctx,
+  merge: (src: JsonSchema) => void,
+): void {
+  if (!Array.isArray(variants)) return;
+  for (const sub of variants) mergeVariantProperties(sub, ctx, merge);
+}
+
+function mergeVariantProperties(
+  sub: unknown,
+  ctx: Ctx,
+  merge: (src: JsonSchema) => void,
+): void {
+  if (!isRecord(sub)) return;
+  if (isRef(sub)) {
+    const refEntry = resolveRefEntry(sub.$ref, ctx);
+    if (refEntry !== undefined) merge(refEntry.schema);
+  } else {
+    merge(sub as JsonSchema);
+  }
 }
 
 function resolveRefEntry(ref: string, ctx: Ctx): TypePlanEntry | undefined {
@@ -532,32 +563,7 @@ function resolveTypeRef(
   fieldName?: string,
 ): TypeRef {
   if (isRef(schema)) {
-    const target = resolveRefEntry(schema.$ref, ctx);
-    if (target === undefined) {
-      // Unresolvable — degrade to string.
-      return builtinType({ name: 'string' });
-    }
-    const ownerPos = ctx.positionOf.get(ownerEntryId) ?? -1;
-    const targetPos = ctx.positionOf.get(target.id) ?? -1;
-    const isBackEdge = targetPos >= 0 && ownerPos >= 0 && targetPos >= ownerPos;
-    const isSelf = target.id === ownerEntryId;
-    if (isSelf || isBackEdge) {
-      const targetOriginal =
-        ctx.originalNameOf.get(target.id) ??
-        ctx.nameOf.get(target.id) ??
-        target.id;
-      const backRefs = ctx.backRefs.get(ownerEntryId);
-      if (backRefs !== undefined) {
-        const label = fieldName
-          ? `${fieldName}:${targetOriginal}`
-          : targetOriginal;
-        backRefs.push(`@openapi-ref ${label}`);
-      }
-      // NamedTypeRef with a multi-token name — the printer emits it verbatim
-      // after `TYPE `, yielding `TYPE REF TO data`.
-      return namedTypeRef({ name: 'REF TO data' });
-    }
-    return namedTypeRef({ name: ctx.nameOf.get(target.id) ?? target.abapName });
+    return resolveNamedTypeRef(schema, ownerEntryId, ctx, fieldName);
   }
 
   const type = pluckType(schema);
@@ -573,38 +579,89 @@ function resolveTypeRef(
 
   const props = (schema as { properties?: unknown }).properties;
   if (type === 'object' || isRecord(props)) {
-    // Prefer a planned entry for this exact schema object if one exists.
-    const matched = findPlannedEntryBySchema(schema, ctx.plan, ownerEntryId);
-    if (matched !== undefined) {
-      const name = ctx.nameOf.get(matched.id);
-      if (name !== undefined) {
-        return namedTypeRef({ name });
-      }
-    }
-    // No matching plan entry — degrade to string (inline objects that the
-    // planner did not extract are unusual; a downstream wave can extend this).
-    return builtinType({ name: 'string' });
+    // Prefer a planned entry for this exact schema object if one exists;
+    // degrade to string otherwise (inline objects that the planner did not
+    // extract are unusual; a downstream wave can extend this).
+    return (
+      plannedEntryRef(schema, ctx, ownerEntryId) ??
+      builtinType({ name: 'string' })
+    );
   }
 
   if (type === undefined) {
-    for (const c of ['allOf', 'oneOf', 'anyOf'] as const) {
-      if (Array.isArray((schema as Record<string, unknown>)[c])) {
-        const matched = findPlannedEntryBySchema(
-          schema,
-          ctx.plan,
-          ownerEntryId,
-        );
-        if (matched !== undefined) {
-          const name = ctx.nameOf.get(matched.id);
-          if (name !== undefined) return namedTypeRef({ name });
-        }
-        return builtinType({ name: 'string' });
-      }
-    }
-    return builtinType({ name: 'string' });
+    return resolveUntypedTypeRef(schema, ctx, ownerEntryId);
   }
 
   return builtinType({ name: mapPrimitiveLocal(schema) });
+}
+
+function resolveNamedTypeRef(
+  schema: JsonSchemaRef,
+  ownerEntryId: string,
+  ctx: Ctx,
+  fieldName?: string,
+): TypeRef {
+  const target = resolveRefEntry(schema.$ref, ctx);
+  if (target === undefined) {
+    // Unresolvable — degrade to string.
+    return builtinType({ name: 'string' });
+  }
+  const ownerPos = ctx.positionOf.get(ownerEntryId) ?? -1;
+  const targetPos = ctx.positionOf.get(target.id) ?? -1;
+  const isBackEdge = targetPos >= 0 && ownerPos >= 0 && targetPos >= ownerPos;
+  const isSelf = target.id === ownerEntryId;
+  if (isSelf || isBackEdge) {
+    return buildBackEdgeRef(target, ownerEntryId, ctx, fieldName);
+  }
+  return namedTypeRef({ name: ctx.nameOf.get(target.id) ?? target.abapName });
+}
+
+function buildBackEdgeRef(
+  target: TypePlanEntry,
+  ownerEntryId: string,
+  ctx: Ctx,
+  fieldName?: string,
+): TypeRef {
+  const targetOriginal =
+    ctx.originalNameOf.get(target.id) ?? ctx.nameOf.get(target.id) ?? target.id;
+  const backRefs = ctx.backRefs.get(ownerEntryId);
+  if (backRefs !== undefined) {
+    const label = fieldName ? `${fieldName}:${targetOriginal}` : targetOriginal;
+    backRefs.push(`@openapi-ref ${label}`);
+  }
+  // NamedTypeRef with a multi-token name — the printer emits it verbatim
+  // after `TYPE `, yielding `TYPE REF TO data`.
+  return namedTypeRef({ name: 'REF TO data' });
+}
+
+/** Name ref for a schema object that has a planned entry; undefined when no
+ *  planned entry (or no emitted name) exists. */
+function plannedEntryRef(
+  schema: JsonSchema,
+  ctx: Ctx,
+  ownerEntryId: string,
+): TypeRef | undefined {
+  const matched = findPlannedEntryBySchema(schema, ctx.plan, ownerEntryId);
+  if (matched === undefined) return undefined;
+  const name = ctx.nameOf.get(matched.id);
+  if (name === undefined) return undefined;
+  return namedTypeRef({ name });
+}
+
+function resolveUntypedTypeRef(
+  schema: JsonSchema,
+  ctx: Ctx,
+  ownerEntryId: string,
+): TypeRef {
+  for (const c of ['allOf', 'oneOf', 'anyOf'] as const) {
+    if (Array.isArray((schema as Record<string, unknown>)[c])) {
+      return (
+        plannedEntryRef(schema, ctx, ownerEntryId) ??
+        builtinType({ name: 'string' })
+      );
+    }
+  }
+  return builtinType({ name: 'string' });
 }
 
 function findPlannedEntryBySchema(

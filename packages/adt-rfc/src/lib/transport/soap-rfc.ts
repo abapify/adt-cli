@@ -35,9 +35,9 @@ export const SOAP_ENV_NS = 'http://schemas.xmlsoap.org/soap/envelope/';
 
 function escapeXml(value: string): string {
   return value
-    .replaceAll(/&/g, '&amp;')
-    .replaceAll(/</g, '&lt;')
-    .replaceAll(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 
 function renderScalar(value: RfcScalar): string {
@@ -120,6 +120,43 @@ function tagNameOf(inside: string): string | undefined {
   return m?.[1];
 }
 
+/**
+ * Skip XML prolog (<?...?>), DOCTYPE, comments (<!-- -->), and any
+ * directive (<!...) — non-structural for RFC parsing.
+ */
+function isDirectiveInside(inside: string): boolean {
+  return (
+    inside.startsWith('?') ||
+    inside.startsWith('!--') ||
+    inside.startsWith('!DOCTYPE') ||
+    inside.startsWith('!')
+  );
+}
+
+/** Push trailing text after a tag when it carries non-whitespace content. */
+function pushTrailingText(tokens: Token[], trailing: string): void {
+  if (trailing && trailing.trim().length > 0) {
+    tokens.push({ kind: 'text', text: trailing });
+  }
+}
+
+/** Push the structural token for a parsed tag body. */
+function pushTagToken(
+  tokens: Token[],
+  inside: string,
+  name: string | undefined,
+): void {
+  if (!name) {
+    tokens.push({ kind: 'text', text: '<' + inside + '>' });
+  } else if (inside.startsWith('/')) {
+    tokens.push({ kind: 'close', name });
+  } else if (inside.endsWith('/')) {
+    tokens.push({ kind: 'self', name });
+  } else {
+    tokens.push({ kind: 'open', name });
+  }
+}
+
 function tokenize(xml: string): Token[] {
   const tokens: Token[] = [];
   const parts = xml.split('<');
@@ -139,32 +176,12 @@ function tokenize(xml: string): Token[] {
     }
     const inside = part.slice(0, gt);
     const trailing = part.slice(gt + 1);
-    // Skip XML prolog (<?...?>), DOCTYPE, comments (<!-- -->), and any
-    // directive (<!...) — non-structural for RFC parsing.
-    if (
-      inside.startsWith('?') ||
-      inside.startsWith('!--') ||
-      inside.startsWith('!DOCTYPE') ||
-      inside.startsWith('!')
-    ) {
-      if (trailing && trailing.trim().length > 0) {
-        tokens.push({ kind: 'text', text: trailing });
-      }
+    if (isDirectiveInside(inside)) {
+      pushTrailingText(tokens, trailing);
       continue;
     }
-    const name = tagNameOf(inside);
-    if (!name) {
-      tokens.push({ kind: 'text', text: '<' + inside + '>' });
-    } else if (inside.startsWith('/')) {
-      tokens.push({ kind: 'close', name });
-    } else if (inside.endsWith('/')) {
-      tokens.push({ kind: 'self', name });
-    } else {
-      tokens.push({ kind: 'open', name });
-    }
-    if (trailing && trailing.trim().length > 0) {
-      tokens.push({ kind: 'text', text: trailing });
-    }
+    pushTagToken(tokens, inside, tagNameOf(inside));
+    pushTrailingText(tokens, trailing);
   }
   return tokens;
 }
@@ -176,11 +193,11 @@ function localName(qname: string): string {
 
 function unescapeXml(s: string): string {
   return s
-    .replaceAll(/&lt;/g, '<')
-    .replaceAll(/&gt;/g, '>')
-    .replaceAll(/&quot;/g, '"')
-    .replaceAll(/&apos;/g, "'")
-    .replaceAll(/&amp;/g, '&');
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&apos;', "'")
+    .replaceAll('&amp;', '&');
 }
 
 interface ParsedNode {

@@ -520,6 +520,9 @@ export interface CustomEntityDefinition extends AstNode {
 // DCL — access control (role)
 // ============================================
 
+/** Combination mode of a grant clause. */
+export type GrantCombinationMode = 'or' | 'and' | 'redefinition';
+
 export interface GrantStatement extends AstNode {
   /** The granted privilege, always `select` for now. */
   privilege: 'select';
@@ -528,7 +531,7 @@ export interface GrantStatement extends AstNode {
   /** `with optional elements ( <name> [default true|false], … )`. */
   optionalElements?: DclOptionalElement[];
   /** `combination mode or|and` or `redefinition` after grant. */
-  combinationMode?: 'or' | 'and' | 'redefinition';
+  combinationMode?: GrantCombinationMode;
   /** `inherit <role> …` — the role whose conditions are inherited. */
   inheritRole?: string;
   /** `inherit <role> and|or <cond>` connector. */

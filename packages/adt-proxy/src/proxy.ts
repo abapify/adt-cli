@@ -66,8 +66,11 @@ const FORWARDABLE_RESPONSE_HEADERS = [
   'location',
 ];
 
+/** Value of a single forwarded/observed HTTP header. */
+type HeaderValue = string | string[] | undefined;
+
 function forwardHeaders(
-  source: Record<string, string | string[] | undefined>,
+  source: Record<string, HeaderValue>,
   target: Record<string, string | string[]>,
   keys: string[],
 ): void {
@@ -172,6 +175,58 @@ async function forwardRequest(params: {
   }
 }
 
+function getContentType(
+  headers: Record<string, HeaderValue>,
+): string | undefined {
+  const ct = headers['content-type'];
+  return Array.isArray(ct) ? ct[0] : ct;
+}
+
+function sendResponse(
+  res: {
+    writeHead: (
+      status: number,
+      headers: Record<string, string | string[]>,
+    ) => void;
+    end: (body?: string) => void;
+  },
+  result: ProxyResult,
+): void {
+  const responseHeaders: Record<string, string | string[]> = {
+    'x-proxy': 'adt-proxy',
+  };
+  forwardHeaders(result.headers, responseHeaders, FORWARDABLE_RESPONSE_HEADERS);
+
+  if (result.converted) {
+    responseHeaders['content-type'] = 'application/json';
+  }
+
+  res.writeHead(result.status, responseHeaders);
+  res.end(result.body);
+}
+
+async function readBody(
+  req: {
+    on: (event: string, cb: (...args: any[]) => void) => void;
+  },
+  maxSize = 10 * 1024 * 1024,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let size = 0;
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > maxSize) {
+        reject(new Error(`Request body exceeds ${maxSize} byte limit`));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks).toString()));
+    req.on('error', (err: Error) => reject(err));
+  });
+}
+
 export function createAdtProxy(config: AdtProxyConfig) {
   const {
     targetUrl,
@@ -187,7 +242,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
   let server: Server | undefined;
 
   function buildDownstreamHeaders(
-    incomingHeaders: Record<string, string | string[] | undefined>,
+    incomingHeaders: Record<string, HeaderValue>,
     contractHeaders?: Record<string, string>,
   ): Record<string, string> {
     const headers: Record<string, string> = {
@@ -210,18 +265,11 @@ export function createAdtProxy(config: AdtProxyConfig) {
     return `${targetUrl}${relativePath}`;
   }
 
-  function getContentType(
-    headers: Record<string, string | string[] | undefined>,
-  ): string | undefined {
-    const ct = headers['content-type'];
-    return Array.isArray(ct) ? ct[0] : ct;
-  }
-
   async function handleMatchedRoute(
     method: string,
     url: string,
     requestBody: string,
-    incomingHeaders: Record<string, string | string[] | undefined>,
+    incomingHeaders: Record<string, HeaderValue>,
     route: RouteDefinition,
   ): Promise<ProxyResult> {
     logger.info(`Matched route: ${route.method} ${route.pathTemplate}`);
@@ -272,7 +320,7 @@ export function createAdtProxy(config: AdtProxyConfig) {
     method: string,
     url: string,
     requestBody: string,
-    incomingHeaders: Record<string, string | string[] | undefined>,
+    incomingHeaders: Record<string, HeaderValue>,
   ): Promise<ProxyResult> {
     logger.debug(`No route match for ${method} ${url} - forwarding as-is`);
 
@@ -316,60 +364,11 @@ export function createAdtProxy(config: AdtProxyConfig) {
     );
   }
 
-  function sendResponse(
-    res: {
-      writeHead: (
-        status: number,
-        headers: Record<string, string | string[]>,
-      ) => void;
-      end: (body?: string) => void;
-    },
-    result: ProxyResult,
-  ): void {
-    const responseHeaders: Record<string, string | string[]> = {
-      'x-proxy': 'adt-proxy',
-    };
-    forwardHeaders(
-      result.headers,
-      responseHeaders,
-      FORWARDABLE_RESPONSE_HEADERS,
-    );
-
-    if (result.converted) {
-      responseHeaders['content-type'] = 'application/json';
-    }
-
-    res.writeHead(result.status, responseHeaders);
-    res.end(result.body);
-  }
-
-  async function readBody(
-    req: {
-      on: (event: string, cb: (...args: any[]) => void) => void;
-    },
-    maxSize = 10 * 1024 * 1024,
-  ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      let size = 0;
-      const chunks: Buffer[] = [];
-      req.on('data', (chunk: Buffer) => {
-        size += chunk.length;
-        if (size > maxSize) {
-          reject(new Error(`Request body exceeds ${maxSize} byte limit`));
-          return;
-        }
-        chunks.push(chunk);
-      });
-      req.on('end', () => resolve(Buffer.concat(chunks).toString()));
-      req.on('error', (err: Error) => reject(err));
-    });
-  }
-
   async function handleRequest(
     req: {
       method?: string;
       url?: string;
-      headers: Record<string, string | string[] | undefined>;
+      headers: Record<string, HeaderValue>;
       on: (event: string, cb: (chunk: any) => void) => void;
     },
     res: {

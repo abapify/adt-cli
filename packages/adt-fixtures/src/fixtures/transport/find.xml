@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  TODO-synthetic: Fabricated minimal ABAP XML envelope mimicking the
+  Synthetic: Fabricated minimal ABAP XML envelope mimicking the
   `GET /sap/bc/adt/cts/transports?_action=FIND` response shape defined in
-  adt-schemas/.xsd/custom/transportfind.xsd. Replace with a real sanitized
+  adt-schemas/.xsd/custom/transportfind.xsd. To be replaced with a real sanitized
   SAP response when available. Transport numbers, usernames and dates are
   mocked (MOCK*, TESTUSER).
 -->

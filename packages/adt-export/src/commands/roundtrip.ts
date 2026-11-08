@@ -14,6 +14,7 @@ import type {
   CliCommandPlugin,
   CliContext,
   ExportOptions,
+  FileTree,
   ImportContext,
 } from '@abapify/adt-plugin';
 import {
@@ -104,8 +105,10 @@ async function normalizeXml(xml: string): Promise<string> {
     normalized = formatXmlAttributes(normalized);
 
     return normalized;
-  } catch (_err) {
-    // If parsing fails, return trimmed original
+  } catch {
+    // The exception is ignored on purpose: normalizeXml runs on round-trip
+    // input that may legitimately be malformed or non-XML, and falling back
+    // to the trimmed original is the desired outcome in that case.
     return xml.trim();
   }
 }
@@ -144,6 +147,345 @@ async function expandGlobs(patterns: string[], cwd: string): Promise<string[]> {
     }
   }
   return results;
+}
+
+/** CLI options parsed for the `roundtrip` command. */
+interface RoundtripCliOptions {
+  files?: string[];
+  source: string;
+  format: string;
+  transport?: string;
+  package?: string;
+  types?: string;
+  activate?: boolean;
+  keepTmp?: boolean;
+  abapLanguageVersion?: string;
+}
+
+/** The ADT client as handed over by the CLI context. */
+type ContextClient = Awaited<
+  ReturnType<NonNullable<CliContext['getAdtClient']>>
+>;
+
+type LoadedPlugin = Awaited<ReturnType<typeof loadFormatPlugin>>;
+
+/**
+ * Resolve the source path: explicit files resolve the abapGit repo root,
+ * otherwise the configured `--source` directory is used.
+ */
+async function resolveSourcePath(
+  options: RoundtripCliOptions,
+  ctx: CliContext,
+): Promise<{ sourcePath: string; specificFiles: string[] | undefined }> {
+  const expandedFiles =
+    options.files && options.files.length > 0
+      ? await expandGlobs(options.files, ctx.cwd)
+      : undefined;
+  const specificFiles =
+    expandedFiles && expandedFiles.length > 0 ? expandedFiles : undefined;
+  let sourcePath = options.source;
+
+  if (specificFiles) {
+    const repoRoot = findAbapGitRoot(ctx.cwd);
+    if (!repoRoot) {
+      ctx.logger.error('❌ No .abapgit.xml found in any parent directory.');
+      process.exit(1);
+    }
+    sourcePath = repoRoot;
+  }
+
+  return { sourcePath, specificFiles };
+}
+
+/** Phase 1: deploy the selected objects to SAP. */
+async function deployPhase(
+  fileTree: FileTree,
+  client: ContextClient,
+  adkContext: AdkContext,
+  options: RoundtripCliOptions,
+  ctx: CliContext,
+): Promise<{ plugin: LoadedPlugin; deployedObjects: AdkObject[] }> {
+  ctx.logger.info('\n═══ Phase 1: Deploy to SAP ═══');
+
+  const plugin = await loadFormatPlugin(options.format);
+  if (!plugin.format.export) {
+    ctx.logger.error(`❌ Plugin '${plugin.name}' does not support export`);
+    process.exit(1);
+  }
+
+  const exportOptions: ExportOptions = {
+    rootPackage: options.package,
+    abapLanguageVersion: options.abapLanguageVersion,
+  };
+
+  // Parse object types filter
+  const objectTypes = options.types
+    ? options.types.split(',').map((t: string) => t.trim().toUpperCase())
+    : undefined;
+
+  const deployedObjects: AdkObject[] = [];
+  const objectSet = await AdkObjectSet.fromGenerator(
+    plugin.format.export(fileTree, client, exportOptions),
+    adkContext,
+    {
+      filter: objectTypes
+        ? (obj) => {
+            const objType = obj.type.toUpperCase();
+            const objPrefix = objType.split('/')[0];
+            return (
+              objectTypes.includes(objType) || objectTypes.includes(objPrefix)
+            );
+          }
+        : undefined,
+      onObject: (obj) => {
+        ctx.logger.info(`   📄 ${obj.kind} ${obj.name}`);
+      },
+    },
+  );
+
+  const deployResult = await objectSet.deploy({
+    transport: options.transport,
+    activate: options.activate,
+    mode: 'upsert',
+    onProgress: (saved, total, obj) => {
+      if (obj._unchanged) {
+        ctx.logger.info(
+          `   ⏭️ [${saved}/${total}] ${obj.kind} ${obj.name} (unchanged)`,
+        );
+      } else {
+        ctx.logger.info(`   💾 [${saved}/${total}] ${obj.kind} ${obj.name}`);
+      }
+    },
+  });
+
+  ctx.logger.info(
+    `   ✅ Deployed: ${deployResult.save.success} saved, ${deployResult.save.unchanged} unchanged, ${deployResult.save.failed} failed`,
+  );
+
+  if (deployResult.save.failed > 0) {
+    ctx.logger.warn(
+      `⚠️ ${deployResult.save.failed} object(s) failed to deploy — continuing roundtrip for ${deployResult.save.success + deployResult.save.unchanged} successful objects`,
+    );
+  }
+
+  if (deployResult.save.success + deployResult.save.unchanged === 0) {
+    ctx.logger.error('❌ No objects deployed successfully — aborting.');
+    process.exit(1);
+  }
+
+  // Collect only successfully deployed objects for reimport
+  for (const result of deployResult.save.results) {
+    if (result.success) {
+      deployedObjects.push(result.object);
+    }
+  }
+
+  return { plugin, deployedObjects };
+}
+
+/** Phase 2: load fresh from SAP and re-serialize to `tmpDir`. */
+async function reimportPhase(
+  deployedObjects: AdkObject[],
+  plugin: LoadedPlugin,
+  tmpDir: string,
+  client: ContextClient,
+  ctx: CliContext,
+): Promise<void> {
+  const adk = createAdk(client as AdtClient);
+  let reimported = 0;
+  let reimportFailed = 0;
+
+  for (const obj of deployedObjects) {
+    try {
+      // Load fresh from SAP
+      const fresh = adk.get(obj.name, obj.type);
+      await (fresh as any).load();
+
+      // Build import context with package path resolver
+      const importContext: ImportContext = {
+        resolvePackagePath,
+      };
+
+      // Serialize back to local files using format plugin
+      const result = await plugin.format.import(
+        fresh as any,
+        tmpDir,
+        importContext,
+      );
+
+      if (result.success) {
+        reimported++;
+        ctx.logger.info(`   ✅ ${obj.kind} ${obj.name}`);
+      } else {
+        reimportFailed++;
+        ctx.logger.error(
+          `   ❌ ${obj.kind} ${obj.name}: ${result.errors?.join(', ') || 'unknown'}`,
+        );
+      }
+    } catch (err) {
+      reimportFailed++;
+      ctx.logger.error(
+        `   ❌ ${obj.kind} ${obj.name}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  // Call afterImport hook (generates .abapgit.xml etc)
+  if (plugin.hooks?.afterImport) {
+    await plugin.hooks.afterImport(tmpDir);
+  }
+
+  ctx.logger.info(
+    `   📊 Reimported: ${reimported} success, ${reimportFailed} failed`,
+  );
+}
+
+/** Show diff with colors (skip file headers, keep hunk headers). */
+function printColoredDiff(patch: string): void {
+  const diffLines = patch.split('\n');
+  let lineCount = 0;
+  const maxLines = 50;
+
+  for (const line of diffLines) {
+    // Skip file path headers (--- and +++)
+    if (line.startsWith('---') || line.startsWith('+++')) {
+      continue;
+    }
+
+    if (lineCount >= maxLines) {
+      console.log(
+        chalk.yellow(
+          '      ... (truncated, use --keep-tmp to inspect full files)',
+        ),
+      );
+      break;
+    }
+
+    if (line.startsWith('+')) {
+      console.log(chalk.green(`      ${line}`));
+    } else if (line.startsWith('-')) {
+      console.log(chalk.red(`      ${line}`));
+    } else if (line.startsWith('@@')) {
+      console.log(chalk.cyan(`      ${line}`));
+    } else if (line.trim()) {
+      console.log(chalk.gray(`      ${line}`));
+    }
+
+    lineCount++;
+  }
+}
+
+/** Phase 3: compare original vs re-imported files. */
+async function comparePhase(
+  fileTree: FileTree,
+  tmpDir: string,
+  options: RoundtripCliOptions,
+  ctx: CliContext,
+): Promise<{
+  matches: number;
+  mismatches: number;
+  onlyOriginal: number;
+  onlyReimported: number;
+}> {
+  // Collect re-imported files (skip .abapgit.xml — generated metadata)
+  const reimportedFiles = collectFiles(tmpDir).filter(
+    (f) => !f.endsWith('.abapgit.xml'),
+  );
+
+  let matches = 0;
+  let mismatches = 0;
+  let onlyOriginal = 0;
+  let onlyReimported = 0;
+
+  // Map reimported files by their filename (last segment) for matching
+  const reimportedByName = new Map<string, string>();
+  for (const f of reimportedFiles) {
+    const name = f.split('/').pop()!;
+    reimportedByName.set(name, f);
+  }
+
+  // Get original files from the FileTree
+  const originalXml = await fileTree.glob('**/*.xml');
+  const originalAbap = await fileTree.glob('**/*.abap');
+  const allOriginal = [...originalXml, ...originalAbap].filter(
+    (f) => !f.endsWith('.abapgit.xml') && !f.endsWith('package.devc.xml'),
+  );
+
+  for (const origRelPath of allOriginal) {
+    const origName = origRelPath.split('/').pop()!;
+    const reimportedRelPath = reimportedByName.get(origName);
+
+    if (!reimportedRelPath) {
+      onlyOriginal++;
+      ctx.logger.warn(`   ⚠️ Only in original: ${origName}`);
+      continue;
+    }
+
+    // Remove from map so we can track reimported-only files
+    reimportedByName.delete(origName);
+
+    // Read original from FileTree, reimported from disk
+    let origContent = (await fileTree.read(origRelPath)).trim();
+    let reimContent = readFileSync(
+      join(tmpDir, reimportedRelPath),
+      'utf-8',
+    ).trim();
+
+    // Normalize line endings (SAP returns CRLF, git uses LF)
+    origContent = origContent.replaceAll('\r\n', '\n');
+    reimContent = reimContent.replaceAll('\r\n', '\n');
+
+    // Normalize XML files before comparison
+    const isXml = origName.endsWith('.xml');
+    if (isXml) {
+      origContent = await normalizeXml(origContent);
+      reimContent = await normalizeXml(reimContent);
+
+      // Save normalized files for inspection
+      if (options.keepTmp) {
+        writeFileSync(
+          join(tmpDir, 'normalized-original-' + origName),
+          origContent,
+          'utf-8',
+        );
+        writeFileSync(
+          join(tmpDir, 'normalized-reimported-' + origName),
+          reimContent,
+          'utf-8',
+        );
+      }
+    }
+
+    // Compare content
+    if (origContent === reimContent) {
+      matches++;
+      ctx.logger.info(`   ✅ ${origName}`);
+    } else {
+      mismatches++;
+      ctx.logger.error(`   ❌ ${origName} — DIFFERS`);
+
+      // Generate unified diff
+      const patch = createTwoFilesPatch(
+        `original/${origName}`,
+        `reimported/${origName}`,
+        origContent,
+        reimContent,
+        '',
+        '',
+        { context: 3 },
+      );
+
+      printColoredDiff(patch);
+    }
+  }
+
+  // Files only in reimported
+  for (const [name] of reimportedByName) {
+    onlyReimported++;
+    ctx.logger.warn(`   ⚠️ Only in reimported: ${name}`);
+  }
+
+  return { matches, mismatches, onlyOriginal, onlyReimported };
 }
 
 export const roundtripCommand: CliCommandPlugin = {
@@ -198,17 +540,7 @@ export const roundtripCommand: CliCommandPlugin = {
   ],
 
   async execute(args: Record<string, unknown>, ctx: CliContext) {
-    const options = args as {
-      files?: string[];
-      source: string;
-      format: string;
-      transport?: string;
-      package?: string;
-      types?: string;
-      activate?: boolean;
-      keepTmp?: boolean;
-      abapLanguageVersion?: string;
-    };
+    const options = args as unknown as RoundtripCliOptions;
 
     if (!ctx.getAdtClient) {
       ctx.logger.error('❌ ADT client not available. Run: adt auth login');
@@ -216,22 +548,7 @@ export const roundtripCommand: CliCommandPlugin = {
     }
 
     // ── Resolve source path ──
-    const expandedFiles =
-      options.files && options.files.length > 0
-        ? await expandGlobs(options.files, ctx.cwd)
-        : undefined;
-    const specificFiles =
-      expandedFiles && expandedFiles.length > 0 ? expandedFiles : undefined;
-    let sourcePath = options.source;
-
-    if (specificFiles) {
-      const repoRoot = findAbapGitRoot(ctx.cwd);
-      if (!repoRoot) {
-        ctx.logger.error('❌ No .abapgit.xml found in any parent directory.');
-        process.exit(1);
-      }
-      sourcePath = repoRoot;
-    }
+    const { sourcePath, specificFiles } = await resolveSourcePath(options, ctx);
 
     ctx.logger.info('🔄 Roundtrip test');
     ctx.logger.info(`📁 Source: ${sourcePath}`);
@@ -253,80 +570,13 @@ export const roundtripCommand: CliCommandPlugin = {
     const adkContext: AdkContext = { client: client as any };
 
     // ── Phase 1: Deploy ──
-    ctx.logger.info('\n═══ Phase 1: Deploy to SAP ═══');
-
-    const plugin = await loadFormatPlugin(options.format);
-    if (!plugin.format.export) {
-      ctx.logger.error(`❌ Plugin '${plugin.name}' does not support export`);
-      process.exit(1);
-    }
-
-    const exportOptions: ExportOptions = {
-      rootPackage: options.package,
-      abapLanguageVersion: options.abapLanguageVersion,
-    };
-
-    // Parse object types filter
-    const objectTypes = options.types
-      ? options.types.split(',').map((t: string) => t.trim().toUpperCase())
-      : undefined;
-
-    const deployedObjects: AdkObject[] = [];
-    const objectSet = await AdkObjectSet.fromGenerator(
-      plugin.format.export(fileTree, client, exportOptions),
+    const { plugin, deployedObjects } = await deployPhase(
+      fileTree,
+      client,
       adkContext,
-      {
-        filter: objectTypes
-          ? (obj) => {
-              const objType = obj.type.toUpperCase();
-              const objPrefix = objType.split('/')[0];
-              return (
-                objectTypes.includes(objType) || objectTypes.includes(objPrefix)
-              );
-            }
-          : undefined,
-        onObject: (obj) => {
-          ctx.logger.info(`   📄 ${obj.kind} ${obj.name}`);
-        },
-      },
+      options,
+      ctx,
     );
-
-    const deployResult = await objectSet.deploy({
-      transport: options.transport,
-      activate: options.activate,
-      mode: 'upsert',
-      onProgress: (saved, total, obj) => {
-        if (obj._unchanged) {
-          ctx.logger.info(
-            `   ⏭️ [${saved}/${total}] ${obj.kind} ${obj.name} (unchanged)`,
-          );
-        } else {
-          ctx.logger.info(`   💾 [${saved}/${total}] ${obj.kind} ${obj.name}`);
-        }
-      },
-    });
-
-    ctx.logger.info(
-      `   ✅ Deployed: ${deployResult.save.success} saved, ${deployResult.save.unchanged} unchanged, ${deployResult.save.failed} failed`,
-    );
-
-    if (deployResult.save.failed > 0) {
-      ctx.logger.warn(
-        `⚠️ ${deployResult.save.failed} object(s) failed to deploy — continuing roundtrip for ${deployResult.save.success + deployResult.save.unchanged} successful objects`,
-      );
-    }
-
-    if (deployResult.save.success + deployResult.save.unchanged === 0) {
-      ctx.logger.error('❌ No objects deployed successfully — aborting.');
-      process.exit(1);
-    }
-
-    // Collect only successfully deployed objects for reimport
-    for (const result of deployResult.save.results) {
-      if (result.success) {
-        deployedObjects.push(result.object);
-      }
-    }
 
     // ── Phase 2: Import back from SAP ──
     ctx.logger.info('\n═══ Phase 2: Import back from SAP ═══');
@@ -340,185 +590,13 @@ export const roundtripCommand: CliCommandPlugin = {
     mkdirSync(tmpDir, { recursive: true });
     ctx.logger.info(`   📂 Temp dir: ${tmpDir}`);
 
-    const adk = createAdk(client as AdtClient);
-    let reimported = 0;
-    let reimportFailed = 0;
-
-    for (const obj of deployedObjects) {
-      try {
-        // Load fresh from SAP
-        const fresh = adk.get(obj.name, obj.type);
-        await (fresh as any).load();
-
-        // Build import context with package path resolver
-        const importContext: ImportContext = {
-          resolvePackagePath,
-        };
-
-        // Serialize back to local files using format plugin
-        const result = await plugin.format.import(
-          fresh as any,
-          tmpDir,
-          importContext,
-        );
-
-        if (result.success) {
-          reimported++;
-          ctx.logger.info(`   ✅ ${obj.kind} ${obj.name}`);
-        } else {
-          reimportFailed++;
-          ctx.logger.error(
-            `   ❌ ${obj.kind} ${obj.name}: ${result.errors?.join(', ') || 'unknown'}`,
-          );
-        }
-      } catch (err) {
-        reimportFailed++;
-        ctx.logger.error(
-          `   ❌ ${obj.kind} ${obj.name}: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-    }
-
-    // Call afterImport hook (generates .abapgit.xml etc)
-    if (plugin.hooks?.afterImport) {
-      await plugin.hooks.afterImport(tmpDir);
-    }
-
-    ctx.logger.info(
-      `   📊 Reimported: ${reimported} success, ${reimportFailed} failed`,
-    );
+    await reimportPhase(deployedObjects, plugin, tmpDir, client, ctx);
 
     // ── Phase 3: Compare ──
     ctx.logger.info('\n═══ Phase 3: Compare ═══');
 
-    // Collect re-imported files (skip .abapgit.xml — generated metadata)
-    const reimportedFiles = collectFiles(tmpDir).filter(
-      (f) => !f.endsWith('.abapgit.xml'),
-    );
-
-    let matches = 0;
-    let mismatches = 0;
-    let onlyOriginal = 0;
-    let onlyReimported = 0;
-
-    // Map reimported files by their filename (last segment) for matching
-    const reimportedByName = new Map<string, string>();
-    for (const f of reimportedFiles) {
-      const name = f.split('/').pop()!;
-      reimportedByName.set(name, f);
-    }
-
-    // Get original files from the FileTree
-    const originalXml = await fileTree.glob('**/*.xml');
-    const originalAbap = await fileTree.glob('**/*.abap');
-    const allOriginal = [...originalXml, ...originalAbap].filter(
-      (f) => !f.endsWith('.abapgit.xml') && !f.endsWith('package.devc.xml'),
-    );
-
-    for (const origRelPath of allOriginal) {
-      const origName = origRelPath.split('/').pop()!;
-      const reimportedRelPath = reimportedByName.get(origName);
-
-      if (!reimportedRelPath) {
-        onlyOriginal++;
-        ctx.logger.warn(`   ⚠️ Only in original: ${origName}`);
-        continue;
-      }
-
-      // Remove from map so we can track reimported-only files
-      reimportedByName.delete(origName);
-
-      // Read original from FileTree, reimported from disk
-      let origContent = (await fileTree.read(origRelPath)).trim();
-      let reimContent = readFileSync(
-        join(tmpDir, reimportedRelPath),
-        'utf-8',
-      ).trim();
-
-      // Normalize line endings (SAP returns CRLF, git uses LF)
-      origContent = origContent.replaceAll(/\r\n/g, '\n');
-      reimContent = reimContent.replaceAll(/\r\n/g, '\n');
-
-      // Normalize XML files before comparison
-      const isXml = origName.endsWith('.xml');
-      if (isXml) {
-        origContent = await normalizeXml(origContent);
-        reimContent = await normalizeXml(reimContent);
-
-        // Save normalized files for inspection
-        if (options.keepTmp) {
-          writeFileSync(
-            join(tmpDir, 'normalized-original-' + origName),
-            origContent,
-            'utf-8',
-          );
-          writeFileSync(
-            join(tmpDir, 'normalized-reimported-' + origName),
-            reimContent,
-            'utf-8',
-          );
-        }
-      }
-
-      // Compare content
-      if (origContent === reimContent) {
-        matches++;
-        ctx.logger.info(`   ✅ ${origName}`);
-      } else {
-        mismatches++;
-        ctx.logger.error(`   ❌ ${origName} — DIFFERS`);
-
-        // Generate unified diff
-        const patch = createTwoFilesPatch(
-          `original/${origName}`,
-          `reimported/${origName}`,
-          origContent,
-          reimContent,
-          '',
-          '',
-          { context: 3 },
-        );
-
-        // Show diff with colors (skip file headers, keep hunk headers)
-        const diffLines = patch.split('\n');
-        let lineCount = 0;
-        const maxLines = 50;
-
-        for (const line of diffLines) {
-          // Skip file path headers (--- and +++)
-          if (line.startsWith('---') || line.startsWith('+++')) {
-            continue;
-          }
-
-          if (lineCount >= maxLines) {
-            console.log(
-              chalk.yellow(
-                '      ... (truncated, use --keep-tmp to inspect full files)',
-              ),
-            );
-            break;
-          }
-
-          if (line.startsWith('+')) {
-            console.log(chalk.green(`      ${line}`));
-          } else if (line.startsWith('-')) {
-            console.log(chalk.red(`      ${line}`));
-          } else if (line.startsWith('@@')) {
-            console.log(chalk.cyan(`      ${line}`));
-          } else if (line.trim()) {
-            console.log(chalk.gray(`      ${line}`));
-          }
-
-          lineCount++;
-        }
-      }
-    }
-
-    // Files only in reimported
-    for (const [name] of reimportedByName) {
-      onlyReimported++;
-      ctx.logger.warn(`   ⚠️ Only in reimported: ${name}`);
-    }
+    const { matches, mismatches, onlyOriginal, onlyReimported } =
+      await comparePhase(fileTree, tmpDir, options, ctx);
 
     // ── Summary ──
     ctx.logger.info('\n═══ Summary ═══');

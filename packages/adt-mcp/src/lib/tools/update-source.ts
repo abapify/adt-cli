@@ -18,7 +18,57 @@ import {
 import type { ToolContext } from '../types';
 import { sessionOrConnectionShape } from './shared-schemas';
 import { resolveClient } from './session-helpers';
-import { resolveObjectUri } from './utils';
+import { mcpErrorResult, resolveObjectUri } from './utils';
+
+type AdtClient = ReturnType<ToolContext['getClient']>;
+type LockService = ReturnType<typeof createLockService>;
+
+type PreparedSource = { sourceToWrite: string } | { errorText: string };
+
+async function writeSourceLocked(
+  client: AdtClient,
+  lockService: LockService,
+  objectUri: string,
+  objectName: string,
+  transport: string | undefined,
+  sourceToWrite: string,
+): Promise<void> {
+  let lockHandle: string | undefined;
+  try {
+    // 1. Acquire lock
+    const lock = await lockService.lock(objectUri, {
+      transport,
+      objectName,
+    });
+    lockHandle = lock.handle;
+    const effectiveTransport = resolveLockCorrelation(lock, transport);
+
+    // 2. PUT source code
+    const params = new URLSearchParams();
+    params.set('lockHandle', lockHandle);
+    if (effectiveTransport) params.set('corrNr', effectiveTransport);
+
+    await client.fetch(`${objectUri}/source/main?${params.toString()}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'text/plain' },
+      body: sourceToWrite,
+    });
+
+    // 3. Release lock
+    await lockService.unlock(objectUri, { lockHandle });
+    lockHandle = undefined;
+  } catch (error) {
+    // Best-effort unlock on failure
+    if (lockHandle) {
+      try {
+        await lockService.unlock(objectUri, { lockHandle });
+      } catch {
+        // ignore unlock errors in error path
+      }
+    }
+    throw error;
+  }
+}
 
 export function registerUpdateSourceTool(
   server: McpServer,
@@ -67,19 +117,11 @@ export function registerUpdateSourceTool(
         ),
     },
     async (args, extra) => {
-      let client;
+      let client: AdtClient;
       try {
         ({ client } = await resolveClient(ctx, args, extra ?? {}));
       } catch (error) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `Update source failed: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-        };
+        return mcpErrorResult(error, 'Update source');
       }
       let objectUri: string | undefined;
 
@@ -90,15 +132,7 @@ export function registerUpdateSourceTool(
           args.objectType,
         );
       } catch (error) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `Search failed: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-        };
+        return mcpErrorResult(error, 'Search');
       }
 
       if (!objectUri) {
@@ -113,165 +147,132 @@ export function registerUpdateSourceTool(
         };
       }
 
-      const lockService = createLockService(client);
-      let lockHandle: string | undefined;
+      const applyMethodEdit = async (uri: string): Promise<PreparedSource> => {
+        if (!args.methodName) {
+          return { errorText: 'methodName is required when action=editMethod' };
+        }
 
-      try {
+        if (!uri.includes('/oo/classes/') && !uri.includes('/oo/interfaces/')) {
+          return {
+            errorText: `editMethod is only supported for classes and interfaces, but '${args.objectName}' resolved to ${uri}`,
+          };
+        }
+
+        const currentSource = String(
+          await client.fetch(`${uri}/source/main`, {
+            method: 'GET',
+            headers: { Accept: 'text/plain' },
+          }),
+        );
+        const boundary = detectMethodBoundary(currentSource, args.methodName);
+        if (!boundary) {
+          return {
+            errorText: `Method ${args.methodName} not found in ${args.objectName}`,
+          };
+        }
+
+        const lines = currentSource.split(/\r?\n/);
+        const methodBody = normalizeMethodBody(
+          args.sourceCode,
+          args.methodName,
+        );
+        const methodBlock = [
+          `METHOD ${args.methodName.toUpperCase()}.`,
+          methodBody,
+          'ENDMETHOD.',
+        ].join('\n');
+
+        lines.splice(
+          boundary.startLine - 1,
+          boundary.endLine - boundary.startLine + 1,
+          methodBlock,
+        );
+        return { sourceToWrite: lines.join('\n') };
+      };
+
+      const lintGateError = (sourceToWrite: string): string | undefined => {
+        const diagnostics = lintSource(sourceToWrite, {
+          filename: `${args.objectName.toLowerCase()}.abap`,
+          systemType: args.lintPreset,
+        });
+        const blocking = diagnostics.filter((d) =>
+          ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),
+        );
+        if (blocking.length > 0) {
+          return JSON.stringify(
+            {
+              status: 'blocked_by_lint',
+              diagnostics: blocking,
+            },
+            null,
+            2,
+          );
+        }
+        return undefined;
+      };
+
+      const prepareSourceToWrite = async (
+        uri: string,
+      ): Promise<PreparedSource> => {
         let sourceToWrite = args.sourceCode;
 
         if (args.action === 'editMethod') {
-          if (!args.methodName) {
-            return {
-              isError: true,
-              content: [
-                {
-                  type: 'text' as const,
-                  text: 'methodName is required when action=editMethod',
-                },
-              ],
-            };
-          }
-
-          if (
-            !objectUri.includes('/oo/classes/') &&
-            !objectUri.includes('/oo/interfaces/')
-          ) {
-            return {
-              isError: true,
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `editMethod is only supported for classes and interfaces, but '${args.objectName}' resolved to ${objectUri}`,
-                },
-              ],
-            };
-          }
-
-          const currentSource = String(
-            await client.fetch(`${objectUri}/source/main`, {
-              method: 'GET',
-              headers: { Accept: 'text/plain' },
-            }),
-          );
-          const boundary = detectMethodBoundary(currentSource, args.methodName);
-
-          if (!boundary) {
-            return {
-              isError: true,
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `Method ${args.methodName} not found in ${args.objectName}`,
-                },
-              ],
-            };
-          }
-
-          const lines = currentSource.split(/\r?\n/);
-          const methodBody = normalizeMethodBody(
-            args.sourceCode,
-            args.methodName,
-          );
-          const methodBlock = [
-            `METHOD ${args.methodName.toUpperCase()}.`,
-            methodBody,
-            'ENDMETHOD.',
-          ].join('\n');
-
-          lines.splice(
-            boundary.startLine - 1,
-            boundary.endLine - boundary.startLine + 1,
-            methodBlock,
-          );
-          sourceToWrite = lines.join('\n');
+          const edited = await applyMethodEdit(uri);
+          if ('errorText' in edited) return edited;
+          sourceToWrite = edited.sourceToWrite;
         }
 
         if (args.lintBeforeWrite) {
-          const diagnostics = lintSource(sourceToWrite, {
-            filename: `${args.objectName.toLowerCase()}.abap`,
-            systemType: args.lintPreset,
-          });
-          const blocking = diagnostics.filter((d) =>
-            ['parser_error', 'cloud_types', 'strict_sql'].includes(d.key),
-          );
-          if (blocking.length > 0) {
-            return {
-              isError: true,
-              content: [
-                {
-                  type: 'text' as const,
-                  text: JSON.stringify(
-                    {
-                      status: 'blocked_by_lint',
-                      diagnostics: blocking,
-                    },
-                    null,
-                    2,
-                  ),
-                },
-              ],
-            };
-          }
+          const lintError = lintGateError(sourceToWrite);
+          if (lintError !== undefined) return { errorText: lintError };
         }
 
-        // 1. Acquire lock
-        const lock = await lockService.lock(objectUri, {
-          transport: args.transport,
-          objectName: args.objectName,
-        });
-        lockHandle = lock.handle;
-        const effectiveTransport = resolveLockCorrelation(lock, args.transport);
+        return { sourceToWrite };
+      };
 
-        // 2. PUT source code
-        const params = new URLSearchParams();
-        params.set('lockHandle', lockHandle);
-        if (effectiveTransport) params.set('corrNr', effectiveTransport);
+      const lockService = createLockService(client);
 
-        await client.fetch(`${objectUri}/source/main?${params.toString()}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'text/plain' },
-          body: sourceToWrite,
-        });
-
-        // 3. Release lock
-        await lockService.unlock(objectUri, { lockHandle });
-        lockHandle = undefined;
-
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  status: 'updated',
-                  object: args.objectName,
-                  action: args.action ?? 'update',
-                },
-                null,
-                2,
-              ),
-            },
-          ],
-        };
+      try {
+        const prepared = await prepareSourceToWrite(objectUri);
+        if ('errorText' in prepared) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text' as const,
+                text: prepared.errorText,
+              },
+            ],
+          };
+        }
+        await writeSourceLocked(
+          client,
+          lockService,
+          objectUri,
+          args.objectName,
+          args.transport,
+          prepared.sourceToWrite,
+        );
       } catch (error) {
-        // Best-effort unlock on failure
-        if (lockHandle) {
-          try {
-            await lockService.unlock(objectUri, { lockHandle });
-          } catch {
-            // ignore unlock errors in error path
-          }
-        }
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text' as const,
-              text: `Update source failed: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-        };
+        return mcpErrorResult(error, 'Update source');
       }
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(
+              {
+                status: 'updated',
+                object: args.objectName,
+                action: args.action ?? 'update',
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
     },
   );
 }

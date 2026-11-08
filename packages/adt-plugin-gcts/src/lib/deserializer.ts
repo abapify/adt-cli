@@ -80,6 +80,87 @@ interface ObjectFiles {
 }
 
 /**
+ * Register one `.json` file in the object index.
+ *
+ * Packages are NOT deployed (same convention as abapGit's `package.devc.xml`)
+ * — they must exist on target. `{name}.{type}.docu.json` is a DOCU
+ * companion, not a second metadata anchor — without this it can overwrite
+ * metadataFile depending on glob order. Other suffixed `.json` companions
+ * (LIMU sub-object metadata, `{sub}.{stype}`) flow through the source
+ * pipeline with an explicit `json` ext marker.
+ */
+function registerJsonAnchor(
+  jsonPath: string,
+  objectMap: Map<string, ObjectFiles>,
+  supportedTypes: ReadonlySet<string>,
+): void {
+  const filename = jsonPath.split('/').pop()!;
+  if (filename === PACKAGE_FILENAME) return;
+
+  const parsed = parseGctsFilename(filename);
+  if (!parsed) return;
+  if (parsed.extension !== 'json') return;
+  if (!supportedTypes.has(parsed.type.toLowerCase())) return;
+
+  const key = `${parsed.name.toUpperCase()}:${parsed.type.toUpperCase()}`;
+  if (!objectMap.has(key)) {
+    objectMap.set(key, {
+      name: parsed.name.toUpperCase(),
+      type: parsed.type.toUpperCase(),
+      sourceFiles: [],
+      propertyFiles: [],
+    });
+  }
+  const entry = objectMap.get(key)!;
+  if (parsed.suffix === 'docu') {
+    entry.docuFile = jsonPath;
+  } else if (parsed.suffix) {
+    entry.sourceFiles.push({
+      path: jsonPath,
+      suffix: parsed.suffix,
+      ext: 'json',
+    });
+  } else {
+    entry.metadataFile = jsonPath;
+  }
+}
+
+/**
+ * Register a `.properties` translation companion — routed into
+ * `data.properties` so it round-trips through metadata, not source staging.
+ */
+function registerPropertyFile(
+  path: string,
+  objectMap: Map<string, ObjectFiles>,
+): void {
+  const filename = path.split('/').pop()!;
+  const parsed = parseGctsFilename(filename);
+  if (!parsed) return;
+  const key = `${parsed.name.toUpperCase()}:${parsed.type.toUpperCase()}`;
+  objectMap.get(key)?.propertyFiles.push({ path, suffix: parsed.suffix });
+}
+
+/** Register a source file (.abap/.asddls/.asdcls) with its object group. */
+function registerSourceFile(
+  path: string,
+  objectMap: Map<string, ObjectFiles>,
+): void {
+  const filename = path.split('/').pop()!;
+  const parsed = parseGctsFilename(filename);
+  if (!parsed) return;
+
+  const key = `${parsed.name.toUpperCase()}:${parsed.type.toUpperCase()}`;
+  const obj = objectMap.get(key);
+  if (!obj) return;
+
+  obj.sourceFiles.push({
+    path,
+    suffix: parsed.suffix,
+    ext: parsed.extension,
+  });
+}
+
+/**
  * Deserialise a gCTS/AFF file tree into `AdkObject` instances.
  *
  * @param fileTree  Virtual FS abstraction (checkin supplies a real-fs impl).
@@ -105,72 +186,20 @@ export async function* deserialize(
   const objectMap = new Map<string, ObjectFiles>();
 
   for (const jsonPath of jsonFiles) {
-    const filename = jsonPath.split('/').pop()!;
-
-    // Packages are NOT deployed (same convention as abapGit's
-    // package.devc.xml) — they must exist on target.
-    if (filename === PACKAGE_FILENAME) continue;
-
-    const parsed = parseGctsFilename(filename);
-    if (!parsed) continue;
-    if (parsed.extension !== 'json') continue;
-    if (!supportedTypes.has(parsed.type.toLowerCase())) continue;
-
-    const key = `${parsed.name.toUpperCase()}:${parsed.type.toUpperCase()}`;
-    if (!objectMap.has(key)) {
-      objectMap.set(key, {
-        name: parsed.name.toUpperCase(),
-        type: parsed.type.toUpperCase(),
-        sourceFiles: [],
-        propertyFiles: [],
-      });
-    }
-    // `{name}.{type}.docu.json` is a DOCU companion, not a second
-    // metadata anchor — without this it can overwrite metadataFile
-    // depending on glob order. Other suffixed `.json` companions (LIMU
-    // sub-object metadata, `{sub}.{stype}`) flow through the source
-    // pipeline with an explicit `json` ext marker.
-    if (parsed.suffix === 'docu') {
-      objectMap.get(key)!.docuFile = jsonPath;
-    } else if (parsed.suffix) {
-      objectMap.get(key)!.sourceFiles.push({
-        path: jsonPath,
-        suffix: parsed.suffix,
-        ext: 'json',
-      });
-      continue;
-    } else {
-      objectMap.get(key)!.metadataFile = jsonPath;
-    }
+    registerJsonAnchor(jsonPath, objectMap, supportedTypes);
   }
 
-  // `.properties` translation companions — routed into `data.properties`
-  // so they round-trip through metadata, not source staging.
   for (const path of await fileTree.glob('**/*.properties')) {
-    const filename = path.split('/').pop()!;
-    const parsed = parseGctsFilename(filename);
-    if (!parsed) continue;
-    const key = `${parsed.name.toUpperCase()}:${parsed.type.toUpperCase()}`;
-    objectMap.get(key)?.propertyFiles.push({ path, suffix: parsed.suffix });
+    registerPropertyFile(path, objectMap);
   }
 
   // Collect every source file (.abap/.asddls/.asdcls) and group by name:type.
-  for (const ext of SOURCE_EXTENSIONS) {
-    const paths = await fileTree.glob(`**/*.${ext}`);
+  const pathsByExtension = await Promise.all(
+    Array.from(SOURCE_EXTENSIONS).map((ext) => fileTree.glob(`**/*.${ext}`)),
+  );
+  for (const paths of pathsByExtension) {
     for (const path of paths) {
-      const filename = path.split('/').pop()!;
-      const parsed = parseGctsFilename(filename);
-      if (!parsed) continue;
-
-      const key = `${parsed.name.toUpperCase()}:${parsed.type.toUpperCase()}`;
-      const obj = objectMap.get(key);
-      if (!obj) continue;
-
-      obj.sourceFiles.push({
-        path,
-        suffix: parsed.suffix,
-        ext: parsed.extension,
-      });
+      registerSourceFile(path, objectMap);
     }
   }
 

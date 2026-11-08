@@ -4,7 +4,7 @@ import { listAvailableSids, getDefaultSid } from '../../utils/auth';
 export const listCommand = new Command('list')
   .alias('ls')
   .description('List all authenticated SAP systems')
-  .action(async () => {
+  .action(() => {
     try {
       const sids = listAvailableSids();
       const defaultSid = getDefaultSid();

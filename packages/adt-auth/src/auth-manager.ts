@@ -27,7 +27,7 @@ export interface Destination {
 }
 
 export class AuthManager {
-  private storage: FileStorage;
+  private readonly storage: FileStorage;
 
   constructor(storage?: FileStorage) {
     this.storage = storage || new FileStorage();

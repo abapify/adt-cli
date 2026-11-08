@@ -36,6 +36,7 @@ import type {
   ExtendSetOperation,
   ExternalEntityDefinition,
   FieldDefinition,
+  GrantCombinationMode,
   GrantStatement,
   HierarchyDefinition,
   HierarchyPeriod,
@@ -1327,7 +1328,7 @@ export class CdsVisitor extends BaseCstVisitor {
     for (const clauseNode of asNodes(ctx.grantClause)) {
       const clause = this.visit(clauseNode) as {
         optionalElements?: DclOptionalElement[];
-        combinationMode?: 'or' | 'and' | 'redefinition';
+        combinationMode?: GrantCombinationMode;
         inheritRole?: string;
         inheritConditionConnector?: 'and' | 'or';
         inheritCondition?: Expression;
@@ -1370,9 +1371,9 @@ export class CdsVisitor extends BaseCstVisitor {
   }
 
   grantCombination(ctx: Ctx): {
-    combinationMode: 'or' | 'and' | 'redefinition';
+    combinationMode: GrantCombinationMode;
   } {
-    let combinationMode: 'or' | 'and' | 'redefinition' = 'and';
+    let combinationMode: GrantCombinationMode = 'and';
     if (ctx.Redefinition) combinationMode = 'redefinition';
     else if (ctx.Or) combinationMode = 'or';
     return { combinationMode };
@@ -1527,10 +1528,14 @@ export class CdsVisitor extends BaseCstVisitor {
     return { key, value };
   }
 
-  dottedName(ctx: Ctx): string {
+  private joinNameSegments(ctx: Ctx): string {
     return asNodes(ctx.cdsName)
       .map((node) => this.visit(node) as string)
       .join('.');
+  }
+
+  dottedName(ctx: Ctx): string {
+    return this.joinNameSegments(ctx);
   }
 
   annotationValue(ctx: Ctx): AnnotationValue {
@@ -1714,9 +1719,7 @@ export class CdsVisitor extends BaseCstVisitor {
   }
 
   qualifiedName(ctx: Ctx): string {
-    return asNodes(ctx.cdsName)
-      .map((node) => this.visit(node) as string)
-      .join('.');
+    return this.joinNameSegments(ctx);
   }
 }
 

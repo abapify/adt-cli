@@ -596,6 +596,63 @@ function writeJsonError(
 /**
  * Creates a reusable MCP HTTP handler without binding a Node listener.
  */
+type DestinationServerConfig = NonNullable<
+  HttpServerOptions['destinationServer']
+>;
+
+interface SessionIdentityCapture {
+  readonly identity: RequestIdentity;
+  readonly access: McpRequestAccess | undefined;
+  /** Stable binding of the session to the derived identity, if it succeeded. */
+  readonly binding: string | undefined;
+}
+
+/**
+ * Derive the identity and access snapshot captured at MCP session
+ * initialization. A failed derivation never falls back to caller-selected
+ * identity material — it degrades to an audit-safe `{ principal: 'unknown' }`
+ * identity with no access.
+ */
+function deriveSessionIdentity(
+  destinationServer: DestinationServerConfig,
+  authMode: AuthMode,
+  userHint: UserHint | undefined,
+  invocation: TrustedMcpInvocationClaims | undefined,
+): SessionIdentityCapture {
+  let identity: RequestIdentity;
+  let binding: string | undefined;
+  try {
+    identity =
+      authMode === 'invocation'
+        ? invocationRequestIdentity(invocation)
+        : destinationServer.requestIdentity({ userHint, invocation });
+    binding = sessionIdentityBinding(identity, invocation?.tokenId);
+  } catch {
+    // A failed identity derivation must not turn into caller-selected
+    // identity material. The fallback is audit-safe and fail-closed
+    // once the lease provider applies its ordinary authorization.
+    return {
+      identity: { principal: 'unknown' },
+      access: undefined,
+      binding: undefined,
+    };
+  }
+  let access: McpRequestAccess | undefined;
+  try {
+    access =
+      authMode === 'invocation'
+        ? invocationRequestAccess(invocation)
+        : snapshotRequestAccess(
+            destinationServer.requestAccess({ userHint, invocation }),
+          );
+  } catch {
+    // Missing or failed trusted access derivation is intentionally
+    // indistinguishable from no access at dispatch time.
+    access = undefined;
+  }
+  return { identity, access, binding };
+}
+
 export function createHttpMcpHandler(
   options: HttpServerOptions = {},
 ): HttpMcpHandler {
@@ -689,6 +746,181 @@ export function createHttpMcpHandler(
     return false;
   };
 
+  const buildServerOptions = (
+    sessionIdentity: RequestIdentity | undefined,
+    sessionAccess: McpRequestAccess | undefined,
+  ) => {
+    const base = {
+      registry,
+      resolveSystem: (id: string) => multiSystem.resolve(id),
+    };
+    if (!destinationServer) return base;
+    return {
+      ...base,
+      destinationRegistry: destinationServer.destinationRegistry,
+      requestIdentity: () => sessionIdentity ?? { principal: 'unknown' },
+      requestAccess: () => sessionAccess,
+      ...(destinationServer.resolveFrozenSource
+        ? {
+            resolveFrozenSource: destinationServer.resolveFrozenSource,
+          }
+        : {}),
+      ...(destinationServer.consumeExecutionAuthorization
+        ? {
+            consumeExecutionAuthorization:
+              destinationServer.consumeExecutionAuthorization,
+          }
+        : {}),
+      ...(destinationServer.reportExecutionOutcome
+        ? {
+            reportExecutionOutcome: destinationServer.reportExecutionOutcome,
+          }
+        : {}),
+      ...(destinationServer.executeWithDeadline
+        ? {
+            executeWithDeadline: destinationServer.executeWithDeadline,
+          }
+        : {}),
+    };
+  };
+
+  const handleInitialize = async (
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    body: unknown,
+    userHint: UserHint | undefined,
+    invocation: TrustedMcpInvocationClaims | undefined,
+  ): Promise<void> => {
+    let initializedSessionBinding: string | undefined;
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => randomUUID(),
+      onsessioninitialized: (id) => {
+        transports.set(id, transport);
+        if (initializedSessionBinding) {
+          sessionIdentityBindings.set(id, initializedSessionBinding);
+        }
+        log('info', `session initialized: ${id}`);
+      },
+      onsessionclosed: async (id) => {
+        log('info', `session closed by client: ${id}`);
+        await releaseSessionResources(id);
+      },
+    });
+
+    transport.onclose = () => {
+      const id = transport.sessionId;
+      if (!id) return;
+      void releaseSessionResources(id);
+    };
+
+    let sessionIdentity: RequestIdentity | undefined;
+    let sessionAccess: McpRequestAccess | undefined;
+    if (destinationServer) {
+      const derived = deriveSessionIdentity(
+        destinationServer,
+        authMode,
+        userHint,
+        invocation,
+      );
+      sessionIdentity = derived.identity;
+      sessionAccess = derived.access;
+      initializedSessionBinding = derived.binding;
+    }
+
+    const mcp = createMcpServer(
+      buildServerOptions(sessionIdentity, sessionAccess),
+    );
+    await mcp.connect(transport);
+    // Store under the generated session id as soon as it exists.
+    // `onsessioninitialized` also stores it, but we want the mapping
+    // available for any in-flight follow-up immediately.
+    if (transport.sessionId) {
+      transports.set(transport.sessionId, transport);
+      servers.set(transport.sessionId, mcp);
+    }
+    await transport.handleRequest(req, res, body);
+    if (transport.sessionId && !servers.has(transport.sessionId)) {
+      servers.set(transport.sessionId, mcp);
+    }
+  };
+
+  const handlePost = async (
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    sessionId: string | undefined,
+    userHint: UserHint | undefined,
+    invocation: TrustedMcpInvocationClaims | undefined,
+  ): Promise<void> => {
+    // Body must be parsed up-front to decide whether this is an
+    // `initialize` request that should spawn a new transport.
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch (err) {
+      writeJsonError(
+        res,
+        400,
+        `Invalid JSON body: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      return;
+    }
+
+    if (sessionId && transports.has(sessionId)) {
+      if (
+        !sessionMatchesAuthenticatedIdentity(
+          sessionId,
+          userHint,
+          invocation,
+          res,
+        )
+      ) {
+        return;
+      }
+      // Refresh the session's last-used timestamp so the TTL sweep
+      // doesn't evict an actively-used session between tool calls.
+      registry.touch(sessionId);
+      const transport = transports.get(sessionId)!;
+      await transport.handleRequest(req, res, body);
+      return;
+    }
+
+    if (!sessionId && isInitializeRequest(body)) {
+      await handleInitialize(req, res, body, userHint, invocation);
+      return;
+    }
+
+    writeJsonError(
+      res,
+      400,
+      sessionId
+        ? `Unknown Mcp-Session-Id: ${sessionId}`
+        : 'Missing Mcp-Session-Id header (non-initialize request)',
+    );
+  };
+
+  const handleSessionGetDelete = async (
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    sessionId: string | undefined,
+    userHint: UserHint | undefined,
+    invocation: TrustedMcpInvocationClaims | undefined,
+  ): Promise<void> => {
+    if (!sessionId || !transports.has(sessionId)) {
+      writeJsonError(res, 400, 'Missing or unknown Mcp-Session-Id header');
+      return;
+    }
+    if (
+      !sessionMatchesAuthenticatedIdentity(sessionId, userHint, invocation, res)
+    ) {
+      return;
+    }
+    registry.touch(sessionId);
+    const transport = transports.get(sessionId)!;
+    await transport.handleRequest(req, res);
+  };
+
   const handleMcp = async (
     req: http.IncomingMessage,
     res: http.ServerResponse,
@@ -701,179 +933,12 @@ export function createHttpMcpHandler(
       : sessionHeader;
 
     if (req.method === 'POST') {
-      // Body must be parsed up-front to decide whether this is an
-      // `initialize` request that should spawn a new transport.
-      let body: unknown;
-      try {
-        body = await readJsonBody(req);
-      } catch (err) {
-        writeJsonError(
-          res,
-          400,
-          `Invalid JSON body: ${
-            err instanceof Error ? err.message : String(err)
-          }`,
-        );
-        return;
-      }
-
-      if (sessionId && transports.has(sessionId)) {
-        if (
-          !sessionMatchesAuthenticatedIdentity(
-            sessionId,
-            userHint,
-            invocation,
-            res,
-          )
-        ) {
-          return;
-        }
-        // Refresh the session's last-used timestamp so the TTL sweep
-        // doesn't evict an actively-used session between tool calls.
-        registry.touch(sessionId);
-        const transport = transports.get(sessionId)!;
-        await transport.handleRequest(req, res, body);
-        return;
-      }
-
-      if (!sessionId && isInitializeRequest(body)) {
-        let initializedSessionBinding: string | undefined;
-        const transport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: () => randomUUID(),
-          onsessioninitialized: (id) => {
-            transports.set(id, transport);
-            if (initializedSessionBinding) {
-              sessionIdentityBindings.set(id, initializedSessionBinding);
-            }
-            log('info', `session initialized: ${id}`);
-          },
-          onsessionclosed: async (id) => {
-            log('info', `session closed by client: ${id}`);
-            await releaseSessionResources(id);
-          },
-        });
-
-        transport.onclose = () => {
-          const id = transport.sessionId;
-          if (!id) return;
-          void releaseSessionResources(id);
-        };
-
-        let sessionIdentity: RequestIdentity | undefined;
-        let sessionAccess: McpRequestAccess | undefined;
-        if (destinationServer) {
-          let identityDerivationFailed = false;
-          try {
-            sessionIdentity =
-              authMode === 'invocation'
-                ? invocationRequestIdentity(invocation)
-                : destinationServer.requestIdentity({ userHint, invocation });
-            initializedSessionBinding = sessionIdentityBinding(
-              sessionIdentity,
-              invocation?.tokenId,
-            );
-          } catch {
-            // A failed identity derivation must not turn into caller-selected
-            // identity material. The fallback is audit-safe and fail-closed
-            // once the lease provider applies its ordinary authorization.
-            sessionIdentity = { principal: 'unknown' };
-            identityDerivationFailed = true;
-          }
-          if (!identityDerivationFailed) {
-            try {
-              sessionAccess =
-                authMode === 'invocation'
-                  ? invocationRequestAccess(invocation)
-                  : snapshotRequestAccess(
-                      destinationServer.requestAccess({ userHint, invocation }),
-                    );
-            } catch {
-              // Missing or failed trusted access derivation is intentionally
-              // indistinguishable from no access at dispatch time.
-              sessionAccess = undefined;
-            }
-          }
-        }
-
-        const mcp = createMcpServer({
-          registry,
-          resolveSystem: (id) => multiSystem.resolve(id),
-          ...(destinationServer
-            ? {
-                destinationRegistry: destinationServer.destinationRegistry,
-                requestIdentity: () =>
-                  sessionIdentity ?? { principal: 'unknown' },
-                requestAccess: () => sessionAccess,
-                ...(destinationServer.resolveFrozenSource
-                  ? {
-                      resolveFrozenSource:
-                        destinationServer.resolveFrozenSource,
-                    }
-                  : {}),
-                ...(destinationServer.consumeExecutionAuthorization
-                  ? {
-                      consumeExecutionAuthorization:
-                        destinationServer.consumeExecutionAuthorization,
-                    }
-                  : {}),
-                ...(destinationServer.reportExecutionOutcome
-                  ? {
-                      reportExecutionOutcome:
-                        destinationServer.reportExecutionOutcome,
-                    }
-                  : {}),
-                ...(destinationServer.executeWithDeadline
-                  ? {
-                      executeWithDeadline:
-                        destinationServer.executeWithDeadline,
-                    }
-                  : {}),
-              }
-            : {}),
-        });
-        await mcp.connect(transport);
-        // Store under the generated session id as soon as it exists.
-        // `onsessioninitialized` also stores it, but we want the mapping
-        // available for any in-flight follow-up immediately.
-        if (transport.sessionId) {
-          transports.set(transport.sessionId, transport);
-          servers.set(transport.sessionId, mcp);
-        }
-        await transport.handleRequest(req, res, body);
-        if (transport.sessionId && !servers.has(transport.sessionId)) {
-          servers.set(transport.sessionId, mcp);
-        }
-        return;
-      }
-
-      writeJsonError(
-        res,
-        400,
-        sessionId
-          ? `Unknown Mcp-Session-Id: ${sessionId}`
-          : 'Missing Mcp-Session-Id header (non-initialize request)',
-      );
+      await handlePost(req, res, sessionId, userHint, invocation);
       return;
     }
 
     if (req.method === 'GET' || req.method === 'DELETE') {
-      if (!sessionId || !transports.has(sessionId)) {
-        writeJsonError(res, 400, 'Missing or unknown Mcp-Session-Id header');
-        return;
-      }
-      if (
-        !sessionMatchesAuthenticatedIdentity(
-          sessionId,
-          userHint,
-          invocation,
-          res,
-        )
-      ) {
-        return;
-      }
-      registry.touch(sessionId);
-      const transport = transports.get(sessionId)!;
-      await transport.handleRequest(req, res);
+      await handleSessionGetDelete(req, res, sessionId, userHint, invocation);
       return;
     }
 

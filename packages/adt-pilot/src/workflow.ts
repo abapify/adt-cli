@@ -302,7 +302,7 @@ function createBuildReportStep() {
     description: 'Aggregate ATC results into a CodeReviewReport',
     inputSchema: runAtcChecksOutputSchema,
     outputSchema: codeReviewOutputSchema,
-    execute: async ({
+    execute: ({
       inputData,
     }: {
       inputData: z.infer<typeof runAtcChecksOutputSchema>;
@@ -339,7 +339,7 @@ function createBuildReportStep() {
         },
       };
 
-      return report;
+      return Promise.resolve(report);
     },
   });
 }

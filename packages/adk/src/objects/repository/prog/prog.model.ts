@@ -42,7 +42,7 @@ export class AdkProgram extends AdkMainObject<typeof ProgramKind, ProgramXml> {
   // Lazy segments - source code
 
   async getSource(): Promise<string> {
-    return this.lazy('source', async () => {
+    return this.lazy('source', () => {
       return this.ctx.client.adt.programs.programs.source.main.get(this.name);
     });
   }

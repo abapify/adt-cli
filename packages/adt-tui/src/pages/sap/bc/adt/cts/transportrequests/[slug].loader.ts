@@ -81,6 +81,54 @@ export function load(xml: string): TransportData {
 }
 
 /**
+ * Normalize an XSD element that may appear once or many times.
+ */
+function asArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
+/** Child tasks for a request view (always empty for task views). */
+function extractTasks(request: Request, isTask: boolean): TaskInfo[] {
+  const tasks: TaskInfo[] = [];
+  if (request.task && !isTask) {
+    for (const task of asArray<Task>(request.task)) {
+      tasks.push({
+        number: task.number ?? '',
+        owner: task.owner ?? '',
+        desc: task.desc ?? '',
+        status: task.status ?? '',
+        statusText: task.status_text ?? '',
+        uri: task.uri ?? '',
+      });
+    }
+  }
+  return tasks;
+}
+
+/** Objects carried by the task element (task views only). */
+function extractObjects(request: Request, isTask: boolean): ObjectInfo[] {
+  const objects: ObjectInfo[] = [];
+  if (!request.task || !isTask) return objects;
+
+  // When viewing a task, the task element contains objects
+  for (const task of asArray<Task>(request.task)) {
+    if (task.abap_object) {
+      for (const obj of asArray<AbapObject>(task.abap_object)) {
+        objects.push({
+          pgmid: obj.pgmid ?? '',
+          type: obj.type ?? '',
+          name: obj.name ?? '',
+          info: obj.obj_info ?? obj.obj_desc ?? '',
+          lockStatus: obj.lock_status ?? '',
+          uri: obj.uri,
+        });
+      }
+    }
+  }
+  return objects;
+}
+
+/**
  * Transform parsed XSD data to TransportData
  */
 function transformToTransportData(data: TransportRoot): TransportData {
@@ -93,50 +141,6 @@ function transformToTransportData(data: TransportRoot): TransportData {
   // Check if this is a task view (has parent) or request view
   const isTask = !!request.parent;
 
-  // Extract tasks
-  const tasks: TaskInfo[] = [];
-  if (request.task && !isTask) {
-    const taskArray = Array.isArray(request.task)
-      ? request.task
-      : [request.task];
-    for (const task of taskArray) {
-      tasks.push({
-        number: task.number ?? '',
-        owner: task.owner ?? '',
-        desc: task.desc ?? '',
-        status: task.status ?? '',
-        statusText: task.status_text ?? '',
-        uri: task.uri ?? '',
-      });
-    }
-  }
-
-  // Extract objects (from task's abap_object)
-  const objects: ObjectInfo[] = [];
-  if (request.task && isTask) {
-    // When viewing a task, the task element contains objects
-    const taskArray = Array.isArray(request.task)
-      ? request.task
-      : [request.task];
-    for (const task of taskArray) {
-      if (task.abap_object) {
-        const objArray = Array.isArray(task.abap_object)
-          ? task.abap_object
-          : [task.abap_object];
-        for (const obj of objArray) {
-          objects.push({
-            pgmid: obj.pgmid ?? '',
-            type: obj.type ?? '',
-            name: obj.name ?? '',
-            info: obj.obj_info ?? obj.obj_desc ?? '',
-            lockStatus: obj.lock_status ?? '',
-            uri: obj.uri,
-          });
-        }
-      }
-    }
-  }
-
   return {
     isTask,
     number: request.number ?? '',
@@ -148,8 +152,8 @@ function transformToTransportData(data: TransportRoot): TransportData {
     statusText: request.status_text ?? '',
     target: request.target ?? '',
     targetDesc: request.target_desc ?? '',
-    tasks,
-    objects,
+    tasks: extractTasks(request, isTask),
+    objects: extractObjects(request, isTask),
     raw: data,
   };
 }

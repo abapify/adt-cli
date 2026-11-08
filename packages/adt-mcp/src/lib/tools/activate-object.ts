@@ -58,12 +58,14 @@ export function registerActivateObjectTool(
         type ObjRef = { uri: string; type: string; name: string };
         const toActivate: ObjRef[] = [];
 
+        const fallbackObjects =
+          args.objectName && args.objectType
+            ? [{ objectName: args.objectName, objectType: args.objectType }]
+            : [];
         const rawObjects =
           args.objects && args.objects.length > 0
             ? args.objects
-            : args.objectName && args.objectType
-              ? [{ objectName: args.objectName, objectType: args.objectType }]
-              : [];
+            : fallbackObjects;
 
         if (rawObjects.length === 0) {
           return {

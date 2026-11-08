@@ -18,6 +18,82 @@ interface DependencyContext {
   fallback: boolean;
 }
 
+type HandlerClient = Awaited<ReturnType<typeof resolveClient>>['client'];
+
+async function collectDependencyContext(
+  client: HandlerClient,
+  rootSource: string,
+  depth: number,
+  maxDeps: number,
+): Promise<DependencyContext[]> {
+  const queue: Array<{ name: string; level: number }> = extractDependencies(
+    rootSource,
+  ).map((name) => ({ name, level: 1 }));
+
+  const seen = new Set<string>();
+  const dependencies: DependencyContext[] = [];
+
+  while (queue.length > 0 && dependencies.length < maxDeps) {
+    const current = queue.shift();
+    if (!current) break;
+    if (seen.has(current.name)) continue;
+    seen.add(current.name);
+
+    const searchResult =
+      await client.adt.repository.informationsystem.search.quickSearch({
+        query: current.name,
+        maxResults: 10,
+      });
+    const upperName = current.name.toUpperCase();
+    const object = extractObjectReferences(searchResult).find(
+      (candidate) => String(candidate.name ?? '').toUpperCase() === upperName,
+    );
+
+    const depUri = object?.uri;
+    if (!depUri) {
+      continue;
+    }
+
+    const depSourceRaw = await client.fetch(`${depUri}/source/main`, {
+      method: 'GET',
+      headers: { Accept: 'text/plain' },
+    });
+    const depSource = String(depSourceRaw);
+    const stripped: StripResult = stripToPublicApi(
+      depSource,
+      object?.type ?? 'CLAS',
+    );
+
+    dependencies.push({
+      name: current.name,
+      type: object?.type,
+      uri: depUri,
+      source: stripped.source,
+      fallback: stripped.fallback,
+    });
+
+    if (current.level < depth) {
+      enqueueNextDeps(queue, seen, depSource, current.level + 1);
+    }
+  }
+
+  return dependencies;
+}
+
+function enqueueNextDeps(
+  queue: Array<{ name: string; level: number }>,
+  seen: Set<string>,
+  depSource: string,
+  level: number,
+): void {
+  const nextDeps = extractDependencies(depSource);
+  for (const next of nextDeps) {
+    if (!seen.has(next)) {
+      queue.push({ name: next, level });
+    }
+  }
+}
+
 export function registerGetContextTool(
   server: McpServer,
   ctx: ToolContext,
@@ -76,61 +152,12 @@ export function registerGetContextTool(
         });
         const rootSource = String(rootSourceRaw);
 
-        const queue: Array<{ name: string; level: number }> =
-          extractDependencies(rootSource).map((name) => ({ name, level: 1 }));
-
-        const seen = new Set<string>();
-        const dependencies: DependencyContext[] = [];
-
-        while (queue.length > 0 && dependencies.length < args.maxDeps) {
-          const current = queue.shift();
-          if (!current) break;
-          if (seen.has(current.name)) continue;
-          seen.add(current.name);
-
-          const searchResult =
-            await client.adt.repository.informationsystem.search.quickSearch({
-              query: current.name,
-              maxResults: 10,
-            });
-          const upperName = current.name.toUpperCase();
-          const object = extractObjectReferences(searchResult).find(
-            (candidate) =>
-              String(candidate.name ?? '').toUpperCase() === upperName,
-          );
-
-          const depUri = object?.uri;
-          if (!depUri) {
-            continue;
-          }
-
-          const depSourceRaw = await client.fetch(`${depUri}/source/main`, {
-            method: 'GET',
-            headers: { Accept: 'text/plain' },
-          });
-          const depSource = String(depSourceRaw);
-          const stripped: StripResult = stripToPublicApi(
-            depSource,
-            object?.type ?? 'CLAS',
-          );
-
-          dependencies.push({
-            name: current.name,
-            type: object?.type,
-            uri: depUri,
-            source: stripped.source,
-            fallback: stripped.fallback,
-          });
-
-          if (current.level < args.depth) {
-            const nextDeps = extractDependencies(depSource);
-            for (const next of nextDeps) {
-              if (!seen.has(next)) {
-                queue.push({ name: next, level: current.level + 1 });
-              }
-            }
-          }
-        }
+        const dependencies = await collectDependencyContext(
+          client,
+          rootSource,
+          args.depth,
+          args.maxDeps,
+        );
 
         return {
           content: [

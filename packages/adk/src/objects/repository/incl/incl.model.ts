@@ -45,7 +45,7 @@ export class AdkInclude extends AdkMainObject<typeof IncludeKind, IncludeXml> {
 
   // Lazy segments - source code
   async getSource(): Promise<string> {
-    return this.lazy('source', async () => {
+    return this.lazy('source', () => {
       return this.ctx.client.adt.programs.includes.source.main.get(this.name);
     });
   }

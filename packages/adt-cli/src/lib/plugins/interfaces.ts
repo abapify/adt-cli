@@ -10,24 +10,18 @@ export type AdkObject = AdkObjectType;
 // Object Type Identification
 // ============================================
 
-/**
- * ABAP object type code (e.g., 'CLAS', 'INTF', 'DOMA')
- * This is the SAP technical type used in abapGit
- */
-export type AbapObjectType = string;
-
 // Re-export ADK mappings for convenience
 /**
  * Get object type from ADK object
  */
-export function getObjectType(object: AdkObject): AbapObjectType {
+export function getObjectType(object: AdkObject): string {
   return adkGetTypeForKind(object.kind as AdkKind) ?? object.type;
 }
 
 /**
  * Get ADK kind from object type
  */
-export function getKindFromType(type: AbapObjectType): AdkKind | undefined {
+export function getKindFromType(type: string): AdkKind | undefined {
   return adkGetKindForType(type);
 }
 
@@ -54,7 +48,7 @@ export interface DeserializedObject<T = unknown> {
   /** Parsed object data */
   data: T;
   /** Object type */
-  type: AbapObjectType;
+  type: string;
   /** Object name */
   name: string;
 }
@@ -71,7 +65,7 @@ export interface DeserializedObject<T = unknown> {
  */
 export interface ObjectHandler<T extends AdkObject = AdkObject> {
   /** ABAP object type code (e.g., 'CLAS') */
-  readonly type: AbapObjectType;
+  readonly type: string;
 
   /** File extension used by this format (e.g., 'clas', 'intf') */
   readonly fileExtension: string;
@@ -107,17 +101,17 @@ export interface ObjectHandlerRegistry {
   /**
    * Get handler for an object type
    */
-  get(type: AbapObjectType): ObjectHandler | undefined;
+  get(type: string): ObjectHandler | undefined;
 
   /**
    * Check if a type has a handler
    */
-  has(type: AbapObjectType): boolean;
+  has(type: string): boolean;
 
   /**
    * Get all registered types
    */
-  getTypes(): AbapObjectType[];
+  getTypes(): string[];
 
   /**
    * Get all handlers
@@ -129,22 +123,22 @@ export interface ObjectHandlerRegistry {
  * Create a new handler registry
  */
 export function createHandlerRegistry(): ObjectHandlerRegistry {
-  const handlers = new Map<AbapObjectType, ObjectHandler>();
+  const handlers = new Map<string, ObjectHandler>();
 
   return {
     register(handler: ObjectHandler): void {
       handlers.set(handler.type, handler);
     },
 
-    get(type: AbapObjectType): ObjectHandler | undefined {
+    get(type: string): ObjectHandler | undefined {
       return handlers.get(type);
     },
 
-    has(type: AbapObjectType): boolean {
+    has(type: string): boolean {
       return handlers.has(type);
     },
 
-    getTypes(): AbapObjectType[] {
+    getTypes(): string[] {
       return Array.from(handlers.keys());
     },
 
@@ -172,7 +166,7 @@ export interface ExportOptions {
   includeSource?: boolean;
 
   /** Filter object types */
-  objectTypes?: AbapObjectType[];
+  objectTypes?: string[];
 }
 
 /**
@@ -189,7 +183,7 @@ export interface ImportOptions {
   dryRun?: boolean;
 
   /** Filter object types */
-  objectTypes?: AbapObjectType[];
+  objectTypes?: string[];
 }
 
 /**
@@ -315,7 +309,7 @@ export interface FormatPlugin {
   /**
    * Get handler for a specific object type
    */
-  getHandler?(type: AbapObjectType): ObjectHandler | undefined;
+  getHandler?(type: string): ObjectHandler | undefined;
 
   /**
    * Register a custom handler

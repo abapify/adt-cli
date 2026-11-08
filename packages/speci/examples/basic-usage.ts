@@ -124,7 +124,7 @@ const client = createClient(api, {
   },
 
   // Optional: Add auth token to all requests
-  onRequest: async (options) => ({
+  onRequest: (options) => ({
     ...options,
     headers: {
       ...options.headers,
@@ -133,15 +133,15 @@ const client = createClient(api, {
   }),
 
   // Optional: Log responses
-  onResponse: async (response) => {
+  onResponse: (response) => {
     console.log('✅ Response received:', response);
     return response;
   },
 
   // Optional: Handle errors
-  onError: async (error) => {
+  onError: (error) => {
     console.error('❌ Request failed:', error);
-    throw error;
+    return Promise.reject(error);
   },
 });
 
@@ -231,4 +231,4 @@ async function demo() {
 }
 
 // Run the demo (commented out - this is just an example)
-demo();
+await demo();

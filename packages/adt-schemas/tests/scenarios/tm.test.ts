@@ -1,6 +1,10 @@
-import { expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
-import { Scenario, runScenario, type SchemaType } from './base/scenario';
+import {
+  Scenario,
+  checkScenarioFixture,
+  type SchemaType,
+} from './base/scenario';
 import {
   transportmanagmentCreate,
   transportmanagmentSingle,
@@ -159,6 +163,29 @@ class TmFullScenario extends Scenario<typeof transportmanagmentSingle> {
 }
 
 // Run all transport management scenarios
-runScenario(new TmTaskScenario());
-runScenario(new TmCreateScenario());
-runScenario(new TmFullScenario());
+describe('TmTaskScenario', () => {
+  const scenario = new TmTaskScenario();
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path.replace('.xml', ''), async () => {
+      await checkScenarioFixture(scenario, fixture);
+    });
+  }
+});
+
+describe('TmCreateScenario', () => {
+  const scenario = new TmCreateScenario();
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path.replace('.xml', ''), async () => {
+      await checkScenarioFixture(scenario, fixture);
+    });
+  }
+});
+
+describe('TmFullScenario', () => {
+  const scenario = new TmFullScenario();
+  for (const fixture of scenario.fixtures) {
+    it(fixture.path.replace('.xml', ''), async () => {
+      await checkScenarioFixture(scenario, fixture);
+    });
+  }
+});

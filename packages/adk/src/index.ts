@@ -171,8 +171,6 @@ export type {
   TransportRequestData,
   TransportTaskData,
   TransportObjectData,
-  TransportTask,
-  TransportObject,
   TransportStatus,
   TransportType,
   TransportCreateOptions,

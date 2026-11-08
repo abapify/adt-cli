@@ -1,12 +1,11 @@
 import { createHash } from 'node:crypto';
 
 export function compareStrings(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
+  if (left < right) return -1;
+  return left > right ? 1 : 0;
 }
 
 const NO_TO_JSON = Symbol('no toJSON');
-
-type NoToJson = typeof NO_TO_JSON;
 
 function isObject(value: unknown): value is object {
   if (value === null) return false;
@@ -14,7 +13,7 @@ function isObject(value: unknown): value is object {
   return true;
 }
 
-function maybeToJson(value: unknown, key: string): unknown | NoToJson {
+function maybeToJson(value: unknown, key: string): unknown {
   if (!isObject(value)) return NO_TO_JSON;
   const toJson = (value as { toJSON?: (key: string) => unknown }).toJSON;
   if (typeof toJson !== 'function') return NO_TO_JSON;

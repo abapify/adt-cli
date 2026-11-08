@@ -29,7 +29,7 @@ interface ContentTypeMapping {
   fallbacks: Record<string, string>;
 }
 
-/** @deprecated Use EndpointDefinition[] instead */
+/** Legacy { enabled: string[] } config format, superseded by EndpointDefinition[]. */
 interface LegacyEnabledEndpoints {
   enabled: string[];
   notes?: Record<string, string>;
@@ -208,14 +208,14 @@ function parseTemplate(template: string): {
   const pathParams: string[] = [];
   const queryParams: string[] = [];
 
-  const queryMatch = template.match(/\{\?([^}]+)\}/);
+  const queryMatch = /\{\?([^}]+)\}/.exec(template);
   if (queryMatch) {
     queryParams.push(...queryMatch[1].split(',').map(sanitizeParamName));
   }
 
   const path = template.replace(/\{\?[^}]+\}/, '');
 
-  const pathMatches = path.matchAll(/\{([^}]+)\}/g);
+  const pathMatches = path.matchAll(/(?<!\{)\{([^}]+)\}/g);
   for (const match of pathMatches) {
     pathParams.push(sanitizeParamName(match[1]));
   }
@@ -228,9 +228,9 @@ function sanitizeParamName(name: string): string {
   // Remove leading special characters like & or *
   let sanitized = name.replace(/^[&*]+/, '');
   // Replace any remaining invalid characters with underscore
-  sanitized = sanitized.replaceAll(/[^a-zA-Z0-9_]/g, '_');
+  sanitized = sanitized.replaceAll(/\W/g, '_');
   // Ensure it starts with a letter or underscore
-  if (/^[0-9]/.test(sanitized)) {
+  if (/^\d/.test(sanitized)) {
     sanitized = '_' + sanitized;
   }
   return sanitized || 'param';
@@ -251,7 +251,7 @@ function methodNameFromRel(
   existingNames: Set<string>,
 ): string {
   const parts = rel.split('/').filter(Boolean);
-  let name = parts[parts.length - 1] ?? httpMethod.toLowerCase();
+  let name = parts.at(-1) ?? httpMethod.toLowerCase();
 
   name = name
     .replace(/^relations?$/, '')
@@ -364,7 +364,7 @@ function generateMethodCode(method: EndpointMethod, indent: string): string {
     pathExpr =
       '`' +
       path.replaceAll(
-        /\{([^}]+)\}/g,
+        /(?<!\{)\{([^}]+)\}/g,
         (_, p) => '${' + sanitizeParamName(p) + '}',
       ) +
       '`';
@@ -635,9 +635,8 @@ function generateIndexFile(
     a[0].localeCompare(b[0]),
   )) {
     code += '// ' + dir + '\n';
-    for (const item of items.sort((a, b) =>
-      a.contractName.localeCompare(b.contractName),
-    )) {
+    items.sort((a, b) => a.contractName.localeCompare(b.contractName));
+    for (const item of items) {
       if (item.exportName === item.contractName + 'Contract') {
         code +=
           'export { ' +
@@ -676,7 +675,8 @@ function generateUnsupportedEndpointsDoc(
     'These endpoints have generated contracts in `src/generated/adt/`:\n\n';
   doc += '| Endpoint | Title | Category |\n';
   doc += '|----------|-------|----------|\n';
-  for (const e of enabled.sort((a, b) => a.href.localeCompare(b.href))) {
+  enabled.sort((a, b) => a.href.localeCompare(b.href));
+  for (const e of enabled) {
     doc += '| `' + e.href + '` | ' + e.title + ' | ' + e.category + ' |\n';
   }
 
@@ -711,7 +711,8 @@ function generateUnsupportedEndpointsDoc(
     doc += '<details>\n<summary>Click to expand</summary>\n\n';
     doc += '| Endpoint | Title |\n';
     doc += '|----------|-------|\n';
-    for (const e of endpoints.sort((a, b) => a.href.localeCompare(b.href))) {
+    endpoints.sort((a, b) => a.href.localeCompare(b.href));
+    for (const e of endpoints) {
       doc += '| `' + e.href + '` | ' + e.title + ' |\n';
     }
     doc += '\n</details>\n\n';
@@ -721,22 +722,94 @@ function generateUnsupportedEndpointsDoc(
 }
 
 async function findJsonFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-
-  async function walk(currentDir: string) {
+  async function walk(currentDir: string): Promise<string[]> {
     const entries = await readdir(currentDir, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = join(currentDir, entry.name);
-      if (entry.isDirectory()) {
-        await walk(fullPath);
-      } else if (entry.name.endsWith('.json')) {
-        files.push(fullPath);
-      }
-    }
+    const perEntry = await Promise.all(
+      entries.map(async (entry) => {
+        const fullPath = join(currentDir, entry.name);
+        if (entry.isDirectory()) {
+          return walk(fullPath);
+        }
+        return entry.name.endsWith('.json') ? [fullPath] : [];
+      }),
+    );
+    return perEntry.flat();
   }
 
-  await walk(dir);
-  return files;
+  return walk(dir);
+}
+
+/** Load content type mapping — either from file or use object directly. */
+async function loadContentTypeMapping(
+  mapping: string | ContentTypeMapping,
+): Promise<void> {
+  if (typeof mapping === 'string') {
+    if (!existsSync(mapping)) {
+      throw new Error('Mapping file not found: ' + mapping);
+    }
+    await loadMapping(mapping);
+  } else {
+    contentTypeMapping = mapping;
+  }
+}
+
+/** Load enabled endpoints — either from file or use object directly. */
+async function loadEnabledEndpointsConfig(
+  endpoints: string | EnabledEndpoints,
+): Promise<void> {
+  if (typeof endpoints === 'string') {
+    if (!existsSync(endpoints)) {
+      throw new Error('Enabled endpoints file not found: ' + endpoints);
+    }
+    await loadEnabledEndpoints(endpoints);
+  } else {
+    enabledEndpointsList = normalizeEnabledEndpoints(endpoints);
+  }
+}
+
+/**
+ * Generate + write one contract file. Returns the method count, or `null`
+ * when the endpoint produced no methods after filtering (nothing written).
+ */
+async function emitContractFile(
+  collJson: CollectionJson,
+  dirPath: string,
+  outputDir: string,
+  importResolver: ResolveImportsHook,
+): Promise<number | null> {
+  // Get endpoint config to check for CRUD mode
+  const endpointConfig = getEndpointConfig(collJson.href);
+  const imports = importResolver(dirPath, outputDir);
+
+  let code: string;
+  let methodCount: number;
+
+  if (endpointConfig?.crud) {
+    // Generate CRUD contract using crud() helper
+    code = generateCrudContractFile(collJson, dirPath, imports, endpointConfig);
+    methodCount = 4; // get, post, put, delete
+    console.log('  + ' + dirPath + '.ts (CRUD: get, post, put, delete)');
+  } else {
+    // Generate standard contract with individual methods
+    const methods = processCollection(collJson);
+
+    // Skip endpoints with no methods (e.g., method filter excluded all)
+    if (methods.length === 0) {
+      console.log(
+        '  - ' + dirPath + '.ts (skipped: no methods after filtering)',
+      );
+      return null;
+    }
+
+    code = generateContractFile(collJson, methods, dirPath, imports);
+    methodCount = methods.length;
+    console.log('  + ' + dirPath + '.ts (' + methods.length + ' methods)');
+  }
+
+  const outputPath = join(outputDir, dirPath + '.ts');
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, code, 'utf-8');
+  return methodCount;
 }
 
 /**
@@ -761,26 +834,10 @@ export async function generateContracts(
   }
 
   // Load content type mapping - either from file or use object directly
-  if (typeof options.contentTypeMapping === 'string') {
-    if (!existsSync(options.contentTypeMapping)) {
-      throw new Error('Mapping file not found: ' + options.contentTypeMapping);
-    }
-    await loadMapping(options.contentTypeMapping);
-  } else {
-    contentTypeMapping = options.contentTypeMapping;
-  }
+  await loadContentTypeMapping(options.contentTypeMapping);
 
   // Load enabled endpoints - either from file or use object directly
-  if (typeof options.enabledEndpoints === 'string') {
-    if (!existsSync(options.enabledEndpoints)) {
-      throw new Error(
-        'Enabled endpoints file not found: ' + options.enabledEndpoints,
-      );
-    }
-    await loadEnabledEndpoints(options.enabledEndpoints);
-  } else {
-    enabledEndpointsList = normalizeEnabledEndpoints(options.enabledEndpoints);
-  }
+  await loadEnabledEndpointsConfig(options.enabledEndpoints);
   console.log('Enabled patterns: ' + enabledEndpointsList.length);
 
   if (!existsSync(collectionsDir)) {
@@ -806,10 +863,22 @@ export async function generateContracts(
   }> = [];
   let totalMethods = 0;
 
-  for (const jsonFile of jsonFiles) {
+  const readResults: Array<
+    { jsonFile: string; content: string } | { jsonFile: string; error: unknown }
+  > = await Promise.all(
+    jsonFiles.map((jsonFile) =>
+      readFile(jsonFile, 'utf-8').then(
+        (content) => ({ jsonFile, content }),
+        (error: unknown) => ({ jsonFile, error }),
+      ),
+    ),
+  );
+
+  for (const result of readResults) {
+    const { jsonFile } = result;
     try {
-      const content = await readFile(jsonFile, 'utf-8');
-      const coll: CollectionJson = JSON.parse(content);
+      if ('error' in result) throw result.error;
+      const coll: CollectionJson = JSON.parse(result.content);
 
       const endpointInfo = {
         href: coll.href,
@@ -828,41 +897,15 @@ export async function generateContracts(
       const dirPath = dirname(relPath);
       const contractName = dirPath.split('/').pop() || 'contract';
 
-      // Get endpoint config to check for CRUD mode
-      const endpointConfig = getEndpointConfig(coll.href);
-      const imports = importResolver(dirPath, outputDir);
-
-      let code: string;
-      let methodCount: number;
-
-      if (endpointConfig?.crud) {
-        // Generate CRUD contract using crud() helper
-        code = generateCrudContractFile(coll, dirPath, imports, endpointConfig);
-        methodCount = 4; // get, post, put, delete
-        console.log('  + ' + dirPath + '.ts (CRUD: get, post, put, delete)');
-      } else {
-        // Generate standard contract with individual methods
-        const methods = processCollection(coll);
-
-        // Skip endpoints with no methods (e.g., method filter excluded all)
-        if (methods.length === 0) {
-          console.log(
-            '  - ' + dirPath + '.ts (skipped: no methods after filtering)',
-          );
-          continue;
-        }
-
-        code = generateContractFile(coll, methods, dirPath, imports);
-        methodCount = methods.length;
-        console.log('  + ' + dirPath + '.ts (' + methods.length + ' methods)');
-      }
+      const methodCount = await emitContractFile(
+        coll,
+        dirPath,
+        outputDir,
+        importResolver,
+      );
+      if (methodCount === null) continue;
 
       totalMethods += methodCount;
-
-      const outputPath = join(outputDir, dirPath + '.ts');
-      await mkdir(dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, code, 'utf-8');
-
       generatedContracts.push({ relativePath: dirPath, contractName });
     } catch (err) {
       console.error('  Error: ' + jsonFile + ':', err);
@@ -955,26 +998,10 @@ export async function generateContractsFromDiscovery(
   console.log('Found ' + collections.length + ' collections in discovery\n');
 
   // Load content type mapping
-  if (typeof options.contentTypeMapping === 'string') {
-    if (!existsSync(options.contentTypeMapping)) {
-      throw new Error('Mapping file not found: ' + options.contentTypeMapping);
-    }
-    await loadMapping(options.contentTypeMapping);
-  } else {
-    contentTypeMapping = options.contentTypeMapping;
-  }
+  await loadContentTypeMapping(options.contentTypeMapping);
 
   // Load enabled endpoints
-  if (typeof options.enabledEndpoints === 'string') {
-    if (!existsSync(options.enabledEndpoints)) {
-      throw new Error(
-        'Enabled endpoints file not found: ' + options.enabledEndpoints,
-      );
-    }
-    await loadEnabledEndpoints(options.enabledEndpoints);
-  } else {
-    enabledEndpointsList = normalizeEnabledEndpoints(options.enabledEndpoints);
-  }
+  await loadEnabledEndpointsConfig(options.enabledEndpoints);
   console.log('Enabled patterns: ' + enabledEndpointsList.length);
 
   const generatedContracts: Array<{
@@ -1020,46 +1047,15 @@ export async function generateContractsFromDiscovery(
     const dirPath = coll.href.replace(/^\//, '');
     const contractName = dirPath.split('/').pop() || 'contract';
 
-    // Get endpoint config to check for CRUD mode
-    const endpointConfig = getEndpointConfig(coll.href);
-    const imports = importResolver(dirPath, outputDir);
-
-    let code: string;
-    let methodCount: number;
-
-    if (endpointConfig?.crud) {
-      // Generate CRUD contract using crud() helper
-      code = generateCrudContractFile(
-        collJson,
-        dirPath,
-        imports,
-        endpointConfig,
-      );
-      methodCount = 4; // get, post, put, delete
-      console.log('  + ' + dirPath + '.ts (CRUD: get, post, put, delete)');
-    } else {
-      // Generate standard contract with individual methods
-      const methods = processCollection(collJson);
-
-      // Skip endpoints with no methods (e.g., method filter excluded all)
-      if (methods.length === 0) {
-        console.log(
-          '  - ' + dirPath + '.ts (skipped: no methods after filtering)',
-        );
-        continue;
-      }
-
-      code = generateContractFile(collJson, methods, dirPath, imports);
-      methodCount = methods.length;
-      console.log('  + ' + dirPath + '.ts (' + methods.length + ' methods)');
-    }
+    const methodCount = await emitContractFile(
+      collJson,
+      dirPath,
+      outputDir,
+      importResolver,
+    );
+    if (methodCount === null) continue;
 
     totalMethods += methodCount;
-
-    const outputPath = join(outputDir, dirPath + '.ts');
-    await mkdir(dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, code, 'utf-8');
-
     generatedContracts.push({ relativePath: dirPath, contractName });
   }
 

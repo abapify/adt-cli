@@ -1,6 +1,7 @@
 import { getGlobalContext } from '../../base/global-context';
 import type { AdkContext } from '../../base/context';
 import { toText } from '../../base/fetch-utils';
+import { asText } from '../../base/text';
 import {
   loadCdsMetadataAndSource,
   type AdkCrudSourceContract,
@@ -29,7 +30,7 @@ export abstract class AdkCrudSourceObject<TMetadata = Record<string, unknown>> {
     this.name = (
       typeof nameOrData === 'string'
         ? nameOrData
-        : String(nameOrData.name ?? '')
+        : asText(nameOrData.name ?? '')
     ).toUpperCase();
   }
 
@@ -98,11 +99,13 @@ export abstract class AdkCrudSourceObject<TMetadata = Record<string, unknown>> {
 
   // ─── Lock / Unlock ─────────────────────────────────────────────────────────
 
-  async lock(transport?: string): Promise<{ handle: string }> {
+  lock(transport?: string): Promise<{ handle: string }> {
     const lockService = this.ctx.lockService;
     if (!lockService) {
-      throw new Error(
-        'Lock not available: no lockService in context. Did you call initializeAdk()?',
+      return Promise.reject(
+        new Error(
+          'Lock not available: no lockService in context. Did you call initializeAdk()?',
+        ),
       );
     }
     return lockService.lock(this.objectUri, {

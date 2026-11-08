@@ -110,8 +110,8 @@ const authPlugin: AuthPlugin = {
    * @param _session - The existing session (unused)
    * @returns Always null, indicating refresh is not supported
    */
-  async refresh(_session: AuthSession): Promise<AuthPluginResult | null> {
-    return null;
+  refresh(_session: AuthSession): Promise<AuthPluginResult | null> {
+    return Promise.resolve(null);
   },
 };
 

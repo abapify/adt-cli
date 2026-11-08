@@ -81,111 +81,151 @@ export async function applyPlan(
   };
 
   for (const group of plan.groups) {
-    const tierResult: ApplyTierResult = {
-      tier: group.tier,
-      size: group.entries.length,
-      saved: 0,
-      failed: 0,
-      unchanged: 0,
-      activated: 0,
-      errors: [],
-    };
+    const tierResult = initTierResult(group);
     options.onTierStart?.(group.tier, group.entries.length);
 
     if (options.dryRun) {
       // Pretend everything succeeded for reporting only.
-      for (const entry of group.entries) {
-        options.onObject?.(entry.object, 'dry-run');
-        tierResult.saved++;
-      }
-      result.tiers.push(tierResult);
-      result.totals.saved += tierResult.saved;
+      dryRunTier(group, tierResult, options);
+      recordTier(result, tierResult);
       continue;
     }
 
     // Optional: release only persisted stale locks. SAP cannot disclose a
     // lost handle by issuing another LOCK.
     if (options.unlock && ctx.lockService) {
-      for (const entry of group.entries) {
-        try {
-          await ctx.lockService.forceUnlock(entry.object.objectUri);
-        } catch {
-          /* no persisted handle or server rejected it — preflight reports it */
-        }
-      }
+      await releasePersistedLocks(group, ctx.lockService);
     }
 
     // Pre-flight: batch-lock to surface conflicts BEFORE we start mutating.
-    // We release immediately afterwards because ADK's save() will re-lock
-    // per object within the same security session (CSRF survives unlock).
-    let preflightFailed = false;
-    if (ctx.lockService) {
-      const targets: BatchLockTarget[] = group.entries.map((e) => ({
-        objectUri: e.object.objectUri,
-        options: {
-          transport: options.transport,
-          objectName: e.object.name,
-          objectType: e.object.type,
-        },
-      }));
-      const batch = createBatchLockSession(ctx.lockService, targets);
-      try {
-        await batch.begin();
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        tierResult.errors.push({
-          name: '(batch)',
-          type: group.tier,
-          error: `batch lock pre-flight failed: ${msg}`,
-        });
-        tierResult.failed = group.entries.length;
-        preflightFailed = true;
-      } finally {
-        await batch.release();
-      }
-    }
-
-    if (preflightFailed) {
-      result.tiers.push(tierResult);
-      result.totals.failed += tierResult.failed;
+    if (await preflightTier(group, options, ctx.lockService, tierResult)) {
+      recordTier(result, tierResult);
       result.aborted = true;
       // Stop applying further tiers — the caller sees a partial-apply state.
       break;
     }
 
-    // Build the tier's AdkObjectSet and deploy.
-    const set = new AdkObjectSet(ctx);
-    for (const entry of group.entries) set.add(entry.object);
-
-    const deployResult = await set.deploy({
-      transport: options.transport,
-      activate,
-      mode: 'upsert',
-      onProgress: (_processed, _total, current) => {
-        options.onObject?.(current, 'saved');
-      },
-    });
-
-    tierResult.saved = deployResult.save.success;
-    tierResult.failed = deployResult.save.failed;
-    tierResult.unchanged = deployResult.save.unchanged;
-    tierResult.activated = deployResult.activation?.success ?? 0;
-    for (const r of deployResult.save.results) {
-      if (!r.success && !r.unchanged) {
-        tierResult.errors.push({
-          name: r.object.name,
-          type: r.object.type,
-          error: r.error ?? 'unknown error',
-        });
-      }
-    }
-
-    result.tiers.push(tierResult);
-    result.totals.saved += tierResult.saved;
-    result.totals.failed += tierResult.failed;
-    result.totals.unchanged += tierResult.unchanged;
-    result.totals.activated += tierResult.activated;
+    await deployTier(group, ctx, options, activate, tierResult);
+    recordTier(result, tierResult);
   }
 
   return result;
+}
+
+type PlanGroup = ChangePlan['groups'][number];
+
+function initTierResult(group: PlanGroup): ApplyTierResult {
+  return {
+    tier: group.tier,
+    size: group.entries.length,
+    saved: 0,
+    failed: 0,
+    unchanged: 0,
+    activated: 0,
+    errors: [],
+  };
+}
+
+function recordTier(result: ApplyResult, tierResult: ApplyTierResult): void {
+  result.tiers.push(tierResult);
+  result.totals.saved += tierResult.saved;
+  result.totals.failed += tierResult.failed;
+  result.totals.unchanged += tierResult.unchanged;
+  result.totals.activated += tierResult.activated;
+}
+
+function dryRunTier(
+  group: PlanGroup,
+  tierResult: ApplyTierResult,
+  options: ApplyOptions,
+): void {
+  for (const entry of group.entries) {
+    options.onObject?.(entry.object, 'dry-run');
+    tierResult.saved++;
+  }
+}
+
+async function releasePersistedLocks(
+  group: PlanGroup,
+  lockService: NonNullable<AdkContext['lockService']>,
+): Promise<void> {
+  for (const entry of group.entries) {
+    try {
+      await lockService.forceUnlock(entry.object.objectUri);
+    } catch {
+      /* no persisted handle or server rejected it — preflight reports it */
+    }
+  }
+}
+
+/** Batch-lock the tier to surface conflicts BEFORE we start mutating.
+ *  Returns true when the pre-flight failed. We release the batch session
+ *  immediately afterwards because ADK's save() will re-lock per object
+ *  within the same security session (CSRF survives unlock). */
+async function preflightTier(
+  group: PlanGroup,
+  options: ApplyOptions,
+  lockService: AdkContext['lockService'],
+  tierResult: ApplyTierResult,
+): Promise<boolean> {
+  if (!lockService) return false;
+  const targets: BatchLockTarget[] = group.entries.map((e) => ({
+    objectUri: e.object.objectUri,
+    options: {
+      transport: options.transport,
+      objectName: e.object.name,
+      objectType: e.object.type,
+    },
+  }));
+  const batch = createBatchLockSession(lockService, targets);
+  try {
+    await batch.begin();
+    return false;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    tierResult.errors.push({
+      name: '(batch)',
+      type: group.tier,
+      error: `batch lock pre-flight failed: ${msg}`,
+    });
+    tierResult.failed = group.entries.length;
+    return true;
+  } finally {
+    await batch.release();
+  }
+}
+
+/** Build the tier's AdkObjectSet and deploy it. */
+async function deployTier(
+  group: PlanGroup,
+  ctx: AdkContext,
+  options: ApplyOptions,
+  activate: boolean,
+  tierResult: ApplyTierResult,
+): Promise<void> {
+  const set = new AdkObjectSet(ctx);
+  for (const entry of group.entries) set.add(entry.object);
+
+  const deployResult = await set.deploy({
+    transport: options.transport,
+    activate,
+    mode: 'upsert',
+    onProgress: (_processed, _total, current) => {
+      options.onObject?.(current, 'saved');
+    },
+  });
+
+  tierResult.saved = deployResult.save.success;
+  tierResult.failed = deployResult.save.failed;
+  tierResult.unchanged = deployResult.save.unchanged;
+  tierResult.activated = deployResult.activation?.success ?? 0;
+  for (const r of deployResult.save.results) {
+    if (!r.success && !r.unchanged) {
+      tierResult.errors.push({
+        name: r.object.name,
+        type: r.object.type,
+        error: r.error ?? 'unknown error',
+      });
+    }
+  }
 }

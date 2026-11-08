@@ -24,28 +24,26 @@ declare global {
 }
 
 function state(): FakePluginState {
-  if (!globalThis.__FAKE_PLUGIN) {
-    globalThis.__FAKE_PLUGIN = {
-      authenticateCalls: 0,
-      refreshCalls: 0,
-      hasRefresh: true,
-    };
-  }
+  globalThis.__FAKE_PLUGIN ??= {
+    authenticateCalls: 0,
+    refreshCalls: 0,
+    hasRefresh: true,
+  };
   return globalThis.__FAKE_PLUGIN;
 }
 
 const plugin: AuthPlugin = {
-  async authenticate(_options: AuthPluginOptions): Promise<AuthPluginResult> {
+  authenticate(_options: AuthPluginOptions): Promise<AuthPluginResult> {
     const s = state();
     s.authenticateCalls++;
-    if (s.authenticateResult) return s.authenticateResult;
-    return {
+    if (s.authenticateResult) return Promise.resolve(s.authenticateResult);
+    return Promise.resolve({
       method: 'cookie',
       credentials: {
         cookies: `SAP_SESSIONID=fake-${s.authenticateCalls}`,
-        expiresAt: new Date(Date.now() + 3600_000),
+        expiresAt: new Date(Date.now() + 3_600_000),
       },
-    };
+    });
   },
 };
 
@@ -55,16 +53,17 @@ Object.defineProperty(plugin, 'refresh', {
   get() {
     const s = state();
     if (!s.hasRefresh) return undefined;
-    return async (_session: AuthSession): Promise<AuthPluginResult | null> => {
+    return (_session: AuthSession): Promise<AuthPluginResult | null> => {
       s.refreshCalls++;
-      if (s.refreshResult !== undefined) return s.refreshResult;
-      return {
+      if (s.refreshResult !== undefined)
+        return Promise.resolve(s.refreshResult);
+      return Promise.resolve({
         method: 'cookie',
         credentials: {
           cookies: `SAP_SESSIONID=refreshed-${s.refreshCalls}`,
-          expiresAt: new Date(Date.now() + 3600_000),
+          expiresAt: new Date(Date.now() + 3_600_000),
         },
-      };
+      });
     };
   },
 });

@@ -33,6 +33,9 @@ import { AdkClass } from '@abapify/adk';
 import { resolveLockCorrelation } from '@abapify/adt-locks';
 import { deleteWithReleasedLock } from '../object/builder';
 
+type AdtClientV2 = Awaited<ReturnType<typeof getAdtClientV2>>;
+type ProgressReporter = ReturnType<typeof createProgressReporter>;
+
 function buildClassTemplate(className: string, body: string): string {
   const lower = className.toLowerCase();
   return `CLASS ${lower} DEFINITION PUBLIC FINAL CREATE PUBLIC.
@@ -73,6 +76,106 @@ async function readSource(fileArg: string): Promise<string> {
   return readFileSync(fileArg, 'utf8');
 }
 
+/**
+ * Create the temp class. A class left over from a previous failed run
+ * ("already exists" / HTTP 422) is reused instead of failing.
+ */
+async function createTempClass(
+  className: string,
+  options: { package: string; transport?: string },
+): Promise<AdkClass> {
+  try {
+    return await AdkClass.create(
+      className,
+      'Temporary ADT CLI runner class',
+      options.package,
+      options.transport ? { transport: options.transport } : undefined,
+    );
+  } catch (err) {
+    // Class may already exist from a previous failed run — try to get it
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('already exists') || msg.includes('422')) {
+      return AdkClass.get(className);
+    }
+    throw err;
+  }
+}
+
+/** Delete the temp class (best effort) after the run. */
+async function cleanupTempClass(
+  cls: AdkClass,
+  className: string,
+  options: { transport?: string },
+  progress: ProgressReporter,
+): Promise<void> {
+  progress.step(`🗑️  Cleaning up ${className}...`);
+  try {
+    await deleteWithReleasedLock(
+      cls,
+      (deleteOptions) => AdkClass.delete(className, deleteOptions),
+      options.transport,
+    );
+    progress.done();
+  } catch {
+    progress.done(`⚠️  Cleanup failed (class ${className} may remain)`);
+  }
+}
+
+type RunOutcome = { output: string; runError: Error | undefined };
+
+/**
+ * Lock, write, activate and execute the temp class. Failures are captured
+ * in `runError`; the temp class is always cleaned up afterwards.
+ */
+async function runClassSource(
+  client: AdtClientV2,
+  cls: AdkClass,
+  classSource: string,
+  className: string,
+  options: { transport?: string },
+  progress: ProgressReporter,
+): Promise<RunOutcome> {
+  let output = '';
+  let runError: Error | undefined;
+
+  try {
+    // Step 3: Lock + write source
+    progress.step(`🔒 Locking ${className}...`);
+    const lockHandle = await cls.lock(options.transport);
+    progress.done();
+
+    try {
+      progress.step(`💾 Writing source...`);
+      await cls.saveMainSource(classSource, {
+        lockHandle: lockHandle.handle,
+        transport: resolveLockCorrelation(lockHandle, options.transport),
+      });
+      progress.done();
+    } finally {
+      await cls.unlock();
+    }
+
+    // Step 4: Activate
+    progress.step(`⚡ Activating ${className}...`);
+    await cls.activate();
+    progress.done();
+
+    // Step 5: Execute
+    progress.step(`🚀 Executing ${className}...`);
+    const result = await client.adt.oo.classrun.post(className);
+    output = typeof result === 'string' ? result : String(result ?? '');
+    progress.done();
+  } catch (err) {
+    runError = err instanceof Error ? err : new Error(String(err));
+    progress.done(`❌ ${runError.message}`);
+  } finally {
+    // Step 6: Always delete the temp class
+    await cleanupTempClass(cls, className, options, progress);
+  }
+
+  return { output, runError };
+}
+
 export const abapRunCommand = new Command('run')
   .description('Execute ABAP code from a file or stdin')
   .argument('[file]', 'Source file path (use - for stdin)', '-')
@@ -108,72 +211,17 @@ export const abapRunCommand = new Command('run')
 
       // Step 2: Create temp class
       progress.step(`📝 Creating temp class ${className}...`);
-      let cls: AdkClass;
-      try {
-        cls = await AdkClass.create(
-          className,
-          'Temporary ADT CLI runner class',
-          options.package,
-          options.transport ? { transport: options.transport } : undefined,
-        );
-      } catch (err) {
-        // Class may already exist from a previous failed run — try to get it
-        const msg = err instanceof Error ? err.message : String(err);
-        if (msg.includes('already exists') || msg.includes('422')) {
-          cls = await AdkClass.get(className);
-        } else {
-          throw err;
-        }
-      }
+      const cls = await createTempClass(className, options);
       progress.done();
 
-      let output = '';
-      let runError: Error | undefined;
-
-      try {
-        // Step 3: Lock + write source
-        progress.step(`🔒 Locking ${className}...`);
-        const lockHandle = await cls.lock(options.transport);
-        progress.done();
-
-        try {
-          progress.step(`💾 Writing source...`);
-          await cls.saveMainSource(classSource, {
-            lockHandle: lockHandle.handle,
-            transport: resolveLockCorrelation(lockHandle, options.transport),
-          });
-          progress.done();
-        } finally {
-          await cls.unlock();
-        }
-
-        // Step 4: Activate
-        progress.step(`⚡ Activating ${className}...`);
-        await cls.activate();
-        progress.done();
-
-        // Step 5: Execute
-        progress.step(`🚀 Executing ${className}...`);
-        const result = await client.adt.oo.classrun.post(className);
-        output = typeof result === 'string' ? result : String(result ?? '');
-        progress.done();
-      } catch (err) {
-        runError = err instanceof Error ? err : new Error(String(err));
-        progress.done(`❌ ${runError.message}`);
-      } finally {
-        // Step 6: Always delete the temp class
-        progress.step(`🗑️  Cleaning up ${className}...`);
-        try {
-          await deleteWithReleasedLock(
-            cls,
-            (deleteOptions) => AdkClass.delete(className, deleteOptions),
-            options.transport,
-          );
-          progress.done();
-        } catch {
-          progress.done(`⚠️  Cleanup failed (class ${className} may remain)`);
-        }
-      }
+      const { output, runError } = await runClassSource(
+        client,
+        cls,
+        classSource,
+        className,
+        options,
+        progress,
+      );
 
       if (runError) {
         console.error('❌ Execution failed:', runError.message);

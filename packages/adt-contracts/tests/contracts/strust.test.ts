@@ -2,9 +2,14 @@
  * System Security / STRUST Contract Scenarios
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { atomFeed } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { psesContract } from '../../src/adt/system/security/pses';
 
 class StrustScenario extends ContractScenario {
@@ -71,4 +76,13 @@ class StrustScenario extends ContractScenario {
   ];
 }
 
-runScenario(new StrustScenario());
+describe('System Security / STRUST Contract Scenarios', () => {
+  describe('System Security / STRUST', () => {
+    const scenario = new StrustScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

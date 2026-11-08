@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["es2022", "es2023.array"],
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,

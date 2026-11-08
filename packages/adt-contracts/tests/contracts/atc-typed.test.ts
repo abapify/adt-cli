@@ -5,10 +5,11 @@
  * If this file compiles, type inference is working correctly!
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import {
   TypedContractScenario,
-  runTypedScenario,
+  checkTypedScenario,
   expect,
   type ExtractRequest,
 } from './base/typed-scenario';
@@ -119,8 +120,13 @@ class AtcWorklistGetScenario extends TypedContractScenario<WorklistGetContract> 
   }
 }
 
-// Run the typed scenario
-runTypedScenario(new AtcWorklistGetScenario());
+// Run the typed scenario with a literal it() so test discovery sees it
+describe('ATC Worklist GET - Typed', () => {
+  const scenario = new AtcWorklistGetScenario();
+  it('validates descriptor, request and fixture response', async () => {
+    await checkTypedScenario(scenario);
+  });
+});
 
 // =============================================================================
 // ATC Check Variant Form Template - Typed Contract Scenario
@@ -201,5 +207,10 @@ class AtcFormtemplateGetScenario extends TypedContractScenario<FormtemplateContr
   }
 }
 
-// Run the typed form template scenario
-runTypedScenario(new AtcFormtemplateGetScenario());
+// Run the typed form template scenario with a literal it() so test discovery sees it
+describe('ATC Check Variant Form Template GET - Typed', () => {
+  const scenario = new AtcFormtemplateGetScenario();
+  it('validates descriptor, request and fixture response', async () => {
+    await checkTypedScenario(scenario);
+  });
+});

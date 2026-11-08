@@ -89,9 +89,10 @@ async function buildMaterializedFiles(
         ...classification,
       };
     })
-    .sort((left, right) =>
-      left.path < right.path ? -1 : left.path > right.path ? 1 : 0,
-    );
+    .sort((left, right) => {
+      if (left.path < right.path) return -1;
+      return left.path > right.path ? 1 : 0;
+    });
 }
 
 export const abapgitFormatPlugin: FormatPlugin = {

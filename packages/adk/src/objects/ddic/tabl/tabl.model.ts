@@ -45,7 +45,7 @@ export class AdkTable extends AdkMainObject<typeof TableKind, TableXml> {
    * Returns the ABAP source definition (annotations + field definitions)
    */
   async getSource(): Promise<string> {
-    return this.lazy('source', async () => {
+    return this.lazy('source', () => {
       return this.ctx.client.adt.ddic.tables.source.main.get(this.name);
     });
   }
@@ -55,7 +55,7 @@ export class AdkTable extends AdkMainObject<typeof TableKind, TableXml> {
    * Returns XML from /sap/bc/adt/ddic/db/settings/{name}
    */
   async getSettings(): Promise<string> {
-    return this.lazy('settings', async () => {
+    return this.lazy('settings', () => {
       return this.ctx.client.adt.ddic.tablesettings.get(this.name);
     });
   }
@@ -142,7 +142,7 @@ export class AdkStructure extends AdkMainObject<
    * Returns the ABAP source definition (annotations + field definitions)
    */
   async getSource(): Promise<string> {
-    return this.lazy('source', async () => {
+    return this.lazy('source', () => {
       return this.ctx.client.adt.ddic.structures.source.main.get(this.name);
     });
   }

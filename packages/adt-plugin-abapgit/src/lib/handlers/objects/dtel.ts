@@ -33,6 +33,28 @@ const TYPEKIND_TO_REFTYPE: Record<string, string | undefined> = {
 };
 
 /**
+ * Map abapGit REFKIND/REFTYPE back to the ADT `typeKind` enum.
+ */
+function typeKindFromRef(
+  refKind: string,
+  refType: string,
+  dataType: string | undefined,
+): string {
+  if (refKind === 'D') {
+    return 'domain';
+  }
+  if (refKind === 'R') {
+    return refType === 'C' ? 'refToClifType' : 'refToDictionaryType';
+  }
+  return dataType ? 'predefinedAbapType' : 'domain';
+}
+
+/** Numeric DD04V field → number (empty/absent → 0). */
+function numOr0(value: unknown): number {
+  return value ? Number(value) : 0;
+}
+
+/**
  * Derive OUTPUTLEN from ABAP data type + length + decimals.
  *
  * The ADT REST API for data elements does not return OUTPUTLEN — SAP derives
@@ -181,16 +203,11 @@ export const dataElementHandler = createHandler(AdkDataElement, {
 
   fromAbapGit: ({ DD04V }) => {
     // Map REFKIND + REFTYPE to ADT typeKind enum
-    const refKind = DD04V?.REFKIND ?? '';
-    const refType = DD04V?.REFTYPE ?? '';
-    let typeKind: string;
-    if (refKind === 'D') {
-      typeKind = 'domain';
-    } else if (refKind === 'R') {
-      typeKind = refType === 'C' ? 'refToClifType' : 'refToDictionaryType';
-    } else {
-      typeKind = DD04V?.DATATYPE ? 'predefinedAbapType' : 'domain';
-    }
+    const typeKind = typeKindFromRef(
+      DD04V?.REFKIND ?? '',
+      DD04V?.REFTYPE ?? '',
+      DD04V?.DATATYPE,
+    );
 
     return {
       name: (DD04V?.ROLLNAME ?? '').toUpperCase(),
@@ -205,22 +222,22 @@ export const dataElementHandler = createHandler(AdkDataElement, {
         typeKind,
         typeName: DD04V?.DOMNAME || '',
         dataType: DD04V?.DATATYPE || '',
-        dataTypeLength: DD04V?.LENG ? Number(DD04V.LENG) : 0,
+        dataTypeLength: numOr0(DD04V?.LENG),
         dataTypeLengthEnabled: false,
-        dataTypeDecimals: DD04V?.DECIMALS ? Number(DD04V.DECIMALS) : 0,
+        dataTypeDecimals: numOr0(DD04V?.DECIMALS),
         dataTypeDecimalsEnabled: false,
         shortFieldLabel: DD04V?.SCRTEXT_S || '',
-        shortFieldLength: DD04V?.SCRLEN1 ? Number(DD04V.SCRLEN1) : 0,
-        shortFieldMaxLength: DD04V?.SCRLEN1 ? Number(DD04V.SCRLEN1) : 0,
+        shortFieldLength: numOr0(DD04V?.SCRLEN1),
+        shortFieldMaxLength: numOr0(DD04V?.SCRLEN1),
         mediumFieldLabel: DD04V?.SCRTEXT_M || '',
-        mediumFieldLength: DD04V?.SCRLEN2 ? Number(DD04V.SCRLEN2) : 0,
-        mediumFieldMaxLength: DD04V?.SCRLEN2 ? Number(DD04V.SCRLEN2) : 0,
+        mediumFieldLength: numOr0(DD04V?.SCRLEN2),
+        mediumFieldMaxLength: numOr0(DD04V?.SCRLEN2),
         longFieldLabel: DD04V?.SCRTEXT_L || '',
-        longFieldLength: DD04V?.SCRLEN3 ? Number(DD04V.SCRLEN3) : 0,
-        longFieldMaxLength: DD04V?.SCRLEN3 ? Number(DD04V.SCRLEN3) : 0,
+        longFieldLength: numOr0(DD04V?.SCRLEN3),
+        longFieldMaxLength: numOr0(DD04V?.SCRLEN3),
         headingFieldLabel: DD04V?.REPTEXT || '',
-        headingFieldLength: DD04V?.HEADLEN ? Number(DD04V.HEADLEN) : 0,
-        headingFieldMaxLength: DD04V?.HEADLEN ? Number(DD04V.HEADLEN) : 0,
+        headingFieldLength: numOr0(DD04V?.HEADLEN),
+        headingFieldMaxLength: numOr0(DD04V?.HEADLEN),
         searchHelp: '',
         searchHelpParameter: '',
         setGetParameter: '',

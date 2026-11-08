@@ -2,9 +2,14 @@
  * DDIC DDL / DCL source contract scenarios
  */
 
+import { describe, it } from 'vitest';
 import { fixtures } from '@abapify/adt-fixtures';
 import { ddlSource, dclSource } from '../../src/schemas';
-import { ContractScenario, runScenario, type ContractOperation } from './base';
+import {
+  ContractScenario,
+  checkContractOperation,
+  type ContractOperation,
+} from './base';
 import { ddlSourcesContract } from '../../src/adt/ddic/ddl';
 import { dclSourcesContract } from '../../src/adt/ddic/dcl';
 
@@ -97,5 +102,22 @@ class DclSourcesScenario extends ContractScenario {
   ];
 }
 
-runScenario(new DdlSourcesScenario());
-runScenario(new DclSourcesScenario());
+describe('DDIC DDL / DCL source contract scenarios', () => {
+  describe('DDIC DDL Sources', () => {
+    const scenario = new DdlSourcesScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+
+  describe('DDIC DCL Sources', () => {
+    const scenario = new DclSourcesScenario();
+    for (const op of scenario.operations) {
+      it(op.name, async () => {
+        await checkContractOperation(op);
+      });
+    }
+  });
+});

@@ -151,6 +151,28 @@ function executionAbortController(): {
   };
 }
 
+/** Parse the response body according to its content type. */
+function parseResponseBody(
+  contentType: string,
+  rawText: string,
+  serializableSchema: { parse: (xml: string) => unknown } | undefined,
+): unknown {
+  // Check for JSON content (including vendor-specific types like application/vnd.sap.*+json)
+  if (
+    contentType.includes('application/json') ||
+    contentType.includes('+json')
+  ) {
+    return JSON.parse(rawText);
+  }
+  if (contentType.includes('text/') || contentType.includes('xml')) {
+    // If serializable schema available (has parse method), use it
+    if (serializableSchema && contentType.includes('xml')) {
+      return serializableSchema.parse(rawText);
+    }
+  }
+  return rawText;
+}
+
 /**
  * Create ADT HTTP adapter with Basic or SAML Authentication and plugin support
  */
@@ -241,6 +263,272 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
     return resolved;
   }
 
+  /** Add query parameters, SAP client and language to the request URL. */
+  function appendQueryParams(url: URL, options: HttpRequestOptions): void {
+    if (options.query) {
+      Object.entries(options.query).forEach(([key, value]) => {
+        const values = Array.isArray(value) ? value : [value];
+        values.forEach((entry) => {
+          if (entry !== undefined) {
+            url.searchParams.append(key, String(entry));
+          }
+        });
+      });
+    }
+
+    // Add SAP client and language if provided
+    if (client) {
+      url.searchParams.append('sap-client', client);
+    }
+    if (language) {
+      url.searchParams.append('sap-language', language);
+    }
+  }
+
+  /** Body schema when it is Serializable (has a build method from adt-schemas). */
+  function bodySchemaOf(
+    options: HttpRequestOptions,
+  ): { build: (data: unknown) => string } | undefined {
+    if (options.bodySchema && typeof options.bodySchema === 'object') {
+      if (
+        'build' in options.bodySchema &&
+        typeof options.bodySchema.build === 'function'
+      ) {
+        return options.bodySchema as { build: (data: unknown) => string };
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Extract response schema from responses object (passed by speci).
+   * Schemas from adt-schemas have parse() method (Serializable interface).
+   */
+  function responseSchemaOf(
+    options: HttpRequestOptions,
+  ): { parse: (xml: string) => unknown } | undefined {
+    if (!options.responses) return undefined;
+    const schema200 = options.responses[200];
+    logger?.debug('Schema detection:', {
+      hasSchema: !!schema200,
+      type: typeof schema200,
+      keys:
+        schema200 && typeof schema200 === 'object'
+          ? Object.keys(schema200)
+          : [],
+    });
+    if (
+      schema200 &&
+      typeof schema200 === 'object' &&
+      'parse' in schema200 &&
+      typeof schema200.parse === 'function'
+    ) {
+      return schema200 as { parse: (xml: string) => unknown };
+    }
+    return undefined;
+  }
+
+  /** Debug-log the request shape before body serialization. */
+  function logPreBodyDebug(
+    options: HttpRequestOptions,
+    bodySerializableSchema: { build: (data: unknown) => string } | undefined,
+  ): void {
+    logger?.debug('Request URL: ' + options.url);
+    logger?.debug('Request method: ' + options.method);
+    logger?.debug(
+      'options.body: ' +
+        (options.body
+          ? JSON.stringify(options.body).substring(0, 500)
+          : 'UNDEFINED'),
+    );
+    logger?.debug(
+      'options.bodySchema: ' + (options.bodySchema ? 'present' : 'undefined'),
+    );
+    logger?.debug(
+      'bodySerializableSchema: ' +
+        (bodySerializableSchema ? 'present' : 'undefined'),
+    );
+  }
+
+  /** Build the request body using the schema if available. */
+  function buildRequestBody(
+    body: unknown,
+    bodySerializableSchema: { build: (data: unknown) => string } | undefined,
+  ): string | undefined {
+    logger?.debug('Body type: ' + typeof body);
+    logger?.debug(
+      'Body value: ' +
+        (body ? JSON.stringify(body).substring(0, 500) : 'UNDEFINED/NULL'),
+    );
+    if (body === undefined || body === null) return undefined;
+
+    if (typeof body === 'string') {
+      logger?.debug('Body: using raw string');
+      logger?.debug('Body content (first 200 chars):', body.substring(0, 200));
+      return body;
+    }
+
+    if (bodySerializableSchema) {
+      // Use Serializable schema's build method (from adt-schemas)
+      try {
+        logger?.debug(
+          'Calling bodySerializableSchema.build with body: ' +
+            JSON.stringify(body).substring(0, 300),
+        );
+        const requestBody = bodySerializableSchema.build(body);
+        logger?.debug('Body: serialized using Serializable.build()');
+        logger?.debug('Body output type: ' + typeof requestBody);
+        logger?.debug('Body output length: ' + requestBody?.length);
+        logger?.debug(
+          'Body content (first 500 chars): ' + requestBody?.substring(0, 500),
+        );
+        return requestBody;
+      } catch (buildError) {
+        logger?.error(
+          'Schema build() threw error: ' +
+            (buildError instanceof Error
+              ? buildError.message
+              : String(buildError)),
+        );
+        logger?.error(
+          'Stack: ' + (buildError instanceof Error ? buildError.stack : 'N/A'),
+        );
+        throw buildError;
+      }
+    }
+
+    logger?.debug('Body: serialized as JSON');
+    return JSON.stringify(body);
+  }
+
+  /** Build and throw the structured ADT error for a failed response. */
+  async function throwResponseError(
+    response: Response,
+    url: URL,
+    options: HttpRequestOptions,
+    headers: Record<string, string>,
+  ): Promise<never> {
+    const errorBody = await response.text();
+
+    // Create structured ADT error with parsed exception details
+    const adtError = createAdtError(
+      response.status,
+      response.statusText,
+      url.toString(),
+      options.method,
+      errorBody,
+    );
+
+    // For 412 Precondition Failed, include ETag diagnostic info in error
+    if (response.status === 412) {
+      const sentETag = headers['If-Match'] ?? '(none)';
+      const diag = `[If-Match: ${sentETag}, URL: ${url.pathname}]`;
+      logger?.error(
+        `ETag mismatch: ${options.method} ${url.pathname} sent If-Match: ${sentETag}`,
+      );
+      // Append diagnostic to the error message so it surfaces in error handlers
+      Object.defineProperty(adtError, 'message', {
+        value: `${adtError.message} ${diag}`,
+        writable: true,
+        configurable: true,
+      });
+    }
+
+    logger?.error(
+      `Request failed - ${adtError.message} (${options.method} ${url.toString()})`,
+    );
+    if (adtError.exception) {
+      logger?.error(
+        `ADT Exception: namespace=${adtError.exception.namespace}, type=${adtError.exception.type}`,
+      );
+    }
+    if (errorBody && !adtError.exception) {
+      // Log raw body only if we couldn't parse it as ADT exception
+      logger?.error(`Response body: ${errorBody}`);
+    }
+
+    // On 403, only clear session if it looks like an auth/CSRF issue.
+    // Lock conflicts ("currently editing") are NOT session problems —
+    // clearing the session would destroy the security session context
+    // and break all subsequent lock/unlock operations.
+    if (response.status === 403) {
+      const isLockConflict =
+        adtError.exception?.type === 'ExceptionResourceNoAccess' &&
+        (adtError.message.includes('currently editing') ||
+          adtError.message.includes('is being edited'));
+      if (!isLockConflict) {
+        sessionManager.clear();
+        logger?.warn('Session cleared due to 403 Forbidden response');
+      } else {
+        logger?.warn(
+          'Lock conflict (403) — session preserved (object locked by another session)',
+        );
+      }
+    }
+    throw adtError;
+  }
+
+  /**
+   * Handle a SAML redirect (expired session cookie): clear the session,
+   * optionally re-authenticate and retry through `retry`.
+   */
+  async function handleSamlRedirect<TResponse>(
+    retry: () => Promise<TResponse>,
+  ): Promise<TResponse> {
+    sessionManager.clear();
+    logger?.warn('SAML redirect detected - session expired');
+
+    // If callback provided, try to re-authenticate and retry the request
+    if (onSessionExpired) {
+      logger?.info('Attempting automatic re-authentication...');
+      try {
+        const newCookie = await onSessionExpired();
+        sessionManager.injectCookie(newCookie);
+        logger?.info('Re-authentication successful, retrying request...');
+        // Retry the request with new cookie
+        return await retry();
+      } catch (refreshError) {
+        logger?.error('Re-authentication failed');
+        throw new Error('Session expired - re-authentication failed', {
+          cause: refreshError,
+        });
+      }
+    }
+
+    throw new Error('Session expired - SAML re-authentication required');
+  }
+
+  /** Run response plugins in sequence; each may replace the parsed data. */
+  async function applyPlugins(
+    data: unknown,
+    rawText: string,
+    url: URL,
+    options: HttpRequestOptions,
+    contentType: string,
+  ): Promise<unknown> {
+    if (plugins.length === 0) return data;
+
+    let current = data;
+    const context: ResponseContext = {
+      rawText,
+      parsedData: current,
+      url: url.toString(),
+      method: options.method,
+      contentType,
+    };
+
+    // Run plugins in sequence
+    for (const plugin of plugins) {
+      const result = await plugin.process(context);
+      // Plugin can modify the data
+      if (result !== undefined) {
+        current = result;
+        context.parsedData = result;
+      }
+    }
+    return current;
+  }
+
   // Determine auth method
   const isSamlAuth = !!cookieHeader;
 
@@ -281,24 +569,7 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
       const url = resolveAdtUrl(options.url);
 
       // Add query parameters
-      if (options.query) {
-        Object.entries(options.query).forEach(([key, value]) => {
-          const values = Array.isArray(value) ? value : [value];
-          values.forEach((entry) => {
-            if (entry !== undefined) {
-              url.searchParams.append(key, String(entry));
-            }
-          });
-        });
-      }
-
-      // Add SAP client and language if provided
-      if (client) {
-        url.searchParams.append('sap-client', client);
-      }
-      if (language) {
-        url.searchParams.append('sap-language', language);
-      }
+      appendQueryParams(url, options);
 
       // For write operations, ensure CSRF token is initialized
       // Uses the 3-step Eclipse ADT security session flow:
@@ -331,108 +602,15 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
       }
 
       // Get schemas from speci's standard fields
-      // Check if bodySchema is Serializable (has build method from adt-schemas)
-      let bodySerializableSchema:
-        { build: (data: unknown) => string } | undefined;
-      if (options.bodySchema && typeof options.bodySchema === 'object') {
-        if (
-          'build' in options.bodySchema &&
-          typeof options.bodySchema.build === 'function'
-        ) {
-          bodySerializableSchema = options.bodySchema as {
-            build: (data: unknown) => string;
-          };
-        }
-      }
-
-      // Extract response schema from responses object (passed by speci)
-      // Schemas from adt-schemas have parse() method (Serializable interface)
-      let serializableSchema: { parse: (xml: string) => unknown } | undefined;
-      if (options.responses) {
-        const schema200 = options.responses[200];
-        logger?.debug('Schema detection:', {
-          hasSchema: !!schema200,
-          type: typeof schema200,
-          keys:
-            schema200 && typeof schema200 === 'object'
-              ? Object.keys(schema200)
-              : [],
-        });
-        if (
-          schema200 &&
-          typeof schema200 === 'object' &&
-          'parse' in schema200 &&
-          typeof schema200.parse === 'function'
-        ) {
-          serializableSchema = schema200 as { parse: (xml: string) => unknown };
-        }
-      }
+      const bodySerializableSchema = bodySchemaOf(options);
+      const serializableSchema = responseSchemaOf(options);
 
       // Build request body using schema if available
-      let requestBody: string | undefined;
-      const body = options.body;
-
-      logger?.debug('Request URL: ' + options.url);
-      logger?.debug('Request method: ' + options.method);
-      logger?.debug(
-        'options.body: ' +
-          (options.body
-            ? JSON.stringify(options.body).substring(0, 500)
-            : 'UNDEFINED'),
+      logPreBodyDebug(options, bodySerializableSchema);
+      const requestBody = buildRequestBody(
+        options.body,
+        bodySerializableSchema,
       );
-      logger?.debug(
-        'options.bodySchema: ' + (options.bodySchema ? 'present' : 'undefined'),
-      );
-      logger?.debug(
-        'bodySerializableSchema: ' +
-          (bodySerializableSchema ? 'present' : 'undefined'),
-      );
-      logger?.debug('Body type: ' + typeof body);
-      logger?.debug(
-        'Body value: ' +
-          (body ? JSON.stringify(body).substring(0, 500) : 'UNDEFINED/NULL'),
-      );
-      if (body !== undefined && body !== null) {
-        if (typeof body === 'string') {
-          requestBody = body;
-          logger?.debug('Body: using raw string');
-          logger?.debug(
-            'Body content (first 200 chars):',
-            requestBody.substring(0, 200),
-          );
-        } else if (bodySerializableSchema) {
-          // Use Serializable schema's build method (from adt-schemas)
-          try {
-            logger?.debug(
-              'Calling bodySerializableSchema.build with body: ' +
-                JSON.stringify(body).substring(0, 300),
-            );
-            requestBody = bodySerializableSchema.build(body);
-            logger?.debug('Body: serialized using Serializable.build()');
-            logger?.debug('Body output type: ' + typeof requestBody);
-            logger?.debug('Body output length: ' + requestBody?.length);
-            logger?.debug(
-              'Body content (first 500 chars): ' +
-                requestBody?.substring(0, 500),
-            );
-          } catch (buildError) {
-            logger?.error(
-              'Schema build() threw error: ' +
-                (buildError instanceof Error
-                  ? buildError.message
-                  : String(buildError)),
-            );
-            logger?.error(
-              'Stack: ' +
-                (buildError instanceof Error ? buildError.stack : 'N/A'),
-            );
-            throw buildError;
-          }
-        } else {
-          requestBody = JSON.stringify(body);
-          logger?.debug('Body: serialized as JSON');
-        }
-      }
 
       // Make request
       logger?.debug(`HTTP ${options.method} ${url.toString()}`);
@@ -468,64 +646,7 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
 
       // Check for HTTP errors
       if (!response.ok) {
-        const errorBody = await response.text();
-
-        // Create structured ADT error with parsed exception details
-        const adtError = createAdtError(
-          response.status,
-          response.statusText,
-          url.toString(),
-          options.method,
-          errorBody,
-        );
-
-        // For 412 Precondition Failed, include ETag diagnostic info in error
-        if (response.status === 412) {
-          const sentETag = headers['If-Match'] ?? '(none)';
-          const diag = `[If-Match: ${sentETag}, URL: ${url.pathname}]`;
-          logger?.error(
-            `ETag mismatch: ${options.method} ${url.pathname} sent If-Match: ${sentETag}`,
-          );
-          // Append diagnostic to the error message so it surfaces in error handlers
-          Object.defineProperty(adtError, 'message', {
-            value: `${adtError.message} ${diag}`,
-            writable: true,
-            configurable: true,
-          });
-        }
-
-        logger?.error(
-          `Request failed - ${adtError.message} (${options.method} ${url.toString()})`,
-        );
-        if (adtError.exception) {
-          logger?.error(
-            `ADT Exception: namespace=${adtError.exception.namespace}, type=${adtError.exception.type}`,
-          );
-        }
-        if (errorBody && !adtError.exception) {
-          // Log raw body only if we couldn't parse it as ADT exception
-          logger?.error(`Response body: ${errorBody}`);
-        }
-
-        // On 403, only clear session if it looks like an auth/CSRF issue.
-        // Lock conflicts ("currently editing") are NOT session problems —
-        // clearing the session would destroy the security session context
-        // and break all subsequent lock/unlock operations.
-        if (response.status === 403) {
-          const isLockConflict =
-            adtError.exception?.type === 'ExceptionResourceNoAccess' &&
-            (adtError.message.includes('currently editing') ||
-              adtError.message.includes('is being edited'));
-          if (!isLockConflict) {
-            sessionManager.clear();
-            logger?.warn('Session cleared due to 403 Forbidden response');
-          } else {
-            logger?.warn(
-              'Lock conflict (403) — session preserved (object locked by another session)',
-            );
-          }
-        }
-        throw adtError;
+        await throwResponseError(response, url, options, headers);
       }
 
       // Parse response
@@ -538,70 +659,19 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
         contentType.includes('text/html') &&
         rawText.includes('SAMLRequest')
       ) {
-        sessionManager.clear();
-        logger?.warn('SAML redirect detected - session expired');
-
-        // If callback provided, try to re-authenticate and retry the request
-        if (onSessionExpired) {
-          logger?.info('Attempting automatic re-authentication...');
-          try {
-            const newCookie = await onSessionExpired();
-            sessionManager.injectCookie(newCookie);
-            logger?.info('Re-authentication successful, retrying request...');
-            // Retry the request with new cookie
-            return this.request(options);
-          } catch (refreshError) {
-            logger?.error('Re-authentication failed');
-            throw new Error('Session expired - re-authentication failed', {
-              cause: refreshError,
-            });
-          }
-        }
-
-        throw new Error('Session expired - SAML re-authentication required');
+        return handleSamlRedirect(() => this.request<TResponse>(options));
       }
-      let data: any;
 
-      // Check for JSON content (including vendor-specific types like application/vnd.sap.*+json)
-      if (
-        contentType.includes('application/json') ||
-        contentType.includes('+json')
-      ) {
-        data = JSON.parse(rawText);
-      } else if (contentType.includes('text/') || contentType.includes('xml')) {
-        // If serializable schema available (has parse method), use it
-        if (serializableSchema && contentType.includes('xml')) {
-          data = serializableSchema.parse(rawText);
-        } else {
-          data = rawText;
-        }
-      } else {
-        data = rawText;
-      }
+      const data = parseResponseBody(contentType, rawText, serializableSchema);
 
       // Apply plugins if any
-      if (plugins.length > 0) {
-        const context: ResponseContext = {
-          rawText,
-          parsedData: data,
-          url: url.toString(),
-          method: options.method,
-          contentType,
-        };
-
-        // Run plugins in sequence
-        for (const plugin of plugins) {
-          const result = await plugin.process(context);
-          // Plugin can modify the data
-          if (result !== undefined) {
-            data = result;
-            context.parsedData = result;
-          }
-        }
-      }
-
-      // Return just the data (matching Speci's HttpAdapter interface)
-      return data as TResponse;
+      return (await applyPlugins(
+        data,
+        rawText,
+        url,
+        options,
+        contentType,
+      )) as TResponse;
     },
 
     clearETag(url?: string) {

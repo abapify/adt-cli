@@ -155,7 +155,7 @@ class Cursor {
     return {
       tokens: collected,
       startOffset: start,
-      endOffset: collected[collected.length - 1]?.endOffset ?? start,
+      endOffset: collected.at(-1)?.endOffset ?? start,
     };
   }
 
@@ -250,7 +250,7 @@ function parseClassOrImpl(
     return null;
   }
   const nameTok = tokens[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected class name after CLASS', nameTok ?? classTok);
     return null;
   }
@@ -284,6 +284,73 @@ function parseClassOrImpl(
   });
 }
 
+/** Map a `CREATE …` visibility token to the `Visibility` enum. */
+function visibilityFromCreate(next: IToken | undefined): Visibility {
+  if (next?.tokenType.name === 'Private') return 'private';
+  if (next?.tokenType.name === 'Protected') return 'protected';
+  return 'public';
+}
+
+/**
+ * Parse the class header modifiers (`FINAL`, `ABSTRACT`, `INHERITING FROM`,
+ * `CREATE …`, `FOR TESTING`, …) into their structured form.
+ */
+function parseClassModifiers(mods: IToken[]): {
+  isFinal: boolean;
+  isAbstract: boolean;
+  isForTesting: boolean;
+  createVisibility: Visibility;
+  superClass: string | undefined;
+} {
+  const result = {
+    isFinal: false,
+    isAbstract: false,
+    isForTesting: false,
+    createVisibility: 'public' as Visibility,
+    superClass: undefined as string | undefined,
+  };
+
+  for (let i = 0; i < mods.length; i++) {
+    const t = mods[i];
+    switch (t.tokenType.name) {
+      case 'Public':
+        break;
+      case 'Final':
+        result.isFinal = true;
+        break;
+      case 'Abstract':
+        result.isAbstract = true;
+        break;
+      case 'Inheriting': {
+        // INHERITING FROM <super>
+        const from = mods[i + 1];
+        const sup = mods[i + 2];
+        if (from?.tokenType.name === 'From' && sup) {
+          result.superClass = sup.image;
+          i += 2;
+        }
+        break;
+      }
+      case 'Create': {
+        result.createVisibility = visibilityFromCreate(mods[i + 1]);
+        i += 1;
+        break;
+      }
+      case 'For': {
+        // FOR TESTING [ RISK LEVEL <x> ] [ DURATION <y> ]
+        if (mods[i + 1]?.tokenType.name === 'Testing') {
+          result.isForTesting = true;
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  return result;
+}
+
 function parseClassDef(
   c: Cursor,
   headerTokens: IToken[],
@@ -313,53 +380,8 @@ function parseClassDef(
     };
   }
 
-  let isFinal = false;
-  let isAbstract = false;
-  let isForTesting = false;
-  let createVisibility: Visibility = 'public';
-  let superClass: string | undefined;
-
-  for (let i = 0; i < mods.length; i++) {
-    const t = mods[i];
-    switch (t.tokenType.name) {
-      case 'Public':
-        break;
-      case 'Final':
-        isFinal = true;
-        break;
-      case 'Abstract':
-        isAbstract = true;
-        break;
-      case 'Inheriting': {
-        // INHERITING FROM <super>
-        const from = mods[i + 1];
-        const sup = mods[i + 2];
-        if (from?.tokenType.name === 'From' && sup) {
-          superClass = sup.image;
-          i += 2;
-        }
-        break;
-      }
-      case 'Create': {
-        const v = mods[i + 1];
-        if (v?.tokenType.name === 'Private') createVisibility = 'private';
-        else if (v?.tokenType.name === 'Protected')
-          createVisibility = 'protected';
-        else createVisibility = 'public';
-        i += 1;
-        break;
-      }
-      case 'For': {
-        // FOR TESTING [ RISK LEVEL <x> ] [ DURATION <y> ]
-        if (mods[i + 1]?.tokenType.name === 'Testing') {
-          isForTesting = true;
-        }
-        break;
-      }
-      default:
-        break;
-    }
-  }
+  const { isFinal, isAbstract, isForTesting, createVisibility, superClass } =
+    parseClassModifiers(mods);
 
   const sections: Section[] = [];
   while (!c.eof() && !c.matches('EndClass')) {
@@ -497,7 +519,7 @@ function parseInterface(
     return null;
   }
   const nameTok = tokens[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected interface name after INTERFACE', nameTok ?? ifaceTok);
     return null;
   }
@@ -549,9 +571,7 @@ function parseSection(c: Cursor): Section | null {
     else break;
   }
   const end =
-    members.length > 0
-      ? members[members.length - 1].span.endOffset
-      : header.endOffset;
+    members.length > 0 ? members.at(-1)!.span.endOffset : header.endOffset;
   return {
     kind: 'Section',
     visibility,
@@ -631,6 +651,90 @@ function parseMember(c: Cursor): ClassMember | null {
 
 // --- METHODS / CLASS-METHODS ---
 
+/** Parameter-section state while scanning a method header. */
+type ParamSection =
+  'none' | 'importing' | 'exporting' | 'changing' | 'returning' | 'raising';
+
+interface MethodHeaderState {
+  isAbstract: boolean;
+  isFinal: boolean;
+  isRedefinition: boolean;
+  isForTesting: boolean;
+  section: ParamSection;
+}
+
+/**
+ * Table-driven scan of the method-header flag/section tokens. Each entry
+ * mutates `state` and returns the number of tokens consumed, or `null` when
+ * the token is not actually a header step (fall through to the parameter
+ * path — e.g. `FOR` not followed by `TESTING`).
+ */
+const METHOD_HEADER_STEPS: Record<
+  string,
+  (state: MethodHeaderState, toks: IToken[], i: number) => number | null
+> = {
+  Abstract: (s) => {
+    s.isAbstract = true;
+    return 1;
+  },
+  Final: (s) => {
+    s.isFinal = true;
+    return 1;
+  },
+  Redefinition: (s) => {
+    s.isRedefinition = true;
+    return 1;
+  },
+  For: (s, toks, i) => {
+    // FOR TESTING [ RISK LEVEL <x> ] [ DURATION <y> ]
+    if (toks[i + 1]?.tokenType.name === 'Testing') {
+      s.isForTesting = true;
+      return 2;
+    }
+    return null;
+  },
+  Importing: (s) => {
+    s.section = 'importing';
+    return 1;
+  },
+  Exporting: (s) => {
+    s.section = 'exporting';
+    return 1;
+  },
+  Changing: (s) => {
+    s.section = 'changing';
+    return 1;
+  },
+  Returning: (s) => {
+    s.section = 'returning';
+    return 1;
+  },
+  Raising: (s) => {
+    s.section = 'raising';
+    return 1;
+  },
+};
+
+/** Buckets collecting the parameters of each method-header section. */
+interface MethodParamBuckets {
+  importing: MethodParam[];
+  exporting: MethodParam[];
+  changing: MethodParam[];
+  returning?: MethodParam;
+}
+
+/** Route a consumed parameter into the collection matching its section. */
+function collectMethodParam(
+  section: ParamSection,
+  param: MethodParam,
+  out: MethodParamBuckets,
+): void {
+  if (section === 'importing') out.importing.push(param);
+  else if (section === 'exporting') out.exporting.push(param);
+  else if (section === 'changing') out.changing.push(param);
+  else if (section === 'returning') out.returning = param;
+}
+
 function parseMethodDecl(
   c: Cursor,
   abapDoc: string[] | undefined,
@@ -646,76 +750,33 @@ function parseMethodDecl(
     return null;
   }
 
-  const importing: MethodParam[] = [];
-  const exporting: MethodParam[] = [];
-  const changing: MethodParam[] = [];
-  let returning: MethodParam | undefined;
+  const out: MethodParamBuckets = {
+    importing: [],
+    exporting: [],
+    changing: [],
+  };
   const raising: string[] = [];
 
-  let isAbstract = false;
-  let isFinal = false;
-  let isRedefinition = false;
-  let isForTesting = false;
-
-  let section:
-    | 'none'
-    | 'importing'
-    | 'exporting'
-    | 'changing'
-    | 'returning'
-    | 'raising' = 'none';
+  const state: MethodHeaderState = {
+    isAbstract: false,
+    isFinal: false,
+    isRedefinition: false,
+    isForTesting: false,
+    section: 'none',
+  };
 
   let i = qual.lastIdx + 1;
   while (i < toks.length) {
     const t = toks[i];
     const tn = t.tokenType.name;
-    if (tn === 'Abstract') {
-      isAbstract = true;
-      i += 1;
-      continue;
-    }
-    if (tn === 'Final') {
-      isFinal = true;
-      i += 1;
-      continue;
-    }
-    if (tn === 'Redefinition') {
-      isRedefinition = true;
-      i += 1;
-      continue;
-    }
-    if (tn === 'For' && toks[i + 1]?.tokenType.name === 'Testing') {
-      isForTesting = true;
-      i += 2;
-      continue;
-    }
-    if (tn === 'Importing') {
-      section = 'importing';
-      i += 1;
-      continue;
-    }
-    if (tn === 'Exporting') {
-      section = 'exporting';
-      i += 1;
-      continue;
-    }
-    if (tn === 'Changing') {
-      section = 'changing';
-      i += 1;
-      continue;
-    }
-    if (tn === 'Returning') {
-      section = 'returning';
-      i += 1;
-      continue;
-    }
-    if (tn === 'Raising') {
-      section = 'raising';
-      i += 1;
+    const step = METHOD_HEADER_STEPS[tn];
+    const advance = step?.(state, toks, i) ?? null;
+    if (advance !== null) {
+      i += advance;
       continue;
     }
 
-    if (section === 'raising') {
+    if (state.section === 'raising') {
       if (tn === 'Identifier') {
         raising.push(t.image);
         i += 1;
@@ -725,7 +786,7 @@ function parseMethodDecl(
       continue;
     }
 
-    if (section === 'none') {
+    if (state.section === 'none') {
       i += 1;
       continue;
     }
@@ -734,10 +795,7 @@ function parseMethodDecl(
     const consumed = consumeMethodParam(toks, i, c);
     if (!consumed) break;
     const { param, nextIndex } = consumed;
-    if (section === 'importing') importing.push(param);
-    else if (section === 'exporting') exporting.push(param);
-    else if (section === 'changing') changing.push(param);
-    else if (section === 'returning') returning = param;
+    collectMethodParam(state.section, param, out);
     i = nextIndex;
   }
 
@@ -746,14 +804,14 @@ function parseMethodDecl(
     name: qual.name,
     abapDoc,
     isClassMethod,
-    isAbstract,
-    isFinal,
-    isRedefinition,
-    isForTesting,
-    importing,
-    exporting,
-    changing,
-    returning,
+    isAbstract: state.isAbstract,
+    isFinal: state.isFinal,
+    isRedefinition: state.isRedefinition,
+    isForTesting: state.isForTesting,
+    importing: out.importing,
+    exporting: out.exporting,
+    changing: out.changing,
+    returning: out.returning,
     raising,
     span: spanFromStmt(stmt, head),
   };
@@ -786,6 +844,44 @@ function consumeMethodParam(
   if (!isNameLike(nameTok)) return null;
   i += 1;
   return parseParamTail(toks, i, c, nameTok.image, isValue);
+}
+
+/**
+ * Greedy scan of a `DEFAULT` literal: take everything until the next keyword
+ * that would start a new section or the next parameter. Returns `null` when
+ * there is no token to start from.
+ */
+function consumeDefaultValue(
+  toks: IToken[],
+  start: number,
+  c: Cursor,
+): { value: string; nextIndex: number } | null {
+  let i = start;
+  const startTok = toks[i];
+  if (!startTok) return null;
+  const valStart = startTok.startOffset;
+  let valEnd = startTok.endOffset ?? startTok.startOffset;
+  while (i < toks.length) {
+    const nt = toks[i]?.tokenType.name;
+    if (
+      nt === 'Optional' ||
+      nt === 'Importing' ||
+      nt === 'Exporting' ||
+      nt === 'Changing' ||
+      nt === 'Returning' ||
+      nt === 'Raising'
+    ) {
+      break;
+    }
+    valEnd = toks[i].endOffset ?? valEnd;
+    i += 1;
+    if (i < toks.length && toks[i]?.tokenType.name === 'Identifier') {
+      // Likely start of next parameter — stop.
+      // Heuristic: two consecutive idents without a connective is a new param.
+      break;
+    }
+  }
+  return { value: c['sliceSource'](valStart, valEnd), nextIndex: i };
 }
 
 function parseParamTail(
@@ -824,32 +920,13 @@ function parseParamTail(
     if (tn === 'Default') {
       // Greedy: take everything until the next keyword that would start a
       // new section or the next parameter.
-      i += 1;
-      const startTok = toks[i];
-      if (!startTok) break;
-      const valStart = startTok.startOffset;
-      let valEnd = startTok.endOffset ?? startTok.startOffset;
-      while (i < toks.length) {
-        const nt = toks[i]?.tokenType.name;
-        if (
-          nt === 'Optional' ||
-          nt === 'Importing' ||
-          nt === 'Exporting' ||
-          nt === 'Changing' ||
-          nt === 'Returning' ||
-          nt === 'Raising'
-        ) {
-          break;
-        }
-        valEnd = toks[i].endOffset ?? valEnd;
+      const def = consumeDefaultValue(toks, i + 1, c);
+      if (!def) {
         i += 1;
-        if (i < toks.length && toks[i]?.tokenType.name === 'Identifier') {
-          // Likely start of next parameter — stop.
-          // Heuristic: two consecutive idents without a connective is a new param.
-          break;
-        }
+        break;
       }
-      defaultValue = c['sliceSource'](valStart, valEnd);
+      defaultValue = def.value;
+      i = def.nextIndex;
       continue;
     }
     // Unknown keyword → param ends here
@@ -896,7 +973,7 @@ function parseNameTypeStatement(
   const toks = stmt.tokens;
   // toks[0] = head keyword (already validated by the caller dispatching on it)
   const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report(`expected ${expectation.name}`, nameTok ?? head);
     return null;
   }
@@ -986,7 +1063,7 @@ function parseStructureTypes(
   const toks = stmt.tokens;
   // [Types, Colon, Begin, Of, Ident, Comma, <field>, Comma, <field>, Comma, End, Of, Ident]
   const nameTok = toks[4];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected struct name in BEGIN OF', nameTok ?? head);
     return null;
   }
@@ -1021,6 +1098,12 @@ function parseStructureTypes(
   };
 }
 
+/** Advance past tokens up to (but not including) the next Comma. */
+function skipToComma(toks: IToken[], i: number): number {
+  while (i < toks.length && toks[i].tokenType.name !== 'Comma') i += 1;
+  return i;
+}
+
 function parseFieldRun(toks: IToken[], out: StructureField[], c: Cursor): void {
   let i = 0;
   while (i < toks.length) {
@@ -1032,7 +1115,7 @@ function parseFieldRun(toks: IToken[], out: StructureField[], c: Cursor): void {
     const nameTok = toks[i];
     if (!isNameLike(nameTok)) {
       // Unexpected — skip to next comma to recover
-      while (i < toks.length && toks[i].tokenType.name !== 'Comma') i += 1;
+      i = skipToComma(toks, i);
       continue;
     }
     if (toks[i + 1]?.tokenType.name !== 'Type') {
@@ -1075,7 +1158,7 @@ function parseConstantDecl(
   const toks = stmt.tokens;
   // [Constants, Ident, Type, <type>, Value, <value tokens>]
   const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected constant name', nameTok ?? head);
     return null;
   }
@@ -1098,7 +1181,7 @@ function parseConstantDecl(
   const typeRes = consumeTypeRef(toks, 3, c, vIdx);
   if (!typeRes) return null;
   const valueStart = toks[vIdx + 1]?.startOffset ?? 0;
-  const valueEnd = toks[toks.length - 1]?.endOffset ?? valueStart;
+  const valueEnd = toks.at(-1)?.endOffset ?? valueStart;
   const value = c['sliceSource'](valueStart, valueEnd);
   return {
     kind: 'ConstantDecl',
@@ -1155,7 +1238,7 @@ function parseInterfaceStmt(
   const head = c.current();
   const stmt = c.collectStatement();
   const nameTok = stmt.tokens[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected interface name after INTERFACES', nameTok ?? head);
     return null;
   }
@@ -1177,7 +1260,7 @@ function parseAliasDecl(
   const stmt = c.collectStatement();
   const toks = stmt.tokens;
   const nameTok = toks[1];
-  if (!nameTok || nameTok.tokenType.name !== 'Identifier') {
+  if (nameTok?.tokenType.name !== 'Identifier') {
     c.report('expected alias name', nameTok ?? head);
     return null;
   }
@@ -1186,7 +1269,7 @@ function parseAliasDecl(
     return null;
   }
   const targetStart = toks[3]?.startOffset ?? 0;
-  const targetEnd = toks[toks.length - 1]?.endOffset ?? targetStart;
+  const targetEnd = toks.at(-1)?.endOffset ?? targetStart;
   const target = c['sliceSource'](targetStart, targetEnd);
   return {
     kind: 'AliasDecl',
@@ -1200,6 +1283,55 @@ function parseAliasDecl(
 // ============================================
 // Type-ref consumption
 // ============================================
+
+/**
+ * Simple name / qualified form: `<name> (=>|~) <name> [(=>|~) <name> …]`.
+ * `<name>` accepts any identifier-shaped token, including keywords
+ * that the grammar re-purposes as names in declaration positions
+ * (`DATA data TYPE i.`, `REF TO data`, `TYPE type`, etc.).
+ */
+function consumeNamedTypeRef(
+  toks: IToken[],
+  i: number,
+  limit: number,
+  c: Cursor,
+): { type: TypeRef; nextIndex: number } | null {
+  const startTok: IToken | undefined = toks[i];
+  if (!isNameLike(startTok)) {
+    // `startTok` is narrowed to `undefined` here (isNameLike rejected a
+    // present token would also land here; in that case the image is
+    // already captured in `toks[i]` so read from there).
+    const at = toks[i] ?? toks[i - 1] ?? toks[0];
+    const label = at ? at.image : '<eof>';
+    c.report(`expected type name, got "${label}"`, at);
+    return null;
+  }
+  let lastIdx = i;
+  const nameParts: string[] = [startTok.image];
+  let j = i + 1;
+  while (j < limit) {
+    const t = toks[j]?.tokenType.name;
+    if (t === 'FatArrow' || t === 'Tilde') {
+      const next = toks[j + 1];
+      if (!isNameLike(next)) break;
+      nameParts.push(t === 'FatArrow' ? '=>' : '~', next.image);
+      lastIdx = j + 1;
+      j += 2;
+      continue;
+    }
+    break;
+  }
+  const lastTok = toks[lastIdx];
+  const source = c['sliceSource'](
+    startTok.startOffset,
+    lastTok.endOffset ?? lastTok.startOffset,
+  );
+  const fullName = nameParts.join('');
+  const type: TypeRef = isBuiltinName(fullName)
+    ? { kind: 'BuiltinTypeRef', name: fullName, source }
+    : { kind: 'NamedTypeRef', name: fullName, source };
+  return { type, nextIndex: lastIdx + 1 };
+}
 
 function consumeTypeRef(
   toks: IToken[],
@@ -1242,45 +1374,7 @@ function consumeTypeRef(
     return consumeTableTypeRef(toks, i, c, limit, tableKind);
   }
 
-  // Simple name / qualified form: <name> (=>|~) <name> [(=>|~) <name> …]
-  // `<name>` accepts any identifier-shaped token, including keywords
-  // that the grammar re-purposes as names in declaration positions
-  // (`DATA data TYPE i.`, `REF TO data`, `TYPE type`, etc.).
-  const startTok: IToken | undefined = toks[i];
-  if (!isNameLike(startTok)) {
-    // `startTok` is narrowed to `undefined` here (isNameLike rejected a
-    // present token would also land here; in that case the image is
-    // already captured in `toks[i]` so read from there).
-    const at = toks[i] ?? toks[i - 1] ?? toks[0];
-    const label = at ? at.image : '<eof>';
-    c.report(`expected type name, got "${label}"`, at);
-    return null;
-  }
-  let lastIdx = i;
-  const nameParts: string[] = [startTok.image];
-  let j = i + 1;
-  while (j < limit) {
-    const t = toks[j]?.tokenType.name;
-    if (t === 'FatArrow' || t === 'Tilde') {
-      const next = toks[j + 1];
-      if (!isNameLike(next)) break;
-      nameParts.push(t === 'FatArrow' ? '=>' : '~', next.image);
-      lastIdx = j + 1;
-      j += 2;
-      continue;
-    }
-    break;
-  }
-  const lastTok = toks[lastIdx];
-  const source = c['sliceSource'](
-    startTok.startOffset,
-    lastTok.endOffset ?? lastTok.startOffset,
-  );
-  const fullName = nameParts.join('');
-  const type: TypeRef = isBuiltinName(fullName)
-    ? { kind: 'BuiltinTypeRef', name: fullName, source }
-    : { kind: 'NamedTypeRef', name: fullName, source };
-  return { type, nextIndex: lastIdx + 1 };
+  return consumeNamedTypeRef(toks, i, limit, c);
 }
 
 function peekTableKind(toks: IToken[], i: number): TableKind | null {
@@ -1321,8 +1415,8 @@ function consumeTableTypeRef(
     keyTokens.length > 0
       ? c['sliceSource'](
           keyTokens[0].startOffset,
-          (keyTokens[keyTokens.length - 1].endOffset ??
-            keyTokens[keyTokens.length - 1].startOffset) as number,
+          (keyTokens.at(-1)!.endOffset ??
+            keyTokens.at(-1)!.startOffset) as number,
         )
       : '';
   const startTok = toks[start];

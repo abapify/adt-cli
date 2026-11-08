@@ -1,16 +1,16 @@
 function escapeAngles(text: string): string {
-  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
 /** Escape text for use in MDX prose (keeps line breaks). */
 export function escapeText(text: string): string {
-  return escapeAngles(text.replace(/[\\{}]/g, '\\$&'));
+  return escapeAngles(text.replace(/[\\{}]/g, String.raw`\$&`));
 }
 
 /** Escape text for use in a single Markdown table cell. */
 export function escapeCell(text: string): string {
-  return escapeAngles(text.replace(/[\\{}|]/g, '\\$&')).replace(
-    /\s*\r?\n\s*/g,
+  return escapeAngles(text.replace(/[\\{}|]/g, String.raw`\$&`)).replace(
+    /(?<![^\S\n])[^\S\n]*(?:\n[^\S\n]*)+/g,
     ' ',
   );
 }
@@ -32,7 +32,7 @@ export function code(text: string): string {
     .split('|')
     .map((part) => part.trim())
     .map(codeSpan)
-    .join(' \\| ');
+    .join(String.raw` \| `);
 }
 
 export function table(headers: string[], rows: string[][]): string {
