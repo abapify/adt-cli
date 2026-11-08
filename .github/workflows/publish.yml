@@ -46,6 +46,7 @@ jobs:
     # read-write Nx Cloud token from repository secrets.
     env:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN_RW }}
+      NX_NO_CLOUD: 'true'
     permissions:
       contents: read
       id-token: write # needed for provenance data generation
@@ -175,14 +176,14 @@ jobs:
         run: |
           if [ "${{ inputs.affected_only }}" = "false" ]; then
             echo "affected=adt-cli,adt-mcp,adt" >> "$GITHUB_OUTPUT"
-            ./node_modules/.bin/nx release publish --nxBail=false
+            ./node_modules/.bin/nx release publish --no-cloud --nxBail=false
             exit 0
           fi
           PREV_TAG=$(git describe --tags --abbrev=0 --match='v*' 'HEAD^' 2>/dev/null || true)
           if [ -z "$PREV_TAG" ]; then
             echo "No previous release tag found — publishing everything"
             echo "affected=adt-cli,adt-mcp,adt" >> "$GITHUB_OUTPUT"
-            ./node_modules/.bin/nx release publish --nxBail=false
+            ./node_modules/.bin/nx release publish --no-cloud --nxBail=false
             exit 0
           fi
           AFFECTED=$(./node_modules/.bin/nx show projects --affected --base="$PREV_TAG" --head='HEAD^' | paste -sd, -)
@@ -265,7 +266,7 @@ jobs:
             if (changed) fs.writeFileSync(`${root}/package.json`, JSON.stringify(pkg, null, 2) + '\n');
           }
           EOF
-          ./node_modules/.bin/nx release publish --nxBail=false
+          ./node_modules/.bin/nx release publish --no-cloud --nxBail=false
         shell: bash
         env:
           NPM_CONFIG_PROVENANCE: true
