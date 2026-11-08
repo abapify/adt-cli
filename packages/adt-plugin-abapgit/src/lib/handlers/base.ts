@@ -135,7 +135,9 @@ const handlerRegistry = new Map<string, ObjectHandler<HandlerObject>>();
  * main type (e.g., 'CLAS/OC' → 'CLAS'). This matches ADK's resolveType()
  * behaviour and handles quickSearch results that return subtypes.
  */
-export function getHandler(type: string): ObjectHandler<HandlerObject> | undefined {
+export function getHandler(
+  type: string,
+): ObjectHandler<HandlerObject> | undefined {
   return handlerRegistry.get(type) ?? handlerRegistry.get(getMainType(type));
 }
 
@@ -468,7 +470,10 @@ export function createHandler<
     },
 
     getData(object: T): Record<string, unknown> {
-      return (object as { dataSync?: unknown }).dataSync as Record<string, unknown>;
+      return (object as { dataSync?: unknown }).dataSync as Record<
+        string,
+        unknown
+      >;
     },
 
     async resolveContent(content: unknown): Promise<string> {
