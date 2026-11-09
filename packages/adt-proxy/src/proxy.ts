@@ -129,7 +129,9 @@ function hasConvertibleResponseBody(
   status: number,
   responseSchemas: RouteDefinition['responseSchemas'],
 ): boolean {
-  return Boolean(body && isXmlContentType(contentType) && responseSchemas[status]);
+  return Boolean(
+    body && isXmlContentType(contentType) && responseSchemas[status],
+  );
 }
 
 function convertResponseBody(params: {
