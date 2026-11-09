@@ -57,7 +57,7 @@ export interface McpServerOptions {
   /** Hard-cancellable runtime required for scoped execution. */
   executeWithDeadline?: NonNullable<ToolContext['executeWithDeadline']>;
   /** Private ADT broker resolver for signed frozen-source capabilities. */
-  resolveFrozenSource: ToolContext['resolveFrozenSource'];
+  resolveFrozenSource?: ToolContext["resolveFrozenSource"];
   /** Filesystem roots available to workspace-mutating flow tools. */
   workspaceRoots?: readonly string[];
   /** Optional deployment-owned flow configuration. */
