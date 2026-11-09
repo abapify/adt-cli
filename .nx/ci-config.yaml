@@ -7,6 +7,11 @@
 dte:
   distribute-on: 3 linux-medium-js
 lifecycle:
-  # Match this repo CI target set (see .github/workflows/ci.yml e2e-ci).
+  # Match the actual CI affected target set when Nx Agents/DTE is enabled
+  # (see .github/workflows/ci.yml: lint test build e2e-ci typecheck:test).
   stop-after:
+    - lint
+    - test
+    - build
     - e2e-ci
+    - typecheck:test
