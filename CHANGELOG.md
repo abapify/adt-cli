@@ -1,3 +1,20 @@
+## 0.4.39 (2026-11-09)
+
+### 🚀 Features
+
+- **nx-cloud:** set up nx cloud workspace ([#316](https://github.com/abapify/adt-cli/pull/316))
+
+### 🩹 Fixes
+
+- **mcp:** remove redundant optional specifier (S4782) ([#312](https://github.com/abapify/adt-cli/pull/312))
+- **nx-npm-trust:** handle npm 11 object-shaped pack --json output ([#133](https://github.com/abapify/adt-cli/pull/133))
+- **typecheck:** partial strict source typecheck fixes ([#311](https://github.com/abapify/adt-cli/pull/311), [#313](https://github.com/abapify/adt-cli/pull/313))
+- **typecheck:** remaining strict source typecheck errors ([#311](https://github.com/abapify/adt-cli/pull/311), [#314](https://github.com/abapify/adt-cli/pull/314))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.38 (2026-11-09)
 
 ### 🚀 Features

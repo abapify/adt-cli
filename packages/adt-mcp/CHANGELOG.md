@@ -1,3 +1,13 @@
+## 0.4.39 (2026-11-09)
+
+### 🩹 Fixes
+
+- **mcp:** remove redundant optional specifier (S4782) ([#312](https://github.com/abapify/adt-cli/pull/312))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.38 (2026-11-09)
 
 This was a version bump only for adt-mcp to align it with other projects, there were no code changes.

@@ -1,3 +1,13 @@
+## 0.4.39 (2026-11-09)
+
+### 🩹 Fixes
+
+- **typecheck:** partial strict source typecheck fixes ([#311](https://github.com/abapify/adt-cli/pull/311), [#313](https://github.com/abapify/adt-cli/pull/313))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.38 (2026-11-09)
 
 This was a version bump only for adt-auth to align it with other projects, there were no code changes.
