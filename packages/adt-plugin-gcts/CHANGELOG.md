@@ -1,3 +1,13 @@
+## 0.4.36 (2026-11-09)
+
+### 🚀 Features
+
+- **gcts:** add dedicated FUNC handler for function module serialization ([#246](https://github.com/abapify/adt-cli/pull/246))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.35 (2026-11-09)
 
 ### 🩹 Fixes
