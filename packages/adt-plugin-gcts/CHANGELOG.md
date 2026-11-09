@@ -1,3 +1,13 @@
+## 0.4.37 (2026-11-09)
+
+### 🩹 Fixes
+
+- **gcts:** remove unused lang in func handler (S1854) ([fea34898](https://github.com/abapify/adt-cli/commit/fea34898))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.36 (2026-11-09)
 
 ### 🚀 Features
