@@ -1,3 +1,33 @@
+## 0.4.38 (2026-11-09)
+
+### 🚀 Features
+
+- **adt-client:** add auth debug logging to diagnose 401s ([#289](https://github.com/abapify/adt-cli/pull/289), [#309](https://github.com/abapify/adt-cli/pull/309))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
+## 0.4.37 (2026-11-09)
+
+This was a version bump only for @abapify/adt-client to align it with other projects, there were no code changes.
+
+## 0.4.36 (2026-11-09)
+
+This was a version bump only for @abapify/adt-client to align it with other projects, there were no code changes.
+
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+- **adt-cli:** silence intentional insecure-TLS opt-in, split verifyBasicAuth ([#296](https://github.com/abapify/adt-cli/pull/296))
+- **adt-cli:** verify basic-auth credentials against SAP before login succeeds ([#289](https://github.com/abapify/adt-cli/pull/289), [#295](https://github.com/abapify/adt-cli/pull/295))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 ### 🩹 Fixes

@@ -1,3 +1,41 @@
+## 0.4.38 (2026-11-09)
+
+This was a version bump only for adt-plugin-gcts to align it with other projects, there were no code changes.
+
+## 0.4.37 (2026-11-09)
+
+### 🩹 Fixes
+
+- **gcts:** remove unused lang in func handler (S1854) ([fea34898](https://github.com/abapify/adt-cli/commit/fea34898))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
+## 0.4.36 (2026-11-09)
+
+### 🚀 Features
+
+- **gcts:** add dedicated FUNC handler for function module serialization ([#246](https://github.com/abapify/adt-cli/pull/246))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- **gcts:** keep DdlsLike fields optional (S4782) ([cd121216](https://github.com/abapify/adt-cli/commit/cd121216))
+- **gcts:** remove redundant optional specifier (S4782) ([907af97e](https://github.com/abapify/adt-cli/commit/907af97e))
+- remove redundant optional specifiers and use TypeError (S4782, S7786) ([07a0a42b](https://github.com/abapify/adt-cli/commit/07a0a42b))
+- harden config parsing, typed serialization contracts and MCP tool schemas ([#304](https://github.com/abapify/adt-cli/pull/304))
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 This was a version bump only for adt-plugin-gcts to align it with other projects, there were no code changes.

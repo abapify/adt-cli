@@ -1,3 +1,19 @@
+## 0.4.38 (2026-11-09)
+
+This was a version bump only for @abapify/adt-playwright to align it with other projects, there were no code changes.
+
+## 0.4.37 (2026-11-09)
+
+This was a version bump only for @abapify/adt-playwright to align it with other projects, there were no code changes.
+
+## 0.4.36 (2026-11-09)
+
+This was a version bump only for @abapify/adt-playwright to align it with other projects, there were no code changes.
+
+## 0.4.35 (2026-11-09)
+
+This was a version bump only for @abapify/adt-playwright to align it with other projects, there were no code changes.
+
 ## 0.4.34 (2026-11-02)
 
 This was a version bump only for @abapify/adt-playwright to align it with other projects, there were no code changes.

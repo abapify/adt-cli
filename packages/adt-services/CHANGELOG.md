@@ -1,3 +1,29 @@
+## 0.4.38 (2026-11-09)
+
+This was a version bump only for adt-services to align it with other projects, there were no code changes.
+
+## 0.4.37 (2026-11-09)
+
+This was a version bump only for adt-services to align it with other projects, there were no code changes.
+
+## 0.4.36 (2026-11-09)
+
+This was a version bump only for adt-services to align it with other projects, there were no code changes.
+
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+- **adt-services:** negotiate ADT session media type during Basic auth ([#297](https://github.com/abapify/adt-cli/pull/297))
+- keep import completeness diagnostics nonblocking ([#298](https://github.com/abapify/adt-cli/pull/298))
+- **adt-cli:** silence intentional insecure-TLS opt-in, split verifyBasicAuth ([#296](https://github.com/abapify/adt-cli/pull/296))
+- **adt-cli:** verify basic-auth credentials against SAP before login succeeds ([#289](https://github.com/abapify/adt-cli/pull/289), [#295](https://github.com/abapify/adt-cli/pull/295))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 This was a version bump only for adt-services to align it with other projects, there were no code changes.

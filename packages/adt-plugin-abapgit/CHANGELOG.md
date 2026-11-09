@@ -1,3 +1,28 @@
+## 0.4.38 (2026-11-09)
+
+This was a version bump only for adt-plugin-abapgit to align it with other projects, there were no code changes.
+
+## 0.4.37 (2026-11-09)
+
+This was a version bump only for adt-plugin-abapgit to align it with other projects, there were no code changes.
+
+## 0.4.36 (2026-11-09)
+
+This was a version bump only for adt-plugin-abapgit to align it with other projects, there were no code changes.
+
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- remove redundant optional specifiers and use TypeError (S4782, S7786) ([07a0a42b](https://github.com/abapify/adt-cli/commit/07a0a42b))
+- harden config parsing, typed serialization contracts and MCP tool schemas ([#304](https://github.com/abapify/adt-cli/pull/304))
+- **sonar:** address security, bugs, and code smells ([#285](https://github.com/abapify/adt-cli/pull/285))
+
+### ❤️ Thank You
+
+- CommandCodeBot
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 ### 🩹 Fixes
