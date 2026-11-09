@@ -21,11 +21,6 @@ type FuncLike = {
 export const functionModuleHandler = createHandler(AdkFunctionModule, {
   toMetadata(func: FuncLike): FuncAff {
     const data = (func.dataSync ?? {}) as Record<string, unknown>;
-    const lang = (
-      (data.language as string) ??
-      (data.masterLanguage as string) ??
-      ''
-    ).toLowerCase();
     const meta: FuncAff = {
       formatVersion: '1',
       header: {
