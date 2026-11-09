@@ -50,7 +50,7 @@ function isValidCapability(
   payload: SealedCapabilityPayload | undefined,
   destination: string,
   now: number,
-): boolean {
+): payload is SealedCapabilityPayload {
   if (!payload) return false;
   if (payload.d !== destination) return false;
   if (payload.e <= now) return false;
