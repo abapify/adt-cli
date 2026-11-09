@@ -1,6 +1,9 @@
 {
   "name": "abapify",
   "$schema": "node_modules/nx/schemas/project-schema.json",
+  "namedInputs": {
+    "rootNoop": ["{projectRoot}/project.json", "{projectRoot}/package.json"]
+  },
   "targets": {
     "local-registry": {
       "executor": "@nx/js:verdaccio",
@@ -11,16 +14,24 @@
       }
     },
     "lint": {
-      "executor": "nx:noop"
+      "executor": "nx:noop",
+      "inputs": ["rootNoop"],
+      "cache": false
     },
     "test": {
-      "executor": "nx:noop"
+      "executor": "nx:noop",
+      "inputs": ["rootNoop"],
+      "cache": false
     },
     "typecheck": {
-      "executor": "nx:noop"
+      "executor": "nx:noop",
+      "inputs": ["rootNoop"],
+      "cache": false
     },
     "e2e-ci": {
-      "executor": "nx:noop"
+      "executor": "nx:noop",
+      "inputs": ["rootNoop"],
+      "cache": false
     }
   }
 }
