@@ -350,10 +350,18 @@ describe('adt-mcp integration tests', () => {
       // The GUID checkId finding is the live worklist shape; the mock
       // documentation page names CL_CI_TEST_AMDP_HDB_MIGRATION, which the
       // catalog assigns to CI_SYNTAX — resolved via the bridge
-      assert.strictEqual(guidFinding.checkCategory, 'CI_SYNTAX', 'the GUID-checkId finding should carry its category via the documentation bridge');
+      assert.strictEqual(
+        guidFinding.checkCategory,
+        'CI_SYNTAX',
+        'the GUID-checkId finding should carry its category via the documentation bridge',
+      );
       // The class-name finding's checkId is already a catalog class name and
       // resolves directly
-      assert.strictEqual(classFinding.checkCategory, 'CI_PERFORMANCE', 'the class-name finding should resolve directly through the catalog');
+      assert.strictEqual(
+        classFinding.checkCategory,
+        'CI_PERFORMANCE',
+        'the class-name finding should resolve directly through the catalog',
+      );
       // The model-facing response must stay URI-free: the documentation
       // link is internal enrichment state only
       for (const finding of data.findings) {
