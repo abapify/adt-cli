@@ -2485,7 +2485,6 @@ function matchGctsRoutes(
     matchGctsRepoActionRoutes(m, sub, f) ??
     matchGctsRepoItemRoutes(m, sub, f)
   );
-  return undefined;
 }
 
 /** True when `path` ends with an entity key like `/Chips('some-id')`. */
