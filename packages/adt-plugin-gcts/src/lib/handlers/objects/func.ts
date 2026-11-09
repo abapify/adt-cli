@@ -25,7 +25,7 @@ const RELEASE_STATE_MAP: Record<string, FuncAff['releaseState']> = {
 
 export const functionModuleHandler = createHandler('FUNC', {
   toMetadata(func: FuncLike): FuncAff {
-    const data = (func.dataSync ?? {}) as Record<string, unknown>;
+    const data = (func.dataSync ?? {}) as any;
     const meta: FuncAff = {
       formatVersion: '1',
       header: {
@@ -48,10 +48,13 @@ export const functionModuleHandler = createHandler('FUNC', {
       meta.rfcProperties = {
         basxmlEnabled: data.basXMLEnabled === true,
         rfcScope:
-          (data.rfcScope as FuncAff['rfcProperties']['rfcScope']) ??
-          'notClassified',
+          (data.rfcScope as NonNullable<
+            FuncAff['rfcProperties']
+          >['rfcScope']) ?? 'notClassified',
         rfcVersion:
-          (data.rfcVersion as FuncAff['rfcProperties']['rfcVersion']) ?? 'any',
+          (data.rfcVersion as NonNullable<
+            FuncAff['rfcProperties']
+          >['rfcVersion']) ?? 'any',
         abapFromJava: data.abapFromJava as boolean | undefined,
         javaFromAbap: data.javaFromAbap as boolean | undefined,
         javaRemote: data.javaRemote as boolean | undefined,
@@ -60,8 +63,9 @@ export const functionModuleHandler = createHandler('FUNC', {
     // Update properties: AFF nests updateTaskKind.
     if (typeof data.updateTaskKind === 'string') {
       meta.updateProperties = {
-        updateTaskKind:
-          data.updateTaskKind as FuncAff['updateProperties']['updateTaskKind'],
+        updateTaskKind: data.updateTaskKind as NonNullable<
+          FuncAff['updateProperties']
+        >['updateTaskKind'],
       };
     }
     if (typeof data.releaseState === 'string') {

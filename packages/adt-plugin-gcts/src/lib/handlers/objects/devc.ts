@@ -18,22 +18,23 @@ export const packageHandler = createHandler(AdkPackage, {
     return {
       formatVersion: '1',
       header: {
-        description: pkg.description ?? '',
+        description: (pkg as any).description ?? '',
         originalLanguage: (
-          pkg.dataSync?.language ??
-          pkg.dataSync?.masterLanguage ??
+          (pkg as any).dataSync?.language ??
+          (pkg as any).dataSync?.masterLanguage ??
           ''
         ).toLowerCase(),
-        ...(pkg.dataSync?.abapLanguageVersion &&
-        pkg.dataSync.abapLanguageVersion !== 'standard'
-          ? { abapLanguageVersion: pkg.dataSync.abapLanguageVersion }
+        ...((pkg as any).dataSync?.abapLanguageVersion &&
+        (pkg as any).dataSync.abapLanguageVersion !== 'standard'
+          ? { abapLanguageVersion: (pkg as any).dataSync.abapLanguageVersion }
           : {}),
       },
       package: {
         // DEVCLASS is carried by filename/directory, not by metadata.
-        softwareComponent: pkg.dataSync?.transport?.softwareComponent?.name,
-        applicationComponent: pkg.dataSync?.applicationComponent?.name,
-        packageType: pkg.dataSync?.attributes?.packageType,
+        softwareComponent: (pkg as any).dataSync?.transport?.softwareComponent
+          ?.name,
+        applicationComponent: (pkg as any).dataSync?.applicationComponent?.name,
+        packageType: (pkg as any).dataSync?.attributes?.packageType,
       },
     };
   },

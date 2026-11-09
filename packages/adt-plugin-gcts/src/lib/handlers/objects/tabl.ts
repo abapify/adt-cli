@@ -10,11 +10,11 @@ import { createHandler } from '../base';
 
 export const tableHandler = createHandler(AdkTable, {
   toMetadata(tabl) {
-    const data = tabl.dataSync as Record<string, unknown>;
+    const data = (tabl as any).dataSync as Record<string, unknown>;
     return {
       formatVersion: '1',
       header: {
-        description: tabl.description ?? '',
+        description: (tabl as any).description ?? '',
         originalLanguage: (
           (data.language as string) ??
           (data.masterLanguage as string) ??

@@ -25,7 +25,7 @@ function collectTransportNumbers(
   alsoTransport: string | undefined,
 ): string[] {
   const alsoTrParsed = parseFilterOption(alsoTransport, true);
-  const alsoTrSingle: string[] = alsoTrParsed ? [alsoTrParsed] : [];
+  const alsoTrSingle: string[] = alsoTrParsed ? [alsoTrParsed as string] : [];
   const alsoTrArray: string[] = Array.isArray(alsoTrParsed)
     ? alsoTrParsed
     : alsoTrSingle;

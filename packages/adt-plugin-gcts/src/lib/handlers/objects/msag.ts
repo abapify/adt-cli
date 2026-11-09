@@ -27,7 +27,7 @@ export const messageClassHandler = createHandler('MSAG', {
     return {
       formatVersion: '1',
       header: {
-        description: obj.description ?? obj.name ?? '',
+        description: (obj as any).description ?? obj.name ?? '',
         originalLanguage: lang,
       },
       messages: obj.messages ?? [],

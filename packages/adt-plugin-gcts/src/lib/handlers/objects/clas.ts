@@ -65,12 +65,12 @@ export const classHandler = createHandler(AdkClass, {
   suffixToSourceKey: SUFFIX_TO_SOURCE_KEY,
 
   toMetadata(cls): ClasAff {
-    const data = cls.dataSync;
+    const data = (cls as any).dataSync;
     const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();
     return {
       formatVersion: '1',
       header: {
-        description: cls.description ?? data.description ?? '',
+        description: (cls as any).description ?? data.description ?? '',
         originalLanguage: lang,
         ...(data.abapLanguageVersion && data.abapLanguageVersion !== 'standard'
           ? {
@@ -92,11 +92,11 @@ export const classHandler = createHandler(AdkClass, {
   },
 
   getSources: (cls) => {
-    const includes = cls.dataSync.include ?? [];
-    return includes.map((inc) => ({
+    const includes = (cls as any).dataSync.include ?? [];
+    return includes.map((inc: any) => ({
       suffix: SUFFIX[String(inc.includeType ?? 'main') as ClassIncludeType],
       content: () =>
-        cls.getIncludeSource(
+        (cls as any).getIncludeSource(
           String(inc.includeType ?? 'main') as ClassIncludeType,
         ),
     }));

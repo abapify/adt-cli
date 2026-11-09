@@ -101,7 +101,7 @@ export const ddlSourceHandler = createHandler('DDLS', {
     const meta: DdlsAff = {
       formatVersion: '1',
       header: {
-        description: obj.description ?? obj.name ?? '',
+        description: (obj as any).description ?? obj.name ?? '',
         originalLanguage: lang,
         ...(obj.abapLanguageVersion
           ? {
@@ -128,7 +128,9 @@ export const ddlSourceHandler = createHandler('DDLS', {
   },
 
   getSource: (obj: DdlsLike) =>
-    typeof obj.getSource === 'function' ? obj.getSource() : '',
+    typeof (obj as any).getSource === 'function'
+      ? (obj as any).getSource()
+      : '',
 
   fromMetadata: (meta: DdlsAff) => ({
     name: '',
