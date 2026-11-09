@@ -6,7 +6,10 @@
     "packageManager": "bun"
   },
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/**/*.config.ts",
@@ -19,7 +22,9 @@
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/tests/**/*"
     ],
-    "sharedGlobals": []
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/ci.yml"
+    ]
   },
   "pluginsConfig": {
     "@nx/js": {
@@ -39,7 +44,9 @@
     {
       "plugin": "./tools/nx-npm-trust/src/index.ts",
       "options": {
-        "publishablePaths": ["packages/"]
+        "publishablePaths": [
+          "packages/"
+        ]
       }
     },
     {
@@ -56,7 +63,9 @@
     },
     {
       "plugin": "@nx/vite/plugin",
-      "exclude": ["**/*"]
+      "exclude": [
+        "**/*"
+      ]
     },
     {
       "plugin": "@nx/eslint/plugin",
@@ -66,7 +75,9 @@
     },
     {
       "plugin": "@nx/vitest",
-      "exclude": ["**/*"]
+      "exclude": [
+        "**/*"
+      ]
     },
     {
       "plugin": "@nx-devkit/nx-cloud",
@@ -74,7 +85,9 @@
     }
   ],
   "release": {
-    "projects": ["packages/*"],
+    "projects": [
+      "packages/*"
+    ],
     "version": {
       "preVersionCommand": "npx nx run-many -t build",
       "conventionalCommits": true,
@@ -98,31 +111,52 @@
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "nx-release-publish": {
-      "dependsOn": ["build"]
+      "dependsOn": [
+        "build"
+      ]
     },
     "@nx/js:swc": {
       "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["default", "^default"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "default",
+        "^default"
+      ]
     },
     "@nx/js:tsc": {
       "cache": true,
       "dependsOn": [],
-      "inputs": ["default", "^default"]
+      "inputs": [
+        "default",
+        "^default"
+      ]
     },
     "typecheck": {
       "cache": true,
       "dependsOn": [],
-      "inputs": ["default", "^default"]
+      "inputs": [
+        "default",
+        "^default"
+      ]
     },
     "lint": {
-      "inputs": ["default", "^default", "{workspaceRoot}/eslint.config.mjs"]
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/eslint.config.mjs"
+      ]
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
   "tui": {
