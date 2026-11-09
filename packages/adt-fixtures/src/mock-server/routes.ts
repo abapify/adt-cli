@@ -775,7 +775,6 @@ function matchCoreHttpRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** True for quick-search queries that should hit the BAdI implementation fixture. */
@@ -829,7 +828,6 @@ function matchInformationSystemRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** Callers / callees and where-used 2-step POST flow. */
@@ -881,7 +879,6 @@ function matchUsageReferenceRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** Navigation target, data preview and DDIC table routes. */
@@ -917,7 +914,6 @@ function matchPreviewAndDdicTableRoutes(
     };
   }
 
-  return undefined;
   return undefined;
 }
 
@@ -1520,7 +1516,6 @@ function matchClassrunAndCtsSetupRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** Release a transport request and all its tasks (status → R). */
@@ -1639,7 +1634,6 @@ function matchCtsReleaseRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** Create a child task under a modifiable transport request. */
@@ -1718,7 +1712,6 @@ function matchCtsTaskRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** CTS list/get/delete for requests and tasks. */
@@ -1772,7 +1765,6 @@ function matchCtsReadRoutes(
     return { status: 204, body: '', contentType: 'text/plain' };
   }
 
-  return undefined;
   return undefined;
 }
 
@@ -1872,7 +1864,6 @@ function matchCtsUpdateAndPackageRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** STRUST certificate and PSE routes. */
@@ -1955,7 +1946,6 @@ function matchStrustRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** System user lookup/search and session info routes. */
@@ -1988,7 +1978,6 @@ function matchUsersAndSessionRoutes(
     return { status: 200, body: f.session, contentType: 'application/json' };
   }
 
-  return undefined;
   return undefined;
 }
 
@@ -2044,7 +2033,6 @@ function matchAtcRoutes(
     };
   }
 
-  return undefined;
   return undefined;
 }
 
@@ -2128,7 +2116,6 @@ function matchSourceAndLockRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** Object-root metadata GET/PUT routes (CLAS / INTF / PROG / FUGR). */
@@ -2192,7 +2179,6 @@ function matchObjectMetadataRoutes(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
-  return undefined;
   return undefined;
 }
 
@@ -2264,7 +2250,6 @@ function matchActivationAndLifecycleRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** Function module / function group routes. */
@@ -2315,7 +2300,6 @@ function matchFunctionGroupRoutes(
     };
   }
 
-  return undefined;
   return undefined;
 }
 
@@ -2379,7 +2363,6 @@ function matchMiscToolRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** JSON route result (gCTS/FLP fixtures are all JSON). */
@@ -2403,7 +2386,6 @@ function matchGctsRepositoryRootRoutes(
       };
   }
   return undefined;
-  return undefined;
 }
 
 /** gCTS branch routes (switch / delete / list / create). */
@@ -2425,7 +2407,6 @@ function matchGctsBranchRoutes(
     return jsonResult('{}');
   }
   return undefined;
-  return undefined;
 }
 
 /** gCTS config routes (single key get/delete + set). */
@@ -2443,7 +2424,6 @@ function matchGctsConfigRoutes(
     return jsonResult('{"result":{"key":"VCS_TARGET_DIR","value":"src/"}}');
   }
   return undefined;
-  return undefined;
 }
 
 /** gCTS repository action routes (clone/pull/push/log/objects/commit). */
@@ -2460,7 +2440,6 @@ function matchGctsRepoActionRoutes(
   if (sub === '/commit' && m === 'POST')
     return jsonResult(f.gctsCommitResponse);
   return undefined;
-  return undefined;
 }
 
 /** gCTS repository item routes (`/<rid>` — GET / setItem / DELETE). */
@@ -2474,7 +2453,6 @@ function matchGctsRepoItemRoutes(
     if (m === 'POST') return jsonResult('{}');
     if (m === 'DELETE') return jsonResult('{}');
   }
-  return undefined;
   return undefined;
 }
 
@@ -2571,7 +2549,6 @@ function matchFlpEntityRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** FLP entity-set list routes (Catalogs / Pages / Chips). */
@@ -2600,7 +2577,6 @@ function matchFlpListRoutes(
   }
 
   return undefined;
-  return undefined;
 }
 
 /** abapGit export and CSRF token routes. */
@@ -2627,7 +2603,6 @@ function matchAbapGitExportAndCsrfRoutes(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
-  return undefined;
   return undefined;
 }
 
