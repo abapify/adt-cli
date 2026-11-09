@@ -30,13 +30,13 @@ export const businessFunctionSetHandler = createHandler<
     NAME32: obj.name32,
     NAME80: obj.name80,
     ASSIGNED_BF: obj.assignedBfs?.length
-      ? { item: obj.assignedBfs.map((b) => ({ BF: b })) }
+      ? { item: obj.assignedBfs.map((b: any) => ({ BF: b })) }
       : undefined,
     NESTED_BFS: obj.nestedBfs?.length
-      ? { item: obj.nestedBfs.map((b) => ({ BFS: b })) }
+      ? { item: obj.nestedBfs.map((b: any) => ({ BFS: b })) }
       : undefined,
     PARENT_BFS: obj.parentBfs?.length
-      ? { item: obj.parentBfs.map((b) => ({ BFS: b })) }
+      ? { item: obj.parentBfs.map((b: any) => ({ BFS: b })) }
       : undefined,
   }),
 

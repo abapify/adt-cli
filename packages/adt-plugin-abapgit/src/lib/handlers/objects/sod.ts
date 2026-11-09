@@ -35,7 +35,7 @@ export function createOdsHandler(
         [type]: {
           METADATA: {
             NAME: String(obj.name ?? '').toUpperCase(),
-            MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+            MASTER_LANGUAGE: isoToSapLang((obj as any).masterLanguage),
           },
         },
       };

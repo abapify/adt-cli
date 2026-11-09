@@ -19,7 +19,7 @@ export const acidHandler = createHandler<AcidObjectLike, typeof acid>('ACID', {
   toAbapGit: (raw) => {
     const obj = unwrapData<AcidObjectLike>(raw);
     return {
-      DESCRIPTION: obj.description,
+      DESCRIPTION: (obj as any).description,
     };
   },
 

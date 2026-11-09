@@ -36,7 +36,7 @@ export const sharedMemoryAreaHandler = createHandler<
   toAbapGit: (obj) => ({
     SHMA: {
       AREA_NAME: String(obj.name ?? '').toUpperCase(),
-      DESCRIPT: obj.description,
+      DESCRIPT: (obj as any).description,
       ROOT: obj.root,
       AUTO_BUILD: obj.autoBuild,
       HAS_VERSIONS: obj.hasVersions,

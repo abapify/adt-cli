@@ -48,12 +48,12 @@ export const businessConfigSetHandler = createHandler<
     // Ensure description is included in texts (and first, since
     // fromAbapGit reads texts[0] as the description)
     const allTexts = [...(obj.texts ?? [])];
-    if (obj.description) {
-      const idx = allTexts.findIndex((t) => t.text === obj.description);
+    if ((obj as any).description) {
+      const idx = allTexts.findIndex((t) => t.text === (obj as any).description);
       if (idx === -1) {
         allTexts.unshift({
           language: obj.texts?.[0]?.language ?? 'en',
-          text: obj.description,
+          text: (obj as any).description,
         });
       } else if (idx > 0) {
         allTexts.unshift(allTexts.splice(idx, 1)[0]);
@@ -77,7 +77,7 @@ export const businessConfigSetHandler = createHandler<
         },
         SCPRTEXT: allTexts.length
           ? {
-              item: allTexts.map((t) => ({
+              item: allTexts.map((t: any) => ({
                 PROFID: name,
                 LANGU: isoToSapLang(t.language),
                 TEXT: t.text,
@@ -86,7 +86,7 @@ export const businessConfigSetHandler = createHandler<
           : undefined,
         SCPRVALS: obj.values?.length
           ? {
-              item: obj.values.map((v) => ({
+              item: obj.values.map((v: any) => ({
                 PROFID: name,
                 TABLENAME: v.tableName,
                 FIELDNAME: v.fieldName,

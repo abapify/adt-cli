@@ -26,7 +26,7 @@ export const amdpSchemaHandler = createHandler<AmdpSchemaLike, typeof amsd>(
         AMSD: {
           METADATA: {
             NAME: String(obj.name ?? '').toUpperCase(),
-            MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+            MASTER_LANGUAGE: isoToSapLang((obj as any).masterLanguage),
             PACKAGE_REF: obj.packageName,
           },
         },

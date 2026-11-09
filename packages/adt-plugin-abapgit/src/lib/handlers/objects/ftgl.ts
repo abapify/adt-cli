@@ -24,7 +24,7 @@ export const featureToggleHandler = createHandler<
     FTGL: {
       HEADER: {
         FEATURE_ID: String(obj.name ?? '').toUpperCase(),
-        DESCRIPTION: obj.description,
+        DESCRIPTION: (obj as any).description,
         STATUS: obj.status,
       },
     },

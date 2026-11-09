@@ -39,12 +39,12 @@ export const authGroupHandler = createHandler<AuthGroupLike, typeof sucu>(
         TBRG_AUTHT: {
           item: (obj.texts?.length
             ? obj.texts
-            : [{ language: obj.language, text: obj.description }]
-          ).map((t) => ({
-            SPRAS: isoToSapLang(t.language ?? obj.language),
+            : [{ language: (obj as any).language, text: (obj as any).description }]
+          ).map((t: any) => ({
+            SPRAS: isoToSapLang(t.language ?? (obj as any).language),
             BRGRU: name,
             OBJECT: obj.object,
-            BEZEI: t.text ?? obj.description,
+            BEZEI: t.text ?? (obj as any).description,
           })),
         },
       };

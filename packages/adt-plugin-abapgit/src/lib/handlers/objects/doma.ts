@@ -14,7 +14,7 @@ export const domainHandler = createHandler(AdkDomain, {
   serializer_version: 'v1.0.0',
 
   toAbapGit: (obj) => {
-    const data = obj.dataSync as Record<string, unknown>;
+    const data = (obj as any).dataSync as any;
     const typeInfo = data?.content?.typeInformation;
     const outInfo = data?.content?.outputInformation;
     const valueInfo = data?.content?.valueInformation;
@@ -24,7 +24,7 @@ export const domainHandler = createHandler(AdkDomain, {
     const DD07V_TAB =
       fixValues && fixValues.length > 0
         ? {
-            DD07V: fixValues.map((fv) => {
+            DD07V: fixValues.map((fv: any) => {
               const entry: Record<string, string> = {
                 DOMNAME: obj.name ?? '',
                 VALPOS: String(fv.position ?? '').padStart(4, '0'),
@@ -56,8 +56,8 @@ export const domainHandler = createHandler(AdkDomain, {
         CONVEXIT: outInfo?.conversionExit || undefined,
         ENTITYTAB: valueInfo?.valueTableRef?.name || undefined,
         VALEXI: fixValues && fixValues.length > 0 ? 'X' : undefined,
-        DDTEXT: obj.description ?? '',
-        DOMMASTER: isoToSapLang(obj.masterLanguage),
+        DDTEXT: (obj as any).description ?? '',
+        DOMMASTER: isoToSapLang((obj as any).masterLanguage),
       },
       DD07V_TAB,
     };

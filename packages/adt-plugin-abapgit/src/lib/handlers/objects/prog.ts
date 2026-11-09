@@ -9,7 +9,7 @@ import { createHandler } from '../base';
 function programSubc(obj: AdkProgram | AdkInclude): string {
   if (obj.kind === AdkInclude.kind) return 'I';
   if (!obj.isLoaded) return '1';
-  switch ((obj.dataSync as { programType?: string }).programType) {
+  switch (((obj as any).dataSync as { programType?: string }).programType) {
     case 'modulePool':
       return 'M';
     case 'subroutinePool':
@@ -40,7 +40,7 @@ export const programHandler = createHandler<
   }),
 
   // Single source file
-  getSource: (obj) => obj.getSource(),
+  getSource: (obj) => (obj as any).getSource(),
 
   // Git → SAP: Map abapGit values to ADK data
   // Returns data matching AbapProgramSchema structure

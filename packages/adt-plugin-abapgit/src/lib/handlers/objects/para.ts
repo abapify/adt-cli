@@ -24,10 +24,10 @@ export const spagpaParamHandler = createHandler<SpagpaParamLike, typeof para>(
       const obj = unwrapData<SpagpaParamLike>(raw);
 
       const name = String(obj.name ?? '').toUpperCase();
-      const lang = isoToSapLang(obj.language);
+      const lang = isoToSapLang((obj as any).language);
       return {
-        TPARA: { PARAMID: name, PARTEXT: obj.description },
-        TPARAT: { PARAMID: name, SPRACHE: lang, PARTEXT: obj.description },
+        TPARA: { PARAMID: name, PARTEXT: (obj as any).description },
+        TPARAT: { PARAMID: name, SPRACHE: lang, PARTEXT: (obj as any).description },
       };
     },
 

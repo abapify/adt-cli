@@ -31,16 +31,16 @@ export const generalTextHandler = createHandler<GeneralTextLike, typeof doct>(
               DOKIL: {
                 ID: 'TX',
                 OBJECT: String(obj.name ?? '').toUpperCase(),
-                LANGU: isoToSapLang(obj.language),
+                LANGU: isoToSapLang((obj as any).language),
               },
               HEAD: {
                 TDNAME: String(obj.name ?? '').toUpperCase(),
                 TDID: 'TX',
-                TDSPRAS: isoToSapLang(obj.language),
+                TDSPRAS: isoToSapLang((obj as any).language),
               },
               LINES: obj.lines?.length
                 ? {
-                    item: obj.lines.map((l) => ({
+                    item: obj.lines.map((l: any) => ({
                       TDFORMAT: l.format,
                       TDLINE: l.line,
                     })),

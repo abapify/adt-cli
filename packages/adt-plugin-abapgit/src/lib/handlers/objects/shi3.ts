@@ -29,7 +29,7 @@ export const hierarchyDisplayHandler = createHandler<
     },
     TREE_TITLES: obj.titles?.length
       ? {
-          item: obj.titles.map((t) => ({
+          item: obj.titles.map((t: any) => ({
             SPRAS: isoToSapLang(t.language),
             TREE_ID: String(obj.name ?? '').toUpperCase(),
             TEXT: t.text,
@@ -38,7 +38,7 @@ export const hierarchyDisplayHandler = createHandler<
       : undefined,
     TREE_NODES: obj.nodes?.length
       ? {
-          item: obj.nodes.map((n) => ({
+          item: obj.nodes.map((n: any) => ({
             NODE_ID: n.nodeId,
             TREE_ID: String(obj.name ?? '').toUpperCase(),
             PARENT_ID: n.parentId,

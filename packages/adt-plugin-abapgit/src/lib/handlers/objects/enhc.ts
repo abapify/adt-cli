@@ -27,10 +27,10 @@ export const enhancementCompositeHandler = createHandler<
     return {
       SHORTTEXT: obj.shortText,
       COMPOSITE_CHILDS: obj.compositeChilds?.length
-        ? { item: obj.compositeChilds.map((c) => ({ ENHCOMPOSITENAME: c })) }
+        ? { item: obj.compositeChilds.map((c: any) => ({ ENHCOMPOSITENAME: c })) }
         : undefined,
       ENH_CHILDS: obj.enhChilds?.length
-        ? { item: obj.enhChilds.map((c) => ({ ENHNAME: c })) }
+        ? { item: obj.enhChilds.map((c: any) => ({ ENHNAME: c })) }
         : undefined,
       LONGTEXT_ID: obj.longtextId,
     };

@@ -30,7 +30,7 @@ export const badiDefinitionHandler = createHandler<
         TEXT: obj.text,
         INTERFACE: obj.interface,
       },
-      MAST_LANGU: isoToSapLang(obj.masterLanguage),
+      MAST_LANGU: isoToSapLang((obj as any).masterLanguage),
       EXT_CLNAME: obj.extClassName,
     },
   }),

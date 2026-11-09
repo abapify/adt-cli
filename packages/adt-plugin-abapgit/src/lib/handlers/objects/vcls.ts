@@ -31,7 +31,7 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
         },
         VCLSTRUC_TAB: obj.structures?.length
           ? {
-              item: obj.structures.map((s) => ({
+              item: obj.structures.map((s: any) => ({
                 VCLNAME: String(obj.name ?? '').toUpperCase(),
                 OBJECT: s.object,
                 OBJTEXT: s.objText,
@@ -40,7 +40,7 @@ export const viewClusterHandler = createHandler<ViewClusterLike, typeof vcls>(
           : undefined,
         VCLMF_TAB: obj.maintenanceForms?.length
           ? {
-              item: obj.maintenanceForms.map((m) => ({
+              item: obj.maintenanceForms.map((m: any) => ({
                 VCLNAME: String(obj.name ?? '').toUpperCase(),
                 OBJECT: m.object,
                 FORM: m.form,

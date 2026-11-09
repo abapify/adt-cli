@@ -58,12 +58,12 @@ export const infoObjectHandler = createHandler<InfoObjectLike, typeof iobj>(
           LOWCASE: obj.lowCase,
           CONVEXIT: obj.convExit,
           KYFNM: obj.keyFigName,
-          TXTLONG: obj.description,
+          TXTLONG: (obj as any).description,
           TXTSHRT: obj.shortText,
         },
         COMPOUNDS: obj.compounds?.length
           ? {
-              BAPI6108CM: obj.compounds.map((c) => ({
+              BAPI6108CM: obj.compounds.map((c: any) => ({
                 IOBJNM_Z: c.iobjnm,
                 COMPOUND: c.compound,
               })),
@@ -71,7 +71,7 @@ export const infoObjectHandler = createHandler<InfoObjectLike, typeof iobj>(
           : undefined,
         ATTRIBUTES: obj.attributes?.length
           ? {
-              BAPI6108AT: obj.attributes.map((a) => ({
+              BAPI6108AT: obj.attributes.map((a: any) => ({
                 ATRNM: a.atrnm,
                 OBJSTAT: a.objstat,
                 ATTRIB: a.attrib,

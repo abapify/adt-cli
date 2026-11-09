@@ -39,12 +39,12 @@ export const dialogModuleHandler = createHandler<DialogModuleLike, typeof dial>(
             DIALOGNAME: String(obj.name ?? '').toUpperCase(),
             DYNR: obj.dynr,
             PROG: obj.program,
-            SPRAS: isoToSapLang(obj.language),
-            DDTEXT: obj.description,
+            SPRAS: isoToSapLang((obj as any).language),
+            DDTEXT: (obj as any).description,
           },
           DIA_PARS: obj.parameters?.length
             ? {
-                item: obj.parameters.map((p) => ({
+                item: obj.parameters.map((p: any) => ({
                   DNAM: p.dnam,
                   DYNR: p.dynr,
                   PARAM: p.param,

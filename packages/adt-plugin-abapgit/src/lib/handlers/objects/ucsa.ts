@@ -25,7 +25,7 @@ export const unitCaseHandler = createHandler<UnitCaseLike, typeof ucsa>(
         UCSA: {
           HEADER: {
             ID: obj.id ?? String(obj.name ?? '').toUpperCase(),
-            DESCRIPTION: obj.description,
+            DESCRIPTION: (obj as any).description,
           },
         },
       };

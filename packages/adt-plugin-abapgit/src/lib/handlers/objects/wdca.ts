@@ -30,7 +30,7 @@ export const wdcaHandler = createHandler<WdcaLike, typeof wdca>('WDCA', {
       },
       DATA: obj.data?.length
         ? {
-            item: obj.data.map((d) => ({
+            item: obj.data.map((d: any) => ({
               CONFIG_ID: String(obj.name ?? '').toUpperCase(),
               CONFIG_TYPE: obj.configType,
               CONFIG_VAR: obj.configVar,

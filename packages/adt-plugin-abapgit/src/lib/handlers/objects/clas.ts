@@ -81,10 +81,10 @@ export const classHandler = createHandler(AdkClass, {
   suffixToSourceKey: SUFFIX_TO_SOURCE_KEY,
 
   toAbapGit: (cls) => {
-    const data = cls.dataSync as Record<string, unknown>;
+    const data = (cls as any).dataSync as any;
     const includes = data.include ?? [];
     const hasTestClasses =
-      includes.some((inc) => String(inc.includeType) === 'testclasses') ||
+      includes.some((inc: any) => String(inc.includeType) === 'testclasses') ||
       (data as any).hasTests === true ||
       (data as any).withUnitTests === true;
 
@@ -132,11 +132,11 @@ export const classHandler = createHandler(AdkClass, {
   },
 
   getSources: (cls) => {
-    const includes = (cls.dataSync as { include?: unknown[] }).include ?? [];
-    return includes.map((inc) => ({
+    const includes = ((cls as any).dataSync as { include?: unknown[] }).include ?? [];
+    return includes.map((inc: any) => ({
       suffix:
         ABAPGIT_SUFFIX[String(inc.includeType ?? 'main') as ClassIncludeType],
-      content: cls.getIncludeSource(
+      content: (cls as any).getIncludeSource(
         String(inc.includeType ?? 'main') as ClassIncludeType,
       ),
     }));

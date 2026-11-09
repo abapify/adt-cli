@@ -29,7 +29,7 @@ export const oauth2ProfileHandler = createHandler<
       HEADER: obj.header,
       T_SCOPES: obj.scopes?.length
         ? {
-            item: obj.scopes.map((s) => ({
+            item: obj.scopes.map((s: any) => ({
               SCOPE: s.scope,
               DESCRIPTION: s.description,
             })),

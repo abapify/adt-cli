@@ -28,7 +28,7 @@ export const w3miHandler = createHandler<W3MimeLike, typeof w3mi>('W3MI', {
       TEXT: obj.text,
       PARAMS: obj.params?.length
         ? {
-            item: obj.params.map((p) => ({
+            item: obj.params.map((p: any) => ({
               OBJID: String(obj.name ?? '').toUpperCase(),
               NAME: p.name,
               VALUE: p.value,

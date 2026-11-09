@@ -37,7 +37,7 @@ export const characteristicHandler = createHandler<
       },
       CLS_ATTRIBUTET: obj.texts?.length
         ? {
-            item: obj.texts.map((t) => ({
+            item: obj.texts.map((t: any) => ({
               SPRAS: isoToSapLang(t.language),
               CLSNAME: t.className ?? obj.className,
               ATBEZ: t.description,

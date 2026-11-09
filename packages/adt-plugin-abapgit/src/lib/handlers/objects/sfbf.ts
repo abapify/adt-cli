@@ -29,10 +29,10 @@ export const businessFunctionHandler = createHandler<
     NAME32: obj.name32,
     NAME80: obj.name80,
     ASSIGNED_SWITCHES: obj.assignedSwitches?.length
-      ? { item: obj.assignedSwitches.map((s) => ({ SWITCH: s })) }
+      ? { item: obj.assignedSwitches.map((s: any) => ({ SWITCH: s })) }
       : undefined,
     PARENT_BFS: obj.parentBfs?.length
-      ? { item: obj.parentBfs.map((b) => ({ BF: b })) }
+      ? { item: obj.parentBfs.map((b: any) => ({ BF: b })) }
       : undefined,
   }),
 

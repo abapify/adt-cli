@@ -32,7 +32,7 @@ export const smartFormStyleHandler = createHandler<
     return {
       HEADER: {
         SSFNAME: String(obj.name ?? '').toUpperCase(),
-        MASTERLANG: isoToSapLang(obj.masterLanguage),
+        MASTERLANG: isoToSapLang((obj as any).masterLanguage),
         TDFAMILY: obj.fontFamily,
       },
       SSFPARAS: obj.ssfparas,

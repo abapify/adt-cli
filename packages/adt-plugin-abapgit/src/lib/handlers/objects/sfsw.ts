@@ -29,13 +29,13 @@ export const switchHandler = createHandler<SwitchLike, typeof sfsw>('SFSW', {
       NAME32: obj.name32,
       NAME80: obj.name80,
       PARENT_BF: obj.parentBfs?.length
-        ? { item: obj.parentBfs.map((b) => ({ BF: b })) }
+        ? { item: obj.parentBfs.map((b: any) => ({ BF: b })) }
         : undefined,
       CONFLICTS: obj.conflicts?.length
-        ? { item: obj.conflicts.map((c) => ({ CONFLICT: c })) }
+        ? { item: obj.conflicts.map((c: any) => ({ CONFLICT: c })) }
         : undefined,
       PACKAGES: obj.packages?.length
-        ? { item: obj.packages.map((p) => ({ PACKAGE: p })) }
+        ? { item: obj.packages.map((p: any) => ({ PACKAGE: p })) }
         : undefined,
     };
   },

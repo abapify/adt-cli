@@ -32,7 +32,7 @@ export const dataModelHandler = createHandler<DataModelLike, typeof udmo>(
         },
         UDMO_ENTITIES: obj.entities?.length
           ? {
-              item: obj.entities.map((e) => ({
+              item: obj.entities.map((e: any) => ({
                 DMOID: String(obj.name ?? '').toUpperCase(),
                 ENTID: e.entId,
                 AS4LOCAL: e.as4local,
@@ -41,7 +41,7 @@ export const dataModelHandler = createHandler<DataModelLike, typeof udmo>(
           : undefined,
         UDMO_TEXTS: obj.texts?.length
           ? {
-              item: obj.texts.map((t) => ({
+              item: obj.texts.map((t: any) => ({
                 SPRACHE: isoToSapLang(t.language),
                 DMOID: String(obj.name ?? '').toUpperCase(),
                 LANGBEZ: t.longText,

@@ -158,7 +158,7 @@ async function resolveCdsSource<T extends AdkTable | AdkStructure>(
     return { source: sources.main };
   }
   try {
-    return { source: await obj.getSource() };
+    return { source: await (obj as any).getSource() };
   } catch {
     return { fallback: true };
   }
@@ -180,8 +180,8 @@ async function buildTablValues<T extends AdkTable | AdkStructure>(
   obj: T,
   def: TableDefinition | StructureDefinition,
 ): Promise<Record<string, unknown>> {
-  const lang = isoToSapLang(obj.language || undefined);
-  const dd02v = buildDD02V(def, lang, obj.description ?? '');
+  const lang = isoToSapLang((obj as any).language || undefined);
+  const dd02v = buildDD02V(def, lang, (obj as any).description ?? '');
   const resolver = createAdtTypeResolver(obj);
   const dd03pEntries = await buildDD03P(
     def.members,
@@ -205,7 +205,7 @@ async function buildTablValues<T extends AdkTable | AdkStructure>(
 
   if (dd03pEntries.length > 0) {
     values.DD03P_TABLE = {
-      DD03P: dd03pEntries.map((entry) => stripEmpty(entry)),
+      DD03P: dd03pEntries.map((entry: any) => stripEmpty(entry)),
     };
   }
 

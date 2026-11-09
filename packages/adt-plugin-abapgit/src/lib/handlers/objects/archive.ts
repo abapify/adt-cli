@@ -44,7 +44,7 @@ export function createArchiveHandler(
         },
         PARAMETERS: obj.parameters?.length
           ? {
-              item: obj.parameters.map((p) => ({
+              item: obj.parameters.map((p: any) => ({
                 NAME: p.name,
                 VALUE: p.value,
               })),

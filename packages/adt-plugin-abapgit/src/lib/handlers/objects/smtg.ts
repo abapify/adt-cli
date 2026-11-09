@@ -74,25 +74,25 @@ export const emailTemplateHandler = createHandler<
           TMPL_NAME: obj.templateName,
           TMPL_TYPE: obj.templateType,
           TMPL_CATEGORY: obj.templateCategory,
-          TMPL_LANGU: isoToSapLang(obj.masterLanguage || obj.language),
+          TMPL_LANGU: isoToSapLang((obj as any).masterLanguage || (obj as any).language),
         },
         HEADER_T: obj.headerTexts?.length
           ? {
-              item: obj.headerTexts.map((t) => ({
+              item: obj.headerTexts.map((t: any) => ({
                 NAME: t.name,
                 DESCRIPTION: t.description,
                 LANGU: isoToSapLang(
-                  t.language || obj.masterLanguage || obj.language,
+                  t.language || (obj as any).masterLanguage || (obj as any).language,
                 ),
               })),
             }
           : undefined,
         CONTENT: obj.contents?.length
           ? {
-              item: obj.contents.map((c) => ({
+              item: obj.contents.map((c: any) => ({
                 TMPL_ID: name,
                 LANGU: isoToSapLang(
-                  c.language || obj.masterLanguage || obj.language,
+                  c.language || (obj as any).masterLanguage || (obj as any).language,
                 ),
                 SUBJECT: c.subject,
                 BODY: c.body,

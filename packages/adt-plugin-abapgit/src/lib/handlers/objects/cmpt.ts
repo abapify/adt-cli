@@ -31,7 +31,7 @@ export const compositeTemplateHandler = createHandler<
       CMPT: {
         HEADER: {
           NAME: String(obj.name ?? '').toUpperCase(),
-          DESCRIPTION: obj.description,
+          DESCRIPTION: (obj as any).description,
         },
         ...obj.extra,
       },

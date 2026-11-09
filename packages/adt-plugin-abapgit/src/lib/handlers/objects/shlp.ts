@@ -59,8 +59,8 @@ export const searchHelpHandler = createHandler<SearchHelpLike, typeof shlp>(
       return {
         DD30V: {
           SHLPNAME: String(obj.name ?? '').toUpperCase(),
-          DDLANGUAGE: isoToSapLang(obj.language),
-          DDTEXT: obj.description ?? '',
+          DDLANGUAGE: isoToSapLang((obj as any).language),
+          DDTEXT: (obj as any).description ?? '',
           SHLPTYPE: obj.helpType ?? undefined,
           DIALOGTYPE: obj.dialogType ?? undefined,
         },
@@ -76,7 +76,7 @@ export const searchHelpHandler = createHandler<SearchHelpLike, typeof shlp>(
         DD32P_TABLE:
           parameters.length > 0
             ? {
-                item: parameters.map((p) => ({
+                item: parameters.map((p: any) => ({
                   SHLPNAME: String(obj.name ?? '').toUpperCase(),
                   FIELDNAME: p.fieldName ?? undefined,
                   SHLPINPUT: p.input ? 'X' : undefined,
@@ -92,7 +92,7 @@ export const searchHelpHandler = createHandler<SearchHelpLike, typeof shlp>(
         DD33V_TABLE:
           assignments.length > 0
             ? {
-                item: assignments.map((a) => ({
+                item: assignments.map((a: any) => ({
                   SHLPNAME: String(obj.name ?? '').toUpperCase(),
                   SHLPFIELD: a.helpField ?? undefined,
                   TABNAME: a.tableName ?? undefined,

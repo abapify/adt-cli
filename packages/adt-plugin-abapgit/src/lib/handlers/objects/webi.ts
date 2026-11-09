@@ -25,12 +25,12 @@ export const webiHandler = createHandler<WebiLike, typeof webi>('WEBI', {
       WEBI: {
         VEPTEXT: {
           VEPNAME: String(obj.name ?? '').toUpperCase(),
-          DESCRIPT: obj.description,
-          LANGU: isoToSapLang(obj.language),
+          DESCRIPT: (obj as any).description,
+          LANGU: isoToSapLang((obj as any).language),
         },
         PVEPHEADER: obj.headers?.length
           ? {
-              item: obj.headers.map((h) => ({
+              item: obj.headers.map((h: any) => ({
                 VEPNAME: String(obj.name ?? '').toUpperCase(),
                 GENERATOR: h.generator,
                 FEATURES: h.features,

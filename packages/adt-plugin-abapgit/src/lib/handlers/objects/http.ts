@@ -32,7 +32,7 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
       const obj = unwrapData<HttpServiceLike>(raw);
 
       const name = String(obj.name ?? '').toUpperCase();
-      const lang = isoToSapLang(obj.masterLanguage || obj.language);
+      const lang = isoToSapLang((obj as any).masterLanguage || (obj as any).language);
       const handlerClassFallback = obj.handlerClass
         ? {
             UCONSERVHANDLER: {
@@ -49,7 +49,7 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
           ID: name,
           VERSION: 'A',
           LANG: lang,
-          SHORTTEXT: obj.description ?? '',
+          SHORTTEXT: (obj as any).description ?? '',
         },
         HTTPHDL: obj.handlers?.length
           ? {
@@ -76,7 +76,7 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
         masterLanguage: sapLangToIso(HTTPTEXT?.LANG),
         handlerClass: firstHandler?.SERVICEHANDLER,
         serviceOrder: firstHandler?.SERVICEORDER,
-        handlers: items.map((h) => ({
+        handlers: items.map((h: any) => ({
           handler: h.SERVICEHANDLER,
           serviceOrder: h.SERVICEORDER,
         })),

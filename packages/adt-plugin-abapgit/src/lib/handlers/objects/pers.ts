@@ -47,9 +47,9 @@ export const personalizationHandler = createHandler<
         PERS_REG_TEXT: {
           item: [
             {
-              LANG: isoToSapLang(obj.language),
+              LANG: isoToSapLang((obj as any).language),
               PERS_KEY: String(obj.name ?? '').toUpperCase(),
-              TEXT: obj.description,
+              TEXT: (obj as any).description,
             },
           ],
         },

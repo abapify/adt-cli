@@ -28,7 +28,7 @@ export const w3htHandler = createHandler<W3TemplateLike, typeof w3ht>('W3HT', {
       TEXT: obj.text,
       PARAMS: obj.params?.length
         ? {
-            item: obj.params.map((p) => ({
+            item: obj.params.map((p: any) => ({
               OBJID: String(obj.name ?? '').toUpperCase(),
               NAME: p.name,
               VALUE: p.value,

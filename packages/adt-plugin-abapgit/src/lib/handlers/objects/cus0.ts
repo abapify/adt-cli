@@ -36,7 +36,7 @@ export const imgActivityHandler = createHandler<ImgActivityLike, typeof cus0>(
           },
           TEXTS: obj.texts?.length
             ? {
-                item: obj.texts.map((t) => ({
+                item: obj.texts.map((t: any) => ({
                   SPRAS: isoToSapLang(t.language),
                   TEXT: t.text,
                 })),

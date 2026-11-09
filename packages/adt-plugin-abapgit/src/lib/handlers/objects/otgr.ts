@@ -30,7 +30,7 @@ export const objectTypeGroupHandler = createHandler<
       },
       TEXTS: obj.texts?.length
         ? {
-            item: obj.texts.map((t) => ({
+            item: obj.texts.map((t: any) => ({
               SPRAS: isoToSapLang(t.language),
               NAME: String(obj.name ?? '').toUpperCase(),
               TEXT: t.text,
@@ -39,7 +39,7 @@ export const objectTypeGroupHandler = createHandler<
         : undefined,
       ELEMENTS: obj.elements?.length
         ? {
-            item: obj.elements.map((e) => ({
+            item: obj.elements.map((e: any) => ({
               OBJ_TYPE_GROUP: String(obj.name ?? '').toUpperCase(),
               OBJ_TYPE: e.objType,
             })),

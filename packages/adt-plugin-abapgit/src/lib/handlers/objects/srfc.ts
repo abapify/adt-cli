@@ -32,7 +32,7 @@ export const rfcServiceHandler = createHandler<RfcServiceLike, typeof srfc>(
           VERSION: obj.version ?? 'A',
           SCOPE: obj.scope,
           FUNCNAME: obj.funcname,
-          TEXT: obj.description,
+          TEXT: (obj as any).description,
         },
       };
     },

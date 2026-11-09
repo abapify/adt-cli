@@ -29,7 +29,7 @@ export const customizingActivityHandler = createHandler<
       },
       ACTIVITY_TITLE: obj.titles?.length
         ? {
-            item: obj.titles.map((t) => ({
+            item: obj.titles.map((t: any) => ({
               ACT_ID: String(obj.name ?? '').toUpperCase(),
               SPRAS: isoToSapLang(t.language),
               TEXT: t.text,

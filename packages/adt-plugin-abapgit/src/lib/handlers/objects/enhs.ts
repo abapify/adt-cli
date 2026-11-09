@@ -58,7 +58,7 @@ export const enhancementSpotHandler = createHandler<
     const tool = obj.tool || 'BADI_DEF';
     const result: Record<string, unknown> = {
       TOOL: tool,
-      SHORTTEXT: obj.description ?? '',
+      SHORTTEXT: (obj as any).description ?? '',
     };
 
     if (obj.parentComposite) {
@@ -70,7 +70,7 @@ export const enhancementSpotHandler = createHandler<
 
     if (tool === 'BADI_DEF' && obj.badiDefinitions?.length) {
       result.BADI_DATA = {
-        item: obj.badiDefinitions.map((b) => ({
+        item: obj.badiDefinitions.map((b: any) => ({
           BADI_NAME: b.BADI_NAME,
           BADI_SHORTTEXT: b.BADI_SHORTTEXT,
           INTERFACE: b.INTERFACE,

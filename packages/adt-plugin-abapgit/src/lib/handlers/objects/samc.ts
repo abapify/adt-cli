@@ -23,7 +23,7 @@ export const amcApplicationHandler = createHandler<
     SAMC: {
       HEADER: {
         AMC_NAME: String(obj.name ?? '').toUpperCase(),
-        DESCRIPT: obj.description,
+        DESCRIPT: (obj as any).description,
       },
     },
   }),

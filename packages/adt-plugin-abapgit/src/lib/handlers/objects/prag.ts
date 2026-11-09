@@ -25,7 +25,7 @@ export const pragmaHandler = createHandler<PragmaLike, typeof prag>('PRAG', {
         PRAGMA: String(obj.name ?? '').toUpperCase(),
         EXTENSION: obj.extension,
         SIGNATURE: obj.signature,
-        DESCRIPTION: obj.description,
+        DESCRIPTION: (obj as any).description,
       },
     };
   },

@@ -123,8 +123,8 @@ function buildTstct(
 ) {
   if (texts.length === 0) return undefined;
   return {
-    item: texts.map((t) => ({
-      SPRSL: isoToSapLang(t.language || obj.masterLanguage || obj.language),
+    item: texts.map((t: any) => ({
+      SPRSL: isoToSapLang(t.language || (obj as any).masterLanguage || (obj as any).language),
       TCODE: String(obj.name ?? '').toUpperCase(),
       TTEXT: t.text ?? '',
     })),

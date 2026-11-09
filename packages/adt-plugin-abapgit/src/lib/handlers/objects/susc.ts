@@ -29,9 +29,9 @@ export const authObjectClassHandler = createHandler<
       OCLSS: String(obj.name ?? '').toUpperCase(),
     },
     TOBCT: {
-      LANGU: isoToSapLang(obj.language),
+      LANGU: isoToSapLang((obj as any).language),
       OCLSS: String(obj.name ?? '').toUpperCase(),
-      CTEXT: obj.description,
+      CTEXT: (obj as any).description,
     },
   }),
 

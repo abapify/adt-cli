@@ -28,11 +28,11 @@ export const webDynproAppHandler = createHandler<WdyaLike, typeof wdya>(
           APPLICATION_NAME: String(obj.name ?? '').toUpperCase(),
           COMPONENT: obj.component,
           INTERFACE: obj.interface,
-          DESCRIPTION: obj.description,
+          DESCRIPTION: (obj as any).description,
         },
         PROPERTIES: obj.properties?.length
           ? {
-              item: obj.properties.map((p) => ({
+              item: obj.properties.map((p: any) => ({
                 NAME: p.name,
                 VALUE: p.value,
               })),
