@@ -1,3 +1,15 @@
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+- **adt-cli:** silence intentional insecure-TLS opt-in, split verifyBasicAuth ([#296](https://github.com/abapify/adt-cli/pull/296))
+- **adt-cli:** verify basic-auth credentials against SAP before login succeeds ([#289](https://github.com/abapify/adt-cli/pull/289), [#295](https://github.com/abapify/adt-cli/pull/295))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 ### 🩹 Fixes

@@ -1,3 +1,18 @@
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- **cli:** remove unused parseDocument import (S1128) ([019e28f8](https://github.com/abapify/adt-cli/commit/019e28f8))
+- harden config parsing, typed serialization contracts and MCP tool schemas ([#304](https://github.com/abapify/adt-cli/pull/304))
+- **cli:** parse YAML configuration as bounded data ([#302](https://github.com/abapify/adt-cli/pull/302))
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+- **adt-cli:** verify basic-auth credentials against SAP before login succeeds ([#289](https://github.com/abapify/adt-cli/pull/289), [#295](https://github.com/abapify/adt-cli/pull/295))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 ### 🩹 Fixes

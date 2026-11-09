@@ -1,3 +1,31 @@
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- keep import completeness diagnostics nonblocking ([#298](https://github.com/abapify/adt-cli/pull/298))
+- harden config parsing, typed serialization contracts and MCP tool schemas ([#304](https://github.com/abapify/adt-cli/pull/304))
+- remove redundant optional specifiers and use TypeError (S4782, S7786) ([07a0a42b](https://github.com/abapify/adt-cli/commit/07a0a42b))
+- **acds:** allow empty parameter list for table function sources in data sources ([02a5508a](https://github.com/abapify/adt-cli/commit/02a5508a))
+- **acds:** allow empty parameter list for table function sources in data sources ([#294](https://github.com/abapify/adt-cli/pull/294))
+- **adt-cli:** verify basic-auth credentials against SAP before login succeeds ([#289](https://github.com/abapify/adt-cli/pull/289), [#295](https://github.com/abapify/adt-cli/pull/295))
+- **adt-cli:** silence intentional insecure-TLS opt-in, split verifyBasicAuth ([#296](https://github.com/abapify/adt-cli/pull/296))
+- **adt-services:** negotiate ADT session media type during Basic auth ([#297](https://github.com/abapify/adt-cli/pull/297))
+- **cli:** parse YAML configuration as bounded data ([#302](https://github.com/abapify/adt-cli/pull/302))
+- **cli:** remove unused parseDocument import (S1128) ([019e28f8](https://github.com/abapify/adt-cli/commit/019e28f8))
+- **gcts:** remove redundant optional specifier (S4782) ([907af97e](https://github.com/abapify/adt-cli/commit/907af97e))
+- **gcts:** keep DdlsLike fields optional (S4782) ([cd121216](https://github.com/abapify/adt-cli/commit/cd121216))
+- **openai-codegen:** drop unused destructured values in classifyVisit (S1854) ([#307](https://github.com/abapify/adt-cli/pull/307))
+- **p2-cli:** restore missing JSDoc opener on filterJars (parse error) ([2f2d15fd](https://github.com/abapify/adt-cli/commit/2f2d15fd))
+- **sonar:** address security, bugs, and code smells ([#285](https://github.com/abapify/adt-cli/pull/285))
+- **sonar:** stage 1 — exec/fs sink hardening, CI install hardening, analysis scope ([#299](https://github.com/abapify/adt-cli/pull/299))
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- CommandCodeBot
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 ### 🩹 Fixes

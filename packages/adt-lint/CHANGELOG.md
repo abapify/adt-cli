@@ -1,3 +1,13 @@
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 This was a version bump only for @abapify/adt-lint to align it with other projects, there were no code changes.

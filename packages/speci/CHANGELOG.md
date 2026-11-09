@@ -1,3 +1,13 @@
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- **sonar:** stage 1 — exec/fs sink hardening, CI install hardening, analysis scope ([#299](https://github.com/abapify/adt-cli/pull/299))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 ### 🩹 Fixes

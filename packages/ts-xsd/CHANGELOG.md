@@ -1,3 +1,14 @@
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- harden config parsing, typed serialization contracts and MCP tool schemas ([#304](https://github.com/abapify/adt-cli/pull/304))
+- **sonar:** residual findings after the cleanup sweep ([#306](https://github.com/abapify/adt-cli/pull/306))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 ### 🩹 Fixes

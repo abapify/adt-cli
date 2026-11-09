@@ -1,3 +1,13 @@
+## 0.4.35 (2026-11-09)
+
+### 🩹 Fixes
+
+- harden config parsing, typed serialization contracts and MCP tool schemas ([#304](https://github.com/abapify/adt-cli/pull/304))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.34 (2026-11-02)
 
 This was a version bump only for @abapify/aclass to align it with other projects, there were no code changes.
