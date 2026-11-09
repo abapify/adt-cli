@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "nxCloudId": "6aad1f30948146843c8151ea",
+  "nxCloudId": "6af2141cd842c1adccdee4a0",
   "cli": {
     "packageManager": "bun"
   },
