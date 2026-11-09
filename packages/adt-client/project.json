@@ -1,0 +1,17 @@
+{
+  "name": "@abapify/adt-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/adt-client/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/tsdown.config.*",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/package.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ]
+    }
+  }
+}
