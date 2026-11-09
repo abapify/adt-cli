@@ -28,7 +28,7 @@ export const behaviorDefinitionHandler = createHandler('BDEF', {
     return {
       formatVersion: '1',
       header: {
-        description: obj.description ?? obj.name ?? '',
+        description: (obj as any).description ?? obj.name ?? '',
         originalLanguage: lang,
         ...(obj.abapLanguageVersion
           ? { abapLanguageVersion: obj.abapLanguageVersion }
@@ -38,7 +38,7 @@ export const behaviorDefinitionHandler = createHandler('BDEF', {
   },
 
   getSource: (obj: BdefLike) =>
-    typeof obj.getSource === 'function' ? obj.getSource() : '',
+    typeof (obj as any).getSource === 'function' ? (obj as any).getSource() : '',
 
   fromMetadata: (meta: BdefAff) => ({
     name: '',

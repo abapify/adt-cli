@@ -46,10 +46,8 @@ type LoginSession = Awaited<
 >;
 
 /** Pick the effective global redirect URI from the loaded config. */
-function resolveGlobalRedirectUri(config: {
-  raw: { redirectUri?: unknown };
-}): string | undefined {
-  const value = config.raw.redirectUri;
+function resolveGlobalRedirectUri(config: unknown): string | undefined {
+  const value = (config as { raw?: { redirectUri?: unknown } })?.raw?.redirectUri;
   return typeof value === 'string' && value.trim().length > 0
     ? value
     : undefined;

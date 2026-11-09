@@ -37,12 +37,14 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
       );
       const handlerClassFallback = obj.handlerClass
         ? {
-            UCONSERVHANDLER: {
-              ID: name,
-              VERSION: 'A',
-              SERVICEORDER: obj.serviceOrder ?? '01',
-              SERVICEHANDLER: obj.handlerClass,
-            },
+            UCONSERVHANDLER: [
+              {
+                ID: name,
+                VERSION: 'A',
+                SERVICEORDER: obj.serviceOrder ?? '01',
+                SERVICEHANDLER: obj.handlerClass,
+              },
+            ],
           }
         : undefined;
       return {

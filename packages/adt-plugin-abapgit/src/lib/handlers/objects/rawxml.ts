@@ -41,7 +41,7 @@ function createRawXmlHandler<TSchema extends AbapGitSchema<unknown, unknown>>(
 
     toAbapGit: (raw) => {
       const obj = unwrapData<RawXmlObject>(raw);
-      return { ...obj.raw };
+      return { ...obj.raw } as any;
     },
 
     fromAbapGit: (values) => ({

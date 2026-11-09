@@ -84,7 +84,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
     const result: DtelAff = {
       formatVersion: '1',
       header: {
-        description: dtel.description ?? '',
+        description: (dtel as any).description ?? '',
         originalLanguage: lang,
       },
       dataTypeInformation: buildDataTypeInformation(data),

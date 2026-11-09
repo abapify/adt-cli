@@ -30,7 +30,7 @@ export const serviceDefinitionHandler = createHandler('SRVD', {
     return {
       formatVersion: '1',
       header: {
-        description: obj.description ?? obj.name ?? '',
+        description: (obj as any).description ?? obj.name ?? '',
         originalLanguage: lang,
         ...(obj.abapLanguageVersion
           ? { abapLanguageVersion: obj.abapLanguageVersion }
@@ -44,7 +44,7 @@ export const serviceDefinitionHandler = createHandler('SRVD', {
   },
 
   getSource: (obj: SrvdLike) =>
-    typeof obj.getSource === 'function' ? obj.getSource() : '',
+    typeof (obj as any).getSource === 'function' ? (obj as any).getSource() : '',
 
   fromMetadata: (meta: SrvdAff) => ({
     name: '',

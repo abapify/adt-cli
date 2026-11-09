@@ -30,7 +30,7 @@ const STATUS_FROM_AFF: Record<string, string> = Object.fromEntries(
 
 export const programHandler = createHandler(AdkProgram, {
   toMetadata(prog: AdkProgram): ProgAff {
-    const data = prog.dataSync;
+    const data = (prog as any).dataSync;
     const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();
     const generalInformation: GeneralInformation = {
       programType: (data.programType ??
@@ -44,7 +44,7 @@ export const programHandler = createHandler(AdkProgram, {
     return {
       formatVersion: '1',
       header: {
-        description: prog.description ?? data.description ?? '',
+        description: (prog as any).description ?? data.description ?? '',
         originalLanguage: lang,
         ...(data.abapLanguageVersion && data.abapLanguageVersion !== 'standard'
           ? {
@@ -57,7 +57,7 @@ export const programHandler = createHandler(AdkProgram, {
     };
   },
 
-  getSource: (prog: AdkProgram) => prog.getSource(),
+  getSource: (prog: AdkProgram) => (prog as any).getSource(),
 
   fromMetadata: (meta: ProgAff) => ({
     name: '',

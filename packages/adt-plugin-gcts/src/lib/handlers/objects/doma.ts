@@ -19,7 +19,7 @@ import type { DomaAff } from '../../../schemas/generated';
 
 export const domainHandler = createHandler(AdkDomain, {
   toMetadata(doma: AdkDomain): DomaAff {
-    const data = doma.dataSync;
+    const data = (doma as any).dataSync;
     const content = data.content;
     const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();
     const ti = content?.typeInformation;
@@ -37,7 +37,7 @@ export const domainHandler = createHandler(AdkDomain, {
     const result: DomaAff = {
       formatVersion: '1',
       header: {
-        description: doma.description ?? '',
+        description: (doma as any).description ?? '',
         originalLanguage: lang,
       },
       format,

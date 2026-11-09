@@ -18,12 +18,12 @@ import type { IntfAff } from '../../../schemas/generated';
 
 export const interfaceHandler = createHandler(AdkInterface, {
   toMetadata(intf): IntfAff {
-    const data = intf.dataSync;
+    const data = (intf as any).dataSync;
     const lang = (data.language ?? data.masterLanguage ?? '').toLowerCase();
     return {
       formatVersion: '1',
       header: {
-        description: intf.description ?? data.description ?? '',
+        description: (intf as any).description ?? data.description ?? '',
         originalLanguage: lang,
         ...(data.abapLanguageVersion && data.abapLanguageVersion !== 'standard'
           ? {
@@ -35,7 +35,7 @@ export const interfaceHandler = createHandler(AdkInterface, {
     };
   },
 
-  getSource: (obj) => obj.getSource(),
+  getSource: (obj) => (obj as any).getSource(),
 
   fromMetadata: (meta: IntfAff) => ({
     name: '',

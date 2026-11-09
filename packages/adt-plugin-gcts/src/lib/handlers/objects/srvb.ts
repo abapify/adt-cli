@@ -39,7 +39,7 @@ export const serviceBindingHandler = createHandler('SRVB', {
     return {
       formatVersion: '1',
       header: {
-        description: obj.description ?? obj.name ?? '',
+        description: (obj as any).description ?? obj.name ?? '',
         originalLanguage: lang,
         ...(obj.abapLanguageVersion
           ? { abapLanguageVersion: obj.abapLanguageVersion }
