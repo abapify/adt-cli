@@ -98,19 +98,38 @@ function addAuthHeaders(
   }
 }
 
+/** Whether a request body has everything needed for JSON→XML conversion. */
+function hasConvertibleRequestBody(
+  body: string,
+  bodySchema: RouteDefinition['bodySchema'] | undefined,
+  contentType: string | undefined,
+): boolean {
+  return Boolean(body && bodySchema && contentType);
+}
+
 function convertRequestBody(params: {
   body: string;
   contentType: string | undefined;
   bodySchema?: RouteDefinition['bodySchema'];
 }): { body: string; converted: boolean } {
   const { body, contentType, bodySchema } = params;
-  if (!body || !bodySchema || !contentType) {
+  if (!hasConvertibleRequestBody(body, bodySchema, contentType)) {
     return { body, converted: false };
   }
   if (!isJsonContentType(contentType)) {
     return { body, converted: false };
   }
   return { body: jsonToXml(body, bodySchema), converted: true };
+}
+
+/** Whether a response body has everything needed for XML→JSON conversion. */
+function hasConvertibleResponseBody(
+  body: string,
+  contentType: string,
+  status: number,
+  responseSchemas: RouteDefinition['responseSchemas'],
+): boolean {
+  return Boolean(body && isXmlContentType(contentType) && responseSchemas[status]);
 }
 
 function convertResponseBody(params: {
@@ -120,7 +139,7 @@ function convertResponseBody(params: {
   responseSchemas: RouteDefinition['responseSchemas'];
 }): { body: string; converted: boolean } {
   const { body, contentType, status, responseSchemas } = params;
-  if (!body || !isXmlContentType(contentType) || !responseSchemas[status]) {
+  if (!hasConvertibleResponseBody(body, contentType, status, responseSchemas)) {
     return { body, converted: false };
   }
   const converted = xmlToJson(body, responseSchemas[status]);
@@ -265,13 +284,14 @@ export function createAdtProxy(config: AdtProxyConfig) {
     return `${targetUrl}${relativePath}`;
   }
 
-  async function handleMatchedRoute(
-    method: string,
-    url: string,
-    requestBody: string,
-    incomingHeaders: Record<string, HeaderValue>,
-    route: RouteDefinition,
-  ): Promise<ProxyResult> {
+  async function handleMatchedRoute(params: {
+    method: string;
+    url: string;
+    requestBody: string;
+    incomingHeaders: Record<string, HeaderValue>;
+    route: RouteDefinition;
+  }): Promise<ProxyResult> {
+    const { method, url, requestBody, incomingHeaders, route } = params;
     logger.info(`Matched route: ${route.method} ${route.pathTemplate}`);
 
     const reqContentType = getContentType(incomingHeaders);
@@ -387,13 +407,13 @@ export function createAdtProxy(config: AdtProxyConfig) {
     const match = contractRoutes.match(method, url, basePath);
 
     if (match && convertContent) {
-      const result = await handleMatchedRoute(
+      const result = await handleMatchedRoute({
         method,
         url,
         requestBody,
-        req.headers,
-        match.route,
-      );
+        incomingHeaders: req.headers,
+        route: match.route,
+      });
       sendResponse(res, result);
       return;
     }

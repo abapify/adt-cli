@@ -179,18 +179,34 @@ function routeFromEndpoint({
   } as RouteDefinition & { _regex: RegExp };
 }
 
+/** Strip the query string and any configured base path from a request URL. */
+function relativeRequestPath(url: string, basePath: string): string {
+  const pathname = url.split('?')[0];
+  if (basePath && pathname.startsWith(basePath)) {
+    return pathname.slice(basePath.length) || '/';
+  }
+  return pathname;
+}
+
+/** Build the params record from a regex match against a route. */
+function paramsFromMatch(
+  route: RouteDefinition,
+  match: RegExpExecArray,
+): Record<string, string> {
+  const params: Record<string, string> = {};
+  for (let i = 0; i < route.pathParamNames.length; i++) {
+    params[route.pathParamNames[i]] = match[i + 1] || '';
+  }
+  return params;
+}
+
 function matchRoute(
   routes: RouteDefinition[],
   method: string,
   url: string,
   basePath: string,
 ): { route: RouteDefinition; params: Record<string, string> } | null {
-  const pathname = url.split('?')[0];
-  const relativePath =
-    basePath && pathname.startsWith(basePath)
-      ? pathname.slice(basePath.length) || '/'
-      : pathname;
-
+  const relativePath = relativeRequestPath(url, basePath);
   const targetMethod = method.toUpperCase();
   for (const route of routes) {
     if (route.method !== targetMethod) continue;
@@ -198,11 +214,7 @@ function matchRoute(
       relativePath,
     );
     if (match) {
-      const params: Record<string, string> = {};
-      for (let i = 0; i < route.pathParamNames.length; i++) {
-        params[route.pathParamNames[i]] = match[i + 1] || '';
-      }
-      return { route, params };
+      return { route, params: paramsFromMatch(route, match) };
     }
   }
   return null;
