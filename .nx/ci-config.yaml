@@ -1,9 +1,12 @@
 # Nx Cloud reads this file to configure your CI Pipeline Executions.
-# Uncomment the "nx start-nx-agents" line in your CI workflow to distribute tasks across agents.
+# Distribution is opt-in: this config alone does not start Nx Cloud agents.
+# To enable agents, add the Nx Cloud agent/workers start command in CI (see Nx docs for the
+# correct command when ci-config.yaml is present) and keep stop-after aligned with CI targets.
 # Learn how to start Nx Agents at https://nx.dev/ci/reference/nx-cloud-cli#nx-cloud-start-nx-agents
 # Learn how to configure this file at https://nx.dev/ci/reference/nx-cloud/ci-config
 dte:
   distribute-on: 3 linux-medium-js
 lifecycle:
+  # Match this repo CI target set (see .github/workflows/ci.yml e2e-ci).
   stop-after:
-    - build
+    - e2e-ci
