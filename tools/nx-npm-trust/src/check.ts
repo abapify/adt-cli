@@ -429,7 +429,8 @@ if (packCheck) {
   const packed = Array.isArray(packedRaw)
     ? (packedRaw[0] as { files?: { path?: string }[] } | undefined)
     : packedRaw && typeof packedRaw === 'object'
-      ? (Object.values(packedRaw)[0] as { files?: { path?: string }[] } | undefined)
+      ? (Object.values(packedRaw)[0] as
+          { files?: { path?: string }[] } | undefined)
       : null;
   const files =
     pack.code === 0 && packed
