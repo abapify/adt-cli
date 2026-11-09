@@ -20,6 +20,7 @@ import { programHandler } from '../../src/lib/handlers/objects/prog.ts';
 import { domainHandler } from '../../src/lib/handlers/objects/doma.ts';
 import { dataElementHandler } from '../../src/lib/handlers/objects/dtel.ts';
 import { functionGroupHandler } from '../../src/lib/handlers/objects/fugr.ts';
+import { functionModuleHandler } from '../../src/lib/handlers/objects/func.ts';
 
 function meta(files: { path: string; content: string }[]): Record<string, any> {
   return JSON.parse(files.find((f) => f.path.endsWith('.json'))!.content);
@@ -376,5 +377,37 @@ describe('FUGR handler — AFF fugr-v1 alignment', () => {
     );
     assert.strictEqual(m.header.originalLanguage, 'en');
     assert.strictEqual(m.fixPointArithmetic, true);
+  });
+});
+
+
+// ============================================================
+// FUNC
+// ============================================================
+
+describe('FUNC handler — AFF func-v1 alignment', () => {
+  it('emits formatVersion "1" and processingType', async () => {
+    const m = meta(
+      await functionModuleHandler.serialize({
+        name: 'ZTEST_FM',
+        description: 'Test func',
+        dataSync: { language: 'EN', processingType: 'normal', includeNumber: '0000' },
+      } as any),
+    );
+    assert.strictEqual(m.formatVersion, '1');
+    assert.strictEqual(m.processingType, 'normal');
+    assert.strictEqual(m.includeNumber, '0000');
+  });
+
+  it('round-trips: serialize → fromMetadata recovers ADK fields', async () => {
+    const files = await functionModuleHandler.serialize({
+      name: 'ZTEST_FM',
+      description: 'Roundtrip func',
+      dataSync: { language: 'EN', processingType: 'rfc', includeNumber: '0001' },
+    } as any);
+    const recovered = functionModuleHandler.fromAbapGit!(meta(files));
+    assert.strictEqual(recovered.description, 'Roundtrip func');
+    assert.strictEqual(recovered.processingType, 'rfc');
+    assert.strictEqual(recovered.includeNumber, '0001');
   });
 });

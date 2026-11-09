@@ -13,6 +13,7 @@ export { dataElementHandler } from './dtel';
 export { tableHandler } from './tabl';
 export { tableTypeHandler } from './ttyp';
 export { functionGroupHandler } from './fugr';
+export { functionModuleHandler } from './func';
 export { ddlSourceHandler } from './ddls';
 export { dclSourceHandler } from './dcls';
 export { behaviorDefinitionHandler } from './bdef';
