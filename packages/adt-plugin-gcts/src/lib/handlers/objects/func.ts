@@ -2,11 +2,8 @@
  * FUNC (function module) handler for gCTS / AFF format.
  *
  * Projects ADK function module data to the AFF func-v1.json schema shape.
- * A function module is a child of a function group, but it can also be
- * serialized as its own ADK object (FUNC) for the gCTS file format.
  */
 
-import { AdkFunctionModule } from '@abapify/adk';
 import { createHandler } from '../base';
 import type { FuncAff } from '../../../schemas/generated';
 
@@ -18,31 +15,74 @@ type FuncLike = {
   getSource?: () => Promise<string> | string;
 };
 
-export const functionModuleHandler = createHandler(AdkFunctionModule, {
+const RELEASE_STATE_MAP: Record<string, FuncAff['releaseState']> = {
+  notReleased: 'notReleased',
+  internal: 'releasedSapInternal',
+  external: 'released',
+  obsolete: 'obsolete',
+  markedForRelease: 'releasePlanned',
+};
+
+export const functionModuleHandler = createHandler('FUNC', {
   toMetadata(func: FuncLike): FuncAff {
     const data = (func.dataSync ?? {}) as Record<string, unknown>;
     const meta: FuncAff = {
       formatVersion: '1',
       header: {
-        description: func.description ?? (data.description as string) ?? '',
+        description:
+          func.description ?? (data.description as string) ?? func.name ?? '',
       },
       processingType:
         (data.processingType as FuncAff['processingType']) ?? 'normal',
       includeNumber: (data.includeNumber as string) ?? '0000',
     };
-    if (data.rfcProperties && typeof data.rfcProperties === 'object') {
-      meta.rfcProperties = data.rfcProperties as FuncAff['rfcProperties'];
+    // RFC properties: AFF nests them; ADT exposes flat fields.
+    if (
+      typeof data.basXMLEnabled === 'boolean' ||
+      typeof data.rfcScope === 'string' ||
+      typeof data.rfcVersion === 'string' ||
+      typeof data.abapFromJava === 'boolean' ||
+      typeof data.javaFromAbap === 'boolean' ||
+      typeof data.javaRemote === 'boolean'
+    ) {
+      meta.rfcProperties = {
+        basxmlEnabled: data.basXMLEnabled === true,
+        rfcScope:
+          (data.rfcScope as FuncAff['rfcProperties']['rfcScope']) ??
+          'notClassified',
+        rfcVersion:
+          (data.rfcVersion as FuncAff['rfcProperties']['rfcVersion']) ?? 'any',
+        abapFromJava: data.abapFromJava as boolean | undefined,
+        javaFromAbap: data.javaFromAbap as boolean | undefined,
+        javaRemote: data.javaRemote as boolean | undefined,
+      };
     }
-    if (data.updateProperties && typeof data.updateProperties === 'object') {
-      meta.updateProperties =
-        data.updateProperties as FuncAff['updateProperties'];
+    // Update properties: AFF nests updateTaskKind.
+    if (typeof data.updateTaskKind === 'string') {
+      meta.updateProperties = {
+        updateTaskKind:
+          data.updateTaskKind as FuncAff['updateProperties']['updateTaskKind'],
+      };
     }
     if (typeof data.releaseState === 'string') {
-      meta.releaseState = data.releaseState as FuncAff['releaseState'];
+      const mapped = RELEASE_STATE_MAP[data.releaseState];
+      if (mapped) meta.releaseState = mapped;
     }
+    if (typeof data.releaseDate === 'string')
+      meta.releaseDate = data.releaseDate;
     if (typeof data.global === 'boolean') meta.global = data.global;
     if (typeof data.exceptionClasses === 'boolean')
       meta.exceptionClasses = data.exceptionClasses;
+    if (typeof data.application === 'string')
+      meta.application = data.application as FuncAff['application'];
+    if (typeof data.client === 'string')
+      meta.client = data.client as FuncAff['client'];
+    if (typeof data.activeFunctionExit === 'string')
+      meta.activeFunctionExit =
+        data.activeFunctionExit as FuncAff['activeFunctionExit'];
+    if (typeof data.notExecutable === 'boolean')
+      meta.notExecutable = data.notExecutable;
+    if (typeof data.editLocked === 'boolean') meta.editLocked = data.editLocked;
     return meta;
   },
 
@@ -52,9 +92,12 @@ export const functionModuleHandler = createHandler(AdkFunctionModule, {
   fromMetadata: (meta: FuncAff) => ({
     name: '',
     description: meta.header.description,
-    language: meta.header.originalLanguage?.toUpperCase(),
-    masterLanguage: meta.header.originalLanguage?.toUpperCase(),
+    language: undefined,
+    masterLanguage: undefined,
     processingType: meta.processingType,
     includeNumber: meta.includeNumber,
+    releaseState: meta.releaseState,
+    global: meta.global,
+    exceptionClasses: meta.exceptionClasses,
   }),
 });

@@ -116,10 +116,14 @@ function convertRequestBody(params: {
   if (!hasConvertibleRequestBody(body, bodySchema, contentType)) {
     return { body, converted: false };
   }
-  if (!isJsonContentType(contentType)) {
+  const narrowedContentType = contentType as string;
+  const narrowedSchema = bodySchema as NonNullable<
+    RouteDefinition['bodySchema']
+  >;
+  if (!isJsonContentType(narrowedContentType)) {
     return { body, converted: false };
   }
-  return { body: jsonToXml(body, bodySchema), converted: true };
+  return { body: jsonToXml(body, narrowedSchema), converted: true };
 }
 
 /** Whether a response body has everything needed for XML→JSON conversion. */

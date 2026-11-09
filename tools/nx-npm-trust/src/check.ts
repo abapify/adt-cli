@@ -430,8 +430,10 @@ if (packCheck) {
   if (Array.isArray(packedRaw)) {
     packed = packedRaw[0] as { files?: { path?: string }[] } | undefined;
   } else if (packedRaw && typeof packedRaw === 'object') {
-    packed = Object.values(packedRaw)[0] as
-      { files?: { path?: string }[] } | undefined;
+    const entry =
+      (name && (packedRaw as Record<string, unknown>)[name]) ??
+      Object.values(packedRaw)[0];
+    packed = entry as { files?: { path?: string }[] } | undefined;
   } else {
     packed = null;
   }

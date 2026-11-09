@@ -76,6 +76,7 @@ export class ConfigLoader implements IConfigLoader {
       for (const plugin of config.plugins.formats) {
         if (!plugin.name) {
           errors.push('Plugin name is required');
+          continue;
         }
         if (!plugin.name.startsWith('@abapify/')) {
           warnings.push(
