@@ -35,7 +35,12 @@ export const wdccHandler = createHandler<WdccLike, typeof wdcc>('WDCC', {
       PARENT: obj.parent,
       RELID: obj.relId,
       OTR_TEXT: obj.otrTexts?.length
-        ? { item: obj.otrTexts.map((t: any) => ({ NAME: t.name, TEXT: t.text })) }
+        ? {
+            item: obj.otrTexts.map((t: any) => ({
+              NAME: t.name,
+              TEXT: t.text,
+            })),
+          }
         : undefined,
       DESCR_LANG: isoToSapLang(obj.descrLang),
     };

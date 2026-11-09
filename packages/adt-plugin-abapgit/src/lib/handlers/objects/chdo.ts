@@ -49,7 +49,9 @@ export const changeDocumentObjectHandler = createHandler<
       ? {
           TCDOBTS: [
             {
-              SPRAS: isoToSapLang((obj as any).masterLanguage || (obj as any).language),
+              SPRAS: isoToSapLang(
+                (obj as any).masterLanguage || (obj as any).language,
+              ),
               OBJECT: name,
               OBTEXT: (obj as any).description,
             },
@@ -83,7 +85,9 @@ export const changeDocumentObjectHandler = createHandler<
           ? {
               TCDOBTS: mapItems(obj.objectTexts, (t) => ({
                 SPRAS: isoToSapLang(
-                  t.language || (obj as any).masterLanguage || (obj as any).language,
+                  t.language ||
+                    (obj as any).masterLanguage ||
+                    (obj as any).language,
                 ),
                 OBJECT: t.object ?? name,
                 OBTEXT: t.text,

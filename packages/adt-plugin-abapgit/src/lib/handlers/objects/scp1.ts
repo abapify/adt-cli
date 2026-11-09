@@ -49,7 +49,9 @@ export const businessConfigSetHandler = createHandler<
     // fromAbapGit reads texts[0] as the description)
     const allTexts = [...(obj.texts ?? [])];
     if ((obj as any).description) {
-      const idx = allTexts.findIndex((t) => t.text === (obj as any).description);
+      const idx = allTexts.findIndex(
+        (t) => t.text === (obj as any).description,
+      );
       if (idx === -1) {
         allTexts.unshift({
           language: obj.texts?.[0]?.language ?? 'en',

@@ -164,10 +164,12 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
       const items = normalizeItems(
         parsed.abapGit?.abap?.values?.TDLINES?.item,
       ) as Array<{ TDLINE?: string; TDFORMAT?: string }>;
-      tdlinesData[sapLangToIso(match[1].toUpperCase())] = items.map((l: any) => ({
-        line: l.TDLINE,
-        format: l.TDFORMAT,
-      }));
+      tdlinesData[sapLangToIso(match[1].toUpperCase())] = items.map(
+        (l: any) => ({
+          line: l.TDLINE,
+          format: l.TDFORMAT,
+        }),
+      );
     }
     if (Object.keys(tdlinesData).length) data.tdlines = tdlinesData;
   },

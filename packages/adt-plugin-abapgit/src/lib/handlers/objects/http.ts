@@ -32,7 +32,9 @@ export const httpServiceHandler = createHandler<HttpServiceLike, typeof http>(
       const obj = unwrapData<HttpServiceLike>(raw);
 
       const name = String(obj.name ?? '').toUpperCase();
-      const lang = isoToSapLang((obj as any).masterLanguage || (obj as any).language);
+      const lang = isoToSapLang(
+        (obj as any).masterLanguage || (obj as any).language,
+      );
       const handlerClassFallback = obj.handlerClass
         ? {
             UCONSERVHANDLER: {

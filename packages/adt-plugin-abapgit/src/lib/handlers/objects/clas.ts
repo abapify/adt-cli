@@ -132,7 +132,8 @@ export const classHandler = createHandler(AdkClass, {
   },
 
   getSources: (cls) => {
-    const includes = ((cls as any).dataSync as { include?: unknown[] }).include ?? [];
+    const includes =
+      ((cls as any).dataSync as { include?: unknown[] }).include ?? [];
     return includes.map((inc: any) => ({
       suffix:
         ABAPGIT_SUFFIX[String(inc.includeType ?? 'main') as ClassIncludeType],

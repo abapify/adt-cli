@@ -37,7 +37,9 @@ export const messageClassHandler = createHandler<MessageClassLike, typeof msag>(
       return {
         T100A: {
           ARBGB: String(obj.name ?? '').toUpperCase(),
-          MASTERLANG: isoToSapLang((obj as any).masterLanguage || (obj as any).language),
+          MASTERLANG: isoToSapLang(
+            (obj as any).masterLanguage || (obj as any).language,
+          ),
           STEXT: (obj as any).description ?? '',
         },
         T100:
@@ -45,7 +47,9 @@ export const messageClassHandler = createHandler<MessageClassLike, typeof msag>(
             ? {
                 item: messages.map((m: any) => ({
                   SPRSL: isoToSapLang(
-                    m.language || (obj as any).masterLanguage || (obj as any).language,
+                    m.language ||
+                      (obj as any).masterLanguage ||
+                      (obj as any).language,
                   ),
                   ARBGB: String(obj.name ?? '').toUpperCase(),
                   MSGNR: String(m.number ?? '').padStart(3, '0'),

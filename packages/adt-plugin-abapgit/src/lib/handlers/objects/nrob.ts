@@ -52,7 +52,9 @@ export const numberRangeObjectHandler = createHandler<
         YEARLY: obj.yearly,
       },
       TEXT: {
-        LANGU: isoToSapLang((obj as any).masterLanguage || (obj as any).language),
+        LANGU: isoToSapLang(
+          (obj as any).masterLanguage || (obj as any).language,
+        ),
         OBJECT: name,
         TXT: (obj as any).description ?? '',
         TXTSHORT: obj.shortText ?? '',
