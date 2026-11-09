@@ -139,7 +139,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
   serializer_version: 'v1.0.0',
 
   toAbapGit: (obj) => {
-    const data = obj.dataSync;
+    const data = obj.dataSync as Record<string, unknown>;
     const de = data?.dataElement;
     const typeKind = de?.typeKind ?? '';
 

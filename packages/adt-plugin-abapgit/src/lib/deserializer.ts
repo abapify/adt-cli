@@ -174,7 +174,7 @@ function collectBinaryCompanions(
 async function parseMetadata(
   fileTree: FileTree,
   objFiles: ObjectFiles,
-  handler: ReturnType<typeof getHandler>,
+  handler: NonNullable<ReturnType<typeof getHandler>>,
 ): Promise<{ values: Record<string, unknown>; isAffJson: boolean } | null> {
   if (objFiles.jsonFile) {
     const jsonContent = await fileTree.read(objFiles.jsonFile);
@@ -216,7 +216,7 @@ async function parseMetadata(
  * Build the payload from handler or filename fallback.
  */
 function buildPayload(
-  handler: ReturnType<typeof getHandler>,
+  handler: NonNullable<ReturnType<typeof getHandler>>,
   values: Record<string, unknown>,
   isAffJson: boolean,
   objFiles: ObjectFiles,
@@ -237,7 +237,7 @@ function buildPayload(
  * Set sources on an ADK object using handler or fallback.
  */
 function setObjectSources(
-  handler: ReturnType<typeof getHandler>,
+  handler: NonNullable<ReturnType<typeof getHandler>>,
   adkObject: AdkObject,
   sources: Record<string, string>,
 ): void {
@@ -303,7 +303,7 @@ type FolderConfig = Awaited<ReturnType<typeof resolveFolderConfig>>;
 async function loadObjectSources(
   fileTree: FileTree,
   objFiles: ObjectFiles,
-  handler: ReturnType<typeof getHandler>,
+  handler: NonNullable<ReturnType<typeof getHandler>>,
 ): Promise<Record<string, string>> {
   const contents = await Promise.all(
     objFiles.sourceFiles.map(({ path, binary }) =>
@@ -350,7 +350,7 @@ async function* buildObject(
   fileTree: FileTree,
   adk: ReturnType<typeof createAdk>,
   objFiles: ObjectFiles,
-  handler: ReturnType<typeof getHandler>,
+  handler: NonNullable<ReturnType<typeof getHandler>>,
   options: ExportOptions | undefined,
   folderConfig: FolderConfig,
 ): AsyncGenerator<AdkObject> {

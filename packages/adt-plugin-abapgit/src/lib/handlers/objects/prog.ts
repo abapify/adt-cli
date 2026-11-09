@@ -9,7 +9,7 @@ import { createHandler } from '../base';
 function programSubc(obj: AdkProgram | AdkInclude): string {
   if (obj.kind === AdkInclude.kind) return 'I';
   if (!obj.isLoaded) return '1';
-  switch (obj.dataSync.programType) {
+  switch ((obj.dataSync as { programType?: string }).programType) {
     case 'modulePool':
       return 'M';
     case 'subroutinePool':

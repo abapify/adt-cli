@@ -16,7 +16,7 @@ export const interfaceHandler = createHandler(AdkInterface, {
   toAbapGit: (obj) => ({
     VSEOINTERF: {
       CLSNAME: obj.name ?? '',
-      LANGU: isoToSapLang(obj.dataSync?.language),
+      LANGU: isoToSapLang((obj.dataSync as { language?: string } | undefined)?.language),
       DESCRIPT: obj.description ?? '',
       EXPOSURE: '2', // 2 = Public
       STATE: '1', // 1 = Active

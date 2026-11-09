@@ -14,7 +14,7 @@ export const domainHandler = createHandler(AdkDomain, {
   serializer_version: 'v1.0.0',
 
   toAbapGit: (obj) => {
-    const data = obj.dataSync;
+    const data = obj.dataSync as Record<string, unknown>;
     const typeInfo = data?.content?.typeInformation;
     const outInfo = data?.content?.outputInformation;
     const valueInfo = data?.content?.valueInformation;

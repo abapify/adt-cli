@@ -775,6 +775,7 @@ function matchCoreHttpRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** True for quick-search queries that should hit the BAdI implementation fixture. */
@@ -828,6 +829,7 @@ function matchInformationSystemRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** Callers / callees and where-used 2-step POST flow. */
@@ -879,6 +881,7 @@ function matchUsageReferenceRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** Navigation target, data preview and DDIC table routes. */
@@ -915,6 +918,7 @@ function matchPreviewAndDdicTableRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** Route matcher: matchDdicDomainsRoutes */
@@ -945,6 +949,7 @@ function matchDdicDomainsRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/domains/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDdicDataElementsRoutes */
@@ -978,6 +983,7 @@ function matchDdicDataElementsRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/dataelements/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDdicStructuresRoutes */
@@ -1028,6 +1034,7 @@ function matchDdicStructuresRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/tables/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchCdsDdlSourcesRoutes */
@@ -1067,6 +1074,7 @@ function matchCdsDdlSourcesRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/ddl/sources/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchCdsDclSourcesRoutes */
@@ -1106,6 +1114,7 @@ function matchCdsDclSourcesRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/acm/dcl/sources/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchBdefRoutes */
@@ -1149,6 +1158,7 @@ function matchBdefRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/bo/behaviordefinitions/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchBadiEnhancementImplementationMetadataRoutes */
@@ -1169,6 +1179,7 @@ function matchBadiEnhancementImplementationMetadataRoutes(
       contentType: 'application/vnd.sap.adt.enh.enhoxhb.v4+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchBadiEnhancementImplementationRoutes */
@@ -1212,6 +1223,7 @@ function matchBadiEnhancementImplementationRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/enhancements/enhoxhh/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchVitWbBasicObjectRoutes */
@@ -1245,6 +1257,7 @@ function matchVitWbBasicObjectRoutes(
       contentType: 'application/vnd.sap.adt.basic.object.properties+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchSrvdRoutes */
@@ -1286,6 +1299,7 @@ function matchSrvdRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/srvd/sources/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchSrvbRoutes */
@@ -1347,6 +1361,7 @@ function matchSrvbRoutes(
   ) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchCdsRapSourceTypesRoutes */
@@ -1394,6 +1409,7 @@ function matchCdsRapSourceTypesRoutes(
       contentType: 'application/vnd.sap.adt.blues.v1+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDsfiRoutes */
@@ -1424,6 +1440,7 @@ function matchDsfiRoutes(
       contentType: 'application/vnd.sap.adt.blues.v1+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDesdRoutes */
@@ -1441,6 +1458,7 @@ function matchDesdRoutes(
       contentType: 'application/xml',
     };
   }
+  return undefined;
 }
 
 /** OO classrun + CTS search/create setup routes. */
@@ -1501,6 +1519,7 @@ function matchClassrunAndCtsSetupRoutes(
     };
   }
 
+  return undefined;
   return undefined;
 }
 
@@ -1620,6 +1639,7 @@ function matchCtsReleaseRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** Create a child task under a modifiable transport request. */
@@ -1698,6 +1718,7 @@ function matchCtsTaskRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** CTS list/get/delete for requests and tasks. */
@@ -1751,6 +1772,7 @@ function matchCtsReadRoutes(
     return { status: 204, body: '', contentType: 'text/plain' };
   }
 
+  return undefined;
   return undefined;
 }
 
@@ -1850,6 +1872,7 @@ function matchCtsUpdateAndPackageRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** STRUST certificate and PSE routes. */
@@ -1932,6 +1955,7 @@ function matchStrustRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** System user lookup/search and session info routes. */
@@ -1964,6 +1988,7 @@ function matchUsersAndSessionRoutes(
     return { status: 200, body: f.session, contentType: 'application/json' };
   }
 
+  return undefined;
   return undefined;
 }
 
@@ -2019,6 +2044,7 @@ function matchAtcRoutes(
     };
   }
 
+  return undefined;
   return undefined;
 }
 
@@ -2102,6 +2128,7 @@ function matchSourceAndLockRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** Object-root metadata GET/PUT routes (CLAS / INTF / PROG / FUGR). */
@@ -2165,6 +2192,7 @@ function matchObjectMetadataRoutes(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  return undefined;
   return undefined;
 }
 
@@ -2236,6 +2264,7 @@ function matchActivationAndLifecycleRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** Function module / function group routes. */
@@ -2286,6 +2315,7 @@ function matchFunctionGroupRoutes(
     };
   }
 
+  return undefined;
   return undefined;
 }
 
@@ -2349,6 +2379,7 @@ function matchMiscToolRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** JSON route result (gCTS/FLP fixtures are all JSON). */
@@ -2372,6 +2403,7 @@ function matchGctsRepositoryRootRoutes(
       };
   }
   return undefined;
+  return undefined;
 }
 
 /** gCTS branch routes (switch / delete / list / create). */
@@ -2393,6 +2425,7 @@ function matchGctsBranchRoutes(
     return jsonResult('{}');
   }
   return undefined;
+  return undefined;
 }
 
 /** gCTS config routes (single key get/delete + set). */
@@ -2410,6 +2443,7 @@ function matchGctsConfigRoutes(
     return jsonResult('{"result":{"key":"VCS_TARGET_DIR","value":"src/"}}');
   }
   return undefined;
+  return undefined;
 }
 
 /** gCTS repository action routes (clone/pull/push/log/objects/commit). */
@@ -2426,6 +2460,7 @@ function matchGctsRepoActionRoutes(
   if (sub === '/commit' && m === 'POST')
     return jsonResult(f.gctsCommitResponse);
   return undefined;
+  return undefined;
 }
 
 /** gCTS repository item routes (`/<rid>` — GET / setItem / DELETE). */
@@ -2439,6 +2474,7 @@ function matchGctsRepoItemRoutes(
     if (m === 'POST') return jsonResult('{}');
     if (m === 'DELETE') return jsonResult('{}');
   }
+  return undefined;
   return undefined;
 }
 
@@ -2471,6 +2507,7 @@ function matchGctsRoutes(
     matchGctsRepoActionRoutes(m, sub, f) ??
     matchGctsRepoItemRoutes(m, sub, f)
   );
+  return undefined;
 }
 
 /** True when `path` ends with an entity key like `/Chips('some-id')`. */
@@ -2534,6 +2571,7 @@ function matchFlpEntityRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** FLP entity-set list routes (Catalogs / Pages / Chips). */
@@ -2562,6 +2600,7 @@ function matchFlpListRoutes(
   }
 
   return undefined;
+  return undefined;
 }
 
 /** abapGit export and CSRF token routes. */
@@ -2588,6 +2627,7 @@ function matchAbapGitExportAndCsrfRoutes(
     return { status: 200, body: '', contentType: 'text/plain' };
   }
 
+  return undefined;
   return undefined;
 }
 
@@ -2616,4 +2656,5 @@ function matchSoapRfcRoutes(
         `</soap-env:Envelope>`,
     };
   }
+  return undefined;
 }

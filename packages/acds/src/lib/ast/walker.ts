@@ -19,6 +19,7 @@ import type {
   HierarchyDefinition,
   JoinClause,
   JoinSource,
+  JoinGroup,
   ParameterDefinition,
   SelectStatement,
   ScalarFunctionDefinition,
@@ -244,9 +245,10 @@ function* walkJoinSource(
   owner: ViewEntityDefinition,
   source: JoinSource,
 ): Iterable<{ owner: ViewEntityDefinition; join: JoinClause }> {
-  if (source.kind !== 'joinGroup') return;
-  yield* walkJoinSource(owner, source.source);
-  yield* walkJoinChain(owner, source.joins);
+  if (!('kind' in source) || source.kind !== 'joinGroup') return;
+  const group = source as JoinGroup;
+  yield* walkJoinSource(owner, group.source);
+  yield* walkJoinChain(owner, group.joins);
 }
 
 /** Yield every field definition from tables and structures. */
