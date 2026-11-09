@@ -31,20 +31,23 @@ export const functionModuleHandler = createHandler(AdkFunctionModule, {
       header: {
         description: func.description ?? (data.description as string) ?? '',
       },
-      processingType: (data.processingType as FuncAff['processingType']) ?? 'normal',
+      processingType:
+        (data.processingType as FuncAff['processingType']) ?? 'normal',
       includeNumber: (data.includeNumber as string) ?? '0000',
     };
     if (data.rfcProperties && typeof data.rfcProperties === 'object') {
       meta.rfcProperties = data.rfcProperties as FuncAff['rfcProperties'];
     }
     if (data.updateProperties && typeof data.updateProperties === 'object') {
-      meta.updateProperties = data.updateProperties as FuncAff['updateProperties'];
+      meta.updateProperties =
+        data.updateProperties as FuncAff['updateProperties'];
     }
     if (typeof data.releaseState === 'string') {
       meta.releaseState = data.releaseState as FuncAff['releaseState'];
     }
     if (typeof data.global === 'boolean') meta.global = data.global;
-    if (typeof data.exceptionClasses === 'boolean') meta.exceptionClasses = data.exceptionClasses;
+    if (typeof data.exceptionClasses === 'boolean')
+      meta.exceptionClasses = data.exceptionClasses;
     return meta;
   },
 
