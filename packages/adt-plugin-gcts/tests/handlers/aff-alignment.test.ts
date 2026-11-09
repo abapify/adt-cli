@@ -380,7 +380,6 @@ describe('FUGR handler — AFF fugr-v1 alignment', () => {
   });
 });
 
-
 // ============================================================
 // FUNC
 // ============================================================
@@ -391,7 +390,11 @@ describe('FUNC handler — AFF func-v1 alignment', () => {
       await functionModuleHandler.serialize({
         name: 'ZTEST_FM',
         description: 'Test func',
-        dataSync: { language: 'EN', processingType: 'normal', includeNumber: '0000' },
+        dataSync: {
+          language: 'EN',
+          processingType: 'normal',
+          includeNumber: '0000',
+        },
       } as any),
     );
     assert.strictEqual(m.formatVersion, '1');
@@ -403,7 +406,11 @@ describe('FUNC handler — AFF func-v1 alignment', () => {
     const files = await functionModuleHandler.serialize({
       name: 'ZTEST_FM',
       description: 'Roundtrip func',
-      dataSync: { language: 'EN', processingType: 'rfc', includeNumber: '0001' },
+      dataSync: {
+        language: 'EN',
+        processingType: 'rfc',
+        includeNumber: '0001',
+      },
     } as any);
     const recovered = functionModuleHandler.fromAbapGit!(meta(files));
     assert.strictEqual(recovered.description, 'Roundtrip func');
