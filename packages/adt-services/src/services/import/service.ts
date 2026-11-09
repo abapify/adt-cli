@@ -533,8 +533,10 @@ function extractSearchObjects(searchResult: unknown): SearchObject[] {
     };
     rawObjects = main.objectReference;
   }
-  const singleObject = rawObjects ? [rawObjects] as SearchObject[] : [];
-  return (Array.isArray(rawObjects) ? rawObjects : singleObject) as SearchObject[];
+  const singleObject = rawObjects ? ([rawObjects] as SearchObject[]) : [];
+  return (
+    Array.isArray(rawObjects) ? rawObjects : singleObject
+  ) as SearchObject[];
 }
 
 /**

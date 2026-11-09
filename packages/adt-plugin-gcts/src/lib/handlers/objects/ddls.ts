@@ -128,7 +128,9 @@ export const ddlSourceHandler = createHandler('DDLS', {
   },
 
   getSource: (obj: DdlsLike) =>
-    typeof (obj as any).getSource === 'function' ? (obj as any).getSource() : '',
+    typeof (obj as any).getSource === 'function'
+      ? (obj as any).getSource()
+      : '',
 
   fromMetadata: (meta: DdlsAff) => ({
     name: '',

@@ -44,7 +44,9 @@ export const serviceDefinitionHandler = createHandler('SRVD', {
   },
 
   getSource: (obj: SrvdLike) =>
-    typeof (obj as any).getSource === 'function' ? (obj as any).getSource() : '',
+    typeof (obj as any).getSource === 'function'
+      ? (obj as any).getSource()
+      : '',
 
   fromMetadata: (meta: SrvdAff) => ({
     name: '',

@@ -56,7 +56,7 @@ export function normalizeSearchResults(
     raw = main.objectReference;
   }
 
-  const single = raw ? [raw] as SearchObject[] : [];
+  const single = raw ? ([raw] as SearchObject[]) : [];
   return (Array.isArray(raw) ? raw : single) as SearchObject[];
 }
 

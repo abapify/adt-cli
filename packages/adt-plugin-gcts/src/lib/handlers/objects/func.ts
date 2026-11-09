@@ -48,10 +48,13 @@ export const functionModuleHandler = createHandler('FUNC', {
       meta.rfcProperties = {
         basxmlEnabled: data.basXMLEnabled === true,
         rfcScope:
-          (data.rfcScope as NonNullable<FuncAff['rfcProperties']>['rfcScope']) ??
-          'notClassified',
+          (data.rfcScope as NonNullable<
+            FuncAff['rfcProperties']
+          >['rfcScope']) ?? 'notClassified',
         rfcVersion:
-          (data.rfcVersion as NonNullable<FuncAff['rfcProperties']>['rfcVersion']) ?? 'any',
+          (data.rfcVersion as NonNullable<
+            FuncAff['rfcProperties']
+          >['rfcVersion']) ?? 'any',
         abapFromJava: data.abapFromJava as boolean | undefined,
         javaFromAbap: data.javaFromAbap as boolean | undefined,
         javaRemote: data.javaRemote as boolean | undefined,
@@ -60,8 +63,9 @@ export const functionModuleHandler = createHandler('FUNC', {
     // Update properties: AFF nests updateTaskKind.
     if (typeof data.updateTaskKind === 'string') {
       meta.updateProperties = {
-        updateTaskKind:
-          data.updateTaskKind as NonNullable<FuncAff['updateProperties']>['updateTaskKind'],
+        updateTaskKind: data.updateTaskKind as NonNullable<
+          FuncAff['updateProperties']
+        >['updateTaskKind'],
       };
     }
     if (typeof data.releaseState === 'string') {

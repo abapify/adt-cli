@@ -38,7 +38,9 @@ export const behaviorDefinitionHandler = createHandler('BDEF', {
   },
 
   getSource: (obj: BdefLike) =>
-    typeof (obj as any).getSource === 'function' ? (obj as any).getSource() : '',
+    typeof (obj as any).getSource === 'function'
+      ? (obj as any).getSource()
+      : '',
 
   fromMetadata: (meta: BdefAff) => ({
     name: '',

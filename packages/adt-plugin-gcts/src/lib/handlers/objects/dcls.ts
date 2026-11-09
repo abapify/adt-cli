@@ -37,7 +37,9 @@ export const dclSourceHandler = createHandler('DCLS', {
   },
 
   getSource: (obj: DclsLike) =>
-    typeof (obj as any).getSource === 'function' ? (obj as any).getSource() : '',
+    typeof (obj as any).getSource === 'function'
+      ? (obj as any).getSource()
+      : '',
 
   fromMetadata: (meta: DclsAff) => ({
     name: '',
