@@ -5,15 +5,10 @@
   "projectType": "library",
   "release": {
     "version": {
-      "manifestRootsToUpdate": [
-        "{projectRoot}"
-      ]
+      "manifestRootsToUpdate": ["{projectRoot}"]
     }
   },
-  "tags": [
-    "scope:adt",
-    "type:client"
-  ],
+  "tags": ["scope:adt", "type:client"],
   "targets": {
     "typecheck": {
       "command": "echo 'MISSING COVERAGE: typecheck disabled (transitive adt-mcp OOM). Tracked: https://github.com/abapify/adt-cli/issues/311' && exit 1"

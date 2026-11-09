@@ -439,7 +439,7 @@ function resolveAdkType(
   localXml: string,
   fallback: string,
 ): string {
-  if (!handler.fromAbapGit) return fallback;
+  if (!handler?.fromAbapGit) return fallback;
   try {
     const parsedXml = handler.schema.parse(localXml);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -501,7 +501,7 @@ function diffOnePair(
   const isXml = localPath.endsWith('.xml');
   let diffLocal = localContent;
   let diffRemote = remoteContent;
-  if (isXml) {
+  if (isXml && handler) {
     [diffLocal, diffRemote] = normalizeXmlPair(
       localContent,
       remoteContent,
@@ -615,7 +615,7 @@ async function diffRawMode(
 
   // Parse local abapGit XML → fromAbapGit() → local ADK data
   let localAdtXml: string | undefined;
-  if (handler.fromAbapGit) {
+  if (handler?.fromAbapGit) {
     try {
       const parsedXml = handler.schema.parse(localXml);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -666,9 +666,16 @@ async function diffFilesMode(
   remoteObj: AdkObject,
   options: DiffModeOptions,
 ): Promise<DiffResult> {
-  const { contextLines, useColor, summary } = options;
+  const { useColor, summary } = options;
 
   // Serialize remote using the same handler → produces SerializedFile[]
+  if (!handler) {
+    return errorResult(
+      parsed,
+      `No format handler for ${parsed.type}`,
+      localFiles.size,
+    );
+  }
   let remoteFiles;
   try {
     remoteFiles = await handler.serialize(remoteObj);
@@ -703,11 +710,7 @@ async function diffFilesMode(
       localContent,
       remoteContent,
       handler,
-      {
-        contextLines,
-        useColor,
-        summary,
-      },
+      options,
     );
     if (diffFound) {
       hasDifferences = true;

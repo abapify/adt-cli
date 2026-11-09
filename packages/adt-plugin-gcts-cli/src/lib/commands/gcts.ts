@@ -484,7 +484,7 @@ const objectsCmd: CliCommandPlugin = {
 // ── config subcommand helpers ──────────────────────────────────────────────
 
 type GctsClient = Awaited<ReturnType<typeof getGctsClient>>;
-type CliArgs = Parameters<CliCommandPlugin['execute']>[0];
+type CliArgs = Parameters<NonNullable<CliCommandPlugin['execute']>>[0];
 
 /** `config list` — print the full repository configuration. */
 async function configList(

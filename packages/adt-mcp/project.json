@@ -3,16 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/adt-mcp/src",
   "projectType": "library",
-  "tags": [
-    "scope:adt",
-    "type:mcp"
-  ],
+  "tags": ["scope:adt", "type:mcp"],
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "options": {
         "cwd": "packages/adt-mcp",
         "command": "bun dist/bin/adt-mcp-http.mjs",
