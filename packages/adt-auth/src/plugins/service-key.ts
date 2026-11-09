@@ -382,7 +382,7 @@ const authPlugin: AuthPlugin = {
         };
       } catch (err) {
         classifyAttemptError(err, port, hasExplicitRedirect, log);
-        lastError = err;
+        lastError = err instanceof Error ? err : new Error(String(err));
         continue;
       }
     }

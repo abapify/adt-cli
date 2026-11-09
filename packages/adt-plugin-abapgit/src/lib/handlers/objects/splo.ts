@@ -31,9 +31,9 @@ export const spoolDescHandler = createHandler<SpoolDescLike, typeof splo>(
       const obj = unwrapData<SpoolDescLike>(raw);
       return {
         TSPLT: {
-          SPRAS: isoToSapLang(obj.language),
+          SPRAS: isoToSapLang((obj as any).language),
           PAPART: String(obj.name ?? '').toUpperCase(),
-          TXT: obj.description,
+          TXT: (obj as any).description,
         },
         TSPLD: {
           PAPART: String(obj.name ?? '').toUpperCase(),

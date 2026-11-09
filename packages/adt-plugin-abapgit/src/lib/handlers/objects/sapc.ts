@@ -23,7 +23,7 @@ export const apcApplicationHandler = createHandler<
     SAPC: {
       HEADER: {
         APC_NAME: String(obj.name ?? '').toUpperCase(),
-        DESCRIPT: obj.description,
+        DESCRIPT: (obj as any).description,
       },
     },
   }),

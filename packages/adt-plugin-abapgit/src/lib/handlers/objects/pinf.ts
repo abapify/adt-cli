@@ -29,11 +29,11 @@ export const packageInterfaceHandler = createHandler<
         ATTRIBUTES: {
           PACK_NAME: obj.packageName,
           INTF_NAME: name,
-          DESCR: obj.description,
+          DESCR: (obj as any).description,
         },
         ELEMENTS: obj.elements?.length
           ? {
-              item: obj.elements.map((e) => ({
+              item: obj.elements.map((e: any) => ({
                 PACK_NAME: obj.packageName,
                 INTF_NAME: name,
                 ELEMENT_NAME: e.elementName,

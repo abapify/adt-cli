@@ -139,7 +139,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
   serializer_version: 'v1.0.0',
 
   toAbapGit: (obj) => {
-    const data = obj.dataSync;
+    const data = (obj as any).dataSync as any;
     const de = data?.dataElement;
     const typeKind = de?.typeKind ?? '';
 
@@ -174,7 +174,7 @@ export const dataElementHandler = createHandler(AdkDataElement, {
     return {
       DD04V: {
         ROLLNAME: obj.name ?? '',
-        DDLANGUAGE: isoToSapLang(obj.language || undefined),
+        DDLANGUAGE: isoToSapLang((obj as any).language || undefined),
         DOMNAME: de?.typeName || undefined,
         HEADLEN: de?.headingFieldLength
           ? String(de.headingFieldLength)
@@ -184,12 +184,12 @@ export const dataElementHandler = createHandler(AdkDataElement, {
           ? String(de.mediumFieldLength)
           : undefined,
         SCRLEN3: de?.longFieldLength ? String(de.longFieldLength) : undefined,
-        DDTEXT: obj.description ?? '',
+        DDTEXT: (obj as any).description ?? '',
         REPTEXT: de?.headingFieldLabel || undefined,
         SCRTEXT_S: de?.shortFieldLabel || undefined,
         SCRTEXT_M: de?.mediumFieldLabel || undefined,
         SCRTEXT_L: de?.longFieldLabel || undefined,
-        DTELMASTER: isoToSapLang(obj.masterLanguage || undefined),
+        DTELMASTER: isoToSapLang((obj as any).masterLanguage || undefined),
         DATATYPE: effectiveDataType,
         LENG: effectiveLeng,
         DECIMALS: effectiveDecimals,

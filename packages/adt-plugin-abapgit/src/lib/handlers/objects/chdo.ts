@@ -45,13 +45,15 @@ export const changeDocumentObjectHandler = createHandler<
 
   toAbapGit: (obj) => {
     const name = String(obj.name ?? '').toUpperCase();
-    const objectTextFallback = obj.description
+    const objectTextFallback = (obj as any).description
       ? {
           TCDOBTS: [
             {
-              SPRAS: isoToSapLang(obj.masterLanguage || obj.language),
+              SPRAS: isoToSapLang(
+                (obj as any).masterLanguage || (obj as any).language,
+              ),
               OBJECT: name,
-              OBTEXT: obj.description,
+              OBTEXT: (obj as any).description,
             },
           ],
         }
@@ -60,7 +62,7 @@ export const changeDocumentObjectHandler = createHandler<
       CHDO: {
         REPORTS_GENERATED: obj.generatedReports?.length
           ? {
-              TCDRPS: obj.generatedReports.map((r) => ({
+              TCDRPS: obj.generatedReports.map((r: any) => ({
                 OBJECT: r.object ?? name,
                 REPORTNAME: r.reportName,
                 ARBGEB: r.area,
@@ -70,7 +72,7 @@ export const changeDocumentObjectHandler = createHandler<
           : undefined,
         OBJECTS: obj.objects?.length
           ? {
-              TCDOBS: obj.objects.map((o) => ({
+              TCDOBS: obj.objects.map((o: any) => ({
                 OBJECT: o.object ?? name,
                 TABNAME: o.tableName,
                 DOCUDEL: o.docDelete ? 'X' : undefined,
@@ -83,7 +85,9 @@ export const changeDocumentObjectHandler = createHandler<
           ? {
               TCDOBTS: mapItems(obj.objectTexts, (t) => ({
                 SPRAS: isoToSapLang(
-                  t.language || obj.masterLanguage || obj.language,
+                  t.language ||
+                    (obj as any).masterLanguage ||
+                    (obj as any).language,
                 ),
                 OBJECT: t.object ?? name,
                 OBTEXT: t.text,

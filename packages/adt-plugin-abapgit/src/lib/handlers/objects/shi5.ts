@@ -29,7 +29,7 @@ export const hierarchyExtensionHandler = createHandler<
       },
       TEXTS: obj.texts?.length
         ? {
-            item: obj.texts.map((t) => ({
+            item: obj.texts.map((t: any) => ({
               SPRAS: isoToSapLang(t.language),
               EXT_ID: String(obj.name ?? '').toUpperCase(),
               TEXT: t.text,

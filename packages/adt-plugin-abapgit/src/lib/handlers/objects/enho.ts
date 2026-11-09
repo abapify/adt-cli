@@ -90,7 +90,7 @@ export const enhancementImplementationHandler = createHandler<
     const tool = obj.tool || 'BADI_IMPL';
     const result: Record<string, unknown> = {
       TOOL: tool,
-      SHORTTEXT: obj.description ?? '',
+      SHORTTEXT: (obj as any).description ?? '',
     };
 
     if (tool === 'BADI_IMPL') {
@@ -163,7 +163,7 @@ export const enhancementImplementationHandler = createHandler<
       filterRoot: implData?.FILTER_ROOT,
       filterValues: implData?.FILTER_VALUES,
       filters: implData?.FILTERS,
-      impls: implRows.map((i) => ({
+      impls: implRows.map((i: any) => ({
         spotName: i.SPOT_NAME,
         badiName: i.BADI_NAME,
         implName: i.IMPL_NAME,

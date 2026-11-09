@@ -27,12 +27,12 @@ export const documentationHandler = createHandler<
       DOCTITLE: obj.docTitle,
       HEAD: {
         TDNAME: String(obj.name ?? '').toUpperCase(),
-        TDSPRAS: isoToSapLang(obj.language),
+        TDSPRAS: isoToSapLang((obj as any).language),
         TDTITLE: obj.docTitle,
       },
       LINES: obj.lines?.length
         ? {
-            item: obj.lines.map((l) => ({
+            item: obj.lines.map((l: any) => ({
               TDFORMAT: l.format,
               TDLINE: l.line,
             })),

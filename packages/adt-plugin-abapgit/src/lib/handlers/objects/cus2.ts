@@ -29,7 +29,7 @@ export const customizingAttributeHandler = createHandler<
       },
       TITLES: obj.titles?.length
         ? {
-            item: obj.titles.map((t) => ({
+            item: obj.titles.map((t: any) => ({
               ATTR_ID: String(obj.name ?? '').toUpperCase(),
               SPRAS: isoToSapLang(t.language),
               TEXT: t.text,

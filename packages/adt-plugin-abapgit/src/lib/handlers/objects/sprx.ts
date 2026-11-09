@@ -43,7 +43,7 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
       return {
         PROXY_HEADER: obj.headers?.length
           ? {
-              item: obj.headers.map((h) => ({
+              item: obj.headers.map((h: any) => ({
                 OBJECT: h.object,
                 OBJ_NAME: h.objName,
                 INACTIVE: h.inactive,
@@ -56,7 +56,7 @@ export const proxyObjectHandler = createHandler<ProxyObjectLike, typeof sprx>(
           : undefined,
         PROXY_DATA: obj.data?.length
           ? {
-              item: obj.data.map((d) => ({
+              item: obj.data.map((d: any) => ({
                 OBJECT: d.object,
                 OBJ_NAME: d.objName,
                 OBJECT1: d.object1,

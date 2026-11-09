@@ -27,14 +27,14 @@ export const typeGroupHandler = createHandler<TypeGroupLike, typeof typeSchema>(
       return {
         TYPE: {
           TYPEGROUP: String(obj.name ?? '').toUpperCase(),
-          DESCRIPT: obj.description ?? '',
+          DESCRIPT: (obj as any).description ?? '',
         },
       };
     },
 
     getSource: (obj) =>
       typeof obj?.getSource === 'function'
-        ? Promise.resolve(obj.getSource())
+        ? Promise.resolve((obj as any).getSource())
         : Promise.resolve(''),
 
     fromAbapGit: ({ TYPE }) => ({

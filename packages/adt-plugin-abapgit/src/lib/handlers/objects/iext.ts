@@ -28,11 +28,11 @@ export const idocExtensionHandler = createHandler<
         EXTTYPE: String(obj.name ?? '').toUpperCase(),
         IDOCTYP: obj.idocType,
         CIMTYP: obj.cimType,
-        DESCRP: obj.description,
+        DESCRP: (obj as any).description,
       },
       T_SYNTAX: obj.syntax?.length
         ? {
-            item: obj.syntax.map((s) => ({
+            item: obj.syntax.map((s: any) => ({
               EXTTYPE: String(obj.name ?? '').toUpperCase(),
               SEGMENT: s.segment,
             })),

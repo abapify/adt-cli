@@ -105,7 +105,7 @@ export const tableTypeHandler = createHandler(AdkTableType, {
   serializer_version: 'v1.0.0',
 
   toAbapGit: (obj) => {
-    const data = obj.dataSync;
+    const data = (obj as any).dataSync as any;
     const accessMode =
       ACCESS_MODE_FROM_ADT[data?.accessType ?? ''] ?? data?.accessType ?? '';
     const keyDef =
@@ -144,7 +144,7 @@ export const tableTypeHandler = createHandler(AdkTableType, {
         ACCESSMODE: accessMode,
         KEYDEF: keyDef,
         KEYKIND: keyKind,
-        DDTEXT: obj.description ?? '',
+        DDTEXT: (obj as any).description ?? '',
         TYPELEN: typeLen ? String(typeLen).padStart(6, '0') : undefined,
         ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(data?.abapLanguageVersion),
       },

@@ -16,15 +16,17 @@ export const interfaceHandler = createHandler(AdkInterface, {
   toAbapGit: (obj) => ({
     VSEOINTERF: {
       CLSNAME: obj.name ?? '',
-      LANGU: isoToSapLang(obj.dataSync?.language),
-      DESCRIPT: obj.description ?? '',
+      LANGU: isoToSapLang(
+        ((obj as any).dataSync as { language?: string } | undefined)?.language,
+      ),
+      DESCRIPT: (obj as any).description ?? '',
       EXPOSURE: '2', // 2 = Public
       STATE: '1', // 1 = Active
       UNICODE: 'X',
     },
   }),
 
-  getSource: (obj) => obj.getSource(),
+  getSource: (obj) => (obj as any).getSource(),
 
   // Git → SAP: Map abapGit values to ADK data (type inferred from AdkInterface)
   fromAbapGit: ({ VSEOINTERF }) => ({

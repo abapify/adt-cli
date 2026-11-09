@@ -24,11 +24,16 @@ export const enhancementProjectHandler = createHandler<
 
   toAbapGit: (obj) => ({
     MODACT: obj.members?.length
-      ? { item: obj.members.map((m) => ({ NAME: m.name, MEMBER: m.member })) }
+      ? {
+          item: obj.members.map((m: any) => ({
+            NAME: m.name,
+            MEMBER: m.member,
+          })),
+        }
       : undefined,
     MODTEXT: obj.texts?.length
       ? {
-          item: obj.texts.map((t) => ({
+          item: obj.texts.map((t: any) => ({
             NAME: t.name,
             SPRAS: isoToSapLang(t.language),
             MODTEXT: t.text,
@@ -37,7 +42,10 @@ export const enhancementProjectHandler = createHandler<
       : undefined,
     MODATTR: obj.attributes?.length
       ? {
-          item: obj.attributes.map((a) => ({ NAME: a.name, STATUS: a.status })),
+          item: obj.attributes.map((a: any) => ({
+            NAME: a.name,
+            STATUS: a.status,
+          })),
         }
       : undefined,
   }),

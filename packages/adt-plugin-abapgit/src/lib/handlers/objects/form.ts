@@ -37,7 +37,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
 
   toAbapGit: (obj) => {
     const name = String(obj.name ?? '').toUpperCase();
-    const lang = isoToSapLang(obj.language);
+    const lang = isoToSapLang((obj as any).language);
     return {
       FORM: {
         item: [
@@ -46,7 +46,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
               TDFORM: name,
               TDSPRAS: lang,
               TDFIRSTPAG: obj.firstPage,
-              TDTEXT: obj.description,
+              TDTEXT: (obj as any).description,
             },
             TEXT_HEADER: {
               TDOBJECT: 'FORM',
@@ -58,7 +58,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
             ORIG_LANGUAGE: lang,
             PAGES: obj.pages?.length
               ? {
-                  item: obj.pages.map((p) => ({
+                  item: obj.pages.map((p: any) => ({
                     PAGENAME: p.pageName,
                     NEXTPAGE: p.nextPage,
                   })),
@@ -66,7 +66,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
               : undefined,
             WINDOWS: obj.windows?.length
               ? {
-                  item: obj.windows.map((w) => ({
+                  item: obj.windows.map((w: any) => ({
                     WINDOW: w.window,
                     PAGENAME: w.pageName,
                   })),
@@ -74,7 +74,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
               : undefined,
             PAGE_WINDOWS: obj.pageWindows?.length
               ? {
-                  item: obj.pageWindows.map((w) => ({
+                  item: obj.pageWindows.map((w: any) => ({
                     TDWINDOW: w.window,
                     PAGENAME: w.pageName,
                   })),
@@ -82,7 +82,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
               : undefined,
             PARAGRAPHS: obj.paragraphs?.length
               ? {
-                  item: obj.paragraphs.map((p) => ({
+                  item: obj.paragraphs.map((p: any) => ({
                     TDPARGRAPH: p.paragraph,
                     TDTEXT: p.text,
                   })),
@@ -90,7 +90,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
               : undefined,
             STRINGS: obj.strings?.length
               ? {
-                  item: obj.strings.map((s) => ({
+                  item: obj.strings.map((s: any) => ({
                     TDSTRING: s.string,
                     TDTEXT: s.text,
                     TDMARK: s.mark,
@@ -99,7 +99,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
               : undefined,
             TABS: obj.tabs?.length
               ? {
-                  item: obj.tabs.map((t) => ({
+                  item: obj.tabs.map((t: any) => ({
                     TDPARGRAPH: t.paragraph,
                     TDPOSITION: t.position,
                   })),
@@ -127,7 +127,7 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
             version: '1.0',
             values: {
               TDLINES: {
-                item: lines.map((l) => ({
+                item: lines.map((l: any) => ({
                   TDLINE: l.line,
                   TDFORMAT: l.format,
                 })),
@@ -164,10 +164,12 @@ export const formHandler = createHandler<FormLike, typeof form>('FORM', {
       const items = normalizeItems(
         parsed.abapGit?.abap?.values?.TDLINES?.item,
       ) as Array<{ TDLINE?: string; TDFORMAT?: string }>;
-      tdlinesData[sapLangToIso(match[1].toUpperCase())] = items.map((l) => ({
-        line: l.TDLINE,
-        format: l.TDFORMAT,
-      }));
+      tdlinesData[sapLangToIso(match[1].toUpperCase())] = items.map(
+        (l: any) => ({
+          line: l.TDLINE,
+          format: l.TDFORMAT,
+        }),
+      );
     }
     if (Object.keys(tdlinesData).length) data.tdlines = tdlinesData;
   },

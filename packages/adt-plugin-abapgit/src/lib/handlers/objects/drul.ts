@@ -29,7 +29,7 @@ export const derivationRuleHandler = createHandler<
     DRUL: {
       METADATA: {
         NAME: String(obj.name ?? '').toUpperCase(),
-        MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+        MASTER_LANGUAGE: isoToSapLang((obj as any).masterLanguage),
         RESPONSIBLE: obj.responsible,
         PACKAGE_REF: obj.packageName,
       },

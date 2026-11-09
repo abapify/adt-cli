@@ -33,9 +33,9 @@ export const formObjectHandler = createHandler<FormObjectLike, typeof sfpf>(
           HEADER: {
             NAME: String(obj.name ?? '').toUpperCase(),
             STATE: obj.state,
-            LANGUAGE: isoToSapLang(obj.language),
+            LANGUAGE: isoToSapLang((obj as any).language),
             TYPE: obj.type,
-            DESCRIPTION: obj.description,
+            DESCRIPTION: (obj as any).description,
           },
           LAYOUT: obj.layout
             ? {

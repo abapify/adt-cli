@@ -24,10 +24,10 @@ export const enhancementSpotCompositeHandler = createHandler<
   toAbapGit: (obj) => ({
     SHORTTEXT: obj.shortText,
     ENH_SPOTS: obj.enhSpots?.length
-      ? { item: obj.enhSpots.map((s) => ({ ENHSPOTNAME: s })) }
+      ? { item: obj.enhSpots.map((s: any) => ({ ENHSPOTNAME: s })) }
       : undefined,
     COMP_ENH_SPOTS: obj.compEnhSpots?.length
-      ? { item: obj.compEnhSpots.map((s) => ({ ENHSPOTNAME: s })) }
+      ? { item: obj.compEnhSpots.map((s: any) => ({ ENHSPOTNAME: s })) }
       : undefined,
   }),
 

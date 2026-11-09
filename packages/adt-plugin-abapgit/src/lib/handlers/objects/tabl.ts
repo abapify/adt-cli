@@ -33,13 +33,13 @@ export const tableHandler = createHandler(AdkTable, {
   toAbapGit: (obj) => ({
     DD02V: {
       TABNAME: obj.name ?? '',
-      DDLANGUAGE: isoToSapLang(obj.language || undefined),
+      DDLANGUAGE: isoToSapLang((obj as any).language || undefined),
       TABCLASS: 'TRANSP',
-      DDTEXT: obj.description ?? '',
+      DDTEXT: (obj as any).description ?? '',
     },
   }),
 
-  serialize: (obj, ctx, options) => serializeTabl(obj, ctx, options),
+  serialize: (obj, ctx, options) => serializeTabl(obj as any, ctx, options),
   fromAbapGit: fromAbapGitTabl,
 });
 
@@ -52,12 +52,12 @@ export const structureHandler = createHandler(AdkStructure, {
   toAbapGit: (obj) => ({
     DD02V: {
       TABNAME: obj.name ?? '',
-      DDLANGUAGE: isoToSapLang(obj.language || undefined),
+      DDLANGUAGE: isoToSapLang((obj as any).language || undefined),
       TABCLASS: 'INTTAB',
-      DDTEXT: obj.description ?? '',
+      DDTEXT: (obj as any).description ?? '',
     },
   }),
 
-  serialize: (obj, ctx, options) => serializeTabl(obj, ctx, options),
+  serialize: (obj, ctx, options) => serializeTabl(obj as any, ctx, options),
   fromAbapGit: fromAbapGitTabl,
 });

@@ -52,15 +52,17 @@ export const lockObjectHandler = createHandler<LockObjectLike, typeof enqu>(
       return {
         DD25V: {
           VIEWNAME: String(obj.name ?? '').toUpperCase(),
-          DDLANGUAGE: isoToSapLang(obj.masterLanguage || obj.language),
-          DDTEXT: obj.description ?? '',
+          DDLANGUAGE: isoToSapLang(
+            (obj as any).masterLanguage || (obj as any).language,
+          ),
+          DDTEXT: (obj as any).description ?? '',
           ROOTTAB: obj.baseTable ?? undefined,
           ROOTFIELD: obj.baseTableField ?? undefined,
         },
         DD26V_TABLE:
           tables.length > 0
             ? {
-                item: tables.map((t) => ({
+                item: tables.map((t: any) => ({
                   VIEWNAME: String(obj.name ?? '').toUpperCase(),
                   TABNAME: t.tableName ?? undefined,
                   TABPOS: t.position ?? undefined,
@@ -73,7 +75,7 @@ export const lockObjectHandler = createHandler<LockObjectLike, typeof enqu>(
         DD27P_TABLE:
           parameters.length > 0
             ? {
-                item: parameters.map((p) => ({
+                item: parameters.map((p: any) => ({
                   VIEWNAME: String(obj.name ?? '').toUpperCase(),
                   VIEWFIELD: p.viewField ?? undefined,
                   TABNAME: p.tableName ?? undefined,

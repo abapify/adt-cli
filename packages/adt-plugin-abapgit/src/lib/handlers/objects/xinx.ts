@@ -28,12 +28,12 @@ export const extensionIndexHandler = createHandler<
       DD12V: {
         SQLTAB: obj.tableName,
         INDEXNAME: obj.indexName ?? String(obj.name ?? '').toUpperCase(),
-        DDTEXT: obj.description,
+        DDTEXT: (obj as any).description,
         UNIQUEFLAG: obj.unique ? 'X' : undefined,
       },
       T_DD17V: obj.fields?.length
         ? {
-            DD17V: obj.fields.map((f) => ({
+            DD17V: obj.fields.map((f: any) => ({
               POSITION: f.position,
               FIELDNAME: f.fieldName,
             })),

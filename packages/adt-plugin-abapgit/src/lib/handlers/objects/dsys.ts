@@ -30,18 +30,18 @@ export const documentationObjectHandler = createHandler<
           DOKIL: {
             ID: 'HY',
             OBJECT: String(obj.name ?? '').toUpperCase(),
-            LANGU: isoToSapLang(obj.language),
+            LANGU: isoToSapLang((obj as any).language),
             TYP: 'E',
           },
           HEAD: {
             TDOBJECT: 'DSYS',
             TDNAME: String(obj.name ?? '').toUpperCase(),
             TDID: 'HY',
-            TDSPRAS: isoToSapLang(obj.language),
+            TDSPRAS: isoToSapLang((obj as any).language),
           },
           LINES: obj.lines?.length
             ? {
-                item: obj.lines.map((l) => ({
+                item: obj.lines.map((l: any) => ({
                   TDFORMAT: l.format,
                   TDLINE: l.line,
                 })),

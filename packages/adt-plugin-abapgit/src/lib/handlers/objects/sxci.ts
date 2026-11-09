@@ -30,7 +30,7 @@ export const badiImplementationHandler = createHandler<
     SXCI: {
       IMPLEMENTATION_DATA: {
         IMP_NAME: String(obj.name ?? '').toUpperCase(),
-        TEXT: obj.description,
+        TEXT: (obj as any).description,
         IMP_CLASS: obj.implementationClass,
         EXIT_NAME: obj.exitName,
         INTER_NAME: obj.interfaceName,

@@ -49,9 +49,9 @@ export const authObjectHandler = createHandler<AuthObjectLike, typeof suso>(
           CONVERSION: obj.conversion,
         },
         TOBJT: {
-          LANGU: isoToSapLang(obj.language),
+          LANGU: isoToSapLang((obj as any).language),
           OBJECT: name,
-          TTEXT: obj.description,
+          TTEXT: (obj as any).description,
         },
       };
     },

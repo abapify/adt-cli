@@ -42,7 +42,7 @@ export const authHierarchyHandler = createHandler<
     },
     USOBX: obj.usobx?.length
       ? {
-          item: obj.usobx.map((u) => ({
+          item: obj.usobx.map((u: any) => ({
             NAME: u.name,
             TYPE: u.type,
             OBJECT: u.object,
@@ -52,7 +52,7 @@ export const authHierarchyHandler = createHandler<
       : undefined,
     USOBT: obj.usobt?.length
       ? {
-          item: obj.usobt.map((u) => ({
+          item: obj.usobt.map((u: any) => ({
             NAME: u.name,
             TYPE: u.type,
             OBJECT: u.object,

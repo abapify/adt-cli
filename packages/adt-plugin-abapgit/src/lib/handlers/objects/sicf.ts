@@ -52,7 +52,7 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
     toAbapGit: (raw) => {
       const obj = unwrapData<IcfServiceLike>(raw);
       const name = String(obj.name ?? '').toUpperCase();
-      const lang = isoToSapLang(obj.language);
+      const lang = isoToSapLang((obj as any).language);
       const fallbackHandlers = obj.handlerClass
         ? [{ handler: obj.handlerClass }]
         : [];
@@ -69,20 +69,20 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
         ICFDOCU: {
           ICF_NAME: name,
           LANGU: lang,
-          DESCRIPT: obj.description ?? '',
+          DESCRIPT: (obj as any).description ?? '',
         },
         ICFHANDLER_TABLE: handlers.length
           ? {
               ICFHANDLER: handlers.map((h, i) => ({
                 ICF_NAME: name,
                 ICFHANDLER: h.handler,
-                ICFHANDLERORDER: h.order ?? String(i + 1),
+                ICFHANDLERORDER: (h as any).order ?? String(i + 1),
               })),
             }
           : undefined,
         SOTS: obj.otrTexts?.length
           ? {
-              item: obj.otrTexts.map((t) => ({
+              item: obj.otrTexts.map((t: any) => ({
                 HEADER: {
                   CONCEPT: t.concept,
                   PAKET: t.paket,
@@ -91,7 +91,7 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
                 },
                 ENTRIES: t.entries?.length
                   ? {
-                      item: t.entries.map((e) => ({
+                      item: t.entries.map((e: any) => ({
                         CONCEPT: t.concept,
                         LANGU: e.langu,
                         OBJECT: e.object,
@@ -105,7 +105,7 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
           : undefined,
         SOTS_USE: obj.otrUses?.length
           ? {
-              item: obj.otrUses.map((u) => ({
+              item: obj.otrUses.map((u: any) => ({
                 PGMID: u.pgmid,
                 OBJECT: u.object,
                 OBJ_NAME: u.objName ?? name,
@@ -145,7 +145,7 @@ export const icfServiceHandler = createHandler<IcfServiceLike, typeof sicf>(
           paket: t.HEADER?.PAKET,
           creaLan: t.HEADER?.CREA_LAN,
           aliasName: t.HEADER?.ALIAS_NAME,
-          entries: normalizeItems(t.ENTRIES?.item).map((e) => ({
+          entries: normalizeItems(t.ENTRIES?.item).map((e: any) => ({
             langu: e.LANGU,
             object: e.OBJECT,
             lfdNum: e.LFD_NUM,

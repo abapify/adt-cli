@@ -61,8 +61,8 @@ export const viewHandler = createHandler<ViewLike, typeof view>('VIEW', {
     return {
       DD25V: {
         VIEWNAME: String(obj.name ?? '').toUpperCase(),
-        DDLANGUAGE: isoToSapLang(obj.language),
-        DDTEXT: obj.description ?? '',
+        DDLANGUAGE: isoToSapLang((obj as any).language),
+        DDTEXT: (obj as any).description ?? '',
         VIEWCLASS: obj.viewClass ?? undefined,
         ROOTTAB: obj.baseTable ?? undefined,
         ROOTFIELD: obj.baseTableField ?? undefined,
@@ -70,7 +70,7 @@ export const viewHandler = createHandler<ViewLike, typeof view>('VIEW', {
       DD26V_TABLE:
         tables.length > 0
           ? {
-              item: tables.map((t) => ({
+              item: tables.map((t: any) => ({
                 VIEWNAME: String(obj.name ?? '').toUpperCase(),
                 TABNAME: t.tableName ?? undefined,
                 TABPOS: t.position ?? undefined,
@@ -83,7 +83,7 @@ export const viewHandler = createHandler<ViewLike, typeof view>('VIEW', {
       DD27P_TABLE:
         fields.length > 0
           ? {
-              item: fields.map((f) => ({
+              item: fields.map((f: any) => ({
                 VIEWNAME: String(obj.name ?? '').toUpperCase(),
                 VIEWFIELD: f.viewField ?? undefined,
                 TABNAME: f.tableName ?? undefined,
@@ -99,7 +99,7 @@ export const viewHandler = createHandler<ViewLike, typeof view>('VIEW', {
       DD28V_TABLE:
         conditions.length > 0
           ? {
-              item: conditions.map((c) => ({
+              item: conditions.map((c: any) => ({
                 VIEWNAME: String(obj.name ?? '').toUpperCase(),
                 ANDOR: c.andOr ?? undefined,
                 LEFTBRACKET: c.leftBracket ?? undefined,

@@ -945,6 +945,7 @@ function matchDdicDomainsRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/domains/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDdicDataElementsRoutes */
@@ -978,6 +979,7 @@ function matchDdicDataElementsRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/dataelements/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDdicStructuresRoutes */
@@ -1028,6 +1030,7 @@ function matchDdicStructuresRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/tables/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchCdsDdlSourcesRoutes */
@@ -1067,6 +1070,7 @@ function matchCdsDdlSourcesRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/ddic/ddl/sources/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchCdsDclSourcesRoutes */
@@ -1106,6 +1110,7 @@ function matchCdsDclSourcesRoutes(
   if (m === 'PUT' && url.startsWith('/sap/bc/adt/acm/dcl/sources/')) {
     return { status: 200, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchBdefRoutes */
@@ -1149,6 +1154,7 @@ function matchBdefRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/bo/behaviordefinitions/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchBadiEnhancementImplementationMetadataRoutes */
@@ -1169,6 +1175,7 @@ function matchBadiEnhancementImplementationMetadataRoutes(
       contentType: 'application/vnd.sap.adt.enh.enhoxhb.v4+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchBadiEnhancementImplementationRoutes */
@@ -1212,6 +1219,7 @@ function matchBadiEnhancementImplementationRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/enhancements/enhoxhh/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchVitWbBasicObjectRoutes */
@@ -1245,6 +1253,7 @@ function matchVitWbBasicObjectRoutes(
       contentType: 'application/vnd.sap.adt.basic.object.properties+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchSrvdRoutes */
@@ -1286,6 +1295,7 @@ function matchSrvdRoutes(
   if (m === 'DELETE' && url.startsWith('/sap/bc/adt/ddic/srvd/sources/')) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchSrvbRoutes */
@@ -1347,6 +1357,7 @@ function matchSrvbRoutes(
   ) {
     return { status: 204, body: '', contentType: 'text/plain' };
   }
+  return undefined;
 }
 
 /** Route matcher: matchCdsRapSourceTypesRoutes */
@@ -1394,6 +1405,7 @@ function matchCdsRapSourceTypesRoutes(
       contentType: 'application/vnd.sap.adt.blues.v1+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDsfiRoutes */
@@ -1424,6 +1436,7 @@ function matchDsfiRoutes(
       contentType: 'application/vnd.sap.adt.blues.v1+xml',
     };
   }
+  return undefined;
 }
 
 /** Route matcher: matchDesdRoutes */
@@ -1441,6 +1454,7 @@ function matchDesdRoutes(
       contentType: 'application/xml',
     };
   }
+  return undefined;
 }
 
 /** OO classrun + CTS search/create setup routes. */
@@ -2616,4 +2630,5 @@ function matchSoapRfcRoutes(
         `</soap-env:Envelope>`,
     };
   }
+  return undefined;
 }

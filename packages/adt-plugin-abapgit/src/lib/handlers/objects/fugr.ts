@@ -36,7 +36,7 @@ function buildMainXmlFile(
   ctx: FugrContext,
 ): SerializedFile {
   const values: Record<string, unknown> = {
-    AREAT: obj.description ?? '',
+    AREAT: (obj as any).description ?? '',
     INCLUDES: {
       SOBJ_NAME: [`L${nameUpper}TOP`, `SAPL${nameUpper}`],
     },
@@ -70,12 +70,12 @@ function deriveFmList(suppliedSources: SourceMap, objectName: string): FmList {
   const lowerTopKey = topKey;
   const lowerSap = `sapl${objectName}`;
   const fmItems = Object.keys(suppliedSources)
-    .filter((key) => {
+    .filter((key: any) => {
       const lower = key.toLowerCase();
       return lower !== 'main' && lower !== lowerTopKey && lower !== lowerSap;
     })
-    .map((key) => ({ key, name: key.toLowerCase() }));
-  const functions = fmItems.map((fm) => ({
+    .map((key: any) => ({ key, name: key.toLowerCase() }));
+  const functions = fmItems.map((fm: any) => ({
     FUNCNAME: fm.key.toUpperCase(),
   }));
   return { fmItems, functions };
@@ -95,7 +95,7 @@ async function buildTopSourceFile(
   try {
     const topSource =
       suppliedTopSource !== undefined || !hasExplicitSources
-        ? (suppliedTopSource ?? (await obj.getSource()))
+        ? (suppliedTopSource ?? (await (obj as any).getSource()))
         : undefined;
     if (shouldIncludeSource(topSource, suppliedTopSource)) {
       return ctx.createFile(
@@ -212,7 +212,7 @@ function createFunctionGroupHandler(type: 'FUGR' | 'FUGS') {
 
       const name = obj.name.toUpperCase();
       return {
-        AREAT: obj.description ?? '',
+        AREAT: (obj as any).description ?? '',
         INCLUDES: {
           SOBJ_NAME: [`L${name}TOP`, `SAPL${name}`],
         },
@@ -349,7 +349,7 @@ async function discoverFunctionModules(
     const regex2 = /adtcore:name="([^"]+)"[^>]*type="FUGR\/FF"/g;
     while ((match = regex2.exec(responseStr)) !== null) {
       const name = match[1];
-      if (name && !fmNames.some((f) => f.name === name)) {
+      if (name && !fmNames.some((f: any) => f.name === name)) {
         fmNames.push({ name });
       }
     }
@@ -436,7 +436,7 @@ export function extractFunctionDescriptors(
     items = [];
   }
 
-  return (items as Array<Record<string, unknown>>).map((fm) => ({
+  return (items as Array<Record<string, unknown>>).map((fm: any) => ({
     funcName: String((fm.FUNCNAME as string | undefined) ?? ''),
     shortText: fm.SHORT_TEXT
       ? String(fm.SHORT_TEXT as string | number | boolean)

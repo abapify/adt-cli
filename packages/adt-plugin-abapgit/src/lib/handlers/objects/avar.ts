@@ -21,10 +21,10 @@ export const activationVariantHandler = createHandler<
   serializer_version: 'v1.0.0',
 
   toAbapGit: (obj) => ({
-    DESCRIPTION: obj.description,
+    DESCRIPTION: (obj as any).description,
     IDS: obj.ids?.length
       ? {
-          item: obj.ids.map((i) => ({
+          item: obj.ids.map((i: any) => ({
             OBJ_NAME: i.objName,
             OBJ_TYPE: i.objType,
             ACTIVE: i.active ? 'X' : undefined,

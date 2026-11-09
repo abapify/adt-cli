@@ -32,14 +32,14 @@ export const otrTextHandler = createHandler<OtrTextLike, typeof sots>('SOTS', {
           {
             HEADER: {
               CONCEPT: obj.concept ?? String(obj.name ?? '').toUpperCase(),
-              CREA_LAN: isoToSapLang(obj.language),
+              CREA_LAN: isoToSapLang((obj as any).language),
             },
             ENTRIES: obj.texts?.length
               ? {
-                  item: obj.texts.map((t) => ({
+                  item: obj.texts.map((t: any) => ({
                     CONCEPT:
                       obj.concept ?? String(obj.name ?? '').toUpperCase(),
-                    LANGU: isoToSapLang(t.langu ?? obj.language),
+                    LANGU: isoToSapLang(t.langu ?? (obj as any).language),
                     OBJECT: t.object,
                     LFD_NUM: t.lfdNum,
                     TEXT: t.text,

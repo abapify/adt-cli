@@ -65,10 +65,10 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
       STYLE: {
         HEADER: {
           TDSTYLE: String(obj.name ?? '').toUpperCase(),
-          TDSPRAS: isoToSapLang(obj.language),
+          TDSPRAS: isoToSapLang((obj as any).language),
           TDOSPRAS: isoToSapLang(obj.origLanguage),
           TDPRINTER: obj.printer,
-          TDTEXT: obj.description,
+          TDTEXT: (obj as any).description,
           TDFIRSTPAR: obj.firstParagraph,
           TDCPI: obj.cpi,
           TDLPI: obj.lpi,
@@ -83,7 +83,7 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
         },
         PARAGRAPHS: obj.paragraphs?.length
           ? {
-              item: obj.paragraphs.map((p) => ({
+              item: obj.paragraphs.map((p: any) => ({
                 TDPARGRAPH: p.paragraph,
                 TDTEXT: p.text,
                 TDPJUSTIFY: p.justify,
@@ -97,7 +97,7 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
           : undefined,
         STRINGS: obj.strings?.length
           ? {
-              item: obj.strings.map((s) => ({
+              item: obj.strings.map((s: any) => ({
                 TDSTRING: s.string,
                 TDTEXT: s.text,
                 TDMARK: s.mark,
@@ -110,7 +110,7 @@ export const styleHandler = createHandler<StyleLike, typeof styl>('STYL', {
           : undefined,
         TABS: obj.tabs?.length
           ? {
-              item: obj.tabs.map((t) => ({
+              item: obj.tabs.map((t: any) => ({
                 TDPARGRAPH: t.paragraph,
                 TDPOSITION: t.position,
                 TDTABPOS: t.tabPos,

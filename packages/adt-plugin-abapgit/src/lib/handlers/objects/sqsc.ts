@@ -58,7 +58,7 @@ export const dbProcProxyHandler = createHandler<DbProcProxyLike, typeof sqsc>(
       const obj = unwrapData<DbProcProxyLike>(raw);
       return {
         SQSC: {
-          DESCRIPTION: obj.description,
+          DESCRIPTION: (obj as any).description,
           HEADER: {
             DB_REPOSITORY_PACKAGE: obj.dbRepositoryPackage,
             DB_REPOSITORY_PROC_NAME: obj.dbRepositoryProcName,
@@ -69,7 +69,7 @@ export const dbProcProxyHandler = createHandler<DbProcProxyLike, typeof sqsc>(
           },
           PARAMETERS: obj.parameters?.length
             ? {
-                item: obj.parameters.map((p) => ({
+                item: obj.parameters.map((p: any) => ({
                   POSITION: p.position,
                   DB_NAME: p.dbName,
                   DIRECTION: p.direction,
@@ -88,7 +88,7 @@ export const dbProcProxyHandler = createHandler<DbProcProxyLike, typeof sqsc>(
             : undefined,
           PARAMETER_TYPES: obj.parameterTypes?.length
             ? {
-                item: obj.parameterTypes.map((t) => ({
+                item: obj.parameterTypes.map((t: any) => ({
                   PARAM_POSITION: t.paramPosition,
                   COMP_INDEX: t.compIndex,
                   DB_COMP_NAME: t.dbCompName,

@@ -38,7 +38,7 @@ export const mimeObjectHandler = createHandler<MimeObjectLike, typeof smim>(
       EXTRA: {
         FILE_NAME: obj.fileName,
         MIMETYPE: obj.mimeType,
-        DESCRIPTION: obj.description,
+        DESCRIPTION: (obj as any).description,
         PARENT_FOLDER_ID: obj.parentFolderId,
       },
     }),

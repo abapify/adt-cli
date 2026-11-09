@@ -41,10 +41,10 @@ export const transportObjectHandler = createHandler<
         OBJTRANSP: obj.transportable ? 'X' : undefined,
       },
       OBJT: {
-        LANGUAGE: isoToSapLang(obj.language),
+        LANGUAGE: isoToSapLang((obj as any).language),
         OBJECTNAME: name,
         OBJECTTYPE: obj.objectType ?? 'L',
-        DDTEXT: obj.description,
+        DDTEXT: (obj as any).description,
       },
       TOBJ: {
         TDDAT: {

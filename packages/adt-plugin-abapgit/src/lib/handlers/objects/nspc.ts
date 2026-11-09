@@ -36,8 +36,8 @@ export const namespaceHandler = createHandler<NamespaceLike, typeof nspc>(
           GEN_ONLY: obj.genOnly ? 'X' : undefined,
         },
         NSPC_TEXT: {
-          SPRAS: isoToSapLang(obj.language),
-          DESCRIPTN: obj.description,
+          SPRAS: isoToSapLang((obj as any).language),
+          DESCRIPTN: (obj as any).description,
           OWNER: obj.owner,
         },
       };

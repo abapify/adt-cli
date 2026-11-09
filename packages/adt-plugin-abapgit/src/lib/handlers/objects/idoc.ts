@@ -43,7 +43,7 @@ export const idocTypeHandler = createHandler<IdocTypeLike, typeof idoc>(
         IDOC: {
           ATTRIBUTES: {
             IDOCTYP: String(obj.name ?? '').toUpperCase(),
-            DESCRP: obj.description,
+            DESCRP: (obj as any).description,
             CLOSED: obj.closed,
             RELEASED: obj.released,
             APPLREL: obj.applrel,
@@ -55,7 +55,7 @@ export const idocTypeHandler = createHandler<IdocTypeLike, typeof idoc>(
           },
           T_SYNTAX: obj.syntax?.length
             ? {
-                EDI_IAPI02: obj.syntax.map((s) => ({
+                EDI_IAPI02: obj.syntax.map((s: any) => ({
                   NR: s.nr,
                   SEGTYP: s.segtyp,
                   PARSEG: s.parseg,

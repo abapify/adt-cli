@@ -57,12 +57,12 @@ export const dataStoreObjectHandler = createHandler<
         IMOFL: obj.imofl,
         PLANNING_MODE: obj.planningMode,
         ACTVIEWGEN: obj.actViewGen,
-        TXTLG: obj.description,
+        TXTLG: (obj as any).description,
         TXTSH: obj.shortText,
       },
       INFOOBJECTS: obj.infoObjects?.length
         ? {
-            BAPI6116IO: obj.infoObjects.map((io) => ({
+            BAPI6116IO: obj.infoObjects.map((io: any) => ({
               INFOBJECT: io.infoobject,
               OBJVERS: io.version,
               KEYFLAG: io.keyflag,

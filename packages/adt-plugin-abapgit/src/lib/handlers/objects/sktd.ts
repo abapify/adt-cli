@@ -37,13 +37,13 @@ export const ktdDocumentHandler = createHandler<KtdDocumentLike, typeof sktd>(
       return {
         SKTD: {
           METADATA: {
-            MASTER_LANGUAGE: isoToSapLang(obj.masterLanguage),
+            MASTER_LANGUAGE: isoToSapLang((obj as any).masterLanguage),
             RESPONSIBLE: obj.responsible,
             ABAP_LANGUAGE_VERSION: abapLangVerFromAdt(obj.abapLanguageVersion),
           },
           REF_OBJECT: {
             URI: obj.refObjectUri,
-            DESCRIPTION: obj.refObjectDescription ?? obj.description,
+            DESCRIPTION: obj.refObjectDescription ?? (obj as any).description,
           },
         },
       };

@@ -24,7 +24,7 @@ export const apiStateHandler = createHandler<ApiStateLike, typeof apis>(
         APIS: {
           HEADER: {
             API_NAME: String(obj.name ?? '').toUpperCase(),
-            DESCRIPTION: obj.description,
+            DESCRIPTION: (obj as any).description,
           },
         },
       };
