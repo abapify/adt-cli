@@ -83,7 +83,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
+          # Deploy key (RELEASE_DEPLOY_KEY) authenticates git push so nx release
+          # can push the release commit/tag to protected main via ruleset bypass.
+          # GITHUB_TOKEN remains used for GitHub API calls (releases, dispatch).
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
