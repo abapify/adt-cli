@@ -600,6 +600,13 @@ export function createAdtAdapter(config: AdtAdapterConfig): AdtHttpAdapter {
       if (authHeader) {
         headers.Authorization = authHeader;
       }
+      logger?.debug(
+        `Adapter auth: mode=${isSamlAuth ? 'cookie' : 'basic'}, ` +
+          `authorizationHeader=${authorizationHeader ? 'present' : 'none'}, ` +
+          `basicCredentials=${basicCredentials ? 'present' : 'none'}, ` +
+          `authHeader=${authHeader ? 'set' : 'unset'}, ` +
+          `cookieHeader=${cookieHeader ? 'present' : 'none'}`,
+      );
 
       // Get schemas from speci's standard fields
       const bodySerializableSchema = bodySchemaOf(options);
