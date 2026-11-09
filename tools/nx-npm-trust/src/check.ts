@@ -426,12 +426,15 @@ if (name) {
 if (packCheck) {
   const pack = npm(['pack', '--dry-run'], { timeout: 30_000 });
   const packedRaw = pack.json;
-  const packed = Array.isArray(packedRaw)
-    ? (packedRaw[0] as { files?: { path?: string }[] } | undefined)
-    : packedRaw && typeof packedRaw === 'object'
-      ? (Object.values(packedRaw)[0] as
-          { files?: { path?: string }[] } | undefined)
-      : null;
+  let packed: { files?: { path?: string }[] } | null | undefined;
+  if (Array.isArray(packedRaw)) {
+    packed = packedRaw[0] as { files?: { path?: string }[] } | undefined;
+  } else if (packedRaw && typeof packedRaw === 'object') {
+    packed = Object.values(packedRaw)[0] as
+      { files?: { path?: string }[] } | undefined;
+  } else {
+    packed = null;
+  }
   const files =
     pack.code === 0 && packed
       ? (packed.files ?? [])
