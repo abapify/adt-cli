@@ -142,17 +142,41 @@ describe('parseCheckCategoryIndex', () => {
 
 describe('fetchCheckCategoryIndex', () => {
   it('builds the index through the client', async () => {
+    const requested: string[] = [];
     const client = {
       adt: {
         atc: {
           checkvariants: {
-            formtemplate: async () => formTemplateDocument(),
+            formtemplate: async (params?: { chkvName?: string }) => {
+              requested.push(params?.chkvName ?? '<missing>');
+              return formTemplateDocument();
+            },
           },
         },
       },
     };
     const index = await fetchCheckCategoryIndex(client, 'DEFAULT');
     assert.equal(index.get('CL_CI_TEST_SELECT_TAW_A'), 'CI_PERFORMANCE');
+    assert.deepEqual(requested, ['DEFAULT']);
+  });
+
+  it('passes a non-default check variant name through to the client', async () => {
+    const requested: string[] = [];
+    const client = {
+      adt: {
+        atc: {
+          checkvariants: {
+            formtemplate: async (params?: { chkvName?: string }) => {
+              requested.push(params?.chkvName ?? '<missing>');
+              return formTemplateDocument();
+            },
+          },
+        },
+      },
+    };
+    const index = await fetchCheckCategoryIndex(client, 'ZCUSTOM_VARIANT');
+    assert.equal(index.get('CL_CI_TEST_SELECT_TAW_A'), 'CI_PERFORMANCE');
+    assert.deepEqual(requested, ['ZCUSTOM_VARIANT']);
   });
 
   it('never throws: client failures return an empty index', async () => {
