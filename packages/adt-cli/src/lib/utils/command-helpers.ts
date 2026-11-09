@@ -63,7 +63,7 @@ function toStr(v: unknown): string {
 /** Read a named optional property from an Error-like value. */
 function errorField(error: unknown, field: string): unknown {
   return error instanceof Error && field in error
-    ? (error as Record<string, unknown>)[field]
+    ? (error as unknown as Record<string, unknown>)[field]
     : undefined;
 }
 

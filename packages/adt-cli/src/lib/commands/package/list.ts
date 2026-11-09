@@ -38,7 +38,7 @@ async function collectAllSubpackages(pkg: AbapObject): Promise<AbapObject[]> {
   const queue: AbapObject[] = [pkg];
   while (queue.length > 0) {
     const current = queue.shift()!;
-    const children = (await current.getSubpackages()) as AbapObject[];
+    const children = (await (current as any).getSubpackages()) as AbapObject[];
     allSubPkgs.push(...children);
     queue.push(...children);
   }

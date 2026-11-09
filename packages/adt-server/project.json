@@ -11,7 +11,7 @@
   "tags": ["scope:adt", "type:server"],
   "targets": {
     "typecheck": {
-      "command": "echo 'typecheck disabled: MCP SDK + Zod type inference in dependency adt-mcp causes OOM (see adt-mcp/project.json)'"
+      "command": "echo 'MISSING COVERAGE: typecheck disabled (depends on adt-mcp OOM). Tracked: https://github.com/abapify/adt-cli/issues/311' && exit 1"
     }
   }
 }

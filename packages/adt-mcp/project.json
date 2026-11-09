@@ -15,7 +15,7 @@
       }
     },
     "typecheck": {
-      "command": "echo 'typecheck disabled: MCP SDK + Zod type inference causes OOM (see adt-mcp/AGENTS.md)'"
+      "command": "echo 'MISSING COVERAGE: typecheck disabled (MCP SDK + Zod OOM). Tracked: https://github.com/abapify/adt-cli/issues/311' && exit 1"
     }
   }
 }
