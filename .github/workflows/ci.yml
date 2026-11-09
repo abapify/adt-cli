@@ -82,10 +82,12 @@ jobs:
       # This line enables distribution
       # The "--stop-agents-after" is optional, but allows idle agents to shut down once the "e2e-ci" targets have been requested
       # - run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
+      # If using .nx/ci-config.yaml (Nx Agents/DTE config), follow current Nx Cloud docs for the
+      # agent/workers startup command; start-ci-run behavior differs when ci-config.yaml is present.
       - run: bun install --frozen-lockfile --ignore-scripts
         if: steps.changes.outputs.has-code-changes == 'true'
 
-      - uses: nrwl/nx-set-shas@afb73a62d26e41464e9254689e1fd6122ee683c1 # v5
+      - uses: nrwl/nx-set-shas@e602fada7ad5987b0f7b1905e7a99ea1c661514c # v5.1.0
         if: steps.changes.outputs.has-code-changes == 'true'
 
       - name: Test tool-call hook scripts
