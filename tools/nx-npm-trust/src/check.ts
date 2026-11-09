@@ -425,9 +425,12 @@ if (name) {
 // shipped as @abapify/*@0.3.5/0.3.6.
 if (packCheck) {
   const pack = npm(['pack', '--dry-run'], { timeout: 30_000 });
-  const packed = Array.isArray(pack.json)
-    ? (pack.json[0] as { files?: { path?: string }[] } | undefined)
-    : (pack.json as { files?: { path?: string }[] } | null);
+  const packedRaw = pack.json;
+  const packed = Array.isArray(packedRaw)
+    ? (packedRaw[0] as { files?: { path?: string }[] } | undefined)
+    : packedRaw && typeof packedRaw === 'object'
+      ? (Object.values(packedRaw)[0] as { files?: { path?: string }[] } | undefined)
+      : null;
   const files =
     pack.code === 0 && packed
       ? (packed.files ?? [])
