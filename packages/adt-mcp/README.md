@@ -13,15 +13,21 @@ npm install -g @abapify/adt-mcp
 
 ## Usage
 
+For VS Code (`.vscode/mcp.json`):
+
 ```json
 {
-  "mcpServers": {
-    "adt": { "command": "npx", "args": ["@abapify/adt-mcp"] }
+  "servers": {
+    "adt": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@abapify/adt-mcp"]
+    }
   }
 }
 ```
 
-Use this in Claude Desktop, Cursor, Windsurf, or VS Code (`.vscode/mcp.json`, `"type": "stdio"`). For a shared, session-aware server run `adt-mcp-http` (Streamable HTTP).
+For a shared, session-aware server run `adt-mcp-http` (Streamable HTTP). For Claude Desktop/Cursor/Windsurf, use the MCP server configuration format expected by that client.
 
 ## Features
 
