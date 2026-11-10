@@ -15,7 +15,14 @@
       }
     },
     "typecheck": {
-      "command": "echo 'MISSING COVERAGE: typecheck disabled (MCP SDK + Zod OOM). Tracked: https://github.com/abapify/adt-cli/issues/311' && exit 1"
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/adt-mcp",
+        "command": "NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.json --noEmit"
+      },
+      "cache": true,
+      "inputs": ["default", "^default", "{workspaceRoot}/tsconfig.base.json"],
+      "dependsOn": ["^build"]
     }
   }
 }

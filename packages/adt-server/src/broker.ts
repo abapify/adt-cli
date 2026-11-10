@@ -851,9 +851,9 @@ async function getPackageTreeFromMetadata( // NOSONAR - SAP package-tree travers
       else if (!existing.description && current.description)
         existing.description = current.description;
     }
-    for (const child of children.toSorted((left, right) =>
-      left.name.localeCompare(right.name),
-    )) {
+    for (const child of children
+      .slice()
+      .sort((left, right) => left.name.localeCompare(right.name))) {
       const existing = packages.get(child.name);
       if (!existing && packages.size >= MAX_PACKAGE_SEARCH_RESULTS) {
         truncated = true;
@@ -1512,10 +1512,15 @@ export function createHttpBrokerOperations(
       return await withClient(
         destination,
         'build_transport_source_manifest',
-        async (client) =>
-          await new ExactSourceHistoryService(client).buildTransportManifest(
-            input,
-          ),
+        async (client) => {
+          const manifest = await new ExactSourceHistoryService(
+            client,
+          ).buildTransportManifest(input);
+          return {
+            ...manifest,
+            inventory: manifest.inventory.map((entry) => ({ ...entry })),
+          };
+        },
       );
     },
     async readImmutableSource(input) {
