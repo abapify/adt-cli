@@ -1,3 +1,13 @@
+## 0.4.40 (2026-11-10)
+
+### 🩹 Fixes
+
+- **typecheck:** restore strict source typecheck for adt-mcp/server packages (https://github.com/abapify/adt-cli/issues/311) ([#320](https://github.com/abapify/adt-cli/pull/320))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.39 (2026-11-09)
 
 This was a version bump only for adt-server to align it with other projects, there were no code changes.
