@@ -115,7 +115,7 @@
     },
     "typecheck": {
       "cache": true,
-      "dependsOn": [],
+      "dependsOn": ["^build"],
       "inputs": ["default", "^default"]
     },
     "lint": {
