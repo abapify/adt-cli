@@ -441,9 +441,8 @@ describe('class component preservation in an existing repository', () => {
   });
 
   it('preserves unselected sources when materialization has no class source anchor', async () => {
-    const { preserveUnselectedClassComponents } = await import(
-      '../src/class-component-preservation'
-    );
+    const { preserveUnselectedClassComponents } =
+      await import('../src/class-component-preservation');
     const f = await fixture();
     await f.seed(false);
     const result = await preserveUnselectedClassComponents({
@@ -482,10 +481,26 @@ describe('class component preservation in an existing repository', () => {
         state: 'present',
         packagePath: ['ZROOT'],
         selections: [
-          { component: 'main', versionId: '00002', sourceUri: '/fixture/main/00002' },
-          { component: 'definitions', versionId: '00002', sourceUri: '/fixture/definitions/00002' },
-          { component: 'macros', versionId: '00002', sourceUri: '/fixture/macros/00002' },
-          { component: 'testclasses', versionId: '00002', sourceUri: '/fixture/testclasses/00002' },
+          {
+            component: 'main',
+            versionId: '00002',
+            sourceUri: '/fixture/main/00002',
+          },
+          {
+            component: 'definitions',
+            versionId: '00002',
+            sourceUri: '/fixture/definitions/00002',
+          },
+          {
+            component: 'macros',
+            versionId: '00002',
+            sourceUri: '/fixture/macros/00002',
+          },
+          {
+            component: 'testclasses',
+            versionId: '00002',
+            sourceUri: '/fixture/testclasses/00002',
+          },
         ],
         ownedFiles: [],
         configDigest: 'x',
