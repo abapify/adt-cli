@@ -239,8 +239,6 @@ export async function readRegularText(
     path,
     async (absolute) => {
       const safePath = safeRelativePath(path);
-      const realRoot = await realpath(root);
-      const expected = resolve(realRoot, safePath);
       const assertRegularTarget = async () => {
         // Re-validate the full parent chain immediately before open to narrow
         // the TOCTOU window where a parent component could be swapped for a
@@ -248,6 +246,9 @@ export async function readRegularText(
         // Node.js does not expose openat-style handle-relative traversal, so a
         // residual race remains if an attacker can concurrently mutate the repo.
         await validatePhysicalRoot(root, absolute);
+        // Re-resolve root at validation time so `expected` reflects the same
+        // moment as the parent-chain checks (root itself could be swapped).
+        const expected = resolve(await realpath(root), safePath);
         if ((await realpath(absolute)) !== expected) {
           throw new AdtFlowError(
             'path_invalid',
@@ -255,9 +256,10 @@ export async function readRegularText(
             { path },
           );
         }
+        return expected;
       };
 
-      await assertRegularTarget();
+      const expected = await assertRegularTarget();
       const handle = await open(
         absolute,
         constants.O_RDONLY | constants.O_NOFOLLOW,
