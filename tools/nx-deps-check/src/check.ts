@@ -107,8 +107,8 @@ const selfName =
 // package name -> list of "file:line"
 const violations = new Map<string, string[]>();
 
-const DEV_DIR =
-  /(^|\/)(tests?|__tests__|e2e|fixtures?|scripts?|generators?|config)\//i;
+const DEV_DIR = /(^|\/)(tests?|__tests__|e2e)\//i;
+const DEV_ROOT_DIR = /^(fixtures?|scripts?|generators?|config)\//i;
 const DEV_SUFFIX = /\.(test|spec|config)\.[a-z]+$/i;
 
 for (const file of scanFiles(projectRoot)) {
@@ -126,8 +126,9 @@ for (const file of scanFiles(projectRoot)) {
     true,
     SCAN_EXT.get(ext) ?? ts.ScriptKind.JS,
   );
-  const rel = file.slice(projectRoot.length + 1);
-  const fileDev = DEV_DIR.test(rel) || DEV_SUFFIX.test(rel);
+  const rel = file.slice(projectRoot.length + 1).replace(/\\/g, '/');
+  const fileDev =
+    DEV_DIR.test(rel) || DEV_ROOT_DIR.test(rel) || DEV_SUFFIX.test(rel);
   // Private projects never ship, so their files may lean on devDeps —
   // but the root workspace-link allowance stays gated on dev files so a
   // private project's prod file can't silently pull a sibling package.
