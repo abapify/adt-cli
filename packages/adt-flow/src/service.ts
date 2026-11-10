@@ -978,9 +978,68 @@ const workspaceLocks = new Map<string, Promise<void>>();
 const CHECKOUT_LOCK_PATH = '.adt/checkout.lock';
 const CHECKOUT_LOCK_TIMEOUT_MS = 60_000;
 const CHECKOUT_LOCK_STALE_MS = 10 * 60_000;
+const CHECKOUT_LOCK_POLL_MS = 200;
 
 async function sleep(ms: number): Promise<void> {
-  await new Promise((r) => setTimeout(r, ms));
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function releaseCheckoutLock(lockPath: string): () => Promise<void> {
+  return async () => {
+    try {
+      await unlink(lockPath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
+  };
+}
+
+function throwCheckoutLockTimeout(root: string, lockPath: string): never {
+  throw new AdtFlowError(
+    'apply_failed',
+    'Another checkout/index operation holds the workspace lock.',
+    { root, lockPath },
+  );
+}
+
+async function tryCreateCheckoutLock(
+  lockPath: string,
+): Promise<(() => Promise<void>) | 'exists'> {
+  try {
+    await mkdir(dirname(lockPath), { recursive: true });
+    const handle = await open(lockPath, 'wx');
+    try {
+      await handle.writeFile(
+        JSON.stringify({
+          pid: process.pid,
+          createdAt: new Date().toISOString(),
+        }),
+      );
+    } finally {
+      await handle.close();
+    }
+    return releaseCheckoutLock(lockPath);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'EEXIST') return 'exists';
+    if (code === 'ENOENT' || code === 'ENOTDIR') return () => Promise.resolve();
+    throw error;
+  }
+}
+
+async function tryReclaimStaleCheckoutLock(
+  lockPath: string,
+): Promise<'reclaimed' | 'wait'> {
+  try {
+    const info = await stat(lockPath);
+    const ageMs = Date.now() - (info.birthtimeMs || info.mtimeMs);
+    if (ageMs <= CHECKOUT_LOCK_STALE_MS) return 'wait';
+    await unlink(lockPath).catch(() => undefined);
+    return 'reclaimed';
+  } catch {
+    // Lock disappeared or unreadable; retry acquisition.
+    return 'reclaimed';
+  }
 }
 
 async function acquireCheckoutFileLock(
@@ -990,65 +1049,22 @@ async function acquireCheckoutFileLock(
   const lockPath = resolve(absoluteRoot, CHECKOUT_LOCK_PATH);
   const deadline = Date.now() + CHECKOUT_LOCK_TIMEOUT_MS;
 
-  while (true) {
-    try {
-      await mkdir(dirname(lockPath), { recursive: true });
-      const handle = await open(lockPath, 'wx');
-      try {
-        await handle.writeFile(
-          JSON.stringify({
-            pid: process.pid,
-            createdAt: new Date().toISOString(),
-          }),
-        );
-      } finally {
-        await handle.close();
-      }
-      return async () => {
-        try {
-          await unlink(lockPath);
-        } catch (error) {
-          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-        }
-      };
-    } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code;
-      if (code !== 'EEXIST') {
-        // If the root is missing or not writable, let checkout/reporting fail normally.
-        if (code === 'ENOENT' || code === 'ENOTDIR') {
-          return async () => undefined;
-        }
-        throw error;
-      }
+  while (Date.now() < deadline) {
+    const created = await tryCreateCheckoutLock(lockPath);
+    if (created !== 'exists') return created;
 
-      try {
-        const info = await stat(lockPath);
-        const ageMs = Date.now() - (info.birthtimeMs || info.mtimeMs);
-        if (ageMs > CHECKOUT_LOCK_STALE_MS) {
-          await unlink(lockPath).catch(() => undefined);
-          if (Date.now() >= deadline) {
-            throw new AdtFlowError(
-              'apply_failed',
-              'Another checkout/index operation holds the workspace lock.',
-              { root: absoluteRoot, lockPath },
-            );
-          }
-          continue;
-        }
-      } catch {
-        // Lock disappeared or unreadable; retry.
-      }
-
-      if (Date.now() >= deadline) {
-        throw new AdtFlowError(
-          'apply_failed',
-          'Another checkout/index operation holds the workspace lock.',
-          { root: absoluteRoot, lockPath },
-        );
-      }
-      await sleep(200);
+    const stale = await tryReclaimStaleCheckoutLock(lockPath);
+    if (stale === 'reclaimed') {
+      if (Date.now() >= deadline)
+        throwCheckoutLockTimeout(absoluteRoot, lockPath);
+      continue;
     }
+
+    if (Date.now() >= deadline) break;
+    await sleep(CHECKOUT_LOCK_POLL_MS);
   }
+
+  return throwCheckoutLockTimeout(absoluteRoot, lockPath);
 }
 
 async function withWorkspaceLock<T>(
