@@ -440,6 +440,88 @@ describe('class component preservation in an existing repository', () => {
     ).toBe('REPORT unrelated.\n');
   });
 
+  it('preserves unselected sources when materialization has no class source anchor', async () => {
+    const { preserveUnselectedClassComponents } =
+      await import('../src/class-component-preservation');
+    const f = await fixture();
+    await f.seed(false);
+    const result = await preserveUnselectedClassComponents({
+      root: f.root,
+      identity: {
+        canonical: 'R3TR/CLAS/ZCL_DEMO',
+        pgmid: 'R3TR',
+        type: 'CLAS',
+        name: 'ZCL_DEMO',
+      },
+      format: abapgitFormatPlugin,
+      selectedComponents: new Set(['implementations']),
+      existingPaths: [
+        'src/zcl_demo.clas.abap',
+        'src/zcl_demo.clas.locals_def.abap',
+        'src/zcl_demo.clas.locals_imp.abap',
+        'src/zcl_demo.clas.macros.abap',
+        'src/zcl_demo.clas.testclasses.abap',
+      ],
+      files: [
+        {
+          path: 'src/zcl_demo.clas.xml',
+          content: '<metadata/>',
+          role: 'metadata',
+        },
+      ],
+      previous: {
+        schemaVersion: 1,
+        formatVersion: 1,
+        identity: {
+          canonical: 'R3TR/CLAS/ZCL_DEMO',
+          pgmid: 'R3TR',
+          type: 'CLAS',
+          name: 'ZCL_DEMO',
+        },
+        state: 'present',
+        packagePath: ['ZROOT'],
+        selections: [
+          {
+            component: 'main',
+            versionId: '00002',
+            sourceUri: '/fixture/main/00002',
+          },
+          {
+            component: 'definitions',
+            versionId: '00002',
+            sourceUri: '/fixture/definitions/00002',
+          },
+          {
+            component: 'macros',
+            versionId: '00002',
+            sourceUri: '/fixture/macros/00002',
+          },
+          {
+            component: 'testclasses',
+            versionId: '00002',
+            sourceUri: '/fixture/testclasses/00002',
+          },
+        ],
+        ownedFiles: [],
+        configDigest: 'x',
+        formatDigest: 'y',
+      },
+    });
+    expect(result.files.map((file) => file.path).sort()).toEqual([
+      'src/zcl_demo.clas.abap',
+      'src/zcl_demo.clas.locals_def.abap',
+      'src/zcl_demo.clas.macros.abap',
+      'src/zcl_demo.clas.testclasses.abap',
+      'src/zcl_demo.clas.xml',
+    ]);
+    expect(result.selections.map((s) => s.component).sort()).toEqual([
+      'definitions',
+      'macros',
+      'main',
+      'testclasses',
+    ]);
+  });
+
   it('moves preserved companions with the class instead of splitting its package layout', async () => {
     const f = await fixture();
     await f.seed(true);

@@ -72,9 +72,18 @@ export async function preserveUnselectedClassComponents(
 }> {
   const files = [...input.files];
   if (input.identity.type !== 'CLAS') return { files, selections: [] };
+
   const anchor = files.find((file) => classFilename(input, file.path));
-  if (!anchor) return { files, selections: [] };
-  const targetDirectory = dirname(anchor.path);
+  const existingAnchor = input.existingPaths.find((path) =>
+    classFilename(input, path),
+  );
+  const targetDirectory = anchor
+    ? dirname(anchor.path)
+    : existingAnchor
+      ? dirname(existingAnchor)
+      : undefined;
+  if (!targetDirectory) return { files, selections: [] };
+
   const materializedPaths = new Set(files.map((file) => file.path));
   const retainedPaths = new Set<string>();
   const retainedComponents = new Set<string>();
