@@ -1016,7 +1016,7 @@ async function acquireCheckoutFileLock(
       if (code !== 'EEXIST') {
         // If the root is missing or not writable, let checkout/reporting fail normally.
         if (code === 'ENOENT' || code === 'ENOTDIR') {
-          return async () => {};
+          return async () => undefined;
         }
         throw error;
       }
@@ -1025,7 +1025,7 @@ async function acquireCheckoutFileLock(
         const info = await stat(lockPath);
         const ageMs = Date.now() - (info.birthtimeMs || info.mtimeMs);
         if (ageMs > CHECKOUT_LOCK_STALE_MS) {
-          await unlink(lockPath).catch(() => {});
+          await unlink(lockPath).catch(() => undefined);
           if (Date.now() >= deadline) {
             throw new AdtFlowError(
               'apply_failed',
