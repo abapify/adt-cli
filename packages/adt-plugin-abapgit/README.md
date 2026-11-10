@@ -19,7 +19,12 @@ import { abapgitFormatPlugin } from '@abapify/adt-plugin-abapgit';
 const adkClass = {
   name: 'ZCL_EXAMPLE',
   description: 'Example class',
-  originalLanguage: 'EN',
+  dataSync: {
+    name: 'ZCL_EXAMPLE',
+    description: 'Example class',
+    language: 'EN',
+    include: [{ includeType: 'main' }],
+  },
 };
 const source = 'CLASS zcl_example DEFINITION PUBLIC. ENDCLASS.';
 
