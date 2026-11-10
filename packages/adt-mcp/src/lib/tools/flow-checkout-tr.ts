@@ -69,9 +69,7 @@ export function registerFlowCheckoutTrTool(
               ...input,
               mode: args.base ? 'base' : 'head',
               ...(args.partial === true ? { partial: true } : {}),
-              ...(args.indexOnInexact === true
-                ? { indexOnInexact: true }
-                : {}),
+              ...(args.indexOnInexact === true ? { indexOnInexact: true } : {}),
               ...(args.verifyInventory === true
                 ? { verifyInventory: true }
                 : {}),
