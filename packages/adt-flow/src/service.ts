@@ -1002,6 +1002,57 @@ function throwCheckoutLockTimeout(root: string, lockPath: string): never {
   );
 }
 
+async function isExistingDirectory(path: string): Promise<boolean | undefined> {
+  try {
+    return (await stat(path)).isDirectory();
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return undefined;
+    throw error;
+  }
+}
+
+async function writeCheckoutLockFile(lockPath: string): Promise<void> {
+  const handle = await open(lockPath, 'wx');
+  try {
+    await handle.writeFile(
+      JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }),
+    );
+  } catch (error) {
+    await unlink(lockPath).catch(() => undefined);
+    throw error;
+  } finally {
+    await handle.close().catch(() => undefined);
+  }
+}
+
+async function tryAcquireCheckoutLock(
+  lockPath: string,
+): Promise<(() => Promise<void>) | 'exists' | 'skip'> {
+  try {
+    await mkdir(dirname(lockPath), { recursive: true });
+    await writeCheckoutLockFile(lockPath);
+    return releaseCheckoutLock(lockPath);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'EEXIST') return 'exists';
+    if (code === 'ENOENT' || code === 'ENOTDIR') return 'skip';
+    throw error;
+  }
+}
+
+async function tryReclaimStaleLock(lockPath: string): Promise<boolean> {
+  try {
+    const info = await stat(lockPath);
+    const ageMs = Date.now() - (info.birthtimeMs || info.mtimeMs);
+    if (ageMs <= CHECKOUT_LOCK_STALE_MS) return false;
+  } catch {
+    return true;
+  }
+  await unlink(lockPath).catch(() => undefined);
+  return true;
+}
+
 async function acquireCheckoutFileLock(
   root: string,
 ): Promise<() => Promise<void>> {
@@ -1009,62 +1060,20 @@ async function acquireCheckoutFileLock(
   const lockPath = resolve(absoluteRoot, CHECKOUT_LOCK_PATH);
   const deadline = Date.now() + CHECKOUT_LOCK_TIMEOUT_MS;
 
-  try {
-    const rootStat = await stat(absoluteRoot);
-    if (!rootStat.isDirectory()) {
-      return () => Promise.resolve();
-    }
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code === 'ENOENT' || code === 'ENOTDIR') {
-      return () => Promise.resolve();
-    }
-    throw error;
+  if ((await isExistingDirectory(absoluteRoot)) !== true) {
+    return () => Promise.resolve();
   }
 
-  while (true) {
-    if (Date.now() >= deadline) {
-      throwCheckoutLockTimeout(absoluteRoot, lockPath);
-    }
+  while (Date.now() < deadline) {
+    const acquired = await tryAcquireCheckoutLock(lockPath);
+    if (acquired === 'skip') return () => Promise.resolve();
+    if (acquired !== 'exists') return acquired;
 
-    try {
-      await mkdir(dirname(lockPath), { recursive: true });
-      const handle = await open(lockPath, 'wx');
-      try {
-        await handle.writeFile(
-          JSON.stringify({
-            pid: process.pid,
-            createdAt: new Date().toISOString(),
-          }),
-        );
-      } catch (error) {
-        await unlink(lockPath).catch(() => undefined);
-        throw error;
-      } finally {
-        await handle.close().catch(() => undefined);
-      }
-      return releaseCheckoutLock(lockPath);
-    } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code;
-      if (code === 'ENOENT' || code === 'ENOTDIR') {
-        return () => Promise.resolve();
-      }
-      if (code !== 'EEXIST') throw error;
-    }
-
-    try {
-      const info = await stat(lockPath);
-      const ageMs = Date.now() - (info.birthtimeMs || info.mtimeMs);
-      if (ageMs > CHECKOUT_LOCK_STALE_MS) {
-        await unlink(lockPath).catch(() => undefined);
-        continue;
-      }
-    } catch {
-      continue;
-    }
-
+    if (await tryReclaimStaleLock(lockPath)) continue;
     await sleep(CHECKOUT_LOCK_POLL_MS);
   }
+
+  return throwCheckoutLockTimeout(absoluteRoot, lockPath);
 }
 
 async function withWorkspaceLock<T>(
