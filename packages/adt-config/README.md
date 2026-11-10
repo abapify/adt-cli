@@ -27,7 +27,7 @@ export default defineConfig({
 ## Features
 
 - Typed `defineConfig` for destinations, plugins, and commands
-- Config discovery and precedence (project → user → env)
+- Config discovery with project files merged over global `~/.adt/config.json`
 - Shared by the CLI, MCP server, and SDK
 
 ## Documentation
