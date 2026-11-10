@@ -1,5 +1,5 @@
-import { realpath } from 'node:fs/promises';
-import { basename, resolve } from 'node:path';
+import { mkdir, open, realpath, stat, unlink } from 'node:fs/promises';
+import { basename, dirname, resolve } from 'node:path';
 import type {
   TransportSourceManifest,
   TransportSourceManifestEntry,
@@ -975,6 +975,68 @@ export interface FlowCheckoutHooks {
 }
 
 const workspaceLocks = new Map<string, Promise<void>>();
+const CHECKOUT_LOCK_PATH = '.adt/checkout.lock';
+const CHECKOUT_LOCK_TIMEOUT_MS = 60_000;
+const CHECKOUT_LOCK_STALE_MS = 10 * 60_000;
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((r) => setTimeout(r, ms));
+}
+
+async function acquireCheckoutFileLock(root: string): Promise<() => Promise<void>> {
+  const absoluteRoot = resolve(root);
+  const lockPath = resolve(absoluteRoot, CHECKOUT_LOCK_PATH);
+  const deadline = Date.now() + CHECKOUT_LOCK_TIMEOUT_MS;
+
+  while (true) {
+    try {
+      await mkdir(dirname(lockPath), { recursive: true });
+      const handle = await open(lockPath, 'wx');
+      try {
+        await handle.writeFile(
+          JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }),
+        );
+      } finally {
+        await handle.close();
+      }
+      return async () => {
+        try {
+          await unlink(lockPath);
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+        }
+      };
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== 'EEXIST') {
+        // If the root is missing or not writable, let checkout/reporting fail normally.
+        if (code === 'ENOENT' || code === 'ENOTDIR') {
+          return async () => {};
+        }
+        throw error;
+      }
+
+      try {
+        const info = await stat(lockPath);
+        if (Date.now() - info.mtimeMs > CHECKOUT_LOCK_STALE_MS) {
+          await unlink(lockPath).catch(() => {});
+          continue;
+        }
+      } catch {
+        // Lock disappeared or unreadable; retry.
+      }
+
+      if (Date.now() >= deadline) {
+        throw new AdtFlowError(
+          'apply_failed',
+          'Another checkout/index operation holds the workspace lock.',
+          { root: absoluteRoot, lockPath },
+        );
+      }
+      await sleep(200);
+    }
+  }
+}
 
 async function withWorkspaceLock<T>(
   root: string,
@@ -995,11 +1057,17 @@ async function withWorkspaceLock<T>(
   const queued = previous.then(() => current);
   workspaceLocks.set(key, queued);
   await previous;
+  let releaseFileLock: (() => Promise<void>) | undefined;
   try {
+    releaseFileLock = await acquireCheckoutFileLock(key);
     return await operation();
   } finally {
-    release();
-    if (workspaceLocks.get(key) === queued) workspaceLocks.delete(key);
+    try {
+      await releaseFileLock?.();
+    } finally {
+      release();
+      if (workspaceLocks.get(key) === queued) workspaceLocks.delete(key);
+    }
   }
 }
 
