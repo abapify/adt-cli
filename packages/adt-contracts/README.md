@@ -17,7 +17,7 @@ npm install @abapify/adt-contracts
 import { adtContract } from '@abapify/adt-contracts';
 import { createClient, createFetchAdapter } from '@abapify/speci/rest';
 
-const baseUrl = 'https://sap.example.com/sap/bc/adt';
+const baseUrl = 'https://sap.example.com';
 const adapter = createFetchAdapter();
 
 const client = createClient(adtContract, { baseUrl, adapter });
