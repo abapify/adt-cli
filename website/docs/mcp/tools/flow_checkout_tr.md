@@ -23,6 +23,8 @@ Defined in [`packages/adt-mcp/src/lib/tools/flow-checkout-tr.ts`](https://github
 | `systemId`        | `string`   | no               | Logical system id (resolved via the server multi-system configuration) Length: 0–∞. Items: 0–∞.                |
 | `transports`      | `string[]` | yes              | Length: 0–∞. Items: 1–∞.                                                                                       |
 | `base`            | `boolean`  | no               | Length: 0–∞. Items: 0–∞.                                                                                       |
+| `partial`         | `boolean`  | no               | Materialize only objects with exact source-history boundaries Length: 0–∞. Items: 0–∞.                         |
+| `indexOnInexact`  | `boolean`  | no               | Persist source-free inventory when an exact source boundary is unavailable Length: 0–∞. Items: 0–∞.            |
 | `verifyInventory` | `boolean`  | no               | Recompute transport inventory instead of reusing an exact-head index Length: 0–∞. Items: 0–∞.                  |
 | `workspaceRoot`   | `string`   | yes              | Absolute target directory within a server-owned root Length: 1–∞. Items: 0–∞.                                  |
 | `destination`     | `string`   | destination mode | Required when the server runs in destination mode; an ADT destination key matching `^[a-z][a-z0-9-]\{1,62\}$`. |

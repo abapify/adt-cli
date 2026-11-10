@@ -100,6 +100,61 @@ test('flow_checkout_tr delegates to the shared service inside an allowed root', 
   });
 });
 
+test('flow_checkout_tr forwards partial and indexOnInexact options', async () => {
+  const allowed = await realpath(
+    await mkdtemp(join(tmpdir(), 'adt-flow-mcp-')),
+  );
+  const target = new CapturingServer();
+  let checkoutInput: unknown;
+  const ctx = {
+    getClient: () => ({}) as AdtClient,
+    workspaceRoots: [allowed],
+    flowConfig: { format: { id: 'abapgit' } },
+  } satisfies ToolContext;
+  registerFlowCheckoutTrTool(target as unknown as McpServer, ctx, {
+    getFormat: () => format,
+    createService: () => ({
+      async checkout(input) {
+        checkoutInput = input;
+        return {
+          mode: 'head',
+          requestedTransports: ['DEVK900001'],
+          scopeTransports: ['DEVK900001'],
+          changed: [],
+          moved: [],
+          removed: [],
+          unchanged: [],
+          descriptors: [],
+          skipped: [],
+          sapCalls: { manifest: 1, metadata: 0, source: 0 },
+          fastPath: 'none',
+        };
+      },
+    }),
+  });
+
+  const result = await target.handler!(
+    {
+      baseUrl: 'https://example.invalid',
+      transports: ['DEVK900001'],
+      partial: true,
+      indexOnInexact: true,
+      workspaceRoot: allowed,
+    },
+    {},
+  );
+
+  assert.notStrictEqual(result.isError, true);
+  assert.deepEqual(checkoutInput, {
+    root: allowed,
+    transports: ['DEVK900001'],
+    mode: 'head',
+    partial: true,
+    indexOnInexact: true,
+    config: ctx.flowConfig,
+  });
+});
+
 test('flow workspace confinement rejects a sibling directory', async () => {
   const allowed = await realpath(
     await mkdtemp(join(tmpdir(), 'adt-flow-allowed-')),
