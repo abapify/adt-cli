@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-fixtures",
-  "version": "0.4.40",
+  "version": "0.4.41",
   "description": "SAP ADT XML fixtures for testing",
   "license": "MIT",
   "private": true,

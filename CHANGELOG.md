@@ -1,3 +1,13 @@
+## 0.4.41 (2026-11-10)
+
+### 🩹 Fixes
+
+- **adt-flow:** harden readRegularText against parent-dir symlink TOCTOU ([#322](https://github.com/abapify/adt-cli/pull/322))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.40 (2026-11-10)
 
 ### 🩹 Fixes

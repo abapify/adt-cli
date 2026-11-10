@@ -1,3 +1,7 @@
+## 0.4.41 (2026-11-10)
+
+This was a version bump only for adt-plugin-abapgit to align it with other projects, there were no code changes.
+
 ## 0.4.40 (2026-11-10)
 
 This was a version bump only for adt-plugin-abapgit to align it with other projects, there were no code changes.
