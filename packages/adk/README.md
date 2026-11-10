@@ -20,7 +20,7 @@ import { createAdk } from '@abapify/adk';
 const client = createAdtClient({ baseUrl, username, password, client: '100' });
 const adk = createAdk(client);
 
-const klass = await adk.getClass('ZCL_DEMO');
+const klass = await adk.get('ZCL_DEMO', 'CLAS');
 await klass.save({ transport: 'DEVK900001' });
 ```
 
