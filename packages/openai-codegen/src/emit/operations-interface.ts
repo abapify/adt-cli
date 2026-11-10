@@ -636,5 +636,9 @@ function renderTypeRefSource(ref: TypeRef): string {
     case 'TableType':
     case 'StructureType':
       return ref.kind;
+    default: {
+      const _exhaustive: never = ref;
+      return _exhaustive;
+    }
   }
 }

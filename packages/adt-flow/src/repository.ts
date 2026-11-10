@@ -238,19 +238,54 @@ export async function readRegularText(
     root,
     path,
     async (absolute) => {
-      const expected = resolve(await realpath(root), safeRelativePath(path));
-      if ((await realpath(absolute)) !== expected) {
-        throw new AdtFlowError(
-          'path_invalid',
-          'Flow cannot preserve a symlinked source path.',
-          { path },
-        );
-      }
+      const safePath = safeRelativePath(path);
+      const assertRegularTarget = async () => {
+        // Re-validate the full parent chain immediately before open to narrow
+        // the TOCTOU window where a parent component could be swapped for a
+        // symlink (O_NOFOLLOW only protects the final path component).
+        // Node.js does not expose openat-style handle-relative traversal, so a
+        // residual race remains if an attacker can concurrently mutate the repo.
+        await validatePhysicalRoot(root, absolute);
+        // Re-resolve root at validation time so `expected` reflects the same
+        // moment as the parent-chain checks (root itself could be swapped).
+        const expected = resolve(await realpath(root), safePath);
+        if ((await realpath(absolute)) !== expected) {
+          throw new AdtFlowError(
+            'path_invalid',
+            'Flow cannot preserve a symlinked source path.',
+            { path },
+          );
+        }
+        return expected;
+      };
+
+      const expected = await assertRegularTarget();
       const handle = await open(
         absolute,
         constants.O_RDONLY | constants.O_NOFOLLOW,
       );
       try {
+        // Best-effort post-open verification: on Linux, /proc/self/fd/<fd>
+        // exposes the opened target, closing the parent-swap race when
+        // available. Use readlink to preserve "(deleted)" suffixes.
+        if (process.platform === 'linux') {
+          const fdPath = `/proc/self/fd/${handle.fd}`;
+          let opened: string | undefined;
+          try {
+            opened = await readlink(fdPath);
+          } catch (error) {
+            // Skip only when procfs/fd entry is unavailable; propagate other
+            // failures so verification does not fail open silently.
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+          }
+          if (opened !== undefined && opened !== expected) {
+            throw new AdtFlowError(
+              'path_invalid',
+              'Flow cannot preserve a symlinked source path.',
+              { path },
+            );
+          }
+        }
         return await handle.readFile('utf8');
       } finally {
         await handle.close();
