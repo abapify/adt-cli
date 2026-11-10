@@ -1277,7 +1277,7 @@ test('runs ATC from a canonical package scope and retains only the trusted docum
                               {
                                 uri: '/sap/bc/adt/atc/findings/itemid/ABC/index/1',
                                 priority: '2',
-                                checkId: 'SCI',
+                                checkId: '005056A509B11EEC9A8A1234567890AB',
                                 checkTitle: 'Safe check',
                                 messageTitle: 'Avoid unsafe access',
                                 location:
@@ -1318,7 +1318,7 @@ test('runs ATC from a canonical package scope and retains only the trusted docum
       checkVariant: 'DEFAULT',
       findings: [
         {
-          checkId: 'SCI',
+          checkId: '005056A509B11EEC9A8A1234567890AB',
           checkTitle: 'Safe check',
           messageText: 'Avoid unsafe access',
           priority: 2,
@@ -1585,7 +1585,7 @@ test('runs ATC with unavailable check categories without failing the run', async
                               {
                                 uri: '/sap/bc/adt/atc/findings/itemid/ABC/index/1',
                                 priority: '2',
-                                checkId: 'SCI',
+                                checkId: '005056A509B11EEC9A8A1234567890AB',
                                 checkTitle: 'Safe check',
                                 messageTitle: 'Avoid unsafe access',
                                 location:

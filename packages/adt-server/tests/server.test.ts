@@ -1131,7 +1131,7 @@ test('runs ATC only from a canonical scope and returns an opaque documentation c
           checkVariant: 'DEFAULT',
           findings: [
             {
-              checkId: 'SCI',
+              checkId: '005056A509B11EEC9A8A1234567890AB',
               checkTitle: 'Safe check',
               messageText: 'Avoid unsafe access',
               priority: 2,
@@ -1183,7 +1183,7 @@ test('runs ATC only from a canonical scope and returns an opaque documentation c
     ]);
     assert.strictEqual(body.checkVariant, 'DEFAULT');
     assert.deepStrictEqual(body.findings[0], {
-      checkId: 'SCI',
+      checkId: '005056A509B11EEC9A8A1234567890AB',
       checkTitle: 'Safe check',
       messageText: 'Avoid unsafe access',
       priority: 2,
