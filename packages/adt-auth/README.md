@@ -18,7 +18,7 @@ import { AuthManager } from '@abapify/adt-auth';
 
 const auth = new AuthManager();
 const session = await auth.login('DEV', {
-  plugin: '@abapify/adt-auth/plugins/basic',
+  type: '@abapify/adt-auth/plugins/basic',
   options: {
     url: 'https://sap.example.com',
     username: 'DEVELOPER',
