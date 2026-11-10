@@ -28,7 +28,7 @@ const adkClass = {
 };
 const source = 'CLASS zcl_example DEFINITION PUBLIC. ENDCLASS.';
 
-const { files } = await abapgitFormatPlugin.materialize({
+const { files } = await abapgitFormatPlugin.materialize!({
   object: adkClass,
   objectType: 'CLAS',
   packagePath: ['ZROOT'],
