@@ -16,8 +16,13 @@ npm install @abapify/adt-pilot
 ```ts
 import { connectMcpClient, createCodeReviewWorkflow } from '@abapify/adt-pilot';
 
-const { callTool } = await connectMcpClient(transport); // MCP transport to adt-mcp
-const workflow = createCodeReviewWorkflow(callTool);
+const { callTool, client } = await connectMcpClient(transport); // MCP transport to adt-mcp
+try {
+  const workflow = createCodeReviewWorkflow(callTool);
+  // use workflow...
+} finally {
+  await client.close();
+}
 ```
 
 ## Features
