@@ -126,7 +126,7 @@ for (const file of scanFiles(projectRoot)) {
     true,
     SCAN_EXT.get(ext) ?? ts.ScriptKind.JS,
   );
-  const rel = file.slice(projectRoot.length + 1);
+  const rel = file.slice(projectRoot.length + 1).replace(/\\/g, '/');
   const fileDev =
     DEV_DIR.test(rel) || DEV_ROOT_DIR.test(rel) || DEV_SUFFIX.test(rel);
   // Private projects never ship, so their files may lean on devDeps —
