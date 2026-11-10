@@ -16,7 +16,19 @@ npm install @abapify/adt-plugin-abapgit
 ```ts
 import { abapgitFormatPlugin } from '@abapify/adt-plugin-abapgit';
 
-const { files } = await abapgitFormatPlugin.materialize({
+const adkClass = {
+  name: 'ZCL_EXAMPLE',
+  description: 'Example class',
+  dataSync: {
+    name: 'ZCL_EXAMPLE',
+    description: 'Example class',
+    language: 'EN',
+    include: [{ includeType: 'main' }],
+  },
+};
+const source = 'CLASS zcl_example DEFINITION PUBLIC. ENDCLASS.';
+
+const { files } = await abapgitFormatPlugin.materialize!({
   object: adkClass,
   objectType: 'CLAS',
   packagePath: ['ZROOT'],
