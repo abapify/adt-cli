@@ -13,12 +13,17 @@ npm install @abapify/adt-flow @abapify/adt-cli
 
 ## Usage
 
-Register the command plugin in your project config:
+Register the command plugin and configure the flow format in your project config:
 
 ```ts
 // adt.config.ts
 export default {
   commands: ['@abapify/adt-flow/commands/flow'],
+  flow: {
+    format: {
+      id: 'abapgit',
+    },
+  },
 };
 ```
 
