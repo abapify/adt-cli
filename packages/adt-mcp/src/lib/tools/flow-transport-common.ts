@@ -49,6 +49,8 @@ export const DEFAULT_FLOW_MCP_DEPENDENCIES: FlowMcpDependencies = {
 type FlowToolArgs = LegacyConnectionArgs & {
   transports: string[];
   workspaceRoot: string;
+  partial?: boolean;
+  indexOnInexact?: boolean;
   verifyInventory?: boolean;
 };
 

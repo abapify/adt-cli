@@ -23,6 +23,18 @@ export function registerFlowCheckoutTrTool(
       ...sessionOrConnectionShape,
       transports: z.array(z.string().trim().min(1)).min(1),
       base: z.boolean().optional(),
+      partial: z
+        .boolean()
+        .optional()
+        .describe(
+          'Materialize only objects with exact source-history boundaries',
+        ),
+      indexOnInexact: z
+        .boolean()
+        .optional()
+        .describe(
+          'Persist source-free inventory when an exact source boundary is unavailable',
+        ),
       verifyInventory: z
         .boolean()
         .optional()
@@ -56,6 +68,10 @@ export function registerFlowCheckoutTrTool(
             service.checkout({
               ...input,
               mode: args.base ? 'base' : 'head',
+              ...(args.partial === true ? { partial: true } : {}),
+              ...(args.indexOnInexact === true
+                ? { indexOnInexact: true }
+                : {}),
               ...(args.verifyInventory === true
                 ? { verifyInventory: true }
                 : {}),
