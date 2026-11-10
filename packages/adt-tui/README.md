@@ -19,7 +19,7 @@ import { run } from '@abapify/adt-tui';
 await run({
   fetch: async (uri) => {
     const data = await client.fetch(uri);
-    return typeof data === "string" ? data : JSON.stringify(data);
+    return typeof data === 'string' ? data : JSON.stringify(data);
   },
   startUrl: '/sap/bc/adt/repository/nodestructure',
 });
