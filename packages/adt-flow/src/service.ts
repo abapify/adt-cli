@@ -1009,6 +1009,19 @@ async function acquireCheckoutFileLock(
   const lockPath = resolve(absoluteRoot, CHECKOUT_LOCK_PATH);
   const deadline = Date.now() + CHECKOUT_LOCK_TIMEOUT_MS;
 
+  try {
+    const rootStat = await stat(absoluteRoot);
+    if (!rootStat.isDirectory()) {
+      return () => Promise.resolve();
+    }
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') {
+      return () => Promise.resolve();
+    }
+    throw error;
+  }
+
   while (true) {
     if (Date.now() >= deadline) {
       throwCheckoutLockTimeout(absoluteRoot, lockPath);
@@ -1024,8 +1037,11 @@ async function acquireCheckoutFileLock(
             createdAt: new Date().toISOString(),
           }),
         );
+      } catch (error) {
+        await unlink(lockPath).catch(() => undefined);
+        throw error;
       } finally {
-        await handle.close();
+        await handle.close().catch(() => undefined);
       }
       return releaseCheckoutLock(lockPath);
     } catch (error) {
