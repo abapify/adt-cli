@@ -1,3 +1,13 @@
+## 0.4.42 (2026-11-10)
+
+### 🩹 Fixes
+
+- **adt-mcp:** align flow_checkout_tr options with CLI checkout parity ([#325](https://github.com/abapify/adt-cli/pull/325))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.41 (2026-11-10)
 
 This was a version bump only for adt-mcp to align it with other projects, there were no code changes.

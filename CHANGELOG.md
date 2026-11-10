@@ -1,3 +1,15 @@
+## 0.4.42 (2026-11-10)
+
+### 🩹 Fixes
+
+- **adt-flow:** preserve unselected class components without source anchor ([#323](https://github.com/abapify/adt-cli/pull/323))
+- **adt-flow:** serialize checkout/index with cross-process workspace lock ([#324](https://github.com/abapify/adt-cli/pull/324))
+- **adt-mcp:** align flow_checkout_tr options with CLI checkout parity ([#325](https://github.com/abapify/adt-cli/pull/325))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.41 (2026-11-10)
 
 ### 🩹 Fixes
