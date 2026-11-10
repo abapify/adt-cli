@@ -983,7 +983,9 @@ async function sleep(ms: number): Promise<void> {
   await new Promise((r) => setTimeout(r, ms));
 }
 
-async function acquireCheckoutFileLock(root: string): Promise<() => Promise<void>> {
+async function acquireCheckoutFileLock(
+  root: string,
+): Promise<() => Promise<void>> {
   const absoluteRoot = resolve(root);
   const lockPath = resolve(absoluteRoot, CHECKOUT_LOCK_PATH);
   const deadline = Date.now() + CHECKOUT_LOCK_TIMEOUT_MS;
@@ -994,7 +996,10 @@ async function acquireCheckoutFileLock(root: string): Promise<() => Promise<void
       const handle = await open(lockPath, 'wx');
       try {
         await handle.writeFile(
-          JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }),
+          JSON.stringify({
+            pid: process.pid,
+            createdAt: new Date().toISOString(),
+          }),
         );
       } finally {
         await handle.close();
@@ -1018,8 +1023,16 @@ async function acquireCheckoutFileLock(root: string): Promise<() => Promise<void
 
       try {
         const info = await stat(lockPath);
-        if (Date.now() - info.mtimeMs > CHECKOUT_LOCK_STALE_MS) {
+        const ageMs = Date.now() - (info.birthtimeMs || info.mtimeMs);
+        if (ageMs > CHECKOUT_LOCK_STALE_MS) {
           await unlink(lockPath).catch(() => {});
+          if (Date.now() >= deadline) {
+            throw new AdtFlowError(
+              'apply_failed',
+              'Another checkout/index operation holds the workspace lock.',
+              { root: absoluteRoot, lockPath },
+            );
+          }
           continue;
         }
       } catch {
@@ -1064,6 +1077,8 @@ async function withWorkspaceLock<T>(
   } finally {
     try {
       await releaseFileLock?.();
+    } catch {
+      // Do not mask the original operation error.
     } finally {
       release();
       if (workspaceLocks.get(key) === queued) workspaceLocks.delete(key);
