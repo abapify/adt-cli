@@ -238,19 +238,48 @@ export async function readRegularText(
     root,
     path,
     async (absolute) => {
-      const expected = resolve(await realpath(root), safeRelativePath(path));
-      if ((await realpath(absolute)) !== expected) {
-        throw new AdtFlowError(
-          'path_invalid',
-          'Flow cannot preserve a symlinked source path.',
-          { path },
-        );
-      }
+      const safePath = safeRelativePath(path);
+      const realRoot = await realpath(root);
+      const expected = resolve(realRoot, safePath);
+      const assertRegularTarget = async () => {
+        // Re-validate the full parent chain immediately before open to narrow
+        // the TOCTOU window where a parent component could be swapped for a
+        // symlink (O_NOFOLLOW only protects the final path component).
+        // Node.js does not expose openat-style handle-relative traversal, so a
+        // residual race remains if an attacker can concurrently mutate the repo.
+        await validatePhysicalRoot(root, absolute);
+        if ((await realpath(absolute)) !== expected) {
+          throw new AdtFlowError(
+            'path_invalid',
+            'Flow cannot preserve a symlinked source path.',
+            { path },
+          );
+        }
+      };
+
+      await assertRegularTarget();
       const handle = await open(
         absolute,
         constants.O_RDONLY | constants.O_NOFOLLOW,
       );
       try {
+        // Best-effort post-open verification: on Linux, /proc/self/fd/<fd>
+        // resolves to the opened target, closing the parent-swap race when
+        // available.
+        if (process.platform === 'linux') {
+          try {
+            const opened = await realpath(`/proc/self/fd/${handle.fd}`);
+            if (opened !== expected) {
+              throw new AdtFlowError(
+                'path_invalid',
+                'Flow cannot preserve a symlinked source path.',
+                { path },
+              );
+            }
+          } catch (error) {
+            if (error instanceof AdtFlowError) throw error;
+          }
+        }
         return await handle.readFile('utf8');
       } finally {
         await handle.close();
