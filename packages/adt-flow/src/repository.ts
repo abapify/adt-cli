@@ -266,20 +266,24 @@ export async function readRegularText(
       );
       try {
         // Best-effort post-open verification: on Linux, /proc/self/fd/<fd>
-        // resolves to the opened target, closing the parent-swap race when
-        // available.
+        // exposes the opened target, closing the parent-swap race when
+        // available. Use readlink to preserve "(deleted)" suffixes.
         if (process.platform === 'linux') {
+          const fdPath = `/proc/self/fd/${handle.fd}`;
+          let opened: string | undefined;
           try {
-            const opened = await realpath(`/proc/self/fd/${handle.fd}`);
-            if (opened !== expected) {
-              throw new AdtFlowError(
-                'path_invalid',
-                'Flow cannot preserve a symlinked source path.',
-                { path },
-              );
-            }
+            opened = await readlink(fdPath);
           } catch (error) {
-            if (error instanceof AdtFlowError) throw error;
+            // Skip only when procfs/fd entry is unavailable; propagate other
+            // failures so verification does not fail open silently.
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+          }
+          if (opened !== undefined && opened !== expected) {
+            throw new AdtFlowError(
+              'path_invalid',
+              'Flow cannot preserve a symlinked source path.',
+              { path },
+            );
           }
         }
         return await handle.readFile('utf8');
