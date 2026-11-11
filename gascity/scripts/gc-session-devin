@@ -431,26 +431,22 @@ def _list_running(prefix=""):
 
 
 def _set_meta(name, key):
-    _name_input = sys.argv[2] if len(sys.argv) > 2 else ""
-    _key_input = sys.argv[3] if len(sys.argv) > 3 else ""
-    _name = os.path.basename(_name_input)
-    _key = os.path.basename(_key_input)
+    _name = os.path.basename(sys.argv[2]) if len(sys.argv) > 2 else ""
+    _key = os.path.basename(sys.argv[3]) if len(sys.argv) > 3 else ""
     base = "/tmp/gc-session-devin"
-    dir_path = os.path.join(base, _name, "meta")
+    dir_path = base + "/" + _name + "/meta"
     os.makedirs(dir_path, exist_ok=True)
-    file_path = os.path.join(dir_path, _key)
+    file_path = dir_path + "/" + _key
     with open(file_path, "w") as f:
         f.write(sys.stdin.read())
     return 0
 
 
 def _get_meta(name, key):
-    _name_input = sys.argv[2] if len(sys.argv) > 2 else ""
-    _key_input = sys.argv[3] if len(sys.argv) > 3 else ""
-    _name = os.path.basename(_name_input)
-    _key = os.path.basename(_key_input)
+    _name = os.path.basename(sys.argv[2]) if len(sys.argv) > 2 else ""
+    _key = os.path.basename(sys.argv[3]) if len(sys.argv) > 3 else ""
     base = "/tmp/gc-session-devin"
-    file_path = os.path.join(base, _name, "meta", _key)
+    file_path = base + "/" + _name + "/meta/" + _key
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
             print(f.read(), end="", flush=True)
@@ -458,12 +454,10 @@ def _get_meta(name, key):
 
 
 def _remove_meta(name, key):
-    _name_input = sys.argv[2] if len(sys.argv) > 2 else ""
-    _key_input = sys.argv[3] if len(sys.argv) > 3 else ""
-    _name = os.path.basename(_name_input)
-    _key = os.path.basename(_key_input)
+    _name = os.path.basename(sys.argv[2]) if len(sys.argv) > 2 else ""
+    _key = os.path.basename(sys.argv[3]) if len(sys.argv) > 3 else ""
     base = "/tmp/gc-session-devin"
-    file_path = os.path.join(base, _name, "meta", _key)
+    file_path = base + "/" + _name + "/meta/" + _key
     try:
         os.unlink(file_path)
     except FileNotFoundError:
