@@ -431,22 +431,18 @@ def _list_running(prefix=""):
 
 
 def _set_meta(name, key):
-    safe_name = os.path.basename(name)
-    safe_key = os.path.basename(key)
     base = "/tmp/gc-session-devin"
-    dir_path = os.path.join(base, safe_name, "meta")
+    dir_path = os.path.join(base, os.path.basename(name), "meta")
     os.makedirs(dir_path, exist_ok=True)
-    file_path = os.path.join(dir_path, safe_key)
+    file_path = os.path.join(dir_path, os.path.basename(key))
     with open(file_path, "w") as f:
         f.write(sys.stdin.read())
     return 0
 
 
 def _get_meta(name, key):
-    safe_name = os.path.basename(name)
-    safe_key = os.path.basename(key)
     base = "/tmp/gc-session-devin"
-    file_path = os.path.join(base, safe_name, "meta", safe_key)
+    file_path = os.path.join(base, os.path.basename(name), "meta", os.path.basename(key))
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
             print(f.read(), end="", flush=True)
@@ -454,10 +450,8 @@ def _get_meta(name, key):
 
 
 def _remove_meta(name, key):
-    safe_name = os.path.basename(name)
-    safe_key = os.path.basename(key)
     base = "/tmp/gc-session-devin"
-    file_path = os.path.join(base, safe_name, "meta", safe_key)
+    file_path = os.path.join(base, os.path.basename(name), "meta", os.path.basename(key))
     try:
         os.unlink(file_path)
     except FileNotFoundError:
