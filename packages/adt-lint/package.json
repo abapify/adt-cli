@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-lint",
-  "version": "0.4.44",
+  "version": "0.4.45",
   "description": "Shared ABAP lint and source-shaping utilities built on @abaplint/core",
   "license": "MIT",
   "publishConfig": {

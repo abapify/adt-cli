@@ -1,3 +1,14 @@
+## 0.4.45 (2026-11-11)
+
+### 🩹 Fixes
+
+- **security:** use CodeQL-recognized regex sanitizers for remaining findings ([f4e4c9b5](https://github.com/abapify/adt-cli/commit/f4e4c9b5))
+- **security:** refine path guards to reject traversal segments only, not valid filenames with dots ([#345](https://github.com/abapify/adt-cli/pull/345))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.44 (2026-11-11)
 
 ### 🩹 Fixes

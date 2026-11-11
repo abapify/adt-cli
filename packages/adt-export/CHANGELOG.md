@@ -1,3 +1,7 @@
+## 0.4.45 (2026-11-11)
+
+This was a version bump only for adt-export to align it with other projects, there were no code changes.
+
 ## 0.4.44 (2026-11-11)
 
 This was a version bump only for adt-export to align it with other projects, there were no code changes.
