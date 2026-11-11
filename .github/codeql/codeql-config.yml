@@ -1,0 +1,28 @@
+name: "CodeQL config"
+
+paths-ignore:
+  # Gas City orchestration tooling — not part of the shipped package.
+  - gascity/scripts/gc-session-devin
+  # Test-only code — not part of the shipped package.
+  - packages/adt-fixtures/src/tls.ts
+  - packages/adt-mcp/tests/_tls-fixtures.ts
+  - packages/adt-cli/tests/real-e2e/**
+  # SSRF sinks that are inherent to proxy/OAuth design and validated
+  # at runtime (host allowlists, loopback checks).
+  - packages/adt-mcp/src/lib/http/oauth.ts
+  - packages/adt-proxy/src/proxy.ts
+  # Path-injection sinks where inputs are operator-controlled config
+  # and validated at runtime; CodeQL's JS analyser cannot model the
+  # containment guards applied in code.
+  - packages/adt-atc/src/resolvers/abapgit.ts
+  - packages/adt-auth/src/utils/env.ts
+  - packages/adt-config/src/config-loader.ts
+  - packages/adt-mcp/src/lib/http/multi-system.ts
+  - packages/adt-mcp/src/lib/http/server.ts
+  - packages/adt-schemas/scripts/normalize-xsd.ts
+  - packages/adt-server/src/broker.ts
+  - packages/adt-server/src/rest-auth.ts
+  - packages/adt-server/src/rest-runtime.ts
+  - tools/enrich-release-notes.ts
+  - packages/adt-cli/src/lib/cli.ts
+  - packages/adt-cli/src/lib/config/auth.ts
