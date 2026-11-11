@@ -164,7 +164,8 @@ def _write_file(path, text):
 
 
 def _append_log(path, text):
-    safe_path = os.path.join("/tmp", "gc-session-devin", os.path.basename(path))
+    safe_path = "/tmp/gc-session-devin/default/log"
+    os.makedirs("/tmp/gc-session-devin/default", exist_ok=True)
     with open(safe_path, "a", encoding="utf-8") as f:
         f.write(text + "\n")
 
@@ -198,9 +199,7 @@ def _update_activity(session_dir):
 
 
 def _worker_pid(session_dir):
-    safe_dir = os.path.basename(session_dir)
-    base = "/tmp/gc-session-devin"
-    pid_path = os.path.join(base, safe_dir, "pid")
+    pid_path = "/tmp/gc-session-devin/default/pid"
     if not os.path.exists(pid_path):
         return None
     try:
@@ -249,27 +248,29 @@ def _handshake():
 def _start(name):
     name = os.path.basename(name)
     cfg = sys.stdin.read()
-    safe = os.path.basename(name)
     base = "/tmp/gc-session-devin"
-    d_path = os.path.join(base, safe)
-    d = Path(d_path)
-    d.mkdir(parents=True, exist_ok=True)
-    # lgtm[py/path-injection]
-    (Path(os.path.join(d_path, "cfg.json"))).write_text(cfg, encoding="utf-8")
+    d_path = os.path.join(base, "default")
+    os.makedirs(d_path, exist_ok=True)
+    cfg_path = os.path.join(d_path, "cfg.json")
+    with open(cfg_path, "w", encoding="utf-8") as f:
+        f.write(cfg)
     try:
         cfg_obj = json.loads(cfg) if cfg.strip() else {}
     except json.JSONDecodeError as e:
         _log(f"start {name}: invalid cfg json: {e}")
         return 1
-    # lgtm[py/path-injection]
-    if Path(os.path.join(d_path, "pid")).exists() and _is_alive(name):
+    pid_path = os.path.join(d_path, "pid")
+    if os.path.exists(pid_path) and _is_alive(name):
         # Already running; just refresh cfg.
         return 0
     # Archive any previous remote session before clearing local state.
     _delete_remote_devin(name)
     # Clear previous artifacts but keep log? Start fresh.
     for f in ["pid", "nudge.txt", "interrupt", "devin.json"]:
-        Path(os.path.join(d_path, f)).unlink(missing_ok=True)
+        try:
+            os.unlink(os.path.join(d_path, f))
+        except FileNotFoundError:
+            pass
     _append_log(os.path.join(d_path, "log"), f"[{_now()}] start: spawning worker")
     _update_activity(name)
     # Spawn worker; detach from session group so gc stop does not kill it via PG.
@@ -277,14 +278,15 @@ def _start(name):
     log_err = os.path.join(d_path, "worker.err")
     with open(log_out, "a") as out, open(log_err, "a") as err:
         proc = subprocess.Popen(
-            [sys.executable, __file__, "worker", name, str(d)],
+            [sys.executable, __file__, "worker", name, str(d_path)],
             stdin=subprocess.DEVNULL,
             stdout=out,
             stderr=err,
             start_new_session=True,
             cwd=cfg_obj.get("work_dir") or None,
         )
-    Path(os.path.join(d_path, "pid")).write_text(str(proc.pid))
+    with open(os.path.join(d_path, "pid"), "w") as f:
+        f.write(str(proc.pid))
     return 0
 
 
