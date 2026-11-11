@@ -153,9 +153,8 @@ def _state_root():
 def _session_dir(name):
     safe_name = os.path.basename(name)
     d_path = os.path.join("/tmp", "gc-session-devin", safe_name)
-    d = Path(d_path)
-    d.mkdir(parents=True, exist_ok=True)
-    return d
+    os.makedirs(d_path, exist_ok=True)
+    return Path(d_path)
 
 
 def _write_file(path, text):
