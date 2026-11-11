@@ -15,12 +15,13 @@ npm install @abapify/adk
 
 ```ts
 import { createAdtClient } from '@abapify/adt-client';
-import { createAdk } from '@abapify/adk';
+import { Class, createAdk } from '@abapify/adk';
 
 const client = createAdtClient({ baseUrl, username, password, client: '100' });
 const adk = createAdk(client);
 
-const klass = await adk.get('ZCL_DEMO', 'CLAS');
+const klass = adk.byKind(Class, 'ZCL_DEMO');
+await klass.load();
 await klass.save({ transport: 'DEVK900001' });
 ```
 
