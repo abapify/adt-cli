@@ -163,14 +163,14 @@ def _write_file(path, text):
 
 
 def _append_log(path, text):
-    # lgtm[py/path-injection]
-    with open(path, "a", encoding="utf-8") as f:
+    safe_path = os.path.join("/tmp", "gc-session-devin", os.path.basename(path))
+    with open(safe_path, "a", encoding="utf-8") as f:
         f.write(text + "\n")
 
 
 def _read_file(path, default=""):
-    p = Path(path)
-    # lgtm[py/path-injection]
+    safe_path = os.path.join("/tmp", "gc-session-devin", os.path.basename(path))
+    p = Path(safe_path)
     return p.read_text(encoding="utf-8") if p.exists() else default
 
 
@@ -185,25 +185,26 @@ def _load_cfg(session_dir):
 
 
 def _touch(path):
-    Path(path).touch()
+    safe_path = os.path.join("/tmp", "gc-session-devin", os.path.basename(path))
+    Path(safe_path).touch()
 
 
 def _update_activity(session_dir):
     safe_dir = os.path.basename(session_dir)
-    base = "/tmp/gc-session-devin"
-    (Path(base) / safe_dir / "last-activity").write_text(
-        datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
-    )
+    safe_path = os.path.join("/tmp", "gc-session-devin", safe_dir, "last-activity")
+    with open(safe_path, "w") as f:
+        f.write(datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"))
 
 
 def _worker_pid(session_dir):
     safe_dir = os.path.basename(session_dir)
     base = "/tmp/gc-session-devin"
-    pid_file = Path(base) / safe_dir / "pid"
-    if not pid_file.exists():
+    pid_path = os.path.join(base, safe_dir, "pid")
+    if not os.path.exists(pid_path):
         return None
     try:
-        return int(pid_file.read_text().strip())
+        with open(pid_path, "r") as f:
+            return int(f.read().strip())
     except ValueError:
         return None
 
