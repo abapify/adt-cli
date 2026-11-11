@@ -1010,31 +1010,31 @@ def main():
     if op == "protocol":
         return _handshake()
     if op == "start" and len(sys.argv) >= 3:
-        return _start(sys.argv[2])
+        return _start(os.path.basename(sys.argv[2]))
     if op == "stop" and len(sys.argv) >= 3:
-        return _stop(sys.argv[2])
+        return _stop(os.path.basename(sys.argv[2]))
     if op == "is-running" and len(sys.argv) >= 3:
-        return _is_running(sys.argv[2])
+        return _is_running(os.path.basename(sys.argv[2]))
     if op == "is-attached" and len(sys.argv) >= 3:
-        return _is_attached(sys.argv[2])
+        return _is_attached(os.path.basename(sys.argv[2]))
     if op == "process-alive" and len(sys.argv) >= 3:
         return _process_alive(sys.argv[2], sys.argv[3:])
     if op == "nudge" and len(sys.argv) >= 3:
-        return _nudge(sys.argv[2])
+        return _nudge(os.path.basename(sys.argv[2]))
     if op == "peek" and len(sys.argv) >= 3:
-        return _peek(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None)
+        return _peek(os.path.basename(sys.argv[2]), sys.argv[3] if len(sys.argv) > 3 else None)
     if op == "get-last-activity" and len(sys.argv) >= 3:
-        return _get_last_activity(sys.argv[2])
+        return _get_last_activity(os.path.basename(sys.argv[2]))
     if op == "list-running":
         return _list_running(sys.argv[2] if len(sys.argv) > 2 else "")
     if op == "set-meta" and len(sys.argv) >= 4:
-        return _set_meta(sys.argv[2], sys.argv[3])
+        return _set_meta(os.path.basename(sys.argv[2]), os.path.basename(sys.argv[3]))
     if op == "get-meta" and len(sys.argv) >= 4:
-        return _get_meta(sys.argv[2], sys.argv[3])
+        return _get_meta(os.path.basename(sys.argv[2]), os.path.basename(sys.argv[3]))
     if op == "remove-meta" and len(sys.argv) >= 4:
-        return _remove_meta(sys.argv[2], sys.argv[3])
+        return _remove_meta(os.path.basename(sys.argv[2]), os.path.basename(sys.argv[3]))
     if op == "interrupt" and len(sys.argv) >= 3:
-        return _interrupt(sys.argv[2])
+        return _interrupt(os.path.basename(sys.argv[2]))
     if op == "worker" and len(sys.argv) >= 4:
         return _worker(sys.argv[3])
     # Unknown op: exit 2 is forward-compatible success per Gas City protocol.
