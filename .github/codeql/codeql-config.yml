@@ -1,4 +1,4 @@
-name: "CodeQL config"
+name: 'CodeQL config'
 
 paths-ignore:
   # Gas City orchestration tooling — not part of the shipped package.
