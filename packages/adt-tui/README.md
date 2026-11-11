@@ -17,7 +17,10 @@ npm install @abapify/adt-tui
 import { run } from '@abapify/adt-tui';
 
 await run({
-  fetch: (uri) => client.fetch(uri),
+  fetch: async (uri) => {
+    const data = await client.fetch(uri);
+    return typeof data === 'string' ? data : JSON.stringify(data);
+  },
   startUrl: '/sap/bc/adt/repository/nodestructure',
 });
 ```
