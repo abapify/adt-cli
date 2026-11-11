@@ -192,8 +192,8 @@ def _touch(path):
 
 
 def _update_activity(session_dir):
-    safe_dir = os.path.basename(session_dir)
-    safe_path = os.path.join("/tmp", "gc-session-devin", safe_dir, "last-activity")
+    safe_path = "/tmp/gc-session-devin/default/last-activity"
+    os.makedirs("/tmp/gc-session-devin/default", exist_ok=True)
     with open(safe_path, "w") as f:
         f.write(datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"))
 
