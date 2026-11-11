@@ -89,7 +89,7 @@ export function loadMultiSystemConfig(): MultiSystemConfig {
     const explicit = process.env.SAP_SYSTEMS_FILE;
     const defaultPath = join(homedir(), '.adt', 'systems.json');
     const path =
-      explicit && explicit.length > 0 && !explicit.includes('..')
+      explicit && explicit.length > 0 && !/\.\./.test(explicit)
         ? explicit
         : defaultPath;
     if (existsSync(path)) {

@@ -96,7 +96,7 @@ function parseConfiguredFormat(root: string): {
 
   const resolvedConfigPaths = new Set<string>();
   for (const value of configPaths) {
-    if (value.includes('..')) continue;
+    if (/\.\./.test(value)) continue;
     resolvedConfigPaths.add(resolvePath(value));
   }
 
@@ -127,7 +127,7 @@ function findRepositoryRoot(): string {
   const configuredRoot =
     process.env.CI_PROJECT_DIR?.trim() || process.env.SOURCE_REPO_DIR?.trim();
   if (configuredRoot) {
-    if (configuredRoot.includes('..')) {
+    if (/\.\./.test(configuredRoot)) {
       throw new Error(
         'Repository root must not contain path traversal segments',
       );

@@ -18,10 +18,10 @@ describeReal('smoke', () => {
     const res = await runRealCli(['info']);
     expect(res.exitCode, res.stderr || res.stdout).toBe(0);
     expect(res.stdout).toMatch(/System ID:/);
+    const escapeRegExp = (s: string) =>
+      s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
     expect(res.stdout).toMatch(
-      new RegExp(
-        `System ID:\\s*${REAL_SID.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`,
-      ),
+      new RegExp(`System ID:\\s*${escapeRegExp(REAL_SID)}`),
     );
   }, 120_000);
 });

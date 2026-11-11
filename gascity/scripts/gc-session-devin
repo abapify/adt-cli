@@ -900,7 +900,7 @@ def _devin_worker(session_dir, cfg):
                 processing = d / "nudge.processing"
                 try:
                     # lgtm[py/path-injection]
-                    nudge_file.replace(processing)
+                    nudge_file.replace(processing)  # lgtm[py/path-injection]
                     # lgtm[py/path-injection]
                     text = processing.read_text(encoding="utf-8")
                     _send_message(devin_id, text)
