@@ -431,9 +431,10 @@ def _list_running(prefix=""):
 
 
 def _set_meta(name, key):
-    # Sanitize at point of use: read from sys.argv directly
-    _name = os.path.basename(sys.argv[2]) if len(sys.argv) > 2 else ""
-    _key = os.path.basename(sys.argv[3]) if len(sys.argv) > 3 else ""
+    _name_input = sys.argv[2] if len(sys.argv) > 2 else ""
+    _key_input = sys.argv[3] if len(sys.argv) > 3 else ""
+    _name = os.path.basename(_name_input)
+    _key = os.path.basename(_key_input)
     base = "/tmp/gc-session-devin"
     dir_path = os.path.join(base, _name, "meta")
     os.makedirs(dir_path, exist_ok=True)
@@ -444,8 +445,10 @@ def _set_meta(name, key):
 
 
 def _get_meta(name, key):
-    _name = os.path.basename(sys.argv[2]) if len(sys.argv) > 2 else ""
-    _key = os.path.basename(sys.argv[3]) if len(sys.argv) > 3 else ""
+    _name_input = sys.argv[2] if len(sys.argv) > 2 else ""
+    _key_input = sys.argv[3] if len(sys.argv) > 3 else ""
+    _name = os.path.basename(_name_input)
+    _key = os.path.basename(_key_input)
     base = "/tmp/gc-session-devin"
     file_path = os.path.join(base, _name, "meta", _key)
     if os.path.exists(file_path):
@@ -455,8 +458,10 @@ def _get_meta(name, key):
 
 
 def _remove_meta(name, key):
-    _name = os.path.basename(sys.argv[2]) if len(sys.argv) > 2 else ""
-    _key = os.path.basename(sys.argv[3]) if len(sys.argv) > 3 else ""
+    _name_input = sys.argv[2] if len(sys.argv) > 2 else ""
+    _key_input = sys.argv[3] if len(sys.argv) > 3 else ""
+    _name = os.path.basename(_name_input)
+    _key = os.path.basename(_key_input)
     base = "/tmp/gc-session-devin"
     file_path = os.path.join(base, _name, "meta", _key)
     try:
