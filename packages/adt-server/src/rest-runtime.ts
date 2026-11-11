@@ -23,6 +23,11 @@ async function readOptionalMountedSecret(
   secretFile: string | undefined,
 ): Promise<string | undefined> {
   if (!secretFile) return undefined;
+  if (secretFile.includes('..')) {
+    throw new Error(
+      'Mounted secret file path must not contain path traversal segments',
+    );
+  }
   const secret = (await readFile(secretFile, 'utf8')).trim();
   return secret || undefined;
 }

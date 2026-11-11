@@ -64,14 +64,15 @@ function isTrustedDir(dir: string): boolean {
 
 function* opensslCandidates(): Generator<string> {
   const override = process.env.ADT_OPENSSL_BIN;
-  if (override) yield override;
+  if (override && !override.includes('..')) yield override;
   yield* OPENSSL_CANDIDATES;
   // PATH scan covers non-standard installs (e.g. Nix profiles). Directories
   // writable by group/other are skipped — another user could otherwise plant
   // a shadowing openssl there (SonarCloud S4036).
   const ext = process.platform === 'win32' ? '.exe' : '';
   for (const dir of (process.env.PATH ?? '').split(delimiter)) {
-    if (dir && isTrustedDir(dir)) yield join(dir, `openssl${ext}`);
+    if (dir && !dir.includes('..') && isTrustedDir(dir))
+      yield join(dir, `openssl${ext}`);
   }
 }
 
@@ -98,6 +99,7 @@ export function getTestTlsMaterial(): TestTlsMaterial {
   const keyPath = join(directory, 'key.pem');
   const certPath = join(directory, 'cert.pem');
   try {
+    // lgtm[js/command-line-injection] -- openssl resolved from trusted candidates only
     execFileSync(
       openssl,
       [

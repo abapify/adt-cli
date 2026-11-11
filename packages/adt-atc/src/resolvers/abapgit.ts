@@ -94,9 +94,13 @@ function parseConfiguredFormat(root: string): {
     join(root, 'adt.config.mjs'),
   ].filter((value): value is string => Boolean(value));
 
-  for (const configPath of new Set(
-    configPaths.map((value) => resolvePath(value)),
-  )) {
+  const resolvedConfigPaths = new Set<string>();
+  for (const value of configPaths) {
+    if (value.includes('..')) continue;
+    resolvedConfigPaths.add(resolvePath(value));
+  }
+
+  for (const configPath of resolvedConfigPaths) {
     if (!existsSync(configPath)) continue;
     try {
       const config = readFileSync(configPath, 'utf8');
@@ -122,7 +126,14 @@ function parseConfiguredFormat(root: string): {
 function findRepositoryRoot(): string {
   const configuredRoot =
     process.env.CI_PROJECT_DIR?.trim() || process.env.SOURCE_REPO_DIR?.trim();
-  if (configuredRoot) return resolvePath(configuredRoot);
+  if (configuredRoot) {
+    if (configuredRoot.includes('..')) {
+      throw new Error(
+        'Repository root must not contain path traversal segments',
+      );
+    }
+    return resolvePath(configuredRoot);
+  }
 
   // Preserve the old API behaviour for callers that pass an explicit source
   // path: paths are still reported relative to the current working directory.

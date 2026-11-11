@@ -1059,6 +1059,12 @@ export async function startHttpServer(
   // missing or malformed certificate must not leak the session registry.
   const certPath = options.tlsCert ?? process.env.MCP_TLS_CERT;
   const keyPath = options.tlsKey ?? process.env.MCP_TLS_KEY;
+  if (certPath?.includes('..')) {
+    throw new Error('MCP_TLS_CERT must not contain path traversal segments');
+  }
+  if (keyPath?.includes('..')) {
+    throw new Error('MCP_TLS_KEY must not contain path traversal segments');
+  }
   const cert =
     options.tlsCertContent ??
     (certPath ? await readFile(certPath, 'utf8') : undefined);

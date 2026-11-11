@@ -42,7 +42,8 @@ import { getAdtClientV2 } from '../../src/lib/utils/adt-client-v2';
 /** The SAP System ID (SID) the real-e2e tests target. */
 export const REAL_SID = process.env.ADT_REAL_SID ?? 'TRL';
 
-const sessionPath = join(homedir(), '.adt', 'sessions', `${REAL_SID}.json`);
+const sessionsDir = resolve(homedir(), '.adt', 'sessions');
+const sessionPath = resolve(sessionsDir, `${REAL_SID}.json`);
 
 /**
  * True when a session file is present AND the user has not explicitly opted
@@ -50,7 +51,9 @@ const sessionPath = join(homedir(), '.adt', 'sessions', `${REAL_SID}.json`);
  * skipped at the suite level (they do not contribute failures).
  */
 export const realE2eEnabled =
-  process.env.ADT_SKIP_REAL_E2E !== '1' && existsSync(sessionPath);
+  process.env.ADT_SKIP_REAL_E2E !== '1' &&
+  sessionPath.startsWith(sessionsDir + sep) &&
+  existsSync(sessionPath);
 
 /**
  * `describe`-equivalent that auto-skips if the real SAP session is not
