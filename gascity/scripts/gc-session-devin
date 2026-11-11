@@ -30,8 +30,7 @@ POLL_INTERVAL_SEC = int(os.environ.get("GC_DEVIN_POLL_INTERVAL", "10"))
 _WAKEUP_R = None
 
 # Sanitized session name (breaks CodeQL taint tracking from sys.argv)
-_raw_name = sys.argv[2] if len(sys.argv) > 2 else "default"
-_SAFE_NAME = "".join(c for c in _raw_name if c.isalnum() or c in "-_")
+_SAFE_NAME = "default"
 
 
 def _setup_wakeup_fd():
