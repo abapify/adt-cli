@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-puppeteer",
-  "version": "0.4.42",
+  "version": "0.4.43",
   "description": "Puppeteer-based authentication for SAP ADT (SSO/IDP)",
   "license": "MIT",
   "publishConfig": {
@@ -17,9 +17,9 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-auth": "0.4.42",
-    "@abapify/adt-config": "0.4.42",
-    "@abapify/browser-auth": "0.4.42",
+    "@abapify/adt-auth": "0.4.43",
+    "@abapify/adt-config": "0.4.43",
+    "@abapify/browser-auth": "0.4.43",
     "puppeteer": "^25.15.0"
   },
   "peerDependencies": {

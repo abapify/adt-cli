@@ -1,3 +1,15 @@
+## 0.4.43 (2026-11-11)
+
+### 🩹 Fixes
+
+- **nx-deps-check:** anchor config/scripts/fixtures dev dirs to project root ([#326](https://github.com/abapify/adt-cli/pull/326))
+- **security:** validate P2 artifact id/version before use (GHSA-x297-8rg2-3wgx) ([#342](https://github.com/abapify/adt-cli/pull/342))
+- **security:** use scoped @abapify/openai-codegen in openapi-to-abap skill (GHSA-rfjr-vx9g-xhq7) ([#341](https://github.com/abapify/adt-cli/pull/341))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.42 (2026-11-10)
 
 ### 🩹 Fixes

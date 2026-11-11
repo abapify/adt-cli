@@ -1,3 +1,7 @@
+## 0.4.43 (2026-11-11)
+
+This was a version bump only for @abapify/adt-lint to align it with other projects, there were no code changes.
+
 ## 0.4.42 (2026-11-10)
 
 This was a version bump only for @abapify/adt-lint to align it with other projects, there were no code changes.

@@ -1,3 +1,13 @@
+## 0.4.43 (2026-11-11)
+
+### 🩹 Fixes
+
+- **security:** use scoped @abapify/openai-codegen in openapi-to-abap skill (GHSA-rfjr-vx9g-xhq7) ([#341](https://github.com/abapify/adt-cli/pull/341))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.42 (2026-11-10)
 
 This was a version bump only for @abapify/openai-codegen to align it with other projects, there were no code changes.
