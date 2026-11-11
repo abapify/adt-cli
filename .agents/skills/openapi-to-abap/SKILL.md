@@ -123,7 +123,7 @@ Short recipe:
 
 ```bash
 bunx adt auth login
-bunx openai-codegen \
+bunx @abapify/openai-codegen \
   --input ./spec/openapi.json \
   --out ./generated/abapgit \
   --format abapgit \
