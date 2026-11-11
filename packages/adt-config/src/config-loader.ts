@@ -271,7 +271,7 @@ export async function loadConfig(
 
   // If explicit config path provided, use it directly
   if (opts.configPath) {
-    if (/\.\./.test(opts.configPath)) {
+    if (/(^|[\\/])\.\.([\\/]|$)/.test(opts.configPath)) {
       console.warn(
         `Warning: Config file path contains path traversal, using auto-discovery`,
       );

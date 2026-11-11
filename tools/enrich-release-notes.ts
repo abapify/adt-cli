@@ -152,7 +152,7 @@ function updateRelease(
   tag: string,
   newBody: string,
 ): string {
-  if (/\.\./.test(tag)) {
+  if (/(^|[\\/])\.\.([\\/]|$)/.test(tag)) {
     throw new Error('Invalid tag');
   }
   const tmpFile = join(tmpdir(), `release-body-${tag}.md`);
