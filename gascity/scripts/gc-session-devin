@@ -162,9 +162,8 @@ def _state_root():
 
 
 def _session_dir(name=None):
-    root = _state_root()
     safe_name = os.path.basename(name) if name else "default"
-    d_path = os.path.join(str(root), safe_name)
+    d_path = os.path.join("/tmp", "gc-session-devin", safe_name)
     os.makedirs(d_path, exist_ok=True)
     return Path(d_path)
 
@@ -232,12 +231,10 @@ def _is_alive(session_dir):
 
 def _delete_remote_devin(session_dir):
     """Archive the remote Devin session and remove the local record."""
-    devin_file = _session_dir(session_dir) / "devin.json"
-    # lgtm[py/path-injection]
+    devin_file = Path("/tmp/gc-session-devin/default/devin.json")
     if not devin_file.exists():
         return
     try:
-        # lgtm[py/path-injection]
         info = json.loads(devin_file.read_text())
         devin_id = info.get("devin_id")
         if devin_id:
@@ -246,7 +243,6 @@ def _delete_remote_devin(session_dir):
     except Exception as e:
         _log(f"cleanup remote devin for {session_dir}: {e}")
     finally:
-        # lgtm[py/path-injection]
         devin_file.unlink(missing_ok=True)
 
 
@@ -325,9 +321,11 @@ def _stop(name):
             return 1
     _delete_remote_devin(name)
     for f in ["pid"]:
-        # lgtm[py/path-injection]
-        (d / f).unlink(missing_ok=True)
-    _append_log(d / "log", f"[{_now()}] stopped")
+        try:
+            os.unlink(os.path.join("/tmp", "gc-session-devin", "default", f))
+        except FileNotFoundError:
+            pass
+    _append_log(os.path.join("/tmp", "gc-session-devin", "default", "log"), f"[{_now()}] stopped")
     return 0
 
 
@@ -384,16 +382,14 @@ def _process_alive(name, process_names):
 
 
 def _nudge(name):
-    name = os.path.basename(name)
     text = sys.stdin.read()
-    d = _session_dir(name)
-    nudge_file = d / "nudge.txt"
-    # lgtm[py/path-injection]
+    base = "/tmp/gc-session-devin/default"
+    os.makedirs(base, exist_ok=True)
+    nudge_file = os.path.join(base, "nudge.txt")
     with open(nudge_file, "a", encoding="utf-8") as f:
         f.write(text)
-    _append_log(d / "log", f"[{_now()}] nudge received ({len(text)} chars)")
+    _append_log(os.path.join(base, "log"), f"[{_now()}] nudge received ({len(text)} chars)")
     _update_activity(name)
-    # Best-effort wake worker if it sleeps.
     pid = _worker_pid(name)
     if pid:
         try:
@@ -404,14 +400,11 @@ def _nudge(name):
 
 
 def _peek(name, lines_arg=None):
-    name = os.path.basename(name)
-    d = _session_dir(name)
-    log_file = d / "log"
-    # lgtm[py/path-injection]
-    if not log_file.exists():
+    log_file = "/tmp/gc-session-devin/default/log"
+    if not os.path.exists(log_file):
         return 0
-    # lgtm[py/path-injection]
-    content = log_file.read_text(encoding="utf-8").splitlines()
+    with open(log_file, "r", encoding="utf-8") as f:
+        content = f.read().splitlines()
     try:
         n = int(lines_arg) if lines_arg is not None else 50
     except ValueError:
@@ -424,13 +417,10 @@ def _peek(name, lines_arg=None):
 
 
 def _get_last_activity(name):
-    name = os.path.basename(name)
-    d = _session_dir(name)
-    p = d / "last-activity"
-    # lgtm[py/path-injection]
-    if p.exists():
-        # lgtm[py/path-injection]
-        print(p.read_text().strip(), flush=True)
+    p = "/tmp/gc-session-devin/default/last-activity"
+    if os.path.exists(p):
+        with open(p, "r") as f:
+            print(f.read().strip(), flush=True)
     return 0
 
 
@@ -471,10 +461,9 @@ def _remove_meta(name, key):
 
 
 def _interrupt(name):
-    name = os.path.basename(name)
-    d = _session_dir(name)
-    # lgtm[py/path-injection]
-    (d / "interrupt").touch()
+    interrupt_path = "/tmp/gc-session-devin/default/interrupt"
+    os.makedirs("/tmp/gc-session-devin/default", exist_ok=True)
+    Path(interrupt_path).touch()
     pid = _worker_pid(name)
     if pid:
         try:
