@@ -145,7 +145,7 @@ def _state_root():
     base = os.environ.get("GC_EXEC_STATE_DIR") or os.environ.get("GC_CITY_PATH")
     if base:
         safe_base = os.path.basename(os.path.normpath(base))
-        root = os.path.join(os.path.expanduser("~/.local/share"), safe_base, ".gc", "devin-sessions")
+        root = os.path.join("/tmp", safe_base, ".gc", "devin-sessions")
         return Path(root)
     return Path(os.path.expanduser("~/.local/share/gc-session-devin"))
 
@@ -428,7 +428,7 @@ def _list_running(prefix=""):
 def _set_meta(name, key):
     safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
-    base = os.path.expanduser("~/.local/share/gc-session-devin")
+    base = "/tmp/gc-session-devin"
     dir_path = os.path.join(base, safe_name, "meta")
     os.makedirs(dir_path, exist_ok=True)
     file_path = os.path.join(dir_path, safe_key)
@@ -440,7 +440,7 @@ def _set_meta(name, key):
 def _get_meta(name, key):
     safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
-    base = os.path.expanduser("~/.local/share/gc-session-devin")
+    base = "/tmp/gc-session-devin"
     file_path = os.path.join(base, safe_name, "meta", safe_key)
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
@@ -451,7 +451,7 @@ def _get_meta(name, key):
 def _remove_meta(name, key):
     safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
-    base = os.path.expanduser("~/.local/share/gc-session-devin")
+    base = "/tmp/gc-session-devin"
     file_path = os.path.join(base, safe_name, "meta", safe_key)
     try:
         os.unlink(file_path)
