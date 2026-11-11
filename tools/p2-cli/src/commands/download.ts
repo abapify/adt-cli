@@ -18,6 +18,17 @@ interface DownloadOptions {
 }
 
 /**
+ * Validate that an artifact id/version is safe to use in file names and URLs.
+ * Prevents command/path injection from attacker-controlled P2 metadata.
+ */
+function safeArtifactPart(value: string, field: string): string {
+  if (!/^[A-Za-z0-9_.-]+$/.test(value)) {
+    throw new Error(`Unsafe P2 artifact ${field}: ${value}`);
+  }
+  return value;
+}
+
+/**
  * Parse artifacts.xml from P2 repository
  */
 function parseArtifacts(xml: string): Artifact[] {
@@ -119,7 +130,9 @@ export async function download(
 
   for (let i = 0; i < toDownload.length; i++) {
     const artifact = toDownload[i];
-    const fileName = `${artifact.id}_${artifact.version}.jar`;
+    const id = safeArtifactPart(artifact.id, 'id');
+    const version = safeArtifactPart(artifact.version, 'version');
+    const fileName = `${id}_${version}.jar`;
     const targetPath = join(pluginsDir, fileName);
 
     process.stdout.write(
