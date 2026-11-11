@@ -111,7 +111,8 @@ def _devin_token():
     if tok:
         return tok
     safe_key = os.path.basename(KEY_PATH)
-    p = Path(os.path.expanduser("~/.config/gc")) / safe_key
+    p_path = os.path.join(os.path.expanduser("~/.config/gc"), safe_key)
+    p = Path(p_path)
     if p.exists():
         return p.read_text().strip()
     return ""
@@ -144,14 +145,16 @@ def _state_root():
     base = os.environ.get("GC_EXEC_STATE_DIR") or os.environ.get("GC_CITY_PATH")
     if base:
         safe_base = os.path.basename(os.path.normpath(base))
-        return Path(os.path.expanduser("~/.local/share")) / safe_base / ".gc" / "devin-sessions"
+        root = os.path.join(os.path.expanduser("~/.local/share"), safe_base, ".gc", "devin-sessions")
+        return Path(root)
     return Path(os.path.expanduser("~/.local/share/gc-session-devin"))
 
 
 def _session_dir(name):
     root = _state_root()
     safe_name = os.path.basename(name)
-    d = root / safe_name
+    d_path = os.path.join(str(root), safe_name)
+    d = Path(d_path)
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -426,9 +429,11 @@ def _set_meta(name, key):
     safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
     base = os.path.expanduser("~/.local/share/gc-session-devin")
-    meta_dir = Path(base) / safe_name / "meta"
-    meta_dir.mkdir(parents=True, exist_ok=True)
-    (meta_dir / safe_key).write_text(sys.stdin.read(), encoding="utf-8")
+    dir_path = os.path.join(base, safe_name, "meta")
+    os.makedirs(dir_path, exist_ok=True)
+    file_path = os.path.join(dir_path, safe_key)
+    with open(file_path, "w") as f:
+        f.write(sys.stdin.read())
     return 0
 
 
@@ -436,9 +441,10 @@ def _get_meta(name, key):
     safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
     base = os.path.expanduser("~/.local/share/gc-session-devin")
-    p = Path(base) / safe_name / "meta" / safe_key
-    if p.exists():
-        print(p.read_text(encoding="utf-8"), end="", flush=True)
+    file_path = os.path.join(base, safe_name, "meta", safe_key)
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            print(f.read(), end="", flush=True)
     return 0
 
 
@@ -446,7 +452,11 @@ def _remove_meta(name, key):
     safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
     base = os.path.expanduser("~/.local/share/gc-session-devin")
-    (Path(base) / safe_name / "meta" / safe_key).unlink(missing_ok=True)
+    file_path = os.path.join(base, safe_name, "meta", safe_key)
+    try:
+        os.unlink(file_path)
+    except FileNotFoundError:
+        pass
     return 0
 
 
