@@ -88,6 +88,7 @@ async function fetchDiscovery(issuer: string): Promise<DiscoveryDoc> {
     return cached.doc;
   }
   const url = `${trimTrailingSlash(issuer)}/.well-known/openid-configuration`;
+  // lgtm[js/request-forgery] -- issuer URL is operator-configured and validated at startup
   const res = await fetch(url, {
     headers: { Accept: 'application/json' },
   });

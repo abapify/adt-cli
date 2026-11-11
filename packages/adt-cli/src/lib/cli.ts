@@ -78,6 +78,7 @@ import { createCliLogger, AVAILABLE_COMPONENTS } from './utils/logger-config';
 import { setCliContext } from './utils/adt-client-v2';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { homedir } from 'node:os';
 import { loadCommandPlugins, loadStaticPlugins } from './plugin-loader';
 import type { CliCommandPlugin } from '@abapify/adt-plugin';
 // gCTS CLI command plugin (E07) — auto-discovered: shipped as a required
@@ -87,11 +88,7 @@ import { gctsCommand } from '@abapify/adt-plugin-gcts-cli';
 // Check for insecure SSL flag in stored session and apply it globally
 function applyInsecureSslFlag(): void {
   try {
-    const authFile = resolve(
-      process.env.HOME || process.env.USERPROFILE || '.',
-      '.adt',
-      'auth.json',
-    );
+    const authFile = resolve(homedir(), '.adt', 'auth.json');
 
     if (existsSync(authFile)) {
       const session = JSON.parse(readFileSync(authFile, 'utf8'));

@@ -13,7 +13,7 @@ import {
   readdirSync,
   unlinkSync,
 } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import type { AuthSession } from '../types';
 
@@ -131,7 +131,13 @@ export class FileStorage {
   // ===========================================================================
 
   private getSessionPath(sid: string): string {
-    return join(this.storageDir, `${sid}.json`);
+    const storageDir = resolve(this.storageDir);
+    const filePath = resolve(storageDir, `${sid}.json`);
+    // Guard against path traversal from attacker-controlled session ids.
+    if (!filePath.startsWith(storageDir + sep)) {
+      throw new Error(`Unsafe session id: ${sid}`);
+    }
+    return filePath;
   }
 
   private ensureStorageDir(): void {

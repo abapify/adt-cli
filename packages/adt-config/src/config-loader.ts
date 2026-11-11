@@ -9,17 +9,14 @@
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
+import { homedir } from 'node:os';
 import type { AdtConfig, Destination } from './types';
 
 // =============================================================================
 // Configuration Paths
 // =============================================================================
 
-const GLOBAL_CONFIG_PATH = resolve(
-  process.env.HOME || process.env.USERPROFILE || '.',
-  '.adt',
-  'config.json',
-);
+const GLOBAL_CONFIG_PATH = resolve(homedir(), '.adt', 'config.json');
 
 // =============================================================================
 // Loaded Config Interface
@@ -274,15 +271,21 @@ export async function loadConfig(
 
   // If explicit config path provided, use it directly
   if (opts.configPath) {
-    const configPath = resolve(cwd, opts.configPath);
-    const config = await loadExplicitConfig(configPath);
-    if (config) {
-      return createLoadedConfig(mergeWithGlobal(config));
+    if (opts.configPath.includes('..')) {
+      console.warn(
+        `Warning: Config file path contains path traversal, using auto-discovery`,
+      );
+    } else {
+      const configPath = resolve(cwd, opts.configPath);
+      const config = await loadExplicitConfig(configPath);
+      if (config) {
+        return createLoadedConfig(mergeWithGlobal(config));
+      }
+      // Config path specified but file not found/loadable - continue with auto-discovery
+      console.warn(
+        `Warning: Config file not found at ${configPath}, using auto-discovery`,
+      );
     }
-    // Config path specified but file not found/loadable - continue with auto-discovery
-    console.warn(
-      `Warning: Config file not found at ${configPath}, using auto-discovery`,
-    );
   }
 
   // Discover base local config (adt.config.*)

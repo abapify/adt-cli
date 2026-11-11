@@ -176,7 +176,7 @@ export class AuthRegistry {
    */
   getProvider(type: string, config: any): AuthProvider {
     const ProviderClass = this.providers.get(type);
-    if (!ProviderClass) {
+    if (typeof ProviderClass !== 'function') {
       throw new Error(`Unknown auth type: ${type}`);
     }
 

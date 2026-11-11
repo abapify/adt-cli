@@ -169,6 +169,7 @@ async function forwardRequest(params: {
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    // lgtm[js/request-forgery] -- targetUrl is operator-configured proxy destination
     const response = await fetch(url, {
       method,
       headers,

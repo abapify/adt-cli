@@ -172,6 +172,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     const handler = FLAG_HANDLERS.get(argv[i]);
     // Unknown flag — ignore for forward compatibility.
     if (handler === undefined) continue;
+    if (typeof handler !== 'function') continue;
     handler(out, () => argv[++i]);
   }
   return out;

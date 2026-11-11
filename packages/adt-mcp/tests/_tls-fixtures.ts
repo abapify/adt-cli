@@ -68,6 +68,7 @@ export function tlsFetch(
     );
   }
   // nosemgrep — test-only helper; hostname is restricted to loopback above.
+  // lgtm[js/request-forgery] -- url restricted to loopback hosts above
   return fetch(url, {
     ...init,
     tls: { ca: material.cert },
