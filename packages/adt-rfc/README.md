@@ -8,7 +8,7 @@ SAP RFC transport for @abapify — SOAP-over-HTTP RFC implementation (/sap/bc/so
 ## Install
 
 ```bash
-npm install @abapify/adt-rfc
+npm install @abapify/adt-rfc @abapify/adt-client
 ```
 
 ## Usage
