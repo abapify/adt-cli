@@ -128,7 +128,9 @@ function findRepositoryRoot(): string {
     process.env.CI_PROJECT_DIR?.trim() || process.env.SOURCE_REPO_DIR?.trim();
   if (configuredRoot) {
     if (configuredRoot.includes('..')) {
-      throw new Error('Repository root must not contain path traversal segments');
+      throw new Error(
+        'Repository root must not contain path traversal segments',
+      );
     }
     return resolvePath(configuredRoot);
   }

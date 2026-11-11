@@ -22,7 +22,9 @@ export function readServiceKey(filePath: string): BTPServiceKey {
   }
 
   if (trimmed.includes('..')) {
-    throw new Error('Service key path must not contain path traversal segments');
+    throw new Error(
+      'Service key path must not contain path traversal segments',
+    );
   }
 
   if (!existsSync(trimmed)) {
