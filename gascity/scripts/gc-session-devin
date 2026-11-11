@@ -113,9 +113,13 @@ def _devin_token():
     tok = os.environ.get("DEVIN_AI_API") or os.environ.get("GC_DEVIN_API_KEY")
     if tok:
         return tok
-    safe_key = os.path.basename(KEY_PATH)
-    p_path = os.path.join(os.path.expanduser("~/.config/gc"), safe_key)
-    p = Path(p_path)
+    home = os.path.expanduser("~")
+    resolved = os.path.realpath(KEY_PATH)
+    if not resolved.startswith(home + os.sep):
+        raise ValueError("Key path must be under home directory")
+    rel = os.path.relpath(resolved, home)
+    safe_parts = [os.path.basename(pp) for pp in rel.split(os.sep) if pp and pp != "."]
+    p = Path(os.path.join(home, *safe_parts))
     if p.exists():
         return p.read_text().strip()
     return ""
@@ -146,15 +150,21 @@ def _api_req(method, path, payload=None, timeout=120):
 
 def _state_root():
     base = os.environ.get("GC_EXEC_STATE_DIR") or os.environ.get("GC_CITY_PATH")
+    home = os.path.expanduser("~")
     if base:
-        safe_base = os.path.basename(os.path.normpath(base))
-        root = os.path.join("/tmp", safe_base, ".gc", "devin-sessions")
-        return Path(root)
-    return Path(os.path.expanduser("~/.local/share/gc-session-devin"))
+        resolved = os.path.realpath(base)
+        if not resolved.startswith(home + os.sep):
+            raise ValueError("State directory must be under home directory")
+        rel = os.path.relpath(resolved, home)
+        safe_parts = [os.path.basename(p) for p in rel.split(os.sep) if p and p != "."]
+        return Path(os.path.join(home, *safe_parts, ".gc", "devin-sessions"))
+    return Path(os.path.join(home, ".local", "share", "gc-session-devin"))
 
 
 def _session_dir(name=None):
-    d_path = os.path.join("/tmp", "gc-session-devin", _SAFE_NAME)
+    root = _state_root()
+    safe_name = os.path.basename(name) if name else "default"
+    d_path = os.path.join(str(root), safe_name)
     os.makedirs(d_path, exist_ok=True)
     return Path(d_path)
 
