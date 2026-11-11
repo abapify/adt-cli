@@ -1,6 +1,6 @@
 {
   "name": "@abapify/asjson-parser",
-  "version": "0.4.43",
+  "version": "0.4.44",
   "license": "MIT",
   "publishConfig": {
     "access": "public"

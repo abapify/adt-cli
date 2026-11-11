@@ -1,3 +1,13 @@
+## 0.4.44 (2026-11-11)
+
+### 🩹 Fixes
+
+- **security:** resolve all CodeQL code-scanning findings ([#344](https://github.com/abapify/adt-cli/pull/344))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.43 (2026-11-11)
 
 This was a version bump only for adt-proxy to align it with other projects, there were no code changes.
