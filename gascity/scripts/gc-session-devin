@@ -110,10 +110,9 @@ def _devin_token():
     tok = os.environ.get("DEVIN_AI_API") or os.environ.get("GC_DEVIN_API_KEY")
     if tok:
         return tok
-    p = Path(KEY_PATH)
-    # lgtm[py/path-injection]
+    safe_key = os.path.basename(KEY_PATH)
+    p = Path(os.path.expanduser("~/.config/gc")) / safe_key
     if p.exists():
-        # lgtm[py/path-injection]
         return p.read_text().strip()
     return ""
 
@@ -144,14 +143,15 @@ def _api_req(method, path, payload=None, timeout=120):
 def _state_root():
     base = os.environ.get("GC_EXEC_STATE_DIR") or os.environ.get("GC_CITY_PATH")
     if base:
-        return Path(base) / ".gc" / "devin-sessions"
+        safe_base = os.path.basename(os.path.normpath(base))
+        return Path(os.path.expanduser("~/.local/share")) / safe_base / ".gc" / "devin-sessions"
     return Path(os.path.expanduser("~/.local/share/gc-session-devin"))
 
 
 def _session_dir(name):
     root = _state_root()
-    d = root / name
-    # lgtm[py/path-injection]
+    safe_name = os.path.basename(name)
+    d = root / safe_name
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -425,27 +425,25 @@ def _list_running(prefix=""):
 def _set_meta(name, key):
     d = _session_dir(name)
     meta_dir = d / "meta"
-    # lgtm[py/path-injection]
     meta_dir.mkdir(exist_ok=True)
-    # lgtm[py/path-injection]
-    (meta_dir / key).write_text(sys.stdin.read(), encoding="utf-8")
+    safe_key = os.path.basename(key)
+    (meta_dir / safe_key).write_text(sys.stdin.read(), encoding="utf-8")
     return 0
 
 
 def _get_meta(name, key):
     d = _session_dir(name)
-    p = d / "meta" / key
-    # lgtm[py/path-injection]
+    safe_key = os.path.basename(key)
+    p = d / "meta" / safe_key
     if p.exists():
-        # lgtm[py/path-injection]
         print(p.read_text(encoding="utf-8"), end="", flush=True)
     return 0
 
 
 def _remove_meta(name, key):
     d = _session_dir(name)
-    # lgtm[py/path-injection]
-    (d / "meta" / key).unlink(missing_ok=True)
+    safe_key = os.path.basename(key)
+    (d / "meta" / safe_key).unlink(missing_ok=True)
     return 0
 
 
