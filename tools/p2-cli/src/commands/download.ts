@@ -18,6 +18,17 @@ interface DownloadOptions {
 }
 
 /**
+ * Validate that an artifact id/version is safe to use in file names and URLs.
+ * Prevents command/path injection from attacker-controlled P2 metadata.
+ */
+function safeArtifactPart(value: string, field: string): string {
+  if (!/^[A-Za-z0-9_.-]+$/.test(value) || /[\r\n]/.test(value)) {
+    throw new Error(`Unsafe P2 artifact ${field}: contains invalid characters`);
+  }
+  return value;
+}
+
+/**
  * Parse artifacts.xml from P2 repository
  */
 function parseArtifacts(xml: string): Artifact[] {
@@ -116,26 +127,32 @@ export async function download(
 
   let downloaded = 0;
   let skipped = 0;
+  let failed = 0;
 
   for (let i = 0; i < toDownload.length; i++) {
     const artifact = toDownload[i];
-    const fileName = `${artifact.id}_${artifact.version}.jar`;
-    const targetPath = join(pluginsDir, fileName);
 
-    process.stdout.write(
-      `\r   Downloading ${i + 1}/${toDownload.length}: ${artifact.id.slice(0, 50).padEnd(50)}`,
-    );
-
-    if (existsSync(targetPath)) {
-      skipped++;
-      continue;
-    }
-
-    const url = `${repoUrl}/plugins/${fileName}`;
     try {
+      safeArtifactPart(artifact.classifier, 'classifier');
+      const id = safeArtifactPart(artifact.id, 'id');
+      const version = safeArtifactPart(artifact.version, 'version');
+      const fileName = `${id}_${version}.jar`;
+      const targetPath = join(pluginsDir, fileName);
+
+      process.stdout.write(
+        `\r   Downloading ${i + 1}/${toDownload.length}: ${artifact.id.slice(0, 50).padEnd(50)}`,
+      );
+
+      if (existsSync(targetPath)) {
+        skipped++;
+        continue;
+      }
+
+      const url = `${repoUrl}/plugins/${fileName}`;
       execOutput('wget', ['-q', urlArg(url), '-O', pathArg(targetPath)]);
       downloaded++;
     } catch {
+      failed++;
       console.error(`\n   ❌ Failed: ${artifact.id}`);
     }
   }
@@ -144,6 +161,7 @@ export async function download(
   console.log('✅ Download complete!');
   console.log(`   Downloaded: ${downloaded}`);
   console.log(`   Skipped: ${skipped}`);
+  console.log(`   Failed: ${failed}`);
   console.log(`   Location: ${pluginsDir}`);
 
   // Extract if requested
