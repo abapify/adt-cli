@@ -162,8 +162,7 @@ def _state_root():
 
 
 def _session_dir(name=None):
-    safe_name = os.path.basename(name) if name else "default"
-    d_path = os.path.join("/tmp", "gc-session-devin", safe_name)
+    d_path = os.path.join("/tmp", "gc-session-devin", "default")
     os.makedirs(d_path, exist_ok=True)
     return Path(d_path)
 
