@@ -19,7 +19,7 @@ import {
 import { join } from 'node:path';
 
 const xsdDir = process.argv[2] || '.xsd/sap';
-if (/(^|[\\/])\.\.([\\/]|$)/.test(xsdDir)) {
+if (/(^|[\\/:\s])\.\.([\\/:\s]|$)/.test(xsdDir)) {
   throw new Error('xsd-dir must not contain path traversal segments');
 }
 

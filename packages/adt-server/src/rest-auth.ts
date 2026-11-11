@@ -34,7 +34,7 @@ export async function loadOptionalRestBearerAuthorizer(
   tokenFile: string | undefined,
 ): Promise<ReturnType<typeof createRestBearerAuthorizer> | undefined> {
   if (!tokenFile) return undefined;
-  if (/(^|[\\/])\.\.([\\/]|$)/.test(tokenFile)) {
+  if (/(^|[\\/:\s])\.\.([\\/:\s]|$)/.test(tokenFile)) {
     throw new Error(
       'REST bearer token file path must not contain path traversal segments',
     );

@@ -1032,7 +1032,7 @@ function brokerLeaseHelpers(options: HttpBrokerOptions) {
   const fetcher = options.fetch ?? globalThis.fetch;
   const readBrokerToken = async (signal?: AbortSignal): Promise<string> => {
     signal?.throwIfAborted();
-    if (/(^|[\\/])\.\.([\\/]|$)/.test(options.tokenFile)) {
+    if (/(^|[\\/:\s])\.\.([\\/:\s]|$)/.test(options.tokenFile)) {
       throw new Error(
         'Broker token file path must not contain path traversal segments',
       );
