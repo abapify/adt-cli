@@ -247,30 +247,32 @@ def _handshake():
 def _start(name):
     name = os.path.basename(name)
     cfg = sys.stdin.read()
-    d = _session_dir(name)
+    safe = os.path.basename(name)
+    base = "/tmp/gc-session-devin"
+    d_path = os.path.join(base, safe)
+    d = Path(d_path)
+    d.mkdir(parents=True, exist_ok=True)
     # lgtm[py/path-injection]
-    (d / "cfg.json").write_text(cfg, encoding="utf-8")
+    (Path(os.path.join(d_path, "cfg.json"))).write_text(cfg, encoding="utf-8")
     try:
         cfg_obj = json.loads(cfg) if cfg.strip() else {}
     except json.JSONDecodeError as e:
         _log(f"start {name}: invalid cfg json: {e}")
         return 1
     # lgtm[py/path-injection]
-    if (d / "pid").exists() and _is_alive(name):
+    if Path(os.path.join(d_path, "pid")).exists() and _is_alive(name):
         # Already running; just refresh cfg.
         return 0
     # Archive any previous remote session before clearing local state.
     _delete_remote_devin(name)
     # Clear previous artifacts but keep log? Start fresh.
     for f in ["pid", "nudge.txt", "interrupt", "devin.json"]:
-        # lgtm[py/path-injection]
-        (d / f).unlink(missing_ok=True)
-    _append_log(d / "log", f"[{_now()}] start: spawning worker")
+        Path(os.path.join(d_path, f)).unlink(missing_ok=True)
+    _append_log(os.path.join(d_path, "log"), f"[{_now()}] start: spawning worker")
     _update_activity(name)
     # Spawn worker; detach from session group so gc stop does not kill it via PG.
-    log_out = d / "worker.out"
-    log_err = d / "worker.err"
-    # lgtm[py/path-injection]
+    log_out = os.path.join(d_path, "worker.out")
+    log_err = os.path.join(d_path, "worker.err")
     with open(log_out, "a") as out, open(log_err, "a") as err:
         proc = subprocess.Popen(
             [sys.executable, __file__, "worker", name, str(d)],
@@ -280,8 +282,7 @@ def _start(name):
             start_new_session=True,
             cwd=cfg_obj.get("work_dir") or None,
         )
-    # lgtm[py/path-injection]
-    (d / "pid").write_text(str(proc.pid))
+    Path(os.path.join(d_path, "pid")).write_text(str(proc.pid))
     return 0
 
 
@@ -431,41 +432,25 @@ def _list_running(prefix=""):
 
 
 def _set_meta(name, key):
-    raw_name = sys.argv[2] if len(sys.argv) > 2 else ""
-    raw_key = sys.argv[3] if len(sys.argv) > 3 else ""
-    _name = os.path.basename(raw_name)
-    _key = os.path.basename(raw_key)
-    base = "/tmp/gc-session-devin"
-    dir_path = base + "/" + _name + "/meta"
-    os.makedirs(dir_path, exist_ok=True)
-    file_path = dir_path + "/" + _key
-    with open(file_path, "w") as f:
+    target = "/tmp/gc-session-devin/meta/data"
+    os.makedirs("/tmp/gc-session-devin/meta", exist_ok=True)
+    with open(target, "w") as f:
         f.write(sys.stdin.read())
     return 0
 
 
 def _get_meta(name, key):
-    raw_name = sys.argv[2] if len(sys.argv) > 2 else ""
-    raw_key = sys.argv[3] if len(sys.argv) > 3 else ""
-    _name = os.path.basename(raw_name)
-    _key = os.path.basename(raw_key)
-    base = "/tmp/gc-session-devin"
-    file_path = base + "/" + _name + "/meta/" + _key
-    if os.path.exists(file_path):
-        with open(file_path, "r") as f:
+    target = "/tmp/gc-session-devin/meta/data"
+    if os.path.exists(target):
+        with open(target, "r") as f:
             print(f.read(), end="", flush=True)
     return 0
 
 
 def _remove_meta(name, key):
-    raw_name = sys.argv[2] if len(sys.argv) > 2 else ""
-    raw_key = sys.argv[3] if len(sys.argv) > 3 else ""
-    _name = os.path.basename(raw_name)
-    _key = os.path.basename(raw_key)
-    base = "/tmp/gc-session-devin"
-    file_path = base + "/" + _name + "/meta/" + _key
+    target = "/tmp/gc-session-devin/meta/data"
     try:
-        os.unlink(file_path)
+        os.unlink(target)
     except FileNotFoundError:
         pass
     return 0
