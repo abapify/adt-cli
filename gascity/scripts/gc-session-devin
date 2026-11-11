@@ -423,27 +423,30 @@ def _list_running(prefix=""):
 
 
 def _set_meta(name, key):
-    d = _session_dir(name)
-    meta_dir = d / "meta"
-    meta_dir.mkdir(exist_ok=True)
+    safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
+    base = os.path.expanduser("~/.local/share/gc-session-devin")
+    meta_dir = Path(base) / safe_name / "meta"
+    meta_dir.mkdir(parents=True, exist_ok=True)
     (meta_dir / safe_key).write_text(sys.stdin.read(), encoding="utf-8")
     return 0
 
 
 def _get_meta(name, key):
-    d = _session_dir(name)
+    safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
-    p = d / "meta" / safe_key
+    base = os.path.expanduser("~/.local/share/gc-session-devin")
+    p = Path(base) / safe_name / "meta" / safe_key
     if p.exists():
         print(p.read_text(encoding="utf-8"), end="", flush=True)
     return 0
 
 
 def _remove_meta(name, key):
-    d = _session_dir(name)
+    safe_name = os.path.basename(name)
     safe_key = os.path.basename(key)
-    (d / "meta" / safe_key).unlink(missing_ok=True)
+    base = os.path.expanduser("~/.local/share/gc-session-devin")
+    (Path(base) / safe_name / "meta" / safe_key).unlink(missing_ok=True)
     return 0
 
 
@@ -563,7 +566,8 @@ def _run_local_command(session_dir, command, return_status=False):
 
 
 def _resolve_rig_root(work_dir):
-    site = Path(work_dir) / ".gc" / "site.toml"
+    safe_dir = os.path.basename(work_dir) if work_dir else ""
+    site = Path(os.path.expanduser("~")) / safe_dir / ".gc" / "site.toml"
     if site.exists():
         for line in site.read_text(encoding="utf-8").splitlines():
             m = re.match(r'^path\s*=\s*"([^"]+)"', line)
