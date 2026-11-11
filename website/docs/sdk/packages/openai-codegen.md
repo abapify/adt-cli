@@ -20,13 +20,13 @@ output; generated artifacts are safe to commit and diff.
 
 ```bash
 bun add -D @abapify/openai-codegen
-bunx openai-codegen --help
+bunx @abapify/openai-codegen --help
 ```
 
 ## Quick start
 
 ```bash
-bunx openai-codegen \
+bunx @abapify/openai-codegen \
   --input ./spec/openapi.json \
   --out ./generated/abapgit \
   --base petstore3 \
@@ -272,7 +272,7 @@ declaration, never rewritten or wrapped.
 
 ```bash
 bunx adt auth login
-bunx openai-codegen \
+bunx @abapify/openai-codegen \
   --input ./spec/openapi.json \
   --out ./generated/abapgit \
   --format abapgit \
