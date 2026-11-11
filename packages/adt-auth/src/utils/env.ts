@@ -21,7 +21,7 @@ export function readServiceKey(filePath: string): BTPServiceKey {
     );
   }
 
-  if (/(^|[\\/:\s])\\.\\.([\\/:\s]|$)/.test(trimmed)) {
+  if (/\\.\\./.test(trimmed)) {
     throw new Error(
       'Service key path must not contain path traversal segments',
     );
