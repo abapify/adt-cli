@@ -64,7 +64,8 @@ function isTrustedDir(dir: string): boolean {
 
 function* opensslCandidates(): Generator<string> {
   const override = process.env.ADT_OPENSSL_BIN;
-  if (override && !/(^|[\\/:\s])\.\.([\\/:\s]|$)/.test(override)) yield override;
+  if (override && !/(^|[\\/:\s])\.\.([\\/:\s]|$)/.test(override))
+    yield override;
   yield* OPENSSL_CANDIDATES;
   // PATH scan covers non-standard installs (e.g. Nix profiles). Directories
   // writable by group/other are skipped — another user could otherwise plant
