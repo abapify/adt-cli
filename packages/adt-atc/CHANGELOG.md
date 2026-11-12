@@ -1,3 +1,13 @@
+## 0.4.50 (2026-11-12)
+
+### 🩹 Fixes
+
+- **security:** add lgtm suppressions for remaining JS alerts ([73676ca8](https://github.com/abapify/adt-cli/commit/73676ca8))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.49 (2026-11-12)
 
 ### 🩹 Fixes
