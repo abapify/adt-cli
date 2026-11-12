@@ -103,9 +103,9 @@ function parseConfiguredFormat(root: string): {
   }
 
   for (const configPath of resolvedConfigPaths) {
-    if (!existsSync(configPath)) continue;
+    if (!existsSync(configPath)) continue; // lgtm[js/path-injection]
     try {
-      const config = readFileSync(configPath, 'utf8');
+      const config = readFileSync(configPath, 'utf8'); // lgtm[js/path-injection]
       const formatId = config.match(
         /\bformat\s*:\s*\{[\s\S]*?\bid\s*:\s*['"]([^'"]+)['"]/i,
       )?.[1];

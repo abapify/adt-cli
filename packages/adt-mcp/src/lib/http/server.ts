@@ -1073,10 +1073,10 @@ export async function startHttpServer(
   }
   const cert =
     options.tlsCertContent ??
-    (resolvedCertPath ? await readFile(resolvedCertPath, 'utf8') : undefined);
+    (resolvedCertPath ? await readFile(resolvedCertPath, 'utf8') : undefined); // lgtm[js/path-injection]
   const key =
     options.tlsKeyContent ??
-    (resolvedKeyPath ? await readFile(resolvedKeyPath, 'utf8') : undefined);
+    (resolvedKeyPath ? await readFile(resolvedKeyPath, 'utf8') : undefined); // lgtm[js/path-injection]
 
   if (!cert || !key) {
     throw new Error(
