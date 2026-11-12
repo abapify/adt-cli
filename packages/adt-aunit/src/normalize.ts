@@ -75,16 +75,16 @@ function normalizeProgram(program: AunitProgram): NormalizedAunitProgram {
 }
 
 function assertConsistentCounts(result: AunitResult): void {
+  if (result.totalTests < 0) {
+    throw new MalformedAunitReportError(
+      'AUnit report summary counts are negative.',
+    );
+  }
   const statusSum =
     result.passCount + result.failCount + result.errorCount + result.skipCount;
   if (result.totalTests !== statusSum) {
     throw new MalformedAunitReportError(
       `AUnit report summary counts are inconsistent: totalTests=${result.totalTests} but statuses sum to ${statusSum}.`,
-    );
-  }
-  if (result.totalTests < 0) {
-    throw new MalformedAunitReportError(
-      'AUnit report summary counts are negative.',
     );
   }
 }
@@ -154,6 +154,37 @@ function counterValue(
   return { total: counter.total, covered: counter.executed ?? 0 };
 }
 
+function aggregateCounters(
+  packages: NormalizedJacocoPackage[],
+): Map<string, { total: number; covered: number }> {
+  const totals = new Map<string, { total: number; covered: number }>();
+  for (const counterType of ['LINE', 'INSTRUCTION', 'BRANCH']) {
+    const aggregated = aggregateCounterType(packages, counterType);
+    if (aggregated) {
+      totals.set(counterType.toLowerCase(), aggregated);
+    }
+  }
+  return totals;
+}
+
+function aggregateCounterType(
+  packages: NormalizedJacocoPackage[],
+  counterType: string,
+): { total: number; covered: number } | undefined {
+  let total = 0;
+  let covered = 0;
+  let present = false;
+  for (const pkg of packages) {
+    const value = counterValue(pkg.counters, counterType);
+    if (value) {
+      present = true;
+      total += value.total;
+      covered += value.covered;
+    }
+  }
+  return present ? { total, covered } : undefined;
+}
+
 /**
  * Normalize raw AUnit coverage measurements into deterministic package-level
  * and total facts, computed from the recorded class/package counters.
@@ -177,23 +208,7 @@ export function normalizeJacocoCoverage(input: {
       })),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const totals = new Map<string, { total: number; covered: number }>();
-  for (const counterType of ['LINE', 'INSTRUCTION', 'BRANCH']) {
-    let total = 0;
-    let covered = 0;
-    let present = false;
-    for (const pkg of packages) {
-      const value = counterValue(pkg.counters, counterType);
-      if (value) {
-        present = true;
-        total += value.total;
-        covered += value.covered;
-      }
-    }
-    if (present) {
-      totals.set(counterType.toLowerCase(), { total, covered });
-    }
-  }
+  const totals = aggregateCounters(packages);
   const line = totals.get('line') ?? { total: 0, covered: 0 };
   const instruction = totals.get('instruction') ?? { total: 0, covered: 0 };
   return {

@@ -116,12 +116,11 @@ export function normalizeAtcResult(
     const findings = await Promise.all(
       result.findings.map((finding) => normalizeFinding(finding, resolver)),
     );
+    const category = resultCategory(result.findings);
     return {
       ...result,
       findings,
-      ...(resultCategory(result.findings) === undefined
-        ? {}
-        : { category: resultCategory(result.findings) }),
+      ...(category === undefined ? {} : { category }),
     };
   })();
 }
