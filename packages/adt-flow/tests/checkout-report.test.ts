@@ -103,6 +103,41 @@ describe('public checkout reports', () => {
     ).toMatchObject({ mode: 'base', indexedOnly: true });
   });
 
+  it('includes derived components only when the result carries them', () => {
+    expect('derived' in createFlowCheckoutReport(result())).toBe(false);
+    const report = createFlowCheckoutReport({
+      ...result(),
+      derived: [
+        {
+          object: 'CLAS/ZCL_OTHER',
+          component: 'macros',
+          diagnostic: 'SOURCE_COMPONENT_SCOPE_DERIVED',
+          sourceTransport: 'DEVK900001',
+        },
+        {
+          object: 'CLAS/ZCL_SAMPLE',
+          component: 'definitions',
+          diagnostic: 'SOURCE_COMPONENT_SCOPE_DERIVED',
+          sourceTransport: 'DEVK900001',
+        },
+      ],
+    });
+    expect(report.derived).toEqual([
+      {
+        object: 'CLAS/ZCL_OTHER',
+        component: 'macros',
+        diagnostic: 'SOURCE_COMPONENT_SCOPE_DERIVED',
+        sourceTransport: 'DEVK900001',
+      },
+      {
+        object: 'CLAS/ZCL_SAMPLE',
+        component: 'definitions',
+        diagnostic: 'SOURCE_COMPONENT_SCOPE_DERIVED',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+  });
+
   it('keeps the partial report compatible without adding coverage fields', () => {
     expect(
       createFlowPartialReport({

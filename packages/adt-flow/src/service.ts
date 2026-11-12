@@ -160,6 +160,15 @@ function isUnsupportedEntry(entry: TransportSourceManifestEntry): boolean {
   );
 }
 
+/**
+ * A component whose boundaries were derived from sibling in-scope provenance
+ * instead of its own scope-attributed versions. It materializes from real
+ * immutable versions but is never presented as scope-attributed provenance.
+ */
+function isDerivedEntry(entry: TransportSourceManifestEntry): boolean {
+  return entry.diagnostic?.code === 'SOURCE_COMPONENT_SCOPE_DERIVED';
+}
+
 function omissionDiagnostic(entry: TransportSourceManifestEntry): string {
   return (
     entry.diagnostic?.code ??
@@ -175,7 +184,7 @@ function selectedVersion(
   entry: TransportSourceManifestEntry,
   mode: 'base' | 'head',
 ): SourceVersionRef | undefined {
-  if (!entry.exact) {
+  if (!entry.exact && !isDerivedEntry(entry)) {
     throw new AdtFlowError(
       'manifest_inexact',
       'Source history did not prove an exact transport boundary.',
@@ -1219,6 +1228,7 @@ interface ManifestContext {
   manifest: TransportSourceManifest;
   entries: TransportSourceManifestEntry[];
   skipped: FlowCheckoutResult['skipped'];
+  derived: FlowCheckoutResult['skipped'];
   metadataLimiter: Limiter;
   sourceLimiter: Limiter;
   maxSourceBytes: number;
@@ -1257,7 +1267,8 @@ function inexactEntries(
   partial: boolean,
 ): TransportSourceManifestEntry[] {
   const inexact = entries.filter(
-    (entry) => !entry.exact && !isUnsupportedEntry(entry),
+    (entry) =>
+      !entry.exact && !isUnsupportedEntry(entry) && !isDerivedEntry(entry),
   );
   if (inexact.length > 0 && !partial) {
     // Preserve the original all-or-nothing safety contract for every caller
@@ -1401,6 +1412,53 @@ async function buildManifestAndGroups(
   const entries = scopedEntries.filter(
     (entry) => !isUnsupportedEntry(entry) && !inexact.includes(entry),
   );
+
+  // Class companion guard: when an object's `main` component entry exists but
+  // is not materializable, materializing sibling include fragments would leave
+  // an orphaned partial class in the tree. Skip the whole object instead and
+  // report each dropped component with the main component's diagnostic.
+  const materializableComponents = new Map<string, Set<string>>();
+  for (const entry of entries) {
+    const canonical = objectIdentity(materializedObject(entry)).canonical;
+    const components = materializableComponents.get(canonical) ?? new Set();
+    components.add(entry.component.id);
+    materializableComponents.set(canonical, components);
+  }
+  const unavailableMainComponents = new Map<
+    string,
+    TransportSourceManifestEntry
+  >();
+  for (const entry of scopedEntries) {
+    if (entry.component.id !== 'main') continue;
+    if (isUnsupportedEntry(entry) || inexact.includes(entry)) {
+      unavailableMainComponents.set(
+        objectIdentity(materializedObject(entry)).canonical,
+        entry,
+      );
+    }
+  }
+  const derived: FlowCheckoutResult['skipped'] = [];
+  const guardedEntries = entries.filter((entry) => {
+    const canonical = objectIdentity(materializedObject(entry)).canonical;
+    const unavailableMain = unavailableMainComponents.get(canonical);
+    if (unavailableMain) {
+      skipped.push({
+        object: `${entry.object.type}/${entry.object.name}`,
+        component: entry.component.id,
+        diagnostic:
+          unavailableMain.diagnostic?.code ??
+          omissionDiagnostic(unavailableMain),
+        ...(entry.sourceTransport
+          ? { sourceTransport: entry.sourceTransport }
+          : {}),
+      });
+      return false;
+    }
+    if (isDerivedEntry(entry)) {
+      derived.push(toSkipped(entry));
+    }
+    return true;
+  });
   const sourceLimiter = new Limiter(
     ctx.config.concurrency?.sources ?? DEFAULT_SOURCE_CONCURRENCY,
   );
@@ -1411,12 +1469,13 @@ async function buildManifestAndGroups(
     allSrcFiles,
     ctx.dependencies.format,
   );
-  const groups = prepareGroups(entries, ctx.mode);
+  const groups = prepareGroups(guardedEntries, ctx.mode);
 
   return {
     manifest,
-    entries,
+    entries: guardedEntries,
     skipped,
+    derived,
     metadataLimiter,
     sourceLimiter,
     maxSourceBytes,
@@ -1780,6 +1839,7 @@ function buildCheckoutResult(
   ctx: FlowContext,
   manifest: TransportSourceManifest,
   skipped: FlowCheckoutResult['skipped'],
+  derived: FlowCheckoutResult['skipped'],
   plan: RepositoryPlan,
   processed: ProcessedGroups,
 ): FlowCheckoutResult {
@@ -1804,6 +1864,7 @@ function buildCheckoutResult(
     unchanged: plan.unchanged.filter((path) => !descriptorSet.has(path)),
     descriptors: [...descriptorSet].sort((a, b) => compareStrings(a, b)),
     skipped,
+    derived,
     inventory: manifest.inventory,
     inventoryResolutions: manifest.inventoryResolutions,
     absentObjects: processed.absentObjects,
@@ -1871,6 +1932,7 @@ async function checkoutFlow(
     ctx,
     manifestContext.manifest,
     manifestContext.skipped,
+    manifestContext.derived,
     plan,
     processed,
   );
@@ -1982,6 +2044,7 @@ async function indexFlow(
       ctx,
       manifestContext.manifest,
       manifestContext.skipped,
+      manifestContext.derived,
       plan,
       indexed,
     ),

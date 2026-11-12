@@ -16,6 +16,7 @@ export type FlowCheckoutReport = FlowPartialReport &
     | 'inventoryResolutions'
     | 'descriptors'
     | 'absentObjects'
+    | 'derived'
   > & {
     coverageVersion: 1;
     indexedOnly: boolean;
@@ -63,5 +64,16 @@ export function createFlowCheckoutReport(
     indexedOnly: result.indexedOnly === true,
     coverageVersion: 1,
     skipped: partial.skipped,
+    ...(result.derived === undefined
+      ? {}
+      : {
+          derived: [...result.derived].sort(
+            (a, b) =>
+              compareStrings(a.object, b.object) ||
+              compareStrings(a.component, b.component) ||
+              compareStrings(a.diagnostic, b.diagnostic) ||
+              compareStrings(a.sourceTransport ?? '', b.sourceTransport ?? ''),
+          ),
+        }),
   };
 }

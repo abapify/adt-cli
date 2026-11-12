@@ -1474,6 +1474,196 @@ describe('buildTransportSourceManifest', () => {
     expect(factoryGet).not.toHaveBeenCalled();
   });
 
+  const classWithDefinitionsMetadata = () => ({
+    ...rootSourceMetadata(),
+    include: [
+      {
+        includeType: 'definitions',
+        sourceUri: 'includes/definitions',
+        link: {
+          rel: VERSIONS_RELATION,
+          href: 'includes/definitions/versions',
+        },
+      },
+    ],
+  });
+
+  it('derives boundaries for scope-unchanged class components from sibling provenance', async () => {
+    const classObject = transportObject({
+      name: 'ZCL_DERIVED',
+      type: 'CLAS',
+      objectUri: '/sap/bc/adt/oo/classes/zcl_derived',
+      metadata: classWithDefinitionsMetadata(),
+    });
+    mockResolution([classObject], ['DEVK900002']);
+    const listVersions = vi.fn(async (uri: string) =>
+      uri.includes('definitions')
+        ? [version('00040', 0, ['DEVK800001'])]
+        : [
+            version('00050', 0, ['DEVK900002']),
+            version('00048', 1, ['DEVK800001']),
+          ],
+    );
+    const { ctx } = contextWithVersions(listVersions);
+
+    const manifest = await buildTransportSourceManifest(
+      ['DEVK900001'],
+      {},
+      ctx,
+    );
+
+    expect(
+      manifest.entries.find(({ component }) => component.id === 'main'),
+    ).toMatchObject({
+      changeKind: 'modified',
+      exact: true,
+      base: { id: '00048' },
+      head: { id: '00050' },
+    });
+    expect(
+      manifest.entries.find(({ component }) => component.id === 'definitions'),
+    ).toMatchObject({
+      object: { type: 'CLAS', name: 'ZCL_DERIVED' },
+      changeKind: 'modified',
+      exact: false,
+      base: { id: '00040' },
+      head: { id: '00040' },
+      diagnostic: { code: 'SOURCE_COMPONENT_SCOPE_DERIVED' },
+    });
+  });
+
+  it('excludes derived versions newer than the sibling in-scope head bound', async () => {
+    const classObject = transportObject({
+      name: 'ZCL_DERIVED',
+      type: 'CLAS',
+      objectUri: '/sap/bc/adt/oo/classes/zcl_derived',
+      metadata: classWithDefinitionsMetadata(),
+    });
+    mockResolution([classObject], ['DEVK900002']);
+    const listVersions = vi.fn(async (uri: string) =>
+      uri.includes('definitions')
+        ? [
+            version('00040', 0, ['DEVK800001']),
+            version('00060', 1, ['DEVK800002']),
+          ]
+        : [
+            version('00050', 0, ['DEVK900002']),
+            version('00048', 1, ['DEVK800001']),
+          ],
+    );
+    const { ctx } = contextWithVersions(listVersions);
+
+    const manifest = await buildTransportSourceManifest(
+      ['DEVK900001'],
+      {},
+      ctx,
+    );
+
+    expect(
+      manifest.entries.find(({ component }) => component.id === 'definitions'),
+    ).toMatchObject({
+      exact: false,
+      base: { id: '00040' },
+      head: { id: '00040' },
+      diagnostic: { code: 'SOURCE_COMPONENT_SCOPE_DERIVED' },
+    });
+  });
+
+  it.each([
+    {
+      name: 'keeps the explicit omission when no version satisfies the derived bounds',
+      definitionsVersions: [version('00060', 0, ['DEVK800002'])],
+    },
+    {
+      name: 'keeps the explicit omission when feed version ids are not comparable',
+      definitionsVersions: [version('X1', 0, ['DEVK800001'])],
+    },
+  ])('$name', async ({ definitionsVersions }) => {
+    const classObject = transportObject({
+      name: 'ZCL_DERIVED',
+      type: 'CLAS',
+      objectUri: '/sap/bc/adt/oo/classes/zcl_derived',
+      metadata: classWithDefinitionsMetadata(),
+    });
+    mockResolution([classObject], ['DEVK900002']);
+    const listVersions = vi.fn(async (uri: string) =>
+      uri.includes('definitions')
+        ? definitionsVersions
+        : [
+            version('00050', 0, ['DEVK900002']),
+            version('00048', 1, ['DEVK800001']),
+          ],
+    );
+    const { ctx } = contextWithVersions(listVersions);
+
+    const manifest = await buildTransportSourceManifest(
+      ['DEVK900001'],
+      {},
+      ctx,
+    );
+
+    expect(
+      manifest.entries.find(({ component }) => component.id === 'definitions'),
+    ).toMatchObject({
+      changeKind: 'ambiguous',
+      exact: false,
+      diagnostic: { code: 'SOURCE_HISTORY_SCOPE_VERSION_MISSING' },
+    });
+  });
+
+  it.each([
+    ['CINC', 'CLAS/OCN', 'ZCL_LEAVES=============CCIMP'],
+    ['CLSD', 'CLAS/OC', 'ZCL_LEAVES'],
+    ['CPRI', 'CLAS/OSI', 'ZCL_LEAVES'],
+    ['METH', 'CLAS/OM', `${'ZCL_LEAVES'.padEnd(30)}DO_RUN`],
+  ])(
+    'derives scope-unchanged components for a %s leaf through its CLAS owner',
+    async (type, wbtype, leafName) => {
+      const leaf = transportObject({
+        name: leafName,
+        type,
+        pgmid: 'LIMU',
+        wbtype,
+        objectUri: '/sap/bc/adt/oo/classes/zcl_leaves/source/main',
+        factoryName: 'ZCL_LEAVES',
+        metadata: classWithDefinitionsMetadata(),
+      });
+      mockResolution([leaf], ['DEVK900002']);
+      const listVersions = vi.fn(async (uri: string) =>
+        uri.includes('definitions')
+          ? [version('00040', 0, ['DEVK800001'])]
+          : [
+              version('00050', 0, ['DEVK900002']),
+              version('00048', 1, ['DEVK800001']),
+            ],
+      );
+      const { ctx } = contextWithVersions(listVersions);
+
+      const manifest = await buildTransportSourceManifest(
+        ['DEVK900001'],
+        {},
+        ctx,
+      );
+
+      expect(manifest.entries).toHaveLength(2);
+      expect(manifest.entries[0]).toMatchObject({
+        object: { type, name: leafName },
+        repositoryObject: { pgmid: 'R3TR', type: 'CLAS', name: 'ZCL_LEAVES' },
+      });
+      expect(
+        manifest.entries.find(({ component }) => component.id === 'main'),
+      ).toMatchObject({ changeKind: 'modified', exact: true });
+      expect(
+        manifest.entries.find(
+          ({ component }) => component.id === 'definitions',
+        ),
+      ).toMatchObject({
+        exact: false,
+        diagnostic: { code: 'SOURCE_COMPONENT_SCOPE_DERIVED' },
+      });
+    },
+  );
+
   it('returns deterministic ordering and bounds metadata/feed concurrency', async () => {
     let active = 0;
     let maximumActive = 0;

@@ -147,7 +147,10 @@ const format: FormatPlugin = {
   supportedTypes: ['CLAS'],
   getHandler: () => undefined,
   parseFilename(filename) {
-    const match = /^(?<name>.+)\.clas\.(?<extension>abap|xml)$/.exec(filename);
+    const match =
+      /^(?<name>.+)\.clas(?:\.(?<suffix>[^.]+))?\.(?<extension>abap|xml)$/.exec(
+        filename,
+      );
     return match?.groups
       ? {
           name: (match.groups['name'] ?? '').toUpperCase(),
@@ -170,14 +173,26 @@ const format: FormatPlugin = {
       })
       .join('/');
     const prefix = `src/${directory ? `${directory}/` : ''}${object.name.toLowerCase()}.clas`;
+    const mainSource = {
+      path: `${prefix}.abap`,
+      content: input.sources?.['main'] ?? '',
+      role: 'source' as const,
+      sourceComponent: 'main',
+    };
+    const componentSources = Object.entries(input.sources ?? {})
+      .filter(([component]) => component !== 'main')
+      .map(([component, content]) => ({
+        path: `${prefix}.${component}.abap`,
+        content: content ?? '',
+        role: 'source' as const,
+        sourceComponent: component,
+      }));
     return {
       files: [
-        {
-          path: `${prefix}.abap`,
-          content: input.sources?.['main'] ?? '',
-          role: 'source',
-          sourceComponent: 'main',
-        },
+        ...componentSources.sort((left, right) =>
+          left.path < right.path ? -1 : left.path > right.path ? 1 : 0,
+        ),
+        mainSource,
         {
           path: `${prefix}.xml`,
           content: `<CLASS NAME="${object.name}"/>\n`,
@@ -1440,6 +1455,121 @@ describe('transport checkout', () => {
     ]);
     expect(result.changed).toContain('src/feature/zcl_sample.clas.abap');
     expect(ports.loadObject).toHaveBeenCalledTimes(1);
+  });
+
+  function classComponentEntry(
+    componentId: string,
+    overrides: Partial<TransportSourceManifest['entries'][number]> = {},
+  ): TransportSourceManifest['entries'][number] {
+    return {
+      object: {
+        pgmid: 'R3TR',
+        type: 'CLAS',
+        name: 'ZCL_SAMPLE',
+        packageName: 'ZROOT_FEATURE',
+      },
+      component: { id: componentId },
+      sourceTransport: 'DEVK900001',
+      changeKind: 'modified',
+      exact: true,
+      base: version('00048'),
+      head: version('00050'),
+      ...overrides,
+    };
+  }
+
+  const DERIVED_DIAGNOSTIC = {
+    code: 'SOURCE_COMPONENT_SCOPE_DERIVED' as const,
+    message:
+      'No source version is attributed to the requested transport scope; boundaries are derived from sibling in-scope versions 00048..00050.',
+  };
+
+  it('materializes derived components and reports their provenance caveat', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('00048'), version('00050'));
+    current.entries.push(
+      classComponentEntry('definitions', {
+        exact: false,
+        diagnostic: DERIVED_DIAGNOSTIC,
+      }),
+    );
+    const ports = dependencies(() => current);
+    ports.loadObject.mockResolvedValue({
+      object: { name: 'ZCL_SAMPLE' },
+      packagePath: ['ZROOT', 'ZROOT_FEATURE'],
+    });
+
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+
+    expect(result.skipped).toEqual([]);
+    expect(result.derived).toEqual([
+      {
+        object: 'CLAS/ZCL_SAMPLE',
+        component: 'definitions',
+        diagnostic: 'SOURCE_COMPONENT_SCOPE_DERIVED',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+    expect(result.changed).toEqual([
+      'src/feature/zcl_sample.clas.abap',
+      'src/feature/zcl_sample.clas.definitions.abap',
+      'src/feature/zcl_sample.clas.xml',
+    ]);
+  });
+
+  it('skips the whole class when its main component is unavailable', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('00048'), version('00050'));
+    current.entries[0] = classComponentEntry('main', {
+      changeKind: 'ambiguous',
+      exact: false,
+      base: undefined,
+      head: undefined,
+      diagnostic: {
+        code: 'SOURCE_HISTORY_SCOPE_VERSION_MISSING',
+        message:
+          'No source version is attributed to the requested transport scope.',
+      },
+    });
+    current.entries.push(
+      classComponentEntry('definitions', {
+        exact: false,
+        diagnostic: DERIVED_DIAGNOSTIC,
+      }),
+    );
+    const ports = dependencies(() => current);
+    ports.loadObject.mockResolvedValue({
+      object: { name: 'ZCL_SAMPLE' },
+      packagePath: ['ZROOT', 'ZROOT_FEATURE'],
+    });
+
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+      partial: true,
+    });
+
+    expect(result.changed).toEqual([]);
+    expect(result.derived ?? []).toEqual([]);
+    expect(result.skipped).toEqual([
+      {
+        object: 'CLAS/ZCL_SAMPLE',
+        component: 'main',
+        diagnostic: 'SOURCE_HISTORY_SCOPE_VERSION_MISSING',
+        sourceTransport: 'DEVK900001',
+      },
+      {
+        object: 'CLAS/ZCL_SAMPLE',
+        component: 'definitions',
+        diagnostic: 'SOURCE_HISTORY_SCOPE_VERSION_MISSING',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
   });
 
   it('persists the SNOTE correction-instruction omission in partial mode', async () => {

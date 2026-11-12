@@ -21,6 +21,7 @@ export type SourceHistoryDiagnosticCode =
   | 'OBJECT_TYPE_UNSUPPORTED'
   | 'SNOTE_CORRECTION_INSTRUCTION'
   | 'SOURCE_COMPONENT_NOT_FOUND'
+  | 'SOURCE_COMPONENT_SCOPE_DERIVED'
   | 'SOURCE_COMPONENTS_UNAVAILABLE'
   | 'SOURCE_COMPONENT_URI_UNSAFE'
   | 'SOURCE_COMPONENT_VERSIONS_UNAVAILABLE'
@@ -558,12 +559,77 @@ function selectedRangeDiagnostic(
 }
 
 /**
+ * Sibling-proven scope bounds used to derive boundaries for components whose
+ * immutable feed carries no version attributed to the requested scope.
+ * ADT version ids are the object-level version counter, so they are
+ * comparable across component feeds of one repository object.
+ */
+export interface DerivedScopeBoundary {
+  /** Newest in-scope version id proven by a sibling component. */
+  headId: string;
+  /** Oldest in-scope version id proven by a sibling component. */
+  baseId: string;
+}
+
+function numericVersionId(id: string): number | undefined {
+  if (!/^\d+$/.test(id)) return undefined;
+  const value = Number.parseInt(id, 10);
+  return Number.isSafeInteger(value) ? value : undefined;
+}
+
+/**
+ * Derive before/after boundaries for an in-scope-unchanged component from
+ * immutable history: head is the newest feed version at or below the sibling
+ * head bound, base the newest version strictly below the sibling base bound.
+ * Returns undefined when the feed ids are not comparable or no version
+ * satisfies a bound — the caller then keeps the explicit scope-missing
+ * omission instead of inventing coverage.
+ */
+function deriveScopeSelection(
+  ordered: readonly SourceVersionRef[],
+  bounds: DerivedScopeBoundary,
+): TransportSourceVersionSelection | undefined {
+  const headBound = numericVersionId(bounds.headId);
+  const baseBound = numericVersionId(bounds.baseId);
+  if (headBound === undefined || baseBound === undefined) return undefined;
+  const numeric = ordered.map((version) => ({
+    version,
+    numericId: numericVersionId(version.id),
+  }));
+  if (numeric.some(({ numericId }) => numericId === undefined)) {
+    return undefined;
+  }
+  const newestFirst = [...numeric].reverse();
+  const head = newestFirst.find(
+    ({ numericId }) => numericId !== undefined && numericId <= headBound,
+  )?.version;
+  const base = newestFirst.find(
+    ({ numericId }) => numericId !== undefined && numericId < baseBound,
+  )?.version;
+  if (!head || !base) return undefined;
+  const derivedFrom = head.transports.length
+    ? ` (transports: ${head.transports.join(', ')})`
+    : '';
+  return {
+    changeKind: 'modified',
+    exact: false,
+    base,
+    head,
+    diagnostic: {
+      code: 'SOURCE_COMPONENT_SCOPE_DERIVED',
+      message: `No source version is attributed to the requested transport scope; boundaries are derived from sibling in-scope versions ${bounds.baseId}..${bounds.headId}. Head version ${head.id}${derivedFrom} is outside the requested scope.`,
+    },
+  };
+}
+
+/**
  * Select immutable before/after references using SAP's observed feed ordinal.
  */
 export function selectTransportSourceVersions( // NOSONAR - SAP feed-order selection is inherently branch-heavy; will be refactored in follow-up
   versions: readonly SourceVersionRef[],
   scopeTransportNumbers: readonly string[],
   deleted = false,
+  derived?: DerivedScopeBoundary,
 ): TransportSourceVersionSelection {
   const scope = new Set(
     scopeTransportNumbers.map((transport) => transport.toUpperCase()),
@@ -647,6 +713,10 @@ export function selectTransportSourceVersions( // NOSONAR - SAP feed-order selec
   }
 
   if (inScope.length === 0) {
+    const derivedSelection = derived
+      ? deriveScopeSelection(ordered, derived)
+      : undefined;
+    if (derivedSelection) return derivedSelection;
     return {
       changeKind: 'ambiguous',
       exact: false,
@@ -1033,6 +1103,11 @@ async function buildObjectEntries( // NOSONAR - SAP object manifest construction
       : discovery.components;
 
   const entries: TransportSourceManifestEntry[] = [];
+  const deferred: Array<{
+    publicComponent: TransportSourceManifestComponent;
+    versions: SourceVersionRef[];
+    selection: TransportSourceVersionSelection;
+  }> = [];
   for (const component of manifestComponents) {
     const publicComponent: TransportSourceManifestComponent = {
       id: component.id,
@@ -1104,11 +1179,68 @@ async function buildObjectEntries( // NOSONAR - SAP object manifest construction
       scopeTransportNumbers,
       repository.isDeleted,
     );
+    deferred.push({ publicComponent, versions, selection });
+  }
+
+  // Sibling components that proved in-scope boundaries bound the derivation
+  // for scope-missing components of the same object: ADT version ids are the
+  // object-level version counter, comparable across component feeds.
+  const scopeSet = new Set(
+    scopeTransportNumbers.map((transport) => transport.toUpperCase()),
+  );
+  const inScopeIds = deferred
+    .filter(({ selection }) => selection.exact)
+    .flatMap(({ versions }) =>
+      versions
+        .filter((version) =>
+          version.transports.some((transport) =>
+            scopeSet.has(transport.toUpperCase()),
+          ),
+        )
+        .map((version) => version.id.toUpperCase()),
+    );
+  let derived: DerivedScopeBoundary | undefined;
+  const numericInScopeIds = inScopeIds.map((id) => numericVersionId(id));
+  if (
+    inScopeIds.length > 0 &&
+    numericInScopeIds.every((id) => id !== undefined)
+  ) {
+    let newestId: string | undefined;
+    let oldestId: string | undefined;
+    let newestNumeric = -1;
+    let oldestNumeric = Number.MAX_SAFE_INTEGER;
+    for (const [index, numericId] of numericInScopeIds.entries()) {
+      const id = inScopeIds[index]!;
+      if (numericId === undefined) continue;
+      if (numericId > newestNumeric) {
+        newestNumeric = numericId;
+        newestId = id;
+      }
+      if (numericId < oldestNumeric) {
+        oldestNumeric = numericId;
+        oldestId = id;
+      }
+    }
+    if (newestId && oldestId) derived = { headId: newestId, baseId: oldestId };
+  }
+
+  for (const candidate of deferred) {
+    const selection =
+      derived &&
+      candidate.selection.diagnostic?.code ===
+        'SOURCE_HISTORY_SCOPE_VERSION_MISSING'
+        ? selectTransportSourceVersions(
+            candidate.versions,
+            scopeTransportNumbers,
+            repository.isDeleted,
+            derived,
+          )
+        : candidate.selection;
     entries.push(
       withRepositoryOwner(
         {
           object: identity,
-          component: publicComponent,
+          component: candidate.publicComponent,
           sourceTransport,
           ...selection,
         },

@@ -106,6 +106,12 @@ export interface FlowCheckoutResult {
   unchanged: string[];
   descriptors: string[];
   skipped: FlowSkippedObject[];
+  /**
+   * Components materialized from immutable versions derived from sibling
+   * in-scope provenance instead of their own scope-attributed versions.
+   * Present so derived coverage cannot be mistaken for scope provenance.
+   */
+  derived?: FlowSkippedObject[];
   sapCalls: { manifest: number; metadata: number; source: number };
   fastPath: 'exact-head' | 'indexed-components' | 'none';
 }
