@@ -177,31 +177,45 @@ function appendTask(
   }
 }
 
+function foldTargetOf(
+  identity: string,
+  payloads: PlannedRootPayloads,
+): PlannedCtsScopeRoot | undefined {
+  const unit = payloads.payloads.get(identity)?.request;
+  if (unit?.kind !== 'task') {
+    return undefined;
+  }
+  const parent = unit.parent;
+  if (parent === undefined || !payloads.roots.has(parent)) {
+    return undefined;
+  }
+  return payloads.roots.get(parent);
+}
+
+function foldIntoParent(
+  identity: string,
+  root: PlannedCtsScopeRoot,
+  parentRoot: PlannedCtsScopeRoot,
+  payloads: PlannedRootPayloads,
+): void {
+  parentRoot.requestedBy.push(...root.requestedBy);
+  for (const task of payloads.payloads.get(identity)?.tasks ?? []) {
+    appendTask(parentRoot.tasks, task.number, parentRoot);
+  }
+  payloads.roots.delete(identity);
+  payloads.payloads.delete(identity);
+}
+
 /**
  * A requested task whose parent is also requested folds into the parent root
  * and takes its request provenance with it.
  */
 function foldTaskRootsIntoParents(payloads: PlannedRootPayloads): void {
   for (const [identity, root] of [...payloads.roots.entries()]) {
-    const unit = payloads.payloads.get(identity)?.request;
-    const parent = unit?.parent;
-    if (
-      unit?.kind !== 'task' ||
-      parent === undefined ||
-      !payloads.roots.has(parent)
-    ) {
-      continue;
+    const parentRoot = foldTargetOf(identity, payloads);
+    if (parentRoot) {
+      foldIntoParent(identity, root, parentRoot, payloads);
     }
-    const parentRoot = payloads.roots.get(parent);
-    if (!parentRoot) {
-      continue;
-    }
-    parentRoot.requestedBy.push(...root.requestedBy);
-    for (const task of payloads.payloads.get(identity)?.tasks ?? []) {
-      appendTask(parentRoot.tasks, task.number, parentRoot);
-    }
-    payloads.roots.delete(identity);
-    payloads.payloads.delete(identity);
   }
 }
 
