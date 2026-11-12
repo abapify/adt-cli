@@ -1,3 +1,13 @@
+## 0.4.53 (2026-11-12)
+
+### 🚀 Features
+
+- **flow:** derive unchanged class component boundaries from sibling provenance ([16c1dcc2](https://github.com/abapify/adt-cli/commit/16c1dcc2))
+
+### ❤️ Thank You
+
+- ThePlenkov @ThePlenkov
+
 ## 0.4.52 (2026-11-12)
 
 This was a version bump only for adk to align it with other projects, there were no code changes.
