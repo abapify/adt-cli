@@ -162,12 +162,18 @@ describe('mergeAtcVariants', () => {
   });
 
   it('is idempotent for a repeated identical variant result', () => {
-    const variantResult = result([finding({})], 'VA');
+    const variantResult = result(
+      [finding({}), finding({ messageId: 'MSG2' })],
+      'VA',
+    );
+    const redelivered = structuredClone(variantResult);
+    // Redelivery may reorder findings; the duplicate must still collapse.
+    redelivered.findings.reverse();
     const merged = mergeAtcVariants(
-      [variantResult, structuredClone(variantResult)],
+      [variantResult, redelivered],
       standardPolicy,
     );
-    expect(merged.totalFindings).toBe(1);
+    expect(merged.totalFindings).toBe(2);
     expect(merged.checkVariant).toBe('VA');
   });
 

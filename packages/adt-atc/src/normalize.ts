@@ -151,7 +151,14 @@ export function mergeAtcVariants(
   const seen = new Set<string>();
   const uniqueResults: NormalizedAtcFinding[][] = [];
   for (const result of results) {
-    const key = JSON.stringify(result);
+    // Canonicalize the key over sorted finding fingerprints so a
+    // redelivered result with reordered findings still collapses.
+    const key = JSON.stringify({
+      ...result,
+      findings: [...result.findings]
+        .map(fingerprintFor)
+        .sort((a, b) => a.localeCompare(b)),
+    });
     if (seen.has(key)) {
       continue;
     }

@@ -83,20 +83,13 @@ function classifyMethod(method: AunitTestMethod): AunitMethodClassification {
 function normalizeProgram(program: AunitProgram): NormalizedAunitProgram {
   return {
     ...program,
-    testClasses: program.testClasses.map((testClass) => {
-      if (!Array.isArray(testClass.methods)) {
-        throw new MalformedAunitReportError(
-          `AUnit report test class ${testClass.name} is missing its methods collection.`,
-        );
-      }
-      return {
-        ...testClass,
-        methods: testClass.methods.map((method) => ({
-          ...method,
-          classification: classifyMethod(method),
-        })),
-      };
-    }),
+    testClasses: program.testClasses.map((testClass) => ({
+      ...testClass,
+      methods: testClass.methods.map((method) => ({
+        ...method,
+        classification: classifyMethod(method),
+      })),
+    })),
   };
 }
 
@@ -196,6 +189,13 @@ export function normalizeAunitResult(
       throw new MalformedAunitReportError(
         `AUnit report program ${program.name} is missing its testClasses collection.`,
       );
+    }
+    for (const testClass of program.testClasses) {
+      if (!Array.isArray(testClass.methods)) {
+        throw new MalformedAunitReportError(
+          `AUnit report test class ${testClass.name} is missing its methods collection.`,
+        );
+      }
     }
   }
   const derived = derivedStatusCounts(result.programs);
@@ -298,7 +298,7 @@ function addCounterEntry(
     measurement,
     existing
       ? {
-          type: counter.type,
+          type: existing.type,
           total: existing.total + counter.total,
           executed: existing.executed + counter.executed,
         }
