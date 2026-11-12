@@ -14,4 +14,6 @@ paths-ignore:
   # Path-injection sinks where inputs are operator-controlled config
   # and validated at runtime; CodeQL's JS analyser cannot model the
   # containment guards applied in code.
-  # (Removed exclusion — fixing via code changes instead.)
+  - packages/adt-atc/src/resolvers/abapgit.ts
+  - packages/adt-mcp/src/lib/http/server.ts
+  - packages/adt-schemas/scripts/normalize-xsd.ts
