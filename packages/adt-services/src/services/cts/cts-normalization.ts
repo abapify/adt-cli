@@ -63,33 +63,39 @@ function unsupportedFieldsOf(
     .map(([field, value]) => ({ field, value }));
 }
 
+function normalizedParent(
+  raw: Record<string, unknown>,
+  fallbackParent?: string,
+): string | undefined {
+  const parentRaw = raw.parent;
+  if (typeof parentRaw === 'string' && parentRaw.trim() !== '') {
+    return canonicalTransport(parentRaw);
+  }
+  return fallbackParent;
+}
+
+function optionalUnitFields(raw: Record<string, unknown>) {
+  return {
+    ...(typeof raw.desc === 'string' ? { description: raw.desc } : {}),
+    ...(typeof raw.owner === 'string' ? { owner: raw.owner } : {}),
+    ...(typeof raw.status === 'string' ? { status: raw.status } : {}),
+    ...(typeof raw.type === 'string' ? { type: raw.type } : {}),
+    ...(typeof raw.lastChangedTimestamp === 'string'
+      ? { lastChangedTimestamp: raw.lastChangedTimestamp }
+      : {}),
+  };
+}
+
 function normalizeUnit(
   raw: Record<string, unknown>,
   fallbackParent?: string,
 ): NormalizedCtsUnit {
-  const parentRaw = raw.parent;
-  const hasParent = typeof parentRaw === 'string' && parentRaw.trim() !== '';
-  const parent = hasParent
-    ? canonicalTransport(parentRaw as string)
-    : fallbackParent;
-  const kind: NormalizedCtsUnit['kind'] =
-    parent === undefined ? 'request' : 'task';
-  const description = raw.desc;
-  const owner = raw.owner;
-  const status = raw.status;
-  const type = raw.type;
-  const lastChangedTimestamp = raw.lastChangedTimestamp;
+  const parent = normalizedParent(raw, fallbackParent);
   return {
-    kind,
+    kind: parent === undefined ? 'request' : 'task',
     number: canonicalTransport(String(raw.number)),
     ...(parent === undefined ? {} : { parent }),
-    ...(typeof description === 'string' ? { description } : {}),
-    ...(typeof owner === 'string' ? { owner } : {}),
-    ...(typeof status === 'string' ? { status } : {}),
-    ...(typeof type === 'string' ? { type } : {}),
-    ...(typeof lastChangedTimestamp === 'string'
-      ? { lastChangedTimestamp }
-      : {}),
+    ...optionalUnitFields(raw),
     unsupportedFields: unsupportedFieldsOf(raw),
   };
 }
