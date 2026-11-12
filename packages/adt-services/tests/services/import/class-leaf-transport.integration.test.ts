@@ -299,6 +299,81 @@ describe('legacy ImportService class-component acquisition', () => {
     ).toBe(implementationsSource);
   });
 
+  it('imports a CPRO protected-section leaf through its CLAS owner', async () => {
+    const className = 'ZCL_VIM_DI3_WF_BO';
+    const classSource =
+      'CLASS zcl_vim_di3_wf_bo DEFINITION PUBLIC.\nENDCLASS.\nCLASS zcl_vim_di3_wf_bo IMPLEMENTATION.\nENDCLASS.\n';
+    const changedAt = new Date('2025-11-09T17:21:38Z');
+    const mainInclude = {
+      includeType: 'main',
+      sourceUri: 'source/main',
+      name: '',
+      type: 'CLAS/I',
+      version: 'active',
+      changedAt,
+      createdAt: new Date('2025-11-09T00:00:00Z'),
+      changedBy: 'TESTUSER',
+      createdBy: 'TESTUSER',
+    };
+    const classGet = vi.fn(async (name: string) => ({
+      abapClass: {
+        name,
+        language: 'EN',
+        include: [mainInclude],
+      },
+    }));
+    const mainSourceGet = vi.fn(async () => classSource);
+    const client = {
+      adt: {
+        oo: {
+          classes: {
+            get: classGet,
+            source: { main: { get: mainSourceGet } },
+          },
+        },
+      },
+    };
+    const object = new AdkTransportObjectRef({ client } as never, {
+      pgmid: 'LIMU',
+      type: 'CPRO',
+      wbtype: 'CLAS/OSP',
+      name: className,
+      obj_func: '',
+    });
+    mockTransportGet.mockResolvedValue({
+      number: 'S0DK958193',
+      description: 'S0D class parent scope',
+      objects: [object],
+    });
+
+    const { ImportService } =
+      await import('../../../src/services/import/service');
+    const result = await new ImportService().importTransport({
+      transportNumber: 'S0DK958193',
+      outputPath,
+      format: 'abapgit',
+    });
+
+    expect(result.results).toEqual({
+      success: 1,
+      skipped: 0,
+      failed: 0,
+      deleted: 0,
+    });
+    expect(result.objectsByType).toEqual({ CPRO: 1 });
+    expect(classGet).toHaveBeenCalledTimes(1);
+    expect(classGet).toHaveBeenCalledWith(className);
+    expect(mainSourceGet).toHaveBeenCalledTimes(1);
+    expect(mainSourceGet).toHaveBeenCalledWith(className);
+    expect(mockPlugin.instance.format.import).toHaveBeenCalledTimes(1);
+    expect(
+      await readFile(
+        join(outputPath, 'src/zcl_vim_di3_wf_bo.clas.abap'),
+        'utf8',
+      ),
+    ).toBe(classSource);
+  });
+
   it('reports transient CLAS read failures for explicit owners and CPRI/CINC leaves', async () => {
     const className = 'ZCL_MISSING';
     const classGet = vi.fn(async () => {

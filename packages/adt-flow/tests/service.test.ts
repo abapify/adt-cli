@@ -1442,6 +1442,40 @@ describe('transport checkout', () => {
     expect(ports.loadObject).toHaveBeenCalledTimes(1);
   });
 
+  it('persists the SNOTE correction-instruction omission in partial mode', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('before'), version('after'));
+    current.entries.push(noteInstructionEntry());
+    const ports = dependencies(() => current);
+    ports.readSource.mockResolvedValue('stable source\n');
+    ports.loadObject.mockResolvedValue({
+      object: { name: 'ZCL_SAMPLE' },
+      packagePath: ['ZROOT', 'ZROOT_FEATURE'],
+    });
+
+    await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+      partial: true,
+    });
+
+    const omitted = JSON.parse(
+      await readFile(
+        join(workspace, '.adt/objects/CINS/0001089198.cins.adt.json'),
+        'utf8',
+      ),
+    );
+    expect(omitted.omissions).toEqual([
+      {
+        component: 'object',
+        diagnostic: 'SNOTE_CORRECTION_INSTRUCTION',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+    expect(omitted.state).toBe('omitted');
+  });
+
   it('reconciles a package reassignment as old-path removal plus new-path writes', async () => {
     const workspace = await root();
     let current = manifest(
