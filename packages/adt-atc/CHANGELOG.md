@@ -1,3 +1,14 @@
+## 0.4.56 (2026-11-12)
+
+### 🩹 Fixes
+
+- **reports:** harden report normalization after merge review ([#361](https://github.com/abapify/adt-cli/pull/361))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.55 (2026-11-12)
 
 This was a version bump only for adt-atc to align it with other projects, there were no code changes.

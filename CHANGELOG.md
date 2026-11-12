@@ -1,3 +1,14 @@
+## 0.4.56 (2026-11-12)
+
+### 🩹 Fixes
+
+- **reports:** harden report normalization after merge review ([#361](https://github.com/abapify/adt-cli/pull/361))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.55 (2026-11-12)
 
 ### 🚀 Features

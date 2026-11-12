@@ -1,3 +1,7 @@
+## 0.4.56 (2026-11-12)
+
+This was a version bump only for adt-mcp to align it with other projects, there were no code changes.
+
 ## 0.4.55 (2026-11-12)
 
 This was a version bump only for adt-mcp to align it with other projects, there were no code changes.
