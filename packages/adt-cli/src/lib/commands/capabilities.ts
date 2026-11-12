@@ -30,7 +30,11 @@ function resolveInstalledModule(name: string): boolean {
     createRequire(import.meta.url).resolve(name);
     return true;
   } catch {
-    return existsSync(resolve(process.cwd(), name));
+    // The fallback branch exists for relative config paths only; bare
+    // package specifiers that fail resolution are simply unresolved.
+    return name.startsWith('./') || name.startsWith('../')
+      ? existsSync(resolve(process.cwd(), name))
+      : false;
   }
 }
 
@@ -78,6 +82,12 @@ export const capabilitiesCommand = new Command('capabilities')
     'Report installed runtime capabilities as versioned JSON (identity, formats, configured modules)',
   )
   .action(async () => {
-    const report = await collectInstalledCapabilities();
-    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+    try {
+      const report = await collectInstalledCapabilities();
+      process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      process.stderr.write(`adt capabilities: ${message}\n`);
+      process.exitCode = 1;
+    }
   });

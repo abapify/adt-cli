@@ -74,7 +74,12 @@ function parseReport(stdout: string): {
   formats: Array<{ format: string; objectTypes: string[] }>;
   runtimeModules: Array<{ name: string; resolved: boolean }>;
 } {
-  return JSON.parse(stdout) as ReturnType<typeof JSON.parse>;
+  return JSON.parse(stdout) as {
+    schemaVersion: number;
+    cli: { name: string; version: string };
+    formats: Array<{ format: string; objectTypes: string[] }>;
+    runtimeModules: Array<{ name: string; resolved: boolean }>;
+  };
 }
 
 describe('installed ADT CLI capabilities', () => {
