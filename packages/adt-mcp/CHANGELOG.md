@@ -1,3 +1,13 @@
+## 0.4.46 (2026-11-12)
+
+### 🩹 Fixes
+
+- **security:** use simpler regex guards for CodeQL recognition ([#346](https://github.com/abapify/adt-cli/pull/346))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.45 (2026-11-11)
 
 ### 🩹 Fixes
