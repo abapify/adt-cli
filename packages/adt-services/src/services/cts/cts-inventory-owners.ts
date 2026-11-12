@@ -34,6 +34,20 @@ function isR3tr(entry: TransportObjectInventoryEntry): boolean {
   return entry.pgmid.trim().toUpperCase() === 'R3TR';
 }
 
+/** The first R3TR entry in a group becomes its repository owner. */
+function promoteOwner(
+  group: GroupBuilder,
+  entry: TransportObjectInventoryEntry,
+): void {
+  if (!isR3tr(entry)) {
+    return;
+  }
+  if (group.owner !== undefined && isR3tr(group.owner)) {
+    return;
+  }
+  group.owner = entry;
+}
+
 /**
  * Derive the repository owner key for a component leaf. Class components
  * resolve through the shared ADK owner rule (the WB type describes the
@@ -73,9 +87,7 @@ function collectGroups(
       groups.set(key, group);
     }
     group.leaves.push({ entry, index });
-    if (isR3tr(entry) && (group.owner === undefined || !isR3tr(group.owner))) {
-      group.owner = entry;
-    }
+    promoteOwner(group, entry);
   });
   return groups;
 }
