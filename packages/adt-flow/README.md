@@ -27,6 +27,20 @@ export default {
 };
 ```
 
+## Derived index reconciliation
+
+`assessFlowIndexReconciliation({ descriptor, currentFileHashes, previousFileHashes })`
+validates an object descriptor and identifies owned paths whose hashes changed.
+Evidence maps use SHA-256 hashes, an explicit `null` for a verified absent path,
+and no entry for unavailable evidence. A stale descriptor is reported only when
+all its owned hashes match the supplied previous source boundary.
+
+This pure helper does not run Git or read, write, archive, or delete files. The
+caller must prove the accepted merge and clean source, collect hashes without
+following unsafe paths, archive original descriptor bytes, and recheck refs,
+source and descriptors before deciding to retire any derived index. A `stale`
+result alone is not permission to remove it or relabel historical selections.
+
 ## Features
 
 - Incremental materialization of transport contents into a source tree
