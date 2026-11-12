@@ -1,3 +1,13 @@
+## 0.4.49 (2026-11-12)
+
+### 🩹 Fixes
+
+- **security:** add containment checks for CodeQL path-injection ([7ddb048d](https://github.com/abapify/adt-cli/commit/7ddb048d))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.48 (2026-11-12)
 
 ### 🩹 Fixes
