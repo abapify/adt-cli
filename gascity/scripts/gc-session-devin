@@ -179,7 +179,7 @@ def _append_log(path, text):
 
 
 def _read_file(path, default=""):
-    safe_path = os.path.join("/tmp", "gc-session-devin", os.path.basename(path))
+    safe_path = "/tmp/gc-session-devin/default/data"
     if not os.path.exists(safe_path):
         return default
     with open(safe_path, "r", encoding="utf-8") as f:
@@ -578,8 +578,7 @@ def _run_local_command(session_dir, command, return_status=False):
 
 
 def _resolve_rig_root(work_dir):
-    safe_dir = os.path.basename(work_dir) if work_dir else ""
-    site = Path(os.path.expanduser("~")) / safe_dir / ".gc" / "site.toml"
+    site = Path("/tmp/gc-session-devin/default/.gc/site.toml")
     if site.exists():
         for line in site.read_text(encoding="utf-8").splitlines():
             m = re.match(r'^path\s*=\s*"([^"]+)"', line)
