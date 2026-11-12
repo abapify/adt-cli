@@ -19,6 +19,7 @@ export type SourceHistoryDiagnosticCode =
   | 'OBJECT_METADATA_LOAD_FAILED'
   | 'OBJECT_METADATA_UNAVAILABLE'
   | 'OBJECT_TYPE_UNSUPPORTED'
+  | 'SNOTE_CORRECTION_INSTRUCTION'
   | 'SOURCE_COMPONENT_NOT_FOUND'
   | 'SOURCE_COMPONENTS_UNAVAILABLE'
   | 'SOURCE_COMPONENT_URI_UNSAFE'
@@ -958,6 +959,26 @@ async function buildObjectEntries( // NOSONAR - SAP object manifest construction
         }
       : entry;
   let discovery: ObjectSourceDiscovery;
+  // R3TR CINS entries are SNOTE correction instructions bundled with an
+  // R3TR NOTE object. They are not ABAP repository objects: ADT exposes no
+  // resource for them and abapGit has no serializer, so there is nothing to
+  // discover or materialize. Report them with a dedicated diagnostic instead
+  // of the generic unsupported code so completeness reports stay actionable.
+  if (baseIdentity.pgmid === 'R3TR' && baseIdentity.type === 'CINS') {
+    return [
+      unavailableEntry(
+        baseIdentity,
+        { id: 'object' },
+        sourceTransport,
+        'unsupported',
+        {
+          code: 'SNOTE_CORRECTION_INSTRUCTION',
+          message:
+            'The SNOTE correction instruction is not an ABAP repository object: ADT exposes no resource for it and abapGit has no serializer. It travels with its R3TR NOTE object and cannot be materialized from source history.',
+        },
+      ),
+    ];
+  }
   try {
     discovery = await discoverObjectSourceHistory(
       repository.name,

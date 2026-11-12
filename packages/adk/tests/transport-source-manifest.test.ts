@@ -843,6 +843,7 @@ describe('buildTransportSourceManifest', () => {
         ['CLSD', 'CLAS/OC'],
         ['CPUB', 'CLAS/OSU'],
         ['METH', 'CLAS/OM'],
+        ['CPRO', 'CLAS/OSP'],
       ].map(([type, wbtype]) =>
         transportObject({
           name:
@@ -873,8 +874,8 @@ describe('buildTransportSourceManifest', () => {
         ctx,
       );
 
-      expect(manifest.inventory).toHaveLength(3);
-      expect(manifest.inventoryResolutions).toHaveLength(3);
+      expect(manifest.inventory).toHaveLength(4);
+      expect(manifest.inventoryResolutions).toHaveLength(4);
       expect(
         manifest.inventoryResolutions?.every(
           (resolution) =>
@@ -912,6 +913,7 @@ describe('buildTransportSourceManifest', () => {
     ['CLSD', 'CLAS/OC'],
     ['CPUB', 'CLAS/OSU'],
     ['METH', 'CLAS/OM'],
+    ['CPRO', 'CLAS/OSP'],
   ])(
     'canonicalizes %s with its actual ADT subtype to R3TR CLAS',
     async (type, wbtype) => {
@@ -1444,6 +1446,32 @@ describe('buildTransportSourceManifest', () => {
       exact: false,
       diagnostic: { code: 'OBJECT_TYPE_UNSUPPORTED' },
     });
+  });
+
+  it('reports R3TR CINS correction instructions with a dedicated diagnostic without discovery', async () => {
+    const object = transportObject({
+      name: '0001089198',
+      type: 'CINS',
+    });
+    mockResolution([object], ['DEVK900002']);
+    const { ctx } = contextWithVersions(vi.fn());
+
+    const manifest = await buildTransportSourceManifest(
+      ['DEVK900001'],
+      {},
+      ctx,
+    );
+
+    expect(manifest.inventory).toHaveLength(1);
+    expect(manifest.entries[0]).toMatchObject({
+      object: { pgmid: 'R3TR', type: 'CINS', name: '0001089198' },
+      component: { id: 'object' },
+      changeKind: 'unsupported',
+      exact: false,
+      diagnostic: { code: 'SNOTE_CORRECTION_INSTRUCTION' },
+    });
+    expect(manifest.entries[0]?.diagnostic?.message).toContain('R3TR NOTE');
+    expect(factoryGet).not.toHaveBeenCalled();
   });
 
   it('returns deterministic ordering and bounds metadata/feed concurrency', async () => {
