@@ -14,6 +14,7 @@ export interface NormalizedCtsUnit {
   owner?: string;
   status?: string;
   type?: string;
+  target?: string;
   lastChangedTimestamp?: string;
   unsupportedFields: UnsupportedCtsField[];
 }
@@ -46,6 +47,7 @@ const KNOWN_UNIT_FIELDS: ReadonlySet<string> = new Set([
   'owner',
   'status',
   'type',
+  'target',
   'parent',
   'lastChangedTimestamp',
   'tasks',
@@ -80,6 +82,7 @@ function optionalUnitFields(raw: Record<string, unknown>) {
     ...(typeof raw.owner === 'string' ? { owner: raw.owner } : {}),
     ...(typeof raw.status === 'string' ? { status: raw.status } : {}),
     ...(typeof raw.type === 'string' ? { type: raw.type } : {}),
+    ...(typeof raw.target === 'string' ? { target: raw.target } : {}),
     ...(typeof raw.lastChangedTimestamp === 'string'
       ? { lastChangedTimestamp: raw.lastChangedTimestamp }
       : {}),
@@ -108,7 +111,10 @@ function normalizeUnit(
  */
 export function normalizeCtsTransport(raw: Transport): NormalizedCtsInventory {
   const rawRecord = raw as unknown as Record<string, unknown>;
-  const requestedTransport = canonicalTransport(String(rawRecord.number));
+  if (typeof rawRecord.number !== 'string' || rawRecord.number.trim() === '') {
+    throw new Error('Transport number is required');
+  }
+  const requestedTransport = canonicalTransport(rawRecord.number);
   const rawTasks = Array.isArray(rawRecord.tasks)
     ? (rawRecord.tasks as Array<Record<string, unknown>>)
     : [];
@@ -136,41 +142,60 @@ export interface PlannedCtsScopeRequest {
   normalized: NormalizedCtsInventory;
 }
 
-/**
- * Ordered multi-root scope planning over requested transports. Pure and
- * deterministic: requested order wins, case-insensitive identities
- * deduplicate with provenance, a requested task whose parent is also
- * requested folds into that parent root instead of becoming a second root,
- * and systems stay separated. The caller's inputs are never mutated.
- */
-type PlannedRoots = Map<string, PlannedCtsScopeRoot>;
+interface RootKey {
+  system: string | undefined;
+  transport: string;
+}
 
-interface PlannedRootPayloads {
-  roots: PlannedRoots;
-  payloads: Map<string, NormalizedCtsInventory>;
+function rootKey(key: RootKey): string {
+  return JSON.stringify([key.system ?? null, key.transport]);
+}
+
+interface RootBuilder {
+  root: PlannedCtsScopeRoot;
+  payload: NormalizedCtsInventory;
+  /** First requested position; folding keeps the earliest position. */
+  order: number;
+  /** Requested spellings with their original positions, for provenance. */
+  origins: Array<{ spelling: string; index: number }>;
+}
+
+interface PlannedRoots {
+  roots: Map<string, RootBuilder>;
 }
 
 function collectRoots(
   requests: ReadonlyArray<PlannedCtsScopeRequest>,
-): PlannedRootPayloads {
-  const roots: PlannedRoots = new Map();
-  const payloads = new Map<string, NormalizedCtsInventory>();
-  for (const request of requests) {
+): PlannedRoots {
+  const roots = new Map<string, RootBuilder>();
+  requests.forEach((request, index) => {
     const identity = canonicalTransport(request.transport);
-    let root = roots.get(identity);
-    if (!root) {
-      root = {
-        transport: identity,
-        ...(request.system === undefined ? {} : { system: request.system }),
-        tasks: [],
-        requestedBy: [],
+    const key = rootKey({ system: request.system, transport: identity });
+    let builder = roots.get(key);
+    if (!builder) {
+      builder = {
+        root: {
+          transport: identity,
+          ...(request.system === undefined ? {} : { system: request.system }),
+          tasks: [],
+          requestedBy: [],
+        },
+        payload: request.normalized,
+        order: index,
+        origins: [],
       };
-      roots.set(identity, root);
-      payloads.set(identity, request.normalized);
+      roots.set(key, builder);
+    } else if (
+      JSON.stringify(request.normalized.units) !==
+      JSON.stringify(builder.payload.units)
+    ) {
+      throw new Error(
+        `Conflicting normalized payloads for transport ${identity}.`,
+      );
     }
-    root.requestedBy.push(request.transport);
-  }
-  return { roots, payloads };
+    builder.origins.push({ spelling: request.transport, index });
+  });
+  return { roots };
 }
 
 function appendTask(
@@ -184,75 +209,64 @@ function appendTask(
 }
 
 function foldTargetOf(
-  identity: string,
-  payloads: PlannedRootPayloads,
-): PlannedCtsScopeRoot | undefined {
-  const unit = payloads.payloads.get(identity)?.request;
+  key: string,
+  payloads: PlannedRoots,
+): RootBuilder | undefined {
+  const unit = payloads.roots.get(key)?.payload.request;
   if (unit?.kind !== 'task') {
     return undefined;
   }
   const parent = unit.parent;
-  if (parent === undefined || !payloads.roots.has(parent)) {
+  if (parent === undefined) {
     return undefined;
   }
-  return payloads.roots.get(parent);
+  const system = payloads.roots.get(key)?.root.system;
+  return payloads.roots.get(rootKey({ system, transport: parent }));
 }
 
 function foldIntoParent(
-  identity: string,
-  root: PlannedCtsScopeRoot,
-  parentRoot: PlannedCtsScopeRoot,
-  payloads: PlannedRootPayloads,
+  key: string,
+  folded: RootBuilder,
+  parent: RootBuilder,
+  payloads: PlannedRoots,
 ): void {
-  parentRoot.requestedBy.push(...root.requestedBy);
-  for (const task of payloads.payloads.get(identity)?.tasks ?? []) {
-    appendTask(parentRoot.tasks, task.number, parentRoot);
+  parent.origins.push(...folded.origins);
+  parent.order = Math.min(parent.order, folded.order);
+  appendTask(parent.root.tasks, folded.root.transport, parent.root);
+  for (const task of folded.payload.tasks) {
+    appendTask(parent.root.tasks, task.number, parent.root);
   }
-  payloads.roots.delete(identity);
-  payloads.payloads.delete(identity);
+  payloads.roots.delete(key);
 }
 
 /**
- * A requested task whose parent is also requested folds into the parent root
- * and takes its request provenance with it.
+ * A requested task whose parent is also requested in the same system folds
+ * into the parent root and takes its request provenance with it.
  */
-function foldTaskRootsIntoParents(payloads: PlannedRootPayloads): void {
-  for (const [identity, root] of [...payloads.roots.entries()]) {
-    const parentRoot = foldTargetOf(identity, payloads);
-    if (parentRoot) {
-      foldIntoParent(identity, root, parentRoot, payloads);
+function foldTaskRootsIntoParents(payloads: PlannedRoots): void {
+  for (const [key, folded] of [...payloads.roots.entries()]) {
+    const parent = foldTargetOf(key, payloads);
+    if (parent) {
+      foldIntoParent(key, folded, parent, payloads);
     }
   }
 }
 
-function expandRootTasks(payloads: PlannedRootPayloads): void {
-  for (const [identity, root] of payloads.roots.entries()) {
-    const payload = payloads.payloads.get(identity);
-    if (!payload) {
-      continue;
-    }
-    for (const task of payload.tasks) {
-      appendTask(root.tasks, task.number, root);
+function expandRootTasks(payloads: PlannedRoots): void {
+  for (const builder of payloads.roots.values()) {
+    for (const task of builder.payload.tasks) {
+      appendTask(builder.root.tasks, task.number, builder.root);
     }
   }
-}
-
-function collectSystems(roots: PlannedRoots): string[] {
-  return [
-    ...new Set(
-      [...roots.values()]
-        .map((root) => root.system)
-        .filter((system): system is string => system !== undefined),
-    ),
-  ].sort();
 }
 
 /**
  * Ordered multi-root scope planning over requested transports. Pure and
- * deterministic: requested order wins, case-insensitive identities
- * deduplicate with provenance, a requested task whose parent is also
- * requested folds into that parent root instead of becoming a second root,
- * and systems stay separated. The caller's inputs are never mutated.
+ * deterministic: requested order wins, identities are scoped per system,
+ * case-insensitive duplicates deduplicate with provenance, a requested task
+ * whose parent is also requested folds into that parent root, root task
+ * lists are sorted by transport number, and systems stay separated. The
+ * caller's inputs are never mutated.
  */
 export function planCtsScope(
   requests: ReadonlyArray<PlannedCtsScopeRequest>,
@@ -260,10 +274,29 @@ export function planCtsScope(
   const payloads = collectRoots(requests);
   foldTaskRootsIntoParents(payloads);
   expandRootTasks(payloads);
-  const roots = [...payloads.roots.values()];
+  const ordered = [...payloads.roots.values()].sort(
+    (a, b) => a.order - b.order,
+  );
+  for (const builder of ordered) {
+    builder.root.tasks.sort(compareTransports);
+    builder.root.requestedBy = builder.origins
+      .sort((a, b) => a.index - b.index)
+      .map(({ spelling }) => spelling);
+  }
+  const systems = [
+    ...new Set(
+      ordered
+        .map((builder) => builder.root.system)
+        .filter((system): system is string => system !== undefined),
+    ),
+  ].sort();
   return {
-    roots,
-    systems: collectSystems(payloads.roots),
+    roots: ordered.map((builder) => builder.root),
+    systems,
     requestedCount: requests.length,
   };
+}
+
+function compareTransports(a: string, b: string): number {
+  return a.localeCompare(b, 'en', { sensitivity: 'variant' });
 }

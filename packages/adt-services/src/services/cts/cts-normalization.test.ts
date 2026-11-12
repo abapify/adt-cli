@@ -48,12 +48,21 @@ describe('normalizeCtsTransport', () => {
     ]);
   });
 
-  it('preserves task parent identity and task numbers', () => {
+  it('treats a target system as a known field, not an unsupported one', () => {
+    const normalized = normalizeCtsTransport({
+      ...releasedRequest(),
+      target: 'P01',
+    });
+    expect(normalized.units[0]).toMatchObject({ target: 'P01' });
+    expect(normalized.units[0].unsupportedFields).toEqual([]);
+  });
+
+  it('preserves task parent identity from a distinct task number', () => {
     const raw: Transport = {
       ...releasedRequest(),
       tasks: [
         {
-          number: 'DEVK900001',
+          number: 'DEVK900002',
           desc: 'Implementation task',
           owner: 'DEV',
           parent: '',
@@ -64,7 +73,7 @@ describe('normalizeCtsTransport', () => {
     expect(normalized.units).toHaveLength(2);
     expect(normalized.units[1].kind).toBe('task');
     expect(normalized.units[1].parent).toBe('DEVK900001');
-    expect(normalized.units[1].number).toBe('DEVK900001');
+    expect(normalized.units[1].number).toBe('DEVK900002');
     expect(normalized.request?.number).toBe('DEVK900001');
   });
 
@@ -80,6 +89,12 @@ describe('normalizeCtsTransport', () => {
     expect(normalized.units[1].parent).toBe('DEVK900003');
     expect(raw).toEqual(before);
   });
+
+  it('rejects a payload without a transport number', () => {
+    expect(() => normalizeCtsTransport({} as Transport)).toThrow(
+      /transport number is required/i,
+    );
+  });
 });
 
 describe('planCtsScope', () => {
@@ -91,6 +106,10 @@ describe('planCtsScope', () => {
       number,
       tasks: tasks.map((task) => ({ number: task, parent: number })),
     });
+  }
+
+  function taskOnly(number: string, parent: string): NormalizedCtsInventory {
+    return normalizeCtsTransport({ number, parent });
   }
 
   it('expands a requested request into its task scope', () => {
@@ -116,12 +135,24 @@ describe('planCtsScope', () => {
     expect(plan.requestedCount).toBe(2);
   });
 
+  it('rejects duplicate requests that carry conflicting task scopes', () => {
+    expect(() =>
+      planCtsScope([
+        {
+          transport: 'DEVK900001',
+          normalized: normalized('DEVK900001', ['DEVK900002']),
+        },
+        {
+          transport: 'devk900001',
+          normalized: normalized('devk900001', ['DEVK900009']),
+        },
+      ]),
+    ).toThrow(/conflicting normalized payloads/i);
+  });
+
   it('records a requested task under its requested parent instead of a second root', () => {
     const parent = normalized('DEVK900001', ['DEVK900002']);
-    const task = normalizeCtsTransport({
-      number: 'DEVK900002',
-      parent: 'DEVK900001',
-    });
+    const task = taskOnly('DEVK900002', 'DEVK900001');
     const plan = planCtsScope([
       { transport: 'DEVK900001', normalized: parent },
       { transport: 'DEVK900002', normalized: task },
@@ -132,14 +163,62 @@ describe('planCtsScope', () => {
     expect(plan.roots[0].requestedBy).toEqual(['DEVK900001', 'DEVK900002']);
   });
 
-  it('anchors a requested task whose parent is not requested as its own root', () => {
-    const task = normalizeCtsTransport({
-      number: 'DEVK900002',
-      parent: 'DEVK900001',
-    });
-    const plan = planCtsScope([{ transport: 'DEVK900002', normalized: task }]);
+  it('keeps a requested task whose parent is not requested as its own root', () => {
+    const plan = planCtsScope([
+      {
+        transport: 'DEVK900002',
+        normalized: taskOnly('DEVK900002', 'DEVK900001'),
+      },
+    ]);
     expect(plan.roots).toHaveLength(1);
     expect(plan.roots[0].transport).toBe('DEVK900002');
+  });
+
+  it('adds a folded task to the parent even when the parent payload omits it', () => {
+    const parent = normalized('DEVK900001');
+    const plan = planCtsScope([
+      { transport: 'DEVK900001', normalized: parent },
+      {
+        transport: 'DEVK900002',
+        normalized: taskOnly('DEVK900002', 'DEVK900001'),
+      },
+    ]);
+    expect(plan.roots).toHaveLength(1);
+    expect(plan.roots[0].tasks).toEqual(['DEVK900002']);
+  });
+
+  it('keeps the first requested position when folding a task root', () => {
+    const plan = planCtsScope([
+      {
+        transport: 'DEVK900002',
+        normalized: taskOnly('DEVK900002', 'DEVK900001'),
+      },
+      { transport: 'DEVK900010', normalized: normalized('DEVK900010') },
+      { transport: 'DEVK900001', normalized: normalized('DEVK900001') },
+    ]);
+    expect(plan.roots.map((root) => root.transport)).toEqual([
+      'DEVK900001',
+      'DEVK900010',
+    ]);
+    expect(plan.roots[0].requestedBy).toEqual(['DEVK900002', 'DEVK900001']);
+  });
+
+  it('keeps the same transport in different systems as separate roots', () => {
+    const plan = planCtsScope([
+      {
+        transport: 'DEVK900001',
+        system: 'P01',
+        normalized: normalized('DEVK900001'),
+      },
+      {
+        transport: 'DEVK900001',
+        system: 'Q01',
+        normalized: normalized('DEVK900001'),
+      },
+    ]);
+    expect(plan.roots).toHaveLength(2);
+    expect(plan.roots.map((root) => root.system)).toEqual(['P01', 'Q01']);
+    expect(plan.systems).toEqual(['P01', 'Q01']);
   });
 
   it('keeps mixed systems per system instead of merging across systems', () => {
@@ -157,6 +236,23 @@ describe('planCtsScope', () => {
     ]);
     expect(plan.systems).toEqual(['P01', 'Q01']);
     expect(plan.roots.map((root) => root.system)).toEqual(['P01', 'Q01']);
+  });
+
+  it('sorts root tasks deterministically regardless of payload order', () => {
+    const first = planCtsScope([
+      {
+        transport: 'DEVK900001',
+        normalized: normalized('DEVK900001', ['DEVK900005', 'DEVK900003']),
+      },
+    ]);
+    const second = planCtsScope([
+      {
+        transport: 'DEVK900001',
+        normalized: normalized('DEVK900001', ['DEVK900003', 'DEVK900005']),
+      },
+    ]);
+    expect(first).toEqual(second);
+    expect(first.roots[0].tasks).toEqual(['DEVK900003', 'DEVK900005']);
   });
 
   it('is deterministic for equivalent inputs regardless of case or duplicates', () => {

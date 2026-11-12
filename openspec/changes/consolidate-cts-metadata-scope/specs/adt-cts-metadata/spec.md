@@ -44,13 +44,17 @@ their normalized units.
 
 #### Scenario: Mixed systems stay per-system
 
-- **WHEN** requested transports resolve to different systems
+- **WHEN** requested transports resolve to different systems, including the
+  same transport number requested in two systems
 - **THEN** the plan groups them per system without merging across systems
 
 #### Scenario: Order is independent of input case and duplicates
 
 - **WHEN** equivalent request lists differ only in case or duplicate entries
-- **THEN** plans serialize identically and inputs are unchanged
+- **THEN** the canonical scope fields (roots, per-root task scope and
+  systems) serialize identically
+- **AND** request provenance preserves the original requested spellings in
+  first-requested order
 
 #### Scenario: Empty request list yields an empty plan
 
