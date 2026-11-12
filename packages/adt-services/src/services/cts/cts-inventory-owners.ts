@@ -85,7 +85,7 @@ function collectGroups(
  * leaves. Ownerless groups keep their identity.
  */
 function foldComponentGroups(groups: Map<string, GroupBuilder>): void {
-  for (const [key, group] of [...groups.entries()]) {
+  for (const [key, group] of groups) {
     if (group.owner !== undefined) {
       continue;
     }

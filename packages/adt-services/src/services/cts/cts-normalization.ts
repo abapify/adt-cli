@@ -251,7 +251,7 @@ function foldIntoParent(
  * into the parent root and takes its request provenance with it.
  */
 function foldTaskRootsIntoParents(payloads: PlannedRoots): void {
-  for (const [key, folded] of [...payloads.roots.entries()]) {
+  for (const [key, folded] of payloads.roots) {
     const parent = foldTargetOf(key, payloads);
     if (parent) {
       foldIntoParent(key, folded, parent, payloads);
@@ -281,14 +281,13 @@ export function planCtsScope(
   const payloads = collectRoots(requests);
   foldTaskRootsIntoParents(payloads);
   expandRootTasks(payloads);
-  const ordered = [...payloads.roots.values()].sort(
-    (a, b) => a.order - b.order,
-  );
+  const ordered = Array.from(payloads.roots.values());
+  ordered.sort((a, b) => a.order - b.order);
   for (const builder of ordered) {
-    builder.root.tasks.sort(compareTransports);
-    builder.root.requestedBy = builder.origins
-      .sort((a, b) => a.index - b.index)
-      .map(({ spelling }) => spelling);
+    builder.root.tasks.sort((a, b) => a.localeCompare(b));
+    const origins = Array.from(builder.origins);
+    origins.sort((a, b) => a.index - b.index);
+    builder.root.requestedBy = origins.map(({ spelling }) => spelling);
   }
   const systems = [
     ...new Set(
@@ -296,14 +295,11 @@ export function planCtsScope(
         .map((builder) => builder.root.system)
         .filter((system): system is string => system !== undefined),
     ),
-  ].sort();
+  ];
+  systems.sort((a, b) => a.localeCompare(b));
   return {
     roots: ordered.map((builder) => builder.root),
     systems,
     requestedCount: requests.length,
   };
-}
-
-function compareTransports(a: string, b: string): number {
-  return a.localeCompare(b, 'en', { sensitivity: 'variant' });
 }
