@@ -16,9 +16,12 @@ import {
   rmdirSync,
   existsSync,
 } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 
-const xsdDir = resolve(process.argv[2] || '.xsd/sap');
+const xsdDir = process.argv[2] || '.xsd/sap';
+if (/\.\./.test(xsdDir)) {
+  throw new Error('xsd-dir must not contain path traversal segments');
+}
 
 // Pattern to match platform:/plugin/.../model/foo.xsd
 const platformPattern =

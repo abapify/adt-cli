@@ -1,6 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import type http from 'node:http';
 
 function tokensMatch(expected: string, actual: string): boolean {
@@ -35,7 +34,11 @@ export async function loadOptionalRestBearerAuthorizer(
   tokenFile: string | undefined,
 ): Promise<ReturnType<typeof createRestBearerAuthorizer> | undefined> {
   if (!tokenFile) return undefined;
-  const resolved = path.resolve(tokenFile);
-  const token = (await readFile(resolved, 'utf8')).trim();
+  if (/\.\./.test(tokenFile)) {
+    throw new Error(
+      'REST bearer token file path must not contain path traversal segments',
+    );
+  }
+  const token = (await readFile(tokenFile, 'utf8')).trim();
   return token ? createRestBearerAuthorizer(token) : undefined;
 }

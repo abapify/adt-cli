@@ -22,7 +22,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import type { ConnectionParams } from '../types.js';
 
 export interface SystemEntry {
@@ -88,11 +88,10 @@ export function loadMultiSystemConfig(): MultiSystemConfig {
   } else {
     const explicit = process.env.SAP_SYSTEMS_FILE;
     const defaultPath = join(homedir(), '.adt', 'systems.json');
-    const home = homedir();
-    const resolvedExplicit = explicit ? resolve(explicit) : defaultPath;
-    const path = resolvedExplicit.startsWith(home)
-      ? resolvedExplicit
-      : defaultPath;
+    const path =
+      explicit && explicit.length > 0 && !/\.\./.test(explicit)
+        ? explicit
+        : defaultPath;
     if (existsSync(path)) {
       raw = parseJsonSafe(readFileSync(path, 'utf8'), path);
     }

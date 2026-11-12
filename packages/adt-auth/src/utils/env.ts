@@ -1,5 +1,4 @@
 import { readFileSync, existsSync } from 'node:fs';
-import path from 'node:path';
 import type { Destination } from '../auth-manager';
 import { ServiceKeyParser, type BTPServiceKey } from '../types/service-key';
 
@@ -22,13 +21,17 @@ export function readServiceKey(filePath: string): BTPServiceKey {
     );
   }
 
-  const resolved = path.resolve(trimmed);
-
-  if (!existsSync(resolved)) {
-    throw new Error(`Service key file not found: ${resolved}`);
+  if (/\\.\\./.test(trimmed)) {
+    throw new Error(
+      'Service key path must not contain path traversal segments',
+    );
   }
 
-  const raw = readFileSync(resolved, 'utf-8');
+  if (!existsSync(trimmed)) {
+    throw new Error(`Service key file not found: ${trimmed}`);
+  }
+
+  const raw = readFileSync(trimmed, 'utf-8');
   return ServiceKeyParser.parse(raw);
 }
 
