@@ -7,6 +7,7 @@ export const cliReferenceDocs = [
   'cli/reference/auth',
   'cli/reference/badi',
   'cli/reference/bdef',
+  'cli/reference/capabilities',
   'cli/reference/changeset',
   'cli/reference/check',
   'cli/reference/checkin',
