@@ -44,16 +44,35 @@ export class MalformedAunitReportError extends Error {
   }
 }
 
+function hasMessageContent(alert: AunitAlert): boolean {
+  return (
+    alert.title.trim().length > 0 ||
+    alert.details.some((detail) => detail.trim().length > 0)
+  );
+}
+
 function isAssertionAlert(alert: AunitAlert): boolean {
-  return alert.kind.toLowerCase().includes('assertion');
+  return (
+    alert.kind.toLowerCase().includes('assertion') && hasMessageContent(alert)
+  );
+}
+
+function isWarningAlert(alert: AunitAlert): boolean {
+  return alert.kind.toLowerCase().includes('warning');
 }
 
 function classifyMethod(method: AunitTestMethod): AunitMethodClassification {
   if (method.status === 'pass') {
+    if (method.alerts.some(isWarningAlert)) {
+      return 'warning';
+    }
     return 'passed';
   }
   if (method.status === 'skip') {
     return 'skipped';
+  }
+  if (method.status === 'error') {
+    return 'technical-error';
   }
   if (method.alerts.some(isAssertionAlert)) {
     return 'assertion-failure';
@@ -64,9 +83,9 @@ function classifyMethod(method: AunitTestMethod): AunitMethodClassification {
 function normalizeProgram(program: AunitProgram): NormalizedAunitProgram {
   return {
     ...program,
-    testClasses: program.testClasses.map((testClass) => ({
+    testClasses: (program.testClasses ?? []).map((testClass) => ({
       ...testClass,
-      methods: testClass.methods.map((method) => ({
+      methods: (testClass.methods ?? []).map((method) => ({
         ...method,
         classification: classifyMethod(method),
       })),
@@ -74,33 +93,91 @@ function normalizeProgram(program: AunitProgram): NormalizedAunitProgram {
   };
 }
 
-function assertConsistentCounts(result: AunitResult): void {
-  if (result.totalTests < 0) {
-    throw new MalformedAunitReportError(
-      'AUnit report summary counts are negative.',
-    );
+function derivedStatusCounts(programs: readonly AunitProgram[]): {
+  passCount: number;
+  failCount: number;
+  errorCount: number;
+  skipCount: number;
+  totalTests: number;
+} {
+  const counts = { pass: 0, fail: 0, error: 0, skip: 0 };
+  for (const program of programs) {
+    for (const testClass of program.testClasses ?? []) {
+      for (const method of testClass.methods ?? []) {
+        counts[method.status] += 1;
+      }
+    }
   }
-  const statusSum =
-    result.passCount + result.failCount + result.errorCount + result.skipCount;
-  if (result.totalTests !== statusSum) {
-    throw new MalformedAunitReportError(
-      `AUnit report summary counts are inconsistent: totalTests=${result.totalTests} but statuses sum to ${statusSum}.`,
-    );
+  return {
+    passCount: counts.pass,
+    failCount: counts.fail,
+    errorCount: counts.error,
+    skipCount: counts.skip,
+    totalTests: counts.pass + counts.fail + counts.error + counts.skip,
+  };
+}
+
+function assertConsistentCounts(
+  result: AunitResult,
+  derived: ReturnType<typeof derivedStatusCounts>,
+): void {
+  const summaryFields: Array<[string, number]> = [
+    ['totalTests', result.totalTests],
+    ['passCount', result.passCount],
+    ['failCount', result.failCount],
+    ['errorCount', result.errorCount],
+    ['skipCount', result.skipCount],
+  ];
+  for (const [field, value] of summaryFields) {
+    if (!Number.isInteger(value) || value < 0) {
+      throw new MalformedAunitReportError(
+        `AUnit report summary count ${field}=${value} is not a non-negative integer.`,
+      );
+    }
+  }
+  const fields: Array<[string, number, number]> = [
+    ['totalTests', result.totalTests, derived.totalTests],
+    ['passCount', result.passCount, derived.passCount],
+    ['failCount', result.failCount, derived.failCount],
+    ['errorCount', result.errorCount, derived.errorCount],
+    ['skipCount', result.skipCount, derived.skipCount],
+  ];
+  for (const [field, summary, actual] of fields) {
+    if (summary !== actual) {
+      throw new MalformedAunitReportError(
+        `AUnit report summary ${field}=${summary} contradicts the recorded methods (${actual}).`,
+      );
+    }
   }
 }
 
 /**
  * Normalize an AUnit result into the canonical model: every method carries
  * an outcome classification that keeps assertion failures distinct from
- * technical errors, summary counts are validated (typed error on malformed
- * input), zero-test runs are valid results, and recorded source paths and
- * URIs are preserved verbatim — path repair stays a consumer concern. The
- * caller's input is never mutated.
+ * technical errors (error status takes precedence; warnings on passing
+ * methods are surfaced), summary counts must be non-negative integers that
+ * match the recorded methods (typed MalformedAunitReportError otherwise),
+ * zero-test runs are valid results, and recorded source paths and URIs are
+ * preserved verbatim — path repair stays a consumer concern. The caller's
+ * input is never mutated.
  */
 export function normalizeAunitResult(
   result: AunitResult,
 ): NormalizedAunitResult {
-  assertConsistentCounts(result);
+  if (!Array.isArray(result.programs)) {
+    throw new MalformedAunitReportError(
+      'AUnit report is missing the recorded programs collection.',
+    );
+  }
+  for (const program of result.programs) {
+    if (!Array.isArray(program.testClasses)) {
+      throw new MalformedAunitReportError(
+        `AUnit report program ${program.name} is missing its testClasses collection.`,
+      );
+    }
+  }
+  const derived = derivedStatusCounts(result.programs);
+  assertConsistentCounts(result, derived);
   return {
     ...result,
     programs: result.programs.map(normalizeProgram),
@@ -127,12 +204,24 @@ export interface NormalizedJacocoCoverage {
     lineCovered: number;
     instructionTotal: number;
     instructionCovered: number;
+    branchTotal: number;
+    branchCovered: number;
   };
 }
+
+/** ADT counter names mapped to their normalized coverage measurement. */
+const COUNTER_ALIASES: Record<string, string> = {
+  LINE: 'line',
+  STATEMENT: 'line',
+  INSTRUCTION: 'instruction',
+  PROCEDURE: 'instruction',
+  BRANCH: 'branch',
+};
 
 interface CoverageNodeInput {
   objectReference?: { type?: string; name?: string };
   coverages?: { coverage?: JacocoCoverageCounter[] };
+  nodes?: { node?: CoverageNodeInput[] };
 }
 
 interface MeasurementRootInput {
@@ -141,41 +230,87 @@ interface MeasurementRootInput {
   };
 }
 
-function counterValue(
-  counters: JacocoCoverageCounter[] | undefined,
-  type: string,
-): { total: number; covered: number } | undefined {
-  const counter = counters?.find(
-    (candidate) => candidate.type.toUpperCase() === type,
-  );
-  if (!counter || typeof counter.total !== 'number') {
-    return undefined;
+function normalizeCounter(
+  counter: JacocoCoverageCounter,
+): JacocoCoverageCounter {
+  if (
+    typeof counter.type !== 'string' ||
+    counter.type.trim() === '' ||
+    typeof counter.total !== 'number' ||
+    !Number.isInteger(counter.total) ||
+    counter.total < 0 ||
+    typeof counter.executed !== 'number' ||
+    !Number.isInteger(counter.executed) ||
+    counter.executed < 0
+  ) {
+    throw new MalformedAunitReportError(
+      'Coverage report contains an incomplete or invalid counter.',
+    );
   }
-  return { total: counter.total, covered: counter.executed ?? 0 };
+  return { ...counter };
 }
 
-function aggregateCounters(
-  packages: NormalizedJacocoPackage[],
-): Map<string, { total: number; covered: number }> {
-  const totals = new Map<string, { total: number; covered: number }>();
-  for (const counterType of ['LINE', 'INSTRUCTION', 'BRANCH']) {
-    const aggregated = aggregateCounterType(packages, counterType);
-    if (aggregated) {
-      totals.set(counterType.toLowerCase(), aggregated);
+/**
+ * Collect a package's counters: the package node's own counters when it
+ * records them, otherwise the aggregated counters of its nested class
+ * nodes — so class-level coverage is never omitted. Multiple entries for
+ * the same measurement (one per class) are summed.
+ */
+function collectPackageCounters(
+  node: CoverageNodeInput,
+): JacocoCoverageCounter[] {
+  const raw = (node.coverages?.coverage ?? []).map(normalizeCounter);
+  const source =
+    raw.length > 0
+      ? raw
+      : (node.nodes?.node ?? []).flatMap((child) =>
+          (child.coverages?.coverage ?? []).map(normalizeCounter),
+        );
+  const summed = new Map<string, JacocoCoverageCounter>();
+  for (const counter of source) {
+    const measurement = COUNTER_ALIASES[counter.type.toUpperCase()];
+    if (!measurement) {
+      throw new MalformedAunitReportError(
+        `Coverage report contains an unknown counter type: ${counter.type}.`,
+      );
     }
+    const existing = summed.get(measurement);
+    summed.set(
+      measurement,
+      existing
+        ? {
+            type: counter.type,
+            total: existing.total + counter.total,
+            executed: existing.executed + counter.executed,
+          }
+        : counter,
+    );
   }
-  return totals;
+  return [...summed.values()];
+}
+
+function counterValue(
+  counters: JacocoCoverageCounter[],
+  measurement: string,
+): { total: number; covered: number } | undefined {
+  const counter = counters.find(
+    (candidate) =>
+      COUNTER_ALIASES[candidate.type.toUpperCase()] === measurement,
+  );
+  return counter
+    ? { total: counter.total, covered: counter.executed }
+    : undefined;
 }
 
 function aggregateCounterType(
   packages: NormalizedJacocoPackage[],
-  counterType: string,
+  measurement: string,
 ): { total: number; covered: number } | undefined {
   let total = 0;
   let covered = 0;
   let present = false;
   for (const pkg of packages) {
-    const value = counterValue(pkg.counters, counterType);
+    const value = counterValue(pkg.counters, measurement);
     if (value) {
       present = true;
       total += value.total;
@@ -187,9 +322,10 @@ function aggregateCounterType(
 
 /**
  * Normalize raw AUnit coverage measurements into deterministic package-level
- * and total facts, computed from the recorded class/package counters.
- * Package order is by name; malformed roots raise a typed error; the
- * caller's input is never mutated.
+ * and total facts, computed from the recorded counters (ADT counter names
+ * such as `statement`/`procedure` map to their normalized measurements).
+ * Package order is by name; malformed roots or counters raise a typed
+ * error; the caller's input is never mutated.
  */
 export function normalizeJacocoCoverage(input: {
   measurements: MeasurementRootInput;
@@ -203,14 +339,21 @@ export function normalizeJacocoCoverage(input: {
   const packages: NormalizedJacocoPackage[] = nodes
     .map((node) => ({
       name: node.objectReference?.name ?? '',
-      counters: (node.coverages?.coverage ?? []).map((counter) => ({
-        ...counter,
-      })),
+      counters: collectPackageCounters(node),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const totals = aggregateCounters(packages);
-  const line = totals.get('line') ?? { total: 0, covered: 0 };
-  const instruction = totals.get('instruction') ?? { total: 0, covered: 0 };
+  const line = aggregateCounterType(packages, 'line') ?? {
+    total: 0,
+    covered: 0,
+  };
+  const instruction = aggregateCounterType(packages, 'instruction') ?? {
+    total: 0,
+    covered: 0,
+  };
+  const branch = aggregateCounterType(packages, 'branch') ?? {
+    total: 0,
+    covered: 0,
+  };
   return {
     packages,
     totals: {
@@ -218,6 +361,8 @@ export function normalizeJacocoCoverage(input: {
       lineCovered: line.covered,
       instructionTotal: instruction.total,
       instructionCovered: instruction.covered,
+      branchTotal: branch.total,
+      branchCovered: branch.covered,
     },
   };
 }

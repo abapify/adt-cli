@@ -2,7 +2,7 @@
 
 Add pure normalization modules inside `adt-atc` (`normalizeAtcResult`, `mergeAtcVariants`) and `adt-aunit` (`normalizeAunitResult`, `normalizeJacocoReport`). The canonical model keeps existing `AtcFinding`/`AtcResult` and `AunitResult` shapes at its core and adds stable fingerprints (derived from check identity + object + location) and per-finding resolved locations. Formatters keep their wire shapes and become projections of the normalized model; the existing formatter contracts do not change in this increment.
 
-Variant merging takes an injected severity policy (`{ error: number, warning: number, info: number }` thresholds or an ordering function); aggregation is commutative so merge order cannot change the outcome. AUnit normalization classifies failures: assertion failures (message present, kind assertion) stay distinct from technical errors (missing source, stack without message). Malformed input raises typed errors; zero-test suites are valid results, not errors.
+Variant merging takes an injected severity policy — a `(priority) => SeverityClass` function (threshold-style policies wrap it in a function); aggregation is commutative so merge order cannot change the outcome. AUnit normalization classifies failures: assertion failures (message present, kind assertion) stay distinct from technical errors (missing source, stack without message). Malformed input raises typed errors; zero-test suites are valid results, not errors.
 
 ## Risks / Trade-offs
 

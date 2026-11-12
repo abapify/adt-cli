@@ -27,6 +27,15 @@ export interface NormalizedAtcResult extends AtcResult {
   findings: NormalizedAtcFinding[];
 }
 
+// Format 1: /sap/bc/adt/oo/classes/zcl_foo/methods/my_method#start=21,0
+// Format 2: ...#type=CLAS%2FOM;name=MY_METHOD;start=21
+function extractMethodName(location?: string): string | undefined {
+  if (!location) return undefined;
+  const match =
+    /\/methods\/(\w+)/i.exec(location) || /[;?&]name=(\w+)/i.exec(location);
+  return match ? match[1].toLowerCase() : undefined;
+}
+
 function fallbackPathFor(finding: AtcFinding): string {
   const type = finding.objectType.toLowerCase();
   const name = finding.objectName.toLowerCase();
@@ -62,8 +71,7 @@ async function normalizeFinding(
       line: methodLine,
     };
   }
-  const methodName =
-    /\/methods\/(\w+)/i.exec(finding.location ?? '')?.[1] ?? undefined;
+  const methodName = extractMethodName(finding.location);
   const resolved = await resolver.resolve(
     finding.objectType,
     finding.objectName,
@@ -90,15 +98,15 @@ async function normalizeFinding(
 
 /** Deterministic result-level category: set only when findings agree. */
 function resultCategory(findings: readonly AtcFinding[]): string | undefined {
-  const categories = new Set(
-    findings
-      .map((finding) => finding.checkCategory)
-      .filter((category): category is string => category !== undefined),
-  );
+  if (findings.length === 0) {
+    return undefined;
+  }
+  const categories = new Set(findings.map((finding) => finding.checkCategory));
   if (categories.size !== 1) {
     return undefined;
   }
-  return [...categories][0];
+  const category = [...categories][0];
+  return category;
 }
 
 /**
@@ -136,18 +144,34 @@ export function mergeAtcVariants(
   results: readonly AtcResult[],
   policy: SeverityPolicy,
 ): NormalizedAtcResult {
-  const findings: NormalizedAtcFinding[] = results.flatMap((result) =>
-    result.findings.map((finding) => ({
-      ...finding,
-      fingerprint: fingerprintFor(finding),
-      fallbackPath: fallbackPathFor(finding),
-      line: methodRelativeLine(finding),
-    })),
-  );
-  findings.sort((a, b) => {
-    const byFingerprint = a.fingerprint.localeCompare(b.fingerprint);
-    return byFingerprint !== 0 ? byFingerprint : a.priority - b.priority;
-  });
+  // Redelivery-safe: an identical variant result (same variant name and
+  // findings) merged twice contributes once.
+  const seen = new Set<string>();
+  const uniqueResults: NormalizedAtcFinding[][] = [];
+  for (const result of results) {
+    const key = JSON.stringify([
+      result.checkVariant,
+      result.findings.map(fingerprintFor),
+    ]);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    uniqueResults.push(
+      result.findings.map((finding) =>
+        isNormalizedFinding(finding)
+          ? { ...finding }
+          : {
+              ...finding,
+              fingerprint: fingerprintFor(finding),
+              fallbackPath: fallbackPathFor(finding),
+              line: methodRelativeLine(finding),
+            },
+      ),
+    );
+  }
+  const findings: NormalizedAtcFinding[] = uniqueResults.flat();
+  findings.sort(compareNormalizedFindings);
   const counts: Record<SeverityClass, number> = {
     error: 0,
     warning: 0,
@@ -159,6 +183,7 @@ export function mergeAtcVariants(
   const variantNames = [...new Set(results.map((r) => r.checkVariant))]
     .slice()
     .sort((a, b) => a.localeCompare(b));
+  const category = resultCategory(findings);
   return {
     checkVariant: variantNames.join('+'),
     totalFindings: findings.length,
@@ -166,5 +191,26 @@ export function mergeAtcVariants(
     warningCount: counts.warning,
     infoCount: counts.info,
     findings,
+    ...(category === undefined ? {} : { category }),
   };
+}
+
+function isNormalizedFinding(
+  finding: AtcFinding,
+): finding is NormalizedAtcFinding {
+  return typeof (finding as NormalizedAtcFinding).fingerprint === 'string';
+}
+
+function compareNormalizedFindings(
+  a: NormalizedAtcFinding,
+  b: NormalizedAtcFinding,
+): number {
+  return (
+    a.fingerprint.localeCompare(b.fingerprint) ||
+    a.priority - b.priority ||
+    a.messageId.localeCompare(b.messageId) ||
+    (a.location ?? '').localeCompare(b.location ?? '') ||
+    a.messageText.localeCompare(b.messageText) ||
+    (a.findingUri ?? '').localeCompare(b.findingUri ?? '')
+  );
 }

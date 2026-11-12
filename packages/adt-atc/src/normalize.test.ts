@@ -99,6 +99,19 @@ describe('normalizeAtcResult', () => {
     expect(normalized.category).toBeUndefined();
   });
 
+  it('keeps composite object facts on the normalized finding', async () => {
+    const composite = finding({
+      objectType: 'CLAS',
+      objectName: 'ZCL_FOO',
+      location:
+        '/sap/bc/adt/oo/classes/zcl_foo/methods/run#type=CLAS%2FOM;name=RUN;start=21',
+    });
+    const normalized = await normalizeAtcResult(result([composite]));
+    expect(normalized.findings[0].objectType).toBe('CLAS');
+    expect(normalized.findings[0].objectName).toBe('ZCL_FOO');
+    expect(normalized.findings[0].location).toContain('methods/run');
+  });
+
   it('keeps namespace segments in identity and fallback path', async () => {
     const normalized = await normalizeAtcResult(
       result([finding({ objectName: '/NS1/ZCL_FOO' })]),
@@ -131,6 +144,31 @@ describe('mergeAtcVariants', () => {
     expect(merged.errorCount).toBe(1);
     expect(merged.warningCount).toBe(1);
     expect(merged.infoCount).toBe(1);
+  });
+
+  it('applies a non-default severity policy, not the priority convention', () => {
+    const invertedPolicy = (priority: number): SeverityClass =>
+      priority === 1 ? 'info' : priority === 3 ? 'error' : 'warning';
+    const merged = mergeAtcVariants(
+      [
+        result([finding({ priority: 1 }), finding({ priority: 3 })]),
+        result([finding({ priority: 2 })]),
+      ],
+      invertedPolicy,
+    );
+    expect(merged.errorCount).toBe(1);
+    expect(merged.warningCount).toBe(1);
+    expect(merged.infoCount).toBe(1);
+  });
+
+  it('is idempotent for a repeated identical variant result', () => {
+    const variantResult = result([finding({})], 'VA');
+    const merged = mergeAtcVariants(
+      [variantResult, structuredClone(variantResult)],
+      standardPolicy,
+    );
+    expect(merged.totalFindings).toBe(1);
+    expect(merged.checkVariant).toBe('VA');
   });
 
   it('keeps findings from identical checks across variants', () => {
