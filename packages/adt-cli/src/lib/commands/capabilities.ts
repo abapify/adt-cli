@@ -66,6 +66,41 @@ async function loadFormatObjectTypes(
  * declared object types, and configured command modules with
  * installed-artifact resolution facts. Deterministic and machine-readable.
  */
+async function loadConfiguredFormats(
+  formatPlugins: readonly ConfiguredFormatPlugin[],
+): Promise<Array<{ format: string; objectTypes: string[] }>> {
+  const formats = await Promise.all(
+    formatPlugins.map(async (plugin) => ({
+      format: plugin.name,
+      objectTypes: await loadFormatObjectTypes(plugin),
+    })),
+  );
+  formats.sort((a, b) => a.format.localeCompare(b.format));
+  return formats;
+}
+
+function configuredModuleList(
+  config: { commands?: string[] } | null,
+  formatPlugins: readonly ConfiguredFormatPlugin[],
+): string[] {
+  return [
+    ...(config?.commands ?? []),
+    ...formatPlugins.map((plugin) => plugin.name),
+  ];
+}
+
+/**
+ * The diagnostic feature the contract promises: flow support is available
+ * when the configured command set includes the flow command module.
+ */
+function diagnosticFeatures(config: { commands?: string[] } | null) {
+  return {
+    flow: (config?.commands ?? []).some((module) =>
+      module.includes('@abapify/adt-flow'),
+    ),
+  };
+}
+
 export async function collectInstalledCapabilities(): Promise<RuntimeCapabilityReport> {
   const configPath = getResolvedConfigPath(process.argv);
   const config = await loadCliConfig(process.cwd(), configPath);
@@ -76,17 +111,8 @@ export async function collectInstalledCapabilities(): Promise<RuntimeCapabilityR
   }
   const formatPlugins =
     (config as ConfigWithFormatPlugins | null)?.plugins?.formats ?? [];
-  const formats = await Promise.all(
-    formatPlugins.map(async (plugin) => ({
-      format: plugin.name,
-      objectTypes: await loadFormatObjectTypes(plugin),
-    })),
-  );
-  formats.sort((a, b) => a.format.localeCompare(b.format));
-  const configuredModules = [
-    ...(config?.commands ?? []),
-    ...formatPlugins.map((plugin) => plugin.name),
-  ];
+  const formats = await loadConfiguredFormats(formatPlugins);
+  const configuredModules = configuredModuleList(config, formatPlugins);
   return collectCapabilityReport({
     cli: { name: 'adt', version: cliVersion() },
     registry: {
@@ -100,11 +126,7 @@ export async function collectInstalledCapabilities(): Promise<RuntimeCapabilityR
     } satisfies RegistryLike,
     lazyModules: [...new Set(configuredModules)],
     resolveModule: resolveInstalledModule,
-    features: {
-      flow: (config?.commands ?? []).some((module) =>
-        module.includes('@abapify/adt-flow'),
-      ),
-    },
+    features: diagnosticFeatures(config),
   });
 }
 
