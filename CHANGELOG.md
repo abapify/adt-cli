@@ -1,3 +1,14 @@
+## 0.4.55 (2026-11-12)
+
+### 🚀 Features
+
+- **cli:** expose installed runtime capabilities without layout introspection ([#358](https://github.com/abapify/adt-cli/pull/358))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.54 (2026-11-12)
 
 ### 🚀 Features
