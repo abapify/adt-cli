@@ -173,6 +173,13 @@ function collectRoots(
     const key = rootKey({ system: request.system, transport: identity });
     let builder = roots.get(key);
     if (!builder) {
+      if (
+        canonicalTransport(request.normalized.requestedTransport) !== identity
+      ) {
+        throw new Error(
+          `Normalized payload for transport ${identity} does not match request.`,
+        );
+      }
       builder = {
         root: {
           transport: identity,

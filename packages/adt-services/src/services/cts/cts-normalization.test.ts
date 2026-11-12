@@ -285,6 +285,17 @@ describe('planCtsScope', () => {
     expect(input).toEqual(before);
   });
 
+  it('rejects a payload paired with a different transport identifier', () => {
+    expect(() =>
+      planCtsScope([
+        {
+          transport: 'DEVK900001',
+          normalized: normalized('DEVK900010'),
+        },
+      ]),
+    ).toThrow(/does not match request/i);
+  });
+
   it('yields an empty plan for an empty request list', () => {
     const plan = planCtsScope([]);
     expect(plan.roots).toEqual([]);
