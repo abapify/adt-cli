@@ -11,7 +11,10 @@ import {
   type FormatPlugin,
 } from '@abapify/adt-plugin';
 import { createAdtFlowDependencies } from '../adt-client-adapter';
-import { compareStrings } from '../deterministic';
+import {
+  createFlowCheckoutReport,
+  createFlowPartialReport,
+} from '../checkout-report';
 import { createAdtFlowService, type AdtFlowService } from '../service';
 import { flowConfigSchema } from '../schemas';
 import { AdtFlowError, type FlowCheckoutInput } from '../types';
@@ -280,32 +283,10 @@ async function writePartialReport(
   coverage = false,
   optionName = coverage ? '--report' : '--partial-report',
 ): Promise<void> {
-  const skipped = [...result.skipped].sort((a, b) => {
-    return (
-      compareStrings(a.object, b.object) ||
-      compareStrings(a.component, b.component) ||
-      compareStrings(a.diagnostic, b.diagnostic) ||
-      compareStrings(a.sourceTransport ?? '', b.sourceTransport ?? '')
-    );
-  });
   const payload = `${JSON.stringify(
-    {
-      schemaVersion: 1,
-      requestedTransports: result.requestedTransports,
-      ...(coverage
-        ? {
-            mode: result.mode,
-            scopeTransports: result.scopeTransports,
-            inventory: result.inventory,
-            inventoryResolutions: result.inventoryResolutions,
-            descriptors: result.descriptors,
-            absentObjects: result.absentObjects,
-            indexedOnly: result.indexedOnly === true,
-            coverageVersion: 1,
-          }
-        : {}),
-      skipped,
-    },
+    coverage
+      ? createFlowCheckoutReport(result)
+      : createFlowPartialReport(result),
     null,
     2,
   )}\n`;
