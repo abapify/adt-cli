@@ -117,10 +117,11 @@ function derivedStatusCounts(programs: readonly AunitProgram[]): {
   };
 }
 
-function assertConsistentCounts(
-  result: AunitResult,
-  derived: ReturnType<typeof derivedStatusCounts>,
-): void {
+function isNonNegativeInteger(value: number): boolean {
+  return Number.isInteger(value) && value >= 0;
+}
+
+function assertNonNegativeCounts(result: AunitResult): void {
   const summaryFields: Array<[string, number]> = [
     ['totalTests', result.totalTests],
     ['passCount', result.passCount],
@@ -129,12 +130,18 @@ function assertConsistentCounts(
     ['skipCount', result.skipCount],
   ];
   for (const [field, value] of summaryFields) {
-    if (!Number.isInteger(value) || value < 0) {
+    if (!isNonNegativeInteger(value)) {
       throw new MalformedAunitReportError(
         `AUnit report summary count ${field}=${value} is not a non-negative integer.`,
       );
     }
   }
+}
+
+function assertCountsMatchMethods(
+  result: AunitResult,
+  derived: ReturnType<typeof derivedStatusCounts>,
+): void {
   const fields: Array<[string, number, number]> = [
     ['totalTests', result.totalTests, derived.totalTests],
     ['passCount', result.passCount, derived.passCount],
@@ -149,6 +156,14 @@ function assertConsistentCounts(
       );
     }
   }
+}
+
+function assertConsistentCounts(
+  result: AunitResult,
+  derived: ReturnType<typeof derivedStatusCounts>,
+): void {
+  assertNonNegativeCounts(result);
+  assertCountsMatchMethods(result, derived);
 }
 
 /**
@@ -230,19 +245,23 @@ interface MeasurementRootInput {
   };
 }
 
+function isWellFormedCounter(counter: JacocoCoverageCounter): boolean {
+  return (
+    typeof counter.type === 'string' &&
+    counter.type.trim() !== '' &&
+    typeof counter.total === 'number' &&
+    Number.isInteger(counter.total) &&
+    counter.total >= 0 &&
+    typeof counter.executed === 'number' &&
+    Number.isInteger(counter.executed) &&
+    counter.executed >= 0
+  );
+}
+
 function normalizeCounter(
   counter: JacocoCoverageCounter,
 ): JacocoCoverageCounter {
-  if (
-    typeof counter.type !== 'string' ||
-    counter.type.trim() === '' ||
-    typeof counter.total !== 'number' ||
-    !Number.isInteger(counter.total) ||
-    counter.total < 0 ||
-    typeof counter.executed !== 'number' ||
-    !Number.isInteger(counter.executed) ||
-    counter.executed < 0
-  ) {
+  if (!isWellFormedCounter(counter)) {
     throw new MalformedAunitReportError(
       'Coverage report contains an incomplete or invalid counter.',
     );
