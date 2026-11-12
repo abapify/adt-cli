@@ -1,6 +1,6 @@
 {
   "name": "@abapify/browser-auth",
-  "version": "0.4.50",
+  "version": "0.4.51",
   "description": "Browser-based SSO authentication core - shared logic for Playwright/Puppeteer plugins",
   "license": "MIT",
   "publishConfig": {
@@ -20,7 +20,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@abapify/adt-config": "0.4.50"
+    "@abapify/adt-config": "0.4.51"
   },
   "devDependencies": {
     "@types/node": "^22.10.2"

@@ -1,3 +1,13 @@
+## 0.4.51 (2026-11-12)
+
+### 🩹 Fixes
+
+- **adk:** classify SNOTE CINS instructions and resolve CPRO class-section leaves ([#352](https://github.com/abapify/adt-cli/pull/352))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.50 (2026-11-12)
 
 This was a version bump only for adt-services to align it with other projects, there were no code changes.
