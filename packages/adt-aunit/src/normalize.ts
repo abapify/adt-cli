@@ -275,35 +275,45 @@ function normalizeCounter(
  * nodes — so class-level coverage is never omitted. Multiple entries for
  * the same measurement (one per class) are summed.
  */
+function rawCountersOf(node: CoverageNodeInput): JacocoCoverageCounter[] {
+  const own = (node.coverages?.coverage ?? []).map(normalizeCounter);
+  if (own.length > 0) {
+    return own;
+  }
+  return (node.nodes?.node ?? []).flatMap((child) =>
+    (child.coverages?.coverage ?? []).map(normalizeCounter),
+  );
+}
+
+function addCounterEntry(
+  summed: Map<string, JacocoCoverageCounter>,
+  counter: JacocoCoverageCounter,
+): void {
+  const measurement = COUNTER_ALIASES[counter.type.toUpperCase()];
+  if (!measurement) {
+    throw new MalformedAunitReportError(
+      `Coverage report contains an unknown counter type: ${counter.type}.`,
+    );
+  }
+  const existing = summed.get(measurement);
+  summed.set(
+    measurement,
+    existing
+      ? {
+          type: counter.type,
+          total: existing.total + counter.total,
+          executed: existing.executed + counter.executed,
+        }
+      : counter,
+  );
+}
+
 function collectPackageCounters(
   node: CoverageNodeInput,
 ): JacocoCoverageCounter[] {
-  const raw = (node.coverages?.coverage ?? []).map(normalizeCounter);
-  const source =
-    raw.length > 0
-      ? raw
-      : (node.nodes?.node ?? []).flatMap((child) =>
-          (child.coverages?.coverage ?? []).map(normalizeCounter),
-        );
   const summed = new Map<string, JacocoCoverageCounter>();
-  for (const counter of source) {
-    const measurement = COUNTER_ALIASES[counter.type.toUpperCase()];
-    if (!measurement) {
-      throw new MalformedAunitReportError(
-        `Coverage report contains an unknown counter type: ${counter.type}.`,
-      );
-    }
-    const existing = summed.get(measurement);
-    summed.set(
-      measurement,
-      existing
-        ? {
-            type: counter.type,
-            total: existing.total + counter.total,
-            executed: existing.executed + counter.executed,
-          }
-        : counter,
-    );
+  for (const counter of rawCountersOf(node)) {
+    addCounterEntry(summed, counter);
   }
   return [...summed.values()];
 }
