@@ -1,3 +1,7 @@
+## 0.4.48 (2026-11-12)
+
+This was a version bump only for adt-server to align it with other projects, there were no code changes.
+
 ## 0.4.47 (2026-11-12)
 
 ### 🩹 Fixes

@@ -1,3 +1,13 @@
+## 0.4.48 (2026-11-12)
+
+### 🩹 Fixes
+
+- **security:** use path.resolve for JS path-injection sinks ([0710f064](https://github.com/abapify/adt-cli/commit/0710f064))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.47 (2026-11-12)
 
 ### 🩹 Fixes
