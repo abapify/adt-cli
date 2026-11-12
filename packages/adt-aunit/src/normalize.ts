@@ -176,28 +176,36 @@ function assertConsistentCounts(
  * preserved verbatim — path repair stays a consumer concern. The caller's
  * input is never mutated.
  */
-export function normalizeAunitResult(
-  result: AunitResult,
-): NormalizedAunitResult {
+function assertWellFormedCollections(result: AunitResult): void {
   if (!Array.isArray(result.programs)) {
     throw new MalformedAunitReportError(
       'AUnit report is missing the recorded programs collection.',
     );
   }
   for (const program of result.programs) {
-    if (!Array.isArray(program.testClasses)) {
+    assertWellFormedProgram(program);
+  }
+}
+
+function assertWellFormedProgram(program: AunitProgram): void {
+  if (!Array.isArray(program.testClasses)) {
+    throw new MalformedAunitReportError(
+      `AUnit report program ${program.name} is missing its testClasses collection.`,
+    );
+  }
+  for (const testClass of program.testClasses) {
+    if (!Array.isArray(testClass.methods)) {
       throw new MalformedAunitReportError(
-        `AUnit report program ${program.name} is missing its testClasses collection.`,
+        `AUnit report test class ${testClass.name} is missing its methods collection.`,
       );
     }
-    for (const testClass of program.testClasses) {
-      if (!Array.isArray(testClass.methods)) {
-        throw new MalformedAunitReportError(
-          `AUnit report test class ${testClass.name} is missing its methods collection.`,
-        );
-      }
-    }
   }
+}
+
+export function normalizeAunitResult(
+  result: AunitResult,
+): NormalizedAunitResult {
+  assertWellFormedCollections(result);
   const derived = derivedStatusCounts(result.programs);
   assertConsistentCounts(result, derived);
   return {
