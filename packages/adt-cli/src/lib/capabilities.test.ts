@@ -93,14 +93,17 @@ describe('collectCapabilityReport', () => {
   it('does not mutate registry or module inputs', () => {
     const reg = registry([['prog', ['PROG']]]);
     const modules = ['b-dep', 'a-dep'];
-    const before = structuredClone(modules);
+    const moduleSnapshot = structuredClone(modules);
+    const formatSnapshot = reg.getAvailableFormats();
     collectCapabilityReport({
       cli: { name: 'adt', version: '0.4.53' },
       registry: reg,
       lazyModules: modules,
       resolveModule: () => true,
     });
-    expect(modules).toEqual(before);
+    expect(modules).toEqual(moduleSnapshot);
+    expect(reg.getAvailableFormats()).toEqual(formatSnapshot);
+    expect(reg.getPlugin('prog')?.getSupportedObjectTypes()).toEqual(['PROG']);
   });
 
   it('reports diagnostic features as boolean facts', () => {

@@ -35,3 +35,4 @@ export { createChangesetCommand } from './changeset';
 export { rfcCommand } from './rfc';
 export { createFlpCommand } from './flp';
 export { proxyCommand } from './proxy';
+export { capabilitiesCommand } from './capabilities';

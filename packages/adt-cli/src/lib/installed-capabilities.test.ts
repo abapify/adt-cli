@@ -1,5 +1,4 @@
 import {
-  chmodSync,
   cpSync,
   existsSync,
   mkdirSync,
@@ -116,12 +115,9 @@ describe('installed ADT CLI capabilities', () => {
       try {
         const binDir = join(installRoot, '.bin');
         mkdirSync(binDir, { recursive: true });
-        const shim = join(binDir, 'adt');
-        writeFileSync(
-          shim,
-          `#!/bin/sh\nexec "${process.execPath}" "${cliPath}" "$@"\n`,
-        );
-        chmodSync(shim, 0o755);
+        // A real filesystem symlink: PATH resolution must survive invoking
+        // the CLI through a path that differs from the canonical install.
+        symlinkSync(cliPath, join(binDir, 'adt'));
 
         const unrelatedCwd = tmpdir();
         const result = spawnSync(
@@ -168,12 +164,13 @@ describe('installed ADT CLI capabilities', () => {
           { cwd: installRoot, encoding: 'utf8', timeout: cliStartupTimeoutMs },
         );
         expect(result.error).toBeUndefined();
-        expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(0);
-        const report = parseReport(result.stdout);
-        expect(report.runtimeModules).toContainEqual({
-          name: '@abapify/adt-nonexistent-module',
-          resolved: false,
-        });
+        expect(
+          result.status,
+          `stdout: ${result.stdout}\nstderr: ${result.stderr}`,
+        ).not.toBe(0);
+        expect(result.stderr).toMatch(/@abapify\/adt-nonexistent-module/);
+        expect(result.stderr).toMatch(/runtime module/i);
+        expect(result.stderr).not.toMatch(/fallback/i);
       } finally {
         cleanup();
       }

@@ -225,6 +225,11 @@ async function registerPluginCommands(
       process.cwd(),
       configPath,
     );
+  } else if (process.argv[2] === 'capabilities') {
+    // Capability assessment must not import configured command plugins:
+    // their top-level code could produce side effects or contaminate the
+    // machine-readable report. Format plugins are loaded by the command
+    // itself, in isolation.
   } else {
     await loadCommandPlugins(program, process.cwd(), configPath);
   }
