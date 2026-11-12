@@ -65,7 +65,7 @@ function parseFolderLogic(value: string | undefined): FolderLogic | undefined {
 }
 
 function parseAbapGitMetadata(root: string): AbapGitMetadata | undefined {
-  const safeRoot = resolve(root);
+  const safeRoot = resolvePath(root);
   const metadataPath = join(safeRoot, '.abapgit.xml');
   if (!existsSync(metadataPath)) return undefined;
 
@@ -88,7 +88,7 @@ function parseConfiguredFormat(root: string): {
   format?: string;
   folderLogic?: FolderLogic;
 } {
-  const safeRoot = resolve(root);
+  const safeRoot = resolvePath(root);
   const configPaths = [
     process.env.ADT_CONFIG_PATH,
     join(safeRoot, 'adt.config.ts'),
@@ -140,7 +140,7 @@ function findRepositoryRoot(): string {
 function resolveRepository(srcRoot: string): ResolverRepository {
   const usesConfiguredSourceRoot = srcRoot === 'src/' || srcRoot === 'src';
   const root = usesConfiguredSourceRoot ? findRepositoryRoot() : process.cwd();
-  const safeRoot = resolve(root);
+  const safeRoot = resolvePath(root);
   const metadata = parseAbapGitMetadata(safeRoot);
   const configured = parseConfiguredFormat(safeRoot);
   const configuredSourceFolder = metadata?.startingFolder ?? 'src';
