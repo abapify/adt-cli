@@ -93,6 +93,29 @@ function unsupportedEntry(
   };
 }
 
+function noteInstructionEntry(
+  name = '0001089198',
+  sourceTransport = 'DEVK900001',
+): TransportSourceManifest['entries'][number] {
+  return {
+    object: {
+      pgmid: 'R3TR',
+      type: 'CINS',
+      name,
+      packageName: 'ZROOT_FEATURE',
+    },
+    component: { id: 'object' },
+    sourceTransport,
+    changeKind: 'unsupported',
+    exact: false,
+    diagnostic: {
+      code: 'SNOTE_CORRECTION_INSTRUCTION',
+      message:
+        'The SNOTE correction instruction is not an ABAP repository object: ADT exposes no resource for it and abapGit has no serializer. It travels with its R3TR NOTE object and cannot be materialized from source history.',
+    },
+  };
+}
+
 function unsupportedDiagnosticEntry(): TransportSourceManifest['entries'][number] {
   return {
     ...unsupportedEntry('ZCL_TR_LOAN_CUSTOM_ENTITY FETCH_DATA_LIST'),
@@ -1388,6 +1411,35 @@ describe('transport checkout', () => {
     ]);
     expect(ports.loadObject).toHaveBeenCalledTimes(1);
     expect(ports.readSource).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports SNOTE correction instructions as skipped with their dedicated diagnostic', async () => {
+    const workspace = await root();
+    const current = manifest('modified', version('before'), version('after'));
+    current.entries.push(noteInstructionEntry());
+    const ports = dependencies(() => current);
+    ports.readSource.mockResolvedValue('stable source\n');
+    ports.loadObject.mockResolvedValue({
+      object: { name: 'ZCL_SAMPLE' },
+      packagePath: ['ZROOT', 'ZROOT_FEATURE'],
+    });
+
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+
+    expect(result.skipped).toEqual([
+      {
+        object: 'CINS/0001089198',
+        component: 'object',
+        diagnostic: 'SNOTE_CORRECTION_INSTRUCTION',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+    expect(result.changed).toContain('src/feature/zcl_sample.clas.abap');
+    expect(ports.loadObject).toHaveBeenCalledTimes(1);
   });
 
   it('reconciles a package reassignment as old-path removal plus new-path writes', async () => {

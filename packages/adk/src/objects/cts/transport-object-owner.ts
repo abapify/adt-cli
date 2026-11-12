@@ -12,6 +12,9 @@ const CLASS_COMPONENT_WBTYPES: Record<string, string> = {
   METH: 'CLAS/OM',
   CPRI: 'CLAS/OSI',
   CINC: 'CLAS/OCN',
+  // LIMU CPRO ("protected header") carries the class name as its transport
+  // object name — sections are identified by type, not by include name.
+  CPRO: 'CLAS/OSP',
 };
 
 interface ClassComponentType {
