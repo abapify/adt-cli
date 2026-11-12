@@ -180,8 +180,10 @@ def _append_log(path, text):
 
 def _read_file(path, default=""):
     safe_path = os.path.join("/tmp", "gc-session-devin", os.path.basename(path))
-    p = Path(safe_path)
-    return p.read_text(encoding="utf-8") if p.exists() else default
+    if not os.path.exists(safe_path):
+        return default
+    with open(safe_path, "r", encoding="utf-8") as f:
+        return f.read()
 
 
 def _load_cfg(session_dir):
