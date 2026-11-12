@@ -151,10 +151,7 @@ export function mergeAtcVariants(
   const seen = new Set<string>();
   const uniqueResults: NormalizedAtcFinding[][] = [];
   for (const result of results) {
-    const key = JSON.stringify([
-      result.checkVariant,
-      result.findings.map(fingerprintFor),
-    ]);
+    const key = JSON.stringify(result);
     if (seen.has(key)) {
       continue;
     }
@@ -213,6 +210,9 @@ function compareNormalizedFindings(
     a.messageId.localeCompare(b.messageId) ||
     (a.location ?? '').localeCompare(b.location ?? '') ||
     a.messageText.localeCompare(b.messageText) ||
-    (a.findingUri ?? '').localeCompare(b.findingUri ?? '')
+    (a.findingUri ?? '').localeCompare(b.findingUri ?? '') ||
+    (a.checkCategory ?? '').localeCompare(b.checkCategory ?? '') ||
+    a.checkTitle.localeCompare(b.checkTitle) ||
+    a.objectUri.localeCompare(b.objectUri)
   );
 }

@@ -83,13 +83,20 @@ function classifyMethod(method: AunitTestMethod): AunitMethodClassification {
 function normalizeProgram(program: AunitProgram): NormalizedAunitProgram {
   return {
     ...program,
-    testClasses: (program.testClasses ?? []).map((testClass) => ({
-      ...testClass,
-      methods: (testClass.methods ?? []).map((method) => ({
-        ...method,
-        classification: classifyMethod(method),
-      })),
-    })),
+    testClasses: program.testClasses.map((testClass) => {
+      if (!Array.isArray(testClass.methods)) {
+        throw new MalformedAunitReportError(
+          `AUnit report test class ${testClass.name} is missing its methods collection.`,
+        );
+      }
+      return {
+        ...testClass,
+        methods: testClass.methods.map((method) => ({
+          ...method,
+          classification: classifyMethod(method),
+        })),
+      };
+    }),
   };
 }
 
@@ -275,15 +282,6 @@ function normalizeCounter(
  * nodes — so class-level coverage is never omitted. Multiple entries for
  * the same measurement (one per class) are summed.
  */
-function rawCountersOf(node: CoverageNodeInput): JacocoCoverageCounter[] {
-  const own = (node.coverages?.coverage ?? []).map(normalizeCounter);
-  if (own.length > 0) {
-    return own;
-  }
-  return (node.nodes?.node ?? []).flatMap((child) =>
-    (child.coverages?.coverage ?? []).map(normalizeCounter),
-  );
-}
 
 function addCounterEntry(
   summed: Map<string, JacocoCoverageCounter>,
@@ -311,9 +309,31 @@ function addCounterEntry(
 function collectPackageCounters(
   node: CoverageNodeInput,
 ): JacocoCoverageCounter[] {
+  const own = (node.coverages?.coverage ?? []).map(normalizeCounter);
+  const ownMeasurements = new Set(
+    own
+      .map((counter) => COUNTER_ALIASES[counter.type.toUpperCase()])
+      .filter(
+        (measurement): measurement is string => measurement !== undefined,
+      ),
+  );
   const summed = new Map<string, JacocoCoverageCounter>();
-  for (const counter of rawCountersOf(node)) {
+  // Package-node counters win per measurement; nested class counters fill
+  // in measurements the package node does not record itself — and are
+  // summed together when the package records none of them.
+  for (const counter of own) {
     addCounterEntry(summed, counter);
+  }
+  for (const child of node.nodes?.node ?? []) {
+    for (const counter of (child.coverages?.coverage ?? []).map(
+      normalizeCounter,
+    )) {
+      const measurement = COUNTER_ALIASES[counter.type.toUpperCase()];
+      if (measurement && ownMeasurements.has(measurement)) {
+        continue;
+      }
+      addCounterEntry(summed, counter);
+    }
   }
   return [...summed.values()];
 }
@@ -366,10 +386,15 @@ export function normalizeJacocoCoverage(input: {
     );
   }
   const packages: NormalizedJacocoPackage[] = nodes
-    .map((node) => ({
-      name: node.objectReference?.name ?? '',
-      counters: collectPackageCounters(node),
-    }))
+    .map((node) => {
+      const name = node.objectReference?.name;
+      if (typeof name !== 'string' || name.trim() === '') {
+        throw new MalformedAunitReportError(
+          'Coverage report contains a package node without a recorded name.',
+        );
+      }
+      return { name, counters: collectPackageCounters(node) };
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
   const line = aggregateCounterType(packages, 'line') ?? {
     total: 0,
