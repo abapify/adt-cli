@@ -37,3 +37,11 @@ export type {
   AunitStackEntry,
   OutputFormat,
 } from './types';
+export {
+  MalformedAunitReportError,
+  normalizeAunitResult,
+  normalizeJacocoCoverage,
+  type AunitMethodClassification,
+  type NormalizedAunitResult,
+  type NormalizedJacocoCoverage,
+} from './normalize';

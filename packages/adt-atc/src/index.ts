@@ -46,3 +46,11 @@ export type {
   FindingResolver,
   ResolvedLocation,
 } from './types';
+export {
+  mergeAtcVariants,
+  normalizeAtcResult,
+  type NormalizedAtcFinding,
+  type NormalizedAtcResult,
+  type SeverityClass,
+  type SeverityPolicy,
+} from './normalize';
