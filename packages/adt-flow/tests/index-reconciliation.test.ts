@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { assessFlowIndexReconciliation, type ObjectDescriptor } from '../src';
+import {
+  AdtFlowError,
+  assessFlowIndexReconciliation,
+  type ObjectDescriptor,
+} from '../src';
 
 const source = 'src/sample/zcl_sample.clas.abap';
 const metadata = 'src/sample/zcl_sample.clas.xml';
@@ -140,6 +144,15 @@ describe('flow index reconciliation assessment', () => {
     expect(() =>
       assess(new Map(), undefined, { ...descriptor(), schemaVersion: 2 }),
     ).toThrow();
+  });
+
+  it('reports invalid descriptors as flow errors instead of raw parse errors', () => {
+    expect(() =>
+      assess(new Map(), undefined, { ...descriptor(), schemaVersion: 2 }),
+    ).toThrow(AdtFlowError);
+    expect(() =>
+      assess(new Map(), undefined, { ...descriptor(), schemaVersion: 2 }),
+    ).toThrow(/unsupported or invalid schema/i);
   });
 
   it('rejects duplicate owned paths instead of choosing one hash', () => {

@@ -101,7 +101,15 @@ function assertPreviousBoundary(
 export function assessFlowIndexReconciliation(
   input: FlowIndexReconciliationInput,
 ): FlowIndexReconciliationAssessment {
-  const descriptor = objectDescriptorSchema.parse(input.descriptor);
+  const parsed = objectDescriptorSchema.safeParse(input.descriptor);
+  if (!parsed.success) {
+    throw new AdtFlowError(
+      'invalid_input',
+      'A flow descriptor uses an unsupported or invalid schema.',
+      { issues: parsed.error.issues },
+    );
+  }
+  const descriptor = parsed.data;
   assertUniqueOwnedPaths(descriptor);
   const changedPaths = findChangedOwnedPaths(
     descriptor,
