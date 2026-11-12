@@ -1,6 +1,6 @@
 {
   "name": "@abapify/speci",
-  "version": "0.4.46",
+  "version": "0.4.47",
   "description": "Minimal arrow-function-based contract specification system for TypeScript",
   "license": "MIT",
   "publishConfig": {

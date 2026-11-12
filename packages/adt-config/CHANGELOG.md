@@ -1,3 +1,13 @@
+## 0.4.47 (2026-11-12)
+
+### 🩹 Fixes
+
+- **security:** apply path.resolve and lgtm suppressions for remaining JS alerts ([fa36b0f0](https://github.com/abapify/adt-cli/commit/fa36b0f0))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.46 (2026-11-12)
 
 ### 🩹 Fixes
