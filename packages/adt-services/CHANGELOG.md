@@ -1,3 +1,14 @@
+## 0.4.54 (2026-11-12)
+
+### 🚀 Features
+
+- **cts:** normalize transport metadata and plan ordered multi-root scope ([#356](https://github.com/abapify/adt-cli/pull/356))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.53 (2026-11-12)
 
 This was a version bump only for adt-services to align it with other projects, there were no code changes.
