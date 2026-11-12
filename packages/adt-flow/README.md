@@ -39,6 +39,12 @@ Optional diagnostic-report storage failures preserve acquired sources and report
 unknown completeness. See the SDK reference for strict checkout and partial-report
 boundaries.
 
+Library consumers can use `createFlowCheckoutReport(result)` for the same
+version-one JSON contract as `--report`, or `createFlowPartialReport(result)`
+for `--partial-report`. Both are pure builders with deterministic omission order.
+They do not write files or assess overall completeness: absent inventory remains
+unavailable, and an empty skipped list alone is not evidence of a full snapshot.
+
 ## Documentation
 
 **[adt-cli.netlify.app/sdk/packages/adt-flow](https://adt-cli.netlify.app/sdk/packages/adt-flow)**

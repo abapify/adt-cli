@@ -22,7 +22,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, parse, resolve } from 'node:path';
 import type { ConnectionParams } from '../types.js';
 
 export interface SystemEntry {
