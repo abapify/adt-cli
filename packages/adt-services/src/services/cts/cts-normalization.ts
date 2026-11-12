@@ -137,11 +137,18 @@ export interface PlannedCtsScopeRequest {
  * requested folds into that parent root instead of becoming a second root,
  * and systems stay separated. The caller's inputs are never mutated.
  */
-export function planCtsScope(
+type PlannedRoots = Map<string, PlannedCtsScopeRoot>;
+
+interface PlannedRootPayloads {
+  roots: PlannedRoots;
+  payloads: Map<string, NormalizedCtsInventory>;
+}
+
+function collectRoots(
   requests: ReadonlyArray<PlannedCtsScopeRequest>,
-): PlannedCtsScope {
-  const roots = new Map<string, PlannedCtsScopeRoot>();
-  const payloadByRoot = new Map<string, NormalizedCtsInventory>();
+): PlannedRootPayloads {
+  const roots: PlannedRoots = new Map();
+  const payloads = new Map<string, NormalizedCtsInventory>();
   for (const request of requests) {
     const identity = canonicalTransport(request.transport);
     let root = roots.get(identity);
@@ -153,58 +160,90 @@ export function planCtsScope(
         requestedBy: [],
       };
       roots.set(identity, root);
-      payloadByRoot.set(identity, request.normalized);
+      payloads.set(identity, request.normalized);
     }
     root.requestedBy.push(request.transport);
   }
-  // A requested task whose parent is also requested folds into the parent.
-  for (const [identity, root] of [...roots.entries()]) {
-    const payload = payloadByRoot.get(identity);
-    const unit = payload?.request;
+  return { roots, payloads };
+}
+
+function appendTask(
+  tasks: string[],
+  taskNumber: string,
+  root: PlannedCtsScopeRoot,
+): void {
+  if (taskNumber !== root.transport && !tasks.includes(taskNumber)) {
+    tasks.push(taskNumber);
+  }
+}
+
+/**
+ * A requested task whose parent is also requested folds into the parent root
+ * and takes its request provenance with it.
+ */
+function foldTaskRootsIntoParents(payloads: PlannedRootPayloads): void {
+  for (const [identity, root] of [...payloads.roots.entries()]) {
+    const unit = payloads.payloads.get(identity)?.request;
     const parent = unit?.parent;
-    if (!parent || unit?.kind !== 'task' || !roots.has(parent)) {
+    if (
+      unit?.kind !== 'task' ||
+      parent === undefined ||
+      !payloads.roots.has(parent)
+    ) {
       continue;
     }
-    const parentRoot = roots.get(parent);
+    const parentRoot = payloads.roots.get(parent);
     if (!parentRoot) {
       continue;
     }
     parentRoot.requestedBy.push(...root.requestedBy);
-    for (const task of payload?.tasks ?? []) {
-      if (
-        task.number !== parentRoot.transport &&
-        !parentRoot.tasks.includes(task.number)
-      ) {
-        parentRoot.tasks.push(task.number);
-      }
+    for (const task of payloads.payloads.get(identity)?.tasks ?? []) {
+      appendTask(parentRoot.tasks, task.number, parentRoot);
     }
-    roots.delete(identity);
-    payloadByRoot.delete(identity);
+    payloads.roots.delete(identity);
+    payloads.payloads.delete(identity);
   }
-  // Expand each surviving root with the tasks of its own payload.
-  for (const [identity] of roots.entries()) {
-    const root = roots.get(identity);
-    const payload = payloadByRoot.get(identity);
-    if (!root || !payload) {
+}
+
+function expandRootTasks(payloads: PlannedRootPayloads): void {
+  for (const [identity, root] of payloads.roots.entries()) {
+    const payload = payloads.payloads.get(identity);
+    if (!payload) {
       continue;
     }
     for (const task of payload.tasks) {
-      if (task.number !== root.transport && !root.tasks.includes(task.number)) {
-        root.tasks.push(task.number);
-      }
+      appendTask(root.tasks, task.number, root);
     }
   }
-  const plannedRoots = [...roots.values()];
-  const systems = [
+}
+
+function collectSystems(roots: PlannedRoots): string[] {
+  return [
     ...new Set(
-      plannedRoots
+      [...roots.values()]
         .map((root) => root.system)
         .filter((system): system is string => system !== undefined),
     ),
   ].sort();
+}
+
+/**
+ * Ordered multi-root scope planning over requested transports. Pure and
+ * deterministic: requested order wins, case-insensitive identities
+ * deduplicate with provenance, a requested task whose parent is also
+ * requested folds into that parent root instead of becoming a second root,
+ * and systems stay separated. The caller's inputs are never mutated.
+ */
+export function planCtsScope(
+  requests: ReadonlyArray<PlannedCtsScopeRequest>,
+): PlannedCtsScope {
+  const payloads = collectRoots(requests);
+  foldTaskRootsIntoParents(payloads);
+  expandRootTasks(payloads);
+  const roots = [...payloads.roots.values()];
   return {
-    roots: plannedRoots,
-    systems,
+    roots,
+    systems: collectSystems(payloads.roots),
     requestedCount: requests.length,
   };
 }

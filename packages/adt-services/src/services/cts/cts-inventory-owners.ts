@@ -35,9 +35,13 @@ function ownerKeyOf(entry: TransportObjectInventoryEntry): string | undefined {
  * entry as provenance; entries without a matching owner form their own group
  * instead of being discarded. The caller's input is never mutated.
  */
-export function dedupeCtsInventoryToOwners(
+function isR3tr(entry: TransportObjectInventoryEntry): boolean {
+  return entry.pgmid.trim().toUpperCase() === 'R3TR';
+}
+
+function collectGroups(
   entries: ReadonlyArray<TransportObjectInventoryEntry>,
-): CtsInventoryOwnerGroup[] {
+): Map<string, CtsInventoryOwnerGroup> {
   const groups = new Map<string, CtsInventoryOwnerGroup>();
   for (const entry of entries) {
     const key = canonicalKey(entry);
@@ -47,20 +51,26 @@ export function dedupeCtsInventoryToOwners(
       groups.set(key, group);
     }
     group.leaves.push(entry);
-    if (
-      entry.pgmid.trim().toUpperCase() === 'R3TR' &&
-      group.owner.pgmid.trim().toUpperCase() !== 'R3TR'
-    ) {
+    if (isR3tr(entry) && !isR3tr(group.owner)) {
       group.owner = entry;
     }
   }
-  // Fold component groups into the owner group their wbtype references.
+  return groups;
+}
+
+/**
+ * Fold component groups into the owner group their wbtype references.
+ * Ownerless groups keep their identity.
+ */
+function foldComponentGroups(
+  groups: Map<string, CtsInventoryOwnerGroup>,
+): void {
   for (const [key, group] of [...groups.entries()]) {
-    if (group.owner.pgmid.trim().toUpperCase() === 'R3TR') {
+    if (isR3tr(group.owner)) {
       continue;
     }
     const target = ownerKeyOf(group.owner);
-    if (!target || target === key || !groups.has(target)) {
+    if (!target || target === key) {
       continue;
     }
     const ownerGroup = groups.get(target);
@@ -70,5 +80,21 @@ export function dedupeCtsInventoryToOwners(
     ownerGroup.leaves.push(...group.leaves);
     groups.delete(key);
   }
+}
+
+/**
+ * Deduplicate raw CTS inventory entries to their repository owners.
+ * Pure: padded or case-different spellings of the same object merge into one
+ * group, LIMU component leaves fold into the R3TR owner referenced by their
+ * `wbtype` (mirroring the ADK manifest's FUNC-to-FUGR ownership rule), and
+ * namespaced names stay distinct identities. Every leaf keeps its original
+ * entry as provenance; entries without a matching owner form their own group
+ * instead of being discarded. The caller's input is never mutated.
+ */
+export function dedupeCtsInventoryToOwners(
+  entries: ReadonlyArray<TransportObjectInventoryEntry>,
+): CtsInventoryOwnerGroup[] {
+  const groups = collectGroups(entries);
+  foldComponentGroups(groups);
   return [...groups.values()];
 }
