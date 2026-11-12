@@ -1,6 +1,7 @@
 import { compareStrings } from './deterministic';
 import { objectDescriptorSchema } from './schemas';
 import { AdtFlowError } from './types';
+import type { z } from 'zod';
 
 export interface FlowIndexReconciliationInput {
   descriptor: unknown;
@@ -14,6 +15,8 @@ export interface FlowIndexReconciliationAssessment {
   status: 'current' | 'stale';
   changedPaths: string[];
 }
+
+type FlowObjectDescriptor = z.infer<typeof objectDescriptorSchema>;
 
 function requireHashEvidence(
   evidence: ReadonlyMap<string, string | null>,
@@ -39,17 +42,8 @@ function requireHashEvidence(
   return hash;
 }
 
-/**
- * Assess derived ownership only. The caller must prove the accepted merge and
- * clean source, archive original bytes, and recheck evidence before mutation.
- * This function neither proves Git history nor authorizes index removal.
- */
-export function assessFlowIndexReconciliation(
-  input: FlowIndexReconciliationInput,
-): FlowIndexReconciliationAssessment {
-  const descriptor = objectDescriptorSchema.parse(input.descriptor);
+function assertUniqueOwnedPaths(descriptor: FlowObjectDescriptor): void {
   const paths = new Set<string>();
-  const changedPaths: string[] = [];
   for (const file of descriptor.ownedFiles) {
     const portablePath = file.path.toLowerCase();
     if (paths.has(portablePath)) {
@@ -60,27 +54,61 @@ export function assessFlowIndexReconciliation(
       );
     }
     paths.add(portablePath);
+  }
+}
+
+function findChangedOwnedPaths(
+  descriptor: FlowObjectDescriptor,
+  currentFileHashes: ReadonlyMap<string, string | null>,
+): string[] {
+  const changedPaths: string[] = [];
+  for (const file of descriptor.ownedFiles) {
     if (
-      requireHashEvidence(input.currentFileHashes, file.path, 'current') !==
-      file.hash
+      requireHashEvidence(currentFileHashes, file.path, 'current') !== file.hash
     ) {
       changedPaths.push(file.path);
     }
   }
-  if (changedPaths.length) {
-    // A later merge cannot explain an index already corrupt at its prior boundary.
-    for (const file of descriptor.ownedFiles) {
-      if (
-        requireHashEvidence(input.previousFileHashes, file.path, 'previous') !==
-        file.hash
-      ) {
-        throw new AdtFlowError(
-          'working_tree_diverged',
-          'Flow index does not match previous source.',
-          { path: file.path },
-        );
-      }
+  return changedPaths;
+}
+
+/**
+ * A later merge cannot explain an index already corrupt at its prior boundary.
+ */
+function assertPreviousBoundary(
+  descriptor: FlowObjectDescriptor,
+  previousFileHashes: ReadonlyMap<string, string | null>,
+): void {
+  for (const file of descriptor.ownedFiles) {
+    if (
+      requireHashEvidence(previousFileHashes, file.path, 'previous') !==
+      file.hash
+    ) {
+      throw new AdtFlowError(
+        'working_tree_diverged',
+        'Flow index does not match previous source.',
+        { path: file.path },
+      );
     }
+  }
+}
+
+/**
+ * Assess derived ownership only. The caller must prove the accepted merge and
+ * clean source, archive original bytes, and recheck evidence before mutation.
+ * This function neither proves Git history nor authorizes index removal.
+ */
+export function assessFlowIndexReconciliation(
+  input: FlowIndexReconciliationInput,
+): FlowIndexReconciliationAssessment {
+  const descriptor = objectDescriptorSchema.parse(input.descriptor);
+  assertUniqueOwnedPaths(descriptor);
+  const changedPaths = findChangedOwnedPaths(
+    descriptor,
+    input.currentFileHashes,
+  );
+  if (changedPaths.length) {
+    assertPreviousBoundary(descriptor, input.previousFileHashes);
   }
   return {
     identity: descriptor.identity.canonical,
