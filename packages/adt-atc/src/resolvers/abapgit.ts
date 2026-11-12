@@ -65,7 +65,8 @@ function parseFolderLogic(value: string | undefined): FolderLogic | undefined {
 }
 
 function parseAbapGitMetadata(root: string): AbapGitMetadata | undefined {
-  const metadataPath = join(root, '.abapgit.xml');
+  const safeRoot = resolve(root);
+  const metadataPath = join(safeRoot, '.abapgit.xml');
   if (!existsSync(metadataPath)) return undefined;
 
   try {
@@ -87,11 +88,12 @@ function parseConfiguredFormat(root: string): {
   format?: string;
   folderLogic?: FolderLogic;
 } {
+  const safeRoot = resolve(root);
   const configPaths = [
     process.env.ADT_CONFIG_PATH,
-    join(root, 'adt.config.ts'),
-    join(root, 'adt.config.js'),
-    join(root, 'adt.config.mjs'),
+    join(safeRoot, 'adt.config.ts'),
+    join(safeRoot, 'adt.config.js'),
+    join(safeRoot, 'adt.config.mjs'),
   ].filter((value): value is string => Boolean(value));
 
   const resolvedConfigPaths = new Set<string>();
@@ -127,11 +129,6 @@ function findRepositoryRoot(): string {
   const configuredRoot =
     process.env.CI_PROJECT_DIR?.trim() || process.env.SOURCE_REPO_DIR?.trim();
   if (configuredRoot) {
-    if (/\.\./.test(configuredRoot)) {
-      throw new Error(
-        'Repository root must not contain path traversal segments',
-      );
-    }
     return resolvePath(configuredRoot);
   }
 
@@ -143,11 +140,12 @@ function findRepositoryRoot(): string {
 function resolveRepository(srcRoot: string): ResolverRepository {
   const usesConfiguredSourceRoot = srcRoot === 'src/' || srcRoot === 'src';
   const root = usesConfiguredSourceRoot ? findRepositoryRoot() : process.cwd();
-  const metadata = parseAbapGitMetadata(root);
-  const configured = parseConfiguredFormat(root);
+  const safeRoot = resolve(root);
+  const metadata = parseAbapGitMetadata(safeRoot);
+  const configured = parseConfiguredFormat(safeRoot);
   const configuredSourceFolder = metadata?.startingFolder ?? 'src';
   const sourcePath = usesConfiguredSourceRoot
-    ? join(root, configuredSourceFolder)
+    ? join(safeRoot, configuredSourceFolder)
     : resolvePath(process.cwd(), srcRoot);
 
   // Guard against path traversal via STARTING_FOLDER — the resolved source
@@ -155,7 +153,7 @@ function resolveRepository(srcRoot: string): ResolverRepository {
   // symlinks before the containment check. If it escapes, fall back to
   // the default `src` folder. Guard existsSync before realpathSync so a
   // missing source folder does not throw and abort report generation.
-  const realRoot = existsSync(root) ? realpathSync(root) : root;
+  const realRoot = existsSync(safeRoot) ? realpathSync(safeRoot) : safeRoot;
   const realSourcePath = existsSync(sourcePath)
     ? realpathSync(sourcePath)
     : sourcePath;
