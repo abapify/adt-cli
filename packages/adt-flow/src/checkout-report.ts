@@ -50,10 +50,16 @@ export function createFlowCheckoutReport(
     requestedTransports: partial.requestedTransports,
     mode: result.mode,
     scopeTransports: [...result.scopeTransports],
-    inventory: result.inventory,
-    inventoryResolutions: result.inventoryResolutions,
+    ...(result.inventory === undefined
+      ? {}
+      : { inventory: [...result.inventory] }),
+    ...(result.inventoryResolutions === undefined
+      ? {}
+      : { inventoryResolutions: [...result.inventoryResolutions] }),
     descriptors: [...result.descriptors],
-    absentObjects: result.absentObjects,
+    ...(result.absentObjects === undefined
+      ? {}
+      : { absentObjects: [...result.absentObjects] }),
     indexedOnly: result.indexedOnly === true,
     coverageVersion: 1,
     skipped: partial.skipped,

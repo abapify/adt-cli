@@ -45,10 +45,52 @@ describe('public checkout reports', () => {
       inventoryResolutions: [],
       absentObjects: [],
     });
+    expect('inventory' in unknown).toBe(false);
+    expect('inventoryResolutions' in unknown).toBe(false);
+    expect('absentObjects' in unknown).toBe(false);
     expect(JSON.parse(JSON.stringify(unknown))).not.toHaveProperty('inventory');
     expect(empty.inventory).toEqual([]);
     expect(empty.inventoryResolutions).toEqual([]);
     expect(empty.absentObjects).toEqual([]);
+  });
+
+  it('does not share optional evidence arrays with the checkout result', () => {
+    const source = {
+      ...result(),
+      inventory: [
+        {
+          pgmid: 'R3TR',
+          type: 'CLAS',
+          name: 'ZCL_SAMPLE',
+          objFunc: 'K',
+          sourceTransport: 'DEVK900001',
+        },
+      ],
+    } as FlowCheckoutResult;
+    const report = createFlowCheckoutReport(source);
+    expect(report.inventory).toEqual([
+      {
+        pgmid: 'R3TR',
+        type: 'CLAS',
+        name: 'ZCL_SAMPLE',
+        objFunc: 'K',
+        sourceTransport: 'DEVK900001',
+      },
+    ]);
+    report.inventory?.push({
+      pgmid: 'R3TR',
+      type: 'CLAS',
+      name: 'ZCL_OTHER',
+      objFunc: 'K',
+      sourceTransport: 'DEVK900002',
+    });
+    report.skipped.push({
+      object: 'CLAS/ZC',
+      component: 'main',
+      diagnostic: 'X',
+    });
+    expect(source.inventory?.length).toBe(1);
+    expect(source.skipped).toEqual([]);
   });
 
   it('preserves baseline and index-only outcomes', () => {
