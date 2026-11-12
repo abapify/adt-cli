@@ -10,9 +10,11 @@ import '@abapify/adt-plugin-abapgit';
 // plugin package; every other consumer uses `getFormatPlugin('gcts')`.
 import '@abapify/adt-plugin-gcts';
 
-import { createRequire } from 'node:module';
-
 import { Command } from 'commander';
+import { cliVersion } from './cli-version';
+import { getResolvedConfigPath } from './config-argv';
+
+export { getResolvedConfigPath };
 import {
   importObjectCommand,
   importPackageCommand,
@@ -64,6 +66,7 @@ import {
   structureCommand,
 } from './commands/ddic';
 import { createDatapreviewCommand } from './commands/datapreview';
+import { capabilitiesCommand } from './commands/capabilities';
 import { createAbapCommand } from './commands/abap';
 import { ddlCommand, dclCommand } from './commands/cds';
 import { bdefCommand } from './commands/bdef';
@@ -128,45 +131,6 @@ ${globalOptions}
   }
 }
 
-function getNonEmptyConfigPathOrThrow(configPath: string | undefined): string {
-  if (!configPath) {
-    throw new Error("option '--config <path>' argument missing");
-  }
-
-  return configPath;
-}
-
-function getSeparatedConfigPathOrThrow(configPath: string | undefined): string {
-  const resolvedConfigPath = getNonEmptyConfigPathOrThrow(configPath);
-  if (resolvedConfigPath.startsWith('-')) {
-    throw new Error("option '--config <path>' argument missing");
-  }
-
-  return resolvedConfigPath;
-}
-
-export function getResolvedConfigPath(argv: string[]): string | undefined {
-  const optionTerminatorIndex = argv.indexOf('--');
-  const optionArgs =
-    optionTerminatorIndex === -1 ? argv : argv.slice(0, optionTerminatorIndex);
-
-  const configArgIndex = optionArgs.indexOf('--config');
-  if (configArgIndex !== -1) {
-    const configPath = optionArgs[configArgIndex + 1];
-    return getSeparatedConfigPathOrThrow(configPath);
-  }
-
-  const inlineConfigArg = optionArgs.find((argument) =>
-    argument.startsWith('--config='),
-  );
-  if (inlineConfigArg !== undefined) {
-    const configPath = inlineConfigArg.slice('--config='.length);
-    return getNonEmptyConfigPathOrThrow(configPath);
-  }
-
-  return undefined;
-}
-
 function registerAuthAndCoreCommands(program: Command): void {
   const authCmd = program
     .command('auth')
@@ -180,6 +144,7 @@ function registerAuthAndCoreCommands(program: Command): void {
 
   program.addCommand(discoveryCommand);
   program.addCommand(infoCommand);
+  program.addCommand(capabilitiesCommand);
   program.addCommand(fetchCommand);
   program.addCommand(getCommand);
   getCommand.addCommand(packageGetCommand);
@@ -263,21 +228,6 @@ async function registerPluginCommands(
   } else {
     await loadCommandPlugins(program, process.cwd(), configPath);
   }
-}
-
-function cliVersion(): string {
-  const req = createRequire(import.meta.url);
-  // '@abapify/adt' is the standalone bundle package — it embeds this code
-  // but ships under its own name, so the adt-cli self-reference misses.
-  for (const name of ['@abapify/adt-cli', '@abapify/adt']) {
-    try {
-      const pkg = req(`${name}/package.json`) as { version?: string };
-      if (pkg.version) return pkg.version;
-    } catch {
-      // try the next package name
-    }
-  }
-  return '0.0.0';
 }
 
 // Create main program
