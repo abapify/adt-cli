@@ -160,7 +160,7 @@ function resolveRepository(srcRoot: string): ResolverRepository {
   const safeSourcePath =
     realSourcePath === realRoot || realSourcePath.startsWith(realRoot + sep)
       ? sourcePath
-      : join(root, 'src');
+      : join(safeRoot, 'src');
 
   return {
     root,

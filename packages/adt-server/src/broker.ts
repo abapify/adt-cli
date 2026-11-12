@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { request as httpsRequest } from 'node:https';
 import {
   AdtResponseTooLargeError,
@@ -1032,13 +1033,15 @@ function brokerLeaseHelpers(options: HttpBrokerOptions) {
   const fetcher = options.fetch ?? globalThis.fetch;
   const readBrokerToken = async (signal?: AbortSignal): Promise<string> => {
     signal?.throwIfAborted();
-    if (/\.\./.test(options.tokenFile)) {
+    const baseDir = path.parse(process.cwd()).root;
+    const resolvedTokenFile = path.resolve(baseDir, options.tokenFile);
+    if (!resolvedTokenFile.startsWith(baseDir)) {
       throw new Error(
         'Broker token file path must not contain path traversal segments',
       );
     }
     const token = (
-      await readFile(options.tokenFile, { encoding: 'utf8', signal })
+      await readFile(resolvedTokenFile, { encoding: 'utf8', signal })
     ).trim();
     signal?.throwIfAborted();
     if (!token) throw new Error('ADT Server broker token file is empty');

@@ -271,12 +271,12 @@ export async function loadConfig(
 
   // If explicit config path provided, use it directly
   if (opts.configPath) {
-    if (/\.\./.test(opts.configPath)) {
+    const configPath = resolve(cwd, opts.configPath);
+    if (!configPath.startsWith(cwd)) {
       console.warn(
         `Warning: Config file path contains path traversal, using auto-discovery`,
       );
     } else {
-      const configPath = resolve(cwd, opts.configPath);
       const config = await loadExplicitConfig(configPath);
       if (config) {
         return createLoadedConfig(mergeWithGlobal(config));

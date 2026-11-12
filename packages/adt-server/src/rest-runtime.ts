@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { createRestPageCursorService } from './page-cursors.js';
 import { loadOptionalRestBearerAuthorizer } from './rest-auth.js';
 import { createRestAtcDocumentationCapabilityService } from './atc-documentation-capabilities.js';
@@ -23,12 +24,14 @@ async function readOptionalMountedSecret(
   secretFile: string | undefined,
 ): Promise<string | undefined> {
   if (!secretFile) return undefined;
-  if (/\.\./.test(secretFile)) {
+  const baseDir = path.parse(process.cwd()).root;
+  const resolved = path.resolve(baseDir, secretFile);
+  if (!resolved.startsWith(baseDir)) {
     throw new Error(
       'Mounted secret file path must not contain path traversal segments',
     );
   }
-  const secret = (await readFile(secretFile, 'utf8')).trim();
+  const secret = (await readFile(resolved, 'utf8')).trim();
   return secret || undefined;
 }
 

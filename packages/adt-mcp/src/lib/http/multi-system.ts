@@ -88,8 +88,9 @@ export function loadMultiSystemConfig(): MultiSystemConfig {
   } else {
     const explicit = process.env.SAP_SYSTEMS_FILE;
     const defaultPath = join(homedir(), '.adt', 'systems.json');
-    const resolved = explicit ? resolve(explicit) : defaultPath;
-    const path = resolved;
+    const baseDir = parse(homedir()).root;
+    const resolved = explicit ? resolve(baseDir, explicit) : defaultPath;
+    const path = resolved.startsWith(baseDir) ? resolved : defaultPath;
     if (existsSync(path)) {
       raw = parseJsonSafe(readFileSync(path, 'utf8'), path);
     }
