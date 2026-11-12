@@ -43,3 +43,8 @@ export {
   type FlowObjectModel,
   type FlowSkippedObject,
 } from './types';
+export {
+  assessFlowIndexReconciliation,
+  type FlowIndexReconciliationInput,
+  type FlowIndexReconciliationAssessment,
+} from './index-reconciliation';
