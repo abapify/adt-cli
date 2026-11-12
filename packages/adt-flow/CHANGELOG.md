@@ -1,3 +1,14 @@
+## 0.4.52 (2026-11-12)
+
+### 🚀 Features
+
+- **flow:** assess stale descriptor ownership from file hashes ([#354](https://github.com/abapify/adt-cli/pull/354))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.51 (2026-11-12)
 
 ### 🩹 Fixes

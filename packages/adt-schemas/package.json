@@ -1,6 +1,6 @@
 {
   "name": "@abapify/adt-schemas",
-  "version": "0.4.51",
+  "version": "0.4.52",
   "description": "ADT XML schemas generated from SAP XSD definitions",
   "license": "MIT",
   "publishConfig": {
@@ -13,11 +13,11 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@abapify/ts-xsd": "0.4.51",
+    "@abapify/ts-xsd": "0.4.52",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@abapify/adt-fixtures": "0.4.51"
+    "@abapify/adt-fixtures": "0.4.52"
   },
   "files": [
     "dist"
