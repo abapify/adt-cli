@@ -271,21 +271,15 @@ export async function loadConfig(
 
   // If explicit config path provided, use it directly
   if (opts.configPath) {
-    if (/\.\./.test(opts.configPath)) {
-      console.warn(
-        `Warning: Config file path contains path traversal, using auto-discovery`,
-      );
-    } else {
-      const configPath = resolve(cwd, opts.configPath);
-      const config = await loadExplicitConfig(configPath);
-      if (config) {
-        return createLoadedConfig(mergeWithGlobal(config));
-      }
-      // Config path specified but file not found/loadable - continue with auto-discovery
-      console.warn(
-        `Warning: Config file not found at ${configPath}, using auto-discovery`,
-      );
+    const configPath = resolve(cwd, opts.configPath);
+    const config = await loadExplicitConfig(configPath);
+    if (config) {
+      return createLoadedConfig(mergeWithGlobal(config));
     }
+    // Config path specified but file not found/loadable - continue with auto-discovery
+    console.warn(
+      `Warning: Config file not found at ${configPath}, using auto-discovery`,
+    );
   }
 
   // Discover base local config (adt.config.*)

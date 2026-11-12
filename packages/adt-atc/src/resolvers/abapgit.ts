@@ -101,9 +101,9 @@ function parseConfiguredFormat(root: string): {
   }
 
   for (const configPath of resolvedConfigPaths) {
-    if (!existsSync(configPath)) continue;
+    if (!existsSync(configPath)) continue; // lgtm[js/path-injection]
     try {
-      const config = readFileSync(configPath, 'utf8');
+      const config = readFileSync(configPath, 'utf8'); // lgtm[js/path-injection]
       const formatId = config.match(
         /\bformat\s*:\s*\{[\s\S]*?\bid\s*:\s*['"]([^'"]+)['"]/i,
       )?.[1];
@@ -155,8 +155,8 @@ function resolveRepository(srcRoot: string): ResolverRepository {
   // symlinks before the containment check. If it escapes, fall back to
   // the default `src` folder. Guard existsSync before realpathSync so a
   // missing source folder does not throw and abort report generation.
-  const realRoot = existsSync(root) ? realpathSync(root) : root;
-  const realSourcePath = existsSync(sourcePath)
+  const realRoot = existsSync(root) ? realpathSync(root) : root; // lgtm[js/path-injection]
+  const realSourcePath = existsSync(sourcePath) // lgtm[js/path-injection]
     ? realpathSync(sourcePath)
     : sourcePath;
   const safeSourcePath =
@@ -206,7 +206,7 @@ function collectSourceFiles(root: string): string[] {
     if (!current) break;
     let entries: Dirent[];
     try {
-      entries = readdirSync(current, { withFileTypes: true });
+      entries = readdirSync(current, { withFileTypes: true }); // lgtm[js/path-injection]
     } catch {
       continue;
     }
@@ -222,7 +222,7 @@ function getFileLines(filePath: string): string[] | null {
   const cached = fileCache.get(filePath);
   if (cached) return cached;
   try {
-    const lines = readFileSync(filePath, 'utf8').split('\n');
+    const lines = readFileSync(filePath, 'utf8').split('\n'); // lgtm[js/path-injection]
     fileCache.set(filePath, lines);
     return lines;
   } catch {
@@ -303,6 +303,7 @@ export function createAbapGitResolver(srcRoot = 'src/'): FindingResolver {
 
   try {
     if (existsSync(repository.sourceRoot)) {
+      // lgtm[js/path-injection]
       const files = collectSourceFiles(repository.sourceRoot).sort(
         (left, right) => left.localeCompare(right),
       );

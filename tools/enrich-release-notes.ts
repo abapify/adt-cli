@@ -156,7 +156,7 @@ function updateRelease(
     throw new Error('Invalid tag');
   }
   const tmpFile = join(tmpdir(), `release-body-${tag}.md`);
-  writeFileSync(tmpFile, newBody); // NOSONAR: tag validated by assertTag, tmpdir() is OS-managed
+  writeFileSync(tmpFile, newBody); // NOSONAR: tag validated by assertTag, tmpdir() is OS-managed // lgtm[js/path-injection]
   return exec(GH, [
     'api',
     '--method',

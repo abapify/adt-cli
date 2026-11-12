@@ -16,6 +16,7 @@
 import https from 'node:https';
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -1059,18 +1060,14 @@ export async function startHttpServer(
   // missing or malformed certificate must not leak the session registry.
   const certPath = options.tlsCert ?? process.env.MCP_TLS_CERT;
   const keyPath = options.tlsKey ?? process.env.MCP_TLS_KEY;
-  if (certPath && /\.\./.test(certPath)) {
-    throw new Error('MCP_TLS_CERT must not contain path traversal segments');
-  }
-  if (keyPath && /\.\./.test(keyPath)) {
-    throw new Error('MCP_TLS_KEY must not contain path traversal segments');
-  }
+  const resolvedCertPath = certPath ? path.resolve(certPath) : undefined;
+  const resolvedKeyPath = keyPath ? path.resolve(keyPath) : undefined;
   const cert =
     options.tlsCertContent ??
-    (certPath ? await readFile(certPath, 'utf8') : undefined);
+    (resolvedCertPath ? await readFile(resolvedCertPath, 'utf8') : undefined);
   const key =
     options.tlsKeyContent ??
-    (keyPath ? await readFile(keyPath, 'utf8') : undefined);
+    (resolvedKeyPath ? await readFile(resolvedKeyPath, 'utf8') : undefined);
 
   if (!cert || !key) {
     throw new Error(

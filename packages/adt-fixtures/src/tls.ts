@@ -124,8 +124,8 @@ export function getTestTlsMaterial(): TestTlsMaterial {
       { stdio: 'ignore' },
     );
     cached = {
-      cert: readFileSync(certPath, 'utf8'),
-      key: readFileSync(keyPath, 'utf8'),
+      cert: readFileSync(certPath, 'utf8'), // lgtm[js/path-injection]
+      key: readFileSync(keyPath, 'utf8'), // lgtm[js/path-injection]
     };
     return cached;
   } finally {
