@@ -63,12 +63,14 @@ async function normalizeFinding(
 ): Promise<NormalizedAtcFinding> {
   const fallbackPath = fallbackPathFor(finding);
   const methodLine = methodRelativeLine(finding);
+  const existing = (finding as Partial<NormalizedAtcFinding>).resolvedLocation;
   if (!resolver) {
     return {
       ...finding,
       fingerprint: fingerprintFor(finding),
       fallbackPath,
-      line: methodLine,
+      line: existing ? existing.line : methodLine,
+      ...(existing ? { resolvedLocation: existing } : {}),
     };
   }
   const methodName = extractMethodName(finding.location);
