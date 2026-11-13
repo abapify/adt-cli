@@ -14,6 +14,7 @@ import {
   createHttpBrokerOperations,
   createHttpDestinationContexts,
 } from '../src/broker.js';
+import { transportDetailResponse } from '../src/rest-schemas.js';
 
 const brokerToken = randomUUID();
 
@@ -357,6 +358,7 @@ test('maps transport detail and objects to canonical REST references without ADT
   const tokenFile = path.join(directory, 'broker-token');
   await writeFile(tokenFile, `${brokerToken}\n`, 'utf8');
   let lease = 0;
+  const rawTaskTypes = ['K', 'W', 'T', 'S', 'R', 'X', 'Q'] as const;
   const operations = createHttpBrokerOperations({
     baseUrl: 'http://adt-api.internal',
     tokenFile,
@@ -386,15 +388,18 @@ test('maps transport detail and objects to canonical REST references without ADT
         adt: {
           cts: {
             transportrequests: {
-              async get() {
+              async get(transport: string) {
                 return {
                   root: {
                     request: {
-                      number: 'DEVK900001',
+                      number: transport,
                       owner: 'ALICE',
                       desc: 'Safe refactor',
                       status: 'D',
-                      type: 'K',
+                      type:
+                        transport === 'DEVK900099'
+                          ? 'Development/Correction'
+                          : 'K',
                       abap_object: [
                         {
                           type: 'CLAS/OC',
@@ -419,7 +424,7 @@ test('maps transport detail and objects to canonical REST references without ADT
                           owner: 'ALICE',
                           desc: 'Implementation task',
                           status: 'D',
-                          type: 'S',
+                          type: 'Development/Correction',
                           abap_object: [
                             {
                               type: 'INTF',
@@ -428,6 +433,34 @@ test('maps transport detail and objects to canonical REST references without ADT
                             },
                           ],
                         },
+                        {
+                          number: 'DEVK900003',
+                          owner: 'ALICE',
+                          desc: 'Legacy task',
+                          status: 'D',
+                          type: 'Customizing task',
+                        },
+                        {
+                          number: 'DEVK900004',
+                          owner: 'ALICE',
+                          desc: 'Long legacy task',
+                          status: 'D',
+                          type: 'constructor',
+                        },
+                        {
+                          number: 'DEVK900005',
+                          owner: 'ALICE',
+                          desc: 'Short legacy task',
+                          status: 'D',
+                          type: 'toString',
+                        },
+                        ...rawTaskTypes.map((type, index) => ({
+                          number: `DEVK90000${index + 6}`,
+                          owner: 'ALICE',
+                          desc: `Canonical ${type} task`,
+                          status: 'D',
+                          type,
+                        })),
                       ],
                     },
                   },
@@ -442,6 +475,13 @@ test('maps transport detail and objects to canonical REST references without ADT
   try {
     const detail = await operations.getTransportDetail!('dev', 'DEVK900001');
     const objects = await operations.listTransportObjects!('dev', 'DEVK900001');
+    const descriptiveRoot = await operations.getTransportDetail!(
+      'dev',
+      'DEVK900099',
+    );
+    assert.doesNotThrow(() => transportDetailResponse.parse(detail));
+    assert.doesNotThrow(() => transportDetailResponse.parse(descriptiveRoot));
+    assert.strictEqual(descriptiveRoot.trFunction, 'S');
     assert.deepStrictEqual(detail, {
       trkorr: 'DEVK900001',
       owner: 'ALICE',
@@ -466,6 +506,45 @@ test('maps transport detail and objects to canonical REST references without ADT
             },
           ],
         },
+        {
+          trkorr: 'DEVK900003',
+          owner: 'ALICE',
+          description: 'Legacy task',
+          status: 'modifiable',
+          statusRaw: 'D',
+          trFunction: 'Q',
+          parentTrkorr: 'DEVK900001',
+          objects: [],
+        },
+        {
+          trkorr: 'DEVK900004',
+          owner: 'ALICE',
+          description: 'Long legacy task',
+          status: 'modifiable',
+          statusRaw: 'D',
+          parentTrkorr: 'DEVK900001',
+          objects: [],
+        },
+        {
+          trkorr: 'DEVK900005',
+          owner: 'ALICE',
+          description: 'Short legacy task',
+          status: 'modifiable',
+          statusRaw: 'D',
+          trFunction: 'TOSTRING',
+          parentTrkorr: 'DEVK900001',
+          objects: [],
+        },
+        ...rawTaskTypes.map((trFunction, index) => ({
+          trkorr: `DEVK90000${index + 6}`,
+          owner: 'ALICE',
+          description: `Canonical ${trFunction} task`,
+          status: 'modifiable',
+          statusRaw: 'D',
+          trFunction,
+          parentTrkorr: 'DEVK900001',
+          objects: [],
+        })),
       ],
       objects: [
         {

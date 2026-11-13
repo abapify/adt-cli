@@ -453,20 +453,39 @@ function normalizeChangedAt(value: unknown): string | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
+const TRANSPORT_FUNCTION_LABELS = new Map<string, string>([
+  ['workbench', 'K'],
+  ['customizing', 'W'],
+  ['transport of copies', 'T'],
+  ['development/correction', 'S'],
+  ['dev/correction', 'S'],
+  ['repair', 'R'],
+  ['unclassified', 'X'],
+  ['customizing task', 'Q'],
+]);
+
+function normalizeTransportFunction(value: string): string | undefined {
+  const normalized = value.toUpperCase();
+  return (
+    TRANSPORT_FUNCTION_LABELS.get(value.toLowerCase()) ??
+    (normalized.length <= 8 ? normalized : undefined)
+  );
+}
+
 function transportSummaryFromRequest(
   request: UnknownRecord,
   fallbackTrkorr: string,
 ): TransportSummary {
   const statusRaw = stringField(request, 'status');
+  const type = stringField(request, 'type');
+  const trFunction = type ? normalizeTransportFunction(type) : undefined;
   return {
     trkorr: stringField(request, 'number') ?? fallbackTrkorr,
     owner: stringField(request, 'owner') ?? '',
     description: stringField(request, 'desc') ?? '',
     status: mapTransportStatus(statusRaw),
     ...(statusRaw ? { statusRaw } : {}),
-    ...(stringField(request, 'type')
-      ? { trFunction: stringField(request, 'type')!.toUpperCase() }
-      : {}),
+    ...(trFunction ? { trFunction } : {}),
     ...(stringField(request, 'target')
       ? { target: stringField(request, 'target')! }
       : {}),
