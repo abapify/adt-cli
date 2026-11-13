@@ -2,26 +2,37 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Read",
         "hooks": [
           {
-            "type": "command",
             "command": ".claude/hooks/sonar-secrets/build-scripts/pretool-secrets.sh",
-            "timeout": 60
+            "timeout": 60,
+            "type": "command"
           }
-        ]
+        ],
+        "matcher": "Read"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bd prime --hook-json",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
       }
     ],
     "UserPromptSubmit": [
       {
-        "matcher": "*",
         "hooks": [
           {
-            "type": "command",
             "command": ".claude/hooks/sonar-secrets/build-scripts/prompt-secrets.sh",
-            "timeout": 60
+            "timeout": 60,
+            "type": "command"
           }
-        ]
+        ],
+        "matcher": "*"
       }
     ]
   }
