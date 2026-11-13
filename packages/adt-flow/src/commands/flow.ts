@@ -21,7 +21,10 @@ import { AdtFlowError, type FlowCheckoutInput } from '../types';
 
 export interface FlowCommandDependencies {
   getFormat(id: string): FormatPlugin | undefined;
-  createService(client: AdtClient, format: FormatPlugin): AdtFlowService;
+  createService(
+    client: AdtClient,
+    format: FormatPlugin,
+  ): Pick<AdtFlowService, 'checkout' | 'index'>;
 }
 
 const DEFAULT_DEPENDENCIES: FlowCommandDependencies = {

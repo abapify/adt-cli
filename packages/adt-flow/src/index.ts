@@ -48,3 +48,16 @@ export {
   type FlowIndexReconciliationInput,
   type FlowIndexReconciliationAssessment,
 } from './index-reconciliation';
+
+export {
+  createCtsDeletionProof,
+  type CtsDeletionEvidence,
+  type CtsDeletionInventoryEntry,
+  type CtsDeletionTransport,
+  type CtsDeletionProof,
+} from './cts-deletion-proof';
+export {
+  type FlowDeletionInput,
+  type FlowDeletionOperation,
+  type FlowDeletionResult,
+} from './cts-deletions';

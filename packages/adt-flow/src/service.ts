@@ -1,3 +1,8 @@
+import {
+  reconcileCtsDeletions,
+  type FlowDeletionInput,
+  type FlowDeletionResult,
+} from './cts-deletions';
 import { mkdir, open, realpath, stat, unlink } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import type {
@@ -970,6 +975,7 @@ async function processGroup(ctx: ProcessGroupContext): Promise<GroupResult> {
 }
 
 export interface AdtFlowService {
+  reconcileDeletions(input: FlowDeletionInput): Promise<FlowDeletionResult>;
   checkout(
     input: FlowCheckoutInput,
     hooks?: FlowCheckoutHooks,
@@ -2056,6 +2062,25 @@ export function createAdtFlowService(
   dependencies: FlowCheckoutDependencies,
 ): AdtFlowService {
   return {
+    async reconcileDeletions(input): Promise<FlowDeletionResult> {
+      return withWorkspaceLock(input.root, () => {
+        const ctx = createFlowContext(
+          {
+            root: input.root,
+            transports: [...input.evidence.requestedTransports],
+            mode: 'head',
+            config: input.config,
+          },
+          dependencies,
+        );
+        return reconcileCtsDeletions(
+          input,
+          dependencies.format,
+          ctx.configDigest,
+          ctx.formatDigest,
+        );
+      });
+    },
     async checkout(input, hooks): Promise<FlowCheckoutResult> {
       return withWorkspaceLock(input.root, async () => {
         await hooks?.beforeCheckout?.();
