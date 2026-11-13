@@ -1,3 +1,7 @@
+## 0.4.57 (2026-11-13)
+
+This was a version bump only for @abapify/adt-puppeteer to align it with other projects, there were no code changes.
+
 ## 0.4.56 (2026-11-12)
 
 This was a version bump only for @abapify/adt-puppeteer to align it with other projects, there were no code changes.

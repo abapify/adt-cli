@@ -1,3 +1,13 @@
+## 0.4.57 (2026-11-13)
+
+### 🩹 Fixes
+
+- **adt-server:** normalize transport function labels ([#363](https://github.com/abapify/adt-cli/pull/363))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.56 (2026-11-12)
 
 This was a version bump only for adt-server to align it with other projects, there were no code changes.
