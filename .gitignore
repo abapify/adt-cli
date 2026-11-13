@@ -190,3 +190,4 @@ gascity/AGENTS.md
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*
+scripts/.oss-guard-local.patterns
