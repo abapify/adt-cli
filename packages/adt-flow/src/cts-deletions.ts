@@ -129,12 +129,16 @@ export async function reconcileCtsDeletions(
       continue;
     }
     const previous = await previousDescriptor(input.root, identity);
+    const matchingPaths = paths.filter((path) =>
+      matches(format, path, identity),
+    );
     if (
       !previous &&
       (!format.parseFilename ||
-        !format.supportedTypes.some(
-          (type) => type.toUpperCase() === identity.type,
-        ))
+        (matchingPaths.length === 0 &&
+          !format.supportedTypes.some(
+            (type) => type.toUpperCase() === identity.type,
+          )))
     ) {
       operation.diagnostic = 'CTS_DELETE_TYPE_UNSUPPORTED';
       continue;
@@ -143,12 +147,9 @@ export async function reconcileCtsDeletions(
       previous?.ownedFiles.map((file) => [sourcePath(file.path), file.hash]) ??
         [],
     );
-    const candidates = [
-      ...new Set([
-        ...indexed.keys(),
-        ...paths.filter((path) => matches(format, path, identity)),
-      ]),
-    ].sort(compareStrings);
+    const candidates = [...new Set([...indexed.keys(), ...matchingPaths])].sort(
+      compareStrings,
+    );
     if (identity.type === 'DEVC' && !previous && candidates.length === 0) {
       operation.diagnostic = 'CTS_DELETE_OWNERSHIP_NOT_PROVEN';
       continue;

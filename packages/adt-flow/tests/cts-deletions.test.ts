@@ -282,6 +282,23 @@ describe('locked deletion reconciliation', () => {
       expect(r.removed).toEqual(Object.keys(files).sort());
     },
   );
+  it('uses proven filename ownership even if the current serializer registry lacks the type', async () => {
+    const file = 'src/demo/zdemo_deleted.sxsd.xml';
+    const f = await fixture({ [file]: '<serialized/>' });
+    expect(f.dependencies.format.supportedTypes).not.toContain('SXSD');
+    const result = await f.apply(evidence([row('SXSD')]));
+    expect(result.removed).toEqual([file]);
+    expect(result.operations[0].outcome).toBe('removed');
+  });
+  it('does not claim unsupported unobserved objects are already absent', async () => {
+    const f = await fixture({ 'src/demo/keep.prog.abap': 'keep' });
+    const result = await f.apply(evidence([row('UNKN')]));
+    expect(result.removed).toEqual([]);
+    expect(result.operations[0]).toMatchObject({
+      outcome: 'unapplied',
+      diagnostic: 'CTS_DELETE_TYPE_UNSUPPORTED',
+    });
+  });
   it('deletes only indexed package metadata, preserving all child source', async () => {
     const file = 'src/demo/package.devc.xml';
     const f = await fixture({
