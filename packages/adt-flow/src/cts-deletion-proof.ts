@@ -46,7 +46,7 @@ function requireEvidence(
   if (!condition) throw new AdtFlowError('invalid_input', message);
 }
 
-const TRANSPORT = /^[A-Z0-9]{3}K[0-9]{6}$/;
+const TRANSPORT = /^[A-Z\d]{3}K\d{6}$/;
 const transportSchema = z.object({
   number: z.string(),
   status: z.string(),
@@ -106,12 +106,13 @@ function normalizeInventory(
         objFunc: parsed.data.objFunc.trim().toUpperCase(),
       };
       requireEvidence(
-        /^[A-Z0-9_]+$/.test(entry.pgmid) &&
-          /^[A-Z0-9_]+(?:\/[A-Z0-9_]+)?$/.test(entry.type) &&
+        /^[A-Z\d_]+$/.test(entry.pgmid) &&
+          /^[A-Z\d_]+(?:\/[A-Z\d_]+)?$/.test(entry.type) &&
           entry.name &&
-          [...entry.name].every(
-            (char) => char.charCodeAt(0) >= 32 && char.charCodeAt(0) !== 127,
-          ),
+          [...entry.name].every((char) => {
+            const code = char.codePointAt(0);
+            return code !== undefined && code >= 32 && code !== 127;
+          }),
         'Invalid CTS object identity.',
       );
       const key = JSON.stringify([entry.pgmid, entry.type, entry.name]);
@@ -135,77 +136,109 @@ function withoutControls(entries: readonly CtsDeletionInventoryEntry[]) {
   );
 }
 
+type ResolvedEvidence = {
+  task: string;
+  snapshotTransport: string;
+  inventory: CtsDeletionInventoryEntry[];
+};
+
+function proofFromInventoryEvidence(
+  evidence: Extract<CtsDeletionEvidence, { kind: 'inventory' }>,
+): ResolvedEvidence {
+  const task = evidence.task;
+  validateScope(task, evidence.requestedTransports);
+  return {
+    task,
+    snapshotTransport: task,
+    inventory: withoutControls(normalizeInventory(evidence.inventory, task)),
+  };
+}
+
+function assertSnapshotContract(
+  source: CtsDeletionTransport,
+  snapshot: CtsDeletionTransport,
+  task: string,
+): void {
+  requireEvidence(
+    source.objectType === 'T' && source.status === 'R',
+    'Deletion source must be a released task.',
+  );
+  requireEvidence(
+    TRANSPORT.test(snapshot.number) &&
+      snapshot.number !== task &&
+      snapshot.number.slice(0, 3) === task.slice(0, 3),
+    'Deletion snapshot identity or system mismatch.',
+  );
+  requireEvidence(
+    ['R', 'K'].includes(snapshot.objectType) &&
+      snapshot.requestType === 'T' &&
+      snapshot.status === 'R',
+    'Deletion snapshot must be a released transport of copies.',
+  );
+}
+
+function snapshotOrigin(
+  copied: readonly CtsDeletionInventoryEntry[],
+): string | undefined {
+  const origins = copied
+    .filter((row) => row.pgmid === 'CORR' && row.type === 'MERG')
+    .map((row) => /^([A-Z\d]{3}K\d{6})(?:\s|$)/.exec(row.name)?.[1])
+    .filter((origin): origin is string => origin !== undefined);
+  return origins.length === 1 ? origins[0] : undefined;
+}
+
+function inventoryKeyDigest(
+  entries: readonly CtsDeletionInventoryEntry[],
+): string {
+  return JSON.stringify(
+    entries.map((row) => JSON.stringify([row.pgmid, row.type, row.name])),
+  );
+}
+
+function proofFromSnapshotEvidence(
+  evidence: Extract<CtsDeletionEvidence, { kind: 'snapshot' }>,
+): ResolvedEvidence {
+  const { source, snapshot } = evidence;
+  const task = source.number;
+  validateScope(task, evidence.requestedTransports);
+  assertSnapshotContract(source, snapshot, task);
+  const project = (transport: CtsDeletionTransport) =>
+    normalizeInventory(
+      transport.objects.map((row) => ({ ...row, sourceTransport: task })),
+      task,
+    );
+  const original = withoutControls(project(source));
+  const copied = project(snapshot);
+  const origin = snapshotOrigin(copied);
+  requireEvidence(
+    origin === task,
+    'Deletion snapshot origin is missing or ambiguous.',
+  );
+  const inventory = withoutControls(copied);
+  requireEvidence(
+    original.length > 0 &&
+      inventoryKeyDigest(original) === inventoryKeyDigest(inventory),
+    'Deletion snapshot inventory differs from its source task.',
+  );
+  return { task, snapshotTransport: snapshot.number, inventory };
+}
+
 /** Validate explicit deletion facts without acquiring source or mutating files. */
 export function createCtsDeletionProof(
   evidence: CtsDeletionEvidence,
 ): CtsDeletionProof {
   const parsed = evidenceSchema.safeParse(evidence);
   requireEvidence(parsed.success, 'Invalid CTS deletion evidence.');
-  evidence = parsed.data;
-  let task: string,
-    snapshotTransport: string,
-    inventory: CtsDeletionInventoryEntry[];
-  if (evidence.kind === 'inventory') {
-    task = evidence.task;
-    validateScope(task, evidence.requestedTransports);
-    inventory = withoutControls(normalizeInventory(evidence.inventory, task));
-    snapshotTransport = task;
-  } else if (evidence.kind === 'snapshot') {
-    const { source, snapshot } = evidence;
-    task = source.number;
-    validateScope(task, evidence.requestedTransports);
-    requireEvidence(
-      source.objectType === 'T' && source.status === 'R',
-      'Deletion source must be a released task.',
-    );
-    requireEvidence(
-      TRANSPORT.test(snapshot.number) &&
-        snapshot.number !== task &&
-        snapshot.number.slice(0, 3) === task.slice(0, 3),
-      'Deletion snapshot identity or system mismatch.',
-    );
-    requireEvidence(
-      ['R', 'K'].includes(snapshot.objectType) &&
-        snapshot.requestType === 'T' &&
-        snapshot.status === 'R',
-      'Deletion snapshot must be a released transport of copies.',
-    );
-    const project = (transport: CtsDeletionTransport) =>
-      normalizeInventory(
-        transport.objects.map((row) => ({ ...row, sourceTransport: task })),
-        task,
-      );
-    const original = withoutControls(project(source));
-    const copied = project(snapshot);
-    const origins = copied
-      .filter((row) => row.pgmid === 'CORR' && row.type === 'MERG')
-      .map((row) => /^([A-Z0-9]{3}K[0-9]{6})(?:\s|$)/.exec(row.name)?.[1])
-      .filter((origin): origin is string => origin !== undefined);
-    requireEvidence(
-      origins.length === 1 && origins[0] === task,
-      'Deletion snapshot origin is missing or ambiguous.',
-    );
-    inventory = withoutControls(copied);
-    const keys = (entries: readonly CtsDeletionInventoryEntry[]) =>
-      entries.map((row) => JSON.stringify([row.pgmid, row.type, row.name]));
-    requireEvidence(
-      original.length > 0 &&
-        JSON.stringify(keys(original)) === JSON.stringify(keys(inventory)),
-      'Deletion snapshot inventory differs from its source task.',
-    );
-    snapshotTransport = snapshot.number;
-  } else {
-    throw new AdtFlowError(
-      'invalid_input',
-      'Unknown CTS deletion evidence kind.',
-    );
-  }
+  const resolved =
+    parsed.data.kind === 'inventory'
+      ? proofFromInventoryEvidence(parsed.data)
+      : proofFromSnapshotEvidence(parsed.data);
   return {
     schemaVersion: 1,
-    sourceTask: task,
-    snapshotTransport,
-    inventoryDigest: digest(inventory),
-    requestedTransports: [...evidence.requestedTransports],
-    declarations: inventory.filter((row) => row.objFunc === 'D'),
+    sourceTask: resolved.task,
+    snapshotTransport: resolved.snapshotTransport,
+    inventoryDigest: digest(resolved.inventory),
+    requestedTransports: [...parsed.data.requestedTransports],
+    declarations: resolved.inventory.filter((row) => row.objFunc === 'D'),
   };
 }
