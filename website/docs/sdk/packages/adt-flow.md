@@ -143,5 +143,7 @@ planned paths without removing files or writing object tombstones.
 The caller must isolate the workspace at the selected task's intended head and
 retain the returned report alongside its source-acquisition diagnostics. A
 deletion proof is not proof of complete or exact historical source coverage.
+Independently reconciled tombstones require an inventory refresh before any
+exact-head cache reuse; historical transport inventory remains unchanged.
 Report persistence and nonblocking reviewer presentation remain consumer
 responsibilities. Ordinary checkout and CLI/MCP surfaces are unchanged.

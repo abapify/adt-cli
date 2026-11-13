@@ -70,6 +70,9 @@ async function fixture(files: Record<string, string | Buffer> = {}) {
       description: 'Synthetic format fixture',
       supportedTypes: ['PROG', 'CLAS', 'FUGR', 'DTEL', 'DEVC', 'SMIM'],
       getHandler: () => undefined,
+      materialize: async () => {
+        throw new Error('Unexpected serialization');
+      },
       parseFilename: (name) => parseAbapGitFilename(name) ?? undefined,
     },
     buildManifest: noSap,
@@ -84,7 +87,7 @@ async function fixture(files: Record<string, string | Buffer> = {}) {
       config: { format: { id: 'abapgit' } },
       dryRun,
     });
-  return { root, service, apply, noSap };
+  return { root, service, apply, noSap, dependencies };
 }
 async function owned(
   root: string,
@@ -145,6 +148,15 @@ describe('CTS deletion proof', () => {
         inventory: [...input.inventory].reverse(),
       }).inventoryDigest,
     ).toBe(proof.inventoryDigest);
+  });
+  it('accepts descriptive MERG control rows but still requires one exact task origin', () => {
+    const input = copyEvidence();
+    input.snapshot.objects.unshift(
+      row('MERG', 'Copy description without a task identity', '', 'CORR'),
+    );
+    expect(createCtsDeletionProof(input).sourceTask).toBe(task);
+    input.snapshot.objects.push(row('MERG', 'DEVK900004', '', 'CORR'));
+    expect(() => createCtsDeletionProof(input)).toThrow(AdtFlowError);
   });
   it('validates a released copy with exact typed origin while original D flags are missing', () => {
     expect(createCtsDeletionProof(copyEvidence())).toMatchObject({
@@ -342,6 +354,41 @@ describe('locked deletion reconciliation', () => {
     await symlink(join(f.root, 'outside'), join(f.root, file));
     await expect(f.apply()).rejects.toMatchObject({ code: 'path_invalid' });
     expect(await readFile(join(f.root, 'outside'), 'utf8')).toBe('keep');
+  });
+  it('invalidates an older transport fast path after independently proven deletion', async () => {
+    const file = 'src/demo/zdemo_deleted.prog.abap';
+    const f = await fixture({ [file]: 'old' });
+    const object = await owned(f.root, 'PROG', 'ZDEMO_DELETED', {
+      [file]: 'old',
+    });
+    const config = { format: { id: 'abapgit' } };
+    const configDigest = digest(config);
+    const formatDigest = digest({
+      id: 'abapgit',
+      options: {},
+      supportedTypes: [...f.dependencies.format.supportedTypes].sort(),
+    });
+    await mkdir(join(f.root, '.adt/tr'), { recursive: true });
+    await writeFile(
+      join(f.root, '.adt/tr/' + task + '.json'),
+      JSON.stringify({
+        schemaVersion: 1,
+        requestedTransports: [task],
+        scopeTransports: [task],
+        inventory: [row('PROG', 'ZDEMO_DELETED', '')],
+        objects: [object],
+        configDigest,
+        formatDigest,
+      }),
+    );
+    await f.apply();
+    f.noSap.mockClear();
+    try {
+      await f.service.checkout({ root: f.root, transports: [task], config });
+    } catch {
+      /* The forbidden acquisition marker is expected after index invalidation. */
+    }
+    expect(f.noSap).toHaveBeenCalledOnce();
   });
   it('removes indexed binary companions using byte hashes', async () => {
     const file = 'src/demo/zdemo_deleted.smim.bin';

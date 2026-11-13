@@ -115,8 +115,10 @@ function normalizeInventory(
         'Invalid CTS object identity.',
       );
       const key = JSON.stringify([entry.pgmid, entry.type, entry.name]);
-      requireEvidence(!unique.has(key), 'Duplicate CTS inventory identity.');
-      unique.add(key);
+      if (!(entry.pgmid === 'CORR' && entry.type === 'MERG')) {
+        requireEvidence(!unique.has(key), 'Duplicate CTS inventory identity.');
+        unique.add(key);
+      }
       return entry;
     })
     .sort((a, b) =>
@@ -177,7 +179,8 @@ export function createCtsDeletionProof(
     const copied = project(snapshot);
     const origins = copied
       .filter((row) => row.pgmid === 'CORR' && row.type === 'MERG')
-      .map((row) => /^([A-Z0-9]{3}K[0-9]{6})(?:\s|$)/.exec(row.name)?.[1]);
+      .map((row) => /^([A-Z0-9]{3}K[0-9]{6})(?:\s|$)/.exec(row.name)?.[1])
+      .filter((origin): origin is string => origin !== undefined);
     requireEvidence(
       origins.length === 1 && origins[0] === task,
       'Deletion snapshot origin is missing or ambiguous.',

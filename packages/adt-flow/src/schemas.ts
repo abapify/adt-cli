@@ -120,6 +120,8 @@ export const objectDescriptorSchema = z
       name: z.string().min(1),
     }),
     state: z.enum(['present', 'deleted', 'omitted']),
+    /** Independent deletion invalidates cached transport-to-object boundaries. */
+    requiresInventoryRefresh: z.literal(true).optional(),
     packagePath: z.array(z.string()),
     selections: z.array(sourceSelectionSchema),
     ownedFiles: z.array(ownedFileSchema),

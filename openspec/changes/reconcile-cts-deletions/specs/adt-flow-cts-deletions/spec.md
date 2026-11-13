@@ -58,3 +58,10 @@ The SDK SHALL return versioned per-operation applied, absent or unapplied eviden
 
 - **WHEN** the caller requests a dry run
 - **THEN** planned paths are reported with no claimed removed paths and no filesystem writes
+
+#### Scenario: Independent deletion invalidates older cached checkout boundaries
+
+- **GIVEN** an older transport index references an object that is independently deleted
+- **WHEN** a later checkout tries to reuse that index
+- **THEN** the SDK refreshes inventory rather than accepting the tombstone as the older transport's proven source state
+- **THEN** historical transport inventory remains intact

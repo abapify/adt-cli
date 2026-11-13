@@ -7,7 +7,11 @@ import {
   type CtsDeletionProof,
 } from './cts-deletion-proof';
 import { compareStrings, sha256, stableJson } from './deterministic';
-import { objectDescriptorPath, objectIdentity } from './identity';
+import {
+  createTombstoneDescriptor,
+  objectDescriptorPath,
+  objectIdentity,
+} from './identity';
 import {
   applyRepositoryPlan,
   planRepositoryChanges,
@@ -89,25 +93,6 @@ async function previousDescriptor(
       { object: identity.canonical },
     );
   return parsed.data;
-}
-
-function tombstone(
-  identity: FlowObjectIdentity,
-  previous: ObjectDescriptor | undefined,
-  configDigest: string,
-  formatDigest: string,
-): ObjectDescriptor {
-  return {
-    schemaVersion: 1,
-    formatVersion: 1,
-    identity,
-    state: 'deleted',
-    packagePath: previous?.packagePath ?? [],
-    selections: [],
-    ownedFiles: [],
-    configDigest,
-    formatDigest,
-  };
 }
 
 /** Called within the service's shared workspace lock; no SAP acquisition. */
@@ -210,9 +195,15 @@ export async function reconcileCtsDeletions(
     }
     for (const path of operation.alreadyAbsent) expected.set(path, null);
     const descriptorPath = objectDescriptorPath(identity);
-    const content = stableJson(
-      tombstone(identity, previous, configDigest, formatDigest),
-    );
+    const content = stableJson({
+      ...createTombstoneDescriptor(
+        identity,
+        previous,
+        configDigest,
+        formatDigest,
+      ),
+      requiresInventoryRefresh: true,
+    });
     const old = await readText(input.root, descriptorPath);
     desired.push({
       path: descriptorPath,
