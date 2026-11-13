@@ -1,3 +1,14 @@
+## 0.4.58 (2026-11-13)
+
+### 🚀 Features
+
+- **flow:** reconcile proven CTS deletions with owned source files ([#365](https://github.com/abapify/adt-cli/pull/365))
+
+### ❤️ Thank You
+
+- Codex @oai-codex
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.57 (2026-11-13)
 
 ### 🩹 Fixes
