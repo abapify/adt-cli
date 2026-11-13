@@ -1,4 +1,11 @@
-import { mkdtemp, mkdir, readFile, writeFile, symlink } from 'node:fs/promises';
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile,
+  symlink,
+  readlink,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -406,6 +413,26 @@ describe('locked deletion reconciliation', () => {
       /* The forbidden acquisition marker is expected after index invalidation. */
     }
     expect(f.noSap).toHaveBeenCalledOnce();
+  });
+  it('rejects a dangling owned symlink before applying any source deletion or tombstone', async () => {
+    const file = 'src/demo/zdemo_deleted.prog.abap';
+    const regular = 'src/demo/za_first.prog.abap';
+    const f = await fixture({ [regular]: 'preserve' });
+    const target = join(f.root, 'src/demo/missing.prog.abap');
+    await symlink(target, join(f.root, file));
+    await expect(
+      f.apply(evidence([row('PROG', 'ZA_FIRST'), row()])),
+    ).rejects.toMatchObject({ code: 'path_invalid' });
+    expect(await readlink(join(f.root, file))).toBe(target);
+    expect(await readFile(join(f.root, regular), 'utf8')).toBe('preserve');
+    await expect(
+      readFile(
+        join(
+          f.root,
+          objectDescriptorPath(objectIdentity(row('PROG', 'ZA_FIRST'))),
+        ),
+      ),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
   });
   it('removes indexed binary companions using byte hashes', async () => {
     const file = 'src/demo/zdemo_deleted.smim.bin';

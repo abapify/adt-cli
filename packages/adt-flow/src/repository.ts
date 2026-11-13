@@ -143,7 +143,18 @@ async function resolveSymlinkChain(
       { path },
     );
   }
-  return resolveSymlinkChain(resolved, realRoot, seen);
+  try {
+    return await resolveSymlinkChain(resolved, realRoot, seen);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new AdtFlowError(
+        'path_invalid',
+        'Flow path contains a dangling symlink.',
+        { path },
+      );
+    }
+    throw error;
+  }
 }
 
 function ensureDirectory(stats: Stats, path: string): void {
