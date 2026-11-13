@@ -143,7 +143,18 @@ async function resolveSymlinkChain(
       { path },
     );
   }
-  return resolveSymlinkChain(resolved, realRoot, seen);
+  try {
+    return await resolveSymlinkChain(resolved, realRoot, seen);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new AdtFlowError(
+        'path_invalid',
+        'Flow path contains a dangling symlink.',
+        { path },
+      );
+    }
+    throw error;
+  }
 }
 
 function ensureDirectory(stats: Stats, path: string): void {
@@ -234,6 +245,14 @@ export async function readRegularText(
   root: string,
   path: string,
 ): Promise<string | undefined> {
+  return (await readRegularFile(root, path))?.toString('utf8');
+}
+
+/** Read owned bytes with the same regular-file and symlink checks as sources. */
+export async function readRegularFile(
+  root: string,
+  path: string,
+): Promise<Buffer | undefined> {
   return withValidatedPath(
     root,
     path,
@@ -286,7 +305,7 @@ export async function readRegularText(
             );
           }
         }
-        return await handle.readFile('utf8');
+        return await handle.readFile();
       } finally {
         await handle.close();
       }
@@ -307,6 +326,7 @@ async function fileExists(root: string, path: string): Promise<boolean> {
 export async function walkFiles(
   root: string,
   relativeDir: string,
+  includeSymlinks = false,
 ): Promise<string[]> {
   const absoluteDir = absolutePath(root, relativeDir);
   await validatePhysicalRoot(root, absoluteDir);
@@ -322,8 +342,8 @@ export async function walkFiles(
       .sort((left, right) => compareStrings(left.name, right.name))
       .map(async (entry) => {
         const child = posix.join(relativeDir, entry.name);
-        if (entry.isSymbolicLink()) return [];
-        if (entry.isDirectory()) return walkFiles(root, child);
+        if (entry.isSymbolicLink()) return includeSymlinks ? [child] : [];
+        if (entry.isDirectory()) return walkFiles(root, child, includeSymlinks);
         if (entry.isFile()) return [child];
         return [];
       }),

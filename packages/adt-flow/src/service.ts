@@ -1,3 +1,8 @@
+import {
+  reconcileCtsDeletions,
+  type FlowDeletionInput,
+  type FlowDeletionResult,
+} from './cts-deletions';
 import { mkdir, open, realpath, stat, unlink } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import type {
@@ -9,6 +14,7 @@ import type { FormatPlugin, MaterializedFormatFile } from '@abapify/adt-plugin';
 import { compareStrings, digest, sha256, stableJson } from './deterministic';
 import { preserveUnselectedClassComponents } from './class-component-preservation';
 import {
+  createTombstoneDescriptor,
   objectDescriptorPath,
   objectIdentity,
   transportDescriptorPath,
@@ -386,6 +392,7 @@ async function exactHeadFastPath(
   for (const path of objectPaths) {
     const descriptor = await readDescriptor(root, path, objectDescriptorSchema);
     if (
+      descriptor?.requiresInventoryRefresh === true ||
       descriptor?.configDigest !== configDigest ||
       descriptor.formatDigest !== formatDigest ||
       descriptor.selections.some((selection) =>
@@ -453,30 +460,6 @@ function filterOwnedFiles(
         parsed.name.toUpperCase() === expectedName)
     );
   });
-}
-
-function createTombstoneDescriptor(
-  identity: FlowObjectIdentity,
-  previous: ObjectDescriptor | undefined,
-  configDigest: string,
-  formatDigest: string,
-): ObjectDescriptor {
-  return {
-    schemaVersion: 1,
-    formatVersion: 1,
-    identity: {
-      canonical: identity.canonical,
-      pgmid: identity.pgmid,
-      type: identity.type,
-      name: identity.name,
-    },
-    state: 'deleted',
-    packagePath: previous?.packagePath ?? [],
-    selections: [],
-    ownedFiles: [],
-    configDigest,
-    formatDigest,
-  };
 }
 
 async function reuseIndexedGroup(
@@ -970,6 +953,7 @@ async function processGroup(ctx: ProcessGroupContext): Promise<GroupResult> {
 }
 
 export interface AdtFlowService {
+  reconcileDeletions(input: FlowDeletionInput): Promise<FlowDeletionResult>;
   checkout(
     input: FlowCheckoutInput,
     hooks?: FlowCheckoutHooks,
@@ -2056,6 +2040,25 @@ export function createAdtFlowService(
   dependencies: FlowCheckoutDependencies,
 ): AdtFlowService {
   return {
+    async reconcileDeletions(input): Promise<FlowDeletionResult> {
+      return withWorkspaceLock(input.root, () => {
+        const ctx = createFlowContext(
+          {
+            root: input.root,
+            transports: [...input.evidence.requestedTransports],
+            mode: 'head',
+            config: input.config,
+          },
+          dependencies,
+        );
+        return reconcileCtsDeletions(
+          input,
+          dependencies.format,
+          ctx.configDigest,
+          ctx.formatDigest,
+        );
+      });
+    },
     async checkout(input, hooks): Promise<FlowCheckoutResult> {
       return withWorkspaceLock(input.root, async () => {
         await hooks?.beforeCheckout?.();

@@ -114,3 +114,36 @@ metadata or replicate repository history.
 
 - Source: [`packages/adt-flow`](https://github.com/abapify/adt-cli/blob/main/packages/adt-flow)
 - README: [`packages/adt-flow/README.md`](https://github.com/abapify/adt-cli/blob/main/packages/adt-flow/README.md)
+
+## Proven CTS deletions (library API)
+
+`createCtsDeletionProof(evidence)` validates explicit CTS D operations without
+loading source. Evidence is either the latest task's structured inventory or a
+released transport-of-copies snapshot bound to that task by typed origin and
+matching non-control inventory. Missing source, metadata 404 and timestamps do
+not authorize deletion. The version-one proof records selected scope, declared
+operations, snapshot identity and a canonical inventory digest.
+
+Use `createAdtFlowService(dependencies).reconcileDeletions({ root, config,
+evidence, dryRun })` to apply the proof using the selected format, existing
+workspace lock and repository transaction. The operation makes no SAP calls.
+Whole-object ownership comes from indexed descriptors and the format filename
+parser. Indexed hashes protect modified files; owned class companions move to
+the same deleted boundary. Package deletion removes owned metadata only and
+preserves child source. Unindexed generic package metadata requires additional
+ownership evidence and is preserved.
+
+The version-one result contains `proof`, `operations`, `planned`, `removed` and
+`dryRun`. Each operation reports `removed`, `already_absent`, `unapplied` or
+`planned`, with exact paths, indexed already-absent paths and a typed diagnostic.
+Components that require ordinary owner-source checkout remain `unapplied`;
+a component declaration cannot delete its containing object. Dry run reports
+planned paths without removing files or writing object tombstones.
+
+The caller must isolate the workspace at the selected task's intended head and
+retain the returned report alongside its source-acquisition diagnostics. A
+deletion proof is not proof of complete or exact historical source coverage.
+Independently reconciled tombstones require an inventory refresh before any
+exact-head cache reuse; historical transport inventory remains unchanged.
+Report persistence and nonblocking reviewer presentation remain consumer
+responsibilities. Ordinary checkout and CLI/MCP surfaces are unchanged.

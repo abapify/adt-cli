@@ -1,3 +1,4 @@
+import type { ObjectDescriptor } from './schemas';
 import { posix } from 'node:path';
 import type { TransportSourceManifestObject } from '@abapify/adk';
 import { AdtFlowError } from './types';
@@ -51,4 +52,28 @@ export function transportDescriptorPath(transport: string): string {
     );
   }
   return posix.join('.adt', 'tr', `${normalizedTransport}.json`);
+}
+
+export function createTombstoneDescriptor(
+  identity: FlowObjectIdentity,
+  previous: ObjectDescriptor | undefined,
+  configDigest: string,
+  formatDigest: string,
+): ObjectDescriptor {
+  return {
+    schemaVersion: 1,
+    formatVersion: 1,
+    identity: {
+      canonical: identity.canonical,
+      pgmid: identity.pgmid,
+      type: identity.type,
+      name: identity.name,
+    },
+    state: 'deleted',
+    packagePath: previous?.packagePath ?? [],
+    selections: [],
+    ownedFiles: [],
+    configDigest,
+    formatDigest,
+  };
 }
