@@ -25,6 +25,19 @@ inventory indexing without source materialization, including when report storage
 Class components with ADT subtypes `CLAS/OC`, `CLAS/OSU`, `CLAS/OM` resolve to
 their full `R3TR CLAS` owner and use ordinary class source/abapGit materialization.
 
+## Checkout coverage assessment
+
+`assessFlowCheckoutCoverage({ report, descriptors, fileEvidence })` binds a
+persisted checkout report to object descriptors and caller-verified file
+evidence (path to sha256, or `null` for verified absence). It validates
+inventory-to-owner mapping, classifies owned files as acquired, deleted,
+diverged or unverified, and emits sorted typed omissions
+(`COVERAGE_ABSENT_OBJECT`, `COVERAGE_OWNERSHIP_UNMAPPED`,
+`COVERAGE_OWNERSHIP_UNINVENTORIED`, `COVERAGE_FILE_DIVERGED`). A missing or
+unsupported report resolves to an explicit `unknown` assessment, never to
+`complete`. The contract is pure: no filesystem, Git or SAP access; a
+report-storage failure stays the caller's boundary.
+
 To persist only transport inventory and unresolved-boundary descriptors under
 `.adt`, without fetching or materializing source, use the explicit index-only
 command. Validation of existing ownership may read local source files and reject
