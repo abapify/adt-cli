@@ -208,6 +208,31 @@ function ownerLookup(
   };
 }
 
+type OwnerLookup = ReturnType<typeof ownerLookup>;
+
+function resolvedOwnership(
+  entry: { pgmid: string; type: string; name: string },
+  lookup: OwnerLookup,
+): string | undefined {
+  const identity = canonicalIdentity(entry);
+  if (lookup.byIdentity.has(identity)) return identity;
+  const owner = lookup.resolutions.get(identity);
+  if (owner === undefined) return undefined;
+  const ownerIdentity = canonicalIdentity(owner);
+  return lookup.byIdentity.has(ownerIdentity) ? ownerIdentity : undefined;
+}
+
+function inventoryCoverage(
+  entry: { pgmid: string; type: string; name: string },
+  lookup: OwnerLookup,
+): 'claimed' | 'absent' | 'skipped' | 'unmapped' {
+  const identity = canonicalIdentity(entry);
+  if (resolvedOwnership(entry, lookup) !== undefined) return 'claimed';
+  if (lookup.absent.has(identity)) return 'absent';
+  if (lookup.skippedKeys.has(identity.toUpperCase())) return 'skipped';
+  return 'unmapped';
+}
+
 function mapInventory(
   report: CoverageReport,
   descriptors: readonly Descriptor[],
@@ -222,28 +247,21 @@ function mapInventory(
   const claimed = new Set<string>();
   let mapped = 0;
   for (const entry of inventory) {
-    const identity = canonicalIdentity(entry);
-    const owner = lookup.resolutions.get(identity);
-    if (
-      lookup.byIdentity.has(identity) ||
-      (owner !== undefined &&
-        lookup.byIdentity.has(canonicalIdentity(owner))) ||
-      lookup.absent.has(identity) ||
-      lookup.skippedKeys.has(identity.toUpperCase())
-    ) {
-      claimed.add(identity);
-      if (owner) claimed.add(canonicalIdentity(owner));
-      mapped += 1;
+    if (inventoryCoverage(entry, lookup) === 'unmapped') {
+      unmapped.push(
+        omitted(
+          canonicalIdentity(entry),
+          'object',
+          'COVERAGE_OWNERSHIP_UNMAPPED',
+          entry.sourceTransport,
+        ),
+      );
       continue;
     }
-    unmapped.push(
-      omitted(
-        identity,
-        'object',
-        'COVERAGE_OWNERSHIP_UNMAPPED',
-        entry.sourceTransport,
-      ),
-    );
+    claimed.add(canonicalIdentity(entry));
+    const owner = lookup.resolutions.get(canonicalIdentity(entry));
+    if (owner) claimed.add(canonicalIdentity(owner));
+    mapped += 1;
   }
   return { counts: { entries: inventory.length, mapped }, unmapped, claimed };
 }
