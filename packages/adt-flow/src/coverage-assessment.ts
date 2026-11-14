@@ -131,21 +131,21 @@ function canonicalIdentity(identity: {
   return `${identity.pgmid}/${identity.type}/${identity.name}`;
 }
 
+const FILE_HASH = /^[a-f0-9]{64}$/;
+
 function requireHashEvidence(
   evidence: ReadonlyMap<string, string | null>,
   path: string,
 ): string | null | undefined {
   if (!evidence.has(path)) return undefined;
   const hash = evidence.get(path);
-  if (
-    hash !== null &&
-    (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash))
-  ) {
+  if (hash === null) return null;
+  if (typeof hash !== 'string' || !FILE_HASH.test(hash)) {
     throw new AdtFlowError('invalid_input', 'Invalid coverage file hash.', {
       path,
     });
   }
-  return hash ?? null;
+  return hash;
 }
 
 function assertUniqueOwnedPaths(descriptor: Descriptor): void {
@@ -185,37 +185,51 @@ function parseReport(report: unknown): CoverageReport | undefined {
   return parsed.success ? parsed.data : undefined;
 }
 
+function ownerLookup(
+  report: CoverageReport,
+  descriptors: readonly Descriptor[],
+) {
+  return {
+    byIdentity: new Set(
+      descriptors.map((descriptor) => descriptor.identity.canonical),
+    ),
+    resolutions: new Map(
+      (report.inventoryResolutions ?? [])
+        .filter((row) => row.outcome === 'resolved')
+        .map((row) => [canonicalIdentity(row.object), row.repositoryObject]),
+    ),
+    skippedKeys: new Set(
+      [...report.skipped, ...(report.derived ?? [])].flatMap((row) => [
+        row.object.toUpperCase(),
+        `R3TR/${row.object.toUpperCase()}`,
+      ]),
+    ),
+    absent: new Set((report.absentObjects ?? []).map((row) => row)),
+  };
+}
+
 function mapInventory(
   report: CoverageReport,
   descriptors: readonly Descriptor[],
-): { counts: FlowCoverageInventoryMapping; unmapped: FlowSkippedObject[] } {
-  const byIdentity = new Set(
-    descriptors.map((descriptor) => descriptor.identity.canonical),
-  );
-  const claimed = new Set<string>();
-  const resolutions = new Map(
-    (report.inventoryResolutions ?? [])
-      .filter((row) => row.outcome === 'resolved')
-      .map((row) => [canonicalIdentity(row.object), row.repositoryObject]),
-  );
-  const skippedKeys = new Set(
-    [...report.skipped, ...(report.derived ?? [])].flatMap((row) => [
-      row.object.toUpperCase(),
-      `R3TR/${row.object.toUpperCase()}`,
-    ]),
-  );
-  const absent = new Set((report.absentObjects ?? []).map((row) => row));
+): {
+  counts: FlowCoverageInventoryMapping;
+  unmapped: FlowSkippedObject[];
+  claimed: Set<string>;
+} {
+  const lookup = ownerLookup(report, descriptors);
   const inventory = report.inventory ?? [];
   const unmapped: FlowSkippedObject[] = [];
+  const claimed = new Set<string>();
   let mapped = 0;
   for (const entry of inventory) {
     const identity = canonicalIdentity(entry);
-    const owner = resolutions.get(identity);
+    const owner = lookup.resolutions.get(identity);
     if (
-      byIdentity.has(identity) ||
-      (owner && byIdentity.has(canonicalIdentity(owner))) ||
-      absent.has(identity) ||
-      skippedKeys.has(identity.toUpperCase())
+      lookup.byIdentity.has(identity) ||
+      (owner !== undefined &&
+        lookup.byIdentity.has(canonicalIdentity(owner))) ||
+      lookup.absent.has(identity) ||
+      lookup.skippedKeys.has(identity.toUpperCase())
     ) {
       claimed.add(identity);
       if (owner) claimed.add(canonicalIdentity(owner));
@@ -231,21 +245,22 @@ function mapInventory(
       ),
     );
   }
-  for (const descriptor of descriptors) {
-    if (!claimed.has(descriptor.identity.canonical)) {
-      unmapped.push(
-        omitted(
-          descriptor.identity.canonical,
-          'object',
-          'COVERAGE_OWNERSHIP_UNINVENTORIED',
-        ),
-      );
-    }
-  }
-  return {
-    counts: { entries: inventory.length, mapped },
-    unmapped,
-  };
+  return { counts: { entries: inventory.length, mapped }, unmapped, claimed };
+}
+
+function uninventoriedDescriptors(
+  descriptors: readonly Descriptor[],
+  claimed: ReadonlySet<string>,
+): FlowSkippedObject[] {
+  return descriptors
+    .filter((descriptor) => !claimed.has(descriptor.identity.canonical))
+    .map((descriptor) =>
+      omitted(
+        descriptor.identity.canonical,
+        'object',
+        'COVERAGE_OWNERSHIP_UNINVENTORIED',
+      ),
+    );
 }
 
 function classifyFiles(
@@ -284,7 +299,13 @@ function classifyFiles(
       );
     }
   }
-  return { files, divergences };
+  const sortedFiles: FlowCoverageFiles = {
+    acquired: files.acquired.sort(compareStrings),
+    deleted: files.deleted.sort(compareStrings),
+    diverged: files.diverged.sort(compareStrings),
+    unverified: files.unverified.sort(compareStrings),
+  };
+  return { files: sortedFiles, divergences };
 }
 
 function sortOmissions(rows: FlowSkippedObject[]): FlowSkippedObject[] {
@@ -330,33 +351,32 @@ export function assessFlowCheckoutCoverage(
   input: FlowCoverageAssessmentInput,
 ): FlowCoverageAssessmentResult {
   const parsed = parseReport(input.report);
-  if (parsed === undefined) {
-    return {
-      schemaVersion: 1,
-      status: 'unknown',
-      reason:
-        input.report === undefined ? 'missing-report' : 'unsupported-report',
-    };
-  }
+  if (parsed === undefined) return unknownAssessment(input.report);
+  return assessValidatedReport(parsed, input);
+}
+
+function unknownAssessment(report: unknown): FlowCoverageUnknownAssessment {
+  return {
+    schemaVersion: 1,
+    status: 'unknown',
+    reason: report === undefined ? 'missing-report' : 'unsupported-report',
+  };
+}
+
+function assessValidatedReport(
+  parsed: CoverageReport,
+  input: FlowCoverageAssessmentInput,
+): FlowCoverageAssessment {
   const descriptors = parseDescriptors(input.descriptors);
   const mapping = mapInventory(parsed, descriptors);
-  const { files, divergences } = parsed.indexedOnly
-    ? {
-        files: {
-          acquired: [],
-          deleted: [],
-          diverged: [],
-          unverified: [],
-        } as FlowCoverageFiles,
-        divergences: [] as FlowSkippedObject[],
-      }
-    : classifyFiles(descriptors, input.fileEvidence);
+  const { files, divergences } = coverageFiles(parsed, descriptors, input);
   const omissions = sortOmissions([
     ...(parsed.absentObjects ?? []).map((object) =>
       omitted(object, 'object', 'COVERAGE_ABSENT_OBJECT'),
     ),
     ...parsed.skipped,
     ...mapping.unmapped,
+    ...uninventoriedDescriptors(descriptors, mapping.claimed),
     ...(parsed.derived ?? []),
     ...divergences,
   ]);
@@ -365,27 +385,42 @@ export function assessFlowCheckoutCoverage(
     : files.unverified.length
       ? ('unverified' as const)
       : ('verified' as const);
-  const status: 'complete' | 'partial' =
-    omissions.length === 0 &&
-    files.diverged.length === 0 &&
-    (parsed.indexedOnly || files.unverified.length === 0)
-      ? 'complete'
-      : 'partial';
   return {
     schemaVersion: 1,
-    status,
+    status: coverageStatus(parsed, files, omissions),
     mode: parsed.mode,
     requestedTransports: [...parsed.requestedTransports],
     scopeTransports: [...parsed.scopeTransports],
     indexedOnly: parsed.indexedOnly,
     sourceExactness,
     inventory: mapping.counts,
-    files: {
-      acquired: files.acquired.slice().sort(compareStrings),
-      deleted: files.deleted.slice().sort(compareStrings),
-      diverged: files.diverged.slice().sort(compareStrings),
-      unverified: files.unverified.slice().sort(compareStrings),
-    },
+    files,
     omissions,
   };
+}
+
+function coverageFiles(
+  parsed: CoverageReport,
+  descriptors: readonly Descriptor[],
+  input: FlowCoverageAssessmentInput,
+): { files: FlowCoverageFiles; divergences: FlowSkippedObject[] } {
+  if (parsed.indexedOnly) {
+    return {
+      files: { acquired: [], deleted: [], diverged: [], unverified: [] },
+      divergences: [],
+    };
+  }
+  return classifyFiles(descriptors, input.fileEvidence);
+}
+
+function coverageStatus(
+  parsed: CoverageReport,
+  files: FlowCoverageFiles,
+  omissions: readonly FlowSkippedObject[],
+): 'complete' | 'partial' {
+  return omissions.length === 0 &&
+    files.diverged.length === 0 &&
+    (parsed.indexedOnly || files.unverified.length === 0)
+    ? 'complete'
+    : 'partial';
 }
