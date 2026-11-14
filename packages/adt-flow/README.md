@@ -59,6 +59,19 @@ for `--partial-report`. Both are pure builders with deterministic omission order
 They do not write files or assess overall completeness: absent inventory remains
 unavailable, and an empty skipped list alone is not evidence of a full snapshot.
 
+## Coverage assessment (library API)
+
+`assessFlowCheckoutCoverage({ report, descriptors, fileEvidence })` binds a
+persisted checkout report to object descriptors and caller-verified file
+evidence (path to sha256, or `null` for verified absence). The assessment
+validates inventory-to-owner mapping, classifies owned files as acquired,
+deleted, diverged or unverified, and emits sorted typed omissions
+(`COVERAGE_ABSENT_OBJECT`, `COVERAGE_OWNERSHIP_UNMAPPED`,
+`COVERAGE_OWNERSHIP_UNINVENTORIED`, `COVERAGE_FILE_DIVERGED`). A missing or
+unsupported report resolves to an explicit `unknown` assessment, never to
+`complete`. The contract is pure: no filesystem, Git or SAP access, and a
+report-storage failure stays the caller's boundary.
+
 ## Proven CTS deletions (library API)
 
 `createCtsDeletionProof(evidence)` validates explicit CTS D operations without

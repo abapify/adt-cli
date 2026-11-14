@@ -15,6 +15,16 @@ export {
   type FlowPartialReport,
 } from './checkout-report';
 export {
+  assessFlowCheckoutCoverage,
+  type FlowCoverageAssessment,
+  type FlowCoverageAssessmentInput,
+  type FlowCoverageAssessmentResult,
+  type FlowCoverageFiles,
+  type FlowCoverageInventoryMapping,
+  type FlowCoverageUnknownAssessment,
+  type FlowCoverageUnknownReason,
+} from './coverage-assessment';
+export {
   encodeObjectName,
   objectDescriptorPath,
   objectIdentity,
