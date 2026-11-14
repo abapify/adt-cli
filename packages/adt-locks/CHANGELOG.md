@@ -1,3 +1,7 @@
+## 0.4.59 (2026-11-14)
+
+This was a version bump only for adt-locks to align it with other projects, there were no code changes.
+
 ## 0.4.58 (2026-11-13)
 
 This was a version bump only for adt-locks to align it with other projects, there were no code changes.

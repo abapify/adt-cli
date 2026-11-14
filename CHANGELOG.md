@@ -1,3 +1,13 @@
+## 0.4.59 (2026-11-14)
+
+### 🚀 Features
+
+- **flow:** assess persisted checkout coverage against verified file evidence ([#367](https://github.com/abapify/adt-cli/pull/367))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.58 (2026-11-13)
 
 ### 🚀 Features
