@@ -1,0 +1,3 @@
+# OSS guard: block internal context from reaching public remotes.
+# Skips internal remotes listed in scripts/.oss-guard-local.remotes.
+sh scripts/oss-github-guard.sh "$@"

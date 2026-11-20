@@ -186,8 +186,10 @@ gascity/AGENTS.md
 
 # Beads / Dolt files (added by bd init)
 .dolt/
-*.db
+.beads/*.db
+.dolt/*.db
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*
 scripts/.oss-guard-local.patterns
+scripts/.oss-guard-local.remotes

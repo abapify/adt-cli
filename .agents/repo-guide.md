@@ -116,6 +116,7 @@ All AI agent rules live in `.agents/rules/` (single source of truth).
 | Rule                                                                            | Description                                                  |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | [`git/autonomous-delivery`](rules/git/autonomous-delivery.md)                   | Commit and push authorized feature work without re-prompting |
+| [`git/oss-isolation`](rules/git/oss-isolation.md)                             | Zero internal context in public contributions; mechanical pre-push guard |
 | [`development/coding-conventions`](rules/development/coding-conventions.md)     | TS strict, ESM only, naming, formatting, import conventions  |
 | [`development/file-lifecycle`](rules/development/file-lifecycle.md)             | Generated/downloaded file guardrails                         |
 | [`openspec/project-planning-memory`](rules/openspec/project-planning-memory.md) | OpenSpec workflow and project memory                         |

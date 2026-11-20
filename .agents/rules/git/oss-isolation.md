@@ -45,13 +45,15 @@ the public PR must stand on its own without internal evidence.
 Before **any** of these actions targeting a public remote:
 
 - `git push` to a `github.com` remote
-- `gh pr create` / `gh pr edit` / `gh pr comment` / `gh issue create`
+- `gh pr create` / `gh pr edit` / `gh pr comment`
+- `gh issue create` / `gh issue comment` (scan with `--issue <N>`)
 
 run:
 
 ```sh
-scripts/oss-github-guard.sh            # scans outgoing commits + branch name
-scripts/oss-github-guard.sh --pr <N>   # scans live PR text via gh
+scripts/oss-github-guard.sh              # scans outgoing commits, patches and branch name
+scripts/oss-github-guard.sh --pr <N>     # scans live PR text, reviews and inline replies via gh
+scripts/oss-github-guard.sh --issue <N>  # scans live issue text via gh
 ```
 
 The guard exits non-zero on any forbidden pattern. **A non-zero exit is a hard
