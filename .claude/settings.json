@@ -17,7 +17,8 @@
         "hooks": [
           {
             "command": "bd prime --hook-json",
-            "type": "command"
+            "type": "command",
+            "timeout": 60
           }
         ],
         "matcher": ""

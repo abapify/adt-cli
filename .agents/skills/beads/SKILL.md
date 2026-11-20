@@ -21,6 +21,14 @@ If that prints nothing, check whether the repository has an active Beads workspa
 bd where
 ```
 
+On a fresh clone there may be no local workspace yet (`.beads/` and `.dolt/`
+are gitignored). Initialize one before any `bd` command:
+
+```bash
+bd init                 # create the local workspace
+bd dolt pull            # sync existing issues from the git remote (if any)
+```
+
 ## Preferred Route
 
 Use the `bd` CLI when shell access is available. It is the most compact and direct Beads interface.
@@ -52,6 +60,11 @@ bd update <id> --claim
 ```bash
 bd create "Short title" --description="Why this exists and what needs to be done" --type=task --priority=2
 ```
+
+Retry safety: if a `bd create` may have succeeded but its response was lost
+(timeout, interrupted session), search before creating again —
+`bd list --search "Short title"` (or `bd ready`) — and reuse the existing
+issue instead of creating a duplicate.
 
 5. Close completed work:
 
