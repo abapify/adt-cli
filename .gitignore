@@ -183,3 +183,10 @@ gascity/AGENTS.md
 # (already-tracked fixture PEMs are unaffected)
 *.pem
 *.key
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
