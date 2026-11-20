@@ -114,19 +114,3 @@ bd prime                # Refresh Beads context
 
 **Architecture in one line:** issues live in a local Dolt DB; sync uses `refs/dolt/data` on your git remote; `.beads/issues.jsonl` is a passive export. See https://github.com/gastownhall/beads/blob/main/docs/core-concepts/sync-concepts.md for details and anti-patterns.
 <!-- END BEADS CODEX SETUP -->
-
-## OSS isolation (mandatory)
-
-Public GitHub remotes and internal development remotes are separate worlds.
-**Zero internal context in any public contribution** — titles, bodies,
-comments, reviews, issues, branch names, commit messages, author/committer
-emails, code comments and docs.
-
-The concrete forbidden patterns are organization-specific and live in
-`scripts/.oss-guard-local.patterns` (local, untracked; see
-`.agents/rules/git/oss-isolation.md`).
-
-Before any `git push` to a public remote or `gh pr create/edit/comment`:
-run `scripts/oss-github-guard.sh` (the pre-push hook enforces this; a
-non-zero exit is a hard stop). Full rule:
-`.agents/rules/git/oss-isolation.md`.
