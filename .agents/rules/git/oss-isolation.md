@@ -59,6 +59,11 @@ scripts/oss-github-guard.sh --issue <N>  # scans live issue text via gh
 The guard exits non-zero on any forbidden pattern. **A non-zero exit is a hard
 stop** — fix the text, do not bypass, do not `--no-verify`.
 
+The guard also rejects direct pushes to protected branches (`main`, `canary`,
+`stable`) on public remotes: those branches only move through pull-request
+merges. An explicit `OSS_GUARD_ALLOW_PROTECTED_PUSH=1` override exists for
+exceptional, user-approved operations.
+
 ## Summarizing internal work for a public PR
 
 Rewrite from scratch in public terms: what the bug was, what changed, which

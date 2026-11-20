@@ -46,7 +46,7 @@ else
 fi
 
 TMP=$(mktemp) || exit 2
-trap 'rm -f "$TMP" "$TMP.out"' EXIT
+trap 'rm -f "$TMP" "$TMP.out" "$TMP.refs"' EXIT
 : > "${TMP:?}"
 
 producer_failed() {
@@ -125,6 +125,23 @@ case "${1:-}" in
           ;;
       esac
       [ "$is_public" = "1" ] || exit 0
+      # Buffer the push input so it can be inspected twice (protected-branch
+      # policy, then the content scan).
+      cp "$TMP" "$TMP.refs" 2>/dev/null || true
+      cat > "$TMP.refs"
+      # Protected branches on public remotes only move through PR merges;
+      # a direct push is rejected unless explicitly overridden.
+      if [ "${OSS_GUARD_ALLOW_PROTECTED_PUSH:-0}" != "1" ]; then
+        while read -r local_ref local_sha remote_ref remote_sha; do
+          case "$local_ref" in
+            refs/heads/main|refs/heads/canary|refs/heads/stable)
+              echo "OSS-GUARD: direct push to protected branch [$local_ref] is rejected." >&2
+              echo "OSS-GUARD: use a pull request, or set OSS_GUARD_ALLOW_PROTECTED_PUSH=1 for an explicit override." >&2
+              exit 2
+              ;;
+          esac
+        done < "$TMP.refs"
+      fi
       while read -r local_ref local_sha remote_ref remote_sha; do
         zero=0000000000000000000000000000000000000000
         [ "$local_sha" = "$zero" ] && continue
@@ -166,7 +183,7 @@ case "${1:-}" in
             ;;
         esac
         check_text "outgoing commits -> $remote_name ($ref_name)" || exit 1
-      done
+      done < "$TMP.refs"
       echo "OSS-GUARD: push to $remote_name (public) clean."
       exit 0
     fi
