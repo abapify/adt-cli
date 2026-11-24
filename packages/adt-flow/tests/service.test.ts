@@ -10,6 +10,7 @@ import {
   AdtFlowError,
   type FlowCheckoutDependencies,
 } from '../src';
+import { applyRepositoryPlan, planRepositoryChanges } from '../src/repository';
 
 const roots: string[] = [];
 
@@ -1358,6 +1359,83 @@ describe('transport checkout', () => {
       ),
     ) as { state: string };
     expect(stillOmitted.state).toBe('omitted');
+  });
+
+  it('preserves unowned files on a deletion retry and reports the typed reason', async () => {
+    const workspace = await root();
+    const ports = dependencies(() =>
+      manifest('deleted', version('before'), undefined),
+    );
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+
+    // A later, external process leaves a matching file behind. The tombstone
+    // descriptor records no ownership for it, so the deletion retry must
+    // keep the bytes and report the skipped file with a typed reason.
+    await mkdir(join(workspace, 'src/feature'), { recursive: true });
+    await writeFile(
+      join(workspace, 'src/feature/zcl_sample.clas.abap'),
+      'unowned leftover\n',
+    );
+
+    // verifyInventory forces the full manifest path: the exact-head fast
+    // path trusts the recorded head state and does not inspect strays.
+    const retry = await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+      verifyInventory: true,
+    });
+    expect(
+      await readFile(
+        join(workspace, 'src/feature/zcl_sample.clas.abap'),
+        'utf8',
+      ),
+    ).toBe('unowned leftover\n');
+    expect(retry.removed).toEqual([]);
+    expect(retry.skipped).toEqual([
+      {
+        object: 'R3TR/CLAS/ZCL_SAMPLE',
+        component: 'files',
+        diagnostic: 'DELETION_OWNERSHIP_NOT_RECORDED',
+      },
+    ]);
+  });
+
+  it('rejects a file that appears at an unowned desired path after planning', async () => {
+    const workspace = await root();
+    await mkdir(join(workspace, 'src/feature'), { recursive: true });
+    const plan = await planRepositoryChanges(
+      workspace,
+      [
+        {
+          path: 'src/feature/zcl_sample.clas.abap',
+          content: 'materialized\n',
+          role: 'source',
+          sourceComponent: 'main',
+          owner: 'R3TR/CLAS/ZCL_SAMPLE',
+        },
+      ],
+      new Set(),
+    );
+    expect(plan.absentWrites).toEqual(['src/feature/zcl_sample.clas.abap']);
+    await writeFile(
+      join(workspace, 'src/feature/zcl_sample.clas.abap'),
+      'planted between plan and apply\n',
+    );
+    await expect(applyRepositoryPlan(workspace, plan)).rejects.toThrow(
+      /appeared at an unowned desired path/,
+    );
+    expect(
+      await readFile(
+        join(workspace, 'src/feature/zcl_sample.clas.abap'),
+        'utf8',
+      ),
+    ).toBe('planted between plan and apply\n');
   });
 
   it('rejects a partial omission when its preserved indexed source was edited', async () => {

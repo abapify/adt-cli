@@ -29,6 +29,12 @@ export interface RepositoryPlan {
   removes: string[];
   unchanged: string[];
   moved: Array<{ from: string; to: string }>;
+  /**
+   * Desired write paths that did not exist when the plan was computed.
+   * applyRepositoryPlan re-verifies their absence right before writing so a
+   * file created in between cannot be overwritten silently.
+   */
+  absentWrites?: string[];
 }
 
 // NUL or backslash anywhere in the path make it unsafe as input.
@@ -535,7 +541,10 @@ export async function planRepositoryChanges(
   }
 
   unchanged.sort(compareStrings);
-  return { writes, removes, unchanged, moved };
+  const absentWrites = [...writes.keys()].filter(
+    (path) => currentByPath.get(path) === undefined,
+  );
+  return { writes, removes, unchanged, moved, absentWrites };
 }
 
 async function ensureParentDirectories(
@@ -663,6 +672,16 @@ export async function applyRepositoryPlan(
     ...plan.removes,
   ]);
   const createdDirs = new Set<string>();
+
+  for (const path of plan.absentWrites ?? []) {
+    if (await fileExists(root, path)) {
+      throw new AdtFlowError(
+        'working_tree_diverged',
+        'A file appeared at an unowned desired path after planning.',
+        { path },
+      );
+    }
+  }
 
   try {
     for (const [path, content] of plan.writes)
