@@ -1516,7 +1516,10 @@ async function buildPendingOwnership(
         );
       }
       const owned: string[] = [];
-      if (previous) {
+      if (previous && previous.state === 'present') {
+        // A previously materialized object remains the authoritative file map.
+        // Omitted and tombstone descriptors own no source files, so they grant
+        // no ownership: pre-existing files are adopted like a fresh object.
         await validateIndexedOwnership(ctx, identity, previous);
         for (const file of previous.ownedFiles) owned.push(file.path);
         owned.push(descriptorPath);
@@ -1524,6 +1527,9 @@ async function buildPendingOwnership(
         const key = `${repositoryType(identity.pgmid, identity.type)}/${identity.name}`;
         const files = srcFilesByObject.get(key) ?? [];
         for (const path of files) owned.push(path);
+        // A pre-existing descriptor file is claimed too, so a retry can
+        // rewrite it without an unowned-collision rejection.
+        owned.push(descriptorPath);
       }
       pendingOwnership.set(identity.canonical, {
         previous,
