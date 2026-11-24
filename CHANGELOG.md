@@ -1,3 +1,13 @@
+## 0.4.60 (2026-11-24)
+
+### 🩹 Fixes
+
+- **flow:** adopt pre-existing object files when descriptors own nothing ([#374](https://github.com/abapify/adt-cli/pull/374))
+
+### ❤️ Thank You
+
+- Petr Plenkov @ThePlenkov
+
 ## 0.4.59 (2026-11-14)
 
 ### 🚀 Features
