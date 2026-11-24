@@ -1518,17 +1518,24 @@ async function buildPendingOwnership(
       const owned: string[] = [];
       if (previous && previous.state === 'present') {
         // A previously materialized object remains the authoritative file map.
-        // Omitted and tombstone descriptors own no source files, so they grant
-        // no ownership: pre-existing files are adopted like a fresh object.
         await validateIndexedOwnership(ctx, identity, previous);
         for (const file of previous.ownedFiles) owned.push(file.path);
         owned.push(descriptorPath);
+      } else if (previous) {
+        // Omitted and deleted descriptors own no source files. Pre-existing
+        // matching files are never adopted without recorded ownership:
+        // planRepositoryChanges rejects the desired path with
+        // path_collision, preserving the unowned bytes, and a deletion
+        // retry cannot remove files no descriptor ever recorded. Only the
+        // descriptor file itself is claimed, so a retry can rewrite that
+        // SDK-owned metadata without an unowned-collision rejection.
+        owned.push(descriptorPath);
       } else {
+        // No descriptor at all: fresh-object semantics adopt matching
+        // pre-existing files, exactly like the historical behavior.
         const key = `${repositoryType(identity.pgmid, identity.type)}/${identity.name}`;
         const files = srcFilesByObject.get(key) ?? [];
         for (const path of files) owned.push(path);
-        // A pre-existing descriptor file is claimed too, so a retry can
-        // rewrite it without an unowned-collision rejection.
         owned.push(descriptorPath);
       }
       pendingOwnership.set(identity.canonical, {

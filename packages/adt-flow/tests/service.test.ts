@@ -1296,7 +1296,7 @@ describe('transport checkout', () => {
     });
   });
 
-  it('re-adopts pre-existing object files after a partial omission on retry', async () => {
+  it('preserves unowned pre-existing files when a partial omission is retried', async () => {
     const workspace = await root();
     // The file already exists from an earlier flow-managed import, and its
     // descriptor no longer records ownership for it.
@@ -1334,25 +1334,30 @@ describe('transport checkout', () => {
     expect(omitted.ownedFiles).toEqual([]);
 
     // Retry: the history is now exact and the object materializes again.
-    // The pre-existing file must be re-adopted instead of rejected as an
-    // unowned collision.
+    // The pre-existing file is not adopted without recorded ownership: the
+    // retry is rejected with the unowned-collision guard and the unowned
+    // bytes are preserved instead of being overwritten silently.
     current = manifest('modified', version('before'), version('after'));
-    const result = await createAdtFlowService(ports).checkout({
-      root: workspace,
-      transports: ['DEVK900001'],
-      config,
-    });
-    expect(result.changed).toContain('src/feature/zcl_sample.clas.abap');
-    const adopted = JSON.parse(
+    await expect(
+      createAdtFlowService(ports).checkout({
+        root: workspace,
+        transports: ['DEVK900001'],
+        config,
+      }),
+    ).rejects.toThrow(/unowned/);
+    expect(
+      await readFile(
+        join(workspace, 'src/feature/zcl_sample.clas.abap'),
+        'utf8',
+      ),
+    ).toBe('source before\n');
+    const stillOmitted = JSON.parse(
       await readFile(
         join(workspace, '.adt/objects/CLAS/zcl_sample.clas.adt.json'),
         'utf8',
       ),
-    ) as { state: string; ownedFiles: Array<{ path: string }> };
-    expect(adopted.state).toBe('present');
-    expect(adopted.ownedFiles.map((file) => file.path)).toContain(
-      'src/feature/zcl_sample.clas.abap',
-    );
+    ) as { state: string };
+    expect(stillOmitted.state).toBe('omitted');
   });
 
   it('rejects a partial omission when its preserved indexed source was edited', async () => {
