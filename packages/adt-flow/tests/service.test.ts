@@ -1296,6 +1296,65 @@ describe('transport checkout', () => {
     });
   });
 
+  it('re-adopts pre-existing object files after a partial omission on retry', async () => {
+    const workspace = await root();
+    // The file already exists from an earlier flow-managed import, and its
+    // descriptor no longer records ownership for it.
+    await mkdir(join(workspace, 'src/feature'), { recursive: true });
+    await writeFile(
+      join(workspace, 'src/feature/zcl_sample.clas.abap'),
+      'source before\n',
+    );
+    // First attempt: inexact history in partial mode leaves an omitted
+    // descriptor that owns no files.
+    let current = manifest('modified', version('before'), version('after'));
+    current.entries[0] = {
+      ...current.entries[0],
+      exact: false,
+      diagnostic: {
+        code: 'SOURCE_HISTORY_INTERVENING_VERSION',
+        message: 'A version from another transport occurs inside this scope.',
+      },
+    };
+    const ports = dependencies(() => current);
+    const flow = createAdtFlowService(ports);
+    await flow.checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+      partial: true,
+    });
+    const omitted = JSON.parse(
+      await readFile(
+        join(workspace, '.adt/objects/CLAS/zcl_sample.clas.adt.json'),
+        'utf8',
+      ),
+    ) as { state: string; ownedFiles: unknown[] };
+    expect(omitted.state).toBe('omitted');
+    expect(omitted.ownedFiles).toEqual([]);
+
+    // Retry: the history is now exact and the object materializes again.
+    // The pre-existing file must be re-adopted instead of rejected as an
+    // unowned collision.
+    current = manifest('modified', version('before'), version('after'));
+    const result = await createAdtFlowService(ports).checkout({
+      root: workspace,
+      transports: ['DEVK900001'],
+      config,
+    });
+    expect(result.changed).toContain('src/feature/zcl_sample.clas.abap');
+    const adopted = JSON.parse(
+      await readFile(
+        join(workspace, '.adt/objects/CLAS/zcl_sample.clas.adt.json'),
+        'utf8',
+      ),
+    ) as { state: string; ownedFiles: Array<{ path: string }> };
+    expect(adopted.state).toBe('present');
+    expect(adopted.ownedFiles.map((file) => file.path)).toContain(
+      'src/feature/zcl_sample.clas.abap',
+    );
+  });
+
   it('rejects a partial omission when its preserved indexed source was edited', async () => {
     const workspace = await root();
     let current = manifest('modified', version('before'), version('after'));
