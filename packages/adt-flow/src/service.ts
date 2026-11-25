@@ -521,7 +521,11 @@ interface ProcessGroupContext {
   limiters: { metadata: Limiter; source: Limiter };
   maxSourceBytes: number;
   materialize: NonNullable<FormatPlugin['materialize']>;
-  pending: { previous?: ObjectDescriptor; ownedPaths: string[] };
+  pending: {
+    previous?: ObjectDescriptor;
+    ownedPaths: string[];
+    unownedMatching: string[];
+  };
   hasApplicationComponentFilter: boolean;
   calls: { manifest: number; metadata: number; source: number };
 }
@@ -533,6 +537,8 @@ interface GroupResult {
   reusedIndexedComponent: boolean;
   hasPresentObject?: boolean;
   excludedByApplicationComponent?: boolean;
+  /** Unowned files a tombstone retry left in place, for typed reporting. */
+  skippedUnowned?: FlowSkippedObject[];
 }
 
 function emptyGroupResult(): GroupResult {
@@ -549,7 +555,7 @@ function buildTombstoneResult(
   identity: FlowObjectIdentity,
   descriptorPath: string,
 ): GroupResult {
-  const { previous, ownedPaths } = ctx.pending;
+  const { previous, ownedPaths, unownedMatching } = ctx.pending;
   const tombstone = createTombstoneDescriptor(
     identity,
     previous,
@@ -567,6 +573,11 @@ function buildTombstoneResult(
     ],
     descriptorPaths: [descriptorPath],
     ownedPaths,
+    skippedUnowned: unownedMatching.map((_path) => ({
+      object: identity.canonical,
+      component: 'files',
+      diagnostic: 'DELETION_OWNERSHIP_NOT_RECORDED',
+    })),
     reusedIndexedComponent: false,
   };
 }
@@ -1471,7 +1482,12 @@ async function buildManifestAndGroups(
 
 type PendingOwnership = Map<
   string,
-  { previous?: ObjectDescriptor; ownedPaths: string[] }
+  {
+    previous?: ObjectDescriptor;
+    ownedPaths: string[];
+    /** Matching src files that recorded ownership never covered. */
+    unownedMatching: string[];
+  }
 >;
 
 async function validateIndexedOwnership(
@@ -1516,24 +1532,38 @@ async function buildPendingOwnership(
         );
       }
       const owned: string[] = [];
+      const unownedMatching: string[] = [];
       if (previous && previous.state === 'present') {
         // A previously materialized object remains the authoritative file map.
-        // Omitted and tombstone descriptors own no source files, so they grant
-        // no ownership: pre-existing files are adopted like a fresh object.
         await validateIndexedOwnership(ctx, identity, previous);
         for (const file of previous.ownedFiles) owned.push(file.path);
         owned.push(descriptorPath);
+      } else if (previous) {
+        // Omitted and deleted descriptors own no source files. Pre-existing
+        // matching files are never adopted without recorded ownership:
+        // planRepositoryChanges rejects the desired path with
+        // path_collision, preserving the unowned bytes, and a deletion
+        // retry cannot remove files no descriptor ever recorded. Only the
+        // descriptor file itself is claimed, so a retry can rewrite that
+        // SDK-owned metadata without an unowned-collision rejection.
+        owned.push(descriptorPath);
+        unownedMatching.push(
+          ...(srcFilesByObject.get(
+            `${repositoryType(identity.pgmid, identity.type)}/${identity.name}`,
+          ) ?? []),
+        );
       } else {
+        // No descriptor at all: fresh-object semantics adopt matching
+        // pre-existing files, exactly like the historical behavior.
         const key = `${repositoryType(identity.pgmid, identity.type)}/${identity.name}`;
         const files = srcFilesByObject.get(key) ?? [];
         for (const path of files) owned.push(path);
-        // A pre-existing descriptor file is claimed too, so a retry can
-        // rewrite it without an unowned-collision rejection.
         owned.push(descriptorPath);
       }
       pendingOwnership.set(identity.canonical, {
         previous,
         ownedPaths: owned,
+        unownedMatching,
       });
     }),
   );
@@ -1550,6 +1580,7 @@ interface CheckoutAccumulator {
 type ProcessedGroups = CheckoutAccumulator & {
   reusedIndexedComponent: boolean;
   absentObjects: string[];
+  skippedUnowned: FlowSkippedObject[];
 };
 
 async function processAllGroups(
@@ -1569,6 +1600,7 @@ async function processAllGroups(
   const ownedOwners = new Map<string, string>();
   const descriptorPaths: string[] = [];
   const absentObjects = new Set<string>();
+  const skippedUnowned: FlowSkippedObject[] = [];
   let reusedIndexedComponent = false;
   await Promise.all(
     groups.map(async (group) => {
@@ -1601,6 +1633,7 @@ async function processAllGroups(
         ownedPaths.add(path);
         ownedOwners.set(path, group.identity.canonical);
       }
+      if (result.skippedUnowned) skippedUnowned.push(...result.skippedUnowned);
       if (result.reusedIndexedComponent) reusedIndexedComponent = true;
       if (
         ctx.mode === 'base' &&
@@ -1621,6 +1654,7 @@ async function processAllGroups(
     ownedOwners,
     reusedIndexedComponent,
     absentObjects: [...absentObjects].sort(compareStrings),
+    skippedUnowned,
   };
 }
 
@@ -1921,7 +1955,7 @@ async function checkoutFlow(
   return buildCheckoutResult(
     ctx,
     manifestContext.manifest,
-    manifestContext.skipped,
+    [...manifestContext.skipped, ...processed.skippedUnowned],
     manifestContext.derived,
     plan,
     processed,
@@ -2001,6 +2035,7 @@ async function indexFlow(
     ownedOwners: new Map<string, string>(),
     reusedIndexedComponent: false,
     absentObjects: [],
+    skippedUnowned: [],
   };
   await addOmittedObjectDescriptors(
     ctx,
